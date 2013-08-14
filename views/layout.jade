@@ -1,0 +1,63 @@
+!!! 5
+
+html(lang='da')
+  head
+    meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
+    meta(charset="UTF-8")
+    title DAWA
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="description", content="Danmarks adresse web API")
+    meta(name="author", content="Finn Jordal")
+    
+    //if lt IE 9
+      script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+      
+    link(href="bootstrap/css/bootstrap.css", rel="stylesheet")
+    link(href="bootstrap/css/bootstrap-responsive.css", rel="stylesheet")
+    link(href="css/style.css", rel="stylesheet")
+    link(href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css", rel="stylesheet")
+
+    link(rel="shortcut icon", href="img/favicon.ico")
+
+  body
+    div.navbar.navbar-inverse.navbar-fixed-top
+      div.navbar-inner        
+        img.pull-right.nav-collapse(id="logo",src="img/logo.png")
+        div.container
+          button.btn.btn-navbar(type="button", data-toggle="collapse", data-target=".nav-collapse") 
+            span.icon-bar
+            span.icon-bar
+            span.icon-bar
+          a.brand(href="/") DAWA
+          div#topbar.nav-collapse.collapse
+            ul.nav
+              li.active
+                a(href='/') Introduktion
+              li
+                a(href='webapi') Web API'et
+              li
+                a(href='kodeeksempler') Kodeeksempler
+              li
+                a(href='datakvalitet') Datakvalitet
+              li
+                a(href='statistik') Statistik
+              li
+                a(href='om') Om DAWA
+    
+    block content          
+
+    block scripts
+      script(src="bootstrap/js/jquery.min.js")
+      script(src="bootstrap/js/bootstrap.min.js")
+      script(src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js")
+
+    script 
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-39392352-3']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();

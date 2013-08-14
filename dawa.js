@@ -1,0 +1,454 @@
+var express= require("express")
+	,	url= require("url")
+  , util= require("util")
+  , ser= require("./serialize")
+	,	Db = require('mongodb').Db
+  , Conn = require('mongodb').Connection
+  , Server = require('mongodb').Server;
+
+var app= express();
+
+app.set('jsonp callback', true);
+
+app.use(express.logger('dev'));
+app.use(express.compress());
+app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+
+app.get('/', function (req, res) {
+  res.render('home.jade');
+});
+
+app.get('/generelt', function (req, res) {
+  res.render('generelt.jade', {url: req.headers.host});
+});
+
+app.get('/webapi', function (req, res) {
+  res.render('webapi.jade', {url: req.headers.host});
+});
+
+app.get('/kodeeksempler', function (req, res) {
+  res.render('kodeeksempler.jade', {url: req.headers.host});
+});
+
+app.get('/om', function (req, res) {
+  res.render('om.jade');
+});
+//(\/[^\.])
+app.get(/html$/i, function (req, res) {
+  console.log('html url: '+req.originalUrl.replace('.html','.json') + ', ' + decodeURIComponent(req.originalUrl.replace('.html','.json')));
+  res.render('kort.jade', {url: decodeURIComponent(req.originalUrl.replace('.html','.json'))});
+});
+
+
+function wildcard(s) {
+  if (s.indexOf('*') !== -1) {
+    if (s.charAt(0) !== '*') {
+      s = '^' + s; // + '$';
+    }
+    if (s.charAt(s.length - 1) !== '*') {
+      s = s + '$';
+    }
+    return new RegExp(s.replace(/\*/g, '(.*)'), 'i')
+  }
+  return s;
+}
+
+// adresser/{unik id}
+app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})(?:\.(\w+))?$/i, function (req, res) {
+  var guid= req.params[0];
+  var type= getFormat(req.params[1]);
+  if (type === undefined) {
+    res.send(400,"Ukendt suffix. Brug csv, json eller html.");
+    return;
+  }
+  console.log("guid genkendt; %s", guid);
+  db.collection('adresser', function (err, collection) {
+    if (err) {
+      console.warn(err.message);
+      res.jsonp("fejl: " + err, 500);
+      return;
+    }    
+    var query = {}; 
+    query.id= guid;
+    console.log(util.inspect(query));
+    var cursor = collection.find(query, { _id: 0 });
+    ser.serializeAdresse(cursor, req, res);
+   /* cursor.toArray(function (err, docs) {
+      if (err) {
+        console.warn('err: ' + err);
+        res.jsonp("fejl: " + err, 500);
+        return;
+      }
+      if (docs.length === 1) {
+        res.statusCode = 200;
+        //res.setHeader("Cache-Control", "public, max-age=86400");
+        res.jsonp(docs[0]);
+      }
+      else {        
+        res.jsonp("Adresse ukendt", 404);
+      }
+    }); */
+  });
+});
+
+function findAdresse(collection, længde, bredde, radius, cb) { 
+  console.log('radius: %s', radius);  
+    var cursor = collection.find(
+              {"adressepunkt.wgs84koordinat": 
+                {$near: 
+                  {$geometry: 
+                    {type: "Point", coordinates: [længde, bredde]}
+                  },
+                  $maxDistance : radius
+                }
+              }, { _id: 0 },{ limit: 1 });
+    cursor.nextObject(function (err, doc) {
+      if (err) {
+        console.warn('err: ' + err);
+        res.jsonp("fejl: " + err, 500);
+        return;
+      }
+      if (doc) {
+        //console.log('count > 0: %s',util.inspect(cursor));
+        cb(doc);
+      }
+      else {
+        if (radius<100000) {          
+          return findAdresse(collection, længde, bredde, radius*10, cb);
+        } 
+        else {       
+          cb(null);
+        }
+      }
+    });
+}
+
+// adresser/{bredde},{længde}
+app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res) {
+  var bredde= parseFloat(req.params[0])
+    , længde= parseFloat(req.params[1])
+    , type= getFormat(req.params[2]);
+  if (type === undefined) {
+    res.send(400,"Ukendt suffix. Brug csv, json eller html.");
+    return;
+  }
+  db.collection('adresser', function (err, collection) {
+    if (err) {
+      console.warn(err.message);
+      res.jsonp("fejl: " + err, 500);
+      return;
+    } 
+    findAdresse(collection, længde, bredde, 50, function(adresse) {
+      if (adresse) {
+        ser.serializeAdresseDoc(adresse, req, res);
+      }
+      else {          
+        res.jsonp("Adresse ukendt", 404);
+      }
+    });
+  });
+});
+
+function getFormat(type) {
+  if (type === undefined) type= 'json';
+  type= type.toLocaleLowerCase();
+  return (type === 'csv' || type === 'json' || type === 'html')?type:undefined;
+}
+
+//app.get('/validadresse?vejnavn={vejnavn}&husnr={husnr}&postnr={postnr}&bynavn={bynavn}&etage={etage}&dør={dør} 
+// husk intevaladresser
+app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
+//app.get(/^\/adresser\/([^,]+)(?:\,(\w+))(?:\,(\d+))(?:\,(\w+))?(?:\,(\w+))?$/, function (req, res) { //,:etage?,:dør?
+  console.log('type: %s', type);
+  var type= getFormat(req.params[0]);
+  if (type === undefined) {
+    res.send(400,"Ukendt suffix. Brug csv, json eller html.");
+    return;
+  }
+  console.log('type: %s', type);
+  var vejnavn= req.query.vejnavn
+    , husnr= req.query.husnr
+    , postnr= req.query.postnr
+    , bynavn= req.query.bynavn
+    , etage= req.query.etage
+    , dor= req.query.dør
+   // var vejnavn= req.params[0]
+   //  , husnr= req.params[1]
+   //  , postnr= req.params[2]
+   //  , etage= req.params[3]
+   //  , dor= req.params[4]
+
+  console.log("%s,%s,%s,%s,%s,%s",vejnavn,husnr,postnr,bynavn,etage,dor);
+  var query = {};  
+  if (vejnavn) {
+    //query.vej= {};
+    query['vej.navn'] = vejnavn; 
+  }
+  if (husnr) {
+    query.husnr = husnr;
+  }
+  if (postnr) {
+    query['postnummer.nr'] = postnr;
+  }
+  if (bynavn) {
+    query['supplerendebynavn'] = bynavn;
+  }
+  if (etage) {
+    query.etage = (etage.match(/^\d+$/) != null)?etage:new RegExp('^'+etage, 'gi');
+  }
+  if (dor) {
+    query.dør= new RegExp('^'+dor+'$', 'gi');
+  }
+  db.collection('adresser', function (err, collection) {
+    if (err) {
+      console.warn(err.message);
+      res.jsonp("fejl: " + err, 500);
+      return;
+    }
+    console.log(util.inspect(query));
+    var cursor = collection.find(query, { _id: 0 });
+    cursor.count(function (err, count) {
+      if (err) {
+        console.warn('err: ' + err);
+        res.jsonp("fejl: " + err, 500);
+        return;
+      }
+      if (count === 1) {
+        res.statusCode = 200;
+        //res.setHeader("Cache-Control", "public, max-age=86400");
+        ser.serializeAdresse(cursor, req, res);
+        //res.jsonp(docs[0]);
+      }
+      else {        
+        res.jsonp("Adresse er ikke valid", 404);
+      }
+    });
+  });
+});
+
+function paginering(query) {
+  var result= {};
+  if (query.side && query.per_side) {
+    result.status= 1;
+    result.side= parseInt(query.side, 10);
+    result.per_side= parseInt(query.per_side, 10);
+    result.skip=  (result.side-1)*result.per_side;
+    result.limit= result.per_side;
+  }
+  else if (query.side || query.per_side){
+    result.status= 2;
+  }
+  else {
+    result.status= 0;
+  }
+  return result;
+}
+
+// adressesøgning
+app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) { 
+  var type= getFormat(req.params[0]);
+  if (type === undefined) {
+    res.send(400,"Ukendt suffix. Brug csv, json eller html.");
+    return;
+  }
+  var options = {};  
+  var pag= paginering(req.query);
+  switch(pag.status) {
+    case 1:
+      options.skip= pag.skip;
+      options.limit= pag.limit;
+      break;
+    case 2:      
+      res.send(400,"Paginering kræver både parametrene side og per_side");
+      return;
+    case 0:
+      break;
+  }
+  var query = {}; 
+  if (req.query.vejnavn) {
+    //query.vej= {};
+    query['vej.navn'] = wildcard(req.query.vejnavn); 
+  }
+  if (req.query.husnr) {
+    query.husnr = req.query.husnr;
+  }
+  if (req.query.postnr) {
+    query['postnummer.nr'] = req.query.postnr;
+  }
+  if (req.query.kommune) {
+    query['kommunekode'] = req.query.kommune;
+  }
+  if (req.query.etage) {
+    query.etage = (req.query.etage.match(/^\d+$/) != null)?req.query.etage:
+    new RegExp('^'+req.query.etage+'$', 'gi');
+  }
+  if (req.query.dør) {
+    query.dør =  wildcard(req.query.dør);
+  }
+  if (req.query.cirkel) {
+    var fields= req.query.cirkel.split(',');
+    if (fields.length != 3) {      
+      res.send(400,"cirkel defineres som <længde>,<bredde>,<radius>");
+      return;
+    }
+    var længde= parseFloat(fields[0])
+      , bredde= parseFloat(fields[1])
+      , radius= parseInt(fields[2])
+    query.wgs84koordinat=
+                {$near: 
+                  {$geometry: 
+                    {type: "Point", coordinates: [længde, bredde]}
+                  },
+                  $maxDistance : radius
+                };
+  }  
+  if (req.query.sogn) {
+    query['sogn.nr'] = req.query.sogn;
+  }
+  db.collection('adresser', function (err, collection) {
+    if (err) {
+      console.warn(err.message);
+      res.jsonp("fejl: " + err, 500);
+      return;
+    }
+    var cursor = collection.find(query, { _id: 0 },options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});
+    console.log(util.inspect(query));
+    ser.serializeAdresser(cursor, req, res);
+    // cursor.toArray(function (err, docs) {
+    //   if (err) {
+    //     console.warn('err: ' + err);
+    //     res.jsonp("fejl: " + err, 500);
+    //     return;
+    //   }
+    //   else {
+    //     res.statusCode = 200;
+    //     //res.setHeader("Cache-Control", "public, max-age=86400");
+    //     res.jsonp(docs);
+    //   }
+    // });
+  });
+});
+
+function spells(query) {
+  if (query.indexOf('ø') !== -1) {
+    query= query.replace('ø','(ø|oe)');
+  }
+  else
+    query= query.replace('oe','(ø|oe)');
+  query= query.replace(' ','( |)');
+  query= query.replace('.','(.| |. )');
+  if (query.indexOf('gl') !== -1) {
+    query= query.replace('gl','(gl|gammel)');
+  }
+  else {
+    query= query.replace('gammel','(gl|gammel)');
+  }
+  if (query.indexOf('alle') !== -1) {
+    query= query.replace('alle','(alle|allé)');
+  }
+  else {
+    query= query.replace('allé','(alle|allé)');
+  }
+  return query;
+}
+
+// fritekstsøgning q=vejnavn husnr etage dør, postnr
+app.get(/^\/adresser\/fritekst(?:\.(\w+))?$/i, function (req, res) { 
+  var type= getFormat(req.params[0]);
+  if (type === undefined) {
+    res.send(400,"Ukendt suffix. Brug csv, json eller html.");
+    return;
+  }
+  if (req.query.q === undefined) {
+    res.send(400,"Parameter q skal anvendes.");
+    return;
+  }
+  var kommune= req.query.kommune;
+  var vejnavn= req.query.vejnavn!==undefined;
+  var pat= '^'+(vejnavn?'('+req.query.vejnavn+')':'([a-zæøå\\s-.]+)')+'(?:\\s*(\\d+[a-z]?))?(?:,?\\s(\\d+|kl|st).?)?(?:\\s+([\\da-z]+))?(?:\\s*-\\s*(\\d*)?\\s?[a-zæøå\\s-]*)?';
+  console.log('RegExp: '+pat);
+  var adrpat= new RegExp(pat,'i');
+  var parts= adrpat.exec(req.query.q);
+  if (parts === null) {
+    res.jsonp([],200);
+    return;
+  }
+  console.log('Vejnavn: ' + vejnavn + " Parts: " + parts + " length: "+parts.length);
+  if (!vejnavn) {
+    var query = {};  
+    var krit= new RegExp('^'+ spells(parts[1].toLocaleLowerCase()).trim() ,'i');
+    query['navn'] = krit; 
+    if (kommune) query.kommuner= kommune;
+    db.collection('vejnavne', function (err, collection) {
+      if (err) {
+        console.warn(err.message);
+        res.jsonp("fejl: " + err, 500);
+        return;
+      }
+      var cursor = collection.find(query, { _id: 0 }, {sort: 'navn'});// , req.query.maxantal ? { limit: req.query.maxantal } : {});
+      console.log(util.inspect(query));
+      //res.setHeader("Cache-Control", "public, max-age=900000");
+      ser.serializeFritekstAdresser(cursor, req, res);
+    });
+  }
+  else {
+    var query = {};  
+    if (parts[1]) {
+      //query.vej= {};
+      query['vej.navn'] = parts[1].trim();//new RegExp('^'+ parts[1].trim() + (exact?'$':''),'i');
+    }
+    if (parts[2]) {
+      query.husnr = new RegExp('^'+ parts[2],'i');
+    }
+    if (parts[3]) {
+      query.etage= new RegExp('^'+parts[3], 'gi');
+    }
+    if (parts[4]) {
+      query.dør =  new RegExp('^'+ parts[4]);
+    }    
+    if (parts[5]) {
+      query['postnummer.nr'] = new RegExp('^'+ parts[5]);
+    }
+
+    if (kommune) query.kommunekode= kommune;
+    db.collection('adresser', function (err, collection) {
+      if (err) {
+        console.warn(err.message);
+        res.jsonp("fejl: " + err, 500);
+        return;
+      }
+      var cursor = collection.find(query, { _id: 0 }, {sort: [['vej.navn', 'asc'],['husnr', 'asc'],['etage', 'asc'],['dør', 'asc']]});// , req.query.maxantal ? { limit: req.query.maxantal } : {});
+      console.log(util.inspect(query));      
+      //res.setHeader("Cache-Control", "public, max-age=900000");
+      ser.serializeAdresser(cursor, req, res);
+    });
+  }
+});
+
+
+var conn = new Db('adressedb', new Server(process.env.dbhost, process.env.dbport, {auto_reconnect : true}), {safe: false});
+//var conn = new Db('adressedb', new Server("ds033268-a0.mongolab.com", 33268, {auto_reconnect : true}), {safe: false});
+//var conn = new Db('adressedb', new Server("ds031588-a0.mongolab.com", 31588, {auto_reconnect : true}), {safe: false});
+//var conn = new Db('adressedb', new Server("localhost", 27017, {}), {safe: false});
+var db;
+conn.open(function (err, database) {
+  if (err) {
+    console.warn('Database ikke åbnet: ' + err.message);
+  }
+  else {
+    // console.log(process.env);
+    database.authenticate(process.env.dbuser,process.env.dbpw, function(err,success) {
+      if (err) {        
+        console.warn('Database ikke åbnet: ' + err.message);
+      }
+      else {
+      	var portnr= 3000;
+        db = database;
+        app.listen(portnr);
+        console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
+      }
+    });
+  }
+});

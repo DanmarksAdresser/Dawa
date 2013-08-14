@@ -1,0 +1,56 @@
+extends layout
+
+block content
+  header.jumbotron.subhead
+    div.container
+      h1 Generelt
+      p.lead Generel dokumentation fælles for adresse, adgangsadresse og navngiven vej. 
+    div.container
+      div.row
+        div.span9
+          section#intro
+            div.page-header
+              h3 Baseadresse (URL)
+            p Som DAWA's baseadresse kan enten anvendes http://#{url} eller https://#{url}.
+
+            div.page-header
+              h3 Dataformater
+            p Data kan returneres i følgende formater: html, json eller csv.
+            p Tidpunkter returners i <a href='http://www.w3.org/TR/NOTE-datetime'>ISO 8601</a>: YYYY-MM-DDTHH:MM:SSTZD. Eksempel; 2000-02-05T12:00:00+01:00.
+            p Angivelse af parameteren mini som query parametre returnerer udelukkende adressen med dens adgangspunkt uden de tilknyttede attributer.
+
+            div.page-header
+              h3  Versionering
+            div.page-header
+              h3  Kompression
+            div.page-header
+              h3  Cross Origin Resource Sharing
+            div.page-header
+              h3  JSONP Callbacks
+            div.page-header
+              h3  Paginering
+              p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kalder vi paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.  
+
+              p
+                pre 
+                  a(href='http://#{url}/adresser?sogn=7060%side=3&per_side=24') http://#{url}/adresser?sogn=7060%side=3&per_side=24
+
+              p Pagineringsinformation er inkluderet i <a href='http://tools.ietf.org/html/rfc5988'>Link header</a>'en. Brug link headeren fremfor at konstruerer URL'en selv.
+
+              p
+                pre Link: &lt;http://#{url}/adresser?sogn=7060%side=2&per_side=24&gt;; rel="prev", 
+                  &lt;http://#{url}/adresser?sogn=7060%side=4&per_side=24&gt;; rel="next"
+
+
+            div.page-header
+              h3  Hypermedia
+            div.page-header
+              h3  Fejlhåndtering
+              p Følger <a href="http://www.mnot.net/blog/2013/05/15/http_problem">Problem Details for HTTP APIs</a>
+
+block append scripts
+  script  
+    $('#topbar li').removeClass('active');
+    var a= $("#topbar li a[href='generelt']")[0];
+    var li= $(a).parent().addClass('active');
+    
