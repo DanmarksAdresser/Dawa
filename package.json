@@ -1,6 +1,6 @@
 {
     "name": "dawa",
-    "version": "0.0.1-11",
+    "version": "0.0.1-12",
     "private": true,
     "dependencies": {
         "mongodb": ">=1.2.14",
