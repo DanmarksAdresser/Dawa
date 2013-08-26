@@ -2,9 +2,7 @@ var express= require("express")
 	,	url= require("url")
   , util= require("util")
   , ser= require("./serialize")
-	,	Db = require('mongodb').Db
-  , Conn = require('mongodb').Connection
-  , Server = require('mongodb').Server;
+	,	MongoClient = require('mongodb').MongoClient;
 
 var app= express();
 
@@ -355,7 +353,7 @@ function spells(query) {
 }
 
 // fritekstsøgning q=vejnavn husnr etage dør, postnr
-app.get(/^\/adresser\/fritekst(?:\.(\w+))?$/i, function (req, res) { 
+app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) { 
   var type= getFormat(req.params[0]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
@@ -428,27 +426,15 @@ app.get(/^\/adresser\/fritekst(?:\.(\w+))?$/i, function (req, res) {
 });
 
 
-var conn = new Db('adressedb', new Server(process.env.dbhost, process.env.dbport, {auto_reconnect : true}), {safe: false});
-//var conn = new Db('adressedb', new Server("ds033268-a0.mongolab.com", 33268, {auto_reconnect : true}), {safe: false});
-//var conn = new Db('adressedb', new Server("ds031588-a0.mongolab.com", 31588, {auto_reconnect : true}), {safe: false});
-//var conn = new Db('adressedb', new Server("localhost", 27017, {}), {safe: false});
 var db;
-conn.open(function (err, database) {
+MongoClient.connect(process.env.connectionstring,function (err, database) {
   if (err) {
     console.warn('Database ikke åbnet: ' + err.message);
   }
   else {
-    // console.log(process.env);
-    database.authenticate(process.env.dbuser,process.env.dbpw, function(err,success) {
-      if (err) {        
-        console.warn('Database ikke åbnet: ' + err.message);
-      }
-      else {
-      	var portnr= 3000;
-        db = database;
-        app.listen(portnr);
-        console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
-      }
-    });
+  	var portnr= 3000;
+    db = database;
+    app.listen(portnr);
+    console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
   }
 });

@@ -10,13 +10,12 @@ block content
           section#intro
             div.page-header
               h2 Hvad er DAWA?
-            p Danmarks Adresse Web API (DAWA) udstiller data om Danmarks adresser og vejnavne.
-            p Formålet med DAWA er at udstille Danmarks adresser på en sådan måde, at de let kan anvendes i andre it-systemer.
+            p Danmarks Adresse Web API (DAWA) udstiller Danmarks adresser, vejnavne, postnumre og kommuner på en sådan måde, at de let kan anvendes af andre it-systemer.
 
           section#anvendelser
             div.page-header
               h2 Hvad kan DAWA bruges til?
-            h3 Adressevælger
+            h3 Adresseindtastning
             p Indtastning af adresser er en et væsentligt element i mange applikationer. I den forbindelse er det vigtigt at det er let for brugeren at indtaste adressen, men også at den indtastede adresse er valid. DAWA kan anvendes til dette. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan foretages.   
             form
               fieldset
@@ -30,6 +29,8 @@ block content
             form
               fieldset
                 legend Feltindtastning
+                label(for='q') Adresse
+                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør - postnummer', id='q') 
 
             form
               fieldset
@@ -37,7 +38,11 @@ block content
 
             legend Reverse geokoding 
             p Klik på kortet nedenfor og få nærmeste adresse. 
-            div#map  
+            div#map 
+
+            h3 Validering af adresser
+            
+            h3 Egen kopi af adresser 
                       
           section#eksempler
             div.page-header
