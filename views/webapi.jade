@@ -127,7 +127,7 @@ block content
             div.page-header
               h3.anchor-header#autocomplete Autocomplete af adresser
             p Søgning er rettet mod autocomplete i adresseindtastning. Indtaster første del adressen, hvor servicen returnerer de adresser som starter med denne del. Det anvendte skema er: {vejnavn} {husnr}, {etage}. {dør}, {postnummer postdistrikt}
-            pre GET /adresser/fritekst
+            pre GET /adresser/autocomplete
             h4 Parametre
             table.table.table-hover
               thead
@@ -141,7 +141,7 @@ block content
             h4 Eksempler
             p Find de adresser som matcher <em>Lilledal 1</em>
             pre 
-              a(href='http://#{url}/adresser/fritekst?q=Lilledal 1') http://#{url}/adresser/fritekst?q=Lilledal 1
+              a(href='http://#{url}/adresser/autocomplete?q=Lilledal 1') http://#{url}/adresser/autocomplete?q=Lilledal 1
 
             
             div.page-header

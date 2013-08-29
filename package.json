@@ -1,12 +1,13 @@
 {
     "name": "dawa",
-    "version": "0.0.1-12",
+    "version": "0.0.1-14",
     "private": true,
     "dependencies": {
         "mongodb": ">=1.2.14",
         "express": "3.1.0",
-        "jade": "0.28.2",
-        "request": "2.16.6"
+        "jade": ">=0.28.2",
+        "request": "2.16.6",
+        "JSONStream": ">=0.6.4"
     },
     "subdomain": "dawa",
     "domains": [
@@ -16,6 +17,6 @@
         "start": "dawa.js"
     },
     "engines": {
-        "node": "0.8.x"
+        "node": "0.10.x"
     }
 }

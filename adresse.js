@@ -1,0 +1,39 @@
+console.log('adresse modul');
+
+var util= require("util");
+
+exports.create= function() {	
+	var adresse= {};
+	adresse.id= '';
+	adresse.vej= {kode: '', navn: ''};
+	adresse.husnr= '';
+	adresse.etage= '';
+	adresse.dør= '';
+	adresse.bygningsnavn= '';
+	adresse.supplerendebynavn= '';
+	adresse.postnummer= {nr: '', navn: ''};
+	adresse.kommunekode= {kode: ''};
+	adresse.adgangsadresseid= '';
+	adresse.adressepunkt= {};
+	adresse.adressepunkt.etrs89koordinat= {};
+	adresse.adressepunkt.etrs89koordinat.coordinates= ['',''];
+	adresse.adressepunkt.wgs84koordinat= {};
+	adresse.adressepunkt.wgs84koordinat.coordinates= ['',''];
+	adresse.adressepunkt.nøjagtighed= '';
+	adresse.adressepunkt.kilde= '';
+	adresse.adressepunkt.tekniskstandard= '';
+	adresse.adressepunkt.tekstretning= '';
+	adresse.adressepunkt.ændret= '';
+	adresse.historik= {};
+	adresse.historik.oprettet= '';
+	adresse.historik.gyldig= '';
+	adresse.historik.ændret= '';
+  adresse.DDKN= {};
+  adresse.DDKN.m100= '';
+  adresse.DDKN.km1= '';
+  adresse.DDKN.km10= '';
+	adresse.sogn= {};
+	adresse.sogn.nr= '';
+	adresse.sogn.navn= '';
+	return adresse;
+};

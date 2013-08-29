@@ -2,6 +2,7 @@ var express= require("express")
 	,	url= require("url")
   , util= require("util")
   , ser= require("./serialize")
+  , dawaStream= require("./dawastream")
 	,	MongoClient = require('mongodb').MongoClient;
 
 var app= express();
@@ -71,8 +72,9 @@ app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-
     var query = {}; 
     query.id= guid;
     console.log(util.inspect(query));
-    var cursor = collection.find(query, { _id: 0 });
-    ser.serializeAdresse(cursor, req, res);
+    var cursor = collection.find(query, { _id: 0 }); 
+    dawaStream.streamAdresser(type, cursor, true, req.query.callback, res);
+    //ser.serializeAdresse(cursor, req, res);
    /* cursor.toArray(function (err, docs) {
       if (err) {
         console.warn('err: ' + err);
@@ -109,8 +111,9 @@ function findAdresse(collection, længde, bredde, radius, cb) {
         return;
       }
       if (doc) {
-        //console.log('count > 0: %s',util.inspect(cursor));
-        cb(doc);
+        cursor= cursor.rewind();
+        cb(cursor);
+        //cb(doc);
       }
       else {
         if (radius<100000) {          
@@ -138,9 +141,10 @@ app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res
       res.jsonp("fejl: " + err, 500);
       return;
     } 
-    findAdresse(collection, længde, bredde, 50, function(adresse) {
-      if (adresse) {
-        ser.serializeAdresseDoc(adresse, req, res);
+    findAdresse(collection, længde, bredde, 50, function(cursor) {
+      if (cursor) {
+//        ser.serializeAdresseDoc(adresse, req, res);
+        dawaStream.streamAdresser(type, cursor, true, req.query.callback, res);
       }
       else {          
         res.jsonp("Adresse ukendt", 404);
@@ -216,7 +220,9 @@ app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
       if (count === 1) {
         res.statusCode = 200;
         //res.setHeader("Cache-Control", "public, max-age=86400");
-        ser.serializeAdresse(cursor, req, res);
+
+        dawaStream.streamAdresser(type, cursor, true, req.query.callback, res);
+        //ser.serializeAdresse(cursor, req, res);
         //res.jsonp(docs[0]);
       }
       else {        
@@ -312,8 +318,9 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
       return;
     }
     var cursor = collection.find(query, { _id: 0 },options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});
-    console.log(util.inspect(query));
-    ser.serializeAdresser(cursor, req, res);
+   
+    dawaStream.streamAdresser(type, cursor, false, req.query.callback, res);
+    //ser.serializeAdresser(cursor, req, res);
     // cursor.toArray(function (err, docs) {
     //   if (err) {
     //     console.warn('err: ' + err);
@@ -388,7 +395,8 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
       var cursor = collection.find(query, { _id: 0 }, {sort: 'navn'});// , req.query.maxantal ? { limit: req.query.maxantal } : {});
       console.log(util.inspect(query));
       //res.setHeader("Cache-Control", "public, max-age=900000");
-      ser.serializeFritekstAdresser(cursor, req, res);
+      //ser.serializeFritekstAdresser(cursor, req, res);      
+      dawaStream.streamAutocompleteAdresser(type, cursor, false, req.query.callback, res);
     });
   }
   else {
@@ -420,7 +428,9 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
       var cursor = collection.find(query, { _id: 0 }, {sort: [['vej.navn', 'asc'],['husnr', 'asc'],['etage', 'asc'],['dør', 'asc']]});// , req.query.maxantal ? { limit: req.query.maxantal } : {});
       console.log(util.inspect(query));      
       //res.setHeader("Cache-Control", "public, max-age=900000");
-      ser.serializeAdresser(cursor, req, res);
+      //ser.serializeAdresser(cursor, req, res);
+
+      dawaStream.streamAdresser(type, cursor, false, req.query.callback, res);
     });
   }
 });
