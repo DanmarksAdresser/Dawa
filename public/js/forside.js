@@ -8,11 +8,14 @@ function search(input,kommune) {
 		if (vejnavn) {
 			vejnavn= ($(input).val().length >= vejnavn.length)?vejnavn:null;
 		}
-	});
+	});  
+  var antaladresser= 12;
 	$(input).typeahead({
-		items: 12,
+		items: antaladresser,
 		source: function (query, process) {
 			var parametre= {q: query}; 
+      parametre.side= 1;
+      parametre.per_side= antaladresser;
 			if (vejnavn) parametre.vejnavn= vejnavn;
 			if (kommune) parametre.kommune= kommune;
 			update= process; 
@@ -65,6 +68,109 @@ function search(input,kommune) {
 	});
 }
 
+function searchPostnr(input) {
+  $.ajax({
+    cache: true,
+    url:'postnumre.json',
+    dataType: "json",
+    error: function (xhr, status, errorThrown) {  
+      var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
+      alert(text);
+    } ,
+    success: function (postnumre) {
+      var items= [];
+      $.each(postnumre, function (i, postnr) {
+        items.push(postnr.postnr + " " + postnr.navn);
+      });
+      $(input).typeahead({
+        items: 12,
+        source: items
+      });
+    }
+  });
+}
+
+function searchVejnavn(pnr,vej) {
+  var update;
+  var ptext = $(pnr).val();
+  var reg = /(\d{4})/g;
+  match = reg.exec(ptext);
+  if (match === null) return;
+  var parametre= {postnr: match[1]}; 
+  $.ajax({
+    url:'vejnavne.json',
+    data: parametre,
+    dataType: "json",
+    error: function (xhr, status, errorThrown) {  
+      var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
+      alert(text);
+    } ,
+    success: function (vejnavne) {
+      var navne= [];
+      $.each(vejnavne, function (i, vejnavn) {
+        navne.push(vejnavn.navn);
+      });
+      $(vej).typeahead({
+        items: 12,
+        source:  function (query, process) {
+          update= process;
+          process(navne);
+        }, 
+        updater: function (item) {
+          this.source(item,update);
+          return item;
+        },
+      });   
+    }
+  });
+}
+
+function searchHusnr(pnr,vej,husnr) {
+  var ptext = $(pnr).val();
+  var reg = /(\d{4})/g;
+  match = reg.exec(ptext);
+  if (match === null) return;
+  var vtext = $(vej).val();
+  if (vtext===null || vtext.length === 0) return;
+  var parametre= {postnr: match[1], vejnavn: vtext}; 
+  $.ajax({
+    cache: true,
+    url:'adresser.json',
+    data: parametre,
+    dataType: "json",
+    error: function (xhr, status, errorThrown) {  
+      var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
+      alert(text);
+    } ,
+    success: function (adresser) {
+      var husnumre= [];
+      $.each(adresser, function (i, adresse) {
+        if (husnumre.indexOf(adresse.husnr) === -1) husnumre.push(adresse.husnr);
+      });
+      $(husnr).typeahead({
+        items: 12,
+        source: function (query, process) {
+          husnumre= husnumre.sort(function(a,b) {
+                              var reg= /(\d+)([A-Z]*)/gi;
+                              var ma= reg.exec(a);
+                              reg.lastIndex= 0; 
+                              var mb= reg.exec(b);
+                              if (ma === null || mb === null) return 0;
+                              var ahusnr= ma[1];
+                              var bhusnr= mb[1];
+                              abok= (ma[2] === '')?' ':ma[2];
+                              bbok= (mb[2] === '')?' ':mb[2];
+                              return (ahusnr !== bhusnr)?(parseInt(ahusnr) - parseInt(bhusnr)):abok.localeCompare(bbok);
+                              //return parseInt(ahusnr) - parseInt(bhusnr);
+                            });
+          
+          process(husnumre);;
+        },
+      });
+    }
+  });
+}
+
 function inverseGeocoding()
 {
 	var map;
@@ -107,6 +213,13 @@ function inverseGeocoding()
 
 $(function () {
 	search('#q',null);
-	search('#qk','0101');
+  search('#qk','0101');
+  searchPostnr('#postnummer');
+  $('#vej').focus(function () {
+    searchVejnavn('#postnummer','#vej');
+  });
+  $('#husnummer').focus(function () {
+    searchHusnr('#postnummer','#vej','#husnummer');
+  });
 	inverseGeocoding();
 });

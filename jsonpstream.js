@@ -5,7 +5,7 @@ var Transform = require('stream').Transform;
 util.inherits(JSONPStream, Transform);
 
 function JSONPStream(callbackname, response) {
-  Transform.call(this);
+  Transform.call(this, { objectMode: true });
   this.callbackname= callbackname;
   this.response= response;
   this.first= true;
@@ -32,6 +32,9 @@ JSONPStream.prototype._transform = function(chunk, encoding, done) {
       done();
     }
     else {
+      console.log('jsonp slut');
+      this.push(null);
+      done();
     }
   }
   catch(err) {

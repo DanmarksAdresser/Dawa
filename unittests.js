@@ -2,8 +2,8 @@ var assert = require("assert")
 	,	request = require("request")
 	, util= require('util');
 
-//var host= "http://localhost:3000";
-var host= "http://dawa.aws.dk";
+var host= "http://localhost:3000";
+//var host= "http://dawa.aws.dk";
 
 describe('Adressevalidering', function(){
 

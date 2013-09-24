@@ -31,6 +31,12 @@ AdresseStream.prototype._transform = function(mongoadresse, encoding, done) {
   }
 };
 
+AdresseStream.prototype._flush = function (callback) {
+  console.log('adresse slut');
+  this.push(null);
+  callback();
+}
+
 function buildAdresse(adresse) {  
   var nyadresse= {};
   nyadresse.id= adresse.id;

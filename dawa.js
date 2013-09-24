@@ -1,7 +1,10 @@
 var express= require("express")
 	,	url= require("url")
   , util= require("util")
-  , ser= require("./serialize")
+  , utility= require('./utility')
+  , postnroperationer= require('./postnroperationer')
+  , vejnavneoperationer= require('./vejnavneoperationer')
+//  , ser= require("./serialize")
   , dawaStream= require("./dawastream")
 	,	MongoClient = require('mongodb').MongoClient;
 
@@ -41,23 +44,10 @@ app.get(/html$/i, function (req, res) {
 });
 
 
-function wildcard(s) {
-  if (s.indexOf('*') !== -1) {
-    if (s.charAt(0) !== '*') {
-      s = '^' + s; // + '$';
-    }
-    if (s.charAt(s.length - 1) !== '*') {
-      s = s + '$';
-    }
-    return new RegExp(s.replace(/\*/g, '(.*)'), 'i')
-  }
-  return s;
-}
-
 // adresser/{unik id}
 app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})(?:\.(\w+))?$/i, function (req, res) {
   var guid= req.params[0];
-  var type= getFormat(req.params[1]);
+  var type= utility.getFormat(req.params[1]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
     return;
@@ -130,7 +120,7 @@ function findAdresse(collection, længde, bredde, radius, cb) {
 app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res) {
   var bredde= parseFloat(req.params[0])
     , længde= parseFloat(req.params[1])
-    , type= getFormat(req.params[2]);
+    , type= utility.getFormat(req.params[2]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
     return;
@@ -153,18 +143,13 @@ app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res
   });
 });
 
-function getFormat(type) {
-  if (type === undefined) type= 'json';
-  type= type.toLocaleLowerCase();
-  return (type === 'csv' || type === 'json' || type === 'html')?type:undefined;
-}
 
 //app.get('/validadresse?vejnavn={vejnavn}&husnr={husnr}&postnr={postnr}&bynavn={bynavn}&etage={etage}&dør={dør} 
 // husk intevaladresser
 app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
 //app.get(/^\/adresser\/([^,]+)(?:\,(\w+))(?:\,(\d+))(?:\,(\w+))?(?:\,(\w+))?$/, function (req, res) { //,:etage?,:dør?
   console.log('type: %s', type);
-  var type= getFormat(req.params[0]);
+  var type= utility.getFormat(req.params[0]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
     return;
@@ -232,33 +217,15 @@ app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
   });
 });
 
-function paginering(query) {
-  var result= {};
-  if (query.side && query.per_side) {
-    result.status= 1;
-    result.side= parseInt(query.side, 10);
-    result.per_side= parseInt(query.per_side, 10);
-    result.skip=  (result.side-1)*result.per_side;
-    result.limit= result.per_side;
-  }
-  else if (query.side || query.per_side){
-    result.status= 2;
-  }
-  else {
-    result.status= 0;
-  }
-  return result;
-}
-
 // adressesøgning
 app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) { 
-  var type= getFormat(req.params[0]);
+  var type= utility.getFormat(req.params[0]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
     return;
   }
   var options = {};  
-  var pag= paginering(req.query);
+  var pag= utility.paginering(req.query);
   switch(pag.status) {
     case 1:
       options.skip= pag.skip;
@@ -273,7 +240,7 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
   var query = {}; 
   if (req.query.vejnavn) {
     //query.vej= {};
-    query['vej.navn'] = wildcard(req.query.vejnavn); 
+    query['vej.navn'] = utility.wildcard(req.query.vejnavn); 
   }
   if (req.query.husnr) {
     query.husnr = req.query.husnr;
@@ -289,7 +256,7 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
     new RegExp('^'+req.query.etage+'$', 'gi');
   }
   if (req.query.dør) {
-    query.dør =  wildcard(req.query.dør);
+    query.dør =  utility.wildcard(req.query.dør);
   }
   if (req.query.cirkel) {
     var fields= req.query.cirkel.split(',');
@@ -342,6 +309,16 @@ function spells(query) {
   }
   else
     query= query.replace('oe','(ø|oe)');
+  if (query.indexOf('æ') !== -1) {
+    query= query.replace('æ','(æ|ae)');
+  }
+  else
+    query= query.replace('ae','(æ|ae)');
+  if (query.indexOf('å') !== -1) {
+    query= query.replace('å','(å|aa)');
+  }
+  else
+    query= query.replace('aa','(å|aa)');
   query= query.replace(' ','( |)');
   query= query.replace('.','(.| |. )');
   if (query.indexOf('gl') !== -1) {
@@ -359,9 +336,9 @@ function spells(query) {
   return query;
 }
 
-// fritekstsøgning q=vejnavn husnr etage dør, postnr
+// autocompletesøgning q=vejnavn husnr etage dør, postnr
 app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) { 
-  var type= getFormat(req.params[0]);
+  var type= utility.getFormat(req.params[0]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
     return;
@@ -369,6 +346,19 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
   if (req.query.q === undefined) {
     res.send(400,"Parameter q skal anvendes.");
     return;
+  }
+  var options = {};  
+  var pag= utility.paginering(req.query);
+  switch(pag.status) {
+    case 1:
+      options.skip= pag.skip;
+      options.limit= pag.limit;
+      break;
+    case 2:      
+      res.send(400,"Paginering kræver både parametrene side og per_side");
+      return;
+    case 0:
+      break;
   }
   var kommune= req.query.kommune;
   var vejnavn= req.query.vejnavn!==undefined;
@@ -392,7 +382,8 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
         res.jsonp("fejl: " + err, 500);
         return;
       }
-      var cursor = collection.find(query, { _id: 0 }, {sort: 'navn'});// , req.query.maxantal ? { limit: req.query.maxantal } : {});
+      options.sort= 'navn';
+      var cursor = collection.find(query, { _id: 0 }, options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});
       console.log(util.inspect(query));
       //res.setHeader("Cache-Control", "public, max-age=900000");
       //ser.serializeFritekstAdresser(cursor, req, res);      
@@ -444,6 +435,8 @@ MongoClient.connect(process.env.connectionstring,function (err, database) {
   else {
   	var portnr= 3000;
     db = database;
+    app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
+    app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
     app.listen(portnr);
     console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
   }
