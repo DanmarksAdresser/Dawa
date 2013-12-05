@@ -3,37 +3,66 @@ extends layout
 block content
   header.jumbotron.subhead
     div.container
-      h1 Generelt
-      p.lead Generel dokumentation fælles for adresse, adgangsadresse og navngiven vej. 
+      h1 Generelt om Web API'et
+      div.page-header
+        p.lead Generel dokumentation fælles for adresse, adgangsadresse, vejnavn og postnummer.
     div.container
       div.row
+        div.span3
+          ul#indhold.nav.nav-list.affix
+            li(data-toggle='collapse', data-target='#generelt').nav-header Generelt            
+            ul#generelt.nav.nav-list
+              li <a href='#baseadresse'>Baseadresse</a>
+              li <a href='#dataformater'>Dataformater</a>
+              li <a href='#versionering'>Versionering</a>
+              li <a href='#kompression'>Kompression</a>
+              li <a href='#cors'>Cross Origin Resource Sharing</a>
+              li <a href='#jsonp'>JSONP Callbacks</a>
+              li <a href='#paginering'>Paginering</a>
+              li <a href='#hypermedia'>Hypermedia</a>
+              li <a href='#fejlhaandtering'>Fejlhåndtering</a>
+              li <a href='#formatering'>Formatering</a>
+              li <a href='#flervaerdisoegning'>Flerværdisøgning</a> 
+              li <a href='#kodeeksempler'>Kodeeksempler</a>
+              li <a href='#kopiregister'>Etablering af opdateret kopiregister</a>
         div.span9
-          section#intro
+          section
             div.page-header
-              h3 Baseadresse (URL)
+              h3.anchor-header#baseadresse Baseadresse
             p Som DAWA's baseadresse kan enten anvendes http://#{url} eller https://#{url}.
 
             div.page-header
-              h3 Dataformater
+              h3.anchor-header#dataformater Dataformater
             p Data kan returneres i følgende formater: html, json eller csv.
             p Tidpunkter returners i <a href='http://www.w3.org/TR/NOTE-datetime'>ISO 8601</a>: YYYY-MM-DDTHH:MM:SSTZD. Eksempel; 2000-02-05T12:00:00+01:00.
             p Angivelse af parameteren mini som query parametre returnerer udelukkende adressen med dens adgangspunkt uden de tilknyttede attributer.
 
             div.page-header
-              h3  Versionering
+              h3.anchor-header#versionering  Versionering
+              p Danmarks Adresse Web API er ikke statisk. Det ændres med tiden pga. nye ønsker, fejlrettelser, nye data, ændring af de bagvedliggende data osv. Vi har af flere grunde ikke ønsket at have flere versioner af DAWA i  drift samtidigt. Vi ønsker heller ikke at bryde DAWA's klienter ved opdatering af dets API. For at opnå dette følger vi følgende verioneringsprincipper:
+              ul
+                li Det er tilladt at tilføje noget til API'et. Nye ressourcer, nye data, nye søgeparametre mm.
+                li Det er ikke tilladt at fjerne noget fra API'et.
+              p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper atableres en ny version, som i en periode driftes samtidig med den tidligere version.
+
+              p Det er vigtigt at de klienter, som anvender Geoservicens API, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det der ofte skaber de største problemer er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Det kunne f.eks. være XPath i forbindelse med XML.
             div.page-header
-              h3  Kompression
+              h3.anchor-header#kompression  Kompression
+              p Hvis den anvendte netværksforbindelse er langsom (lille båndbredde) og den datamængde der ønskes fra DAWA er stor, kan klientapplikationen anmode om at svaret (response) komprimeres. Dette gøres ved at indsætte følgende http header i requestet.
+              p
+                pre Accept-Encoding: gzip, deflate
+              p Herved reduceres størrelsen af et typisk response med ca. 90%.
             div.page-header
-              h3  Cross Origin Resource Sharing
+              h3.anchor-header#cors Cross Origin Resource Sharing
             div.page-header
-              h3  JSONP Callbacks
+              h3.anchor-header#jsonp JSONP Callbacks
             div.page-header
-              h3  Paginering
-              p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kalder vi paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.  
+              h3.anchor-header#paginering  Paginering
+              p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kaldes paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.  
 
               p
                 pre 
-                  a(href='http://#{url}/adresser?sogn=7060%side=3&per_side=24') http://#{url}/adresser?sogn=7060%side=3&per_side=24
+                  a(href='http://#{url}/adresser?sogn=7060&side=3&per_side=24') http://#{url}/adresser?sogn=7060&side=3&per_side=24
 
               p Pagineringsinformation er inkluderet i <a href='http://tools.ietf.org/html/rfc5988'>Link header</a>'en. Brug link headeren fremfor at konstruerer URL'en selv.
 
@@ -43,14 +72,54 @@ block content
 
 
             div.page-header
-              h3  Hypermedia
+              h3.anchor-header#hypermedia  Hypermedia
             div.page-header
-              h3  Fejlhåndtering
+              h3.anchor-header#fejlhaandtering  Fejlhåndtering
               p Følger <a href="http://www.mnot.net/blog/2013/05/15/http_problem">Problem Details for HTTP APIs</a>
 
+            div.page-header
+              h3.anchor-header#formatering  Formatering
+              p Web API'ets svar i JSON er formateret. Hvis formatering af f.eks. performancegrunde ikke ønskes, så kan parameteren <em>noformat</em> anvendes, som vist i eksemplet nedenfor:
+              p
+                pre 
+                  a(href='http://#{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat') http://#{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat
+          
+
+            div.page-header
+              h3.anchor-header#flervaerdisoegning  Flerværdisøgning
+              p Ved søgning med parametrene kommune, sogn, postnr, region, politikreds, retskreds og opstillingskreds er det muligt at angive flere værdier i søgeparameteren. Værdirne separeres med komma (','). Hvis man f.eks. ønsker at alle adresser med husnummmer 177 i både Københavns og Frederiksberg kommune gøres det på følgende måde:
+              p
+                pre 
+                  a(href='http://#{url}/adresser?kommune=0101,0147&husnr=177') http://#{url}/adresser?kommune=0101,0147&husnr=177
+
+            div.page-header
+              h3.anchor-header#kodeeksempler Kodeeksempler
+              p At se på kodeeksempler er en god måde at finde ud af hvordan DAWA anvendes. Du kan finde en række kodeeksempler på 
+                a(href='https://github.com/DanmarksAdresser') https://github.com/DanmarksAdresser
+
+            div.page-header
+              h3.anchor-header#kopiregister Etablering af opdateret kopiregister
+              p Vi anbefaler, at den service baserede adgang til adressefunktionalitet sker via Web API'et anvendes, men i nogle tilfælde giver det mening at have en lokal kopi af adresse-, vejnavne- eller postnummerdata. I det følgende beskrives hvorledes et opdateret kopiregister etableres via et eksempel. Lad os sige vi ønsker en opdateret kopi af adresserne i København og Frederiksberg kommuners adresser. Det sker på følgende måde:
+              ol
+                li 
+                  | Gem det aktuelle hændelsesløbenummer for adresser: <a href='http://#{url}/adressehaendelser/loebenummer'>http://#{url}/adressehaendelser/loebenummer</a>
+                  | Lad os sige at det aktuelle løbenummer er 2027.
+                li Hent adresserne i København og Frederiksberg kommuner:              
+                  a(href='http://#{url}/adresser?kommune=0101,0147') http://#{url}/adresser?kommune=0101,0147
+                li
+                  | Opdater adresserne vha. adressehændelserne fra følgende: <a href='http://#{url}/adresserhaendelser?fraloebenr=2027'>http://#{url}/adresserhaendelser?fraloebenr=2027</a>
+                  | Opdateringen skal kun ske hvis hændelsens løbenummer er større end løbenummeret registreret på adressen.
+                li Sidste løbenummer i listen af adressehændelser fra ovenstående gemmes til næste opdatering.
+
+
 block append scripts
-  script  
+
+  script 
     $('#topbar li').removeClass('active');
     var a= $("#topbar li a[href='generelt']")[0];
-    var li= $(a).parent().addClass('active');
+    var li= $(a).parent().addClass('active'); 
+    //$('#indhold li a').on('click', function() {
+    //$('#indhold li').removeClass('active');
+    //$(this).parent().addClass('active');
+    //});
     

@@ -17,14 +17,14 @@ exports.Vejnavn2AdresseStream = Vejnavn2AdresseStream;
 Vejnavn2AdresseStream.prototype._transform = function(mongovejnavn, encoding, done) {
   try {
     if (mongovejnavn) {
-      console.log('vejnavn chunk');
+      //console.log('vejnavn chunk');
       var adresse= Adresse.create();
       adresse.vej.navn= mongovejnavn.navn;
       this.push(adresse);
       done();
     }
     else {
-      console.log('vejnavn slut');
+      //console.log('vejnavn slut');
       this.push(null);
       done();
     }

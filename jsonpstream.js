@@ -27,12 +27,10 @@ JSONPStream.prototype._transform = function(chunk, encoding, done) {
       }
     }
     if (chunk) {
-      console.log('jsonp chunk');
       this.push(chunk);
       done();
     }
     else {
-      console.log('jsonp slut');
       this.push(null);
       done();
     }
@@ -44,7 +42,6 @@ JSONPStream.prototype._transform = function(chunk, encoding, done) {
 
 
 JSONPStream.prototype._flush = function(done) {  
-    console.log('jsonp slut');
     if (this.callbackname!==undefined) {  
       this.push(');');
     }

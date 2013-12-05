@@ -1,0 +1,446 @@
+extends layout
+
+block content
+  header.jumbotron.subhead
+    div.container
+      h1 Adgangsadresser
+      div.page-header
+        p.lead Web API'et udstiller Danmarks adgangsadresser samt tilhørende funktionalitet.
+    div.container
+      div.row
+        div.span3
+          ul#indhold.nav.nav-list.affix
+            li(data-toggle='collapse', data-target='#adresse').nav-header Adgangsadresse API            
+            ul#adresse.nav.nav-list
+              li <a href='#adressesoegning'>Adgangsdressesøgning</a>
+              li <a href='#autocomplete'>Autocomplete af adgangsadresser</a>
+              li <a href='#adressevalidering'>Adgangsadressevalidering</a>
+              li <a href='#adresseopslag'>Adgangsadresseopslag</a>
+              li <a href='#reversegeokodning'>Reverse geokodning</a>
+            li(data-toggle='collapse', data-target='#haendelser').nav-header Adgangsadressehændelser           
+            ul#haendelser.nav.nav-list
+            li(data-toggle='collapse', data-target='#adressedatanav').nav-header Adgangsadressedata            
+            ul#adressedatanav.nav.nav-list
+              li <a href='#adressedata'>Beskrivelse</a>
+
+        div.span9
+          section
+            div.page-header
+              h3.anchor-header#adressesoegning Adgangsadressesøgning
+            p Søg efter adresser. Returnerer de adgangsadresser som opfylder kriteriet.
+            pre GET /adgangsadresser
+            h4 Parametre
+            p
+              table.table.table-hover
+                thead
+                  th Navn
+                  th Beskrivelse
+                tbody
+                  tr
+                    td vejnavn
+                    td Vejnavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. vejnavn=rød* returnerer alle de adreser, hvis vejnavn starter på <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver.
+                  tr
+                    td husnr
+                    td Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.
+                  tr
+                    td postnr
+                    td Postnummer. 4 cifre.                 
+                                                 
+                  tr
+                    td sogn
+                    td Sognekode. 4 cifre.                                           
+                  tr
+                    td kommune
+                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.                                 
+                  tr
+                    td cirkel
+                    td Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.                               
+                  tr
+                    td rektangel
+                    td Find de adresse, som ligger indenfor den rektangel angivet af det sydvestlige koordinat (x1,y1) og det nordøstlige koordinat (x2, y2). Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. rektangel={x1},{y1};{x2},{y2}
+              h4 Eksempler
+              p Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46
+              pre 
+                a(href='http://#{url}/adgangsadresser?vejnavn=Rødkildevej&husnr=46') http://#{url}/adgangsadresser?vejnavn=Rødkildevej&husnr=46
+              p Find de adresser Hvis vejnavn starter med hvid (eller Hvid) og har postnummeret 2400
+              pre 
+                a(href='http://#{url}/adgangsadresser?vejnavn=hvid*&postnr=2400') http://#{url}/adgangsadresser?vejnavn=hvid*&postnr=2400
+             
+
+            div.page-header
+              h3.anchor-header#autocomplete Autocomplete af adgangsadresser
+            p Søgning er rettet mod autocomplete i adresseindtastning. Indtaster første del adressen, hvor servicen returnerer de adresser som starter med denne del. Det anvendte skema er: {vejnavn} {husnr}, {postnummer postdistrikt}
+            pre GET /adresser/autocomplete
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
+                tr
+                  td q
+                  td Del af adresse
+                
+            h4 Eksempler
+            p Find de adresser som matcher <em>Lilledal 1</em>
+            pre 
+              a(href='http://#{url}/adgangsadresser/autocomplete?q=Lilledal 1') http://#{url}/adgangsadresser/autocomplete?q=Lilledal 1
+
+            
+            div.page-header
+              h3.anchor-header#adressevalidering Adgangsadressevalidering
+            p Valider adresse. Hvis adgangsadressen er valid returneres adressen eller returneres http status 404.
+            pre GET /adresser/valid 
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
+                tr
+                  td vejnavn
+                  td Vejnavn. Der kan anvendes wildcard-søgning. F.eks. vejnavn=rød* returnerer alle de adgangsadreser, hvis vejnavn starter på <em>rød</em>
+                tr
+                  td husnr
+                  td Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.
+                tr
+                  td bynavn
+                  td Suplerende bynavn.
+                tr
+                  td postnr
+                  td                 
+                
+            h4 Eksempler
+            p Valider adressen: Hulgårdsvej 67, 2400 København NV            
+            pre 
+              a(href='http://#{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400') http://#{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400
+            p Adressen, som udpeger et rækkehus, er gyldig
+            p Valider adressen: Lilledal 23, 3450 Allerød
+            pre 
+              a(href='http://#{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450') http://#{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450
+            p Adressen er  valid. Den udpeger en opgang (adgangsadresse) med flere adresser. Se eventuelt under validering af adgangsadresser.
+            
+            
+            div.page-header
+              h3.anchor-header#adresseopslag Adresseopslag
+            p Modtag adresse med id.
+            pre GET /adgangsadresser/{id}
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
+                tr
+                  td id
+                  td Adgangsadressen identificeres ved en UUID.
+            h4 Eksempel
+            p Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018
+            pre 
+              a(href='http://#{url}/adresser/39ece5fb-ef0c-0ee2-e044-0003ba298018') http://#{url}/adresser/39ece5fb-ef0c-0ee2-e044-0003ba298018
+          
+            
+            div.page-header
+              h3.anchor-header#reversegeokodning Reverse geokodning
+            p Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.
+            pre GET /adgangsadresser/{x},{y}
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
+                tr
+                  td x
+                  td X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendex angives bredde-værdien.
+                tr
+                  td y
+                  td Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk anvendex angives længde-værdien.
+            h4 Eksempler
+            p Ikke implementeret: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
+            pre 
+              a(href='http://#{url}/adgangsadresser/6176652.55,725369.59') http://#{url}/adgangsadresser/6176652.55,725369.59
+            p Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)
+            pre 
+              a(href='http://#{url}/adgangsadresser/55.6832383751223,12.5851471984198') http://#{url}/adgangsadresser/55.6832383751223,12.5851471984198
+            
+            div.page-header
+              h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
+            p Ovenstående Web API udstiller adgangsadresser. En <em>adgangsadresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal eller en bygning efter reglerne i adressebekendtgørelsen.
+             p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke. 
+            p Web API'et udstiller for hver adgangsadresse følgende informationer:
+
+            table.table.table-hover
+              thead
+                th(colspan="3") Navn
+                th Beskrivelse
+              tbody               
+                tr
+                  td(colspan="3") id
+                  td Universel, unik identifikation af adressen af datatypen UUID . Er stabil over hele adressens levetid (ligesom et CPR-nummer) dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode. Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”. 
+
+                
+                tr
+                  td(colspan="3") vejnavn
+                  td Vejnavnet som adressen er knyttet til. Udgår og bliver erstattet af Navngiven vej. 
+
+                tr
+                  td
+                  td(colspan="2") kode
+                  td Identifikation af det vejnavn som adressen er knyttet til. Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”. 
+                
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Vejens navn som det er fastsat og registreret af kommunen. Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.
+                
+                tr
+                  td(colspan="3") husnr
+                  td Husnummer, som der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn. Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A..Z, og fastsættes i stigende orden, normalt med lige og ulige numre på hver side af vejen. Eksempel: "11", "12A", "187B".  
+                
+                tr
+                  td(colspan="3") supplerendebynavn
+                  td Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.  
+                
+                tr
+                  td(colspan="3") postnummer
+                  td Postnummeret som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") nr
+                  td Unik identifikation af det postnummer som adressen er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.  
+                
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”. 
+                                
+                tr
+                  td(colspan="3") bygningsnavn
+                  td Evt. bygningsnavn eller gårdnavn, der er registreret af kommunen som en supplerende adressebetegnelse. Indtil 34 tegn. Eksempel: ”Solholm”. Udgår og bliver overført til Stednavne.
+                
+                tr
+                  td(colspan="3") kommune
+                  td Kommunen som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") kode
+                  td Unik identifikation af den kommune som adressen ligger i. Repræsenteret ved fire cifre. Eksempel: 0101 for Københavns kommune. 
+                  
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Kommunens navn. Eksempel: 0101 for Københavns kommune.
+
+                tr
+                  td(colspan="3") ejerlav
+                  td Det matrikulære ejerlav som adressen ligger i.
+
+                tr
+                  td
+                  td(colspan="2") kode
+                  td Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i. Repræsenteret ved indtil 8 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.  
+                
+                tr
+                td
+                  td(colspan="2") navn
+                  td Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”. 
+                
+                tr
+                  td(colspan="3") matrikelnr
+                  td Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på. Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”. 
+                
+                tr
+                  td(colspan="3") esrejendomsnr
+                  td Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ESR, som det matrikelnummer som adressen ligger på, er en del af. Repræsenteret ved seks cifre. Eksempel ”001388”.  
+                
+                tr
+                  td(colspan="3") historik
+                  td Væsentlige tidspunkter for adressen
+
+                tr
+                  td
+                  td(colspan="2") oprettet
+                  td Dato og tid for adressens oprettelse. Eksempel: 2001-12-23T00:00:00.  
+                
+                tr
+                  td
+                  td(colspan="2") ikrafttrædelse
+                  td Dato og tid for adressens ikrafttrædelse. Eksempel: 2002-01-01T00:00:00.  
+                
+                tr
+                  td
+                  td(colspan="2") ændret
+                  td Dato og tid hvor der sidst er ændret i adressen. Eksempel: 2002-04-08T00:00:00. 
+                
+                tr
+                  td(colspan="3") adgangspunkt
+                  td Geografisk punkt, som angiver særskilt adgang fra navngiven vej ind på et areal eller bygning.
+
+                tr
+                  td 
+                  td(colspan="2") etrs89koordinat
+                  td Adgangspunktets koordinatsæt angivet i koordinatsystemet UTM zone 32 og ved brug af fælles europæiske terrestriale referencesystem EUREF89/ETRS89.
+
+                tr
+                  td
+                  td
+                  td øst
+                  td Østlige koordinat til adgangspunktets koordinatsæt. 
+                
+                tr
+                  td
+                  td
+                  td nord
+                  td Nordlige koordinat til adgangspunktets koordinatsæt. 
+                
+                tr
+                  td 
+                  td(colspan="2") wgs84koordinat
+                  td Adgangspunktets koordinatsæt angivet i koordinatsystemet WGS84/geografisk.
+
+                tr
+                  td
+                  td
+                  td bredde
+                  td Breddegraden til adgangspunktets koordinatsæt. 
+                
+                tr
+                  td
+                  td 
+                  td længde
+                  td Lændegraden til adgangspunktets koordinatsæt.                 
+
+                tr
+                  td 
+                  td(colspan="2") nøjagtighed
+                  td Kode der angiver nøjagtigheden for adressepunktet. Et tegn. ”A” betyder at adressepunktet er absolut placeret på et detaljeret grundkort, tyisk med en nøjagtighed bedre end +/- 2 meter. ”B” betyder at adressepunktet er beregnet – typisk på basis af matrikelkortet, således at adressen ligger midt på det pågældende matrikelnummer. I så fald kan nøjagtigheden være ringere en end +/- 100 meter afhængig af forholdene. ”U” betyder intet adressepunkt.  
+                
+                tr
+                  td 
+                  td(colspan="2") kilde
+                  td Kode der angiver kilden til adressepunktet. Et tegn. ”1” = oprettet maskinelt fra teknisk kort; ”2” = Oprettet maskinelt fra af matrikelnummer tyngdepunkt; ”3” = Eksternt indberettet af konsulent på vegne af kommunen; ”4” = Eksternt indberettet af kommunes kortkontor o.l. ”5” = Oprettet af teknisk forvaltning."  
+                
+                tr
+                  td 
+                  td(colspan="2") tekniskstandard
+                  td Kode der angiver den specifikation adressepunktet skal opfylde. 2 tegn. ”TD” = 3 meter inde i bygningen ved det sted hvor indgangsdør e.l. skønnes placeret; ”TK” = Udtrykkelig TK-standard: 3 meter inde i bygning, midt for længste side mod vej; ”TN” Alm. teknisk standard: bygningstyngdepunkt eller blot i bygning; ”UF” = Uspecificeret/foreløbig: ikke nødvendigvis placeret i bygning."  
+                
+                tr
+                  td 
+                  td(colspan="2") tekstretning
+                  td Angiver en evt. retningsvinkel for adressen i ”gon” dvs. hvor hele cirklen er 400 gon og 200 er vandret. Værdier 0.00-400.00: Eksempel: ”128.34”. 
+                
+                tr
+                  td 
+                  td(colspan="2") ændret
+                  td Dato og tid for sidste ændring i adressepunktet. Eksempel: ”1998-11-17T00:00:00”  
+
+                tr
+                  td(colspan="3") DDKN
+                  td Adressens placering i Det Danske Kvadratnet (DDKN).
+
+                tr
+                  td 
+                  td(colspan="2") m100
+                  td Angiver betegnelsen for den 100 m celle som adressen er beliggende i. 15 tegn. Eksempel: ”100m_61768_6435”. 
+                
+                tr
+                  td 
+                  td(colspan="2") km1
+                  td Angiver betegnelsen for den 1 km celle som adressen er beliggende i. 12 tegn. Eksempel: ”1km_6176_643”. 
+                
+                tr
+                  td 
+                  td(colspan="2") km10
+                  td Angiver betegnelsen for den 10 km celle som adressen er beliggende i. 11 tegn. Eksempel: ”10km_617_64”. 
+
+                tr
+                  td(colspan="3") sogn
+                  td Sognet som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") nr
+                  td Identifikation af sognet
+
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Sognets navn
+
+                tr
+                  td(colspan="3") region
+                  td Regionen som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") nr
+                  td Identifikation af regionen
+
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Regionens navn
+
+                tr
+                  td(colspan="3") retskreds
+                  td Retskredsen som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") nr
+                  td Identifikation af retkredsen
+
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Retskredsens navn
+
+                tr
+                  td(colspan="3") politikreds
+                  td Politikredsen som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") nr
+                  td Identifikation af politikredsen
+
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Politikredsens navn
+
+                tr
+                  td(colspan="3") opstillingskreds
+                  td Opstillingskredsen som adressen er beliggende i.
+
+                tr
+                  td
+                  td(colspan="2") nr
+                  td Identifikation af opstillingskredsen
+
+                tr
+                  td
+                  td(colspan="2") navn
+                  td Opstillingskredsens navn
+         
+                tr
+                  td(colspan="3") løbenr
+                  td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
+                
+
+
+block append scripts
+
+  script 
+    $('#topbar li').removeClass('active');
+    var a= $("#topbar li a[href='adgangsadressedok']")[0];
+    var li= $(a).parent().addClass('active'); 
+    //$('#indhold li a').on('click', function() {
+    //$('#indhold li').removeClass('active');
+    //$(this).parent().addClass('active');
+    //});
+    

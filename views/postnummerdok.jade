@@ -1,0 +1,116 @@
+extends layout
+
+block content
+  header.jumbotron.subhead
+    div.container
+      h1 Postnumre
+      div.page-header
+        p.lead Web API'et udstiller Danmarks postnumre samt tilhørende funktionalitet.
+    div.container
+      div.row
+        div.span3
+          ul#indhold.nav.nav-list.affix
+            li(data-toggle='collapse', data-target='#postnummer').nav-header Postnummer API            
+            ul#postnummer.nav.nav-list
+              li <a href='#postnummersoegning'>Postnummersøgning</a>
+              li <a href='#postnummeropslag'>Postnummeropslag</a>
+            li(data-toggle='collapse', data-target='#haendelser').nav-header postnummer hændelse           
+            ul#haendelser.nav.nav-list
+            li(data-toggle='collapse', data-target='#postnummerdatanav').nav-header Postnummerdata            
+            ul#postnummerdatanav.nav.nav-list
+              li <a href='#postnummerdata'>Beskrivelse</a>
+
+        div.span9
+          section
+            div.page-header
+              h3.anchor-header#postnummersoegning Postnummersøgning
+            p Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.
+            pre GET /postnumre
+            h4 Parametre
+            p
+              table.table.table-hover
+                thead
+                  th Navn
+                  th Beskrivelse
+                tbody
+                  tr
+                    td postnr
+                    td Postnummer. 4 cifre.
+                  tr
+                    td navn
+                    td Postnummernavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. navn=*rød* returnerer alle de postnumre, hvis navn rød på <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver.
+                  tr
+                    td kommune
+                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.
+                  tr
+                    td region
+                    td Regionkode. 4 cifre. Eksempel: 1085 for Region Sjælland.
+              h4 Eksempler
+              p Find de postnumre hvis navn starter med <em>Al</em>
+              pre 
+                a(href='http://#{url}/postnumre?navn=Al*') http://#{url}/postnumre?navn=Al*
+              p Find postnumrene i Aarhus kommune
+              pre 
+                a(href='http://#{url}/postnumre?kommune=0751') http://#{url}/postnumre?kommune=0751
+             
+                    
+            div.page-header
+              h3.anchor-header#postnummeropslag Postnummeropslag
+            p Modtag postnummer med id.
+            pre GET /postnumre/{postnr}
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
+                tr
+                  td postnr
+                  td Postnummeret identificeres med 4 cifre.
+            h4 Eksempel
+            p Returner postnummer 2400
+            pre 
+              a(href='http://#{url}/postnumre/2400') http://#{url}/postnumre/2400
+          
+                       
+            div.page-header
+              h3.anchor-header#postnummerdata Beskrivelse af postnummerdata
+            p Ovenstående Web API udstiller postnumre. 
+            p Web API'et udstiller for hver postnummer følgende informationer:
+
+            table.table.table-hover
+              thead
+                th(colspan="3") Navn
+                th Beskrivelse
+              tbody               
+                tr
+                  td(colspan="3") nr
+                  td Unik identifikation af det postnummer som postnummern er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.  
+                
+                tr
+                  td(colspan="3") navn
+                  td Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”. 
+                tr
+                  td(colspan="3") stormodtageradresse
+                  td Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.   
+                tr
+                  td(colspan="3") kommuner
+                  td De kommuner hvis areal overlapper postnumeret areal.  
+                tr
+                  td(colspan="3") regioner
+                  td De regioner hvis areal overlapper postnumeret areal.                    
+                tr
+                  td(colspan="3") løbenr
+                  td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
+                
+block append scripts
+
+  script 
+    $('#topbar li').removeClass('active');
+    var a= $("#topbar li a[href='postnummerdok']")[0];
+    var li= $(a).parent().addClass('active'); 
+    //$('#indhold li a').on('click', function() {
+    //$('#indhold li').removeClass('active');
+    //$(this).parent().addClass('active');
+    //});
+    

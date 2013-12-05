@@ -105,8 +105,8 @@ function buildAdresseCsv(adresse) {
     encodeField(adresse.DDKN.m100),
     encodeField(adresse.DDKN.km1),
     encodeField(adresse.DDKN.km10),
-    encodeField(adresse.sogn.nr),
-    encodeField(adresse.sogn.navn)
+    adresse.sogn?encodeField(adresse.sogn.nr):"",
+    adresse.sogn?encodeField(adresse.sogn.navn):""
   );
 };
 

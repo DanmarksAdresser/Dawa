@@ -28,11 +28,13 @@ exports.sogvejnavne= function(database) {
 	  var query = {}; 
 	  if (req.query.navn) {
 	    query['navn'] = utility.wildcard(req.query.navn); 
+	  } else if (req.query.alternativstavning) {
+	    query['navn'] = utility.spells(req.query.alternativstavning); 
 	  }
 	  if (req.query.postnr) {
 	    query['postnumre'] = req.query.postnr;
 	  }
-	  if (req.query.q) {
+	  if (req.query.kommune) {
 	    query['kommuner'] = req.query.kommune;
 	  }
 	  db.collection('vejnavne', function (err, collection) {
@@ -43,7 +45,7 @@ exports.sogvejnavne= function(database) {
 	    }
 	    options.sort= 'navn';
 	    var cursor = collection.find(query, { _id: 0 },options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});	   
-	    dawaStream.streamVejnavne(type, cursor, false, req.query.callback, res);
+	    dawaStream.streamVejnavne(type, cursor, false, req.query.callback, res, req);
 	  });
 	};
 	return soeg;

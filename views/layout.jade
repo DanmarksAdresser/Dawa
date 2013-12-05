@@ -14,6 +14,7 @@ html(lang='da')
       
     link(href="bootstrap/css/bootstrap.css", rel="stylesheet")
     link(href="bootstrap/css/bootstrap-responsive.css", rel="stylesheet")
+    link(href="css/jquery-ui-1.10.3.custom.min.css", rel="stylesheet")
     link(href="css/style.css", rel="stylesheet")
     link(href="http://cdn.leafletjs.com/leaflet-0.5/leaflet.css", rel="stylesheet")
 
@@ -34,24 +35,31 @@ html(lang='da')
               li.active
                 a(href='/') Introduktion
               li
-                a(href='webapi') Web API'et
+                a(href='generelt') Generelt
               li
-                a(href='kodeeksempler') Kodeeksempler
+                a(href='adressedok') Adresser
               li
-                a(href='datakvalitet') Datakvalitet
+                a(href='adgangsadressedok') Adgangsadresser
               li
-                a(href='statistik') Statistik
+                a(href='vejnavndok') Vejnavne
               li
-                a(href='om') Om DAWA
+                a(href='supplerendebynavndok') Suppl. bynavne
+              li
+                a(href='postnummerdok') Postnumre
+              li
+                a(href='listerdok') Lister
+              li
+                a(href='om') Om
     
     block content          
 
     block scripts
       script(src="bootstrap/js/jquery.min.js")
-      script(src="bootstrap/js/bootstrap.min.js")
+      script(src="bootstrap/js/bootstrap.min.js")jquery-ui-1.10.3.custom.min
+      script(src="js/jquery-ui-1.10.3.custom.min.js")
       script(src="http://cdn.leafletjs.com/leaflet-0.5/leaflet.js")
 
-    script 
+    script(type='text/javascript').
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-39392352-3']);
       _gaq.push(['_trackPageview']);

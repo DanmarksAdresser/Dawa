@@ -3,18 +3,27 @@ extends layout
 block content
   header.jumbotron.subhead
     div.container
-      h1 Danmarks Adresse Web API - DAWA
+      h1 Danmarks Adressers Web API - DAWA
     div.container
       div.row
         div.span9
           section#intro
             div.page-header
               h2 Hvad er DAWA?
-            p Danmarks Adresse Web API (DAWA) udstiller Danmarks adresser, vejnavne, postnumre og kommuner på en sådan måde, at de let kan anvendes af andre it-systemer.
+            p Danmarks Adressers Web API (DAWA) udstiller Danmarks adresser, adgangsadresser, vejnavne og postnumre. Disse data og og tilknyttede funktionalitet udstilles via et web API. Web API'et kan anvendes etablering af adressefunktionalitet i andre it-systemer. Nærværende website er rettet mod udviklere - ikke slutbrugere.
+            p.text-error Dette website er en prototype på den kommende DAWA, som har følgende formål:
+            ul.text-error
+              li At inddrage adresseanvendere tidligt i den konkrete udformning af DAWA (AWS 4).
+              li At sikre at leverandør og kunde har samme billede af hvordan kravene skal implementeres.
+              li At sikre at den specificerede løsning er realiserbar.
+  
+            p.text-error Den udarbejdede prototype rummer selvfølgelig ikke DAWA's fulde funktionalitet. Adressedelen af web API'et er den del, som har mest funktionalitet. Web sitets beskrivelser og funktionalitet skulle gerne give dig mulighed for at vurdere, om DAWA kommer til at opfylde dit behov for adressefunktionalitet. Hvis ikke eller hvis du har kommentarer, ideer eller spørgsmål, så giv din mening til kende på ...
+
 
           section#anvendelser
             div.page-header
               h2 Hvad kan DAWA bruges til?
+            p DAWA anvendes til at etablere adressefunktionalitet i it-systemer. Nedenfor kan du se en række eksempler på hvad DAWA kan anvendes til.Eksemplerne er baseret på DAWA, som tilbyder adressefunktionalitet, men ikke nogen form for brugergrænseflade.
             h3 Adresseindtastning
             p Indtastning af adresser er en et væsentligt element i mange applikationer. I den forbindelse er det vigtigt at det er let for brugeren at indtaste adressen, men også at den indtastede adresse er valid. DAWA kan anvendes til dette. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan foretages.   
             form
@@ -36,22 +45,74 @@ block content
                 input.span3(type='text', autocomplete='off', placeholder='vejnavn', id='vej') 
                 label(for='husnr') Husnr
                 input.span3(type='text', autocomplete='off', placeholder='Husnummer', id='husnummer') 
-
-            form
-              fieldset
-                legend Feltindtastning indenfor en kommune
+                label(for='etage') Etage
+                input.span3(type='text', autocomplete='off', placeholder='Etage', id='etage') 
+                label(for='doer') Dør
+                input.span3(type='text', autocomplete='off', placeholder='Dør', id='doer') 
 
             legend Reverse geokoding 
-            p Klik på kortet nedenfor og få nærmeste adresse. 
+            p Klik på kortet nedenfor og få nærmeste adresse.
+
             div#map 
 
             h3 Validering af adresser
+            p DAWA kan også anvendes til validering af adresser, hvad nedenstående er et eksempel på:
+
+              fieldset
+                legend Adresservalidering
+
+                label(for='vpostnummer') Postnr
+                input.span3(type='text', placeholder='postnummer', id='vpostnummer') 
+                label(for='vvej') Vej
+                input.span3(type='text', placeholder='vejnavn', id='vvej') 
+                label(for='vhusnr') Husnr
+                input.span3(type='text', placeholder='Husnummer', id='vhusnummer') 
+                label(for='vetage') Etage
+                input.span3(type='text', placeholder='Etage', id='vetage') 
+                label(for='vdoer') Dør
+                input.span3(type='text', placeholder='Dør', id='vdoer') 
+                legend
+                button.span1(id='valider') Valider  
+                label.span2(id='ervalideringok') Er adressen gyldig?
             
-            h3 Egen kopi af adresser 
-                      
+             h3 Adressedata
+            p Udover data om selve adressen, som vejnavn, husnr, supplerende bynavn, postnummer, etage og dør, er der knyttet en række andre data til adressen. Her kan nævnes placering (koordinater), ejerlav, matrikelnr, ejendomsnr samt tilknyning til administrative inddelinger: kommune, sogn, region, retskreds, politikreds og opstillingskreds. 
+            p Adressen kan på denne måde være indgang til andre områder, som f.eks. ejendomsområdet. Starter med en adresse, får via denne fat i ejensdomsnummeret, som så kan anvendes til opslag efter ejendomsdata.
+            h3 Adressesøgning
+            p Mange gange er det ikke alle Danmarks adresser, man er interesseret i. Det kan dreje sig om adresser i et enkelt sogn eller kommune. Det kan dreje som adresser indenfor en bestemt afstand til punkt. Eller adresser på en enkelt vej. Dawa giver mulighed for at udsøge adresser efter mange parametre og kombinationer af disse. 
+            h3 Download af adresser
+            p Nogle it-systemer fungerer bedst med en lokal kopi af adresser. Til dette er muligt at downloade udvalgte adresser, som i nedenstående eksempler.
+
+            p 
+              a(href='http://#{url}/adresser.csv?sogn=7060') CSV fil med alle adresser i Grøndal sogn
+
+            p 
+              a(href='http://#{url}/adresser.csv?kommune=0326') CSV fil med alle adresser i Kalundborg kommune
+
+            p 
+              a(href='http://#{url}/adresser.csv?husnr=77') CSV fil med alle adresser med husnummeret 77
+
+            p 
+              a(href='http://#{url}/adresser.csv?cirkel=55.681219613782,12.5816211914972,150') CSV fil med de adresser, som ligger som har en afstand på mindre end 150 m til Gammel mønt 4, 1117 København K.
+
+            p 
+              a(href='http://#{url}/adresser.csv?kommune=0101,0147') CSV fil med København og Frederiksberg kommuners adresser.
+
+            h3 Etablering af opdateret kopiadresseregister
+            p I nogle situationer er der behov for at have et lokalt opdateret kopiadresseregister. DAWA kan anvendes til at etablere og opdatere kopiregisteret.
+
           section#eksempler
             div.page-header
               h2 Hvordan bruges DAWA?
+            p Dawa bruges af udviklere til at etablere adressefunktionalitet i it-systemer. DAWA tilgås via et web API, hvor man ved simple HTTP forespørgsler kalder DAWA. DAWA kan anvendes fra et meget bredt udsnit af - for ikke at sige alle - platforme og udviklingssprog. I skrivende stund kan der ikke findes eksemper på platforme eller udviklingssprog, som ikke kan anvendes.
+            p Eksempler på DAWA kald er listet nedenfor:
+            h4 Adressevalidering. Eksisterer Fægangen 1, 1. 13, 4180 Sorø?
+            p
+              a(href='http://#{url}/adresser/valid?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180') http://#{url}/adresser/valid?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180
+            p Ja, den eksisterer, da vi fik et succesfuldt svar tilbage.
+            h4 Reverse geokodning. Hvilken adresse ligger nærmest koordinatet (55.700677,12.59074)?          
+            p
+              a(href='http://#{url}/adresser/55.700677,12.59074') http://#{url}/adresser/55.700677,12.59074
 
 block append scripts 
   script(src="js/forside.js")

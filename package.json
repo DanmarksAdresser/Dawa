@@ -1,13 +1,14 @@
 {
     "name": "dawa",
-    "version": "0.0.1-16",
+    "version": "0.0.1-46",
     "private": true,
     "dependencies": {
         "mongodb": ">=1.2.14",
         "express": "3.1.0",
-        "jade": ">=0.28.2",
+        "jade": "0.28.2",
         "request": "2.16.6",
-        "JSONStream": ">=0.6.4"
+        "JSONStream": ">=0.6.4",
+        "through": "~2.2.7"
     },
     "subdomain": "dawa",
     "domains": [

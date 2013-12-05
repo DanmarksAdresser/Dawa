@@ -19,19 +19,35 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 app.get('/', function (req, res) {
-  res.render('home.jade');
+  res.render('home.jade', {url: req.headers.host});
 });
 
 app.get('/generelt', function (req, res) {
   res.render('generelt.jade', {url: req.headers.host});
 });
 
-app.get('/webapi', function (req, res) {
-  res.render('webapi.jade', {url: req.headers.host});
+app.get('/adressedok', function (req, res) {
+  res.render('adressedok.jade', {url: req.headers.host});
 });
 
-app.get('/kodeeksempler', function (req, res) {
-  res.render('kodeeksempler.jade', {url: req.headers.host});
+app.get('/adgangsadressedok', function (req, res) {
+  res.render('adgangsadressedok.jade', {url: req.headers.host});
+});
+
+app.get('/vejnavndok', function (req, res) {
+  res.render('vejnavndok.jade', {url: req.headers.host});
+});
+
+app.get('/supplerendebynavndok', function (req, res) {
+  res.render('supplerendebynavndok.jade', {url: req.headers.host});
+});
+
+app.get('/postnummerdok', function (req, res) {
+  res.render('postnummerdok.jade', {url: req.headers.host});
+});
+
+app.get('/listerdok', function (req, res) {
+  res.render('listerdok.jade', {url: req.headers.host});
 });
 
 app.get('/om', function (req, res) {
@@ -63,7 +79,7 @@ app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-
     query.id= guid;
     console.log(util.inspect(query));
     var cursor = collection.find(query, { _id: 0 }); 
-    dawaStream.streamAdresser(type, cursor, true, req.query.callback, res);
+    dawaStream.streamAdresser(type, cursor, true, req.query.callback, res, req);
     //ser.serializeAdresse(cursor, req, res);
    /* cursor.toArray(function (err, docs) {
       if (err) {
@@ -97,7 +113,7 @@ function findAdresse(collection, længde, bredde, radius, cb) {
     cursor.nextObject(function (err, doc) {
       if (err) {
         console.warn('err: ' + err);
-        res.jsonp("fejl: " + err, 500);
+        //res.jsonp("fejl: " + err, 500);
         return;
       }
       if (doc) {
@@ -134,7 +150,7 @@ app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res
     findAdresse(collection, længde, bredde, 50, function(cursor) {
       if (cursor) {
 //        ser.serializeAdresseDoc(adresse, req, res);
-        dawaStream.streamAdresser(type, cursor, true, req.query.callback, res);
+        dawaStream.streamAdresser(type, cursor, true, req.query.callback, res, req);
       }
       else {          
         res.jsonp("Adresse ukendt", 404);
@@ -206,7 +222,7 @@ app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
         res.statusCode = 200;
         //res.setHeader("Cache-Control", "public, max-age=86400");
 
-        dawaStream.streamAdresser(type, cursor, true, req.query.callback, res);
+        dawaStream.streamAdresser(type, cursor, true, req.query.callback, res, req);
         //ser.serializeAdresse(cursor, req, res);
         //res.jsonp(docs[0]);
       }
@@ -216,6 +232,19 @@ app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
     });
   });
 });
+
+function matches(value) {
+  var v;
+  var values= value.split(',');
+  if (values.length===1) {
+    v= value;
+  }
+  else {
+    v= {};
+    v.$in= values;
+  }
+  return v;
+}
 
 // adressesøgning
 app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) { 
@@ -246,10 +275,10 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
     query.husnr = req.query.husnr;
   }
   if (req.query.postnr) {
-    query['postnummer.nr'] = req.query.postnr;
+    query['postnummer.nr'] = matches(req.query.postnr);
   }
   if (req.query.kommune) {
-    query['kommunekode'] = req.query.kommune;
+    query['kommunekode'] = matches(req.query.kommune);
   }
   if (req.query.etage) {
     query.etage = (req.query.etage.match(/^\d+$/) != null)?req.query.etage:
@@ -264,19 +293,20 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
       res.send(400,"cirkel defineres som <længde>,<bredde>,<radius>");
       return;
     }
-    var længde= parseFloat(fields[0])
-      , bredde= parseFloat(fields[1])
+    var bredde= parseFloat(fields[0])
+      , længde= parseFloat(fields[1])
       , radius= parseInt(fields[2])
-    query.wgs84koordinat=
+    query['adressepunkt.wgs84koordinat']=
                 {$near: 
                   {$geometry: 
                     {type: "Point", coordinates: [længde, bredde]}
                   },
                   $maxDistance : radius
                 };
+
   }  
   if (req.query.sogn) {
-    query['sogn.nr'] = req.query.sogn;
+    query['sogn.nr'] = matches(req.query.sogn);
   }
   db.collection('adresser', function (err, collection) {
     if (err) {
@@ -285,8 +315,7 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
       return;
     }
     var cursor = collection.find(query, { _id: 0 },options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});
-   
-    dawaStream.streamAdresser(type, cursor, false, req.query.callback, res);
+    dawaStream.streamAdresser(type, cursor, false, req.query.callback, res, req);
     //ser.serializeAdresser(cursor, req, res);
     // cursor.toArray(function (err, docs) {
     //   if (err) {
@@ -303,38 +332,6 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
   });
 });
 
-function spells(query) {
-  if (query.indexOf('ø') !== -1) {
-    query= query.replace('ø','(ø|oe)');
-  }
-  else
-    query= query.replace('oe','(ø|oe)');
-  if (query.indexOf('æ') !== -1) {
-    query= query.replace('æ','(æ|ae)');
-  }
-  else
-    query= query.replace('ae','(æ|ae)');
-  if (query.indexOf('å') !== -1) {
-    query= query.replace('å','(å|aa)');
-  }
-  else
-    query= query.replace('aa','(å|aa)');
-  query= query.replace(' ','( |)');
-  query= query.replace('.','(.| |. )');
-  if (query.indexOf('gl') !== -1) {
-    query= query.replace('gl','(gl|gammel)');
-  }
-  else {
-    query= query.replace('gammel','(gl|gammel)');
-  }
-  if (query.indexOf('alle') !== -1) {
-    query= query.replace('alle','(alle|allé)');
-  }
-  else {
-    query= query.replace('allé','(alle|allé)');
-  }
-  return query;
-}
 
 // autocompletesøgning q=vejnavn husnr etage dør, postnr
 app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) { 
@@ -365,7 +362,7 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
   var pat= '^'+(vejnavn?'('+req.query.vejnavn+')':'([a-zæøå\\s-.]+)')+'(?:\\s*(\\d+[a-z]?))?(?:,?\\s(\\d+|kl|st).?)?(?:\\s+([\\da-z]+))?(?:\\s*-\\s*(\\d*)?\\s?[a-zæøå\\s-]*)?';
   console.log('RegExp: '+pat);
   var adrpat= new RegExp(pat,'i');
-  var parts= adrpat.exec(req.query.q);
+  var parts= adrpat.exec(req.query.q.toLocaleLowerCase());
   if (parts === null) {
     res.jsonp([],200);
     return;
@@ -373,8 +370,7 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
   console.log('Vejnavn: ' + vejnavn + " Parts: " + parts + " length: "+parts.length);
   if (!vejnavn) {
     var query = {};  
-    var krit= new RegExp('^'+ spells(parts[1].toLocaleLowerCase()).trim() ,'i');
-    query['navn'] = krit; 
+    query['navn'] = utility.spells(parts[1]); 
     if (kommune) query.kommuner= kommune;
     db.collection('vejnavne', function (err, collection) {
       if (err) {
@@ -387,14 +383,14 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
       console.log(util.inspect(query));
       //res.setHeader("Cache-Control", "public, max-age=900000");
       //ser.serializeFritekstAdresser(cursor, req, res);      
-      dawaStream.streamAutocompleteAdresser(type, cursor, false, req.query.callback, res);
+      dawaStream.streamAutocompleteAdresser(type, cursor, false, req.query.callback, res, req);
     });
   }
   else {
     var query = {};  
     if (parts[1]) {
       //query.vej= {};
-      query['vej.navn'] = parts[1].trim();//new RegExp('^'+ parts[1].trim() + (exact?'$':''),'i');
+      query['vej.navn'] = req.query.vejnavn.trim();//new RegExp('^'+ parts[1].trim() + (exact?'$':''),'i');
     }
     if (parts[2]) {
       query.husnr = new RegExp('^'+ parts[2],'i');
@@ -421,7 +417,7 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
       //res.setHeader("Cache-Control", "public, max-age=900000");
       //ser.serializeAdresser(cursor, req, res);
 
-      dawaStream.streamAdresser(type, cursor, false, req.query.callback, res);
+      dawaStream.streamAdresser(type, cursor, false, req.query.callback, res, req);
     });
   }
 });

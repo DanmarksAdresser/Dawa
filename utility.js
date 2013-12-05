@@ -5,7 +5,7 @@ var util= require("util");
 exports.getFormat= function (type) {
   if (type === undefined) type= 'json';
   type= type.toLocaleLowerCase();
-  return (type === 'csv' || type === 'json' || type === 'html')?type:undefined;
+  return (type === 'csv' || type === 'json'|| type === 'geojson' || type === 'html')?type:undefined;
 }
 
 
@@ -38,4 +38,39 @@ exports.wildcard= function(s) {
     return new RegExp(s.replace(/\*/g, '(.*)'), 'i')
   }
   return s;
+}
+
+exports.spells= function (query) {
+  console.log('spells pre: '+query.toLocaleLowerCase().trim());
+  if (query.indexOf('ø') !== -1) {
+    query= query.replace(new RegExp('ø', 'g'),'(ø|oe)');
+  }
+  else
+    query= query.replace(new RegExp('oe', 'g'),'(ø|oe)');
+  if (query.indexOf('æ') !== -1) {
+    query= query.replace(new RegExp('æ', 'g'),'(æ|ae)');
+  }
+  else
+    query= query.replace(new RegExp('ae', 'g'),'(æ|ae)');
+  if (query.indexOf('å') !== -1) {
+    query= query.replace(new RegExp('å', 'g'),'(å|aa)');
+  }
+  else
+    query= query.replace(new RegExp('aa', 'g'),'(å|aa)');
+  query= query.replace(new RegExp(' ', 'g'),'( ?)');
+  query= query.replace(new RegExp('\\.', 'g'),'(\\.| |\\. )');
+  if (query.indexOf('gl') !== -1) {
+    query= query.replace('gl','(gl|gammel)');
+  }
+  else {
+    query= query.replace('gammel','(gl|gammel)');
+  }
+  if (query.indexOf('alle') !== -1) {
+    query= query.replace('alle','(alle|allé)');
+  }
+  else {
+    query= query.replace('allé','(alle|allé)');
+  }
+  console.log('spells post: '+query.toLocaleLowerCase().trim());
+  return new RegExp('^'+ query.toLocaleLowerCase().trim() ,'i');
 }

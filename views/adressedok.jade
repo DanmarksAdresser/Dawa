@@ -3,78 +3,33 @@ extends layout
 block content
   header.jumbotron.subhead
     div.container
-      h1 Web API'et
-      p.lead Danmarks adresser, adgangsadresser og navngivne veje udstilles ved et web API.
+      h1 Adresser
+      div.page-header
+        p.lead Adresse web API'et udstiller Danmarks adresser samt tilhørende funktionalitet.
+
     div.container
       div.row
         div.span3
           ul#indhold.nav.nav-list.affix
-            li(data-toggle='collapse', data-target='#generelt').nav-header Generelt            
-            ul#generelt.nav.nav-list
-              li <a href='#baseadresse'>Baseadresse</a>
-              li <a href='#dataformater'>Dataformater</a>
-              li <a href='#versionering'>Versionering</a>
-              li <a href='#kompression'>Kompression</a>
-              li <a href='#cors'>Cross Origin Resource Sharing</a>
-              li <a href='#jsonp'>JSONP Callbacks</a>
-              li <a href='#paginering'>Paginering</a>
-              li <a href='#hypermedia'>Hypermedia</a>
-              li <a href='#fejlhaandtering'>Fejlhåndtering</a>
             li(data-toggle='collapse', data-target='#adresse').nav-header Adresse API            
-            ul#adresse.nav.nav-list.collapse
+            ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adressesøgning</a>
               li <a href='#autocomplete'>Autocomplete af adresser</a>
+              li <a href='#fritekst'>Fritekstsøgning</a>
               li <a href='#adressevalidering'>Adressevalidering</a>
               li <a href='#adresseopslag'>Adresseopslag</a>
               li <a href='#reversegeokodning'>Reverse geokodning</a>
-              li <a href='#adressedata'>Adressedata</a>
+            li(data-toggle='collapse', data-target='#adressedatanav').nav-header Adressedata            
+            ul#adressedatanav.nav.nav-list
+              li <a href='#adressedata'>Beskrivelse</a>
+            li(data-toggle='collapse', data-target='#adressehaendelser').nav-header Adressehændelser           
+            ul#adressehaendelser.nav.nav-list 
+              li <a href='#adressehaendelsessoegning'>Adressehændelsessøgning</a>
+              li <a href='#adressehaendelsesloebenummer'>Seneste løbenummer</a>
+              li <a href='#adressehaendelsestyper'>Adressehændelsestyper</a>
+
         div.span9
           section
-            div.page-header
-              h2 Generelt
-            p Generel dokumentation fælles for adresse, adgangsadresse og navngiven vej.
-            div.page-header
-              h3.anchor-header#baseadresse Baseadresse (URL)
-            p Som DAWA's baseadresse kan enten anvendes http://#{url} eller https://#{url}.
-
-            div.page-header
-              h3.anchor-header#dataformater Dataformater
-            p Data kan returneres i følgende formater: html, json eller csv.
-            p Tidpunkter returners i <a href='http://www.w3.org/TR/NOTE-datetime'>ISO 8601</a>: YYYY-MM-DDTHH:MM:SSTZD. Eksempel; 2000-02-05T12:00:00+01:00.
-            p Angivelse af parameteren mini som query parametre returnerer udelukkende adressen med dens adgangspunkt uden de tilknyttede attributer.
-
-            div.page-header
-              h3.anchor-header#versionering  Versionering
-            div.page-header
-              h3.anchor-header#kompression  Kompression
-            div.page-header
-              h3.anchor-header#cors Cross Origin Resource Sharing
-            div.page-header
-              h3.anchor-header#jsonp JSONP Callbacks
-            div.page-header
-              h3.anchor-header#paginering  Paginering
-              p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kaldes paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.  
-
-              p
-                pre 
-                  a(href='http://#{url}/adresser?sogn=7060&side=3&per_side=24') http://#{url}/adresser?sogn=7060&side=3&per_side=24
-
-              p Pagineringsinformation er inkluderet i <a href='http://tools.ietf.org/html/rfc5988'>Link header</a>'en. Brug link headeren fremfor at konstruerer URL'en selv.
-
-              p
-                pre Link: &lt;http://#{url}/adresser?sogn=7060%side=2&per_side=24&gt;; rel="prev", 
-                  &lt;http://#{url}/adresser?sogn=7060%side=4&per_side=24&gt;; rel="next"
-
-
-            div.page-header
-              h3.anchor-header#hypermedia  Hypermedia
-            div.page-header
-              h3.anchor-header#fejlhaandtering  Fejlhåndtering
-              p Følger <a href="http://www.mnot.net/blog/2013/05/15/http_problem">Problem Details for HTTP APIs</a>
-          section
-            div.page-header
-              h2 Adresse web API
-            p Adresse web API'et udstiller Danmarks adresser samt tilhørende funktionalitet.
             div.page-header
               h3.anchor-header#adressesoegning Adressesøgning
             p Søg efter adresser. Returnerer de adresser som opfylder kriteriet.
@@ -91,28 +46,59 @@ block content
                     td Vejnavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. vejnavn=rød* returnerer alle de adreser, hvis vejnavn starter på <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver.
                   tr
                     td husnr
-                    td Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.
+                    td Husnummer. Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A-Z. Eksempel: "11", "12A", "187B".
+                                                               
+                  tr
+                    td supplerendebynavn
+                    td (ikke med i prototypen) Supplerende bynavn indtil 34 tegn.      
                   tr
                     td postnr
-                    td                 
+                    td Postnummer. 4 cifre.                
                   tr
                     td etage
-                    td                                 
+                    td Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9                                
                   tr
                     td dør
-                    td                                       
+                    td Dørbetegnelse. Tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.  
                   tr
-                    td sogn
-                    td                                           
+                    td adgangsadresseid
+                    td (ikke med i prototypen) Id på den til adressen tilknyttede adgangsadresse. UUID.
                   tr
                     td kommune
-                    td                                  
+                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.                                    
+                  tr
+                    td sogn
+                    td Sognekode. 4 cifre.   
+                  tr
+                    td region
+                    td (ikke med i prototypen) Regionskode. 4 cifre.     
+                  tr
+                    td retskreds
+                    td (ikke med i prototypen) Retskredskode. 4 cifre.     
+                  tr
+                    td politikreds
+                    td (ikke med i prototypen) Politikredskode. 4 cifre.     
+                  tr
+                    td opstillingskreds
+                    td (ikke med i prototypen) ROpstillingskredskode. 4 cifre.    
+                  tr
+                    td ejerlav
+                    td (ikke med i prototypen) Matrikelnummer. Indtil 7 tegn.     
+                  tr
+                    td esrejendomsnr
+                    td (ikke med i prototypen) ESR Ejendomsnummer. Indtil 6 cifre.       
+                  tr
+                    td matrikel
+                    td (ikke med i prototypen) Matrikelnummer. Indtil 7 tegn.             
+                  tr
+                    td matrikelindeholder
+                    td (ikke med i prototypen) Udpeger de adresser, som er beliggende på den matrikel, som koordinatet er indeholdt i. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. matrikelindeholder={x},{y}                                
                   tr
                     td cirkel
                     td Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.                                 
                   tr
                     td rektangel
-                    td Find de adresse, som ligger indenfor den rektangel angivet af det sydvestlige koordinat (x1,y1) og det nordøstlige koordinat (x2, y2). Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. rektangel={x1},{y1};{x2},{y2}
+                    td (ikke med i prototypen )Find de adresse, som ligger indenfor den rektangel angivet af det sydvestlige koordinat (x1,y1) og det nordøstlige koordinat (x2, y2). Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. rektangel={x1},{y1};{x2},{y2}
               h4 Eksempler
               p Find de adresser som ligger på Rødkildevej og har husnummeret 46
               pre 
@@ -123,10 +109,13 @@ block content
               p Find de adresser som ligger på Lilledal på 1. sal til venstre.
               pre 
                 a(href='http://#{url}/adresser?vejnavn=Lilledal&etage=1&dør=tv') http://#{url}/adresser?vejnavn=Lilledal&etage=1&dør=tv
+              p Find de adresser, som ligger mindre end 150 m fra placeringen angivet af koordinatet (55.6812,12.5816)
+              pre 
+                a(href='http://#{url}/adresser?cirkel=55.6812,12.5816,150') http://#{url}/adresser?cirkel=55.6812,12.5816,150
 
             div.page-header
               h3.anchor-header#autocomplete Autocomplete af adresser
-            p Søgning er rettet mod autocomplete i adresseindtastning. Indtaster første del adressen, hvor servicen returnerer de adresser som starter med denne del. Det anvendte skema er: {vejnavn} {husnr}, {etage}. {dør}, {postnummer postdistrikt}
+            p Søgning er rettet mod autocomplete i adresseindtastning. Indtaster første del adressen, hvor servicen returnerer de adresser som starter med denne del. Det anvendte skema er: {vejnavn} {husnr}, {etage}. {dør} - {postnummer postdistrikt}
             pre GET /adresser/autocomplete
             h4 Parametre
             table.table.table-hover
@@ -137,13 +126,40 @@ block content
                 tr
                   td q
                   td Del af adresse
+                tr
+                  td vejnavn
+                  td Angivelse af gyldigt vejnavn. Anvendes når klienten har genkendt vejnavnet.
+                tr
+                  td kommune
+                  td Angivelse af kommunekode. Anvendes til at angive hvilken kommune adresserne skal søges i.
                 
             h4 Eksempler
             p Find de adresser som matcher <em>Lilledal 1</em>
             pre 
               a(href='http://#{url}/adresser/autocomplete?q=Lilledal 1') http://#{url}/adresser/autocomplete?q=Lilledal 1
 
-            
+            div.page-header
+              h3.anchor-header#fritekst Fritekstsøgning
+            p (ikke med i prototypen) Søgning er rettet mod fritekstsøgning i adresseindtastning. Søgningen efter de enkelte dele af q-parameteren foregår i adressebetegnelsens dele: vejnavn, husnr, etage, dør, supplerende bynavn, postnummer og postdistrikt.
+            pre GET /adresser/fritekst
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
+                tr
+                  td q
+                  td Del af adressebetegnelsen
+                tr
+                  td kommune
+                  td Angivelse af kommunekode. Anvendes til at angive hvilken kommune adresserne skal søges i.
+                
+            h4 Eksempler
+            p Find de adresser hvis adressebetegnelse indeholder <em>Kollerød</em>
+            pre 
+              a(href='http://#{url}/adresser/fritekst?q=Kollerød') http://#{url}/adresser/fritekst?q=Kollerød
+
             div.page-header
               h3.anchor-header#adressevalidering Adressevalidering
             p Valider adresse. Hvis adressen er valid returneres adressen eller eeturneres http status 404.
@@ -165,13 +181,13 @@ block content
                   td Suplerende bynavn.
                 tr
                   td postnr
-                  td                 
+                  td Postnummer. 4 cifre.                
                 tr
                   td etage
-                  td                                 
+                  td Etagebetegnelse, som kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9                                
                 tr
                   td dør
-                  td 
+                  td Dørbetegnelse. Tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.
             h4 Eksempler
             p Valider adressen: Hulgårdsvej 67, 2400 København NV            
             pre 
@@ -223,16 +239,25 @@ block content
                   td y
                   td Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk anvendex angives længde-værdien.
             h4 Eksempler
-            p Ikke implementeret: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
+            p Ikke med i prototypen: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
             pre 
-              a(href='http://#{url}/adresser/6176652.55,725369.59') http://#{url}/adresser/6176652.55,725369.59
+              http://#{url}/adresser/6176652.55,725369.59
             p Returner adressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)
             pre 
-              a(href='http://#{url}/adresser/12.5851471984198,55.6832383751223') http://#{url}/adresser/55.6832383751223,12.5851471984198
+              a(href='http://#{url}/adresser/55.6832383751223,12.5851471984198') http://#{url}/adresser/55.6832383751223,12.5851471984198
             
+            
+            
+
             div.page-header
-              h3.anchor-header#adressedata Adressedata
-            p Ovenstående Web API udstiller adresser. En <em>adresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal, en bygning eller en del af en bygning efter reglerne i adressebekendtgørelsen.
+              h2.anchor-header#adressedata Beskrivelse af adressedata
+            p En <em>adresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal, en bygning eller en del af en bygning efter reglerne i adressebekendtgørelsen.
+            p En adresse angiver en særskilt adgang til et areal, en bygning eller en del af en bygning, efter reglerne i adressebekendtgørelsen. En adresse fastsættes for at angive en bestemt adgang til 
+            ul 
+              li et areal,  fx. en byggegrund, et grønt område eller en sportsplads
+              li en bygning, herunder et andet bygværk, f.eks. et teknisk anlæg
+              li en del af en bygning, fx en etage eller en bolig- eller erhvervs¬enhed i en bygning
+            p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke. 
             p Web API'et udstiller for hver adresse følgende informationer:
 
             table.table.table-hover
@@ -347,15 +372,6 @@ block content
                   td(colspan="2") ikrafttrædelse
                   td Dato og tid for adressens ikrafttrædelse. Eksempel: 2002-01-01T00:00:00.  
                 
-                tr
-                  td
-                  td(colspan="2") ændret
-                  td Dato og tid hvor der sidst er ændret i adressen. Eksempel: 2002-04-08T00:00:00. 
-                
-                tr
-                  td(colspan="3") højde
-                  td Højde i meter over havets overflade. Kilde Danmarks højdemodel.
-
                 tr
                   td(colspan="3") adgangspunkt
                   td Geografisk punkt, som angiver særskilt adgang fra navngiven vej ind på et areal eller bygning.
@@ -507,44 +523,156 @@ block content
                   td
                   td(colspan="2") navn
                   td Opstillingskredsens navn
-
                 tr
-                  td(colspan="3") afstemningsområde
-                  td Afstemningsområdet som adressen er beliggende i.
+                  td(colspan="3") løbenr
+                  td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
 
+
+            div.page-header
+              h2.anchor-header#adressehaendelser Adressehændelser
+            p Ikke med i prototypen: Adresser oprettes, ændres og nedlægges. Nedenfor beskrevne funktionalitet gør det muligt at følge disse hændelser. Hændelser kan f.eks. anvendes til at etablere en opdateret kopi af adresserdata. Hvordan dette gøres kan du læse om  
+               a(href='http://#{url}/generelt#kopiregister') her
+
+            div.page-header
+              h3.anchor-header#adressehaendelsessoegning Adressehændelsessøgning
+            p Søg efter adressehændelser. Returner de adressehændelser, som opfylder kriteriet.
+            pre GET /adresserhaendelser
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
                 tr
-                  td
-                  td(colspan="2") nr
-                  td Identifikation af afstemningsområdet
-
+                  td fraloebenr
+                  td Medtager de adressehændelser, hvis løbenumre er større end det angivne.
                 tr
-                  td
-                  td(colspan="2") navn
-                  td Afstemningsområdets navn
-
+                  td fratidspunkt
+                  td Medtager de adressehændelser, hvis hændelsestidpunkter er senere end det angivne.
                 tr
-                  td(colspan="3") meninghedsrådsafstemningsområde
-                  td Meninghedsrådsafstemningsområdet som adressen er beliggende i.
-
+                  td adresseid
+                  td Medtager de adressehændelser, som vedrører adressen med pågældende adresseid.
                 tr
-                  td
-                  td(colspan="2") nr
-                  td Identifikation af meninghedsrådsafstemningsområdet
+                  td type
+                  td Medtager de adressehændelser, hvis type er lig den angivne. Typen kan antage følgende værdier: <em>oprettet</em>, <em>ændret</em> og <em>nedlagt</em>.
+            h4 Eksempler
+            p Returner oprettelsesadressehændelser med løbenummer større end 2027
+            pre 
+              a(href='http://#{url}/adresserhaendelser?fraloebenr=2027&type=oprettelse') http://#{url}/adresser?fraloebenr=2027&type=oprettelse
+            p Returner adressehændelser som vedrører adressen med adresseid'et 0a3f50a0-73ca-32b8-e044-0003ba298018
+            pre 
+              a(href='http://#{url}/adressehaendelser?adresseid=0a3f50a0-73ca-32b8-e044-0003ba298018') http://#{url}/adressehaendelser?adresseid=0a3f50a0-73ca-32b8-e044-0003ba298018
 
+            div.page-header
+              h3.anchor-header#adressehaendelsessoegning Adressehændelseopslag
+            p Returner den adressehændelser med det givne løbenummer.
+            pre GET /adressehaendelser/{løbenummer}
+            h4 Parametre
+            table.table.table-hover
+              thead
+                th Navn
+                th Beskrivelse
+              tbody
                 tr
-                  td
-                  td(colspan="2") navn
-                  td Meninghedsrådsafstemningsområdets navn
+                  td løbenummer
+                  td Løbenummeret på den ønskede adressehændelse.
 
-                
-                
+            h4 Eksempler
+            p Returner adressehændelsen med løbenummeret 2027
+            pre 
+              a(href='http://#{url}/adressehaendelser/2027') http://#{url}/adressehaendelser/2027
+           
+            div.page-header
+              h3.anchor-header#adressehaendelsesloebenummer Seneste løbenummer
+            p Returner senest anvendte løbenummer.
+            pre GET /adressehaendelser/loebenummer
+            h4 Eksempler
+            p Returner senest anvendte løbenummer
+            pre 
+              a(href='http://#{url}/adressehaendelser/loebenummer') http://#{url}/adressehaendelser/loebenummer
+
+            div.page-header
+              h3.anchor-header#adressehaendelsestyper Adressehændelsestyper
+            p Nedenfor beskrives de enkelte hændelsestyper.
+            h4 Adresseoprettelse
+
+            table.table.table-hover
+              thead
+                th(colspan="3") Navn
+                th Beskrivelse
+              tbody               
+                tr
+                  td(colspan="3") løbenr
+                  td Hændelsens løbenummer.               
+                tr
+                  td(colspan="3") tidspunkt
+                  td Hændelsestidspunkt.               
+                tr
+                  td(colspan="3") adresseid
+                  td Adresseid for den aktuelle adresse.                
+                tr
+                  td(colspan="3") type
+                  td Hændelsestype. I dette tilfælde <em>oprettelse</em>.                
+                tr
+                  td(colspan="3") adresse
+                  td Den oprettede adresse. 
+
+            h4 Adresseændring
+
+            table.table.table-hover
+              thead
+                th(colspan="3") Navn
+                th Beskrivelse
+              tbody               
+                tr
+                  td(colspan="3") løbenr
+                  td Hændelsens løbenummer.               
+                tr
+                  td(colspan="3") tidspunkt
+                  td Hændelsestidspunkt.               
+                tr
+                  td(colspan="3") adresseid
+                  td Adresseid for den aktuelle adresse.                
+                tr
+                  td(colspan="3") type
+                  td Hændelsestype. I dette tilfælde <em>ændring</em>.                
+                tr
+                  td(colspan="3") feltnavn
+                  td Navnet på de felt, som er ændret. Kan antage følgende værdier: vej, husnr, etage, dør, supplerendebynavn, postnr, kommune, matrikelnr, esrejendomsnr, adgangspunkt, ddkn, sogn, retskreds, politikreds, opstillingskreds, region.                                 
+                tr
+                  td(colspan="3") værdifør
+                  td Værdien før hændelsen.                                  
+                tr
+                  td(colspan="3") værdiefter
+                  td Værdien efter hændelsen.  
+
+            h4 Adressenedlæggelse
+
+            table.table.table-hover
+              thead
+                th(colspan="3") Navn
+                th Beskrivelse
+              tbody               
+                tr
+                  td(colspan="3") løbenr
+                  td Hændelsens løbenummer.               
+                tr
+                  td(colspan="3") tidspunkt
+                  td Hændelsestidspunkt.               
+                tr
+                  td(colspan="3") adresseid
+                  td Adresseid for den aktuelle adresse.                
+                tr
+                  td(colspan="3") type
+                  td Hændelsestype. I dette tilfælde <em>nedlæggelse</em>.                
+                  
 
 
 block append scripts
 
   script 
     $('#topbar li').removeClass('active');
-    var a= $("#topbar li a[href='webapi']")[0];
+    var a= $("#topbar li a[href='adressedok']")[0];
     var li= $(a).parent().addClass('active'); 
     //$('#indhold li a').on('click', function() {
     //$('#indhold li').removeClass('active');

@@ -25,11 +25,9 @@ MongoAdresseStream.prototype._read = function() {
       return self.emit('error', err);
     }
     else if (doc) {
-      console.log('mongoadresse');
       self.push(doc);
     }
     else {
-      console.log('mongoadresse slut');
       self.push(null);
     }
   });

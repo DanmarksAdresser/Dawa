@@ -44,7 +44,7 @@ exports.sogpostnumre= function(database) {
 	    options.sort= 'postnr';
 	    var cursor = collection.find(query, { _id: 0 },options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});
 	   
-	    dawaStream.streamPostnumre(type, cursor, false, req.query.callback, res);
+	    dawaStream.streamPostnumre(type, cursor, false, req.query.callback, res, req);
 	  });
 	};
 	return soeg;
