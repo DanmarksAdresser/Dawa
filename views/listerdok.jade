@@ -30,7 +30,7 @@ block content
               li <a href='#retskredssoegning'>Retskredssøgning</a>
               li <a href='#retskredsopslag'>Retskredsopslag</a>
               li <a href='#retskredsdata'>Databeskrivelse</a>
-            li(data-toggle='collapse', data-target='#politikreds').nav-header Retskreds API            
+            li(data-toggle='collapse', data-target='#politikreds').nav-header Politikreds API            
             ul#politikreds.nav.nav-list
               li <a href='#politikredssoegning'>Politikredssøgning</a>
               li <a href='#politikredsopslag'>Politikredsopslag</a>
@@ -248,9 +248,9 @@ block content
 
           section
             div.page-header
-              h3.anchor-header#retskredssoegning Retskredssngning
-            p Søg efter sogne. Returnerer de sogne som opfylder kriteriet. 
-            pre GET /sogne
+              h3.anchor-header#retskredssoegning Retskredssøgning
+            p Søg efter retskredse. Returnerer de retskredse som opfylder kriteriet. 
+            pre GET /retskredse
             h4 Parametre
             p
               table.table.table-hover
@@ -277,7 +277,7 @@ block content
 
             
             div.page-header
-              h3.anchor-header#retskredsopslag Retskredsenpslag
+              h3.anchor-header#retskredsopslag Retskredsopslag
             p Modtag sogn.
             pre GET /retskredse/{retskredskode}
             h4 Parametre
@@ -318,8 +318,8 @@ block content
           section
             div.page-header
               h3.anchor-header#politikredssoegning Politikredssøgning
-            p Søg efter sogne. Returnerer de sogne som opfylder kriteriet. 
-            pre GET /sogne
+            p Søg efter politikredse. Returnerer de politikredse, som opfylder kriteriet. 
+            pre GET /politikredse
             h4 Parametre
             p
               table.table.table-hover
@@ -332,7 +332,7 @@ block content
                     td Politikredsens navn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de sogne, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
                   tr
                     td alternativstavning
-                    td Alternativ stavning af sognets navn. Kan ikke anvendes sammen med <em>navn</em>.
+                    td Alternativ stavning af politikredsens navn. Kan ikke anvendes sammen med <em>navn</em>.
                   tr
                     td sognekode
                     td Politikredskoden. 4 cifre.                                                        

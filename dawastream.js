@@ -26,8 +26,9 @@ exports.streamAdresser= function(format, cursor, enadresse, callbackname, respon
   } else if (format === 'geojson') {
     var jsonstream= JSONStream.stringify({op:'{\n"type": "FeatureCollection",\n"crs": {\n"type": "name",\n"properties": {"name": "EPSG:25832"}\n}\n,"features":[', sep:'\n,\n',cl:']\n}'},formatted)
     , jsonpstream= new JSONPStream(callbackname,response)
+    , adressestream= new AdresseStream({req: request})
     , adressegeojsonstream= new AdresseGeoJSONStream({req: request});
-    mongoadressestream.pipe(adressegeojsonstream).pipe(jsonstream).pipe(jsonpstream).pipe(response);
+    mongoadressestream.pipe(adressestream).pipe(adressegeojsonstream).pipe(jsonstream).pipe(jsonpstream).pipe(response);
   }
   else if (format === 'csv') {
     var csvadressestream= new CsvAdresseStream(response);
