@@ -2,8 +2,8 @@ var assert = require("assert")
 	,	request = require("request")
 	, util= require('util');
 
-var host= "http://localhost:3000";
-//var host= "http://dawa.aws.dk";
+//var host= "http://localhost:3000";
+var host= "http://dawa.aws.dk";
 
 describe('Adressevalidering', function(){
 
@@ -85,14 +85,14 @@ describe('Adresseopslag', function(){
 
   it('/adresser/55.737308,12.513428.json', function(done){
     request(host+'/adresser/55.737308,12.513428.json', function (error, response, body) {
-	    if (response.statusCode != 200) {
+	    if (error || response.statusCode != 200) {
 	      throw new Error('error: '+error + ", statuscode: "+response.statusCode);
     new RegExp('^'+req.query.etage+'$', 'gi');
 	    }
 	    else {
 	      var adresse= JSON.parse(body);
 	      line= util.format(adresse.vej.navn + " " + adresse.husnr + ', ' + adresse.postnummer.nr + ' ' + adresse.postnummer.navn + '(' + adresse.kommune.kode + ')');
-	      console.log(line);
+	      //console.log(line);
 	    }
 	    done();
 	  })

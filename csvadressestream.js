@@ -13,7 +13,7 @@ function CsvAdresseStream(response) {
 exports.CsvAdresseStream = CsvAdresseStream;
 
 CsvAdresseStream.prototype._transform = function(adresse, encoding, done) {
-  console.log("CSV encoding: "+encoding);
+  //console.log("CSV encoding: "+encoding);
   try {
     if (this.first) { 
       this.first= false;     
@@ -23,7 +23,7 @@ CsvAdresseStream.prototype._transform = function(adresse, encoding, done) {
       this.push(buffer);
     }
     if (adresse) {
-      console.log('csv adresse');
+      //console.log('csv adresse');
       var buffer= new Buffer(buildAdresseCsv(adresse));
       this.push(buffer);
       done();

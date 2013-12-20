@@ -427,13 +427,17 @@ var db;
 MongoClient.connect(process.env.connectionstring,function (err, database) {
   if (err) {
     console.warn('Database ikke åbnet: ' + err.message);
+    process.exit(1);
   }
-  else {
-  	var portnr= 3000;
-    db = database;
-    app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
-    app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
-    app.listen(portnr);
-    console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
-  }
+
+  database.on('error', function (err) {
+      console.log('db.on(\'error\'):', err);
+  });
+
+	var portnr= 3000;
+  db = database;
+  app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
+  app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
+  app.listen(portnr);
+  console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
 });
