@@ -1,5 +1,5 @@
 {
-  "extend": "../.jshintrc",
+  "extends": "../.jshintrc",
   "browser":true,
   "node": false,
   "jquery":true

@@ -1,4 +1,4 @@
-
+"use strict";
 var model = require("../../awsDataModel");
 
 describe("Any validation", function () {

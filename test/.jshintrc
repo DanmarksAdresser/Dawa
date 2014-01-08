@@ -1,4 +1,5 @@
 {
+  "globalstrict": true,
   "extends": "../.jshintrc",
   "globals": {
     "afterEach" : true,

@@ -11,7 +11,9 @@
         "through": "~2.2.7"
     },
     "devDependencies" : {
-      "jasmine-node" : "1.12.0"
+      "jasmine-node" : "1.12.0",
+      "grunt": "~0.4.2",
+      "grunt-contrib-jshint": "~0.8.0"
     },
     "subdomain": "dawa",
     "domains": [
@@ -19,7 +21,7 @@
     ],
     "scripts": {
         "start": "dawa.js",
-        "test" : "jasmine-node --matchall unittests.js"
+        "test" : "grunt test"
     },
     "engines": {
         "node": "0.10.x"
