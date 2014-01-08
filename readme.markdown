@@ -1,4 +1,4 @@
-Danmarks Adressers Web API - DAWA
+Danmarks Adressers Web API - DAWA [![Build Status](https://travis-ci.org/DanmarksAdresser/Dawa.png?branch=master)](https://travis-ci.org/DanmarksAdresser/Dawa)
 ======
 
 Et web API til at udstille Danmarks adresser.
