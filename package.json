@@ -10,12 +10,16 @@
         "JSONStream": ">=0.6.4",
         "through": "~2.2.7"
     },
+    "devDependencies" : {
+      "jasmine-node" : "1.12.0"
+    },
     "subdomain": "dawa",
     "domains": [
         "dawa.aws.dk"
     ],
     "scripts": {
-        "start": "dawa.js"
+        "start": "dawa.js",
+        "test" : "jasmine-node --matchall unittests.js"
     },
     "engines": {
         "node": "0.10.x"
