@@ -1,16 +1,16 @@
-var express= require("express")
-	,	url= require("url")
-  , util= require("util")
-  , utility= require('./utility')
-  , postnroperationer= require('./postnroperationer')
-  , vejnavneoperationer= require('./vejnavneoperationer')
-//  , ser= require("./serialize")
-  , dawaStream= require("./dawastream")
-	,	MongoClient = require('mongodb').MongoClient;
+"use strict";
+
+var express= require("express"),
+//  url= require("url"),
+  util= require("util"),
+  utility= require('./utility'),
+  postnroperationer= require('./postnroperationer'),
+  vejnavneoperationer= require('./vejnavneoperationer'),
+  dawaStream= require("./dawastream"),
+  MongoClient = require('mongodb').MongoClient,
+  dawaApi = require('./dawaApi');
 
 var app= express();
-
-app.set('jsonp callback', true);
 
 app.use(express.logger('dev'));
 app.use(express.compress());
@@ -436,6 +436,9 @@ MongoClient.connect(process.env.connectionstring,function (err, database) {
 
 	var portnr= 3000;
   db = database;
+
+  app.use('/api', dawaApi(db));
+
   app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
   app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
   app.listen(portnr);
