@@ -19,7 +19,7 @@ describe("Postnummer schema validation", function () {
         result = err;
       });
 
-    waitsFor(function() { return !(result === undefined); }, "schema validation to succeed", 100);
+    waitsFor(function() { return (result !== undefined); }, "schema validation to succeed", 100);
 
     runs(function(){
       expect(result.valid).toBe(true);

@@ -8,6 +8,8 @@
     "expect":true,
     "it":true,
     "jasmine":true,
-    "spyOn":true
+    "spyOn":true,
+    "waitsFor":true,
+    "runs":true
   }
 }
