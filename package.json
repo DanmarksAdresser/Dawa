@@ -9,6 +9,7 @@
     "request": "2.16.6",
     "JSONStream": ">=0.6.4",
     "through": "~2.2.7",
+    "z-schema": "2.3.1"
   },
   "devDependencies" : {
     "jasmine-node" : "1.12.0",
