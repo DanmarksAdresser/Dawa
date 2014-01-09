@@ -1,13 +1,14 @@
+'use strict';
 
-'use strict'
+var ZSchema = require("z-schema");
 
 var definitions = {
-  'UUID' : {type: 'string', pattern: '^([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})$'},
+  'UUID' : {type: 'string', pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
   'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[0-9]?)$'},
   'DateTime': {type: 'string'} // TODO: find the correct format.
 };
 
-exports.adresseSchema = {
+var adresseSchema = {
   'title': 'Adresse',
   'type': 'object',
   'properties': {
@@ -21,7 +22,7 @@ exports.adresseSchema = {
   'definitions': definitions
 };
 
-exports.postnummerSchema =  {
+var postnummerSchema =  {
   'title': 'postnummer',
   'type': 'object',
   'properties': {
@@ -32,3 +33,40 @@ exports.postnummerSchema =  {
   'required': ['nr', 'navn', 'version'],
   'definitions': definitions
 };
+
+var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
+  noExtraKeywords: true,
+  forceItems: true,
+  forceProperties: true});
+
+function makeValidator(schema) {
+  return function(object) {
+    return zSchemaValidator.validate(object, schema);
+  };
+}
+
+/**
+ * A model consists of:
+ * name : the name of the 'class'
+ * plural : plural version of the name
+ * schema: the schema that validates an object
+ * key: The unique key property
+ * validate: a function that validates an object against the schema
+ */
+module.exports = {
+  adresse : {
+    name: 'adresse',
+    plural : 'adresser',
+    schema : adresseSchema,
+    key : 'id',
+    validator: makeValidator(adresseSchema)
+  },
+  postnummer : {
+    name: 'postnummer',
+    plural: 'postnumre',
+    schema: postnummerSchema,
+    key: 'nr',
+    validate: makeValidator(postnummerSchema)
+  }
+};
+

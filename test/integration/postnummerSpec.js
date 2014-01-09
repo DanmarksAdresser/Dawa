@@ -1,7 +1,7 @@
 "use strict";
 var request = require("request");
 var MongoClient = require('mongodb').MongoClient;
-var postnummerCrud = require('../../postnummerCrud');
+var postnummerCrud = require('../../crud').postnummer;
 
 var baseUrl = 'http://localhost:3000/api';
 var mongoTestUrl = 'mongodb://localhost/dawatest';
@@ -45,7 +45,7 @@ describe('Postnumre', function () {
         throw new Error(error);
       }
       expect(response.statusCode).toBe(200);
-      postnummerCrud.getPostnummer(db, '8260', function(err, postnummer) {
+      postnummerCrud.get(db, '8260', function(err, postnummer) {
         expect(postnummer).toBeDefined();
         expect(postnummer.nr).toBe('8260');
         expect(postnummer.navn).toBe('Viby J');
