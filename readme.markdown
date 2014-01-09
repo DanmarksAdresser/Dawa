@@ -35,6 +35,11 @@ install
  $> npm install -d
 ```
 
+### Kør tests
+```
+ $> npm test
+```
+
 Anvender Node v0.10.7.15 og MongoDB 2.4.1.
 
 
