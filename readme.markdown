@@ -12,11 +12,28 @@ Se [DAWA](http://dawa.aws.dk)
 install
 =======
 
-git clone git://github.com/DanmarksAdresser/dawa.git
+### Install mongodb, nodejs, og npm
 
-cd dawa
+##### On Ubuntu 12.04
+```
+ $> sudo apt-get install mongodb
+ $> sudo apt-get install python-software-properties python g++ make
+ $> sudo add-apt-repository ppa:chris-lea/node.js # needed for Ubuntu 12.04, which doesn't have the newest npm
+ $> sudo apt-get update
+ $> sudo apt-get install nodejs
+ $> sudo apt-get install npm
+```
 
-npm install -d
+### Hent koden
+```
+ $> git clone git://github.com/DanmarksAdresser/dawa.git
+ $> cd dawa
+```
+
+### Hest dependencies
+```
+ $> npm install -d
+```
 
 Anvender Node v0.10.7.15 og MongoDB 2.4.1.
 
