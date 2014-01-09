@@ -7,23 +7,29 @@ var validator = new ZSchema({noZeroLengthStrings: true,
                              forceProperties: true});
 
 describe("Postnummer schema validation", function () {
-  it("should validate basic datum", function () {
-    var result;
+  it("should validate basic datum", function (done) {
     validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1'}, model.postnummerSchema)
-    /*jshint unused: vars */
       .then(function(report){
-        result = report;
+        expect(report.valid).toBe(true);
+        done();
       })
       .catch(function(err){
-        console.error(err);
-        result = err;
+        expect(err).toBe(false);
+        done();
       });
 
-    waitsFor(function() { return (result !== undefined); }, "schema validation to succeed", 100);
+  });
+  it("should fail on 5 digit zip", function (done) {
+    validator.validate({nr: '88600', navn: 'Silkeborg', version: 'ver1'}, model.postnummerSchema)
+      .then(function(report){
+        expect(report.valid).toBe(false);
+        done();
+      })
+      .catch(function(err){
+        expect(err.errors.length).toBe(1);
+        done();
+      });
 
-    runs(function(){
-      expect(result.valid).toBe(true);
-    });
   });
 });
 
