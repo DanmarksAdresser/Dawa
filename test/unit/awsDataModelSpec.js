@@ -8,7 +8,7 @@ var validator = new ZSchema({noZeroLengthStrings: true,
 
 describe("Postnummer schema validation", function () {
   it("should validate basic datum", function (done) {
-    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1'}, model.postnummerSchema)
+    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1'}, model.postnummer.schema)
       .then(function(report){
         expect(report.valid).toBe(true);
         done();
@@ -20,7 +20,7 @@ describe("Postnummer schema validation", function () {
 
   });
   it("should fail on 5 digit zip", function (done) {
-    validator.validate({nr: '88600', navn: 'Silkeborg', version: 'ver1'}, model.postnummerSchema)
+    validator.validate({nr: '88600', navn: 'Silkeborg', version: 'ver1'}, model.postnummer.schema)
       .then(function(report){
         expect(report.valid).toBe(false);
         done();
