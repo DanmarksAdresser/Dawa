@@ -1,7 +1,7 @@
 "use strict";
 
-var express = require('express'),
-  postnroperationer = require('./postnummerCrud');
+var express = require('express');
+var postnroperationer = require('./postnummerCrud');
 
 
 module.exports = function(db) {
@@ -38,13 +38,11 @@ module.exports = function(db) {
         console.error(err);
         res.status(500);
         res.end();
+        return;
       }
+      res.status(200);
+      res.end();
     });
-
-    res.status(200);
-    res.end();
   });
-
-
-  return app;
+return app;
 };

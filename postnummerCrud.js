@@ -16,6 +16,6 @@ exports.putPostnummer = function(db, postnummer, callback) {
     }
 
     console.log("opretter postnummer" + JSON.stringify(postnummer));
-    return collection.update({postnr: postnummer.nr}, postnummer, { upsert: true }, callback);
+    return collection.update({nr: postnummer.nr}, postnummer, { upsert: true }, callback);
   });
 };

@@ -5,7 +5,7 @@ module.exports = function (grunt) {
     pkg: grunt.file.readJSON('package.json'),
     jshint: {
       all: [
-        "Gruntfile.js", "test/**/*.js"
+        "Gruntfile.js", "dawaApi.js", "postnummerCrud.js", "test/**/*.js"
       ],
       options: {
         jshintrc: true
