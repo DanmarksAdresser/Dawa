@@ -30,7 +30,7 @@ install
  $> cd dawa
 ```
 
-### Hest dependencies
+### Hent dependencies
 ```
  $> npm install -d
 ```
