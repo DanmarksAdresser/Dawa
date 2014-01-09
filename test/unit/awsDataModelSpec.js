@@ -58,3 +58,45 @@ describe("Etage validation", function () {
   });
 });
 
+describe("AdgangsAdresse validation", function () {
+  it("should validate", function () {
+    expect(model.validate({id: '38743874-3874-3874-3874-387438743874',
+                           version: 'noehu',
+                           husnr: '10'},
+                          model.AdgangsAdresse))
+      .toMatch('^Success$');
+  });
+});
+
+
+describe("Adresse validation", function () {
+  var adgangsadressen = {id: '38743874-3874-3874-3874-387438743874',
+                         version: 'noehu',
+                         husnr: '10'};
+
+  it("should validate", function () {
+    expect(model.validate({id:                '38743874-3874-3874-3874-387438743874',
+                           version:           'version',
+                           etage:             '7',
+                           dør:               'doer',
+                           adressebetegnelse: 'adressebetegnelse',
+                           adgangsadressen:   adgangsadressen},
+                          model.Adresse))
+      .toMatch('^Success$');
+  });
+
+  it("should only require some fields", function () {
+    expect(model.validate({id:                '38743874-3874-3874-3874-387438743874',
+                           version:           'version',
+                           adressebetegnelse: 'adressebetegnelse',
+                           adgangsadressen:   adgangsadressen},
+                          model.Adresse))
+      .toMatch('^Success$');
+    expect(model.validate({id:                '38743874-3874-3874-3874-387438743874',
+                           adressebetegnelse: 'adressebetegnelse',
+                           adgangsadressen:   adgangsadressen},
+                          model.Adresse))
+      .toMatch('Missing required field: version');
+  });
+});
+

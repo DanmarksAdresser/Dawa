@@ -1,4 +1,8 @@
 
+function defRegexpType(regexp){
+  return function (str){ return (str.match(regexp) == null ? false : true); };
+}
+
 function Any(_){ return true; };
 exports.Any = Any;
 
@@ -8,50 +12,31 @@ exports.String = String;
 function Number(str){ return (typeof str === 'number'); }
 exports.Number = Number;
 
-function UUID(str){
-  var r = /^([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})$/;
-  return (str.match(r) == null ? false : true);
-}
+var UUID = defRegexpType(/^([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})$/);
 exports.UUID = UUID;
 
-function Etage(str){ return (str.match(/^([1-9]|[1-9][0-9]|st|kl[0-9]?)$/) === null ? false : true); }
+var Etage = defRegexpType(/^([1-9]|[1-9][0-9]|st|kl[0-9]?)$/);
 exports.Etage = Etage;
 
-var AdresseBetegnelse = Any;
-var DateTime = Any;
-var Doer     = Any;
-var Husnr    = Any;
-
-
 var AdgangsAdresse =  {fields: {id:                UUID,
-				version:           DateTime,
-				husnr:             Husnr},
+				version:           Any,
+				husnr:             Any},
 		       required: ['id', 'version', 'husnr']
 		      };
-
+exports.AdgangsAdresse = AdgangsAdresse;
 
 var Adresse =  {fields: {id:                UUID,
-			 version:           DateTime,
+			 version:           Any,
 			 etage:             Etage,
-			 dør:               Doer,
-			 adressebetegnelse: AdresseBetegnelse,
-			 adgangsadressen:   Any},
-		required: ['id', 'version', 'adressebetegnelse', 'adgangsadresse']
+			 dør:               Any,
+			 adressebetegnelse: Any,
+			 adgangsadressen:   AdgangsAdresse},
+		required: ['id', 'version', 'adressebetegnelse']
 	       };
+exports.Adresse = Adresse;
 
-
-var ex1 =  {id: '83292397-2397-2397-2397-239723972397',
-	    version: 'satneoh',
-	    etage:'kl3',
-	    dør:'satneoh',
-	    adressebetegnelse:'satneoh',
-	    adgangsadressen: {id: '23482348-2348-2348-2348-234823482348',
-			      version: 'saoethu',
-			      husnr: 'soaeut'}
-	   };
-
-function validate(adr, schema){
-  var result = validateType([], adr, schema);
+exports.validate = function (data, schema){
+  var result = validateType([], data, schema);
   if (result.length === 0){
     return "Success";
   }
@@ -60,19 +45,27 @@ function validate(adr, schema){
   }
 }
 
-function validateType(errors, adr, schema){
-  for (var key in adr) {
-    if (adr.hasOwnProperty(key)) {
-      var val = adr[key];
+function validateType(errors, data, schema){
+  schema.required.forEach(function(f){
+    if (data[f] === undefined){
+      errors.push(" Missing required field: "+f);
+    }
+  });
+
+  for (var key in data) {
+    if (data.hasOwnProperty(key)) {
+      var val = data[key];
       var spec = schema.fields[key];
       if ((typeof spec === 'object') && (typeof val === 'object')){
 	validateType(errors, val, spec)
       } else if (typeof spec === 'function'){
 	if (!spec(val)){
-	  errors.push("specKey="+key+" val="+val);
+	  errors.push(" SpecKey="+key+" val="+val);
 	}
-      } else {
-	throw "Schema error: "+ schema;
+      } else if (spec === undefined){
+        errors.push(" Unknown field found: "+key);
+      } else{
+	throw "Schema error: "+ spec+ "  " +schema;
       }
     }
   }
