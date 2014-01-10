@@ -34,7 +34,7 @@ describe("Postnummer schema validation", function () {
   });
 
   it("should fail on extra properties", function (done) {
-    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1', foo: 42}, model.postnummerSchema)
+    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1', foo: 42}, model.postnummer.schema)
       .then(function(report){
         expect(report.valid).toBe(false);
         done();
