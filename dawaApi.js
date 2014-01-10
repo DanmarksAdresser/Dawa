@@ -4,6 +4,7 @@ var express = require('express');
 var awsDataModel = require('./awsDataModel');
 var crud = require('./crud');
 var JSONStream = require('JSONStream');
+var utility = require('./utility');
 
 function handleInternalError(err, res) {
   console.error(err);
@@ -14,7 +15,18 @@ function handleInternalError(err, res) {
 module.exports = function(db) {
   function publishModel(app, model, crud) {
     app.get('/' + model.plural, function(req, res) {
-      crud.query(db, {}, function(err, cursor) {
+      var pag= utility.paginering(req.query);
+      var options = {};
+      switch(pag.status) {
+        case 1:
+          options.skip= pag.skip;
+          options.limit= pag.limit;
+          break;
+        case 2:
+          res.send(400,"Paginering kræver både parametrene side og per_side");
+          return;
+      }
+      crud.query(db, {}, options, function(err, cursor) {
         if(err) {
           return handleInternalError(err, res);
         }

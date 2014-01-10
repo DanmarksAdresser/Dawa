@@ -16,13 +16,13 @@ function buildCrud(model) {
     });
   };
 
-  crud.query = function(db, query, callback) {
+  crud.query = function(db, query, options, callback) {
     db.collection(model.plural, function (err, collection) {
       if (err) {
         callback(err);
         return;
       }
-      return collection.find(query, callback);
+      return collection.find(query, options, callback);
     });
   };
 
