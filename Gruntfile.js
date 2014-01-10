@@ -18,13 +18,33 @@ module.exports = function (grunt) {
       integration: {
         specFolders: ['test/integration']
       }
+    },
+    express: {
+      test: {
+        options: {
+          script: 'dawa.js',
+          output: 'Express server listening'
+        }
+      }
+    },
+    watch: {
+      test: {
+        files:  [ 'test/**/*.js', '*.js', 'public/**/*' ],
+        tasks:  [ 'test' ]
+//        options: {
+//          spawn: false // Without this option specified express won't be reloaded
+//        }
+      }
     }
   });
 
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-express-server');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
-  grunt.registerTask('test', ['jshint', 'jasmine_node:unit']);
-  grunt.registerTask('integrationtest', ['jasmine_node:integration']);
+  grunt.registerTask('unitTest', ['jshint', 'jasmine_node:unit']);
+  grunt.registerTask('integrationtest', ['express:test', 'jasmine_node:integration', 'express:test:stop']);
+  grunt.registerTask('test', ['unitTest', 'integrationtest']);
   grunt.registerTask('default', ['test']);
 
   grunt.registerMultiTask('jasmine_node', 'Run jasmine-node', function() {

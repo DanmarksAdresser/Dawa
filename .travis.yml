@@ -4,5 +4,3 @@ node_js:
 services: mongodb
 env:
   - connectionstring=mongodb://localhost/dawatest
-before_test:
-  - "node dawa.js"
