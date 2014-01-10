@@ -15,6 +15,17 @@ function buildCrud(model) {
       return collection.findOne(query, callback);
     });
   };
+
+  crud.query = function(db, query, callback) {
+    db.collection(model.plural, function (err, collection) {
+      if (err) {
+        callback(err);
+        return;
+      }
+      return collection.find(query, callback);
+    });
+  };
+
   crud.put = function(db, object, callback) {
     model.validate(object).then(function() {
       db.collection(model.plural, function(err, collection) {
@@ -30,6 +41,7 @@ function buildCrud(model) {
         callback(err);
       });
   };
+
   return crud;
 }
 
