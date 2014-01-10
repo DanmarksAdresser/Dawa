@@ -1,21 +1,11 @@
 'use strict';
-
-var _ = require("underscore");
+var _       = require("underscore");
 var ZSchema = require("z-schema");
 
-var definitions = {
-  'UUID' : {type: 'string', pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
-  'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
-  'Kode4': {type: 'string', pattern: '^(\\d{4})$'},
-  'UpTo8': {type: 'string', pattern: '^\\d{1,8}$'},
-  'DateTime': {type: 'string'}, // TODO: find the correct format.
-  'Wgs84koordinat': {type: 'object',
-                     properties: {'øst':  {type: 'number'}, // TODO: can we add ranges?
-                                  'nord': {type: 'number'}}}, // TODO: can we add ranges?
-  'Etrs89koordinat': {type: 'object',
-                      properties: {'bredde': {type: 'integer'}, // TODO: can we add ranges?
-                                   'længde': {type: 'integer'}}}, // TODO: can we add ranges?
-};
+
+/******************************************************************************/
+/*** Helper functions *********************************************************/
+/******************************************************************************/
 
 function object_AllRequired(properties){
   return   {type: 'object',
@@ -23,6 +13,34 @@ function object_AllRequired(properties){
             required: _.keys(properties),
             additionalProperties: false};
 }
+
+var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
+  noExtraKeywords: true,
+  forceItems: true,
+  forceProperties: true});
+
+function makeValidator(schema) {
+  return function(object) {
+    return zSchemaValidator.validate(object, schema);
+  };
+}
+
+
+/******************************************************************************/
+/*** JSON-Schema definitions **************************************************/
+/******************************************************************************/
+
+var definitions = {
+  'UUID' : {type: 'string', pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
+  'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
+  'Kode4': {type: 'string', pattern: '^(\\d{4})$'},
+  'UpTo8': {type: 'string', pattern: '^\\d{1,8}$'},
+  'DateTime': {type: 'string'}, // TODO: find the correct format.
+  'Wgs84koordinat': object_AllRequired({'bredde': {type: 'number'}, // TODO: can we add ranges?
+                                        'længde': {type: 'number'}}), // TODO: can we add ranges?
+  'Etrs89koordinat': object_AllRequired({'øst':  {type: 'number'}, // TODO: can we add ranges?
+                                         'nord': {type: 'number'}}), // TODO: can we add ranges?
+};
 
 var adgangsAdresseSchema = {
   title: 'AdgangsAdresse',
@@ -82,8 +100,8 @@ var adresseSchema = {
     'dør':   { type: 'string' },
     'adressebetegnelse': { type: 'string' },
     // Here we just reuse the JS definition above.  If schemas get
-    // public URLs, these should be used instead!
-    //    'adgangsadresse': adgangsAdresseSchema,
+    // public URLs, these should be used instead!  'adgangsadresse':
+    // adgangsAdresseSchema,
     'adgangsadresse': adgangsAdresseSchema,
   },
   'required': ['id', 'adressebetegnelse', 'adgangsadresse'],
@@ -125,7 +143,6 @@ var vejnavnSchema = {
   'definitions': definitions
 }
 
-
 var supplerendebynavnSchema = {
   'title': 'supplerendebynavn',
   'type': 'object',
@@ -145,25 +162,17 @@ var supplerendebynavnSchema = {
 }
 
 
-var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
-  noExtraKeywords: true,
-  forceItems: true,
-  forceProperties: true});
+/******************************************************************************/
+/*** Data Model definitions ***************************************************/
+/******************************************************************************/
 
-function makeValidator(schema) {
-  return function(object) {
-    return zSchemaValidator.validate(object, schema);
-  };
-}
+// A model consists of:
+//   name : the name of the 'class'
+//   plural : plural version of the name
+//   schema: the schema that validates an object
+//   key: The unique key property
+//   validate: a function that validates an object against the schema
 
-/**
- * A model consists of:
- * name : the name of the 'class'
- * plural : plural version of the name
- * schema: the schema that validates an object
- * key: The unique key property
- * validate: a function that validates an object against the schema
- */
 module.exports = {
   adresse : {
     name: 'adresse',
@@ -206,3 +215,6 @@ module.exports = {
   },
 };
 
+/******************************************************************************/
+/*** EOF **********************************************************************/
+/******************************************************************************/
