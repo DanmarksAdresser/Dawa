@@ -7,43 +7,180 @@ var validator = new ZSchema({noZeroLengthStrings: true,
                              forceItems: true,
                              forceProperties: true});
 
+
+function valid(data, schema, done){
+  validator.validate(data, schema)
+    .then(function(report){
+      expect(report.valid).toBe(true);
+      done();
+    })
+    .catch(function(err){
+      console.log(err);
+      expect(err).toBe(false);
+      done();
+    });
+}
+
+function invalid(data, schema, invalidPattern, done){
+  validator.validate(data, schema)
+    .then(function(report){
+      expect(report.valid).toBe(false);
+      done();
+    })
+    .catch(function(err){
+      expect(err.errors[0].code).toMatch(invalidPattern);
+      done();
+    });
+}
+
 describe("Postnummer schema validation", function () {
   it("should validate basic datum", function (done) {
-    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1'}, model.postnummer.schema)
-      .then(function(report){
-        expect(report.valid).toBe(true);
-        done();
-      })
-      .catch(function(err){
-        expect(err).toBe(false);
-        done();
-      });
-
+    valid({nr: '8600',
+           navn: 'Silkeborg',
+           version: 'ver1',
+           stormodtageradresse: 'adr 1',
+           regioner: ['9234', '9873'],
+           kommuner: ['9249', '3832']
+          },
+          model.postnummer.schema,
+          done);
   });
   it("should fail on 5 digit zip", function (done) {
-    validator.validate({nr: '88600', navn: 'Silkeborg', version: 'ver1'}, model.postnummer.schema)
-      .then(function(report){
-        expect(report.valid).toBe(false);
-        done();
-      })
-      .catch(function(err){
-        expect(err.errors[0].code).toMatch('PATTERN');
-        done();
-      });
-
+    invalid({nr: '88600', navn: 'Silkeborg', version: 'ver1'}, model.postnummer.schema, 'PATTERN', done);
   });
 
   it("should fail on extra properties", function (done) {
-    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1', foo: 42}, model.postnummer.schema)
-      .then(function(report){
-        expect(report.valid).toBe(false);
-        done();
-      })
-      .catch(function(err){
-        expect(err.errors[0].code).toMatch('OBJECT_ADDITIONAL_PROPERTIES');
-        done();
-      });
-
+    invalid({nr: '8600', navn: 'Silkeborg', version: 'ver1', foo: 42}, model.postnummer.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
   });
 });
 
+describe("AdgangsAdresse schema validation", function () {
+  it("should fail on OBJECT_ADDITIONAL_PROPERTIES, this assert that the schema is valid", function (done) {
+    invalid({foo: 42}, model.adgangsadresse.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
+  });
+});
+
+describe("Adresse schema validation", function () {
+  it("should fail on OBJECT_ADDITIONAL_PROPERTIES, this assert that the schema is valid", function (done) {
+    invalid({foo: 42}, model.adresse.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
+  });
+
+  it("should validate complete address", function (done) {
+    valid({id: "98349834-9834-9834-9834-983498349834",
+           adressebetegnelse: "noeh",
+           adgangsadresse: {"id": "0a3f50ae-da7f-32b8-e044-0003ba298018",
+                            "vej": {
+                              "kode": "0237",
+                              "navn": "Fægangen",
+                              "vejadresseringsnavn": "F_gangen"
+                            },
+                            "husnr": "1",
+                            "supplerendebynavn": "Byen",
+                            "postnummer": {
+                              "nr": "4180",
+                              "navn": "Sorø",
+                            },
+                            "kommune": {
+                              "kode": "0340",
+                              "navn": "Kommune 0340"
+                            },
+                            "ejerlav": {
+                              "kode": "0340",
+                              "navn": "Ejerlav 0340"
+                            },
+                            "historik": {"oprettet": "dato",
+                                         "ændret": "dato"},
+                            "matrikelnr": "3b",
+                            "adgangspunkt": {
+                              "etrs89koordinat": {
+                                "øst": 6146489.42,
+                                "nord": 661986.43
+                              },
+                              "wgs84koordinat": {
+                                "længde": 11.5605367427032,
+                                "bredde": 55.4377705205619
+                              },
+                              "kvalitet": {
+                                "nøjagtighed": "A",
+                                "kilde": 5,
+                                "tekniskstandard": "TK"},
+                              "tekstretning": 115.67,
+                              "ændret": "dato"
+                            },
+                            "DDKN": {
+                              "m100": "100m_61464_6619",
+                              "km1": "1km_6146_661",
+                              "km10": "10km_614_66"
+                            },
+                            "sogn": {"kode": "7383",
+                                     "navn": "Sorø"},
+                            "region": {"kode": "7383",
+                                       "navn": "Sorø"},
+                            "retskreds": {"kode": "7383",
+                                          "navn": "Sorø"},
+                            "politikreds": {"kode": "7383",
+                                            "navn": "Sorø"},
+                            "opstillingskreds": {"kode": "7383",
+                                                 "navn": "Sorø"},
+                            "afstemningsområde": {"kode": "7383",
+                                                  "navn": "Sorø"}
+                           }
+          },
+          model.adresse.schema,
+          done);
+  });
+});
+
+describe("Vejnavn schema validation", function () {
+  it("should validate basic datum", function (done) {
+    valid({kommunekode: '8600',
+           kode: '9324',
+           navn: 'vej',
+           vejadresseringsnavn: 'vejen',
+           postnumre: ['2939', '2398'],
+          },
+          model.vejnavn.schema, done);
+  });
+
+});
+
+describe("Supplendebynavn schema validation", function () {
+  it("should validate basic datum", function (done) {
+    valid({version: "ver1",
+           navn: 'vej',
+           postnumre: ['2939', '2398'],
+           regioner: ['2939', '2398'],
+           kommuner: ['2939', '2398'],
+          },
+          model.supplerendebynavn.schema, done);
+  });
+
+});
+
+
+var regExpTestSchema =  {
+  'type': 'object',
+  'properties': {
+    'UpTo5': { type: 'string', pattern: '^\\d{1,5}$'}
+  },
+  'additionalProperties': false
+};
+
+describe("RegExp validation", function () {
+  it("should support the regexp construct: {x,y}", function (done) {
+    valid({UpTo5: '0'},regExpTestSchema, done);
+  });
+
+  it("should support the regexp construct: {x,y}", function (done) {
+    valid({UpTo5: '99999'},regExpTestSchema, done);
+  });
+
+  it("should support the regexp construct: {x,y}", function (done) {
+    invalid({UpTo5: ''},regExpTestSchema, 'PATTERN', done);
+  });
+
+  it("should support the regexp construct: {x,y}", function (done) {
+    invalid({UpTo5: '555555'},regExpTestSchema, 'PATTERN', done);
+  });
+
+});
