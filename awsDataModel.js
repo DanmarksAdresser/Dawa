@@ -4,7 +4,7 @@ var ZSchema = require("z-schema");
 
 var definitions = {
   'UUID' : {type: 'string', pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
-  'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[0-9]?)$'},
+  'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
   'DateTime': {type: 'string'} // TODO: find the correct format.
 };
 
@@ -12,13 +12,14 @@ var adresseSchema = {
   'title': 'Adresse',
   'type': 'object',
   'properties': {
-    'id': { '$ref': '#/definitions/UUID' },
+    'id':    { '$ref': '#/definitions/UUID' },
     'etage': { '$ref': '#/definitions/Etage' },
-    'dør': { type: 'string' },
+    'dør':   { type: 'string' },
     'adressebetegnelse': { type: 'string' },
-    'adgangsadresse': { type: 'string' }
+    'adgangsadresse':    { type: 'string' }
   },
   'required': ['id', 'adressebetegnelse', 'adgangsadresse'],
+  'additionalProperties': false,
   'definitions': definitions
 };
 
@@ -31,6 +32,7 @@ var postnummerSchema =  {
     'version' : { '$ref': '#/definitions/DateTime' }
   },
   'required': ['nr', 'navn', 'version'],
+  'additionalProperties': false,
   'definitions': definitions
 };
 

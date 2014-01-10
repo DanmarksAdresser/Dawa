@@ -1,4 +1,5 @@
 "use strict";
+
 var model = require("../../awsDataModel");
 var ZSchema = require("z-schema");
 var validator = new ZSchema({noZeroLengthStrings: true,
@@ -26,7 +27,20 @@ describe("Postnummer schema validation", function () {
         done();
       })
       .catch(function(err){
-        expect(err.errors.length).toBe(1);
+        expect(err.errors[0].code).toMatch('PATTERN');
+        done();
+      });
+
+  });
+
+  it("should fail on extra properties", function (done) {
+    validator.validate({nr: '8600', navn: 'Silkeborg', version: 'ver1', foo: 42}, model.postnummerSchema)
+      .then(function(report){
+        expect(report.valid).toBe(false);
+        done();
+      })
+      .catch(function(err){
+        expect(err.errors[0].code).toMatch('OBJECT_ADDITIONAL_PROPERTIES');
         done();
       });
 
