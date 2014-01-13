@@ -98,7 +98,9 @@ block content
                     td Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.                                 
                   tr
                     td rektangel
-                    td (ikke med i prototypen )Find de adresse, som ligger indenfor den rektangel angivet af det sydvestlige koordinat (x1,y1) og det nordøstlige koordinat (x2, y2). Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. rektangel={x1},{y1};{x2},{y2}
+                    td (ikke med i prototypen )Find de adresse, som ligger indenfor den rektangel angivet af det sydvestlige koordinat (x1,y1) og det nordøstlige koordinat (x2, y2). Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. rektangel={x1},{y1};{x2},{y2}tr
+                  td polygon
+                    td (ikke med i prototypen )Find de adresse, som ligger indenfor den angivne polygon. Polygonen specificeres som et array af koordinater på samme måde som koordinaterne specificeres i <a href='http://geojson.org/geojson-spec.html#id4'>GeoJSON's polygon</a>. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. polygon=[[100.0, 0.0], [101.0, 0.0], [101.0, 1.0], [100.0, 1.0], [100.0, 0.0]].
               h4 Eksempler
               p Find de adresser som ligger på Rødkildevej og har husnummeret 46
               pre 

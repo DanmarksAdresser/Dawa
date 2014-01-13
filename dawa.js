@@ -250,7 +250,7 @@ function matches(value) {
 app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) { 
   var type= utility.getFormat(req.params[0]);
   if (type === undefined) {
-    res.send(400,"Ukendt suffix. Brug csv, json eller html.");
+    res.send(400,"Ukendt suffix. Brug csv, json, geojson eller html.");
     return;
   }
   var options = {};  
