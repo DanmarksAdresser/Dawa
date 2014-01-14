@@ -61,4 +61,14 @@ describe('Postnumre', function () {
       });
     });
   });
+
+
+  it('foobarbaz', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser', function(error, response, body){
+      var adrs = JSON.parse(body);
+      expect(adrs.length).toBeGreaterThan(1000);
+      done();
+    });
+  }, 15000);
+
 });

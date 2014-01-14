@@ -1,16 +1,16 @@
 "use strict";
 
-var express= require("express"),
-//  url= require("url"),
-  util= require("util"),
-  utility= require('./utility'),
-  postnroperationer= require('./postnroperationer'),
-  vejnavneoperationer= require('./vejnavneoperationer'),
-  dawaStream= require("./dawastream"),
-  MongoClient = require('mongodb').MongoClient,
-  dawaApi = require('./dawaApi');
+var express             = require("express");
+var util                = require("util");
+var utility             = require('./utility');
+var postnroperationer   = require('./postnroperationer');
+var vejnavneoperationer = require('./vejnavneoperationer');
+var dawaStream          = require("./dawastream");
+var MongoClient         = require('mongodb').MongoClient;
+var dawaApi             = require('./dawaApi');
+var dawaPGApi           = require('./dawaPGApi');
 
-var app= express();
+var app = express();
 
 app.use(express.logger('dev'));
 app.use(express.compress());
@@ -438,6 +438,7 @@ MongoClient.connect(process.env.connectionstring,function (err, database) {
   db = database;
 
   app.use('/api', dawaApi(db));
+  app.use('/api/pg', dawaPGApi.setupRoutes(db));
 
   app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
   app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
