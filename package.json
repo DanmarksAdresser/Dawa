@@ -10,6 +10,8 @@
     "JSONStream": ">=0.6.4",
     "through": "~2.2.7",
     "z-schema": "2.3.1",
+    "pg": "2.11.0",
+    "pg-query-stream": "0.2.0",
     "underscore": "1.5.2"
   },
   "devDependencies": {
