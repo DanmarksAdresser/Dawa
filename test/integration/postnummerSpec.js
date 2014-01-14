@@ -6,10 +6,9 @@ var postnummerCrud = require('../../crud').postnummer;
 var baseUrl = 'http://localhost:3000/api';
 var mongoTestUrl = 'mongodb://localhost/dawatest';
 
-
-
 describe('Postnumre', function () {
   var db;
+
   beforeEach(function(done) {
     MongoClient.connect(mongoTestUrl,function (err, database) {
       if (err) {
@@ -23,11 +22,13 @@ describe('Postnumre', function () {
       });
     });
   });
+
   afterEach(function() {
     if(db) {
       db.close();
     }
   });
+
   it('Skal kunne tage imod en postnummeroprettelse fra BBR og oprette postnummeret i databasen', function (done) {
     request.put({
       url: baseUrl + '/postnummerhaendelse/oprettelse',
@@ -49,7 +50,14 @@ describe('Postnumre', function () {
         expect(postnummer).toBeDefined();
         expect(postnummer.nr).toBe('8260');
         expect(postnummer.navn).toBe('Viby J');
-        done();
+
+        request.get(baseUrl + '/postnumre/8260', function(error, response, body){
+          var postnummer = JSON.parse(body);
+          expect(postnummer).toBeDefined();
+          expect(postnummer.nr).toBe('8260');
+          expect(postnummer.navn).toBe('Viby J');
+          done();
+        });
       });
     });
   });
