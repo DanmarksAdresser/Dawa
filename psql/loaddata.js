@@ -1,13 +1,18 @@
+"use strict";
+
 var fs = require('fs');
-var pg = require('pg');
+var pg = require('pg.js');
 var copyFrom = require('pg-copy-streams').from;
 var zlib = require('zlib');
 var byline = require('byline');
 var csv = require('csv');
 var stream = require('stream');
 var async = require('async');
+var process = require('process');
 
-var conString = "postgres://ahj@localhost/dawa";
+var conString = process.env.conString;
+var dataDir = process.env.dataDir;
+
 var client = new pg.Client(conString);
 
 function loadCsv(client, gzippedInputStream, options, callback) {
@@ -59,7 +64,7 @@ client.connect(function (err) {
   async.series([
     function(callback) {
       console.log("Indlæser postnumre....");
-      var postnumreStream = fs.createReadStream('data/PostCode.csv.gz');
+      var postnumreStream = fs.createReadStream( dataDir + '/PostCode.csv.gz');
       loadCsv(client, postnumreStream, {
         tableName : 'Postnumre',
         columns : ['nr', 'version', 'navn'],
@@ -77,7 +82,7 @@ client.connect(function (err) {
     },
     function(callback) {
       console.log("Indlæser vejnavne....");
-      var vejnavneStream = fs.createReadStream('data/RoadName.csv.gz');
+      var vejnavneStream = fs.createReadStream(dataDir + '/RoadName.csv.gz');
       loadCsv(client, vejnavneStream, {
         tableName : 'Vejnavne',
         columns : ['kode', 'kommunekode', 'version', 'vejnavn'],
@@ -97,7 +102,7 @@ client.connect(function (err) {
     },
     function(callback) {
       console.log("Indlæser enhedsadresser....");
-  var enhedsadresserStream = fs.createReadStream('data/AddressSpecific.csv.gz');
+  var enhedsadresserStream = fs.createReadStream(dataDir + '/AddressSpecific.csv.gz');
       loadCsv(client, enhedsadresserStream, {
         tableName : 'Enhedsadresser',
         columns : ['id', 'version', 'adgangsadresseId', 'oprettet', 'aendret', 'etage', 'doer'],
@@ -120,7 +125,7 @@ client.connect(function (err) {
     },
     function(callback) {
       console.log("Indlæser adgangsadresser....");
-      var adgangsAdresserStream = fs.createReadStream('data/AddressAccess.csv.gz');
+      var adgangsAdresserStream = fs.createReadStream(dataDir + '/AddressAccess.csv.gz');
       loadCsv(client, adgangsAdresserStream, {
         tableName : 'Adgangsadresser',
         columns : ['id', 'version', 'vejkode', 'kommunekode', 'husnr', 'postnr', 'ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'oprettet', 'aendret', 'etrs89oest', 'etrs89nord', 'wgs84'],

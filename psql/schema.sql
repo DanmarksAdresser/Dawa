@@ -1,6 +1,13 @@
 --CREATE DATABASE dawa;
 --\c dawa;
---CREATE EXTENSION postgis;
+CREATE EXTENSION postgis;
+-- Enable Topology
+CREATE EXTENSION postgis_topology;
+-- fuzzy matching needed for Tiger
+CREATE EXTENSION fuzzystrmatch;
+
+-- unaccent used for full text indexing
+CREATE EXTENSION unaccent;
 
 CREATE TABLE IF NOT EXISTS Postnumre (
   nr integer NOT NULL PRIMARY KEY,
@@ -153,4 +160,3 @@ VALUES (165, 'Albertslund'),
        (580, 'Aabenraa'),
        (851, 'Aalborg'),
        (751, 'Aarhus');
-
