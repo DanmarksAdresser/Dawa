@@ -43,7 +43,6 @@ CREATE TABLE IF NOT EXISTS Enhedsadresser (
   doer VARCHAR(4)
 );
 
-
 CREATE TABLE IF NOT EXISTS ejerlav (
   kode integer NOT NULL PRIMARY KEY,
   navn VARCHAR(50) NOT NULL
