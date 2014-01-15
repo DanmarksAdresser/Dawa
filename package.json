@@ -28,7 +28,7 @@
     "dawa.aws.dk"
   ],
   "scripts": {
-    "start": "dawa.js",
+    "start": "server.js",
     "test": "grunt test"
   },
   "engines": {

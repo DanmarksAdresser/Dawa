@@ -22,7 +22,7 @@ module.exports = function (grunt) {
     express: {
       test: {
         options: {
-          script: 'dawa.js',
+          script: 'server.js',
           output: 'Express server listening'
         }
       }
