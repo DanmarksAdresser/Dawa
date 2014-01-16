@@ -434,7 +434,7 @@ MongoClient.connect(process.env.connectionstring,function (err, database) {
       console.log('db.on(\'error\'):', err);
   });
 
-	var portnr= 3000;
+  var portnr= 3000;
   db = database;
 
   app.use('/api', dawaApi(db));
