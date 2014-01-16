@@ -64,7 +64,10 @@ describe('Postnumre', function () {
 
 
 //  it('foobarbaz', function (done) {
-//    request.get('http://localhost:3000/api/pg/adresser', function(error, response, body){
+//    request.get('http://localhost:3000/api/pg/adresser.json'+
+//                '?polygon=[[[56.129, 9.60], [56.139, 9.60], [56.139, 9.65], [56.129, 9.65], [56.129, 9.60]]]'+
+//                '&postnr=8600',
+//                function(error, response, body){
 //      var adrs = JSON.parse(body);
 //      expect(adrs.length).toBeGreaterThan(1000);
 //      done();

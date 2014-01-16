@@ -1,18 +1,19 @@
 "use strict";
 
-var express = require('express');
-var JSONStream = require('JSONStream');
-
-var pg = require('pg');
+var express     = require('express');
+var JSONStream  = require('JSONStream');
+var _           = require('underscore');
+var pg          = require('pg');
 var QueryStream = require('pg-query-stream');
+
 var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
 
 var SQL ="\n"+
-  "  SELECT * FROM adgangsadresser\n"+
-  "  LEFT JOIN enhedsadresser ON (enhedsadresser.adgangsadresseid = adgangsadresser.id)\n" +
-  "  LEFT JOIN vejnavne ON (adgangsadresser.kommunekode = vejnavne.kommunekode\n"+
-  "            AND adgangsadresser.vejkode = vejnavne.kode)\n" +
-  "  LEFT JOIN postnumre ON (adgangsadresser.postnr = postnumre.nr)\n";
+  "  SELECT * FROM adgangsadresser as A\n"+
+  "  LEFT JOIN enhedsadresser as E ON (E.adgangsadresseid = A.id)\n" +
+  "  LEFT JOIN vejnavne as V ON (A.kommunekode = V.kommunekode\n"+
+  "            AND A.vejkode = V.kode)\n" +
+  "  LEFT JOIN postnumre as P ON (A.postnr = P.nr)\n";
 
 function addressesInZip(sql, cb){
   pg.connect(connString, function(err, client, done) {
@@ -42,6 +43,7 @@ function onHttpStreamFailures(httpStream, done){
       });
 }
 
+
 exports.setupRoutes = function(db) {
   var app = express();
   app.set('jsonp callback', true);
@@ -49,14 +51,32 @@ exports.setupRoutes = function(db) {
   app.use(express.bodyParser());
 
   app.get(/^\/adresser.json(?:(\w+))?$/i, function (req, res) {
-    var where = "";
+    var whereClauses = [];
     if (req.query.postnr) {
-      where = "  WHERE adgangsadresser.postnr = " + req.query.postnr;
+      whereClauses.push("A.postnr = " + parseInt(req.query.postnr)+"\n");
     }
+    if (req.query.polygon) {
+      // mapping GeoJson to WKT (Well-Known Text)
+      var p = JSON.parse(req.query.polygon);
+      var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
+      var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
+      var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
+      var poly = mapPolygon(p);
+      whereClauses.push(
+        "ST_Contains(ST_GeomFromText('"+poly+"', 4326)::geometry, A.geom)\n");
+    }
+    var where = "  WHERE "+whereClauses.join("        AND ");
+    console.log(SQL+where);
     addressesInZip(SQL+where, function(adrStream, done){
       onHttpStreamFailures(res, function() { done(true); });
+      //TODO better error handling!!!!!
+      adrStream.on('error', function(err) { console.log(err); res.status(500); res.end(); });
       adrStream.pipe(JSONStream.stringify('[', ',\n', ']\n')).pipe(res);
     });
   });
   return app;
 };
+
+// For manuel testing
+// Area around my home (PMM): POLYGON((56.129 9.60, 56.139 9.60, 56.139 9.65, 56.129 9.65, 56.129 9.60))
+// About 1200 addresses in the polygon
