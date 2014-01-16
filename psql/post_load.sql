@@ -40,3 +40,10 @@ CREATE INDEX vejnavne_tsv ON vejnavne USING gin(tsv);
 ALTER TABLE postnumre ADD COLUMN tsv tsvector;
 UPDATE postnumre SET tsv = to_tsvector('vejnavne', coalesce(to_char(nr,'0000'), '') || ' ' || coalesce(navn, ''));
 CREATE INDEX postnumre_tsv ON postnumre USING gin(tsv);
+
+
+-- GIS opsaetning for wgs84 coordinater
+ALTER TABLE Adgangsadresser ADD COLUMN geom geometry;
+UPDATE Adgangsadresser SET geom = wgs84::geometry; -- tager nogle minutter
+CREATE INDEX adgangsadresser_geom_index ON Adgangsadresser USING GIST (geom);
+
