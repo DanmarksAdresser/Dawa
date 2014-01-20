@@ -2,6 +2,8 @@
   "name": "dawa",
   "version": "0.0.1-52",
   "private": true,
+  "author": "Ministeriet for By, Bolig og Landdistrikter",
+  "homepage": "http://github.com/DanmarksAdresser/Dawa",
   "dependencies": {
     "mongodb": ">=1.2.14",
     "express": "3.1.0",
