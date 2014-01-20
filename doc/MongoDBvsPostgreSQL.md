@@ -15,7 +15,7 @@ Det springende punkt er at PostgreSQL er velegnet til normaliserede
 data og har transaktioner  Begge dele giver store fordele for systemer
 med komplekse data og brugsscenarier som udvikler sig.  Det som mistes
 ved PostgreSQL er simplicitet.  PostgreSQL er mere kompleks at bruge,
-og kan kræve mere opsætning for at sikre performance og vertikal
+og kan kræve mere opsætning for at sikre performance og horisontal
 skalering.
 
 
@@ -71,7 +71,7 @@ fleksibilitet.
 ##### MongoDB
 
   - Key-value store
-  - Vertikal læse-skalering
+  - Horisontal læse-skalering
   - GIS
   - Prototype af Dawa bygger allerede på MongoDB
   - Nem at gå til for udviklere
@@ -80,7 +80,7 @@ fleksibilitet.
 ##### PostgreSQL
 
   - Relationel database
-  - Vertikal læse-skalering understøttes (men p.t. ikke af Amazon)
+  - Horisontal læse-skalering understøttes (men p.t. ikke af Amazon)
   - Transaktioner (velegnet til normaliserede data)
   - Avanceret GIS (WMF/WFS benytter PostGIS)
   - Moden teknologi
@@ -134,7 +134,8 @@ geometriske/kort værktøjer.  Fx er polygon søgninger effektive.
 ### Vurdering af udviklingsomkostninger
 
 På den korte bane vil der være nogle ekstra omkostninger ved at vælge
-PostgreSQL, men PostgreSQL er et mere fleksibelt database system, og
-formindsker derved risikoen for at få sene store ekstra omkostninger i
-tid og pris.  Samlet vurderes at PostgreSQL ikke koster mere end
-MongoDB.
+PostgreSQL, da den nuværende prototype af Dawa er baseret på MongoDB,
+og der vil være mindre mulighed for genbrug.  Dertil er PostgreSQL er
+et mere fleksibelt database system, og formindsker risikoen for at få
+sene store ekstra omkostninger i tid og pris.  Samlet vurderes at
+udviklingsomkostninger for PostgreSQL er det samme som for MongoDB.
