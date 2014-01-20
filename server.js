@@ -434,14 +434,15 @@ MongoClient.connect(process.env.connectionstring,function (err, database) {
       console.log('db.on(\'error\'):', err);
   });
 
-  var portnr= 3000;
+  var listenPort = process.env.PORT || 3000;
+
   db = database;
 
   app.use('/api', dawaApi(db));
-  app.use('/api/pg', dawaPGApi.setupRoutes(db));
+  app.use('/api/pg', dawaPGApi.setupRoutes());
 
   app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
   app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
-  app.listen(portnr);
-  console.log("Express server listening on port %d in %s mode", portnr, app.settings.env);
+  app.listen(listenPort);
+  console.log("Express server listening on port %d in %s mode", listenPort, app.settings.env);
 });
