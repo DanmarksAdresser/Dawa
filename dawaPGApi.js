@@ -5,8 +5,7 @@ var JSONStream  = require('JSONStream');
 var _           = require('underscore');
 var pg          = require('pg');
 var QueryStream = require('pg-query-stream');
-
-var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
+var eventStream = require('event-stream');
 
 var SQL ="\n"+
   "  SELECT * FROM adgangsadresser as A\n"+
@@ -15,36 +14,96 @@ var SQL ="\n"+
   "            AND A.vejkode = V.kode)\n" +
   "  LEFT JOIN postnumre as P ON (A.postnr = P.nr)\n";
 
-function addressesInZip(sql, cb){
-  pg.connect(connString, function(err, client, done) {
-    if(err) {
-      return console.error('could not connect to postgres', err);
+//var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
+var connString = "postgres://ahj@localhost/dawa2";
+
+function vejnavnRowToSuggestJson(row) {
+  return {
+    id: '',
+    vej: {
+      kode: '',
+      navn: row.vejnavn
+    },
+    husnr: '',
+    etage: '',
+    dør: '',
+    bygningsnavn: '',
+    supplerendebynavn: '',
+    postnummer: {
+      nr: '',
+      navn: '',
+      href: ''
     }
-    //    console.log("\nAddress SQL: "+sql);
-    var stream = client.query(new QueryStream(sql, [], {batchSize: 10000}));
-    stream.on('end', done);
-    stream.on('error', done);
-    cb(stream, done);
+  };
+}
+
+function adresseRowToSuggestJson(row) {
+  return {
+    id: row.id,
+    vej: {
+      kode: row.vejkode,
+      navn: row.vejnavn
+    },
+    husnr: row.husnr ? row.husnr : "",
+    etage: row.etage ? row.etage : "",
+    dør: row.doer ? row.doer : "",
+    bygningsnavn: '',
+    supplerendebynavn: '',
+    postnummer: {
+      nr: "" + row.postnr,
+      navn: row.postnrnavn,
+      href: 'http://dawa.aws.dk/kommuner/' + row.postnr
+    }
+  };
+}
+
+function withPsqlClient(cb) {
+  return pg.connect(connString, cb);
+}
+
+// pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
+function streamToHttpResponse(stream, res, cb) {
+  res.on('error', function (err) {
+    console.error("An error occured while streaming data to HTTP response", new Error(err));
+    cb(err);
   });
+  res.on('close', function () {
+    console.log("Client closed connection");
+    cb("Client closed connection");
+  });
+  res.on('finish', cb);
+  stream.pipe(res);
 }
 
-function onHttpStreamFailures(httpStream, done){
-      httpStream.on('error', function(err) {
-        console.error("An error happened while sending response to client", new Error(err));
-        done();
-      });
-      httpStream.on('clientError', function(err) {
-        console.info("clientError: An error happened while sending response to client", new Error(err));
-        done();
-      });
-      httpStream.on('close', function() {
-        console.info("Client closed connection");
-        done();
-      });
+function streamingQuery(client, sql, params) {
+  //    console.log("\nAddress SQL: "+sql);
+  return client.query(new QueryStream(sql, params, {batchSize: 10000}));
 }
 
+function toPgSuggestQuery(q) {
+  q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE]/g, ' ');
 
-exports.setupRoutes = function(db) {
+  // normalize whitespace
+  q = q.replace(/\s+/g, ' ');
+
+  var hasTrailingWhitespace = /.*\s$/.test(q);
+  // remove leading / trailing whitespace
+  q = q.replace(/^\s*/g, '');
+  q = q.replace(/\s*$/g, '');
+
+
+  // translate spaces into AND clauses
+  var tsq = q.replace(/ /g, ' & ');
+
+  // Since we do suggest, if there is no trailing whitespace,
+  // the last search clause should be a prefix search
+  if (!hasTrailingWhitespace) {
+    tsq += ":*";
+  }
+  return tsq;
+}
+
+exports.setupRoutes = function () {
   var app = express();
   app.set('jsonp callback', true);
   app.use(express.methodOverride());
@@ -63,17 +122,84 @@ exports.setupRoutes = function(db) {
       var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
       var poly = mapPolygon(p);
       whereClauses.push(
-        "ST_Contains(ST_GeomFromText('"+poly+"', 4326)::geometry, A.geom)\n");
+      "ST_Contains(ST_GeomFromText($1, 4326)::geometry, A.geom)\n");
     }
     var where = "  WHERE "+whereClauses.join("        AND ");
-    console.log(SQL+where);
-    addressesInZip(SQL+where, function(adrStream, done){
-      onHttpStreamFailures(res, function() { done(true); });
-      //TODO better error handling!!!!!
-      adrStream.on('error', function(err) { console.log(err); res.status(500); res.end(); });
-      adrStream.pipe(JSONStream.stringify('[', ',\n', ']\n')).pipe(res);
+
+    withPsqlClient(function(err, client, done) {
+      var stream = eventStream.pipeline(
+        streamingQuery(client, SQL+where, [poly]),
+        JSONStream.stringify()
+      );
+      streamToHttpResponse(stream, res, done);
     });
   });
+
+
+
+  app.get('/adresser/autocomplete', function (req, res) {
+    var q = req.query.q;
+
+    var tsq = toPgSuggestQuery(q);
+
+    var postnr = req.query.postnr;
+
+    var args = [tsq];
+    if (postnr) {
+      args.push(postnr);
+    }
+
+    withPsqlClient(function (err, client, done) {
+      // TODO handle error
+
+      var responseDataStream;
+      // Search vejnavne first
+      // TODO check, at DISTINCT ikke unorder vores resultat
+      var vejnavneSql = 'SELECT DISTINCT vejnavn FROM (SELECT * FROM Vejnavne, to_tsquery(\'vejnavne\', $1) query WHERE (tsv @@ query)';
+
+      if (postnr) {
+        vejnavneSql += ' AND EXISTS (SELECT * FROM Enhedsadresser WHERE vejkode = Vejnavne.kode AND kommunekode = Vejnavne.kommunekode AND postnr = $2)';
+      }
+
+      vejnavneSql += 'ORDER BY ts_rank(Vejnavne.tsv, query) DESC) AS v LIMIT 10';
+
+      client.query(vejnavneSql, args, function (err, result) {
+        if (err) {
+          console.error('error running query', err);
+          // TODO reportErrorToClient(...)
+          return done(err);
+        }
+        if (result.rows.length > 1) {
+          responseDataStream =
+            eventStream.pipeline(
+              eventStream.readArray(result.rows),
+              eventStream.mapSync(vejnavnRowToSuggestJson),
+              JSONStream.stringify()
+            );
+          streamToHttpResponse(responseDataStream, res, done);
+          return;
+        }
+
+        var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (tsv @@ query)';
+        if (postnr) {
+          sql += ' AND postnr = $2';
+        }
+        sql += ' ORDER BY ts_rank(Adresser.tsv, query) DESC';
+
+        sql += ' LIMIT 10';
+
+
+        var queryStream = streamingQuery(client, sql, args);
+        responseDataStream = eventStream.pipeline(
+          queryStream,
+          eventStream.mapSync(adresseRowToSuggestJson),
+          JSONStream.stringify()
+        );
+        streamToHttpResponse(responseDataStream, res, done);
+      });
+    });
+  });
+
   return app;
 };
 

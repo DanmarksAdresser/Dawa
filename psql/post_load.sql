@@ -47,3 +47,12 @@ ALTER TABLE Adgangsadresser ADD COLUMN geom geometry;
 UPDATE Adgangsadresser SET geom = wgs84::geometry; -- tager nogle minutter
 CREATE INDEX adgangsadresser_geom_index ON Adgangsadresser USING GIST (geom);
 
+CREATE OR REPLACE VIEW Adresser AS
+SELECT Enhedsadresser.id, Adgangsadresser.husnr, Enhedsadresser.etage, Enhedsadresser.doer, Vejnavne.vejnavn, Postnumre.nr AS postnr, Postnumre.navn AS postnrnavn, kommuner.kode as kommunekode, kommuner.navn as kommunenavn, enhedsadresser.tsv
+FROM Enhedsadresser
+join Adgangsadresser on (Enhedsadresser.adgangsadresseid = Adgangsadresser.id)
+join Vejnavne on (Adgangsadresser.kommunekode = Vejnavne.kommunekode and Adgangsadresser.vejkode = Vejnavne.kode)
+join Postnumre on (Adgangsadresser.postnr = postnumre.nr)
+JOIN Kommuner ON (Adgangsadresser.kommunekode = Kommuner.kode);
+
+CREATE INDEX Adgangsadresser_kommunekode_vejkode ON Adgangsadresser(kommunekode, vejkode);

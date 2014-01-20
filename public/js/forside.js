@@ -45,7 +45,7 @@ function search(input,kommune) {
       // var starttime= Date.now();    // start på udelukkelse af gamle forspørgelser  
 			$.ajax({
 				cache: true,
-			  url:'adresser/autocomplete.json',
+			  url:'api/pg/adresser/autocomplete',
 				data: parametre,
 			  dataType: "json",
 			  error: function (xhr, status, errorThrown) {	
