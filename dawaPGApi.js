@@ -17,6 +17,7 @@ var SQL ="\n"+
 //var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
 // var connString = "postgres://ahj@localhost/dawa2";
 var connString = process.env.pgConnectionUrl;
+console.log("Loading dawaPGApi with connection: "+connString);
 
 function vejnavnRowToSuggestJson(row) {
   return {
