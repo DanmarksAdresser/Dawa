@@ -17,7 +17,7 @@ var SQL ="\n"+
 //var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
 // var connString = "postgres://ahj@localhost/dawa2";
 var connString = process.env.pgConnectionUrl;
-console.log("Loading dawaPGApi with connection: "+connString);
+console.log("Loading dawaPGApi with process.env.pgConnectionUrl="+connString);
 
 function vejnavnRowToSuggestJson(row) {
   return {
@@ -78,7 +78,7 @@ function streamToHttpResponse(stream, res, cb) {
 }
 
 function streamingQuery(client, sql, params) {
-  //    console.log("\nAddress SQL: "+sql);
+  console.log("\nAddress SQL ["+params+"]: "+sql);
   return client.query(new QueryStream(sql, params, {batchSize: 10000}));
 }
 
@@ -113,8 +113,10 @@ exports.setupRoutes = function () {
 
   app.get(/^\/adresser.json(?:(\w+))?$/i, function (req, res) {
     var whereClauses = [];
+    var whereParams  = [];
     if (req.query.postnr) {
-      whereClauses.push("A.postnr = " + parseInt(req.query.postnr)+"\n");
+      whereClauses.push("A.postnr = $1\n");
+      whereParams.push(parseInt(req.query.postnr));
     }
     if (req.query.polygon) {
       // mapping GeoJson to WKT (Well-Known Text)
@@ -122,15 +124,14 @@ exports.setupRoutes = function () {
       var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
       var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
       var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
-      var poly = mapPolygon(p);
-      whereClauses.push(
-      "ST_Contains(ST_GeomFromText($1, 4326)::geometry, A.geom)\n");
+      whereClauses.push("ST_Contains(ST_GeomFromText($2, 4326)::geometry, A.geom)\n");
+      whereParams.push(mapPolygon(p));
     }
     var where = "  WHERE "+whereClauses.join("        AND ");
 
     withPsqlClient(function(err, client, done) {
       var stream = eventStream.pipeline(
-        streamingQuery(client, SQL+where, [poly]),
+        streamingQuery(client, SQL+where, whereParams),
         JSONStream.stringify()
       );
       streamToHttpResponse(stream, res, done);

@@ -424,6 +424,7 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
 
 
 var db;
+console.log("MongoDB connection: "+process.env.connectionstring);
 MongoClient.connect(process.env.connectionstring,function (err, database) {
   if (err) {
     console.warn('Database ikke åbnet: ' + err.message);
