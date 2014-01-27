@@ -1,10 +1,13 @@
 
 ######################
-## Node dependencies
+## Misc
 ######################
 
 node_modules/*
-
+performanceTest/*.csv
+data/*.csv
+.Rhistory
+*.pem
 
 #################
 ## Eclipse
