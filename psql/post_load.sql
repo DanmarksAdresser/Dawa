@@ -47,12 +47,45 @@ ALTER TABLE Adgangsadresser ADD COLUMN geom geometry;
 UPDATE Adgangsadresser SET geom = wgs84::geometry; -- tager nogle minutter
 CREATE INDEX adgangsadresser_geom_index ON Adgangsadresser USING GIST (geom);
 
+DROP VIEW Adresser;
 CREATE OR REPLACE VIEW Adresser AS
-SELECT Enhedsadresser.id, Adgangsadresser.husnr, Enhedsadresser.etage, Enhedsadresser.doer, Vejnavne.vejnavn, Postnumre.nr AS postnr, Postnumre.navn AS postnrnavn, kommuner.kode as kommunekode, kommuner.navn as kommunenavn, enhedsadresser.tsv
-FROM Enhedsadresser
-join Adgangsadresser on (Enhedsadresser.adgangsadresseid = Adgangsadresser.id)
-join Vejnavne on (Adgangsadresser.kommunekode = Vejnavne.kommunekode and Adgangsadresser.vejkode = Vejnavne.kode)
-join Postnumre on (Adgangsadresser.postnr = postnumre.nr)
-JOIN Kommuner ON (Adgangsadresser.kommunekode = Kommuner.kode);
+SELECT
+       E.id       AS enhedsadresseid,
+       E.version  AS e_version,
+       E.oprettet AS e_oprettet,
+       E.aendret  AS e_aendret,
+-- TODO      E.tsv      AS e_tsv,
+       E.etage,
+       E.doer,
+
+       A.id AS adgangsadresseid,
+       A.version AS a_version,
+       A.husnr,
+       A.matrikelnr,
+       A.oprettet AS a_oprettet,
+       A.aendret  AS a_aendret,
+       A.etrs89oest AS oest,
+       A.etrs89nord AS nord,
+       ST_x(A.geom) AS bredde,
+       ST_y(A.geom) as laengde,
+
+       P.nr   AS postnr,
+       P.navn AS postnrnavn,
+
+       V.kode    AS vejkode,
+       V.vejnavn AS vejnavn,
+
+       LAV.kode AS ejerlavkode,
+       LAV.navn AS ejerlavnavn,
+
+       K.kode AS kommunekode,
+       K.navn AS kommunenavn
+
+FROM Enhedsadresser  AS E
+JOIN Adgangsadresser AS A   ON (E.adgangsadresseid = A.id)
+JOIN Vejnavne        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
+JOIN Postnumre       AS P   ON (A.postnr = P.nr)
+JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
+JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
 CREATE INDEX Adgangsadresser_kommunekode_vejkode ON Adgangsadresser(kommunekode, vejkode);
