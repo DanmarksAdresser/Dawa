@@ -17,6 +17,7 @@
     "underscore": "1.5.2",
     "bluebird": "~1.0.0",
     "sql": "~0.34.0",
+    "async": "~0.2.10",
     "event-stream": "~3.1.0"
   },
   "devDependencies": {
@@ -25,6 +26,7 @@
     "grunt": "~0.4.2",
     "grunt-cli": "0.1.11",
     "grunt-contrib-jshint": "~0.8.0",
+    "bench-rest": "~0.5.0 ",
     "grunt-express-server": "0.4.11 ",
     "grunt-contrib-watch": "~0.5.3"
   },
