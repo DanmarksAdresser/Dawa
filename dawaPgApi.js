@@ -242,6 +242,5 @@ function streamToHttpResponse(stream, res, cb) {
 }
 
 function streamingQuery(client, sql, params) {
-  console.log("\nAddress SQL ["+params+"]: "+sql);
   return client.query(new QueryStream(sql, params, {batchSize: 10000}));
 }
