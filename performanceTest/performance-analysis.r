@@ -1,13 +1,14 @@
-perf <- read.csv(file="perf.csv",head=TRUE,sep=" ")
-perf <- read.csv(file="perf-40workers.csv",head=TRUE,sep=" ")
+perf <- read.csv(file="performanceTest/perf.csv",head=TRUE,sep=" ")
+perf <- read.csv(file="performanceTest/perf-10workers.csv",head=TRUE,sep=" ")
 perf$begin = perf$start - perf$start[1]
 perf$diff = perf$end - perf$start
 
-plot(perf$begin, perf$diff, col=rgb(0,0,0,0.01))
+plot(perf$begin, perf$diff)
+plot(perf$begin, perf$diff, col=rgb(0,0,0,0.05))
 hist(perf$diff, breaks=1000)
 
 summary(perf$diff)
-quantile(perf$diff, c(0, 0.5, 0.75, 0.90,0.95,0.99,0.995, 0.999, 0.9999, 0.99999))
+quantile(perf$diff, c(0.01, 0.5, 0.75, 0.90,0.95,0.99,0.995, 0.999, 0.9999, 0.99999))
 plot.ecdf(perf$diff)
 plot.ecdf(perf$diff, xlim=c(100,600))
 plot.ecdf(perf$diff, ylim=c(0.9,1))
