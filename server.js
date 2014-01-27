@@ -8,7 +8,7 @@ var vejnavneoperationer = require('./vejnavneoperationer');
 var dawaStream          = require("./dawastream");
 var MongoClient         = require('mongodb').MongoClient;
 var dawaApi             = require('./dawaApi');
-var dawaPGApi           = require('./dawaPGApi');
+var dawaPgApi           = require('./dawaPgApi');
 
 var app = express();
 
@@ -440,7 +440,7 @@ MongoClient.connect(process.env.connectionstring,function (err, database) {
   db = database;
 
   app.use('/api', dawaApi(db));
-  app.use('/api/pg', dawaPGApi.setupRoutes());
+  app.use('/api/pg', dawaPgApi.setupRoutes());
 
   app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
   app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
