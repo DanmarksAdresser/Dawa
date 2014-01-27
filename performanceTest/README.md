@@ -7,17 +7,14 @@ currently quite simple, so look in the code for more details.
 ## Custom script - with full logging
 
 ```
-$> > node performanceTest.js
-
+$> node performanceTest.js
 ```
 
 ## Bench-test
 
 ```
-$> > node performanceBenchTest.js
-
+$> node performanceBenchTest.js
 ```
-
 
 ## Apache ab
 
