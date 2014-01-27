@@ -9,6 +9,17 @@ Sign-in to the AWS Management Console here:
 [https://console.aws.amazon.com/](https://console.aws.amazon.com/)
 
 
+## Monitoring
+
+All instances, load-balancers, and databases are monitored through the
+AWS CloudWatch service.
+
+For application level monitoring, the Beanstalk load-balance does a
+HTTP GET against Dawa, with a query hitting the DB, every minute. I
+this fails for 3 minutes in a row, the Currently, if this fail 5 times
+in a row, an email is sent to the administrator.
+
+
 ## Setting up a PostgreSQL database
 
  - Sign in to the Management Console
