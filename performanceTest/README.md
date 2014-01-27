@@ -9,6 +9,8 @@ currently quite simple, so look in the code for more details.
 ```
 $> node performanceTest.js
 ```
+The output file can be analysed with the R script: performance-analysis.r
+
 
 ## Bench-test
 
