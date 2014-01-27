@@ -10,6 +10,7 @@ var _           = require('underscore');
 var pg          = require('pg');
 var QueryStream = require('pg-query-stream');
 var eventStream = require('event-stream');
+var model       = require('./awsDataModel');
 
 
 /******************************************************************************/
@@ -45,7 +46,75 @@ exports.setupRoutes = function () {
 /******************************************************************************/
 
 function doAddressLookup(req, res){
-  //todo
+  var sql ="\n"+
+    "  SELECT * FROM adresser\n"+
+    "  WHERE enhedsadresseid = $1";
+
+  var guid= req.params[0];
+
+  withPsqlClient(function(err, client, done) {
+    client.query(sql,
+                 [guid],
+                 function(err, result) {
+                   done();
+                   if(err) {
+                     res.send(500, JSON.stringify(err));
+                   } else if (result.rows.length === 1){
+                     var adr = mapAddress(result.rows[0]);
+                     model.adresse.validator(adr)
+                       .then(function(report){
+                         res.send(200, JSON.stringify(adr));
+                       })
+                       .catch(function(err){
+                         console.log(require('util').inspect(adr, true, 10));
+                         console.log(require('util').inspect(err, true, 10));
+                         res.send(500, err);
+                       });
+                   } else {
+                     res.send(500, {error: 'unknown id'});
+                   }
+                 });
+  });
+}
+
+function mapAddress(rs){
+  return {id: rs.enhedsadresseid,
+          version: rs.e_version,
+          adressebetegnelse: "TODO",  //TODO
+          adgangsadresse: mapAdressebetegnelse(rs)};
+}
+
+function mapAdressebetegnelse(rs){
+  var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
+
+  return {id:      rs.adgangsadresseid,
+          version: rs.a_version,
+          vej: {navn: rs.vejnavn,
+                kode: slice(-4, rs.vejkode),
+                vejadresseringsnavn: "TODO"},
+          husnr:   rs.husnr,
+          supplerendebynavn: "TODO",
+          postnummer: {nr: slice(-4, rs.postnr),
+                       navn: rs.postnrnavn},
+          kommune: {kode: slice(-4, rs.kommunekode),
+                    navn: rs.kommunenavn},
+          ejerlav: {kode: slice(-8, rs.ejerlavkode),
+                    navn: rs.ejerlavnavn},
+          matrikelnr: rs.matrikelnr,
+          historik: {oprettet: rs.e_oprettet,
+                     'ændret': rs.e_aendret},
+          adgangspunkt: {etrs89koordinat: {'øst': 0, //TODO
+                                           nord: 0},
+                         wgs84koordinat: {'længde': rs.laengde,
+                                          bredde: rs.bredde},
+                         kvalitet: {'nøjagtighed': "U", //TODO
+                                    kilde: 5,
+                                    tekniskstandard: "UF"},
+                         tekstretning: 0,
+                         'ændret': rs.e_aendret},
+          DDKN: {m100: "100m_12345_1234",
+                 km1:  "1km_1234_123",
+                 km10: "10km_123_12"}};
 }
 
 /******************************************************************************/
