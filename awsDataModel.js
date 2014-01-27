@@ -15,9 +15,9 @@ function object_AllRequired(properties){
 }
 
 var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
-  noExtraKeywords: true,
-  forceItems: true,
-  forceProperties: true});
+                                    noExtraKeywords: true,
+                                    forceItems: true,
+                                    forceProperties: true});
 
 function makeValidator(schema) {
   return function(object) {
@@ -95,13 +95,13 @@ var adresseSchema = {
   'title': 'Adresse',
   'type': 'object',
   'properties': {
-    'id':    { '$ref': '#/definitions/UUID' },
-    'etage': { '$ref': '#/definitions/Etage' },
-    'dør':   { type: 'string' },
+    'id':      { '$ref': '#/definitions/UUID' },
+    'version': { '$ref': '#/definitions/DateTime' },  // TODO: a version should not be a timestamp!
+    'etage':   { '$ref': '#/definitions/Etage' },
+    'dør':     { type: 'string' },
     'adressebetegnelse': { type: 'string' },
     // Here we just reuse the JS definition above.  If schemas get
-    // public URLs, these should be used instead!  'adgangsadresse':
-    // adgangsAdresseSchema,
+    // public URLs, those should be used instead!
     'adgangsadresse': adgangsAdresseSchema,
   },
   'required': ['id', 'adressebetegnelse', 'adgangsadresse'],
