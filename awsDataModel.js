@@ -59,7 +59,7 @@ var adgangsAdresseSchema = {
                                    'navn': { type: 'string'}}), // todo: what is the maxLength?
     'ejerlav': object_AllRequired({'kode': { '$ref': '#/definitions/UpTo8' },
                                    'navn': { type: 'string'}}), // todo: what is the maxLength?
-    'matrikelnr': { type: 'string', pattern: '^[0-9a-z]{1,7}$'}, // TODO: can we strengthen this pattern?
+    'matrikelnr': { type: 'string', pattern: '^[0-9a-zæøå]{1,7}$'}, // TODO: can we strengthen this pattern?
     'historik'  : object_AllRequired({'oprettet': {'$ref': '#/definitions/DateTime' },
                                       'ændret'  : {'$ref': '#/definitions/DateTime' }}),
     'adgangspunkt': object_AllRequired({'etrs89koordinat': {'$ref': '#/definitions/Etrs89koordinat' },
