@@ -24,7 +24,7 @@ console.log("Loading dawaPgApi with process.env.pgConnectionUrl="+connString);
 
 
 /******************************************************************************/
-/*** Setup routes *************************************************************/
+/*** Routes *******************************************************************/
 /******************************************************************************/
 
 exports.setupRoutes = function () {
@@ -46,11 +46,11 @@ exports.setupRoutes = function () {
 /******************************************************************************/
 
 function doAddressLookup(req, res){
-  var sql ="\n"+
+  var sql =
     "  SELECT * FROM adresser\n"+
     "  WHERE enhedsadresseid = $1";
 
-  var guid= req.params[0];
+  var guid = req.params[0];
 
   withPsqlClient(function(err, client, done) {
     client.query(sql,
