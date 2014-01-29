@@ -68,7 +68,6 @@ app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
     return;
   }
-  console.log("guid genkendt; %s", guid);
   db.collection('adresser', function (err, collection) {
     if (err) {
       console.warn(err.message);
@@ -77,7 +76,6 @@ app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-
     }    
     var query = {}; 
     query.id= guid;
-    console.log(util.inspect(query));
     var cursor = collection.find(query, { _id: 0 }); 
     dawaStream.streamAdresser(type, cursor, true, req.query.callback, res, req);
     //ser.serializeAdresse(cursor, req, res);
