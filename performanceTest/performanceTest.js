@@ -51,6 +51,10 @@ var get = {uri: httpHost+'/adresser/0a3f50ae-da7f-32b8-e044-0003ba298018',
            method: 'GET',
            timeout: 1000};
 
+var getpg = {uri: httpHost+'/api/pg/adresser/0a3f50ae-da7f-32b8-e044-0003ba298018',
+             method: 'GET',
+             timeout: 1000};
+
 var put = {url: httpHost+'/api/postnummerhaendelse/oprettelse',
            method: 'PUT',
            json: {
@@ -61,4 +65,4 @@ var put = {url: httpHost+'/api/postnummerhaendelse/oprettelse',
                nr: '8260',
                navn: 'Viby J'}}};
 
-workers(10, 10, get);
+workers(15, 100000, getpg);
