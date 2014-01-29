@@ -188,6 +188,7 @@ function doAddressAutocomplete(req, res) {
 
     client.query(vejnavneSql, args, function (err, result) {
       if (err) {
+        console.log([vejnavneSql, args]);
         console.error('error running query', err);
         // TODO reportErrorToClient(...)
         return done(err);
@@ -203,11 +204,11 @@ function doAddressAutocomplete(req, res) {
         return;
       }
 
-      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (tsv @@ query)';
+      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (e_tsv @@ query)';
       if (postnr) {
         sql += ' AND postnr = $2';
       }
-      sql += ' ORDER BY ts_rank(Adresser.tsv, query) DESC';
+      sql += ' ORDER BY ts_rank(Adresser.e_tsv, query) DESC';
 
       sql += ' LIMIT 10';
 
