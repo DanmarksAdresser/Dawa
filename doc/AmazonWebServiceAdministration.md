@@ -43,6 +43,11 @@ configure SGs:
  - Go to the VPN service
  - Click Security Groups
 
+It is possible to add one SG as a source to an inbound rule of another
+SG.  Fx adding the SG for Beanstalk instances to the SG of an RDS
+instance.
+
+
 ## Setting up a Node app in Beanstalk
 
 In order to debug problems, having ssh access to the beanstalk
