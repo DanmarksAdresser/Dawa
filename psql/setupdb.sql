@@ -304,26 +304,28 @@ CREATE TABLE IF NOT EXISTS enhedsadresser (
   doer VARCHAR(4),
   tsv tsvector
 );
-CREATE INDEX ON enhedsadresser USING gin(tsv);
 CREATE INDEX ON enhedsadresser(adgangsadresseid);
+CREATE INDEX ON enhedsadresser USING gin(tsv);
 
 \echo '\n***** Loading enhedsadresser data'
 \COPY enhedsadresser (id, version, adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer) from program 'gunzip -c data/AddressSpecific.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 \echo '\n***** Populate text search column'
-UPDATE enhedsadresser
-set tsv = to_tsvector('vejnavne', coalesce(t.etage, '') || ' ' || coalesce(t.doer, '') || ' ' || coalesce(t.postnrnavn, '') || ' ' || coalesce(t.vejnavn, '') ||  ' ' || coalesce(to_char(t.postnr,'0000'), '') || ' ' || coalesce(t.husnr, ''))
-FROM
- (select etage,
-         doer,
-         p.navn as postnrnavn,
-         v.vejnavn,
-         p.nr as postnr,
-         husnr
-  from enhedsadresser e
-  join adgangsadresser a on a.id = e.adgangsadresseid
-  join vejnavne v        on a.vejkode = v.kode and a.kommunekode = v.kommunekode
-  join postnumre p       on  a.postnr = p.nr) as T;
+
+create temp table tmp  AS select id,
+                                 to_tsvector('vejnavne', coalesce(etage, '') || ' ' || coalesce(doer, '') || ' '
+                                             || coalesce(postnrnavn, '') || ' ' || coalesce(vejnavn, '') ||  ' '
+                                             || coalesce(to_char(postnr,'0000'), '') || ' ' || coalesce(husnr, ''))
+         AS tsv
+  FROM (SELECT e.id, etage, doer, p.navn as postnrnavn, v.vejnavn, p.nr as postnr, husnr
+        FROM enhedsadresser e
+        LEFT JOIN adgangsadresser a ON a.id = e.adgangsadresseid
+        LEFT JOIN vejnavne v ON a.vejkode = v.kode AND a.kommunekode = v.kommunekode
+        LEFT JOIN postnumre p ON  a.postnr = p.nr) as T;
+
+UPDATE enhedsadresser AS e SET tsv = T.tsv from (select * from tmp) as T where e.id = T.id;
+
+DROP TABLE tmp;
 
 
 \echo ''
@@ -333,26 +335,44 @@ FROM
 \echo '***************************************************************************'
 \echo ''
 
-CREATE OR REPLACE VIEW Adresser AS
+CREATE OR REPLACE VIEW adresser AS
 SELECT
-       E.id       AS enhedsadresseid,
-       E.version  AS e_version,
-       E.oprettet AS e_oprettet,
-       E.aendret  AS e_aendret,
-       E.tsv      AS e_tsv,
+       E.id        AS id,
+       E.id        AS enhedsadresseid,
+       E.version   AS e_version,
+       E.oprettet  AS e_oprettet,
+       E.ikraftfra AS e_ikraftfra,
+       E.aendret   AS e_aendret,
+       E.tsv       AS e_tsv,
        E.etage,
        E.doer,
 
        A.id AS adgangsadresseid,
        A.version AS a_version,
+       A.bygningsnavn,
        A.husnr,
+       A.supplerendebynavn,
        A.matrikelnr,
+       A.esrejendomsnr,
        A.oprettet AS a_oprettet,
+       A.ikraftfra as a_ikraftfra,
        A.aendret  AS a_aendret,
        A.etrs89oest AS oest,
        A.etrs89nord AS nord,
+       A.wgs84lat   AS lat,
+       A.wgs84long  AS long,
+       A.wgs84,
+       A.geom       AS wgs84geom,
        ST_x(A.geom) AS bredde,
        ST_y(A.geom) as laengde,
+       A.noejagtighed,
+       A.kilde,
+       A.tekniskstandard,
+       A.tekstretning,
+       A.kn100mdk,
+       A.kn1kmdk,
+       A.kn10kmdk,
+       A.adressepunktaendringsdato,
 
        P.nr   AS postnr,
        P.navn AS postnrnavn,
