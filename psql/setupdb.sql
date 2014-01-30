@@ -226,8 +226,8 @@ CREATE TABLE IF NOT EXISTS adgangsadresser (
   aendret VARCHAR(255) NOT NULL,
   etrs89oest DECIMAL(8,2) NULL,
   etrs89nord DECIMAL(9,2) NULL,
-  wgs84lat DECIMAL(7,2) NULL,
-  wgs84long DECIMAL(7,2) NULL,
+  wgs84lat DECIMAL(16,14) NULL,
+  wgs84long DECIMAL(16,14) NULL,
   wgs84 GEOGRAPHY(POINT, 4326),
   noejagtighed CHAR(1) NOT NULL,
   kilde CHAR(1) NULL,
@@ -251,10 +251,11 @@ CREATE INDEX ON adgangsadresser(postnr);
 
 
 
-\echo '\n***** Updating geom and wgs84 columns'
-UPDATE Adgangsadresser SET geom = wgs84::geometry;
+\echo '\n***** Updating wgs84 and geom columns'
 UPDATE adgangsadresser SET wgs84 = ST_GeometryFromText('POINT('||wgs84lat||' '||wgs84long||')', 4326)
 WHERE wgs84lat IS NOT NULL AND wgs84long IS NOT NULL;
+
+UPDATE Adgangsadresser SET geom = wgs84::geometry;
 
 \echo '\n***** Correcting data error in ejerlav'
 UPDATE adgangsadresser SET ejerlavnavn = 'DEN NORDVESTLIGE DEL, HØRBY'
@@ -335,7 +336,8 @@ DROP TABLE tmp;
 \echo '***************************************************************************'
 \echo ''
 
-CREATE OR REPLACE VIEW adresser AS
+DROP VIEW IF EXISTS adresser;
+CREATE VIEW adresser AS
 SELECT
        E.id        AS id,
        E.id        AS enhedsadresseid,
@@ -357,18 +359,16 @@ SELECT
        A.oprettet AS a_oprettet,
        A.ikraftfra as a_ikraftfra,
        A.aendret  AS a_aendret,
-       A.etrs89oest AS oest,
-       A.etrs89nord AS nord,
-       A.wgs84lat   AS lat,
-       A.wgs84long  AS long,
+       A.etrs89oest::double precision AS oest,
+       A.etrs89nord::double precision AS nord,
+       A.wgs84lat::double precision   AS lat,
+       A.wgs84long::double precision  AS long,
        A.wgs84,
        A.geom       AS wgs84geom,
-       ST_x(A.geom) AS bredde,
-       ST_y(A.geom) as laengde,
        A.noejagtighed,
-       A.kilde,
+       A.kilde::smallint,
        A.tekniskstandard,
-       A.tekstretning,
+       A.tekstretning::double precision,
        A.kn100mdk,
        A.kn1kmdk,
        A.kn10kmdk,
