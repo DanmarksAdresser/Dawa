@@ -48,7 +48,8 @@ exports.setupRoutes = function () {
 function doAddressLookup(req, res){
   var sql =
     "  SELECT * FROM adresser\n"+
-    "  WHERE enhedsadresseid = $1";
+    "  WHERE id = $1";
+
 
   var guid = req.params[0];
 
@@ -77,44 +78,49 @@ function doAddressLookup(req, res){
   });
 }
 
+function d(date) { return JSON.stringify(date); }
+//function defaultVal(val, def) { return val ? val : def;}
+
 function mapAddress(rs){
   return {id: rs.enhedsadresseid,
-          version: rs.e_version,
+          version: d(rs.e_version),
           adressebetegnelse: "TODO",  //TODO
-          adgangsadresse: mapAdressebetegnelse(rs)};
+          adgangsadresse: mapAdganggsadresse(rs)};
 }
 
-function mapAdressebetegnelse(rs){
+function mapAdganggsadresse(rs){
   var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
+  var adr = {};
+  adr.id = rs.id;
+  adr.version = d(rs.e_version);
+  adr.vej = {navn: rs.vejnavn,
+             kode: slice(-4, rs.vejkode)};
+  adr.husnr = rs.husnr;
+  //if (rs.bygningsnavn) adr.bygningsnavn = rs.bygningsnavn;
+  if (rs.supplerendebynavn) adr.supplerendebynavn = rs.supplerendebynavn;
+  adr.postnummer = {nr: slice(-4, rs.postnr),
+                    navn: rs.postnrnavn};
+  adr.kommune = {kode: slice(-4, rs.kommunekode),
+                 navn: rs.kommunenavn};
+  adr.ejerlav = {kode: slice(-8, rs.ejerlavkode),
+                 navn: rs.ejerlavnavn};
+  adr.matrikelnr = rs.matrikelnr;
+  adr.historik = {oprettet: d(rs.e_oprettet),
+                  'ændret': d(rs.e_aendret)};
+  adr.adgangspunkt = {etrs89koordinat: {'øst': rs.oest,
+                                        nord:  rs.nord},
+                      wgs84koordinat:  {'længde': rs.lat,
+                                        bredde: rs.long},
+                      kvalitet:        {'nøjagtighed': rs.noejagtighed,
+                                        kilde: rs.kilde,
+                                        tekniskstandard: rs.tekniskstandard},
+                      tekstretning:    rs.tekstretning,
+                      'ændret':        d(rs.adressepunktaendringsdato)};
+  adr.DDKN = {m100: rs.kn100mdk,
+              km1:  rs.kn1kmdk,
+              km10: rs.kn10kmdk};
 
-  return {id:      rs.adgangsadresseid,
-          version: rs.a_version,
-          vej: {navn: rs.vejnavn,
-                kode: slice(-4, rs.vejkode),
-                vejadresseringsnavn: "TODO"},
-          husnr:   rs.husnr,
-          supplerendebynavn: "TODO",
-          postnummer: {nr: slice(-4, rs.postnr),
-                       navn: rs.postnrnavn},
-          kommune: {kode: slice(-4, rs.kommunekode),
-                    navn: rs.kommunenavn},
-          ejerlav: {kode: slice(-8, rs.ejerlavkode),
-                    navn: rs.ejerlavnavn},
-          matrikelnr: rs.matrikelnr,
-          historik: {oprettet: rs.e_oprettet,
-                     'ændret': rs.e_aendret},
-          adgangspunkt: {etrs89koordinat: {'øst': 0, //TODO
-                                           nord: 0},
-                         wgs84koordinat: {'længde': rs.laengde,
-                                          bredde: rs.bredde},
-                         kvalitet: {'nøjagtighed': "U", //TODO
-                                    kilde: 5,
-                                    tekniskstandard: "UF"},
-                         tekstretning: 0,
-                         'ændret': rs.e_aendret},
-          DDKN: {m100: "100m_12345_1234",
-                 km1:  "1km_1234_123",
-                 km10: "10km_123_12"}};
+  return adr;
 }
 
 /******************************************************************************/
@@ -122,17 +128,12 @@ function mapAdressebetegnelse(rs){
 /******************************************************************************/
 
 function doAddressSearch(req, res) {
-  var sql ="\n"+
-    "  SELECT * FROM adgangsadresser as A\n"+
-    "  LEFT JOIN enhedsadresser as E ON (E.adgangsadresseid = A.id)\n" +
-    "  LEFT JOIN vejnavne as V ON (A.kommunekode = V.kommunekode\n"+
-    "            AND A.vejkode = V.kode)\n" +
-    "  LEFT JOIN postnumre as P ON (A.postnr = P.nr)\n";
+  var sql = "  SELECT * FROM adresser\n";
 
   var whereClauses = [];
   var whereParams  = [];
   if (req.query.postnr) {
-    whereClauses.push("A.postnr = $1\n");
+    whereClauses.push("postnr = $1\n");
     whereParams.push(parseInt(req.query.postnr));
   }
   if (req.query.polygon) {
@@ -141,7 +142,7 @@ function doAddressSearch(req, res) {
     var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
     var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
     var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
-    whereClauses.push("ST_Contains(ST_GeomFromText($2, 4326)::geometry, A.geom)\n");
+    whereClauses.push("ST_Contains(ST_GeomFromText($2, 4326)::geometry, wgs84geom)\n");
     whereParams.push(mapPolygon(p));
   }
   var where = "  WHERE "+whereClauses.join("        AND ");
@@ -188,7 +189,6 @@ function doAddressAutocomplete(req, res) {
 
     client.query(vejnavneSql, args, function (err, result) {
       if (err) {
-        console.log([vejnavneSql, args]);
         console.error('error running query', err);
         // TODO reportErrorToClient(...)
         return done(err);
