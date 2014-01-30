@@ -386,11 +386,11 @@ SELECT
        K.kode AS kommunekode,
        K.navn AS kommunenavn
 
-FROM Enhedsadresser  AS E
-JOIN Adgangsadresser AS A   ON (E.adgangsadresseid = A.id)
-JOIN Vejnavne        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
-JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
-JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
+FROM adgangsadresser A
+LEFT JOIN enhedsadresser  AS E ON (E.adgangsadresseid = A.id)
+LEFT JOIN Vejnavne        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
+LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
+LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
+LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
 \echo '\n***** Bootstrap complete!'
