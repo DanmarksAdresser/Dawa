@@ -72,7 +72,7 @@ describe("Adresse schema validation", function () {
                             "vej": {
                               "kode": "0237",
                               "navn": "Fægangen",
-                              "vejadresseringsnavn": "F_gangen"
+                              //TODO                              "vejadresseringsnavn": "F_gangen"
                             },
                             "husnr": "1",
                             "supplerendebynavn": "Byen",
@@ -136,7 +136,7 @@ describe("Vejnavn schema validation", function () {
     valid({kommunekode: '8600',
            kode: '9324',
            navn: 'vej',
-           vejadresseringsnavn: 'vejen',
+           //todo           vejadresseringsnavn: 'vejen',
            postnumre: ['2939', '2398'],
           },
           model.vejnavn.schema, done);

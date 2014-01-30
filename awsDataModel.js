@@ -49,8 +49,7 @@ var adgangsAdresseSchema = {
     'id'     : { '$ref': '#/definitions/UUID' },
     'version': { '$ref': '#/definitions/DateTime' },  // TODO: a version should not be a timestamp!
     'vej'    : object_AllRequired({'kode': { '$ref': '#/definitions/Kode4' },
-                                   'navn': { type: 'string', maxLength: 40},
-                                   'vejadresseringsnavn': { type: 'string', maxLength: 20}}),
+                                   'navn': { type: 'string', maxLength: 40}}), //TODO 'vejadresseringsnavn': { type: 'string', maxLength: 20}}),
     'husnr'  : {type: 'string', pattern: '([1-9]|[1-9]\\d|[1-9]\\d{2})[A-Z]?'}, // todo: is this pattern too restrictive? only up to 999
     'supplerendebynavn': { type: 'string', maxLength: 34},
     'postnummer': object_AllRequired({'nr'  : { '$ref': '#/definitions/Kode4' },
@@ -134,7 +133,7 @@ var vejnavnSchema = {
     'kommunekode': { type: 'string'}, // todo: pattern?
     'kode': { '$ref': '#/definitions/Kode4'},
     'navn' : { type: 'string', maxLength: 40},
-    'vejadresseringsnavn' : { type: 'string', maxLength: 20},
+//    'vejadresseringsnavn' : { type: 'string', maxLength: 20},
     'postnumre': {type: 'array',
                  items: { '$ref': '#/definitions/Kode4'}},
   },
