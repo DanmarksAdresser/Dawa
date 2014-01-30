@@ -212,13 +212,13 @@ CREATE TABLE IF NOT EXISTS adgangsadresser (
   bygningsnavn VARCHAR(255) NULL,
   kommunekode INTEGER NOT NULL,
   vejkode INTEGER NOT NULL,
-  vejnavn VARCHAR(255) NOT NULL,
+  vejnavn VARCHAR(255) NOT NULL,  -- Will be dropped later (normalization)!
   husnr VARCHAR(6) NOT NULL,
   supplerendebynavn VARCHAR(34) NULL,
   postnr INTEGER NULL,
-  postnrnavn VARCHAR(20) NULL,
+  postnrnavn VARCHAR(20) NULL,  -- Will be dropped later (normalization)!
   ejerlavkode INTEGER NOT NULL,
-  ejerlavnavn VARCHAR(255) NULL,  -- Will be dropped again when the ejerlav table is created!
+  ejerlavnavn VARCHAR(255) NULL,  -- Will be dropped again when the ejerlav table is created (normalization)!
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr CHAR(6) NULL,
   oprettet VARCHAR(255) NOT NULL,
@@ -244,9 +244,12 @@ CREATE INDEX ON Adgangsadresser(ejerlavkode);
 CREATE INDEX ON Adgangsadresser(wgs84lat);
 CREATE INDEX ON Adgangsadresser(wgs84long);
 CREATE INDEX ON Adgangsadresser(vejkode, kommunekode);
+CREATE INDEX ON adgangsadresser(postnr);
 
 \echo '\n***** Loading adgangsadresse data'
 \COPY adgangsadresser (id, version, bygningsnavn, kommunekode, vejkode, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn, ejerlavkode, ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato) from  program 'gunzip -c data/AddressAccess.csv.gz | sed -f psql/replaceDoubleQuotes.sed' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
+
+
 
 \echo '\n***** Updating geom and wgs84 columns'
 UPDATE Adgangsadresser SET geom = wgs84::geometry;
@@ -278,6 +281,8 @@ INSERT INTO ejerlav SELECT ejerlavkode, ejerlavnavn FROM adgangsadresser WHERE e
 
 \echo '\n***** Cleaning up adgangsadresser'
 ALTER TABLE adgangsadresser DROP COLUMN ejerlavnavn;
+ALTER TABLE adgangsadresser DROP COLUMN postnrnavn;
+ALTER TABLE adgangsadresser DROP COLUMN vejnavn;
 
 
 \echo ''
