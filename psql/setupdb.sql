@@ -42,10 +42,11 @@
 \echo '*** Tables creation *******************************************************'
 \echo '***************************************************************************'
 \echo ''
+
 \echo '***** Create text search config for address search'
-DROP TEXT SEARCH CONFIGURATION IF EXISTS vejnavne;
+DROP   TEXT SEARCH CONFIGURATION IF EXISTS vejnavne;
 CREATE TEXT SEARCH CONFIGURATION vejnavne (copy=simple);
-ALTER TEXT SEARCH CONFIGURATION vejnavne ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;
+ALTER  TEXT SEARCH CONFIGURATION vejnavne ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;
 
 
 \echo ''
@@ -65,12 +66,12 @@ CREATE TABLE IF NOT EXISTS vejnavne (
   PRIMARY KEY(kode, kommunekode)
 );
 
-\echo '\n***** Text search'
-CREATE INDEX vejnavne_tsv ON vejnavne USING gin(tsv);
+CREATE INDEX ON vejnavne USING gin(tsv);
 
 \COPY vejnavne (kommunekode, kode, vejnavn, version) from program 'gunzip -c data/RoadName.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 UPDATE vejnavne SET tsv = to_tsvector('vejnavne', coalesce(vejnavn, ''));
+
 
 \echo '\n***** Creating postnumre table'
 DROP TABLE IF EXISTS postnumre;
@@ -81,8 +82,7 @@ CREATE TABLE IF NOT EXISTS postnumre (
   tsv tsvector
 );
 
-\echo '\n***** Text search'
-CREATE INDEX postnumre_tsv ON postnumre USING gin(tsv);
+CREATE INDEX ON postnumre USING gin(tsv);
 
 \echo '\n***** Loading postnumre data'
 \COPY postnumre (nr, version, navn) from program 'gunzip -c data/PostCode.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -239,11 +239,11 @@ CREATE TABLE IF NOT EXISTS adgangsadresser (
   adressepunktaendringsdato TIMESTAMP NULL,
   geom geometry
 );
-CREATE INDEX adgangsadresser_geom_index ON Adgangsadresser USING GIST (geom);
+CREATE INDEX ON Adgangsadresser USING GIST (geom);
 CREATE INDEX ON Adgangsadresser(ejerlavkode);
 CREATE INDEX ON Adgangsadresser(wgs84lat);
 CREATE INDEX ON Adgangsadresser(wgs84long);
-CREATE INDEX Adgangsadresser_kommunekode_vejkode ON Adgangsadresser(kommunekode, vejkode);
+CREATE INDEX ON Adgangsadresser(vejkode, kommunekode);
 
 \echo '\n***** Loading adgangsadresse data'
 \COPY adgangsadresser (id, version, bygningsnavn, kommunekode, vejkode, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn, ejerlavkode, ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato) from  program 'gunzip -c data/AddressAccess.csv.gz | sed -f psql/replaceDoubleQuotes.sed' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -299,16 +299,27 @@ CREATE TABLE IF NOT EXISTS enhedsadresser (
   doer VARCHAR(4),
   tsv tsvector
 );
-CREATE INDEX enhedsadresser_tsv ON enhedsadresser USING gin(tsv);
+CREATE INDEX ON enhedsadresser USING gin(tsv);
+CREATE INDEX ON enhedsadresser(adgangsadresseid);
 
 \echo '\n***** Loading enhedsadresser data'
 \COPY enhedsadresser (id, version, adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer) from program 'gunzip -c data/AddressSpecific.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 \echo '\n***** Populate text search column'
 UPDATE enhedsadresser
-set tsv = to_tsvector('vejnavne', coalesce(etage, '') || ' ' || coalesce(doer, '') || ' ' || coalesce(postnumre.navn, '') || ' ' || coalesce(vejnavne.vejnavn, '') ||  ' ' || coalesce(to_char(postnumre.nr,'0000'), '') || ' ' || coalesce(husnr, ''))
-from adgangsadresser, vejnavne, postnumre
-where enhedsadresser.adgangsadresseid = adgangsadresser.id and adgangsadresser.vejkode = vejnavne.kode and adgangsadresser.kommunekode = vejnavne.kommunekode and adgangsadresser.postnr = postnumre.nr;
+set tsv = to_tsvector('vejnavne', coalesce(t.etage, '') || ' ' || coalesce(t.doer, '') || ' ' || coalesce(t.postnrnavn, '') || ' ' || coalesce(t.vejnavn, '') ||  ' ' || coalesce(to_char(t.postnr,'0000'), '') || ' ' || coalesce(t.husnr, ''))
+FROM
+ (select etage,
+         doer,
+         p.navn as postnrnavn,
+         v.vejnavn,
+         p.nr as postnr,
+         husnr
+  from enhedsadresser e
+  join adgangsadresser a on a.id = e.adgangsadresseid
+  join vejnavne v        on a.vejkode = v.kode and a.kommunekode = v.kommunekode
+  join postnumre p       on  a.postnr = p.nr) as T;
+
 
 \echo ''
 \echo ''
