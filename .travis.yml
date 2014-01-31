@@ -1,6 +1,20 @@
+
 language: node_js
+
 node_js:
   - "0.10"
-services: mongodb
+
+services:
+  - mongodb
+  - postgresql
+
 env:
   - connectionstring=mongodb://localhost/dawatest
+  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
+
+before_script:
+  - psql -c 'CREATE DATABASE dawaintegrationtest;'             -U postgres
+  - psql -c 'CREATE EXTENSION IF NOT EXISTS postgis;'          -U postgres dawaintegrationtest
+  - psql -c 'CREATE EXTENSION IF NOT EXISTS postgis_topology;' -U postgres dawaintegrationtest
+  - bash psql/setupdb.bash test/data/ localhost dawaintegrationtest postgres
+
