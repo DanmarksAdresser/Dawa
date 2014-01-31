@@ -1,4 +1,9 @@
 
+notifications:
+  email:
+    - peter.mechlenborg@gmail.com
+    - ahj@trifork.com
+
 language: node_js
 
 node_js:
