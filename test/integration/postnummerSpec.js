@@ -65,17 +65,17 @@ describe('Postnumre', function () {
 
   it('uhaaaa', function (done) {
     request.get('http://localhost:3000/api/pg/adresser.json'+
-                '?polygon=[[[56.129, 9.60], [56.139, 9.60], [56.139, 9.65], [56.129, 9.65], [56.129, 9.60]]]'+
+                '?polygon=[[[56.191, 9.501], [56.199, 9.501], [56.199, 9.529], [56.191, 9.529], [56.191, 9.501]]]'+
                 '&postnr=8600',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
-                  expect(adrs.length).toBeGreaterThan(1000);
+                  expect(adrs.length).toBe(152);
                   done();
                 });
   }, 15000);
 
   it('blah blah', function (done) {
-    var uuid = '0a3f50ae-da7f-32b8-e044-0003ba298018';
+    var uuid = '0a3f50c1-deb6-32b8-e044-0003ba298018';
     request.get('http://localhost:3000/api/pg/adresser/'+uuid,
                 function(error, response, body){
                   var adr = JSON.parse(body);
