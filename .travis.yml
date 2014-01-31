@@ -9,8 +9,7 @@ services:
   - postgresql
 
 env:
-  - connectionstring=mongodb://localhost/dawatest
-  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
+  - connectionstring=mongodb://localhost/dawatest pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
 
 before_script:
   - psql -c 'CREATE DATABASE dawaintegrationtest;'             -U postgres
