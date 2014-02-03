@@ -21,7 +21,7 @@ cp setupdb.source.sql $GEN
 
 SED="s/:DATADIR:/${DATADIR//\//\\/}/g;s/:SCRIPTDIR:/${PWD//\//\\/}/g"
 
-sed -i $SED $GEN
+sed -i "" $SED $GEN &&
 
 psql -h $HOST $DB $USER -f $PWD/$GEN
 
