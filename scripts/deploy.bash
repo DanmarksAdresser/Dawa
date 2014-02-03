@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO.  Document and maybe rewrite in Node.js
+
 set -x
 
 GITHASH=`git rev-parse --short HEAD`
@@ -14,7 +16,7 @@ EXISTS=`aws elasticbeanstalk describe-application-versions --output json \
     --application-name "$APPNAME" \
     --version-label "$VERSION" | grep -v "\[\]" | wc -l`
 
-if [[ $EXISTS == 0 ]]; then
+if [[ $EXISTS == 2 ]]; then
     zip --recurse-paths "$ZIP" * -x data/\* node_modules/\* \*.zip &&
     aws s3 cp $ZIP s3://$BUCKET/$ZIP &&
     aws elasticbeanstalk create-application-version \
