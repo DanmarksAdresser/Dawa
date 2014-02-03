@@ -12,7 +12,7 @@
     "JSONStream": ">=0.6.4",
     "through": "~2.2.7",
     "z-schema": "~2.4.2",
-    "pg": "2.11.0",
+    "pg": "~2.11.1",
     "pg-query-stream": "0.2.0",
     "underscore": "1.5.2",
     "bluebird": "~1.0.0",
