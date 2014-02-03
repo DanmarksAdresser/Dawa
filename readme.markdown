@@ -36,7 +36,7 @@ install
  $> npm install
 ```
 
-### Import data til lokal PostgreSQL
+### Importer data til lokal PostgreSQL
 Dette skridt tager lidt tid...
 
 Hent data filer fra aws.dk, og kør psql/setupdb.bash:
