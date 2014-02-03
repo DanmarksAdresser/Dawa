@@ -12,7 +12,7 @@ Se [DAWA](http://dawa.aws.dk)
 install
 =======
 
-### Install mongodb, nodejs, og npm
+### Install mongodb, nodejs, PostgreSQL og npm
 
 ##### On Ubuntu 12.04
 ```
@@ -22,6 +22,7 @@ install
  $> sudo apt-get update
  $> sudo apt-get install nodejs
  $> sudo apt-get install npm
+ $> sudo apt-get install postgresql-9.3
 ```
 
 ### Hent koden
@@ -32,12 +33,26 @@ install
 
 ### Hent dependencies
 ```
- $> npm install -d
+ $> npm install
+```
+
+### Import data til lokal PostgreSQL
+Dette skridt tager lidt tid...
+
+Hent data filer fra aws.dk, og kør psql/setupdb.bash:
+
+```
+ $> wget http://file.aws.dk/csv/PostCode.csv.gz -O data/PostCode.csv.gz
+ $> wget http://file.aws.dk/csv/AddressAccess.csv.gz -O data/AddressAccess.csv.gz
+ $> wget http://file.aws.dk/csv/RoadName.csv.gz -O data/RoadName.csv.gz
+ $> wget http://file.aws.dk/csv/AddressSpecific.csv.gz -O data/AddressSpecific.csv.gz
+ $> bash psql/setupdb.bash
 ```
 
 ### Kør tests
 ```
- $> npm test
+ $> connectionstring=mongodb://<Mongo-settings> pgConnectionUrl=postgres://<PG-settings> npm test
+ # Ex: connectionstring=mongodb://localhost/dawatest pgConnectionUrl=postgres://dawa:dawa@localhost:5432/dawa
 ```
 
 Anvender Node v0.10.7.15 og MongoDB 2.4.1.
