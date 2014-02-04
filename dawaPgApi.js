@@ -88,7 +88,7 @@ function publishQuery(app, spec) {
     if(spec.parameters) {
       spec.parameters.forEach(function(parameter) {
         var name = parameter.name;
-        var column = parameter.column || parameter.name;
+        var column = spec.fieldMap[name].column || name;
         if(req.query[name] !== undefined) {
           sqlParams.push(req.query[name]);
           whereClauses.push(column + " = $" + sqlParams.length);
@@ -115,7 +115,12 @@ function publishQuery(app, spec) {
 }
 
 function createSqlQuery(select, whereClauses, offsetLimitClause){
-  return select +  " WHERE " + whereClauses.join(" AND ") + offsetLimitClause;
+  var sql = select;
+  if(whereClauses.length > 0) {
+    sql +=  " WHERE " + whereClauses.join(" AND ");
+  }
+  sql += offsetLimitClause;
+  return sql;
 }
 
 function createOffsetLimitClause(req, res) {
@@ -132,15 +137,61 @@ function createOffsetLimitClause(req, res) {
   }
 }
 
+/**
+ * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
+ */
+var adresseFields = [
+  {
+    name: 'id'
+  },
+  {
+    name: 'vejkode'
+  },
+  {
+    name: 'vejnavn'
+  },
+  {
+    name: 'husnr'
+  },
+  {
+    name: 'supplerendebynavn'
+  },
+  {
+    name: 'postnr'
+  },
+  {
+    name: 'etage'
+  },
+  {
+    name: 'dør',
+    column: 'doer'
+  },
+  {
+    name: 'adgangsadresseid'
+  },
+  {
+    name: 'kommune',
+    column: 'kommunekode'
+  },
+  {
+    name: 'ejerlav',
+    column: 'ejerlavkode'
+  },
+  {
+    name: 'matrikel',
+    column: 'matrikelnr'
+  }
+];
 
 var adresseApiSpec = {
   model: model.adresse,
   pageable: true,
   searchable: true,
+  fields: adresseFields,
+  fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: [
     {
-      name: 'id',
-      type: parameterTypes.uuid
+      name: 'id'
     },
     {
       name: 'vejkode'
@@ -161,23 +212,19 @@ var adresseApiSpec = {
       name: 'etage'
     },
     {
-      name: 'dør',
-      column: 'doer'
+      name: 'dør'
     },
     {
       name: 'adgangsadresseid'
     },
     {
-      name: 'kommune',
-      column: 'kommunekode'
+      name: 'kommune'
     },
     {
-      name: 'ejerlav',
-      column: 'ejerlavkode'
+      name: 'ejerlav'
     },
     {
-      name: 'matrikel',
-      column: 'matrikelnr'
+      name: 'matrikel'
     }
   ],
   mappers: {

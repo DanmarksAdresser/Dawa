@@ -18,7 +18,8 @@
     "bluebird": "~1.0.0",
     "sql": "~0.34.0",
     "async": "~0.2.10",
-    "event-stream": "~3.1.0"
+    "event-stream": "~3.1.0",
+    "csv": "~0.3.7"
   },
   "devDependencies": {
     "jasmine-node": "1.12.0",
