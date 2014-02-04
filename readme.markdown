@@ -55,8 +55,17 @@ Hent data filer fra aws.dk, og kør psql/setupdb.bash:
  # Ex: connectionstring=mongodb://localhost/dawatest pgConnectionUrl=postgres://dawa:dawa@localhost:5432/dawa
 ```
 
-Anvender Node v0.10.7.15 og MongoDB 2.4.1.
+### Deployment
 
+Dawa kan deployes på Amazon med:
+```
+ $> script/deploy.bash
+```
+
+Dokumentation:
+```
+ $> script/deploy.bash --help
+```
 
 Status
 ====
