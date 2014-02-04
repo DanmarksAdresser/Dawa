@@ -211,7 +211,7 @@ module.exports = {
     schema: supplerendebynavnSchema,
     key: 'navn', // TODO: this is not a key!!!!
     validate: makeValidator(supplerendebynavnSchema)
-  },
+  }
 };
 
 /******************************************************************************/

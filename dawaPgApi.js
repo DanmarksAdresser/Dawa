@@ -11,6 +11,7 @@ var pg          = require('pg');
 var QueryStream = require('pg-query-stream');
 var eventStream = require('event-stream');
 var model       = require('./awsDataModel');
+var utility     = require('./utility');
 
 
 /******************************************************************************/
@@ -33,50 +34,161 @@ exports.setupRoutes = function () {
   app.use(express.methodOverride());
   app.use(express.bodyParser());
 
-  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
-  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
+  publishGetByKey(app, adresseApiSpec);
+  publishQuery(app, adresseApiSpec);
+
+//  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
+//  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
   app.get('/adresser/autocomplete', doAddressAutocomplete);
 
   return app;
 };
 
+function publishGetByKey(app, spec) {
+  app.get('/' + spec.model.plural + '/:id', function (req, res) {
+    var sql = "SELECT * FROM " + spec.model.plural + " WHERE " + spec.model.key + " = $1";
+    var uuid = req.params.id;
+    withPsqlClient(function (err, client, done) {
+      if (err) {
+        res.send(500, JSON.stringify(err));
+      }
+      client.query(sql,
+        [uuid],
+        function (err, result) {
+          done();
+          if (err) {
+            res.send(500, JSON.stringify(err));
+          } else if (result.rows.length === 1) {
+            var adr = spec.mappers.json(result.rows[0]);
+            spec.model.validator(adr)
+              .then(function (report) {
+                res.send(200, JSON.stringify(adr));
+              })
+              .catch(function (err) {
+                console.log(require('util').inspect(adr, true, 10));
+                console.log(require('util').inspect(err, true, 10));
+                res.send(500, err);
+              });
+          } else {
+            res.send(500, {error: 'unknown id'});
+          }
+        });
+    });
+  });
+}
+
+function publishQuery(app, spec) {
+  app.get('/' + spec.model.plural, function(req, res) {
+    var select = "  SELECT * FROM " + spec.model.plural;
+
+    var whereClauses = [];
+    var sqlParams  = [];
+    var offsetLimitClause = "";
+
+    if(spec.parameters) {
+      spec.parameters.forEach(function(parameter) {
+        var name = parameter.name;
+        var column = parameter.column || parameter.name;
+        if(req.query[name] !== undefined) {
+          sqlParams.push(req.query[name]);
+          whereClauses.push(column + " = $" + sqlParams.length);
+        }
+      });
+    }
+
+    if(spec.pageable) {
+      offsetLimitClause = createOffsetLimitClause(req, res);
+    }
+
+    var sql = createSqlQuery(select, whereClauses, offsetLimitClause);
+    console.log('executing sql' + sql);
+
+    withPsqlClient(function(err, client, done) {
+      var stream = eventStream.pipeline(
+        streamingQuery(client, sql, sqlParams),
+        eventStream.mapSync(spec.mappers.json),
+        JSONStream.stringify()
+      );
+      streamJsonToHttpResponse(stream, res, done);
+    });
+  });
+}
+
+function createSqlQuery(select, whereClauses, offsetLimitClause){
+  return select +  " WHERE " + whereClauses.join(" AND ") + offsetLimitClause;
+}
+
+function createOffsetLimitClause(req, res) {
+  var paging = utility.paginering(req.query);
+  if(paging.status === 1) {
+    return ' OFFSET ' + paging.skip + ' LIMIT ' + paging.limit;
+  }
+  else if(paging.status === 2) {
+    // TODO send client error?
+    return '';
+  }
+  else {
+    return '';
+  }
+}
+
+
+var adresseApiSpec = {
+  model: model.adresse,
+  pageable: true,
+  searchable: true,
+  parameters: [
+    {
+      name: 'id',
+      type: parameterTypes.uuid
+    },
+    {
+      name: 'vejkode'
+    },
+    {
+      name: 'vejnavn'
+    },
+    {
+      name: 'husnr'
+    },
+    {
+      name: 'supplerendebynavn'
+    },
+    {
+      name: 'postnr'
+    },
+    {
+      name: 'etage'
+    },
+    {
+      name: 'dør',
+      column: 'doer'
+    },
+    {
+      name: 'adgangsadresseid'
+    },
+    {
+      name: 'kommune',
+      column: 'kommunekode'
+    },
+    {
+      name: 'ejerlav',
+      column: 'ejerlavkode'
+    },
+    {
+      name: 'matrikel',
+      column: 'matrikelnr'
+    }
+  ],
+  mappers: {
+    json: mapAddress,
+    csv: undefined
+  }
+};
 
 /******************************************************************************/
 /*** Address Lookup ***********************************************************/
 /******************************************************************************/
-
-function doAddressLookup(req, res){
-  var sql =
-    "  SELECT * FROM adresser\n"+
-    "  WHERE id = $1";
-
-
-  var guid = req.params[0];
-
-  withPsqlClient(function(err, client, done) {
-    client.query(sql,
-                 [guid],
-                 function(err, result) {
-                   done();
-                   if(err) {
-                     res.send(500, JSON.stringify(err));
-                   } else if (result.rows.length === 1){
-                     var adr = mapAddress(result.rows[0]);
-                     model.adresse.validator(adr)
-                       .then(function(report){
-                         res.send(200, JSON.stringify(adr));
-                       })
-                       .catch(function(err){
-                         console.log(require('util').inspect(adr, true, 10));
-                         console.log(require('util').inspect(err, true, 10));
-                         res.send(500, err);
-                       });
-                   } else {
-                     res.send(500, {error: 'unknown id'});
-                   }
-                 });
-  });
-}
 
 function d(date) { return JSON.stringify(date); }
 //function defaultVal(val, def) { return val ? val : def;}
@@ -84,6 +196,8 @@ function d(date) { return JSON.stringify(date); }
 function mapAddress(rs){
   return {id: rs.enhedsadresseid,
           version: d(rs.e_version),
+          etage: rs.etage,
+          dør: rs.doer,
           adressebetegnelse: "TODO",  //TODO
           adgangsadresse: mapAdganggsadresse(rs)};
 }
@@ -152,8 +266,21 @@ function doAddressSearch(req, res) {
       streamingQuery(client, sql+where, whereParams),
       JSONStream.stringify()
     );
-    streamToHttpResponse(stream, res, done);
+    streamJsonToHttpResponse(stream, res, done);
   });
+}
+
+/**
+ * Stream database rows to the client
+ * @param stream
+ * @param res
+ * @param format
+ * @param done
+ */
+function streamRowsToClient(stream, res, format, done) {
+  if(!format) {
+    format = 'json';
+  }
 }
 
 
@@ -200,7 +327,7 @@ function doAddressAutocomplete(req, res) {
             eventStream.mapSync(vejnavnRowToSuggestJson),
             JSONStream.stringify()
           );
-        streamToHttpResponse(responseDataStream, res, done);
+        streamJsonToHttpResponse(responseDataStream, res, done);
         return;
       }
 
@@ -219,7 +346,7 @@ function doAddressAutocomplete(req, res) {
         eventStream.mapSync(adresseRowToSuggestJson),
         JSONStream.stringify()
       );
-      streamToHttpResponse(responseDataStream, res, done);
+      streamJsonToHttpResponse(responseDataStream, res, done);
     });
   });
 }
@@ -297,8 +424,14 @@ function withPsqlClient(cb) {
   return pg.connect(connString, cb);
 }
 
+function streamJsonToHttpResponse(stream, res, cb) {
+  res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+  streamToHttpResponse(stream, res, cb);
+}
+
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
 function streamToHttpResponse(stream, res, cb) {
+
   res.on('error', function (err) {
     console.error("An error occured while streaming data to HTTP response", new Error(err));
     cb(err);
@@ -314,3 +447,24 @@ function streamToHttpResponse(stream, res, cb) {
 function streamingQuery(client, sql, params) {
   return client.query(new QueryStream(sql, params, {batchSize: 10000}));
 }
+
+/******************************************************************************/
+/*** Parameter parsing and validation *****************************************/
+/******************************************************************************/
+
+function parseParameters(params, parameterSpec) {
+
+}
+
+// Kaldes med parseParameter('xxxx-xx-xxx-xx',parameterTypes.uuid);
+// Kaster en exception ved parsing/valideringsfejl
+function parseParameter(param, type) {
+
+}
+
+var parameterTypes = {
+  uuid: {
+    type: 'string',
+    schema: undefined
+  }
+};
