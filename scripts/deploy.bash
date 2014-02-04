@@ -1,6 +1,37 @@
 #!/bin/bash
 
-# TODO.  Document and maybe rewrite in Node.js
+if [ "$1" == "--help" ]; then
+    echo ""
+    echo "     ################################################################################"
+    echo "     ### Deployment script for Beanstalk ############################################"
+    echo "     ################################################################################"
+    echo "     #                                                                              #"
+    echo "     # This script will deploy the current HEAD of you git repository to the Dawa   #"
+    echo "     # Elastic Beanstalk production environment.                                    #"
+    echo "     #                                                                              #"
+    echo "     # To use it you first need to install the awscli tool:                         #"
+    echo "     #                                                                              #"
+    echo "     #    $> sudo aptitude install python-pip                                       #"
+    echo "     #    $> sudo pip install awscli                                                #"
+    echo "     #                                                                              #"
+    echo "     # Then you need your AWS access keys installed in awscli:                      #"
+    echo "     #                                                                              #"
+    echo "     #    $> aws configure                                                          #"
+    echo "     #                                                                              #"
+    echo "     # Access keys can be created through the AWS>IAM>User>Security-Credentials     #"
+    echo "     # web-console:                                                                 #"
+    echo "     #                                                                              #"
+    echo "     #    https://console.aws.amazon.com/iam/home?region=eu-west-1#users            #"
+    echo "     #                                                                              #"
+    echo "     ################################################################################"
+    echo "     ################################################################################"
+    echo "     ################################################################################"
+    echo ""
+    echo ""
+    echo "   Usage: $0 [--help]"
+
+    exit 1
+fi
 
 set -x
 
@@ -12,6 +43,7 @@ BUCKET=elasticbeanstalk-eu-west-1-040349710985
 APPNAME="Dawa"
 APPNAMEENV="$APPNAME-env"
 
+# EXISTS is 2 in case the version is new.
 EXISTS=`aws elasticbeanstalk describe-application-versions --output json \
     --application-name "$APPNAME" \
     --version-label "$VERSION" | grep -v "\[\]" | wc -l`
