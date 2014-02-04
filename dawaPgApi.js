@@ -12,6 +12,7 @@ var QueryStream = require('pg-query-stream');
 var eventStream = require('event-stream');
 var model       = require('./awsDataModel');
 var utility     = require('./utility');
+var ZSchema     = require("z-schema");
 
 
 /******************************************************************************/
@@ -191,7 +192,8 @@ var adresseApiSpec = {
   fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: [
     {
-      name: 'id'
+      name: 'id',
+//      type: parameterTypes.uuid
     },
     {
       name: 'vejkode'
@@ -288,48 +290,48 @@ function mapAdganggsadresse(rs){
 /*** Address Search ***********************************************************/
 /******************************************************************************/
 
-function doAddressSearch(req, res) {
-  var sql = "  SELECT * FROM adresser\n";
-
-  var whereClauses = [];
-  var whereParams  = [];
-  if (req.query.postnr) {
-    whereClauses.push("postnr = $1\n");
-    whereParams.push(parseInt(req.query.postnr));
-  }
-  if (req.query.polygon) {
-    // mapping GeoJson to WKT (Well-Known Text)
-    var p = JSON.parse(req.query.polygon);
-    var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
-    var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
-    var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
-    whereClauses.push("ST_Contains(ST_GeomFromText($2, 4326)::geometry, wgs84geom)\n");
-    whereParams.push(mapPolygon(p));
-  }
-  var where = "  WHERE "+whereClauses.join("        AND ");
-
-  withPsqlClient(function(err, client, done) {
-    var stream = eventStream.pipeline(
-      streamingQuery(client, sql+where, whereParams),
-      JSONStream.stringify()
-    );
-    streamJsonToHttpResponse(stream, res, done);
-  });
-}
-
-/**
- * Stream database rows to the client
- * @param stream
- * @param res
- * @param format
- * @param done
- */
-function streamRowsToClient(stream, res, format, done) {
-  if(!format) {
-    format = 'json';
-  }
-}
-
+//function doAddressSearch(req, res) {
+//  var sql = "  SELECT * FROM adresser\n";
+//
+//  var whereClauses = [];
+//  var whereParams  = [];
+//  if (req.query.postnr) {
+//    whereClauses.push("postnr = $1\n");
+//    whereParams.push(parseInt(req.query.postnr));
+//  }
+//  if (req.query.polygon) {
+//    // mapping GeoJson to WKT (Well-Known Text)
+//    var p = JSON.parse(req.query.polygon);
+//    var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
+//    var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
+//    var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
+//    whereClauses.push("ST_Contains(ST_GeomFromText($2, 4326)::geometry, wgs84geom)\n");
+//    whereParams.push(mapPolygon(p));
+//  }
+//  var where = "  WHERE "+whereClauses.join("        AND ");
+//
+//  withPsqlClient(function(err, client, done) {
+//    var stream = eventStream.pipeline(
+//      streamingQuery(client, sql+where, whereParams),
+//      JSONStream.stringify()
+//    );
+//    streamJsonToHttpResponse(stream, res, done);
+//  });
+//}
+//
+///**
+// * Stream database rows to the client
+// * @param stream
+// * @param res
+// * @param format
+// * @param done
+// */
+//function streamRowsToClient(stream, res, format, done) {
+//  if(!format) {
+//    format = 'json';
+//  }
+//}
+//
 
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
@@ -499,19 +501,72 @@ function streamingQuery(client, sql, params) {
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
 
-function parseParameters(params, parameterSpec) {
-
-}
-
-// Kaldes med parseParameter('xxxx-xx-xxx-xx',parameterTypes.uuid);
-// Kaster en exception ved parsing/valideringsfejl
-function parseParameter(param, type) {
-
-}
-
-var parameterTypes = {
-  uuid: {
-    type: 'string',
-    schema: undefined
-  }
+exports.parseParameters = function(params, parameterSpec) {
+  var parameterSpecTypes = parameterSpec.parameters;
+  var paramNames = _.filter(_.keys(params), function(name) {
+    return parameterSpecTypes[name] ? true : false;
+  });
+  return _.reduce(paramNames,
+                  function(memo, name){
+                    try{
+                      var val = parseParameter(params[name], parameterSpecTypes[name]);
+                      memo.values[name] = val;
+                    } catch(error){
+                      memo.errors.push([name, error]);
+                    }
+                    return memo;
+                  },
+                  {values: {}, errors: []});
 };
+
+function parseParameter(valString, spec) {
+  var val = parseParameterType(valString, spec.type);
+  jsonSchemaValidation(val, spec.schema);
+  return val;
+}
+function parseParameterType(valString, type) {
+  if (type === undefined){
+    return valString;
+  } else {
+    var val;
+    try {
+      val = JSON.parse(valString);
+    }
+    catch(error){
+      throw 'notValidJSON';
+    }
+    if(type === 'string'){
+      if (_.isString(val)) return val; else throw "notString";
+    } else if(type === 'number'){
+      if (_.isNumber(val)) return val; else throw "notNumber";
+    } else if(type === 'array'){
+      if (_.isArray(val)) return val; else throw "notArray";
+    } else if(type === 'object'){
+      if (_.isObject(val) && !_.isArray(val)) return val; else throw "notObject";
+    }
+    else {
+      throw "unknownType";
+    }
+  }
+}
+
+function jsonSchemaValidation(val, schema){
+  if (schema){
+    try{
+      zsValidate(val, schema);
+    }
+    catch(error){
+      throw error.errors[0].message;
+    }
+  }
+}
+
+var validator = new ZSchema({ sync: true });
+function zsValidate(json, schema){
+  var valid = validator.validate(json, schema);
+  if (!valid) {
+    throw validator.getLastError();
+  } else {
+    return true;
+  }
+}
