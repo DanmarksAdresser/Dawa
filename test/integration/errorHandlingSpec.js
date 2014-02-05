@@ -28,7 +28,7 @@ describe('Ill-formed UUID', function () {
                   expect(error).toEqual(
                     {
                       "type": "UUIDFormatError",
-                      "title": "The address UUId was ill-formed.",
+                      "title": "The address-UUID was ill-formed.",
                       "details": 'UUID is ill-formed: 0a3f50c1-deb6-32b8-e04-0003ba298018. String does not match pattern: ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'
                     });
                     done();
@@ -38,11 +38,17 @@ describe('Ill-formed UUID', function () {
 
 describe('When getting single addresses', function () {
   it('an unknown id will fail', function (done) {
-    var uuid2 = '0a3f50ae-da7f-32b8-e044-0003ba298019';
+    var uuid2 = '0a3f50ae-aaaa-bbbb-cccc-0003ba298019';
     request.get('http://localhost:3000/api/pg/adresser/'+uuid2,
-                function(error, response, body){
-                  expect(response.statusCode).toBe(500);
-                  expect(JSON.parse(body).error).toMatch('unknown id');
+                function(err, response, body){
+                  expect(response.statusCode).toBe(404);
+                  var error = JSON.parse(body);
+                  expect(error).toEqual(
+                    {
+                      type: "AddressNotFoundError",
+                      title: "The given UUID does not match any address.",
+                      details: "UUID: 0a3f50ae-aaaa-bbbb-cccc-0003ba298019, match no address"
+                    });
                   done();
                 });
   }, 300);

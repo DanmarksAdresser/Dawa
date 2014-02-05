@@ -47,30 +47,10 @@ exports.setupRoutes = function () {
   return app;
 };
 
-function sendQueryParameterFormatError(res, details){
-  sendError(res, 400, {type: "QueryParameterFormatError",
-                       title: "One or more query parameters was ill-formed.",
-                       details: details});
-}
-
-function sendUUIDFormatError(res, details){
-  sendError(res, 400, {type: "UUIDFormatError",
-                       title: "The address UUId was ill-formed.",
-                       details: details});
-}
-
-function sendInternalServerError(res, details){
-  sendError(res, 500, {type: "InternalServerError",
-                       title: "Something unexpected happened inside the server.",
-                       details: details});
-}
-
-function sendError(res, code, message){
-  res.send(code, JSON.stringify(message));
-}
-
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:id', function (req, res) {
+
+    // Parsing query-parameters
     var parsedParams = parameterParsing.parseParameters({id: req.params.id}, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
       if (parsedParams.errors[0][0] == 'id' && parsedParams.errors.length == 1){
@@ -80,29 +60,30 @@ function publishGetByKey(app, spec) {
       }
     }
 
+    // Getting the data
     var query = createSqlQueryFromSpec(spec, parsedParams.params);
-    withPsqlClient(function (err, client, done) {
-      if (err) {
-        res.send(500, JSON.stringify(err));
-      }
+    withPsqlClient(res, function (client, done) {
       client.query(
         query.sql,
         query.params,
         function (err, result) {
           done();
           if (err) {
-            res.send(500, JSON.stringify(err));
+            sendInternalServerError(res, err);
           } else if (result.rows.length === 1) {
             var adr = spec.mappers.json(result.rows[0]);
             spec.model.validator(adr)
               .then(function (report) {
+                // The good case.  The rest is error handling!
                 res.send(200, JSON.stringify(adr));
               })
               .catch(function (err) {
-                res.send(500, err);
+                sendInternalServerError(res, err);
               });
+          } else if (result.rows.length > 1) {
+            sendInternalServerError(res, "UUID: "+req.params.id+", results in more than one address: "+result.rows);
           } else {
-            res.send(500, {error: 'unknown id'});
+            sendAddressNotFoundError(res, "UUID: "+req.params.id+", match no address");
           }
         });
     });
@@ -126,7 +107,7 @@ function publishQuery(app, spec) {
     var query = createSqlQueryFromSpec(spec, parsedParams.params, pagingParams.params);
     console.log('executing sql' + JSON.stringify(query));
 
-    withPsqlClient(function(err, client, done) {
+    withPsqlClient(res, function(client, done) {
       var stream = streamingQuery(client, query.sql, query.params);
       var format = req.query.format;
       if(format === 'csv') {
@@ -253,7 +234,7 @@ function createOffsetLimitClause(params) {
 //  }
 //  var where = "  WHERE "+whereClauses.join("        AND ");
 //
-//  withPsqlClient(function(err, client, done) {
+//  withPsqlClient(function(client, done) {
 //    var stream = eventStream.pipeline(
 //      streamingQuery(client, sql+where, whereParams),
 //      JSONStream.stringify()
@@ -278,9 +259,7 @@ function doAddressAutocomplete(req, res) {
     args.push(postnr);
   }
 
-  withPsqlClient(function (err, client, done) {
-    // TODO handle error
-
+  withPsqlClient(res, function (client, done) {
     // Search vejnavne first
     // TODO check, at DISTINCT ikke unorder vores resultat
     var vejnavneSql = 'SELECT DISTINCT vejnavn FROM (SELECT * FROM Vejnavne, to_tsquery(\'vejnavne\', $1) query WHERE (tsv @@ query)';
@@ -386,8 +365,16 @@ function adresseRowToSuggestJson(row) {
 /*** Utility functions ********************************************************/
 /******************************************************************************/
 
-function withPsqlClient(cb) {
-  return pg.connect(connString, cb);
+function withPsqlClient(res, callback) {
+  return pg.connect(connString, function (err, client, done) {
+    if (err) {
+      // We do not have a connection to PostgreSQL.
+      // About!
+      sendInternalServerError(res, err);
+      process.exit(1);
+    }
+    callback(client, done);
+  });
 }
 
 function streamJsonpToHttpResponse(stream, mapper, callbackName, res, done) {
@@ -439,3 +426,35 @@ function streamToHttpResponse(stream, res, options, cb) {
 function streamingQuery(client, sql, params) {
   return client.query(new QueryStream(sql, params, {batchSize: 10000}));
 }
+
+function sendQueryParameterFormatError(res, details){
+  sendError(res, 400, {type: "QueryParameterFormatError",
+                       title: "One or more query parameters was ill-formed.",
+                       details: details});
+}
+
+function sendUUIDFormatError(res, details){
+  sendError(res, 400, {type: "UUIDFormatError",
+                       title: "The address-UUID was ill-formed.",
+                       details: details});
+}
+
+function sendAddressNotFoundError(res, details){
+  sendError(res, 404, {type: "AddressNotFoundError",
+                       title: "The given UUID does not match any address.",
+                       details: details});
+}
+
+function sendInternalServerError(res, details){
+  var msg = {type: "InternalServerError",
+             title: "Something unexpected happened inside the server.",
+             details: details};
+  console.log("Internal server error: "+util.inspect(msg, {depth: 20}));
+  sendError(res, 500, msg);
+}
+
+function sendError(res, code, message){
+  res.setHeader('Content-Type', 'application/problem+json; charset=UTF-8');
+  res.send(code, JSON.stringify(message));
+}
+
