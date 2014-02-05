@@ -24,6 +24,7 @@ describe('Paginering', function () {
         getJson('http://localhost:3000/api/pg/adresser?side=1&per_side=20', function(bothPages) {
           expect(page1.length).toBe(10);
           expect(page2.length).toBe(10);
+          expect(page1).not.toEqual(page2);
           expect(bothPages.length).toBe(20);
           expect(page1.concat(page2)).toEqual(bothPages);
           done();
@@ -45,6 +46,18 @@ describe('Paginering', function () {
         expect(page1).toEqual(page2);
         done();
       });
+    });
+  });
+  it("Illegal parameter value for side should result in error", function(done) {
+    request.get('http://localhost:3000/api/pg/adresser?side=0&per_side=20', function(error, response) {
+      expect(response.statusCode).toBe(400);
+      done();
+    });
+  });
+  it("Illegal parameter value for per_side should result in error", function(done) {
+    request.get('http://localhost:3000/api/pg/adresser?side=1&per_side=-10', function(error, response) {
+      expect(response.statusCode).toBe(400);
+      done();
     });
   });
 });
