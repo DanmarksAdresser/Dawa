@@ -11,6 +11,7 @@ var pg          = require('pg');
 var QueryStream = require('pg-query-stream');
 var eventStream = require('event-stream');
 var utility     = require('./utility');
+var util        = require('util');
 var csv         = require('csv');
 var parameterParsing = require('./parameterParsing');
 var apiSpec = require('./apiSpec');
@@ -46,39 +47,65 @@ exports.setupRoutes = function () {
   return app;
 };
 
+function sendQueryParameterFormatError(res, details){
+  sendError(res, 400, {type: "QueryParameterFormatError",
+                       title: "One or more query parameters was ill-formed.",
+                       details: details});
+}
+
+function sendUUIDFormatError(res, details){
+  sendError(res, 400, {type: "UUIDFormatError",
+                       title: "The address UUId was ill-formed.",
+                       details: details});
+}
+
+function sendInternalServerError(res, details){
+  sendError(res, 500, {type: "InternalServerError",
+                       title: "Something unexpected happened inside the server.",
+                       details: details});
+}
+
+function sendError(res, code, message){
+  res.send(code, JSON.stringify(message));
+}
+
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:id', function (req, res) {
     var parsedParams = parameterParsing.parseParameters({id: req.params.id }, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
-        res.send(500, JSON.stringify({error: parsedParams.errors}));
-    } else {
-      var query = createSqlQueryFromSpec(spec, parsedParams.params);
-      withPsqlClient(function (err, client, done) {
-        if (err) {
-          res.send(500, JSON.stringify(err));
-        }
-        client.query(
-          query.sql,
-          query.params,
-          function (err, result) {
-            done();
-            if (err) {
-              res.send(500, JSON.stringify(err));
-            } else if (result.rows.length === 1) {
-              var adr = spec.mappers.json(result.rows[0]);
-              spec.model.validator(adr)
-                .then(function (report) {
-                  res.send(200, JSON.stringify(adr));
-                })
-                .catch(function (err) {
-                  res.send(500, err);
-                });
-            } else {
-              res.send(500, {error: 'unknown id'});
-            }
-          });
-      });
+      if (parsedParams.errors[0][0] == 'id'){
+        return sendUUIDFormatError(res, "UUID is ill-formed: "+req.params.id+". "+parsedParams.errors[0][1]);
+      } else {
+        return sendInternalServerError(res, 'Unexpected query-parameter error: '+util.inspect(parsedParams.errors, {depth: 10}));
+      }
     }
+
+    var query = createSqlQueryFromSpec(spec, parsedParams.params);
+    withPsqlClient(function (err, client, done) {
+      if (err) {
+        res.send(500, JSON.stringify(err));
+      }
+      client.query(
+        query.sql,
+        query.params,
+        function (err, result) {
+          done();
+          if (err) {
+            res.send(500, JSON.stringify(err));
+          } else if (result.rows.length === 1) {
+            var adr = spec.mappers.json(result.rows[0]);
+            spec.model.validator(adr)
+              .then(function (report) {
+                res.send(200, JSON.stringify(adr));
+              })
+              .catch(function (err) {
+                res.send(500, err);
+              });
+          } else {
+            res.send(500, {error: 'unknown id'});
+          }
+        });
+    });
   });
 }
 
@@ -86,7 +113,7 @@ function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
     var parsedParams = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
-      return res.send(500, JSON.stringify({error: parsedParams.errors}));
+      return sendQueryParameterFormatError(res, parsedParams.errors);
     }
 
     var pagingParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
