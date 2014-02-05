@@ -48,14 +48,14 @@ exports.setupRoutes = function () {
 
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:id', function (req, res) {
-    var sql = "SELECT * FROM " + spec.model.plural + " WHERE " + spec.model.key + " = $1";
-    var uuid = req.params.id;
+    var params = {id: req.params.id };
+    var query = createSqlQueryFromSpec(spec, params);
     withPsqlClient(function (err, client, done) {
       if (err) {
         res.send(500, JSON.stringify(err));
       }
-      client.query(sql,
-        [uuid],
+      client.query(query.sql,
+        query.params,
         function (err, result) {
           done();
           if (err) {
@@ -81,32 +81,11 @@ function publishGetByKey(app, spec) {
 
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
-    var select = "  SELECT * FROM " + spec.model.plural;
-
-    var whereClauses = [];
-    var sqlParams  = [];
-    var offsetLimitClause = "";
-
-    if(spec.parameters) {
-      spec.parameters.forEach(function(parameter) {
-        var name = parameter.name;
-        var column = spec.fieldMap[name].column || name;
-        if(req.query[name] !== undefined) {
-          sqlParams.push(req.query[name]);
-          whereClauses.push(column + " = $" + sqlParams.length);
-        }
-      });
-    }
-
-    if(spec.pageable) {
-      offsetLimitClause = createOffsetLimitClause(req, res);
-    }
-
-    var sql = createSqlQuery(select, whereClauses, offsetLimitClause);
-    console.log('executing sql' + sql);
+    var query  = createSqlQueryFromSpec(spec, req.query);
+    console.log('executing sql' + JSON.stringify(query));
 
     withPsqlClient(function(err, client, done) {
-      var stream = streamingQuery(client, sql, sqlParams);
+      var stream = streamingQuery(client, query.sql, query.params);
       var format = req.query.format;
       if(format === 'csv') {
         return streamCsvToHttpResponse(stream, spec, res, done);
@@ -116,6 +95,34 @@ function publishQuery(app, spec) {
       }
     });
   });
+}
+
+function createSqlQueryFromSpec(spec, params) {
+  var select = "  SELECT * FROM " + spec.model.plural;
+
+  var whereClauses = [];
+  var sqlParams  = [];
+  var offsetLimitClause = "";
+
+  if(spec.parameters) {
+    spec.parameters.forEach(function(parameter) {
+      var name = parameter.name;
+      var column = spec.fieldMap[name].column || name;
+      if(params[name] !== undefined) {
+        sqlParams.push(params[name]);
+        whereClauses.push(column + " = $" + sqlParams.length);
+      }
+    });
+  }
+
+  if(spec.pageable) {
+    offsetLimitClause = createOffsetLimitClause(params);
+  }
+
+  return {
+    sql: createSqlQuery(select, whereClauses, offsetLimitClause),
+    params: sqlParams
+  };
 }
 
 function streamCsvToHttpResponse(rowStream, spec, res, cb) {
@@ -149,8 +156,8 @@ function createSqlQuery(select, whereClauses, offsetLimitClause){
   return sql;
 }
 
-function createOffsetLimitClause(req, res) {
-  var paging = utility.paginering(req.query);
+function createOffsetLimitClause(params) {
+  var paging = utility.paginering(params);
   if(paging.status === 1) {
     return ' OFFSET ' + paging.skip + ' LIMIT ' + paging.limit;
   }
