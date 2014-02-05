@@ -22,6 +22,16 @@ describe('Format selection', function () {
     });
   });
 
+  it("By default, JSON should be returned (single result mode)", function(done) {
+    var id = "0a3f50c1-d506-32b8-e044-0003ba298018";
+    request.get("http://localhost:3000/api/pg/adresser/" + id, function(error, response, body) {
+      expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
+      var bodyJson = JSON.parse(body);
+      expect(bodyJson.id).toBe("0a3f50c1-d506-32b8-e044-0003ba298018");
+      done();
+    });
+  });
+
   it("If format=json is passed as query parameter, JSON should be returned", function(done) {
     request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=json", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
@@ -44,6 +54,20 @@ describe('Format selection', function () {
     });
   });
 
+  it("If format=csv is passed as query parameter, CSV should be returned (single result mode)", function(done) {
+    var id = "0a3f50c1-d506-32b8-e044-0003ba298018";
+    request.get("http://localhost:3000/api/pg/adresser/" + id + "?format=csv", function(error, response, body) {
+      expect(response.headers['content-type']).toBe('text/csv; charset=UTF-8');
+      csv()
+        .from.string(body, {columns: true})
+        .to.array(function (data) {
+          expect(data.length).toBe(1);
+          expect(data[0].id).toEqual('0a3f50c1-d506-32b8-e044-0003ba298018');
+          done();
+        });
+    });
+  });
+
   it("If format=jsonp is passed as query parameter, JSONP should be returned", function(done) {
     request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=jsonp&callback=jsonpCallback", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
@@ -52,6 +76,18 @@ describe('Format selection', function () {
       expect(result).toBeDefined();
       expect(_.isArray(result)).toBe(true);
       expect(result.length).toBe(10);
+      done();
+    });
+  });
+
+  it("If format=jsonp is passed as query parameter, JSONP should be returned (single result mode)", function(done) {
+    var id = "0a3f50c1-d506-32b8-e044-0003ba298018";
+    request.get("http://localhost:3000/api/pg/adresser/" + id + "?format=jsonp&callback=jsonpCallback", function(error, response, body) {
+      expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
+      eval(body); // jshint ignore:line
+      var result = jsonpResults.pop();
+      expect(result).toBeDefined();
+      expect(result.id).toEqual(id);
       done();
     });
   });

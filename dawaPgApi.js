@@ -60,6 +60,13 @@ function publishGetByKey(app, spec) {
       }
     }
 
+    // Parsing format parameters
+    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
+    if(formatParamsParseResult.errors.length > 0) {
+      return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
+    }
+    var formatParams = formatParamsParseResult.params;
+
     // Making the query string
     var query = createSqlQueryFromSpec(spec, parsedParams.params);
 
@@ -77,7 +84,9 @@ function publishGetByKey(app, spec) {
             spec.model.validator(adr)
               .then(function (report) {
                 // The good case.  The rest is error handling!
-                res.send(200, JSON.stringify(adr));
+                sendSingleResultToHttpResponse(result.rows[0], res, spec, {
+                  formatParams: formatParams
+                }, done);
               })
               .catch(function (err) {
                 sendInternalServerError(res, err);
@@ -107,10 +116,12 @@ function publishQuery(app, spec) {
       return sendQueryParameterFormatError(res, pagingParams.errors);
     }
 
-    var formatParamParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
-    if(formatParamParseResult.errors.length > 0) {
-      return sendQueryParameterFormatError(res, formatParamParseResult.errors);
+    // Parsing format parameters
+    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
+    if(formatParamsParseResult.errors.length > 0) {
+      return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
     }
+    var formatParams = formatParamsParseResult.params;
     applyDefaultPaging(pagingParams.params);
 
     // Making the query string
@@ -120,20 +131,53 @@ function publishQuery(app, spec) {
     // Getting the data
     withPsqlClient(res, function(client, done) {
       var stream = streamingQuery(client, query.sql, query.params);
-      var format = formatParamParseResult.params.format;
-      if(format === 'csv') {
-        return streamCsvToHttpResponse(stream, spec, res, done);
-      }
-      else if(format === 'jsonp') {
-        // TODO validate/sanitize callback parameter
-        return streamJsonpToHttpResponse(stream, spec.mappers.json, req.query.callback, res, done);
-      }
-      else {
-        return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
-      }
+      streamHttpResponse(stream, res, spec, {
+        formatParams: formatParams
+      }, done);
     });
   });
 }
+
+function sendSingleResultToHttpResponse(result, res, spec, options, done) {
+  var format = options.formatParams.format;
+  if(format === 'csv') {
+    return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, done);
+  }
+  else if(format === 'jsonp') {
+    setJsonpContentHeader(res);
+    res.write(options.formatParams.callback + "(");
+    res.write(JSON.stringify(spec.mappers.json(result)));
+    res.end(");");
+    done();
+  }
+  else {
+    setJsonContentHeader(res);
+    res.end(JSON.stringify(spec.mappers.json(result)));
+    done();
+  }
+}
+
+/**
+ * Sends a stream DB query rows to the http response in the appropriate format
+ * @param stream a stream of database rows
+ * @param res http response
+ * @param spec the api spec
+ * @param options must contain formatParams
+ * @param done called upon completion
+ */
+function streamHttpResponse(stream, res, spec, options, done) {
+  var format = options.formatParams.format;
+  if(format === 'csv') {
+    return streamCsvToHttpResponse(stream, spec, res, done);
+  }
+  else if(format === 'jsonp') {
+    return streamJsonpToHttpResponse(stream, spec.mappers.json, options.formatParams.callback, res, done);
+  }
+  else {
+    return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
+  }
+}
+
 /**
  * By default, if per_side is specified, side defaults to 1.
  * If side is specified, per_side defaults to 20.
@@ -185,9 +229,12 @@ function createSqlQueryFromSpec(spec, params, pagingParams) {
   };
 }
 
+function setCsvContentHeader(res) {
+  res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
+}
 function streamCsvToHttpResponse(rowStream, spec, res, cb) {
   var fields = spec.fields;
-  res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
+  setCsvContentHeader(res);
   var csvTransformer = csv();
   csvTransformer.to.options({
     header: true,
@@ -398,8 +445,11 @@ function withPsqlClient(res, callback) {
   });
 }
 
-function streamJsonpToHttpResponse(stream, mapper, callbackName, res, done) {
+function setJsonpContentHeader(res) {
   res.setHeader('Content-Type', "application/javascript; charset=UTF-8");
+}
+function streamJsonpToHttpResponse(stream, mapper, callbackName, res, done) {
+  setJsonpContentHeader(res);
   var jsonStream = createJsonStream(stream, mapper);
   res.write(callbackName + "(");
   streamToHttpResponse(jsonStream, res, { end: false }, function(err) {
@@ -418,8 +468,11 @@ function createJsonStream(stream, mapper) {
     JSONStream.stringify()
   );
 }
-function streamJsonToHttpResponse(stream, mapper, res, cb) {
+function setJsonContentHeader(res) {
   res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+}
+function streamJsonToHttpResponse(stream, mapper, res, cb) {
+  setJsonContentHeader(res);
   var transformedStream = createJsonStream(stream, mapper);
   streamToHttpResponse(transformedStream, res, {}, cb);
 }

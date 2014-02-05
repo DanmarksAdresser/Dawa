@@ -234,6 +234,14 @@ module.exports = {
       schema: {
         "enum" : ['csv', 'json', 'jsonp']
       }
+    },
+    {
+      name: 'callback',
+      schema: {
+        type: 'string',
+        pattern: '^[\\$_a-zA-Z0-9]+$'
+      }
+
     }
   ]
 
