@@ -115,10 +115,14 @@ function createSqlQueryFromSpec(spec, params) {
   if(spec.parameters) {
     spec.parameters.forEach(function(parameter) {
       var name = parameter.name;
-      var column = spec.fieldMap[name].column || name;
       if(params[name] !== undefined) {
         sqlParams.push(params[name]);
-        whereClauses.push(column + " = $" + sqlParams.length);
+        if (parameter.whereClause) {
+          whereClauses.push(parameter.whereClause("$" + sqlParams.length));
+        } else {
+          var column = spec.fieldMap[name].column || name;
+          whereClauses.push(column + " = $" + sqlParams.length);
+        }
       }
     });
   }
@@ -231,10 +235,8 @@ var schema =  {
            minimum: 1000,
            maximum: 9999},
   polygon: {type: 'array',
-            items: { type: 'array',
-                     items: {type: 'array',
-                             items: 'integer'}}},
-  
+            items: { type: 'array'}},
+
 };
 
 var adresseApiSpec = {
@@ -284,18 +286,30 @@ var adresseApiSpec = {
     {
       name: 'matrikel'
     },
-//todo
-//    {
-//      name: 'polygon',
-//      type: 'array',
-//      schema: schema.polygon
-//    },
+    {
+      name: 'polygon',
+      type: 'array',
+      schema: schema.polygon,
+      whereClause: polygonWhereClause,
+      transform: polygonTransformer,
+    },
   ],
   mappers: {
     json: mapAddress,
     csv: undefined
   }
 };
+
+function polygonWhereClause(paramNumberString){
+  return "ST_Contains(ST_GeomFromText("+paramNumberString+", 4326)::geometry, wgs84geom)\n";
+}
+
+function polygonTransformer(paramValue){
+  var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
+  var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
+  var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
+  return mapPolygon(paramValue);
+}
 
 /******************************************************************************/
 /*** Address Lookup ***********************************************************/
@@ -563,7 +577,7 @@ exports.parseParameters = function(params, parameterSpec) {
 function parseParameter(valString, spec) {
   var val = parseParameterType(valString, spec.type);
   jsonSchemaValidation(val, spec.schema);
-  return val;
+  return spec.transform ? spec.transform(val) : val;
 }
 function parseParameterType(valString, type) {
   if (type === undefined){
