@@ -86,30 +86,35 @@ function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
     var parsedParams = exports.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
-      res.send(500, JSON.stringify({error: parsedParams.errors}));
-    } else {
-      var query = createSqlQueryFromSpec(spec, parsedParams.params);
-      console.log('executing sql' + JSON.stringify(query));
-
-      withPsqlClient(function(err, client, done) {
-        var stream = streamingQuery(client, query.sql, query.params);
-        var format = req.query.format;
-        if(format === 'csv') {
-          return streamCsvToHttpResponse(stream, spec, res, done);
-        }
-        else if(format === 'jsonp') {
-          // TODO validate/sanitize callback parameter
-          return streamJsonpToHttpResponse(stream, spec.mappers.json, req.query.callback, res, done);
-        }
-        else {
-          return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
-        }
-      });
+      return res.send(500, JSON.stringify({error: parsedParams.errors}));
     }
+
+    var pagingParams = exports.parseParameters(req.query, _.indexBy(pagingParameterSpec, 'name'));
+    if(pagingParams.errors.length > 0) {
+      return res.send(500, JSON.stringify({error: parsedParams.errors}));
+    }
+
+    var query = createSqlQueryFromSpec(spec, parsedParams.params, pagingParams.params);
+    console.log('executing sql' + JSON.stringify(query));
+
+    withPsqlClient(function(err, client, done) {
+      var stream = streamingQuery(client, query.sql, query.params);
+      var format = req.query.format;
+      if(format === 'csv') {
+        return streamCsvToHttpResponse(stream, spec, res, done);
+      }
+      else if(format === 'jsonp') {
+        // TODO validate/sanitize callback parameter
+        return streamJsonpToHttpResponse(stream, spec.mappers.json, req.query.callback, res, done);
+      }
+      else {
+        return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
+      }
+    });
   });
 }
 
-function createSqlQueryFromSpec(spec, params) {
+function createSqlQueryFromSpec(spec, params, pagingParams) {
   var select = "  SELECT * FROM " + spec.model.plural;
 
   var whereClauses = [];
@@ -132,7 +137,7 @@ function createSqlQueryFromSpec(spec, params) {
   }
 
   if(spec.pageable) {
-    offsetLimitClause = createOffsetLimitClause(params);
+    offsetLimitClause = createOffsetLimitClause(pagingParams);
   }
 
   return {
@@ -240,8 +245,25 @@ var schema =  {
            minimum: 1000,
            maximum: 9999},
   polygon: {type: 'array',
-            items: { type: 'array'}}
+            items: { type: 'array'}},
+  positiveInteger: {
+    type: 'integer',
+    minimum: 1
+  }
 };
+
+var pagingParameterSpec = [
+  {
+    name: 'side',
+    type: 'number',
+    schema: schema.positiveInteger
+  },
+  {
+    name: 'per_side',
+    type: 'number',
+    schema: schema.positiveInteger
+  }
+]
 
 var adresseApiSpec = {
   model: model.adresse,
