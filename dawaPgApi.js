@@ -10,10 +10,10 @@ var _           = require('underscore');
 var pg          = require('pg');
 var QueryStream = require('pg-query-stream');
 var eventStream = require('event-stream');
-var model       = require('./awsDataModel');
 var utility     = require('./utility');
-var ZSchema     = require("z-schema");
 var csv         = require('csv');
+var parameterParsing = require('./parameterParsing');
+var apiSpec = require('./apiSpec');
 
 
 /******************************************************************************/
@@ -36,8 +36,8 @@ exports.setupRoutes = function () {
   app.use(express.methodOverride());
   app.use(express.bodyParser());
 
-  publishGetByKey(app, adresseApiSpec);
-  publishQuery(app, adresseApiSpec);
+  publishGetByKey(app, apiSpec.adresse);
+  publishQuery(app, apiSpec.adresse);
 
   //  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
   //  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
@@ -48,7 +48,7 @@ exports.setupRoutes = function () {
 
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:id', function (req, res) {
-    var parsedParams = exports.parseParameters({id: req.params.id }, _.indexBy(spec.parameters, 'name'));
+    var parsedParams = parameterParsing.parseParameters({id: req.params.id }, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
         res.send(500, JSON.stringify({error: parsedParams.errors}));
     } else {
@@ -84,12 +84,12 @@ function publishGetByKey(app, spec) {
 
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
-    var parsedParams = exports.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
+    var parsedParams = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
       return res.send(500, JSON.stringify({error: parsedParams.errors}));
     }
 
-    var pagingParams = exports.parseParameters(req.query, _.indexBy(pagingParameterSpec, 'name'));
+    var pagingParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
     if(pagingParams.errors.length > 0) {
       return res.send(500, JSON.stringify({error: parsedParams.errors}));
     }
@@ -136,7 +136,7 @@ function createSqlQueryFromSpec(spec, params, pagingParams) {
     });
   }
 
-  if(spec.pageable) {
+  if(spec.pageable && pagingParams) {
     offsetLimitClause = createOffsetLimitClause(pagingParams);
   }
 
@@ -190,209 +190,6 @@ function createOffsetLimitClause(params) {
     return '';
   }
 }
-
-/**
- * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
- * Felterne anvendes som kolonner i CSV-formateringen af adresser.
- */
-var adresseFields = [
-  {
-    name: 'id'
-  },
-  {
-    name: 'vejkode'
-  },
-  {
-    name: 'vejnavn'
-  },
-  {
-    name: 'husnr'
-  },
-  {
-    name: 'supplerendebynavn'
-  },
-  {
-    name: 'postnr'
-  },
-  {
-    name: 'etage'
-  },
-  {
-    name: 'dør',
-    column: 'doer'
-  },
-  {
-    name: 'adgangsadresseid'
-  },
-  {
-    name: 'kommune',
-    column: 'kommunekode'
-  },
-  {
-    name: 'ejerlav',
-    column: 'ejerlavkode'
-  },
-  {
-    name: 'matrikel',
-    column: 'matrikelnr'
-  }
-];
-
-var schema =  {
-  uuid: {type: 'string',
-         pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
-  postnr: {type: 'integer',
-           minimum: 1000,
-           maximum: 9999},
-  polygon: {type: 'array',
-            items: { type: 'array'}},
-  positiveInteger: {
-    type: 'integer',
-    minimum: 1
-  }
-};
-
-var pagingParameterSpec = [
-  {
-    name: 'side',
-    type: 'number',
-    schema: schema.positiveInteger
-  },
-  {
-    name: 'per_side',
-    type: 'number',
-    schema: schema.positiveInteger
-  }
-]
-
-var adresseApiSpec = {
-  model: model.adresse,
-  pageable: true,
-  searchable: true,
-  fields: adresseFields,
-  fieldMap: _.indexBy(adresseFields, 'name'),
-  parameters: [
-    {
-      name: 'id',
-      type: 'string',
-      schema: schema.uuid
-    },
-    {
-      name: 'vejkode'
-    },
-    {
-      name: 'vejnavn'
-    },
-    {
-      name: 'husnr'
-    },
-    {
-      name: 'supplerendebynavn'
-    },
-    {
-      name: 'postnr',
-      type: 'number',
-      schema: schema.postnr
-    },
-    {
-      name: 'etage'
-    },
-    {
-      name: 'dør'
-    },
-    {
-      name: 'adgangsadresseid'
-    },
-    {
-      name: 'kommune'
-    },
-    {
-      name: 'ejerlav'
-    },
-    {
-      name: 'matrikel'
-    },
-    {
-      name: 'polygon',
-      type: 'array',
-      schema: schema.polygon,
-      whereClause: polygonWhereClause,
-      transform: polygonTransformer
-    }
-  ],
-  mappers: {
-    json: mapAddress,
-    csv: undefined
-  }
-};
-
-function polygonWhereClause(paramNumberString){
-  return "ST_Contains(ST_GeomFromText("+paramNumberString+", 4326)::geometry, wgs84geom)\n";
-}
-
-function polygonTransformer(paramValue){
-  var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
-  var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
-  var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
-  return mapPolygon(paramValue);
-}
-
-/******************************************************************************/
-/*** Address Lookup ***********************************************************/
-/******************************************************************************/
-
-function d(date) { return JSON.stringify(date); }
-//function defaultVal(val, def) { return val ? val : def;}
-
-function mapAddress(rs){
-  var adr = {};
-  adr.id = rs.enhedsadresseid;
-  adr.version = d(rs.e_version);
-  if (adr.etage) adr.etage = rs.etage;
-  if (adr.dør) adr.dør = rs.doer;
-  adr.adressebetegnelse = "TODO";  //TODO
-  adr.adgangsadresse = mapAdganggsadresse(rs);
-  return adr;
-}
-
-function mapAdganggsadresse(rs){
-  var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
-  var adr = {};
-  adr.id = rs.id;
-  adr.version = d(rs.e_version);
-  adr.vej = {navn: rs.vejnavn,
-             kode: slice(-4, rs.vejkode)};
-  adr.husnr = rs.husnr;
-  //if (rs.bygningsnavn) adr.bygningsnavn = rs.bygningsnavn;
-  if (rs.supplerendebynavn) adr.supplerendebynavn = rs.supplerendebynavn;
-  adr.postnummer = {nr: slice(-4, rs.postnr),
-                    navn: rs.postnrnavn};
-  adr.kommune = {kode: slice(-4, rs.kommunekode),
-                 navn: rs.kommunenavn};
-  adr.ejerlav = {kode: slice(-8, rs.ejerlavkode),
-                 navn: rs.ejerlavnavn};
-  adr.matrikelnr = rs.matrikelnr;
-  adr.historik = {oprettet: d(rs.e_oprettet),
-                  'ændret': d(rs.e_aendret)};
-  adr.adgangspunkt = {etrs89koordinat: {'øst': rs.oest,
-                                        nord:  rs.nord},
-                      wgs84koordinat:  {'længde': rs.lat,
-                                        bredde: rs.long},
-                      kvalitet:        {'nøjagtighed': rs.noejagtighed,
-                                        kilde: rs.kilde,
-                                        tekniskstandard: rs.tekniskstandard},
-                      tekstretning:    rs.tekstretning,
-                      'ændret':        d(rs.adressepunktaendringsdato)};
-  adr.DDKN = {m100: rs.kn100mdk,
-              km1:  rs.kn1kmdk,
-              km10: rs.kn10kmdk};
-
-  return adr;
-}
-
-/******************************************************************************/
-/*** Address Search ***********************************************************/
-/******************************************************************************/
 
 //function doAddressSearch(req, res) {
 //  var sql = "  SELECT * FROM adresser\n";
@@ -599,78 +396,4 @@ function streamToHttpResponse(stream, res, options, cb) {
 
 function streamingQuery(client, sql, params) {
   return client.query(new QueryStream(sql, params, {batchSize: 10000}));
-}
-
-/******************************************************************************/
-/*** Parameter parsing and validation *****************************************/
-/******************************************************************************/
-
-exports.parseParameters = function(params, parameterSpec) {
-  var paramNames = _.filter(_.keys(params), function(name) {
-    return parameterSpec[name] ? true : false;
-  });
-  return _.reduce(paramNames,
-                  function(memo, name){
-                    try{
-                      var val = parseParameter(params[name], parameterSpec[name]);
-                      memo.params[name] = val;
-                    } catch(error){
-                      memo.errors.push([name, error]);
-                    }
-                    return memo;
-                  },
-                  {params: {}, errors: []});
-};
-
-function parseParameter(valString, spec) {
-  var val = parseParameterType(valString, spec.type);
-  jsonSchemaValidation(val, spec.schema);
-  return spec.transform ? spec.transform(val) : val;
-}
-function parseParameterType(valString, type) {
-  if (type === undefined){
-    return valString;
-  } else {
-    var val;
-    try {
-      val = JSON.parse(valString);
-    }
-    catch(error){
-      // When JSON parsing fails, just assume it is a string.
-      val = valString;
-    }
-    if(type === 'string'){
-      if (_.isString(val)) return val; else throw "notString";
-    } else if(type === 'number'){
-      if (_.isNumber(val)) return val; else throw "notNumber";
-    } else if(type === 'array'){
-      if (_.isArray(val)) return val; else throw "notArray";
-    } else if(type === 'object'){
-      if (_.isObject(val) && !_.isArray(val)) return val; else throw "notObject";
-    }
-    else {
-      throw "unknownType";
-    }
-  }
-}
-
-function jsonSchemaValidation(val, schema){
-  if (schema){
-    try{
-      zsValidate(val, schema);
-    }
-    catch(error){
-      throw error.errors[0].message;
-    }
-  }
-}
-
-var validator = new ZSchema({ sync: true });
-function zsValidate(json, schema){
-  var valid = validator.validate(json, schema);
-  if (!valid) {
-    throw validator.getLastError();
-  } else {
-    return true;
-  }
 }
