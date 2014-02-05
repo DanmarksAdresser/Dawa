@@ -1,6 +1,7 @@
 "use strict";
 
 var request = require("request");
+var _       = require('underscore');
 
 
 describe('Paginering', function () {
@@ -26,7 +27,11 @@ describe('Paginering', function () {
           expect(page2.length).toBe(10);
           expect(page1).not.toEqual(page2);
           expect(bothPages.length).toBe(20);
-          expect(page1.concat(page2)).toEqual(bothPages);
+          _.each(page1.concat(page2),
+                function(adr, index){
+                  expect(adr).toEqual(bothPages[index]);
+                });
+
           done();
         });
       });
