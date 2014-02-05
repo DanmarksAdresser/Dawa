@@ -227,6 +227,14 @@ module.exports = {
       type: 'number',
       schema: schema.positiveInteger
     }
+  ],
+  formatParameterSpec: [
+    {
+      name: 'format',
+      schema: {
+        "enum" : ['csv', 'json', 'jsonp']
+      }
+    }
   ]
 
 

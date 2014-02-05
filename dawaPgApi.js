@@ -104,7 +104,12 @@ function publishQuery(app, spec) {
     // Parsing paging-parameters
     var pagingParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
     if(pagingParams.errors.length > 0) {
-      return sendQueryParameterFormatError(res, parsedParams.errors);
+      return sendQueryParameterFormatError(res, pagingParams.errors);
+    }
+
+    var formatParamParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
+    if(formatParamParseResult.errors.length > 0) {
+      return sendQueryParameterFormatError(res, formatParamParseResult.errors);
     }
     applyDefaultPaging(pagingParams.params);
 
@@ -115,7 +120,7 @@ function publishQuery(app, spec) {
     // Getting the data
     withPsqlClient(res, function(client, done) {
       var stream = streamingQuery(client, query.sql, query.params);
-      var format = req.query.format;
+      var format = formatParamParseResult.params.format;
       if(format === 'csv') {
         return streamCsvToHttpResponse(stream, spec, res, done);
       }
