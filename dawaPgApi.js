@@ -97,6 +97,10 @@ function publishQuery(app, spec) {
         if(format === 'csv') {
           return streamCsvToHttpResponse(stream, spec, res, done);
         }
+        else if(format === 'jsonp') {
+          // TODO validate/sanitize callback parameter
+          return streamJsonpToHttpResponse(stream, spec.mappers.json, req.query.callback, res, done);
+        }
         else {
           return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
         }
@@ -155,7 +159,7 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
     }),
     csvTransformer
   );
-  streamToHttpResponse(csvStream, res, cb);
+  streamToHttpResponse(csvStream, res, {}, cb);
 
 }
 
@@ -184,6 +188,7 @@ function createOffsetLimitClause(params) {
 
 /**
  * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
+ * Felterne anvendes som kolonner i CSV-formateringen af adresser.
  */
 var adresseFields = [
   {
@@ -235,8 +240,7 @@ var schema =  {
            minimum: 1000,
            maximum: 9999},
   polygon: {type: 'array',
-            items: { type: 'array'}},
-
+            items: { type: 'array'}}
 };
 
 var adresseApiSpec = {
@@ -291,8 +295,8 @@ var adresseApiSpec = {
       type: 'array',
       schema: schema.polygon,
       whereClause: polygonWhereClause,
-      transform: polygonTransformer,
-    },
+      transform: polygonTransformer
+    }
   ],
   mappers: {
     json: mapAddress,
@@ -525,17 +529,34 @@ function withPsqlClient(cb) {
   return pg.connect(connString, cb);
 }
 
-function streamJsonToHttpResponse(stream, mapper, res, cb) {
-  res.setHeader('Content-Type', 'application/json; charset=UTF-8');
-  var transformedStream = eventStream.pipeline(stream,
+function streamJsonpToHttpResponse(stream, mapper, callbackName, res, done) {
+  res.setHeader('Content-Type', "application/javascript; charset=UTF-8");
+  var jsonStream = createJsonStream(stream, mapper);
+  res.write(callbackName + "(");
+  streamToHttpResponse(jsonStream, res, { end: false }, function(err) {
+    if(err) {
+      return done(err);
+    }
+    res.end(");");
+    done();
+  });
+
+}
+
+function createJsonStream(stream, mapper) {
+  return eventStream.pipeline(stream,
     eventStream.mapSync(mapper),
     JSONStream.stringify()
   );
-  streamToHttpResponse(transformedStream, res, cb);
+}
+function streamJsonToHttpResponse(stream, mapper, res, cb) {
+  res.setHeader('Content-Type', 'application/json; charset=UTF-8');
+  var transformedStream = createJsonStream(stream, mapper);
+  streamToHttpResponse(transformedStream, res, {}, cb);
 }
 
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
-function streamToHttpResponse(stream, res, cb) {
+function streamToHttpResponse(stream, res, options, cb) {
 
   res.on('error', function (err) {
     console.error("An error occured while streaming data to HTTP response", new Error(err));
@@ -545,8 +566,13 @@ function streamToHttpResponse(stream, res, cb) {
     console.log("Client closed connection");
     cb("Client closed connection");
   });
-  res.on('finish', cb);
-  stream.pipe(res);
+  if(options.end === false) {
+    stream.on('end', cb);
+  }
+  else {
+    res.on('finish', cb);
+  }
+  stream.pipe(res, options);
 }
 
 function streamingQuery(client, sql, params) {
