@@ -512,21 +512,20 @@ function streamingQuery(client, sql, params) {
 /******************************************************************************/
 
 exports.parseParameters = function(params, parameterSpec) {
-  var parameterSpecTypes = parameterSpec.parameters;
   var paramNames = _.filter(_.keys(params), function(name) {
-    return parameterSpecTypes[name] ? true : false;
+    return parameterSpec[name] ? true : false;
   });
   return _.reduce(paramNames,
                   function(memo, name){
                     try{
-                      var val = parseParameter(params[name], parameterSpecTypes[name]);
-                      memo.values[name] = val;
+                      var val = parseParameter(params[name], parameterSpec[name]);
+                      memo.params[name] = val;
                     } catch(error){
                       memo.errors.push([name, error]);
                     }
                     return memo;
                   },
-                  {values: {}, errors: []});
+                  {params: {}, errors: []});
 };
 
 function parseParameter(valString, spec) {
