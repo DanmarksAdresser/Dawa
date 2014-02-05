@@ -60,8 +60,10 @@ function publishGetByKey(app, spec) {
       }
     }
 
-    // Getting the data
+    // Making the query string
     var query = createSqlQueryFromSpec(spec, parsedParams.params);
+
+    // Getting the data
     withPsqlClient(res, function (client, done) {
       client.query(
         query.sql,
@@ -92,21 +94,25 @@ function publishGetByKey(app, spec) {
 
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
+
+    // Parsing query-parameters
     var parsedParams = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
       return sendQueryParameterFormatError(res, parsedParams.errors);
     }
 
+    // Parsing paging-parameters
     var pagingParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
     if(pagingParams.errors.length > 0) {
       return sendQueryParameterFormatError(res, parsedParams.errors);
     }
-
     applyDefaultPaging(pagingParams.params);
 
+    // Making the query string
     var query = createSqlQueryFromSpec(spec, parsedParams.params, pagingParams.params);
     console.log('executing sql' + JSON.stringify(query));
 
+    // Getting the data
     withPsqlClient(res, function(client, done) {
       var stream = streamingQuery(client, query.sql, query.params);
       var format = req.query.format;
