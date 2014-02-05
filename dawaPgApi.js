@@ -118,7 +118,7 @@ function publishQuery(app, spec) {
 
     var pagingParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
     if(pagingParams.errors.length > 0) {
-      return res.send(500, JSON.stringify({error: parsedParams.errors}));
+      return sendQueryParameterFormatError(res, parsedParams.errors);
     }
 
     applyDefaultPaging(pagingParams.params);
