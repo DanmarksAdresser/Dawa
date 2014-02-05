@@ -48,32 +48,37 @@ exports.setupRoutes = function () {
 
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:id', function (req, res) {
-    var params = {id: req.params.id };
-    var query = createSqlQueryFromSpec(spec, params);
-    withPsqlClient(function (err, client, done) {
-      if (err) {
-        res.send(500, JSON.stringify(err));
-      }
-      client.query(query.sql,
-        query.params,
-        function (err, result) {
-          done();
-          if (err) {
-            res.send(500, JSON.stringify(err));
-          } else if (result.rows.length === 1) {
-            var adr = spec.mappers.json(result.rows[0]);
-            spec.model.validator(adr)
-              .then(function (report) {
-                res.send(200, JSON.stringify(adr));
-              })
-              .catch(function (err) {
-                res.send(500, err);
-              });
-          } else {
-            res.send(500, {error: 'unknown id'});
-          }
-        });
-    });
+    var parsedParams = exports.parseParameters({id: req.params.id }, _.indexBy(spec.parameters, 'name'));
+    if (parsedParams.errors.length > 0){
+        res.send(500, JSON.stringify({error: parsedParams.errors}));
+    } else {
+      var query = createSqlQueryFromSpec(spec, parsedParams.params);
+      withPsqlClient(function (err, client, done) {
+        if (err) {
+          res.send(500, JSON.stringify(err));
+        }
+        client.query(
+          query.sql,
+          query.params,
+          function (err, result) {
+            done();
+            if (err) {
+              res.send(500, JSON.stringify(err));
+            } else if (result.rows.length === 1) {
+              var adr = spec.mappers.json(result.rows[0]);
+              spec.model.validator(adr)
+                .then(function (report) {
+                  res.send(200, JSON.stringify(adr));
+                })
+                .catch(function (err) {
+                  res.send(500, err);
+                });
+            } else {
+              res.send(500, {error: 'unknown id'});
+            }
+          });
+      });
+    }
   });
 }
 
@@ -214,6 +219,11 @@ var adresseFields = [
   }
 ];
 
+var schema =  {
+  uuid: {type: 'string',
+         pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
+};
+
 var adresseApiSpec = {
   model: model.adresse,
   pageable: true,
@@ -222,8 +232,9 @@ var adresseApiSpec = {
   fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: [
     {
-      name: 'id'
-//      type: parameterTypes.uuid
+      name: 'id',
+      type: 'string',
+      schema: schema.uuid
     },
     {
       name: 'vejkode'
@@ -542,7 +553,7 @@ function parseParameterType(valString, type) {
       val = JSON.parse(valString);
     }
     catch(error){
-      throw 'notValidJSON';
+      val = valString;
     }
     if(type === 'string'){
       if (_.isString(val)) return val; else throw "notString";

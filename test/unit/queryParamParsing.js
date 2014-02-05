@@ -60,7 +60,7 @@ describe("Parsing parameters of different types", function () {
 describe("When Parsing parameters", function () {
   it("all errors should be returned", function (done) {
     expect(backend.parseParameters({aString: "42", aNumber: "ad", anotherNumber: "[3.14]", anArray: "42", anObject: "42"}, parameterSpec))
-      .toEqual({params: {}, errors: [["aString", 'notString'],["aNumber", 'notValidJSON'],
+      .toEqual({params: {}, errors: [["aString", 'notString'],["aNumber", 'notNumber'],
                                      ["anotherNumber", 'notNumber'], ["anArray", 'notArray'], ["anObject", 'notObject']]});
     done();
   });
