@@ -84,19 +84,24 @@ function publishGetByKey(app, spec) {
 
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
-    var query  = createSqlQueryFromSpec(spec, req.query);
-    console.log('executing sql' + JSON.stringify(query));
+    var parsedParams = exports.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
+    if (parsedParams.errors.length > 0){
+      res.send(500, JSON.stringify({error: parsedParams.errors}));
+    } else {
+      var query = createSqlQueryFromSpec(spec, parsedParams.params);
+      console.log('executing sql' + JSON.stringify(query));
 
-    withPsqlClient(function(err, client, done) {
-      var stream = streamingQuery(client, query.sql, query.params);
-      var format = req.query.format;
-      if(format === 'csv') {
-        return streamCsvToHttpResponse(stream, spec, res, done);
-      }
-      else {
-        return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
-      }
-    });
+      withPsqlClient(function(err, client, done) {
+        var stream = streamingQuery(client, query.sql, query.params);
+        var format = req.query.format;
+        if(format === 'csv') {
+          return streamCsvToHttpResponse(stream, spec, res, done);
+        }
+        else {
+          return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
+        }
+      });
+    }
   });
 }
 
@@ -222,6 +227,14 @@ var adresseFields = [
 var schema =  {
   uuid: {type: 'string',
          pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
+  postnr: {type: 'integer',
+           minimum: 1000,
+           maximum: 9999},
+  polygon: {type: 'array',
+            items: { type: 'array',
+                     items: {type: 'array',
+                             items: 'integer'}}},
+  
 };
 
 var adresseApiSpec = {
@@ -249,7 +262,9 @@ var adresseApiSpec = {
       name: 'supplerendebynavn'
     },
     {
-      name: 'postnr'
+      name: 'postnr',
+      type: 'number',
+      schema: schema.postnr
     },
     {
       name: 'etage'
@@ -268,7 +283,13 @@ var adresseApiSpec = {
     },
     {
       name: 'matrikel'
-    }
+    },
+//todo
+//    {
+//      name: 'polygon',
+//      type: 'array',
+//      schema: schema.polygon
+//    },
   ],
   mappers: {
     json: mapAddress,
@@ -553,6 +574,7 @@ function parseParameterType(valString, type) {
       val = JSON.parse(valString);
     }
     catch(error){
+      // When JSON parsing fails, just assume it is a string.
       val = valString;
     }
     if(type === 'string'){

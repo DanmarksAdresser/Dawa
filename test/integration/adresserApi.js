@@ -2,6 +2,30 @@
 
 var request = require("request");
 
+describe('Zipcode format errors', function () {
+  it('should result in failure', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser?postnr=860',
+                function(error, response, body){
+                  expect(response.statusCode).toBe(500);
+                  done();
+                });
+  });
+  it('should result in failure', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser?postnr=86000',
+                function(error, response, body){
+                  expect(response.statusCode).toBe(500);
+                  done();
+                });
+  });
+  it('should result in failure', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser?postnr=860A',
+                function(error, response, body){
+                  expect(response.statusCode).toBe(500);
+                  done();
+                });
+  });
+});
+
 describe('When searching for polygons and zipcodes', function () {
 
   it('both should be used', function (done) {
