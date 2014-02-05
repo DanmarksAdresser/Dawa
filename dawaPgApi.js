@@ -13,6 +13,7 @@ var eventStream = require('event-stream');
 var model       = require('./awsDataModel');
 var utility     = require('./utility');
 var ZSchema     = require("z-schema");
+var csv         = require('csv');
 
 
 /******************************************************************************/
@@ -105,14 +106,38 @@ function publishQuery(app, spec) {
     console.log('executing sql' + sql);
 
     withPsqlClient(function(err, client, done) {
-      var stream = eventStream.pipeline(
-        streamingQuery(client, sql, sqlParams),
-        eventStream.mapSync(spec.mappers.json),
-        JSONStream.stringify()
-      );
-      streamJsonToHttpResponse(stream, res, done);
+      var stream = streamingQuery(client, sql, sqlParams);
+      var format = req.query.format;
+      if(format === 'csv') {
+        return streamCsvToHttpResponse(stream, spec, res, done);
+      }
+      else {
+        return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
+      }
     });
   });
+}
+
+function streamCsvToHttpResponse(rowStream, spec, res, cb) {
+  var fields = spec.fields;
+  res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
+  var csvTransformer = csv();
+  csvTransformer.to.options({
+    header: true,
+    columns: _.pluck(fields,'name')
+  });
+  var csvStream = eventStream.pipeline(
+    rowStream,
+    eventStream.mapSync(function(row) {
+      return _.reduce(fields, function(memo, field) {
+        memo[field.name] = row[field.column || field.name];
+        return memo;
+      }, {});
+    }),
+    csvTransformer
+  );
+  streamToHttpResponse(csvStream, res, cb);
+
 }
 
 function createSqlQuery(select, whereClauses, offsetLimitClause){
@@ -192,7 +217,7 @@ var adresseApiSpec = {
   fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: [
     {
-      name: 'id',
+      name: 'id'
 //      type: parameterTypes.uuid
     },
     {
@@ -318,20 +343,6 @@ function mapAdganggsadresse(rs){
 //    streamJsonToHttpResponse(stream, res, done);
 //  });
 //}
-//
-///**
-// * Stream database rows to the client
-// * @param stream
-// * @param res
-// * @param format
-// * @param done
-// */
-//function streamRowsToClient(stream, res, format, done) {
-//  if(!format) {
-//    format = 'json';
-//  }
-//}
-//
 
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
@@ -352,7 +363,6 @@ function doAddressAutocomplete(req, res) {
   withPsqlClient(function (err, client, done) {
     // TODO handle error
 
-    var responseDataStream;
     // Search vejnavne first
     // TODO check, at DISTINCT ikke unorder vores resultat
     var vejnavneSql = 'SELECT DISTINCT vejnavn FROM (SELECT * FROM Vejnavne, to_tsquery(\'vejnavne\', $1) query WHERE (tsv @@ query)';
@@ -370,13 +380,7 @@ function doAddressAutocomplete(req, res) {
         return done(err);
       }
       if (result.rows.length > 1) {
-        responseDataStream =
-          eventStream.pipeline(
-            eventStream.readArray(result.rows),
-            eventStream.mapSync(vejnavnRowToSuggestJson),
-            JSONStream.stringify()
-          );
-        streamJsonToHttpResponse(responseDataStream, res, done);
+        streamJsonToHttpResponse(eventStream.readArray(result.rows), vejnavnRowToSuggestJson, res, done);
         return;
       }
 
@@ -390,12 +394,7 @@ function doAddressAutocomplete(req, res) {
 
 
       var queryStream = streamingQuery(client, sql, args);
-      responseDataStream = eventStream.pipeline(
-        queryStream,
-        eventStream.mapSync(adresseRowToSuggestJson),
-        JSONStream.stringify()
-      );
-      streamJsonToHttpResponse(responseDataStream, res, done);
+      streamJsonToHttpResponse(queryStream, adresseRowToSuggestJson, res, done);
     });
   });
 }
@@ -473,9 +472,13 @@ function withPsqlClient(cb) {
   return pg.connect(connString, cb);
 }
 
-function streamJsonToHttpResponse(stream, res, cb) {
+function streamJsonToHttpResponse(stream, mapper, res, cb) {
   res.setHeader('Content-Type', 'application/json; charset=UTF-8');
-  streamToHttpResponse(stream, res, cb);
+  var transformedStream = eventStream.pipeline(stream,
+    eventStream.mapSync(mapper),
+    JSONStream.stringify()
+  );
+  streamToHttpResponse(transformedStream, res, cb);
 }
 
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
