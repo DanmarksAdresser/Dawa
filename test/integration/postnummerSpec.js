@@ -64,13 +64,17 @@ describe('Postnumre', function () {
 
 
   it('uhaaaa', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser.json'+
+    request.get('http://localhost:3000/api/pg/adresser'+
                 '?polygon=[[[56.191, 9.501], [56.199, 9.501], [56.199, 9.529], [56.191, 9.529], [56.191, 9.501]]]'+
                 '&postnr=8600',
                 function(error, response, body){
-                  var adrs = JSON.parse(body);
-                  expect(adrs.length).toBe(152);
-                  done();
+                  if (response.statusCode != "200"){
+                    done(response.statusCode);
+                  } else {
+                    var adrs = JSON.parse(body);
+                    expect(adrs.length).toBe(152);
+                    done();
+                  }
                 });
   }, 15000);
 
@@ -79,6 +83,7 @@ describe('Postnumre', function () {
     request.get('http://localhost:3000/api/pg/adresser/'+uuid,
                 function(error, response, body){
                   var adr = JSON.parse(body);
+                  expect(adr.error).toBeUndefined();
                   expect(response.statusCode).toBe(200);
                   expect(adr.id).toBe(uuid);
                   done();

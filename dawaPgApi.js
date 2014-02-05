@@ -39,8 +39,8 @@ exports.setupRoutes = function () {
   publishGetByKey(app, adresseApiSpec);
   publishQuery(app, adresseApiSpec);
 
-//  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
-//  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
+  //  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
+  //  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
   app.get('/adresser/autocomplete', doAddressAutocomplete);
 
   return app;
@@ -67,8 +67,6 @@ function publishGetByKey(app, spec) {
                 res.send(200, JSON.stringify(adr));
               })
               .catch(function (err) {
-                console.log(require('util').inspect(adr, true, 10));
-                console.log(require('util').inspect(err, true, 10));
                 res.send(500, err);
               });
           } else {
@@ -275,12 +273,14 @@ function d(date) { return JSON.stringify(date); }
 //function defaultVal(val, def) { return val ? val : def;}
 
 function mapAddress(rs){
-  return {id: rs.enhedsadresseid,
-          version: d(rs.e_version),
-          etage: rs.etage,
-          dør: rs.doer,
-          adressebetegnelse: "TODO",  //TODO
-          adgangsadresse: mapAdganggsadresse(rs)};
+  var adr = {};
+  adr.id = rs.enhedsadresseid;
+  adr.version = d(rs.e_version);
+  if (adr.etage) adr.etage = rs.etage;
+  if (adr.dør) adr.dør = rs.doer;
+  adr.adressebetegnelse = "TODO";  //TODO
+  adr.adgangsadresse = mapAdganggsadresse(rs);
+  return adr;
 }
 
 function mapAdganggsadresse(rs){
