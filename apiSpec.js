@@ -69,6 +69,28 @@ function polygonWhereClause(paramNumberString){
   return "ST_Contains(ST_GeomFromText("+paramNumberString+", 4326)::geometry, wgs84geom)\n";
 }
 
+function searchWhereClause(paramNumberString) {
+  // TODO add support for parameterized where clauses.
+  return "(e_tsv @@ to_tsquery('danish', " + paramNumberString + "))";
+}
+
+function toPgSearchQuery(q) {
+  q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE]/g, ' ');
+
+  // normalize whitespace
+  q = q.replace(/\s+/g, ' ');
+
+  // remove leading / trailing whitespace
+  q = q.replace(/^\s*/g, '');
+  q = q.replace(/\s*$/g, '');
+
+
+  // translate spaces into AND clauses
+  var tsq = q.replace(/ /g, ' & ');
+
+  return tsq;
+}
+
 function polygonTransformer(paramValue){
   var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
   var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
@@ -178,6 +200,12 @@ var adresseApiSpec = {
       schema: schema.polygon,
       whereClause: polygonWhereClause,
       transform: polygonTransformer
+    },
+    {
+      name: 'q',
+      type: 'string',
+      whereClause: searchWhereClause,
+      transform: toPgSearchQuery
     }
   ],
   mappers: {
