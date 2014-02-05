@@ -71,9 +71,9 @@ function sendError(res, code, message){
 
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:id', function (req, res) {
-    var parsedParams = parameterParsing.parseParameters({id: req.params.id }, _.indexBy(spec.parameters, 'name'));
+    var parsedParams = parameterParsing.parseParameters({id: req.params.id}, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
-      if (parsedParams.errors[0][0] == 'id'){
+      if (parsedParams.errors[0][0] == 'id' && parsedParams.errors.length == 1){
         return sendUUIDFormatError(res, "UUID is ill-formed: "+req.params.id+". "+parsedParams.errors[0][1]);
       } else {
         return sendInternalServerError(res, 'Unexpected query-parameter error: '+util.inspect(parsedParams.errors, {depth: 10}));
