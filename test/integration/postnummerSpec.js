@@ -61,43 +61,4 @@ describe('Postnumre', function () {
       });
     });
   });
-
-
-  it('uhaaaa', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser'+
-                '?polygon=[[[56.191, 9.501], [56.199, 9.501], [56.199, 9.529], [56.191, 9.529], [56.191, 9.501]]]'+
-                '&postnr=8600',
-                function(error, response, body){
-                  if (response.statusCode != "200"){
-                    done(response.statusCode);
-                  } else {
-                    var adrs = JSON.parse(body);
-                    expect(adrs.length).toBe(152);
-                    done();
-                  }
-                });
-  }, 15000);
-
-  it('blah blah', function (done) {
-    var uuid = '0a3f50c1-deb6-32b8-e044-0003ba298018';
-    request.get('http://localhost:3000/api/pg/adresser/'+uuid,
-                function(error, response, body){
-                  var adr = JSON.parse(body);
-                  expect(adr.error).toBeUndefined();
-                  expect(response.statusCode).toBe(200);
-                  expect(adr.id).toBe(uuid);
-                  done();
-                });
-  });
-
-  it('blah blah2', function (done) {
-    var uuid2 = '0a3f50ae-da7f-32b8-e044-0003ba298019';
-    request.get('http://localhost:3000/api/pg/adresser/'+uuid2,
-                function(error, response, body){
-                  expect(response.statusCode).toBe(500);
-                  expect(JSON.parse(body).error).toMatch('unknown id');
-                  done();
-                });
-  }, 300);
-
 });
