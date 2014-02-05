@@ -94,6 +94,8 @@ function publishQuery(app, spec) {
       return res.send(500, JSON.stringify({error: parsedParams.errors}));
     }
 
+    applyDefaultPaging(pagingParams.params);
+
     var query = createSqlQueryFromSpec(spec, parsedParams.params, pagingParams.params);
     console.log('executing sql' + JSON.stringify(query));
 
@@ -112,6 +114,19 @@ function publishQuery(app, spec) {
       }
     });
   });
+}
+/**
+ * By default, if per_side is specified, side defaults to 1.
+ * If side is specified, per_side defaults to 20.
+ * @param pagingParams
+ */
+function applyDefaultPaging(pagingParams) {
+  if(pagingParams.per_side && !pagingParams.side) {
+    pagingParams.side = 1;
+  }
+  if(pagingParams.side && !pagingParams.per_side) {
+    pagingParams.per_side = 20;
+  }
 }
 
 function createSqlQueryFromSpec(spec, params, pagingParams) {
