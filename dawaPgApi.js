@@ -170,7 +170,12 @@ function createSqlQueryFromSpec(spec, params, pagingParams) {
   }
 
   return {
-    sql: createSqlQuery(select, whereClauses, offsetLimitClause),
+    sql: createSqlQuery({
+      select : select,
+      whereClauses: whereClauses,
+      orderBy: spec.model.key,
+      offsetLimitClause: offsetLimitClause
+    }),
     params: sqlParams
   };
 }
@@ -197,12 +202,17 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
 
 }
 
-function createSqlQuery(select, whereClauses, offsetLimitClause){
-  var sql = select;
-  if(whereClauses.length > 0) {
-    sql +=  " WHERE " + whereClauses.join(" AND ");
+function createSqlQuery(parts){
+  var sql = parts.select;
+  if(parts.whereClauses.length > 0) {
+    sql +=  " WHERE " + parts.whereClauses.join(" AND ");
   }
-  sql += offsetLimitClause;
+  if(parts.orderBy) {
+    sql += " ORDER BY " + parts.orderBy;
+  }
+  if(parts.offsetLimitClause) {
+    sql += parts.offsetLimitClause;
+  }
   return sql;
 }
 
