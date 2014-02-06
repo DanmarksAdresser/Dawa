@@ -20,3 +20,35 @@ describe('When searching for polygons and zipcodes', function () {
                 });
   }, 15000);
 });
+
+describe('The query-parameter', function () {
+
+  it('vejkode should succeed', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser?vejkode=0851',
+                function(error, response, body){
+                  var adrs = JSON.parse(body);
+                  expect(response.statusCode).toBe(200);
+                  expect(adrs.length).toBeGreaterThan(1);
+                  done();
+                });
+  });
+
+  it('vejkode should succeed without leading 0s', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser?vejkode=851',
+                function(error, response, body){
+                  var adrs = JSON.parse(body);
+                  expect(response.statusCode).toBe(200);
+                  expect(adrs.length).toBeGreaterThan(1);
+                  done();
+                });
+  });
+  it('vejkode should fail', function (done) {
+    request.get('http://localhost:3000/api/pg/adresser?vejkode=A851',
+                function(error, response, body){
+                  var adrs = JSON.parse(body);
+                  expect(response.statusCode).toBe(400);
+                  expect(adrs.type).toBe("QueryParameterFormatError");
+                  done();
+                });
+  });
+});
