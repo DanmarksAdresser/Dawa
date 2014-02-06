@@ -70,7 +70,7 @@ CREATE INDEX ON vejnavne USING gin(tsv);
 
 \COPY vejnavne (kommunekode, kode, vejnavn, version) from program 'gunzip -c :DATADIR:/RoadName.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
-UPDATE vejnavne SET tsv = to_tsvector('vejnavne', coalesce(vejnavn, ''));
+UPDATE vejnavne SET tsv = to_tsvector('danish', coalesce(vejnavn, ''));
 
 
 \echo '\n***** Creating postnumre table'
@@ -86,7 +86,7 @@ CREATE INDEX ON postnumre USING gin(tsv);
 
 \echo '\n***** Loading postnumre data'
 \COPY postnumre (nr, version, navn) from program 'gunzip -c :DATADIR:/PostCode.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
-UPDATE postnumre SET tsv = to_tsvector('vejnavne', coalesce(to_char(nr,'0000'), '') || ' ' || coalesce(navn, ''));
+UPDATE postnumre SET tsv = to_tsvector('danish', coalesce(to_char(nr,'0000'), '') || ' ' || coalesce(navn, ''));
 
 \echo '\n***** Creating kommuner table'
 DROP TABLE IF EXISTS kommuner;
@@ -314,7 +314,7 @@ CREATE INDEX ON enhedsadresser USING gin(tsv);
 \echo '\n***** Populate text search column'
 
 create temp table tmp  AS select id,
-                                 to_tsvector('vejnavne', coalesce(etage, '') || ' ' || coalesce(doer, '') || ' '
+                                 to_tsvector('danish', coalesce(etage, '') || ' ' || coalesce(doer, '') || ' '
                                              || coalesce(postnrnavn, '') || ' ' || coalesce(vejnavn, '') ||  ' '
                                              || coalesce(to_char(postnr,'0000'), '') || ' ' || coalesce(husnr, ''))
          AS tsv
