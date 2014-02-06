@@ -37,15 +37,13 @@ exports.setupRoutes = function () {
   app.use(express.methodOverride());
   app.use(express.bodyParser());
 
+  publishAutocomplete(app, apiSpec.adresse);
   publishGetByKey(app, apiSpec.adresse);
   publishQuery(app, apiSpec.adresse);
 
+  publishAutocomplete(app, apiSpec.vejnavnnavn);
   publishGetByKey(app, apiSpec.vejnavnnavn);
   publishQuery(app, apiSpec.vejnavnnavn);
-
-  //  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
-  //  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
-  app.get('/adresser/autocomplete', doAddressAutocomplete);
 
   return app;
 };
@@ -53,13 +51,15 @@ exports.setupRoutes = function () {
 function publishGetByKey(app, spec) {
   app.get('/' + spec.model.plural + '/:' + spec.model.key, function (req, res) {
 
-    // Parsing query-parameters
-    var parsedParams = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
-    if (parsedParams.errors.length > 0){
-      if (parsedParams.errors[0][0] == 'id' && parsedParams.errors.length == 1){
-        return sendUUIDFormatError(res, "UUID is ill-formed: "+req.params.id+". "+parsedParams.errors[0][1]);
+    // Parsing the path parameters, which constitutes the key
+
+    var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
+    if (parseParamsResult.errors.length > 0){
+      if (parseParamsResult.errors[0][0] == 'id' && parseParamsResult.errors.length == 1){
+        // TODO The id is not necessarily a UUID
+        return sendUUIDFormatError(res, "UUID is ill-formed: "+req.params.id+". "+parseParamsResult.errors[0][1]);
       } else {
-        return sendInternalServerError(res, 'Unexpected query-parameter error: '+util.inspect(parsedParams.errors, {depth: 10}));
+        return sendInternalServerError(res, 'Unexpected query-parameter error: '+util.inspect(parseParamsResult.errors, {depth: 10}));
       }
     }
 
@@ -68,19 +68,25 @@ function publishGetByKey(app, spec) {
     if(formatParamsParseResult.errors.length > 0) {
       return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
     }
+
     var formatParams = formatParamsParseResult.params;
     if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
       return sendJsonCallbackParameterMissingError(res);
     }
 
     // Making the query string
-    var query = createSqlQueryFromSpec(spec, parsedParams.params);
+    // make the query string
+    var sqlParts = initialQuery(spec);
+
+    applyParameters(spec, spec.parameters, parseParamsResult.params, sqlParts);
+
+    var sqlString = createSqlQuery(sqlParts);
 
     // Getting the data
     withPsqlClient(res, function (client, done) {
       client.query(
-        query.sql,
-        query.params,
+        sqlString,
+        sqlParts.sqlParams,
         function (err, result) {
           done();
           if (err) {
@@ -110,38 +116,57 @@ function publishGetByKey(app, spec) {
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
 
-    // Parsing query-parameters
-    var parsedParams = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
-    if (parsedParams.errors.length > 0){
-      return sendQueryParameterFormatError(res, parsedParams.errors);
+    // Parsing parameters specified by spec
+    var specifiedParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
+    if (specifiedParamsParseResult.errors.length > 0){
+      return sendQueryParameterFormatError(res, specifiedParamsParseResult.errors);
     }
 
-    // Parsing paging-parameters
-    var pagingParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
-    if(pagingParams.errors.length > 0) {
-      return sendQueryParameterFormatError(res, pagingParams.errors);
-    }
-
-    // Parsing format parameters
+    // Parsing format parameter
     var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
     if(formatParamsParseResult.errors.length > 0) {
       return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
     }
     var formatParams = formatParamsParseResult.params;
 
+    // verify that the callback parameter is specified for jsonp format
     if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
       return sendJsonCallbackParameterMissingError(res);
     }
 
-    applyDefaultPaging(pagingParams.params);
+    // make the query string
+    var sqlParts = initialQuery(spec);
 
-    // Making the query string
-    var query = createSqlQueryFromSpec(spec, parsedParams.params, pagingParams.params);
-    console.log('executing sql' + JSON.stringify(query));
+    applyParameters(spec, spec.parameters, specifiedParamsParseResult.params, sqlParts);
+
+    // parse and apply paging parameters
+    if(spec.pageable) {
+      var pagingParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
+      if(pagingParamsParseResult.errors.length > 0) {
+        return sendQueryParameterFormatError(res, pagingParamsParseResult.errors);
+      }
+      applyDefaultPaging(pagingParamsParseResult.params);
+      sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParamsParseResult.params);
+    }
+
+    // Parse and apply search-parameter
+    if(spec.searchable) {
+      var searchParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.searchParameterSpec, 'name'));
+      if (searchParamsParseResult.errors.length > 0){
+        return sendQueryParameterFormatError(res, searchParamsParseResult.errors);
+      }
+      applyParameters(spec, apiSpec.searchParameterSpec, searchParamsParseResult.params, sqlParts);
+    }
+
+    sqlParts.orderClauses.push(spec.model.key);
+
+    var sqlString = createSqlQuery(sqlParts);
+
+    console.log('executing sql' + JSON.stringify({sql: sqlString, params: sqlParts.sqlParams}));
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
-      var stream = streamingQuery(client, query.sql, query.params);
+      var stream = streamingQuery(client, sqlString, sqlParts.sqlParams);
       streamHttpResponse(stream, res, spec, {
         formatParams: formatParams
       }, done);
@@ -190,6 +215,28 @@ function streamHttpResponse(stream, res, spec, options, done) {
 }
 
 /**
+ * Sends a stream DB query rows to the http response in the appropriate format
+ * @param stream a stream of database rows
+ * @param res http response
+ * @param spec the api spec
+ * @param options must contain formatParams
+ * @param done called upon completion
+ */
+function streamAutocompleteResponse(stream, res, spec, options, done) {
+  var format = options.formatParams.format;
+  if(format === 'csv') {
+    // TODO autocomplete CSV responses?
+    return sendInternalServerError(res, "CSV for autocomplete not implemented");
+  }
+  else if(format === 'jsonp') {
+    return streamJsonpToHttpResponse(stream, spec.mappers.autocomplete, options.formatParams.callback, res, done);
+  }
+  else {
+    return streamJsonToHttpResponse(stream, spec.mappers.autocomplete, res, done);
+  }
+}
+
+/**
  * By default, if per_side is specified, side defaults to 1.
  * If side is specified, per_side defaults to 20.
  * @param pagingParams
@@ -203,46 +250,36 @@ function applyDefaultPaging(pagingParams) {
   }
 }
 
-function createSqlQueryFromSpec(spec, params, pagingParams) {
-  var select = "  SELECT * FROM " + spec.model.plural;
-
-  var whereClauses = [];
-  var sqlParams  = [];
-  var offsetLimitClause = "";
-
-  if(spec.parameters) {
-    spec.parameters.forEach(function(parameter) {
-      var name = parameter.name;
-      if(params[name] !== undefined) {
-        sqlParams.push(params[name]);
-        if (parameter.whereClause) {
-          whereClauses.push(parameter.whereClause("$" + sqlParams.length));
-        } else {
-          var column = spec.fieldMap[name].column || name;
-          whereClauses.push(column + " = $" + sqlParams.length);
-        }
+function applyParameters(spec, parameterSpec, params, query) {
+  parameterSpec.forEach(function (parameter) {
+    var name = parameter.name;
+    if (params[name] !== undefined) {
+      query.sqlParams.push(params[name]);
+      if (parameter.whereClause) {
+        query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length));
+      } else {
+        var column = spec.fieldMap[name].column || name;
+        query.whereClauses.push(column + " = $" + query.sqlParams.length);
       }
-    });
-  }
+    }
+  });
+}
 
-  if(spec.pageable && pagingParams) {
-    offsetLimitClause = createOffsetLimitClause(pagingParams);
-  }
-
-  return {
-    sql: createSqlQuery({
-      select : select,
-      whereClauses: whereClauses,
-      orderBy: spec.model.key,
-      offsetLimitClause: offsetLimitClause
-    }),
-    params: sqlParams
+function initialQuery(spec) {
+  var query = {
+    select: "  SELECT * FROM " + spec.model.plural,
+    whereClauses: [],
+    orderClauses: [],
+    offsetLimitClause: "",
+    sqlParams: []
   };
+  return query;
 }
 
 function setCsvContentHeader(res) {
   res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
 }
+
 function streamCsvToHttpResponse(rowStream, spec, res, cb) {
   var fields = spec.fields;
   setCsvContentHeader(res);
@@ -270,8 +307,8 @@ function createSqlQuery(parts){
   if(parts.whereClauses.length > 0) {
     sql +=  " WHERE " + parts.whereClauses.join(" AND ");
   }
-  if(parts.orderBy) {
-    sql += " ORDER BY " + parts.orderBy;
+  if(parts.orderClauses.length > 0) {
+    sql += " ORDER BY " + parts.orderClauses.join(", ");
   }
   if(parts.offsetLimitClause) {
     sql += parts.offsetLimitClause;
@@ -293,152 +330,117 @@ function createOffsetLimitClause(params) {
   }
 }
 
-//function doAddressSearch(req, res) {
-//  var sql = "  SELECT * FROM adresser\n";
-//
-//  var whereClauses = [];
-//  var whereParams  = [];
-//  if (req.query.postnr) {
-//    whereClauses.push("postnr = $1\n");
-//    whereParams.push(parseInt(req.query.postnr));
-//  }
-//  if (req.query.polygon) {
-//    // mapping GeoJson to WKT (Well-Known Text)
-//    var p = JSON.parse(req.query.polygon);
-//    var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
-//    var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
-//    var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
-//    whereClauses.push("ST_Contains(ST_GeomFromText($2, 4326)::geometry, wgs84geom)\n");
-//    whereParams.push(mapPolygon(p));
-//  }
-//  var where = "  WHERE "+whereClauses.join("        AND ");
-//
-//  withPsqlClient(function(client, done) {
-//    var stream = eventStream.pipeline(
-//      streamingQuery(client, sql+where, whereParams),
-//      JSONStream.stringify()
-//    );
-//    streamJsonToHttpResponse(stream, res, done);
-//  });
-//}
-
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
 /******************************************************************************/
 
-function doAddressAutocomplete(req, res) {
-  var q = req.query.q;
-
-  var tsq = toPgSuggestQuery(q);
-
-  var postnr = req.query.postnr;
-
-  var args = [tsq];
-  if (postnr) {
-    args.push(postnr);
-  }
-
-  withPsqlClient(res, function (client, done) {
-    // Search vejnavne first
-    // TODO check, at DISTINCT ikke unorder vores resultat
-    var vejnavneSql = 'SELECT DISTINCT vejnavn FROM (SELECT * FROM Vejnavne, to_tsquery(\'vejnavne\', $1) query WHERE (tsv @@ query)';
-
-    if (postnr) {
-      vejnavneSql += ' AND EXISTS (SELECT * FROM Enhedsadresser WHERE vejkode = Vejnavne.kode AND kommunekode = Vejnavne.kommunekode AND postnr = $2)';
+function publishAutocomplete(app, spec) {
+  app.get('/' + spec.model.plural + "/autocomplete", function(req, res) {
+    // Parsing parameters specified by spec
+    var specifiedParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
+    if (specifiedParamsParseResult.errors.length > 0){
+      return sendQueryParameterFormatError(res, specifiedParamsParseResult.errors);
     }
 
-    vejnavneSql += 'ORDER BY ts_rank(Vejnavne.tsv, query) DESC) AS v LIMIT 10';
+    // Parsing format parameter
+    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
+    if(formatParamsParseResult.errors.length > 0) {
+      return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
+    }
+    var formatParams = formatParamsParseResult.params;
 
-    client.query(vejnavneSql, args, function (err, result) {
-      if (err) {
-        console.error('error running query', err);
-        // TODO reportErrorToClient(...)
-        return done(err);
+    // verify that the callback parameter is specified for jsonp format
+    if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
+      return sendJsonCallbackParameterMissingError(res);
+    }
+
+    // make the query string
+    var sqlParts = initialQuery(spec);
+
+    applyParameters(spec, spec.parameters, specifiedParamsParseResult.params, sqlParts);
+
+    // parse and apply paging parameters
+    if(spec.pageable) {
+      var pagingParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
+      if(pagingParamsParseResult.errors.length > 0) {
+        return sendQueryParameterFormatError(res, pagingParamsParseResult.errors);
       }
-      if (result.rows.length > 1) {
-        streamJsonToHttpResponse(eventStream.readArray(result.rows), vejnavnRowToSuggestJson, res, done);
-        return;
-      }
+      applyDefaultPaging(pagingParamsParseResult.params);
+      sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParamsParseResult.params);
+    }
 
-      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (tsv @@ query)';
-      if (postnr) {
-        sql += ' AND postnr = $2';
-      }
-      sql += ' ORDER BY ts_rank(Adresser.tsv, query) DESC';
+    // Parse and apply autocomplete parameter
+    var autocompleteParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.autocompleteParameterSpec, 'name'));
+    if (autocompleteParams.errors.length > 0){
+      return sendQueryParameterFormatError(res, autocompleteParams.errors);
+    }
+    applyParameters(spec, apiSpec.autocompleteParameterSpec, autocompleteParams.params, sqlParts);
 
-      sql += ' LIMIT 10';
+    // ensure stable ordering, which is required for paging
+    sqlParts.orderClauses.push(spec.model.key);
 
+    var sqlString = createSqlQuery(sqlParts);
 
-      var queryStream = streamingQuery(client, sql, args);
-      streamJsonToHttpResponse(queryStream, adresseRowToSuggestJson, res, done);
+    console.log('executing sql' + JSON.stringify({sql: sqlString, params: sqlParts.sqlParams}));
+
+    // Getting the data
+    withPsqlClient(res, function(client, done) {
+      var stream = streamingQuery(client, sqlString, sqlParts.sqlParams);
+      streamAutocompleteResponse(stream, res, spec, {
+        formatParams: formatParams
+      }, done);
     });
   });
 }
 
-
-function toPgSuggestQuery(q) {
-  q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE]/g, ' ');
-
-  // normalize whitespace
-  q = q.replace(/\s+/g, ' ');
-
-  var hasTrailingWhitespace = /.*\s$/.test(q);
-  // remove leading / trailing whitespace
-  q = q.replace(/^\s*/g, '');
-  q = q.replace(/\s*$/g, '');
-
-
-  // translate spaces into AND clauses
-  var tsq = q.replace(/ /g, ' & ');
-
-  // Since we do suggest, if there is no trailing whitespace,
-  // the last search clause should be a prefix search
-  if (!hasTrailingWhitespace) {
-    tsq += ":*";
-  }
-  return tsq;
-}
-
-function vejnavnRowToSuggestJson(row) {
-  return {
-    id: '',
-    vej: {
-      kode: '',
-      navn: row.vejnavn
-    },
-    husnr: '',
-    etage: '',
-    dør: '',
-    bygningsnavn: '',
-    supplerendebynavn: '',
-    postnummer: {
-      nr: '',
-      navn: '',
-      href: ''
-    }
-  };
-}
-
-function adresseRowToSuggestJson(row) {
-  return {
-    id: row.id,
-    vej: {
-      kode: row.vejkode,
-      navn: row.vejnavn
-    },
-    husnr: row.husnr ? row.husnr : "",
-    etage: row.etage ? row.etage : "",
-    dør: row.doer ? row.doer : "",
-    bygningsnavn: '',
-    supplerendebynavn: '',
-    postnummer: {
-      nr: "" + row.postnr,
-      navn: row.postnrnavn,
-      href: 'http://dawa.aws.dk/kommuner/' + row.postnr
-    }
-  };
-}
-
+//function doAddressAutocomplete(req, res) {
+//  var q = req.query.q;
+//
+//  var tsq = toPgSuggestQuery(q);
+//
+//  var postnr = req.query.postnr;
+//
+//  var args = [tsq];
+//  if (postnr) {
+//    args.push(postnr);
+//  }
+//
+//  withPsqlClient(res, function (client, done) {
+//    // Search vejnavne first
+//    // TODO check, at DISTINCT ikke unorder vores resultat
+//    var vejnavneSql = 'SELECT DISTINCT vejnavn FROM (SELECT * FROM Vejnavne, to_tsquery(\'vejnavne\', $1) query WHERE (tsv @@ query)';
+//
+//    if (postnr) {
+//      vejnavneSql += ' AND EXISTS (SELECT * FROM Enhedsadresser WHERE vejkode = Vejnavne.kode AND kommunekode = Vejnavne.kommunekode AND postnr = $2)';
+//    }
+//
+//    vejnavneSql += 'ORDER BY ts_rank(Vejnavne.tsv, query) DESC) AS v LIMIT 10';
+//
+//    client.query(vejnavneSql, args, function (err, result) {
+//      if (err) {
+//        console.error('error running query', err);
+//        // TODO reportErrorToClient(...)
+//        return done(err);
+//      }
+//      if (result.rows.length > 1) {
+//        streamJsonToHttpResponse(eventStream.readArray(result.rows), vejnavnRowToSuggestJson, res, done);
+//        return;
+//      }
+//
+//      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (tsv @@ query)';
+//      if (postnr) {
+//        sql += ' AND postnr = $2';
+//      }
+//      sql += ' ORDER BY ts_rank(Adresser.tsv, query) DESC';
+//
+//      sql += ' LIMIT 10';
+//
+//
+//      var queryStream = streamingQuery(client, sql, args);
+//      streamJsonToHttpResponse(queryStream, adresseRowToSuggestJson, res, done);
+//    });
+//  });
+//}
 
 /******************************************************************************/
 /*** Utility functions ********************************************************/

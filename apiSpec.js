@@ -109,7 +109,6 @@ function polygonWhereClause(paramNumberString){
 }
 
 function searchWhereClause(paramNumberString) {
-  // TODO add support for parameterized where clauses.
   return "(tsv @@ to_tsquery('danish', " + paramNumberString + "))";
 }
 
@@ -129,6 +128,22 @@ function toPgSearchQuery(q) {
 
   return tsq;
 }
+
+function toPgSuggestQuery(q) {
+  // normalize whitespace
+  q = q.replace(/\s+/g, ' ');
+
+  var hasTrailingWhitespace = /.*\s$/.test(q);
+  var tsq = toPgSearchQuery(q);
+
+  // Since we do suggest, if there is no trailing whitespace,
+  // the last search clause should be a prefix search
+  if (!hasTrailingWhitespace) {
+    tsq += ":*";
+  }
+  return tsq;
+}
+
 
 function polygonTransformer(paramValue){
   var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
@@ -186,6 +201,27 @@ function mapAdganggsadresse(rs){
   return adr;
 }
 
+function adresseRowToSuggestJson(row) {
+  return {
+    id: row.id,
+    vej: {
+      kode: row.vejkode,
+      navn: row.vejnavn
+    },
+    husnr: row.husnr ? row.husnr : "",
+    etage: row.etage ? row.etage : "",
+    dør: row.doer ? row.doer : "",
+    bygningsnavn: '',
+    supplerendebynavn: '',
+    postnummer: {
+      nr: "" + row.postnr,
+      navn: row.postnrnavn,
+      href: 'http://dawa.aws.dk/kommuner/' + row.postnr
+    }
+  };
+}
+
+
 var schema =  {
   uuid: {type: 'string',
          pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
@@ -198,13 +234,14 @@ var schema =  {
                     minimum: 1
                    },
   kode4: {type: 'string',
-          pattern: '^(\\d{1,4})$'},
+          pattern: '^(\\d{1,4})$'}
 };
 
 var adresseApiSpec = {
   model: model.adresse,
   pageable: true,
   searchable: true,
+  suggestable: true,
   fields: adresseFields,
   fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: [
@@ -216,7 +253,7 @@ var adresseApiSpec = {
     {
       name: 'vejkode',
       type: 'string',
-      schema: schema.kode4,
+      schema: schema.kode4
     },
     {
       name: 'vejnavn'
@@ -256,20 +293,15 @@ var adresseApiSpec = {
       schema: schema.polygon,
       whereClause: polygonWhereClause,
       transform: polygonTransformer
-    },
-    {
-      name: 'q',
-      type: 'string',
-      whereClause: searchWhereClause,
-      transform: toPgSearchQuery
     }
   ],
   mappers: {
-    json: mapAddress
+    json: mapAddress,
+    autocomplete: adresseRowToSuggestJson
   }
 };
 
-var vejnavnenavneFields = [
+var vejnavnnavneFields = [
   {
     name: 'vejnavn'
   }
@@ -281,25 +313,43 @@ var vejnavnenavneJsonMapper = function(row) {
   };
 };
 
+function vejnavnRowToSuggestJson(row) {
+  return {
+    id: '',
+    vej: {
+      kode: '',
+      navn: row.vejnavn
+    },
+    husnr: '',
+    etage: '',
+    dør: '',
+    bygningsnavn: '',
+    supplerendebynavn: '',
+    postnummer: {
+      nr: '',
+      navn: '',
+      href: ''
+    }
+  };
+}
+
+
+
 var vejnavnnavnApiSpec = {
   model: model.vejnavnnavn,
   pageable: true,
   searchable: true,
-  fields: vejnavnenavneFields,
+  suggestable: true,
+  fields: vejnavnnavneFields,
   fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: [
     {
       name: 'vejnavn'
-    },
-    {
-      name: 'q',
-      type: 'string',
-      whereClause: searchWhereClause,
-      transform: toPgSearchQuery
     }
   ],
   mappers: {
-    json: vejnavnenavneJsonMapper
+    json: vejnavnenavneJsonMapper,
+    autocomplete: vejnavnRowToSuggestJson
   }
 };
 
@@ -332,6 +382,23 @@ module.exports = {
         pattern: '^[\\$_a-zA-Z0-9]+$'
       }
 
+    }
+  ],
+  searchParameterSpec: [
+    {
+      name: 'q',
+      type: 'string',
+      whereClause: searchWhereClause,
+      transform: toPgSearchQuery
+    }
+  ],
+
+  autocompleteParameterSpec: [
+    {
+      name: 'q',
+      type: 'string',
+      whereClause: searchWhereClause,
+      transform: toPgSuggestQuery
     }
   ]
 
