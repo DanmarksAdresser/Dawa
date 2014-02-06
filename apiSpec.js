@@ -154,7 +154,7 @@ function mapAddress(rs){
 function mapAdganggsadresse(rs){
   var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
   var adr = {};
-  adr.id = rs.id;
+  adr.id = rs.adgangsadresseid;
   adr.version = d(rs.e_version);
   adr.vej = {navn: rs.vejnavn,
     kode: slice(-4, rs.vejkode)};
