@@ -12,7 +12,7 @@ var dawaPgApi           = require('./dawaPgApi');
 
 var app = express();
 
-app.use(express.logger('dev'));
+app.use(express.logger('[:date - :response-time] :remote-addr -- ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"'));
 app.use(express.compress());
 app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
 app.set('views', __dirname + '/views');
