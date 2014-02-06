@@ -1,6 +1,7 @@
 "use strict";
 
 var request = require("request");
+var _       = require("underscore");
 
 describe('When searching for polygons and zipcodes', function () {
 
@@ -51,4 +52,35 @@ describe('The query-parameter', function () {
                   done();
                 });
   });
+
+  it('param should succeed', function (done) {
+    var params = [
+      ['id', '0a3f50c1-b854-32b8-e044-0003ba298018'],
+      ['vejkode', '0851'],
+      ['vejnavn', 'Jeppe Aakjærs Vej'],
+      ['husnr', '8'],
+      ['etage', 'st'],
+      ['dør', '1'],
+      ['adgangsadresseid', '0a3f5095-45ef-32b8-e044-0003ba298018'],
+      ['kommune', '0740'],
+      ['ejerlav', '00810151'],
+      ['matrikel', '12ek'],
+      ['q', 'Jeppe Aakjærs Vej'],
+      // polygon and postnr is // Tested elsewhere!
+      //TODO supplerendebynavn. No data yet!
+    ];
+
+    _.each(params, queryParamTest);
+    done();
+
+  });
 });
+
+function queryParamTest(param){
+  return request.get('http://localhost:3000/api/pg/adresser?postnr=8600&'+param[0]+'='+encodeURIComponent(param[1]),
+                     function(error, response, body){
+                       var adrs = JSON.parse(body);
+                       expect(response.statusCode).toBe(200);
+                       expect(adrs.length).toBeGreaterThan(0);
+                     });
+}
