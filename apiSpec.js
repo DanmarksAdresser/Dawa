@@ -56,7 +56,7 @@ function polygonWhereClause(paramNumberString){
 
 function searchWhereClause(paramNumberString) {
   // TODO add support for parameterized where clauses.
-  return "(e_tsv @@ to_tsquery('danish', " + paramNumberString + "))";
+  return "(tsv @@ to_tsquery('danish', " + paramNumberString + "))";
 }
 
 function toPgSearchQuery(q) {
@@ -211,13 +211,47 @@ var adresseApiSpec = {
     }
   ],
   mappers: {
-    json: mapAddress,
-    csv: undefined
+    json: mapAddress
+  }
+};
+
+var vejnavnenavneFields = [
+  {
+    name: 'vejnavn'
+  }
+];
+
+var vejnavnenavneJsonMapper = function(row) {
+  return {
+    vejnavn: row.vejnavn
+  };
+};
+
+var vejnavnnavnApiSpec = {
+  model: model.vejnavnnavn,
+  pageable: true,
+  searchable: true,
+  fields: vejnavnenavneFields,
+  fieldMap: _.indexBy(adresseFields, 'name'),
+  parameters: [
+    {
+      name: 'vejnavn'
+    },
+    {
+      name: 'q',
+      type: 'string',
+      whereClause: searchWhereClause,
+      transform: toPgSearchQuery
+    }
+  ],
+  mappers: {
+    json: vejnavnenavneJsonMapper
   }
 };
 
 module.exports = {
   adresse: adresseApiSpec,
+  vejnavnnavn: vejnavnnavnApiSpec,
   pagingParameterSpec: [
     {
       name: 'side',

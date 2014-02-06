@@ -140,7 +140,15 @@ var vejnavnSchema = {
   'required': ['kode', 'kommunekode', 'navn'],// TODO
   'additionalProperties': false,
   'definitions': definitions
-}
+  };
+
+var vejnavnnavnSchema = {
+  'title': 'vejnavnnavn',
+  'type': 'object',
+  'properties': {
+    'vejnavn': { type: 'string'}
+  }
+};
 
 var supplerendebynavnSchema = {
   'title': 'supplerendebynavn',
@@ -178,7 +186,7 @@ module.exports = {
     plural : 'adresser',
     schema : adresseSchema,
     key : 'id',
-    validator: makeValidator(adresseSchema)
+    validate: makeValidator(adresseSchema)
   },
 
   adgangsadresse : {
@@ -186,7 +194,7 @@ module.exports = {
     plural : 'adgangsadresser',
     schema : adgangsAdresseSchema,
     key : 'id',
-    validator: makeValidator(adgangsAdresseSchema)
+    validate: makeValidator(adgangsAdresseSchema)
   },
 
   postnummer : {
@@ -203,6 +211,14 @@ module.exports = {
     schema: vejnavnSchema,
     key: 'kode',
     validate: makeValidator(vejnavnSchema)
+  },
+
+  vejnavnnavn: {
+    name: 'vejnavnnavn',
+    plural: 'vejnavnnavne',
+    schema: vejnavnnavnSchema,
+    key: 'vejnavn',
+    validate: makeValidator(vejnavnnavnSchema)
   },
 
   supplerendebynavn : {

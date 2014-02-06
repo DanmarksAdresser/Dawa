@@ -40,6 +40,9 @@ exports.setupRoutes = function () {
   publishGetByKey(app, apiSpec.adresse);
   publishQuery(app, apiSpec.adresse);
 
+  publishGetByKey(app, apiSpec.vejnavnnavn);
+  publishQuery(app, apiSpec.vejnavnnavn);
+
   //  app.get(/^\/adresser\/([0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12})(?:\.(\w+))?$/i, doAddressLookup);
   //  app.get(/^\/adresser.json(?:(\w+))?$/i, doAddressSearch);
   app.get('/adresser/autocomplete', doAddressAutocomplete);
@@ -48,10 +51,10 @@ exports.setupRoutes = function () {
 };
 
 function publishGetByKey(app, spec) {
-  app.get('/' + spec.model.plural + '/:id', function (req, res) {
+  app.get('/' + spec.model.plural + '/:' + spec.model.key, function (req, res) {
 
     // Parsing query-parameters
-    var parsedParams = parameterParsing.parseParameters({id: req.params.id}, _.indexBy(spec.parameters, 'name'));
+    var parsedParams = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
     if (parsedParams.errors.length > 0){
       if (parsedParams.errors[0][0] == 'id' && parsedParams.errors.length == 1){
         return sendUUIDFormatError(res, "UUID is ill-formed: "+req.params.id+". "+parsedParams.errors[0][1]);
@@ -81,7 +84,7 @@ function publishGetByKey(app, spec) {
             sendInternalServerError(res, err);
           } else if (result.rows.length === 1) {
             var adr = spec.mappers.json(result.rows[0]);
-            spec.model.validator(adr)
+            spec.model.validate(adr)
               .then(function (report) {
                 // The good case.  The rest is error handling!
                 sendSingleResultToHttpResponse(result.rows[0], res, spec, {
@@ -349,11 +352,11 @@ function doAddressAutocomplete(req, res) {
         return;
       }
 
-      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (e_tsv @@ query)';
+      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (tsv @@ query)';
       if (postnr) {
         sql += ' AND postnr = $2';
       }
-      sql += ' ORDER BY ts_rank(Adresser.e_tsv, query) DESC';
+      sql += ' ORDER BY ts_rank(Adresser.tsv, query) DESC';
 
       sql += ' LIMIT 10';
 
@@ -531,4 +534,3 @@ function sendError(res, code, message){
   res.setHeader('Content-Type', 'application/problem+json; charset=UTF-8');
   res.send(code, JSON.stringify(message));
 }
-

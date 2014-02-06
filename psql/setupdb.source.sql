@@ -345,7 +345,7 @@ SELECT
        E.oprettet  AS e_oprettet,
        E.ikraftfra AS e_ikraftfra,
        E.aendret   AS e_aendret,
-       E.tsv       AS e_tsv,
+       E.tsv       AS tsv,
        E.etage,
        E.doer,
 
@@ -392,5 +392,8 @@ LEFT JOIN Vejnavne        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode
 LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
 LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
 LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
+
+DROP VIEW IF EXISTS Vejnavnnavne;
+CREATE VIEW Vejnavnnavne AS SELECT DISTINCT vejnavn,tsv FROM Vejnavne;
 
 \echo '\n***** Bootstrap complete!'
