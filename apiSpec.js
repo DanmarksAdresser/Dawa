@@ -28,6 +28,9 @@ var adresseFields = [
     name: 'postnr'
   },
   {
+    name: 'postnrnavn'
+  },
+  {
     name: 'etage'
   },
   {
@@ -35,19 +38,70 @@ var adresseFields = [
     column: 'doer'
   },
   {
+    name: 'bygningsnavn'
+  },
+  {
     name: 'adgangsadresseid'
   },
   {
-    name: 'kommune',
-    column: 'kommunekode'
+    name: 'kommunekode'
   },
   {
-    name: 'ejerlav',
-    column: 'ejerlavkode'
+    name: 'kommunenavn'
+  },
+  {
+    name: 'ejerlavkode'
+  },
+  {
+    name: 'ejerlavnavn'
   },
   {
     name: 'matrikel',
     column: 'matrikelnr'
+  },
+  {
+    name: 'esrejendomsnr'
+  },
+  {
+    name: 'etrs89koordinat_øst',
+    column: 'oest'
+  },
+  {
+    name: 'etrs89koordinat_nord',
+    column: 'nord'
+  },
+  {
+    name: 'wgs84koordinat_bredde',
+    column: 'lat'
+  },
+  {
+    name: 'wgs84koordinat_længde',
+    column: 'long'
+  },
+  {
+    name: 'nøjagtighed',
+    column: 'noejagtighed'
+  },
+  {
+    name: 'kilde'
+  },
+  {
+    name: 'tekniskstandard'
+  },
+  {
+    name: 'tekstretning'
+  },
+  {
+    name: 'DDKN_m100',
+    column: 'kn100mdk'
+  },
+  {
+    name: 'DDKN_km1',
+    column: 'kn1kmdk'
+  },
+  {
+    name: 'DDKN_km10',
+    column: 'kn10kmdk'
   }
 ];
 function polygonWhereClause(paramNumberString){
