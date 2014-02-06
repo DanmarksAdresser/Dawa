@@ -20,30 +20,26 @@ var parameterSpec =  {
 
 describe("Parsing types with schemas", function () {
   it("should succeed on valid data", function (done) {
-    expect(parameterParsing.parseParameters({uuid: '"98239823-9823-9823-9823-982398239823"'}, parameterSpec))
+    expect(parameterParsing.parseParameters({uuid: '98239823-9823-9823-9823-982398239823'}, parameterSpec))
       .toEqual({params: {uuid: "98239823-9823-9823-9823-982398239823"}, errors: []});
     done();
   });
 
   it("should fail on invalid data ", function (done) {
-    expect(parameterParsing.parseParameters({uuid: '"98239823-982-982-982-982398239823"'}, parameterSpec))
+    expect(parameterParsing.parseParameters({uuid: '98239823-982-982-982-982398239823'}, parameterSpec))
       .toEqual({params: {}, errors: [['uuid', 'String does not match pattern: ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$']]});
     done();
   });
 });
 
 describe("Parsing parameters of type 'string'", function () {
-  it("should accept strings", function (done) {
-    expect(parameterParsing.parseParameters({aString: '"str"'}, parameterSpec))
+  it("should accept anything", function (done) {
+    expect(parameterParsing.parseParameters({aString: 'str'}, parameterSpec))
       .toEqual({params: {aString: "str"}, errors: []});
-    done();
-  });
-
-  it("should fails on other data than strings", function (done) {
     expect(parameterParsing.parseParameters({aString: '42'}, parameterSpec))
-      .toEqual({params: {}, errors: [['aString', 'notString']]});
+      .toEqual({params: {aString: '42'}, errors: []});
     expect(parameterParsing.parseParameters({aString: '[1,2,3]'}, parameterSpec))
-      .toEqual({params: {}, errors: [['aString', 'notString']]});
+      .toEqual({params: {aString: '[1,2,3]'}, errors: []});
 
     done();
   });
@@ -51,7 +47,7 @@ describe("Parsing parameters of type 'string'", function () {
 
 describe("Parsing parameters of different types", function () {
   it("should succeed", function (done) {
-    expect(parameterParsing.parseParameters({aString:'"str"', aNumber:"42", anotherNumber:"3.14", anArray:'[1,2,"3"]', anObject:'{"foo":42}'}, parameterSpec))
+    expect(parameterParsing.parseParameters({aString:'str', aNumber:"42", anotherNumber:"3.14", anArray:'[1,2,"3"]', anObject:'{"foo":42}'}, parameterSpec))
       .toEqual({params: {aString: "str", aNumber: 42, anotherNumber: 3.14, anArray: [1,2,"3"], anObject: {foo:42}}, errors: []});
     done();
   });
@@ -60,8 +56,8 @@ describe("Parsing parameters of different types", function () {
 describe("When Parsing parameters", function () {
   it("all errors should be returned", function (done) {
     expect(parameterParsing.parseParameters({aString: "42", aNumber: "ad", anotherNumber: "[3.14]", anArray: "42", anObject: "42"}, parameterSpec))
-      .toEqual({params: {}, errors: [["aString", 'notString'],["aNumber", 'notNumber'],
-                                     ["anotherNumber", 'notNumber'], ["anArray", 'notArray'], ["anObject", 'notObject']]});
+      .toEqual({params: {aString: '42'}, errors: [["aNumber", 'notNumber'],["anotherNumber", 'notNumber'],
+                                                  ["anArray", 'notArray'], ["anObject", 'notObject']]});
     done();
   });
 });
