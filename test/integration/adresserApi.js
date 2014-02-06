@@ -62,8 +62,8 @@ describe('The query-parameter', function () {
       ['etage', 'st'],
       ['dør', '1'],
       ['adgangsadresseid', '0a3f5095-45ef-32b8-e044-0003ba298018'],
-      ['kommune', '0740'],
-      ['ejerlav', '00810151'],
+      ['kommunekode', '0740'],
+      ['ejerlavkode', '00810151'],
       ['matrikel', '12ek'],
       ['q', 'Jeppe Aakjærs Vej'],
       // polygon and postnr is // Tested elsewhere!

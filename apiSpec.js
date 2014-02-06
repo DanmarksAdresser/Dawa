@@ -242,10 +242,10 @@ var adresseApiSpec = {
       name: 'adgangsadresseid'
     },
     {
-      name: 'kommune'
+      name: 'kommunekode'
     },
     {
-      name: 'ejerlav'
+      name: 'ejerlavkode'
     },
     {
       name: 'matrikel'
