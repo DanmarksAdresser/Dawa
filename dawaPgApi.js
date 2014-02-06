@@ -69,6 +69,9 @@ function publishGetByKey(app, spec) {
       return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
     }
     var formatParams = formatParamsParseResult.params;
+    if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
+      return sendJsonCallbackParameterMissingError(res);
+    }
 
     // Making the query string
     var query = createSqlQueryFromSpec(spec, parsedParams.params);
@@ -125,6 +128,11 @@ function publishQuery(app, spec) {
       return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
     }
     var formatParams = formatParamsParseResult.params;
+
+    if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
+      return sendJsonCallbackParameterMissingError(res);
+    }
+
     applyDefaultPaging(pagingParams.params);
 
     // Making the query string
@@ -508,6 +516,12 @@ function sendQueryParameterFormatError(res, details){
   sendError(res, 400, {type: "QueryParameterFormatError",
                        title: "One or more query parameters was ill-formed.",
                        details: details});
+}
+
+function sendJsonCallbackParameterMissingError(res) {
+  sendError(res, 400, {type: "JsonCallbackParameterMissingError",
+    title: "When using JSONP, a callback parameter must be speficied",
+    details: "When using JSONP, a callback parameter must be speficied"});
 }
 
 function sendUUIDFormatError(res, details){

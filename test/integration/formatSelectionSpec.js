@@ -101,4 +101,15 @@ describe('Format selection', function () {
       done();
     });
   });
+
+  it("If format is jsonp, and the callback parameter is missing, a nice JSON error mesage is returned", function(done) {
+    request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=jsonp", function(error, response, body) {
+      expect(response.statusCode).toBe(400);
+      expect(response.headers['content-type']).toBe("application/problem+json; charset=UTF-8");
+      var errorMessage = JSON.parse(body);
+      expect(errorMessage.type).toEqual('JsonCallbackParameterMissingError');
+      done();
+    });
+  });
+
 });
