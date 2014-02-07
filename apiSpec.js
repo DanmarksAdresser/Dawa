@@ -159,8 +159,8 @@ function mapAddress(rs){
   var adr = {};
   adr.id = rs.enhedsadresseid;
   adr.version = d(rs.e_version);
-  if (adr.etage) adr.etage = rs.etage;
-  if (adr.dør) adr.dør = rs.doer;
+  if (rs.etage) adr.etage = rs.etage;
+  if (rs.dør) adr.dør = rs.doer;
   adr.adressebetegnelse = "TODO";  //TODO
   adr.adgangsadresse = mapAdganggsadresse(rs);
   return adr;
