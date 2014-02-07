@@ -73,10 +73,10 @@ app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-
       console.warn(err.message);
       res.jsonp("fejl: " + err, 500);
       return;
-    }    
-    var query = {}; 
+    }
+    var query = {};
     query.id= guid;
-    var cursor = collection.find(query, { _id: 0 }); 
+    var cursor = collection.find(query, { _id: 0 });
     dawaStream.streamAdresser(type, cursor, true, req.query.callback, res, req);
     //ser.serializeAdresse(cursor, req, res);
    /* cursor.toArray(function (err, docs) {
@@ -90,19 +90,19 @@ app.get(/^\/adresser\/([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-
         //res.setHeader("Cache-Control", "public, max-age=86400");
         res.jsonp(docs[0]);
       }
-      else {        
+      else {
         res.jsonp("Adresse ukendt", 404);
       }
     }); */
   });
 });
 
-function findAdresse(collection, længde, bredde, radius, cb) { 
-  console.log('radius: %s', radius);  
+function findAdresse(collection, længde, bredde, radius, cb) {
+  console.log('radius: %s', radius);
     var cursor = collection.find(
-              {"adressepunkt.wgs84koordinat": 
-                {$near: 
-                  {$geometry: 
+              {"adressepunkt.wgs84koordinat":
+                {$near:
+                  {$geometry:
                     {type: "Point", coordinates: [længde, bredde]}
                   },
                   $maxDistance : radius
@@ -120,10 +120,10 @@ function findAdresse(collection, længde, bredde, radius, cb) {
         //cb(doc);
       }
       else {
-        if (radius<100000) {          
+        if (radius<100000) {
           return findAdresse(collection, længde, bredde, radius*10, cb);
-        } 
-        else {       
+        }
+        else {
           cb(null);
         }
       }
@@ -144,13 +144,13 @@ app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res
       console.warn(err.message);
       res.jsonp("fejl: " + err, 500);
       return;
-    } 
+    }
     findAdresse(collection, længde, bredde, 50, function(cursor) {
       if (cursor) {
 //        ser.serializeAdresseDoc(adresse, req, res);
         dawaStream.streamAdresser(type, cursor, true, req.query.callback, res, req);
       }
-      else {          
+      else {
         res.jsonp("Adresse ukendt", 404);
       }
     });
@@ -158,7 +158,7 @@ app.get(/^\/adresser\/(\d+\.?\d*),(\d+\.?\d*)(?:\.(\w+))?$/i, function (req, res
 });
 
 
-//app.get('/validadresse?vejnavn={vejnavn}&husnr={husnr}&postnr={postnr}&bynavn={bynavn}&etage={etage}&dør={dør} 
+//app.get('/validadresse?vejnavn={vejnavn}&husnr={husnr}&postnr={postnr}&bynavn={bynavn}&etage={etage}&dør={dør}
 // husk intevaladresser
 app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
 //app.get(/^\/adresser\/([^,]+)(?:\,(\w+))(?:\,(\d+))(?:\,(\w+))?(?:\,(\w+))?$/, function (req, res) { //,:etage?,:dør?
@@ -182,10 +182,10 @@ app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
    //  , dor= req.params[4]
 
   console.log("%s,%s,%s,%s,%s,%s",vejnavn,husnr,postnr,bynavn,etage,dor);
-  var query = {};  
+  var query = {};
   if (vejnavn) {
     //query.vej= {};
-    query['vej.navn'] = vejnavn; 
+    query['vej.navn'] = vejnavn;
   }
   if (husnr) {
     query.husnr = husnr;
@@ -224,7 +224,7 @@ app.get(/^\/adresser\/valid(?:\.(\w+))?$/i, function (req, res) {
         //ser.serializeAdresse(cursor, req, res);
         //res.jsonp(docs[0]);
       }
-      else {        
+      else {
         res.jsonp("Adresse er ikke valid", 404);
       }
     });
@@ -245,29 +245,29 @@ function matches(value) {
 }
 
 // adressesøgning
-app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) { 
+app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
   var type= utility.getFormat(req.params[0]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json, geojson eller html.");
     return;
   }
-  var options = {};  
+  var options = {};
   var pag= utility.paginering(req.query);
   switch(pag.status) {
     case 1:
       options.skip= pag.skip;
       options.limit= pag.limit;
       break;
-    case 2:      
+    case 2:
       res.send(400,"Paginering kræver både parametrene side og per_side");
       return;
     case 0:
       break;
   }
-  var query = {}; 
+  var query = {};
   if (req.query.vejnavn) {
     //query.vej= {};
-    query['vej.navn'] = utility.wildcard(req.query.vejnavn); 
+    query['vej.navn'] = utility.wildcard(req.query.vejnavn);
   }
   if (req.query.husnr) {
     query.husnr = req.query.husnr;
@@ -287,7 +287,7 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
   }
   if (req.query.cirkel) {
     var fields= req.query.cirkel.split(',');
-    if (fields.length != 3) {      
+    if (fields.length != 3) {
       res.send(400,"cirkel defineres som <længde>,<bredde>,<radius>");
       return;
     }
@@ -295,14 +295,14 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
       , længde= parseFloat(fields[1])
       , radius= parseInt(fields[2])
     query['adressepunkt.wgs84koordinat']=
-                {$near: 
-                  {$geometry: 
+                {$near:
+                  {$geometry:
                     {type: "Point", coordinates: [længde, bredde]}
                   },
                   $maxDistance : radius
                 };
 
-  }  
+  }
   if (req.query.sogn) {
     query['sogn.nr'] = matches(req.query.sogn);
   }
@@ -332,7 +332,7 @@ app.get(/^\/adresser(?:\.(\w+))?$/i, function (req, res) {
 
 
 // autocompletesøgning q=vejnavn husnr etage dør, postnr
-app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) { 
+app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
   var type= utility.getFormat(req.params[0]);
   if (type === undefined) {
     res.send(400,"Ukendt suffix. Brug csv, json eller html.");
@@ -342,14 +342,14 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
     res.send(400,"Parameter q skal anvendes.");
     return;
   }
-  var options = {};  
+  var options = {};
   var pag= utility.paginering(req.query);
   switch(pag.status) {
     case 1:
       options.skip= pag.skip;
       options.limit= pag.limit;
       break;
-    case 2:      
+    case 2:
       res.send(400,"Paginering kræver både parametrene side og per_side");
       return;
     case 0:
@@ -367,8 +367,8 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
   }
   console.log('Vejnavn: ' + vejnavn + " Parts: " + parts + " length: "+parts.length);
   if (!vejnavn) {
-    var query = {};  
-    query['navn'] = utility.spells(parts[1]); 
+    var query = {};
+    query['navn'] = utility.spells(parts[1]);
     if (kommune) query.kommuner= kommune;
     db.collection('vejnavne', function (err, collection) {
       if (err) {
@@ -380,12 +380,12 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
       var cursor = collection.find(query, { _id: 0 }, options);// , req.query.maxantal ? { limit: req.query.maxantal } : {});
       console.log(util.inspect(query));
       //res.setHeader("Cache-Control", "public, max-age=900000");
-      //ser.serializeFritekstAdresser(cursor, req, res);      
+      //ser.serializeFritekstAdresser(cursor, req, res);
       dawaStream.streamAutocompleteAdresser(type, cursor, false, req.query.callback, res, req);
     });
   }
   else {
-    var query = {};  
+    var query = {};
     if (parts[1]) {
       //query.vej= {};
       query['vej.navn'] = req.query.vejnavn.trim();//new RegExp('^'+ parts[1].trim() + (exact?'$':''),'i');
@@ -398,7 +398,7 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
     }
     if (parts[4]) {
       query.dør =  new RegExp('^'+ parts[4]);
-    }    
+    }
     if (parts[5]) {
       query['postnummer.nr'] = new RegExp('^'+ parts[5]);
     }
@@ -411,7 +411,7 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
         return;
       }
       var cursor = collection.find(query, { _id: 0 }, {sort: [['vej.navn', 'asc'],['husnr', 'asc'],['etage', 'asc'],['dør', 'asc']]});// , req.query.maxantal ? { limit: req.query.maxantal } : {});
-      console.log(util.inspect(query));      
+      console.log(util.inspect(query));
       //res.setHeader("Cache-Control", "public, max-age=900000");
       //ser.serializeAdresser(cursor, req, res);
 
@@ -420,28 +420,51 @@ app.get(/^\/adresser\/autocomplete(?:\.(\w+))?$/i, function (req, res) {
   }
 });
 
+var cluster = require('cluster');
+var workers = {};
+var count = require('os').cpus().length;
 
-var db;
-console.log("MongoDB connection: "+process.env.connectionstring);
-MongoClient.connect(process.env.connectionstring,function (err, database) {
-  if (err) {
-    console.warn('Database ikke åbnet: ' + err.message);
-    process.exit(1);
+function spawn(){
+  var worker = cluster.fork();
+  workers[worker.pid] = worker;
+  return worker;
+}
+
+if (cluster.isMaster) {
+  for (var i = 0; i < count; i++) {
+    spawn();
   }
 
-  database.on('error', function (err) {
-      console.log('db.on(\'error\'):', err);
+  cluster.on('exit', function(worker, code, signal) {
+    console.log('worker %d died (%s %s). restarting...', worker.process.pid, signal, code);
+    delete workers[worker.pid];
+    spawn();
   });
 
-  var listenPort = process.env.PORT || 3000;
+} else {
+  var db;
+  console.log("MongoDB connection: "+process.env.connectionstring);
+  MongoClient.connect(process.env.connectionstring,function (err, database) {
+    if (err) {
+      console.warn('Database ikke åbnet: ' + err.message);
+      process.exit(1);
+    }
 
-  db = database;
+    database.on('error', function (err) {
+      console.log('db.on(\'error\'):', err);
+    });
 
-  app.use('/api', dawaApi(db));
-  app.use('/api/pg', dawaPgApi.setupRoutes());
+    var listenPort = process.env.PORT || 3000;
 
-  app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
-  app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
-  app.listen(listenPort);
-  console.log("Express server listening on port %d in %s mode", listenPort, app.settings.env);
-});
+    db = database;
+
+    app.use('/api', dawaApi(db));
+    app.use('/api/pg', dawaPgApi.setupRoutes());
+
+    app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
+    app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
+    app.listen(listenPort);
+    console.log("Express server listening on port %d in %s mode", listenPort, app.settings.env);
+  });
+
+}
