@@ -1,4 +1,3 @@
-console.log('MongoVejnavneStream modul');
 
 var util = require('util');
 var Readable = require('stream').Readable;

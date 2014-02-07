@@ -1,4 +1,3 @@
-console.log('AdresseStream modul');
 
 var util = require('util')
   , url = require("url");

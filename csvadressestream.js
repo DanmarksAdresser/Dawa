@@ -1,4 +1,3 @@
-console.log('CsvAdresseStream modul');
 
 var util = require('util')
 ,   Transform = require('stream').Transform;

@@ -1,4 +1,3 @@
-console.log('adresse modul');
 
 var util= require("util");
 

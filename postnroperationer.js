@@ -1,4 +1,3 @@
-console.log('postnroperationer modul');
 
 var util= require("util")
   , dawaStream= require("./dawastream")

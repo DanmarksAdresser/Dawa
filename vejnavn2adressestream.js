@@ -1,4 +1,3 @@
-console.log('Vejnavn2AdresseStream modul');
 
 var util = require('util')
   , Transform = require('stream').Transform

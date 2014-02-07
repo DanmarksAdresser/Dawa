@@ -1,4 +1,3 @@
-console.log('MongoAdresseStream modul');
 
 var util = require('util');
 var Readable = require('stream').Readable;

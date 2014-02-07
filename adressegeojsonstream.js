@@ -1,4 +1,3 @@
-console.log('AdresseGeoJSONStream modul');
 
 var util = require('util')
   , url = require("url");

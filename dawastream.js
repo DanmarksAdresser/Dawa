@@ -1,4 +1,3 @@
-console.log('dawastream modul');
 
 var util = require('util')
 	, MongoAdresseStream= require("./mongoadressestream").MongoAdresseStream

@@ -1,4 +1,3 @@
-console.log('MongoPostnummerStream modul');
 
 var util = require('util');
 var Readable = require('stream').Readable;

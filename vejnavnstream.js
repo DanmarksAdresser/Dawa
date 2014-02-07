@@ -1,4 +1,3 @@
-console.log('VejnavnStream modul');
 
 var util = require('util');
 var Transform = require('stream').Transform;

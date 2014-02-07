@@ -1,4 +1,3 @@
-console.log('PostnummerStream modul');
 
 var util = require('util');
 var Transform = require('stream').Transform;

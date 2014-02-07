@@ -1,4 +1,3 @@
-console.log('utility modul');
 
 var util= require("util");
 

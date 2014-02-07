@@ -1,4 +1,3 @@
-console.log('serialize modul');
 
 var util= require("util");
 

@@ -1,4 +1,3 @@
-console.log('vejnavneoperationer modul');
 
 var util= require("util")
   , dawaStream= require("./dawastream")
