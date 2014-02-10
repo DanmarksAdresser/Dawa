@@ -412,6 +412,10 @@ var vejstykkeFields = [
   {
     name: 'navn',
     column: 'vejnavn'
+  },
+  {
+    name: 'postnr',
+    selectable: false
   }
 ];
 
@@ -454,11 +458,28 @@ var vejstykkeSpec = {
     },
     {
       name: 'navn'
+    },
+    {
+      name: 'postnr'
     }
   ],
   mappers: {
     json: vejstykkeJsonMapper,
     autocomplete: vejstykkeRowToAutocompleteJson
+  },
+  baseQuery: function() {
+    return {
+      select: 'SELECT vejstykker.kode, vejstykker.kommunekode, vejstykker.version, vejnavn, vejstykker.tsv, max(kommuner.navn) AS kommunenavn, json_agg(PostnumreMini) AS postnumre' +
+        ' FROM vejstykker' +
+        ' LEFT JOIN kommuner ON vejstykker.kommunekode = kommuner.kode' +
+
+        ' LEFT JOIN vejstykkerPostnr ON (vejstykkerPostnr.kommunekode = vejstykker.kommunekode AND vejstykkerPostnr.vejkode = vejstykker.kode)' +
+        ' LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)',
+      whereClauses: [],
+      groupBy: 'vejstykker.kode, vejstykker.kommunekode',
+      orderClauses: [],
+      sqlParams: []
+    };
   }
 }
 

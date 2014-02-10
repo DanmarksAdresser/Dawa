@@ -293,8 +293,11 @@ function applyParameters(spec, parameterSpec, params, query) {
 }
 
 function initialQuery(spec) {
+  if(spec.baseQuery) {
+    return spec.baseQuery();
+  }
   var query = {
-    select: "  SELECT * FROM " + (spec.model.table || spec.model.plural),
+    select: "  SELECT * FROM " + spec.model.plural,
     whereClauses: [],
     orderClauses: [],
     offsetLimitClause: "",
@@ -319,6 +322,10 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
     rowStream,
     eventStream.mapSync(function(row) {
       return _.reduce(fields, function(memo, field) {
+        // currently, all selectable fields are part of the CSV format
+        if(field.selectable && field.selectable === false) {
+          return memo;
+        }
         memo[field.name] = row[field.column || field.name];
         return memo;
       }, {});
@@ -333,6 +340,9 @@ function createSqlQuery(parts){
   var sql = parts.select;
   if(parts.whereClauses.length > 0) {
     sql +=  " WHERE " + parts.whereClauses.join(" AND ");
+  }
+  if(parts.groupBy) {
+    sql += ' GROUP BY ' + parts.groupBy;
   }
   if(parts.orderClauses.length > 0) {
     sql += " ORDER BY " + parts.orderClauses.join(", ");
