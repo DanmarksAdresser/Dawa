@@ -9,9 +9,11 @@ language: node_js
 node_js:
   - "0.10"
 
+addons:
+  postgresql: 9.3
+
 services:
   - mongodb
-  - postgresql
 
 env:
   - connectionstring=mongodb://localhost/dawatest pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
