@@ -308,45 +308,45 @@ var adresseApiSpec = {
   }
 };
 
-var vejnavnnavneFields = [
+var vejnavnFields = [
   {
     name: 'vejnavn'
   }
 ];
 
-var vejnavnenavneJsonMapper = function(row) {
+var vejnavnJsonMapper = function(row) {
   return {
     vejnavn: row.vejnavn
   };
 };
 
-function vejnavnnavnRowToAutocompleteJson(row) {
+function vejnavnRowToAutocompleteJson(row) {
   return {
     tekst: row.vejnavn,
-    vejnavnnavn: {
+    vejnavnn: {
       vejnavn: row.vejnavn,
-      href: BASE_URL + '/vejnavnnavne/' + encodeURIComponent(row.vejnavn)
+      href: BASE_URL + '/vejnavne/' + encodeURIComponent(row.vejnavn)
     }
   };
 }
 
 
 
-var vejnavnnavnApiSpec = {
-  model: model.vejnavnnavn,
+var vejnavnApiSpec = {
+  model: model.vejnavn,
   pageable: true,
   searchable: true,
   suggestable: true,
-  fields: vejnavnnavneFields,
-  fieldMap: _.indexBy(vejnavnnavneFields, 'name'),
+  fields: vejnavnFields,
+  fieldMap: _.indexBy(vejnavnFields, 'name'),
   parameters: [
     {
       name: 'vejnavn'
     }
   ],
   mappers: {
-    json: vejnavnenavneJsonMapper,
-    autocomplete: vejnavnnavnRowToAutocompleteJson
+    json: vejnavnJsonMapper,
+    autocomplete: vejnavnRowToAutocompleteJson
   }
 };
 
@@ -402,7 +402,7 @@ var postnummerSpec = {
   }
 };
 
-var vejnavnFields = [
+var vejstykkeFields = [
   {
     name: 'kode'
   },
@@ -415,7 +415,7 @@ var vejnavnFields = [
   }
 ];
 
-function vejnavnJsonMapper(row) {
+function vejstykkeJsonMapper(row) {
   console.log(JSON.stringify(row));
   return {
     kode: row.kode,
@@ -428,23 +428,23 @@ function vejnavnJsonMapper(row) {
   };
 }
 
-function vejnavnRowToAutocompleteJson(row) {
+function vejstykkeRowToAutocompleteJson(row) {
   return {
     tekst: row.navn,
-    vejnavn: {
-      href: BASE_URL + '/vejnavne/' + row.kommunekode + '/' + row.kode
+    vejstykke: {
+      href: BASE_URL + '/vejstykker/' + row.kommunekode + '/' + row.kode
     }
   };
 }
 
 
-var vejnavnSpec = {
-  model: model.vejnavn,
+var vejstykkeSpec = {
+  model: model.vejstykke,
   pageable: true,
   searchable: true,
   suggestable: true,
-  fields: vejnavnFields,
-  fieldMap: _.indexBy(vejnavnFields, 'name'),
+  fields: vejstykkeFields,
+  fieldMap: _.indexBy(vejstykkeFields, 'name'),
   parameters: [
     {
       name: 'kode'
@@ -457,16 +457,16 @@ var vejnavnSpec = {
     }
   ],
   mappers: {
-    json: vejnavnJsonMapper,
-    autocomplete: vejnavnRowToAutocompleteJson
+    json: vejstykkeJsonMapper,
+    autocomplete: vejstykkeRowToAutocompleteJson
   }
 }
 
 module.exports = {
   adresse: adresseApiSpec,
-  vejnavnnavn: vejnavnnavnApiSpec,
+  vejnavn: vejnavnApiSpec,
   postnummer: postnummerSpec,
-  vejnavn: vejnavnSpec,
+  vejstykke: vejstykkeSpec,
   pagingParameterSpec: [
     {
       name: 'side',

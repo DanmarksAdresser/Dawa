@@ -56,25 +56,25 @@ ALTER  TEXT SEARCH CONFIGURATION vejnavne ALTER MAPPING FOR asciiword,word,numwo
 \echo '***************************************************************************'
 \echo ''
 \echo '***** Creating postnumre table'
-DROP TABLE IF EXISTS vejnavne CASCADE;
-CREATE TABLE IF NOT EXISTS vejnavne (
-  kode integer NOT NULL,
+DROP TABLE IF EXISTS vejstykker CASCADE;
+CREATE TABLE IF NOT EXISTS vejstykker (
   kommunekode integer NOT NULL,
+  kode integer NOT NULL,
   version VARCHAR(255) NOT NULL,
   vejnavn VARCHAR(255) NOT NULL,
   tsv tsvector,
-  PRIMARY KEY(kode, kommunekode)
+  PRIMARY KEY(kommunekode, kode)
 );
 
-CREATE INDEX ON vejnavne USING gin(tsv);
+CREATE INDEX ON vejstykker USING gin(tsv);
 
-\COPY vejnavne (kommunekode, kode, vejnavn, version) from program 'gunzip -c :DATADIR:/RoadName.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
+\COPY vejstykker (kommunekode, kode, vejnavn, version) from program 'gunzip -c :DATADIR:/RoadName.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
-UPDATE vejnavne SET tsv = to_tsvector('danish', coalesce(vejnavn, ''));
+UPDATE vejstykker SET tsv = to_tsvector('danish', coalesce(vejnavn, ''));
 
 
 \echo '\n***** Creating postnumre table'
-DROP TABLE IF EXISTS postnumre;
+DROP TABLE IF EXISTS postnumre CASCADE;
 CREATE TABLE IF NOT EXISTS postnumre (
   nr integer NOT NULL PRIMARY KEY,
   version VARCHAR(255) NOT NULL,
@@ -205,7 +205,7 @@ VALUES (165, 'Albertslund'),
 \echo '***************************************************************************'
 \echo ''
 \echo '***** Creating adgangsadresse table'
-DROP TABLE IF EXISTS adgangsadresser;
+DROP TABLE IF EXISTS adgangsadresser CASCADE;
 CREATE TABLE IF NOT EXISTS adgangsadresser (
   id uuid NOT NULL PRIMARY KEY,
   version VARCHAR(255) NOT NULL,
@@ -321,7 +321,7 @@ create temp table tmp  AS select id,
   FROM (SELECT e.id, etage, doer, p.navn as postnrnavn, v.vejnavn, p.nr as postnr, husnr
         FROM enhedsadresser e
         LEFT JOIN adgangsadresser a ON a.id = e.adgangsadresseid
-        LEFT JOIN vejnavne v ON a.vejkode = v.kode AND a.kommunekode = v.kommunekode
+        LEFT JOIN vejstykker v ON a.vejkode = v.kode AND a.kommunekode = v.kommunekode
         LEFT JOIN postnumre p ON  a.postnr = p.nr) as T;
 
 UPDATE enhedsadresser AS e SET tsv = T.tsv from (select * from tmp) as T where e.id = T.id;
@@ -388,37 +388,37 @@ SELECT
 
 FROM enhedsadresser E
 LEFT JOIN adgangsadresser A  ON (E.adgangsadresseid = A.id)
-LEFT JOIN Vejnavne        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
+LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
 LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
 LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
 LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
-DROP VIEW IF EXISTS VejnavneView;
+DROP VIEW IF EXISTS vejstykkerView;
 DROP VIEW IF EXISTS PostnumreMini;
-DROP VIEW IF EXISTS VejnavnePostnr;
+DROP VIEW IF EXISTS vejstykkerPostnr;
 DROP VIEW IF EXISTS Vejnavnnavne;
 
-CREATE VIEW Vejnavnnavne AS SELECT DISTINCT vejnavn,tsv FROM Vejnavne;
+CREATE VIEW Vejnavne AS SELECT DISTINCT vejnavn,tsv FROM vejstykker;
 
-CREATE VIEW VejnavnePostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
+CREATE VIEW vejstykkerPostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
 
 CREATE VIEW PostnumreMini AS
   SELECT nr, navn FROM Postnumre;
 
-CREATE VIEW VejnavneView AS
+CREATE VIEW vejstykkerView AS
   SELECT
-    Vejnavne.kode,
-    vejnavne.kommunekode,
-    vejnavne.version,
+    vejstykker.kode,
+    vejstykker.kommunekode,
+    vejstykker.version,
     vejnavn,
-    Vejnavne.tsv,
+    vejstykker.tsv,
     max(kommuner.navn) AS kommunenavn,
     json_agg(PostnumreMini) AS postnumre
-  FROM Vejnavne
-    LEFT JOIN kommuner ON Vejnavne.kommunekode = kommuner.kode
-    LEFT JOIN VejnavnePostnr
-      ON (VejnavnePostnr.kommunekode = Vejnavne.kommunekode AND VejnavnePostnr.vejkode = Vejnavne.kode)
+  FROM vejstykker
+    LEFT JOIN kommuner ON vejstykker.kommunekode = kommuner.kode
+    LEFT JOIN vejstykkerPostnr
+      ON (vejstykkerPostnr.kommunekode = vejstykker.kommunekode AND vejstykkerPostnr.vejkode = vejstykker.kode)
     LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)
-  GROUP BY Vejnavne.kode, Vejnavne.kommunekode;
+  GROUP BY vejstykker.kode, vejstykker.kommunekode;
 
 \echo '\n***** Bootstrap complete!'

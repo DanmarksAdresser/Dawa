@@ -41,17 +41,17 @@ exports.setupRoutes = function () {
   publishGetByKey(app, apiSpec.adresse);
   publishQuery(app, apiSpec.adresse);
 
-  publishAutocomplete(app, apiSpec.vejnavnnavn);
-  publishGetByKey(app, apiSpec.vejnavnnavn);
-  publishQuery(app, apiSpec.vejnavnnavn);
+  publishAutocomplete(app, apiSpec.vejnavn);
+  publishGetByKey(app, apiSpec.vejnavn);
+  publishQuery(app, apiSpec.vejnavn);
 
   publishAutocomplete(app, apiSpec.postnummer);
   publishGetByKey(app, apiSpec.postnummer);
   publishQuery(app, apiSpec.postnummer);
 
-  publishAutocomplete(app, apiSpec.vejnavn);
-  publishGetByKey(app, apiSpec.vejnavn);
-  publishQuery(app, apiSpec.vejnavn);
+  publishAutocomplete(app, apiSpec.vejstykke);
+  publishGetByKey(app, apiSpec.vejstykke);
+  publishQuery(app, apiSpec.vejstykke);
   return app;
 };
 

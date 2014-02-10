@@ -26,18 +26,23 @@ function makeshow(loebenr,input,process) {
 }
 function search(input,kommunekode) {
   var antaladresser= 12;
+  // loebenummer for de viste forslag
+  var loebenummerViste = 0;
+  // loebenummer for naeste query der laves
+  var loebenummerNaeste = 1;
 	$(input).typeahead({
 		items: antaladresser,
     matcher: function() { return true; },
     sorter: function(items) { return items; },
 		source: function (query, process) {
+      var loebenummer = loebenummerNaeste++;
 			var parametre= {q: query}; 
       parametre.side= 1;
       parametre.per_side= antaladresser;
 			if (kommunekode) parametre.kommunekode= kommunekode;
 			$.ajax({
 				cache: true,
-	  url: apiBase+'vejnavnnavne/autocomplete',
+	  url: apiBase+'vejnavne/autocomplete',
 				data: parametre,
 			  dataType: "json",
 			  error: function (xhr, status, errorThrown) {	
@@ -45,8 +50,15 @@ function search(input,kommunekode) {
   				alert(text);
 				} ,
 				success: function(vejnavneResults) {
+          function showSuggestions(suggestions) {
+            if(loebenummer > loebenummerViste) {
+              loebenummerViste = loebenummer;
+              return process(suggestions);
+            }
+          }
+
           if(vejnavneResults.length > 1) {
-            return process(_.pluck(vejnavneResults, 'tekst'));
+            return showSuggestions(_.pluck(vejnavneResults, 'tekst'));
           }
           $.ajax({
             cache: true,
@@ -58,7 +70,7 @@ function search(input,kommunekode) {
               alert(text);
             } ,
             success: function(adresseResults) {
-              return process(_.pluck(adresseResults, 'tekst'));
+              return showSuggestions(_.pluck(adresseResults, 'tekst'));
             }
           });
         }

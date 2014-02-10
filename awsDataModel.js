@@ -205,18 +205,18 @@ module.exports = {
     validate: makeValidator(postnummerSchema)
   },
 
-  vejnavn : {
-    name: 'vejnavn',
-    plural: 'vejnavne',
-    table: 'VejnavneView',
+  vejstykke : {
+    name: 'vejstykke',
+    plural: 'vejstykker',
+    table: 'vejstykkerView',
     schema: vejnavnSchema,
     key: ['kommunekode','kode'],
     validate: makeValidator(vejnavnSchema)
   },
 
-  vejnavnnavn: {
-    name: 'vejnavnnavn',
-    plural: 'vejnavnnavne',
+  vejnavn: {
+    name: 'vejnavn',
+    plural: 'vejnavne',
     schema: vejnavnnavnSchema,
     key: 'vejnavn',
     validate: makeValidator(vejnavnnavnSchema)
