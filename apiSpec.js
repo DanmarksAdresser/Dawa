@@ -462,11 +462,51 @@ var vejstykkeSpec = {
   }
 }
 
+
+var kommuneFields = [{name: 'kommunekode', column: 'kode'}, {name: 'navn'}];
+
+var kommuneApiSpec = {
+  model: model.kommune,
+  pageable: true,
+  searchable: true,
+  suggestable: true,
+  fields: kommuneFields,
+  fieldMap: _.indexBy(kommuneFields, 'name'),
+  parameters: [{name: 'navn'},
+               {name: 'kommunekode'}
+              ],
+  mappers: {
+    json: kommuneJsonMapper,
+    autocomplete: kommuneRowToAutocompleteJson
+  }
+};
+
+
+function kommuneJsonMapper(row) {
+  return {
+    kode: row.kode,
+    navn: row.navn,
+  };
+};
+
+function kommuneRowToAutocompleteJson(row) {
+  return {
+    tekst: row.navn,
+    kommune: {
+      navn: row.navn,
+      href: BASE_URL + '/kommuner/' + encodeURIComponent(row.kode)
+    }
+  };
+}
+
+
 module.exports = {
   adresse: adresseApiSpec,
   vejnavn: vejnavnApiSpec,
   postnummer: postnummerSpec,
   vejstykke: vejstykkeSpec,
+  kommune: kommuneApiSpec,
+
   pagingParameterSpec: [
     {
       name: 'side',
@@ -513,4 +553,6 @@ module.exports = {
     }
   ]
 };
+
+
 

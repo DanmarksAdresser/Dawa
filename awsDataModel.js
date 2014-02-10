@@ -168,6 +168,17 @@ var supplerendebynavnSchema = {
   'definitions': definitions
 }
 
+var kommuneSchema = {
+  'title': 'kommune',
+  'type': 'object',
+  'properties': {
+    'kode': { type: 'integer',  maximum: 9999},
+    'navn' : { type: 'string'},
+  },
+  'required': ['kode', 'navn'],
+  'additionalProperties': false,
+};
+
 
 /******************************************************************************/
 /*** Data Model definitions ***************************************************/
@@ -228,7 +239,17 @@ module.exports = {
     schema: supplerendebynavnSchema,
     key: 'navn', // TODO: this is not a key!!!!
     validate: makeValidator(supplerendebynavnSchema)
-  }
+  },
+
+  kommune : {
+    name: 'kommune',
+    plural: 'kommuner',
+    table: 'kommuner',
+    schema: kommuneSchema,
+    key: 'kommunekode',
+    validate: makeValidator(kommuneSchema)
+  },
+
 };
 
 /******************************************************************************/

@@ -52,6 +52,10 @@ exports.setupRoutes = function () {
   publishAutocomplete(app, apiSpec.vejstykke);
   publishGetByKey(app, apiSpec.vejstykke);
   publishQuery(app, apiSpec.vejstykke);
+
+  publishGetByKey(app, apiSpec.kommune);
+  publishQuery(app, apiSpec.kommune);
+
   return app;
 };
 
@@ -64,12 +68,10 @@ function publishGetByKey(app, spec) {
   app.get(path, function (req, res) {
 
     // Parsing the path parameters, which constitutes the key
-
     var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
     if (parseParamsResult.errors.length > 0){
-      if (parseParamsResult.errors[0][0] == 'id' && parseParamsResult.errors.length == 1){
-        // TODO The id is not necessarily a UUID
-        return sendUUIDFormatError(res, "UUID is ill-formed: "+req.params.id+". "+parseParamsResult.errors[0][1]);
+      if (parseParamsResult.errors[0][0] == key && parseParamsResult.errors.length == 1){
+        return sendResourceKeyFormatError(res, "The resource-key is ill-formed: "+req.params.id+". "+parseParamsResult.errors[0][1]);
       } else {
         return sendInternalServerError(res, 'Unexpected query-parameter error: '+util.inspect(parseParamsResult.errors, {depth: 10}));
       }
@@ -507,9 +509,9 @@ function sendJsonCallbackParameterMissingError(res) {
     details: "When using JSONP, a callback parameter must be speficied"});
 }
 
-function sendUUIDFormatError(res, details){
-  sendError(res, 400, {type: "UUIDFormatError",
-                       title: "The address-UUID was ill-formed.",
+function sendResourceKeyFormatError(res, details){
+  sendError(res, 400, {type: "ResourceKeyFormatError",
+                       title: "The resource-key was ill-formed.",
                        details: details});
 }
 
