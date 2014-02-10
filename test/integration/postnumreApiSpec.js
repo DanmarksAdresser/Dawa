@@ -21,7 +21,7 @@ describe("PostnumreApi", function() {
   });
 
   it('It is possible to search for postnumre', function(done) {
-    request.get({url: "http://localhost:3000/api/pg/postnumre?q=viby", json: true}, function(error, response, result) {
+    request.get({url: "http://localhost:3000/api/pg/postnumre?q=silkeborg", json: true}, function(error, response, result) {
       var postnummer = result[0];
       expect(postnummer.nr).toBe('8600');
       expect(postnummer.navn).toBe('Silkeborg');
