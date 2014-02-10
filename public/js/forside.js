@@ -1,4 +1,7 @@
 var senesteloebenr= 0;
+
+var apiBase = 'api/pg/';
+
 function makeshow(loebenr,input,process) {
   return function (adresser) 
   {
@@ -21,56 +24,45 @@ function makeshow(loebenr,input,process) {
     process(items);
   };
 }
-function search(input,kommune) {
-	var update;
-	var vejnavn= null;
-	//var fremadtast
-	$(input).keyup(function(event) {
-		//fremadtast= (event.which !== 8);
-		console.log("#q: %s, vejnavn: %s", $(input).val(), vejnavn);
-		if (vejnavn) {
-			vejnavn= ($(input).val().length >= vejnavn.length)?vejnavn:null;
-		}
-	});  
+function search(input,kommunekode) {
   var antaladresser= 12;
 	$(input).typeahead({
 		items: antaladresser,
+    matcher: function() { return true; },
+    sorter: function(items) { return items; },
 		source: function (query, process) {
 			var parametre= {q: query}; 
       parametre.side= 1;
       parametre.per_side= antaladresser;
-			if (vejnavn) parametre.vejnavn= vejnavn;
-			if (kommune) parametre.kommune= kommune;
-			update= process; 
-      // var starttime= Date.now();    // start på udelukkelse af gamle forspørgelser  
+			if (kommunekode) parametre.kommunekode= kommunekode;
 			$.ajax({
 				cache: true,
-			  url:'adresser/autocomplete',
+	  url: apiBase+'vejnavnnavne/autocomplete',
 				data: parametre,
 			  dataType: "json",
 			  error: function (xhr, status, errorThrown) {	
   				var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
   				alert(text);
 				} ,
-				success: makeshow(++senesteloebenr, input, process)
-			});
-    },
-    updater: function (item) {
-    	if (vejnavn===null) vejnavn= item;
-    	this.source(item,update);
-    	return item;
-    },
-    sorter: function (items) {
-    	var s= $(input).val();
-    	if (vejnavn===null && items.length===1 && s.length === items[0].length) {
-    		// $(input).val(items[0]);
-    		vejnavn= items[0];
-    		this.source(items[0],update);
-    	}
-    	return items;
-    },
-    matcher: function (item) {
-    	return true;
+				success: function(vejnavneResults) {
+          if(vejnavneResults.length > 1) {
+            return process(_.pluck(vejnavneResults, 'tekst'));
+          }
+          $.ajax({
+            cache: true,
+            url: apiBase+'adresser/autocomplete',
+            data: parametre,
+            dataType: "json",
+            error: function (xhr, status, errorThrown) {
+              var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
+              alert(text);
+            } ,
+            success: function(adresseResults) {
+              return process(_.pluck(adresseResults, 'tekst'));
+            }
+          });
+        }
+      });
     }
 	});
 }
@@ -78,7 +70,7 @@ function search(input,kommune) {
 function searchPostnr(input) {
   $.ajax({
     cache: true,
-    url:'postnumre.json',
+    url:apiBase +'postnumre',
     dataType: "json",
     error: function (xhr, status, errorThrown) {  
       var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;

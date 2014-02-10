@@ -3,7 +3,7 @@
 var model = require('./awsDataModel');
 var _     = require('underscore');
 
-
+var BASE_URL = 'http://dawa.aws.dk/api/pg';
 /**
  * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
  * Felterne anvendes som kolonner i CSV-formateringen af adresser.
@@ -201,22 +201,29 @@ function mapAdganggsadresse(rs){
   return adr;
 }
 
-function adresseRowToSuggestJson(row) {
+function adresseRowToAutocompleteJson(row) {
+  function adresseText(row) {
+    var result =  row.vejnavn + ' ' + row.husnr;
+    if(row.etage || row.doer) {
+      result += ', ';
+      if(row.etage) {
+        result += row.etage + '.';
+      }
+      if(row.doer) {
+        result += ' ' +row.doer;
+      }
+    }
+    if(row.supplerendebynavn) {
+      result += ', ' + row.supplerendebynavn;
+    }
+    result += ', ' + row.postnr + ' ' + row.postnrnavn;
+    return result;
+  }
   return {
-    id: row.id,
-    vej: {
-      kode: row.vejkode,
-      navn: row.vejnavn
-    },
-    husnr: row.husnr ? row.husnr : "",
-    etage: row.etage ? row.etage : "",
-    dør: row.doer ? row.doer : "",
-    bygningsnavn: '',
-    supplerendebynavn: '',
-    postnummer: {
-      nr: "" + row.postnr,
-      navn: row.postnrnavn,
-      href: 'http://dawa.aws.dk/kommuner/' + row.postnr
+    tekst: adresseText(row),
+    adresse: {
+      id: row.id,
+      href: BASE_URL + '/adresser/' + row.id
     }
   };
 }
@@ -297,7 +304,7 @@ var adresseApiSpec = {
   ],
   mappers: {
     json: mapAddress,
-    autocomplete: adresseRowToSuggestJson
+    autocomplete: adresseRowToAutocompleteJson
   }
 };
 
@@ -313,22 +320,12 @@ var vejnavnenavneJsonMapper = function(row) {
   };
 };
 
-function vejnavnRowToSuggestJson(row) {
+function vejnavnRowToAutocompleteJson(row) {
   return {
-    id: '',
-    vej: {
-      kode: '',
-      navn: row.vejnavn
-    },
-    husnr: '',
-    etage: '',
-    dør: '',
-    bygningsnavn: '',
-    supplerendebynavn: '',
-    postnummer: {
-      nr: '',
-      navn: '',
-      href: ''
+    tekst: row.vejnavn,
+    vejnavnnavn: {
+      vejnavn: row.vejnavn,
+      href: BASE_URL + '/vejnavnnavne/' + encodeURIComponent(row.vejnavn)
     }
   };
 }
@@ -341,7 +338,7 @@ var vejnavnnavnApiSpec = {
   searchable: true,
   suggestable: true,
   fields: vejnavnnavneFields,
-  fieldMap: _.indexBy(adresseFields, 'name'),
+  fieldMap: _.indexBy(vejnavnnavneFields, 'name'),
   parameters: [
     {
       name: 'vejnavn'
@@ -349,13 +346,127 @@ var vejnavnnavnApiSpec = {
   ],
   mappers: {
     json: vejnavnenavneJsonMapper,
-    autocomplete: vejnavnRowToSuggestJson
+    autocomplete: vejnavnRowToAutocompleteJson
   }
 };
+
+var postnummerFields = [
+  {
+    name: 'nr'
+  },
+  {
+    name: 'navn'
+  },
+  {
+    name: 'version'
+  }
+];
+
+function postnummerJsonMapper(row) {
+  return {
+    nr: "" + row.nr,
+    navn: row.navn,
+    version: row.version
+  };
+}
+
+function postnummerRowToAutocompleteJson(row) {
+  return {
+    tekst: row.nr + ' ' + row.navn,
+    postnummer: {
+      nr: "" + row.nr,
+      href: BASE_URL + '/postnumre/' + row.nr
+    }
+  };
+}
+
+
+var postnummerSpec = {
+  model: model.postnummer,
+  pageable: true,
+  searchable: true,
+  suggestable: true,
+  fields: postnummerFields,
+  fieldMap: _.indexBy(postnummerFields, 'name'),
+  parameters: [
+    {
+      name: 'nr'
+    },
+    {
+      name: 'navn'
+    }
+  ],
+  mappers: {
+    json: postnummerJsonMapper,
+    autocomplete: postnummerRowToAutocompleteJson
+  }
+};
+
+var vejnavnFields = [
+  {
+    name: 'kode'
+  },
+  {
+    name: 'kommunekode'
+  },
+  {
+    name: 'navn',
+    column: 'vejnavn'
+  }
+];
+
+function vejnavnJsonMapper(row) {
+  console.log(JSON.stringify(row));
+  return {
+    kode: row.kode,
+    navn: row.vejnavn,
+    kommune: {
+      kode: "" + row.kommunekode,
+      navn: row.kommunenavn
+    },
+    postnumre: row.postnumre
+  };
+}
+
+function vejnavnRowToAutocompleteJson(row) {
+  return {
+    tekst: row.navn,
+    vejnavn: {
+      href: BASE_URL + '/vejnavne/' + row.kommunekode + '/' + row.kode
+    }
+  };
+}
+
+
+var vejnavnSpec = {
+  model: model.vejnavn,
+  pageable: true,
+  searchable: true,
+  suggestable: true,
+  fields: vejnavnFields,
+  fieldMap: _.indexBy(vejnavnFields, 'name'),
+  parameters: [
+    {
+      name: 'kode'
+    },
+    {
+      name: 'kommunekode'
+    },
+    {
+      name: 'navn'
+    }
+  ],
+  mappers: {
+    json: vejnavnJsonMapper,
+    autocomplete: vejnavnRowToAutocompleteJson
+  }
+}
 
 module.exports = {
   adresse: adresseApiSpec,
   vejnavnnavn: vejnavnnavnApiSpec,
+  postnummer: postnummerSpec,
+  vejnavn: vejnavnSpec,
   pagingParameterSpec: [
     {
       name: 'side',
@@ -401,7 +512,5 @@ module.exports = {
       transform: toPgSuggestQuery
     }
   ]
-
-
 };
 

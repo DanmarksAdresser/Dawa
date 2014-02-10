@@ -45,11 +45,23 @@ exports.setupRoutes = function () {
   publishGetByKey(app, apiSpec.vejnavnnavn);
   publishQuery(app, apiSpec.vejnavnnavn);
 
+  publishAutocomplete(app, apiSpec.postnummer);
+  publishGetByKey(app, apiSpec.postnummer);
+  publishQuery(app, apiSpec.postnummer);
+
+  publishAutocomplete(app, apiSpec.vejnavn);
+  publishGetByKey(app, apiSpec.vejnavn);
+  publishQuery(app, apiSpec.vejnavn);
   return app;
 };
 
 function publishGetByKey(app, spec) {
-  app.get('/' + spec.model.plural + '/:' + spec.model.key, function (req, res) {
+  var key = spec.model.key;
+  var keyArray = _.isArray(key) ? key : [key];
+  var path = _.reduce(keyArray, function(memo, key) {
+    return memo + '/:' + key;
+  }, '/' + spec.model.plural);
+  app.get(path, function (req, res) {
 
     // Parsing the path parameters, which constitutes the key
 
@@ -158,7 +170,7 @@ function publishQuery(app, spec) {
       applyParameters(spec, apiSpec.searchParameterSpec, searchParamsParseResult.params, sqlParts);
     }
 
-    sqlParts.orderClauses.push(spec.model.key);
+    addOrderByKey(spec, sqlParts);
 
     var sqlString = createSqlQuery(sqlParts);
 
@@ -250,6 +262,9 @@ function applyDefaultPaging(pagingParams) {
   }
 }
 
+function getColumnName(spec, name) {
+  return spec.fieldMap[name].column || name;
+}
 function applyParameters(spec, parameterSpec, params, query) {
   parameterSpec.forEach(function (parameter) {
     var name = parameter.name;
@@ -258,7 +273,7 @@ function applyParameters(spec, parameterSpec, params, query) {
       if (parameter.whereClause) {
         query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length));
       } else {
-        var column = spec.fieldMap[name].column || name;
+        var column = getColumnName(spec, name);
         query.whereClauses.push(column + " = $" + query.sqlParams.length);
       }
     }
@@ -267,7 +282,7 @@ function applyParameters(spec, parameterSpec, params, query) {
 
 function initialQuery(spec) {
   var query = {
-    select: "  SELECT * FROM " + spec.model.plural,
+    select: "  SELECT * FROM " + (spec.model.table || spec.model.plural),
     whereClauses: [],
     orderClauses: [],
     offsetLimitClause: "",
@@ -332,6 +347,12 @@ function createOffsetLimitClause(params) {
 
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
+function addOrderByKey(spec, sqlParts) {
+  var keyArray = _.isArray(spec.model.key) ? spec.model.key : [spec.model.key];
+  keyArray.forEach(function (key) {
+    sqlParts.orderClauses.push(getColumnName(spec, key));
+  });
+}
 /******************************************************************************/
 
 function publishAutocomplete(app, spec) {
@@ -377,8 +398,7 @@ function publishAutocomplete(app, spec) {
     applyParameters(spec, apiSpec.autocompleteParameterSpec, autocompleteParams.params, sqlParts);
 
     // ensure stable ordering, which is required for paging
-    sqlParts.orderClauses.push(spec.model.key);
-
+    addOrderByKey(spec, sqlParts);
     var sqlString = createSqlQuery(sqlParts);
 
     console.log('executing sql' + JSON.stringify({sql: sqlString, params: sqlParts.sqlParams}));
@@ -392,55 +412,6 @@ function publishAutocomplete(app, spec) {
     });
   });
 }
-
-//function doAddressAutocomplete(req, res) {
-//  var q = req.query.q;
-//
-//  var tsq = toPgSuggestQuery(q);
-//
-//  var postnr = req.query.postnr;
-//
-//  var args = [tsq];
-//  if (postnr) {
-//    args.push(postnr);
-//  }
-//
-//  withPsqlClient(res, function (client, done) {
-//    // Search vejnavne first
-//    // TODO check, at DISTINCT ikke unorder vores resultat
-//    var vejnavneSql = 'SELECT DISTINCT vejnavn FROM (SELECT * FROM Vejnavne, to_tsquery(\'vejnavne\', $1) query WHERE (tsv @@ query)';
-//
-//    if (postnr) {
-//      vejnavneSql += ' AND EXISTS (SELECT * FROM Enhedsadresser WHERE vejkode = Vejnavne.kode AND kommunekode = Vejnavne.kommunekode AND postnr = $2)';
-//    }
-//
-//    vejnavneSql += 'ORDER BY ts_rank(Vejnavne.tsv, query) DESC) AS v LIMIT 10';
-//
-//    client.query(vejnavneSql, args, function (err, result) {
-//      if (err) {
-//        console.error('error running query', err);
-//        // TODO reportErrorToClient(...)
-//        return done(err);
-//      }
-//      if (result.rows.length > 1) {
-//        streamJsonToHttpResponse(eventStream.readArray(result.rows), vejnavnRowToSuggestJson, res, done);
-//        return;
-//      }
-//
-//      var sql = 'SELECT * FROM Adresser, to_tsquery(\'vejnavne\', $1) query  WHERE (tsv @@ query)';
-//      if (postnr) {
-//        sql += ' AND postnr = $2';
-//      }
-//      sql += ' ORDER BY ts_rank(Adresser.tsv, query) DESC';
-//
-//      sql += ' LIMIT 10';
-//
-//
-//      var queryStream = streamingQuery(client, sql, args);
-//      streamJsonToHttpResponse(queryStream, adresseRowToSuggestJson, res, done);
-//    });
-//  });
-//}
 
 /******************************************************************************/
 /*** Utility functions ********************************************************/

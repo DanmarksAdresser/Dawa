@@ -243,7 +243,7 @@ CREATE INDEX ON Adgangsadresser USING GIST (geom);
 CREATE INDEX ON Adgangsadresser(ejerlavkode);
 CREATE INDEX ON Adgangsadresser(wgs84lat);
 CREATE INDEX ON Adgangsadresser(wgs84long);
-CREATE INDEX ON Adgangsadresser(vejkode, kommunekode);
+CREATE INDEX ON Adgangsadresser(vejkode, kommunekode, postnr);
 CREATE INDEX ON adgangsadresser(postnr);
 
 \echo '\n***** Loading adgangsadresse data'
@@ -393,7 +393,32 @@ LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
 LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
 LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
+DROP VIEW IF EXISTS VejnavneView;
+DROP VIEW IF EXISTS PostnumreMini;
+DROP VIEW IF EXISTS VejnavnePostnr;
 DROP VIEW IF EXISTS Vejnavnnavne;
+
 CREATE VIEW Vejnavnnavne AS SELECT DISTINCT vejnavn,tsv FROM Vejnavne;
+
+CREATE VIEW VejnavnePostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
+
+CREATE VIEW PostnumreMini AS
+  SELECT nr, navn FROM Postnumre;
+
+CREATE VIEW VejnavneView AS
+  SELECT
+    Vejnavne.kode,
+    vejnavne.kommunekode,
+    vejnavne.version,
+    vejnavn,
+    Vejnavne.tsv,
+    max(kommuner.navn) AS kommunenavn,
+    json_agg(PostnumreMini) AS postnumre
+  FROM Vejnavne
+    LEFT JOIN kommuner ON Vejnavne.kommunekode = kommuner.kode
+    LEFT JOIN VejnavnePostnr
+      ON (VejnavnePostnr.kommunekode = Vejnavne.kommunekode AND VejnavnePostnr.vejkode = Vejnavne.kode)
+    LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)
+  GROUP BY Vejnavne.kode, Vejnavne.kommunekode;
 
 \echo '\n***** Bootstrap complete!'

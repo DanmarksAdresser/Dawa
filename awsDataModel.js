@@ -208,8 +208,9 @@ module.exports = {
   vejnavn : {
     name: 'vejnavn',
     plural: 'vejnavne',
+    table: 'VejnavneView',
     schema: vejnavnSchema,
-    key: 'kode',
+    key: ['kommunekode','kode'],
     validate: makeValidator(vejnavnSchema)
   },
 

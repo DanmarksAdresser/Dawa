@@ -115,9 +115,11 @@ block content
               a(href='http://#{url}/adresser/55.700677,12.59074') http://#{url}/adresser/55.700677,12.59074
 
 block append scripts 
+  script(src="js/underscore-min.js")
+
   script(src="js/forside.js")
 
-  script  
+  script
     $('#topbar li').removeClass('active');
     var a= $("#topbar li a[href='/']")[0];
     var li= $(a).parent().addClass('active');
