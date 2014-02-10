@@ -320,7 +320,7 @@ var vejnavnenavneJsonMapper = function(row) {
   };
 };
 
-function vejnavnRowToAutocompleteJson(row) {
+function vejnavnnavnRowToAutocompleteJson(row) {
   return {
     tekst: row.vejnavn,
     vejnavnnavn: {
@@ -346,7 +346,7 @@ var vejnavnnavnApiSpec = {
   ],
   mappers: {
     json: vejnavnenavneJsonMapper,
-    autocomplete: vejnavnRowToAutocompleteJson
+    autocomplete: vejnavnnavnRowToAutocompleteJson
   }
 };
 
