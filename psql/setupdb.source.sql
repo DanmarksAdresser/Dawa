@@ -55,7 +55,7 @@ ALTER  TEXT SEARCH CONFIGURATION vejnavne ALTER MAPPING FOR asciiword,word,numwo
 \echo '*** Tables creation *******************************************************'
 \echo '***************************************************************************'
 \echo ''
-\echo '***** Creating postnumre table'
+\echo '***** Creating vejstykker table'
 DROP TABLE IF EXISTS vejstykker CASCADE;
 CREATE TABLE IF NOT EXISTS vejstykker (
   kommunekode integer NOT NULL,
