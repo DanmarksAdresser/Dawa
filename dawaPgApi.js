@@ -249,6 +249,16 @@ function streamAutocompleteResponse(stream, res, spec, options, done) {
 }
 
 /**
+ * When autocompleting, if per_side is not specified, it defaults to 20.
+ */
+function applyDefaultPagingForAutocomplete(pagingParams) {
+  if(!pagingParams.per_side) {
+    pagingParams.per_side = 20;
+  }
+  applyDefaultPaging(pagingParams);
+}
+
+/**
  * By default, if per_side is specified, side defaults to 1.
  * If side is specified, per_side defaults to 20.
  * @param pagingParams
@@ -386,7 +396,7 @@ function publishAutocomplete(app, spec) {
       if(pagingParamsParseResult.errors.length > 0) {
         return sendQueryParameterFormatError(res, pagingParamsParseResult.errors);
       }
-      applyDefaultPaging(pagingParamsParseResult.params);
+      applyDefaultPagingForAutocomplete(pagingParamsParseResult.params);
       sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParamsParseResult.params);
     }
 
