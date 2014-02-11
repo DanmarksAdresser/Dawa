@@ -12,7 +12,8 @@ block content
           ul#indhold.nav.nav-list.affix
             li(data-toggle='collapse', data-target='#postnummer').nav-header Postnummer API
             ul#postnummer.nav.nav-list
-              li <a href='#postnummersoegning'>Postnummersøgning</a>
+              li <a href='s#postnummersoegning'>Postnummersøgning</a>
+              li <a href='s#postnummerautocompletion'>Postnummer-autocompletion</a>
               li <a href='#postnummeropslag'>Postnummeropslag</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header postnummer hændelse
             ul#haendelser.nav.nav-list
@@ -44,15 +45,78 @@ block content
                     td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.
                   tr
                     td region
-                    td Regionkode. 4 cifre. Eksempel: 1085 for Region Sjælland.
+                    td Regionkode. 4 cifre. Eksempel: 1085 for Region Sjælland. (ikke med i prototype).
+                  tr
+                    td q
+                    td Helordssøgning. Se også autocompletion nedenfor.
+                  tr
+                    td side
+                    td Paginering. Hvilken side som skal returnenes. Default sat til 1.
+                  tr
+                    td per_side
+                    td Paginering. Antallet af postnumre i søgeresultatet. Default sat til 20.
               h4 Eksempler
-              p Find de postnumre hvis navn starter med <em>Al</em>
-              pre
-                a(href='http://#{url}/postnumre?navn=Al*') http://#{url}/postnumre?navn=Al*
-              p Find postnumrene i Aarhus kommune
-              pre
-                a(href='http://#{url}/postnumre?kommune=0751') http://#{url}/postnumre?kommune=0751
+              p Find postnumrene efter postnr, navn eller kommune
+              pre: a(href='http://#{url}/postnumre?postnr=8600') http://#{url}/postnumre?postnr=8600
+              pre: a(href='http://#{url}/postnumre?kommune=0751') http://#{url}/postnumre?kommune=0751
+              pre: a(href='http://#{url}/postnumre?navn=Silkeborg') http://#{url}/postnumre?navn=Silkeborg
 
+              p Find de postnummeret hvor navnet indeholder <em>Aarhus</em>
+              pre: a(href='http://#{url}/postnumre?q=Aarhus') http://#{url}/postnumre?q=Aarhus
+
+              p Del resultater op i sider
+              pre: a(href='http://#{url}/postnumre?side=1') http://#{url}/postnumre?side=1
+              pre: a(href='http://#{url}/postnumre?per_side=10') http://#{url}/postnumre?per_side=10
+              pre: a(href='http://#{url}/postnumre?side=3&per_side=5') http://#{url}/postnumre?side=3&per_side=5
+
+
+            div.page-header
+              h3.anchor-header#postnummerautocompletion Postnummer-autocompletion
+            p Autocomplete er identisk med den basale søgning, bortset for at q parameteren er prefikssøgning.
+            pre GET /postnumre/autocomplete
+            h4 Parametre
+            p
+              table.table.table-hover
+                thead
+                  th Navn
+                  th Beskrivelse
+                tbody
+                  tr
+                    td postnr
+                    td Postnummer. 4 cifre.
+                  tr
+                    td navn
+                    td Postnummernavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. navn=*rød* returnerer alle de postnumre, hvis navn rød på <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver.
+                  tr
+                    td kommune
+                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.
+                  tr
+                    td region
+                    td Regionkode. 4 cifre. Eksempel: 1085 for Region Sjælland. (ikke med i prototype).
+                  tr
+                    td q
+                    td Case insensitiv prefikssøgning. Finder resultater som starter med.
+                  tr
+                    td side
+                    td Paginering. Hvilken side som skal returnenes. Default sat til 1.
+                  tr
+                    td per_side
+                    td Paginering. Antallet af postnumre i søgeresultatet. Default sat til 20.
+              h4 Eksempler
+              p Find postnumrene efter postnr, navn eller kommune
+              pre: a(href='http://#{url}/postnumre/autocomplete?postnr=8600') http://#{url}/postnumre/autocomplete?postnr=8600
+              pre: a(href='http://#{url}/postnumre/autocomplete?kommune=0751') http://#{url}/postnumre/autocomplete?kommune=0751
+              pre: a(href='http://#{url}/postnumre/autocomplete?navn=Silkeborg') http://#{url}/postnumre/autocomplete?navn=Silkeborg
+
+              p Find de postnummeret hvor navnet starter med  <em>aar</em>
+              pre: a(href='http://#{url}/postnumre/autocomplete?q=aar') http://#{url}/postnumre/autocomplete?q=aar
+              p Find de postnummeret hvor navnet starter med  <em>aar</em> og ligger indenfor kommune <em>751</em>
+              pre: a(href='http://#{url}/postnumre/autocomplete?q=aar&kommune=751') http://#{url}/postnumre/autocomplete?q=aar&kommune=751
+
+              p Del resultater op i sider
+              pre: a(href='http://#{url}/postnumre/autocomplete?side=1') http://#{url}/postnumre/autocomplete?side=1
+              pre: a(href='http://#{url}/postnumre/autocomplete?per_side=10') http://#{url}/postnumre/autocomplete?per_side=10
+              pre: a(href='http://#{url}/postnumre/autocomplete?side=3&per_side=5') http://#{url}/postnumre/autocomplete?side=3&per_side=5
 
             div.page-header
               h3.anchor-header#postnummeropslag Postnummeropslag
