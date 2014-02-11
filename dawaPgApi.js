@@ -15,6 +15,8 @@ var util        = require('util');
 var csv         = require('csv');
 var parameterParsing = require('./parameterParsing');
 var apiSpec = require('./apiSpec');
+var Readable = require('stream').Readable;
+
 
 
 /******************************************************************************/
@@ -143,6 +145,77 @@ function publishGetByKey(app, spec) {
     });
   });
 }
+util.inherits(CursorStream, Readable);
+
+function CursorStream(client, cursorName) {
+  Readable.call(this, {
+    objectMode: true,
+    highWaterMark: 1000
+  });
+  this.client = client;
+  this.cursorName = cursorName;
+  this.maxFetchSize = 200;
+  this.closed = false;
+  this.moreRowsAvailable = true;
+  this.queryInProgress = false;
+}
+
+CursorStream.prototype._doFetch = function(count) {
+  var self = this;
+  if(self.queryInProgress) {
+    throw "Invalid state: Query already in progress";
+  }
+  if(!self.moreRowsAvailable) {
+    return;
+  }
+  self.queryInProgress = true;
+  var fetchSize = Math.min(self.maxFetchSize,count);
+  self.client.query('FETCH ' + fetchSize + ' FROM ' + self.cursorName, [], function(err, result) {
+    self.queryInProgress = false;
+    if(result.rows.length < fetchSize) {
+      self.moreRowsAvailable = false;
+    }
+    if(err) {
+      self.emit('error', err);
+      return;
+    }
+    result.rows.forEach(function(row) {
+      self.push(row);
+    });
+
+    if(!self.moreRowsAvailable && !self.closed) {
+      self.closed = true;
+      self.push(null);
+      self.client.query("CLOSE " + self.cursorName, [], function() {});
+      return;
+    }
+  });
+};
+
+
+CursorStream.prototype._read = function(count, cb) {
+  var self = this;
+  if(self.closed) {
+    console.log('attempted read from a closed source');
+    return;
+  }
+  if(!self.queryInProgress) {
+    self._doFetch(count);
+  }
+};
+
+function streamingQueryUsingCursor(client, sql, params, cb) {
+  sql = 'declare c1 NO SCROLL cursor for ' + sql;
+  client.query(
+    sql,
+    params, function (err, result) {
+      if(err) {
+        return cb(err);
+      }
+      cb(null, new CursorStream(client, 'c1'));
+    }
+  );
+}
 
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
@@ -190,10 +263,7 @@ function publishQuery(app, spec) {
       applyParameters(spec, apiSpec.searchParameterSpec, parameterParseResult.search, sqlParts);
     }
 
-    // If paging through results, we need to ensure a stable ordering of the results
-    if(spec.pageable && pagingParams.per_side) {
-      addOrderByKey(spec, sqlParts);
-    }
+    addOrderByKey(spec, sqlParts);
 
     var sqlString = createSqlQuery(sqlParts);
 
@@ -201,10 +271,12 @@ function publishQuery(app, spec) {
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
-      var stream = streamingQuery(client, sqlString, sqlParts.sqlParams);
-      streamHttpResponse(stream, res, spec, {
-        formatParams: formatParams
-      }, done);
+      streamingQueryUsingCursor(client, sqlString, sqlParts.sqlParams, function(err, stream) {
+        streamHttpResponse(stream, res, spec, {
+          formatParams: formatParams
+        }, done);
+      });
+//      var stream = streamingQuery(client, sqlString, sqlParts.sqlParams);
     });
   });
 }
@@ -456,11 +528,20 @@ function withPsqlClient(res, callback) {
   return pg.connect(connString, function (err, client, done) {
     if (err) {
       // We do not have a connection to PostgreSQL.
-      // About!
+      // Abort!
       sendInternalServerError(res, err);
       process.exit(1);
     }
-    callback(client, done);
+    client.query('BEGIN READ ONLY', [], function(err) {
+      if(err) {
+        sendInternalServerError(res, err);
+        done();
+      }
+      callback(client, function() {
+        client.query('ROLLBACK', function(err) {});
+        done();
+      });
+    });
   });
 }
 
