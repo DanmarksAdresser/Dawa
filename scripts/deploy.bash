@@ -33,6 +33,13 @@ if [ "$1" == "--help" ]; then
     exit 1
 fi
 
+read -p "Are you sure you want to deploy to production (y/n)? " choice
+case "$choice" in
+  y|Y ) echo "Beginning deployment...";;
+  n|N ) echo "Stopping..."; exit 0;;
+  * )   echo "Input not understood. Stopping..."; exit 1;;
+esac
+
 set -x
 
 GITHASH=`git rev-parse --short HEAD`
