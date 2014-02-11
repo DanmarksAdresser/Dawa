@@ -59,6 +59,24 @@ exports.setupRoutes = function () {
   return app;
 };
 
+/**
+ * Parses multiple groups of parameters.
+ * @param parameterSpecs a hash where values are lists of parameter specifications
+ * @param rawParams the query parameters
+ * @returns a hash where the values are the parsed parameters, plus an additional errors key that contains
+ * an array of parsing errors.
+ */
+function parseParameters(parameterSpecs, rawParams) {
+  return _.reduce(parameterSpecs, function(memo, parameterSpec, groupName) {
+    var parseResult = parameterParsing.parseParameters(rawParams, _.indexBy(parameterSpec, 'name'));
+    memo.errors = memo.errors.concat(parseResult.errors);
+    memo[groupName] = parseResult.params;
+    return memo;
+  }, {
+    errors: []
+  });
+}
+
 function publishGetByKey(app, spec) {
   var key = spec.model.key;
   var keyArray = _.isArray(key) ? key : [key];
@@ -66,7 +84,6 @@ function publishGetByKey(app, spec) {
     return memo + '/:' + key;
   }, '/' + spec.model.plural);
   app.get(path, function (req, res) {
-
     // Parsing the path parameters, which constitutes the key
     var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
     if (parseParamsResult.errors.length > 0){
@@ -130,18 +147,25 @@ function publishGetByKey(app, spec) {
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
 
-    // Parsing parameters specified by spec
-    var specifiedParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
-    if (specifiedParamsParseResult.errors.length > 0){
-      return sendQueryParameterFormatError(res, specifiedParamsParseResult.errors);
+    var parameterGroups = {
+      specified: spec.parameters,
+      format: apiSpec.formatParameterSpec
+    };
+    if(spec.pageable) {
+      parameterGroups.paging = apiSpec.pagingParameterSpec;
+    }
+    if(spec.searchable) {
+      parameterGroups.search = apiSpec.searchParameterSpec;
+    }
+    var parameterParseResult = parseParameters(parameterGroups, req.query);
+    if (parameterParseResult.errors.length > 0){
+      return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
+    var specifiedParams = parameterParseResult.specified;
+    var formatParams = parameterParseResult.format;
+
     // Parsing format parameter
-    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
-    if(formatParamsParseResult.errors.length > 0) {
-      return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
-    }
-    var formatParams = formatParamsParseResult.params;
 
     // verify that the callback parameter is specified for jsonp format
     if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
@@ -151,28 +175,25 @@ function publishQuery(app, spec) {
     // make the query string
     var sqlParts = initialQuery(spec);
 
-    applyParameters(spec, spec.parameters, specifiedParamsParseResult.params, sqlParts);
+    applyParameters(spec, spec.parameters, specifiedParams, sqlParts);
 
     // parse and apply paging parameters
+    var pagingParams = {};
     if(spec.pageable) {
-      var pagingParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
-      if(pagingParamsParseResult.errors.length > 0) {
-        return sendQueryParameterFormatError(res, pagingParamsParseResult.errors);
-      }
-      applyDefaultPaging(pagingParamsParseResult.params);
-      sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParamsParseResult.params);
+      pagingParams = parameterParseResult.paging;
+      applyDefaultPaging(pagingParams);
+      sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParams);
     }
 
     // Parse and apply search-parameter
     if(spec.searchable) {
-      var searchParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.searchParameterSpec, 'name'));
-      if (searchParamsParseResult.errors.length > 0){
-        return sendQueryParameterFormatError(res, searchParamsParseResult.errors);
-      }
-      applyParameters(spec, apiSpec.searchParameterSpec, searchParamsParseResult.params, sqlParts);
+      applyParameters(spec, apiSpec.searchParameterSpec, parameterParseResult.search, sqlParts);
     }
 
-    addOrderByKey(spec, sqlParts);
+    // If paging through results, we need to ensure a stable ordering of the results
+    if(spec.pageable && pagingParams.per_side) {
+      addOrderByKey(spec, sqlParts);
+    }
 
     var sqlString = createSqlQuery(sqlParts);
 
@@ -379,18 +400,22 @@ function addOrderByKey(spec, sqlParts) {
 
 function publishAutocomplete(app, spec) {
   app.get('/' + spec.model.plural + "/autocomplete", function(req, res) {
-    // Parsing parameters specified by spec
-    var specifiedParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(spec.parameters, 'name'));
-    if (specifiedParamsParseResult.errors.length > 0){
-      return sendQueryParameterFormatError(res, specifiedParamsParseResult.errors);
+    var parameterGroups = {
+      specified: spec.parameters,
+      format: apiSpec.formatParameterSpec,
+      paging: apiSpec.pagingParameterSpec,
+      autocomplete: apiSpec.autocompleteParameterSpec
+
+    };
+    var parameterParseResult = parseParameters(parameterGroups, req.query);
+    if (parameterParseResult.errors.length > 0){
+      return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
-    // Parsing format parameter
-    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
-    if(formatParamsParseResult.errors.length > 0) {
-      return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
-    }
-    var formatParams = formatParamsParseResult.params;
+    var specifiedParams = parameterParseResult.specified;
+    var formatParams = parameterParseResult.format;
+    var pagingParams = parameterParseResult.paging;
+    var autocompleteParams = parameterParseResult.autocomplete;
 
     // verify that the callback parameter is specified for jsonp format
     if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
@@ -400,24 +425,12 @@ function publishAutocomplete(app, spec) {
     // make the query string
     var sqlParts = initialQuery(spec);
 
-    applyParameters(spec, spec.parameters, specifiedParamsParseResult.params, sqlParts);
+    applyParameters(spec, spec.parameters, specifiedParams, sqlParts);
 
-    // parse and apply paging parameters
-    if(spec.pageable) {
-      var pagingParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.pagingParameterSpec, 'name'));
-      if(pagingParamsParseResult.errors.length > 0) {
-        return sendQueryParameterFormatError(res, pagingParamsParseResult.errors);
-      }
-      applyDefaultPagingForAutocomplete(pagingParamsParseResult.params);
-      sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParamsParseResult.params);
-    }
+    applyDefaultPagingForAutocomplete(pagingParams);
+    sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParams);
 
-    // Parse and apply autocomplete parameter
-    var autocompleteParams = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.autocompleteParameterSpec, 'name'));
-    if (autocompleteParams.errors.length > 0){
-      return sendQueryParameterFormatError(res, autocompleteParams.errors);
-    }
-    applyParameters(spec, apiSpec.autocompleteParameterSpec, autocompleteParams.params, sqlParts);
+    applyParameters(spec, apiSpec.autocompleteParameterSpec, autocompleteParams, sqlParts);
 
     // ensure stable ordering, which is required for paging
     addOrderByKey(spec, sqlParts);
