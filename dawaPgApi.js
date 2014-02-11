@@ -93,8 +93,8 @@ function parseParameters(parameterSpecs, rawParams) {
 }
 
 function publishGetByKey(app, spec) {
-  var key = spec.getKey ? spec.getKey : spec.model.key; // TODO getKey is a hack!!!
-  var keyArray = _.isArray(key) ? key : [key];
+var keyArray = apiSpec.getKeyForFilter(spec);
+
   var path = _.reduce(keyArray, function(memo, key) {
     return memo + '/:' + key;
   }, '/' + spec.model.plural);
@@ -102,11 +102,11 @@ function publishGetByKey(app, spec) {
     // Parsing the path parameters, which constitutes the key
     var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
     if (parseParamsResult.errors.length > 0){
-      if (parseParamsResult.errors[0][0] == key && parseParamsResult.errors.length == 1){
-        return sendResourceKeyFormatError(res, "The resource-key is ill-formed: "+req.params.id+". "+parseParamsResult.errors[0][1]);
-      } else {
-        return sendInternalServerError(res, 'Unexpected query-parameter error: '+util.inspect(parseParamsResult.errors, {depth: 10}));
-      }
+      var keyValues = _.reduce(keyArray, function(memo, key) {
+        memo.push(req.params[key]);
+        return memo;
+      }, []);
+      return sendResourceKeyFormatError(res, "The resource-key is ill-formed: " + keyValues.join(', ') + ". "+parseParamsResult.errors[0][1]);
     }
 
     // Parsing format parameters
@@ -480,7 +480,7 @@ function createOffsetLimitClause(params) {
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
 function addOrderByKey(spec, sqlParts) {
-  var keyArray = _.isArray(spec.model.key) ? spec.model.key : [spec.model.key];
+  var keyArray = apiSpec.getKeyForSelect(spec);
   keyArray.forEach(function (key) {
     sqlParts.orderClauses.push(getColumnName(spec, key));
   });

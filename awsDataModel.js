@@ -212,7 +212,10 @@ module.exports = {
     name: 'postnummer',
     plural: 'postnumre',
     schema: postnummerSchema,
-    key: 'nr',
+    key: {
+      select: 'nr',
+      filter: 'postnr'
+    },
     validate: makeValidator(postnummerSchema)
   },
 

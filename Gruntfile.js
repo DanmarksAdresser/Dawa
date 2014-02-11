@@ -13,10 +13,12 @@ module.exports = function (grunt) {
     },
     jasmine_node: {
       unit: {
-        specFolders: ['test/unit']
+        specFolders: ['test/unit'],
+        includeStackTrace: true
       },
       integration: {
-        specFolders: ['test/integration']
+        specFolders: ['test/integration'],
+        includeStackTrace: true
       }
     },
     express: {
@@ -63,7 +65,6 @@ module.exports = function (grunt) {
 
       done();
     };
-
     jasmine.executeSpecsInFolder(options);
   });
 };

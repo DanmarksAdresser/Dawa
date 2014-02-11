@@ -311,6 +311,16 @@ var adresseApiSpec = {
 var vejnavnFields = [
   {
     name: 'vejnavn'
+  },
+  {
+    name: 'postnr',
+    selectable: false,
+    column: 'vp.postnr'
+  },
+  {
+    name: 'kommunekode',
+    selectable: false,
+    column: 'vejstykker.kommunekode'
   }
 ];
 
@@ -323,7 +333,7 @@ var vejnavnJsonMapper = function(row) {
 function vejnavnRowToAutocompleteJson(row) {
   return {
     tekst: row.vejnavn,
-    vejnavnn: {
+    vejnavn: {
       vejnavn: row.vejnavn,
       href: BASE_URL + '/vejnavne/' + encodeURIComponent(row.vejnavn)
     }
@@ -342,12 +352,30 @@ var vejnavnApiSpec = {
   parameters: [
     {
       name: 'vejnavn'
+    },
+    {
+      name: 'postnr'
+    },
+    {
+      name: 'kommunekode'
     }
   ],
   mappers: {
     json: vejnavnJsonMapper,
     autocomplete: vejnavnRowToAutocompleteJson
+  },
+  baseQuery: function() {
+    return {
+      select: 'SELECT vejstykker.vejnavn' +
+        ' FROM vejstykker' +
+        ' LEFT JOIN vejstykkerPostnumreMat  vp ON (vp.kommunekode = vejstykker.kommunekode AND vp.vejkode = vejstykker.kode)',
+      whereClauses: [],
+      groupBy: 'vejstykker.vejnavn',
+      orderClauses: [],
+      sqlParams: []
+    };
   }
+
 };
 
 var postnummerFields = [{name: 'nr'},
@@ -365,7 +393,6 @@ var postnummerSpec = {
   suggestable: true,
   fields: postnummerFields,
   fieldMap: _.indexBy(postnummerFields, 'name'),
-  getKey: 'postnr', // TODO Hack!!! to overcome key incompatibility between crud api and postnumre api.
   parameters: [{name: 'postnr'},
                {name: 'navn'},
                {name: 'kommune'}
@@ -382,7 +409,7 @@ var postnummerSpec = {
         'LEFT JOIN postnumre_kommunekoder n ON m.nr = n.nr '+
         'LEFT JOIN postnumre p ON p.nr = m.nr ',
       whereClauses: [],
-      groupBy: 'p.nr, p.navn, p,version',
+      groupBy: 'p.nr, p.navn, p.version',
       orderClauses: [],
       sqlParams: []
     };
@@ -410,10 +437,12 @@ function postnummerRowToAutocompleteJson(row) {
 
 var vejstykkeFields = [
   {
-    name: 'kode'
+    name: 'kode',
+    column: 'vejstykker.kode'
   },
   {
-    name: 'kommunekode'
+    name: 'kommunekode',
+    column: 'vejstykker.kommunekode'
   },
   {
     name: 'navn',
@@ -427,7 +456,6 @@ var vejstykkeFields = [
 ];
 
 function vejstykkeJsonMapper(row) {
-  console.log(JSON.stringify(row));
   return {
     kode: row.kode,
     navn: row.vejnavn,
@@ -480,16 +508,16 @@ var vejstykkeSpec = {
         ' FROM vejstykker' +
         ' LEFT JOIN kommuner ON vejstykker.kommunekode = kommuner.kode' +
 
-        ' LEFT JOIN vejstykkerPostnr  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
+        ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
         ' LEFT JOIN PostnumreMini ON (PostnumreMini.nr = vp1.postnr)' +
-        ' LEFT JOIN vejstykkerPostnr vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
+        ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
       whereClauses: [],
       groupBy: 'vejstykker.kode, vejstykker.kommunekode',
       orderClauses: [],
       sqlParams: []
     };
   }
-}
+};
 
 
 var kommuneFields = [{name: 'kommunekode', column: 'kode'}, {name: 'navn'}];
@@ -580,7 +608,24 @@ module.exports = {
       whereClause: searchWhereClause,
       transform: toPgSuggestQuery
     }
-  ]
+  ],
+
+  getKeyForSelect: function(spec) {
+    var keySpec = spec.model.key;
+    if(!_.isArray(keySpec) && _.isObject(keySpec)) {
+      keySpec = keySpec.select;
+    }
+    return _.isArray(keySpec) ? keySpec : [keySpec];
+  },
+
+  getKeyForFilter: function(spec) {
+    var keySpec = spec.model.key;
+    if(!_.isArray(keySpec) && _.isObject(keySpec)) {
+      keySpec = keySpec.filter;
+    }
+    return _.isArray(keySpec) ? keySpec : [keySpec];
+  }
+
 };
 
 
