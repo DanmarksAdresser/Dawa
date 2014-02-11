@@ -10,13 +10,13 @@ block content
       div.row
         div.span3
           ul#indhold.nav.nav-list.affix
-            li(data-toggle='collapse', data-target='#postnummer').nav-header Postnummer API            
+            li(data-toggle='collapse', data-target='#postnummer').nav-header Postnummer API
             ul#postnummer.nav.nav-list
               li <a href='#postnummersoegning'>Postnummersøgning</a>
               li <a href='#postnummeropslag'>Postnummeropslag</a>
-            li(data-toggle='collapse', data-target='#haendelser').nav-header postnummer hændelse           
+            li(data-toggle='collapse', data-target='#haendelser').nav-header postnummer hændelse
             ul#haendelser.nav.nav-list
-            li(data-toggle='collapse', data-target='#postnummerdatanav').nav-header Postnummerdata            
+            li(data-toggle='collapse', data-target='#postnummerdatanav').nav-header Postnummerdata
             ul#postnummerdatanav.nav.nav-list
               li <a href='#postnummerdata'>Beskrivelse</a>
 
@@ -47,13 +47,13 @@ block content
                     td Regionkode. 4 cifre. Eksempel: 1085 for Region Sjælland.
               h4 Eksempler
               p Find de postnumre hvis navn starter med <em>Al</em>
-              pre 
+              pre
                 a(href='http://#{url}/postnumre?navn=Al*') http://#{url}/postnumre?navn=Al*
               p Find postnumrene i Aarhus kommune
-              pre 
+              pre
                 a(href='http://#{url}/postnumre?kommune=0751') http://#{url}/postnumre?kommune=0751
-             
-                    
+
+
             div.page-header
               h3.anchor-header#postnummeropslag Postnummeropslag
             p Modtag postnummer med id.
@@ -69,48 +69,47 @@ block content
                   td Postnummeret identificeres med 4 cifre.
             h4 Eksempel
             p Returner postnummer 2400
-            pre 
+            pre
               a(href='http://#{url}/postnumre/2400') http://#{url}/postnumre/2400
-          
-                       
+
+
             div.page-header
               h3.anchor-header#postnummerdata Beskrivelse af postnummerdata
-            p Ovenstående Web API udstiller postnumre. 
+            p Ovenstående Web API udstiller postnumre.
             p Web API'et udstiller for hver postnummer følgende informationer:
 
             table.table.table-hover
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody               
+              tbody
                 tr
                   td(colspan="3") nr
-                  td Unik identifikation af det postnummer som postnummern er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.  
-                
+                  td Unik identifikation af det postnummer som postnummern er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.
+
                 tr
                   td(colspan="3") navn
-                  td Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”. 
+                  td Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.
                 tr
                   td(colspan="3") stormodtageradresse
-                  td Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.   
+                  td Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.
                 tr
                   td(colspan="3") kommuner
-                  td De kommuner hvis areal overlapper postnumeret areal.  
+                  td De kommuner hvis areal overlapper postnumeret areal.
                 tr
                   td(colspan="3") regioner
-                  td De regioner hvis areal overlapper postnumeret areal.                    
+                  td De regioner hvis areal overlapper postnumeret areal.
                 tr
                   td(colspan="3") løbenr
                   td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
-                
+
 block append scripts
 
-  script 
+  script
     $('#topbar li').removeClass('active');
     var a= $("#topbar li a[href='postnummerdok']")[0];
-    var li= $(a).parent().addClass('active'); 
+    var li= $(a).parent().addClass('active');
     //$('#indhold li a').on('click', function() {
     //$('#indhold li').removeClass('active');
     //$(this).parent().addClass('active');
     //});
-    
