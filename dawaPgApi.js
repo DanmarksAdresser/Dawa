@@ -272,11 +272,15 @@ function publishQuery(app, spec) {
     // Getting the data
     withPsqlClient(res, function(client, done) {
       streamingQueryUsingCursor(client, sqlString, sqlParts.sqlParams, function(err, stream) {
+        if(err) {
+          console.log("Error executing cursor query");
+          done();
+          throw err;
+        }
         streamHttpResponse(stream, res, spec, {
           formatParams: formatParams
         }, done);
       });
-//      var stream = streamingQuery(client, sqlString, sqlParts.sqlParams);
     });
   });
 }
@@ -530,16 +534,16 @@ function withPsqlClient(res, callback) {
       // We do not have a connection to PostgreSQL.
       // Abort!
       sendInternalServerError(res, err);
-      process.exit(1);
+      return process.exit(1);
     }
     client.query('BEGIN READ ONLY', [], function(err) {
       if(err) {
         sendInternalServerError(res, err);
-        done();
+        return done();
       }
       callback(client, function() {
         client.query('ROLLBACK', function(err) {});
-        done();
+        return done();
       });
     });
   });
