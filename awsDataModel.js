@@ -119,7 +119,7 @@ var postnummerSchema =  {
     'regioner': {type: 'array',
                  items: { type: 'string'}}, //todo: pattern?
     'kommuner': {type: 'array',
-                 items: { '$ref': '#/definitions/Kode4'}},
+                 items: {type: 'integer'}},
   },
   'required': ['nr', 'navn', 'version'],
   'additionalProperties': false,

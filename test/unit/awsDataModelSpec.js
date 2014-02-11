@@ -40,7 +40,7 @@ describe("Postnummer schema validation", function () {
            version: 'ver1',
            stormodtageradresse: 'adr 1',
            regioner: ['9234', '9873'],
-           kommuner: ['9249', '3832']
+           kommuner: [9249, 3832]
           },
           model.postnummer.schema,
           done);
