@@ -245,6 +245,9 @@ CREATE INDEX ON Adgangsadresser(wgs84lat);
 CREATE INDEX ON Adgangsadresser(wgs84long);
 CREATE INDEX ON Adgangsadresser(vejkode, kommunekode, postnr);
 CREATE INDEX ON adgangsadresser(postnr);
+CREATE INDEX ON adgangsadresser(kommunekode);
+CREATE INDEX ON adgangsadresser(postnr, kommunekode);
+
 
 \echo '\n***** Loading adgangsadresse data'
 \COPY adgangsadresser (id, version, bygningsnavn, kommunekode, vejkode, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn, ejerlavkode, ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato) from  program 'gunzip -c :DATADIR:/AddressAccess.csv.gz | sed -f :SCRIPTDIR:/replaceDoubleQuotes.sed' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -393,18 +396,17 @@ LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
 LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
 LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
-DROP VIEW IF EXISTS vejstykkerView;
-DROP VIEW IF EXISTS PostnumreMini;
-DROP VIEW IF EXISTS vejstykkerPostnr;
-DROP VIEW IF EXISTS Vejnavnnavne;
-
+DROP VIEW IF EXISTS Vejnavne;
 CREATE VIEW Vejnavne AS SELECT DISTINCT vejnavn,tsv FROM vejstykker;
 
+DROP VIEW IF EXISTS vejstykkerPostnr;
 CREATE VIEW vejstykkerPostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
 
+DROP VIEW IF EXISTS PostnumreMini;
 CREATE VIEW PostnumreMini AS
   SELECT nr, navn FROM Postnumre;
 
+DROP VIEW IF EXISTS vejstykkerView;
 CREATE VIEW vejstykkerView AS
   SELECT
     vejstykker.kode,
@@ -420,5 +422,11 @@ CREATE VIEW vejstykkerView AS
       ON (vejstykkerPostnr.kommunekode = vejstykker.kommunekode AND vejstykkerPostnr.vejkode = vejstykker.kode)
     LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)
   GROUP BY vejstykker.kode, vejstykker.kommunekode;
+
+DROP VIEW IF EXISTS postnumre_kommunekoder;
+CREATE VIEW postnumre_kommunekoder AS
+select DISTINCT a.postnr nr, a.kommunekode kode
+from adgangsadresser a
+WHERE a.postnr is not null;
 
 \echo '\n***** Bootstrap complete!'
