@@ -463,8 +463,12 @@ if (cluster.isMaster && !cluseringDisabled) {
     app.use('/api', dawaApi(db));
     app.use('/api/pg', dawaPgApi.setupRoutes());
 
-    app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
+
+    //app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
+    app.use('', dawaPgApi.setupPublicRoutes());
+
     app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
+
     app.listen(listenPort);
     console.log("Express server listening on port %d in %s mode", listenPort, app.settings.env);
   });

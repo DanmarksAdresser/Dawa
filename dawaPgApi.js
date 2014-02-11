@@ -61,6 +61,19 @@ exports.setupRoutes = function () {
   return app;
 };
 
+exports.setupPublicRoutes = function () {
+  var app = express();
+  app.set('jsonp callback', true);
+  app.use(express.methodOverride());
+  app.use(express.bodyParser());
+
+  publishAutocomplete(app, apiSpec.postnummer);
+  publishGetByKey(app, apiSpec.postnummer);
+  publishQuery(app, apiSpec.postnummer);
+
+  return app;
+};
+
 /**
  * Parses multiple groups of parameters.
  * @param parameterSpecs a hash where values are lists of parameter specifications
