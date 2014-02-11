@@ -350,23 +350,50 @@ var vejnavnApiSpec = {
   }
 };
 
-var postnummerFields = [
-  {
-    name: 'nr'
+var postnummerFields = [{name: 'nr'},
+                        {name: 'navn'},
+                        {name: 'kommuner'},
+                        {name: 'version'},
+                        {name: 'postnr',  selectable: false, column: 'm.nr'},
+                        {name: 'kommune', selectable: false, column: 'n.kode'},
+                       ];
+
+var postnummerSpec = {
+  model: model.postnummer,
+  pageable: true,
+  searchable: true,
+  suggestable: true,
+  fields: postnummerFields,
+  fieldMap: _.indexBy(postnummerFields, 'name'),
+  parameters: [{name: 'postnr'},
+               {name: 'navn'},
+               {name: 'kommune'}
+              ],
+  mappers: {
+    json: postnummerJsonMapper,
+    autocomplete: postnummerRowToAutocompleteJson
   },
-  {
-    name: 'navn'
-  },
-  {
-    name: 'version'
+  baseQuery: function() {
+    return {
+      select:''+
+        'SELECT  p.nr, p.navn, p.version, json_agg(DISTINCT m.kode) kommuner '+
+        'FROM postnumre_kommunekoder m '+
+        'LEFT JOIN postnumre_kommunekoder n ON m.nr = n.nr '+
+        'LEFT JOIN postnumre p ON p.nr = m.nr ',
+      whereClauses: [],
+      groupBy: 'p.nr, p.navn, p,version',
+      orderClauses: [],
+      sqlParams: []
+    };
   }
-];
+};
 
 function postnummerJsonMapper(row) {
   return {
     nr: "" + row.nr,
     navn: row.navn,
-    version: row.version
+    version: row.version,
+    kommuner: row.kommuner
   };
 }
 
@@ -379,28 +406,6 @@ function postnummerRowToAutocompleteJson(row) {
     }
   };
 }
-
-
-var postnummerSpec = {
-  model: model.postnummer,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
-  fields: postnummerFields,
-  fieldMap: _.indexBy(postnummerFields, 'name'),
-  parameters: [
-    {
-      name: 'nr'
-    },
-    {
-      name: 'navn'
-    }
-  ],
-  mappers: {
-    json: postnummerJsonMapper,
-    autocomplete: postnummerRowToAutocompleteJson
-  }
-};
 
 var vejstykkeFields = [
   {
