@@ -80,7 +80,7 @@ function parseParameters(parameterSpecs, rawParams) {
 }
 
 function publishGetByKey(app, spec) {
-  var key = spec.model.key;
+  var key = spec.getKey ? spec.getKey : spec.model.key; // TODO getKey is a hack!!!
   var keyArray = _.isArray(key) ? key : [key];
   var path = _.reduce(keyArray, function(memo, key) {
     return memo + '/:' + key;

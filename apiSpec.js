@@ -365,6 +365,7 @@ var postnummerSpec = {
   suggestable: true,
   fields: postnummerFields,
   fieldMap: _.indexBy(postnummerFields, 'name'),
+  getKey: 'postnr', // TODO Hack!!! to overcome key incompatibility between crud api and postnumre api.
   parameters: [{name: 'postnr'},
                {name: 'navn'},
                {name: 'kommune'}
