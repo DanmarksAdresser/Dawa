@@ -396,6 +396,7 @@ LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
 LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
 LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
+DROP TABLE IF EXISTS Vejnavne;
 DROP VIEW IF EXISTS Vejnavne;
 CREATE VIEW Vejnavne AS SELECT DISTINCT vejnavn,tsv FROM vejstykker;
 
