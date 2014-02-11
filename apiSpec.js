@@ -420,7 +420,8 @@ var vejstykkeFields = [
   },
   {
     name: 'postnr',
-    selectable: false
+    selectable: false,
+    column: 'vp2.postnr'
   }
 ];
 
@@ -478,8 +479,9 @@ var vejstykkeSpec = {
         ' FROM vejstykker' +
         ' LEFT JOIN kommuner ON vejstykker.kommunekode = kommuner.kode' +
 
-        ' LEFT JOIN vejstykkerPostnr ON (vejstykkerPostnr.kommunekode = vejstykker.kommunekode AND vejstykkerPostnr.vejkode = vejstykker.kode)' +
-        ' LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)',
+        ' LEFT JOIN vejstykkerPostnr  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
+        ' LEFT JOIN PostnumreMini ON (PostnumreMini.nr = vp1.postnr)' +
+        ' LEFT JOIN vejstykkerPostnr vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
       whereClauses: [],
       groupBy: 'vejstykker.kode, vejstykker.kommunekode',
       orderClauses: [],
