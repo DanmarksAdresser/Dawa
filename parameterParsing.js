@@ -29,29 +29,32 @@ function parseParameter(valString, spec) {
   jsonSchemaValidation(val, spec.schema);
   return spec.transform ? spec.transform(val) : val;
 }
+
 function parseParameterType(valString, type) {
-  if (type === undefined || type === 'string'){
+  if (type === undefined || type === 'string') {
     return valString;
-  } else {
-    var val;
+  }
+  if(type === 'integer') {
+    if(!/^[0-9]+$/.test(valString)) {
+      throw 'notInteger';
+    }
+    return parseInt(valString, 10);
+  }
+  if(type === 'float') {
+    if(!/^(\-|\+)?[0-9]+(\.[0-9]+)?$/.test(valString)) {
+      throw 'notFloat';
+    }
+    return parseFloat(valString);
+  }
+  if(type === 'json') {
     try {
-      val = JSON.parse(valString);
+      return JSON.parse(valString);
     }
-    catch(error){
-      // When JSON parsing fails, just assume it is a string.
-      val = valString;
-    }
-    if(type === 'number'){
-      if (_.isNumber(val)) return val; else throw "notNumber";
-    } else if(type === 'array'){
-      if (_.isArray(val)) return val; else throw "notArray";
-    } else if(type === 'object'){
-      if (_.isObject(val) && !_.isArray(val)) return val; else throw "notObject";
-    }
-    else {
-      throw "unknownType";
+    catch(error) {
+      throw 'notJson';
     }
   }
+  throw 'Internal error: Invalid type ' + type + ' specified for parameter';
 }
 
 function jsonSchemaValidation(val, schema){

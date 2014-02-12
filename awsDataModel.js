@@ -212,10 +212,7 @@ module.exports = {
     name: 'postnummer',
     plural: 'postnumre',
     schema: postnummerSchema,
-    key: {
-      select: 'nr',
-      filter: 'postnr'
-    },
+    key: 'nr',
     validate: makeValidator(postnummerSchema)
   },
 
@@ -251,7 +248,7 @@ module.exports = {
     schema: kommuneSchema,
     key: 'kommunekode',
     validate: makeValidator(kommuneSchema)
-  },
+  }
 
 };
 

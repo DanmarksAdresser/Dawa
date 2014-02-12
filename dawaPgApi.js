@@ -15,6 +15,7 @@ var util        = require('util');
 var csv         = require('csv');
 var parameterParsing = require('./parameterParsing');
 var apiSpec = require('./apiSpec');
+var apiSpecUtil = require('./apiSpecUtil');
 var Readable = require('stream').Readable;
 
 
@@ -93,9 +94,10 @@ function parseParameters(parameterSpecs, rawParams) {
 }
 
 function publishGetByKey(app, spec) {
-var keyArray = apiSpec.getKeyForFilter(spec);
+var keyArray = apiSpecUtil.getKeyForFilter(spec);
 
   var path = _.reduce(keyArray, function(memo, key) {
+
     return memo + '/:' + key;
   }, '/' + spec.model.plural);
   app.get(path, function (req, res) {
@@ -218,6 +220,7 @@ CursorStream.prototype._read = function(count, cb) {
 };
 
 function streamingQueryUsingCursor(client, sql, params, cb) {
+  console.log("executing sql " + JSON.stringify({sq: sql, params: params}));
   sql = 'declare c1 NO SCROLL cursor for ' + sql;
   client.query(
     sql,
@@ -384,9 +387,6 @@ function applyDefaultPaging(pagingParams) {
   }
 }
 
-function getColumnName(spec, name) {
-  return spec.fieldMap[name].column || name;
-}
 function applyParameters(spec, parameterSpec, params, query) {
   parameterSpec.forEach(function (parameter) {
     var name = parameter.name;
@@ -395,7 +395,7 @@ function applyParameters(spec, parameterSpec, params, query) {
       if (parameter.whereClause) {
         query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length));
       } else {
-        var column = getColumnName(spec, name);
+        var column = apiSpecUtil.getColumnNameForWhere(spec, name);
         query.whereClauses.push(column + " = $" + query.sqlParams.length);
       }
     }
@@ -436,7 +436,7 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
         if(field.selectable && field.selectable === false) {
           return memo;
         }
-        memo[field.name] = row[field.column || field.name];
+        memo[field.name] = row[apiSpecUtil.getColumnNameForSelect(spec, field.name)];
         return memo;
       }, {});
     }),
@@ -480,9 +480,9 @@ function createOffsetLimitClause(params) {
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
 function addOrderByKey(spec, sqlParts) {
-  var keyArray = apiSpec.getKeyForSelect(spec);
+  var keyArray = apiSpecUtil.getKeyForSelect(spec);
   keyArray.forEach(function (key) {
-    sqlParts.orderClauses.push(getColumnName(spec, key));
+    sqlParts.orderClauses.push(apiSpecUtil.getColumnNameForSelect(spec, key));
   });
 }
 /******************************************************************************/

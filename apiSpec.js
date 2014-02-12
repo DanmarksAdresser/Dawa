@@ -112,8 +112,13 @@ function searchWhereClause(paramNumberString) {
   return "(tsv @@ to_tsquery('danish', " + paramNumberString + "))";
 }
 
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+
 function toPgSearchQuery(q) {
-  q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE]/g, ' ');
+  q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
 
   // normalize whitespace
   q = q.replace(/\s+/g, ' ');
@@ -122,11 +127,16 @@ function toPgSearchQuery(q) {
   q = q.replace(/^\s*/g, '');
   q = q.replace(/\s*$/g, '');
 
+  // tokenize the query
+  var tokens = q.split(' ');
+  tokens = _.map(tokens, function(token) {
+    if(endsWith(token, '*')) {
+      token = token.substring(0, token.length - 1) + ':*';
+    }
+    return token;
+  });
 
-  // translate spaces into AND clauses
-  var tsq = q.replace(/ /g, ' & ');
-
-  return tsq;
+  return tokens.join(' & ');
 }
 
 function toPgSuggestQuery(q) {
@@ -240,8 +250,11 @@ var schema =  {
   positiveInteger: {type: 'integer',
                     minimum: 1
                    },
-  kode4: {type: 'string',
-          pattern: '^(\\d{1,4})$'}
+  kode4: {
+    type: 'integer',
+    minimum: 0,
+    maximum: 9999
+  }
 };
 
 var adresseApiSpec = {
@@ -259,7 +272,7 @@ var adresseApiSpec = {
     },
     {
       name: 'vejkode',
-      type: 'string',
+      type: 'integer',
       schema: schema.kode4
     },
     {
@@ -273,7 +286,7 @@ var adresseApiSpec = {
     },
     {
       name: 'postnr',
-      type: 'number',
+      type: 'integer',
       schema: schema.postnr
     },
     {
@@ -296,7 +309,7 @@ var adresseApiSpec = {
     },
     {
       name: 'polygon',
-      type: 'array',
+      type: 'json',
       schema: schema.polygon,
       whereClause: polygonWhereClause,
       transform: polygonTransformer
@@ -354,10 +367,14 @@ var vejnavnApiSpec = {
       name: 'vejnavn'
     },
     {
-      name: 'postnr'
+      name: 'postnr',
+      type: 'integer',
+      schema: schema.postnr
     },
     {
-      name: 'kommunekode'
+      name: 'kommunekode',
+      type: 'integer',
+      schema: schema.kode4
     }
   ],
   mappers: {
@@ -375,16 +392,21 @@ var vejnavnApiSpec = {
       sqlParams: []
     };
   }
-
 };
 
-var postnummerFields = [{name: 'nr'},
-                        {name: 'navn'},
-                        {name: 'kommuner'},
-                        {name: 'version'},
-                        {name: 'postnr',  selectable: false, column: 'm.nr'},
-                        {name: 'kommune', selectable: false, column: 'n.kode'},
-                       ];
+var postnummerFields = [
+  {
+    name: 'nr',
+    column: {
+      select: 'nr',
+      where: 'm.nr'
+    }
+  },
+  {name: 'navn'},
+  {name: 'kommuner'},
+  {name: 'version'},
+  {name: 'kommune', selectable: false, column: 'n.kode'},
+];
 
 var postnummerSpec = {
   model: model.postnummer,
@@ -567,12 +589,12 @@ module.exports = {
   pagingParameterSpec: [
     {
       name: 'side',
-      type: 'number',
+      type: 'integer',
       schema: schema.positiveInteger
     },
     {
       name: 'per_side',
-      type: 'number',
+      type: 'integer',
       schema: schema.positiveInteger
     }
   ],
@@ -608,24 +630,7 @@ module.exports = {
       whereClause: searchWhereClause,
       transform: toPgSuggestQuery
     }
-  ],
-
-  getKeyForSelect: function(spec) {
-    var keySpec = spec.model.key;
-    if(!_.isArray(keySpec) && _.isObject(keySpec)) {
-      keySpec = keySpec.select;
-    }
-    return _.isArray(keySpec) ? keySpec : [keySpec];
-  },
-
-  getKeyForFilter: function(spec) {
-    var keySpec = spec.model.key;
-    if(!_.isArray(keySpec) && _.isObject(keySpec)) {
-      keySpec = keySpec.filter;
-    }
-    return _.isArray(keySpec) ? keySpec : [keySpec];
-  }
-
+  ]
 };
 
 

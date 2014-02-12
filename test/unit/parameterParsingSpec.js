@@ -10,12 +10,12 @@ var schema =  {
 var parameterSpec =  {
   anyValue:  {name: 'something'},
   aString:   {type: 'string'},
-  aNumber:   {type: 'number'},
-  anArray:   {type: 'array'},
-  anObject:  {type: 'object'},
-  anotherNumber: {type: 'number'},
+  aInteger:   {type: 'integer'},
+  aFloat: {type: 'float'},
+  objectJson: {type: 'json'},
+  arrayJson: {type: 'json'},
   uuid: {type: 'string',
-         schema: schema.uuid},
+         schema: schema.uuid}
 };
 
 describe("Parsing types with schemas", function () {
@@ -47,25 +47,17 @@ describe("Parsing parameters of type 'string'", function () {
 
 describe("Parsing parameters of different types", function () {
   it("should succeed", function (done) {
-    expect(parameterParsing.parseParameters({aString:'str', aNumber:"42", anotherNumber:"3.14", anArray:'[1,2,"3"]', anObject:'{"foo":42}'}, parameterSpec))
-      .toEqual({params: {aString: "str", aNumber: 42, anotherNumber: 3.14, anArray: [1,2,"3"], anObject: {foo:42}}, errors: []});
+    expect(parameterParsing.parseParameters({aString:'str', aInteger:"42", aFloat:"3.14", arrayJson:'[1,2,"3"]', objectJson:'{"foo":42}'}, parameterSpec))
+      .toEqual({params: {aString: "str", aInteger: 42, aFloat: 3.14, arrayJson: [1,2,"3"], objectJson: {foo:42}}, errors: []});
     done();
   });
 });
 
 describe("When Parsing parameters", function () {
   it("all errors should be returned", function (done) {
-    expect(parameterParsing.parseParameters({aString: "42", aNumber: "ad", anotherNumber: "[3.14]", anArray: "42", anObject: "42"}, parameterSpec))
-      .toEqual({params: {aString: '42'}, errors: [["aNumber", 'notNumber'],["anotherNumber", 'notNumber'],
-                                                  ["anArray", 'notArray'], ["anObject", 'notObject']]});
-    done();
-  });
-});
-
-describe("When Parsing object", function () {
-  it("arrays should not be accepted", function (done) {
-    expect(parameterParsing.parseParameters({anObject: "[1,2,3]"}, parameterSpec))
-      .toEqual({params: {}, errors: [['anObject', 'notObject']]});
+    expect(parameterParsing.parseParameters({aString: "42", aInteger: "ad", aFloat: "[3.14]", arrayJson: "a42", objectJson: "4,2"}, parameterSpec))
+      .toEqual({params: {aString: '42'}, errors: [["aInteger", 'notInteger'],["aFloat", 'notFloat'],
+                                                  ["arrayJson", 'notJson'], ["objectJson", 'notJson']]});
     done();
   });
 });

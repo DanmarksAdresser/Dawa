@@ -1,0 +1,33 @@
+mixin parameterDocQuery(apiSpec, docSpec)
+    pre= 'GET ' + url + '/' + apiSpec.model.plural
+    h4 Parametre
+    p
+        table.table.table-hover
+            thead
+                th Navn
+                th Beskrivelse
+            tbody
+                - each parameter in docSpec.parameters
+                    tr
+                        td= parameter.name
+                        td!= parameter.doc
+    h4 Eksempler
+    - each example in docSpec.examples.query
+        p!= example.description
+        pre
+            a(href=docUtil.computeQueryUrl(url, apiSpec, example.query))
+              = docUtil.computeQueryUrl(url, apiSpec, example.query)
+
+mixin parameterDocGet(apiSpec, docSpec)
+    pre= 'GET ' + docUtil.computeGetUrlTemplate(url, apiSpec)
+    h4 Parametre
+    p
+        table.table.table-hover
+            thead
+                th Navn
+                th Beskrivelse
+            tbody
+                - each parameter in docUtil.computeGetParameters(apiSpec, docSpec)
+                    tr
+                        td= parameter.name
+                        td!= parameter.doc
