@@ -92,7 +92,8 @@ UPDATE postnumre SET tsv = to_tsvector('danish', coalesce(to_char(nr,'0000'), ''
 DROP TABLE IF EXISTS kommuner;
 CREATE TABLE IF NOT EXISTS kommuner (
   kode integer NOT NULL PRIMARY KEY,
-  navn VARCHAR(20) NOT NULL
+  navn VARCHAR(20) NOT NULL,
+  tsv tsvector
 );
 
 \echo '\n***** Inserting kommunedata data'
@@ -198,6 +199,9 @@ VALUES (165, 'Albertslund'),
        (751, 'Aarhus');
 
 
+UPDATE kommuner SET tsv = to_tsvector('danish', coalesce(navn, '') || ' ' || kode);
+
+CREATE INDEX ON kommuner USING gin(tsv);
 \echo ''
 \echo ''
 \echo '***************************************************************************'
