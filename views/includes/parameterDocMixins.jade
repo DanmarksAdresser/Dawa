@@ -31,3 +31,9 @@ mixin parameterDocGet(apiSpec, docSpec)
                     tr
                         td= parameter.name
                         td!= parameter.doc
+    h4 Eksempler
+    - each example in docSpec.examples.get
+      p!= example.description
+      pre
+        a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
+          = docUtil.computeGetUrl(url, apiSpec, example.path)

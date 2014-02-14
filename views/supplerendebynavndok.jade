@@ -1,4 +1,5 @@
 extends layout
+include includes/parameterDocMixins
 
 block content
   header.jumbotron.subhead
@@ -25,56 +26,11 @@ block content
             div.page-header
               h3.anchor-header#supplerendebynavnsoegning Supplerende bynavnesøgning
             p Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet. 
-            pre GET /supplerendebynavne
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Supplerende bynavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de supplerende bynavne, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                 tr
-                    td alternativstavning
-                    td Alternativ stavning af supplerende bynavn. F.eks. alternativstavning=Soenderholm returnerer Sønderholm.  F.eks. alternativstavning=gl returnerer alle de supplerende bynavne, hvis supplerende bynavn starter på <em>Gl</em>, <em>Gl.</em> eller <em>Gammel</em>. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td kommune
-                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.        
-                  tr
-                    td region
-                    td Region. 4 cifre.   
-                  tr
-                    td postnr
-                    td Postnummer. 4 cifre.                                                         
-              h4 Eksempler
-              p Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em> 
-              pre 
-                a(href='http://#{url}/supplerendebynavne?postnr=2400&navn=Hvid*') http://#{url}/supplerendebynavne?postnr=2400&navn=Hvid*
-              p Find de supplerende bynavne hvis navn starter med <em>Aar</em> eller <em>År</em>
-              pre 
-                a(href='http://#{url}/supplerendebynavne?alternativstavning=år') http://#{url}/supplerendebynavne?alternativstavning=år
-
-            
+            +parameterDocQuery(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
             div.page-header
               h3.anchor-header#supplerendebynavnopslag Supplerende bynavnopslag
             p Modtag supplerende bynavn.
-            pre GET /supplerendebynavne/{navn}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td navn
-                  td Navn på supplerende bynavn.
-            h4 Eksempel
-            p Returner supplerende bynavn med navnet <em>Aarsballe</em>
-            pre 
-              a(href='http://#{url}/supplerendebynavne/Aarsballe') http://#{url}/supplerendebynavne/Aarsballe
-          
+            +parameterDocGet(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
             div.page-header
               h3.anchor-header#supplerendebynavndata Beskrivelse af supplerende bynavnedata
             p Ovenstående Web API udstiller supplerende bynavne. Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.

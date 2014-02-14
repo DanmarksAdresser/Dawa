@@ -84,6 +84,10 @@ exports.setupPublicRoutes = function () {
   publishGetByKey(app, apiSpec.vejstykke);
   publishQuery(app, apiSpec.vejstykke);
 
+  publishAutocomplete(app, apiSpec.supplerendeBynavn);
+  publishGetByKey(app, apiSpec.supplerendeBynavn);
+  publishQuery(app, apiSpec.supplerendeBynavn);
+
   return app;
 };
 

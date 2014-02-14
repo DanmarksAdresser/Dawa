@@ -40,12 +40,16 @@ app.get('/adgangsadressedok', function (req, res) {
   res.render('adgangsadressedok.jade', {url: req.headers.host});
 });
 
+function jadeDocumentationParams(req) {
+  return {url: req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
+}
+
 app.get('/vejnavndok', function (req, res) {
-  res.render('vejnavndok.jade', {url: req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil});
+  res.render('vejnavndok.jade', jadeDocumentationParams(req));
 });
 
 app.get('/supplerendebynavndok', function (req, res) {
-  res.render('supplerendebynavndok.jade', {url: req.headers.host});
+  res.render('supplerendebynavndok.jade', jadeDocumentationParams(req));
 });
 
 app.get('/postnummerdok', function (req, res) {

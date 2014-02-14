@@ -646,10 +646,10 @@ var supplerendeBynavnApiSpec = {
       name: 'navn'
     },
     {
-      navn: 'kommunekode'
+      name: 'kommunekode'
     },
     {
-      navn: 'postnr'
+      name: 'postnr'
     }
   ],
   mappers: {

@@ -113,7 +113,54 @@ var vejstykkerDoc = {
   }
 };
 
+var supplerendeBynavneDoc = {
+  parameters: [
+    {
+      name: 'q',
+      doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejnavnet. ' +
+        'Wildcard * er tilladt i slutningen af hvert ord.'
+    },
+    {
+      name: 'navn',
+      doc: 'Navnet på det supplerende bynavn, f.eks. <em>Holeby</em>',
+      examples: ['Holeby', 'Aabybro']
+    },
+    {
+      name: 'postnr',
+      doc: 'Postnummer. 4 cifre.',
+      examples: ['2700']
+    },
+    {
+      name: 'kommunekode',
+      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+      examples: ['0101']
+    }
+  ],
+  examples: {
+    query: [
+      {
+        description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
+        query: [
+          {
+            name: 'postnr',
+            value: '3700'
+          }
+          ]
+      },
+      {
+        description: 'Find de supplerende bynavne, hvor et ord i det supplerende bynavn starter med <em>aar</em>',
+        query: [
+          { name: 'q',
+            value: "aar*"
+          }
+          ]
+      }
+    ]
+  }
+};
+
 module.exports= {
   vejnavn: vejnavneDoc,
-  vejstykke: vejstykkerDoc
+  vejstykke: vejstykkerDoc,
+  supplerendeBynavn: supplerendeBynavneDoc
 };

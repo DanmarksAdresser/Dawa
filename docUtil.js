@@ -23,5 +23,10 @@ module.exports = {
       }).join('&');
     }
     return url;
+  },
+  computeGetUrl: function(baseUrl, spec, path) {
+    var url = baseUrl + '/' + spec.model.plural + '/';
+    url += _.map(path, encodeURIComponent).join('/');
+    return url;
   }
 };
