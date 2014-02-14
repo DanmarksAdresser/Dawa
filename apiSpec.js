@@ -172,13 +172,32 @@ function polygonTransformer(paramValue){
 function d(date) { return JSON.stringify(date); }
 //function defaultVal(val, def) { return val ? val : def;}
 
+function adressebetegnelse(adresseRow) {
+  var adresse = adresseRow.vejnavn;
+  if(adresseRow.husnr) {
+    adresse += ' ' + adresseRow.husnr;
+  }
+  if(adresseRow.etage) {
+    adresse += ' ' + adresseRow.etage + '.';
+  }
+  if(adresseRow.doer) {
+    adresse += ' ' + adresseRow.doer;
+  }
+  adresse += '\n';
+  if(adresseRow.supplerendebynavn) {
+    adresse += adresseRow.supplerendebynavn + '\n';
+  }
+  adresse += adresseRow.postnr + ' ' + adresseRow.postnrnavn;
+  return adresse;
+}
+
 function mapAddress(rs){
   var adr = {};
   adr.id = rs.enhedsadresseid;
   adr.version = d(rs.e_version);
   if (rs.etage) adr.etage = rs.etage;
   if (rs.doer) adr.dør = rs.doer;
-  adr.adressebetegnelse = "TODO";  //TODO
+  adr.adressebetegnelse = adressebetegnelse(rs);
   adr.adgangsadresse = mapAdganggsadresse(rs);
   return adr;
 }
