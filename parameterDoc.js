@@ -155,7 +155,12 @@ var supplerendeBynavneDoc = {
           }
           ]
       }
-    ]
+    ],
+    get: [
+      {
+        description: 'Hent det supplerende bynavn med navn <em>Aarsballe</em>',
+        path: ['Aarsballe']
+      }]
   }
 };
 

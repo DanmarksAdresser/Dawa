@@ -41,7 +41,8 @@ app.get('/adgangsadressedok', function (req, res) {
 });
 
 function jadeDocumentationParams(req) {
-  return {url: req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
+  var protocol = req.connection.encrypted ? 'https' : 'http';
+  return {url: protocol + '://' + req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
 }
 
 app.get('/vejnavndok', function (req, res) {
