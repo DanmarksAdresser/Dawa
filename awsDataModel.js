@@ -229,7 +229,7 @@ module.exports = {
     name: 'vejnavn',
     plural: 'vejnavne',
     schema: vejnavnnavnSchema,
-    key: 'vejnavn',
+    key: 'navn',
     validate: makeValidator(vejnavnnavnSchema)
   },
 

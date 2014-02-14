@@ -1,5 +1,5 @@
 extends layout
-
+include includes/parameterDocMixins
 block content
   header.jumbotron.subhead
     div.container
@@ -22,66 +22,29 @@ block content
 
         div.span9
           section
-            div.page-header
-              h3.anchor-header#vejnavnsoegning Vejnavnesøgning
+            h2 Vejnavne og vejstykker
+            p Et vejstykke er en vej, som er afgrænset af en kommune. Et vejstykke er identificeret ved en kommunekode og en vejkode og har desuden et navn. En vej som gennemløber mere end en kommune vil bestå af flere vejstykker. Det er p.t. ikke muligt at få information om hvilke vejstykker der er en del af den samme vej. Vejstykker er udstillet under /vejstykker
+            p Vejnavne er udstillet under /vejnavne. Her returneres kun unikke vejnavne.
+            h2 Vejnavne
+            h3.anchor-header#vejnavnsoegning Vejnavnesøgning
             p Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.
-            pre GET /vejnavne
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Vejnavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. vejnavn=rød* returnerer alle de adreser, hvis vejnavn starter på <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                 tr
-                    td alternativstavning
-                    td Alternativ stavning af vejnavn. F.eks. alternativstavning=Laesoegade returnerer Læsøgade.  F.eks. alternativstavning=gl returnerer alle de adreser, hvis vejnavn starter på <em>Gl</em>, <em>Gl.</em> eller <em>Gammel</em>. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td kommune
-                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.        
-                  tr
-                    td kode
-                    td Vejkode. 4 cifre. (ikke med i prototype)    
-                  tr
-                    td postnr
-                    td Postnummer. 4 cifre.                                                         
-              h4 Eksempler
-              p Find de vejnavne som i postnummeret <em>2400 København NV</em> og navnet starter med <em>Hvid</em> 
-              pre 
-                a(href='http://#{url}/vejnavne?postnr=2400&navn=Hvid*') http://#{url}/vejnavne?postnr=2400&navn=Hvid*
-              p Find de vejnavne hvis navn starter med <em>Gl</em>, <em>Gl.</em> eller <em>Gammel</em> og fortsætter <em>mø</em>
-              pre 
-                a(href='http://#{url}/vejnavne?alternativstavning=gl mø') http://#{url}/vejnavne?alternativstavning=gl mø
-
-            
+            +parameterDocQuery(apiSpec.vejnavn, parameterDoc.vejnavn)
             div.page-header
               h3.anchor-header#vejnavnopslag Vejnavnopslag
-            p Modtag vejnavn med id.
-            pre GET /vejnavne/{kommunekode}/{vejkode}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td kommunekode
-                  td Kommunekode. 4 cifre.
-                tr
-                  td vejkode
-                  td vejkode. 4 cifre.
-            h4 Eksempel
-            p Returner vejnavnet med kommunekoden 0101 for København og vejkoden 6099
-            pre 
-              a(href='http://#{url}/vejnavne/0101/6099') http://#{url}/vejnavne/0101/6099
-          
+            p Opslag på enkelt vejnavn
+            +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+            h2 Vejstykker
+            h3 Vejstykkesøgning
+            p Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.
+            +parameterDocQuery(apiSpec.vejstykke, parameterDoc.vejstykke)
+            h3 Vejstykkeopslag
+            p Opslag på enkelt vejstykke ud fra kommunekode og vejkode.
+            +parameterDocGet(apiSpec.vejstykke, parameterDoc.vejstykke)
+
             div.page-header
-              h3.anchor-header#vejnavndata Beskrivelse af vejnavnedata
-            p Ovenstående Web API udstiller vejnavne. 
-            p Web API'et udstiller for hver vejnavn følgende informationer:
+              h3.anchor-header#vejnavndata Beskrivelse af vejstykkedata
+            p Ovenstående Web API udstiller vejstykker.
+            p Web API'et udstiller for hver vejstykke følgende informationer:
 
             table.table.table-hover
               thead
@@ -90,7 +53,7 @@ block content
               tbody 
                 tr
                   td(colspan="3") kode
-                  td Identifikation af vejnavn. Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”. 
+                  td Identifikation af vejstykke. Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.
                 
                 tr
                   td(colspan="3") navn
@@ -128,8 +91,6 @@ block content
                   td(colspan="3") løbenr
                   td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
                 
-
-
 block append scripts
 
   script 

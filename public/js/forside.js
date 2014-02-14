@@ -91,7 +91,7 @@ function searchPostnr(input) {
     success: function (postnumre) {
       var items= [];
       $.each(postnumre, function (i, postnr) {
-        items.push(postnr.postnr + " " + postnr.navn);
+        items.push(postnr.nr + " " + postnr.navn);
       });
       $(input).autocomplete({
         source: items,
@@ -110,7 +110,7 @@ function searchVejnavn(pnr,vej) {
   if (match === null) return;
   var parametre= {postnr: match[1]}; 
   $.ajax({
-    url:'vejnavne.json',
+    url: apiBase + 'vejnavne',
     data: parametre,
     dataType: "json",
     error: function (xhr, status, errorThrown) {  
@@ -141,7 +141,7 @@ function searchHusnr(pnr,vej,husnr) {
   var parametre= {postnr: match[1], vejnavn: vtext}; 
   $.ajax({
     cache: true,
-    url:'adresser.json',
+    url: apiBase + 'adresser',
     data: parametre,
     dataType: "json",
     error: function (xhr, status, errorThrown) {  
@@ -151,7 +151,7 @@ function searchHusnr(pnr,vej,husnr) {
     success: function (adresser) {
       var husnumre= [];
       $.each(adresser, function (i, adresse) {
-        if (husnumre.indexOf(adresse.husnr) === -1) husnumre.push(adresse.husnr);
+        if (husnumre.indexOf(adresse.adgangsadresse.husnr) === -1) husnumre.push(adresse.adgangsadresse.husnr);
       });
       husnumre= husnumre.sort(function(a,b) {
                               var reg= /(\d+)([A-Z]*)/gi;
@@ -188,7 +188,7 @@ function searchEtage(pnr,vej,husnr,etage) {
   var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext}; 
   $.ajax({
     cache: true,
-    url:'adresser.json',
+    url: apiBase + 'adresser',
     data: parametre,
     dataType: "json",
     error: function (xhr, status, errorThrown) {  
@@ -225,7 +225,7 @@ function searchDør(pnr,vej,husnr,etage,doer) {
   var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext, etage: etext}; 
   $.ajax({
     cache: true,
-    url:'adresser.json',
+    url:apiBase + 'adresser',
     data: parametre,
     dataType: "json",
     error: function (xhr, status, errorThrown) {  

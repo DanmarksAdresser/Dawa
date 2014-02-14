@@ -7,7 +7,7 @@ module.exports = {
   computeGetUrlTemplate: function(baseUrl, spec) {
     return baseUrl + '/' + spec.model.plural + _.map(apiSpecUtil.getKeyForSelect(spec), function(keyPart) {
       return '/{' + keyPart + '}';
-    }).join();
+    }).join('');
   },
   computeGetParameters: function(apiSpec, docSpec) {
     var parameterNames = apiSpecUtil.getKeyForSelect(apiSpec);

@@ -9,6 +9,10 @@ var dawaStream          = require("./dawastream");
 var MongoClient         = require('mongodb').MongoClient;
 var dawaApi             = require('./dawaApi');
 var dawaPgApi           = require('./dawaPgApi');
+var apiSpec             = require('./apiSpec');
+var apiSpecUtil         = require('./apiSpecUtil');
+var parameterDoc        = require('./parameterDoc');
+var docUtil             = require('./docUtil');
 
 var app = express();
 
@@ -37,7 +41,7 @@ app.get('/adgangsadressedok', function (req, res) {
 });
 
 app.get('/vejnavndok', function (req, res) {
-  res.render('vejnavndok.jade', {url: req.headers.host});
+  res.render('vejnavndok.jade', {url: req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil});
 });
 
 app.get('/supplerendebynavndok', function (req, res) {
@@ -449,12 +453,14 @@ if (cluster.isMaster && !cluseringDisabled) {
   MongoClient.connect(process.env.connectionstring,function (err, database) {
     if (err) {
       console.warn('Database ikke åbnet: ' + err.message);
-      process.exit(1);
+//      process.exit(1);
     }
 
-    database.on('error', function (err) {
-      console.log('db.on(\'error\'):', err);
-    });
+    if(database) {
+      database.on('error', function (err) {
+        console.log('db.on(\'error\'):', err);
+      });
+    }
 
     var listenPort = process.env.PORT || 3000;
 
@@ -467,7 +473,7 @@ if (cluster.isMaster && !cluseringDisabled) {
     //app.get(/^\/postnumre(?:\.(\w+))?$/i, postnroperationer.sogpostnumre(db));
     app.use('', dawaPgApi.setupPublicRoutes());
 
-    app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
+    //app.get(/^\/vejnavne(?:\.(\w+))?$/i, vejnavneoperationer.sogvejnavne(db));
 
     app.listen(listenPort);
     console.log("Express server listening on port %d in %s mode", listenPort, app.settings.env);

@@ -249,6 +249,7 @@ CREATE INDEX ON Adgangsadresser(wgs84lat);
 CREATE INDEX ON Adgangsadresser(wgs84long);
 CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
 CREATE INDEX ON adgangsadresser(postnr, kommunekode);
+CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
 
 \echo '\n***** Loading adgangsadresse data'
 \COPY adgangsadresser (id, version, bygningsnavn, kommunekode, vejkode, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn, ejerlavkode, ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato) from  program 'gunzip -c :DATADIR:/AddressAccess.csv.gz | sed -f :SCRIPTDIR:/replaceDoubleQuotes.sed' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -461,5 +462,31 @@ CREATE VIEW postnumre_kommunekoder AS
   from VejstykkerPostnumreMat a
   WHERE a.postnr is not null;
 
+CREATE TABLE SupplerendeBynavne (
+  supplerendebynavn VARCHAR(34) NOT NULL,
+  kommunekode INTEGER NOT NULL,
+  postnr INTEGER NOT NULL,
+  tsv tsvector,
+  PRIMARY KEY (supplerendebynavn, kommunekode, postnr)
+);
+
+CREATE INDEX ON SupplerendeBynavne(kommunekode);
+CREATE INDEX ON SupplerendeBynavne(postnr);
+
+INSERT INTO SupplerendeBynavne(supplerendebynavn, kommunekode, postnr)
+  SELECT DISTINCT supplerendebynavn, kommunekode, postnr FROM AdgangsAdresser
+  WHERE supplerendebynavn IS NOT NULL and kommunekode IS NOT NULL and postnr IS NOT NULL;
+
+UPDATE SupplerendeBynavne SET tsv = to_tsvector('danish', supplerendebynavn);
+
+CREATE TYPE PostnummerRef AS (
+nr integer,
+navn varchar
+);
+
+CREATE TYPE KommuneRef AS (
+  kode integer,
+  navn varchar
+);
 
 \echo '\n***** Bootstrap complete!'

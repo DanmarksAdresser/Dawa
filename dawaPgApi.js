@@ -56,9 +56,13 @@ exports.setupRoutes = function () {
   publishGetByKey(app, apiSpec.vejstykke);
   publishQuery(app, apiSpec.vejstykke);
 
+  publishAutocomplete(app, apiSpec.kommune);
   publishGetByKey(app, apiSpec.kommune);
   publishQuery(app, apiSpec.kommune);
 
+  publishAutocomplete(app, apiSpec.supplerendeBynavn);
+  publishGetByKey(app, apiSpec.supplerendeBynavn);
+  publishQuery(app, apiSpec.supplerendeBynavn);
   return app;
 };
 
@@ -71,6 +75,14 @@ exports.setupPublicRoutes = function () {
   publishAutocomplete(app, apiSpec.postnummer);
   publishGetByKey(app, apiSpec.postnummer);
   publishQuery(app, apiSpec.postnummer);
+
+  publishAutocomplete(app, apiSpec.vejnavn);
+  publishGetByKey(app, apiSpec.vejnavn);
+  publishQuery(app, apiSpec.vejnavn);
+
+  publishAutocomplete(app, apiSpec.vejstykke);
+  publishGetByKey(app, apiSpec.vejstykke);
+  publishQuery(app, apiSpec.vejstykke);
 
   return app;
 };
@@ -140,17 +152,18 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
           if (err) {
             sendInternalServerError(res, err);
           } else if (result.rows.length === 1) {
-            var adr = spec.mappers.json(result.rows[0]);
-            spec.model.validate(adr)
-              .then(function (report) {
-                // The good case.  The rest is error handling!
+// TODO fix validation rules
+//            var adr = spec.mappers.json(result.rows[0]);
+//            spec.model.validate(adr)
+//              .then(function (report) {
+//                // The good case.  The rest is error handling!
                 sendSingleResultToHttpResponse(result.rows[0], res, spec, {
                   formatParams: formatParams
                 }, done);
-              })
-              .catch(function (err) {
-                sendInternalServerError(res, err);
-              });
+//              })
+//              .catch(function (err) {
+//                sendInternalServerError(res, err);
+//              });
           } else if (result.rows.length > 1) {
             sendInternalServerError(res, "UUID: "+req.params.id+", results in more than one address: "+result.rows);
           } else {
@@ -187,12 +200,12 @@ CursorStream.prototype._doFetch = function(count) {
   var fetchSize = Math.min(self.maxFetchSize,count);
   self.client.query('FETCH ' + fetchSize + ' FROM ' + self.cursorName, [], function(err, result) {
     self.queryInProgress = false;
-    if(result.rows.length < fetchSize) {
-      self.moreRowsAvailable = false;
-    }
     if(err) {
       self.emit('error', err);
       return;
+    }
+    if(result.rows.length < fetchSize) {
+      self.moreRowsAvailable = false;
     }
     result.rows.forEach(function(row) {
       self.push(row);
@@ -393,7 +406,7 @@ function applyParameters(spec, parameterSpec, params, query) {
     if (params[name] !== undefined) {
       query.sqlParams.push(params[name]);
       if (parameter.whereClause) {
-        query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length));
+        query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length, spec));
       } else {
         var column = apiSpecUtil.getColumnNameForWhere(spec, name);
         query.whereClauses.push(column + " = $" + query.sqlParams.length);

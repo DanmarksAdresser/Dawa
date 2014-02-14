@@ -4,6 +4,8 @@ var model = require('./awsDataModel');
 var _     = require('underscore');
 
 var BASE_URL = 'http://dawa.aws.dk/api/pg';
+
+var apiSpecUtil = require('./apiSpecUtil');
 /**
  * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
  * Felterne anvendes som kolonner i CSV-formateringen af adresser.
@@ -102,14 +104,19 @@ var adresseFields = [
   {
     name: 'DDKN_km10',
     column: 'kn10kmdk'
+  },
+  {
+    name: 'tsv',
+    selectable: false
   }
 ];
 function polygonWhereClause(paramNumberString){
   return "ST_Contains(ST_GeomFromText("+paramNumberString+", 4326)::geometry, wgs84geom)\n";
 }
 
-function searchWhereClause(paramNumberString) {
-  return "(tsv @@ to_tsquery('danish', " + paramNumberString + "))";
+function searchWhereClause(paramNumberString, spec) {
+  var columnName = apiSpecUtil.getSearchColumn(spec);
+  return "(" + columnName + " @@ to_tsquery('danish', " + paramNumberString + "))";
 }
 
 function endsWith(str, suffix) {
@@ -170,7 +177,7 @@ function mapAddress(rs){
   adr.id = rs.enhedsadresseid;
   adr.version = d(rs.e_version);
   if (rs.etage) adr.etage = rs.etage;
-  if (rs.dør) adr.dør = rs.doer;
+  if (rs.doer) adr.dør = rs.doer;
   adr.adressebetegnelse = "TODO";  //TODO
   adr.adgangsadresse = mapAdganggsadresse(rs);
   return adr;
@@ -323,7 +330,7 @@ var adresseApiSpec = {
 
 var vejnavnFields = [
   {
-    name: 'vejnavn'
+    name: 'navn'
   },
   {
     name: 'postnr',
@@ -334,21 +341,25 @@ var vejnavnFields = [
     name: 'kommunekode',
     selectable: false,
     column: 'vejstykker.kommunekode'
+  },
+  {
+    name: 'tsv',
+    selectable : false
   }
 ];
 
 var vejnavnJsonMapper = function(row) {
   return {
-    vejnavn: row.vejnavn
+    navn: row.navn
   };
 };
 
 function vejnavnRowToAutocompleteJson(row) {
   return {
-    tekst: row.vejnavn,
+    tekst: row.navn,
     vejnavn: {
-      vejnavn: row.vejnavn,
-      href: BASE_URL + '/vejnavne/' + encodeURIComponent(row.vejnavn)
+      navn: row.navn,
+      href: BASE_URL + '/vejnavne/' + encodeURIComponent(row.navn)
     }
   };
 }
@@ -364,7 +375,7 @@ var vejnavnApiSpec = {
   fieldMap: _.indexBy(vejnavnFields, 'name'),
   parameters: [
     {
-      name: 'vejnavn'
+      name: 'navn'
     },
     {
       name: 'postnr',
@@ -383,11 +394,11 @@ var vejnavnApiSpec = {
   },
   baseQuery: function() {
     return {
-      select: 'SELECT vejstykker.vejnavn' +
+      select: 'SELECT vejstykker.vejnavn as navn' +
         ' FROM vejstykker' +
         ' LEFT JOIN vejstykkerPostnumreMat  vp ON (vp.kommunekode = vejstykker.kommunekode AND vp.vejkode = vejstykker.kode)',
       whereClauses: [],
-      groupBy: 'vejstykker.vejnavn',
+      groupBy: 'navn',
       orderClauses: [],
       sqlParams: []
     };
@@ -406,6 +417,7 @@ var postnummerFields = [
   {name: 'kommuner'},
   {name: 'version'},
   {name: 'kommune', selectable: false, column: 'n.kode'},
+  {name: 'tsv', selectable: false}
 ];
 
 var postnummerSpec = {
@@ -474,6 +486,10 @@ var vejstykkeFields = [
     name: 'postnr',
     selectable: false,
     column: 'vp2.postnr'
+  },
+  {
+    name: 'tsv',
+    selectable: false
   }
 ];
 
@@ -542,7 +558,7 @@ var vejstykkeSpec = {
 };
 
 
-var kommuneFields = [{name: 'kommunekode', column: 'kode'}, {name: 'navn'}];
+var kommuneFields = [{name: 'kommunekode', column: 'kode'}, {name: 'navn'}, {name: 'tsv', selectable: false}];
 
 var kommuneApiSpec = {
   model: model.kommune,
@@ -564,7 +580,7 @@ var kommuneApiSpec = {
 function kommuneJsonMapper(row) {
   return {
     kode: row.kode,
-    navn: row.navn,
+    navn: row.navn
   };
 };
 
@@ -578,6 +594,82 @@ function kommuneRowToAutocompleteJson(row) {
   };
 }
 
+var supplerendeBynavnFields = [
+  {
+    name: 'navn',
+    column: 'supplerendebynavn'
+  },
+  {
+    name: 'kommunekode',
+    selectable: false,
+    column: 'supplerendebynavne.kommunekode'
+  },
+  {
+    name: 'postnr',
+    selectable: false,
+    column: 'supplerendebynavne.postnr'
+  },
+  {
+    name: 'tsv',
+    selectable: false,
+    column: 'supplerendebynavne.tsv'
+  }
+]
+
+var supplerendeByavnJsonMapper = function(row) {
+  return {
+    navn: row.supplerendebynavn,
+    postnumre: row.postnumre,
+    kommuner: row.kommuner
+  };
+};
+
+var supplerendeBynavnAutocompleteMapper = function(row) {
+  return {
+    tekst: row.supplerendebynavn,
+    supplerendeBynavn: {
+      href: BASE_URL + '/supplerendebynavne/' + encodeURIComponent(row.supplerendebynavn),
+      navn: row.supplerendebynavn
+    }
+  }
+}
+
+var supplerendeBynavnApiSpec = {
+  model: model.supplerendebynavn,
+  pageable: true,
+  searchable: true,
+  suggestable: true,
+  fields: supplerendeBynavnFields,
+  fieldMap: _.indexBy(supplerendeBynavnFields, 'name'),
+  parameters: [
+    {
+      name: 'navn'
+    },
+    {
+      navn: 'kommunekode'
+    },
+    {
+      navn: 'postnr'
+    }
+  ],
+  mappers: {
+    json: supplerendeByavnJsonMapper,
+    autocomplete: supplerendeBynavnAutocompleteMapper
+  },
+  baseQuery: function() {
+    return {
+      select: 'SELECT supplerendebynavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) as postnumre, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner' +
+        ' FROM supplerendebynavne' +
+        ' LEFT JOIN kommuner k ON supplerendebynavne.kommunekode = k.kode' +
+        ' LEFT JOIN postnumre p ON supplerendebynavne.postnr = p.nr',
+      whereClauses: [],
+      groupBy: 'supplerendebynavne.supplerendebynavn',
+      orderClauses: [],
+      sqlParams: []
+    };
+  }
+};
+
 
 module.exports = {
   adresse: adresseApiSpec,
@@ -585,6 +677,7 @@ module.exports = {
   postnummer: postnummerSpec,
   vejstykke: vejstykkeSpec,
   kommune: kommuneApiSpec,
+  supplerendeBynavn: supplerendeBynavnApiSpec,
 
   pagingParameterSpec: [
     {

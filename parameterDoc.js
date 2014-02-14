@@ -10,7 +10,7 @@ var vejnavneDoc = {
       examples: ['tværvej']
     },
     {
-      name: 'vejnavn',
+      name: 'navn',
       doc: "Vejnavn. Der skelnes mellem store og små bokstaver.",
       examples: ['Margrethepladsen', 'Viborgvej']
     },
@@ -64,7 +64,7 @@ var vejstykkerDoc = {
       examples: ['tværvej']
     },
     {
-      name: 'vejnavn',
+      name: 'navn',
       doc: "Vejnavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning.",
       examples: ['Margrethepladsen', 'Viborgvej']
     },
