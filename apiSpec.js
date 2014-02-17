@@ -475,7 +475,8 @@ var adgangsadresseApiSpec = {
 
 var vejnavnFields = [
   {
-    name: 'navn'
+    name: 'navn',
+    column: 'vejstykker.vejnavn'
   },
   {
     name: 'postnr',
@@ -543,7 +544,7 @@ var vejnavnApiSpec = {
         ' FROM vejstykker' +
         ' LEFT JOIN vejstykkerPostnumreMat  vp ON (vp.kommunekode = vejstykker.kommunekode AND vp.vejkode = vejstykker.kode)',
       whereClauses: [],
-      groupBy: 'navn',
+      groupBy: 'vejstykker.vejnavn',
       orderClauses: [],
       sqlParams: []
     };
