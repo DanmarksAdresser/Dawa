@@ -3,9 +3,9 @@ include includes/parameterDocMixins
 block content
   header.jumbotron.subhead
     div.container
-      h1 Vejnavne
+      h1 Veje
       div.page-header
-        p.lead Web API'et udstiller Danmarks vejnavne samt tilhørende funktionalitet.
+        p.lead Web API'et udstiller Danmarks vejnavne og vejstykker samt tilhørende funktionalitet.
     div.container
       div.row
         div.span3
@@ -13,7 +13,11 @@ block content
             li(data-toggle='collapse', data-target='#vejnavn').nav-header Vejnavne API
             ul#vejnavn.nav.nav-list
               li <a href='#vejnavnsoegning'>Vejnavnesøgning</a>
-              li <a href='#vejnavnopslag'>Vejnavnopslag</a>
+              li <a href='#vejnavneopslag'>Vejnavneopslag</a>
+            li(data-toggle='collapse', data-target='#vejstykke').nav-header Vejstykke API
+            ul#vejstykke.nav.nav-list
+              li <a href='#vejstykkesoegning'>Vejstykkesøgning</a>
+              li <a href='#vejstykkeopslag'>Vejstykkeopslag</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header vejnavn hændelse
             ul#haendelser.nav.nav-list
             li(data-toggle='collapse', data-target='#vejnavndatanav').nav-header vejnavndata
@@ -25,24 +29,31 @@ block content
             h2 Vejnavne og vejstykker
             p Et vejstykke er en vej, som er afgrænset af en kommune. Et vejstykke er identificeret ved en kommunekode og en vejkode og har desuden et navn. En vej som gennemløber mere end en kommune vil bestå af flere vejstykker. Det er p.t. ikke muligt at få information om hvilke vejstykker der er en del af den samme vej. Vejstykker er udstillet under /vejstykker
             p Vejnavne er udstillet under /vejnavne. Her returneres kun unikke vejnavne.
+
+            div.page-header
             h2 Vejnavne
             h3.anchor-header#vejnavnsoegning Vejnavnesøgning
             p Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.
             +parameterDocQuery(apiSpec.vejnavn, parameterDoc.vejnavn)
+
             div.page-header
-              h3.anchor-header#vejnavnopslag Vejnavnopslag
+            h3.anchor-header#vejnavneopslag Vejnavneopslag
             p Opslag på enkelt vejnavn
             +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+
+            div.page-header
             h2 Vejstykker
-            h3 Vejstykkesøgning
+            h3.anchor-header#vejstykkesoegning Vejstykkesøgning
             p Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.
             +parameterDocQuery(apiSpec.vejstykke, parameterDoc.vejstykke)
-            h3 Vejstykkeopslag
+
+            div.page-header
+            h3.anchor-header#vejstykkeopslag Vejstykkeopslag
             p Opslag på enkelt vejstykke ud fra kommunekode og vejkode.
             +parameterDocGet(apiSpec.vejstykke, parameterDoc.vejstykke)
 
             div.page-header
-              h3.anchor-header#vejnavndata Beskrivelse af vejstykkedata
+            h3.anchor-header#vejnavndata Beskrivelse af vejstykkedata
             p Ovenstående Web API udstiller vejstykker.
             p Web API'et udstiller for hver vejstykke følgende informationer:
 
@@ -95,7 +106,7 @@ block append scripts
 
   script
     $('#topbar li').removeClass('active');
-    var a= $("#topbar li a[href='vejnavndok']")[0];
+    var a= $("#topbar li a[href='vejedok']")[0];
     var li= $(a).parent().addClass('active');
     //$('#indhold li a').on('click', function() {
     //$('#indhold li').removeClass('active');

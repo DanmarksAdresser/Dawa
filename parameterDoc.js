@@ -51,7 +51,9 @@ var vejnavneDoc = {
       }
 
     ],
-    get: []
+    get: [{ description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
+            path: ['Gammel Viborgvej']
+          }]
   }
 };
 
@@ -110,7 +112,9 @@ var vejstykkerDoc = {
         ]
       }
     ],
-    get: []
+    get: [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>322</em>',
+            path: ['0101', '322']
+          }]
   }
 };
 

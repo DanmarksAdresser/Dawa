@@ -45,8 +45,8 @@ function jadeDocumentationParams(req) {
   return {url: protocol + '://' + req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
 }
 
-app.get('/vejnavndok', function (req, res) {
-  res.render('vejnavndok.jade', jadeDocumentationParams(req));
+app.get('/vejedok', function (req, res) {
+  res.render('vejedok.jade', jadeDocumentationParams(req));
 });
 
 app.get('/supplerendebynavndok', function (req, res) {
