@@ -58,17 +58,17 @@ block content
                     td Paginering. Antallet af postnumre i søgeresultatet. Default sat til 20.
               h4 Eksempler
               p Find postnumrene efter postnr, navn eller kommune
-              pre: a(href='http://#{url}/postnumre?postnr=8600') http://#{url}/postnumre?postnr=8600
-              pre: a(href='http://#{url}/postnumre?kommune=0751') http://#{url}/postnumre?kommune=0751
-              pre: a(href='http://#{url}/postnumre?navn=Silkeborg') http://#{url}/postnumre?navn=Silkeborg
+              pre: a(href='#{url}/postnumre?postnr=8600') #{url}/postnumre?postnr=8600
+              pre: a(href='#{url}/postnumre?kommune=0751') #{url}/postnumre?kommune=0751
+              pre: a(href='#{url}/postnumre?navn=Silkeborg') #{url}/postnumre?navn=Silkeborg
 
               p Find de postnummeret hvor navnet indeholder <em>Aarhus</em>
-              pre: a(href='http://#{url}/postnumre?q=Aarhus') http://#{url}/postnumre?q=Aarhus
+              pre: a(href='#{url}/postnumre?q=Aarhus') #{url}/postnumre?q=Aarhus
 
               p Del resultater op i sider
-              pre: a(href='http://#{url}/postnumre?side=1') http://#{url}/postnumre?side=1
-              pre: a(href='http://#{url}/postnumre?per_side=10') http://#{url}/postnumre?per_side=10
-              pre: a(href='http://#{url}/postnumre?side=3&per_side=5') http://#{url}/postnumre?side=3&per_side=5
+              pre: a(href='#{url}/postnumre?side=1') #{url}/postnumre?side=1
+              pre: a(href='#{url}/postnumre?per_side=10') #{url}/postnumre?per_side=10
+              pre: a(href='#{url}/postnumre?side=3&per_side=5') #{url}/postnumre?side=3&per_side=5
 
 
             div.page-header
@@ -105,19 +105,19 @@ block content
                     td Paginering. Antallet af postnumre i søgeresultatet. Default sat til 20.
               h4 Eksempler
               p Find postnumrene efter postnr, navn eller kommune
-              pre: a(href='http://#{url}/postnumre/autocomplete?postnr=8600') http://#{url}/postnumre/autocomplete?postnr=8600
-              pre: a(href='http://#{url}/postnumre/autocomplete?kommune=0751') http://#{url}/postnumre/autocomplete?kommune=0751
-              pre: a(href='http://#{url}/postnumre/autocomplete?navn=Silkeborg') http://#{url}/postnumre/autocomplete?navn=Silkeborg
+              pre: a(href='#{url}/postnumre/autocomplete?postnr=8600') #{url}/postnumre/autocomplete?postnr=8600
+              pre: a(href='#{url}/postnumre/autocomplete?kommune=0751') #{url}/postnumre/autocomplete?kommune=0751
+              pre: a(href='#{url}/postnumre/autocomplete?navn=Silkeborg') #{url}/postnumre/autocomplete?navn=Silkeborg
 
               p Find de postnummeret hvor navnet starter med  <em>aar</em>
-              pre: a(href='http://#{url}/postnumre/autocomplete?q=aar') http://#{url}/postnumre/autocomplete?q=aar
+              pre: a(href='#{url}/postnumre/autocomplete?q=aar') #{url}/postnumre/autocomplete?q=aar
               p Find de postnummeret hvor navnet starter med  <em>aar</em> og ligger indenfor kommune <em>751</em>
-              pre: a(href='http://#{url}/postnumre/autocomplete?q=aar&kommune=751') http://#{url}/postnumre/autocomplete?q=aar&kommune=751
+              pre: a(href='#{url}/postnumre/autocomplete?q=aar&kommune=751') #{url}/postnumre/autocomplete?q=aar&kommune=751
 
               p Del resultater op i sider
-              pre: a(href='http://#{url}/postnumre/autocomplete?side=1') http://#{url}/postnumre/autocomplete?side=1
-              pre: a(href='http://#{url}/postnumre/autocomplete?per_side=10') http://#{url}/postnumre/autocomplete?per_side=10
-              pre: a(href='http://#{url}/postnumre/autocomplete?side=3&per_side=5') http://#{url}/postnumre/autocomplete?side=3&per_side=5
+              pre: a(href='#{url}/postnumre/autocomplete?side=1') #{url}/postnumre/autocomplete?side=1
+              pre: a(href='#{url}/postnumre/autocomplete?per_side=10') #{url}/postnumre/autocomplete?per_side=10
+              pre: a(href='#{url}/postnumre/autocomplete?side=3&per_side=5') #{url}/postnumre/autocomplete?side=3&per_side=5
 
             div.page-header
               h3.anchor-header#postnummeropslag Postnummeropslag
@@ -135,7 +135,7 @@ block content
             h4 Eksempel
             p Returner postnummer 2400
             pre
-              a(href='http://#{url}/postnumre/2400') http://#{url}/postnumre/2400
+              a(href='#{url}/postnumre/2400') #{url}/postnumre/2400
 
 
             div.page-header
