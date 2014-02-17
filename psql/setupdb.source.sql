@@ -241,7 +241,8 @@ CREATE TABLE IF NOT EXISTS adgangsadresser (
   kn1kmdk CHAR(15) NULL,
   kn10kmdk CHAR(15) NULL,
   adressepunktaendringsdato TIMESTAMP NULL,
-  geom geometry
+  geom geometry,
+  tsv tsvector
 );
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
 CREATE INDEX ON Adgangsadresser(ejerlavkode);
@@ -254,7 +255,20 @@ CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
 \echo '\n***** Loading adgangsadresse data'
 \COPY adgangsadresser (id, version, bygningsnavn, kommunekode, vejkode, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn, ejerlavkode, ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato) from  program 'gunzip -c :DATADIR:/AddressAccess.csv.gz | sed -f :SCRIPTDIR:/replaceDoubleQuotes.sed' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
+UPDATE adgangsadresser
+SET tsv = to_tsvector('danish',
+                      coalesce(vejstykker.vejnavn, '') || ' '
+                      || coalesce(husnr, '') || ' '
+                      || coalesce(supplerendebynavn, '') || ' '
+                      || coalesce(to_char(postnr, '0000'), '')
+                      || coalesce(postnumre.navn, '') || ' ')
+FROM
+  postnumre, vejstykker
+WHERE
+  postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
+  vejstykker.kode = adgangsadresser.vejkode;
 
+CREATE INDEX ON adgangsadresser USING gin(tsv);
 
 \echo '\n***** Updating wgs84 and geom columns'
 UPDATE adgangsadresser SET wgs84 = ST_GeometryFromText('POINT('||wgs84lat||' '||wgs84long||')', 4326)
@@ -344,8 +358,7 @@ DROP TABLE tmp;
 DROP VIEW IF EXISTS adresser;
 CREATE VIEW adresser AS
 SELECT
-       E.id        AS id,
-       E.id        AS enhedsadresseid,
+       E.id        AS e_id,
        E.version   AS e_version,
        E.oprettet  AS e_oprettet,
        E.ikraftfra AS e_ikraftfra,
@@ -354,7 +367,7 @@ SELECT
        E.etage,
        E.doer,
 
-       A.id AS adgangsadresseid,
+       A.id AS a_id,
        A.version AS a_version,
        A.bygningsnavn,
        A.husnr,
@@ -397,6 +410,60 @@ LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejko
 LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
 LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
 LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
+
+\echo ''
+\echo ''
+\echo '***************************************************************************'
+\echo '*** adresser view *********************************************************'
+\echo '***************************************************************************'
+\echo ''
+
+DROP VIEW IF EXISTS AdgangsadresserView;
+CREATE VIEW AdgangsadresserView AS
+  SELECT
+    A.id as a_id,
+    A.version AS a_version,
+    A.bygningsnavn,
+    A.husnr,
+    A.supplerendebynavn,
+    A.matrikelnr,
+    A.esrejendomsnr,
+    A.oprettet AS a_oprettet,
+    A.ikraftfra as a_ikraftfra,
+    A.aendret  AS a_aendret,
+    A.etrs89oest::double precision AS oest,
+    A.etrs89nord::double precision AS nord,
+    A.wgs84lat::double precision   AS lat,
+    A.wgs84long::double precision  AS long,
+    A.wgs84,
+    A.geom       AS wgs84geom,
+    A.noejagtighed,
+    A.kilde::smallint,
+    A.tekniskstandard,
+    A.tekstretning::double precision,
+    A.kn100mdk,
+    A.kn1kmdk,
+    A.kn10kmdk,
+    A.adressepunktaendringsdato,
+
+    P.nr   AS postnr,
+    P.navn AS postnrnavn,
+
+    V.kode    AS vejkode,
+    V.vejnavn AS vejnavn,
+
+    LAV.kode AS ejerlavkode,
+    LAV.navn AS ejerlavnavn,
+
+    K.kode AS kommunekode,
+    K.navn AS kommunenavn,
+    A.tsv
+
+  FROM adgangsadresser A
+    LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
+    LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
+    LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
+    LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
 
 DROP VIEW IF EXISTS vejstykkerPostnr;
 CREATE VIEW vejstykkerPostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
@@ -462,6 +529,7 @@ CREATE VIEW postnumre_kommunekoder AS
   from VejstykkerPostnumreMat a
   WHERE a.postnr is not null;
 
+DROP TABLE IF EXISTS SupplerendeBynavne CASCADE;
 CREATE TABLE SupplerendeBynavne (
   supplerendebynavn VARCHAR(34) NOT NULL,
   kommunekode INTEGER NOT NULL,
@@ -479,11 +547,13 @@ INSERT INTO SupplerendeBynavne(supplerendebynavn, kommunekode, postnr)
 
 UPDATE SupplerendeBynavne SET tsv = to_tsvector('danish', supplerendebynavn);
 
+DROP TYPE IF EXISTS PostnummerRef CASCADE;
 CREATE TYPE PostnummerRef AS (
 nr integer,
 navn varchar
 );
 
+DROP TYPE IF EXISTS KommuneRef CASCADE;
 CREATE TYPE KommuneRef AS (
   kode integer,
   navn varchar

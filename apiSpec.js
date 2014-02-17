@@ -6,13 +6,30 @@ var _     = require('underscore');
 var BASE_URL = 'http://dawa.aws.dk/api/pg';
 
 var apiSpecUtil = require('./apiSpecUtil');
-/**
- * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
- * Felterne anvendes som kolonner i CSV-formateringen af adresser.
- */
-var adresseFields = [
+
+var schema =  {
+  uuid: {type: 'string',
+    pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
+  postnr: {type: 'integer',
+    minimum: 1000,
+    maximum: 9999},
+  polygon: {type: 'array',
+    items: { type: 'array'}},
+  positiveInteger: {type: 'integer',
+    minimum: 1
+  },
+  kode4: {
+    type: 'integer',
+    minimum: 0,
+    maximum: 9999
+  }
+};
+
+
+var adgangsadresseFields = [
   {
-    name: 'id'
+    name: 'id',
+    column: 'a_id'
   },
   {
     name: 'vejkode'
@@ -33,17 +50,7 @@ var adresseFields = [
     name: 'postnrnavn'
   },
   {
-    name: 'etage'
-  },
-  {
-    name: 'dør',
-    column: 'doer'
-  },
-  {
     name: 'bygningsnavn'
-  },
-  {
-    name: 'adgangsadresseid'
   },
   {
     name: 'kommunekode'
@@ -110,6 +117,168 @@ var adresseFields = [
     selectable: false
   }
 ];
+/**
+ * Specificerer hvilke felter en adresse har, samt hvordan de mapper til kolonnenavne i databasen
+ * Felterne anvendes som kolonner i CSV-formateringen af adresser.
+ */
+var adresseFields = [
+  {
+    name: 'id',
+    column: 'e_id'
+  },
+  {
+    name: 'vejkode'
+  },
+  {
+    name: 'vejnavn'
+  },
+  {
+    name: 'husnr'
+  },
+  {
+    name: 'supplerendebynavn'
+  },
+  {
+    name: 'postnr'
+  },
+  {
+    name: 'postnrnavn'
+  },
+  {
+    name: 'bygningsnavn'
+  },
+  {
+    name: 'kommunekode'
+  },
+  {
+    name: 'kommunenavn'
+  },
+  {
+    name: 'ejerlavkode'
+  },
+  {
+    name: 'ejerlavnavn'
+  },
+  {
+    name: 'matrikel',
+    column: 'matrikelnr'
+  },
+  {
+    name: 'esrejendomsnr'
+  },
+  {
+    name: 'etrs89koordinat_øst',
+    column: 'oest'
+  },
+  {
+    name: 'etrs89koordinat_nord',
+    column: 'nord'
+  },
+  {
+    name: 'wgs84koordinat_bredde',
+    column: 'lat'
+  },
+  {
+    name: 'wgs84koordinat_længde',
+    column: 'long'
+  },
+  {
+    name: 'nøjagtighed',
+    column: 'noejagtighed'
+  },
+  {
+    name: 'kilde'
+  },
+  {
+    name: 'tekniskstandard'
+  },
+  {
+    name: 'tekstretning'
+  },
+  {
+    name: 'DDKN_m100',
+    column: 'kn100mdk'
+  },
+  {
+    name: 'DDKN_km1',
+    column: 'kn1kmdk'
+  },
+  {
+    name: 'DDKN_km10',
+    column: 'kn10kmdk'
+  },
+  {
+    name: 'etage'
+  },
+  {
+    name: 'dør',
+    column: 'doer'
+  },
+  {
+    name: 'adgangsadresseid',
+    column: 'a_id'
+  },
+  {
+    name: 'tsv',
+    selectable: false
+  }
+];
+
+var adgangsadresseParameters = [
+  {
+    name: 'id',
+    type: 'string',
+    schema: schema.uuid
+  },
+  {
+    name: 'vejkode',
+    type: 'integer',
+    schema: schema.kode4
+  },
+  {
+    name: 'vejnavn'
+  },
+  {
+    name: 'husnr'
+  },
+  {
+    name: 'supplerendebynavn'
+  },
+  {
+    name: 'postnr',
+    type: 'integer',
+    schema: schema.postnr
+  },
+  {
+    name: 'adgangsadresseid'
+  },
+  {
+    name: 'kommunekode'
+  },
+  {
+    name: 'ejerlavkode'
+  },
+  {
+    name: 'matrikel'
+  },
+  {
+    name: 'polygon',
+    type: 'json',
+    schema: schema.polygon,
+    whereClause: polygonWhereClause,
+    transform: polygonTransformer
+  }
+];
+
+var adresseParameters = adgangsadresseParameters.concat([
+  {
+    name: 'etage'
+  },
+  {
+    name: 'dør'
+  }
+]);
+
 function polygonWhereClause(paramNumberString){
   return "ST_Contains(ST_GeomFromText("+paramNumberString+", 4326)::geometry, wgs84geom)\n";
 }
@@ -172,16 +341,18 @@ function polygonTransformer(paramValue){
 function d(date) { return JSON.stringify(date); }
 //function defaultVal(val, def) { return val ? val : def;}
 
-function adressebetegnelse(adresseRow) {
+function adressebetegnelse(adresseRow, adgangOnly) {
   var adresse = adresseRow.vejnavn;
   if(adresseRow.husnr) {
     adresse += ' ' + adresseRow.husnr;
   }
-  if(adresseRow.etage) {
-    adresse += ' ' + adresseRow.etage + '.';
-  }
-  if(adresseRow.doer) {
-    adresse += ' ' + adresseRow.doer;
+  if(!adgangOnly) {
+    if(adresseRow.etage) {
+      adresse += ' ' + adresseRow.etage + '.';
+    }
+    if(adresseRow.doer) {
+      adresse += ' ' + adresseRow.doer;
+    }
   }
   adresse += '\n';
   if(adresseRow.supplerendebynavn) {
@@ -193,7 +364,8 @@ function adressebetegnelse(adresseRow) {
 
 function mapAddress(rs){
   var adr = {};
-  adr.id = rs.enhedsadresseid;
+  adr.id = rs.e_id;
+  adr.href = BASE_URL + '/adresser/' + rs.e_id;
   adr.version = d(rs.e_version);
   if (rs.etage) adr.etage = rs.etage;
   if (rs.doer) adr.dør = rs.doer;
@@ -239,49 +411,30 @@ function mapAdganggsadresse(rs){
 
 function adresseRowToAutocompleteJson(row) {
   function adresseText(row) {
-    var result =  row.vejnavn + ' ' + row.husnr;
-    if(row.etage || row.doer) {
-      result += ', ';
-      if(row.etage) {
-        result += row.etage + '.';
-      }
-      if(row.doer) {
-        result += ' ' +row.doer;
-      }
-    }
-    if(row.supplerendebynavn) {
-      result += ', ' + row.supplerendebynavn;
-    }
-    result += ', ' + row.postnr + ' ' + row.postnrnavn;
-    return result;
+    return adressebetegnelse(row).replace(/\n/g, ', ');
   }
   return {
     tekst: adresseText(row),
     adresse: {
-      id: row.id,
-      href: BASE_URL + '/adresser/' + row.id
+      id: row.e_id,
+      href: BASE_URL + '/adresser/' + row.e_id
     }
   };
 }
 
-
-var schema =  {
-  uuid: {type: 'string',
-         pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
-  postnr: {type: 'integer',
-           minimum: 1000,
-           maximum: 9999},
-  polygon: {type: 'array',
-            items: { type: 'array'}},
-  positiveInteger: {type: 'integer',
-                    minimum: 1
-                   },
-  kode4: {
-    type: 'integer',
-    minimum: 0,
-    maximum: 9999
+function adgangsadresseRowToAutocompleteJson(row) {
+  function adresseText(row) {
+    return adressebetegnelse(row, true).replace(/\n/g, ', ');
   }
-};
+  return {
+    tekst: adresseText(row),
+    adresse: {
+      id: row.a_id,
+      href: BASE_URL + '/adgangsadresser/' + row.a_id
+    }
+  };
+}
+
 
 var adresseApiSpec = {
   model: model.adresse,
@@ -290,62 +443,35 @@ var adresseApiSpec = {
   suggestable: true,
   fields: adresseFields,
   fieldMap: _.indexBy(adresseFields, 'name'),
-  parameters: [
-    {
-      name: 'id',
-      type: 'string',
-      schema: schema.uuid
-    },
-    {
-      name: 'vejkode',
-      type: 'integer',
-      schema: schema.kode4
-    },
-    {
-      name: 'vejnavn'
-    },
-    {
-      name: 'husnr'
-    },
-    {
-      name: 'supplerendebynavn'
-    },
-    {
-      name: 'postnr',
-      type: 'integer',
-      schema: schema.postnr
-    },
-    {
-      name: 'etage'
-    },
-    {
-      name: 'dør'
-    },
-    {
-      name: 'adgangsadresseid'
-    },
-    {
-      name: 'kommunekode'
-    },
-    {
-      name: 'ejerlavkode'
-    },
-    {
-      name: 'matrikel'
-    },
-    {
-      name: 'polygon',
-      type: 'json',
-      schema: schema.polygon,
-      whereClause: polygonWhereClause,
-      transform: polygonTransformer
-    }
-  ],
+  parameters: adresseParameters,
   mappers: {
     json: mapAddress,
     autocomplete: adresseRowToAutocompleteJson
   }
 };
+
+var adgangsadresseApiSpec = {
+  model: model.adgangsadresse,
+  pageable: true,
+  searchable: true,
+  suggestable: true,
+  fields: adgangsadresseFields,
+  fieldMap: _.indexBy(adgangsadresseFields, 'name'),
+  parameters: adgangsadresseParameters,
+  mappers: {
+    json: mapAdganggsadresse,
+    autocomplete: adgangsadresseRowToAutocompleteJson
+  },
+  baseQuery: function() {
+    return {
+      select: 'SELECT * from AdgangsadresserView',
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    };
+  }
+};
+
 
 var vejnavnFields = [
   {
@@ -692,6 +818,7 @@ var supplerendeBynavnApiSpec = {
 
 module.exports = {
   adresse: adresseApiSpec,
+  adgangsadresse: adgangsadresseApiSpec,
   vejnavn: vejnavnApiSpec,
   postnummer: postnummerSpec,
   vejstykke: vejstykkeSpec,

@@ -63,6 +63,10 @@ exports.setupRoutes = function () {
   publishAutocomplete(app, apiSpec.supplerendeBynavn);
   publishGetByKey(app, apiSpec.supplerendeBynavn);
   publishQuery(app, apiSpec.supplerendeBynavn);
+
+  publishAutocomplete(app, apiSpec.adgangsadresse);
+  publishGetByKey(app, apiSpec.adgangsadresse);
+  publishQuery(app, apiSpec.adgangsadresse);
   return app;
 };
 
@@ -88,6 +92,9 @@ exports.setupPublicRoutes = function () {
   publishGetByKey(app, apiSpec.supplerendeBynavn);
   publishQuery(app, apiSpec.supplerendeBynavn);
 
+  publishAutocomplete(app, apiSpec.adgangsadresse);
+  publishGetByKey(app, apiSpec.adgangsadresse);
+  publishQuery(app, apiSpec.adgangsadresse);
   return app;
 };
 
