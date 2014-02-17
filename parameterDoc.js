@@ -50,7 +50,8 @@ var vejnavneDoc = {
         ]
       }
 
-    ]
+    ],
+    get: []
   }
 };
 
@@ -108,8 +109,8 @@ var vejstykkerDoc = {
           }
         ]
       }
-
-    ]
+    ],
+    get: []
   }
 };
 
