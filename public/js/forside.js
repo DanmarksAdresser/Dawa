@@ -3,7 +3,7 @@ var senesteloebenr= 0;
 var apiBase = 'api/pg/';
 
 function makeshow(loebenr,input,process) {
-  return function (adresser) 
+  return function (adresser)
   {
     console.log("loebenr: %d, seneste: %d",loebenr,senesteloebenr);
     if (loebenr < senesteloebenr) return;
@@ -36,7 +36,7 @@ function search(input,kommunekode) {
     sorter: function(items) { return items; },
 		source: function (query, process) {
       var loebenummer = loebenummerNaeste++;
-			var parametre= {q: query}; 
+			var parametre= {q: query};
       parametre.side= 1;
       parametre.per_side= antaladresser;
 			if (kommunekode) parametre.kommunekode= kommunekode;
@@ -45,7 +45,7 @@ function search(input,kommunekode) {
 	  url: apiBase+'vejnavne/autocomplete',
 				data: parametre,
 			  dataType: "json",
-			  error: function (xhr, status, errorThrown) {	
+			  error: function (xhr, status, errorThrown) {
   				var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
   				alert(text);
 				} ,
@@ -84,7 +84,7 @@ function searchPostnr(input) {
     cache: true,
     url:apiBase +'postnumre',
     dataType: "json",
-    error: function (xhr, status, errorThrown) {  
+    error: function (xhr, status, errorThrown) {
       var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
       alert(text);
     } ,
@@ -108,12 +108,12 @@ function searchVejnavn(pnr,vej) {
   var reg = /(\d{4})/g;
   match = reg.exec(ptext);
   if (match === null) return;
-  var parametre= {postnr: match[1]}; 
+  var parametre= {postnr: match[1]};
   $.ajax({
     url: apiBase + 'vejnavne',
     data: parametre,
     dataType: "json",
-    error: function (xhr, status, errorThrown) {  
+    error: function (xhr, status, errorThrown) {
       var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
       alert(text);
     } ,
@@ -138,13 +138,13 @@ function searchHusnr(pnr,vej,husnr) {
   if (match === null) return;
   var vtext = $(vej).val();
   if (vtext===null || vtext.length === 0) return;
-  var parametre= {postnr: match[1], vejnavn: vtext}; 
+  var parametre= {postnr: match[1], vejnavn: vtext};
   $.ajax({
     cache: true,
     url: apiBase + 'adresser',
     data: parametre,
     dataType: "json",
-    error: function (xhr, status, errorThrown) {  
+    error: function (xhr, status, errorThrown) {
       var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
       alert(text);
     } ,
@@ -156,7 +156,7 @@ function searchHusnr(pnr,vej,husnr) {
       husnumre= husnumre.sort(function(a,b) {
                               var reg= /(\d+)([A-Z]*)/gi;
                               var ma= reg.exec(a);
-                              reg.lastIndex= 0; 
+                              reg.lastIndex= 0;
                               var mb= reg.exec(b);
                               if (ma === null || mb === null) return 0;
                               var ahusnr= ma[1];
@@ -185,13 +185,13 @@ function searchEtage(pnr,vej,husnr,etage) {
   if (vtext===null || vtext.length === 0) return;
   var htext = $(husnr).val();
   if (htext===null || htext.length === 0) return;
-  var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext}; 
+  var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext};
   $.ajax({
     cache: true,
     url: apiBase + 'adresser',
     data: parametre,
     dataType: "json",
-    error: function (xhr, status, errorThrown) {  
+    error: function (xhr, status, errorThrown) {
       var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
       alert(text);
     } ,
@@ -222,13 +222,13 @@ function searchDør(pnr,vej,husnr,etage,doer) {
   if (htext===null || htext.length === 0) return;
   var etext = $(etage).val();
   if (etext===null || etext.length === 0) return;
-  var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext, etage: etext}; 
+  var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext, etage: etext};
   $.ajax({
     cache: true,
     url:apiBase + 'adresser',
     data: parametre,
     dataType: "json",
-    error: function (xhr, status, errorThrown) {  
+    error: function (xhr, status, errorThrown) {
       var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
       alert(text);
     } ,
@@ -259,12 +259,12 @@ function inverseGeocoding()
     $.ajax({
       url: url,
       dataType: "jsonp",
-      success: function(data) {          
+      success: function(data) {
         var popup = L.popup();
         popup
           .setLatLng(new L.LatLng(data.adressepunkt.wgs84koordinat.bredde,data.adressepunkt.wgs84koordinat.længde))
           .setContent((data.bygningsnavn.length > 0?data.bygningsnavn + "<br>":"") +
-                      data.vej.navn + " " + data.husnr + "<br>" + 
+                      data.vej.navn + " " + data.husnr + "<br>" +
                       (data.supplerendebynavn.length > 0?data.supplerendebynavn + "<br>":"") +
                       data.postnummer.nr + " " + data.postnummer.navn )
           .openOn(map);
@@ -275,7 +275,7 @@ function inverseGeocoding()
   map = L.map('map');
   var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   var osmAttrib='Map data &copy; OpenStreetMap contributors';
-  var osm = new L.TileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib}); 
+  var osm = new L.TileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib});
   map.setView(new L.LatLng(55.0014602722233, 14.9985934015052),16);
   map.addLayer(osm);
   //marker= L.marker([55.6983973833368, 12.510857247459]).addTo(map);
@@ -316,8 +316,8 @@ function valider(pnr,vej,husnr,etage,doer) {
   if (dtext!==null && dtext.length > 0) {
     parametre.dør= dtext;
     antal++;
-  }; 
-  if (antal < 3) {    
+  };
+  if (antal < 3) {
     $('#ervalideringok').text('Adressen er ikke gyldig') ;
     return;
   }
@@ -326,7 +326,7 @@ function valider(pnr,vej,husnr,etage,doer) {
     url:'adresser/valid.json',
     data: parametre,
     dataType: "json",
-    error: function (xhr, status, errorThrown) { 
+    error: function (xhr, status, errorThrown) {
       $('#ervalideringok').text('Adressen er ikke gyldig') ;
     } ,
     success: function (adresse) {
