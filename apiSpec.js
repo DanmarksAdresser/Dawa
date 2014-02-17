@@ -665,21 +665,30 @@ var vejstykkeFields = [
 
 function vejstykkeJsonMapper(row) {
   return {
+    href: makeHref(BASE_URL, vejstykkeSpec, [row.kommunekode, row.kode]),
     kode: row.kode,
     navn: row.vejnavn,
     kommune: {
-      kode: "" + row.kommunekode,
+      href: makeHref(BASE_URL, kommuneApiSpec, [row.kommunekode]),
+      kode: row.kommunekode,
       navn: row.kommunenavn
     },
-    postnumre: row.postnumre
+    postnumre: _.map(row.postnumre, mapPostnummerRef)
   };
 }
 
 function vejstykkeRowToAutocompleteJson(row) {
   return {
-    tekst: row.navn,
+    tekst: row.vejnavn,
     vejstykke: {
-      href: BASE_URL + '/vejstykker/' + row.kommunekode + '/' + row.kode
+      href: makeHref(BASE_URL, vejstykkeSpec, [row.kommunekode, row.kode]),
+      kode: row.kode,
+      navn: row.vejnavn,
+      kommune: {
+        href: makeHref(BASE_URL, kommuneApiSpec, [row.kommunekode]),
+        kode: row.kommunekode,
+        navn: row.kommunenavn
+      }
     }
   };
 }

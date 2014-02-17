@@ -56,51 +56,7 @@ block content
             h3.anchor-header#vejstykkedata Beskrivelse af vejstykkedata
             p Ovenstående Web API udstiller vejstykker.
             p Web API'et udstiller for hver vejstykke følgende informationer:
-
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td(colspan="3") kode
-                  td Identifikation af vejstykke. Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.
-
-                tr
-                  td(colspan="3") navn
-                  td Vejens navn som det er fastsat og registreret af kommunen. Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.
-
-                tr
-                  td(colspan="3") kommune
-                  td Kommunen som vejnavnet er beliggende i.
-
-                tr
-                  td
-                  td(colspan="2") kode
-                  td Unik identifikation af den kommune som vejnavnet ligger i. Repræsenteret ved fire cifre. Eksempel: 0101 for Københavns kommune.
-
-                tr
-                  td
-                  td(colspan="2") navn
-                  td Kommunens navn. Eksempel: 0101 for Københavns kommune.
-
-                tr
-                  td(colspan="3") postnummer
-                  td Postnummeret som vejnavnet er beliggende i.
-
-                tr
-                  td
-                  td(colspan="2") nr
-                  td Unik identifikation af det postnummer som vejnavnet er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.
-
-                tr
-                  td
-                  td(colspan="2") navn
-                  td Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.
-
-                tr
-                  td(colspan="3") løbenr
-                  td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
+            +documentSchema(apiSpec.vejstykke.model.schema)
 
 block append scripts
 

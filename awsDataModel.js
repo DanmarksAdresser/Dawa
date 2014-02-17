@@ -198,19 +198,40 @@ var postnummerSchema =  {
 };
 
 var vejstykkeSchema = {
-  'title': 'vejnavn',
+  'title': 'vejstykke',
   'type': 'object',
   'properties': {
-    'kommunekode': { type: 'string'}, // todo: pattern?
-    'kode': { '$ref': '#/definitions/Kode4'},
-    'navn' : { type: 'string', maxLength: 40},
-//    'vejadresseringsnavn' : { type: 'string', maxLength: 20},
-    'postnumre': {type: 'array',
-                 items: { '$ref': '#/definitions/Kode4'}},
+    'href': {
+      description: 'Vejstykkets unikke URL.',
+      $ref: '#/definitions/Href'
+    },
+    'kode': {
+      description: 'Identifikation af vejstykke. ' +
+        'Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. ' +
+        'Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.',
+      '$ref': '#/definitions/Kode4'
+    },
+    'navn' : {
+      description: 'Vejens navn som det er fastsat og registreret af kommunen. Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.',
+      type: 'string',
+      maxLength: 40
+    },
+    'kommune': {
+      description: 'Kommunen som vejstykket er beliggende i.',
+      $ref: '#/definitions/KommuneRef'
+    },
+    'postnumre': {
+      description: 'Postnummrene som vejstykket er beliggende i.',
+      type: 'array',
+      items: {
+        $ref: '#/definitions/PostnummerRef'
+      }
+    }
   },
-  'required': ['kode', 'kommunekode', 'navn'],// TODO
+  'required': ['href', 'kode', 'navn','kommune', 'postnumre'],
   'additionalProperties': false,
-  'definitions': definitions
+  'definitions': definitions,
+  docOrder: ['href', 'kode', 'navn', 'kommune', 'postnumre']
   };
 
 var vejnavnSchema = {

@@ -50,6 +50,8 @@ mixin documentProperties(props, indent)
       td!= property.description
     if property.type === 'array'
       +documentProperties(property.items, indent+1)
+    if property.type === 'object'
+      +documentProperties(property.properties, indent+1)
 
 mixin documentSchema(schema)
   table.table.table-hover
