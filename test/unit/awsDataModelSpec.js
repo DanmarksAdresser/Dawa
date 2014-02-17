@@ -153,7 +153,7 @@ describe("Vejnavn schema validation", function () {
 
 describe("Supplendebynavn schema validation", function () {
   it("should validate basic datum", function (done) {
-    valid({"navn": "Aa", "postnumre": [
+    valid({href: 'http://dawa.aws.dk/supplerendebynavne/Aa', "navn": "Aa", "postnumre": [
         {"href": "http://dawa.aws.dk/api/pg/postnumre/5631", "nr": 5631, "navn": "Ebberup"}
       ], "kommuner": [
         {"href": "http://dawa.aws.dk/api/pg/kommuner/420", "kode": 420, "navn": "Assens"}
