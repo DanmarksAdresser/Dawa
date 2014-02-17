@@ -209,7 +209,9 @@ CursorStream.prototype._doFetch = function(count) {
   }
   self.queryInProgress = true;
   var fetchSize = Math.min(self.maxFetchSize,count);
-  self.client.query('FETCH ' + fetchSize + ' FROM ' + self.cursorName, [], function(err, result) {
+  var fetch = 'FETCH ' + fetchSize +' FROM ' + self.cursorName;
+  console.log("Fetching new set of rows: "+fetch);
+  self.client.query(fetch, [], function(err, result) {
     self.queryInProgress = false;
     if(err) {
       self.emit('error', err);
@@ -225,7 +227,9 @@ CursorStream.prototype._doFetch = function(count) {
     if(!self.moreRowsAvailable && !self.closed) {
       self.closed = true;
       self.push(null);
-      self.client.query("CLOSE " + self.cursorName, [], function() {});
+      var close = "CLOSE " + self.cursorName;
+      console.log("Closing cursor: "+close);
+      self.client.query(close, [], function() {});
       return;
     }
   });
@@ -244,8 +248,8 @@ CursorStream.prototype._read = function(count, cb) {
 };
 
 function streamingQueryUsingCursor(client, sql, params, cb) {
-  console.log("executing sql " + JSON.stringify({sq: sql, params: params}));
   sql = 'declare c1 NO SCROLL cursor for ' + sql;
+  console.log("executing sql " + JSON.stringify({sq: sql, params: params}));
   client.query(
     sql,
     params, function (err, result) {
@@ -306,8 +310,6 @@ function publishQuery(app, spec) {
     addOrderByKey(spec, sqlParts);
 
     var sqlString = createSqlQuery(sqlParts);
-
-    console.log('executing sql' + JSON.stringify({sql: sqlString, params: sqlParts.sqlParams}));
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
