@@ -35,37 +35,9 @@ block content
               h3.anchor-header#supplerendebynavndata Beskrivelse af supplerende bynavnedata
             p Ovenstående Web API udstiller supplerende bynavne. Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.
             p Web API'et udstiller for hver supplerende bynavn følgende informationer:
+            +documentSchema(apiSpec.supplerendeBynavn.model.schema)
 
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody 
-                tr
-                  td(colspan="3") version
-                  td Tidspunkt for sidste ændring af supplerende bynavn. 
-                
-                tr
-                  td(colspan="3") navn
-                  td Det supplerende bynavn. Indtil 34 tegn. Eksempel: ”Sønderholm”.
-                 
-                tr
-                  td(colspan="3") kommuner
-                  td Kommuner, som det supplerende bynavn er beliggende i.
-  
 
-                tr
-                  td(colspan="3") postnumre
-                  td Postnumre, som det supplerende bynavn er beliggende i.
-
-                tr
-                  td(colspan="3") regioner
-                  td Regioner, som det supplerende bynavn er beliggende i.  
-                                          
-                tr
-                  td(colspan="3") løbenr
-                  td Løbenummeret på den hændelse, som sidst har forårsaget en ændring.
-                
 
 
 block append scripts

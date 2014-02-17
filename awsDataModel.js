@@ -68,6 +68,7 @@ var definitions = {
       }
     },
     required: ['href', 'nr'],
+    additionalProperties: false,
     docOrder: ['href', 'nr', 'navn']
   },
   KommuneRef: {
@@ -224,13 +225,28 @@ var supplerendebynavnSchema = {
   'title': 'supplerendebynavn',
   'type': 'object',
   'properties': {
-    'navn' : { type: 'string', maxLength: 34},
-    'postnumre': {type: 'array',
-                 items: { '$ref': '#/definitions/PostnummerRef'}},
-    'kommuner': {type: 'array',
-                 items: { '$ref': '#/definitions/KommuneRef'}},
+    href: {
+      description: 'Det supplerende bynavns unikke URL',
+      $ref: '#/definitions/Href'
+    },
+    'navn': {
+      description: 'Det supplerende bynavn. Indtil 34 tegn. Eksempel: ”Sønderholm”.',
+      type: 'string',
+      maxLength: 34
+    },
+    'postnumre': {
+      description: 'Postnumre, som det supplerende bynavn er beliggende i.',
+      type: 'array',
+      items: { '$ref': '#/definitions/PostnummerRef'}
+    },
+    'kommuner': {
+      description: 'Kommuner, som det supplerende bynavn er beliggende i.',
+      type: 'array',
+      items: { '$ref': '#/definitions/KommuneRef'}
+    }
   },
-  'required': ['navn', 'postnumre', 'kommuner'],
+  'required': ['href', 'navn', 'postnumre', 'kommuner'],
+  'docOrder': ['href', 'navn', 'kommuner', 'postnumre'],
   'additionalProperties': false,
   'definitions': definitions
 };

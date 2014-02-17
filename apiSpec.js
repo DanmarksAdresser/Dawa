@@ -788,6 +788,7 @@ var supplerendeBynavnFields = [
 
 var supplerendeByavnJsonMapper = function(row) {
   return {
+    href: makeHref(BASE_URL, supplerendeBynavnApiSpec, [row.supplerendebynavn]),
     navn: row.supplerendebynavn,
     postnumre: _.map(row.postnumre, mapPostnummerRef),
     kommuner: _.map(row.kommuner, mapKommuneRef)
@@ -798,11 +799,11 @@ var supplerendeBynavnAutocompleteMapper = function(row) {
   return {
     tekst: row.supplerendebynavn,
     supplerendeBynavn: {
-      href: BASE_URL + '/supplerendebynavne/' + encodeURIComponent(row.supplerendebynavn),
+      href:  makeHref(BASE_URL, supplerendeBynavnApiSpec, [row.supplerendebynavn]),
       navn: row.supplerendebynavn
     }
-  }
-}
+  };
+};
 
 var supplerendeBynavnApiSpec = {
   model: model.supplerendebynavn,
