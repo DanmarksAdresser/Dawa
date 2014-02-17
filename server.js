@@ -54,7 +54,7 @@ app.get('/supplerendebynavndok', function (req, res) {
 });
 
 app.get('/postnummerdok', function (req, res) {
-  res.render('postnummerdok.jade', {url: req.headers.host});
+  res.render('postnummerdok.jade', jadeDocumentationParams(req));
 });
 
 app.get('/listerdok', function (req, res) {

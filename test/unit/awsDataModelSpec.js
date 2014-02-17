@@ -3,7 +3,7 @@
 var model = require("../../awsDataModel");
 var ZSchema = require("z-schema");
 var validator = new ZSchema({noZeroLengthStrings: true,
-                             noExtraKeywords: true,
+                             noExtraKeywords: false,
                              forceItems: true,
                              forceProperties: true});
 
@@ -47,7 +47,13 @@ describe("Postnummer schema validation", function () {
           done);
   });
   it("should fail on 5 digit zip", function (done) {
-    invalid({nr: 88600, navn: 'Silkeborg', version: 'ver1', kommuner: []}, model.postnummer.schema, 'MAXIMUM', done);
+    invalid({"href": "http://dawa.aws.dk/api/pg/postnumre/8600",
+      "nr": 86000,
+      "navn": "Silkeborg",
+      "version": "2011-12-02T04:20:03+01:00",
+      "kommuner": [
+        {"href": "http://dawa.aws.dk/api/pg/kommuner/740", "kode": 740, "navn": "Silkeborg"}
+      ]}, model.postnummer.schema, 'MAXIMUM', done);
   });
 
   it("should fail on extra properties", function (done) {

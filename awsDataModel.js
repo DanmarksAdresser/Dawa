@@ -19,6 +19,9 @@ var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
                                     forceItems: true,
                                     forceProperties: true});
 
+function compileSchema(schema) {
+  return new ZSchema().compileSchemasSync([schema])[0];
+}
 function makeValidator(schema) {
   return function(object) {
     return zSchemaValidator.validate(object, schema);
@@ -60,10 +63,12 @@ var definitions = {
         '$ref': '#/definitions/Postnr'
       },
       navn: {
+        description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
         type: 'string'
       }
     },
-    required: ['href', 'nr']
+    required: ['href', 'nr'],
+    docOrder: ['href', 'nr', 'navn']
   },
   KommuneRef: {
     type: 'object',
@@ -79,9 +84,11 @@ var definitions = {
       navn: {
         description: 'Kommunens navn.',
         type: 'string'
-      }
+      },
     },
-    required: ['href', 'kode' ]
+    required: ['href', 'kode' ],
+    additionalProperties: false,
+    docOrder: ['href', 'kode', 'navn']
   }
 };
 
@@ -183,7 +190,8 @@ var postnummerSchema =  {
       }
     }
   },
-  'required': ['nr', 'navn', 'version', 'kommuner'],
+  'required': ['href','nr', 'navn', 'version', 'kommuner'],
+  'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresse', 'kommuner'],
   'additionalProperties': false,
   'definitions': definitions
 };
@@ -254,7 +262,7 @@ module.exports = {
   adresse : {
     name: 'adresse',
     plural : 'adresser',
-    schema : adresseSchema,
+    schema : compileSchema(adresseSchema),
     key : 'id',
     validate: makeValidator(adresseSchema)
   },
@@ -262,7 +270,7 @@ module.exports = {
   adgangsadresse : {
     name: 'adgangsadresse',
     plural : 'adgangsadresser',
-    schema : adgangsAdresseSchema,
+    schema : compileSchema(adgangsAdresseSchema),
     key : 'id',
     validate: makeValidator(adgangsAdresseSchema)
   },
@@ -270,7 +278,7 @@ module.exports = {
   postnummer : {
     name: 'postnummer',
     plural: 'postnumre',
-    schema: postnummerSchema,
+    schema: compileSchema(postnummerSchema),
     key: 'nr',
     validate: makeValidator(postnummerSchema)
   },
@@ -279,7 +287,7 @@ module.exports = {
     name: 'vejstykke',
     plural: 'vejstykker',
     table: 'vejstykkerView',
-    schema: vejstykkeSchema,
+    schema: compileSchema(vejstykkeSchema),
     key: ['kommunekode','kode'],
     validate: makeValidator(vejstykkeSchema)
   },
@@ -287,7 +295,7 @@ module.exports = {
   vejnavn: {
     name: 'vejnavn',
     plural: 'vejnavne',
-    schema: vejnavnSchema,
+    schema: compileSchema(vejnavnSchema),
     key: 'navn',
     validate: makeValidator(vejnavnSchema)
   },
@@ -295,7 +303,7 @@ module.exports = {
   supplerendebynavn : {
     name: 'supplerendebynavn',
     plural: 'supplerendebynavne',
-    schema: supplerendebynavnSchema,
+    schema: compileSchema(supplerendebynavnSchema),
     key: 'navn', // TODO: this is not a key!!!!
     validate: makeValidator(supplerendebynavnSchema)
   },
@@ -304,7 +312,7 @@ module.exports = {
     name: 'kommune',
     plural: 'kommuner',
     table: 'kommuner',
-    schema: kommuneSchema,
+    schema: compileSchema(kommuneSchema),
     key: 'kommunekode',
     validate: makeValidator(kommuneSchema)
   }
