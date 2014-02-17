@@ -32,14 +32,57 @@ function makeValidator(schema) {
 
 var definitions = {
   'UUID' : {type: 'string', pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
+  'Href' : {
+    type: 'string'
+  },
   'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
-  'Kode4': {type: 'string', pattern: '^(\\d{4})$'},
+  'Kode4': {type: 'integer', pattern: '^(\\d{4})$'},
   'UpTo8': {type: 'string', pattern: '^\\d{1,8}$'},
   'DateTime': {type: 'string'}, // TODO: find the correct format.
   'Wgs84koordinat': object_AllRequired({'bredde': {type: 'number'}, // TODO: can we add ranges?
                                         'længde': {type: 'number'}}), // TODO: can we add ranges?
   'Etrs89koordinat': object_AllRequired({'øst':  {type: 'number'}, // TODO: can we add ranges?
                                          'nord': {type: 'number'}}), // TODO: can we add ranges?
+  Postnr: {
+    type: 'integer',
+    minimum: 1000,
+    maximum: 9999
+  },
+  PostnummerRef: {
+    type: 'object',
+    properties: {
+      href: {
+        description: 'Postnummerets unikke URL',
+        type: 'string'
+      },
+      nr: {
+        description: 'Postnummer',
+        '$ref': '#/definitions/Postnr'
+      },
+      navn: {
+        type: 'string'
+      }
+    },
+    required: ['href', 'nr']
+  },
+  KommuneRef: {
+    type: 'object',
+    properties: {
+      href: {
+        description: 'Kommunens unikke URL.',
+        type: 'string'
+      },
+      kode: {
+        description: 'Kommunekoden. 4 cifre.',
+        '$ref': '#/definitions/Kode4'
+      },
+      navn: {
+        description: 'Kommunens navn.',
+        type: 'string'
+      }
+    },
+    required: ['href', 'kode' ]
+  }
 };
 
 var adgangsAdresseSchema = {
@@ -112,21 +155,40 @@ var postnummerSchema =  {
   'title': 'postnummer',
   'type': 'object',
   'properties': {
-    'nr'      : { type: 'string', pattern: '^\\d{4}$'},
-    'navn'    : { type: 'string', maxLength: 20 },
-    'version' : { '$ref': '#/definitions/DateTime' },
-    'stormodtageradresse': { type: 'string'}, // TODO: format?
-    'regioner': {type: 'array',
-                 items: { type: 'string'}}, //todo: pattern?
-    'kommuner': {type: 'array',
-                 items: {type: 'integer'}},
+    'href': {
+      description: 'Postnummerets unikke URL.',
+      '$ref': '#/definitions/Href'
+    },
+    'nr'      : {
+      description: 'Unik identifikation af det postnummer som postnummern er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
+      '$ref': '#/definitions/Postnr'
+    },
+    'navn'    : {
+      description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
+      type: 'string',
+      maxLength: 20
+    },
+    'version' : {
+      '$ref': '#/definitions/DateTime'
+    },
+    'stormodtageradresse': {
+      description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.',
+      type: 'string'
+    },
+    'kommuner': {
+      description: 'De kommuner hvis areal overlapper postnumeret areal.',
+      type: 'array',
+      items: {
+        '$ref': '#/definitions/KommuneRef'
+      }
+    }
   },
-  'required': ['nr', 'navn', 'version'],
+  'required': ['nr', 'navn', 'version', 'kommuner'],
   'additionalProperties': false,
   'definitions': definitions
 };
 
-var vejnavnSchema = {
+var vejstykkeSchema = {
   'title': 'vejnavn',
   'type': 'object',
   'properties': {
@@ -142,7 +204,7 @@ var vejnavnSchema = {
   'definitions': definitions
   };
 
-var vejnavnnavnSchema = {
+var vejnavnSchema = {
   'title': 'vejnavnnavn',
   'type': 'object',
   'properties': {
@@ -154,19 +216,16 @@ var supplerendebynavnSchema = {
   'title': 'supplerendebynavn',
   'type': 'object',
   'properties': {
-    'version': { '$ref': '#/definitions/DateTime'},
     'navn' : { type: 'string', maxLength: 34},
     'postnumre': {type: 'array',
-                 items: { '$ref': '#/definitions/Kode4'}},
-    'regioner': {type: 'array',
-                 items: { type: 'string'}}, //todo: pattern?
+                 items: { '$ref': '#/definitions/PostnummerRef'}},
     'kommuner': {type: 'array',
-                 items: { '$ref': '#/definitions/Kode4'}},
+                 items: { '$ref': '#/definitions/KommuneRef'}},
   },
-  'required': ['version','navn'],// TODO
+  'required': ['navn', 'postnumre', 'kommuner'],
   'additionalProperties': false,
   'definitions': definitions
-}
+};
 
 var kommuneSchema = {
   'title': 'kommune',
@@ -220,17 +279,17 @@ module.exports = {
     name: 'vejstykke',
     plural: 'vejstykker',
     table: 'vejstykkerView',
-    schema: vejnavnSchema,
+    schema: vejstykkeSchema,
     key: ['kommunekode','kode'],
-    validate: makeValidator(vejnavnSchema)
+    validate: makeValidator(vejstykkeSchema)
   },
 
   vejnavn: {
     name: 'vejnavn',
     plural: 'vejnavne',
-    schema: vejnavnnavnSchema,
+    schema: vejnavnSchema,
     key: 'navn',
-    validate: makeValidator(vejnavnnavnSchema)
+    validate: makeValidator(vejnavnSchema)
   },
 
   supplerendebynavn : {

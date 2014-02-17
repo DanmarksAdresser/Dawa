@@ -25,6 +25,26 @@ var schema =  {
   }
 };
 
+function makeHref(baseUrl, spec, idArray) {
+  return baseUrl +'/' + spec.model.plural + '/' + idArray.join('/');
+}
+
+function mapKommuneRef(dbJson, baseUrl) {
+  return {
+    href: makeHref(BASE_URL, module.exports.kommune, [dbJson.kode]),
+    kode: dbJson.kode,
+    navn: dbJson.navn
+  };
+}
+
+function mapPostnummerRef(dbJson, baseUrl) {
+  return {
+    href: makeHref(BASE_URL, module.exports.postnummer, [dbJson.nr]),
+    nr: dbJson.nr,
+    navn: dbJson.navn
+  };
+}
+
 
 var adgangsadresseFields = [
   {
@@ -559,11 +579,11 @@ var postnummerFields = [
       where: 'm.nr'
     }
   },
-  {name: 'navn'},
+  {name: 'navn', column: 'p.navn'},
   {name: 'kommuner'},
-  {name: 'version'},
+  {name: 'version', column: 'p.version'},
   {name: 'kommune', selectable: false, column: 'n.kode'},
-  {name: 'tsv', selectable: false}
+  {name: 'tsv', selectable: false, column: 'p.tsv'}
 ];
 
 var postnummerSpec = {
@@ -584,10 +604,11 @@ var postnummerSpec = {
   baseQuery: function() {
     return {
       select:''+
-        'SELECT  p.nr, p.navn, p.version, json_agg(DISTINCT m.kode) kommuner '+
+        'SELECT  p.nr, p.navn, p.version, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner '+
         'FROM postnumre_kommunekoder m '+
         'LEFT JOIN postnumre_kommunekoder n ON m.nr = n.nr '+
-        'LEFT JOIN postnumre p ON p.nr = m.nr ',
+        'LEFT JOIN postnumre p ON p.nr = m.nr ' +
+        ' LEFT JOIN kommuner k ON m.kode = k.kode',
       whereClauses: [],
       groupBy: 'p.nr, p.navn, p.version',
       orderClauses: [],
@@ -598,10 +619,11 @@ var postnummerSpec = {
 
 function postnummerJsonMapper(row) {
   return {
-    nr: "" + row.nr,
+    href: makeHref(BASE_URL, module.exports.postnummer, [row.nr]),
+    nr:  row.nr,
     navn: row.navn,
     version: row.version,
-    kommuner: row.kommuner
+    kommuner: _.map(row.kommuner, mapKommuneRef)
   };
 }
 
@@ -609,8 +631,9 @@ function postnummerRowToAutocompleteJson(row) {
   return {
     tekst: row.nr + ' ' + row.navn,
     postnummer: {
-      nr: "" + row.nr,
-      href: BASE_URL + '/postnumre/' + row.nr
+      nr: row.nr,
+      href: BASE_URL + '/postnumre/' + row.nr,
+      navn: row.navn
     }
   };
 }
@@ -729,7 +752,7 @@ function kommuneJsonMapper(row) {
     kode: row.kode,
     navn: row.navn
   };
-};
+}
 
 function kommuneRowToAutocompleteJson(row) {
   return {
@@ -766,8 +789,8 @@ var supplerendeBynavnFields = [
 var supplerendeByavnJsonMapper = function(row) {
   return {
     navn: row.supplerendebynavn,
-    postnumre: row.postnumre,
-    kommuner: row.kommuner
+    postnumre: _.map(row.postnumre, mapPostnummerRef),
+    kommuner: _.map(row.kommuner, mapKommuneRef)
   };
 };
 

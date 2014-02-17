@@ -35,22 +35,23 @@ function invalid(data, schema, invalidPattern, done){
 
 describe("Postnummer schema validation", function () {
   it("should validate basic datum", function (done) {
-    valid({nr: '8600',
-           navn: 'Silkeborg',
-           version: 'ver1',
-           stormodtageradresse: 'adr 1',
-           regioner: ['9234', '9873'],
-           kommuner: [9249, 3832]
-          },
-          model.postnummer.schema,
+    valid(
+      {"href": "http://dawa.aws.dk/api/pg/postnumre/8600",
+        "nr": 8600,
+        "navn": "Silkeborg",
+        "version": "2011-12-02T04:20:03+01:00",
+        "kommuner": [
+          {"href": "http://dawa.aws.dk/api/pg/kommuner/740", "kode": 740, "navn": "Silkeborg"}
+        ]},
+      model.postnummer.schema,
           done);
   });
   it("should fail on 5 digit zip", function (done) {
-    invalid({nr: '88600', navn: 'Silkeborg', version: 'ver1'}, model.postnummer.schema, 'PATTERN', done);
+    invalid({nr: 88600, navn: 'Silkeborg', version: 'ver1', kommuner: []}, model.postnummer.schema, 'MAXIMUM', done);
   });
 
   it("should fail on extra properties", function (done) {
-    invalid({nr: '8600', navn: 'Silkeborg', version: 'ver1', foo: 42}, model.postnummer.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
+    invalid({nr: 8600, navn: 'Silkeborg', version: 'ver1', foo: 42, kommuner: []}, model.postnummer.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
   });
 });
 
@@ -70,18 +71,18 @@ describe("Adresse schema validation", function () {
            adressebetegnelse: "noeh",
            adgangsadresse: {"id": "0a3f50ae-da7f-32b8-e044-0003ba298018",
                             "vej": {
-                              "kode": "0237",
+                              "kode": 237,
                               "navn": "Fægangen",
                               //TODO                              "vejadresseringsnavn": "F_gangen"
                             },
                             "husnr": "1",
                             "supplerendebynavn": "Byen",
                             "postnummer": {
-                              "nr": "4180",
+                              "nr": 4180,
                               "navn": "Sorø",
                             },
                             "kommune": {
-                              "kode": "0340",
+                              "kode": 340,
                               "navn": "Kommune 0340"
                             },
                             "ejerlav": {
@@ -146,15 +147,13 @@ describe("Vejnavn schema validation", function () {
 
 describe("Supplendebynavn schema validation", function () {
   it("should validate basic datum", function (done) {
-    valid({version: "ver1",
-           navn: 'vej',
-           postnumre: ['2939', '2398'],
-           regioner: ['2939', '2398'],
-           kommuner: ['2939', '2398'],
-          },
-          model.supplerendebynavn.schema, done);
+    valid({"navn": "Aa", "postnumre": [
+        {"href": "http://dawa.aws.dk/api/pg/postnumre/5631", "nr": 5631, "navn": "Ebberup"}
+      ], "kommuner": [
+        {"href": "http://dawa.aws.dk/api/pg/kommuner/420", "kode": 420, "navn": "Assens"}
+      ]},
+      model.supplerendebynavn.schema, done);
   });
-
 });
 
 
