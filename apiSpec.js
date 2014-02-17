@@ -635,6 +635,7 @@ var vejstykkeFields = [
   },
   {
     name: 'tsv',
+    column: 'vejstykker.tsv',
     selectable: false
   }
 ];
