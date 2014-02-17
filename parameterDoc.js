@@ -112,8 +112,8 @@ var vejstykkerDoc = {
         ]
       }
     ],
-    get: [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>322</em>',
-            path: ['0101', '322']
+    get: [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
+            path: ['0101', '316']
           }]
   }
 };
