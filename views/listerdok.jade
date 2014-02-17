@@ -3,34 +3,34 @@ extends layout
 block content
   header.jumbotron.subhead
     div.container
-      h1 Regioner, kommuner, sogne, retskredse og politikredse 
+      h1 Regioner, kommuner, sogne, retskredse og politikredse
       div.page-header
         p.lead Web API'et udstiller lister over Danmarks regioner, kommuner, sogne, retskredse og politikredse. (ikke med i prototype)
     div.container
       div.row
         div.span3
           ul#indhold.nav.nav-list.affix
-            li(data-toggle='collapse', data-target='#region').nav-header Region API            
+            li(data-toggle='collapse', data-target='#region').nav-header Region API
             ul#region.nav.nav-list
               li <a href='#regionsoegning'>Regionsøgning</a>
               li <a href='#regionopslag'>Regionopslag</a>
               li <a href='#regiondata'>Databeskrivelse</a>
-            li(data-toggle='collapse', data-target='#kommune').nav-header Kommune API            
+            li(data-toggle='collapse', data-target='#kommune').nav-header Kommune API
             ul#kommune.nav.nav-list
               li <a href='#kommunesoegning'>Kommunesøgning</a>
               li <a href='#kommuneopslag'>Kommuneopslag</a>
               li <a href='#kommunedata'>Databeskrivelse</a>
-            li(data-toggle='collapse', data-target='#sogn').nav-header Sogn API            
+            li(data-toggle='collapse', data-target='#sogn').nav-header Sogn API
             ul#sogn.nav.nav-list
               li <a href='#sognsoegning'>Sognsøgning</a>
               li <a href='#sognopslag'>Sognopslag</a>
               li <a href='#sogndata'>Databeskrivelse</a>
-            li(data-toggle='collapse', data-target='#retskreds').nav-header Retskreds API            
+            li(data-toggle='collapse', data-target='#retskreds').nav-header Retskreds API
             ul#retskreds.nav.nav-list
               li <a href='#retskredssoegning'>Retskredssøgning</a>
               li <a href='#retskredsopslag'>Retskredsopslag</a>
               li <a href='#retskredsdata'>Databeskrivelse</a>
-            li(data-toggle='collapse', data-target='#politikreds').nav-header Politikreds API            
+            li(data-toggle='collapse', data-target='#politikreds').nav-header Politikreds API
             ul#politikreds.nav.nav-list
               li <a href='#politikredssoegning'>Politikredssøgning</a>
               li <a href='#politikredsopslag'>Politikredsopslag</a>
@@ -40,7 +40,7 @@ block content
           section
             div.page-header
               h3.anchor-header#regionsoegning Regionsøgning
-            p Søg efter regioner. Returnerer de regioner som opfylder kriteriet. 
+            p Søg efter regioner. Returnerer de regioner som opfylder kriteriet.
             pre GET /regioner
             h4 Parametre
             p
@@ -57,16 +57,16 @@ block content
                     td Alternativ stavning af regionens navn. Kan ikke anvendes sammen med <em>navn</em>.
                   tr
                     td regionskode
-                    td Regionskoden. 4 cifre.                                                        
+                    td Regionskoden. 4 cifre.
               h4 Eksempler
-              p Find de regioner, hvis navn starter med h 
-              pre 
+              p Find de regioner, hvis navn starter med h
+              pre
                 a(href='http://#{url}/regioner?navn=h*') http://#{url}/regioner?navn=h*
               p Returner alle regioner
-              pre 
+              pre
                 a(href='http://#{url}/regioner') http://#{url}/regioner
 
-            
+
             div.page-header
               h3.anchor-header#regionopslag Regionopslag
             p Modtag region.
@@ -82,9 +82,9 @@ block content
                   td Fircifret regionskode
             h4 Eksempel
             p Returner oplysniger om Region Syddanmark
-            pre 
+            pre
               a(href='http://#{url}/regioner/1083') http://#{url}/regioner/1083
-          
+
             div.page-header
               h3.anchor-header#regiondata Beskrivelse af regionsdata
             p Web API'et udstiller for hver region følgende informationer:
@@ -93,23 +93,23 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody 
+              tbody
                 tr
                   td(colspan="3") kode
-                  td Fircifret regionskode. 
-                
+                  td Fircifret regionskode.
+
                 tr
                   td(colspan="3") navn
                   td Regionens navn.
-                 
+
                 tr
                   td(colspan="3") grænse
-                  td Regionens grænse i GeoJSON              
+                  td Regionens grænse i GeoJSON
 
           section
             div.page-header
               h3.anchor-header#kommunesoegning Kommunesøgning
-            p Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet. 
+            p Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.
             pre GET /kommuner
             h4 Parametre
             p
@@ -126,16 +126,16 @@ block content
                     td Alternativ stavning af kommuneens navn. Kan ikke anvendes sammen med <em>navn</em>.
                   tr
                     td kommunekode
-                    td Kommunekoden. 4 cifre.                                                        
+                    td Kommunekoden. 4 cifre.
               h4 Eksempler
-              p Find de kommuner, hvis navn starter med h 
-              pre 
+              p Find de kommuner, hvis navn starter med h
+              pre
                 a(href='http://#{url}/kommuner?navn=h*') http://#{url}/kommuner?navn=h*
               p Returner alle kommuner
-              pre 
+              pre
                 a(href='http://#{url}/kommuner') http://#{url}/kommuner
 
-            
+
             div.page-header
               h3.anchor-header#kommuneopslag Kommuneopslag
             p Modtag kommune.
@@ -151,9 +151,9 @@ block content
                   td Fircifret kommunekode
             h4 Eksempel
             p Returner oplysniger om Halsnæs kommune
-            pre 
+            pre
               a(href='http://#{url}/kommuer/0260') http://#{url}/kommuner/0260
-          
+
             div.page-header
               h3.anchor-header#kommunedata Beskrivelse af kommunedata
             p Web API'et udstiller for hver kommune følgende informationer:
@@ -162,24 +162,24 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody 
+              tbody
                 tr
                   td(colspan="3") kode
-                  td Fircifret kommunekode. 
-                
+                  td Fircifret kommunekode.
+
                 tr
                   td(colspan="3") navn
                   td Kommunens navn.
-                 
+
                 tr
                   td(colspan="3") grænse
-                  td Kommunens grænse i GeoJSON   
+                  td Kommunens grænse i GeoJSON
 
 
           section
             div.page-header
               h3.anchor-header#sognsoegning Sognsøgning
-            p Søg efter sogne. Returnerer de sogne som opfylder kriteriet. 
+            p Søg efter sogne. Returnerer de sogne som opfylder kriteriet.
             pre GET /sogne
             h4 Parametre
             p
@@ -196,16 +196,16 @@ block content
                     td Alternativ stavning af sognets navn. Kan ikke anvendes sammen med <em>navn</em>.
                   tr
                     td sognekode
-                    td Sognekoden. 4 cifre.                                                        
+                    td Sognekoden. 4 cifre.
               h4 Eksempler
-              p Find de sogne, hvis navn starter med grøn 
-              pre 
+              p Find de sogne, hvis navn starter med grøn
+              pre
                 a(href='http://#{url}/sogne?navn=grøn*') http://#{url}/sogne?navn=grøn*
               p Returner alle sogne
-              pre 
+              pre
                 a(href='http://#{url}/sogne') http://#{url}/sogne
 
-            
+
             div.page-header
               h3.anchor-header#sognopslag Sogneopslag
             p Modtag sogn.
@@ -221,9 +221,9 @@ block content
                   td Fircifret sognekode
             h4 Eksempel
             p Returner oplysninger om Grøndal sogn
-            pre 
+            pre
               a(href='http://#{url}/sogne/7060') http://#{url}/sogne/7060
-          
+
             div.page-header
               h3.anchor-header#sogndata Beskrivelse af sognedata
             p Web API'et udstiller for hvert sogn følgende informationer:
@@ -232,24 +232,24 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody 
+              tbody
                 tr
                   td(colspan="3") kode
-                  td Fircifret sognekode. 
-                
+                  td Fircifret sognekode.
+
                 tr
                   td(colspan="3") navn
                   td Sognets navn.
-                 
+
                 tr
                   td(colspan="3") grænse
-                  td Sognets grænse i GeoJSON   
+                  td Sognets grænse i GeoJSON
 
 
           section
             div.page-header
               h3.anchor-header#retskredssoegning Retskredssøgning
-            p Søg efter retskredse. Returnerer de retskredse som opfylder kriteriet. 
+            p Søg efter retskredse. Returnerer de retskredse som opfylder kriteriet.
             pre GET /retskredse
             h4 Parametre
             p
@@ -266,16 +266,16 @@ block content
                     td Alternativ stavning af sognets navn. Kan ikke anvendes sammen med <em>navn</em>.
                   tr
                     td sognekode
-                    td Retskredskoden. 4 cifre.                                                        
+                    td Retskredskoden. 4 cifre.
               h4 Eksempler
-              p Find de retskredse, hvis navn indeholder med århus 
-              pre 
+              p Find de retskredse, hvis navn indeholder med århus
+              pre
                 a(href='http://#{url}/retskredse?navn=*århus*') http://#{url}/retskredse?navn=*århus*
               p Returner alle retskredse
-              pre 
+              pre
                 a(href='http://#{url}/retskredse') http://#{url}/retskredse
 
-            
+
             div.page-header
               h3.anchor-header#retskredsopslag Retskredsopslag
             p Modtag sogn.
@@ -291,9 +291,9 @@ block content
                   td Fircifret retskredskode
             h4 Eksempel
             p Returner oplysninger om Retten på Frederiksberg
-            pre 
+            pre
               a(href='http://#{url}/retskredse/22') http://#{url}/retskredse/22
-          
+
             div.page-header
               h3.anchor-header#retskredsdata Beskrivelse af retskredsdata
             p Web API'et udstiller for hver retskreds følgende informationer:
@@ -302,23 +302,23 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody 
+              tbody
                 tr
                   td(colspan="3") kode
-                  td Tocifret retskredskode. 
-                
+                  td Tocifret retskredskode.
+
                 tr
                   td(colspan="3") navn
                   td Retskredsens navn.
-                 
+
                 tr
                   td(colspan="3") grænse
-                  td Retkredsens grænse i GeoJSON  
+                  td Retkredsens grænse i GeoJSON
 
           section
             div.page-header
               h3.anchor-header#politikredssoegning Politikredssøgning
-            p Søg efter politikredse. Returnerer de politikredse, som opfylder kriteriet. 
+            p Søg efter politikredse. Returnerer de politikredse, som opfylder kriteriet.
             pre GET /politikredse
             h4 Parametre
             p
@@ -335,16 +335,16 @@ block content
                     td Alternativ stavning af politikredsens navn. Kan ikke anvendes sammen med <em>navn</em>.
                   tr
                     td sognekode
-                    td Politikredskoden. 4 cifre.                                                        
+                    td Politikredskoden. 4 cifre.
               h4 Eksempler
-              p Find de politikredse, hvis navn indeholder med københavn 
-              pre 
+              p Find de politikredse, hvis navn indeholder med københavn
+              pre
                 a(href='http://#{url}/politikredse?navn=*københavn*') http://#{url}/politikredse?navn=*københavn*
               p Returner alle politikredse
-              pre 
+              pre
                 a(href='http://#{url}/politikredse') http://#{url}/politikredse
 
-            
+
             div.page-header
               h3.anchor-header#politikredsopslag Politikredsopslag
             p Modtag sogn.
@@ -360,9 +360,9 @@ block content
                   td Fircifret politikredskode
             h4 Eksempel
             p Returner oplysninger om Bornholms Politi
-            pre 
+            pre
               a(href='http://#{url}/politikredse/12') http://#{url}/politikredse/12
-          
+
             div.page-header
               h3.anchor-header#politikredsdata Beskrivelse af politikredsdata
             p Web API'et udstiller for hver politikreds følgende informationer:
@@ -371,27 +371,26 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody 
+              tbody
                 tr
                   td(colspan="3") kode
-                  td Tocifret politikredskode. 
-                
+                  td Tocifret politikredskode.
+
                 tr
                   td(colspan="3") navn
                   td Politikredsens navn.
-                 
+
                 tr
                   td(colspan="3") grænse
-                  td Politikredsens grænse i GeoJSON  
+                  td Politikredsens grænse i GeoJSON
 
 block append scripts
 
-  script 
+  script
     $('#topbar li').removeClass('active');
     var a= $("#topbar li a[href='listerdok']")[0];
-    var li= $(a).parent().addClass('active'); 
+    var li= $(a).parent().addClass('active');
     //$('#indhold li a').on('click', function() {
     //$('#indhold li').removeClass('active');
     //$(this).parent().addClass('active');
     //});
-    
