@@ -177,8 +177,8 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
     });
   });
 }
-util.inherits(CursorStream, Readable);
 
+util.inherits(CursorStream, Readable);
 function CursorStream(client, cursorName) {
   Readable.call(this, {
     objectMode: true,
