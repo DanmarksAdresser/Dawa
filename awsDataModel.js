@@ -6,6 +6,15 @@ var ZSchema = require("z-schema");
 /******************************************************************************/
 /*** Helper functions *********************************************************/
 /******************************************************************************/
+function nullableType(type) {
+  return [type, 'null'];
+}
+
+function nullable(schemaType) {
+  var result = _.clone(schemaType);
+  result.type = nullableType(schemaType.type);
+  return result;
+}
 
 function object_AllRequired(properties){
   return   {type: 'object',
@@ -41,7 +50,9 @@ var definitions = {
   'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
   'Kode4': {type: 'integer', pattern: '^(\\d{4})$'},
   'UpTo8': {type: 'string', pattern: '^\\d{1,8}$'},
-  'DateTime': {type: 'string'}, // TODO: find the correct format.
+  'DateTime': {
+    type: 'string'
+  }, // TODO: find the correct format.
   'Wgs84koordinat': object_AllRequired({'bredde': {type: 'number'}, // TODO: can we add ranges?
                                         'længde': {type: 'number'}}), // TODO: can we add ranges?
   'Etrs89koordinat': object_AllRequired({'øst':  {type: 'number'}, // TODO: can we add ranges?
@@ -64,7 +75,7 @@ var definitions = {
       },
       navn: {
         description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
-        type: 'string'
+        type: nullableType('string')
       }
     },
     required: ['href', 'nr'],
@@ -84,7 +95,7 @@ var definitions = {
       },
       navn: {
         description: 'Kommunens navn.',
-        type: 'string'
+        type: nullableType('string')
       }
     },
     required: ['href', 'kode' ],
@@ -111,8 +122,9 @@ var definitions = {
     additionalProperties: false,
     docOrder: ['href', 'kode', 'navn']
   }
-
 };
+
+definitions.NullableDateTime = nullable(definitions.DateTime);
 
 var adgangsAdresseSchema = {
   title: 'AdgangsAdresse',
@@ -140,11 +152,15 @@ var adgangsAdresseSchema = {
       type: 'string',
       pattern: '([1-9]|[1-9]\\d|[1-9]\\d{2})[A-Z]?'
     },
+    'bygningsnavn': {
+      description: '',
+      type: nullableType('string')
+    },
     'supplerendebynavn': {
       description: 'Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af ' +
         'kommunen for at præcisere adressens beliggenhed indenfor postnummeret. ' +
         'Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.',
-      type: 'string', maxLength: 34
+      type: nullableType('string'), maxLength: 34
     },
     'postnummer': {
       description: 'Postnummeret som adressen er beliggende i.',
@@ -155,7 +171,7 @@ var adgangsAdresseSchema = {
       $ref: '#/definitions/KommuneRef'
     },
     'ejerlav': {
-      type: 'object',
+      type: nullableType('object'),
       description: 'Det matrikulære ejerlav som adressen ligger i.',
       properties: {
         'kode': {
@@ -175,7 +191,7 @@ var adgangsAdresseSchema = {
     'matrikelnr': {
       description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på. ' +
         'Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
-      type: 'string',
+      type: nullableType('string'),
       pattern: '^[0-9a-zæøå]{1,7}$'
     },
     'esrejendomsnr': {
@@ -190,15 +206,16 @@ var adgangsAdresseSchema = {
       properties: {
         'oprettet': {
           description: 'Dato og tid for adressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
-          '$ref': '#/definitions/DateTime'
+          '$ref': '#/definitions/NullableDateTime'
         },
         'ikrafttrædelse': {
           description: 'Dato og tid for adressens ikrafttrædelse. Eksempel: 2002-01-01T00:00:00.',
-          '$ref': '#/definitions/DateTime'
+          '$ref': '#/definitions/NullableDateTime'
         },
         'ændret': {
           description: 'Dato og tid hvor der sidst er ændret i adressen. Eksempel: 2002-04-08T00:00:00.',
-          '$ref': '#/definitions/DateTime'
+          type: nullableType('string'),
+          '$ref': '#/definitions/NullableDateTime'
         },
         additionalProperties: false,
         docOrder: ['oprettet', 'ikrafttrædelse', 'ændret']
@@ -387,8 +404,8 @@ var adgangsAdresseSchema = {
       docOrder: ['nr', 'navn']
     }
   },
-  required: ['href','id', 'vejstykke', 'husnr', 'postnummer', 'kommune','historik'],
-  docOrder: ['href','id', 'vejstykke', 'husnr','supplerendebynavn',
+  required: ['href','id', 'vejstykke', 'husnr', 'bygningsnavn', 'supplerendebynavn','postnummer', 'kommune','historik'],
+  docOrder: ['href','id', 'vejstykke', 'husnr','bygningsnavn', 'supplerendebynavn',
     'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
   'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds','afstemningsområde'],
   additionalProperties: false,

@@ -98,7 +98,9 @@ function createQuery(parts){
 
 function createQueryFromSpec(spec, params, paging) {
   var sqlParts = initialQuery(spec);
-  applyParameters(spec, spec.parameters, params.specified, sqlParts);
+  if(params.specified) {
+    applyParameters(spec, spec.parameters, params.specified, sqlParts);
+  }
   if(params.search) {
     applyParameters(spec, apiSpec.searchParameterSpec, params.search, sqlParts);
   }

@@ -7,6 +7,13 @@ var apiSpecUtil = require('./apiSpecUtil');
 
 var BASE_URL = 'http://dawa.aws.dk';
 
+function maybeNull(val) {
+  if(val === undefined) {
+    return null;
+  }
+  return val;
+}
+
 var schema =  {
   uuid: {type: 'string',
     pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
@@ -367,6 +374,10 @@ function polygonTransformer(paramValue){
 }
 
 function d(date) {
+  if(date instanceof Date) {
+    return date.toString();
+  }
+
   return date;
 }
 //function defaultVal(val, def) { return val ? val : def;}
@@ -396,7 +407,6 @@ function mapAdresse(rs){
   var adr = {};
   adr.id = rs.e_id;
   adr.href = makeHref(BASE_URL, adresseApiSpec, [rs.e_id]);
-  adr.version = d(rs.e_version);
   if (rs.etage) adr.etage = rs.etage;
   if (rs.doer) adr.dør = rs.doer;
   adr.adressebetegnelse = adressebetegnelse(rs);
@@ -407,6 +417,7 @@ function mapAdresse(rs){
 function mapAdganggsadresse(rs){
   var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
   var adr = {};
+  adr.href = makeHref(BASE_URL, adgangsadresseApiSpec, [rs.a_id]);
   adr.id = rs.a_id;
   adr.vejstykke = {
     href: makeHref(BASE_URL, vejstykkeSpec, [rs.vejkode]),
@@ -414,14 +425,19 @@ function mapAdganggsadresse(rs){
     kode: rs.vejkode
   };
   adr.husnr = rs.husnr;
-  adr.bygningsnavn = rs.bygningsnavn;
-  adr.supplerendebynavn = rs.supplerendebynavn;
+  adr.bygningsnavn = maybeNull(rs.bygningsnavn);
+  adr.supplerendebynavn = maybeNull(rs.supplerendebynavn);
   adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, BASE_URL);
   adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, BASE_URL);
-  adr.ejerlav = {
-    kode: slice(-8, rs.ejerlavkode),
-    navn: rs.ejerlavnavn
-  };
+  if(rs.ejerlavkode) {
+    adr.ejerlav = {
+      kode: slice(-8, rs.ejerlavkode),
+      navn: rs.ejerlavnavn
+    };
+  }
+  else {
+    rs.ejerlav = null;
+  }
   adr.matrikelnr = rs.matrikelnr;
   adr.historik = {
     oprettet: d(rs.a_oprettet),
@@ -437,12 +453,9 @@ function mapAdganggsadresse(rs){
       'længde': rs.lat,
       bredde: rs.long
     },
-    kvalitet:
-    {
-      'nøjagtighed': rs.noejagtighed,
-      kilde: rs.kilde,
-      tekniskstandard: rs.tekniskstandard
-    },
+    'nøjagtighed': rs.noejagtighed,
+    kilde: rs.kilde,
+    tekniskstandard: rs.tekniskstandard,
     tekstretning:    rs.tekstretning,
     'ændret':        d(rs.adressepunktaendringsdato)
   };
