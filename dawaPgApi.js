@@ -6,7 +6,6 @@
 
 var express     = require('express');
 var _           = require('underscore');
-var pg          = require('pg');
 var eventStream = require('event-stream');
 var util        = require('util');
 var csv         = require('csv');
@@ -15,18 +14,6 @@ var apiSpec = require('./apiSpec');
 var apiSpecUtil = require('./apiSpecUtil');
 var dbapi = require('./dbapi');
 var Transform = require('stream').Transform;
-
-
-
-/******************************************************************************/
-/*** Configuration ************************************************************/
-/******************************************************************************/
-
-//var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
-// var connString = "postgres://ahj@localhost/dawa2";
-var connString = process.env.pgConnectionUrl;
-console.log("Loading dawaPgApi with process.env.pgConnectionUrl="+connString);
-
 
 /******************************************************************************/
 /*** Routes *******************************************************************/
@@ -410,23 +397,15 @@ function publishAutocomplete(app, spec) {
 /******************************************************************************/
 
 function withPsqlClient(res, callback) {
-  return pg.connect(connString, function (err, client, done) {
+  return dbapi.withTransaction(function(err, client, done) {
     if (err) {
       // We do not have a connection to PostgreSQL.
       // Abort!
       sendInternalServerError(res, err);
-      return process.exit(1);
+      console.log("Failed to obtain postgresql connection", err);
+      return done();
     }
-    client.query('BEGIN READ ONLY', [], function(err) {
-      if(err) {
-        sendInternalServerError(res, err);
-        return done();
-      }
-      callback(client, function() {
-        client.query('ROLLBACK', function(err) {});
-        return done();
-      });
-    });
+    return callback(client, done);
   });
 }
 

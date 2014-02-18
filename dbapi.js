@@ -6,6 +6,16 @@ var eventStream = require('event-stream');
 var _           = require('underscore');
 var Readable = require('stream').Readable;
 var apiSpec = require('./apiSpec');
+var pg          = require('pg');
+
+/******************************************************************************/
+/*** Configuration ************************************************************/
+/******************************************************************************/
+
+//var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
+// var connString = "postgres://ahj@localhost/dawa2";
+var connString = process.env.pgConnectionUrl;
+console.log("Loading dbapi with process.env.pgConnectionUrl="+connString);
 
 function notNull(v) {
   return v !== undefined && v !== null;
@@ -194,6 +204,24 @@ var transformToCsvObjects = function(rowStream, spec) {
     })
   );
 };
+
+exports.withTransaction = function(cb) {
+  return pg.connect(connString, function (err, client, done) {
+    if (err) {
+      return cb(err);
+    }
+    client.query('BEGIN READ ONLY', [], function(err) {
+      if(err) {
+        done();
+        return cb(err);
+      }
+      cb(err, client, function() {
+        client.query('ROLLBACK', function(err) {});
+        return done();
+      });
+    });
+  });
+}
 
 exports.query = function(client, spec, params, paging, cb) {
   var query = createQueryFromSpec(spec, params, paging);
