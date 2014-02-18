@@ -36,7 +36,7 @@ block content
                   th Beskrivelse
                 tbody
                   tr
-                    td postnr
+                    td nr
                     td Postnummer. 4 cifre.
                   tr
                     td navn
@@ -58,7 +58,7 @@ block content
                     td Paginering. Antallet af postnumre i søgeresultatet. Default sat til 20.
               h4 Eksempler
               p Find postnumrene efter postnr, navn eller kommune
-              pre: a(href='#{url}/postnumre?postnr=8600') #{url}/postnumre?postnr=8600
+              pre: a(href='#{url}/postnumre?nr=8600') #{url}/postnumre?nr=8600
               pre: a(href='#{url}/postnumre?kommune=0751') #{url}/postnumre?kommune=0751
               pre: a(href='#{url}/postnumre?navn=Silkeborg') #{url}/postnumre?navn=Silkeborg
 
@@ -83,7 +83,7 @@ block content
                   th Beskrivelse
                 tbody
                   tr
-                    td postnr
+                    td nr
                     td Postnummer. 4 cifre.
                   tr
                     td navn
@@ -105,7 +105,7 @@ block content
                     td Paginering. Antallet af postnumre i søgeresultatet. Default sat til 20.
               h4 Eksempler
               p Find postnumrene efter postnr, navn eller kommune
-              pre: a(href='#{url}/postnumre/autocomplete?postnr=8600') #{url}/postnumre/autocomplete?postnr=8600
+              pre: a(href='#{url}/postnumre/autocomplete?nr=8600') #{url}/postnumre/autocomplete?nr=8600
               pre: a(href='#{url}/postnumre/autocomplete?kommune=0751') #{url}/postnumre/autocomplete?kommune=0751
               pre: a(href='#{url}/postnumre/autocomplete?navn=Silkeborg') #{url}/postnumre/autocomplete?navn=Silkeborg
 
@@ -122,7 +122,7 @@ block content
             div.page-header
               h3.anchor-header#postnummeropslag Postnummeropslag
             p Modtag postnummer med id.
-            pre GET /postnumre/{postnr}
+            pre GET /postnumre/{nr}
             h4 Parametre
             table.table.table-hover
               thead
@@ -130,7 +130,7 @@ block content
                 th Beskrivelse
               tbody
                 tr
-                  td postnr
+                  td nr
                   td Postnummeret identificeres med 4 cifre.
             h4 Eksempel
             p Returner postnummer 2400
