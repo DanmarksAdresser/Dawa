@@ -516,6 +516,7 @@ var vejnavnFields = [
 
 var vejnavnJsonMapper = function(row) {
   return {
+    href: makeHref(BASE_URL, vejnavnApiSpec, [row.navn]),
     navn: row.navn
   };
 };
@@ -524,8 +525,8 @@ function vejnavnRowToAutocompleteJson(row) {
   return {
     tekst: row.navn,
     vejnavn: {
-      navn: row.navn,
-      href: BASE_URL + '/vejnavne/' + encodeURIComponent(row.navn)
+      href: makeHref(BASE_URL, vejnavnApiSpec, [row.navn]),
+      navn: row.navn
     }
   };
 }

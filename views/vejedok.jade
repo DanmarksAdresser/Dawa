@@ -40,6 +40,11 @@ block content
             h3.anchor-header#vejnavneopslag Vejnavneopslag
             p Opslag på enkelt vejnavn
             +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+            div.page-header
+            h3.anchor-header#vejstykkedata Beskrivelse af vejnavnedata
+            p Ovenstående Web API udstiller vejnavne.
+            p Web API'et udstiller for hver vejnavn følgende informationer:
+            +documentSchema(apiSpec.vejnavn.model.schema)
 
             div.page-header
             h2 Vejstykker

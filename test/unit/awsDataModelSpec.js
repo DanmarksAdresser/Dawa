@@ -138,15 +138,19 @@ describe("Adresse schema validation", function () {
   });
 });
 
-describe("Vejnavn schema validation", function () {
+describe('Vejnavn schema validation', function() {
   it("should validate basic datum", function (done) {
-    valid({kommunekode: '8600',
-           kode: '9324',
-           navn: 'vej',
-           //todo           vejadresseringsnavn: 'vejen',
-           postnumre: ['2939', '2398'],
-          },
-          model.vejnavn.schema, done);
+    valid({"href":"http://dawa.aws.dk/api/pg/vejnavne/Anders Højensvej","navn":"Anders Højensvej"},
+      model.vejnavn.schema, done);
+  });
+});
+
+describe("Vejstykke schema validation", function () {
+  it("should validate basic datum", function (done) {
+    valid({"href": "http://dawa.aws.dk/api/pg/vejstykker/101/4", "kode": 4, "navn": "Abel Cathrines Gade", "kommune": {"href": "http://dawa.aws.dk/api/pg/kommuner/101", "kode": 101, "navn": "København"}, "postnumre": [
+        {"href": "http://dawa.aws.dk/api/pg/postnumre/1654", "nr": 1654, "navn": "København V"}
+      ]},
+      model.vejstykke.schema, done);
   });
 
 });

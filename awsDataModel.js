@@ -238,8 +238,19 @@ var vejnavnSchema = {
   'title': 'vejnavnnavn',
   'type': 'object',
   'properties': {
-    'vejnavn': { type: 'string'}
-  }
+    href: {
+      description: 'Vejnavnets unikke URL.',
+      $ref: '#/definitions/Href'
+    },
+    'navn': {
+      description: 'Vejnavnet',
+      type: 'string'
+    }
+  },
+  required: ['href', 'navn'],
+  additionalProperties: false,
+  'definitions': definitions,
+  docOrder: ['href', 'navn']
 };
 
 var supplerendebynavnSchema = {
@@ -277,10 +288,10 @@ var kommuneSchema = {
   'type': 'object',
   'properties': {
     'kode': { type: 'integer',  maximum: 9999},
-    'navn' : { type: 'string'},
+    'navn' : { type: 'string'}
   },
   'required': ['kode', 'navn'],
-  'additionalProperties': false,
+  'additionalProperties': false
 };
 
 
