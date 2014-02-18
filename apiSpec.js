@@ -612,7 +612,7 @@ var postnummerSpec = {
   suggestable: true,
   fields: postnummerFields,
   fieldMap: _.indexBy(postnummerFields, 'name'),
-  parameters: [{name: 'postnr'},
+  parameters: [{name: 'nr'},
                {name: 'navn'},
                {name: 'kommune'}
               ],
@@ -651,7 +651,7 @@ function postnummerRowToAutocompleteJson(row) {
     tekst: row.nr + ' ' + row.navn,
     postnummer: {
       nr: row.nr,
-      href: BASE_URL + '/postnumre/' + row.nr,
+      href: makeHref(BASE_URL, module.exports.postnummer, [row.nr]),
       navn: row.navn
     }
   };
