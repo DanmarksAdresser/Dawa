@@ -1,5 +1,7 @@
-DROP VIEW IF EXISTS AdgangsadresserView;
+BEGIN;
+
 DROP VIEW IF EXISTS Adresser;
+DROP VIEW IF EXISTS AdgangsadresserView;
 
 alter table adgangsadresser alter column kn100mdk TYPE varchar(15);
 alter table adgangsadresser alter column kn1kmdk TYPE varchar(15);
@@ -67,3 +69,4 @@ CREATE VIEW adresser AS
   FROM enhedsadresser E
     LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
+COMMIT;
