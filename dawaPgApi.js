@@ -80,6 +80,10 @@ exports.setupPublicRoutes = function () {
   publishAutocomplete(app, apiSpec.adgangsadresse);
   publishGetByKey(app, apiSpec.adgangsadresse);
   publishQuery(app, apiSpec.adgangsadresse);
+
+  publishAutocomplete(app, apiSpec.kommune);
+  publishGetByKey(app, apiSpec.kommune);
+  publishQuery(app, apiSpec.kommune);
   return app;
 };
 

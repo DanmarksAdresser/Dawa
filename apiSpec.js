@@ -781,7 +781,7 @@ var vejstykkeSpec = {
 };
 
 
-var kommuneFields = [{name: 'kommunekode', column: 'kode'}, {name: 'navn'}, {name: 'tsv', selectable: false}];
+var kommuneFields = [{name: 'kode'}, {name: 'navn'}, {name: 'tsv', selectable: false}];
 
 var kommuneApiSpec = {
   model: model.kommune,
@@ -791,7 +791,7 @@ var kommuneApiSpec = {
   fields: kommuneFields,
   fieldMap: _.indexBy(kommuneFields, 'name'),
   parameters: [{name: 'navn'},
-               {name: 'kommunekode'}
+               {name: 'kode'}
               ],
   mappers: {
     json: kommuneJsonMapper,
@@ -802,6 +802,7 @@ var kommuneApiSpec = {
 
 function kommuneJsonMapper(row) {
   return {
+    href: makeHref(BASE_URL, kommuneApiSpec, [row.kode]),
     kode: row.kode,
     navn: row.navn
   };
@@ -811,8 +812,9 @@ function kommuneRowToAutocompleteJson(row) {
   return {
     tekst: row.navn,
     kommune: {
-      navn: row.navn,
-      href: BASE_URL + '/kommuner/' + encodeURIComponent(row.kode)
+      href: makeHref(BASE_URL, kommuneApiSpec, [row.kode]),
+      kode: row.kode,
+      navn: row.navn
     }
   };
 }

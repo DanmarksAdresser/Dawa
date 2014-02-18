@@ -169,8 +169,53 @@ var supplerendeBynavneDoc = {
   }
 };
 
+var kommuneDoc = {
+  parameters: [
+    {
+      name: 'q',
+      doc: 'Søgetekst. Der søges i kommunenavnet. Alle ord i søgeteksten skal matche kommunenavnet. ' +
+        'Wildcard * er tilladt i slutningen af hvert ord.'
+    },
+    {
+      name: 'navn',
+      doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
+      examples: ['Aarhus', 'København']
+    },
+    {
+      name: 'kode',
+      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+      examples: ['0101']
+    }
+  ],
+  examples: {
+    query: [
+      {
+        description: 'Hent alle kommuner',
+        query: [
+        ]
+      },
+      {
+        description: 'Find de kommuner, som starter med <em>aa</em>',
+        query: [
+          { name: 'q',
+            value: "aa*"
+          }
+        ]
+      }
+    ],
+    get: [
+      {
+        description: 'Hent København kommune (kode 101)',
+        path: ['101']
+      }]
+
+  }
+};
+
+
 module.exports= {
   vejnavn: vejnavneDoc,
   vejstykke: vejstykkerDoc,
-  supplerendeBynavn: supplerendeBynavneDoc
+  supplerendeBynavn: supplerendeBynavneDoc,
+  kommune: kommuneDoc
 };

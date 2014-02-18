@@ -1,4 +1,5 @@
 extends layout
+include includes/parameterDocMixins
 
 block content
   header.jumbotron.subhead
@@ -110,71 +111,15 @@ block content
             div.page-header
               h3.anchor-header#kommunesoegning Kommunesøgning
             p Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.
-            pre GET /kommuner
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Kommunens navn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de kommuner, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                  tr
-                    td alternativstavning
-                    td Alternativ stavning af kommuneens navn. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td kommunekode
-                    td Kommunekoden. 4 cifre.
-              h4 Eksempler
-              p Find de kommuner, hvis navn starter med h
-              pre
-                a(href='http://#{url}/kommuner?navn=h*') http://#{url}/kommuner?navn=h*
-              p Returner alle kommuner
-              pre
-                a(href='http://#{url}/kommuner') http://#{url}/kommuner
-
-
+            +parameterDocQuery(apiSpec.kommune, parameterDoc.kommune)
             div.page-header
               h3.anchor-header#kommuneopslag Kommuneopslag
             p Modtag kommune.
-            pre GET /kommuner/{kommunekode}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td kommunekode
-                  td Fircifret kommunekode
-            h4 Eksempel
-            p Returner oplysniger om Halsnæs kommune
-            pre
-              a(href='http://#{url}/kommuer/0260') http://#{url}/kommuner/0260
-
+            +parameterDocGet(apiSpec.kommune, parameterDoc.kommune)
             div.page-header
               h3.anchor-header#kommunedata Beskrivelse af kommunedata
             p Web API'et udstiller for hver kommune følgende informationer:
-
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td(colspan="3") kode
-                  td Fircifret kommunekode.
-
-                tr
-                  td(colspan="3") navn
-                  td Kommunens navn.
-
-                tr
-                  td(colspan="3") grænse
-                  td Kommunens grænse i GeoJSON
-
+            +documentSchema(apiSpec.kommune.model.schema)
 
           section
             div.page-header

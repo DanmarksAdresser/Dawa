@@ -583,11 +583,23 @@ var kommuneSchema = {
   'title': 'kommune',
   'type': 'object',
   'properties': {
-    'kode': { type: 'integer',  maximum: 9999},
-    'navn' : { type: 'string'}
+    'href': {
+      description: 'Kommunens unikke URL.',
+      $ref: '#/definitions/Href'
+    },
+    'kode': {
+      description: 'Fircifret kommunekode.',
+      type: 'integer',  minimum: 0, maximum: 9999
+    },
+    'navn' : {
+      description: 'Kommunens navn.',
+      type: 'string'
+    }
   },
-  'required': ['kode', 'navn'],
-  'additionalProperties': false
+  'required': ['href', 'kode', 'navn'],
+  'docOrder': ['href', 'kode', 'navn'],
+  'additionalProperties': false,
+  'definitions': definitions
 };
 
 
@@ -657,7 +669,7 @@ module.exports = {
     plural: 'kommuner',
     table: 'kommuner',
     schema: compileSchema(kommuneSchema),
-    key: 'kommunekode',
+    key: 'kode',
     validate: makeValidator(kommuneSchema)
   }
 

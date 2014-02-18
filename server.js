@@ -59,7 +59,7 @@ app.get('/postnummerdok', function (req, res) {
 });
 
 app.get('/listerdok', function (req, res) {
-  res.render('listerdok.jade', {url: req.headers.host});
+  res.render('listerdok.jade', jadeDocumentationParams(req));
 });
 
 app.get('/om', function (req, res) {
