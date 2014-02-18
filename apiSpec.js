@@ -895,61 +895,60 @@ var supplerendeBynavnApiSpec = {
 };
 
 
-module.exports = {
+_.extend(exports, {
   adresse: adresseApiSpec,
   adgangsadresse: adgangsadresseApiSpec,
   vejnavn: vejnavnApiSpec,
   postnummer: postnummerSpec,
   vejstykke: vejstykkeSpec,
   kommune: kommuneApiSpec,
-  supplerendeBynavn: supplerendeBynavnApiSpec,
+  supplerendeBynavn: supplerendeBynavnApiSpec
+});
 
-  pagingParameterSpec: [
-    {
-      name: 'side',
-      type: 'integer',
-      schema: schema.positiveInteger
-    },
-    {
-      name: 'per_side',
-      type: 'integer',
-      schema: schema.positiveInteger
-    }
-  ],
-  formatParameterSpec: [
-    {
-      name: 'format',
-      schema: {
-        "enum" : ['csv', 'json', 'jsonp']
-      }
-    },
-    {
-      name: 'callback',
-      schema: {
-        type: 'string',
-        pattern: '^[\\$_a-zA-Z0-9]+$'
-      }
+exports.allSpecNames = _.keys(exports);
 
+
+exports.pagingParameterSpec = [
+  {
+    name: 'side',
+    type: 'integer',
+    schema: schema.positiveInteger
+  },
+  {
+    name: 'per_side',
+    type: 'integer',
+    schema: schema.positiveInteger
+  }
+];
+exports.formatParameterSpec = [
+  {
+    name: 'format',
+    schema: {
+      "enum": ['csv', 'json', 'jsonp']
     }
-  ],
-  searchParameterSpec: [
-    {
-      name: 'q',
+  },
+  {
+    name: 'callback',
+    schema: {
       type: 'string',
-      whereClause: searchWhereClause,
-      transform: toPgSearchQuery
+      pattern: '^[\\$_a-zA-Z0-9]+$'
     }
-  ],
 
-  autocompleteParameterSpec: [
-    {
-      name: 'q',
-      type: 'string',
-      whereClause: searchWhereClause,
-      transform: toPgSuggestQuery
-    }
-  ]
-};
-
-
-
+  }
+];
+exports.searchParameterSpec = [
+  {
+    name: 'q',
+    type: 'string',
+    whereClause: searchWhereClause,
+    transform: toPgSearchQuery
+  }
+];
+exports.autocompleteParameterSpec = [
+  {
+    name: 'q',
+    type: 'string',
+    whereClause: searchWhereClause,
+    transform: toPgSuggestQuery
+  }
+];

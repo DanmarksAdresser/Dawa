@@ -4,6 +4,61 @@ var dbapi = require('../../dbapi');
 var ZSchema = require('z-schema');
 var _ = require('underscore');
 
+/**
+ * This test verifies that all testdata is valid according to JSON schema
+ * and that all fields (except the ones specified in valuesNeverExpectedToBeSeen below)
+ * is returned at least once.
+ */
+
+var specsToTest = apiSpec.allSpecNames;
+
+var valuesNeverExpectedToBeSeen = {
+  postnumre: {
+    stormodtageradresse: true
+  },
+  adgangsadresser: {
+    supplerendebynavn: true, // todo kræver bedre testdata
+    sogn: {
+      nr: true,
+      navn: true
+    },
+    retskreds: {
+      nr: true,
+      navn: true
+    },
+    politikreds: {
+      nr: true,
+      navn: true
+    },
+    opstillingskreds: {
+      nr: true,
+      navn: true
+    },
+    afstemningsområde: {
+      nr: true,
+      navn: true
+    },
+    region: {
+      nr: true,
+      navn: true
+    }
+  },
+  supplerendebynavne: { // todo kræver bedre testdata
+    href: true,
+    navn: true,
+    postnumre: {
+      href: true,
+      nr: true,
+      navn: true
+    },
+    kommuner: {
+      href: true,
+      kode: true,
+      navn: true
+    }
+  }
+};
+
 var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
   noExtraKeywords: true,
   forceItems: true,
@@ -63,54 +118,6 @@ function verifyAllValuesVisited(schema, record, prefix) {
 }
 
 describe('Validering af JSON-formatteret output', function() {
-  var specsToTest = ['vejstykke', 'vejnavn', 'postnummer', 'kommune', 'adgangsadresse', 'adresse', 'supplerendeBynavn'];
-
-  var valuesNeverExpectedToBeSeen = {
-    postnumre: {
-      stormodtageradresse: true
-    },
-    adgangsadresser: {
-      supplerendebynavn: true, // todo kræver bedre testdata
-      sogn: {
-        nr: true,
-        navn: true
-      },
-      retskreds: {
-        nr: true,
-        navn: true
-      },
-      politikreds: {
-        nr: true,
-        navn: true
-      },
-      opstillingskreds: {
-        nr: true,
-        navn: true
-      },
-      afstemningsområde: {
-        nr: true,
-        navn: true
-      },
-      region: {
-        nr: true,
-        navn: true
-      }
-    },
-    supplerendebynavne: { // todo kræver bedre testdata
-      href: true,
-      navn: true,
-      postnumre: {
-        href: true,
-        nr: true,
-        navn: true
-      },
-      kommuner: {
-        href: true,
-        kode: true,
-        navn: true
-      }
-    }
-  };
   specsToTest.forEach(function(specName) {
     var spec = apiSpec[specName];
     it('Alle ' + spec.model.plural + ' skal validere', function(specDone) {

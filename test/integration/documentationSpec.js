@@ -5,7 +5,7 @@ var parameterDoc = require('../../parameterDoc');
 var apiSpec = require('../../apiSpec');
 //var request = require('request');
 
-var specsToTest = ['vejstykke', 'vejnavn'];
+var specsToTest = _.keys(parameterDoc);
 
 describe('Parameter documentation', function() {
   specsToTest.forEach(function(specName) {
