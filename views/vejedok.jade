@@ -14,15 +14,15 @@ block content
             ul#vejnavn.nav.nav-list
               li <a href='#vejnavnsoegning'>Vejnavnesøgning</a>
               li <a href='#vejnavneopslag'>Vejnavneopslag</a>
+              li <a href='#vejnavnedata'>Beskrivelse af vejnavnedata</a>
+
             li(data-toggle='collapse', data-target='#vejstykke').nav-header Vejstykke API
             ul#vejstykke.nav.nav-list
               li <a href='#vejstykkesoegning'>Vejstykkesøgning</a>
               li <a href='#vejstykkeopslag'>Vejstykkeopslag</a>
+              li <a href='#vejstykkedata'>Beskrivelse af vejstykkedata</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header vejnavn hændelse
             ul#haendelser.nav.nav-list
-            li(data-toggle='collapse', data-target='#vejstykkedatanav').nav-header vejstykkedata
-            ul#vejstykkedatanav.nav.nav-list
-              li <a href='#vejstykkedata'>Beskrivelse</a>
 
         div.span9
           section
@@ -40,8 +40,9 @@ block content
             h3.anchor-header#vejnavneopslag Vejnavneopslag
             p Opslag på enkelt vejnavn
             +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+
             div.page-header
-            h3.anchor-header#vejstykkedata Beskrivelse af vejnavnedata
+            h3.anchor-header#vejnavnedata Beskrivelse af vejnavnedata
             p Ovenstående Web API udstiller vejnavne.
             p Web API'et udstiller for hver vejnavn følgende informationer:
             +documentSchema(apiSpec.vejnavn.model.schema)
