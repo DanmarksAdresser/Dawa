@@ -3,7 +3,7 @@
 var model = require('./awsDataModel');
 var _     = require('underscore');
 
-var BASE_URL = 'http://dawa.aws.dk/api/pg';
+var BASE_URL = 'http://dawa.aws.dk';
 
 var apiSpecUtil = require('./apiSpecUtil');
 
