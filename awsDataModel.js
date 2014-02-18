@@ -182,11 +182,11 @@ var adgangsAdresseSchema = {
         'navn': {
           description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
           type: 'string'
-        },
-        required: ['kode', 'navn'],
-        additionalProperties: false,
-        docOrder: ['kode', 'navn']
-      }
+        }
+      },
+      required: ['kode', 'navn'],
+      additionalProperties: false,
+      docOrder: ['kode', 'navn']
     },
     'matrikelnr': {
       description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på. ' +
@@ -198,7 +198,7 @@ var adgangsAdresseSchema = {
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ' +
         'ESR, som det matrikelnummer som adressen ligger på, er en del af. ' +
         'Repræsenteret ved seks cifre. Eksempel ”001388”.',
-      type: 'string',
+      type: nullableType('string'),
       pattern: '^[0-9]{1,6}'
     },
     'historik'  : {

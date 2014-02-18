@@ -438,6 +438,7 @@ function mapAdganggsadresse(rs){
   else {
     rs.ejerlav = null;
   }
+  adr.esrejendomsnr = maybeNull(rs.esrejendomsnr);
   adr.matrikelnr = rs.matrikelnr;
   adr.historik = {
     oprettet: d(rs.a_oprettet),
