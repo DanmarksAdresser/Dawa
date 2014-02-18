@@ -11,21 +11,21 @@ block content
       div.row
         div.span3
           ul#indhold.nav.nav-list.affix
-            li(data-toggle='collapse', data-target='#supplerendebynavn').nav-header Supplerende bynavne API            
+            li(data-toggle='collapse', data-target='#supplerendebynavn').nav-header Supplerende bynavne API
             ul#supplerendebynavn.nav.nav-list
               li <a href='#supplerendebynavnsoegning'>Supplerende bynavnesøgning</a>
               li <a href='#supplerendebynavnopslag'>Supplerende bynavnopslag</a>
-            li(data-toggle='collapse', data-target='#haendelser').nav-header supplerende bynavn hændelse           
+            li(data-toggle='collapse', data-target='#haendelser').nav-header supplerende bynavn hændelse
             ul#haendelser.nav.nav-list
               li <a href='#supplerendebynavndata'>Beskrivelse</a>
-            li(data-toggle='collapse', data-target='#haendelser').nav-header supplerende bynavn hændelse           
+            li(data-toggle='collapse', data-target='#haendelser').nav-header supplerende bynavn hændelse
             ul#haendelser.nav.nav-list
 
         div.span9
           section
             div.page-header
               h3.anchor-header#supplerendebynavnsoegning Supplerende bynavnesøgning
-            p Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet. 
+            p Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.
             +parameterDocQuery(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
             div.page-header
               h3.anchor-header#supplerendebynavnopslag Supplerende bynavnopslag
@@ -42,12 +42,11 @@ block content
 
 block append scripts
 
-  script 
+  script
     $('#topbar li').removeClass('active');
     var a= $("#topbar li a[href='supplerendebynavndok']")[0];
-    var li= $(a).parent().addClass('active'); 
+    var li= $(a).parent().addClass('active');
     //$('#indhold li a').on('click', function() {
     //$('#indhold li').removeClass('active');
     //$(this).parent().addClass('active');
     //});
-    
