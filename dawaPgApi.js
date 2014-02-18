@@ -5,18 +5,16 @@
 /******************************************************************************/
 
 var express     = require('express');
-var JSONStream  = require('JSONStream');
 var _           = require('underscore');
 var pg          = require('pg');
-var QueryStream = require('pg-query-stream');
 var eventStream = require('event-stream');
-var utility     = require('./utility');
 var util        = require('util');
 var csv         = require('csv');
 var parameterParsing = require('./parameterParsing');
 var apiSpec = require('./apiSpec');
 var apiSpecUtil = require('./apiSpecUtil');
-var Readable = require('stream').Readable;
+var dbapi = require('./dbapi');
+var Transform = require('stream').Transform;
 
 
 
@@ -145,120 +143,45 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
       return sendJsonCallbackParameterMissingError(res);
     }
 
-    // Making the query string
-    // make the query string
-    var sqlParts = initialQuery(spec);
-
-    applyParameters(spec, spec.parameters, parseParamsResult.params, sqlParts);
-
-    var sqlString = createSqlQuery(sqlParts);
-
     // Getting the data
     withPsqlClient(res, function (client, done) {
-      client.query(
-        sqlString,
-        sqlParts.sqlParams,
-        function (err, result) {
-          done();
-          if (err) {
-            sendInternalServerError(res, err);
-          } else if (result.rows.length === 1) {
+      dbapi.query(client, spec, { specified: parseParamsResult.params }, {}, function(err, rows) {
+        done();
+        if (err) {
+          sendInternalServerError(res, err);
+        } else if (rows.length === 1) {
 // TODO fix validation rules
 //            var adr = spec.mappers.json(result.rows[0]);
 //            spec.model.validate(adr)
 //              .then(function (report) {
 //                // The good case.  The rest is error handling!
-                sendSingleResultToHttpResponse(result.rows[0], res, spec, {
-                  formatParams: formatParams
-                }, done);
+          sendSingleResultToHttpResponse(rows[0], res, spec, {
+            formatParams: formatParams
+          });
 //              })
 //              .catch(function (err) {
 //                sendInternalServerError(res, err);
 //              });
-          } else if (result.rows.length > 1) {
-            sendInternalServerError(res, "UUID: "+req.params.id+", results in more than one address: "+result.rows);
-          } else {
-            sendAddressNotFoundError(res, "UUID: "+req.params.id+", match no address");
-          }
-        });
+        } else if (rows.length > 1) {
+          sendInternalServerError(res, "UUID: "+req.params.id+", results in more than one address: "+rows);
+        } else {
+          sendAddressNotFoundError(res, "UUID: "+req.params.id+", match no address");
+        }
+      });
     });
   });
 }
 
-util.inherits(CursorStream, Readable);
-function CursorStream(client, cursorName) {
-  Readable.call(this, {
-    objectMode: true,
-    highWaterMark: 1000
-  });
-  this.client = client;
-  this.cursorName = cursorName;
-  this.maxFetchSize = 200;
-  this.closed = false;
-  this.moreRowsAvailable = true;
-  this.queryInProgress = false;
-}
-
-CursorStream.prototype._doFetch = function(count) {
-  var self = this;
-  if(self.queryInProgress) {
-    throw "Invalid state: Query already in progress";
+function toOffsetLimit(paging) {
+  if(paging.side && paging.per_side) {
+    return {
+      offset: (paging.side-1) * paging.per_side,
+      limit: paging.per_side
+    };
   }
-  if(!self.moreRowsAvailable) {
-    return;
+  else {
+    return {};
   }
-  self.queryInProgress = true;
-  var fetchSize = Math.min(self.maxFetchSize,count);
-  var fetch = 'FETCH ' + fetchSize +' FROM ' + self.cursorName;
-  console.log("Fetching new set of rows: "+fetch);
-  self.client.query(fetch, [], function(err, result) {
-    self.queryInProgress = false;
-    if(err) {
-      self.emit('error', err);
-      return;
-    }
-    if(result.rows.length < fetchSize) {
-      self.moreRowsAvailable = false;
-    }
-    result.rows.forEach(function(row) {
-      self.push(row);
-    });
-
-    if(!self.moreRowsAvailable && !self.closed) {
-      self.closed = true;
-      self.push(null);
-      var close = "CLOSE " + self.cursorName;
-      console.log("Closing cursor: "+close);
-      self.client.query(close, [], function() {});
-      return;
-    }
-  });
-};
-
-
-CursorStream.prototype._read = function(count, cb) {
-  var self = this;
-  if(self.closed) {
-    console.log('attempted read from a closed source');
-    return;
-  }
-  if(!self.queryInProgress) {
-    self._doFetch(count);
-  }
-};
-
-function streamingQueryUsingCursor(client, sql, params, cb) {
-  sql = 'declare c1 NO SCROLL cursor for ' + sql;
-  console.log("executing sql " + JSON.stringify({sq: sql, params: params}));
-  client.query(
-    sql,
-    params, function (err, result) {
-      if(err) {
-        return cb(err);
-      }
-      cb(null, new CursorStream(client, 'c1'));
-    }
-  );
 }
 
 function publishQuery(app, spec) {
@@ -289,34 +212,27 @@ function publishQuery(app, spec) {
       return sendJsonCallbackParameterMissingError(res);
     }
 
-    // make the query string
-    var sqlParts = initialQuery(spec);
-
-    applyParameters(spec, spec.parameters, specifiedParams, sqlParts);
 
     // parse and apply paging parameters
     var pagingParams = {};
     if(spec.pageable) {
       pagingParams = parameterParseResult.paging;
       applyDefaultPaging(pagingParams);
-      sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParams);
     }
 
-    // Parse and apply search-parameter
-    if(spec.searchable) {
-      applyParameters(spec, apiSpec.searchParameterSpec, parameterParseResult.search, sqlParts);
-    }
 
-    addOrderByKey(spec, sqlParts);
-
-    var sqlString = createSqlQuery(sqlParts);
+    var params = {
+      specified: specifiedParams,
+      search: parameterParseResult.search
+    };
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
-      streamingQueryUsingCursor(client, sqlString, sqlParts.sqlParams, function(err, stream) {
+      dbapi.streamingQuery(client, spec, params, toOffsetLimit(pagingParams), function(err, stream) {
         if(err) {
           console.log("Error executing cursor query");
           done();
+
           throw err;
         }
         streamHttpResponse(stream, res, spec, {
@@ -328,6 +244,7 @@ function publishQuery(app, spec) {
 }
 
 function sendSingleResultToHttpResponse(result, res, spec, options, done) {
+  done = done ? done : function() {};
   var format = options.formatParams.format;
   if(format === 'csv') {
     return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, done);
@@ -335,13 +252,13 @@ function sendSingleResultToHttpResponse(result, res, spec, options, done) {
   else if(format === 'jsonp') {
     setJsonpContentHeader(res);
     res.write(options.formatParams.callback + "(");
-    res.write(JSON.stringify(spec.mappers.json(result)));
+    res.write(jsonStringifyPretty(spec.mappers.json(result)));
     res.end(");");
     done();
   }
   else {
     setJsonContentHeader(res);
-    res.end(JSON.stringify(spec.mappers.json(result)));
+    res.end(jsonStringifyPretty(spec.mappers.json(result)));
     done();
   }
 }
@@ -359,11 +276,13 @@ function streamHttpResponse(stream, res, spec, options, done) {
   if(format === 'csv') {
     return streamCsvToHttpResponse(stream, spec, res, done);
   }
-  else if(format === 'jsonp') {
-    return streamJsonpToHttpResponse(stream, spec.mappers.json, options.formatParams.callback, res, done);
+
+  var objectStream = dbapi.transformToObjects(stream, spec, 'json');
+  if(format === 'jsonp') {
+    return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
   }
   else {
-    return streamJsonToHttpResponse(stream, spec.mappers.json, res, done);
+    return streamJsonToHttpResponse(objectStream, res, done);
   }
 }
 
@@ -379,13 +298,14 @@ function streamAutocompleteResponse(stream, res, spec, options, done) {
   var format = options.formatParams.format;
   if(format === 'csv') {
     // TODO autocomplete CSV responses?
-    return sendInternalServerError(res, "CSV for autocomplete not implemented");
+    return sendInternalServerError(res, "CSV for autocomplete not supported");
   }
-  else if(format === 'jsonp') {
-    return streamJsonpToHttpResponse(stream, spec.mappers.autocomplete, options.formatParams.callback, res, done);
+  var objectStream = dbapi.transformToObjects(stream, spec, 'autocomplete');
+  if(format === 'jsonp') {
+    return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
   }
   else {
-    return streamJsonToHttpResponse(stream, spec.mappers.autocomplete, res, done);
+    return streamJsonToHttpResponse(objectStream, res, done);
   }
 }
 
@@ -413,35 +333,6 @@ function applyDefaultPaging(pagingParams) {
   }
 }
 
-function applyParameters(spec, parameterSpec, params, query) {
-  parameterSpec.forEach(function (parameter) {
-    var name = parameter.name;
-    if (params[name] !== undefined) {
-      query.sqlParams.push(params[name]);
-      if (parameter.whereClause) {
-        query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length, spec));
-      } else {
-        var column = apiSpecUtil.getColumnNameForWhere(spec, name);
-        query.whereClauses.push(column + " = $" + query.sqlParams.length);
-      }
-    }
-  });
-}
-
-function initialQuery(spec) {
-  if(spec.baseQuery) {
-    return spec.baseQuery();
-  }
-  var query = {
-    select: "  SELECT * FROM " + spec.model.plural,
-    whereClauses: [],
-    orderClauses: [],
-    offsetLimitClause: "",
-    sqlParams: []
-  };
-  return query;
-}
-
 function setCsvContentHeader(res) {
   res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
 }
@@ -455,62 +346,16 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
     columns: _.pluck(fields,'name')
   });
   var csvStream = eventStream.pipeline(
-    rowStream,
-    eventStream.mapSync(function(row) {
-      return _.reduce(fields, function(memo, field) {
-        // currently, all selectable fields are part of the CSV format
-        if(field.selectable && field.selectable === false) {
-          return memo;
-        }
-        memo[field.name] = row[apiSpecUtil.getColumnNameForSelect(spec, field.name)];
-        return memo;
-      }, {});
-    }),
+    dbapi.transformToObjects(rowStream, spec, 'csv'),
     csvTransformer
   );
   streamToHttpResponse(csvStream, res, {}, cb);
 
 }
 
-function createSqlQuery(parts){
-  var sql = parts.select;
-  if(parts.whereClauses.length > 0) {
-    sql +=  " WHERE " + parts.whereClauses.join(" AND ");
-  }
-  if(parts.groupBy) {
-    sql += ' GROUP BY ' + parts.groupBy;
-  }
-  if(parts.orderClauses.length > 0) {
-    sql += " ORDER BY " + parts.orderClauses.join(", ");
-  }
-  if(parts.offsetLimitClause) {
-    sql += parts.offsetLimitClause;
-  }
-  return sql;
-}
-
-function createOffsetLimitClause(params) {
-  var paging = utility.paginering(params);
-  if(paging.status === 1) {
-    return ' OFFSET ' + paging.skip + ' LIMIT ' + paging.limit;
-  }
-  else if(paging.status === 2) {
-    // TODO send client error?
-    return '';
-  }
-  else {
-    return '';
-  }
-}
 
 /******************************************************************************/
 /*** Address Autocomplete *****************************************************/
-function addOrderByKey(spec, sqlParts) {
-  var keyArray = apiSpecUtil.getKeyForSelect(spec);
-  keyArray.forEach(function (key) {
-    sqlParts.orderClauses.push(apiSpecUtil.getColumnNameForSelect(spec, key));
-  });
-}
 /******************************************************************************/
 
 function publishAutocomplete(app, spec) {
@@ -537,28 +382,25 @@ function publishAutocomplete(app, spec) {
       return sendJsonCallbackParameterMissingError(res);
     }
 
-    // make the query string
-    var sqlParts = initialQuery(spec);
-
-    applyParameters(spec, spec.parameters, specifiedParams, sqlParts);
+    var params = {
+      specified: specifiedParams,
+      autocomplete: autocompleteParams
+    };
 
     applyDefaultPagingForAutocomplete(pagingParams);
-    sqlParts.offsetLimitClause = createOffsetLimitClause(pagingParams);
-
-    applyParameters(spec, apiSpec.autocompleteParameterSpec, autocompleteParams, sqlParts);
-
-    // ensure stable ordering, which is required for paging
-    addOrderByKey(spec, sqlParts);
-    var sqlString = createSqlQuery(sqlParts);
-
-    console.log('executing sql' + JSON.stringify({sql: sqlString, params: sqlParts.sqlParams}));
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
-      var stream = streamingQuery(client, sqlString, sqlParts.sqlParams);
-      streamAutocompleteResponse(stream, res, spec, {
-        formatParams: formatParams
-      }, done);
+      dbapi.streamingQuery(client, spec,  params, toOffsetLimit(pagingParams), function(err, stream) {
+        if(err) {
+          done();
+          sendInternalServerError(res, "Failed to execute query");
+          throw err;
+        }
+        streamAutocompleteResponse(stream, res, spec, {
+          formatParams: formatParams
+        }, done);
+      });
     });
   });
 }
@@ -591,11 +433,52 @@ function withPsqlClient(res, callback) {
 function setJsonpContentHeader(res) {
   res.setHeader('Content-Type', "application/javascript; charset=UTF-8");
 }
-function streamJsonpToHttpResponse(stream, mapper, callbackName, res, done) {
+
+function jsonStringifyPretty(object){
+  return JSON.stringify(object, undefined, 2);
+}
+util.inherits(JsonStringifyStream, Transform);
+function JsonStringifyStream(replacer, space) {
+  Transform.call(this, {
+    objectMode: true
+  });
+  this.replacer = replacer;
+  this.space = space;
+  this.headerWritten = false;
+}
+
+JsonStringifyStream.prototype._flush = function(cb) {
+  if(!this.headerWritten) {
+    this.push('[\n');
+  }
+  this.push('\n]');
+  cb();
+};
+
+JsonStringifyStream.prototype._transform = function(chunk, encoding, cb) {
+  var json = JSON.stringify(chunk, this.replacer, this.space);
+  if(!this.headerWritten) {
+    this.headerWritten = true;
+    this.push('[\n');
+  }
+  else {
+    this.push(',\n');
+  }
+  this.push(json);
+  cb();
+};
+
+function transformJsonToText(objectStream) {
+  return eventStream.pipeline(
+    objectStream,
+    new JsonStringifyStream(undefined, 2)
+  );
+}
+
+function streamJsonpToHttpResponse(stream, callbackName, res, done) {
   setJsonpContentHeader(res);
-  var jsonStream = createJsonStream(stream, mapper);
   res.write(callbackName + "(");
-  streamToHttpResponse(jsonStream, res, { end: false }, function(err) {
+  streamToHttpResponse(transformJsonToText(stream), res, { end: false }, function(err) {
     if(err) {
       return done(err);
     }
@@ -605,19 +488,12 @@ function streamJsonpToHttpResponse(stream, mapper, callbackName, res, done) {
 
 }
 
-function createJsonStream(stream, mapper) {
-  return eventStream.pipeline(stream,
-    eventStream.mapSync(mapper),
-    JSONStream.stringify()
-  );
-}
 function setJsonContentHeader(res) {
   res.setHeader('Content-Type', 'application/json; charset=UTF-8');
 }
-function streamJsonToHttpResponse(stream, mapper, res, cb) {
+function streamJsonToHttpResponse(stream, res, cb) {
   setJsonContentHeader(res);
-  var transformedStream = createJsonStream(stream, mapper);
-  streamToHttpResponse(transformedStream, res, {}, cb);
+  streamToHttpResponse(transformJsonToText(stream), res, {}, cb);
 }
 
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
@@ -638,10 +514,6 @@ function streamToHttpResponse(stream, res, options, cb) {
     res.on('finish', cb);
   }
   stream.pipe(res, options);
-}
-
-function streamingQuery(client, sql, params) {
-  return client.query(new QueryStream(sql, params, {batchSize: 10000}));
 }
 
 function sendQueryParameterFormatError(res, details){
@@ -678,5 +550,5 @@ function sendInternalServerError(res, details){
 
 function sendError(res, code, message){
   res.setHeader('Content-Type', 'application/problem+json; charset=UTF-8');
-  res.send(code, JSON.stringify(message));
+  res.send(code, jsonStringifyPretty(message));
 }

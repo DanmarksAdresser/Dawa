@@ -37,12 +37,19 @@ function mapKommuneRef(dbJson, baseUrl) {
   };
 }
 
+function mapPostnummerRefArray(array, baseUrl) {
+  return _.map(array.filter(function(postnr) { return notNull(postnr.nr); }), mapPostnummerRef);
+}
+
 function mapPostnummerRef(dbJson, baseUrl) {
-  return {
-    href: makeHref(BASE_URL, module.exports.postnummer, [dbJson.nr]),
-    nr: dbJson.nr,
-    navn: dbJson.navn
-  };
+  if(dbJson) {
+    return {
+      href: makeHref(BASE_URL, module.exports.postnummer, [dbJson.nr]),
+      nr: dbJson.nr,
+      navn: dbJson.navn
+    };
+  }
+  return null;
 }
 
 
@@ -682,6 +689,10 @@ var vejstykkeFields = [
   }
 ];
 
+function notNull(obj) {
+  return obj !== undefined && obj !== null;
+}
+
 function vejstykkeJsonMapper(row) {
   return {
     href: makeHref(BASE_URL, vejstykkeSpec, [row.kommunekode, row.kode]),
@@ -692,7 +703,7 @@ function vejstykkeJsonMapper(row) {
       kode: row.kommunekode,
       navn: row.kommunenavn
     },
-    postnumre: _.map(row.postnumre, mapPostnummerRef)
+    postnumre: mapPostnummerRefArray(row.postnumre, BASE_URL)
   };
 }
 
@@ -740,12 +751,12 @@ var vejstykkeSpec = {
   },
   baseQuery: function() {
     return {
-      select: 'SELECT vejstykker.kode, vejstykker.kommunekode, vejstykker.version, vejnavn, vejstykker.tsv, max(kommuner.navn) AS kommunenavn, json_agg(PostnumreMini) AS postnumre' +
+      select: 'SELECT vejstykker.kode, vejstykker.kommunekode, vejstykker.version, vejnavn, vejstykker.tsv, max(kommuner.navn) AS kommunenavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre' +
         ' FROM vejstykker' +
         ' LEFT JOIN kommuner ON vejstykker.kommunekode = kommuner.kode' +
 
         ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
-        ' LEFT JOIN PostnumreMini ON (PostnumreMini.nr = vp1.postnr)' +
+        ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
         ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
       whereClauses: [],
       groupBy: 'vejstykker.kode, vejstykker.kommunekode',
@@ -812,13 +823,13 @@ var supplerendeBynavnFields = [
     selectable: false,
     column: 'supplerendebynavne.tsv'
   }
-]
+];
 
 var supplerendeByavnJsonMapper = function(row) {
   return {
     href: makeHref(BASE_URL, supplerendeBynavnApiSpec, [row.supplerendebynavn]),
     navn: row.supplerendebynavn,
-    postnumre: _.map(row.postnumre, mapPostnummerRef),
+    postnumre: mapPostnummerRefArray(row.postnumre),
     kommuner: _.map(row.kommuner, mapKommuneRef)
   };
 };
