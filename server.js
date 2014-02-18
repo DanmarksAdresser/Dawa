@@ -24,6 +24,11 @@ app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
+function jadeDocumentationParams(req) {
+  var protocol = req.connection.encrypted ? 'https' : 'http';
+  return {url: protocol + '://' + req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
+}
+
 app.get('/', function (req, res) {
   res.render('home.jade', {url: req.headers.host});
 });
@@ -33,17 +38,13 @@ app.get('/generelt', function (req, res) {
 });
 
 app.get('/adressedok', function (req, res) {
-  res.render('adressedok.jade', {url: req.headers.host});
+  res.render('adressedok.jade', jadeDocumentationParams(req));
 });
 
 app.get('/adgangsadressedok', function (req, res) {
-  res.render('adgangsadressedok.jade', {url: req.headers.host});
+  res.render('adgangsadressedok.jade', jadeDocumentationParams(req));
 });
 
-function jadeDocumentationParams(req) {
-  var protocol = req.connection.encrypted ? 'https' : 'http';
-  return {url: protocol + '://' + req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
-}
 
 app.get('/vejedok', function (req, res) {
   res.render('vejedok.jade', jadeDocumentationParams(req));

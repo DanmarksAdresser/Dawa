@@ -240,6 +240,7 @@ var adresseFields = [
   },
   {
     name: 'tsv',
+    column: 'e_tsv',
     selectable: false
   }
 ];
@@ -358,7 +359,9 @@ function polygonTransformer(paramValue){
   return mapPolygon(paramValue);
 }
 
-function d(date) { return JSON.stringify(date); }
+function d(date) {
+  return date;
+}
 //function defaultVal(val, def) { return val ? val : def;}
 
 function adressebetegnelse(adresseRow, adgangOnly) {
@@ -382,10 +385,10 @@ function adressebetegnelse(adresseRow, adgangOnly) {
   return adresse;
 }
 
-function mapAddress(rs){
+function mapAdresse(rs){
   var adr = {};
   adr.id = rs.e_id;
-  adr.href = BASE_URL + '/adresser/' + rs.e_id;
+  adr.href = makeHref(BASE_URL, adresseApiSpec, [rs.e_id]);
   adr.version = d(rs.e_version);
   if (rs.etage) adr.etage = rs.etage;
   if (rs.doer) adr.dør = rs.doer;
@@ -397,35 +400,50 @@ function mapAddress(rs){
 function mapAdganggsadresse(rs){
   var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
   var adr = {};
-  adr.id = rs.adgangsadresseid;
-  adr.version = d(rs.e_version);
-  adr.vej = {navn: rs.vejnavn,
-    kode: slice(-4, rs.vejkode)};
+  adr.id = rs.a_id;
+  adr.vejstykke = {
+    href: makeHref(BASE_URL, vejstykkeSpec, [rs.vejkode]),
+    navn: rs.vejnavn,
+    kode: rs.vejkode
+  };
   adr.husnr = rs.husnr;
-  //if (rs.bygningsnavn) adr.bygningsnavn = rs.bygningsnavn;
-  if (rs.supplerendebynavn) adr.supplerendebynavn = rs.supplerendebynavn;
-  adr.postnummer = {nr: slice(-4, rs.postnr),
-    navn: rs.postnrnavn};
-  adr.kommune = {kode: slice(-4, rs.kommunekode),
-    navn: rs.kommunenavn};
-  adr.ejerlav = {kode: slice(-8, rs.ejerlavkode),
-    navn: rs.ejerlavnavn};
+  adr.bygningsnavn = rs.bygningsnavn;
+  adr.supplerendebynavn = rs.supplerendebynavn;
+  adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, BASE_URL);
+  adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, BASE_URL);
+  adr.ejerlav = {
+    kode: slice(-8, rs.ejerlavkode),
+    navn: rs.ejerlavnavn
+  };
   adr.matrikelnr = rs.matrikelnr;
-  adr.historik = {oprettet: d(rs.e_oprettet),
-    'ændret': d(rs.e_aendret)};
-  adr.adgangspunkt = {etrs89koordinat: {'øst': rs.oest,
-    nord:  rs.nord},
-    wgs84koordinat:  {'længde': rs.lat,
-      bredde: rs.long},
-    kvalitet:        {'nøjagtighed': rs.noejagtighed,
+  adr.historik = {
+    oprettet: d(rs.a_oprettet),
+    ikrafttrædelse: d(rs.a_ikraftfra),
+    'ændret': d(rs.a_aendret)
+  };
+  adr.adgangspunkt = {
+    etrs89koordinat: {
+      'øst': rs.oest,
+      nord:  rs.nord
+    },
+    wgs84koordinat:  {
+      'længde': rs.lat,
+      bredde: rs.long
+    },
+    kvalitet:
+    {
+      'nøjagtighed': rs.noejagtighed,
       kilde: rs.kilde,
-      tekniskstandard: rs.tekniskstandard},
+      tekniskstandard: rs.tekniskstandard
+    },
     tekstretning:    rs.tekstretning,
-    'ændret':        d(rs.adressepunktaendringsdato)};
-  adr.DDKN = {m100: rs.kn100mdk,
+    'ændret':        d(rs.adressepunktaendringsdato)
+  };
+  adr.DDKN = {
+    m100: rs.kn100mdk,
     km1:  rs.kn1kmdk,
-    km10: rs.kn10kmdk};
-
+    km10: rs.kn10kmdk
+  };
   return adr;
 }
 
@@ -465,7 +483,7 @@ var adresseApiSpec = {
   fieldMap: _.indexBy(adresseFields, 'name'),
   parameters: adresseParameters,
   mappers: {
-    json: mapAddress,
+    json: mapAdresse,
     autocomplete: adresseRowToAutocompleteJson
   }
 };

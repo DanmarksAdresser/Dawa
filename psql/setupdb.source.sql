@@ -210,7 +210,7 @@ CREATE INDEX ON kommuner USING gin(tsv);
 \echo ''
 \echo '***** Creating adgangsadresse table'
 DROP TABLE IF EXISTS adgangsadresser CASCADE;
-CREATE TABLE IF NOT EXISTS adgangsadresser (
+CREATE TABLE  adgangsadresser (
   id uuid NOT NULL PRIMARY KEY,
   version VARCHAR(255) NOT NULL,
   bygningsnavn VARCHAR(255) NULL,
@@ -237,9 +237,9 @@ CREATE TABLE IF NOT EXISTS adgangsadresser (
   kilde CHAR(1) NULL,
   tekniskstandard CHAR(2) NULL,
   tekstretning DECIMAL(5,2) NULL,
-  kn100mdk CHAR(15) NULL,
-  kn1kmdk CHAR(15) NULL,
-  kn10kmdk CHAR(15) NULL,
+  kn100mdk VARCHAR(15) NULL,
+  kn1kmdk VARCHAR(15) NULL,
+  kn10kmdk VARCHAR(15) NULL,
   adressepunktaendringsdato TIMESTAMP NULL,
   geom geometry,
   tsv tsvector
@@ -355,70 +355,7 @@ DROP TABLE tmp;
 \echo '***************************************************************************'
 \echo ''
 
-DROP VIEW IF EXISTS adresser;
-CREATE VIEW adresser AS
-SELECT
-       E.id        AS e_id,
-       E.version   AS e_version,
-       E.oprettet  AS e_oprettet,
-       E.ikraftfra AS e_ikraftfra,
-       E.aendret   AS e_aendret,
-       E.tsv       AS tsv,
-       E.etage,
-       E.doer,
-
-       A.id AS a_id,
-       A.version AS a_version,
-       A.bygningsnavn,
-       A.husnr,
-       A.supplerendebynavn,
-       A.matrikelnr,
-       A.esrejendomsnr,
-       A.oprettet AS a_oprettet,
-       A.ikraftfra as a_ikraftfra,
-       A.aendret  AS a_aendret,
-       A.etrs89oest::double precision AS oest,
-       A.etrs89nord::double precision AS nord,
-       A.wgs84lat::double precision   AS lat,
-       A.wgs84long::double precision  AS long,
-       A.wgs84,
-       A.geom       AS wgs84geom,
-       A.noejagtighed,
-       A.kilde::smallint,
-       A.tekniskstandard,
-       A.tekstretning::double precision,
-       A.kn100mdk,
-       A.kn1kmdk,
-       A.kn10kmdk,
-       A.adressepunktaendringsdato,
-
-       P.nr   AS postnr,
-       P.navn AS postnrnavn,
-
-       V.kode    AS vejkode,
-       V.vejnavn AS vejnavn,
-
-       LAV.kode AS ejerlavkode,
-       LAV.navn AS ejerlavnavn,
-
-       K.kode AS kommunekode,
-       K.navn AS kommunenavn
-
-FROM enhedsadresser E
-LEFT JOIN adgangsadresser A  ON (E.adgangsadresseid = A.id)
-LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
-LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
-LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
-
-\echo ''
-\echo ''
-\echo '***************************************************************************'
-\echo '*** adresser view *********************************************************'
-\echo '***************************************************************************'
-\echo ''
-
-DROP VIEW IF EXISTS AdgangsadresserView;
+DROP VIEW IF EXISTS AdgangsadresserView CASCADE;
 CREATE VIEW AdgangsadresserView AS
   SELECT
     A.id as a_id,
@@ -464,6 +401,28 @@ CREATE VIEW AdgangsadresserView AS
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN Kommuner        AS K   ON (A.kommunekode = K.kode)
     LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode);
+
+\echo ''
+\echo ''
+\echo '***************************************************************************'
+\echo '*** adresser view *********************************************************'
+\echo '***************************************************************************'
+\echo ''
+
+DROP VIEW IF EXISTS adresser;
+CREATE VIEW adresser AS
+  SELECT
+    E.id        AS e_id,
+    E.version   AS e_version,
+    E.oprettet  AS e_oprettet,
+    E.ikraftfra AS e_ikraftfra,
+    E.aendret   AS e_aendret,
+    E.tsv       AS e_tsv,
+    E.etage,
+    E.doer,
+    A.*
+  FROM enhedsadresser E
+    LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
 DROP VIEW IF EXISTS vejstykkerPostnr;
 CREATE VIEW vejstykkerPostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;

@@ -73,66 +73,73 @@ describe("Adresse schema validation", function () {
   });
 
   it("should validate complete address", function (done) {
-    valid({id: "98349834-9834-9834-9834-983498349834",
-           adressebetegnelse: "noeh",
-           adgangsadresse: {"id": "0a3f50ae-da7f-32b8-e044-0003ba298018",
-                            "vej": {
-                              "kode": 237,
-                              "navn": "Fægangen",
-                              //TODO                              "vejadresseringsnavn": "F_gangen"
-                            },
-                            "husnr": "1",
-                            "supplerendebynavn": "Byen",
-                            "postnummer": {
-                              "nr": 4180,
-                              "navn": "Sorø",
-                            },
-                            "kommune": {
-                              "kode": 340,
-                              "navn": "Kommune 0340"
-                            },
-                            "ejerlav": {
-                              "kode": "0340",
-                              "navn": "Ejerlav 0340"
-                            },
-                            "historik": {"oprettet": "dato",
-                                         "ændret": "dato"},
-                            "matrikelnr": "3b",
-                            "adgangspunkt": {
-                              "etrs89koordinat": {
-                                "øst": 6146489.42,
-                                "nord": 661986.43
-                              },
-                              "wgs84koordinat": {
-                                "længde": 11.5605367427032,
-                                "bredde": 55.4377705205619
-                              },
-                              "kvalitet": {
-                                "nøjagtighed": "A",
-                                "kilde": 5,
-                                "tekniskstandard": "TK"},
-                              "tekstretning": 115.67,
-                              "ændret": "dato"
-                            },
-                            "DDKN": {
-                              "m100": "100m_61464_6619",
-                              "km1": "1km_6146_661",
-                              "km10": "10km_614_66"
-                            },
-                            "sogn": {"kode": "7383",
-                                     "navn": "Sorø"},
-                            "region": {"kode": "7383",
-                                       "navn": "Sorø"},
-                            "retskreds": {"kode": "7383",
-                                          "navn": "Sorø"},
-                            "politikreds": {"kode": "7383",
-                                            "navn": "Sorø"},
-                            "opstillingskreds": {"kode": "7383",
-                                                 "navn": "Sorø"},
-                            "afstemningsområde": {"kode": "7383",
-                                                  "navn": "Sorø"}
-                           }
+    valid({
+        href: 'link',
+        id: "98349834-9834-9834-9834-983498349834",
+        etage: '1',
+        dør: 'tv',
+        adressebetegnelse: "noeh",
+        adgangsadresse: {
+          href: 'link',
+          "id": "0a3f50ae-da7f-32b8-e044-0003ba298018",
+          "vejstykke": {
+            href: 'link',
+            "kode": 237,
+            "navn": "Fægangen"
           },
+          "husnr": "1",
+          "supplerendebynavn": "Byen",
+          "postnummer": {
+            href: 'link',
+            "nr": 4180,
+            "navn": "Sorø"
+          },
+          "kommune": {
+            href: 'link',
+            "kode": 340,
+            "navn": "Kommune 0340"
+          },
+          "ejerlav": {
+            "kode": "0340",
+            "navn": "Ejerlav 0340"
+          },
+          "historik": {"oprettet": "dato",
+            "ændret": "dato"},
+          "matrikelnr": "3b",
+          "adgangspunkt": {
+            "etrs89koordinat": {
+              "øst": 6146489.42,
+              "nord": 661986.43
+            },
+            "wgs84koordinat": {
+              "længde": 11.5605367427032,
+              "bredde": 55.4377705205619
+            },
+            "nøjagtighed": "A",
+            "kilde": 5,
+            "tekniskstandard": "TK",
+            "tekstretning": 115.67,
+            "ændret": "dato"
+          },
+          "DDKN": {
+            "m100": "100m_61464_6619",
+            "km1": "1km_6146_661",
+            "km10": "10km_614_66"
+          },
+          "sogn": {"nr": 7383,
+            "navn": "Sorø"},
+          "region": {"nr": 7383,
+            "navn": "Sorø"},
+          "retskreds": {"nr": 7383,
+            "navn": "Sorø"},
+          "politikreds": {"nr": 7383,
+            "navn": "Sorø"},
+          "opstillingskreds": {"nr": 7383,
+            "navn": "Sorø"},
+          "afstemningsområde": {"nr": 7383,
+            "navn": "Sorø"}
+        }
+      },
           model.adresse.schema,
           done);
   });
