@@ -15,24 +15,25 @@ block content
             ul#supplerendebynavn.nav.nav-list
               li <a href='#supplerendebynavnsoegning'>Supplerende bynavnesøgning</a>
               li <a href='#supplerendebynavnopslag'>Supplerende bynavnopslag</a>
-            li(data-toggle='collapse', data-target='#haendelser').nav-header supplerende bynavn hændelse
-            ul#haendelser.nav.nav-list
-              li <a href='#supplerendebynavndata'>Beskrivelse</a>
+              li <a href='#supplerendebynavndata'>Beskrivelse af supplerendebynavnedata</a>
+
             li(data-toggle='collapse', data-target='#haendelser').nav-header supplerende bynavn hændelse
             ul#haendelser.nav.nav-list
 
         div.span9
           section
-            div.page-header
-              h3.anchor-header#supplerendebynavnsoegning Supplerende bynavnesøgning
+
+            h3.anchor-header#supplerendebynavnsoegning Supplerende bynavnesøgning
             p Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.
             +parameterDocQuery(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
             div.page-header
-              h3.anchor-header#supplerendebynavnopslag Supplerende bynavnopslag
+
+            h3.anchor-header#supplerendebynavnopslag Supplerende bynavnopslag
             p Modtag supplerende bynavn.
             +parameterDocGet(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
             div.page-header
-              h3.anchor-header#supplerendebynavndata Beskrivelse af supplerende bynavnedata
+
+            h3.anchor-header#supplerendebynavndata Beskrivelse af supplerende bynavnedata
             p Ovenstående Web API udstiller supplerende bynavne. Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.
             p Web API'et udstiller for hver supplerende bynavn følgende informationer:
             +documentSchema(apiSpec.supplerendeBynavn.model.schema)
