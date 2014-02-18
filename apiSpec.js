@@ -1,11 +1,11 @@
 "use strict";
 
-var model = require('./awsDataModel');
-var _     = require('underscore');
+var model       = require('./awsDataModel');
+var _           = require('underscore');
+var apiSpecUtil = require('./apiSpecUtil');
+
 
 var BASE_URL = 'http://dawa.aws.dk';
-
-var apiSpecUtil = require('./apiSpecUtil');
 
 var schema =  {
   uuid: {type: 'string',
