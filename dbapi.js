@@ -140,7 +140,7 @@ CursorStream.prototype._doFetch = function(count) {
   self.queryInProgress = true;
   var fetchSize = Math.min(self.maxFetchSize,count);
   var fetch = 'FETCH ' + fetchSize +' FROM ' + self.cursorName;
-  console.log("Fetching new set of rows: "+fetch);
+  //console.log("Fetching new set of rows: "+fetch);
   self.client.query(fetch, [], function(err, result) {
     self.queryInProgress = false;
     if(err) {
