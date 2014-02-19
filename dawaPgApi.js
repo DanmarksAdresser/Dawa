@@ -4,16 +4,16 @@
 /*** Module setup *************************************************************/
 /******************************************************************************/
 
-var express     = require('express');
-var _           = require('underscore');
-var eventStream = require('event-stream');
-var util        = require('util');
-var csv         = require('csv');
+var express          = require('express');
+var _                = require('underscore');
+var eventStream      = require('event-stream');
+var util             = require('util');
+var csv              = require('csv');
 var parameterParsing = require('./parameterParsing');
-var apiSpec = require('./apiSpec');
-var apiSpecUtil = require('./apiSpecUtil');
-var dbapi = require('./dbapi');
-var Transform = require('stream').Transform;
+var apiSpec          = require('./apiSpec');
+var apiSpecUtil      = require('./apiSpecUtil');
+var dbapi            = require('./dbapi');
+var Transform        = require('stream').Transform;
 
 /******************************************************************************/
 /*** Routes *******************************************************************/
