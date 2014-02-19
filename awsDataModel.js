@@ -16,11 +16,41 @@ function nullable(schemaType) {
   return result;
 }
 
-function object_AllRequired(properties){
-  return   {type: 'object',
-            properties: properties,
-            required: _.keys(properties),
-            additionalProperties: false};
+/**
+ * Creates a JSON schema object with all fields as required,
+ * and the specified docOrder, allowing no additional properties.
+ */
+function schemaObject(def){
+  var fieldNames = _.keys(def.properties).sort();
+  var documentedNames = _.clone(def.docOrder).sort();
+  if(!_.isEqual(fieldNames, documentedNames)) {
+    throw new Error("docOrder and list of fields did not correspond. fieldNames: " + JSON.stringify(fieldNames) + " documentedNames " + JSON.stringify(documentedNames));
+  }
+  var result = {
+    type : def.nullable ? nullableType('object') : 'object',
+    properties: def.properties,
+    required: fieldNames,
+    additionalProperties: false,
+    docOrder: def.docOrder
+  }
+  if(def.title) {
+    result.title = def.title;
+  }
+  if(def.description) {
+    result.description = def.description;
+  }
+  return result;
+}
+
+function globalSchemaObject(def) {
+  var result = schemaObject(def);
+  if(def.definitions) {
+    result.definitions = def.definitions;
+  }
+  else {
+    result.definitions = definitions;
+  }
+  return result;
 }
 
 var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
@@ -52,18 +82,39 @@ var definitions = {
   'UpTo8': {type: 'string', pattern: '^\\d{1,8}$'},
   'DateTime': {
     type: 'string'
-  }, // TODO: find the correct format.
-  'Wgs84koordinat': object_AllRequired({'bredde': {type: 'number'}, // TODO: can we add ranges?
-                                        'længde': {type: 'number'}}), // TODO: can we add ranges?
-  'Etrs89koordinat': object_AllRequired({'øst':  {type: 'number'}, // TODO: can we add ranges?
-                                         'nord': {type: 'number'}}), // TODO: can we add ranges?
+  },
+  'Wgs84koordinat': schemaObject({
+      properties: {
+        'bredde': {
+          description: 'Breddegraden til adgangspunktets koordinatsæt.',
+          type: 'number'
+        },
+        'længde': {
+          description: 'Lændegraden til adgangspunktets koordinatsæt.',
+          type: 'number'
+        }
+      },
+      docOrder: ['bredde', 'længde']
+    }),
+  'Etrs89koordinat': schemaObject({
+      properties: {
+        'øst': {
+          description: 'Østlige koordinat til adgangspunktets koordinatsæt.',
+          type: 'number'
+        },
+        'nord': {
+          description: 'Nordlige koordinat til adgangspunktets koordinatsæt. ',
+          type: 'number'
+        }
+      },
+      docOrder: ['øst', 'nord']
+    }),
   Postnr: {
     type: 'integer',
     minimum: 1000,
     maximum: 9999
   },
-  PostnummerRef: {
-    type: 'object',
+  PostnummerRef: schemaObject({
     properties: {
       href: {
         description: 'Postnummerets unikke URL',
@@ -74,16 +125,14 @@ var definitions = {
         '$ref': '#/definitions/Postnr'
       },
       navn: {
-        description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
+        description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
+          'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
         type: nullableType('string')
       }
     },
-    required: ['href', 'nr'],
-    additionalProperties: false,
     docOrder: ['href', 'nr', 'navn']
-  },
-  KommuneRef: {
-    type: 'object',
+  }),
+  KommuneRef: schemaObject({
     properties: {
       href: {
         description: 'Kommunens unikke URL.',
@@ -98,39 +147,35 @@ var definitions = {
         type: nullableType('string')
       }
     },
-    required: ['href', 'kode' ],
-    additionalProperties: false,
     docOrder: ['href', 'kode', 'navn']
-  },
-  VejstykkeKodeOgNavn: {
-    type: 'object',
+  }),
+  VejstykkeKodeOgNavn: schemaObject({
     properties: {
       href: {
         description: 'Vejstykkets unikke URL.',
         type: 'string'
       },
       kode: {
-        description: 'Identifikation af det vejstykket. Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.',
+        description: 'Identifikation af det vejstykket. ' +
+          'Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. ' +
+          'Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.',
         '$ref': '#/definitions/Kode4'
       },
       navn: {
         description: 'Vejens navn.',
-        type: 'string'
+        type: nullableType('string')
       }
     },
-    required: ['href', 'kode' ],
-    additionalProperties: false,
     docOrder: ['href', 'kode', 'navn']
-  }
+  })
 };
 
 _.each(definitions, function(value, key) {
   definitions['Nullable' + key] = nullable(value);
 });
 
-var adgangsAdresseSchema = {
-  title: 'AdgangsAdresse',
-  type: 'object',
+var adgangsAdresseSchema = globalSchemaObject({
+  title: 'Adgangsadresse',
   properties: {
     href: {
       description: 'Adgangsadressens URL.',
@@ -155,7 +200,7 @@ var adgangsAdresseSchema = {
       pattern: '([1-9]|[1-9]\\d|[1-9]\\d{2})[A-Z]?'
     },
     'bygningsnavn': {
-      description: '',
+      description: 'Evt. bygningsnavn eller gårdnavn, der er registreret af kommunen som en supplerende adressebetegnelse. Indtil 34 tegn. Eksempel: ”Solholm”. Udgår og bliver overført til Stednavne.',
       type: nullableType('string')
     },
     'supplerendebynavn': {
@@ -166,15 +211,15 @@ var adgangsAdresseSchema = {
     },
     'postnummer': {
       description: 'Postnummeret som adressen er beliggende i.',
-      $ref: '#/definitions/PostnummerRef'
+      $ref: '#/definitions/NullablePostnummerRef'
     },
     'kommune':{
       description: 'Kommunen som adressen er beliggende i.',
       $ref: '#/definitions/KommuneRef'
     },
-    'ejerlav': {
-      type: nullableType('object'),
+    'ejerlav': schemaObject({
       description: 'Det matrikulære ejerlav som adressen ligger i.',
+      nullable: true,
       properties: {
         'kode': {
           description: 'Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i. ' +
@@ -186,10 +231,8 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['kode', 'navn'],
-      additionalProperties: false,
       docOrder: ['kode', 'navn']
-    },
+    }),
     'matrikelnr': {
       description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på. ' +
         'Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
@@ -203,7 +246,7 @@ var adgangsAdresseSchema = {
       type: nullableType('string'),
       pattern: '^[0-9]{1,6}'
     },
-    'historik'  : {
+    'historik' : schemaObject({
       'description': 'Væsentlige tidspunkter for adressen',
       properties: {
         'oprettet': {
@@ -218,23 +261,22 @@ var adgangsAdresseSchema = {
           description: 'Dato og tid hvor der sidst er ændret i adressen. Eksempel: 2002-04-08T00:00:00.',
           type: nullableType('string'),
           '$ref': '#/definitions/NullableDateTime'
-        },
-        additionalProperties: false,
-        docOrder: ['oprettet', 'ikrafttrædelse', 'ændret']
-      }
-    },
-    'adgangspunkt': {
-      type: 'object',
+        }
+      },
+      docOrder: ['oprettet', 'ikrafttrædelse', 'ændret']
+
+    }),
+    'adgangspunkt': schemaObject({
       description: 'Geografisk punkt, som angiver særskilt adgang fra navngiven vej ind på et areal eller bygning.',
       properties: {
         etrs89koordinat: {
           description: 'Adgangspunktets koordinatsæt angivet i koordinatsystemet ' +
             'UTM zone 32 og ved brug af fælles europæiske terrestriale referencesystem EUREF89/ETRS89.',
-          $ref: '#/definitions/Etrs89koordinat'
+          $ref: '#/definitions/NullableEtrs89koordinat'
         },
         wgs84koordinat: {
           description: 'Adgangspunktets koordinatsæt angivet i koordinatsystemet WGS84/geografisk.',
-          $ref: '#/definitions/Wgs84koordinat'
+          $ref: '#/definitions/NullableWgs84koordinat'
         },
         nøjagtighed: {
           description: 'Kode der angiver nøjagtigheden for adressepunktet. ' +
@@ -253,7 +295,7 @@ var adgangsAdresseSchema = {
             '”3” = Eksternt indberettet af konsulent på vegne af kommunen; ' +
             '”4” = Eksternt indberettet af kommunes kortkontor o.l. ' +
             '”5” = Oprettet af teknisk forvaltning."',
-          type: 'integer', minimum: 1, maximum: 5
+          type: nullableType('integer'), minimum: 1, maximum: 5
 
         },
         tekniskstandard: {
@@ -262,27 +304,26 @@ var adgangsAdresseSchema = {
             '”TK” = Udtrykkelig TK-standard: 3 meter inde i bygning, midt for længste side mod vej; ' +
             '”TN” Alm. teknisk standard: bygningstyngdepunkt eller blot i bygning; ' +
             '”UF” = Uspecificeret/foreløbig: ikke nødvendigvis placeret i bygning."',
-          type: 'string',
+          type: nullableType('string'),
           pattern: '^TD|TK|TN|UF$'
         },
         tekstretning: {
           description: 'Angiver en evt. retningsvinkel for adressen i ”gon” ' +
             'dvs. hvor hele cirklen er 400 gon og 200 er vandret. ' +
             'Værdier 0.00-400.00: Eksempel: ”128.34”.',
-          type: 'number',
+          type: nullableType('number'),
           minimum: 0,
           maximum: 400
         },
         ændret: {
           description: 'Dato og tid for sidste ændring i adressepunktet. Eksempel: ”1998-11-17T00:00:00”',
-          '$ref': '#/definitions/DateTime'
+          '$ref': '#/definitions/NullableDateTime'
         }
       },
-      additionalProperties: false,
       docOrder: ['etrs89koordinat', 'wgs84koordinat','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
-    },
-    'DDKN': {
-      type: 'object',
+    }),
+    'DDKN': schemaObject({
+      nullable: true,
       description: 'Adressens placering i Det Danske Kvadratnet (DDKN).',
       properties: {
         'm100': {
@@ -302,9 +343,9 @@ var adgangsAdresseSchema = {
         }
       },
       docOrder: ['m100', 'km1', 'km10']
-    },
-    'sogn': {
-      type: 'object',
+    }),
+    'sogn': schemaObject({
+      nullable: true,
       description: 'Sognet som adressen er beliggende i.',
       properties: {
         nr: {
@@ -316,12 +357,10 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['nr', 'navn'],
-      additionalProperties: false,
       docOrder: ['nr', 'navn']
-    },
-    'region': {
-      type: 'object',
+    }),
+    'region': schemaObject({
+      nullable: true,
       description: 'Regionen som adressen er beliggende i.',
       properties: {
         nr: {
@@ -333,12 +372,10 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['nr', 'navn'],
-      additionalProperties: false,
       docOrder: ['nr', 'navn']
-    },
-    'retskreds': {
-      type: 'object',
+    }),
+    'retskreds': schemaObject({
+      nullable: true,
       description: 'Retskredsen som adressen er beliggende i.',
       properties: {
         nr: {
@@ -350,12 +387,10 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['nr', 'navn'],
-      additionalProperties: false,
       docOrder: ['nr', 'navn']
-    },
-    'politikreds': {
-      type: 'object',
+    }),
+    'politikreds': schemaObject({
+      nullable: true,
       description: 'Politikredsen som adressen er beliggende i.',
       properties: {
         nr: {
@@ -367,12 +402,10 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['nr', 'navn'],
-      additionalProperties: false,
       docOrder: ['nr', 'navn']
-    },
-    'opstillingskreds': {
-      type: 'object',
+    }),
+    'opstillingskreds': schemaObject({
+      nullable: true,
       description: 'Opstillingskresen som adressen er beliggende i.',
       properties: {
         nr: {
@@ -384,12 +417,10 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['nr', 'navn'],
-      additionalProperties: false,
       docOrder: ['nr', 'navn']
-    },
-    'afstemningsområde': {
-      type: 'object',
+    }),
+    'afstemningsområde': schemaObject({
+      nullable: true,
       description: 'Afstemningsområde som adressen er beliggende i.',
       properties: {
         nr: {
@@ -401,25 +432,19 @@ var adgangsAdresseSchema = {
           type: 'string'
         }
       },
-      required: ['nr', 'navn'],
-      additionalProperties: false,
       docOrder: ['nr', 'navn']
-    }
+    })
   },
-  required: ['href','id', 'vejstykke', 'husnr', 'bygningsnavn', 'supplerendebynavn','postnummer', 'kommune','historik'],
   docOrder: ['href','id', 'vejstykke', 'husnr','bygningsnavn', 'supplerendebynavn',
-    'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-  'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds','afstemningsområde'],
-  additionalProperties: false,
-  definitions: definitions
-};
+  'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
+  'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds','afstemningsområde']
+});
 
 var adresseDefinitions = _.clone(definitions);
 adresseDefinitions.Adgangsadresse = adgangsAdresseSchema;
 
-var adresseSchema = {
+var adresseSchema = globalSchemaObject({
   'title': 'Adresse',
-  'type': 'object',
   'properties': {
     'href': {
       description: 'Adressens unikke URL.',
@@ -435,12 +460,12 @@ var adresseSchema = {
     'etage':   {
       description: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
         'tal fra 1 til 99, st, kl, kl2 op til kl9.',
-      '$ref': '#/definitions/Etage'
+      '$ref': '#/definitions/NullableEtage'
     },
     'dør':     {
       description: 'Dørbetnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
         'tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.',
-      type: 'string'
+      type: nullableType('string')
     },
     'adressebetegnelse': {
       description: '',
@@ -451,15 +476,12 @@ var adresseSchema = {
       $ref: '#/definitions/Adgangsadresse'
     }
   },
-  'required': ['href','id', 'adressebetegnelse', 'adgangsadresse'],
   docOrder: ['href','id', 'etage', 'dør', 'adressebetegnelse', 'adgangsadresse'],
-  'additionalProperties': false,
-  'definitions': adresseDefinitions
-};
+  definitions: adresseDefinitions
+});
 
-var postnummerSchema =  {
+var postnummerSchema =  globalSchemaObject({
   'title': 'postnummer',
-  'type': 'object',
   'properties': {
     'href': {
       description: 'Postnummerets unikke URL.',
@@ -479,7 +501,7 @@ var postnummerSchema =  {
     },
     'stormodtageradresse': {
       description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.',
-      type: 'string'
+      type: nullableType('string')
     },
     'kommuner': {
       description: 'De kommuner hvis areal overlapper postnumeret areal.',
@@ -489,15 +511,11 @@ var postnummerSchema =  {
       }
     }
   },
-  'required': ['href','nr', 'navn', 'version', 'kommuner'],
-  'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresse', 'kommuner'],
-  'additionalProperties': false,
-  'definitions': definitions
-};
+  'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresse', 'kommuner']
+});
 
-var vejstykkeSchema = {
+var vejstykkeSchema = globalSchemaObject({
   'title': 'vejstykke',
-  'type': 'object',
   'properties': {
     'href': {
       description: 'Vejstykkets unikke URL.',
@@ -526,15 +544,11 @@ var vejstykkeSchema = {
       }
     }
   },
-  'required': ['href', 'kode', 'navn','kommune', 'postnumre'],
-  'additionalProperties': false,
-  'definitions': definitions,
   docOrder: ['href', 'kode', 'navn', 'kommune', 'postnumre']
-  };
+});
 
-var vejnavnSchema = {
-  'title': 'vejnavnnavn',
-  'type': 'object',
+var vejnavnSchema = globalSchemaObject({
+  'title': 'vejnavn',
   'properties': {
     href: {
       description: 'Vejnavnets unikke URL.',
@@ -545,15 +559,11 @@ var vejnavnSchema = {
       type: 'string'
     }
   },
-  required: ['href', 'navn'],
-  additionalProperties: false,
-  'definitions': definitions,
   docOrder: ['href', 'navn']
-};
+});
 
-var supplerendebynavnSchema = {
+var supplerendebynavnSchema = globalSchemaObject({
   'title': 'supplerendebynavn',
-  'type': 'object',
   'properties': {
     href: {
       description: 'Det supplerende bynavns unikke URL',
@@ -575,15 +585,11 @@ var supplerendebynavnSchema = {
       items: { '$ref': '#/definitions/KommuneRef'}
     }
   },
-  'required': ['href', 'navn', 'postnumre', 'kommuner'],
-  'docOrder': ['href', 'navn', 'kommuner', 'postnumre'],
-  'additionalProperties': false,
-  'definitions': definitions
-};
+  'docOrder': ['href', 'navn', 'kommuner', 'postnumre']
+});
 
-var kommuneSchema = {
+var kommuneSchema = globalSchemaObject({
   'title': 'kommune',
-  'type': 'object',
   'properties': {
     'href': {
       description: 'Kommunens unikke URL.',
@@ -598,11 +604,8 @@ var kommuneSchema = {
       type: 'string'
     }
   },
-  'required': ['href', 'kode', 'navn'],
-  'docOrder': ['href', 'kode', 'navn'],
-  'additionalProperties': false,
-  'definitions': definitions
-};
+  'docOrder': ['href', 'kode', 'navn']
+});
 
 
 /******************************************************************************/

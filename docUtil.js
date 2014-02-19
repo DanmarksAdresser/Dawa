@@ -31,11 +31,12 @@ exports.computeGetUrl = function (baseUrl, spec, path) {
 };
 
 exports.extractDocumentationForObject = function (schema) {
-  return _.map(schema.docOrder, function (propertyName) {
+  var result = _.map(schema.docOrder, function (propertyName) {
     var property = schema.properties[propertyName];
-    var required = schema.required && schema.required.indexOf(propertyName) != -1;
-    return exports.extractDocumentationForProperty(property, propertyName, required);
+    return exports.extractDocumentationForProperty(property, propertyName);
   });
+  console.log(JSON.stringify(result));
+  return  result;
 };
 
 // for now, this one just assumes that the schema is compiled
@@ -53,16 +54,37 @@ function resolveProperty(property) {
   }
   return propertyDef;
 }
-exports.extractDocumentationForProperty = function (property, propertyName,required) {
+
+function isType(type, candidate) {
+  if(_.isArray(type)) {
+    return type.indexOf(candidate) !== -1;
+  }
+  return type === candidate;
+}
+
+function extractTypeDesc(type) {
+  if(!_.isArray(type)) {
+    return type;
+  }
+  return _.without(type, 'null').join(', ');
+}
+
+function isNullable(type) {
+  return _.isArray(type) && type.indexOf('null') !== -1;
+}
+
+exports.extractDocumentationForProperty = function (property, propertyName) {
   var propertyDef = resolveProperty(property);
+  var type = propertyDef.type || 'string';
+  var typeDesc = extractTypeDesc(type);
   var result = {
     name: propertyName,
     description: propertyDef.description || '',
-    type: propertyDef.type || 'string',
-    required: required
+    type: typeDesc,
+    required: !isNullable(type)
   };
 
-  if (propertyDef.type === 'array') {
+  if (isType(propertyDef.type,'array')) {
     var itemDef = resolveProperty(propertyDef.items);
     if (itemDef.type === 'object') {
       result.items = exports.extractDocumentationForObject(itemDef);
@@ -71,7 +93,7 @@ exports.extractDocumentationForProperty = function (property, propertyName,requi
       throw 'Simple arrays not yet supported';
     }
   }
-  else if (propertyDef.type === 'object') {
+  else if (isType(propertyDef.type,'object')) {
     result.properties = exports.extractDocumentationForObject(propertyDef);
   }
   return result;

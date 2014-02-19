@@ -37,11 +37,14 @@ function makeHref(baseUrl, spec, idArray) {
 }
 
 function mapKommuneRef(dbJson, baseUrl) {
-  return {
-    href: makeHref(BASE_URL, module.exports.kommune, [dbJson.kode]),
-    kode: dbJson.kode,
-    navn: dbJson.navn
-  };
+  if(dbJson) {
+    return {
+      href: makeHref(BASE_URL, module.exports.kommune, [dbJson.kode]),
+      kode: dbJson.kode,
+      navn: dbJson.navn
+    };
+  }
+  return null;
 }
 
 function mapPostnummerRefArray(array, baseUrl) {
@@ -377,8 +380,12 @@ function d(date) {
   if(date instanceof Date) {
     return date.toString();
   }
-
-  return date;
+  else if(date) {
+    return date;
+  }
+  else {
+    return null;
+  }
 }
 //function defaultVal(val, def) { return val ? val : def;}
 
@@ -407,21 +414,21 @@ function mapAdresse(rs){
   var adr = {};
   adr.id = rs.e_id;
   adr.href = makeHref(BASE_URL, adresseApiSpec, [rs.e_id]);
-  if (rs.etage) adr.etage = rs.etage;
-  if (rs.doer) adr.dør = rs.doer;
+  adr.etage = maybeNull(rs.etage);
+  adr.dør = maybeNull(rs.doer);
   adr.adressebetegnelse = adressebetegnelse(rs);
-  adr.adgangsadresse = mapAdganggsadresse(rs);
+  adr.adgangsadresse = mapAdgangsadresse(rs);
   return adr;
 }
 
-function mapAdganggsadresse(rs){
+function mapAdgangsadresse(rs){
   var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
   var adr = {};
   adr.href = makeHref(BASE_URL, adgangsadresseApiSpec, [rs.a_id]);
   adr.id = rs.a_id;
   adr.vejstykke = {
     href: makeHref(BASE_URL, vejstykkeSpec, [rs.vejkode]),
-    navn: rs.vejnavn,
+    navn: maybeNull(rs.vejnavn),
     kode: rs.vejkode
   };
   adr.husnr = rs.husnr;
@@ -436,35 +443,41 @@ function mapAdganggsadresse(rs){
     };
   }
   else {
-    rs.ejerlav = null;
+    adr.ejerlav = null;
   }
   adr.esrejendomsnr = maybeNull(rs.esrejendomsnr);
-  adr.matrikelnr = rs.matrikelnr;
+  adr.matrikelnr = maybeNull(rs.matrikelnr);
   adr.historik = {
     oprettet: d(rs.a_oprettet),
     ikrafttrædelse: d(rs.a_ikraftfra),
     'ændret': d(rs.a_aendret)
   };
   adr.adgangspunkt = {
-    etrs89koordinat: {
+    etrs89koordinat: rs.oest && rs.nord ? {
       'øst': rs.oest,
       nord:  rs.nord
-    },
-    wgs84koordinat:  {
+    } : null,
+    wgs84koordinat: rs.lat && rs.long ?  {
       'længde': rs.lat,
       bredde: rs.long
-    },
-    'nøjagtighed': rs.noejagtighed,
-    kilde: rs.kilde,
-    tekniskstandard: rs.tekniskstandard,
-    tekstretning:    rs.tekstretning,
+    } : null,
+    'nøjagtighed': maybeNull(rs.noejagtighed),
+    kilde: maybeNull(rs.kilde),
+    tekniskstandard: maybeNull(rs.tekniskstandard),
+    tekstretning:    maybeNull(rs.tekstretning),
     'ændret':        d(rs.adressepunktaendringsdato)
   };
-  adr.DDKN = {
-    m100: rs.kn100mdk,
-    km1:  rs.kn1kmdk,
-    km10: rs.kn10kmdk
-  };
+  adr.DDKN = rs.kn100mdk || rs.kn1kmdk || rs.kn10kmdk ? {
+    m100: maybeNull(rs.kn100mdk),
+    km1:  maybeNull(rs.kn1kmdk),
+    km10: maybeNull(rs.kn10kmdk)
+  } : null;
+  adr.sogn = null;
+  adr.region = null;
+  adr.retskreds = null;
+  adr.politikreds = null;
+  adr.opstillingskreds = null;
+  adr.afstemningsområde = null;
   return adr;
 }
 
@@ -518,7 +531,7 @@ var adgangsadresseApiSpec = {
   fieldMap: _.indexBy(adgangsadresseFields, 'name'),
   parameters: adgangsadresseParameters,
   mappers: {
-    json: mapAdganggsadresse,
+    json: mapAdgangsadresse,
     autocomplete: adgangsadresseRowToAutocompleteJson
   },
   baseQuery: function() {
@@ -663,6 +676,7 @@ function postnummerJsonMapper(row) {
     nr:  row.nr,
     navn: row.navn,
     version: row.version,
+    stormodtageradresse: null,
     kommuner: _.map(row.kommuner, mapKommuneRef)
   };
 }

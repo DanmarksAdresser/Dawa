@@ -40,6 +40,7 @@ describe("Postnummer schema validation", function () {
         "nr": 8600,
         "navn": "Silkeborg",
         "version": "2011-12-02T04:20:03+01:00",
+        stormodtageradresse: null,
         "kommuner": [
           {"href": "http://dawa.aws.dk/api/pg/kommuner/740", "kode": 740, "navn": "Silkeborg"}
         ]},
@@ -51,13 +52,16 @@ describe("Postnummer schema validation", function () {
       "nr": 86000,
       "navn": "Silkeborg",
       "version": "2011-12-02T04:20:03+01:00",
+      stormodtageradresse: null,
       "kommuner": [
         {"href": "http://dawa.aws.dk/api/pg/kommuner/740", "kode": 740, "navn": "Silkeborg"}
       ]}, model.postnummer.schema, 'MAXIMUM', done);
   });
 
   it("should fail on extra properties", function (done) {
-    invalid({nr: 8600, navn: 'Silkeborg', version: 'ver1', foo: 42, kommuner: []}, model.postnummer.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
+    invalid({nr: 8600, navn: 'Silkeborg', version: 'ver1',
+      stormodtageradresse: null,
+      foo: 42, kommuner: []}, model.postnummer.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
   });
 });
 
@@ -104,8 +108,12 @@ describe("Adresse schema validation", function () {
             "kode": "0340",
             "navn": "Ejerlav 0340"
           },
-          "historik": {"oprettet": "dato",
-            "ændret": "dato"},
+          'esrejendomsnr': null,
+          "historik": {
+            "oprettet": "dato",
+            "ændret": "dato",
+            'ikrafttrædelse': null
+          },
           "matrikelnr": "3b",
           "adgangspunkt": {
             "etrs89koordinat": {

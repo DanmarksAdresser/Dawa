@@ -26,7 +26,7 @@ describe('Documentation generation utilities', function() {
         'docOrder': ['stormodtageradresse', 'kommuner'],
         'additionalProperties': false,
         'definitions': {
-          'Kode4': {type: 'integer', pattern: '^(\\d{4})$'},
+          'NullableKode4': {type: ['null','integer'], pattern: '^(\\d{4})$'},
           KommuneRef: {
             type: 'object',
             properties: {
@@ -36,10 +36,10 @@ describe('Documentation generation utilities', function() {
               },
               kode: {
                 description: 'Kommunekoden. 4 cifre.',
-                '$ref': '#/definitions/Kode4'
+                '$ref': '#/definitions/NullableKode4'
               }
             },
-            required: ['href' ],
+            required: ['href', 'kode'],
             docOrder: ['href', 'kode']
           },
           'additionalProperties': false
