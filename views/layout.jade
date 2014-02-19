@@ -8,10 +8,10 @@ html(lang='da')
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     meta(name="description", content="Danmarks adresse web API")
     meta(name="author", content="Finn Jordal")
-    
+
     //if lt IE 9
       script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
-      
+
     link(href="bootstrap/css/bootstrap.css", rel="stylesheet")
     link(href="bootstrap/css/bootstrap-responsive.css", rel="stylesheet")
     link(href="css/jquery-ui-1.10.3.custom.min.css", rel="stylesheet")
@@ -22,10 +22,10 @@ html(lang='da')
 
   body
     div.navbar.navbar-inverse.navbar-fixed-top
-      div.navbar-inner        
+      div.navbar-inner
         img.pull-right.nav-collapse(id="logo",src="img/logo.png")
         div.container
-          button.btn.btn-navbar(type="button", data-toggle="collapse", data-target=".nav-collapse") 
+          button.btn.btn-navbar(type="button", data-toggle="collapse", data-target=".nav-collapse")
             span.icon-bar
             span.icon-bar
             span.icon-bar
@@ -50,8 +50,8 @@ html(lang='da')
                 a(href='listerdok') Lister
               li
                 a(href='om') Om
-    
-    block content          
+
+    block content
 
     block scripts
       script(src="bootstrap/js/jquery.min.js")
