@@ -17,7 +17,6 @@ var valuesNeverExpectedToBeSeen = {
     stormodtageradresse: true
   },
   adgangsadresser: {
-    supplerendebynavn: true, // todo kræver bedre testdata
     sogn: {
       nr: true,
       navn: true
@@ -43,20 +42,6 @@ var valuesNeverExpectedToBeSeen = {
       navn: true
     }
   },
-  supplerendebynavne: { // todo kræver bedre testdata
-    href: true,
-    navn: true,
-    postnumre: {
-      href: true,
-      nr: true,
-      navn: true
-    },
-    kommuner: {
-      href: true,
-      kode: true,
-      navn: true
-    }
-  }
 };
 
 var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,

@@ -3,50 +3,52 @@
 var request = require("request");
 //var _       = require("underscore");
 
+var kommuner = [ { href : 'http://dawa.aws.dk/kommuner/253', kode : 253, navn : 'Greve' },
+                 { href : 'http://dawa.aws.dk/kommuner/269', kode : 269, navn : 'Solrød' } ];
+
 describe("PostnumreApi", function() {
   it("It is possible to get a single postnummer", function(done) {
-    request.get({url: "http://localhost:3000/postnumre/8600", json: true}, function(error, response, result) {
-      expect(result.nr).toBe(8600);
-      expect(result.navn).toBe("Silkeborg");
-      expect(result.kommuner).toEqual([{ href : 'http://dawa.aws.dk/kommuner/740', kode : 740, navn : 'Silkeborg' }]);
+    request.get({url: "http://localhost:3000/postnumre/2690", json: true}, function(error, response, result) {
+      expect(result.nr).toBe(2690);
+      expect(result.navn).toBe("Karlslunde");
+      expect(result.kommuner).toEqual(kommuner);
       done();
     });
   });
   it("It is possible to autocomplete a postnummer", function(done) {
-    request.get({url: "http://localhost:3000/postnumre/autocomplete?q=silkeb", json: true}, function(error, response, result) {
+    request.get({url: "http://localhost:3000/postnumre/autocomplete?q=Karls", json: true}, function(error, response, result) {
       var suggestion = result[0];
-      expect(suggestion.tekst).toBe('8600 Silkeborg');
-      expect(suggestion.postnummer.nr).toBe(8600);
+      expect(suggestion.tekst).toBe('2690 Karlslunde');
+      expect(suggestion.postnummer.nr).toBe(2690);
       done();
     });
   });
 
   it('It is possible to search for postnumre', function(done) {
-    request.get({url: "http://localhost:3000/postnumre?q=silkeborg", json: true}, function(error, response, result) {
+    request.get({url: "http://localhost:3000/postnumre?q=karlslunde", json: true}, function(error, response, result) {
       var postnummer = result[0];
-      expect(postnummer.nr).toBe(8600);
-      expect(postnummer.navn).toBe('Silkeborg');
-      expect(postnummer.kommuner).toEqual([{ href : 'http://dawa.aws.dk/kommuner/740', kode : 740, navn : 'Silkeborg' }]);
+      expect(postnummer.nr).toBe(2690);
+      expect(postnummer.navn).toBe('Karlslunde');
+      expect(postnummer.kommuner).toEqual(kommuner);
       done();
     });
   });
 
   it('It is possible to search for postnumre by name', function(done) {
-    request.get({url: "http://localhost:3000/postnumre?navn=Silkeborg", json: true}, function(error, response, result) {
+    request.get({url: "http://localhost:3000/postnumre?navn=Karlslunde", json: true}, function(error, response, result) {
       var postnummer = result[0];
-      expect(postnummer.nr).toBe(8600);
-      expect(postnummer.navn).toBe('Silkeborg');
-      expect(postnummer.kommuner).toEqual([{ href : 'http://dawa.aws.dk/kommuner/740', kode : 740, navn : 'Silkeborg' }]);
+      expect(postnummer.nr).toBe(2690);
+      expect(postnummer.navn).toBe('Karlslunde');
+      expect(postnummer.kommuner).toEqual(kommuner);
       done();
     });
   });
-
   it('It is possible to search for postnumre by kommunekode', function(done) {
-    request.get({url: "http://localhost:3000/postnumre?kommune=740", json: true}, function(error, response, result) {
+    request.get({url: "http://localhost:3000/postnumre?kommune=253", json: true}, function(error, response, result) {
       var postnummer = result[0];
-      expect(postnummer.nr).toBe(8600);
-      expect(postnummer.navn).toBe('Silkeborg');
-      expect(postnummer.kommuner).toEqual([{ href : 'http://dawa.aws.dk/kommuner/740', kode : 740, navn : 'Silkeborg' }]);
+      expect(postnummer.nr).toBe(2690);
+      expect(postnummer.navn).toBe('Karlslunde');
+      expect(postnummer.kommuner).toEqual(kommuner);
       done();
     });
   });

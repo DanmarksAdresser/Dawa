@@ -23,11 +23,12 @@ describe('Format selection', function () {
   });
 
   it("By default, JSON should be returned (single result mode)", function(done) {
-    var id = "0a3f50c1-d506-32b8-e044-0003ba298018";
+    var id = "0a3f50a3-822a-32b8-e044-0003ba298018";
     request.get("http://localhost:3000/api/pg/adresser/" + id, function(error, response, body) {
+      expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
       var bodyJson = JSON.parse(body);
-      expect(bodyJson.id).toBe("0a3f50c1-d506-32b8-e044-0003ba298018");
+      expect(bodyJson.id).toBe('0a3f50a3-822a-32b8-e044-0003ba298018');
       done();
     });
   });
@@ -55,14 +56,14 @@ describe('Format selection', function () {
   });
 
   it("If format=csv is passed as query parameter, CSV should be returned (single result mode)", function(done) {
-    var id = "0a3f50c1-d506-32b8-e044-0003ba298018";
+    var id = "0a3f50a3-822a-32b8-e044-0003ba298018";
     request.get("http://localhost:3000/api/pg/adresser/" + id + "?format=csv", function(error, response, body) {
       expect(response.headers['content-type']).toBe('text/csv; charset=UTF-8');
       csv()
         .from.string(body, {columns: true})
         .to.array(function (data) {
           expect(data.length).toBe(1);
-          expect(data[0].id).toEqual('0a3f50c1-d506-32b8-e044-0003ba298018');
+          expect(data[0].id).toEqual("0a3f50a3-822a-32b8-e044-0003ba298018");
           done();
         });
     });
@@ -81,9 +82,11 @@ describe('Format selection', function () {
   });
 
   it("If format=jsonp is passed as query parameter, JSONP should be returned (single result mode)", function(done) {
-    var id = "0a3f50c1-d506-32b8-e044-0003ba298018";
+    var id = "0a3f50a3-8192-32b8-e044-0003ba298018";
     request.get("http://localhost:3000/api/pg/adresser/" + id + "?format=jsonp&callback=jsonpCallback", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
+      expect(response.statusCode).toBe(200);
+      console.log(body);
       eval(body); // jshint ignore:line
       var result = jsonpResults.pop();
       expect(result).toBeDefined();

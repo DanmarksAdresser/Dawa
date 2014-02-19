@@ -3,18 +3,16 @@
 \set ECHO queries
 
 CREATE TEMP TABLE IDs AS
-SELECT enhedsadresseid, adgangsadresseid, kommunekode, vejkode, postnr
+SELECT e_id, a_id, kommunekode, vejkode, postnr
 FROM adresser
-WHERE postnr = 8600
-      AND ST_Contains(ST_GeomFromText('POLYGON((56.19 9.5,  56.20 9.5, 56.20 9.53, 56.19 9.53, 56.19 9.5))',
+WHERE ST_Contains(ST_GeomFromText('POLYGON((55.3 9.4,  55.6 12.7, 55.601 12.7, 55.301 9.4, 55.3 9.4))',
                                       4326)::geometry,
                       wgs84geom);
-
 
 CREATE TEMP TABLE enhedsadresser_out AS
 SELECT id, version, e.adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer
 FROM enhedsadresser e
-JOIN IDs ON e.id = IDs.enhedsadresseid;
+JOIN IDs ON e.id = IDs.e_id;
 
 \copy enhedsadresser_out  TO 'AddressSpecific.csv'  WITH  (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
@@ -23,7 +21,7 @@ SELECT id, a.version, bygningsnavn, a.kommunekode, a.vejkode, v.vejnavn, husnr, 
        a.ejerlavkode, e.navn AS ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord,
        wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato
 FROM adgangsadresser a
-JOIN (SELECT DISTINCT adgangsadresseid from IDs) T ON a.id = T.adgangsadresseid
+JOIN (SELECT DISTINCT a_id from IDs) T ON a.id = T.a_id
 LEFT JOIN vejnavne v ON v.kode = a.vejkode AND v.kommunekode = a.kommunekode
 LEFT JOIN postnumre p ON p.nr = a.postnr
 LEFT JOIN ejerlav e ON e.kode = a.ejerlavkode;
