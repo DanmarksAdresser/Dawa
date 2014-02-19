@@ -25,33 +25,14 @@ exports.setupRoutes = function () {
   app.use(express.methodOverride());
   app.use(express.bodyParser());
 
-  publishAutocomplete(app, apiSpec.adresse);
-  publishGetByKey(app, apiSpec.adresse);
-  publishQuery(app, apiSpec.adresse);
-
-  publishAutocomplete(app, apiSpec.vejnavn);
-  publishGetByKey(app, apiSpec.vejnavn);
-  publishQuery(app, apiSpec.vejnavn);
-
-  publishAutocomplete(app, apiSpec.postnummer);
-  publishGetByKey(app, apiSpec.postnummer);
-  publishQuery(app, apiSpec.postnummer);
-
-  publishAutocomplete(app, apiSpec.vejstykke);
-  publishGetByKey(app, apiSpec.vejstykke);
-  publishQuery(app, apiSpec.vejstykke);
-
-  publishAutocomplete(app, apiSpec.kommune);
-  publishGetByKey(app, apiSpec.kommune);
-  publishQuery(app, apiSpec.kommune);
-
-  publishAutocomplete(app, apiSpec.supplerendeBynavn);
-  publishGetByKey(app, apiSpec.supplerendeBynavn);
-  publishQuery(app, apiSpec.supplerendeBynavn);
-
-  publishAutocomplete(app, apiSpec.adgangsadresse);
-  publishGetByKey(app, apiSpec.adgangsadresse);
-  publishQuery(app, apiSpec.adgangsadresse);
+  apiSpec.allSpecNames.forEach(function(specName) {
+    var spec = apiSpec[specName];
+    if(spec.suggestable) {
+      publishAutocomplete(app, spec);
+    }
+    publishGetByKey(app, spec);
+    publishQuery(app, spec);
+  });
   return app;
 };
 
@@ -60,30 +41,15 @@ exports.setupPublicRoutes = function () {
   app.set('jsonp callback', true);
   app.use(express.methodOverride());
   app.use(express.bodyParser());
-
-  publishAutocomplete(app, apiSpec.postnummer);
-  publishGetByKey(app, apiSpec.postnummer);
-  publishQuery(app, apiSpec.postnummer);
-
-  publishAutocomplete(app, apiSpec.vejnavn);
-  publishGetByKey(app, apiSpec.vejnavn);
-  publishQuery(app, apiSpec.vejnavn);
-
-  publishAutocomplete(app, apiSpec.vejstykke);
-  publishGetByKey(app, apiSpec.vejstykke);
-  publishQuery(app, apiSpec.vejstykke);
-
-  publishAutocomplete(app, apiSpec.supplerendeBynavn);
-  publishGetByKey(app, apiSpec.supplerendeBynavn);
-  publishQuery(app, apiSpec.supplerendeBynavn);
-
-  publishAutocomplete(app, apiSpec.adgangsadresse);
-  publishGetByKey(app, apiSpec.adgangsadresse);
-  publishQuery(app, apiSpec.adgangsadresse);
-
-  publishAutocomplete(app, apiSpec.kommune);
-  publishGetByKey(app, apiSpec.kommune);
-  publishQuery(app, apiSpec.kommune);
+  var specs = ['vejnavn', 'vejstykke', 'supplerendeBynavn', 'adgangsadresse', 'postnummer', 'kommune'];
+  specs.forEach(function(specName) {
+    var spec = apiSpec[specName];
+    if(spec.suggestable) {
+      publishAutocomplete(app, spec);
+    }
+    publishGetByKey(app, spec);
+    publishQuery(app, spec);
+  });
   return app;
 };
 
@@ -420,6 +386,7 @@ function setJsonpContentHeader(res) {
 function jsonStringifyPretty(object){
   return JSON.stringify(object, undefined, 2);
 }
+
 util.inherits(JsonStringifyStream, Transform);
 function JsonStringifyStream(replacer, space) {
   Transform.call(this, {

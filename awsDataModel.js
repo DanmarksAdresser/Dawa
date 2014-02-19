@@ -124,7 +124,9 @@ var definitions = {
   }
 };
 
-definitions.NullableDateTime = nullable(definitions.DateTime);
+_.each(definitions, function(value, key) {
+  definitions['Nullable' + key] = nullable(value);
+});
 
 var adgangsAdresseSchema = {
   title: 'AdgangsAdresse',

@@ -9,6 +9,7 @@ describe('Autocomplete af adresser', function() {
       expect(response.statusCode).toEqual(200);
       expect(_.isArray(result)).toBe(true);
       var suggestion = result[0];
+      expect(suggestion).toBeDefined();
       expect(suggestion.tekst).toBeDefined();
       expect(suggestion.tekst).toMatch(/Dalve/);
       expect(suggestion.adresse).toBeDefined();

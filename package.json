@@ -22,7 +22,7 @@
     "csv": "~0.3.7"
   },
   "devDependencies": {
-    "jasmine-node": "1.12.0",
+    "jasmine-node": "1.13.1",
     "jshint": "2.4.1",
     "grunt": "~0.4.2",
     "grunt-cli": "0.1.11",
