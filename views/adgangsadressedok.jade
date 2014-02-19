@@ -64,10 +64,10 @@ block content
               h4 Eksempler
               p Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46
               pre 
-                a(href='http://#{url}/adgangsadresser?vejnavn=Rødkildevej&husnr=46') http://#{url}/adgangsadresser?vejnavn=Rødkildevej&husnr=46
+                a(href='#{url}/adgangsadresser?vejnavn=Rødkildevej&husnr=46') #{url}/adgangsadresser?vejnavn=Rødkildevej&husnr=46
               p Find de adresser Hvis vejnavn starter med hvid (eller Hvid) og har postnummeret 2400
               pre 
-                a(href='http://#{url}/adgangsadresser?vejnavn=hvid*&postnr=2400') http://#{url}/adgangsadresser?vejnavn=hvid*&postnr=2400
+                a(href='#{url}/adgangsadresser?vejnavn=hvid*&postnr=2400') #{url}/adgangsadresser?vejnavn=hvid*&postnr=2400
              
 
             div.page-header
@@ -87,7 +87,7 @@ block content
             h4 Eksempler
             p Find de adresser som matcher <em>Lilledal 1</em>
             pre 
-              a(href='http://#{url}/adgangsadresser/autocomplete?q=Lilledal 1') http://#{url}/adgangsadresser/autocomplete?q=Lilledal 1
+              a(href='#{url}/adgangsadresser/autocomplete?q=Lilledal 1') #{url}/adgangsadresser/autocomplete?q=Lilledal 1
 
             
             div.page-header
@@ -116,11 +116,11 @@ block content
             h4 Eksempler
             p Valider adressen: Hulgårdsvej 67, 2400 København NV            
             pre 
-              a(href='http://#{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400') http://#{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400
+              a(href='#{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400') #{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400
             p Adressen, som udpeger et rækkehus, er gyldig
             p Valider adressen: Lilledal 23, 3450 Allerød
             pre 
-              a(href='http://#{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450') http://#{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450
+              a(href='#{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450') #{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450
             p Adressen er  valid. Den udpeger en opgang (adgangsadresse) med flere adresser. Se eventuelt under validering af adgangsadresser.
             
             
@@ -140,7 +140,7 @@ block content
             h4 Eksempel
             p Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018
             pre 
-              a(href='http://#{url}/adresser/39ece5fb-ef0c-0ee2-e044-0003ba298018') http://#{url}/adresser/39ece5fb-ef0c-0ee2-e044-0003ba298018
+              a(href='#{url}/adresser/39ece5fb-ef0c-0ee2-e044-0003ba298018') #{url}/adresser/39ece5fb-ef0c-0ee2-e044-0003ba298018
           
             
             div.page-header
@@ -162,10 +162,10 @@ block content
             h4 Eksempler
             p Ikke implementeret: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
             pre 
-              a(href='http://#{url}/adgangsadresser/6176652.55,725369.59') http://#{url}/adgangsadresser/6176652.55,725369.59
+              a(href='#{url}/adgangsadresser/6176652.55,725369.59') #{url}/adgangsadresser/6176652.55,725369.59
             p Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)
             pre 
-              a(href='http://#{url}/adgangsadresser/55.6832383751223,12.5851471984198') http://#{url}/adgangsadresser/55.6832383751223,12.5851471984198
+              a(href='#{url}/adgangsadresser/55.6832383751223,12.5851471984198') #{url}/adgangsadresser/55.6832383751223,12.5851471984198
             
             div.page-header
               h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
