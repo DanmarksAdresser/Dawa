@@ -304,10 +304,58 @@ var adgangsadresseDoc = {
 };
 
 
-module.exports= {
+var postnummerDoc = {
+  parameters: [
+    {
+      name: 'nr',
+      doc: 'Postnummer. 4 cifre.',
+      examples: ['2690', '8600']
+    },
+    {
+      name: 'navn',
+      doc: 'Postnummernavn',
+      examples: ['Aarhus', 'København']
+    },
+    {
+      name: 'kommune',
+      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+      examples: ['0101']
+    },
+    {
+      name: 'q',
+      doc: 'Søgetekst. Der søges i postnummernavnet. Alle ord i søgeteksten skal matche postnummernavnet. ' +
+        'Wildcard * er tilladt i slutningen af hvert ord.'
+    }
+  ],
+  examples: {
+    query: [
+      {description: 'Hent alle postnumre', query: []},
+      {description: 'Find postnummer <em>8600</em>. Bemærk, retunerer en liste',
+       query: [{ name: 'nr', value: "8600"}]},
+      {description: 'Find alle postnummer som benyttes i kommune <em>751</em> (Aarhus)',
+       query: [{ name: 'kommune', value: "751"}]},
+      {description: 'Find postnummer for postnummernavn <em>Silkeborg</em>',
+       query: [{ name: 'navn', value: "Silkeborg"}]},
+      {description: 'Find alle postnumre som indeholder ordet <em>strand</em>',
+       query: [{ name: 'q', value: "strand"}]},
+      {description: 'Find alle postnumre som indeholder <em>aar*</em>',
+       query: [{ name: 'q', value: "aar*"}]},
+    ],
+    get: [
+      {
+        description: 'Hent postnummer for København NV',
+        path: ['2400']
+      }]
+
+  }
+};
+
+
+module.exports = {
   vejnavn: vejnavneDoc,
   vejstykke: vejstykkerDoc,
   supplerendeBynavn: supplerendeBynavneDoc,
   kommune: kommuneDoc,
-  adgangsadresse: adgangsadresseDoc
+  adgangsadresse: adgangsadresseDoc,
+  postnummer: postnummerDoc
 };
