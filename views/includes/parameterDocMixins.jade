@@ -43,7 +43,7 @@ mixin documentProperties(props, indent)
     tr
       - for (var x = 0; x < indent; x++)
         td
-      td(colspan=3-indent)
+      td(colspan=5-indent)
         = property.name
       td= property.type || 'string'
       td= property.required ? 'nej' : 'ja'
@@ -56,7 +56,7 @@ mixin documentProperties(props, indent)
 mixin documentSchema(schema)
   table.table.table-hover
     thead
-      th(colspan="3") Navn
+      th(colspan="5") Navn
       th Type
       th Optionelt
       th Beskrivelse
