@@ -332,7 +332,7 @@ var postnummerDoc = {
       {description: 'Hent alle postnumre', query: []},
       {description: 'Find postnummer <em>8600</em>',
        query: [{ name: 'nr', value: "8600"}]},
-      {description: 'Find alle postnummer som benyttes i kommune <em>751</em> (Aarhus)',
+      {description: 'Find alle postnumre som benyttes i kommune <em>751</em> (Aarhus)',
        query: [{ name: 'kommune', value: "751"}]},
       {description: 'Find postnummer for postnummernavn <em>Silkeborg</em>',
        query: [{ name: 'navn', value: "Silkeborg"}]},
