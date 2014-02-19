@@ -288,9 +288,6 @@ var adgangsadresseParameters = [
     schema: schema.postnr
   },
   {
-    name: 'adgangsadresseid'
-  },
-  {
     name: 'kommunekode'
   },
   {
