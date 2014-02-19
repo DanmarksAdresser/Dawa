@@ -333,9 +333,10 @@ CREATE INDEX ON enhedsadresser USING gin(tsv);
 \echo '\n***** Populate text search column'
 
 create temp table tmp  AS select id,
-                                 to_tsvector('danish', coalesce(etage, '') || ' ' || coalesce(doer, '') || ' '
-                                             || coalesce(postnrnavn, '') || ' ' || coalesce(vejnavn, '') ||  ' '
-                                             || coalesce(to_char(postnr,'0000'), '') || ' ' || coalesce(husnr, ''))
+                                 to_tsvector('danish',
+                                                coalesce(etage,                  '') || ' ' || coalesce(doer,    '') || ' '
+                                             || coalesce(postnrnavn,             '') || ' ' || coalesce(vejnavn, '') || ' '
+                                             || coalesce(to_char(postnr,'0000'), '') || ' ' || coalesce(husnr,   ''))
          AS tsv
   FROM (SELECT e.id, etage, doer, p.navn as postnrnavn, v.vejnavn, p.nr as postnr, husnr
         FROM enhedsadresser e
