@@ -62,7 +62,7 @@ block content
             p Myndigheden garanterer ikke den fortsatte tilrådighedsstillelse af data, og kan til enhver tid ændre brugsretten til data og vilkårene herfor. 
 
 block append scripts
-  script  
+  script(type='text/javascript').
     $('#topbar li').removeClass('active');
     var a= $("#topbar li a[href='om']")[0];
     var li= $(a).parent().addClass('active');
