@@ -15,6 +15,12 @@ var apiSpecUtil      = require('./apiSpecUtil');
 var dbapi            = require('./dbapi');
 var Transform        = require('stream').Transform;
 
+function corsMiddleware(req, res, next) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  next();
+}
+
+
 /******************************************************************************/
 /*** Routes *******************************************************************/
 /******************************************************************************/
@@ -24,6 +30,7 @@ exports.setupRoutes = function () {
   app.set('jsonp callback', true);
   app.use(express.methodOverride());
   app.use(express.bodyParser());
+  app.use(corsMiddleware);
 
   apiSpec.allSpecNames.forEach(function(specName) {
     var spec = apiSpec[specName];
@@ -41,6 +48,7 @@ exports.setupPublicRoutes = function () {
   app.set('jsonp callback', true);
   app.use(express.methodOverride());
   app.use(express.bodyParser());
+  app.use(corsMiddleware);
   var specs = ['vejnavn', 'vejstykke', 'supplerendeBynavn', 'adgangsadresse', 'postnummer', 'kommune'];
   specs.forEach(function(specName) {
     var spec = apiSpec[specName];
