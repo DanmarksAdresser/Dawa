@@ -47,6 +47,11 @@ function mapKommuneRef(dbJson, baseUrl) {
   return null;
 }
 
+function mapKommuneRefArray(array, baseUrl) {
+  return _.map(array.filter(function(kommune) { return notNull(kommune.kode); }), mapKommuneRef);
+}
+
+
 function mapPostnummerRefArray(array, baseUrl) {
   return _.map(array.filter(function(postnr) { return notNull(postnr.nr); }), mapPostnummerRef);
 }
@@ -550,7 +555,7 @@ var vejnavnFields = [
   {
     name: 'postnr',
     selectable: false,
-    column: 'vp.postnr'
+    column: 'vp1.postnr'
   },
   {
     name: 'kommunekode',
@@ -566,8 +571,11 @@ var vejnavnFields = [
 var vejnavnJsonMapper = function(row) {
   return {
     href: makeHref(BASE_URL, vejnavnApiSpec, [row.navn]),
-    navn: row.navn
-  };
+    navn: row.navn,
+    postnumre: mapPostnummerRefArray(row.postnumre, BASE_URL),
+    kommuner: mapKommuneRefArray(row.kommuner, BASE_URL)
+
+};
 };
 
 function vejnavnRowToAutocompleteJson(row) {
@@ -610,9 +618,13 @@ var vejnavnApiSpec = {
   },
   baseQuery: function() {
     return {
-      select: 'SELECT vejstykker.vejnavn as navn' +
+      select: 'SELECT vejstykker.vejnavn as navn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre,' +
+        ' json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner' +
         ' FROM vejstykker' +
-        ' LEFT JOIN vejstykkerPostnumreMat  vp ON (vp.kommunekode = vejstykker.kommunekode AND vp.vejkode = vejstykker.kode)',
+        ' LEFT JOIN kommuner k ON vejstykker.kommunekode = k.kode' +
+        ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
+        ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
+        ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
       whereClauses: [],
       groupBy: 'vejstykker.vejnavn',
       orderClauses: [],

@@ -557,9 +557,21 @@ var vejnavnSchema = globalSchemaObject({
     'navn': {
       description: 'Vejnavnet',
       type: 'string'
+    },
+    'postnumre': {
+      description: 'De postnumre, hvori der ligger en vej med dette navn.',
+      type: 'array',
+      items: {
+        $ref: '#/definitions/PostnummerRef'
+      }
+    },
+    'kommuner': {
+      description: 'De kommuner hvori der ligger en vej med dette navn.',
+      type: 'array',
+      items: { '$ref': '#/definitions/KommuneRef'}
     }
   },
-  docOrder: ['href', 'navn']
+  docOrder: ['href', 'navn', 'postnumre', 'kommuner']
 });
 
 var supplerendebynavnSchema = globalSchemaObject({

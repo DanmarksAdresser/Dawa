@@ -156,7 +156,24 @@ describe("Adresse schema validation", function () {
 
 describe('Vejnavn schema validation', function() {
   it("should validate basic datum", function (done) {
-    valid({"href":"http://dawa.aws.dk/api/pg/vejnavne/Anders Højensvej","navn":"Anders Højensvej"},
+    valid({
+        "href": "http://dawa.aws.dk/vejnavne/Avnsbjergvej",
+        "navn": "Avnsbjergvej",
+        "postnumre": [
+          {
+            "href": "http://dawa.aws.dk/postnumre/4174",
+            "nr": 4174,
+            "navn": "Jystrup Midtsj"
+          }
+        ],
+        "kommuner": [
+          {
+            "href": "http://dawa.aws.dk/kommuner/329",
+            "kode": 329,
+            "navn": "Ringsted"
+          }
+        ]
+      },
       model.vejnavn.schema, done);
   });
 });
