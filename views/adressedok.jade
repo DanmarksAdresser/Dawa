@@ -34,87 +34,7 @@ block content
             div.page-header
               h3.anchor-header#adressesoegning Adressesøgning
             p Søg efter adresser. Returnerer de adresser som opfylder kriteriet.
-            pre GET /adresser
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td vejnavn
-                    td Vejnavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning. F.eks. vejnavn=rød* returnerer alle de adreser, hvis vejnavn starter på <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bokstaver.
-                  tr
-                    td husnr
-                    td Husnummer. Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A-Z. Eksempel: "11", "12A", "187B".
-                                                               
-                  tr
-                    td supplerendebynavn
-                    td (ikke med i prototypen) Supplerende bynavn indtil 34 tegn.      
-                  tr
-                    td postnr
-                    td Postnummer. 4 cifre.                
-                  tr
-                    td etage
-                    td Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9                                
-                  tr
-                    td dør
-                    td Dørbetegnelse. Tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.  
-                  tr
-                    td adgangsadresseid
-                    td (ikke med i prototypen) Id på den til adressen tilknyttede adgangsadresse. UUID.
-                  tr
-                    td kommune
-                    td Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.                                    
-                  tr
-                    td sogn
-                    td Sognekode. 4 cifre.   
-                  tr
-                    td region
-                    td (ikke med i prototypen) Regionskode. 4 cifre.     
-                  tr
-                    td retskreds
-                    td (ikke med i prototypen) Retskredskode. 4 cifre.     
-                  tr
-                    td politikreds
-                    td (ikke med i prototypen) Politikredskode. 4 cifre.     
-                  tr
-                    td opstillingskreds
-                    td (ikke med i prototypen) Opstillingskredskode. 4 cifre.    
-                  tr
-                    td ejerlav
-                    td (ikke med i prototypen) Matrikelnummer. Indtil 7 tegn.     
-                  tr
-                    td esrejendomsnr
-                    td (ikke med i prototypen) ESR Ejendomsnummer. Indtil 6 cifre.       
-                  tr
-                    td matrikel
-                    td (ikke med i prototypen) Matrikelnummer. Indtil 7 tegn.             
-                  tr
-                    td matrikelindeholder
-                    td (ikke med i prototypen) Udpeger de adresser, som er beliggende på den matrikel, som koordinatet er indeholdt i. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. matrikelindeholder={x},{y}                                
-                  tr
-                    td cirkel
-                    td Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.                                 
-                  tr
-                    td rektangel
-                    td (ikke med i prototypen )Find de adresse, som ligger indenfor den rektangel angivet af det sydvestlige koordinat (x1,y1) og det nordøstlige koordinat (x2, y2). Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. rektangel={x1},{y1};{x2},{y2}tr
-                  td polygon
-                    td (ikke med i prototypen )Find de adresse, som ligger indenfor den angivne polygon. Polygonen specificeres som et array af koordinater på samme måde som koordinaterne specificeres i <a href='http://geojson.org/geojson-spec.html#id4'>GeoJSON's polygon</a>. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. polygon=[[10.1351967049683,55.5670601123672],[10.135200982843,55.5671204601228],[10.1362257877892,55.5682107215927],[10.1362451883392,55.568284049162], [10.1362396504186,55.5683669533645]].
-              h4 Eksempler
-              p Find de adresser som ligger på Rødkildevej og har husnummeret 46
-              pre 
-                a(href='#{url}/adresser?vejnavn=Rødkildevej&husnr=46') #{url}/adresser?vejnavn=Rødkildevej&husnr=46
-              p Find de adresser Hvis vejnavn starter med hvid (eller Hvid) og har postnummeret 2400
-              pre 
-                a(href='#{url}/adresser?vejnavn=hvid*&postnr=2400') #{url}/adresser?vejnavn=hvid*&postnr=2400
-              p Find de adresser som ligger på Lilledal på 1. sal til venstre.
-              pre 
-                a(href='#{url}/adresser?vejnavn=Lilledal&etage=1&dør=tv') #{url}/adresser?vejnavn=Lilledal&etage=1&dør=tv
-              p Find de adresser, som ligger mindre end 150 m fra placeringen angivet af koordinatet (55.6812,12.5816)
-              pre 
-                a(href='#{url}/adresser?cirkel=55.6812,12.5816,150') #{url}/adresser?cirkel=55.6812,12.5816,150
+            +parameterDocQuery(apiSpec.adresse, parameterDoc.adresse)
 
             div.page-header
               h3.anchor-header#autocomplete Autocomplete af adresser
@@ -209,21 +129,7 @@ block content
             div.page-header
               h3.anchor-header#adresseopslag Adresseopslag
             p Modtag adresse med id.
-            pre GET /adresser/{id}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td id
-                  td Adressen identificeres ved en UUID.
-            h4 Eksempel
-            p Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018
-            pre 
-              a(href='#{url}/adresser/0a3f507a-b2e6-32b8-e044-0003ba298018') #{url}/adresser/0a3f507a-b2e6-32b8-e044-0003ba298018
-          
+            +parameterDocGet(apiSpec.adresse, parameterDoc.adresse)
             
             div.page-header
               h3.anchor-header#reversegeokodning Reverse geokodning

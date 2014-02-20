@@ -175,6 +175,12 @@ var sampleParameters = {
         return adr.matrikelnr === matrikelnr;
       }
     },
+    esrejendomsnr: {
+      values: ['189180'],
+      verifier: function(adr, esrejendomsnr) {
+        return adr.esrejendomsnr === esrejendomsnr;
+      }
+    },
     polygon: {
       values: [],
       verifier: function(adr, polygon) {
@@ -256,8 +262,14 @@ var sampleParameters = {
         return adr.adgangsadresse.matrikelnr === matrikelnr;
       }
     },
+    esrejendomsnr: {
+      values: ['189180'],
+      verifier: function(adr, esrejendomsnr) {
+        return adr.adgangsadresse.esrejendomsnr === esrejendomsnr;
+      }
+    },
     polygon: {
-      values: [],
+      values: [], // TODO
       verifier: function(adr, polygon) {
 
       }
@@ -271,7 +283,7 @@ describe('Alle specificerede parametre skal virke', function() {
       it('Alle almindelige parametre for ' + specName + ' bliver testet', function() {
         var specifiedParameterNames = _.pluck(spec.parameters, 'name');
         var testedParameterNames = _.keys(sampleParameters[specName]);
-        expect(_.difference(specifiedParameterNames, testedParameterNames).length).toBe(0);
+        expect(_.difference(specifiedParameterNames, testedParameterNames)).toEqual([]);
       });
       var spec = apiSpec[specName];
       _.each(sampleParameters[specName], function(sample, paramName) {

@@ -212,6 +212,60 @@ var kommuneDoc = {
   }
 };
 
+var parametersForBothAdresseAndAdgangsAdresse = [
+  {
+    name: 'vejkode',
+    doc: 'Vejkoden. 4 cifre.'
+  },
+  {
+    name: 'vejnavn',
+    doc: 'Vejnavn. Der skelnes mellem store og små bokstaver.'
+  },
+  {
+    name: 'husnr',
+    doc: 'Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.'
+  },
+  {
+    name: 'supplerendebynavn',
+    doc: 'Det supplerende bynavn.'
+  },
+  {
+    name: 'postnr',
+    doc: 'Postnummer. 4 cifre.'
+  },
+  {
+    name: 'kommunekode',
+    doc: 'Kommunekoden for den kommune som adressen skal ligge på. 4 cifre.'
+  },
+  {
+    name: 'ejerlavkode',
+    doc: 'Koden på det matrikulære ejerlav som adressen skal ligge på.'
+  },
+  {
+    name: 'matrikelnr',
+    doc: 'matrikelnummer. Unikt indenfor et ejerlav.'
+  },
+  {
+    name: 'esrejendomsnr',
+    doc: 'ESR Ejendomsnummer. Indtil 6 cifre.'
+  },
+  {
+    name: 'polygon',
+    doc: 'Find de adresse, som ligger indenfor den angivne polygon. ' +
+      'Polygonen specificeres som et array af koordinater på samme måde som' +
+      ' koordinaterne specificeres i GeoJSON\'s polygon.' +
+      ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.' +
+      ' polygon=[[10.1351967049683,55.5670601123672],' +
+      '[10.135200982843,55.5671204601228],' +
+      '[10.1362257877892,55.5682107215927],' +
+      '[10.1362451883392,55.568284049162], ' +
+      '[10.1362396504186,55.5683669533645]].'
+
+  }
+];
+
+
+
 var adgangsadresseDoc = {
   parameters: [
     {
@@ -224,57 +278,70 @@ var adgangsadresseDoc = {
     {
       name: 'id',
       doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
-    },
-    {
-      name: 'vejkode',
-      doc: 'Vejkoden. 4 cifre.'
-    },
-    {
-      name: 'vejnavn',
-      doc: 'Vejnavn. Der skelnes mellem store og små bokstaver.'
-    },
-    {
-      name: 'husnr',
-      doc: 'Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.'
-    },
-    {
-      name: 'supplerendebynavn',
-      doc: 'Det supplerende bynavn.'
-    },
-    {
-      name: 'postnr',
-      doc: 'Postnummer. 4 cifre.'
-    },
-    {
-      name: 'kommunekode',
-      doc: 'Kommunekoden for den kommune som adressen skal ligge på. 4 cifre.'
-    },
-    {
-      name: 'ejerlavkode',
-      doc: 'Koden på det matrikulære ejerlav som adressen skal ligge på.'
-    },
-    {
-      name: 'matrikelnr',
-      doc: 'matrikelnummer. Unikt indenfor et ejerlav.'
-    },
-    {
-      name: 'polygon',
-      doc: 'Find de adresse, som ligger indenfor den angivne polygon. ' +
-        'Polygonen specificeres som et array af koordinater på samme måde som' +
-        ' koordinaterne specificeres i GeoJSON\'s polygon.' +
-        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.' +
-        ' polygon=[[10.1351967049683,55.5670601123672],' +
-        '[10.135200982843,55.5671204601228],' +
-        '[10.1362257877892,55.5682107215927],' +
-        '[10.1362451883392,55.568284049162], ' +
-        '[10.1362396504186,55.5683669533645]].'
-
     }
-  ],
+  ].concat(parametersForBothAdresseAndAdgangsAdresse),
   examples: {
     query: [
       {
         description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
+        query: [{
+          name: 'vejnavn',
+          value: 'Rødkildevej'
+        },{
+          name: 'husnr',
+          value: '46'
+        }]
+      }, {
+        description: 'Find de adgangsadresser som indeholder et ord der starter med hvid og har postnummeret 2400',
+        query: [{
+          name: 'q',
+          value: 'hvid*'
+        }, {
+          name: 'postnr',
+          value: '2400'
+        }]
+      }
+    ],
+    get: [
+      {
+        description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
+        path: ['0a3f507a-b2e6-32b8-e044-0003ba298018']
+      }
+    ]
+  }
+
+};
+
+var adresseDoc = {
+  parameters: [
+    {
+      name: 'q',
+      doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche vejnavnet. ' +
+        'Wildcard * er tilladt i slutningen af hvert ord. ' +
+        'Der skelnes ikke mellem store og små bogstaver.',
+      examples: ['tværv*']
+    },
+    {
+      name: 'id',
+      doc: 'adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
+    },
+    {
+      name: 'adgangsadresseid',
+      doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'
+    },
+    {
+      name: 'etage',
+      doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9',
+    },
+    {
+      name: 'dør',
+      doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.'
+    }
+  ].concat(parametersForBothAdresseAndAdgangsAdresse),
+  examples: {
+    query: [
+      {
+        description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
         query: [{
           name: 'vejnavn',
           value: 'Rødkildevej'
@@ -295,13 +362,14 @@ var adgangsadresseDoc = {
     ],
     get: [
       {
-        description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
-        path: ['0a3f507a-b2e6-32b8-e044-0003ba298018']
+        description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
+        path: ['0255b942-f3ac-4969-a963-d2c4ed9ab943']
       }
     ]
   }
 
 };
+
 
 
 var postnummerDoc = {
@@ -357,5 +425,6 @@ module.exports = {
   supplerendeBynavn: supplerendeBynavneDoc,
   kommune: kommuneDoc,
   adgangsadresse: adgangsadresseDoc,
-  postnummer: postnummerDoc
+  postnummer: postnummerDoc,
+  adresse: adresseDoc
 };

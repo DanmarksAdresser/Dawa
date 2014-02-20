@@ -303,6 +303,10 @@ var adgangsadresseParameters = [
     name: 'matrikelnr'
   },
   {
+    name: 'esrejendomsnr',
+    type: 'integer'
+  },
+  {
     name: 'polygon',
     type: 'json',
     schema: schema.polygon,
