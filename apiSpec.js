@@ -499,7 +499,7 @@ function adresseRowToAutocompleteJson(row) {
     tekst: adresseText(row),
     adresse: {
       id: row.e_id,
-      href: BASE_URL + '/adresser/' + row.e_id
+      href: makeHref(BASE_URL, adresseApiSpec, [row.e_id])
     }
   };
 }
@@ -510,9 +510,9 @@ function adgangsadresseRowToAutocompleteJson(row) {
   }
   return {
     tekst: adresseText(row),
-    adresse: {
+    adgangsadresse: {
       id: row.a_id,
-      href: BASE_URL + '/adgangsadresser/' + row.a_id
+      href: makeHref(BASE_URL, adgangsadresseApiSpec, [row.a_id])
     }
   };
 }
