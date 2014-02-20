@@ -268,6 +268,11 @@ var sampleParameters = {
 describe('Alle specificerede parametre skal virke', function() {
   _.keys(sampleParameters).forEach(function(specName) {
     describe('Alle parametre for ' + specName + ' skal virke', function() {
+      it('Alle almindelige parametre for ' + specName + ' bliver testet', function() {
+        var specifiedParameterNames = _.pluck(spec.parameters, 'name');
+        var testedParameterNames = _.keys(sampleParameters[specName]);
+        expect(_.difference(specifiedParameterNames, testedParameterNames).length).toBe(0);
+      });
       var spec = apiSpec[specName];
       _.each(sampleParameters[specName], function(sample, paramName) {
         var verify = sample.verifier;
