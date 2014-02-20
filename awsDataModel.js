@@ -78,8 +78,8 @@ var definitions = {
     type: 'string'
   },
   'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
-  'Kode4': {type: 'integer', pattern: '^(\\d{4})$'},
-  'UpTo8': {type: 'string', pattern: '^\\d{1,8}$'},
+  'Kode4': {type: 'integer', minimum: 0, maximum: 9999},
+  'UpTo8': {type: 'integer', minimum: 1, maximum: 99999999},
   'DateTime': {
     type: 'string'
   },

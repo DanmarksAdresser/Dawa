@@ -254,8 +254,8 @@ var adgangsadresseDoc = {
       doc: 'Koden på det matrikulære ejerlav som adressen skal ligge på.'
     },
     {
-      name: 'matrikel',
-      doc: 'matrikelnummer.'
+      name: 'matrikelnr',
+      doc: 'matrikelnummer. Unikt indenfor et ejerlav.'
     },
     {
       name: 'polygon',

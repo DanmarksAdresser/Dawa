@@ -105,7 +105,7 @@ describe("Adresse schema validation", function () {
             "navn": "Kommune 0340"
           },
           "ejerlav": {
-            "kode": "0340",
+            "kode": 340,
             "navn": "Ejerlav 0340"
           },
           'esrejendomsnr': null,

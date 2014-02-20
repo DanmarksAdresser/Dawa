@@ -107,8 +107,7 @@ var adgangsadresseFields = [
     name: 'ejerlavnavn'
   },
   {
-    name: 'matrikel',
-    column: 'matrikelnr'
+    name: 'matrikelnr'
   },
   {
     name: 'esrejendomsnr'
@@ -202,8 +201,7 @@ var adresseFields = [
     name: 'ejerlavnavn'
   },
   {
-    name: 'matrikel',
-    column: 'matrikelnr'
+    name: 'matrikelnr'
   },
   {
     name: 'esrejendomsnr'
@@ -293,13 +291,16 @@ var adgangsadresseParameters = [
     schema: schema.postnr
   },
   {
-    name: 'kommunekode'
+    name: 'kommunekode',
+    type: 'integer',
+    schema: schema.kode4
   },
   {
-    name: 'ejerlavkode'
+    name: 'ejerlavkode',
+    type: 'integer'
   },
   {
-    name: 'matrikel'
+    name: 'matrikelnr'
   },
   {
     name: 'polygon',
@@ -316,6 +317,9 @@ var adresseParameters = adgangsadresseParameters.concat([
   },
   {
     name: 'dør'
+  },
+  {
+    name: 'adgangsadresseid'
   }
 ]);
 
@@ -440,7 +444,7 @@ function mapAdgangsadresse(rs){
   adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, BASE_URL);
   if(rs.ejerlavkode) {
     adr.ejerlav = {
-      kode: slice(-8, rs.ejerlavkode),
+      kode: rs.ejerlavkode,
       navn: rs.ejerlavnavn
     };
   }
@@ -638,13 +642,13 @@ var postnummerFields = [
     name: 'nr',
     column: {
       select: 'nr',
-      where: 'm.nr'
+      where: 'm.postnr'
     }
   },
   {name: 'navn', column: 'p.navn'},
   {name: 'kommuner'},
   {name: 'version', column: 'p.version'},
-  {name: 'kommune', selectable: false, column: 'n.kode'},
+  {name: 'kommune', selectable: false, column: 'n.kommunekode'},
   {name: 'tsv', selectable: false, column: 'p.tsv'}
 ];
 
@@ -667,10 +671,10 @@ var postnummerSpec = {
     return {
       select:''+
         'SELECT  p.nr, p.navn, p.version, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner '+
-        'FROM postnumre_kommunekoder m '+
-        'LEFT JOIN postnumre_kommunekoder n ON m.nr = n.nr '+
-        'LEFT JOIN postnumre p ON p.nr = m.nr ' +
-        ' LEFT JOIN kommuner k ON m.kode = k.kode',
+        'FROM PostnumreKommunekoderMat m '+
+        'LEFT JOIN PostnumreKommunekoderMat n ON m.postnr = n.postnr '+
+        'LEFT JOIN postnumre p ON p.nr = m.postnr ' +
+        ' LEFT JOIN kommuner k ON m.kommunekode = k.kode',
       whereClauses: [],
       groupBy: 'p.nr, p.navn, p.version',
       orderClauses: [],
@@ -773,13 +777,17 @@ var vejstykkeSpec = {
       name: 'kode'
     },
     {
-      name: 'kommunekode'
+      name: 'kommunekode',
+      type: 'integer',
+      schema: schema.kode4
     },
     {
       name: 'navn'
     },
     {
-      name: 'postnr'
+      name: 'postnr',
+      type: 'integer',
+      schema: schema.postnr
     }
   ],
   mappers: {
@@ -814,7 +822,8 @@ var kommuneApiSpec = {
   fields: kommuneFields,
   fieldMap: _.indexBy(kommuneFields, 'name'),
   parameters: [{name: 'navn'},
-               {name: 'kode'}
+               {name: 'kode',
+               type: 'integer'}
               ],
   mappers: {
     json: kommuneJsonMapper,
@@ -895,7 +904,9 @@ var supplerendeBynavnApiSpec = {
       name: 'navn'
     },
     {
-      name: 'kommunekode'
+      name: 'kommunekode',
+      type: 'integer',
+      schema: schema.kode4
     },
     {
       name: 'postnr'

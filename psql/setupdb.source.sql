@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS vejstykker (
 );
 
 CREATE INDEX ON vejstykker USING gin(tsv);
+CREATE INDEX ON vejstykker(kode);
 
 \COPY vejstykker (kommunekode, kode, vejnavn, version) from program 'gunzip -c :DATADIR:/RoadName.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
@@ -83,6 +84,7 @@ CREATE TABLE IF NOT EXISTS postnumre (
 );
 
 CREATE INDEX ON postnumre USING gin(tsv);
+CREATE INDEX ON postnumre(navn);
 
 \echo '\n***** Loading postnumre data'
 \COPY postnumre (nr, version, navn) from program 'gunzip -c :DATADIR:/PostCode.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -245,12 +247,16 @@ CREATE TABLE  adgangsadresser (
   tsv tsvector
 );
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
-CREATE INDEX ON Adgangsadresser(ejerlavkode);
+CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
 CREATE INDEX ON Adgangsadresser(wgs84lat);
 CREATE INDEX ON Adgangsadresser(wgs84long);
 CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
 CREATE INDEX ON adgangsadresser(postnr, kommunekode);
 CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
+CREATE INDEX ON adgangsadresser(matrikelnr);
+CREATE INDEX ON adgangsadresser(husnr, id);
+CREATE INDEX ON adgangsadresser(esrejendomsnr);
+
 
 \echo '\n***** Loading adgangsadresse data'
 \COPY adgangsadresser (id, version, bygningsnavn, kommunekode, vejkode, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn, ejerlavkode, ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato) from  program 'gunzip -c :DATADIR:/AddressAccess.csv.gz | sed -f :SCRIPTDIR:/replaceDoubleQuotes.sed' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -326,6 +332,8 @@ CREATE TABLE IF NOT EXISTS enhedsadresser (
 );
 CREATE INDEX ON enhedsadresser(adgangsadresseid);
 CREATE INDEX ON enhedsadresser USING gin(tsv);
+CREATE INDEX ON enhedsadresser(etage, id);
+CREATE INDEX ON enhedsadresser(doer, id);
 
 \echo '\n***** Loading enhedsadresser data'
 \COPY enhedsadresser (id, version, adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer) from program 'gunzip -c :DATADIR:/AddressSpecific.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
@@ -483,11 +491,10 @@ FOR EACH ROW EXECUTE PROCEDURE update_vejstykker_postnumre_mat();
 CREATE UNIQUE INDEX ON VejstykkerPostnumreMat(postnr, kommunekode, vejkode);
 CREATE INDEX ON vejstykkerpostnumremat(kommunekode, vejkode);
 
-DROP VIEW IF EXISTS postnumre_kommunekoder;
-CREATE VIEW postnumre_kommunekoder AS
-  select DISTINCT a.postnr nr, a.kommunekode kode
-  from VejstykkerPostnumreMat a
-  WHERE a.postnr is not null;
+CREATE TABLE PostnumreKommunekoderMat(postnr integer not null, kommunekode integer not null, primary key(postnr, kommunekode));
+INSERT INTO PostnumreKommunekoderMat SELECT DISTINCT postnr, kommunekode FROM VejstykkerPostnumreMat
+WHERE postnr is not null and kommunekode is not null;
+
 
 DROP TABLE IF EXISTS SupplerendeBynavne CASCADE;
 CREATE TABLE SupplerendeBynavne (
