@@ -30,7 +30,7 @@ describe('Autocomplete af adresser', function() {
     });
   });
 
-  it('Suggestions should include a valid link id and href for adress', function(done) {
+  it('Suggestions should include a valid link id and href for adresse', function(done) {
     request.get({url: 'http://localhost:3000/adresser/autocomplete?q=si', json: true}, function(error, response, result) {
       var suggestion = result[0];
       var id = suggestion.adresse.id;

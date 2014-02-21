@@ -149,6 +149,79 @@ var definitions = {
     },
     docOrder: ['href', 'kode', 'navn']
   }),
+  VejnavnRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Vejnavnets unikke URL.',
+        type: 'string'
+      },
+      navn: {
+        description: 'Vejnavnet.',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'navn']
+  }),
+  VejstykkeRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Vejnavnets unikke URL.',
+        type: 'string'
+      },
+      kommunekode: {
+        description: 'Kommunekoden. 4 cifre.',
+        $ref: '#/definitions/Kode4'
+      },
+      kode: {
+        description: 'Vejkoden. 4 cifre.',
+        $ref: '#/definitions/Kode4'
+      },
+      navn: {
+        description: 'Vejnavnet.',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'kommunekode', 'kode','navn']
+  }),
+  SupplerendeBynavnRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Det supplerende bynavns unikke URL.',
+        type: 'string'
+      },
+      navn: {
+        description: 'Det supplerende bynavn.',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'navn']
+  }),
+  AdgangsadresseRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Adgangsadressens unikke URL.',
+        type: 'string'
+      },
+      id: {
+        description: 'Adgangsadressens unikke UUID.',
+        $ref: '#/definitions/UUID'
+      }
+    },
+    docOrder: ['href', 'id']
+  }),
+  AdresseRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Adressens unikke URL.',
+        type: 'string'
+      },
+      id: {
+        description: 'Adressens unikke UUID.',
+        $ref: '#/definitions/UUID'
+      }
+    },
+    docOrder: ['href', 'id']
+  }),
   VejstykkeKodeOgNavn: schemaObject({
     properties: {
       href: {
@@ -169,6 +242,90 @@ var definitions = {
     docOrder: ['href', 'kode', 'navn']
   })
 };
+
+var autocompleteSchemas = {
+  postnummer: globalSchemaObject( {
+    properties: {
+      tekst: {
+        type: 'string'
+      },
+      postnummer: {
+        $ref: '#/definitions/PostnummerRef'
+      }
+    },
+    docOrder: ['tekst', 'postnummer']
+  }),
+  vejnavn: globalSchemaObject({
+    properties: {
+      tekst: {
+        type: 'string'
+      },
+      vejnavn: {
+        $ref: '#/definitions/VejnavnRef'
+      }
+    },
+    docOrder: ['tekst', 'vejnavn']
+  }),
+  vejstykke: globalSchemaObject( {
+    properties: {
+      tekst: {
+        type: 'string'
+      },
+      vejstykke: {
+        $ref: '#/definitions/VejstykkeRef'
+      }
+    },
+    docOrder: ['tekst', 'vejstykke']
+  }),
+  kommune: globalSchemaObject({
+    properties: {
+      tekst: {
+        type: 'string'
+      },
+      kommune: {
+        $ref: '#/definitions/KommuneRef'
+      }
+    },
+    docOrder: ['tekst', 'kommune']
+  }),
+  supplerendeBynavn: globalSchemaObject({
+    properties: {
+      tekst: {
+        type: 'string'
+      },
+      supplerendebynavn: {
+        $ref: '#/definitions/SupplerendeBynavnRef'
+      }
+    },
+    docOrder: ['tekst', 'supplerendebynavn']
+  }),
+  adgangsadresse: globalSchemaObject({
+      properties: {
+        tekst: {
+          type: 'string'
+        },
+        adgangsadresse: {
+          $ref: '#/definitions/AdgangsadresseRef'
+        }
+      },
+      docOrder: ['tekst', 'adgangsadresse']
+    }),
+  adresse: globalSchemaObject({
+    properties: {
+      tekst: {
+        type: 'string'
+      },
+      adresse: {
+        $ref: '#/definitions/AdresseRef'
+      }
+    },
+    docOrder: ['tekst', 'adresse']
+  })
+};
+
+_.map(autocompleteSchemas, function(schema) {
+  return compileSchema(schema);
+});
 
 _.each(definitions, function(value, key) {
   definitions['Nullable' + key] = nullable(value);
@@ -636,6 +793,7 @@ module.exports = {
     name: 'adresse',
     plural : 'adresser',
     schema : compileSchema(adresseSchema),
+    autocompleteSchema: autocompleteSchemas.adresse,
     key : 'id',
     validate: makeValidator(adresseSchema)
   },
@@ -644,6 +802,7 @@ module.exports = {
     name: 'adgangsadresse',
     plural : 'adgangsadresser',
     schema : compileSchema(adgangsAdresseSchema),
+    autocompleteSchema: autocompleteSchemas.adgangsadresse,
     key : 'id',
     validate: makeValidator(adgangsAdresseSchema)
   },
@@ -652,6 +811,7 @@ module.exports = {
     name: 'postnummer',
     plural: 'postnumre',
     schema: compileSchema(postnummerSchema),
+    autocompleteSchema: autocompleteSchemas.postnummer,
     key: 'nr',
     validate: makeValidator(postnummerSchema)
   },
@@ -661,6 +821,7 @@ module.exports = {
     plural: 'vejstykker',
     table: 'vejstykkerView',
     schema: compileSchema(vejstykkeSchema),
+    autocompleteSchema: autocompleteSchemas.vejstykke,
     key: ['kommunekode','kode'],
     validate: makeValidator(vejstykkeSchema)
   },
@@ -669,6 +830,7 @@ module.exports = {
     name: 'vejnavn',
     plural: 'vejnavne',
     schema: compileSchema(vejnavnSchema),
+    autocompleteSchema: autocompleteSchemas.vejnavn,
     key: 'navn',
     validate: makeValidator(vejnavnSchema)
   },
@@ -677,7 +839,8 @@ module.exports = {
     name: 'supplerendebynavn',
     plural: 'supplerendebynavne',
     schema: compileSchema(supplerendebynavnSchema),
-    key: 'navn', // TODO: this is not a key!!!!
+    autocompleteSchema: autocompleteSchemas.supplerendeBynavn,
+    key: 'navn',
     validate: makeValidator(supplerendebynavnSchema)
   },
 
@@ -686,6 +849,7 @@ module.exports = {
     plural: 'kommuner',
     table: 'kommuner',
     schema: compileSchema(kommuneSchema),
+    autocompleteSchema: autocompleteSchemas.kommune,
     key: 'kode',
     validate: makeValidator(kommuneSchema)
   }

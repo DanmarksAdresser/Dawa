@@ -758,13 +758,9 @@ function vejstykkeRowToAutocompleteJson(row) {
     tekst: row.vejnavn,
     vejstykke: {
       href: makeHref(BASE_URL, vejstykkeSpec, [row.kommunekode, row.kode]),
+      kommunekode: row.kommunekode,
       kode: row.kode,
-      navn: row.vejnavn,
-      kommune: {
-        href: makeHref(BASE_URL, kommuneApiSpec, [row.kommunekode]),
-        kode: row.kommunekode,
-        navn: row.kommunenavn
-      }
+      navn: row.vejnavn
     }
   };
 }
@@ -890,7 +886,7 @@ var supplerendeByavnJsonMapper = function(row) {
 var supplerendeBynavnAutocompleteMapper = function(row) {
   return {
     tekst: row.supplerendebynavn,
-    supplerendeBynavn: {
+    supplerendebynavn: {
       href:  makeHref(BASE_URL, supplerendeBynavnApiSpec, [row.supplerendebynavn]),
       navn: row.supplerendebynavn
     }
