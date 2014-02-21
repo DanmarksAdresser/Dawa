@@ -342,7 +342,14 @@ function endsWith(str, suffix) {
 
 
 function toPgSearchQuery(q) {
+  // remove all special chars
   q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
+
+  // replace '*' not at the end of a token with ' '
+  q = q.replace(/[\*]([^ ])/g, ' $1');
+
+  // remove any tokens consisting only of '*'
+  q = q.replace(/(^|[ ])[\*]/g, ' ');
 
   // normalize whitespace
   q = q.replace(/\s+/g, ' ');
@@ -353,6 +360,7 @@ function toPgSearchQuery(q) {
 
   // tokenize the query
   var tokens = q.split(' ');
+
   tokens = _.map(tokens, function(token) {
     if(endsWith(token, '*')) {
       token = token.substring(0, token.length - 1) + ':*';
