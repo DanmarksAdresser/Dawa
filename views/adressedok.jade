@@ -12,7 +12,7 @@ block content
       div.row
         div.span3
           ul#indhold.nav.nav-list.affix
-            li(data-toggle='collapse', data-target='#adresse').nav-header Adresse API            
+            li(data-toggle='collapse', data-target='#adresse').nav-header Adresse API
             ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adressesøgning</a>
               li <a href='#autocomplete'>Autocomplete af adresser</a>
@@ -20,11 +20,11 @@ block content
               li <a href='#adressevalidering'>Adressevalidering</a>
               li <a href='#adresseopslag'>Adresseopslag</a>
               li <a href='#reversegeokodning'>Reverse geokodning</a>
-            li(data-toggle='collapse', data-target='#adressedatanav').nav-header Adressedata            
+            li(data-toggle='collapse', data-target='#adressedatanav').nav-header Adressedata
             ul#adressedatanav.nav.nav-list
               li <a href='#adressedata'>Beskrivelse</a>
-            li(data-toggle='collapse', data-target='#adressehaendelser').nav-header Adressehændelser           
-            ul#adressehaendelser.nav.nav-list 
+            li(data-toggle='collapse', data-target='#adressehaendelser').nav-header Adressehændelser
+            ul#adressehaendelser.nav.nav-list
               li <a href='#adressehaendelsessoegning'>Adressehændelsessøgning</a>
               li <a href='#adressehaendelsesloebenummer'>Seneste løbenummer</a>
               li <a href='#adressehaendelsestyper'>Adressehændelsestyper</a>
@@ -55,10 +55,10 @@ block content
                 tr
                   td kommune
                   td Angivelse af kommunekode. Anvendes til at angive hvilken kommune adresserne skal søges i.
-                
+
             h4 Eksempler
             p Find de adresser som matcher <em>Lilledal 1</em>
-            pre 
+            pre
               a(href='#{url}/adresser/autocomplete?q=Lilledal 1') #{url}/adresser/autocomplete?q=Lilledal 1
 
             div.page-header
@@ -77,16 +77,16 @@ block content
                 tr
                   td kommune
                   td Angivelse af kommunekode. Anvendes til at angive hvilken kommune adresserne skal søges i.
-                
+
             h4 Eksempler
             p Find de adresser hvis adressebetegnelse indeholder <em>Kollerød</em>
-            pre 
+            pre
               a(href='#{url}/adresser/fritekst?q=Kollerød') #{url}/adresser/fritekst?q=Kollerød
 
             div.page-header
               h3.anchor-header#adressevalidering Adressevalidering
             p Valider adresse. Hvis adressen er valid returneres adressen eller eeturneres http status 404.
-            pre GET /adresser/valid 
+            pre GET /adresser/valid
             h4 Parametre
             table.table.table-hover
               thead
@@ -104,33 +104,33 @@ block content
                   td Suplerende bynavn.
                 tr
                   td postnr
-                  td Postnummer. 4 cifre.                
+                  td Postnummer. 4 cifre.
                 tr
                   td etage
-                  td Etagebetegnelse, som kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9                                
+                  td Etagebetegnelse, som kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9
                 tr
                   td dør
                   td Dørbetegnelse. Tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.
             h4 Eksempler
-            p Valider adressen: Hulgårdsvej 67, 2400 København NV            
-            pre 
+            p Valider adressen: Hulgårdsvej 67, 2400 København NV
+            pre
               a(href='#{url}/adresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400') #{url}/adresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400
             p Adressen, som udpeger et rækkehus, er gyldig
             p Valider adressen: Lilledal 23, 3450 Allerød
-            pre 
+            pre
               a(href='#{url}/adresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450') #{url}/adresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450
             p Adressen er ikke valid, da den udpeger en opgang (adgangsadresse) med flere adresser. Se eventuelt under validering af adgangsadresser.
-            p Hvis derimod etage og dør også angives:            
-            pre 
+            p Hvis derimod etage og dør også angives:
+            pre
               a(href='#{url}/adresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450&etage=1&dør=tv') #{url}/adresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450&etage=1&dør=tv
             p Udpeges en valid adresse.
 
-            
+
             div.page-header
               h3.anchor-header#adresseopslag Adresseopslag
             p Modtag adresse med id.
             +parameterDocGet(apiSpec.adresse, parameterDoc.adresse)
-            
+
             div.page-header
               h3.anchor-header#reversegeokodning Reverse geokodning
             p Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.
@@ -149,30 +149,30 @@ block content
                   td Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk anvendex angives længde-værdien.
             h4 Eksempler
             p Ikke med i prototypen: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
-            pre 
+            pre
               a(href='#{url}/adresser/6176652.55,725369.59') #{url}/adresser/6176652.55,725369.59
             p Returner adressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)
-            pre 
+            pre
               a(href='#{url}/adresser/55.6832383751223,12.5851471984198') #{url}/adresser/55.6832383751223,12.5851471984198
-            
-            
-            
+
+
+
 
             div.page-header
               h2.anchor-header#adressedata Beskrivelse af adressedata
             p En <em>adresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal, en bygning eller en del af en bygning efter reglerne i adressebekendtgørelsen.
-            p En adresse angiver en særskilt adgang til et areal, en bygning eller en del af en bygning, efter reglerne i adressebekendtgørelsen. En adresse fastsættes for at angive en bestemt adgang til 
-            ul 
+            p En adresse angiver en særskilt adgang til et areal, en bygning eller en del af en bygning, efter reglerne i adressebekendtgørelsen. En adresse fastsættes for at angive en bestemt adgang til
+            ul
               li et areal,  fx. en byggegrund, et grønt område eller en sportsplads
               li en bygning, herunder et andet bygværk, f.eks. et teknisk anlæg
               li en del af en bygning, fx en etage eller en bolig- eller erhvervs¬enhed i en bygning
-            p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke. 
+            p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
             p Web API'et udstiller for hver adresse følgende informationer:
             +documentSchema(apiSpec.adresse.model.schema)
 
             div.page-header
               h2.anchor-header#adressehaendelser Adressehændelser
-            p Ikke med i prototypen: Adresser oprettes, ændres og nedlægges. Nedenfor beskrevne funktionalitet gør det muligt at følge disse hændelser. Hændelser kan f.eks. anvendes til at etablere en opdateret kopi af adresserdata. Hvordan dette gøres kan du læse om  
+            p Ikke med i prototypen: Adresser oprettes, ændres og nedlægges. Nedenfor beskrevne funktionalitet gør det muligt at følge disse hændelser. Hændelser kan f.eks. anvendes til at etablere en opdateret kopi af adresserdata. Hvordan dette gøres kan du læse om
                a(href='#{url}/generelt#kopiregister') her
 
             div.page-header
@@ -199,10 +199,10 @@ block content
                   td Medtager de adressehændelser, hvis type er lig den angivne. Typen kan antage følgende værdier: <em>oprettet</em>, <em>ændret</em> og <em>nedlagt</em>.
             h4 Eksempler
             p Returner oprettelsesadressehændelser med løbenummer større end 2027
-            pre 
+            pre
               a(href='#{url}/adresserhaendelser?fraloebenr=2027&type=oprettelse') #{url}/adresser?fraloebenr=2027&type=oprettelse
             p Returner adressehændelser som vedrører adressen med adresseid'et 0a3f50a0-73ca-32b8-e044-0003ba298018
-            pre 
+            pre
               a(href='#{url}/adressehaendelser?adresseid=0a3f50a0-73ca-32b8-e044-0003ba298018') #{url}/adressehaendelser?adresseid=0a3f50a0-73ca-32b8-e044-0003ba298018
 
             div.page-header
@@ -221,16 +221,16 @@ block content
 
             h4 Eksempler
             p Returner adressehændelsen med løbenummeret 2027
-            pre 
+            pre
               a(href='#{url}/adressehaendelser/2027') #{url}/adressehaendelser/2027
-           
+
             div.page-header
               h3.anchor-header#adressehaendelsesloebenummer Seneste løbenummer
             p Returner senest anvendte løbenummer.
             pre GET /adressehaendelser/loebenummer
             h4 Eksempler
             p Returner senest anvendte løbenummer
-            pre 
+            pre
               a(href='#{url}/adressehaendelser/loebenummer') #{url}/adressehaendelser/loebenummer
 
             div.page-header
@@ -242,22 +242,22 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody               
+              tbody
                 tr
                   td(colspan="3") løbenr
-                  td Hændelsens løbenummer.               
+                  td Hændelsens løbenummer.
                 tr
                   td(colspan="3") tidspunkt
-                  td Hændelsestidspunkt.               
+                  td Hændelsestidspunkt.
                 tr
                   td(colspan="3") adresseid
-                  td Adresseid for den aktuelle adresse.                
+                  td Adresseid for den aktuelle adresse.
                 tr
                   td(colspan="3") type
-                  td Hændelsestype. I dette tilfælde <em>oprettelse</em>.                
+                  td Hændelsestype. I dette tilfælde <em>oprettelse</em>.
                 tr
                   td(colspan="3") adresse
-                  td Den oprettede adresse. 
+                  td Den oprettede adresse.
 
             h4 Adresseændring
 
@@ -265,28 +265,28 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody               
+              tbody
                 tr
                   td(colspan="3") løbenr
-                  td Hændelsens løbenummer.               
+                  td Hændelsens løbenummer.
                 tr
                   td(colspan="3") tidspunkt
-                  td Hændelsestidspunkt.               
+                  td Hændelsestidspunkt.
                 tr
                   td(colspan="3") adresseid
-                  td Adresseid for den aktuelle adresse.                
+                  td Adresseid for den aktuelle adresse.
                 tr
                   td(colspan="3") type
-                  td Hændelsestype. I dette tilfælde <em>ændring</em>.                
+                  td Hændelsestype. I dette tilfælde <em>ændring</em>.
                 tr
                   td(colspan="3") feltnavn
-                  td Navnet på de felt, som er ændret. Kan antage følgende værdier: vej, husnr, etage, dør, supplerendebynavn, postnr, kommune, matrikelnr, esrejendomsnr, adgangspunkt, ddkn, sogn, retskreds, politikreds, opstillingskreds, region.                                 
+                  td Navnet på de felt, som er ændret. Kan antage følgende værdier: vej, husnr, etage, dør, supplerendebynavn, postnr, kommune, matrikelnr, esrejendomsnr, adgangspunkt, ddkn, sogn, retskreds, politikreds, opstillingskreds, region.
                 tr
                   td(colspan="3") værdifør
-                  td Værdien før hændelsen.                                  
+                  td Værdien før hændelsen.
                 tr
                   td(colspan="3") værdiefter
-                  td Værdien efter hændelsen.  
+                  td Værdien efter hændelsen.
 
             h4 Adressenedlæggelse
 
@@ -294,20 +294,20 @@ block content
               thead
                 th(colspan="3") Navn
                 th Beskrivelse
-              tbody               
+              tbody
                 tr
                   td(colspan="3") løbenr
-                  td Hændelsens løbenummer.               
+                  td Hændelsens løbenummer.
                 tr
                   td(colspan="3") tidspunkt
-                  td Hændelsestidspunkt.               
+                  td Hændelsestidspunkt.
                 tr
                   td(colspan="3") adresseid
-                  td Adresseid for den aktuelle adresse.                
+                  td Adresseid for den aktuelle adresse.
                 tr
                   td(colspan="3") type
-                  td Hændelsestype. I dette tilfælde <em>nedlæggelse</em>.                
-                  
+                  td Hændelsestype. I dette tilfælde <em>nedlæggelse</em>.
+
 
 
 block append scripts
