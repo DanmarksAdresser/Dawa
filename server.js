@@ -34,7 +34,7 @@ app.get('/', function (req, res) {
 });
 
 app.get('/generelt', function (req, res) {
-  res.render('generelt.jade', {url: req.headers.host});
+  res.render('generelt.jade', jadeDocumentationParams(req));
 });
 
 app.get('/adressedok', function (req, res) {

@@ -14,6 +14,8 @@ block content
             ul#generelt.nav.nav-list
               li <a href='#baseadresse'>Baseadresse</a>
               li <a href='#dataformater'>Dataformater</a>
+              li <a href='#tekstsoegning'>Tekstsøgning</a>
+              li <a href='#autocomplete'>Autocomplete</a>
               li <a href='#versionering'>Versionering</a>
               li <a href='#kompression'>Kompression</a>
               li <a href='#cors'>Cross Origin Resource Sharing</a>
@@ -36,7 +38,46 @@ block content
             p Data kan returneres i følgende formater: html, json eller csv. Adresser og adgangsadresser kan også returneres i geojson(det skal være muligt at angive koordinatsystem).
             p Tidpunkter returners i <a href='http://www.w3.org/TR/NOTE-datetime'>ISO 8601</a>: YYYY-MM-DDTHH:MM:SSTZD. Eksempel; 2000-02-05T12:00:00+01:00.
             p Angivelse af parameteren mini som query parametre returnerer udelukkende adressen med dens adgangspunkt uden de tilknyttede attributer.
-
+            div.page-header
+              h3.anchor-header#tekstsoegning Tekstsøgning
+            p Det er muligt at foretage en tekstsøgning i mange af de datatyper, som DAWA udstiller.For tekstsøgning gælder følgende:
+            ul
+              li Der er ingen forskel på store og små bogstaver
+              li Der foretages såkaldt <a href="http://en.wikipedia.org/wiki/Stemming">Stemming</a> af ordene i en fritekstsøgning
+              li Hvis der angives flere ord i en søgning skal alle ordene matche.
+              li Accenter normaliseres, der er ingen forskel på é og e.
+              li æ, ø og å normaliseres, der er ingen forskel på å og Aa.
+              li Det er muligt at tilføje et <em>wildcard</em> '*' i slutningen af hvert ord. Wildcard matcher alle endelser.
+              li Tegn, som ikke er bogstaver eller et wildcard i slutningen af et ord fortolkes som mellemrum.
+              li Tekstsøgning kan kombineres med andre søgeparametre. Se mulighederne under dokumentationen for de enkelte APIer.
+            h4 Eksempler
+            p Find de adresser som matcher <em>Lilledal 1</em>
+            pre
+              a(href='#{url}/adresser?q=Lilledal 1') #{url}/adresser/autocomplete?q=Lilledal 1
+            p Find alle vejnavne, som matcher <em>vibor</em>
+            pre
+              a(href='#{url}/vejnavne?q=vibor') #{url}/vejnavne/autocomplete?q=vibor
+            p Find alle vejnavne i Aarhus kommune (kommunekode 751), som matcher <em>vibor</em>
+            pre
+              a(href='#{url}/vejnavne?q=vibor&kommunekode=751') #{url}/vejnavne/autocomplete?q=vibor&kommunekode=751
+            div.page-header
+              h3.anchor-header#autocomplete Autocomplete
+            p DAWA udstiller API'er til autocomplete af adresser, adgangsadresser, veje, postnumre, supplerende bynavne samt kommuner.
+            p Autocomplete har samme egenskaber som tekstsøgninger beskrevet ovenfor, med følgende forskelle:
+            ul
+              li Der tilføjes automatisk et wildcard til det sidste ord i søgningen, med mindre det sidste tegn i søgestrengen er et mellemrum
+              li Autocomplete returnerer en liste af simple forslag. Hvert forslag indeholder et 'tekst' felt, som beskriver forslaget, samt et objekt med oplysninger der identificerer forslaget.
+              li Der returneres som udgangspunkt 20 resultater. Ønskes et andet antal anvendes per_side parameteren.
+            h4 Eksempler
+            p Find de adresser som matcher <em>Lilledal 1</em>
+            pre
+              a(href='#{url}/adresser/autocomplete?q=Lilledal 1') #{url}/adresser/autocomplete?q=Lilledal 1
+            p Find alle vejnavne, som matcher <em>vibor</em>
+            pre
+              a(href='#{url}/vejnavne/autocomplete?q=vibor') #{url}/vejnavne/autocomplete?q=vibor
+            p Find alle vejnavne i Aarhus kommune (kommunekode 751), som matcher <em>vibor</em>
+            pre
+              a(href='#{url}/vejnavne/autocomplete?q=vibor&kommunekode=751') #{url}/vejnavne/autocomplete?q=vibor&kommunekode=751
             div.page-header
               h3.anchor-header#versionering  Versionering
               p Danmarks Adresse Web API er ikke statisk. Det ændres med tiden pga. nye ønsker, fejlrettelser, nye data, ændring af de bagvedliggende data osv. Vi har af flere grunde ikke ønsket at have flere versioner af DAWA i  drift samtidigt. Vi ønsker heller ikke at bryde DAWA's klienter ved opdatering af dets API. For at opnå dette følger vi følgende verioneringsprincipper:
@@ -54,6 +95,9 @@ block content
               p Herved reduceres størrelsen af et typisk response med ca. 90%.
             div.page-header
               h3.anchor-header#cors Cross Origin Resource Sharing
+            p Alle GET svar fra DAWA indeholder en CORS header der tillader cross-site requests:
+            pre Access-Control-Allow-Origin: *
+            p Dette muliggør cross-site requests direkte til DAWA.
             div.page-header
               h3.anchor-header#jsonp JSONP Callbacks
             div.page-header
