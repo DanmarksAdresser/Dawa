@@ -1,10 +1,14 @@
+
+\set ON_ERROR_STOP on
+\set ECHO queries
+
 CREATE INDEX ON adgangsadresser(matrikelnr);
 CREATE INDEX ON adgangsadresser(husnr, id);
 CREATE INDEX ON adgangsadresser(esrejendomsnr);
 CREATE INDEX ON enhedsadresser(etage, id);
 CREATE INDEX ON enhedsadresser(doer, id);
 
-DROP INDEX adgangsadresser_ejerlavkode_idx;
+DROP INDEX IF EXISTS adgangsadresser_ejerlavkode_idx;
 CREATE INDEX ON adgangsadresser(ejerlavkode, id);
 
 CREATE INDEX ON vejstykker(kode);

@@ -1,3 +1,7 @@
+
+\set ON_ERROR_STOP on
+\set ECHO queries
+
 BEGIN;
 
 DROP VIEW IF EXISTS Adresser;
