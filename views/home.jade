@@ -16,7 +16,7 @@ block content
               li At inddrage adresseanvendere tidligt i den konkrete udformning af DAWA (AWS 4).
               li At sikre at leverandør og kunde har samme billede af hvordan kravene skal implementeres.
               li At sikre at den specificerede løsning er realiserbar.
-  
+
             p.text-error Den udarbejdede prototype rummer selvfølgelig ikke DAWA's fulde funktionalitet og driftsegenskaber. Adressedelen af web API'et er den del, som har mest funktionalitet. Web sitets beskrivelser og funktionalitet skulle gerne give dig mulighed for at vurdere, om DAWA kommer til at opfylde dit behov for adressefunktionalitet. Hvis ikke eller hvis du har kommentarer, ideer eller spørgsmål, så giv din mening til kende i <a href=http://digitaliser.dk/news/2549612>AWS-gruppen på Digitaliser.dk</a>
 
 
@@ -25,12 +25,12 @@ block content
               h2 Hvad kan DAWA bruges til?
             p DAWA anvendes til at etablere adressefunktionalitet i it-systemer. Nedenfor kan du se en række eksempler på hvad DAWA kan anvendes til.Eksemplerne er baseret på DAWA, som tilbyder adressefunktionalitet, men ikke nogen form for brugergrænseflade.
             h3 Adresseindtastning
-            p Indtastning af adresser er en et væsentligt element i mange applikationer. I den forbindelse er det vigtigt at det er let for brugeren at indtaste adressen, men også at den indtastede adresse er valid. DAWA kan anvendes til dette. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan foretages.   
+            p Indtastning af adresser er en et væsentligt element i mange applikationer. I den forbindelse er det vigtigt at det er let for brugeren at indtaste adressen, men også at den indtastede adresse er valid. DAWA kan anvendes til dette. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan foretages.
             form
               fieldset
                 legend Autocomplete
                 label(for='q') Adresse
-                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør - postnummer', id='q') 
+                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør - postnummer', id='q')
 
                 label(for='qk') Adresse i København
                 input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør - postnummer', id='qk')
@@ -40,20 +40,20 @@ block content
                 legend Feltindtastning
 
                 label(for='postnummer') Postnr
-                input.span3(type='text', autocomplete='off', placeholder='postnummer', id='postnummer') 
+                input.span3(type='text', autocomplete='off', placeholder='postnummer', id='postnummer')
                 label(for='vej') Vej
-                input.span3(type='text', autocomplete='off', placeholder='vejnavn', id='vej') 
+                input.span3(type='text', autocomplete='off', placeholder='vejnavn', id='vej')
                 label(for='husnr') Husnr
-                input.span3(type='text', autocomplete='off', placeholder='Husnummer', id='husnummer') 
+                input.span3(type='text', autocomplete='off', placeholder='Husnummer', id='husnummer')
                 label(for='etage') Etage
-                input.span3(type='text', autocomplete='off', placeholder='Etage', id='etage') 
+                input.span3(type='text', autocomplete='off', placeholder='Etage', id='etage')
                 label(for='doer') Dør
-                input.span3(type='text', autocomplete='off', placeholder='Dør', id='doer') 
+                input.span3(type='text', autocomplete='off', placeholder='Dør', id='doer')
 
-            legend Reverse geokoding 
+            legend Reverse geokoding
             p Klik på kortet nedenfor og få nærmeste adresse.
 
-            div#map 
+            div#map
 
             h3 Validering af adresser
             p DAWA kan også anvendes til validering af adresser. For at validere en adresse laves en søgning på adressen. Hvis adressen giver ét resultat, og resultatet matcher, er adressen valid.
@@ -63,40 +63,40 @@ block content
                 legend Adresservalidering
 
                 label(for='vpostnummer') Postnr
-                input.span3(type='text', placeholder='postnummer', id='vpostnummer') 
+                input.span3(type='text', placeholder='postnummer', id='vpostnummer')
                 label(for='vvej') Vej
-                input.span3(type='text', placeholder='vejnavn', id='vvej') 
+                input.span3(type='text', placeholder='vejnavn', id='vvej')
                 label(for='vhusnr') Husnr
-                input.span3(type='text', placeholder='Husnummer', id='vhusnummer') 
+                input.span3(type='text', placeholder='Husnummer', id='vhusnummer')
                 label(for='vetage') Etage
-                input.span3(type='text', placeholder='Etage', id='vetage') 
+                input.span3(type='text', placeholder='Etage', id='vetage')
                 label(for='vdoer') Dør
-                input.span3(type='text', placeholder='Dør', id='vdoer') 
+                input.span3(type='text', placeholder='Dør', id='vdoer')
                 legend
-                button.span1(id='valider') Valider  
+                button.span1(id='valider') Valider
                 label.span2(id='ervalideringok') Er adressen gyldig?
-            
+
              h3 Adressedata
-            p Udover data om selve adressen, som vejnavn, husnr, supplerende bynavn, postnummer, etage og dør, er der knyttet en række andre data til adressen. Her kan nævnes placering (koordinater), ejerlav, matrikelnr, ejendomsnr samt tilknyning til administrative inddelinger: kommune, sogn, region, retskreds, politikreds og opstillingskreds. 
+            p Udover data om selve adressen, som vejnavn, husnr, supplerende bynavn, postnummer, etage og dør, er der knyttet en række andre data til adressen. Her kan nævnes placering (koordinater), ejerlav, matrikelnr, ejendomsnr samt tilknyning til administrative inddelinger: kommune, sogn, region, retskreds, politikreds og opstillingskreds.
             p Adressen kan på denne måde være indgang til andre områder, som f.eks. ejendomsområdet. Starter med en adresse, får via denne fat i ejensdomsnummeret, som så kan anvendes til opslag efter ejendomsdata.
             h3 Adressesøgning
-            p Mange gange er det ikke alle Danmarks adresser, man er interesseret i. Det kan dreje sig om adresser i et enkelt sogn eller kommune. Det kan dreje som adresser indenfor en bestemt afstand til punkt. Eller adresser på en enkelt vej. Dawa giver mulighed for at udsøge adresser efter mange parametre og kombinationer af disse. 
+            p Mange gange er det ikke alle Danmarks adresser, man er interesseret i. Det kan dreje sig om adresser i et enkelt sogn eller kommune. Det kan dreje som adresser indenfor en bestemt afstand til punkt. Eller adresser på en enkelt vej. Dawa giver mulighed for at udsøge adresser efter mange parametre og kombinationer af disse.
             h3 Download af adresser
             p Nogle it-systemer fungerer bedst med en lokal kopi af adresser. Til dette er muligt at downloade udvalgte adresser, som i nedenstående eksempler.
 
-            p 
+            p
               a(href='http://#{url}/adresser.csv?sogn=7060') CSV fil med alle adresser i Grøndal sogn
 
-            p 
+            p
               a(href='http://#{url}/adresser.csv?kommune=0326') CSV fil med alle adresser i Kalundborg kommune
 
-            p 
+            p
               a(href='http://#{url}/adresser.csv?husnr=77') CSV fil med alle adresser med husnummeret 77
 
-            p 
+            p
               a(href='http://#{url}/adresser.csv?cirkel=55.681219613782,12.5816211914972,150') CSV fil med de adresser, som ligger som har en afstand på mindre end 150 m til Gammel mønt 4, 1117 København K.
 
-            p 
+            p
               a(href='http://#{url}/adresser.csv?kommune=0101,0147') CSV fil med København og Frederiksberg kommuners adresser.
 
             h3 Etablering af opdateret kopiadresseregister
@@ -111,11 +111,11 @@ block content
             p
               a(href='http://#{url}/adresser/valid?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180') http://#{url}/adresser/valid?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180
             p Ja, den eksisterer, da vi fik et succesfuldt svar tilbage.
-            h4 Reverse geokodning. Hvilken adresse ligger nærmest koordinatet (55.700677,12.59074)?          
+            h4 Reverse geokodning. Hvilken adresse ligger nærmest koordinatet (55.700677,12.59074)?
             p
               a(href='http://#{url}/adresser/55.700677,12.59074') http://#{url}/adresser/55.700677,12.59074
 
-block append scripts 
+block append scripts
   script(src="js/underscore-min.js")
 
   script(src="js/forside.js")
