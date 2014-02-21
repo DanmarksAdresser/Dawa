@@ -6,7 +6,7 @@ var _       = require("underscore");
 describe("AdresserApi", function() {
   describe("Opslag på ID", function() {
     it("Should be possible to get an address", function(done) {
-      request.get('http://localhost:3000/api/pg/adresser/0a3f50a3-823b-32b8-e044-0003ba298018', function(error, response, body) {
+      request.get('http://localhost:3000/adresser/0a3f50a3-823b-32b8-e044-0003ba298018', function(error, response, body) {
         expect(response.statusCode).toBe(200);
         var adresse = JSON.parse(body);
         expect(adresse.id).toBe('0a3f50a3-823b-32b8-e044-0003ba298018');
@@ -19,7 +19,7 @@ describe("AdresserApi", function() {
 describe('When searching for polygons and zipcodes', function () {
 
   it('both should be used', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser'+
+    request.get('http://localhost:3000/adresser'+
                 '?polygon=[[[55.3, 9.4], [55.6, 12.7], [55.601, 12.7], [55.301, 9.4], [55.3, 9.4]]]'+
                 '&postnr=2690',
                 function(error, response, body){
@@ -38,7 +38,7 @@ describe('When searching for polygons and zipcodes', function () {
 describe('The query-parameter', function () {
 
   it('vejkode should succeed', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser?vejkode=0801',
+    request.get('http://localhost:3000/adresser?vejkode=0801',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
                   expect(response.statusCode).toBe(200);
@@ -48,7 +48,7 @@ describe('The query-parameter', function () {
   });
 
   it('vejkode should succeed without leading 0s', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser?vejkode=801',
+    request.get('http://localhost:3000/adresser?vejkode=801',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
                   expect(response.statusCode).toBe(200);
@@ -57,7 +57,7 @@ describe('The query-parameter', function () {
                 });
   });
   it('vejkode should fail', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser?vejkode=A851',
+    request.get('http://localhost:3000/adresser?vejkode=A851',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
                   expect(response.statusCode).toBe(400);
@@ -90,7 +90,7 @@ describe('All paremetrs should succeed. ', function () {
 
 function queryParamTest(param){
   it(param+' should succeed', function(done){
-    request.get('http://localhost:3000/api/pg/adresser?postnr=2690&'+param[0]+'='+encodeURIComponent(param[1]),
+    request.get('http://localhost:3000/adresser?postnr=2690&'+param[0]+'='+encodeURIComponent(param[1]),
                 function(error, response, body){
                   var adrs = JSON.parse(body);
                   expect(response.statusCode).toBe(200);

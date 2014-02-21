@@ -51,7 +51,7 @@ var get = {uri: httpHost+'/adresser/0a3f50ae-da7f-32b8-e044-0003ba298018',
            method: 'GET',
            timeout: 1000};
 
-var getpg = {uri: httpHost+'/api/pg/adresser/0a3f50ae-da7f-32b8-e044-0003ba298018',
+var getpg = {uri: httpHost+'/adresser/0a3f50ae-da7f-32b8-e044-0003ba298018',
              method: 'GET',
              timeout: 1000};
 

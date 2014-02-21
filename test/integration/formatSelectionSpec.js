@@ -14,7 +14,7 @@ var jsonpCallback = function(result) {
 
 describe('Format selection', function () {
   it("By default, JSON should be returned", function(done) {
-    request.get("http://localhost:3000/api/pg/adresser?per_side=10", function(error, response, body) {
+    request.get("http://localhost:3000/adresser?per_side=10", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
       var bodyJson = JSON.parse(body);
       expect(_.isArray(bodyJson)).toBe(true);
@@ -24,7 +24,7 @@ describe('Format selection', function () {
 
   it("By default, JSON should be returned (single result mode)", function(done) {
     var id = "0a3f50a3-822a-32b8-e044-0003ba298018";
-    request.get("http://localhost:3000/api/pg/adresser/" + id, function(error, response, body) {
+    request.get("http://localhost:3000/adresser/" + id, function(error, response, body) {
       expect(response.statusCode).toBe(200);
       expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
       var bodyJson = JSON.parse(body);
@@ -34,7 +34,7 @@ describe('Format selection', function () {
   });
 
   it("If format=json is passed as query parameter, JSON should be returned", function(done) {
-    request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=json", function(error, response, body) {
+    request.get("http://localhost:3000/adresser?per_side=10&format=json", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
       var bodyJson = JSON.parse(body);
       expect(_.isArray(bodyJson)).toBe(true);
@@ -43,7 +43,7 @@ describe('Format selection', function () {
   });
 
   it("If format=csv is passed as query parameter, CSV should be returned", function(done) {
-    request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=csv", function(error, response, body) {
+    request.get("http://localhost:3000/adresser?per_side=10&format=csv", function(error, response, body) {
       expect(response.headers['content-type']).toBe("text/csv; charset=UTF-8");
       csv()
         .from.string(body, {columns: true})
@@ -57,7 +57,7 @@ describe('Format selection', function () {
 
   it("If format=csv is passed as query parameter, CSV should be returned (single result mode)", function(done) {
     var id = "0a3f50a3-822a-32b8-e044-0003ba298018";
-    request.get("http://localhost:3000/api/pg/adresser/" + id + "?format=csv", function(error, response, body) {
+    request.get("http://localhost:3000/adresser/" + id + "?format=csv", function(error, response, body) {
       expect(response.headers['content-type']).toBe('text/csv; charset=UTF-8');
       csv()
         .from.string(body, {columns: true})
@@ -70,7 +70,7 @@ describe('Format selection', function () {
   });
 
   it("If format=jsonp is passed as query parameter, JSONP should be returned", function(done) {
-    request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=jsonp&callback=jsonpCallback", function(error, response, body) {
+    request.get("http://localhost:3000/adresser?per_side=10&format=jsonp&callback=jsonpCallback", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
       eval(body); // jshint ignore:line
       var result = jsonpResults.pop();
@@ -83,7 +83,7 @@ describe('Format selection', function () {
 
   it("If format=jsonp is passed as query parameter, JSONP should be returned (single result mode)", function(done) {
     var id = "0a3f50a3-8192-32b8-e044-0003ba298018";
-    request.get("http://localhost:3000/api/pg/adresser/" + id + "?format=jsonp&callback=jsonpCallback", function(error, response, body) {
+    request.get("http://localhost:3000/adresser/" + id + "?format=jsonp&callback=jsonpCallback", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
       expect(response.statusCode).toBe(200);
       console.log(body);
@@ -96,7 +96,7 @@ describe('Format selection', function () {
   });
 
   it("If an illegal value is specified as format parameter, a nice JSON error message should be returned", function(done) {
-    request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=xml", function(error, response, body) {
+    request.get("http://localhost:3000/adresser?per_side=10&format=xml", function(error, response, body) {
       expect(response.statusCode).toBe(400);
       expect(response.headers['content-type']).toBe("application/problem+json; charset=UTF-8");
       var errorMessage = JSON.parse(body);
@@ -106,7 +106,7 @@ describe('Format selection', function () {
   });
 
   it("If format is jsonp, and the callback parameter is missing, a nice JSON error mesage is returned", function(done) {
-    request.get("http://localhost:3000/api/pg/adresser?per_side=10&format=jsonp", function(error, response, body) {
+    request.get("http://localhost:3000/adresser?per_side=10&format=jsonp", function(error, response, body) {
       expect(response.statusCode).toBe(400);
       expect(response.headers['content-type']).toBe("application/problem+json; charset=UTF-8");
       var errorMessage = JSON.parse(body);

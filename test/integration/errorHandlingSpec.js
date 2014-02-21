@@ -4,7 +4,7 @@ var request = require("request");
 
 describe('Ill-formed query parameters', function () {
   it('should result in QueryParameterFormatError', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser?postnr=860',
+    request.get('http://localhost:3000/adresser?postnr=860',
                 function(err, response, body){
                   expect(response.statusCode).toBe(400);
                   var error = JSON.parse(body);
@@ -21,7 +21,7 @@ describe('Ill-formed query parameters', function () {
 
 describe('Ill-formed UUID', function () {
   it('should result in ResourceKeyFormatError', function (done) {
-    request.get('http://localhost:3000/api/pg/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018',
+    request.get('http://localhost:3000/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018',
                 function(err, response, body){
                   expect(response.statusCode).toBe(400);
                   var error = JSON.parse(body);
@@ -39,7 +39,7 @@ describe('Ill-formed UUID', function () {
 describe('When getting single addresses', function () {
   it('an unknown id will fail', function (done) {
     var uuid2 = '0a3f50ae-aaaa-bbbb-cccc-0003ba298019';
-    request.get('http://localhost:3000/api/pg/adresser/'+uuid2,
+    request.get('http://localhost:3000/adresser/'+uuid2,
                 function(err, response, body){
                   expect(response.statusCode).toBe(404);
                   var error = JSON.parse(body);

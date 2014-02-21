@@ -1,6 +1,6 @@
 var senesteloebenr= 0;
 
-var apiBase = 'api/pg/';
+var apiBase = '';
 
 function makeshow(loebenr,input,process) {
   return function (adresser)

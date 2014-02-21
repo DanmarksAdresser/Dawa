@@ -36,25 +36,25 @@ function invalid(data, schema, invalidPattern, done){
 describe("Postnummer schema validation", function () {
   it("should validate basic datum", function (done) {
     valid(
-      {"href": "http://dawa.aws.dk/api/pg/postnumre/8600",
+      {"href": "http://dawa.aws.dk/postnumre/8600",
         "nr": 8600,
         "navn": "Silkeborg",
         "version": "2011-12-02T04:20:03+01:00",
         stormodtageradresse: null,
         "kommuner": [
-          {"href": "http://dawa.aws.dk/api/pg/kommuner/740", "kode": 740, "navn": "Silkeborg"}
+          {"href": "http://dawa.aws.dk/kommuner/740", "kode": 740, "navn": "Silkeborg"}
         ]},
       model.postnummer.schema,
           done);
   });
   it("should fail on 5 digit zip", function (done) {
-    invalid({"href": "http://dawa.aws.dk/api/pg/postnumre/8600",
+    invalid({"href": "http://dawa.aws.dk/postnumre/8600",
       "nr": 86000,
       "navn": "Silkeborg",
       "version": "2011-12-02T04:20:03+01:00",
       stormodtageradresse: null,
       "kommuner": [
-        {"href": "http://dawa.aws.dk/api/pg/kommuner/740", "kode": 740, "navn": "Silkeborg"}
+        {"href": "http://dawa.aws.dk/kommuner/740", "kode": 740, "navn": "Silkeborg"}
       ]}, model.postnummer.schema, 'MAXIMUM', done);
   });
 
@@ -180,8 +180,8 @@ describe('Vejnavn schema validation', function() {
 
 describe("Vejstykke schema validation", function () {
   it("should validate basic datum", function (done) {
-    valid({"href": "http://dawa.aws.dk/api/pg/vejstykker/101/4", "kode": 4, "navn": "Abel Cathrines Gade", "kommune": {"href": "http://dawa.aws.dk/api/pg/kommuner/101", "kode": 101, "navn": "København"}, "postnumre": [
-        {"href": "http://dawa.aws.dk/api/pg/postnumre/1654", "nr": 1654, "navn": "København V"}
+    valid({"href": "http://dawa.aws.dk/vejstykker/101/4", "kode": 4, "navn": "Abel Cathrines Gade", "kommune": {"href": "http://dawa.aws.dk/kommuner/101", "kode": 101, "navn": "København"}, "postnumre": [
+        {"href": "http://dawa.aws.dk/postnumre/1654", "nr": 1654, "navn": "København V"}
       ]},
       model.vejstykke.schema, done);
   });
@@ -191,9 +191,9 @@ describe("Vejstykke schema validation", function () {
 describe("Supplendebynavn schema validation", function () {
   it("should validate basic datum", function (done) {
     valid({href: 'http://dawa.aws.dk/supplerendebynavne/Aa', "navn": "Aa", "postnumre": [
-        {"href": "http://dawa.aws.dk/api/pg/postnumre/5631", "nr": 5631, "navn": "Ebberup"}
+        {"href": "http://dawa.aws.dk/postnumre/5631", "nr": 5631, "navn": "Ebberup"}
       ], "kommuner": [
-        {"href": "http://dawa.aws.dk/api/pg/kommuner/420", "kode": 420, "navn": "Assens"}
+        {"href": "http://dawa.aws.dk/kommuner/420", "kode": 420, "navn": "Assens"}
       ]},
       model.supplerendebynavn.schema, done);
   });

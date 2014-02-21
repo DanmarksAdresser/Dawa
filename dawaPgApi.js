@@ -43,24 +43,6 @@ exports.setupRoutes = function () {
   return app;
 };
 
-exports.setupPublicRoutes = function () {
-  var app = express();
-  app.set('jsonp callback', true);
-  app.use(express.methodOverride());
-  app.use(express.bodyParser());
-  app.use(corsMiddleware);
-  var specs = ['vejnavn', 'vejstykke', 'supplerendeBynavn', 'adgangsadresse', 'postnummer', 'kommune'];
-  specs.forEach(function(specName) {
-    var spec = apiSpec[specName];
-    if(spec.suggestable) {
-      publishAutocomplete(app, spec);
-    }
-    publishGetByKey(app, spec);
-    publishQuery(app, spec);
-  });
-  return app;
-};
-
 /**
  * Parses multiple groups of parameters.
  * @param parameterSpecs a hash where values are lists of parameter specifications
