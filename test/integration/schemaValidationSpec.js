@@ -1,8 +1,8 @@
 "use strict";
 var apiSpec = require('../../apiSpec');
 var dbapi = require('../../dbapi');
-var ZSchema = require('z-schema');
 var _ = require('underscore');
+var schemaValidationUtil = require('./schemaValidationUtil');
 
 /**
  * This test verifies that all testdata is valid according to JSON schema
@@ -43,22 +43,6 @@ var valuesNeverExpectedToBeSeen = {
     }
   },
 };
-
-var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
-  noExtraKeywords: true,
-  forceItems: true,
-  forceProperties: true,
-  sync: true
-});
-
-function expectSchemaValid(object, schema) {
-  var valid = zSchemaValidator.validate(object, schema);
-  expect(valid).toBe(true);
-  if(!valid) {
-    console.log("invalid json: " + JSON.stringify(object));
-    console.log(zSchemaValidator.getLastError());
-  }
-}
 
 function hasType(schema, type) {
   return schema.type === type || (_.isArray(schema.type) && schema.type.indexOf(type) !== -1);
@@ -112,7 +96,7 @@ describe('Validering af JSON-formatteret output', function() {
         dbapi.query(client, spec, {}, {}, function(err, rows) {
           rows.forEach(function(row) {
             var json = spec.mappers.json(row);
-            expectSchemaValid(json, schema);
+            expect(schemaValidationUtil.isSchemaValid(json, schema)).toBe(true);
           });
           transactionDone();
           specDone();

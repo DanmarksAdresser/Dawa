@@ -14,12 +14,14 @@ block content
             ul#vejnavn.nav.nav-list
               li <a href='#vejnavnsoegning'>Vejnavnesøgning</a>
               li <a href='#vejnavneopslag'>Vejnavneopslag</a>
+              li <a href='#vejnavneautocomplete'>Vejnavne autocomplete</a>
               li <a href='#vejnavnedata'>Beskrivelse af vejnavnedata</a>
 
             li(data-toggle='collapse', data-target='#vejstykke').nav-header Vejstykke API
             ul#vejstykke.nav.nav-list
               li <a href='#vejstykkesoegning'>Vejstykkesøgning</a>
               li <a href='#vejstykkeopslag'>Vejstykkeopslag</a>
+              li <a href='#vejstykkerautocomplete'>Vejstykker autocomplete</a>
               li <a href='#vejstykkedata'>Beskrivelse af vejstykkedata</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header vejnavn hændelse
             ul#haendelser.nav.nav-list
@@ -40,6 +42,12 @@ block content
             h3.anchor-header#vejnavneopslag Vejnavneopslag
             p Opslag på enkelt vejnavn
             +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+            div.page-header
+              h3.anchor-header#vejnavneautocomplete Vejnavne autocomplete
+            p Autocomplete på vejnavne. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+            pre GET #{url}/vejnavne/autocomplete
+            p Autocomplete for vejnavne returnerer følgende JSON struktur:
+            +documentSchema(apiSpec.vejnavn.model.autocompleteSchema)
 
             div.page-header
             h3.anchor-header#vejnavnedata Beskrivelse af vejnavnedata
@@ -57,6 +65,13 @@ block content
             h3.anchor-header#vejstykkeopslag Vejstykkeopslag
             p Opslag på enkelt vejstykke ud fra kommunekode og vejkode.
             +parameterDocGet(apiSpec.vejstykke, parameterDoc.vejstykke)
+
+            div.page-header
+              h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
+            p Autocomplete på vejstykker. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+            pre GET #{url}/vejstykker/autocomplete
+            p Autocomplete for vejstykker returnerer følgende JSON struktur:
+            +documentSchema(apiSpec.vejstykke.model.autocompleteSchema)
 
             div.page-header
             h3.anchor-header#vejstykkedata Beskrivelse af vejstykkedata
