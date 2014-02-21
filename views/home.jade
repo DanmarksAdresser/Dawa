@@ -50,7 +50,8 @@ block content
                 label(for='doer') Dør
                 input.span3(type='text', autocomplete='off', placeholder='Dør', id='doer')
 
-            legend Reverse geokoding
+            legend Reverse geokoding (under udvikling)
+            p <b>Bemærk. Reverse geokodning er p.t. under udvikling, og giver ikke noget resultat</b>
             p Klik på kortet nedenfor og få nærmeste adresse.
 
             div#map
@@ -85,19 +86,17 @@ block content
             p Nogle it-systemer fungerer bedst med en lokal kopi af adresser. Til dette er muligt at downloade udvalgte adresser, som i nedenstående eksempler.
 
             p
-              a(href='http://#{url}/adresser.csv?sogn=7060') CSV fil med alle adresser i Grøndal sogn
+              a(href='http://#{url}/adresser?kommunekode=0326&format=csv') CSV fil med alle adresser i Kalundborg kommune
 
             p
-              a(href='http://#{url}/adresser.csv?kommune=0326') CSV fil med alle adresser i Kalundborg kommune
+              a(href='http://#{url}/adresser?husnr=77&format=csv') CSV fil med alle adresser med husnummeret 77
+
+            p <b>Følgende 2 eksempler benytter funktionalitet der er under udvikling, og er vil ikke give noget resultat!</b>
+            p
+              a(href='http://#{url}/adresser/under-dev/?cirkel=55.681219613782,12.5816211914972,150&format=csv') CSV fil med de adresser, som ligger som har en afstand på mindre end 150 m til Gammel mønt 4, 1117 København K.
 
             p
-              a(href='http://#{url}/adresser.csv?husnr=77') CSV fil med alle adresser med husnummeret 77
-
-            p
-              a(href='http://#{url}/adresser.csv?cirkel=55.681219613782,12.5816211914972,150') CSV fil med de adresser, som ligger som har en afstand på mindre end 150 m til Gammel mønt 4, 1117 København K.
-
-            p
-              a(href='http://#{url}/adresser.csv?kommune=0101,0147') CSV fil med København og Frederiksberg kommuners adresser.
+              a(href='http://#{url}/adresser?kommunekode=0101,0147&format=csv') CSV fil med København og Frederiksberg kommuners adresser.
 
             h3 Etablering af opdateret kopiadresseregister
             p I nogle situationer er der behov for at have et lokalt opdateret kopiadresseregister. DAWA kan anvendes til at etablere og opdatere kopiregisteret.
@@ -109,11 +108,14 @@ block content
             p Eksempler på DAWA kald er listet nedenfor:
             h4 Adressevalidering. Eksisterer Fægangen 1, 1. 13, 4180 Sorø?
             p
-              a(href='http://#{url}/adresser/valid?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180') http://#{url}/adresser/valid?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180
-            p Ja, den eksisterer, da vi fik et succesfuldt svar tilbage.
+              a(href='http://#{url}/adresser?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180') http://#{url}/adresser?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180
+            p Ja, den eksisterer, da vi fik en liste med 1 adresse tilbage (dvs. adressen findes, og den er unik).
+
             h4 Reverse geokodning. Hvilken adresse ligger nærmest koordinatet (55.700677,12.59074)?
+
             p
               a(href='http://#{url}/adresser/55.700677,12.59074') http://#{url}/adresser/55.700677,12.59074
+              <br><b>Bemærk. Reverse geokodning er p.t. under udvikling, og giver ikke noget resultat</b>
 
 block append scripts
   script(src="js/underscore-min.js")
