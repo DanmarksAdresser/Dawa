@@ -35,7 +35,6 @@ exports.extractDocumentationForObject = function (schema) {
     var property = schema.properties[propertyName];
     return exports.extractDocumentationForProperty(property, propertyName);
   });
-  console.log(JSON.stringify(result));
   return  result;
 };
 
