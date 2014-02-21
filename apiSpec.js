@@ -572,6 +572,7 @@ var vejnavnFields = [
   },
   {
     name: 'tsv',
+    column: 'vejstykker.tsv',
     selectable : false
   }
 ];
