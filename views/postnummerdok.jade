@@ -15,7 +15,8 @@ block content
             ul#postnummer.nav.nav-list
               li <a href='#postnummersoegning'>Postnummersøgning</a>
               li <a href='#postnummeropslag'>Postnummeropslag</a>
-              li <a href='#postnummerdata'>Beskrivelse af postnummerdata</a>
+              li <a href='#postnummerautocomplete'>Postnummer autocomplete</a>
+                li <a href='#postnummerdata'>Beskrivelse af postnummerdata</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header postnummer hændelse
             ul#haendelser.nav.nav-list
 
@@ -29,6 +30,13 @@ block content
             h3.anchor-header#postnummeropslag Postnummeropslag
             p Modtag postnummer med id.
             +parameterDocGet(apiSpec.postnummer, parameterDoc.postnummer)
+
+            div.page-header
+              h3.anchor-header#postnummerautocomplete Postnummer autocomplete
+            p Autocomplete på postnumre. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+            pre GET #{url}/postnumre/autocomplete
+            p Autocomplete for postnumre returnerer følgende JSON struktur:
+            +documentSchema(apiSpec.postnummer.model.autocompleteSchema)
 
             div.page-header
             h3.anchor-header#postnummerdata Beskrivelse af postnummerdata

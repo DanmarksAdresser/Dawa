@@ -15,6 +15,7 @@ block content
             ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adgangsdressesøgning</a>
               li <a href='#adresseopslag'>Adgangsadresseopslag</a>
+              li <a href='#adresseautocomplete'>Adgangsadresser autocomplete</a>
               li <a href='#reversegeokodning'>Reverse geokodning (stadig<br>under udvikling)</a>
               li <a href='#adressedata'>Beskrivelse af adgangsadressedata</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header Adgangsadressehændelser
@@ -25,14 +26,21 @@ block content
         div.span9
           section
             div.page-header
-            h3.anchor-header#adressesoegning Adgangsadressesøgning
-            p Søg efter adresser. Returnerer de adgangsadresser som opfylder kriteriet.
+              h3.anchor-header#adressesoegning Adgangsadressesøgning
+            p Søg efter adgangsadresser. Returnerer de adgangsadresser som opfylder kriteriet.
             +parameterDocQuery(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
 
             div.page-header
-            h3.anchor-header#adresseopslag Adresseopslag
-            p Modtag adresse med id.
+              h3.anchor-header#adresseopslag Adgangsadresseopslag
+            p Modtag adgangsadresse med id.
             +parameterDocGet(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
+
+            div.page-header
+              h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
+            p Autocomplete på adgangsadresser. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+            pre GET #{url}/adresser/autocomplete
+            p Autocomplete for adgangsadresser returnerer følgende JSON struktur:
+            +documentSchema(apiSpec.adgangsadresse.model.autocompleteSchema)
 
             div.page-header
             h3.anchor-header#reversegeokodning Reverse geokodning (stadig under udvikling)

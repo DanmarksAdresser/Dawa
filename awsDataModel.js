@@ -247,9 +247,11 @@ var autocompleteSchemas = {
   postnummer: globalSchemaObject( {
     properties: {
       tekst: {
+        description: 'Postnummeret (4 cifre) efterfulgt af postnummerområdets navn, f.eks. "8260 Viby J".',
         type: 'string'
       },
       postnummer: {
+        description: 'Link og basale data for postnummret.',
         $ref: '#/definitions/PostnummerRef'
       }
     },
@@ -258,9 +260,11 @@ var autocompleteSchemas = {
   vejnavn: globalSchemaObject({
     properties: {
       tekst: {
+        description: 'Vejnavnet',
         type: 'string'
       },
       vejnavn: {
+        description: 'Link og basale data for vejnavnet',
         $ref: '#/definitions/VejnavnRef'
       }
     },
@@ -269,9 +273,11 @@ var autocompleteSchemas = {
   vejstykke: globalSchemaObject( {
     properties: {
       tekst: {
+        description: 'Navnet på vejstykket',
         type: 'string'
       },
       vejstykke: {
+        description: 'Link og basale data for vejstykket',
         $ref: '#/definitions/VejstykkeRef'
       }
     },
@@ -280,9 +286,11 @@ var autocompleteSchemas = {
   kommune: globalSchemaObject({
     properties: {
       tekst: {
+        description: 'Kommunens navn',
         type: 'string'
       },
       kommune: {
+        description: 'Link og basale data for kommunen.',
         $ref: '#/definitions/KommuneRef'
       }
     },
@@ -291,9 +299,11 @@ var autocompleteSchemas = {
   supplerendeBynavn: globalSchemaObject({
     properties: {
       tekst: {
+        description: 'Det supplerende bynavn.',
         type: 'string'
       },
       supplerendebynavn: {
+        description: 'Link og basale data for det supplerende bynavn.',
         $ref: '#/definitions/SupplerendeBynavnRef'
       }
     },
@@ -302,9 +312,11 @@ var autocompleteSchemas = {
   adgangsadresse: globalSchemaObject({
       properties: {
         tekst: {
+          description: 'Adgangsadressen på formen {vej} {husnr}, {supplerende bynavn}, {postnr} {postnrnavn}',
           type: 'string'
         },
         adgangsadresse: {
+          description: 'Link og id for adgangsadressen.',
           $ref: '#/definitions/AdgangsadresseRef'
         }
       },
@@ -313,9 +325,11 @@ var autocompleteSchemas = {
   adresse: globalSchemaObject({
     properties: {
       tekst: {
+        description: 'Adgangsadressen på formen {vej} {husnr}, {etage}. {dør}, {supplerende bynavn}, {postnr} {postnrnavn}',
         type: 'string'
       },
       adresse: {
+        description: 'Link og id for adressen.',
         $ref: '#/definitions/AdresseRef'
       }
     },

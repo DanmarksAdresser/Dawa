@@ -16,6 +16,7 @@ block content
             ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adressesøgning</a>
               li <a href='#adresseopslag'>Adresseopslag</a>
+              li <a href='#adresseautocomplete'>Adresser autocomplete</a>
               li <a href='#reversegeokodning'>Reverse geokodning (stadig<br>under udvikling)</a>
               li <a href='#adressedata'>Beskrivelse af adressedata</a>
 
@@ -36,6 +37,13 @@ block content
             h3.anchor-header#adresseopslag Adresseopslag
             p Modtag adresse med id.
             +parameterDocGet(apiSpec.adresse, parameterDoc.adresse)
+
+            div.page-header
+              h3.anchor-header#adresseautocomplete Adresser autocomplete
+            p Autocomplete på adresser. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+            pre GET #{url}/adresser/autocomplete
+            p Autocomplete for adresser returnerer følgende JSON struktur:
+            +documentSchema(apiSpec.adresse.model.autocompleteSchema)
 
             div.page-header
             h3.anchor-header#reversegeokodning Reverse geokodning (stadig under udvikling)
