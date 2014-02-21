@@ -323,14 +323,22 @@ function valider(pnr,vej,husnr,etage,doer) {
   }
   $.ajax({
     cache: true,
-    url:'adresser/valid.json',
+    url:'/adresser',
     data: parametre,
     dataType: "json",
     error: function (xhr, status, errorThrown) {
-      $('#ervalideringok').text('Adressen er ikke gyldig') ;
+      $('#ervalideringok').text('Der opstod en fejl under valideringen') ;
     } ,
-    success: function (adresse) {
-      $('#ervalideringok').text('Adressen er gyldig') ;
+    success: function (adresser) {
+      if(adresser.length > 1) {
+        $('#ervalideringok').text('Adressen er ugyldig, der er mere end én adresse der matcher det indtastede.') ;
+      }
+      else if(adresser.length === 0) {
+        $('#ervalideringok').text('Adressen er ugyldig, der er ingen adresser der matcher det indtastede.') ;
+      }
+      else {
+        $('#ervalideringok').text('Adressen er gyldig') ;
+      }
     }
   });
 }
