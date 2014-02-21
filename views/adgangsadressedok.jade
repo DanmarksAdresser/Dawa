@@ -14,84 +14,29 @@ block content
             li(data-toggle='collapse', data-target='#adresse').nav-header Adgangsadresse API
             ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adgangsdressesøgning</a>
-              li <a href='#autocomplete'>Autocomplete af adgangsadresser</a>
-              li <a href='#adressevalidering'>Adgangsadressevalidering</a>
               li <a href='#adresseopslag'>Adgangsadresseopslag</a>
-              li <a href='#reversegeokodning'>Reverse geokodning</a>
+              li <a href='#reversegeokodning'>Reverse geokodning (stadig<br>under udvikling)</a>
+              li <a href='#adressedata'>Beskrivelse af adgangsadressedata</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header Adgangsadressehændelser
             ul#haendelser.nav.nav-list
-            li(data-toggle='collapse', data-target='#adressedatanav').nav-header Adgangsadressedata
             ul#adressedatanav.nav.nav-list
-              li <a href='#adressedata'>Beskrivelse</a>
+
 
         div.span9
           section
             div.page-header
-              h3.anchor-header#adressesoegning Adgangsadressesøgning
+            h3.anchor-header#adressesoegning Adgangsadressesøgning
             p Søg efter adresser. Returnerer de adgangsadresser som opfylder kriteriet.
             +parameterDocQuery(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
 
             div.page-header
-              h3.anchor-header#autocomplete Autocomplete af adgangsadresser
-            p Søgning er rettet mod autocomplete i adresseindtastning. Indtaster første del adressen, hvor servicen returnerer de adresser som starter med denne del. Det anvendte skema er: {vejnavn} {husnr}, {postnummer postdistrikt}
-            pre GET /adresser/autocomplete
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td q
-                  td Del af adresse
-
-            h4 Eksempler
-            p Find de adresser som matcher <em>Lilledal 1</em>
-            pre
-              a(href='#{url}/adgangsadresser/autocomplete?q=Lilledal 1') #{url}/adgangsadresser/autocomplete?q=Lilledal 1
-
-
-            div.page-header
-              h3.anchor-header#adressevalidering Adgangsadressevalidering
-            p Valider adresse. Hvis adgangsadressen er valid returneres adressen eller returneres http status 404.
-            pre GET /adresser/valid
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td vejnavn
-                  td Vejnavn. Der kan anvendes wildcard-søgning. F.eks. vejnavn=rød* returnerer alle de adgangsadreser, hvis vejnavn starter på <em>rød</em>
-                tr
-                  td husnr
-                  td Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.
-                tr
-                  td bynavn
-                  td Suplerende bynavn.
-                tr
-                  td postnr
-                  td
-
-            h4 Eksempler
-            p Valider adressen: Hulgårdsvej 67, 2400 København NV
-            pre
-              a(href='#{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400') #{url}/adgangsadresser/valid?vejnavn=Hulgårdsvej&husnr=67&postnr=2400
-            p Adressen, som udpeger et rækkehus, er gyldig
-            p Valider adressen: Lilledal 23, 3450 Allerød
-            pre
-              a(href='#{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450') #{url}/adgangsadresser/valid?vejnavn=Lilledal&husnr=23&postnr=3450
-            p Adressen er  valid. Den udpeger en opgang (adgangsadresse) med flere adresser. Se eventuelt under validering af adgangsadresser.
-
-
-            div.page-header
-              h3.anchor-header#adresseopslag Adresseopslag
+            h3.anchor-header#adresseopslag Adresseopslag
             p Modtag adresse med id.
             +parameterDocGet(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
 
             div.page-header
-              h3.anchor-header#reversegeokodning Reverse geokodning
+            h3.anchor-header#reversegeokodning Reverse geokodning (stadig under udvikling)
+            p <b>Reversegeokodning er stadig under udvikling, og kan p.t. ikke benyttes!</b>
             p Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.
             pre GET /adgangsadresser/{x},{y}
             h4 Parametre
@@ -115,11 +60,12 @@ block content
               a(href='#{url}/adgangsadresser/55.6832383751223,12.5851471984198') #{url}/adgangsadresser/55.6832383751223,12.5851471984198
 
             div.page-header
-              h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
+            h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
             p Ovenstående Web API udstiller adgangsadresser. En <em>adgangsadresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal eller en bygning efter reglerne i adressebekendtgørelsen.
-             p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
+            p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
             p Web API'et udstiller for hver adgangsadresse følgende informationer:
             +documentSchema(apiSpec.adgangsadresse.model.schema)
+
 block append scripts
   script.
     $('#topbar li').removeClass('active');
