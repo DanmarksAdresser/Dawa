@@ -288,39 +288,29 @@ function inverseGeocoding()
 }
 
 function valider(pnr,vej,husnr,etage,doer) {
-  var parametre= {};
-  var antal= 0;
+  var parametre= {per_side: 2};
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
   match = reg.exec(ptext);
   if (match !== null) {
     parametre.postnr= match[1];
-    antal++;
   }
   var vtext = $(vej).val();
   if (vtext!==null && vtext.length > 0) {
     parametre.vejnavn= vtext;
-    antal++;
   };
   var htext = $(husnr).val();
   if (htext!==null && htext.length > 0) {
     parametre.husnr= htext;
-    antal++;
   };
   var etext = $(etage).val();
   if (etext!==null && etext.length > 0) {
     parametre.etage= etext;
-    antal++;
   };
   var dtext = $(doer).val();
   if (dtext!==null && dtext.length > 0) {
     parametre.dør= dtext;
-    antal++;
   };
-  if (antal < 3) {
-    $('#ervalideringok').text('Adressen er ikke gyldig') ;
-    return;
-  }
   $.ajax({
     cache: true,
     url:'/adresser',
