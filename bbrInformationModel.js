@@ -18,7 +18,7 @@ var BBRAdresse =
       // Why upper and lowel bounds on floors?  They seem rather rescrictive.
 
       { name: 'dør',
-	type: 'String'}, // regexp: not really sure? Quote: 'tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.
+	type: 'String'}, // regexp: not really sure? Quote: 'tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.
 
       { name: 'AAD id',
 	type: 'UUID-String'},

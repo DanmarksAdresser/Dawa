@@ -11,7 +11,7 @@ var vejnavneDoc = {
     },
     {
       name: 'navn',
-      doc: "Vejnavn. Der skelnes mellem store og små bokstaver.",
+      doc: "Vejnavn. Der skelnes mellem store og små bogstaver.",
       examples: ['Margrethepladsen', 'Viborgvej']
     },
     {
@@ -68,7 +68,7 @@ var vejstykkerDoc = {
     },
     {
       name: 'navn',
-      doc: "Vejnavn. Der skelnes mellem store og små bokstaver. Der kan anvendes wildcard-søgning.",
+      doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
       examples: ['Margrethepladsen', 'Viborgvej']
     },
     {
@@ -205,7 +205,7 @@ var kommuneDoc = {
     ],
     get: [
       {
-        description: 'Hent København kommune (kode 101)',
+        description: 'Hent Københavns kommune (kode 101)',
         path: ['101']
       }]
 
@@ -219,11 +219,11 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'vejnavn',
-    doc: 'Vejnavn. Der skelnes mellem store og små bokstaver.'
+    doc: 'Vejnavn. Der skelnes mellem store og små bogstaver.'
   },
   {
     name: 'husnr',
-    doc: 'Husnummer. Max 4 cifre eventuelt med et efterfølgende bokstav.'
+    doc: 'Husnummer. Max 4 cifre eventuelt med et efterfølgende bogstav.'
   },
   {
     name: 'supplerendebynavn',
@@ -251,8 +251,8 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'polygon',
-    doc: 'Find de adresse, som ligger indenfor den angivne polygon. ' +
-      'Polygonen specificeres som et array af koordinater på samme måde som' +
+    doc: 'Find de adresser, som ligger indenfor det angivne polygon. ' +
+      'Polygonet specificeres som et array af koordinater på samme måde som' +
       ' koordinaterne specificeres i GeoJSON\'s polygon.' +
       ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.' +
       ' polygon=[[10.1351967049683,55.5670601123672],' +
@@ -323,7 +323,7 @@ var adresseDoc = {
     },
     {
       name: 'id',
-      doc: 'adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
+      doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
     },
     {
       name: 'adgangsadresseid',
@@ -335,7 +335,7 @@ var adresseDoc = {
     },
     {
       name: 'dør',
-      doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.'
+      doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'
     }
   ].concat(parametersForBothAdresseAndAdgangsAdresse),
   examples: {

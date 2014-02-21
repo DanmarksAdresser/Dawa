@@ -156,7 +156,7 @@ var definitions = {
         type: 'string'
       },
       kode: {
-        description: 'Identifikation af det vejstykket. ' +
+        description: 'Identifikation af vejstykket. ' +
           'Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. ' +
           'Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.',
         '$ref': '#/definitions/Kode4'
@@ -193,7 +193,7 @@ var adgangsAdresseSchema = globalSchemaObject({
       $ref: '#/definitions/VejstykkeKodeOgNavn'
     },
     'husnr'  : {
-      description: 'Husnummer, som der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +
+      description: 'Husnummer der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +
         ' Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A..Z, og fastsættes i stigende orden, ' +
         'normalt med lige og ulige numre på hver side af vejen. Eksempel: "11", "12A", "187B".',
       type: 'string',
@@ -421,7 +421,7 @@ var adgangsAdresseSchema = globalSchemaObject({
     }),
     'afstemningsområde': schemaObject({
       nullable: true,
-      description: 'Afstemningsområde som adressen er beliggende i.',
+      description: 'Afstemningsområdet som adressen er beliggende i.',
       properties: {
         nr: {
           description: 'Identifikation af afstemningsområdet',
@@ -464,7 +464,7 @@ var adresseSchema = globalSchemaObject({
     },
     'dør':     {
       description: 'Dørbetnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
-        'tal fra 1 til 9999, små og store bokstaver samt tegnene / og -.',
+        'tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
       type: nullableType('string')
     },
     'adressebetegnelse': {
@@ -488,7 +488,7 @@ var postnummerSchema =  globalSchemaObject({
       '$ref': '#/definitions/Href'
     },
     'nr'      : {
-      description: 'Unik identifikation af det postnummer som postnummern er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
+      description: 'Unik identifikation af det postnummer som postnummeret er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
       '$ref': '#/definitions/Postnr'
     },
     'navn'    : {
