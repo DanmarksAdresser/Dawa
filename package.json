@@ -19,7 +19,10 @@
     "sql": "~0.34.0",
     "async": "~0.2.10",
     "event-stream": "~3.1.0",
-    "csv": "~0.3.7"
+    "csv": "~0.3.7",
+    "winston": "~0.7.2",
+    "express-winston": "~0.2.4",
+    "winston-loggly": "~1.0.1"
   },
   "devDependencies": {
     "jasmine-node": "1.13.1",
