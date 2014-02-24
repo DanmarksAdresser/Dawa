@@ -20,6 +20,7 @@ block content
             ul#kommune.nav.nav-list
               li <a href='#kommunesoegning'>Kommunesøgning</a>
               li <a href='#kommuneopslag'>Kommuneopslag</a>
+              li <a href='#kommuneautocomplete'>Kommune autocomplete</a>
               li <a href='#kommunedata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#sogn').nav-header Sogn API
             ul#sogn.nav.nav-list
@@ -112,10 +113,19 @@ block content
               h3.anchor-header#kommunesoegning Kommunesøgning
             p Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.
             +parameterDocQuery(apiSpec.kommune, parameterDoc.kommune)
+
             div.page-header
               h3.anchor-header#kommuneopslag Kommuneopslag
             p Modtag kommune.
             +parameterDocGet(apiSpec.kommune, parameterDoc.kommune)
+
+            div.page-header
+              h3.anchor-header#kommuneautocomplete Kommune autocomplete
+            p Autocomplete på kommuner. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+            pre GET #{url}/kommuner/autocomplete
+            p Autocomplete for kommuner returnerer følgende JSON struktur:
+            +documentSchema(apiSpec.kommune.model.autocompleteSchema)
+
             div.page-header
               h3.anchor-header#kommunedata Beskrivelse af kommunedata
             p Web API'et udstiller for hver kommune følgende informationer:
