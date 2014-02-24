@@ -324,7 +324,7 @@ var autocompleteSchemas = {
   adresse: globalSchemaObject({
     properties: {
       tekst: {
-        description: 'Adgangsadressen på formen {vej} {husnr}, {etage}. {dør}, {supplerende bynavn}, {postnr} {postnrnavn}',
+        description: 'Adressen på formen {vej} {husnr}, {etage}. {dør}, {supplerende bynavn}, {postnr} {postnrnavn}',
         type: 'string'
       },
       adresse: {
