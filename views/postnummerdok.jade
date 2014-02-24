@@ -33,10 +33,7 @@ block content
 
             div.page-header
               h3.anchor-header#postnummerautocomplete Postnummer autocomplete
-            p Autocomplete på postnumre. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
-            pre GET #{url}/postnumre/autocomplete
-            p Autocomplete for postnumre returnerer følgende JSON struktur:
-            +documentSchema(apiSpec.postnummer.model.autocompleteSchema)
+            +autocompleteDoc(apiSpec.postnummer.model.autocompleteSchema, apiSpec.postnummer.model.plural, parameterDoc.postnummer.autocompleteExamples)
 
             div.page-header
             h3.anchor-header#postnummerdata Beskrivelse af postnummerdata

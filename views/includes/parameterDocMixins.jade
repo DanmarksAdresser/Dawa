@@ -15,8 +15,26 @@ mixin parameterDocQuery(apiSpec, docSpec)
     - each example in docSpec.examples.query
         p!= example.description
         pre
-            a(href=docUtil.computeQueryUrl(url, apiSpec, example.query))
-              = docUtil.computeQueryUrl(url, apiSpec, example.query)
+            a(href=docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query))
+              = docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query)
+
+mixin autocompleteDoc(autocompleteSchema, plural, examples)
+    p Autocomplete på #{plural}. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+    pre GET #{url}/#{plural}/autocomplete
+
+    div.page-header
+    h4 Eksempler
+    - each example in examples
+        p!= example.description
+        pre
+            a(href=docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query))
+              = docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query)
+
+    div.page-header
+    h4 Autocomplete return data
+    p Autocomplete for #{plural} returnerer følgende JSON struktur:
+    +documentSchema(autocompleteSchema)
+
 
 mixin parameterDocGet(apiSpec, docSpec)
     pre= 'GET ' + docUtil.computeGetUrlTemplate(url, apiSpec)
@@ -35,8 +53,8 @@ mixin parameterDocGet(apiSpec, docSpec)
     - each example in docSpec.examples.get
       p!= example.description
       pre
-        a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
-          = docUtil.computeGetUrl(url, apiSpec, example.path)
+        a(href=docUtil.computeGetUrl(url, apiSpec.model.plural, example.path))
+          = docUtil.computeGetUrl(url, apiSpec.model.plural, example.path)
 
 mixin documentProperties(props, indent)
   - each property in props
