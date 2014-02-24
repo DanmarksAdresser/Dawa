@@ -42,12 +42,10 @@ block content
             h3.anchor-header#vejnavneopslag Vejnavneopslag
             p Opslag på enkelt vejnavn
             +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+
             div.page-header
-              h3.anchor-header#vejnavneautocomplete Vejnavne autocomplete
-            p Autocomplete på vejnavne. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
-            pre GET #{url}/vejnavne/autocomplete
-            p Autocomplete for vejnavne returnerer følgende JSON struktur:
-            +documentSchema(apiSpec.vejnavn.model.autocompleteSchema)
+            h3.anchor-header#vejnavneautocomplete Vejnavne autocomplete
+            +autocompleteDoc(apiSpec.vejnavn.model.autocompleteSchema, apiSpec.vejnavn.model.plural, parameterDoc.vejnavn.autocompleteExamples)
 
             div.page-header
             h3.anchor-header#vejnavnedata Beskrivelse af vejnavnedata

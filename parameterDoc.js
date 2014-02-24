@@ -54,7 +54,13 @@ var vejnavneDoc = {
     get: [{ description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
             path: ['Gammel Viborgvej']
           }]
-  }
+  },
+
+  autocompleteExamples: [
+    {description: 'Find alle vejnavne som indeholder <em>jolle</em>',
+     query: [{name:'q', value:'jolle'}]},
+    {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
+     query: [{name:'q', value:'strand '}]}],
 };
 
 var vejstykkerDoc = {
