@@ -964,7 +964,7 @@ exports.formatParameterSpec = [
   {
     name: 'format',
     schema: {
-      "enum": ['csv', 'json', 'jsonp']
+      "enum": ['csv', 'json']
     }
   },
   {

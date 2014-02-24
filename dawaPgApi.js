@@ -91,9 +91,6 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
     }
 
     var formatParams = formatParamsParseResult.params;
-    if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
-      return sendJsonCallbackParameterMissingError(res);
-    }
 
     // Getting the data
     withPsqlClient(res, function (client, done) {
@@ -200,10 +197,11 @@ function publishQuery(app, spec) {
 function sendSingleResultToHttpResponse(result, res, spec, options, done) {
   done = done ? done : function() {};
   var format = options.formatParams.format;
+  var callback = options.formatParams.callback;
   if(format === 'csv') {
     return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, done);
   }
-  else if(format === 'jsonp') {
+  else if(callback) {
     setJsonpContentHeader(res);
     res.write(options.formatParams.callback + "(");
     res.write(jsonStringifyPretty(spec.mappers.json(result, { baseUrl: options.baseUrl })));
@@ -227,13 +225,14 @@ function sendSingleResultToHttpResponse(result, res, spec, options, done) {
  */
 function streamHttpResponse(stream, res, spec, options, done) {
   var format = options.formatParams.format;
+  var callback = options.formatParams.callback;
   if(format === 'csv') {
     return streamCsvToHttpResponse(stream, spec, res, done);
   }
 
   var objectStream = dbapi.transformToObjects(stream, spec, 'json', { baseUrl: options.baseUrl });
-  if(format === 'jsonp') {
-    return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
+  if(callback) {
+    return streamJsonpToHttpResponse(objectStream, callback, res, done);
   }
   else {
     return streamJsonToHttpResponse(objectStream, res, done);
@@ -250,12 +249,13 @@ function streamHttpResponse(stream, res, spec, options, done) {
  */
 function streamAutocompleteResponse(stream, res, spec, options, done) {
   var format = options.formatParams.format;
+  var callback = options.formatParams.callback;
   if(format === 'csv') {
     // TODO autocomplete CSV responses?
     return sendInternalServerError(res, "CSV for autocomplete not supported");
   }
   var objectStream = dbapi.transformToObjects(stream, spec, 'autocomplete', {baseUrl: options.baseUrl } );
-  if(format === 'jsonp') {
+  if(callback) {
     return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
   }
   else {
@@ -334,11 +334,6 @@ function publishAutocomplete(app, spec) {
     var pagingParams = parameterParseResult.paging;
     var autocompleteParams = parameterParseResult.autocomplete;
 
-    // verify that the callback parameter is specified for jsonp format
-    if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
-      return sendJsonCallbackParameterMissingError(res);
-    }
-
     var params = {
       specified: specifiedParams,
       autocomplete: autocompleteParams
@@ -389,20 +384,22 @@ function jsonStringifyPretty(object){
 }
 
 util.inherits(JsonStringifyStream, Transform);
-function JsonStringifyStream(replacer, space) {
+function JsonStringifyStream(replacer, space, beginText, endText) {
   Transform.call(this, {
     objectMode: true
   });
   this.replacer = replacer;
   this.space = space;
   this.headerWritten = false;
+  this.beginText = beginText ? beginText : '[\n';
+  this.endText = endText ? endText : '\n]';
 }
 
 JsonStringifyStream.prototype._flush = function(cb) {
   if(!this.headerWritten) {
-    this.push('[\n');
+    this.push(this.beginText);
   }
-  this.push('\n]');
+  this.push(this.endText);
   cb();
 };
 
@@ -410,7 +407,7 @@ JsonStringifyStream.prototype._transform = function(chunk, encoding, cb) {
   var json = JSON.stringify(chunk, this.replacer, this.space);
   if(!this.headerWritten) {
     this.headerWritten = true;
-    this.push('[\n');
+    this.push(this.beginText);
   }
   else {
     this.push(',\n');
@@ -426,17 +423,16 @@ function transformJsonToText(objectStream) {
   );
 }
 
-function streamJsonpToHttpResponse(stream, callbackName, res, done) {
-  setJsonpContentHeader(res);
-  res.write(callbackName + "(");
-  streamToHttpResponse(transformJsonToText(stream), res, { end: false }, function(err) {
-    if(err) {
-      return done(err);
-    }
-    res.end(");");
-    done();
-  });
+function transformJsonToJsonpText(objectStream, callbackName) {
+  return eventStream.pipeline(
+    objectStream,
+    new JsonStringifyStream(undefined, 2, callbackName +'([\n', '\n]);')
+  );
+}
 
+function streamJsonpToHttpResponse(stream, callbackName, res, cb) {
+  setJsonpContentHeader(res);
+ streamToHttpResponse(transformJsonToJsonpText(stream, callbackName), res, {}, cb);
 }
 
 function setJsonContentHeader(res) {

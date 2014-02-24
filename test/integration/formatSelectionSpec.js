@@ -69,8 +69,8 @@ describe('Format selection', function () {
     });
   });
 
-  it("If format=jsonp is passed as query parameter, JSONP should be returned", function(done) {
-    request.get("http://localhost:3000/adresser?per_side=10&format=jsonp&callback=jsonpCallback", function(error, response, body) {
+  it("If callback parameter is specified, JSONP should be returned", function(done) {
+    request.get("http://localhost:3000/adresser?per_side=10&callback=jsonpCallback", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
       eval(body); // jshint ignore:line
       var result = jsonpResults.pop();
@@ -81,12 +81,11 @@ describe('Format selection', function () {
     });
   });
 
-  it("If format=jsonp is passed as query parameter, JSONP should be returned (single result mode)", function(done) {
+  it("If callback parameter is specified, JSONP should be returned (single result mode)", function(done) {
     var id = "0a3f50a3-8192-32b8-e044-0003ba298018";
-    request.get("http://localhost:3000/adresser/" + id + "?format=jsonp&callback=jsonpCallback", function(error, response, body) {
+    request.get("http://localhost:3000/adresser/" + id + "?callback=jsonpCallback", function(error, response, body) {
       expect(response.headers['content-type']).toBe("application/javascript; charset=UTF-8");
       expect(response.statusCode).toBe(200);
-      console.log(body);
       eval(body); // jshint ignore:line
       var result = jsonpResults.pop();
       expect(result).toBeDefined();
@@ -104,15 +103,4 @@ describe('Format selection', function () {
       done();
     });
   });
-
-  it("If format is jsonp, and the callback parameter is missing, a nice JSON error mesage is returned", function(done) {
-    request.get("http://localhost:3000/adresser?per_side=10&format=jsonp", function(error, response, body) {
-      expect(response.statusCode).toBe(400);
-      expect(response.headers['content-type']).toBe("application/problem+json; charset=UTF-8");
-      var errorMessage = JSON.parse(body);
-      expect(errorMessage.type).toEqual('JsonCallbackParameterMissingError');
-      done();
-    });
-  });
-
 });
