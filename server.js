@@ -13,6 +13,7 @@ var docUtil        = require('./docUtil');
 var app = express();
 
 setupLogging(app);
+
 app.use(express.compress());
 app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
 app.set('views', __dirname + '/views');
@@ -22,41 +23,17 @@ app.get('/', function (req, res) {
   res.render('home.jade', {url: req.headers.host});
 });
 
-app.get('/generelt', function (req, res) {
-  res.render('generelt.jade', jadeDocumentationParams(req));
-});
+setupJadePage('/generelt'             , 'generelt.jade');
+setupJadePage('/adressedok'           , 'adressedok.jade');
+setupJadePage('/adgangsadressedok'    , 'adgangsadressedok.jade');
+setupJadePage('/vejedok'              , 'vejedok.jade');
+setupJadePage('/supplerendebynavndok' , 'supplerendebynavndok.jade');
+setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
+setupJadePage('/listerdok'            , 'listerdok.jade');
+setupJadePage('/om'                   , 'om.jade');
 
-app.get('/adressedok', function (req, res) {
-  res.render('adressedok.jade', jadeDocumentationParams(req));
-});
-
-app.get('/adgangsadressedok', function (req, res) {
-  res.render('adgangsadressedok.jade', jadeDocumentationParams(req));
-});
-
-
-app.get('/vejedok', function (req, res) {
-  res.render('vejedok.jade', jadeDocumentationParams(req));
-});
-
-app.get('/supplerendebynavndok', function (req, res) {
-  res.render('supplerendebynavndok.jade', jadeDocumentationParams(req));
-});
-
-app.get('/postnummerdok', function (req, res) {
-  res.render('postnummerdok.jade', jadeDocumentationParams(req));
-});
-
-app.get('/listerdok', function (req, res) {
-  res.render('listerdok.jade', jadeDocumentationParams(req));
-});
-
-app.get('/om', function (req, res) {
-  res.render('om.jade');
-});
 //(\/[^\.])
 app.get(/html$/i, function (req, res) {
-//  console.log('html url: '+req.originalUrl.replace('.html','.json') + ', ' + decodeURIComponent(req.originalUrl.replace('.html','.json')));
   res.render('kort.jade', {url: decodeURIComponent(req.originalUrl.replace('.html','.json'))});
 });
 
@@ -115,7 +92,17 @@ function setupLogging(app){
   app.use(expressWinston.logger({transports: expressTransports}));
 }
 
+function setupJadePage(path, page, optionsFun){
+  app.get(path, function (req, res) {
+    res.render(page, jadeDocumentationParams(req));
+  });
+}
+
 function jadeDocumentationParams(req) {
   var protocol = req.connection.encrypted ? 'https' : 'http';
-  return {url: protocol + '://' + req.headers.host, apiSpec: apiSpec, parameterDoc: parameterDoc, apiSpecUtil: apiSpecUtil, docUtil: docUtil};
+  return {url: protocol + '://' + req.headers.host,
+          apiSpec: apiSpec,
+          parameterDoc: parameterDoc,
+          apiSpecUtil: apiSpecUtil,
+          docUtil: docUtil};
 }
