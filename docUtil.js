@@ -24,9 +24,20 @@ exports.computeQueryUrl = function (baseUrl, plural, query) {
   }
   return url;
 };
-exports.computeGetUrl = function (baseUrl, plural, path) {
-  var url = baseUrl + '/' + plural + '/';
-  url += _.map(path, encodeURIComponent).join('/');
+exports.computeGetUrl = function (baseUrl, spec, path) {
+  var url = baseUrl + '/' + spec.model.plural + '/';
+  var key = apiSpecUtil.getKeyForSelect(spec);
+  url += _.chain(_.zip(key, path)).map(function(pair) {
+    var fieldName = pair[0];
+    var fieldValue = pair[1];
+    var field = spec.fieldMap[fieldName];
+    if(field.formatter) {
+      return field.formatter(fieldValue);
+    }
+    else {
+      return fieldValue;
+    }
+  }).map(encodeURIComponent).value().join('/');
   return url;
 };
 

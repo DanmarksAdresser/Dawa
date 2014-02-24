@@ -53,8 +53,8 @@ mixin parameterDocGet(apiSpec, docSpec)
     - each example in docSpec.examples.get
       p!= example.description
       pre
-        a(href=docUtil.computeGetUrl(url, apiSpec.model.plural, example.path))
-          = docUtil.computeGetUrl(url, apiSpec.model.plural, example.path)
+        a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
+          = docUtil.computeGetUrl(url, apiSpec, example.path)
 
 mixin documentProperties(props, indent)
   - each property in props

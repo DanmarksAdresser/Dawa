@@ -21,6 +21,10 @@ function corsMiddleware(req, res, next) {
   next();
 }
 
+function baseUrl(req) {
+  var protocol = req.connection.encrypted ? 'https' : 'http';
+  return protocol + '://' + req.headers.host;
+}
 
 /******************************************************************************/
 /*** Routes *******************************************************************/
@@ -104,7 +108,8 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
 //              .then(function (report) {
 //                // The good case.  The rest is error handling!
           sendSingleResultToHttpResponse(rows[0], res, spec, {
-            formatParams: formatParams
+            formatParams: formatParams,
+            baseUrl: baseUrl(req)
           });
 //              })
 //              .catch(function (err) {
@@ -184,7 +189,8 @@ function publishQuery(app, spec) {
           throw err;
         }
         streamHttpResponse(stream, res, spec, {
-          formatParams: formatParams
+          formatParams: formatParams,
+          baseUrl: baseUrl(req)
         }, done);
       });
     });
@@ -200,13 +206,13 @@ function sendSingleResultToHttpResponse(result, res, spec, options, done) {
   else if(format === 'jsonp') {
     setJsonpContentHeader(res);
     res.write(options.formatParams.callback + "(");
-    res.write(jsonStringifyPretty(spec.mappers.json(result)));
+    res.write(jsonStringifyPretty(spec.mappers.json(result, { baseUrl: options.baseUrl })));
     res.end(");");
     done();
   }
   else {
     setJsonContentHeader(res);
-    res.end(jsonStringifyPretty(spec.mappers.json(result)));
+    res.end(jsonStringifyPretty(spec.mappers.json(result, { baseUrl: options.baseUrl })));
     done();
   }
 }
@@ -225,7 +231,7 @@ function streamHttpResponse(stream, res, spec, options, done) {
     return streamCsvToHttpResponse(stream, spec, res, done);
   }
 
-  var objectStream = dbapi.transformToObjects(stream, spec, 'json');
+  var objectStream = dbapi.transformToObjects(stream, spec, 'json', { baseUrl: options.baseUrl });
   if(format === 'jsonp') {
     return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
   }
@@ -248,7 +254,7 @@ function streamAutocompleteResponse(stream, res, spec, options, done) {
     // TODO autocomplete CSV responses?
     return sendInternalServerError(res, "CSV for autocomplete not supported");
   }
-  var objectStream = dbapi.transformToObjects(stream, spec, 'autocomplete');
+  var objectStream = dbapi.transformToObjects(stream, spec, 'autocomplete', {baseUrl: options.baseUrl } );
   if(format === 'jsonp') {
     return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
   }
@@ -297,7 +303,7 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
     }),'name')
   });
   var csvStream = eventStream.pipeline(
-    dbapi.transformToObjects(rowStream, spec, 'csv'),
+    dbapi.transformToObjects(rowStream, spec, 'csv', {}),
     csvTransformer
   );
   streamToHttpResponse(csvStream, res, {}, cb);
@@ -349,7 +355,8 @@ function publishAutocomplete(app, spec) {
           throw err;
         }
         streamAutocompleteResponse(stream, res, spec, {
-          formatParams: formatParams
+          formatParams: formatParams,
+          baseUrl: baseUrl(req)
         }, done);
       });
     });

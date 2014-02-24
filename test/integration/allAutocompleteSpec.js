@@ -36,7 +36,7 @@ describe('Alle suggestable specs skal kunne autocomplete', function() {
               expect(err).toBeFalsy();
               expect(rows.length).toBeGreaterThan(0);
               rows.forEach(function(row) {
-                var json = spec.mappers.autocomplete(row);
+                var json = spec.mappers.autocomplete(row, {baseUrl: "BASE_URL"});
                 expect(schemaValidationUtil.isSchemaValid(json, spec.model.autocompleteSchema)).toBe(true);
               });
               specDone();

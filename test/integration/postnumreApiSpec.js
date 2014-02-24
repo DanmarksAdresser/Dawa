@@ -3,8 +3,8 @@
 var request = require("request");
 //var _       = require("underscore");
 
-var kommuner = [ { href : 'http://dawa.aws.dk/kommuner/253', kode : "0253", navn : 'Greve' },
-                 { href : 'http://dawa.aws.dk/kommuner/269', kode : "0269", navn : 'Solrød' } ];
+var kommuner = [ { href : 'http://localhost:3000/kommuner/253', kode : "0253", navn : 'Greve' },
+                 { href : 'http://localhost:3000/kommuner/269', kode : "0269", navn : 'Solrød' } ];
 
 describe("PostnumreApi", function() {
   it("It is possible to get a single postnummer", function(done) {

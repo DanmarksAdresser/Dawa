@@ -303,7 +303,7 @@ describe('Alle specificerede parametre skal virke', function() {
                 expect(err).toBeFalsy();
                 expect(rows.length).toBeGreaterThan(0);
                 rows.forEach(function(row) {
-                  var json = spec.mappers.json(row);
+                  var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
                   var verifyResult = verify(json, sampleValue);
                   expect(verifyResult).toBe(true);
                   if(!verifyResult) {

@@ -199,7 +199,15 @@ var transformToCsvObjects = function(rowStream, spec) {
         if(field.selectable && field.selectable === false) {
           return memo;
         }
-        memo[field.name] = row[apiSpecUtil.getColumnNameForSelect(spec, field.name)];
+        var dbValue = row[apiSpecUtil.getColumnNameForSelect(spec, field.name)];
+        var formattedValue;
+        if(field.formatter) {
+          formattedValue = field.formatter(dbValue);
+        }
+        else {
+          formattedValue = dbValue;
+        }
+        memo[field.name] = formattedValue;
         return memo;
       }, {});
     })
@@ -245,7 +253,7 @@ exports.streamingQuery = function(client, spec, params, paging, cb) {
  * Takes a stream of database rows and returns an object stream
  * with the specified mapping ('csv', 'json' or 'autocomplete')
  */
-exports.transformToObjects = function(stream, spec, format) {
+exports.transformToObjects = function(stream, spec, format, options) {
   if(format === 'csv') {
     return transformToCsvObjects(stream, spec);
   }
@@ -253,6 +261,6 @@ exports.transformToObjects = function(stream, spec, format) {
     throw "No mapper for " + format;
   }
   return eventStream.pipeline(stream,
-    eventStream.mapSync(spec.mappers[format])
+    eventStream.mapSync(function(obj) { return spec.mappers[format](obj, options); })
   );
 };

@@ -95,7 +95,7 @@ describe('Validering af JSON-formatteret output', function() {
       dbapi.withTransaction(function(err, client, transactionDone) {
         dbapi.query(client, spec, {}, {}, function(err, rows) {
           rows.forEach(function(row) {
-            var json = spec.mappers.json(row);
+            var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
             expect(schemaValidationUtil.isSchemaValid(json, schema)).toBe(true);
           });
           transactionDone();
@@ -109,7 +109,7 @@ describe('Validering af JSON-formatteret output', function() {
       dbapi.withTransaction(function(err, client, transactionDone) {
         dbapi.query(client, spec, {}, {}, function(err, rows) {
           rows.forEach(function(row) {
-            var json = spec.mappers.json(row);
+            var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
             recordVisitedValues(json, schema, valuesSeen);
           });
           transactionDone();
