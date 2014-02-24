@@ -291,7 +291,9 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
   var csvTransformer = csv();
   csvTransformer.to.options({
     header: true,
-    columns: _.pluck(fields,'name')
+    columns: _.pluck(_.filter(fields, function(field) {
+      return field.selectable === undefined || field.selectable;
+    }),'name')
   });
   var csvStream = eventStream.pipeline(
     dbapi.transformToObjects(rowStream, spec, 'csv'),
