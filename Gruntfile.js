@@ -53,18 +53,29 @@ module.exports = function (grunt) {
     var jasmine = require('jasmine-node');
     var done = this.async();
     var options = this.data;
+    var previousListeners = process.listeners('uncaughtException');
+    var globalExceptionCount = 0;
     options.onComplete = function(runner) {
       var exitCode;
-      if (runner.results().failedCount === 0) {
+      if (runner.results().failedCount === 0 && globalExceptionCount === 0) {
         exitCode = 0;
       } else {
         exitCode = 1;
 
         process.exit(exitCode);
       }
-
+      process.removeListener('uncaughtException', jasmineExceptionHandler);
+      previousListeners.forEach(function(listener) {
+        process.addListener('uncaughtException', listener);
+      });
       done();
     };
+    var jasmineExceptionHandler = function(e) {
+      console.error(e.stack || e);
+      globalExceptionCount++;
+    };
+    process.removeAllListeners('uncaughtException');
+    process.addListener('uncaughtException', jasmineExceptionHandler);
     jasmine.executeSpecsInFolder(options);
   });
 };
