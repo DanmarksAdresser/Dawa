@@ -415,7 +415,10 @@ var postnummerDoc = {
         path: ['2400']
       }]
 
-  }
+  },
+  autocompleteExamples: [
+    {description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
+     query: [{name:'q', value:'strand'}]}],
 };
 
 
