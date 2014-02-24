@@ -397,7 +397,13 @@ var adresseDoc = {
         path: ['0255b942-f3ac-4969-a963-d2c4ed9ab943']
       }
     ]
-  }
+  },
+  autocompleteExamples: [
+    {description: 'Find alle adresser som indeholder <em>rand</em>',
+     query: [{name:'q', value:'rand'}]},
+    {description: 'Find alle adresser som indeholder <em>randers</em> på etage <em>2</em>',
+     query: [{name:'q', value:'randers'},{name:'etage', value:'2'}]}
+  ],
 
 };
 
