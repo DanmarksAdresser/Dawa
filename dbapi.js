@@ -4,18 +4,18 @@ var apiSpecUtil = require('./apiSpecUtil');
 var util        = require('util');
 var eventStream = require('event-stream');
 var _           = require('underscore');
-var Readable = require('stream').Readable;
-var apiSpec = require('./apiSpec');
+var Readable    = require('stream').Readable;
+var apiSpec     = require('./apiSpec');
 var pg          = require('pg');
+var winston     = require('winston');
 
 /******************************************************************************/
 /*** Configuration ************************************************************/
 /******************************************************************************/
 
-//var connString = "postgres://pmm@dkadrdevdb.co6lm7u4jeil.eu-west-1.rds.amazonaws.com:5432/dkadr";
 // var connString = "postgres://ahj@localhost/dawa2";
 var connString = process.env.pgConnectionUrl;
-console.log("Loading dbapi with process.env.pgConnectionUrl="+connString);
+winston.info("Loading dbapi with process.env.pgConnectionUrl=%s",connString);
 
 function notNull(v) {
   return v !== undefined && v !== null;
@@ -140,7 +140,6 @@ CursorStream.prototype._doFetch = function(count) {
   self.queryInProgress = true;
   var fetchSize = Math.min(self.maxFetchSize,count);
   var fetch = 'FETCH ' + fetchSize +' FROM ' + self.cursorName;
-  //console.log("Fetching new set of rows: "+fetch);
   self.client.query(fetch, [], function(err, result) {
     self.queryInProgress = false;
     if(err) {
@@ -158,7 +157,7 @@ CursorStream.prototype._doFetch = function(count) {
       self.closed = true;
       self.push(null);
       var close = "CLOSE " + self.cursorName;
-      console.log("Closing cursor: "+close);
+      winston.info("Closing cursor: %j", close, {});
       self.client.query(close, [], function() {});
       return;
     }
@@ -168,7 +167,7 @@ CursorStream.prototype._doFetch = function(count) {
 CursorStream.prototype._read = function(count, cb) {
   var self = this;
   if(self.closed) {
-    console.log('attempted read from a closed source');
+    winston.info('attempted read from a closed source');
     return;
   }
   if(!self.queryInProgress) {
@@ -178,7 +177,7 @@ CursorStream.prototype._read = function(count, cb) {
 
 function streamingQueryUsingCursor(client, sql, params, cb) {
   sql = 'declare c1 NO SCROLL cursor for ' + sql;
-  console.log("executing sql " + JSON.stringify({sql: sql, params: params}));
+  winston.info('executing sql: %j with params: %j', sql, params, {});
   client.query(
     sql,
     params, function (err, result) {

@@ -14,6 +14,7 @@ var apiSpec          = require('./apiSpec');
 var apiSpecUtil      = require('./apiSpecUtil');
 var dbapi            = require('./dbapi');
 var Transform        = require('stream').Transform;
+var winston          = require('winston');
 
 function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -177,7 +178,7 @@ function publishQuery(app, spec) {
     withPsqlClient(res, function(client, done) {
       dbapi.streamingQuery(client, spec, params, toOffsetLimit(pagingParams), function(err, stream) {
         if(err) {
-          console.log("Error executing cursor query");
+          winston.error("Error executing cursor query: %j", err, {});
           done();
 
           throw err;
@@ -362,7 +363,7 @@ function withPsqlClient(res, callback) {
       // We do not have a connection to PostgreSQL.
       // Abort!
       sendInternalServerError(res, err);
-      console.log("Failed to obtain postgresql connection", err);
+      winston.error("Failed to obtain postgresql connection: %j", err, {});
       return done();
     }
     return callback(client, done);
@@ -440,11 +441,11 @@ function streamJsonToHttpResponse(stream, res, cb) {
 function streamToHttpResponse(stream, res, options, cb) {
 
   res.on('error', function (err) {
-    console.error("An error occured while streaming data to HTTP response", new Error(err));
+    winston.error("An error occured while streaming data to HTTP response: %j", new Error(err), {});
     cb(err);
   });
   res.on('close', function () {
-    console.log("Client closed connection");
+    winston.info("Client closed connection");
     cb("Client closed connection");
   });
   if(options.end === false) {
@@ -484,7 +485,7 @@ function sendInternalServerError(res, details){
   var msg = {type: "InternalServerError",
              title: "Something unexpected happened inside the server.",
              details: details};
-  console.log("Internal server error: "+util.inspect(msg, {depth: 20}));
+  winston.error("Internal server error: %j", msg, {});
   sendError(res, 500, msg);
 }
 

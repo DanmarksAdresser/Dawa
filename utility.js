@@ -1,5 +1,6 @@
 
-var util= require("util");
+var util    = require("util");
+var winston = require('winston');
 
 exports.getFormat= function (type) {
   if (type === undefined) type= 'json';
@@ -40,7 +41,7 @@ exports.wildcard= function(s) {
 }
 
 exports.spells= function (query) {
-  console.log('spells pre: '+query.toLocaleLowerCase().trim());
+  winston.info('spells pre: %s', query.toLocaleLowerCase().trim());
   if (query.indexOf('ø') !== -1) {
     query= query.replace(new RegExp('ø', 'g'),'(ø|oe)');
   }
@@ -70,6 +71,6 @@ exports.spells= function (query) {
   else {
     query= query.replace('allé','(alle|allé)');
   }
-  console.log('spells post: '+query.toLocaleLowerCase().trim());
+  winston.info('spells post: %s'+query.toLocaleLowerCase().trim());
   return new RegExp('^'+ query.toLocaleLowerCase().trim() ,'i');
 }
