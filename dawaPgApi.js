@@ -291,6 +291,7 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
   var csvTransformer = csv();
   csvTransformer.to.options({
     header: true,
+    lineBreaks: 'windows',
     columns: _.pluck(_.filter(fields, function(field) {
       return field.selectable === undefined || field.selectable;
     }),'name')
