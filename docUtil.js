@@ -15,8 +15,8 @@ exports.computeGetParameters = function (apiSpec, docSpec) {
   });
 };
 
-exports.computeQueryUrl = function (baseUrl, spec, query) {
-  var url = baseUrl + '/' + spec.model.plural;
+exports.computeQueryUrl = function (baseUrl, plural, query) {
+  var url = baseUrl + '/' + plural;
   if (!_.isEmpty(query)) {
     url += '?' + _.map(query,function (param) {
       return encodeURIComponent(param.name) + '=' + encodeURIComponent(param.value);
@@ -24,8 +24,8 @@ exports.computeQueryUrl = function (baseUrl, spec, query) {
   }
   return url;
 };
-exports.computeGetUrl = function (baseUrl, spec, path) {
-  var url = baseUrl + '/' + spec.model.plural + '/';
+exports.computeGetUrl = function (baseUrl, plural, path) {
+  var url = baseUrl + '/' + plural + '/';
   url += _.map(path, encodeURIComponent).join('/');
   return url;
 };
