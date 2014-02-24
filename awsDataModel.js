@@ -78,8 +78,8 @@ var definitions = {
     type: 'string'
   },
   'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
-  'Kode4': {type: 'integer', minimum: 0, maximum: 9999},
-  'UpTo8': {type: 'integer', minimum: 1, maximum: 99999999},
+  'Kode4': {type: 'string', pattern: '^[\\d]{4}$'},
+  'UpTo7': {type: 'integer', minimum: 1, maximum: 9999999},
   'DateTime': {
     type: 'string'
   },
@@ -110,9 +110,8 @@ var definitions = {
       docOrder: ['øst', 'nord']
     }),
   Postnr: {
-    type: 'integer',
-    minimum: 1000,
-    maximum: 9999
+    type: 'string',
+    pattern: "^[\\d]{4}$"
   },
   PostnummerRef: schemaObject({
     properties: {
@@ -394,8 +393,8 @@ var adgangsAdresseSchema = globalSchemaObject({
       properties: {
         'kode': {
           description: 'Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i. ' +
-            'Repræsenteret ved indtil 8 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
-          '$ref': '#/definitions/UpTo8'
+            'Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
+          '$ref': '#/definitions/UpTo7'
         },
         'navn': {
           description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
@@ -519,91 +518,91 @@ var adgangsAdresseSchema = globalSchemaObject({
       nullable: true,
       description: 'Sognet som adressen er beliggende i.',
       properties: {
-        nr: {
+        kode: {
           description: 'Identifikation af sognet',
-          type: 'integer'
+          $ref: '#/definitions/Kode4'
         },
         navn: {
           description: 'Sognets navn',
           type: 'string'
         }
       },
-      docOrder: ['nr', 'navn']
+      docOrder: ['kode', 'navn']
     }),
     'region': schemaObject({
       nullable: true,
       description: 'Regionen som adressen er beliggende i.',
       properties: {
-        nr: {
+        kode: {
           description: 'Identifikation af regionen',
-          type: 'integer'
+          $ref: '#/definitions/Kode4'
         },
         navn: {
           description: 'Regionens navn',
           type: 'string'
         }
       },
-      docOrder: ['nr', 'navn']
+      docOrder: ['kode', 'navn']
     }),
     'retskreds': schemaObject({
       nullable: true,
       description: 'Retskredsen som adressen er beliggende i.',
       properties: {
-        nr: {
+        kode: {
           description: 'Identifikation af retskredsen',
-          type: 'integer'
+          $ref: '#/definitions/Kode4'
         },
         navn: {
           description: 'Retskredsens navn',
           type: 'string'
         }
       },
-      docOrder: ['nr', 'navn']
+      docOrder: ['kode', 'navn']
     }),
     'politikreds': schemaObject({
       nullable: true,
       description: 'Politikredsen som adressen er beliggende i.',
       properties: {
-        nr: {
+        kode: {
           description: 'Identifikation af politikredsen',
-          type: 'integer'
+          $ref: '#/definitions/Kode4'
         },
         navn: {
           description: 'Politikredsens navn',
           type: 'string'
         }
       },
-      docOrder: ['nr', 'navn']
+      docOrder: ['kode', 'navn']
     }),
     'opstillingskreds': schemaObject({
       nullable: true,
       description: 'Opstillingskresen som adressen er beliggende i.',
       properties: {
-        nr: {
-          description: 'Identifikation af opstillingskredsen',
-          type: 'integer'
+        kode: {
+          description: 'Identifikation af opstillingskredsen.',
+          $ref: '#/definitions/Kode4'
         },
         navn: {
-          description: 'Opstillingskredsens navn',
+          description: 'Opstillingskredsens navn.',
           type: 'string'
         }
       },
-      docOrder: ['nr', 'navn']
+      docOrder: ['kode', 'navn']
     }),
     'afstemningsområde': schemaObject({
       nullable: true,
       description: 'Afstemningsområdet som adressen er beliggende i.',
       properties: {
-        nr: {
+        kode: {
           description: 'Identifikation af afstemningsområdet',
-          type: 'integer'
+          $ref: '#/definitions/Kode4'
         },
         navn: {
           description: 'Afstemningsområdet navn',
           type: 'string'
         }
       },
-      docOrder: ['nr', 'navn']
+      docOrder: ['kode', 'navn']
     })
   },
   docOrder: ['href','id', 'vejstykke', 'husnr','bygningsnavn', 'supplerendebynavn',
@@ -780,7 +779,7 @@ var kommuneSchema = globalSchemaObject({
     },
     'kode': {
       description: 'Fircifret kommunekode.',
-      type: 'integer',  minimum: 0, maximum: 9999
+      $ref: '#/definitions/Kode4'
     },
     'navn' : {
       description: 'Kommunens navn.',

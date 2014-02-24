@@ -5,19 +5,21 @@ var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
 
+var kode4String = require('../../apiSpecUtil').kode4String;
+
 var sampleParameters = {
   vejstykke: {
     kode: {
       values: ['522', '0522'],
       verifier: function(vejstykke, kode) {
-        return vejstykke.kode === parseInt(kode, 10);
+        return vejstykke.kode === kode4String(kode);
       }
     },
 
     kommunekode: {
       values: ['269', '0269'],
       verifier: function(vejstykke, kommunekode) {
-        return vejstykke.kommune.kode === parseInt(kommunekode, 10);
+        return vejstykke.kommune.kode === kode4String(kommunekode);
       }
     },
     navn: {
@@ -30,7 +32,7 @@ var sampleParameters = {
       values: ['6100'],
       verifier: function(vejstykke, nr) {
         return _.some(vejstykke.postnumre, function(postnummer) {
-          return postnummer.nr === parseInt(nr, 10);
+          return postnummer.nr === nr;
         });
       }
     }
@@ -46,7 +48,7 @@ var sampleParameters = {
       values: ['6100'],
       verifier: function(vejnavn, nr) {
         return _.some(vejnavn.postnumre, function(postnummer) {
-          return postnummer.nr === parseInt(nr, 10);
+          return postnummer.nr === nr;
         });
       }
     },
@@ -54,7 +56,7 @@ var sampleParameters = {
       values: ['461', '0461'],
       verifier: function(vejnavn, kommunekode) {
         return _.some(vejnavn.kommuner, function(kommune){
-          return kommune.kode === parseInt(kommunekode, 10);
+          return kommune.kode === kode4String(kommunekode);
         });
       }
     }
@@ -63,7 +65,7 @@ var sampleParameters = {
     nr: {
       values: ['6100'],
       verifier: function(postnummer, nr) {
-        return postnummer.nr === parseInt(nr, 10);
+        return postnummer.nr === nr;
       }
     },
     navn: {
@@ -76,7 +78,7 @@ var sampleParameters = {
       values: ['461', '0461'],
       verifier: function(postnummer, kommunekode) {
         return _.some(postnummer.kommuner, function(kommune) {
-          return kommune.kode === parseInt(kommunekode, 10);
+          return kommune.kode === kode4String(kommunekode);
         });
       }
     }
@@ -92,7 +94,7 @@ var sampleParameters = {
       values: ['461', '0461'],
       verifier: function(supplerendeBynavn, kommunekode) {
         return _.some(supplerendeBynavn.kommuner, function(kommune) {
-          return kommune.kode === parseInt(kommunekode, 10);
+          return kommune.kode === kode4String(kommunekode);
         });
       }
     },
@@ -100,7 +102,7 @@ var sampleParameters = {
       values: ['5200'],
       verifier: function(supplerendeBynavn, nr) {
         return _.some(supplerendeBynavn.postnumre, function(postnummer){
-          return postnummer.nr === parseInt(nr);
+          return postnummer.nr === nr;
         });
       }
     }
@@ -109,7 +111,7 @@ var sampleParameters = {
     kode: {
       values: ['461', '0461'],
       verifier: function(kommune, kode) {
-        return kommune.kode === parseInt(kode, 10);
+        return kommune.kode === kode4String(kode);
       }
     },
     navn: {
@@ -129,7 +131,7 @@ var sampleParameters = {
     vejkode: {
       values: ['1010'],
       verifier: function(adr, vejkode) {
-        return adr.vejstykke.kode === parseInt(vejkode, 10);
+        return adr.vejstykke.kode === kode4String(vejkode);
       }
     },
     vejnavn: {
@@ -154,13 +156,13 @@ var sampleParameters = {
     postnr: {
       values: ['4622'],
       verifier: function(adr, nr) {
-        return adr.postnummer.nr === parseInt(nr, 10);
+        return adr.postnummer.nr === nr;
       }
     },
     kommunekode: {
       values: ['461', '0461'],
       verifier: function(adr, kode) {
-        return adr.kommune.kode === parseInt(kode, 10);
+        return adr.kommune.kode === kode4String(kode);
       }
     },
     ejerlavkode: {
@@ -216,7 +218,7 @@ var sampleParameters = {
     vejkode: {
       values: ['1010'],
       verifier: function(adr, vejkode) {
-        return adr.adgangsadresse.vejstykke.kode === parseInt(vejkode, 10);
+        return adr.adgangsadresse.vejstykke.kode === kode4String(vejkode);
       }
     },
     vejnavn: {
@@ -241,13 +243,13 @@ var sampleParameters = {
     postnr: {
       values: ['4622'],
       verifier: function(adr, nr) {
-        return adr.adgangsadresse.postnummer.nr === parseInt(nr, 10);
+        return adr.adgangsadresse.postnummer.nr === nr;
       }
     },
     kommunekode: {
       values: ['461', '0461'],
       verifier: function(adr, kode) {
-        return adr.adgangsadresse.kommune.kode === parseInt(kode, 10);
+        return adr.adgangsadresse.kommune.kode === kode4String(kode);
       }
     },
     ejerlavkode: {

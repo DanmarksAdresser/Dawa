@@ -7,6 +7,8 @@ var apiSpecUtil = require('./apiSpecUtil');
 
 var BASE_URL = 'http://dawa.aws.dk';
 
+var kode4String = apiSpecUtil.kode4String;
+
 function maybeNull(val) {
   if(val === undefined) {
     return null;
@@ -40,7 +42,7 @@ function mapKommuneRef(dbJson, baseUrl) {
   if(dbJson) {
     return {
       href: makeHref(BASE_URL, module.exports.kommune, [dbJson.kode]),
-      kode: dbJson.kode,
+      kode: kode4String(dbJson.kode),
       navn: dbJson.navn
     };
   }
@@ -60,7 +62,7 @@ function mapPostnummerRef(dbJson, baseUrl) {
   if(dbJson) {
     return {
       href: makeHref(BASE_URL, module.exports.postnummer, [dbJson.nr]),
-      nr: dbJson.nr,
+      nr: kode4String(dbJson.nr),
       navn: dbJson.navn
     };
   }
@@ -440,14 +442,13 @@ function mapAdresse(rs){
 }
 
 function mapAdgangsadresse(rs){
-  var slice = function(slice, str) { return ("00000000000"+str).slice(slice); };
   var adr = {};
   adr.href = makeHref(BASE_URL, adgangsadresseApiSpec, [rs.a_id]);
   adr.id = rs.a_id;
   adr.vejstykke = {
     href: makeHref(BASE_URL, vejstykkeSpec, [rs.vejkode]),
     navn: maybeNull(rs.vejnavn),
-    kode: rs.vejkode
+    kode: kode4String(rs.vejkode)
   };
   adr.husnr = rs.husnr;
   adr.bygningsnavn = maybeNull(rs.bygningsnavn);
@@ -699,7 +700,7 @@ var postnummerSpec = {
 function postnummerJsonMapper(row) {
   return {
     href: makeHref(BASE_URL, module.exports.postnummer, [row.nr]),
-    nr:  row.nr,
+    nr:  kode4String(row.nr),
     navn: row.navn,
     version: row.version,
     stormodtageradresse: null,
@@ -710,11 +711,7 @@ function postnummerJsonMapper(row) {
 function postnummerRowToAutocompleteJson(row) {
   return {
     tekst: row.nr + ' ' + row.navn,
-    postnummer: {
-      nr: row.nr,
-      href: makeHref(BASE_URL, module.exports.postnummer, [row.nr]),
-      navn: row.navn
-    }
+    postnummer: mapPostnummerRef(row)
   };
 }
 
@@ -750,13 +747,9 @@ function notNull(obj) {
 function vejstykkeJsonMapper(row) {
   return {
     href: makeHref(BASE_URL, vejstykkeSpec, [row.kommunekode, row.kode]),
-    kode: row.kode,
+    kode: kode4String(row.kode),
     navn: row.vejnavn,
-    kommune: {
-      href: makeHref(BASE_URL, kommuneApiSpec, [row.kommunekode]),
-      kode: row.kommunekode,
-      navn: row.kommunenavn
-    },
+    kommune: mapKommuneRef({ kode: row.kommunekode, navn: row.kommunenavn}, BASE_URL),
     postnumre: mapPostnummerRefArray(row.postnumre, BASE_URL)
   };
 }
@@ -766,8 +759,8 @@ function vejstykkeRowToAutocompleteJson(row) {
     tekst: row.vejnavn,
     vejstykke: {
       href: makeHref(BASE_URL, vejstykkeSpec, [row.kommunekode, row.kode]),
-      kommunekode: row.kommunekode,
-      kode: row.kode,
+      kommunekode: kode4String(row.kommunekode),
+      kode: kode4String(row.kode),
       navn: row.vejnavn
     }
   };
@@ -844,7 +837,7 @@ var kommuneApiSpec = {
 function kommuneJsonMapper(row) {
   return {
     href: makeHref(BASE_URL, kommuneApiSpec, [row.kode]),
-    kode: row.kode,
+    kode: kode4String(row.kode),
     navn: row.navn
   };
 }
@@ -852,11 +845,7 @@ function kommuneJsonMapper(row) {
 function kommuneRowToAutocompleteJson(row) {
   return {
     tekst: row.navn,
-    kommune: {
-      href: makeHref(BASE_URL, kommuneApiSpec, [row.kode]),
-      kode: row.kode,
-      navn: row.navn
-    }
+    kommune: mapKommuneRef(row, BASE_URL)
   };
 }
 

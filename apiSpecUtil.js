@@ -44,3 +44,7 @@ exports.getColumnNameForWhere = function (spec, name) {
 exports.getSearchColumn = function(spec) {
   return exports.getColumnNameForWhere(spec, 'tsv');
 };
+
+exports.kode4String = function(kodeAsInteger) {
+  return ("0000" + kodeAsInteger).slice(-4);
+};

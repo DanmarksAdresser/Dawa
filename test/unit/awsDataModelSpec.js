@@ -37,29 +37,29 @@ describe("Postnummer schema validation", function () {
   it("should validate basic datum", function (done) {
     valid(
       {"href": "http://dawa.aws.dk/postnumre/8600",
-        "nr": 8600,
+        "nr": "8600",
         "navn": "Silkeborg",
         "version": "2011-12-02T04:20:03+01:00",
         stormodtageradresse: null,
         "kommuner": [
-          {"href": "http://dawa.aws.dk/kommuner/740", "kode": 740, "navn": "Silkeborg"}
+          {"href": "http://dawa.aws.dk/kommuner/740", "kode": "0740", "navn": "Silkeborg"}
         ]},
       model.postnummer.schema,
           done);
   });
   it("should fail on 5 digit zip", function (done) {
     invalid({"href": "http://dawa.aws.dk/postnumre/8600",
-      "nr": 86000,
+      "nr": "86000",
       "navn": "Silkeborg",
       "version": "2011-12-02T04:20:03+01:00",
       stormodtageradresse: null,
       "kommuner": [
-        {"href": "http://dawa.aws.dk/kommuner/740", "kode": 740, "navn": "Silkeborg"}
-      ]}, model.postnummer.schema, 'MAXIMUM', done);
+        {"href": "http://dawa.aws.dk/kommuner/740", "kode": "0740", "navn": "Silkeborg"}
+      ]}, model.postnummer.schema, 'PATTERN', done);
   });
 
   it("should fail on extra properties", function (done) {
-    invalid({nr: 8600, navn: 'Silkeborg', version: 'ver1',
+    invalid({nr: "8600", navn: 'Silkeborg', version: 'ver1',
       stormodtageradresse: null,
       foo: 42, kommuner: []}, model.postnummer.schema, 'OBJECT_ADDITIONAL_PROPERTIES', done);
   });
@@ -88,7 +88,7 @@ describe("Adresse schema validation", function () {
           "id": "0a3f50ae-da7f-32b8-e044-0003ba298018",
           "vejstykke": {
             href: 'link',
-            "kode": 237,
+            "kode": "0237",
             "navn": "Fægangen"
           },
           "husnr": "1",
@@ -96,17 +96,17 @@ describe("Adresse schema validation", function () {
           "supplerendebynavn": "Byen",
           "postnummer": {
             href: 'link',
-            "nr": 4180,
+            "nr": "4180",
             "navn": "Sorø"
           },
           "kommune": {
             href: 'link',
-            "kode": 340,
+            "kode": "0340",
             "navn": "Kommune 0340"
           },
           "ejerlav": {
             "kode": 340,
-            "navn": "Ejerlav 0340"
+            "navn": "Ejerlav 340"
           },
           'esrejendomsnr': null,
           "historik": {
@@ -135,17 +135,17 @@ describe("Adresse schema validation", function () {
             "km1": "1km_6146_661",
             "km10": "10km_614_66"
           },
-          "sogn": {"nr": 7383,
+          "sogn": {"kode": "7383",
             "navn": "Sorø"},
-          "region": {"nr": 7383,
+          "region": {"kode": "7383",
             "navn": "Sorø"},
-          "retskreds": {"nr": 7383,
+          "retskreds": {"kode": "7383",
             "navn": "Sorø"},
-          "politikreds": {"nr": 7383,
+          "politikreds": {"kode": "7383",
             "navn": "Sorø"},
-          "opstillingskreds": {"nr": 7383,
+          "opstillingskreds": {"kode": "7383",
             "navn": "Sorø"},
-          "afstemningsområde": {"nr": 7383,
+          "afstemningsområde": {"kode": "7383",
             "navn": "Sorø"}
         }
       },
@@ -162,14 +162,14 @@ describe('Vejnavn schema validation', function() {
         "postnumre": [
           {
             "href": "http://dawa.aws.dk/postnumre/4174",
-            "nr": 4174,
+            "nr": "4174",
             "navn": "Jystrup Midtsj"
           }
         ],
         "kommuner": [
           {
             "href": "http://dawa.aws.dk/kommuner/329",
-            "kode": 329,
+            "kode": "0329",
             "navn": "Ringsted"
           }
         ]
@@ -180,8 +180,8 @@ describe('Vejnavn schema validation', function() {
 
 describe("Vejstykke schema validation", function () {
   it("should validate basic datum", function (done) {
-    valid({"href": "http://dawa.aws.dk/vejstykker/101/4", "kode": 4, "navn": "Abel Cathrines Gade", "kommune": {"href": "http://dawa.aws.dk/kommuner/101", "kode": 101, "navn": "København"}, "postnumre": [
-        {"href": "http://dawa.aws.dk/postnumre/1654", "nr": 1654, "navn": "København V"}
+    valid({"href": "http://dawa.aws.dk/vejstykker/0101/0004", "kode": "0004", "navn": "Abel Cathrines Gade", "kommune": {"href": "http://dawa.aws.dk/kommuner/101", "kode": "0101", "navn": "København"}, "postnumre": [
+        {"href": "http://dawa.aws.dk/postnumre/1654", "nr": "1654", "navn": "København V"}
       ]},
       model.vejstykke.schema, done);
   });
@@ -191,9 +191,9 @@ describe("Vejstykke schema validation", function () {
 describe("Supplendebynavn schema validation", function () {
   it("should validate basic datum", function (done) {
     valid({href: 'http://dawa.aws.dk/supplerendebynavne/Aa', "navn": "Aa", "postnumre": [
-        {"href": "http://dawa.aws.dk/postnumre/5631", "nr": 5631, "navn": "Ebberup"}
+        {"href": "http://dawa.aws.dk/postnumre/5631", "nr": "5631", "navn": "Ebberup"}
       ], "kommuner": [
-        {"href": "http://dawa.aws.dk/kommuner/420", "kode": 420, "navn": "Assens"}
+        {"href": "http://dawa.aws.dk/kommuner/420", "kode": "0420", "navn": "Assens"}
       ]},
       model.supplerendebynavn.schema, done);
   });

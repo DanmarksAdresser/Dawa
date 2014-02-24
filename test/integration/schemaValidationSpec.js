@@ -18,30 +18,30 @@ var valuesNeverExpectedToBeSeen = {
   },
   adgangsadresser: {
     sogn: {
-      nr: true,
+      kode: true,
       navn: true
     },
     retskreds: {
-      nr: true,
+      kode: true,
       navn: true
     },
     politikreds: {
-      nr: true,
+      kode: true,
       navn: true
     },
     opstillingskreds: {
-      nr: true,
+      kode: true,
       navn: true
     },
     afstemningsområde: {
-      nr: true,
+      kode: true,
       navn: true
     },
     region: {
-      nr: true,
+      kode: true,
       navn: true
     }
-  },
+  }
 };
 
 function hasType(schema, type) {
