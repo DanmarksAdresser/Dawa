@@ -121,7 +121,14 @@ var vejstykkerDoc = {
     get: [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
             path: ['0101', '316']
           }]
-  }
+  },
+
+  autocompleteExamples: [
+    {description: 'Find alle vejstykker som indeholder <em>jolle</em>',
+     query: [{name:'q', value:'jolle'}]},
+    {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
+     query: [{name:'q', value:'strand '}]}],
+
 };
 
 var supplerendeBynavneDoc = {

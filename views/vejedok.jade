@@ -65,11 +65,8 @@ block content
             +parameterDocGet(apiSpec.vejstykke, parameterDoc.vejstykke)
 
             div.page-header
-              h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
-            p Autocomplete på vejstykker. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
-            pre GET #{url}/vejstykker/autocomplete
-            p Autocomplete for vejstykker returnerer følgende JSON struktur:
-            +documentSchema(apiSpec.vejstykke.model.autocompleteSchema)
+            h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
+            +autocompleteDoc(apiSpec.vejstykke.model.autocompleteSchema, apiSpec.vejstykke.model.plural, parameterDoc.vejstykke.autocompleteExamples)
 
             div.page-header
             h3.anchor-header#vejstykkedata Beskrivelse af vejstykkedata
