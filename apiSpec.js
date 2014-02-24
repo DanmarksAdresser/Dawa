@@ -376,6 +376,10 @@ function toPgSearchQuery(q) {
   return tokens.join(' & ');
 }
 
+function endsWith (str, suffix) {
+  return str.indexOf(suffix, str.length - suffix.length) !== -1;
+};
+
 function toPgSuggestQuery(q) {
   // normalize whitespace
   q = q.replace(/\s+/g, ' ');
@@ -385,7 +389,7 @@ function toPgSuggestQuery(q) {
 
   // Since we do suggest, if there is no trailing whitespace,
   // the last search clause should be a prefix search
-  if (!hasTrailingWhitespace) {
+  if (!hasTrailingWhitespace && !endsWith(tsq, '*')) {
     tsq += ":*";
   }
   return tsq;
