@@ -9,6 +9,10 @@ var apiSpecUtil    = require('./apiSpecUtil');
 var parameterDoc   = require('./parameterDoc');
 var docUtil        = require('./docUtil');
 
+var logglyOptions = {subdomain        : 'dawa',
+                     inputToken       : process.env.DAWALOGGLY,
+                     json             : true,
+                     handleExceptions : true};
 
 var app = express();
 
@@ -60,6 +64,8 @@ if (cluster.isMaster && !cluseringDisabled) {
 
   app.use('', dawaPgApi.setupRoutes());
 
+  app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
+
   app.listen(listenPort);
   winston.info("Express server listening on port %d in %s mode", listenPort, app.settings.env);
 }
@@ -77,19 +83,21 @@ function spawn(){
 
 function setupLogging(app){
   require('winston-loggly')
-  var expressTransports = [];
   if (process.env.DAWALOGGLY){
-    var logglyOptions = {subdomain:  'dawa',
-                         inputToken: process.env.DAWALOGGLY,
-                         json:       true};
-
     winston.add(winston.transports.Loggly, logglyOptions);
-    expressTransports.push(new winston.transports.Loggly(logglyOptions));
     winston.info("Production mode. Setting up Loggly logging %s", process.env.DAWALOGGLY);
   }
+  app.use(expressWinston.logger({transports: expressLogTransports()}));
+  winston.handleExceptions(new winston.transports.Console());
+}
 
-  expressTransports.push(new winston.transports.Console());
-  app.use(expressWinston.logger({transports: expressTransports}));
+function expressLogTransports(){
+  var transports = [];
+  if (process.env.DAWALOGGLY){
+    transports.push(new winston.transports.Loggly(logglyOptions));
+  }
+  transports.push(new winston.transports.Console());
+  return transports;
 }
 
 function setupJadePage(path, page, optionsFun){
