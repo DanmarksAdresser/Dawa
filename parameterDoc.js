@@ -330,7 +330,16 @@ var adgangsadresseDoc = {
         path: ['0a3f507a-b2e6-32b8-e044-0003ba298018']
       }
     ]
-  }
+  },
+
+  autocompleteExamples: [
+    {description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
+     query: [{name:'q', value:'rand'}]},
+    {description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
+     query: [{name:'q', value:'randers'},{name:'postnr', value:'8600'}]},
+],
+
+
 
 };
 

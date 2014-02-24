@@ -25,22 +25,18 @@ block content
 
         div.span9
           section
-            div.page-header
-              h3.anchor-header#adressesoegning Adgangsadressesøgning
+            h3.anchor-header#adressesoegning Adgangsadressesøgning
             p Søg efter adgangsadresser. Returnerer de adgangsadresser som opfylder kriteriet.
             +parameterDocQuery(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
 
             div.page-header
-              h3.anchor-header#adresseopslag Adgangsadresseopslag
+            h3.anchor-header#adresseopslag Adgangsadresseopslag
             p Modtag adgangsadresse med id.
             +parameterDocGet(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
 
             div.page-header
-              h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
-            p Autocomplete på adgangsadresser. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
-            pre GET #{url}/adresser/autocomplete
-            p Autocomplete for adgangsadresser returnerer følgende JSON struktur:
-            +documentSchema(apiSpec.adgangsadresse.model.autocompleteSchema)
+            h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
+            +autocompleteDoc(apiSpec.adgangsadresse.model.autocompleteSchema, apiSpec.adgangsadresse.model.plural, parameterDoc.adgangsadresse.autocompleteExamples)
 
             div.page-header
             h3.anchor-header#reversegeokodning Reverse geokodning (stadig under udvikling)
