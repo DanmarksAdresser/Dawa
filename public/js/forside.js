@@ -58,7 +58,9 @@ function search(input,kommunekode) {
           }
 
           if(vejnavneResults.length > 1) {
-            return showSuggestions(_.pluck(vejnavneResults, 'tekst'));
+            return showSuggestions(_.map(_.pluck(vejnavneResults, 'tekst'), function(sugg) {
+              return sugg + ' ';
+            }));
           }
           $.ajax({
             cache: true,
