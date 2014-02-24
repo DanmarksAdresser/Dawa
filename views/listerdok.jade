@@ -40,8 +40,7 @@ block content
 
         div.span9
           section
-            div.page-header
-              h3.anchor-header#regionsoegning Regionsøgning
+            h3.anchor-header#regionsoegning Regionsøgning
             p Søg efter regioner. Returnerer de regioner som opfylder kriteriet.
             pre GET /regioner
             h4 Parametre
@@ -70,7 +69,7 @@ block content
 
 
             div.page-header
-              h3.anchor-header#regionopslag Regionopslag
+            h3.anchor-header#regionopslag Regionopslag
             p Modtag region.
             pre GET /regioner/{regionskode}
             h4 Parametre
@@ -88,7 +87,7 @@ block content
               a(href='http://#{url}/regioner/1083') http://#{url}/regioner/1083
 
             div.page-header
-              h3.anchor-header#regiondata Beskrivelse af regionsdata
+            h3.anchor-header#regiondata Beskrivelse af regionsdata
             p Web API'et udstiller for hver region følgende informationer:
 
             table.table.table-hover
@@ -110,30 +109,27 @@ block content
 
           section
             div.page-header
-              h3.anchor-header#kommunesoegning Kommunesøgning
+            h3.anchor-header#kommunesoegning Kommunesøgning
             p Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.
             +parameterDocQuery(apiSpec.kommune, parameterDoc.kommune)
 
             div.page-header
-              h3.anchor-header#kommuneopslag Kommuneopslag
+            h3.anchor-header#kommuneopslag Kommuneopslag
             p Modtag kommune.
             +parameterDocGet(apiSpec.kommune, parameterDoc.kommune)
 
             div.page-header
-              h3.anchor-header#kommuneautocomplete Kommune autocomplete
-            p Autocomplete på kommuner. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
-            pre GET #{url}/kommuner/autocomplete
-            p Autocomplete for kommuner returnerer følgende JSON struktur:
-            +documentSchema(apiSpec.kommune.model.autocompleteSchema)
+            h3.anchor-header#kommuneautocomplete Kommune autocomplete
+            +autocompleteDoc(apiSpec.kommune.model.autocompleteSchema, apiSpec.kommune.model.plural, parameterDoc.kommune.autocompleteExamples) 
 
             div.page-header
-              h3.anchor-header#kommunedata Beskrivelse af kommunedata
+            h3.anchor-header#kommunedata Beskrivelse af kommunedata
             p Web API'et udstiller for hver kommune følgende informationer:
             +documentSchema(apiSpec.kommune.model.schema)
 
           section
             div.page-header
-              h3.anchor-header#sognsoegning Sognsøgning
+            h3.anchor-header#sognsoegning Sognsøgning
             p Søg efter sogne. Returnerer de sogne som opfylder kriteriet.
             pre GET /sogne
             h4 Parametre
@@ -162,7 +158,7 @@ block content
 
 
             div.page-header
-              h3.anchor-header#sognopslag Sogneopslag
+            h3.anchor-header#sognopslag Sogneopslag
             p Modtag sogn.
             pre GET /sogne/{sognekode}
             h4 Parametre
@@ -180,7 +176,7 @@ block content
               a(href='http://#{url}/sogne/7060') http://#{url}/sogne/7060
 
             div.page-header
-              h3.anchor-header#sogndata Beskrivelse af sognedata
+            h3.anchor-header#sogndata Beskrivelse af sognedata
             p Web API'et udstiller for hvert sogn følgende informationer:
 
             table.table.table-hover
@@ -203,7 +199,7 @@ block content
 
           section
             div.page-header
-              h3.anchor-header#retskredssoegning Retskredssøgning
+            h3.anchor-header#retskredssoegning Retskredssøgning
             p Søg efter retskredse. Returnerer de retskredse som opfylder kriteriet.
             pre GET /retskredse
             h4 Parametre
@@ -232,7 +228,7 @@ block content
 
 
             div.page-header
-              h3.anchor-header#retskredsopslag Retskredsopslag
+            h3.anchor-header#retskredsopslag Retskredsopslag
             p Modtag sogn.
             pre GET /retskredse/{retskredskode}
             h4 Parametre
@@ -250,7 +246,7 @@ block content
               a(href='http://#{url}/retskredse/22') http://#{url}/retskredse/22
 
             div.page-header
-              h3.anchor-header#retskredsdata Beskrivelse af retskredsdata
+            h3.anchor-header#retskredsdata Beskrivelse af retskredsdata
             p Web API'et udstiller for hver retskreds følgende informationer:
 
             table.table.table-hover
@@ -272,7 +268,7 @@ block content
 
           section
             div.page-header
-              h3.anchor-header#politikredssoegning Politikredssøgning
+            h3.anchor-header#politikredssoegning Politikredssøgning
             p Søg efter politikredse. Returnerer de politikredse, som opfylder kriteriet.
             pre GET /politikredse
             h4 Parametre
@@ -301,7 +297,7 @@ block content
 
 
             div.page-header
-              h3.anchor-header#politikredsopslag Politikredsopslag
+            h3.anchor-header#politikredsopslag Politikredsopslag
             p Modtag sogn.
             pre GET /politikredse/{politikredskode}
             h4 Parametre
@@ -319,7 +315,7 @@ block content
               a(href='http://#{url}/politikredse/12') http://#{url}/politikredse/12
 
             div.page-header
-              h3.anchor-header#politikredsdata Beskrivelse af politikredsdata
+            h3.anchor-header#politikredsdata Beskrivelse af politikredsdata
             p Web API'et udstiller for hver politikreds følgende informationer:
 
             table.table.table-hover

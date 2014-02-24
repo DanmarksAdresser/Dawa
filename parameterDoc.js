@@ -226,7 +226,12 @@ var kommuneDoc = {
         path: ['101']
       }]
 
-  }
+  },
+
+  autocompleteExamples: [
+    {description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
+     query: [{name:'q', value:'8'}]}],
+
 };
 
 var parametersForBothAdresseAndAdgangsAdresse = [
