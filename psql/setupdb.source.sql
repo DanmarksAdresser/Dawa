@@ -277,7 +277,7 @@ WHERE
 CREATE INDEX ON adgangsadresser USING gin(tsv);
 
 \echo '\n***** Updating wgs84 and geom columns'
-UPDATE adgangsadresser SET wgs84 = ST_GeometryFromText('POINT('||wgs84lat||' '||wgs84long||')', 4326)
+UPDATE adgangsadresser SET wgs84 = ST_GeometryFromText('POINT('||wgs84long||' '||wgs84lat||')', 4326)
 WHERE wgs84lat IS NOT NULL AND wgs84long IS NOT NULL;
 
 UPDATE adgangsadresser SET geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
@@ -491,6 +491,7 @@ FOR EACH ROW EXECUTE PROCEDURE update_vejstykker_postnumre_mat();
 CREATE UNIQUE INDEX ON VejstykkerPostnumreMat(postnr, kommunekode, vejkode);
 CREATE INDEX ON vejstykkerpostnumremat(kommunekode, vejkode);
 
+DROP TABLE IF EXISTS PostnumreKommunekoderMat;
 CREATE TABLE PostnumreKommunekoderMat(postnr integer not null, kommunekode integer not null, primary key(postnr, kommunekode));
 INSERT INTO PostnumreKommunekoderMat SELECT DISTINCT postnr, kommunekode FROM VejstykkerPostnumreMat
 WHERE postnr is not null and kommunekode is not null;
