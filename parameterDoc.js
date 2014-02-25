@@ -287,6 +287,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
       '[10.1362451883392,55.568284049162], ' +
       '[10.1362396504186,55.5683669533645]].'
 
+  },
+  {
+    name: 'cirkel',
+    doc: 'Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}. '
   }
 ];
 

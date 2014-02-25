@@ -130,14 +130,31 @@ var geomWithinParameterSpec = {
       name: 'polygon',
       type: 'json',
       schema: schema.polygon
+    },
+    {
+      name: 'cirkel',
+      type: 'string'
     }
   ],
   applySql: function(sqlParts, params, spec) {
     var srid = params.srid || 4326;
+    var sridAlias;
+    if(params.polygon || params.cirkel) {
+      sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+    }
     if(params.polygon) {
       var polygonAlias = dbapi.addSqlParameter(sqlParts, polygonTransformer(params.polygon));
-      var sridAlias = dbapi.addSqlParameter(sqlParts, srid);
       dbapi.addWhereClause(sqlParts, "ST_Contains(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), geom)");
+    }
+    if(params.cirkel) {
+      var args = params.cirkel.split(',');
+      var x = args[0];
+      var y = args[1];
+      var r = args[2];
+      var point = "POINT(" + x + " " + y + ")";
+      var pointAlias = dbapi.addSqlParameter(sqlParts, point);
+      var radiusAlias = dbapi.addSqlParameter(sqlParts, r);
+      dbapi.addWhereClause(sqlParts, "ST_DWithin(geom, ST_Transform(ST_GeomFromText(" + pointAlias + ","+sridAlias + "), 25832), " + radiusAlias + ")");
     }
   }
 };
