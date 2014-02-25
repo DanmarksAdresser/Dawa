@@ -33,11 +33,6 @@ if [ "$1" == "--help" ]; then
     exit 1
 fi
 
-if [ "$#" != "1" ]; then
-	echo "Usage: $0 <git tag>"
-	exit 1
-fi
-
 read -p "Are you sure you want to deploy to production (y/n)? " choice
 case "$choice" in
   y|Y ) echo "Beginning deployment...";;
@@ -47,26 +42,26 @@ esac
 
 set -x
 
-VERSION="$1"
+GITHASH=`git rev-parse --short HEAD`
+VERSION="git-$GITHASH"
 TIME=`date +"%b-%d-%Y-%H-%M-%S"`
 ZIP="dawa-$VERSION-$TIME.zip"
 BUCKET=elasticbeanstalk-eu-west-1-040349710985
 APPNAME="Dawa"
 APPNAMEENV="$APPNAME-env"
-FILENAME="$VERSION.zip"
 
 # EXISTS is 2 in case the version is new.
 EXISTS=`aws elasticbeanstalk describe-application-versions --output json \
     --application-name "$APPNAME" \
-    --version-label "$VERSION" | grep -v "\[\]" | wc -l | tr -d ' '`
+    --version-label "$VERSION" | grep -v "\[\]" | wc -l`
 
 if [[ $EXISTS == 2 ]]; then
-    wget "https://github.com/DanmarksAdresser/Dawa/archive/$FILENAME"
-    aws s3 cp "./$FILENAME" s3://$BUCKET/$FILENAME &&
+    zip --recurse-paths "$ZIP" * -x data/\* node_modules/\* \*.zip &&
+    aws s3 cp $ZIP s3://$BUCKET/$ZIP &&
     aws elasticbeanstalk create-application-version \
         --application-name "$APPNAME" \
         --version-label "$VERSION" \
-        --source-bundle S3Bucket="$BUCKET",S3Key="$FILENAME" &&
+        --source-bundle S3Bucket="$BUCKET",S3Key="$ZIP" &&
     aws elasticbeanstalk update-environment \
         --environment-name "$APPNAMEENV" \
         --version-label "$VERSION"
