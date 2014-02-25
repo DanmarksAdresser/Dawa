@@ -39,7 +39,7 @@ exports.setupRoutes = function () {
 
   apiSpec.allSpecNames.forEach(function(specName) {
     var spec = apiSpec[specName];
-    if(spec.suggestable) {
+    if(spec.parameterGroups.autocomplete) {
       publishAutocomplete(app, spec);
     }
     publishGetByKey(app, spec);
@@ -50,18 +50,20 @@ exports.setupRoutes = function () {
 
 /**
  * Parses multiple groups of parameters.
- * @param parameterSpecs a hash where values are lists of parameter specifications
+ * @param parameterGroups a hash where values are lists of parameter specifications
  * @param rawParams the query parameters
  * @returns a hash where the values are the parsed parameters, plus an additional errors key that contains
  * an array of parsing errors.
  */
-function parseParameters(parameterSpecs, rawParams) {
-  return _.reduce(parameterSpecs, function(memo, parameterSpec, groupName) {
-    var parseResult = parameterParsing.parseParameters(rawParams, _.indexBy(parameterSpec, 'name'));
+function parseParameters(parameterGroups, rawParams) {
+  return _.reduce(parameterGroups, function(memo, parameterSpec, groupName) {
+    var parseResult = parameterParsing.parseParameters(rawParams, _.indexBy(parameterSpec.parameters, 'name'));
     memo.errors = memo.errors.concat(parseResult.errors);
     memo[groupName] = parseResult.params;
+    _.extend(memo.params, parseResult.params);
     return memo;
   }, {
+    params: {},
     errors: []
   });
 }
@@ -75,7 +77,7 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
   }, '/' + spec.model.plural);
   app.get(path, function (req, res) {
     // Parsing the path parameters, which constitutes the key
-    var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameters, 'name'));
+    var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameterGroups.propertyFilter.parameters, 'name'));
     if (parseParamsResult.errors.length > 0){
       var keyValues = _.reduce(keyArray, function(memo, key) {
         memo.push(req.params[key]);
@@ -85,16 +87,21 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
     }
 
     // Parsing format parameters
-    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec, 'name'));
+    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec.parameters, 'name'));
     if(formatParamsParseResult.errors.length > 0) {
       return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
     }
 
     var formatParams = formatParamsParseResult.params;
 
+
+    var sqlParts = apiSpecUtil.createSqlParts(spec, {
+      propertyFilter: spec.parameterGroups.propertyFilter
+    }, parseParamsResult.params);
+
     // Getting the data
     withPsqlClient(res, function (client, done) {
-      dbapi.query(client, spec, { specified: parseParamsResult.params }, {}, function(err, rows) {
+      dbapi.query(client, sqlParts, function(err, rows) {
         done();
         if (err) {
           sendInternalServerError(res, err);
@@ -121,64 +128,23 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
     });
   });
 }
-
-function toOffsetLimit(paging) {
-  if(paging.side && paging.per_side) {
-    return {
-      offset: (paging.side-1) * paging.per_side,
-      limit: paging.per_side
-    };
-  }
-  else {
-    return {};
-  }
-}
-
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
 
-    var parameterGroups = {
-      specified: spec.parameters,
-      format: apiSpec.formatParameterSpec
-    };
-    if(spec.pageable) {
-      parameterGroups.paging = apiSpec.pagingParameterSpec;
-    }
-    if(spec.searchable) {
-      parameterGroups.search = apiSpec.searchParameterSpec;
-    }
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'search', 'format', 'paging', 'crs', 'geomWithin'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
+
     var parameterParseResult = parseParameters(parameterGroups, req.query);
     if (parameterParseResult.errors.length > 0){
       return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
-    var specifiedParams = parameterParseResult.specified;
-    var formatParams = parameterParseResult.format;
+    var params = parameterParseResult.params;
 
-    // Parsing format parameter
-
-    // verify that the callback parameter is specified for jsonp format
-    if(formatParams.format === 'jsonp' && formatParams.callback === undefined) {
-      return sendJsonCallbackParameterMissingError(res);
-    }
-
-
-    // parse and apply paging parameters
-    var pagingParams = {};
-    if(spec.pageable) {
-      pagingParams = parameterParseResult.paging;
-      applyDefaultPaging(pagingParams);
-    }
-
-
-    var params = {
-      specified: specifiedParams,
-      search: parameterParseResult.search
-    };
+    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, params);
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
-      dbapi.streamingQuery(client, spec, params, toOffsetLimit(pagingParams), function(err, stream) {
+      dbapi.stream(client, sqlParts, function(err, stream) {
         if(err) {
           winston.error("Error executing cursor query: %j", err, {});
           done();
@@ -186,7 +152,7 @@ function publishQuery(app, spec) {
           throw err;
         }
         streamHttpResponse(stream, res, spec, {
-          formatParams: formatParams,
+          formatParams: parameterParseResult.format,
           baseUrl: baseUrl(req)
         }, done);
       });
@@ -270,21 +236,6 @@ function applyDefaultPagingForAutocomplete(pagingParams) {
   if(!pagingParams.per_side) {
     pagingParams.per_side = 20;
   }
-  applyDefaultPaging(pagingParams);
-}
-
-/**
- * By default, if per_side is specified, side defaults to 1.
- * If side is specified, per_side defaults to 20.
- * @param pagingParams
- */
-function applyDefaultPaging(pagingParams) {
-  if(pagingParams.per_side && !pagingParams.side) {
-    pagingParams.side = 1;
-  }
-  if(pagingParams.side && !pagingParams.per_side) {
-    pagingParams.per_side = 20;
-  }
 }
 
 function setCsvContentHeader(res) {
@@ -317,40 +268,28 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
 
 function publishAutocomplete(app, spec) {
   app.get('/' + spec.model.plural + "/autocomplete", function(req, res) {
-    var parameterGroups = {
-      specified: spec.parameters,
-      format: apiSpec.formatParameterSpec,
-      paging: apiSpec.pagingParameterSpec,
-      autocomplete: apiSpec.autocompleteParameterSpec
-
-    };
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'paging', 'autocomplete'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
     var parameterParseResult = parseParameters(parameterGroups, req.query);
     if (parameterParseResult.errors.length > 0){
       return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
-    var specifiedParams = parameterParseResult.specified;
-    var formatParams = parameterParseResult.format;
-    var pagingParams = parameterParseResult.paging;
-    var autocompleteParams = parameterParseResult.autocomplete;
+    var params = parameterParseResult.params;
 
-    var params = {
-      specified: specifiedParams,
-      autocomplete: autocompleteParams
-    };
+    applyDefaultPagingForAutocomplete(params);
 
-    applyDefaultPagingForAutocomplete(pagingParams);
+    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, params);
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
-      dbapi.streamingQuery(client, spec,  params, toOffsetLimit(pagingParams), function(err, stream) {
+      dbapi.stream(client, sqlParts, function(err, stream) {
         if(err) {
           done();
           sendInternalServerError(res, "Failed to execute query");
           throw err;
         }
         streamAutocompleteResponse(stream, res, spec, {
-          formatParams: formatParams,
+          formatParams: parameterParseResult.format,
           baseUrl: baseUrl(req)
         }, done);
       });
@@ -467,12 +406,6 @@ function sendQueryParameterFormatError(res, details){
   sendError(res, 400, {type: "QueryParameterFormatError",
                        title: "One or more query parameters was ill-formed.",
                        details: details});
-}
-
-function sendJsonCallbackParameterMissingError(res) {
-  sendError(res, 400, {type: "JsonCallbackParameterMissingError",
-    title: "When using JSONP, a callback parameter must be speficied",
-    details: "When using JSONP, a callback parameter must be speficied"});
 }
 
 function sendResourceKeyFormatError(res, details){

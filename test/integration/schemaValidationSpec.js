@@ -1,5 +1,6 @@
 "use strict";
 var apiSpec = require('../../apiSpec');
+var apiSpecUtil = require('../../apiSpecUtil');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
 var schemaValidationUtil = require('./schemaValidationUtil');
@@ -93,7 +94,8 @@ describe('Validering af JSON-formatteret output', function() {
       console.log('validerer alle ' + spec.model.plural);
       var schema = spec.model.schema;
       dbapi.withTransaction(function(err, client, transactionDone) {
-        dbapi.query(client, spec, {}, {}, function(err, rows) {
+        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {});
+        dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
             var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
             expect(schemaValidationUtil.isSchemaValid(json, schema)).toBe(true);
@@ -107,7 +109,8 @@ describe('Validering af JSON-formatteret output', function() {
       var schema = spec.model.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[spec.model.plural] || {};
       dbapi.withTransaction(function(err, client, transactionDone) {
-        dbapi.query(client, spec, {}, {}, function(err, rows) {
+        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {});
+        dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
             var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
             recordVisitedValues(json, schema, valuesSeen);

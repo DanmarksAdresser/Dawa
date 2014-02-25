@@ -5,7 +5,6 @@ var util        = require('util');
 var eventStream = require('event-stream');
 var _           = require('underscore');
 var Readable    = require('stream').Readable;
-var apiSpec     = require('./apiSpec');
 var pg          = require('pg');
 var winston     = require('winston');
 
@@ -21,60 +20,14 @@ function notNull(v) {
   return v !== undefined && v !== null;
 }
 
-function initialQuery(spec) {
-  if(spec.baseQuery) {
-    return spec.baseQuery();
-  }
-  var query = {
-    select: "  SELECT * FROM " + spec.model.plural,
-    whereClauses: [],
-    orderClauses: [],
-    offsetLimitClause: "",
-    sqlParams: []
-  };
-  return query;
-}
+exports.addSqlParameter = function(sqlParts, param) {
+  sqlParts.sqlParams.push(param);
+  return '$' + sqlParts.sqlParams.length;
+};
 
-/**
- * Applies a list of parameters to a query by generating the
- * appropriate where clauses.
- */
-function applyParameters(spec, parameterSpec, params, query) {
-  parameterSpec.forEach(function (parameter) {
-    var name = parameter.name;
-    if (params[name] !== undefined) {
-      query.sqlParams.push(params[name]);
-      if (parameter.whereClause) {
-        query.whereClauses.push(parameter.whereClause("$" + query.sqlParams.length, spec));
-      } else {
-        var column = apiSpecUtil.getColumnNameForWhere(spec, name);
-        query.whereClauses.push(column + " = $" + query.sqlParams.length);
-      }
-    }
-  });
-}
-
-function applyOffsetLimitClause(params, query) {
-  if(notNull(params.offset) || notNull(params.limit)) {
-    var clause = '';
-    if(notNull(params.offset)) {
-      query.sqlParams.push(params.offset);
-      clause += ' OFFSET $' + query.sqlParams.length;
-    }
-    if(notNull(params.limit)) {
-      query.sqlParams.push(params.limit);
-      clause += ' LIMIT $' + query.sqlParams.length;
-    }
-    query.offsetLimitClause = clause;
-  }
-}
-
-function applyOrderByKey(spec, sqlParts) {
-  var columnArray = apiSpecUtil.getKeyForSelect(spec);
-  columnArray.forEach(function (key) {
-    sqlParts.orderClauses.push(apiSpecUtil.getColumnNameForSelect(spec, key));
-  });
-}
+exports.addWhereClause = function(sqlParts, clause) {
+  sqlParts.whereClauses.push(clause);
+};
 
 function createQuery(parts){
   var sql = parts.select;
@@ -87,32 +40,18 @@ function createQuery(parts){
   if(parts.orderClauses.length > 0) {
     sql += " ORDER BY " + parts.orderClauses.join(", ");
   }
-  if(parts.offsetLimitClause) {
-    sql += parts.offsetLimitClause;
+  if(parts.offset) {
+    var offsetAlias = exports.addSqlParameter(parts, parts.offset);
+    sql += " OFFSET " + offsetAlias;
+  }
+  if(parts.limit) {
+    var limitAlias = exports.addSqlParameter(parts, parts.limit);
+    sql += " LIMIT " + limitAlias;
   }
   return {
     sql: sql,
     params: parts.sqlParams
   };
-}
-
-function createQueryFromSpec(spec, params, paging) {
-  var sqlParts = initialQuery(spec);
-  if(params.specified) {
-    applyParameters(spec, spec.parameters, params.specified, sqlParts);
-  }
-  if(params.search) {
-    applyParameters(spec, apiSpec.searchParameterSpec, params.search, sqlParts);
-  }
-  if(params.autocomplete) {
-    applyParameters(spec, apiSpec.autocompleteParameterSpec, params.autocomplete, sqlParts);
-  }
-  if (paging) {
-    applyOffsetLimitClause(paging, sqlParts);
-  }
-  applyOrderByKey(spec, sqlParts);
-  var query = createQuery(sqlParts);
-  return query;
 }
 
 util.inherits(CursorStream, Readable);
@@ -230,10 +169,10 @@ exports.withTransaction = function(cb) {
       });
     });
   });
-}
+};
 
-exports.query = function(client, spec, params, paging, cb) {
-  var query = createQueryFromSpec(spec, params, paging);
+exports.query = function(client, sqlParts, cb) {
+  var query = createQuery(sqlParts);
   client.query(
     query.sql,
     query.params,
@@ -243,11 +182,10 @@ exports.query = function(client, spec, params, paging, cb) {
     });
 };
 
-exports.streamingQuery = function(client, spec, params, paging, cb) {
-  var query = createQueryFromSpec(spec, params, paging);
+exports.stream = function(client, sqlParts, cb) {
+  var query = createQuery(sqlParts);
   streamingQueryUsingCursor(client, query.sql, query.params, cb);
 };
-
 
 /**
  * Takes a stream of database rows and returns an object stream

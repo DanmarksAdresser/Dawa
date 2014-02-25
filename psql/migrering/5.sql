@@ -25,7 +25,7 @@ CREATE VIEW AdgangsadresserView AS
     A.wgs84lat::double precision   AS lat,
     A.wgs84long::double precision  AS long,
     A.wgs84,
-    A.geom       AS wgs84geom,
+    A.geom       AS geom,
     A.noejagtighed,
     A.kilde::smallint,
     A.tekniskstandard,

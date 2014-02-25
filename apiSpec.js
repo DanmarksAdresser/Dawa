@@ -4,9 +4,25 @@ var model       = require('./awsDataModel');
 var _           = require('underscore');
 var apiSpecUtil = require('./apiSpecUtil');
 var winston     = require('winston');
+var dbapi = require('./dbapi');
 
 
 var kode4String = apiSpecUtil.kode4String;
+
+/**
+ * Applies a list of parameters to a query by generating the
+ * appropriate where clauses.
+ */
+function applyParameters(spec, parameterSpec, params, query) {
+  parameterSpec.forEach(function (parameter) {
+    var name = parameter.name;
+    if (params[name] !== undefined) {
+      var parameterAlias = dbapi.addSqlParameter(query, params[name]);
+      var column = apiSpecUtil.getColumnNameForWhere(spec, name);
+      query.whereClauses.push(column + " = " + parameterAlias);
+    }
+  });
+}
 
 function maybeNull(val) {
   if(val === undefined) {
@@ -68,6 +84,130 @@ function mapPostnummerRef(dbJson, baseUrl) {
   return null;
 }
 
+/**
+ * By default, if per_side is specified, side defaults to 1.
+ * If side is specified, per_side defaults to 20.
+ */
+function applyDefaultPaging(pagingParams) {
+  if(pagingParams.per_side && !pagingParams.side) {
+    pagingParams.side = 1;
+  }
+  if(pagingParams.side && !pagingParams.per_side) {
+    pagingParams.per_side = 20;
+  }
+}
+
+function toOffsetLimit(paging) {
+  if(paging.side && paging.per_side) {
+    return {
+      offset: (paging.side-1) * paging.per_side,
+      limit: paging.per_side
+    };
+  }
+  else {
+    return {};
+  }
+}
+function applyOrderByKey(spec, sqlParts) {
+  var columnArray = apiSpecUtil.getKeyForSelect(spec);
+  columnArray.forEach(function (key) {
+    sqlParts.orderClauses.push(apiSpecUtil.getColumnNameForSelect(spec, key));
+  });
+}
+
+var crsParameterSpec = {
+  parameters: [
+    {
+      name: 'srid',
+      type: 'integer'
+    }
+  ]
+};
+
+var geomWithinParameterSpec = {
+  parameters:[
+    {
+      name: 'polygon',
+      type: 'json',
+      schema: schema.polygon
+    }
+  ],
+  applySql: function(sqlParts, params, spec) {
+    var srid = params.srid || 4326;
+    if(params.polygon) {
+      var polygonAlias = dbapi.addSqlParameter(sqlParts, polygonTransformer(params.polygon));
+      var sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+      dbapi.addWhereClause(sqlParts, "ST_Contains(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), geom)");
+    }
+  }
+};
+
+exports.pagingParameterSpec = {
+  parameters: [
+    {
+      name: 'side',
+      type: 'integer',
+      schema: schema.positiveInteger
+    },
+    {
+      name: 'per_side',
+      type: 'integer',
+      schema: schema.positiveInteger
+    }
+  ],
+  applySql: function(sqlParts, params, spec) {
+    applyDefaultPaging(params);
+    var offsetLimit = toOffsetLimit(params);
+    _.extend(sqlParts, offsetLimit);
+    if(params.per_side) {
+      applyOrderByKey(spec ,sqlParts);
+    }
+  }
+};
+exports.formatParameterSpec = {
+  parameters: [
+    {
+      name: 'format',
+      schema: {
+        "enum": ['csv', 'json']
+      }
+    },
+    {
+      name: 'callback',
+      schema: {
+        type: 'string',
+        pattern: '^[\\$_a-zA-Z0-9]+$'
+      }
+    }
+  ]};
+exports.searchParameterSpec = {
+  parameters: [
+    {
+      name: 'q',
+      type: 'string'
+    }
+  ],
+  applySql: function(sqlParts, params, spec) {
+    if(notNull(params.q)) {
+      var parameterAlias = dbapi.addSqlParameter(sqlParts, toPgSearchQuery(params.q));
+      dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, spec));
+    }
+  }
+};
+exports.autocompleteParameterSpec = {
+  parameters: [
+    {
+      name: 'q',
+      type: 'string'
+    }
+  ],
+  applySql: function(sqlParts, params, spec) {
+    if(notNull(params.q)) {
+      var parameterAlias = dbapi.addSqlParameter(sqlParts, toPgSuggestQuery(params.q));
+      dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, spec));
+    }
+  }
+};
 
 var adgangsadresseFields = [
   {
@@ -271,57 +411,60 @@ var adresseFields = [
   }
 ];
 
-var adgangsadresseParameters = [
-  {
-    name: 'id',
-    type: 'string',
-    schema: schema.uuid
-  },
-  {
-    name: 'vejkode',
-    type: 'integer',
-    schema: schema.kode4
-  },
-  {
-    name: 'vejnavn'
-  },
-  {
-    name: 'husnr'
-  },
-  {
-    name: 'supplerendebynavn'
-  },
-  {
-    name: 'postnr',
-    type: 'integer',
-    schema: schema.postnr
-  },
-  {
-    name: 'kommunekode',
-    type: 'integer',
-    schema: schema.kode4
-  },
-  {
-    name: 'ejerlavkode',
-    type: 'integer'
-  },
-  {
-    name: 'matrikelnr'
-  },
-  {
-    name: 'esrejendomsnr',
-    type: 'integer'
-  },
-  {
-    name: 'polygon',
-    type: 'json',
-    schema: schema.polygon,
-    whereClause: polygonWhereClause,
-    transform: polygonTransformer
-  }
-];
+function propertyFilterParameterGroup(parameters) {
+  var result = {
+    parameters: parameters
+  };
+  result.applySql = function(sqlParts, params, spec) {
+    return applyParameters(spec, parameters, params, sqlParts);
+  };
+  return result;
+}
 
-var adresseParameters = adgangsadresseParameters.concat([
+var adgangsadresseFilterParameters = propertyFilterParameterGroup([
+    {
+      name: 'id',
+      type: 'string',
+      schema: schema.uuid
+    },
+    {
+      name: 'vejkode',
+      type: 'integer',
+      schema: schema.kode4
+    },
+    {
+      name: 'vejnavn'
+    },
+    {
+      name: 'husnr'
+    },
+    {
+      name: 'supplerendebynavn'
+    },
+    {
+      name: 'postnr',
+      type: 'integer',
+      schema: schema.postnr
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer',
+      schema: schema.kode4
+    },
+    {
+      name: 'ejerlavkode',
+      type: 'integer'
+    },
+    {
+      name: 'matrikelnr'
+    },
+    {
+      name: 'esrejendomsnr',
+      type: 'integer'
+    }
+  ]);
+
+var adresseParameters = adgangsadresseFilterParameters.parameters.concat([
   {
     name: 'etage'
   },
@@ -332,10 +475,6 @@ var adresseParameters = adgangsadresseParameters.concat([
     name: 'adgangsadresseid'
   }
 ]);
-
-function polygonWhereClause(paramNumberString){
-  return "ST_Contains(ST_GeomFromText("+paramNumberString+", 4326)::geometry, wgs84geom)\n";
-}
 
 function searchWhereClause(paramNumberString, spec) {
   var columnName = apiSpecUtil.getSearchColumn(spec);
@@ -379,7 +518,7 @@ function toPgSearchQuery(q) {
 
 function endsWith (str, suffix) {
   return str.indexOf(suffix, str.length - suffix.length) !== -1;
-};
+}
 
 function toPgSuggestQuery(q) {
   // normalize whitespace
@@ -537,12 +676,15 @@ function adgangsadresseRowToAutocompleteJson(row, options) {
 
 var adresseApiSpec = {
   model: model.adresse,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
   fields: adresseFields,
   fieldMap: _.indexBy(adresseFields, 'name'),
-  parameters: adresseParameters,
+  parameterGroups: {
+    propertyFilter: propertyFilterParameterGroup(adresseParameters),
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec,
+    crs: crsParameterSpec,
+    geomWithin: geomWithinParameterSpec
+  },
   mappers: {
     json: mapAdresse,
     autocomplete: adresseRowToAutocompleteJson
@@ -551,12 +693,15 @@ var adresseApiSpec = {
 
 var adgangsadresseApiSpec = {
   model: model.adgangsadresse,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
   fields: adgangsadresseFields,
   fieldMap: _.indexBy(adgangsadresseFields, 'name'),
-  parameters: adgangsadresseParameters,
+  parameterGroups: {
+    propertyFilter: adgangsadresseFilterParameters,
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec,
+    crs: crsParameterSpec,
+    geomWithin: geomWithinParameterSpec
+  },
   mappers: {
     json: mapAdgangsadresse,
     autocomplete: adgangsadresseRowToAutocompleteJson
@@ -614,16 +759,7 @@ function vejnavnRowToAutocompleteJson(row, options) {
   };
 }
 
-
-
-var vejnavnApiSpec = {
-  model: model.vejnavn,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
-  fields: vejnavnFields,
-  fieldMap: _.indexBy(vejnavnFields, 'name'),
-  parameters: [
+var vejnavnPropertyFilterParameterGroup = propertyFilterParameterGroup([
     {
       name: 'navn'
     },
@@ -637,7 +773,17 @@ var vejnavnApiSpec = {
       type: 'integer',
       schema: schema.kode4
     }
-  ],
+  ]);
+
+var vejnavnApiSpec = {
+  model: model.vejnavn,
+  fields: vejnavnFields,
+  fieldMap: _.indexBy(vejnavnFields, 'name'),
+  parameterGroups: {
+    propertyFilter: vejnavnPropertyFilterParameterGroup,
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec
+  },
   mappers: {
     json: vejnavnJsonMapper,
     autocomplete: vejnavnRowToAutocompleteJson
@@ -677,15 +823,18 @@ var postnummerFields = [
 
 var postnummerSpec = {
   model: model.postnummer,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
   fields: postnummerFields,
   fieldMap: _.indexBy(postnummerFields, 'name'),
-  parameters: [{name: 'nr'},
-               {name: 'navn'},
-               {name: 'kommune'}
-              ],
+  parameterGroups: {
+    propertyFilter: propertyFilterParameterGroup(
+      [
+        {name: 'nr'},
+        {name: 'navn'},
+        {name: 'kommune'}
+      ]),
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec
+  },
   mappers: {
     json: postnummerJsonMapper,
     autocomplete: postnummerRowToAutocompleteJson
@@ -780,29 +929,30 @@ function vejstykkeRowToAutocompleteJson(row, options) {
 
 var vejstykkeSpec = {
   model: model.vejstykke,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
   fields: vejstykkeFields,
   fieldMap: _.indexBy(vejstykkeFields, 'name'),
-  parameters: [
-    {
-      name: 'kode'
-    },
-    {
-      name: 'kommunekode',
-      type: 'integer',
-      schema: schema.kode4
-    },
-    {
-      name: 'navn'
-    },
-    {
-      name: 'postnr',
-      type: 'integer',
-      schema: schema.postnr
-    }
-  ],
+  parameterGroups: {
+    propertyFilter: propertyFilterParameterGroup([
+      {
+        name: 'kode'
+      },
+      {
+        name: 'kommunekode',
+        type: 'integer',
+        schema: schema.kode4
+      },
+      {
+        name: 'navn'
+      },
+      {
+        name: 'postnr',
+        type: 'integer',
+        schema: schema.postnr
+      }
+    ]),
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec
+  },
   mappers: {
     json: vejstykkeJsonMapper,
     autocomplete: vejstykkeRowToAutocompleteJson
@@ -829,15 +979,16 @@ var kommuneFields = [{name: 'kode', formatter: kode4String}, {name: 'navn'}, {na
 
 var kommuneApiSpec = {
   model: model.kommune,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
   fields: kommuneFields,
   fieldMap: _.indexBy(kommuneFields, 'name'),
-  parameters: [{name: 'navn'},
-               {name: 'kode',
-               type: 'integer'}
-              ],
+  parameterGroups: {
+    propertyFilter: propertyFilterParameterGroup([{name: 'navn'},
+      {name: 'kode',
+        type: 'integer'}
+    ]),
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec
+  },
   mappers: {
     json: kommuneJsonMapper,
     autocomplete: kommuneRowToAutocompleteJson
@@ -904,24 +1055,25 @@ var supplerendeBynavnAutocompleteMapper = function(row, options) {
 
 var supplerendeBynavnApiSpec = {
   model: model.supplerendebynavn,
-  pageable: true,
-  searchable: true,
-  suggestable: true,
   fields: supplerendeBynavnFields,
   fieldMap: _.indexBy(supplerendeBynavnFields, 'name'),
-  parameters: [
-    {
-      name: 'navn'
-    },
-    {
-      name: 'kommunekode',
-      type: 'integer',
-      schema: schema.kode4
-    },
-    {
-      name: 'postnr'
-    }
-  ],
+  parameterGroups: {
+    propertyFilter: propertyFilterParameterGroup([
+      {
+        name: 'navn'
+      },
+      {
+        name: 'kommunekode',
+        type: 'integer',
+        schema: schema.kode4
+      },
+      {
+        name: 'postnr'
+      }
+    ]),
+    search: exports.searchParameterSpec,
+    autocomplete: exports.autocompleteParameterSpec
+  },
   mappers: {
     json: supplerendeByavnJsonMapper,
     autocomplete: supplerendeBynavnAutocompleteMapper
@@ -940,8 +1092,7 @@ var supplerendeBynavnApiSpec = {
   }
 };
 
-
-_.extend(exports, {
+var apiSpecs = {
   adresse: adresseApiSpec,
   adgangsadresse: adgangsadresseApiSpec,
   vejnavn: vejnavnApiSpec,
@@ -949,52 +1100,8 @@ _.extend(exports, {
   vejstykke: vejstykkeSpec,
   kommune: kommuneApiSpec,
   supplerendeBynavn: supplerendeBynavnApiSpec
-});
+};
 
-exports.allSpecNames = _.keys(exports);
+_.extend(exports, apiSpecs);
 
-
-exports.pagingParameterSpec = [
-  {
-    name: 'side',
-    type: 'integer',
-    schema: schema.positiveInteger
-  },
-  {
-    name: 'per_side',
-    type: 'integer',
-    schema: schema.positiveInteger
-  }
-];
-exports.formatParameterSpec = [
-  {
-    name: 'format',
-    schema: {
-      "enum": ['csv', 'json']
-    }
-  },
-  {
-    name: 'callback',
-    schema: {
-      type: 'string',
-      pattern: '^[\\$_a-zA-Z0-9]+$'
-    }
-
-  }
-];
-exports.searchParameterSpec = [
-  {
-    name: 'q',
-    type: 'string',
-    whereClause: searchWhereClause,
-    transform: toPgSearchQuery
-  }
-];
-exports.autocompleteParameterSpec = [
-  {
-    name: 'q',
-    type: 'string',
-    whereClause: searchWhereClause,
-    transform: toPgSuggestQuery
-  }
-];
+exports.allSpecNames = _.keys(apiSpecs);

@@ -1,6 +1,7 @@
 "use strict";
 
 var apiSpec = require('../../apiSpec');
+var apiSpecUtil = require('../../apiSpecUtil');
 var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
@@ -182,12 +183,6 @@ var sampleParameters = {
       verifier: function(adr, esrejendomsnr) {
         return adr.esrejendomsnr === esrejendomsnr;
       }
-    },
-    polygon: {
-      values: [],
-      verifier: function(adr, polygon) {
-
-      }
     }
   },
   adresse: {
@@ -269,36 +264,33 @@ var sampleParameters = {
       verifier: function(adr, esrejendomsnr) {
         return adr.adgangsadresse.esrejendomsnr === esrejendomsnr;
       }
-    },
-    polygon: {
-      values: [], // TODO
-      verifier: function(adr, polygon) {
-
-      }
     }
   }
 };
 
-describe('Alle specificerede parametre skal virke', function() {
+describe('Alle propertyFilter parametre skal virke', function() {
   _.keys(sampleParameters).forEach(function(specName) {
+    var spec = apiSpec[specName];
+    var propertyFilterParameters = spec.parameterGroups.propertyFilter.parameters;
     describe('Alle parametre for ' + specName + ' skal virke', function() {
       it('Alle almindelige parametre for ' + specName + ' bliver testet', function() {
-        var specifiedParameterNames = _.pluck(spec.parameters, 'name');
+        var specifiedParameterNames = _.pluck(propertyFilterParameters, 'name');
         var testedParameterNames = _.keys(sampleParameters[specName]);
         expect(_.difference(specifiedParameterNames, testedParameterNames)).toEqual([]);
       });
-      var spec = apiSpec[specName];
       _.each(sampleParameters[specName], function(sample, paramName) {
         var verify = sample.verifier;
         sample.values.forEach(function(sampleValue) {
           it('Parameteren ' + paramName + '=' + sampleValue + ' skal virke', function(specDone) {
             var rawQueryParams = {};
             rawQueryParams[paramName] = sampleValue;
-            var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(spec.parameters, 'name'));
+            var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(propertyFilterParameters, 'name'));
             expect(parseResult.errors.length).toBe(0);
+            var sqlParts = apiSpecUtil.createSqlParts(spec, {propertyFilter: spec.parameterGroups.propertyFilter}, parseResult.params);
+            sqlParts.limit = 100;
             dbapi.withTransaction(function(err, client, transactionDone) {
               if(err) throw 'unable to open connection';
-              dbapi.query(client, spec, { specified: parseResult.params }, {limit: 100}, function(err, rows) {
+              dbapi.query(client, sqlParts, function(err, rows) {
                 transactionDone();
                 expect(err).toBeFalsy();
                 expect(rows.length).toBeGreaterThan(0);

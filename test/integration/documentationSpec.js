@@ -12,25 +12,20 @@ describe('Parameter documentation', function() {
     describe('Documentation for ' + specName, function() {
       var spec = apiSpec[specName];
       var docSpec = parameterDoc[specName];
+      var parameterGroups = spec.parameterGroups;
+      var parametersWhichShouldBeDocumented = _.reduce(parameterGroups, function(memo, parameterGroup) {
+        return memo.concat(parameterGroup.parameters);
+      }, []);
       var docSpecParameterMap = _.indexBy(docSpec.parameters, 'name');
-      var apiSpecParameterMap = _.indexBy(spec.parameters, 'name');
-      var paramsWhichShouldBeDocumented = spec.parameters;
-      if(spec.searchable) {
-        paramsWhichShouldBeDocumented = paramsWhichShouldBeDocumented.concat(apiSpec.searchParameterSpec);
-      }
-      paramsWhichShouldBeDocumented.forEach(function(parameter) {
+      var apiSpecParameterMap = _.indexBy(parametersWhichShouldBeDocumented, 'name');
+      parametersWhichShouldBeDocumented.forEach(function(parameter) {
         it('The parameter ' + parameter.name + ' should be documented', function() {
           expect(docSpecParameterMap[parameter.name]).toBeDefined();
         });
       });
       docSpec.parameters.forEach(function(docParam) {
         it('The documented parameter ' + docParam.name + ' should be specified', function() {
-          if(docParam.name === 'q') {
-            expect(spec.searchable).toBe(true);
-          }
-          else {
-            expect(apiSpecParameterMap[docParam.name]).toBeDefined();
-          }
+          expect(apiSpecParameterMap[docParam.name]).toBeDefined();
         });
       });
     });

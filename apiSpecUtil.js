@@ -48,3 +48,44 @@ exports.getSearchColumn = function(spec) {
 exports.kode4String = function(kodeAsInteger) {
   return ("0000" + kodeAsInteger).slice(-4);
 };
+
+exports.getParameterGroupsForSpec = function(spec, groupNames, formatParameterSpec, pagingParameterSpec) {
+  var result = {};
+  if(_.contains(groupNames, 'format')) {
+    result.format = formatParameterSpec;
+  }
+  if(_.contains(groupNames,'paging')) {
+    result.paging = pagingParameterSpec;
+  }
+  groupNames.forEach(function(groupName) {
+    if(spec.parameterGroups[groupName]) {
+      result[groupName] = spec.parameterGroups[groupName];
+    }
+  });
+  return result;
+};
+
+ exports.initialQuery = function(spec) {
+  if(spec.baseQuery) {
+    return spec.baseQuery();
+  }
+  var query = {
+    select: "  SELECT * FROM " + spec.model.plural,
+    whereClauses: [],
+    orderClauses: [],
+    offset: undefined,
+    limit: undefined,
+    sqlParams: []
+  };
+  return query;
+};
+
+exports.createSqlParts = function(spec, parameterGroups, params) {
+  var sqlParts = exports.initialQuery(spec);
+  _.each(parameterGroups, function(group) {
+    if(group.applySql) {
+      group.applySql(sqlParts, params, spec);
+    }
+  });
+  return sqlParts;
+};

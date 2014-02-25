@@ -27,7 +27,7 @@ exports.parseParameters = function(params, parameterSpec) {
 function parseParameter(valString, spec) {
   var val = parseParameterType(valString, spec.type);
   jsonSchemaValidation(val, spec.schema);
-  return spec.transform ? spec.transform(val) : val;
+  return val;
 }
 
 function parseParameterType(valString, type) {

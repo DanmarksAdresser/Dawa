@@ -272,6 +272,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     doc: 'ESR Ejendomsnummer. Indtil 6 cifre.'
   },
   {
+    name: 'srid',
+    doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a> for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
+  },
+  {
     name: 'polygon',
     doc: 'Find de adresser, som ligger indenfor det angivne polygon. ' +
       'Polygonet specificeres som et array af koordinater på samme måde som' +
@@ -403,7 +407,7 @@ var adresseDoc = {
      query: [{name:'q', value:'rand'}]},
     {description: 'Find alle adresser som indeholder <em>randers</em> på etage <em>2</em>',
      query: [{name:'q', value:'randers'},{name:'etage', value:'2'}]}
-  ],
+  ]
 
 };
 
