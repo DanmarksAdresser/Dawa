@@ -144,7 +144,7 @@ var geomWithinParameterSpec = {
     }
     if(params.polygon) {
       var polygonAlias = dbapi.addSqlParameter(sqlParts, polygonTransformer(params.polygon));
-      dbapi.addWhereClause(sqlParts, "ST_Contains(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), geom)");
+      dbapi.addWhereClause(sqlParts, "ST_Contains(ST_Transform(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), 25832), geom)");
     }
     if(params.cirkel) {
       var args = params.cirkel.split(',');
