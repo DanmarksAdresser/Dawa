@@ -3,6 +3,7 @@
 var model       = require('./awsDataModel');
 var _           = require('underscore');
 var apiSpecUtil = require('./apiSpecUtil');
+var winston     = require('winston');
 
 
 var kode4String = apiSpecUtil.kode4String;
@@ -882,11 +883,12 @@ var supplerendeBynavnFields = [
 ];
 
 var supplerendeByavnJsonMapper = function(row, options) {
+  var baseUrl = options.baseUrl;
   return {
-    href: makeHref(options.baseUrl, supplerendeBynavnApiSpec, [row.supplerendebynavn]),
+    href: makeHref(baseUrl, supplerendeBynavnApiSpec, [row.supplerendebynavn]),
     navn: row.supplerendebynavn,
-    postnumre: mapPostnummerRefArray(row.postnumre),
-    kommuner: mapKommuneRefArray(row.kommuner, options.baseUrl)
+    postnumre: mapPostnummerRefArray(row.postnumre, baseUrl),
+    kommuner: mapKommuneRefArray(row.kommuner, baseUrl)
   };
 };
 
