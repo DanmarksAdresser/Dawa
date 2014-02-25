@@ -243,7 +243,7 @@ CREATE TABLE  adgangsadresser (
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
   adressepunktaendringsdato TIMESTAMP NULL,
-  geom geometry,
+  geom  geometry(point, 25832),
   tsv tsvector
 );
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
@@ -280,7 +280,7 @@ CREATE INDEX ON adgangsadresser USING gin(tsv);
 UPDATE adgangsadresser SET wgs84 = ST_GeometryFromText('POINT('||wgs84lat||' '||wgs84long||')', 4326)
 WHERE wgs84lat IS NOT NULL AND wgs84long IS NOT NULL;
 
-UPDATE Adgangsadresser SET geom = wgs84::geometry;
+UPDATE adgangsadresser SET geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
 
 \echo '\n***** Correcting data error in ejerlav'
 UPDATE adgangsadresser SET ejerlavnavn = 'DEN NORDVESTLIGE DEL, HØRBY'
