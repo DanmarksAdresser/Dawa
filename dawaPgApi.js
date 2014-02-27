@@ -104,7 +104,7 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
       dbapi.query(client, sqlParts, function(err, rows) {
         done(err);
         if (err) {
-          sendInternalServerError(res, err);
+          return sendPostgresQueryError(res, err);
         } else if (rows.length === 1) {
 // TODO fix validation rules
 //            var adr = spec.mappers.json(result.rows[0]);
@@ -147,7 +147,8 @@ function publishQuery(app, spec) {
       dbapi.stream(client, sqlParts, function(err, stream) {
         if(err) {
           winston.error("Error executing cursor query: %j", err, {});
-          return done(err);
+          done(err);
+          return sendPostgresQueryError(res, err);
         }
         streamHttpResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
@@ -282,8 +283,8 @@ function publishAutocomplete(app, spec) {
     withPsqlClient(res, function(client, done) {
       dbapi.stream(client, sqlParts, function(err, stream) {
         if(err) {
-          sendInternalServerError(res, "Failed to execute query");
-          return done(err);
+          done(err);
+          return sendPostgresQueryError(res, err);
         }
         streamAutocompleteResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
@@ -411,6 +412,12 @@ function sendResourceKeyFormatError(res, details){
                        details: details});
 }
 
+function sendPostgresQueryError(res, details) {
+  sendError(res, 400, {type: "InvalidRequestError",
+    title: "The request resulted in an invalid database query, probably due to bad query parameters",
+    details: details.hint});
+}
+
 function sendAddressNotFoundError(res, details){
   sendError(res, 404, {type: "AddressNotFoundError",
                        title: "The given UUID does not match any address.",
@@ -426,6 +433,7 @@ function sendInternalServerError(res, details){
 }
 
 function sendError(res, code, message){
+  res.statusCode = code;
   res.setHeader('Content-Type', 'application/problem+json; charset=UTF-8');
-  res.send(code, jsonStringifyPretty(message));
-}
+  res.end(jsonStringifyPretty(message));
+};
