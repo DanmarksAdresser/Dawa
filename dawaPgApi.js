@@ -63,6 +63,7 @@ function parseParameters(parameterGroups, rawParams) {
     var parseResult = parameterParsing.parseParameters(rawParams, _.indexBy(parameterSpec.parameters, 'name'));
     memo.errors = memo.errors.concat(parseResult.errors);
     memo[groupName] = parseResult.params;
+    memo[groupName].errors = parseResult.errors;
     _.extend(memo.params, parseResult.params);
     return memo;
   }, {
@@ -79,28 +80,24 @@ function publishGetByKey(app, spec) {
     return memo + '/:' + key;
   }, '/' + spec.model.plural);
   app.get(path, function (req, res) {
-    // Parsing the path parameters, which constitutes the key
-    var parseParamsResult = parameterParsing.parseParameters(req.params, _.indexBy(spec.parameterGroups.propertyFilter.parameters, 'name'));
-    if (parseParamsResult.errors.length > 0){
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'crs'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
+    var rawParams = {};
+    _.extend(rawParams, req.query, req.params);
+    var parameterParseResult = parseParameters(parameterGroups, rawParams);
+    if (parameterParseResult.propertyFilter.errors.length > 0){
       var keyValues = _.reduce(keyArray, function(memo, key) {
         memo.push(req.params[key]);
         return memo;
       }, []);
-      return sendResourceKeyFormatError(res, "The resource-key is ill-formed: " + keyValues.join(', ') + ". "+parseParamsResult.errors[0][1]);
+      return sendResourceKeyFormatError(res, "The resource-key is ill-formed: " + keyValues.join(', ') + ". "+parameterParseResult.propertyFilter.errors[0][1]);
+    }
+    if(parameterParseResult.errors.length > 0) {
+      return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
-    // Parsing format parameters
-    var formatParamsParseResult = parameterParsing.parseParameters(req.query, _.indexBy(apiSpec.formatParameterSpec.parameters, 'name'));
-    if(formatParamsParseResult.errors.length > 0) {
-      return sendQueryParameterFormatError(res, formatParamsParseResult.errors);
-    }
-
-    var formatParams = formatParamsParseResult.params;
 
 
-    var sqlParts = apiSpecUtil.createSqlParts(spec, {
-      propertyFilter: spec.parameterGroups.propertyFilter
-    }, parseParamsResult.params);
+    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, parameterParseResult.params);
 
     // Getting the data
     withPsqlClient(res, function (client, done) {
@@ -115,8 +112,9 @@ function publishGetByKey(app, spec) {
 //              .then(function (report) {
 //                // The good case.  The rest is error handling!
           sendSingleResultToHttpResponse(rows[0], res, spec, {
-            formatParams: formatParams,
-            baseUrl: baseUrl(req)
+            formatParams: parameterParseResult.format,
+            baseUrl: baseUrl(req),
+            srid: parameterParseResult.params.srid || 4326
           });
 //              })
 //              .catch(function (err) {
@@ -189,7 +187,8 @@ function publishQuery(app, spec) {
         }
         streamHttpResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
-          baseUrl: baseUrl(req)
+          baseUrl: baseUrl(req),
+          srid: parameterParseResult.srid || 4326
         }, done);
       });
     });
@@ -198,7 +197,7 @@ function publishQuery(app, spec) {
 
 function sendSingleResultToHttpResponse(result, res, spec, options, done) {
   done = done ? done : function() {};
-  var format = options.formatParams.format;
+  var format = options.formatParams.format || 'json';
   var callback = options.formatParams.callback;
   if(format === 'csv') {
     return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, done);
@@ -206,13 +205,13 @@ function sendSingleResultToHttpResponse(result, res, spec, options, done) {
   else if(callback) {
     setJsonpContentHeader(res);
     res.write(options.formatParams.callback + "(");
-    res.write(jsonStringifyPretty(spec.mappers.json(result, { baseUrl: options.baseUrl })));
+    res.write(jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid })));
     res.end(");");
     done();
   }
   else {
     setJsonContentHeader(res);
-    res.end(jsonStringifyPretty(spec.mappers.json(result, { baseUrl: options.baseUrl })));
+    res.end(jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid })));
     done();
   }
 }
@@ -226,13 +225,12 @@ function sendSingleResultToHttpResponse(result, res, spec, options, done) {
  * @param done called upon completion
  */
 function streamHttpResponse(stream, res, spec, options, done) {
-  var format = options.formatParams.format;
+  var format = options.formatParams.format || 'json';
   var callback = options.formatParams.callback;
   if(format === 'csv') {
     return streamCsvToHttpResponse(stream, spec, res, done);
   }
-
-  var objectStream = dbapi.transformToObjects(stream, spec, 'json', { baseUrl: options.baseUrl });
+  var objectStream = dbapi.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl, srid: options.srid });
   if(callback) {
     return streamJsonpToHttpResponse(objectStream, callback, res, done);
   }

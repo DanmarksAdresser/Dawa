@@ -65,9 +65,9 @@ exports.getParameterGroupsForSpec = function(spec, groupNames, formatParameterSp
   return result;
 };
 
- exports.initialQuery = function(spec) {
+ exports.initialQuery = function(spec, params) {
   if(spec.baseQuery) {
-    return spec.baseQuery();
+    return spec.baseQuery(params);
   }
   var query = {
     select: "  SELECT * FROM " + spec.model.plural,
@@ -81,7 +81,7 @@ exports.getParameterGroupsForSpec = function(spec, groupNames, formatParameterSp
 };
 
 exports.createSqlParts = function(spec, parameterGroups, params) {
-  var sqlParts = exports.initialQuery(spec);
+  var sqlParts = exports.initialQuery(spec, params);
   _.each(parameterGroups, function(group) {
     if(group.applySql) {
       group.applySql(sqlParts, params, spec);

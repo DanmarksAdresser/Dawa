@@ -190,7 +190,7 @@ exports.formatParameterSpec = {
     {
       name: 'format',
       schema: {
-        "enum": ['csv', 'json']
+        "enum": ['csv', 'json', 'geojson']
       }
     },
     {
@@ -659,14 +659,7 @@ function mapAdgangsadresse(rs, options){
     'ændret': d(rs.a_aendret)
   };
   adr.adgangspunkt = {
-    etrs89koordinat: rs.oest && rs.nord ? {
-      'øst': rs.oest,
-      nord:  rs.nord
-    } : null,
-    wgs84koordinat: rs.lat && rs.long ?  {
-      'længde': rs.lat,
-      bredde: rs.long
-    } : null,
+    koordinat: rs.geom_json ? JSON.parse(rs.geom_json) : null,
     'nøjagtighed': maybeNull(rs.noejagtighed),
     kilde: maybeNull(rs.kilde),
     tekniskstandard: maybeNull(rs.tekniskstandard),
@@ -713,6 +706,21 @@ function adgangsadresseRowToAutocompleteJson(row, options) {
   };
 }
 
+function mapAdresseGeoJson(row, options) {
+  var result= {};
+  result.type = 'Feature';
+  if(row.geom_json) {
+    result.geometry = JSON.parse(row.geom_json);
+  }
+  result.crs = {
+    type: 'name',
+    properties: {
+      name: 'EPSG:' + options.srid
+    }
+  };
+  result.properties = mapAdresse(row, options);
+  return result;
+}
 
 var adresseApiSpec = {
   model: model.adresse,
@@ -727,9 +735,25 @@ var adresseApiSpec = {
   },
   mappers: {
     json: mapAdresse,
-    autocomplete: adresseRowToAutocompleteJson
+    autocomplete: adresseRowToAutocompleteJson,
+    geojson: mapAdresseGeoJson
   }
 };
+function mapAdgangsadresseGeoJson(row, options) {
+  var result= {};
+  result.type = 'Feature';
+  if(row.geom_json) {
+    result.geometry = JSON.parse(row.geom_json);
+  }
+  result.crs = {
+    type: 'name',
+    properties: {
+      name: 'EPSG:' + options.srid
+    }
+  };
+  result.properties = mapAdgangsadresse(row, options);
+  return result;
+}
 
 var adgangsadresseApiSpec = {
   model: model.adgangsadresse,
@@ -745,15 +769,19 @@ var adgangsadresseApiSpec = {
   },
   mappers: {
     json: mapAdgangsadresse,
-    autocomplete: adgangsadresseRowToAutocompleteJson
+    autocomplete: adgangsadresseRowToAutocompleteJson,
+    geojson: mapAdgangsadresseGeoJson
   },
-  baseQuery: function() {
-    return {
-      select: 'SELECT * from AdgangsadresserView',
+  baseQuery: function(parameters) {
+    var baseQuery ={
+      select: '',
       whereClauses: [],
       orderClauses: [],
       sqlParams: []
     };
+    var sridAlias = dbapi.addSqlParameter(baseQuery, parameters.srid || 4326);
+    baseQuery.select = 'SELECT *, ST_AsGeoJSON(ST_Transform(AdgangsadresserView.geom,' + sridAlias + ')) AS geom_json from AdgangsadresserView';
+    return baseQuery;
   }
 };
 

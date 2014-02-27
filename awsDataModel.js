@@ -83,32 +83,22 @@ var definitions = {
   'DateTime': {
     type: 'string'
   },
-  'Wgs84koordinat': schemaObject({
-      properties: {
-        'bredde': {
-          description: 'Breddegraden til adgangspunktets koordinatsæt.',
-          type: 'number'
-        },
-        'længde': {
-          description: 'Lændegraden til adgangspunktets koordinatsæt.',
+  GeoJsonPunkt: schemaObject({
+    properties: {
+      'type': {
+        description: 'Har altid værdien \'Point\'.',
+        enum: ['Point']
+      },
+      coordinates: {
+        type: 'array',
+        items: {
+          description: 'koordinateterne for punktet.',
           type: 'number'
         }
-      },
-      docOrder: ['bredde', 'længde']
-    }),
-  'Etrs89koordinat': schemaObject({
-      properties: {
-        'øst': {
-          description: 'Østlige koordinat til adgangspunktets koordinatsæt.',
-          type: 'number'
-        },
-        'nord': {
-          description: 'Nordlige koordinat til adgangspunktets koordinatsæt. ',
-          type: 'number'
-        }
-      },
-      docOrder: ['øst', 'nord']
-    }),
+      }
+    },
+    docOrder: ['type', 'coordinates']
+  }),
   Postnr: {
     type: 'string',
     pattern: "^[\\d]{4}$"
@@ -439,14 +429,9 @@ var adgangsAdresseSchema = globalSchemaObject({
     'adgangspunkt': schemaObject({
       description: 'Geografisk punkt, som angiver særskilt adgang fra navngiven vej ind på et areal eller bygning.',
       properties: {
-        etrs89koordinat: {
-          description: 'Adgangspunktets koordinatsæt angivet i koordinatsystemet ' +
-            'UTM zone 32 og ved brug af fælles europæiske terrestriale referencesystem EUREF89/ETRS89.',
-          $ref: '#/definitions/NullableEtrs89koordinat'
-        },
-        wgs84koordinat: {
-          description: 'Adgangspunktets koordinatsæt angivet i koordinatsystemet WGS84/geografisk.',
-          $ref: '#/definitions/NullableWgs84koordinat'
+        koordinat: {
+          description: 'Adgangspunktets koordinat angivet i GeoJSON format',
+          $ref: '#/definitions/NullableGeoJsonPunkt'
         },
         nøjagtighed: {
           description: 'Kode der angiver nøjagtigheden for adressepunktet. ' +
@@ -490,7 +475,7 @@ var adgangsAdresseSchema = globalSchemaObject({
           '$ref': '#/definitions/NullableDateTime'
         }
       },
-      docOrder: ['etrs89koordinat', 'wgs84koordinat','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
+      docOrder: ['koordinat','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
     }),
     'DDKN': schemaObject({
       nullable: true,

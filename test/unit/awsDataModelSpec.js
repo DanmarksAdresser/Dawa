@@ -116,13 +116,12 @@ describe("Adresse schema validation", function () {
           },
           "matrikelnr": "3b",
           "adgangspunkt": {
-            "etrs89koordinat": {
-              "øst": 6146489.42,
-              "nord": 661986.43
-            },
-            "wgs84koordinat": {
-              "længde": 11.5605367427032,
-              "bredde": 55.4377705205619
+            "koordinat": {
+              "type": "Point",
+              "coordinates": [
+                10.1072927531609,
+                56.3303963702154
+              ]
             },
             "nøjagtighed": "A",
             "kilde": 5,
