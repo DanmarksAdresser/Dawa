@@ -133,7 +133,11 @@ var geomWithinParameterSpec = {
     },
     {
       name: 'cirkel',
-      type: 'string'
+      type: 'string',
+      schema:{
+        type: 'string',
+        pattern: '^((\\+|\\-)?[0-9]+(\\.[0-9]*)?),((\\+|\\-)?[0-9]+(\\.[0-9]*)?),((\\+|\\-)?[0-9]+(\\.[0-9]*)?)$'
+      }
     }
   ],
   applySql: function(sqlParts, params, spec) {
@@ -148,9 +152,9 @@ var geomWithinParameterSpec = {
     }
     if(params.cirkel) {
       var args = params.cirkel.split(',');
-      var x = args[0];
-      var y = args[1];
-      var r = args[2];
+      var x = parseFloat(args[0]);
+      var y = parseFloat(args[1]);
+      var r = parseFloat(args[2]);
       var point = "POINT(" + x + " " + y + ")";
       var pointAlias = dbapi.addSqlParameter(sqlParts, point);
       var radiusAlias = dbapi.addSqlParameter(sqlParts, r);

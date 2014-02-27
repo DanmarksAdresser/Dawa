@@ -413,9 +413,11 @@ function sendResourceKeyFormatError(res, details){
 }
 
 function sendPostgresQueryError(res, details) {
-  sendError(res, 400, {type: "InvalidRequestError",
+  var msg = {type: "InvalidRequestError",
     title: "The request resulted in an invalid database query, probably due to bad query parameters",
-    details: details.hint});
+    details: details.hint};
+  winston.info("Postgres query error %j", msg, {});
+  sendError(res, 400, msg);
 }
 
 function sendAddressNotFoundError(res, details){
@@ -434,6 +436,7 @@ function sendInternalServerError(res, details){
 
 function sendError(res, code, message){
   res.statusCode = code;
+//  winston.debug("Sending error message %j", message, {});
   res.setHeader('Content-Type', 'application/problem+json; charset=UTF-8');
   res.end(jsonStringifyPretty(message));
-};
+}
