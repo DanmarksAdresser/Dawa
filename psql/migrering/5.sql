@@ -66,8 +66,8 @@ CREATE VIEW adresser AS
   FROM enhedsadresser E
     LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
-ALTER TABLE adgangsadresser ENABLE TRIGGER ALL;
 COMMIT;
 update adgangsadresser set geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
 
+ALTER TABLE adgangsadresser ENABLE TRIGGER ALL;
