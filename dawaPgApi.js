@@ -76,9 +76,9 @@ function publishGetByKey(app, spec) {
   var keyArray = apiSpecUtil.getKeyForFilter(spec);
 
   var path = _.reduce(keyArray, function(memo, key) {
-
     return memo + '/:' + key;
   }, '/' + spec.model.plural);
+
   app.get(path, function (req, res) {
     var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'crs'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
     var rawParams = {};
