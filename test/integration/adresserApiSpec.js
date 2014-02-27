@@ -20,7 +20,7 @@ describe('When searching for polygons and zipcodes', function () {
 
   it('both should be used', function (done) {
     request.get('http://localhost:3000/adresser'+
-                '?polygon=[[[55.3, 9.4], [55.6, 12.7], [55.601, 12.7], [55.301, 9.4], [55.3, 9.4]]]'+
+                '?polygon=[[[9.4,55.3], [12.7,55.6], [12.7,55.601], [9.4,55.301], [9.4,55.3]]]'+
                 '&postnr=2690',
                 function(error, response, body){
                   if (response.statusCode != "200"){
