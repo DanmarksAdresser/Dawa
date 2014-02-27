@@ -42,6 +42,9 @@ exports.setupRoutes = function () {
     if(spec.parameterGroups.autocomplete) {
       publishAutocomplete(app, spec);
     }
+    if(spec.parameterGroups.reverseGeocoding) {
+      publishReverseGeocoding(app, spec);
+    }
     publishGetByKey(app, spec);
     publishQuery(app, spec);
   });
@@ -69,7 +72,7 @@ function parseParameters(parameterGroups, rawParams) {
 }
 
 function publishGetByKey(app, spec) {
-var keyArray = apiSpecUtil.getKeyForFilter(spec);
+  var keyArray = apiSpecUtil.getKeyForFilter(spec);
 
   var path = _.reduce(keyArray, function(memo, key) {
 
@@ -128,6 +131,40 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
     });
   });
 }
+
+
+function publishReverseGeocoding(app, spec) {
+  app.get('/'+ spec.model.plural+'/reverse', function (req, res) {
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(
+      spec,
+      ['format', 'crs', 'reverseGeocoding'],
+      apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec
+    );
+
+    var parameterParseResult = parseParameters(parameterGroups, req.query);
+    if (parameterParseResult.errors.length > 0){
+      return sendQueryParameterFormatError(res, parameterParseResult.errors);
+    }
+
+    // Getting the data
+    withPsqlClient(res, function (client, done) {
+      dbapi.query(client, apiSpecUtil.createSqlParts(spec, parameterGroups, parameterParseResult.params), function(err, rows) {
+        done();
+        if (err) {
+          sendInternalServerError(res, err);
+        } else if (rows.length === 1) {
+          sendSingleResultToHttpResponse(rows[0], res, spec, {
+            formatParams: parameterParseResult.params,
+            baseUrl: baseUrl(req)
+          });
+        } else {
+          sendInternalServerError(res, "Reverse geocoding results in more than one address: "+rows);
+        }
+      });
+    });
+  });
+}
+
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
 

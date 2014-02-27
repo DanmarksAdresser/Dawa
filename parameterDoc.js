@@ -308,7 +308,15 @@ var adgangsadresseDoc = {
     {
       name: 'id',
       doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
-    }
+    },
+    {
+      name: 'x',
+      doc: 'X koordinat (longitude, øst)'
+    },
+    {
+      name: 'y',
+      doc: 'Y koordinat (latitude, nord)'
+    },
   ].concat(parametersForBothAdresseAndAdgangsAdresse),
   examples: {
     query: [
@@ -409,8 +417,8 @@ var adresseDoc = {
   autocompleteExamples: [
     {description: 'Find alle adresser som indeholder <em>rand</em>',
      query: [{name:'q', value:'rand'}]},
-    {description: 'Find alle adresser som indeholder <em>randers</em> på etage <em>2</em>',
-     query: [{name:'q', value:'randers'},{name:'etage', value:'2'}]}
+    {description: 'Find alle adresser som indeholder <em>randers</em> på postnr <em>8450</em>',
+     query: [{name:'q', value:'randers'},{name:'postnr', value:'8450'}]}
   ]
 
 };

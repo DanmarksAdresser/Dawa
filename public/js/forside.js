@@ -257,17 +257,17 @@ function inverseGeocoding()
   function onMapClick(e) {
     // marker= L.marker(e.latlng).addTo(map);
     // marker.bindPopup(e.latlng.toString()).openPopup();
-    var url = "/adresser/" + e.latlng.lat.toString() + "," + e.latlng.lng.toString() + ".json";
+    var url = "/adgangsadresser/reverse?x=" + e.latlng.lng.toString() + "&y=" + e.latlng.lat.toString();
     $.ajax({
       url: url,
       dataType: "jsonp",
       success: function(data) {
         var popup = L.popup();
         popup
-          .setLatLng(new L.LatLng(data.adressepunkt.wgs84koordinat.bredde,data.adressepunkt.wgs84koordinat.længde))
-          .setContent((data.bygningsnavn.length > 0?data.bygningsnavn + "<br>":"") +
-                      data.vej.navn + " " + data.husnr + "<br>" +
-                      (data.supplerendebynavn.length > 0?data.supplerendebynavn + "<br>":"") +
+          .setLatLng(new L.LatLng(data.adgangspunkt.wgs84koordinat.længde, data.adgangspunkt.wgs84koordinat.bredde))
+          .setContent((data.bygningsnavn ? data.bygningsnavn + "<br>":"") +
+                      data.vejstykke.navn + " " + data.husnr + "<br>" +
+                      (data.supplerendebynavn ? data.supplerendebynavn + "<br>":"") +
                       data.postnummer.nr + " " + data.postnummer.navn )
           .openOn(map);
       }

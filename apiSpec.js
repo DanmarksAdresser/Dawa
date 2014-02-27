@@ -201,6 +201,24 @@ exports.formatParameterSpec = {
       }
     }
   ]};
+
+var reverseGeocodingSpec =
+  {parameters: [{name: 'x',    type: 'float'},
+                {name: 'y',    type: 'float'}],
+
+   applySql: function(sqlParts, params, spec) {
+     if (!params.srid){ params.srid = 4326;}
+
+     var orderby =
+       "geom <-> ST_Transform(ST_SetSRID(ST_Point("
+       +dbapi.addSqlParameter(sqlParts, params.x)+", "
+       +dbapi.addSqlParameter(sqlParts, params.y)+"), "
+       +dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)::geometry";
+     sqlParts.orderClauses.push(orderby);
+     sqlParts.limit = "1";
+   }
+  };
+
 exports.searchParameterSpec = {
   parameters: [
     {
@@ -215,6 +233,7 @@ exports.searchParameterSpec = {
     }
   }
 };
+
 exports.autocompleteParameterSpec = {
   parameters: [
     {
@@ -721,7 +740,8 @@ var adgangsadresseApiSpec = {
     search: exports.searchParameterSpec,
     autocomplete: exports.autocompleteParameterSpec,
     crs: crsParameterSpec,
-    geomWithin: geomWithinParameterSpec
+    geomWithin: geomWithinParameterSpec,
+    reverseGeocoding: reverseGeocodingSpec
   },
   mappers: {
     json: mapAdgangsadresse,
