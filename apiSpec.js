@@ -202,7 +202,7 @@ exports.formatParameterSpec = {
     }
   ]};
 
-var reverseGeocodingSpec =
+var reverseGeocodingParameterSpec =
   {parameters: [{name: 'x',    type: 'float'},
                 {name: 'y',    type: 'float'}],
 
@@ -765,7 +765,7 @@ var adgangsadresseApiSpec = {
     autocomplete: exports.autocompleteParameterSpec,
     crs: crsParameterSpec,
     geomWithin: geomWithinParameterSpec,
-    reverseGeocoding: reverseGeocodingSpec
+    reverseGeocoding: reverseGeocodingParameterSpec
   },
   mappers: {
     json: mapAdgangsadresse,
