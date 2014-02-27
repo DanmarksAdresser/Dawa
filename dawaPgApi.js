@@ -102,7 +102,7 @@ var keyArray = apiSpecUtil.getKeyForFilter(spec);
     // Getting the data
     withPsqlClient(res, function (client, done) {
       dbapi.query(client, sqlParts, function(err, rows) {
-        done();
+        done(err);
         if (err) {
           sendInternalServerError(res, err);
         } else if (rows.length === 1) {
@@ -147,9 +147,7 @@ function publishQuery(app, spec) {
       dbapi.stream(client, sqlParts, function(err, stream) {
         if(err) {
           winston.error("Error executing cursor query: %j", err, {});
-          done();
-
-          throw err;
+          return done(err);
         }
         streamHttpResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
@@ -284,9 +282,8 @@ function publishAutocomplete(app, spec) {
     withPsqlClient(res, function(client, done) {
       dbapi.stream(client, sqlParts, function(err, stream) {
         if(err) {
-          done();
           sendInternalServerError(res, "Failed to execute query");
-          throw err;
+          return done(err);
         }
         streamAutocompleteResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
