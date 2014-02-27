@@ -5,8 +5,6 @@ ALTER TABLE adgangsadresser DISABLE TRIGGER ALL;
 
 alter table adgangsadresser drop column geom;
 alter table adgangsadresser add column geom geometry(point, 25832);
-update adgangsadresser set geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
-CREATE INDEX ON Adgangsadresser USING GIST (geom);
 
 CREATE VIEW AdgangsadresserView AS
   SELECT
@@ -70,4 +68,6 @@ CREATE VIEW adresser AS
 
 ALTER TABLE adgangsadresser ENABLE TRIGGER ALL;
 COMMIT;
+update adgangsadresser set geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
+CREATE INDEX ON Adgangsadresser USING GIST (geom);
 
