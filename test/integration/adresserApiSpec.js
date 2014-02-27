@@ -20,15 +20,14 @@ describe('When searching for polygons and zipcodes', function () {
 
   it('both should be used', function (done) {
     request.get('http://localhost:3000/adresser'+
-                '?polygon=[[[9.4,55.3], [12.7,55.6], [12.7,55.601], [9.4,55.301], [9.4,55.3]]]'+
-                '&postnr=2690',
+                '?polygon=[[[10.3,55.3], [10.4,55.3], [10.4,55.4], [10.4,55.4], [10.3,55.3]]]&postnr=5000',
                 function(error, response, body){
                   if (response.statusCode != "200"){
                     done(response.statusCode);
                   } else {
                     var adrs = JSON.parse(body);
                     // TODO Naar alle enhedsadresser er oprettet vil dette resultere i 152
-                    expect(adrs.length).toBe(177);
+                    expect(adrs.length).toBe(390);
                     done();
                   }
                 });
