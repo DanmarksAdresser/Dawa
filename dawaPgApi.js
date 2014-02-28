@@ -416,10 +416,12 @@ var jsonSep = {
 function geojsonFeatureSep(crsUri) {
   return {
     open: '{\n' +
-      '"type": "FeatureCollection",\n' +
-      '"crs": {' +
-      '\n"type": "name",' +
-      '\n"properties": {"name": "' + crsUri + '"}\n}\n,"features":[',
+      '  "type": "FeatureCollection",\n' +
+      '  "crs": {\n' +
+      '    "type": "name",\n' +
+      '    "properties": {"name": "' + crsUri + '"}\n'+
+      '  },\n'+
+      '  "features": [\n',
     separator: ', ',
     close: ']\n}'
   };
