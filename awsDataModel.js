@@ -86,7 +86,7 @@ var definitions = {
   GeoJsonCoordinates: {
     type: 'array',
     items: {
-      description: 'koordinateterne for punktet.',
+      description: 'koordinat for punktet.',
       type: 'number'
     },
     "minItems": 2,

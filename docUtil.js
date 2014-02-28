@@ -111,7 +111,7 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
       result.items = exports.extractDocumentationForObject(itemDef);
     }
     else {
-      throw 'Simple arrays not yet supported';
+      result.items = [exports.extractDocumentationForProperty(itemDef, 'item')];
     }
   }
   else if (isType(propertyDef.type,'object')) {
