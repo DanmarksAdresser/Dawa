@@ -188,7 +188,7 @@ function publishQuery(app, spec) {
         streamRowsHttpResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
           baseUrl: baseUrl(req),
-          srid: parameterParseResult.srid || 4326
+          srid: parameterParseResult.params.srid || 4326
         }, done);
       });
     });
