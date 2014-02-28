@@ -210,7 +210,6 @@ function sendSingleResultToHttpResponse(result, res, spec, options) {
     res.end(sep.close);
   }
   else {
-    console.log('ending with ' + textObject);
     res.end(textObject);
   }
 }

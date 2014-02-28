@@ -31,8 +31,6 @@ describe('Parameter documentation.', function() {
           });
         });
       } else {
-        console.log(docSpec);
-
         // Checking version 2 of parameter doc.
 
         var pg = parameterGroups;
