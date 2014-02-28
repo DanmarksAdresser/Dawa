@@ -344,8 +344,9 @@ var adgangsadresseDoc = {
                           {name:'postnr', value:'8600'}]}]},
 
     '/adgangsadresser/reverse':{
-      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes'
-        +'ETRS89/UTM32 med <em>srid=4326</em> eller WGS84/geografisk med <em>srid=25832</em>.  Default er WGS84.',
+      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes '
+        +'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller '
+        +'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
       parameters: [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '
                     +'anvendex angives bredde-værdien.'},
                    {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '
