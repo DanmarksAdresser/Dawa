@@ -116,13 +116,10 @@ describe("Adresse schema validation", function () {
           },
           "matrikelnr": "3b",
           "adgangspunkt": {
-            "koordinat": {
-              "type": "Point",
-              "coordinates": [
-                10.1072927531609,
-                56.3303963702154
-              ]
-            },
+            "koordinater": [
+              10.1072927531609,
+              56.3303963702154
+            ],
             "nøjagtighed": "A",
             "kilde": 5,
             "tekniskstandard": "TK",

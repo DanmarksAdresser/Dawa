@@ -185,7 +185,7 @@ function publishQuery(app, spec) {
           done(err);
           return sendPostgresQueryError(res, err);
         }
-        streamHttpResponse(stream, res, spec, {
+        streamRowsHttpResponse(stream, res, spec, {
           formatParams: parameterParseResult.format,
           baseUrl: baseUrl(req),
           srid: parameterParseResult.srid || 4326
@@ -195,27 +195,63 @@ function publishQuery(app, spec) {
   });
 }
 
-function sendSingleResultToHttpResponse(result, res, spec, options, done) {
-  done = done ? done : function() {};
+function sendSingleResultToHttpResponse(result, res, spec, options) {
   var format = options.formatParams.format || 'json';
   var callback = options.formatParams.callback;
+  setAppropriateContentHeader(res, format, callback);
   if(format === 'csv') {
-    return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, done);
+    return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, function() {});
   }
-  else if(callback) {
-    setJsonpContentHeader(res);
-    res.write(options.formatParams.callback + "(");
-    res.write(jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid })));
-    res.end(");");
-    done();
+  var textObject = jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid }));
+  if(callback) {
+    var sep = jsonpSep(callback, {open: '', separator: '', close: ''});
+    res.write(sep.open);
+    res.write(textObject);
+    res.end(sep.close);
   }
   else {
-    setJsonContentHeader(res);
-    res.end(jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid })));
-    done();
+    console.log('ending with ' + textObject);
+    res.end(textObject);
   }
 }
 
+function toGeoJsonUrn(srid) {
+  return 'EPSG:' + srid;
+}
+
+function computeSeparator(format, options, callbackName) {
+  var sep = format === 'geojson' ? geojsonFeatureSep(toGeoJsonUrn(options.srid)) : jsonSep;
+  if (callbackName) {
+    sep = jsonpSep(callbackName, sep);
+  }
+  return sep;
+}
+function transformToText(objectStream, format, callbackName, options) {
+  var sep = computeSeparator(format, options, callbackName);
+  return eventStream.pipeline(
+    objectStream,
+    new JsonStringifyStream(undefined, 2, sep)
+  );
+}
+
+/**
+ * Compute the appropriate Content-Type header based on the format and
+ */
+function contentHeader(format, jsonpCallbackName) {
+  if(format == 'csv') {
+    return 'text/csv; charset=UTF-8';
+  }
+  else if (jsonpCallbackName) {
+    return "application/javascript; charset=UTF-8";
+  }
+  else {
+    return 'application/json; charset=UTF-8';
+  }
+}
+
+function setAppropriateContentHeader(res, format, callback) {
+  res.setHeader('Content-Type', contentHeader(format, callback));
+}
 /**
  * Sends a stream DB query rows to the http response in the appropriate format
  * @param stream a stream of database rows
@@ -224,19 +260,16 @@ function sendSingleResultToHttpResponse(result, res, spec, options, done) {
  * @param options must contain formatParams
  * @param done called upon completion
  */
-function streamHttpResponse(stream, res, spec, options, done) {
+function streamRowsHttpResponse(stream, res, spec, options, done) {
   var format = options.formatParams.format || 'json';
   var callback = options.formatParams.callback;
+  setAppropriateContentHeader(res, format, callback);
   if(format === 'csv') {
     return streamCsvToHttpResponse(stream, spec, res, done);
   }
-  var objectStream = dbapi.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl, srid: options.srid });
-  if(callback) {
-    return streamJsonpToHttpResponse(objectStream, callback, res, done);
-  }
-  else {
-    return streamJsonToHttpResponse(objectStream, res, done);
-  }
+  var objectStream = dbapi.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl });
+  var textStream = transformToText(objectStream, format, callback, options);
+  streamToHttpResponse(textStream, res, {}, done);
 }
 
 /**
@@ -255,12 +288,9 @@ function streamAutocompleteResponse(stream, res, spec, options, done) {
     return sendInternalServerError(res, "CSV for autocomplete not supported");
   }
   var objectStream = dbapi.transformToObjects(stream, spec, 'autocomplete', {baseUrl: options.baseUrl } );
-  if(callback) {
-    return streamJsonpToHttpResponse(objectStream, options.formatParams.callback, res, done);
-  }
-  else {
-    return streamJsonToHttpResponse(objectStream, res, done);
-  }
+  var textStream = transformToText(objectStream, 'json', options.formatParams.callback, {});
+  setAppropriateContentHeader(res, format, callback);
+  streamToHttpResponse(textStream, res, {}, done);
 }
 
 /**
@@ -272,13 +302,8 @@ function applyDefaultPagingForAutocomplete(pagingParams) {
   }
 }
 
-function setCsvContentHeader(res) {
-  res.setHeader('Content-Type', 'text/csv; charset=UTF-8');
-}
-
 function streamCsvToHttpResponse(rowStream, spec, res, cb) {
   var fields = spec.fields;
-  setCsvContentHeader(res);
   var csvTransformer = csv();
   csvTransformer.to.options({
     header: true,
@@ -347,31 +372,26 @@ function withPsqlClient(res, callback) {
   });
 }
 
-function setJsonpContentHeader(res) {
-  res.setHeader('Content-Type', "application/javascript; charset=UTF-8");
-}
-
 function jsonStringifyPretty(object){
   return JSON.stringify(object, undefined, 2);
 }
 
 util.inherits(JsonStringifyStream, Transform);
-function JsonStringifyStream(replacer, space, beginText, endText) {
+function JsonStringifyStream(replacer, space, sep) {
   Transform.call(this, {
     objectMode: true
   });
   this.replacer = replacer;
   this.space = space;
   this.headerWritten = false;
-  this.beginText = beginText ? beginText : '[\n';
-  this.endText = endText ? endText : '\n]';
+  this.sep = sep ? sep : { open: '[\n', separator: ',\n', close: '\n]'};
 }
 
 JsonStringifyStream.prototype._flush = function(cb) {
   if(!this.headerWritten) {
-    this.push(this.beginText);
+    this.push(this.sep.open);
   }
-  this.push(this.endText);
+  this.push(this.sep.close);
   cb();
 };
 
@@ -379,40 +399,39 @@ JsonStringifyStream.prototype._transform = function(chunk, encoding, cb) {
   var json = JSON.stringify(chunk, this.replacer, this.space);
   if(!this.headerWritten) {
     this.headerWritten = true;
-    this.push(this.beginText);
+    this.push(this.sep.open);
   }
   else {
-    this.push(',\n');
+    this.push(this.sep.separator);
   }
   this.push(json);
   cb();
 };
 
-function transformJsonToText(objectStream) {
-  return eventStream.pipeline(
-    objectStream,
-    new JsonStringifyStream(undefined, 2)
-  );
+var jsonSep = {
+  open: '[\n',
+  separator: ', ',
+  close: '\n]'
+};
+
+function geojsonFeatureSep(crsUri) {
+  return {
+    open: '{\n' +
+      '"type": "FeatureCollection",\n' +
+      '"crs": {' +
+      '\n"type": "name",' +
+      '\n"properties": {"name": "' + crsUri + '"}\n}\n,"features":[',
+    separator: ', ',
+    close: ']\n}'
+  };
 }
 
-function transformJsonToJsonpText(objectStream, callbackName) {
-  return eventStream.pipeline(
-    objectStream,
-    new JsonStringifyStream(undefined, 2, callbackName +'([\n', '\n]);')
-  );
-}
-
-function streamJsonpToHttpResponse(stream, callbackName, res, cb) {
-  setJsonpContentHeader(res);
- streamToHttpResponse(transformJsonToJsonpText(stream, callbackName), res, {}, cb);
-}
-
-function setJsonContentHeader(res) {
-  res.setHeader('Content-Type', 'application/json; charset=UTF-8');
-}
-function streamJsonToHttpResponse(stream, res, cb) {
-  setJsonContentHeader(res);
-  streamToHttpResponse(transformJsonToText(stream), res, {}, cb);
+function jsonpSep(callbackName, sep) {
+  return {
+    open: callbackName +'(' + sep.open,
+    separator: jsonSep.separator,
+    close: sep.close + ');'
+  };
 }
 
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.

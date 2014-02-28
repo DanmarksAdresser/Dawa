@@ -83,6 +83,15 @@ var definitions = {
   'DateTime': {
     type: 'string'
   },
+  GeoJsonCoordinates: {
+    type: 'array',
+    items: {
+      description: 'koordinateterne for punktet.',
+      type: 'number'
+    },
+    "minItems": 2,
+    "maxItems": 2
+  },
   GeoJsonPunkt: schemaObject({
     properties: {
       'type': {
@@ -90,11 +99,8 @@ var definitions = {
         enum: ['Point']
       },
       coordinates: {
-        type: 'array',
-        items: {
-          description: 'koordinateterne for punktet.',
-          type: 'number'
-        }
+        description: 'koordinateterne for punktet.',
+        $ref: '#/definitions/GeoJsonCoordinates'
       }
     },
     docOrder: ['type', 'coordinates']
@@ -429,9 +435,9 @@ var adgangsAdresseSchema = globalSchemaObject({
     'adgangspunkt': schemaObject({
       description: 'Geografisk punkt, som angiver særskilt adgang fra navngiven vej ind på et areal eller bygning.',
       properties: {
-        koordinat: {
-          description: 'Adgangspunktets koordinat angivet i GeoJSON format',
-          $ref: '#/definitions/NullableGeoJsonPunkt'
+        koordinater: {
+          description: 'Adgangspunktets koordinater som array [x,y].',
+          $ref: '#/definitions/NullableGeoJsonCoordinates'
         },
         nøjagtighed: {
           description: 'Kode der angiver nøjagtigheden for adressepunktet. ' +
@@ -475,7 +481,7 @@ var adgangsAdresseSchema = globalSchemaObject({
           '$ref': '#/definitions/NullableDateTime'
         }
       },
-      docOrder: ['koordinat','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
+      docOrder: ['koordinater','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
     }),
     'DDKN': schemaObject({
       nullable: true,

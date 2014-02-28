@@ -659,7 +659,7 @@ function mapAdgangsadresse(rs, options){
     'ændret': d(rs.a_aendret)
   };
   adr.adgangspunkt = {
-    koordinat: rs.geom_json ? JSON.parse(rs.geom_json) : null,
+    koordinater: rs.geom_json ? JSON.parse(rs.geom_json).coordinates : null,
     'nøjagtighed': maybeNull(rs.noejagtighed),
     kilde: maybeNull(rs.kilde),
     tekniskstandard: maybeNull(rs.tekniskstandard),
@@ -712,12 +712,14 @@ function mapAdresseGeoJson(row, options) {
   if(row.geom_json) {
     result.geometry = JSON.parse(row.geom_json);
   }
-  result.crs = {
-    type: 'name',
-    properties: {
-      name: 'EPSG:' + options.srid
-    }
-  };
+  if(options.srid) {
+    result.crs = {
+      type: 'name',
+      properties: {
+        name: 'EPSG:' + options.srid
+      }
+    };
+  }
   result.properties = mapAdresse(row, options);
   return result;
 }
@@ -737,6 +739,17 @@ var adresseApiSpec = {
     json: mapAdresse,
     autocomplete: adresseRowToAutocompleteJson,
     geojson: mapAdresseGeoJson
+  },
+  baseQuery: function(parameters) {
+    var baseQuery ={
+      select: '',
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    };
+    var sridAlias = dbapi.addSqlParameter(baseQuery, parameters.srid || 4326);
+    baseQuery.select = 'SELECT *, ST_AsGeoJSON(ST_Transform(Adresser.geom,' + sridAlias + ')) AS geom_json from Adresser';
+    return baseQuery;
   }
 };
 function mapAdgangsadresseGeoJson(row, options) {
