@@ -50,8 +50,7 @@ block content
                 label(for='doer') Dør
                 input.span3(type='text', autocomplete='off', placeholder='Dør', id='doer')
 
-            legend Reverse geokoding (under udvikling)
-            p <b>Bemærk. Reverse geokodning er p.t. under udvikling, og giver ikke noget resultat</b>
+            legend Reverse geokoding
             p Klik på kortet nedenfor og få nærmeste adresse.
 
             div#map
@@ -92,10 +91,10 @@ block content
             p
               a(href='http://#{url}/adresser?husnr=77&format=csv') CSV fil med alle adresser med husnummeret 77
 
-            p <b>Følgende 2 eksempler benytter funktionalitet der er under udvikling, og er vil ikke give noget resultat!</b>
             p
-              a(href='http://#{url}/adresser/under-dev/?cirkel=55.681219613782,12.5816211914972,150&format=csv') CSV fil med de adresser, som ligger som har en afstand på mindre end 150 m til Gammel mønt 4, 1117 København K.
+              a(href='http://#{url}/adresser/?cirkel=12.5816211914972,55.681219613782,50&format=csv') CSV fil med de adresser, som ligger som har en afstand på mindre end 50 m til Gammel mønt 4, 1117 København K.
 
+            p <b>Følgende eksemple benytter funktionalitet der er under udvikling, og er vil ikke give noget resultat!</b>
             p
               a(href='http://#{url}/adresser?kommunekode=0101,0147&format=csv') CSV fil med København og Frederiksberg kommuners adresser.
 
@@ -115,8 +114,8 @@ block content
             h4 Reverse geokodning. Hvilken adresse ligger nærmest koordinatet (55.700677,12.59074)?
 
             p
-              a(href='http://#{url}/adresser/55.700677,12.59074') http://#{url}/adresser/55.700677,12.59074
-              <br><b>Bemærk. Reverse geokodning er p.t. under udvikling, og giver ikke noget resultat</b>
+              a(href='http://#{url}/adgangsadresser/reverse?x=12.59074&y=55.700677') http://#{url}/adgangsadresser/reverse?x=12.59074&y=55.700677
+              <br>
 
 block append scripts
   script(src="js/underscore-min.js")
