@@ -1,6 +1,9 @@
 "use strict";
 
+var _ = require('underscore');
+
 var vejnavneDoc = {
+  docVersion: 1,
   parameters: [
     {
       name: 'q',
@@ -64,6 +67,7 @@ var vejnavneDoc = {
 };
 
 var vejstykkerDoc = {
+  docVersion: 1,
   parameters: [
     {
       name: 'q',
@@ -132,6 +136,7 @@ var vejstykkerDoc = {
 };
 
 var supplerendeBynavneDoc = {
+  docVersion: 1,
   parameters: [
     {
       name: 'q',
@@ -187,6 +192,7 @@ var supplerendeBynavneDoc = {
 };
 
 var kommuneDoc = {
+  docVersion: 1,
   parameters: [
     {
       name: 'q',
@@ -234,6 +240,11 @@ var kommuneDoc = {
 
 };
 
+var SRIDParameter = {name: 'srid',
+                     doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'
+                     +' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
+                    };
+
 var parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'vejkode',
@@ -271,10 +282,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     name: 'esrejendomsnr',
     doc: 'ESR Ejendomsnummer. Indtil 6 cifre.'
   },
-  {
-    name: 'srid',
-    doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a> for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
-  },
+  SRIDParameter,
   {
     name: 'polygon',
     doc: 'Find de adresser, som ligger indenfor det angivne polygon. ' +
@@ -294,72 +302,78 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   }
 ];
 
-
-
-var adgangsadresseDoc = {
-  parameters: [
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i vejnavn, husnr, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adgangsadressen. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord. ' +
-        'Der skelnes ikke mellem store og små bogstaver.',
-      examples: ['tværv*']
-    },
-    {
-      name: 'id',
-      doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
-    },
-    {
-      name: 'x',
-      doc: 'X koordinat (longitude, øst)'
-    },
-    {
-      name: 'y',
-      doc: 'Y koordinat (latitude, nord)'
-    },
-  ].concat(parametersForBothAdresseAndAdgangsAdresse),
-  examples: {
-    query: [
-      {
-        description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
-        query: [{
-          name: 'vejnavn',
-          value: 'Rødkildevej'
-        },{
-          name: 'husnr',
-          value: '46'
-        }]
-      }, {
-        description: 'Find de adgangsadresser som indeholder et ord der starter med hvid og har postnummeret 2400',
-        query: [{
-          name: 'q',
-          value: 'hvid*'
-        }, {
-          name: 'postnr',
-          value: '2400'
-        }]
-      }
-    ],
-    get: [
-      {
-        description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
-        path: ['0a3f507a-b2e6-32b8-e044-0003ba298018']
-      }
-    ]
-  },
-
-  autocompleteExamples: [
-    {description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
-     query: [{name:'q', value:'rand'}]},
-    {description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
-     query: [{name:'q', value:'randers'},{name:'postnr', value:'8600'}]},
-],
-
-
-
+var adgangsadresseIdParameter =   {
+  name: 'id',
+  doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
 };
 
+var adgangsadresseParameters =  [
+  {
+    name: 'q',
+    doc: 'Søgetekst. Der søges i vejnavn, husnr, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adgangsadressen. ' +
+      'Wildcard * er tilladt i slutningen af hvert ord. ' +
+      'Der skelnes ikke mellem store og små bogstaver.',
+    examples: ['tværv*']
+  },
+  adgangsadresseIdParameter].concat(parametersForBothAdresseAndAdgangsAdresse);
+
+var adgangsadresseDoc = {
+  docVersion: 2,
+  resources: {
+    '/adgangsadresser/{id}': {
+      subtext: 'Modtag adresse med id.',
+      parameters: [adgangsadresseIdParameter],
+      examples:  [{description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
+                   path: ['/adgangsadresser/0a3f507a-b2e6-32b8-e044-0003ba298018']}]},
+
+    '/adgangsadresser':{
+      subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
+      parameters: adgangsadresseParameters,
+      examples: [{description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
+                  query: [{name: 'vejnavn', value: 'Rødkildevej'},
+                          {name: 'husnr',   value: '46'}]},
+                 {description: 'Find de adgangsadresser som indeholder et ord der starter med hvid og har postnummeret 2400',
+                  query: [{name: 'q',      value: 'hvid*'},
+                          {name: 'postnr', value: '2400'}]}]},
+
+    '/adgangsadresser/autocomplete':{
+      subtext: 'Autocomplete på adgangsadresser. Der kan anvendes de samme parametre som ved søgning, men bemærk at'
+        +' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.',
+      parameters: extendPropertyList(adgangsadresseParameters,
+                                     [{name: 'q', doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'}]),
+      examples: [{description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
+                  query: [{name:'q', value:'rand'}]},
+                 {description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
+                  query: [{name:'q', value:'randers'},
+                          {name:'postnr', value:'8600'}]}]},
+
+    '/adgangsadresser/reverse':{
+      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes'
+        +'ETRS89/UTM32 med <em>srid=4326</em> eller WGS84/geografisk med <em>srid=25832</em>.  Default er WGS84.',
+      parameters: [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '
+                    +'anvendex angives bredde-værdien.'},
+                   {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '
+                    +'anvendex angives længde-værdien.'},
+                   SRIDParameter],
+      examples: [{description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+                  query: [{name:'x', value:'12.5851471984198'},
+                          {name:'y', value:'55.6832383751223'}]},
+                 {description: 'Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
+                  query: [{name:'x'     , value: '6176652.55'},
+                          {name:'y'     , value: '725369.59'},
+                          {name: 'srid' , value: '25832'}]}]}}};
+
+
+function extendPropertyList(properties, overwrite){
+  return _.map(_.pairs(_.extend(_.indexBy(properties, 'name'), _.indexBy(overwrite, 'name'))),
+               function(pair){
+                 pair[1].name = pair[0];
+                 return pair[1];
+               })
+}
+
 var adresseDoc = {
+  docVersion: 1,
   parameters: [
     {
       name: 'q',
@@ -426,6 +440,7 @@ var adresseDoc = {
 
 
 var postnummerDoc = {
+  docVersion: 1,
   parameters: [
     {
       name: 'nr',

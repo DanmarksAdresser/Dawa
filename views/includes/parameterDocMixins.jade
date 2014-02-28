@@ -1,3 +1,26 @@
+mixin documentResource(specs, path)
+    - var spec = specs[path]
+    p!= spec.subtext
+    pre= 'GET ' + url + path
+    if spec.parameters.length > 1
+      h4 Parametre
+      p
+        table.table.table-hover
+            thead
+                th Navn
+                th Beskrivelse
+            tbody
+                - each parameter in spec.parameters
+                    tr
+                        td= parameter.name
+                        td!= parameter.doc
+    h4 Eksempler
+    - each example in spec.examples
+        p!= example.description
+        pre
+            a(href=docUtil.addBaseUrlAndParameters(url, path, example.query))
+              = docUtil.addBaseUrlAndParameters(url, example.path ? example.path : path, example.query)
+
 mixin parameterDocQuery(apiSpec, docSpec)
     pre= 'GET ' + url + '/' + apiSpec.model.plural
     h4 Parametre

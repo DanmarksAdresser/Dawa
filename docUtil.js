@@ -15,6 +15,16 @@ exports.computeGetParameters = function (apiSpec, docSpec) {
   });
 };
 
+exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
+  var url = baseUrl + path;
+  if (!_.isEmpty(query)) {
+    url += '?' + _.map(query,function (param) {
+      return encodeURIComponent(param.name) + '=' + encodeURIComponent(param.value);
+    }).join('&');
+  }
+  return url;
+};
+
 exports.computeQueryUrl = function (baseUrl, plural, query) {
   var url = baseUrl + '/' + plural;
   if (!_.isEmpty(query)) {
@@ -24,6 +34,7 @@ exports.computeQueryUrl = function (baseUrl, plural, query) {
   }
   return url;
 };
+
 exports.computeGetUrl = function (baseUrl, spec, path) {
   var url = baseUrl + '/' + spec.model.plural + '/';
   var key = apiSpecUtil.getKeyForSelect(spec);

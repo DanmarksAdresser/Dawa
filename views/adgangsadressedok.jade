@@ -16,7 +16,7 @@ block content
               li <a href='#adressesoegning'>Adgangsdressesøgning</a>
               li <a href='#adresseopslag'>Adgangsadresseopslag</a>
               li <a href='#adresseautocomplete'>Adgangsadresser autocomplete</a>
-              li <a href='#reversegeokodning'>Reverse geokodning (stadig<br>under udvikling)</a>
+              li <a href='#reversegeokodning'>Reverse geokodning</a>
               li <a href='#adressedata'>Beskrivelse af adgangsadressedata</a>
             li(data-toggle='collapse', data-target='#haendelser').nav-header Adgangsadressehændelser
             ul#haendelser.nav.nav-list
@@ -25,43 +25,21 @@ block content
 
         div.span9
           section
+
             h3.anchor-header#adressesoegning Adgangsadressesøgning
-            p Søg efter adgangsadresser. Returnerer de adgangsadresser som opfylder kriteriet.
-            +parameterDocQuery(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
+            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser')
 
             div.page-header
             h3.anchor-header#adresseopslag Adgangsadresseopslag
-            p Modtag adgangsadresse med id.
-            +parameterDocGet(apiSpec.adgangsadresse, parameterDoc.adgangsadresse)
+            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser/{id}')
 
             div.page-header
             h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
-            +autocompleteDoc(apiSpec.adgangsadresse.model.autocompleteSchema, apiSpec.adgangsadresse.model.plural, parameterDoc.adgangsadresse.autocompleteExamples)
+            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser/autocomplete')
 
             div.page-header
-            h3.anchor-header#reversegeokodning Reverse geokodning (stadig under udvikling)
-            p <b>Reversegeokodning er stadig under udvikling, og kan p.t. ikke benyttes!</b>
-            p Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.
-            pre GET /adgangsadresser/{x},{y}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td x
-                  td X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendex angives bredde-værdien.
-                tr
-                  td y
-                  td Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk anvendex angives længde-værdien.
-            h4 Eksempler
-            p Ikke implementeret: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
-            pre
-              a(href='#{url}/adgangsadresser/6176652.55,725369.59') #{url}/adgangsadresser/6176652.55,725369.59
-            p Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)
-            pre
-              a(href='#{url}/adgangsadresser/55.6832383751223,12.5851471984198') #{url}/adgangsadresser/55.6832383751223,12.5851471984198
+            h3.anchor-header#reversegeokodning Reverse geokodning
+            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser/reverse')
 
             div.page-header
             h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
