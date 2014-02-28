@@ -5,7 +5,7 @@ var util        = require('util');
 var eventStream = require('event-stream');
 var _           = require('underscore');
 var Readable    = require('stream').Readable;
-var pg          = require('pg');
+var pg          = require('pg.js');
 var winston     = require('winston');
 
 /******************************************************************************/
