@@ -17,7 +17,6 @@ block content
               li <a href='#adressesoegning'>Adressesøgning</a>
               li <a href='#adresseopslag'>Adresseopslag</a>
               li <a href='#adresseautocomplete'>Adresser autocomplete</a>
-              li <a href='#reversegeokodning'>Reverse geokodning (stadig<br>under udvikling)</a>
               li <a href='#adressedata'>Beskrivelse af adressedata</a>
 
             li(data-toggle='collapse', data-target='#adressehaendelser').nav-header Adressehændelser<br>(stadig under udvikling)
@@ -41,31 +40,6 @@ block content
             div.page-header
             h3.anchor-header#adresseautocomplete Adresser autocomplete
             +autocompleteDoc(apiSpec.adresse.model.autocompleteSchema, apiSpec.adresse.model.plural, parameterDoc.adresse.autocompleteExamples)
-
-            div.page-header
-            h3.anchor-header#reversegeokodning Reverse geokodning (stadig under udvikling)
-            p <b>Reversegeokodning er stadig under udvikling, og kan p.t. ikke benyttes!</b>
-            p Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.
-            pre GET /adresser/{x},{y}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td x
-                  td X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendex angives bredde-værdien.
-                tr
-                  td y
-                  td Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk anvendex angives længde-værdien.
-            h4 Eksempler
-            p Ikke med i prototypen: Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)
-            pre
-              a(href='#{url}/adresser/6176652.55,725369.59') #{url}/adresser/6176652.55,725369.59
-            p Returner adressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)
-            pre
-              a(href='#{url}/adresser/55.6832383751223,12.5851471984198') #{url}/adresser/55.6832383751223,12.5851471984198
 
             div.page-header
             h3.anchor-header#adressedata Beskrivelse af adressedata
