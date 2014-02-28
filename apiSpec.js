@@ -802,7 +802,10 @@ var adgangsadresseApiSpec = {
 var vejnavnFields = [
   {
     name: 'navn',
-    column: 'vejstykker.vejnavn'
+    column: {
+      select: 'navn',
+      where:'vejstykker.vejnavn'
+    }
   },
   {
     name: 'postnr',

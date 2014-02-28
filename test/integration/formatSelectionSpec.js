@@ -42,19 +42,6 @@ describe('Format selection', function () {
     });
   });
 
-  it("If format=csv is passed as query parameter, CSV should be returned", function(done) {
-    request.get("http://localhost:3000/adresser?per_side=10&format=csv", function(error, response, body) {
-      expect(response.headers['content-type']).toBe("text/csv; charset=UTF-8");
-      csv()
-        .from.string(body, {columns: true})
-        .to.array(function (data) {
-          expect(data.length).toBe(10);
-          expect(data[0].id).toBeDefined();
-          done();
-        });
-    });
-  });
-
   it("If format=csv is passed as query parameter, CSV should be returned (single result mode)", function(done) {
     var id = "0a3f50a3-822a-32b8-e044-0003ba298018";
     request.get("http://localhost:3000/adresser/" + id + "?format=csv", function(error, response, body) {
