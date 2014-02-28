@@ -35,17 +35,16 @@ block content
             div.page-header
             h2 Vejnavne
             h3.anchor-header#vejnavnsoegning Vejnavnesøgning
-            p Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.
-            +parameterDocQuery(apiSpec.vejnavn, parameterDoc.vejnavn)
+            +documentResource(parameterDoc.vejnavn.resources, '/vejnavne')
 
             div.page-header
             h3.anchor-header#vejnavneopslag Vejnavneopslag
-            p Opslag på enkelt vejnavn
-            +parameterDocGet(apiSpec.vejnavn, parameterDoc.vejnavn)
+            +documentResource(parameterDoc.vejnavn.resources, '/vejnavne/{navn}')
 
             div.page-header
             h3.anchor-header#vejnavneautocomplete Vejnavne autocomplete
-            +autocompleteDoc(apiSpec.vejnavn.model.autocompleteSchema, apiSpec.vejnavn.model.plural, parameterDoc.vejnavn.autocompleteExamples)
+            +documentResource(parameterDoc.vejnavn.resources, '/vejnavne/autocomplete')
+
 
             div.page-header
             h3.anchor-header#vejnavnedata Beskrivelse af vejnavnedata

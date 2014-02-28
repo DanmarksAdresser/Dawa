@@ -18,8 +18,8 @@ mixin documentResource(specs, path)
     - each example in spec.examples
         p!= example.description
         pre
-            a(href=docUtil.addBaseUrlAndParameters(url, path, example.query))
-              = docUtil.addBaseUrlAndParameters(url, example.path ? example.path : path, example.query)
+            a(href=docUtil.addBaseUrlAndParameters(url, example.path || path, example.query))
+              = docUtil.addBaseUrlAndParameters   (url, example.path || path, example.query)
 
 mixin parameterDocQuery(apiSpec, docSpec)
     pre= 'GET ' + url + '/' + apiSpec.model.plural

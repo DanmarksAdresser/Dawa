@@ -31,6 +31,7 @@ describe('Parameter documentation.', function() {
           });
         });
       } else {
+        console.log(docSpec);
 
         // Checking version 2 of parameter doc.
 
@@ -47,16 +48,21 @@ describe('Parameter documentation.', function() {
         checkPG(pg.crs,            'autocomplete',  autocompleteDocParems(docSpec, spec));
         checkPG(pg.propertyfilter, 'autocomplete',  autocompleteDocParems(docSpec, spec));
         checkPG(pg.geomWithin,     'autocomplete',  autocompleteDocParems(docSpec, spec));
-        checkPG(pg.search,         'autocomplete',  autocompleteDocParems(docSpec, spec));
         checkPG(pg.autocomplete,   'autocomplete',  autocompleteDocParems(docSpec, spec));
       }
     });
   });
 });
 
-function reverseDocParems     (docSpec, spec){ return docSpec.resources['/'+spec.model.plural+'/reverse'].parameters; }
-function autocompleteDocParems(docSpec, spec){ return docSpec.resources['/'+spec.model.plural+'/autocomplete'].parameters; }
-function searchDocParems      (docSpec, spec){ return docSpec.resources['/'+spec.model.plural].parameters; }
+function reverseDocParems(docSpec, spec){
+  var res = docSpec.resources['/'+spec.model.plural+'/reverse'];
+  return res ? res.parameters : [];
+}
+function autocompleteDocParems(docSpec, spec){
+  return docSpec.resources['/'+spec.model.plural+'/autocomplete'].parameters; }
+function searchDocParems(docSpec, spec){
+  return docSpec.resources['/'+spec.model.plural].parameters;
+}
 
 function checkPG(group, text, paramsInDoc){
   if (group){

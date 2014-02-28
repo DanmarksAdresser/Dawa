@@ -2,69 +2,67 @@
 
 var _ = require('underscore');
 
+function autocompleteSubtext(name){
+  return 'Autocomplete på '+name+'. Der kan anvendes de samme parametre som ved søgning, men bemærk at'
+    +' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.';
+}
+
+function overwriteWithAutocompleteQParameter(properties, overwrite){
+  var overwrite = [{name: 'q', doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'}];
+  return _.map(_.pairs(_.extend(_.indexBy(properties, 'name'), _.indexBy(overwrite, 'name'))),
+               function(pair){
+                 pair[1].name = pair[0];
+                 return pair[1];
+               })
+}
+
+var vejnavneIdParameter = {name: 'navn',
+                           doc: "Vejnavn. Der skelnes mellem store og små bogstaver.",
+                           examples: ['Margrethepladsen', 'Viborgvej']};
+
+var vejnavneParameters = [{name: 'q',
+                           doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejnavnet. ' +
+                           'Wildcard * er tilladt i slutningen af hvert ord. ' +
+                           'Der skelnes ikke mellem store og små bogstaver.',
+                           examples: ['tværvej']},
+
+                          vejnavneIdParameter,
+
+                          {name: 'kommunekode',
+                           doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+                           examples: ['0101']},
+
+                          {name: 'postnr',
+                           doc: 'Postnummer. 4 cifre.',
+                           examples: ['2700']}];
+
 var vejnavneDoc = {
-  docVersion: 1,
-  parameters: [
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejnavnet. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord. ' +
-        'Der skelnes ikke mellem store og små bogstaver.',
-      examples: ['tværvej']
-    },
-    {
-      name: 'navn',
-      doc: "Vejnavn. Der skelnes mellem store og små bogstaver.",
-      examples: ['Margrethepladsen', 'Viborgvej']
-    },
-    {
-      name: 'kommunekode',
-      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-      examples: ['0101']
-    },
-    {
-      name: 'postnr',
-      doc: 'Postnummer. 4 cifre.',
-      examples: ['2700']
-    }
-  ],
-  examples: {
-    query: [
-      {
-        description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
-        query: [
-          {
-            name: 'postnr',
-            value: '2400'
-          },
-          {
-            name: 'q',
-            value: 'hvid*'
-          }
-        ]
-      },
-      {
-        description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
-        query: [
-          {
-            name: 'kommunekode',
-            value: '0101'
-          }
-        ]
-      }
+  docVersion: 2,
+  resources: {
+    '/vejnavne/{navn}': {
+      subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
+      parameters: [vejnavneIdParameter],
+      examples:  [{description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
+                   path: ['/vejnavne/Gammel%20Viborgvej']}]},
 
-    ],
-    get: [{ description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
-            path: ['Gammel Viborgvej']
-          }]
-  },
+    '/vejnavne': {
+      subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
+      parameters: vejnavneParameters,
+      examples:   [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og '
+                    +'indeholder et ord der starter med <em>hvid</em>',
+                    query: [{name: 'postnr', value: '2400'},
+                            {name: 'q',value: 'hvid*'}]},
+                   {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
+                   query: [{name: 'kommunekode', value: '0101'}]}]},
 
-  autocompleteExamples: [
-    {description: 'Find alle vejnavne som indeholder <em>jolle</em>',
-     query: [{name:'q', value:'jolle'}]},
-    {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
-     query: [{name:'q', value:'strand '}]}],
-};
+    '/vejnavne/autocomplete': {
+      subtext: autocompleteSubtext('vejnavne'),
+      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters),
+      examples:    [{description: 'Find alle vejnavne som indeholder <em>jolle</em>',
+                     query: [{name:'q', value:'jolle'}]},
+                    {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
+                     query: [{name:'q', value:'strand '}]}]}}};
+
 
 var vejstykkerDoc = {
   docVersion: 1,
@@ -337,10 +335,8 @@ var adgangsadresseDoc = {
                           {name: 'postnr', value: '2400'}]}]},
 
     '/adgangsadresser/autocomplete':{
-      subtext: 'Autocomplete på adgangsadresser. Der kan anvendes de samme parametre som ved søgning, men bemærk at'
-        +' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.',
-      parameters: extendPropertyList(adgangsadresseParameters,
-                                     [{name: 'q', doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'}]),
+      subtext: autocompleteSubtext('adgangsadresser'),
+      parameters: overwriteWithAutocompleteQParameter(adgangsadresseParameters),
       examples: [{description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
                   query: [{name:'q', value:'rand'}]},
                  {description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
@@ -363,14 +359,6 @@ var adgangsadresseDoc = {
                           {name:'y'     , value: '725369.59'},
                           {name: 'srid' , value: '25832'}]}]}}};
 
-
-function extendPropertyList(properties, overwrite){
-  return _.map(_.pairs(_.extend(_.indexBy(properties, 'name'), _.indexBy(overwrite, 'name'))),
-               function(pair){
-                 pair[1].name = pair[0];
-                 return pair[1];
-               })
-}
 
 var adresseDoc = {
   docVersion: 1,
