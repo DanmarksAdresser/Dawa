@@ -2,6 +2,17 @@
 
 var _ = require('underscore');
 
+exports.hasColumnForSelect = function(columnSpec, name) {
+  var spec = columnSpec[name];
+  if(_.isUndefined(spec)) {
+    return true;
+  }
+  if(!_.isUndefined(spec.column)) {
+    return true;
+  }
+  return spec.select ? true : false;
+};
+
 exports.getColumnNameForSelect = function (columnSpec, name) {
   var spec = columnSpec[name];
   if(_.isUndefined(spec)) {

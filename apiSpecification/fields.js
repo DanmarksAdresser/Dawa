@@ -9,8 +9,6 @@ var dagiTemaer = require('./dagiTemaer');
  * Each field specifies:
  *  name: the name of the field
  *  formatter: (optional) A function that formats the field
- *  selectable: (optional) True or false, specifies whether the field can be part of the output or
- *              only used for filtering. Defaults to true
  */
 
 exports.adgangsadresse = [
@@ -189,12 +187,10 @@ exports.supplerendebynavn = [
     name: 'navn'
   },
   {
-    name: 'kommunekode',
-    selectable: false
+    name: 'kommunekode'
   },
   {
-    name: 'postnr',
-    selectable: false
+    name: 'postnr'
   }
 ];
 
@@ -203,12 +199,10 @@ exports.vejnavn = [
     name: 'navn'
   },
   {
-    name: 'postnr',
-    selectable: false
+    name: 'postnr'
   },
   {
-    name: 'kommunekode',
-    selectable: false
+    name: 'kommunekode'
   }
 ];
 
@@ -225,8 +219,7 @@ exports.vejstykke = [
     name: 'navn'
   },
   {
-    name: 'postnr',
-    selectable: false
+    name: 'postnr'
   }
 ];
 
@@ -242,8 +235,7 @@ exports.postnummer = [
     name: 'version'
   },
   {
-    name: 'kommune',
-    selectable: false
+    name: 'kommune'
   }
 ];
 
