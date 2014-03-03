@@ -158,7 +158,7 @@ exports.withTransaction = function(cb) {
     if (err) {
       return cb(err);
     }
-    client.query('BEGIN READ ONLY', [], function(err) {
+    client.query('BEGIN', [], function(err) {
       if(err) {
         done();
         return cb(err);

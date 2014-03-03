@@ -26,7 +26,7 @@ describe('When searching for polygons and zipcodes', function () {
                     done(response.statusCode);
                   } else {
                     var adrs = JSON.parse(body);
-                    // TODO Naar alle enhedsadresser er oprettet vil dette resultere i 152
+                    // TODO Naar alle enhedsadresser er oprettet vil dette resultere i flere adresser
                     expect(adrs.length).toBe(390);
                     done();
                   }

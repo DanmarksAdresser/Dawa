@@ -482,7 +482,7 @@ var postnummerDoc = {
 module.exports = {
   vejnavn: vejnavneDoc,
   vejstykke: vejstykkerDoc,
-  supplerendeBynavn: supplerendeBynavneDoc,
+  supplerendebynavn: supplerendeBynavneDoc,
   kommune: kommuneDoc,
   adgangsadresse: adgangsadresseDoc,
   postnummer: postnummerDoc,

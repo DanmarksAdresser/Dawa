@@ -15,6 +15,7 @@ var apiSpecUtil      = require('./apiSpecUtil');
 var dbapi            = require('./dbapi');
 var Transform        = require('stream').Transform;
 var winston          = require('winston');
+var commonParameterGroups = require('./apiSpecification/commonParameterGroups');
 
 function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -80,7 +81,7 @@ function publishGetByKey(app, spec) {
   }, '/' + spec.model.plural);
 
   app.get(path, function (req, res) {
-    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'crs'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'crs'], commonParameterGroups.formatParameterSpec, commonParameterGroups.pagingParameterSpec);
     var rawParams = {};
     _.extend(rawParams, req.query, req.params);
     var parameterParseResult = parseParameters(parameterGroups, rawParams);
@@ -136,7 +137,7 @@ function publishReverseGeocoding(app, spec) {
     var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(
       spec,
       ['format', 'crs', 'reverseGeocoding'],
-      apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec
+      commonParameterGroups.formatParameterSpec, commonParameterGroups.pagingParameterSpec
     );
 
     var parameterParseResult = parseParameters(parameterGroups, req.query);
@@ -166,7 +167,7 @@ function publishReverseGeocoding(app, spec) {
 function publishQuery(app, spec) {
   app.get('/' + spec.model.plural, function(req, res) {
 
-    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'search', 'format', 'paging', 'crs', 'geomWithin'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'search', 'format', 'paging', 'crs', 'geomWithin'], commonParameterGroups.formatParameterSpec, commonParameterGroups.pagingParameterSpec);
 
     var parameterParseResult = parseParameters(parameterGroups, req.query);
     if (parameterParseResult.errors.length > 0){
@@ -326,7 +327,7 @@ function streamCsvToHttpResponse(rowStream, spec, res, cb) {
 
 function publishAutocomplete(app, spec) {
   app.get('/' + spec.model.plural + "/autocomplete", function(req, res) {
-    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'paging', 'autocomplete'], apiSpec.formatParameterSpec, apiSpec.pagingParameterSpec);
+    var parameterGroups = apiSpecUtil.getParameterGroupsForSpec(spec, ['propertyFilter', 'format', 'paging', 'autocomplete'], commonParameterGroups.formatParameterSpec, commonParameterGroups.pagingParameterSpec);
     var parameterParseResult = parseParameters(parameterGroups, req.query);
     if (parameterParseResult.errors.length > 0){
       return sendQueryParameterFormatError(res, parameterParseResult.errors);

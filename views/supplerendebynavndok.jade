@@ -26,22 +26,22 @@ block content
 
             h3.anchor-header#supplerendebynavnsoegning Supplerende bynavnesøgning
             p Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.
-            +parameterDocQuery(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
+            +parameterDocQuery(apiSpec.supplerendebynavn, parameterDoc.supplerendebynavn)
             div.page-header
 
             h3.anchor-header#supplerendebynavnopslag Supplerende bynavnopslag
             p Modtag supplerende bynavn.
-            +parameterDocGet(apiSpec.supplerendeBynavn, parameterDoc.supplerendeBynavn)
+            +parameterDocGet(apiSpec.supplerendebynavn, parameterDoc.supplerendebynavn)
             div.page-header
 
             div.page-header
             h3.anchor-header#supplerendebynavnautocomplete Supplerende bynavn autocomplete
-            +autocompleteDoc(apiSpec.supplerendeBynavn.model.autocompleteSchema, apiSpec.supplerendeBynavn.model.plural, parameterDoc.supplerendeBynavn.autocompleteExamples)
+            +autocompleteDoc(apiSpec.supplerendebynavn.model.autocompleteSchema, apiSpec.supplerendebynavn.model.plural, parameterDoc.supplerendebynavn.autocompleteExamples)
 
             h3.anchor-header#supplerendebynavndata Beskrivelse af supplerende bynavnedata
             p Ovenstående Web API udstiller supplerende bynavne. Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.
             p Web API'et udstiller for hver supplerende bynavn følgende informationer:
-            +documentSchema(apiSpec.supplerendeBynavn.model.schema)
+            +documentSchema(apiSpec.supplerendebynavn.model.schema)
 
 
 

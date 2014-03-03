@@ -84,7 +84,7 @@ var sampleParameters = {
       }
     }
   },
-  supplerendeBynavn: {
+  supplerendebynavn: {
     navn: {
       values: ['Elmelund'],
       verifier: function(supplerendeBynavn, navn) {
