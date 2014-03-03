@@ -63,75 +63,50 @@ var vejnavneDoc = {
                     {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
                      query: [{name:'q', value:'strand '}]}]}}};
 
+var vejstykkerIdParameters = [{name: 'navn',
+                               doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
+                               examples: ['Margrethepladsen', 'Viborgvej']},
+                              {name: 'kommunekode',
+                               doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+                               examples: ['0101']}];
+var vejstykkerParameters = [{name: 'q',
+                             doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
+                             'Wildcard * er tilladt i slutningen af hvert ord. ' +
+                             'Der skelnes ikke mellem store og små bogstaver.',
+                             examples: ['tværvej']},
+                            vejstykkerIdParameters[0],
+                            vejstykkerIdParameters[1],
+                            {name: 'kode',
+                             doc: 'vejkode. 4 cifre.',
+                             examples: ['0052']},
+                            {name: 'postnr',
+                             doc: 'Postnummer. 4 cifre.',
+                             examples: ['2700']}];
 
 var vejstykkerDoc = {
-  docVersion: 1,
-  parameters: [
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord. ' +
-        'Der skelnes ikke mellem store og små bogstaver.',
-      examples: ['tværvej']
-    },
-    {
-      name: 'navn',
-      doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
-      examples: ['Margrethepladsen', 'Viborgvej']
-    },
-    {
-      name: 'kommunekode',
-      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-      examples: ['0101']
-    },
-    {
-      name: 'kode',
-      doc: 'vejkode. 4 cifre.',
-      examples: ['0052']
-    },
-    {
-      name: 'postnr',
-      doc: 'Postnummer. 4 cifre.',
-      examples: ['2700']
-    }
-  ],
-  examples: {
-    query: [
-      {
-        description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
-        query: [
-          {
-            name: 'postnr',
-            value: '2400'
-          },
-          {
-            name: 'q',
-            value: 'hvid*'
-          }
-        ]
-      },
-      {
-        description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
-        query: [
-          {
-            name: 'kommunekode',
-            value: '0101'
-          }
-        ]
-      }
-    ],
-    get: [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
-            path: ['0101', '316']
-          }]
-  },
+  docVersion: 2,
+  resources: {
+    '/vejstykker/{kommunekode}/{kode}': {
+      subtext: 'Opslag på enkelt vejstykke ud fra kommunekode og vejkode.',
+      parameters: vejstykkerIdParameters,
+      examples:  [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
+                    path: ['/vejstykker/0101/316']}]},
 
-  autocompleteExamples: [
-    {description: 'Find alle vejstykker som indeholder <em>jolle</em>',
-     query: [{name:'q', value:'jolle'}]},
-    {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
-     query: [{name:'q', value:'strand '}]}],
+    '/vejstykker': {
+      subtext: 'Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.',
+      parameters: vejstykkerParameters,
+      examples:  [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
+                   query: [{name:'postnr', value:'2400'}, {name: 'q',value: 'hvid*'}]},
+                  {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
+                   query: [{name: 'kommunekode',value: '0101'}]}]},
 
-};
+    '/vejstykker/autocomplete': {
+      subtext: autocompleteSubtext('vejstykker'),
+      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters),
+      examples: [{description: 'Find alle vejstykker som indeholder <em>jolle</em>',
+                  query: [{name:'q', value:'jolle'}]},
+                 {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
+                  query: [{name:'q', value:'strand '}]}]}}};
 
 var supplerendeBynavneDoc = {
   docVersion: 1,

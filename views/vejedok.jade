@@ -10,6 +10,7 @@ block content
       div.row
         div.span3
           ul#indhold.nav.nav-list.affix
+
             li(data-toggle='collapse', data-target='#vejnavn').nav-header Vejnavne API
             ul#vejnavn.nav.nav-list
               li <a href='#vejnavnsoegning'>Vejnavnesøgning</a>
@@ -23,6 +24,7 @@ block content
               li <a href='#vejstykkeopslag'>Vejstykkeopslag</a>
               li <a href='#vejstykkerautocomplete'>Vejstykker autocomplete</a>
               li <a href='#vejstykkedata'>Beskrivelse af vejstykkedata</a>
+
             li(data-toggle='collapse', data-target='#haendelser').nav-header vejnavn hændelse
             ul#haendelser.nav.nav-list
 
@@ -55,17 +57,15 @@ block content
             div.page-header
             h2 Vejstykker
             h3.anchor-header#vejstykkesoegning Vejstykkesøgning
-            p Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.
-            +parameterDocQuery(apiSpec.vejstykke, parameterDoc.vejstykke)
+            +documentResource(parameterDoc.vejstykke.resources, '/vejstykker')
 
             div.page-header
             h3.anchor-header#vejstykkeopslag Vejstykkeopslag
-            p Opslag på enkelt vejstykke ud fra kommunekode og vejkode.
-            +parameterDocGet(apiSpec.vejstykke, parameterDoc.vejstykke)
+            +documentResource(parameterDoc.vejstykke.resources, '/vejstykker/{kommunekode}/{kode}')
 
             div.page-header
             h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
-            +autocompleteDoc(apiSpec.vejstykke.model.autocompleteSchema, apiSpec.vejstykke.model.plural, parameterDoc.vejstykke.autocompleteExamples)
+            +documentResource(parameterDoc.vejstykke.resources, '/vejstykker/autocomplete')
 
             div.page-header
             h3.anchor-header#vejstykkedata Beskrivelse af vejstykkedata
