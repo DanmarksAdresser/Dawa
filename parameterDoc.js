@@ -2,6 +2,10 @@
 
 var _ = require('underscore');
 
+/******************************************************************************/
+/*** Utils ********************************************************************/
+/******************************************************************************/
+
 function autocompleteSubtext(name){
   return 'Autocomplete på '+name+'. Der kan anvendes de samme parametre som ved søgning, men bemærk at'+
     ' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.';
@@ -15,6 +19,11 @@ function overwriteWithAutocompleteQParameter(properties){
                  return pair[1];
                });
 }
+
+
+/******************************************************************************/
+/*** Vejnavne *****************************************************************/
+/******************************************************************************/
 
 var vejnavneIdParameter = {name: 'navn',
                            doc: "Vejnavn. Der skelnes mellem store og små bogstaver.",
@@ -63,6 +72,11 @@ var vejnavneDoc = {
                     {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
                      query: [{name:'q', value:'strand '}]}]}}};
 
+
+/******************************************************************************/
+/*** Vejstykker ***************************************************************/
+/******************************************************************************/
+
 var vejstykkerIdParameters = [{name: 'navn',
                                doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
                                examples: ['Margrethepladsen', 'Viborgvej']},
@@ -108,6 +122,11 @@ var vejstykkerDoc = {
                  {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
                   query: [{name:'q', value:'strand '}]}]}}};
 
+
+/******************************************************************************/
+/*** Supp. bynavne ************************************************************/
+/******************************************************************************/
+
 var supplerendeBynavneIdParameters = {name: 'navn',
                                       doc: 'Navnet på det supplerende bynavn, f.eks. <em>Holeby</em>',
                                       examples: ['Holeby', 'Aabybro']};
@@ -145,6 +164,11 @@ var supplerendeBynavneDoc = {
       parameters: overwriteWithAutocompleteQParameter(supplerendeBynavneParameters),
       examples:[{description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
                  query: [{name:'q', value:'sejr'}]}]}}};
+
+
+/******************************************************************************/
+/*** Kommune ******************************************************************/
+/******************************************************************************/
 
 var kommuneDoc = {
   docVersion: 1,
@@ -199,6 +223,10 @@ var SRIDParameter = {name: 'srid',
                      doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
                      ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
                     };
+
+/******************************************************************************/
+/*** Adresser og adgangsadresser **********************************************/
+/******************************************************************************/
 
 var parametersForBothAdresseAndAdgangsAdresse = [
   {
@@ -384,6 +412,9 @@ var adresseDoc = {
 };
 
 
+/******************************************************************************/
+/*** Postnumre ****************************************************************/
+/******************************************************************************/
 
 var postnummerDoc = {
   docVersion: 1,
