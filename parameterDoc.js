@@ -257,11 +257,12 @@ var parametersForBothAdresseAndAdgangsAdresse = [
       'Polygonet specificeres som et array af koordinater på samme måde som' +
       ' koordinaterne specificeres i GeoJSON\'s polygon.' +
       ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.' +
-      ' polygon=[[10.1351967049683,55.5670601123672],' +
+      ' polygon=[[[10.1351967049683,55.5670601123672],' +
       '[10.135200982843,55.5671204601228],' +
       '[10.1362257877892,55.5682107215927],' +
       '[10.1362451883392,55.568284049162], ' +
-      '[10.1362396504186,55.5683669533645]].'
+      '[10.1362396504186,55.5683669533645],' +
+      '[10.1351967049683,55.5670601123672]]].'
 
   },
   {
