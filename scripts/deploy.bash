@@ -63,7 +63,7 @@ EXISTS=`aws elasticbeanstalk describe-application-versions --output json \
 
 if [[ $EXISTS == 2 ]]; then
     git clone https://github.com/DanmarksAdresser/Dawa "$TMPDIR"
-    (cd "$TMPDIR"  ; git archive --format=zip "$VERSION" > "$TMPDIR/$FILENAME" )
+    (cd "$TMPDIR" ; npm install ; zip --recurse-paths "$TMPDIR/$FILENAME" * -x data/\* \*.zip  )
     aws s3 cp "$TMPDIR/$FILENAME" "s3://$BUCKET/$FILENAME" &&
     aws elasticbeanstalk create-application-version \
         --application-name "$APPNAME" \
