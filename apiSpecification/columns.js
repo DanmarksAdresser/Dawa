@@ -38,6 +38,9 @@ exports.adgangsadresse = {
   DDKN_km10: {
     column: 'kn10kmdk'
   },
+  dagitemaer: {
+    multi: true
+  },
   tsv: {
     select: null,
     where: 'tsv'
@@ -78,6 +81,9 @@ exports.adresse = {
   DDKN_km10: {
     column: 'kn10kmdk'
   },
+  dagitemaer: {
+    multi: true
+  },
   tsv: {
     select: null,
     where: 'e_tsv'
@@ -96,6 +102,12 @@ exports.supplerendebynavn = {
     select: null,
     where: 'supplerendebynavne.postnr'
   },
+  kommuner: {
+    multi: true
+  },
+  postnumre: {
+    multi: true
+  },
   tsv: {
     select: null,
     where: 'supplerendebynavne.tsv'
@@ -112,8 +124,14 @@ exports.vejnavn = {
     where: 'vp1.postnr'
   },
   kommunekode: {
-    select: null,
+    select: 'kommunekode',
     where: 'vejstykker.kommunekode'
+  },
+  kommuner: {
+    multi: true
+  },
+  postnumre: {
+    multi: true
   },
   tsv: {
     select: null,
@@ -137,6 +155,12 @@ exports.vejstykke = {
     select: null,
     where: 'vp2.postnr'
   },
+  kommuner: {
+    multi: true
+  },
+  postnumre: {
+    multi: true
+  },
   tsv: {
     select: null,
     where: 'vejstykker.tsv'
@@ -159,6 +183,9 @@ exports.postnummer = {
   kommune: {
     select: null,
     where: 'n.kommunekode'
+  },
+  kommuner: {
+    multi: true
   },
   tsv: {
     select: null,

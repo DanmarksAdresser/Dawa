@@ -137,10 +137,13 @@ var transformToCsvObjects = function(rowStream, spec) {
     eventStream.mapSync(function(row) {
       return _.reduce(fields, function(memo, field) {
         // currently, all selectable fields are part of the CSV format
-        if(field.selectable && field.selectable === false) {
+        if(!_.isUndefined(field.selectable) && field.selectable === false) {
           return memo;
         }
         var columnSpec = columns[spec.model.name];
+        if(columnSpec[field.name] && columnSpec[field.name].multi) {
+          return memo;
+        }
         var columnName = columnsUtil.getColumnNameForSelect(columnSpec, field.name);
         var dbValue = row[columnName];
         var formattedValue;

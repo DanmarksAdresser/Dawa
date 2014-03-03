@@ -10,7 +10,12 @@ exports.getColumnNameForSelect = function (columnSpec, name) {
   if(!_.isUndefined(spec.column)) {
     return spec.column;
   }
-  return spec.select;
+  if(!_.isUndefined(spec.select)) {
+    if(!spec.select) {
+      throw "Internal error: no column " + name + ' for select';
+    }
+    return spec.select;
+  }
 };
 
 exports.getColumnNameForWhere = function (columnSpec, name) {
