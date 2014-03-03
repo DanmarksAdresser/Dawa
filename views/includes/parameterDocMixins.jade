@@ -2,7 +2,7 @@ mixin documentResource(specs, path)
     - var spec = specs[path]
     p!= spec.subtext
     pre= 'GET ' + url + path
-    if spec.parameters.length > 1
+    if spec.parameters.length >= 1
       h4 Parametre
       p
         table.table.table-hover
