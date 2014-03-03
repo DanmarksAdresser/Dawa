@@ -12,85 +12,93 @@ var dagiTemaer = require('./dagiTemaer');
 
 exports.adgangsadresse = {
   id: {
-    select: 'a_id'
+    column: 'a_id'
   },
   etrs89koordinat_øst: {
-    select: 'oest'
+    column: 'oest'
   },
   etrs89koordinat_nord: {
-    select: 'nord'
+    column: 'nord'
   },
   wgs84koordinat_bredde: {
-    select: 'lat'
+    column: 'lat'
   },
   wgs84koordinat_længde: {
-    select: 'long'
+    column: 'long'
   },
   nøjagtighed: {
-    select: 'noejagtighed'
+    column: 'noejagtighed'
   },
   DDKN_m100: {
-    select: 'kn100mdk'
+    column: 'kn100mdk'
   },
   DDKN_km1: {
-    select: 'kn1kmdk'
+    column: 'kn1kmdk'
   },
   DDKN_km10: {
-    select: 'kn10kmdk'
+    column: 'kn10kmdk'
+  },
+  tsv: {
+    select: null,
+    where: 'tsv'
   }
 };
 
 exports.adresse = {
   id: {
-    select: 'e_id'
+    column: 'e_id'
   },
   adgangsadresseid: {
-    select: 'a_id'
+    column: 'a_id'
   },
   dør: {
-    select: 'doer'
+    column: 'doer'
   },
   etrs89koordinat_øst: {
-    select: 'oest'
+    column: 'oest'
   },
   etrs89koordinat_nord: {
-    select: 'nord'
+    column: 'nord'
   },
   wgs84koordinat_bredde: {
-    select: 'lat'
+    column: 'lat'
   },
   wgs84koordinat_længde: {
-    select: 'long'
+    column: 'long'
   },
   nøjagtighed: {
-    select: 'noejagtighed'
+    column: 'noejagtighed'
   },
   DDKN_m100: {
-    select: 'kn100mdk'
+    column: 'kn100mdk'
   },
   DDKN_km1: {
-    select: 'kn1kmdk'
+    column: 'kn1kmdk'
   },
   DDKN_km10: {
-    select: 'kn10kmdk'
+    column: 'kn10kmdk'
   },
   tsv: {
-    select: 'e_tsv'
+    select: null,
+    where: 'e_tsv'
   }
 };
 
 exports.supplerendebynavn = {
   navn: {
-    select: 'supplerendebynavn'
+    column: 'supplerendebynavn'
   },
   kommunekode: {
-    select: 'supplerendebynavne.kommunekode'
+    select: null,
+    where: 'supplerendebynavne.kommunekode'
   },
   postnr: {
-    select: 'supplerendebynavne.postnr'
+    select: null,
+    where: 'supplerendebynavne.postnr'
   },
   tsv: {
-    select: 'supplerendebynavne.tsv'
+    select: null,
+    where: 'supplerendebynavne.tsv'
   }
 };
 
@@ -100,31 +108,38 @@ exports.vejnavn = {
     where:'vejstykker.vejnavn'
   },
   postnr: {
-    select: 'vp1.postnr'
+    select: null,
+    where: 'vp1.postnr'
   },
   kommunekode: {
-    select: 'vejstykker.kommunekode'
+    select: null,
+    where: 'vejstykker.kommunekode'
   },
   tsv: {
-    select: 'vejstykker.tsv'
+    select: null,
+    where: 'vejstykker.tsv'
   }
 };
 
 exports.vejstykke = {
   kode: {
-    select: 'vejstykker.kode'
+    select: 'kode',
+    where: 'vejstykker.kode'
   },
   kommunekode: {
-    select: 'vejstykker.kommunekode'
+    select: 'kommunekode',
+    where: 'vejstykker.kommunekode'
   },
   navn: {
-    select: 'vejnavn'
+    column: 'vejnavn'
   },
   postnr: {
-    select: 'vp2.postnr'
+    select: null,
+    where: 'vp2.postnr'
   },
   tsv: {
-    select: 'vejstykker.tsv'
+    select: null,
+    where: 'vejstykker.tsv'
   }
 };
 
@@ -134,20 +149,24 @@ exports.postnummer = {
     where: 'm.postnr'
   },
   navn: {
-    select: 'p.navn'
+    select: 'navn',
+    column: 'p.navn'
   },
   version: {
-    select: 'p.version'
+    select: 'version',
+    where: 'p.version'
   },
   kommune: {
-    select: 'n.kommunekode'
+    select: null,
+    where: 'n.kommunekode'
   },
   tsv: {
-    select: 'p.tsv'
+    select: null,
+    where: 'p.tsv'
   }
 };
 
-// no column mappings necessary for DAGI temaer
+// no column mappings necessary for dagi temaer.
 dagiTemaer.forEach(function(tema) {
   exports[tema.singular] = {};
 });

@@ -1,6 +1,8 @@
 "use strict";
 
 var apiSpecUtil = require('./apiSpecUtil');
+var columns = require('./apiSpecification/columns');
+var columnsUtil = require('./apiSpecification/columnsUtil');
 var util        = require('util');
 var eventStream = require('event-stream');
 var _           = require('underscore');
@@ -138,7 +140,9 @@ var transformToCsvObjects = function(rowStream, spec) {
         if(field.selectable && field.selectable === false) {
           return memo;
         }
-        var dbValue = row[apiSpecUtil.getColumnNameForSelect(spec, field.name)];
+        var columnSpec = columns[spec.model.name];
+        var columnName = columnsUtil.getColumnNameForSelect(columnSpec, field.name);
+        var dbValue = row[columnName];
         var formattedValue;
         if(field.formatter) {
           formattedValue = field.formatter(dbValue);

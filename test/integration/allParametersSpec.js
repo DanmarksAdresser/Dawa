@@ -6,7 +6,7 @@ var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
 
-var kode4String = require('../../apiSpecUtil').kode4String;
+var kode4String = require('../../apiSpecification/util').kode4String;
 
 var sampleParameters = {
   vejstykke: {

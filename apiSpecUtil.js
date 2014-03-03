@@ -19,36 +19,6 @@ exports.getKeyForFilter = function(spec) {
   return _.isArray(keySpec) ? keySpec : [keySpec];
 };
 
-exports.getColumnNameForSelect = function (spec, name) {
-  if (_.isUndefined(spec.fieldMap[name].column)) {
-    return name;
-  }
-  var columnSpec = spec.fieldMap[name].column;
-  if (_.isString(columnSpec)) {
-    return columnSpec;
-  }
-  return columnSpec.select;
-};
-
-exports.getColumnNameForWhere = function (spec, name) {
-  if (_.isUndefined(spec.fieldMap[name].column)) {
-    return name;
-  }
-  var columnSpec = spec.fieldMap[name].column;
-  if (_.isString(columnSpec)) {
-    return columnSpec;
-  }
-  return columnSpec.where;
-};
-
-exports.getSearchColumn = function(spec) {
-  return exports.getColumnNameForWhere(spec, 'tsv');
-};
-
-exports.kode4String = function(kodeAsInteger) {
-  return ("0000" + kodeAsInteger).slice(-4);
-};
-
 exports.getParameterGroupsForSpec = function(spec, groupNames, formatParameterSpec, pagingParameterSpec) {
   var result = {};
   if(_.contains(groupNames, 'format')) {
