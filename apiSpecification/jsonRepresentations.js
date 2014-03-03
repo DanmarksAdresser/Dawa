@@ -288,6 +288,13 @@ exports.adgangsadresse = {
       'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds','afstemningsområde']
   }),
   mapper: function (rs, options){
+    function mapDagiTema(tema) {
+      return {
+        href: makeHref(options.baseUrl, tema.tema, tema.kode),
+        kode: tema.kode,
+        navn: tema.navn
+      };
+    }
     var adr = {};
     adr.href = makeHref(options.baseUrl, 'adgangsadresse', [rs.a_id]);
     adr.id = rs.a_id;
@@ -330,12 +337,19 @@ exports.adgangsadresse = {
       km1:  maybeNull(rs.kn1kmdk),
       km10: maybeNull(rs.kn10kmdk)
     } : null;
+
+    // DAGI temaer
     adr.sogn = null;
     adr.region = null;
     adr.retskreds = null;
     adr.politikreds = null;
     adr.opstillingskreds = null;
     adr.afstemningsområde = null;
+    var dagiTemaArray = rs.dagitemaer ? rs.dagitemaer.filter(function(tema) { return util.notNull(tema.tema); }) : [];
+    var dagiTemaer = _.indexBy(_.map(dagiTemaArray, mapDagiTema), 'tema');
+    // kommune is handled differently
+    delete dagiTemaer.kommune;
+    _.extend(adr, dagiTemaer);
     return adr;
   }
 };
