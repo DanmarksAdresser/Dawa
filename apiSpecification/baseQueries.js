@@ -31,7 +31,7 @@ exports.supplerendebynavn = function() {
   return {
     select: 'SELECT supplerendebynavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) as postnumre, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner' +
       ' FROM supplerendebynavne' +
-      ' LEFT JOIN kommuner k ON supplerendebynavne.kommunekode = k.kode' +
+      " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND supplerendebynavne.kommunekode = k.kode" +
       ' LEFT JOIN postnumre p ON supplerendebynavne.postnr = p.nr',
     whereClauses: [],
     groupBy: 'supplerendebynavne.supplerendebynavn',
@@ -45,7 +45,7 @@ exports.vejnavn = function() {
     select: 'SELECT vejstykker.vejnavn as navn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre,' +
       ' json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner' +
       ' FROM vejstykker' +
-      ' LEFT JOIN kommuner k ON vejstykker.kommunekode = k.kode' +
+      " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND vejstykker.kommunekode = k.kode" +
       ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
       ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
       ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
@@ -63,7 +63,7 @@ exports.postnummer = function() {
       'FROM PostnumreKommunekoderMat m '+
       'LEFT JOIN PostnumreKommunekoderMat n ON m.postnr = n.postnr '+
       'LEFT JOIN postnumre p ON p.nr = m.postnr ' +
-      ' LEFT JOIN kommuner k ON m.kommunekode = k.kode',
+      " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND m.kommunekode = k.kode",
     whereClauses: [],
     groupBy: 'p.nr, p.navn, p.version',
     orderClauses: [],
@@ -75,7 +75,7 @@ exports.vejstykke = function() {
   return {
     select: 'SELECT vejstykker.kode, vejstykker.kommunekode, vejstykker.version, vejnavn, vejstykker.tsv, max(kommuner.navn) AS kommunenavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre' +
       ' FROM vejstykker' +
-      ' LEFT JOIN kommuner ON vejstykker.kommunekode = kommuner.kode' +
+      " LEFT JOIN DagiTemaer kommuner ON kommuner.tema = 'kommune' AND vejstykker.kommunekode = kommuner.kode" +
 
       ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
       ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
