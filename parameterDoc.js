@@ -3,17 +3,17 @@
 var _ = require('underscore');
 
 function autocompleteSubtext(name){
-  return 'Autocomplete på '+name+'. Der kan anvendes de samme parametre som ved søgning, men bemærk at'
-    +' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.';
+  return 'Autocomplete på '+name+'. Der kan anvendes de samme parametre som ved søgning, men bemærk at'+
+    ' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.';
 }
 
-function overwriteWithAutocompleteQParameter(properties, overwrite){
+function overwriteWithAutocompleteQParameter(properties){
   var overwrite = [{name: 'q', doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'}];
   return _.map(_.pairs(_.extend(_.indexBy(properties, 'name'), _.indexBy(overwrite, 'name'))),
                function(pair){
                  pair[1].name = pair[0];
                  return pair[1];
-               })
+               });
 }
 
 var vejnavneIdParameter = {name: 'navn',
@@ -48,8 +48,8 @@ var vejnavneDoc = {
     '/vejnavne': {
       subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
       parameters: vejnavneParameters,
-      examples:   [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og '
-                    +'indeholder et ord der starter med <em>hvid</em>',
+      examples:   [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og '+
+                    'indeholder et ord der starter med <em>hvid</em>',
                     query: [{name: 'postnr', value: '2400'},
                             {name: 'q',value: 'hvid*'}]},
                    {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
@@ -108,61 +108,43 @@ var vejstykkerDoc = {
                  {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
                   query: [{name:'q', value:'strand '}]}]}}};
 
-var supplerendeBynavneDoc = {
-  docVersion: 1,
-  parameters: [
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche det supplerende bynavn. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord.'
-    },
-    {
-      name: 'navn',
-      doc: 'Navnet på det supplerende bynavn, f.eks. <em>Holeby</em>',
-      examples: ['Holeby', 'Aabybro']
-    },
-    {
-      name: 'postnr',
-      doc: 'Postnummer. 4 cifre.',
-      examples: ['2700']
-    },
-    {
-      name: 'kommunekode',
-      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-      examples: ['0101']
-    }
-  ],
-  examples: {
-    query: [
-      {
-        description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
-        query: [
-          {
-            name: 'postnr',
-            value: '3700'
-          }
-          ]
-      },
-      {
-        description: 'Find de supplerende bynavne, hvor et ord i det supplerende bynavn starter med <em>aar</em>',
-        query: [
-          { name: 'q',
-            value: "aar*"
-          }
-          ]
-      }
-    ],
-    get: [
-      {
-        description: 'Hent det supplerende bynavn med navn <em>Aarsballe</em>',
-        path: ['Aarsballe']
-      }]
-  },
+var supplerendeBynavneIdParameters = {name: 'navn',
+                                      doc: 'Navnet på det supplerende bynavn, f.eks. <em>Holeby</em>',
+                                      examples: ['Holeby', 'Aabybro']};
 
-  autocompleteExamples: [
-    {description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
-     query: [{name:'q', value:'sejr'}]}],
-};
+var supplerendeBynavneParameters = [{name: 'q',
+                                     doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche det supplerende bynavn. ' +
+                                     'Wildcard * er tilladt i slutningen af hvert ord.'},
+                                    supplerendeBynavneIdParameters,
+                                    {name: 'postnr',
+                                     doc: 'Postnummer. 4 cifre.',
+                                     examples: ['2700']},
+                                    {name: 'kommunekode',
+                                     doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+                                     examples: ['0101']}];
+
+var supplerendeBynavneDoc = {
+  docVersion: 2,
+  resources: {
+    '/supplerendebynavne/{navn}': {
+      subtext: 'Modtag supplerende bynavn.',
+      parameters: [supplerendeBynavneIdParameters],
+      examples: [{description: 'Hent det supplerende bynavn med navn <em>Aarsballe</em>',
+                  path: ['/supplerendebynavne/Aarsballe']}]},
+
+    '/supplerendebynavne': {
+      subtext: 'Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.',
+      parameters: supplerendeBynavneParameters,
+      examples: [{description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
+                  query: [{name: 'postnr',value: '3700'}]},
+                 {description: 'Find de supplerende bynavne, hvor et ord i det supplerende bynavn starter med <em>aar</em>',
+                  query: [{ name: 'q',value: "aar*"}]}]},
+
+    '/supplerendebynavne/autocomplete': {
+      subtext: autocompleteSubtext('supplerendebynavne'),
+      parameters: overwriteWithAutocompleteQParameter(supplerendeBynavneParameters),
+      examples:[{description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
+                 query: [{name:'q', value:'sejr'}]}]}}};
 
 var kommuneDoc = {
   docVersion: 1,
@@ -214,8 +196,8 @@ var kommuneDoc = {
 };
 
 var SRIDParameter = {name: 'srid',
-                     doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'
-                     +' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
+                     doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
+                     ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
                     };
 
 var parametersForBothAdresseAndAdgangsAdresse = [
@@ -319,13 +301,13 @@ var adgangsadresseDoc = {
                           {name:'postnr', value:'8600'}]}]},
 
     '/adgangsadresser/reverse':{
-      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes '
-        +'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller '
-        +'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
-      parameters: [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '
-                    +'anvendex angives bredde-værdien.'},
-                   {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '
-                    +'anvendex angives længde-værdien.'},
+      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes '+
+        'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller '+
+        'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
+      parameters: [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '+
+                    'anvendex angives bredde-værdien.'},
+                   {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '+
+                    'anvendex angives længde-værdien.'},
                    SRIDParameter],
       examples: [{description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
                   query: [{name:'x', value:'12.5851471984198'},
