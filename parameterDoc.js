@@ -331,71 +331,45 @@ var adgangsadresseDoc = {
                           {name:'y'     , value: '725369.59'},
                           {name: 'srid' , value: '25832'}]}]}}};
 
+var adresseParameters = [{name: 'q',
+                          doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adressebetegnelsen. ' +
+                          'Wildcard * er tilladt i slutningen af hvert ord. ' +
+                          'Der skelnes ikke mellem store og små bogstaver.',
+                          examples: ['tværv*']},
+                         {name: 'id',
+                          doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'},
+                         {name: 'adgangsadresseid',
+                          doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'},
+                         {name: 'etage',
+                          doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9',},
+                         {name: 'dør',
+                          doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'}
+                        ].concat(parametersForBothAdresseAndAdgangsAdresse);
 
 var adresseDoc = {
-  docVersion: 1,
-  parameters: [
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adressebetegnelsen. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord. ' +
-        'Der skelnes ikke mellem store og små bogstaver.',
-      examples: ['tværv*']
-    },
-    {
-      name: 'id',
-      doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
-    },
-    {
-      name: 'adgangsadresseid',
-      doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'
-    },
-    {
-      name: 'etage',
-      doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9',
-    },
-    {
-      name: 'dør',
-      doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'
-    }
-  ].concat(parametersForBothAdresseAndAdgangsAdresse),
-  examples: {
-    query: [
-      {
-        description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
-        query: [{
-          name: 'vejnavn',
-          value: 'Rødkildevej'
-        },{
-          name: 'husnr',
-          value: '46'
-        }]
-      }, {
-        description: 'Find de adresser som indeholder et ord der starter med hvid og har postnummeret 2400',
-        query: [{
-          name: 'q',
-          value: 'hvid*'
-        }, {
-          name: 'postnr',
-          value: '2400'
-        }]
-      }
-    ],
-    get: [
-      {
-        description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
-        path: ['0255b942-f3ac-4969-a963-d2c4ed9ab943']
-      }
-    ]
-  },
-  autocompleteExamples: [
-    {description: 'Find alle adresser som indeholder <em>rand</em>',
-     query: [{name:'q', value:'rand'}]},
-    {description: 'Find alle adresser som indeholder <em>randers</em> på postnr <em>8450</em>',
-     query: [{name:'q', value:'randers'},{name:'postnr', value:'8450'}]}
-  ]
+  docVersion: 2,
+  resources: {
+    '/adresser': {
+      subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
+      parameters: adresseParameters,
+      examples: [{description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
+                  query: [{name: 'vejnavn',value: 'Rødkildevej'}, {name: 'husnr',value: '46'}]},
+                 {description: 'Find de adresser som indeholder et ord der starter med hvid og har postnummeret 2400',
+                  query: [{name: 'q',value: 'hvid*'}, {name: 'postnr',value: '2400'}]}]},
 
-};
+    '/adresser/{id}': {
+      subtext: 'Modtag adresse med id.',
+      parameters: [_.find(adresseParameters, function(p){ return p.name === 'id'; })],
+      examples: [{description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
+                  path: ['/adresser/0255b942-f3ac-4969-a963-d2c4ed9ab943']}]},
+
+    '/adresser/autocomplete': {
+      subtext: autocompleteSubtext('adresser'),
+      parameters: overwriteWithAutocompleteQParameter(adresseParameters),
+      examples: [{description: 'Find alle adresser som indeholder <em>rand</em>',
+                  query: [{name:'q', value:'rand'}]},
+                 {description: 'Find alle adresser som indeholder <em>randers</em> på postnr <em>8450</em>',
+                  query: [{name:'q', value:'randers'},{name:'postnr', value:'8450'}]}]}}};
 
 
 /******************************************************************************/

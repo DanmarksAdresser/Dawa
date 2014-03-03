@@ -29,17 +29,15 @@ block content
           section
 
             h3.anchor-header#adressesoegning Adressesøgning
-            p Søg efter adresser. Returnerer de adresser som opfylder kriteriet.
-            +parameterDocQuery(apiSpec.adresse, parameterDoc.adresse)
+            +documentResource(parameterDoc.adresse.resources, '/adresser')
 
             div.page-header
             h3.anchor-header#adresseopslag Adresseopslag
-            p Modtag adresse med id.
-            +parameterDocGet(apiSpec.adresse, parameterDoc.adresse)
+            +documentResource(parameterDoc.adresse.resources, '/adresser/{id}')
 
             div.page-header
             h3.anchor-header#adresseautocomplete Adresser autocomplete
-            +autocompleteDoc(apiSpec.adresse.model.autocompleteSchema, apiSpec.adresse.model.plural, parameterDoc.adresse.autocompleteExamples)
+            +documentResource(parameterDoc.adresse.resources, '/adresser/autocomplete')
 
             div.page-header
             h3.anchor-header#adressedata Beskrivelse af adressedata
