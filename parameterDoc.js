@@ -170,54 +170,39 @@ var supplerendeBynavneDoc = {
 /*** Kommune ******************************************************************/
 /******************************************************************************/
 
+var kommuneIdParameters = {name: 'kode',
+                         doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+                         examples: ['0101']};
+var kommuneParameters = [{name: 'q',
+                          doc: 'Søgetekst. Der søges i kommunenavnet. Alle ord i søgeteksten skal matche kommunenavnet. ' +
+                          'Wildcard * er tilladt i slutningen af hvert ord.'},
+                         {name: 'navn',
+                          doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
+                          examples: ['Aarhus', 'København']},
+                         kommuneIdParameters];
+
 var kommuneDoc = {
-  docVersion: 1,
-  parameters: [
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i kommunenavnet. Alle ord i søgeteksten skal matche kommunenavnet. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord.'
-    },
-    {
-      name: 'navn',
-      doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
-      examples: ['Aarhus', 'København']
-    },
-    {
-      name: 'kode',
-      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-      examples: ['0101']
-    }
-  ],
-  examples: {
-    query: [
-      {
-        description: 'Hent alle kommuner',
-        query: [
-        ]
-      },
-      {
-        description: 'Find de kommuner, som starter med <em>aa</em>',
-        query: [
-          { name: 'q',
-            value: "aa*"
-          }
-        ]
-      }
-    ],
-    get: [
-      {
-        description: 'Hent Københavns kommune (kode 101)',
-        path: ['101']
-      }]
+  docVersion: 2,
+  resources: {
+    '/kommuner': {
+      subtext: 'Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.',
+      parameters: kommuneParameters,
+      examples: [{description: 'Hent alle kommuner',
+                  query: []},
+                 {description: 'Find de kommuner, som starter med <em>aa</em>',
+                  query: [{ name: 'q',value: "aa*"}]}]},
 
-  },
+    '/kommuner/{kode}': {
+      subtext: 'Modtag kommune.',
+      parameters: [kommuneIdParameters],
+      examples: [{description: 'Hent Københavns kommune (kode 101)',
+                  path: ['/kommuner/101']}]},
 
-  autocompleteExamples: [
-    {description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
-     query: [{name:'q', value:'8'}]}],
-
-};
+    '/kommuner/autocomplete': {
+      subtext: autocompleteSubtext('kommuner'),
+      parameters: overwriteWithAutocompleteQParameter(kommuneParameters),
+      examples: [{description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
+                  query: [{name:'q', value:'8'}]}]}}};
 
 var SRIDParameter = {name: 'srid',
                      doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
