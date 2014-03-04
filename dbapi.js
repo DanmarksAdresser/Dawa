@@ -200,7 +200,7 @@ exports.withRollbackTransaction = function(cb) {
       });
     });
   });
-}
+};
 
 exports.withWriteTransaction = function(cb) {
   return pg.connect(connString, function (err, client, done) {
@@ -218,7 +218,7 @@ exports.withWriteTransaction = function(cb) {
       });
     });
   });
-}
+};
 
 exports.query = function(client, sqlParts, cb) {
   var query = createQuery(sqlParts);
