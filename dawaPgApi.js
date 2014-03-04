@@ -493,6 +493,6 @@ function sendInternalServerError(res, details){
 function sendError(res, code, message){
   res.statusCode = code;
 //  winston.debug("Sending error message %j", message, {});
-  res.setHeader('Content-Type', 'application/problem+json; charset=UTF-8');
+  res.setHeader('Content-Type', 'application/json; charset=UTF-8');
   res.end(jsonStringifyPretty(message));
 }
