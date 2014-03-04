@@ -29,7 +29,7 @@ describe('Alle suggestable specs skal kunne autocomplete', function() {
           rawQueryParams.q = sampleQueryParam;
           var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(apiSpec.autocompleteParameterSpec));
           expect(parseResult.errors.length).toBe(0);
-          dbapi.withTransaction(function(err, client, transactionDone) {
+          dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
             if(err) throw 'unable to open connection';
             dbapi.query(client, spec, { autocomplete: parseResult.params }, {limit: 20}, function(err, rows) {
               transactionDone();

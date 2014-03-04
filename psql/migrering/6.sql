@@ -14,7 +14,7 @@ CREATE TABLE DagiTemaer (
   tema DagiTemaType not null,
   kode integer not null,
   navn varchar(255),
-  geom  geometry(polygon, 25832),
+  geom  geometry(MultiPolygon, 25832),
   tsv tsvector,
   PRIMARY KEY(tema, kode)
 );
@@ -163,7 +163,7 @@ CREATE VIEW AdgangsadresserView AS
 
     K.kode AS kommunekode,
     K.navn AS kommunenavn,
-    array_to_json((select array_agg(DISTINCT CAST((D.tema, D.kode, D.navn) AS DagiTemaRef)) FROM AdgangsadresserDagiRel DR JOIN DagiTemaer D  ON (D.tema = DR.dagiTema AND D.kode = DR.dagiKode))) AS dagitemaer,
+    array_to_json((select array_agg(DISTINCT CAST((D.tema, D.kode, D.navn) AS DagiTemaRef)) FROM AdgangsadresserDagiRel DR JOIN DagiTemaer D  ON (DR.adgangsadresseid = A.id AND D.tema = DR.dagiTema AND D.kode = DR.dagiKode))) AS dagitemaer,
     A.tsv
 
   FROM adgangsadresser A

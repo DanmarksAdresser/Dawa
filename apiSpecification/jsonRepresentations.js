@@ -290,7 +290,7 @@ exports.adgangsadresse = {
   mapper: function (rs, options){
     function mapDagiTema(tema) {
       return {
-        href: makeHref(options.baseUrl, tema.tema, tema.kode),
+        href: makeHref(options.baseUrl, tema.tema, [tema.kode]),
         kode: tema.kode,
         navn: tema.navn
       };
@@ -346,10 +346,14 @@ exports.adgangsadresse = {
     adr.opstillingskreds = null;
     adr.afstemningsområde = null;
     var dagiTemaArray = rs.dagitemaer ? rs.dagitemaer.filter(function(tema) { return util.notNull(tema.tema); }) : [];
-    var dagiTemaer = _.indexBy(_.map(dagiTemaArray, mapDagiTema), 'tema');
+    var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');
+    var mappedDagiTemaer = _.reduce(dagiTemaMap, function(memo, tema, temaNavn) {
+      memo[temaNavn] = mapDagiTema(tema);
+      return memo;
+    }, {});
     // kommune is handled differently
     delete dagiTemaer.kommune;
-    _.extend(adr, dagiTemaer);
+    _.extend(adr, mappedDagiTemaer);
     return adr;
   }
 };

@@ -164,12 +164,12 @@ var transformToCsvObjects = function(rowStream, spec) {
   );
 };
 
-exports.withTransaction = function(cb) {
+exports.withReadonlyTransaction = function(cb) {
   return pg.connect(connString, function (err, client, done) {
     if (err) {
       return cb(err);
     }
-    client.query('BEGIN', [], function(err) {
+    client.query('BEGIN READ ONLY', [], function(err) {
       if(err) {
         done();
         return cb(err);
@@ -183,6 +183,42 @@ exports.withTransaction = function(cb) {
     });
   });
 };
+
+exports.withRollbackTransaction = function(cb) {
+  return pg.connect(connString, function (err, client, done) {
+    if (err) {
+      return cb(err);
+    }
+    client.query('BEGIN', [], function(err) {
+      if(err) {
+        done();
+        return cb(err);
+      }
+      cb(err, client, function() {
+        client.query('ROLLBACK', function(err) {});
+        return done();
+      });
+    });
+  });
+}
+
+exports.withWriteTransaction = function(cb) {
+  return pg.connect(connString, function (err, client, done) {
+    if (err) {
+      return cb(err);
+    }
+    client.query('BEGIN', [], function(err) {
+      if(err) {
+        done();
+        return cb(err);
+      }
+      cb(err, client, function(committedCallback) {
+        client.query('COMMIT', committedCallback);
+        return done();
+      });
+    });
+  });
+}
 
 exports.query = function(client, sqlParts, cb) {
   var query = createQuery(sqlParts);

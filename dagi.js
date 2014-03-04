@@ -1,5 +1,17 @@
 "use strict";
 
+exports.getDagiTemaer = function(client, temaNavn, cb) {
+  var sql = "SELECT tema, kode, navn, ST_AsGeoJSON(geom) FROM DagiTemaer WHERE tema = $1";
+  var params = [temaNavn];
+  client.query(sql, params, function(err, result) {
+    if(err) cb(err);
+    if(result.rows) {
+      return cb(null, result.rows);
+    }
+    return cb(null, []);
+  });
+};
+
 exports.addDagiTema = function(client, tema, cb) {
   var sql = 'INSERT INTO DagiTemaer(tema, kode, navn, geom) VALUES ($1, $2, $3, ST_SetSRID(ST_GeomFromGeoJSON($4), 25832))';
   var params = [tema.tema, tema.kode, tema.navn, tema.geom];

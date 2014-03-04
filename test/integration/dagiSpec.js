@@ -11,19 +11,19 @@ var sampleTema = {
   tema: 'region',
   kode: 10,
   navn: 'Test Region',
-  geom: {"type": "Polygon", "coordinates": [
-    [
+  geom: {"type": "MultiPolygon", "coordinates": [
+    [[
       [582534.985506234, 6128945.80096767],
       [588883.402508489, 6129068.80096925],
       [588659.687757301, 6140196.17148899],
       [582534.985506234, 6128945.80096767]
-    ]
+    ]]
   ]}
 };
 
 describe('DAGI updates', function() {
   it('When adding a new DAGI tema, the AdgangsAdresserDagiRel table should be updated', function(done) {
-    dbapi.withTransaction(function(err, client, transactionDone) {
+    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
@@ -38,7 +38,7 @@ describe('DAGI updates', function() {
   });
 
   it('When deleting a DAGI tema, the AdgangsAdresserDagiRel table should be updated', function(done) {
-    dbapi.withTransaction(function(err, client, transactionDone) {
+    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
@@ -55,18 +55,18 @@ describe('DAGI updates', function() {
   });
 
   it('When updating a DAGI tema, the AdgangsAdresserDagiRel table should be updated', function(done) {
-    dbapi.withTransaction(function(err, client, transactionDone) {
+    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
         var updated = _.clone(sampleTema);
         updated.geom.coordinates =
-          [[
+          [[[
             [585534.985506234, 6128945.80096767],
             [588883.402508489, 6129068.80096925],
             [588659.687757301, 6140196.17148899],
             [585534.985506234, 6128945.80096767]
-          ]];
+          ]]];
         dagi.updateDagiTema(client, updated, function(err) {
           if(err) throw err;
           client.query("select count(*) as c FROM AdgangsAdresserDagiRel WHERE dagiTema = 'region' AND dagiKode = 10", [], function(err, result) {
@@ -81,7 +81,7 @@ describe('DAGI updates', function() {
   });
 
   it('When adding a new DAGI tema, the tsv column should be populated', function(done) {
-    dbapi.withTransaction(function(err, client, transactionDone) {
+    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
@@ -96,7 +96,7 @@ describe('DAGI updates', function() {
   });
 
   it('When updating a DAGI tema, the tsv column should be updated', function(done) {
-    dbapi.withTransaction(function(err, client, transactionDone) {
+    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;

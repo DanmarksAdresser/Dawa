@@ -360,7 +360,7 @@ function publishAutocomplete(app, spec) {
 /******************************************************************************/
 
 function withPsqlClient(res, callback) {
-  return dbapi.withTransaction(function(err, client, done) {
+  return dbapi.withReadonlyTransaction(function(err, client, done) {
     if (err) {
       // We do not have a connection to PostgreSQL.
       // Abort!

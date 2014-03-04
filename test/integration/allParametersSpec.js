@@ -288,7 +288,7 @@ describe('Alle propertyFilter parametre skal virke', function() {
             expect(parseResult.errors.length).toBe(0);
             var sqlParts = apiSpecUtil.createSqlParts(spec, {propertyFilter: spec.parameterGroups.propertyFilter}, parseResult.params);
             sqlParts.limit = 100;
-            dbapi.withTransaction(function(err, client, transactionDone) {
+            dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
               if(err) throw 'unable to open connection';
               dbapi.query(client, sqlParts, function(err, rows) {
                 transactionDone();

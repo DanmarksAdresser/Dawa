@@ -93,7 +93,7 @@ describe('Validering af JSON-formatteret output', function() {
     it('Alle ' + spec.model.plural + ' skal validere', function(specDone) {
       console.log('validerer alle ' + spec.model.plural);
       var schema = spec.model.schema;
-      dbapi.withTransaction(function(err, client, transactionDone) {
+      dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
         var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {});
         dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
@@ -108,7 +108,7 @@ describe('Validering af JSON-formatteret output', function() {
     it('Alle felter i' + spec.model.plural + ' skal ses mindst en gang', function(specDone) {
       var schema = spec.model.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[spec.model.plural] || {};
-      dbapi.withTransaction(function(err, client, transactionDone) {
+      dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
         var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {});
         dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
