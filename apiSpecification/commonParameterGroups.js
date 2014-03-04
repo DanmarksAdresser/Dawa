@@ -155,7 +155,23 @@ exports.geomWithinParameterSpec = {
     {
       name: 'polygon',
       type: 'json',
-      schema: schema.polygon
+      schema: schema.polygon,
+      validateFun: function(multipolygon){
+        _.each(multipolygon, function(polygon){
+          // Ensure polygons consists of number-pairs
+          _.each(polygon, function(pair){
+            if (! (pair.length === 2 && _.isNumber(pair[0]) && _.isNumber(pair[1]))) {
+              throw 'Polygon must consist of coordinate pairs of numbers: '+JSON.stringify(polygon);
+            }
+          });
+          // Ensure closed polygons
+          var first = _.first(polygon);
+          var last  = _.last (polygon);
+          if (! (first[0] === last[0] && first[1] === last[1])) {
+            throw 'Polygon cannot be open, first and last element must be equal: '+JSON.stringify(polygon);
+          }
+        });
+      }
     },
     {
       name: 'cirkel',
