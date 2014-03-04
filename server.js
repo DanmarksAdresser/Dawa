@@ -82,7 +82,7 @@ function spawn(){
 }
 
 function setupLogging(app){
-  require('winston-loggly')
+  require('winston-loggly');
   if (process.env.DAWALOGGLY){
     winston.add(winston.transports.Loggly, logglyOptions);
     winston.info("Production mode. Setting up Loggly logging %s", process.env.DAWALOGGLY);

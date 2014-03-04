@@ -1,6 +1,5 @@
 "use strict";
 
-var apiSpecUtil = require('./apiSpecUtil');
 var columns = require('./apiSpecification/columns');
 var columnsUtil = require('./apiSpecification/columnsUtil');
 var util        = require('util');
@@ -105,7 +104,7 @@ CursorStream.prototype._doFetch = function(count) {
   });
 };
 
-CursorStream.prototype._read = function(count, cb) {
+CursorStream.prototype._read = function(count) {
   var self = this;
   if(self.closed) {
     winston.info('attempted read from a closed source');
@@ -121,7 +120,8 @@ function streamingQueryUsingCursor(client, sql, params, cb) {
   winston.info('executing sql: %j with params: %j', sql, params, {});
   client.query(
     sql,
-    params, function (err, result) {
+    params,
+    function (err) {
       if(err) {
         return cb(err);
       }
@@ -168,7 +168,9 @@ exports.withTransaction = function(cb) {
         return cb(err);
       }
       cb(err, client, function() {
+        /* jshint ignore:start */
         client.query('ROLLBACK', function(err) {});
+        /* jshint ignore:end */
         return done();
       });
     });
