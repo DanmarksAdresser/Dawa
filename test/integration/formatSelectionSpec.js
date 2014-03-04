@@ -84,7 +84,7 @@ describe('Format selection', function () {
   it("If an illegal value is specified as format parameter, a nice JSON error message should be returned", function(done) {
     request.get("http://localhost:3000/adresser?per_side=10&format=xml", function(error, response, body) {
       expect(response.statusCode).toBe(400);
-      expect(response.headers['content-type']).toBe("application/problem+json; charset=UTF-8");
+      expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
       var errorMessage = JSON.parse(body);
       expect(errorMessage.type).toEqual('QueryParameterFormatError');
       done();
