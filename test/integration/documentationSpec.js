@@ -54,7 +54,7 @@ describe('Parameter documentation.', function() {
 
 function reverseDocParems(docSpec, spec){
   var res = docSpec.resources['/'+spec.model.plural+'/reverse'];
-  return res ? res.parameters : [];
+  return res ? res.parameters : undefined;
 }
 function autocompleteDocParems(docSpec, spec){
   return docSpec.resources['/'+spec.model.plural+'/autocomplete'].parameters; }
@@ -63,7 +63,7 @@ function searchDocParems(docSpec, spec){
 }
 
 function checkPG(group, text, paramsInDoc){
-  if (group){
+  if (group && paramsInDoc){
     var paramsInDocMap = _.indexBy(paramsInDoc, 'name');
     group.parameters.forEach(
       function(param){
