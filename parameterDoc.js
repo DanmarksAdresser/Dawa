@@ -255,14 +255,12 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     name: 'polygon',
     doc: 'Find de adresser, som ligger indenfor det angivne polygon. ' +
       'Polygonet specificeres som et array af koordinater på samme måde som' +
-      ' koordinaterne specificeres i GeoJSON\'s polygon.' +
-      ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.' +
-      ' polygon=[[[10.1351967049683,55.5670601123672],' +
-      '[10.135200982843,55.5671204601228],' +
-      '[10.1362257877892,55.5682107215927],' +
-      '[10.1362451883392,55.568284049162], ' +
-      '[10.1362396504186,55.5683669533645],' +
-      '[10.1351967049683,55.5670601123672]]].'
+      ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.'+
+      ' Bemærk at polygoner skal' +
+      ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>'+
+      ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+      ' angives vha. srid parameteren, se ovenover.<br> Eksempel: '+
+      ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
 
   },
   {
@@ -299,11 +297,17 @@ var adgangsadresseDoc = {
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
       parameters: adgangsadresseParameters,
       examples: [{description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
-                  query: [{name: 'vejnavn', value: 'Rødkildevej'},
+                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
                           {name: 'husnr',   value: '46'}]},
                  {description: 'Find de adgangsadresser som indeholder et ord der starter med hvid og har postnummeret 2400',
                   query: [{name: 'q',      value: 'hvid*'},
-                          {name: 'postnr', value: '2400'}]}]},
+                          {name: 'postnr', value: '2400'}]},
+                 {description: 'Find de adgangsadresser som er indenfor polygonet <em>(10.3,55.3), (10.4,55.3), '+
+                  '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
+                  query: [{name: 'polygon',
+                           encodeValue: false,
+                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]}]},
+
 
     '/adgangsadresser/autocomplete':{
       subtext: autocompleteSubtext('adgangsadresser'),
@@ -355,7 +359,12 @@ var adresseDoc = {
       examples: [{description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
                   query: [{name: 'vejnavn',value: 'Rødkildevej'}, {name: 'husnr',value: '46'}]},
                  {description: 'Find de adresser som indeholder et ord der starter med hvid og har postnummeret 2400',
-                  query: [{name: 'q',value: 'hvid*'}, {name: 'postnr',value: '2400'}]}]},
+                  query: [{name: 'q',value: 'hvid*'}, {name: 'postnr',value: '2400'}]},
+                 {description: 'Find de adgangsadresser som er indenfor polygonet <em>(10.3,55.3), (10.4,55.3), '+
+                  '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
+                  query: [{name: 'polygon',
+                           encodeValue: false,
+                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]}]},
 
     '/adresser/{id}': {
       subtext: 'Modtag adresse med id.',

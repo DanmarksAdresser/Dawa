@@ -19,7 +19,7 @@ exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
   var url = baseUrl + path;
   if (!_.isEmpty(query)) {
     url += '?' + _.map(query,function (param) {
-      return encodeURIComponent(param.name) + '=' + encodeURIComponent(param.value);
+      return encodeURIComponent(param.name) + '=' + (param.encodeValue === false ? param.value : encodeURIComponent(param.value));
     }).join('&');
   }
   return url;
