@@ -7,7 +7,9 @@ var dagi = require('./dagi');
 var dbapi = require('./dbapi');
 var async = require('async');
 
-var dagiUrl = 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2';
+var dagiUrl = process.env.dagiUrl || 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2';
+var dagiLogin = process.env.dagiLogin || 'dawa';
+var dagiPassword = process.env.dagiPassword;
 
 var dagiFeatureNames = {
   kommune: 'KOMMUNE10',
@@ -87,8 +89,8 @@ function putDagiTemaer(temaNavn, temaer, callback) {
 
 function indlæsDagiTema(temaNavn) {
   var queryParams = {
-    login: 'dawa',
-    password: 'AWSversion4',
+    login: dagiLogin,
+    password: dagiPassword,
     SERVICE: 'WFS',
     VERSION: '1.0.0',
     REQUEST: 'GetFeature',
@@ -137,4 +139,4 @@ function indlæsDagiTema(temaNavn) {
   });
 }
 
-indlæsDagiTema('sogn');
+indlæsDagiTema('region');
