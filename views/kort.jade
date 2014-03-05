@@ -37,8 +37,7 @@ html(lang='da')
         var koordinater= [];
 
         function adressetekst(adresse) {
-          return (adresse.bygningsnavn.length > 0?adresse.bygningsnavn + "<br>":"") +
-                          adresse.vej.navn + " " + adresse.husnr + "<br>" + 
+          return adresse.vej.navn + " " + adresse.husnr + "<br>" +
                           (adresse.supplerendebynavn.length > 0?adresse.supplerendebynavn + "<br>":"") +
                           adresse.postnummer.nr + " " + adresse.postnummer.navn;
         }

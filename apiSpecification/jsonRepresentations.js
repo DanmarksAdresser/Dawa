@@ -52,10 +52,6 @@ exports.adgangsadresse = {
         type: 'string',
         pattern: '([1-9]|[1-9]\\d|[1-9]\\d{2})[A-Z]?'
       },
-      'bygningsnavn': {
-        description: 'Evt. bygningsnavn eller gårdnavn, der er registreret af kommunen som en supplerende adressebetegnelse. Indtil 34 tegn. Eksempel: ”Solholm”. Udgår og bliver overført til Stednavne.',
-        type: nullableType('string')
-      },
       'supplerendebynavn': {
         description: 'Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af ' +
           'kommunen for at præcisere adressens beliggenhed indenfor postnummeret. ' +
@@ -283,7 +279,7 @@ exports.adgangsadresse = {
         docOrder: ['kode', 'navn']
       })
     },
-    docOrder: ['href','id', 'vejstykke', 'husnr','bygningsnavn', 'supplerendebynavn',
+    docOrder: ['href','id', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds','afstemningsområde']
   }),
@@ -304,7 +300,6 @@ exports.adgangsadresse = {
       kode: kode4String(rs.vejkode)
     };
     adr.husnr = rs.husnr;
-    adr.bygningsnavn = maybeNull(rs.bygningsnavn);
     adr.supplerendebynavn = maybeNull(rs.supplerendebynavn);
     adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, options.baseUrl);
     adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, options.baseUrl);

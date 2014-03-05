@@ -265,8 +265,7 @@ function inverseGeocoding()
         var popup = L.popup();
         popup
           .setLatLng(new L.LatLng(data.adgangspunkt.koordinater[1], data.adgangspunkt.koordinater[0]))
-          .setContent((data.bygningsnavn ? data.bygningsnavn + "<br>":"") +
-                      data.vejstykke.navn + " " + data.husnr + "<br>" +
+          .setContent(data.vejstykke.navn + " " + data.husnr + "<br>" +
                       (data.supplerendebynavn ? data.supplerendebynavn + "<br>":"") +
                       data.postnummer.nr + " " + data.postnummer.navn )
           .openOn(map);

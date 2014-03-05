@@ -36,9 +36,6 @@ exports.adgangsadresse = [
     name: 'postnrnavn'
   },
   {
-    name: 'bygningsnavn'
-  },
-  {
     name: 'kommunekode',
     formatter: kode4String
   },

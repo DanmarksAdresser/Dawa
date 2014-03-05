@@ -92,7 +92,6 @@ describe("Adresse schema validation", function () {
             "navn": "Fægangen"
           },
           "husnr": "1",
-          bygningsnavn: null,
           "supplerendebynavn": "Byen",
           "postnummer": {
             href: 'link',
