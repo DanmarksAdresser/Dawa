@@ -7,14 +7,14 @@ var _           = require('underscore');
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
 
-exports.parseParameters = function(params, parameterSpec) {
+exports.parseParameters = function(params, parameterSpec, resourceSpec) {
   var paramNames = _.filter(_.keys(params), function(name) {
     return parameterSpec[name] ? true : false;
   });
   return _.reduce(paramNames,
     function(memo, name){
       try{
-        var val = parseParameter(params[name], parameterSpec[name]);
+        var val = parseParameter(params[name], parameterSpec[name], resourceSpec);
         memo.params[name] = val;
       } catch(error){
         memo.errors.push([name, error]);
@@ -24,10 +24,10 @@ exports.parseParameters = function(params, parameterSpec) {
     {params: {}, errors: []});
 };
 
-function parseParameter(valString, spec) {
-  var val = parseParameterType(valString, spec.type);
-  jsonSchemaValidation(val, spec.schema);
-  if (spec.validateFun) { spec.validateFun(val); }
+function parseParameter(valString, paramSpec, resourceSpec) {
+  var val = parseParameterType(valString, paramSpec.type);
+  jsonSchemaValidation(val, paramSpec.schema);
+  if (paramSpec.validateFun) { paramSpec.validateFun(val, resourceSpec); }
   return val;
 }
 

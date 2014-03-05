@@ -7,6 +7,7 @@ var namesAndKeys = require('./namesAndKeys');
 var schema = require('./parameterSchema');
 var util = require('./util');
 var _ = require('underscore');
+//var winston = require('winston');
 
 var notNull = util.notNull;
 
@@ -255,6 +256,11 @@ exports.formatParameterSpec = {
       name: 'format',
       schema: {
         "enum": ['csv', 'json', 'geojson']
+      },
+      validateFun: function(formatString, resourceSpec){
+        if (formatString === 'geojson' && !resourceSpec.mappers.geojson){
+          throw 'geojson format not supported for '+resourceSpec.model.name;
+        }
       }
     },
     {
