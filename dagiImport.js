@@ -30,7 +30,7 @@ var dagiKodeKolonne = {
 //  postdistrikt: 'CPR_noegle',
   retskreds: 'CPR_noegle'
 
-}
+};
 
 function mapGmlCoordinates(str) {
   var coordinateArray = str.split(' ');
@@ -65,9 +65,9 @@ function removeAll(as, bs) {
 }
 function putDagiTemaer(temaNavn, temaer, callback) {
   dbapi.withWriteTransaction(function(err, client, done) {
-    if(err) throw err;
+    if(err) { throw err; }
     dagi.getDagiTemaer(client, temaNavn, function(err, existingTemaer) {
-      if(err) throw err;
+      if(err) { throw err; }
       var temaerToRemove = removeAll(existingTemaer, temaer);
       var temaerToCreate = removeAll(temaer, existingTemaer);
       var temaerToUpdate = removeAll(temaer, temaerToCreate);
@@ -118,7 +118,7 @@ function indlæsDagiTema(temaNavn, callback) {
       tagNameProcessors: [xml2js.processors.stripPrefix],
       trim: true
     },function(err, result) {
-      if(err) throw err;
+      if(err) { throw err; }
       if(!result.FeatureCollection) {
         throw 'Unexpected result from DAGI: ' + JSON.stringify(result);
       }
@@ -159,5 +159,5 @@ function indlæsDagiTema(temaNavn, callback) {
 async.eachSeries(_.keys(dagiFeatureNames), function(temaNavn, callback) {
   indlæsDagiTema(temaNavn, callback);
 }, function(err) {
-  if(err) throw err;
+  if(err) { throw err; }
 });
