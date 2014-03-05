@@ -32,22 +32,62 @@ CREATE TABLE AdgangsAdresserDagiRel(
 
 CREATE INDEX ON AdgangsadresserDagiRel(dagiTema, dagiKode, adgangsadresseid);
 
-CREATE OR REPLACE FUNCTION refresh_adgangsadresser_dagi_rel()
-  RETURNS INTEGER AS
+DROP TABLE IF EXISTS GriddedDagiTemaer;
+CREATE TABLE GriddedDagiTemaer(
+  tema dagiTemaType not null,
+  kode integer not null,
+  geom geometry
+);
+
+CREATE INDEX ON GriddedDagiTemaer(tema, kode);
+CREATE INDEX ON GriddedDagiTemaer USING GIST(geom);
+
+CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEGER)
+  RETURNS SETOF geometry AS
   $$
+  DECLARE
+    xmin DOUBLE PRECISION;
+    xmax   DOUBLE PRECISION;
+    ymin   DOUBLE PRECISION;
+    ymax   DOUBLE PRECISION;
+    dx   DOUBLE PRECISION;
+    dy DOUBLE PRECISION;
+    r1 geometry;
+    r2 geometry;
+    i1 geometry;
+    i2 geometry;
+    points INTEGER;
+  srid integer;
   BEGIN
-    DELETE FROM AdgangsAdresserDagiRel;
-    INSERT INTO AdgangsAdresserDagiRel (adgangsadresseid, dagitema, dagiKode)
-      (SELECT
-         Adgangsadresser.id,
-         tema,
-         kode
-       FROM AdgangsAdresser, DagiTemaer
-       WHERE ST_CONTAINS(DagiTemaer.geom,
-                         AdgangsAdresser.geom));
-    RETURN NULL;
+    points := ST_NPoints(g);
+--    RAISE NOTICE 'Points: (%)', points;
+
+    IF points <= maxPointCount THEN
+      RETURN QUERY SELECT g;
+      RETURN;
+    END IF;
+    xmin := ST_XMin(g);
+    xmax := ST_XMax(g);
+    ymin := ST_YMin(g);
+    ymax := ST_YMax(g);
+    dx := xmax - xmin;
+    dy := ymax - ymin;
+      srid := st_srid(g);
+--    RAISE NOTICE 'xmin: (%), ymin: (%), xmax: (%), ymax: (%)', xmin, ymin, xmax, ymax;
+    IF(dx > dy) THEN
+      r1 := makeRectangle(xmin, ymin, xmin + dx/2, ymax, srid);
+      r2 := makeRectangle(xmin + dx/2, ymin, xmax, ymax, srid);
+    ELSE
+      r1 := makeRectangle(xmin, ymin, xmax, ymin + dy/2, srid);
+      r2 := makeRectangle(xmin, ymin + dy/2, xmax, ymax, srid);
+    END IF;
+    i1 := st_intersection(g, r1);
+    i2 := st_intersection(g, r2);
+    RETURN QUERY SELECT splitToGridRecursive(i1, maxPointCount);
+    RETURN QUERY SELECT splitToGridRecursive(i2, maxPointCount);
+    RETURN;
   END;
-  $$ LANGUAGE PLPGSQL;
+  $$ LANGUAGE plpgsql IMMUTABLE STRICT;
 
 CREATE OR REPLACE FUNCTION update_dagi_temaer_tsv()
   RETURNS TRIGGER AS $$
@@ -57,6 +97,33 @@ BEGIN
     NEW.tsv = to_tsvector('danish', NEW.kode || ' ' || COALESCE(NEW.navn, ''));
   END IF;
   RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE OR REPLACE FUNCTION update_gridded_dagi_temaer()
+  RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' AND OLD.geom = NEW.geom THEN
+    RETURN NULL;
+  END IF;
+  IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'
+  THEN
+    DELETE FROM GriddedDagiTemaer WHERE tema = OLD.tema AND kode = OLD.kode;
+    DELETE FROM AdgangsAdresserDagiRel WHERE dagiTema = OLD.tema AND dagiKode = OLD.kode;
+  END IF;
+  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
+  THEN
+    INSERT INTO GriddedDagiTemaer (tema, kode, geom)
+      (SELECT
+         NEW.tema,
+        NEW.kode,
+         splitToGridRecursive(NEW.geom, 100) as geom);
+    INSERT INTO AdgangsadresserDagiRel(adgangsadresseid, dagitema, dagikode)
+      (SELECT DISTINCT Adgangsadresser.id, GriddedDagiTemaer.tema, GriddedDagiTemaer.kode
+       FROM Adgangsadresser
+         JOIN GriddedDagiTemaer ON ST_Contains(GriddedDagiTemaer.geom, Adgangsadresser.geom));
+  END IF;
+  RETURN NULL;
 END;
 $$ LANGUAGE PLPGSQL;
 
@@ -73,39 +140,12 @@ BEGIN
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
   THEN
     INSERT INTO AdgangsadresserDagiRel (adgangsadresseid, dagiTema, dagiKode)
-      (SELECT
+      (SELECT DISTINCT
          Adgangsadresser.id,
          Dagitemaer.tema,
          Dagitemaer.kode
-       FROM Adgangsadresser, Dagitemaer
-       WHERE Adgangsadresser.id = NEW.id AND ST_Contains(Dagitemaer.geom, Adgangsadresser.geom));
-  END IF;
-  RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION update_adgangsadresser_dagi_rel_dagitemaer()
-  RETURNS TRIGGER AS $$
-BEGIN
-  IF (TG_OP = 'UPDATE' AND OLD.geom = NEW.geom) THEN
-    RETURN NULL;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'
-  THEN
-    DELETE FROM AdgangsadresserDagiRel WHERE dagiTema = OLD.tema AND dagiKode = OLD.kode;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
-  THEN
-    INSERT INTO AdgangsadresserDagiRel (adgangsadresseid, dagiTema, dagiKode)
-      (SELECT
-         Adgangsadresser.id,
-         Dagitemaer.tema,
-         Dagitemaer.kode
-       FROM Adgangsadresser, Dagitemaer
-       WHERE DagiTemaer.tema = NEW.tema AND
-             DagiTemaer.kode = NEW.kode AND
-             ST_Contains(Dagitemaer.geom,
-                         Adgangsadresser.geom));
+       FROM Adgangsadresser, GriddedDagitemaer
+       WHERE Adgangsadresser.id = NEW.id AND ST_Contains(GriddedDagitemaer.geom, Adgangsadresser.geom));
   END IF;
   RETURN NULL;
 END;
