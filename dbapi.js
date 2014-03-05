@@ -132,11 +132,11 @@ function streamingQueryUsingCursor(client, sql, params, cb) {
 
 var transformToCsvObjects = function(rowStream, spec) {
   var fields = spec.fields;
+  var columnSpec = columns[spec.model.name];
   return eventStream.pipeline(
     rowStream,
     eventStream.mapSync(function(row) {
       return _.reduce(fields, function(memo, field) {
-        var columnSpec = columns[spec.model.name];
 
         // currently, all selectable fields are part of the CSV format
         if(!columnsUtil.hasColumnForSelect(columnSpec, field.name)) {
