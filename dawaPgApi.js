@@ -201,17 +201,18 @@ function sendSingleResultToHttpResponse(result, res, spec, options) {
   var callback = options.formatParams.callback;
   setAppropriateContentHeader(res, format, callback);
   if(format === 'csv') {
-    return streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, function() {});
-  }
-  var textObject = jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid }));
-  if(callback) {
-    var sep = jsonpSep(callback, {open: '', separator: '', close: ''});
-    res.write(sep.open);
-    res.write(textObject);
-    res.end(sep.close);
-  }
-  else {
-    res.end(textObject);
+    streamCsvToHttpResponse(eventStream.readArray([result]), spec, res, function() {});
+  } else {
+    var textObject = jsonStringifyPretty(spec.mappers[format](result, { baseUrl: options.baseUrl, srid: options.srid }));
+    if(callback) {
+      var sep = jsonpSep(callback, {open: '', separator: '', close: ''});
+      res.write(sep.open);
+      res.write(textObject);
+      res.end(sep.close);
+    }
+    else {
+      res.end(textObject);
+    }
   }
 }
 
@@ -265,11 +266,12 @@ function streamRowsHttpResponse(stream, res, spec, options, done) {
   var callback = options.formatParams.callback;
   setAppropriateContentHeader(res, format, callback);
   if(format === 'csv') {
-    return streamCsvToHttpResponse(stream, spec, res, done);
+    streamCsvToHttpResponse(stream, spec, res, done);
+  } else {
+    var objectStream = dbapi.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl });
+    var textStream = transformToText(objectStream, format, callback, options);
+    streamToHttpResponse(textStream, res, {}, done);
   }
-  var objectStream = dbapi.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl });
-  var textStream = transformToText(objectStream, format, callback, options);
-  streamToHttpResponse(textStream, res, {}, done);
 }
 
 /**
