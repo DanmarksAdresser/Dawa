@@ -30,6 +30,12 @@ var formatParameters = [{name: 'callback',
                        {name: 'format',
                         doc: 'Output leveres i andet format end <em>JSON</em>. Se <a href=generelt#dataformater>Dataformater</a>.'}];
 
+var pagingParameters = [{name: 'side',
+                        doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt##paginering>Paginering</a>.'},
+                       {name: 'per_side',
+                        doc: 'Antal resultater per side. Se <a href=generelt##paginering>Paginering</a>.'}];
+
+var formatAndPagingParams = formatParameters.concat(pagingParameters);
 
 /******************************************************************************/
 /*** Vejnavne *****************************************************************/
@@ -66,7 +72,7 @@ var vejnavneDoc = {
 
     '/vejnavne': {
       subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
-      parameters: vejnavneParameters.concat(formatParameters),
+      parameters: vejnavneParameters.concat(formatAndPagingParams),
       examples:   [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og '+
                     'indeholder et ord der starter med <em>hvid</em>',
                     query: [{name: 'postnr', value: '2400'},
@@ -76,7 +82,7 @@ var vejnavneDoc = {
 
     '/vejnavne/autocomplete': {
       subtext: autocompleteSubtext('vejnavne'),
-      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatAndPagingParams),
       examples:    [{description: 'Find alle vejnavne som indeholder <em>jolle</em>',
                      query: [{name:'q', value:'jolle'}]},
                     {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
@@ -118,7 +124,7 @@ var vejstykkerDoc = {
 
     '/vejstykker': {
       subtext: 'Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.',
-      parameters: vejstykkerParameters.concat(formatParameters),
+      parameters: vejstykkerParameters.concat(formatAndPagingParams),
       examples:  [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
                    query: [{name:'postnr', value:'2400'}, {name: 'q',value: 'hvid*'}]},
                   {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
@@ -126,7 +132,7 @@ var vejstykkerDoc = {
 
     '/vejstykker/autocomplete': {
       subtext: autocompleteSubtext('vejstykker'),
-      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle vejstykker som indeholder <em>jolle</em>',
                   query: [{name:'q', value:'jolle'}]},
                  {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
@@ -163,7 +169,7 @@ var supplerendeBynavneDoc = {
 
     '/supplerendebynavne': {
       subtext: 'Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.',
-      parameters: supplerendeBynavneParameters.concat(formatParameters),
+      parameters: supplerendeBynavneParameters.concat(formatAndPagingParams),
       examples: [{description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
                   query: [{name: 'postnr',value: '3700'}]},
                  {description: 'Find de supplerende bynavne, hvor et ord i det supplerende bynavn starter med <em>aar</em>',
@@ -171,7 +177,7 @@ var supplerendeBynavneDoc = {
 
     '/supplerendebynavne/autocomplete': {
       subtext: autocompleteSubtext('supplerendebynavne'),
-      parameters: overwriteWithAutocompleteQParameter(supplerendeBynavneParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(supplerendeBynavneParameters).concat(formatAndPagingParams),
       examples:[{description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
                  query: [{name:'q', value:'sejr'}]}]}}};
 
@@ -196,7 +202,7 @@ var kommuneDoc = {
   resources: {
     '/kommuner': {
       subtext: 'Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.',
-      parameters: kommuneParameters.concat(formatParameters),
+      parameters: kommuneParameters.concat(formatAndPagingParams),
       examples: [{description: 'Hent alle kommuner',
                   query: []},
                  {description: 'Find de kommuner, som starter med <em>aa</em>',
@@ -210,7 +216,7 @@ var kommuneDoc = {
 
     '/kommuner/autocomplete': {
       subtext: autocompleteSubtext('kommuner'),
-      parameters: overwriteWithAutocompleteQParameter(kommuneParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(kommuneParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
                   query: [{name:'q', value:'8'}]}]}}};
 
@@ -305,7 +311,7 @@ var adgangsadresseDoc = {
 
     '/adgangsadresser':{
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
-      parameters: adgangsadresseParameters.concat(formatParameters),
+      parameters: adgangsadresseParameters.concat(formatAndPagingParams),
       examples: [{description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
                   query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
                           {name: 'husnr',   value: '46'}]},
@@ -336,7 +342,7 @@ var adgangsadresseDoc = {
 
     '/adgangsadresser/autocomplete':{
       subtext: autocompleteSubtext('adgangsadresser'),
-      parameters: overwriteWithAutocompleteQParameter(adgangsadresseParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(adgangsadresseParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
                   query: [{name:'q', value:'rand'}]},
                  {description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
@@ -380,7 +386,7 @@ var adresseDoc = {
   resources: {
     '/adresser': {
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
-      parameters: adresseParameters.concat(formatParameters),
+      parameters: adresseParameters.concat(formatAndPagingParams),
       examples: [{description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
                   query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'}, {name: 'husnr',value: '46'}]},
                  {description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. '+
@@ -414,7 +420,7 @@ var adresseDoc = {
 
     '/adresser/autocomplete': {
       subtext: autocompleteSubtext('adresser'),
-      parameters: overwriteWithAutocompleteQParameter(adresseParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(adresseParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle adresser som indeholder <em>rand</em>',
                   query: [{name:'q', value:'rand'}]},
                  {description: 'Find alle adresser som indeholder <em>randers</em> på postnr <em>8450</em>',
@@ -443,7 +449,7 @@ var postnummerDoc = {
   resources: {
     '/postnumre': {
       subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
-      parameters: postnummerParameters.concat(formatParameters),
+      parameters: postnummerParameters.concat(formatAndPagingParams),
       examples: [{description: 'Hent alle postnumre', query: []},
                  {description: 'Find postnummer <em>8600</em>',
                   query: [{ name: 'nr', value: "8600"}]},
@@ -464,7 +470,7 @@ var postnummerDoc = {
 
     '/postnumre/autocomplete': {
       subtext: autocompleteSubtext('postnumre'),
-      parameters: overwriteWithAutocompleteQParameter(postnummerParameters).concat(formatParameters),
+      parameters: overwriteWithAutocompleteQParameter(postnummerParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
                   query: [{name:'q', value:'strand'}]}]}}};
 
