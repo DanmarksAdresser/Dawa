@@ -88,12 +88,12 @@ exports.vejstykke = function() {
 };
 
 dagiTemaer.forEach(function(tema) {
-  exports[tema.singular] = function() {
+  exports[tema.singular] = function(parameters) {
     return {
-      select: 'SELECT kode, navn FROM DagiTemaer',
+      select: 'SELECT kode, navn, ST_AsGeoJSON(ST_Transform(DagiTemaer.geom,$2)) as geom_json FROM DagiTemaer',
       whereClauses: ['tema = $1'],
       orderClauses: [],
-      sqlParams: [tema.singular]
+      sqlParams: [tema.singular, parameters.srid || 4326]
     };
   };
 });

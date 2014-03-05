@@ -15,11 +15,22 @@ var dagiFeatureNames = {
   kommune: 'KOMMUNE10',
   opstillingskreds: 'OPSTILLINGSKREDS10',
   politikreds: 'POLITIKREDS10',
-  postdistrikt: 'POSTDISTRIKT10',
+//  postdistrikt: 'POSTDISTRIKT10',
   region: 'REGION10',
   retskreds: 'RETSKREDS10',
   sogn: 'SOGN10'
 };
+
+var dagiKodeKolonne = {
+  kommune: 'CPR_noegle',
+  region: 'CPR_noegle',
+  sogn: 'CPR_noegle',
+  opstillingskreds: 'Opstillingskredsnummer',
+  politikreds: 'CPR_noegle',
+//  postdistrikt: 'CPR_noegle',
+  retskreds: 'CPR_noegle'
+
+}
 
 function mapGmlCoordinates(str) {
   var coordinateArray = str.split(' ');
@@ -63,19 +74,19 @@ function putDagiTemaer(temaNavn, temaer, callback) {
       async.series([
         function(callback) {
           async.eachSeries(temaerToRemove, function(tema, callback) {
-            console.log('deleting: ' + JSON.stringify(tema));
+            console.log('removing: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
             dagi.deleteDagiTema(client, tema, callback);
           }, callback);
         },
         function(callback) {
           async.eachSeries(temaerToCreate, function(tema, callback) {
-            console.log('adding: ' + JSON.stringify(tema));
+            console.log('adding: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
             dagi.addDagiTema(client, tema, callback);
           }, callback);
         },
         function(callback) {
           async.eachSeries(temaerToUpdate, function(tema, callback) {
-            console.log('updating: ' + JSON.stringify(tema));
+            console.log('updating: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
             dagi.updateDagiTema(client, tema, callback);
           }, callback);
         },
@@ -87,7 +98,8 @@ function putDagiTemaer(temaNavn, temaer, callback) {
   });
 }
 
-function indlæsDagiTema(temaNavn) {
+function indlæsDagiTema(temaNavn, callback) {
+  console.log("Indlæser DAGI tema " + temaNavn);
   var queryParams = {
     login: dagiLogin,
     password: dagiPassword,
@@ -100,18 +112,22 @@ function indlæsDagiTema(temaNavn) {
     return name + '=' + encodeURIComponent(value);
   }).join('&');
   var url = dagiUrl + '&' + paramString;
-  console.log(url);
+  console.log("URL: " + url);
   request.get(url, function(err, response, body) {
     xml2js.parseString(body, {
       tagNameProcessors: [xml2js.processors.stripPrefix],
       trim: true
     },function(err, result) {
+      if(err) throw err;
+      if(!result.FeatureCollection) {
+        throw 'Unexpected result from DAGI: ' + JSON.stringify(result);
+      }
       var features = result.FeatureCollection.featureMember;
       var dagiTemaFragments = _.map(features, function(feature) {
         var f = feature[dagiFeatureNames[temaNavn]][0];
         return {
           tema: temaNavn,
-          kode: parseInt(f.CPR_noegle[0], 10),
+          kode: parseInt(f[dagiKodeKolonne[temaNavn]][0], 10),
           navn: f.Navn[0],
           geom: mapGmlPolygon(f.geometri[0])
         };
@@ -134,9 +150,14 @@ function indlæsDagiTema(temaNavn) {
       dagiTemaFragmentMap = null;
       putDagiTemaer(temaNavn, dagiTemaer, function(err)  {
         console.log('put dagi temaer complete: ' + err);
+        callback(err);
       });
     });
   });
 }
 
-indlæsDagiTema('region');
+async.eachSeries(_.keys(dagiFeatureNames), function(temaNavn, callback) {
+  indlæsDagiTema(temaNavn, callback);
+}, function(err) {
+  if(err) throw err;
+});
