@@ -20,7 +20,6 @@ block content
               li <a href='#versionering'>Versionering</a>
               li <a href='#kompression'>Kompression</a>
               li <a href='#cors'>Cross Origin Resource Sharing</a>
-              li <a href='#jsonp'>JSONP Callbacks</a>
               li <a href='#paginering'>Paginering</a>
               li <a href='#hypermedia'>Hypermedia</a>
               li <a href='#fejlhaandtering'>Fejlhåndtering</a>
@@ -38,14 +37,21 @@ block content
               h3.anchor-header#dataformater Dataformater
             p Alle typer data kan returneres i følgende formater:
               ul
-                li json
+                li json. Default.
+                   PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej">#{url}/adresser?postnr=8830&vejnavn=Bakkevej</a>
+                li jsonp.
+                   PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun</a>
+                li csv.
+                  PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=csv">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=csv</a>
                 li html (ikke muligt endnu!)
-                li csv
+
               ul
-            p Derudover understøtter adresser og adgangsadresser også:
+            p Derudover understøtter <em>adresser</em> og <em>adgangsadresser</em> også:
               ul
-                li geojson
+                li geojson.
+                   PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
                 li mini (ikke muligt endnu!)
+
               ul
             p Angivelse af parameteren mini som query parametre returnerer udelukkende adressen med dens adgangspunkt uden de tilknyttede attributer.
 
@@ -114,8 +120,6 @@ block content
             p Alle GET svar fra DAWA indeholder en CORS header der tillader cross-site requests:
             pre Access-Control-Allow-Origin: *
             p Dette muliggør cross-site requests direkte til DAWA.
-            div.page-header
-              h3.anchor-header#jsonp JSONP Callbacks
             div.page-header
               h3.anchor-header#paginering  Paginering
               p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kaldes paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.
