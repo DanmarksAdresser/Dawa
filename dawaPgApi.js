@@ -238,7 +238,7 @@ function transformToText(objectStream, format, callbackName, options) {
  * Compute the appropriate Content-Type header based on the format and
  */
 function contentHeader(format, jsonpCallbackName) {
-  if(format == 'csv') {
+  if(format === 'csv') {
     return 'text/csv; charset=UTF-8';
   }
   else if (jsonpCallbackName) {
