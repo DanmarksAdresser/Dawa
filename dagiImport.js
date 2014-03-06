@@ -27,9 +27,18 @@ var dagiKodeKolonne = {
   sogn: 'CPR_noegle',
   opstillingskreds: 'Opstillingskredsnummer',
   politikreds: 'CPR_noegle',
-//  postdistrikt: 'CPR_noegle',
+  postdistrikt: 'PostCodeLabelText',
   retskreds: 'CPR_noegle'
+};
 
+var dagiNavnKolonne = {
+  kommune: 'Navn',
+  region: 'Navn',
+  sogn: 'Navn',
+  opstillingskreds: 'Navn',
+  politikreds: 'Navn',
+  postdistrikt: 'DistrictName',
+  retskreds: 'Navn'
 };
 
 function as2DWkt(text) {
@@ -126,7 +135,7 @@ function indlæsDagiTema(temaNavn, callback) {
         return {
           tema: temaNavn,
           kode: parseInt(f[dagiKodeKolonne[temaNavn]][0], 10),
-          navn: f.Navn[0],
+          navn: f[dagiNavnKolonne[temaNavn]][0],
           polygon: gmlPolygonToWkt(f.geometri[0])
         };
       });
