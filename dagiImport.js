@@ -15,7 +15,7 @@ var dagiFeatureNames = {
   kommune: 'KOMMUNE10',
   opstillingskreds: 'OPSTILLINGSKREDS10',
   politikreds: 'POLITIKREDS10',
-//  postdistrikt: 'POSTDISTRIKT10',
+  postdistrikt: 'POSTDISTRIKT10',
   region: 'REGION10',
   retskreds: 'RETSKREDS10',
   sogn: 'SOGN10'

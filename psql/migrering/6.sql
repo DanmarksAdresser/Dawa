@@ -1,6 +1,8 @@
 BEGIN;
+DROP TABLE IF EXISTS Kommuner CASCADE;
+
 DROP TYPE IF EXISTS DagiTemaType CASCADE;
-CREATE TYPE DagiTemaType AS ENUM ('kommune', 'region', 'sogn', 'opstillingskreds', 'politikreds', 'retskreds', 'afstemningsområde');
+CREATE TYPE DagiTemaType AS ENUM ('kommune', 'region', 'sogn', 'opstillingskreds', 'politikreds', 'retskreds', 'afstemningsområde', 'postdistrikt');
 
 DROP TYPE IF EXISTS DagiTemaRef CASCADE;
 CREATE TYPE DagiTemaRef AS (
@@ -38,10 +40,20 @@ CREATE TABLE GriddedDagiTemaer(
   kode integer not null,
   geom geometry
 );
-
 CREATE INDEX ON GriddedDagiTemaer(tema, kode);
 CREATE INDEX ON GriddedDagiTemaer USING GIST(geom);
 
+CREATE OR REPLACE FUNCTION makeRectangle(xmin DOUBLE PRECISION,
+                                         ymin DOUBLE PRECISION, xmax DOUBLE PRECISION,
+                                         ymax DOUBLE PRECISION, srid integer)
+  RETURNS geometry AS
+  $$
+  BEGIN
+    RETURN st_setsrid(st_makepolygon(st_makeline(ARRAY [st_makepoint(xmin, ymin), st_makepoint(xmin, ymax), st_makepoint(xmax,
+                                                                                                              ymax), st_makepoint(
+        xmax, ymin), st_makepoint(xmin, ymin)])), srid);
+  END;
+  $$ LANGUAGE plpgsql IMMUTABLE STRICT;
 CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEGER)
   RETURNS SETOF geometry AS
   $$
@@ -89,17 +101,6 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
   END;
   $$ LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION update_dagi_temaer_tsv()
-  RETURNS TRIGGER AS $$
-BEGIN
-  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
-  THEN
-    NEW.tsv = to_tsvector('danish', NEW.kode || ' ' || COALESCE(NEW.navn, ''));
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE PLPGSQL;
-
 CREATE OR REPLACE FUNCTION update_gridded_dagi_temaer()
   RETURNS TRIGGER AS $$
 BEGIN
@@ -121,7 +122,9 @@ BEGIN
     INSERT INTO AdgangsadresserDagiRel(adgangsadresseid, dagitema, dagikode)
       (SELECT DISTINCT Adgangsadresser.id, GriddedDagiTemaer.tema, GriddedDagiTemaer.kode
        FROM Adgangsadresser
-         JOIN GriddedDagiTemaer ON ST_Contains(GriddedDagiTemaer.geom, Adgangsadresser.geom));
+         JOIN GriddedDagiTemaer ON ST_Contains(GriddedDagiTemaer.geom, Adgangsadresser.geom)
+      WHERE
+        GriddedDagiTemaer.tema = NEW.tema AND GriddedDagiTemaer.kode = NEW.kode);
   END IF;
   RETURN NULL;
 END;
@@ -160,9 +163,27 @@ CREATE TRIGGER update_adgangsadresser_dagi_rel_adgangsadresser AFTER INSERT OR U
 FOR EACH ROW EXECUTE PROCEDURE update_adgangsadresser_dagi_rel_adgangsadresser();
 
 DROP TRIGGER IF EXISTS update_adgangsadresser_dagi_rel_dagitemaer ON DagiTemaer;
-CREATE TRIGGER update_adgangsadresser_dagi_rel_dagitemaer AFTER INSERT OR UPDATE OR DELETE ON DagiTemaer
-FOR EACH ROW EXECUTE PROCEDURE update_adgangsadresser_dagi_rel_dagitemaer();
+DROP TRIGGER IF EXISTS update_gridded_dagi_temaer ON DagiTemaer;
+CREATE TRIGGER update_gridded_dagi_temaer AFTER INSERT OR UPDATE OR DELETE ON DagiTemaer
+FOR EACH ROW EXECUTE PROCEDURE update_gridded_dagi_temaer();
 
+
+DROP VIEW IF EXISTS vejstykkerView;
+CREATE VIEW vejstykkerView AS
+  SELECT
+    vejstykker.kode,
+    vejstykker.kommunekode,
+    vejstykker.version,
+    vejnavn,
+    vejstykker.tsv,
+    max(kommuner.navn) AS kommunenavn,
+    json_agg(PostnumreMini) AS postnumre
+  FROM vejstykker
+    LEFT JOIN Dagitemaer kommuner ON kommuner.tema = 'kommune' AND vejstykker.kommunekode = kommuner.kode
+    LEFT JOIN vejstykkerPostnr
+      ON (vejstykkerPostnr.kommunekode = vejstykker.kommunekode AND vejstykkerPostnr.vejkode = vejstykker.kode)
+    LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)
+  GROUP BY vejstykker.kode, vejstykker.kommunekode;
 DROP VIEW IF EXISTS Adresser CASCADE;
 DROP VIEW IF EXISTS AdgangsadresserView CASCADE;
 CREATE VIEW AdgangsadresserView AS
@@ -204,9 +225,7 @@ CREATE VIEW AdgangsadresserView AS
     K.kode AS kommunekode,
     K.navn AS kommunenavn,
     array_to_json((select array_agg(DISTINCT CAST((D.tema, D.kode, D.navn) AS DagiTemaRef)) FROM AdgangsadresserDagiRel DR JOIN DagiTemaer D  ON (DR.adgangsadresseid = A.id AND D.tema = DR.dagiTema AND D.kode = DR.dagiKode))) AS dagitemaer,
-    A.tsv
-
-  FROM adgangsadresser A
+    A.tsv FROM adgangsadresser A
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN ejerlav         AS LAV ON (A.ejerlavkode = LAV.kode)
@@ -318,31 +337,13 @@ VALUES ('kommune', 165, 'Albertslund'),
 ('kommune', 573, 'Varde'),
 ('kommune', 575, 'Vejen'),
 ('kommune', 630, 'Vejle'),
-  ('kommune', 820, 'Vesthimmerland'),
-  ('kommune', 791, 'Viborg'),
-  ('kommune', 390, 'Vordingborg'),
-  ('kommune', 492, 'Ærø'),
-  ('kommune', 580, 'Aabenraa'),
-  ('kommune', 851, 'Aalborg'),
-  ('kommune', 751, 'Aarhus');
+('kommune', 820, 'Vesthimmerland'),
+('kommune', 791, 'Viborg'),
+('kommune', 390, 'Vordingborg'),
+('kommune', 492, 'Ærø'),
+('kommune', 580, 'Aabenraa'),
+('kommune', 851, 'Aalborg'),
+('kommune', 751, 'Aarhus');
 
-
-DROP VIEW IF EXISTS vejstykkerView;
-CREATE VIEW vejstykkerView AS
-  SELECT
-    vejstykker.kode,
-    vejstykker.kommunekode,
-    vejstykker.version,
-    vejnavn,
-    vejstykker.tsv,
-    max(kommuner.navn) AS kommunenavn,
-    json_agg(PostnumreMini) AS postnumre
-  FROM vejstykker
-    LEFT JOIN Dagitemaer kommuner ON kommuner.tema = 'kommune' AND vejstykker.kommunekode = kommuner.kode
-    LEFT JOIN vejstykkerPostnr
-      ON (vejstykkerPostnr.kommunekode = vejstykker.kommunekode AND vejstykkerPostnr.vejkode = vejstykker.kode)
-    LEFT JOIN PostnumreMini ON (PostnumreMini.nr = postnr)
-  GROUP BY vejstykker.kode, vejstykker.kommunekode;
-
-DROP TABLE IF EXISTS Kommuner CASCADE;
 COMMIT;
+
