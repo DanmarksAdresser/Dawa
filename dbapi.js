@@ -32,6 +32,9 @@ exports.addWhereClause = function(sqlParts, clause) {
 
 function createQuery(parts){
   var sql = parts.select;
+  if(parts.from && parts.from.length !== 0) {
+    sql += ' FROM ' + parts.from.join(' ');
+  }
   if(parts.whereClauses.length > 0) {
     sql +=  " WHERE " + parts.whereClauses.join(" AND ");
   }

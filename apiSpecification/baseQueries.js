@@ -5,34 +5,36 @@ var dagiTemaer = require('./dagiTemaer');
 
 exports.adresse = function(parameters) {
   var baseQuery ={
-    select: '',
+    select: [],
+    from: ['Adresser'],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
   };
   var sridAlias = dbapi.addSqlParameter(baseQuery, parameters.srid || 4326);
-  baseQuery.select = 'SELECT *, ST_AsGeoJSON(ST_Transform(Adresser.geom,' + sridAlias + ')) AS geom_json from Adresser';
+  baseQuery.select = ['SELECT *, ST_AsGeoJSON(ST_Transform(Adresser.geom,' + sridAlias + ')) AS geom_json'];
   return baseQuery;
 };
 
 exports.adgangsadresse = function(parameters) {
   var baseQuery ={
-    select: '',
+    select: [],
+    from: ['AdgangsadresserView'],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
   };
   var sridAlias = dbapi.addSqlParameter(baseQuery, parameters.srid || 4326);
-  baseQuery.select = 'SELECT *, ST_AsGeoJSON(ST_Transform(AdgangsadresserView.geom,' + sridAlias + ')) AS geom_json from AdgangsadresserView';
+  baseQuery.select = ['SELECT *, ST_AsGeoJSON(ST_Transform(AdgangsadresserView.geom,' + sridAlias + ')) AS geom_json'];
   return baseQuery;
 };
 
 exports.supplerendebynavn = function() {
   return {
-    select: 'SELECT supplerendebynavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) as postnumre, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner' +
-      ' FROM supplerendebynavne' +
+    select: ['SELECT supplerendebynavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) as postnumre, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner'],
+    from: [' supplerendebynavne' +
       " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND supplerendebynavne.kommunekode = k.kode" +
-      ' LEFT JOIN postnumre p ON supplerendebynavne.postnr = p.nr',
+      ' LEFT JOIN postnumre p ON supplerendebynavne.postnr = p.nr'],
     whereClauses: [],
     groupBy: 'supplerendebynavne.supplerendebynavn',
     orderClauses: [],
@@ -42,13 +44,15 @@ exports.supplerendebynavn = function() {
 
 exports.vejnavn = function() {
   return {
-    select: 'SELECT vejstykker.vejnavn as navn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre,' +
-      ' json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner' +
-      ' FROM vejstykker' +
+    select: ['SELECT vejstykker.vejnavn as navn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre,' +
+      ' json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner'],
+    from: [
+      ' vejstykker' +
       " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND vejstykker.kommunekode = k.kode" +
       ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
       ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
-      ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
+      ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'
+    ],
     whereClauses: [],
     groupBy: 'vejstykker.vejnavn',
     orderClauses: [],
@@ -58,12 +62,11 @@ exports.vejnavn = function() {
 
 exports.postnummer = function() {
   return {
-    select:''+
-      'SELECT  p.nr, p.navn, p.version, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner '+
-      'FROM PostnumreKommunekoderMat m '+
+    select:[ 'SELECT  p.nr, p.navn, p.version, json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef)) as kommuner '],
+    from: ['PostnumreKommunekoderMat m '+
       'LEFT JOIN PostnumreKommunekoderMat n ON m.postnr = n.postnr '+
       'LEFT JOIN postnumre p ON p.nr = m.postnr ' +
-      " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND m.kommunekode = k.kode",
+      " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND m.kommunekode = k.kode"],
     whereClauses: [],
     groupBy: 'p.nr, p.navn, p.version',
     orderClauses: [],
@@ -73,13 +76,14 @@ exports.postnummer = function() {
 
 exports.vejstykke = function() {
   return {
-    select: 'SELECT vejstykker.kode, vejstykker.kommunekode, vejstykker.version, vejnavn, vejstykker.tsv, max(kommuner.navn) AS kommunenavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre' +
-      ' FROM vejstykker' +
+    select: ['SELECT vejstykker.kode, vejstykker.kommunekode, vejstykker.version, vejnavn, vejstykker.tsv, max(kommuner.navn) AS kommunenavn, json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef)) AS postnumre'
+      ],
+    from: ['vejstykker' +
       " LEFT JOIN DagiTemaer kommuner ON kommuner.tema = 'kommune' AND vejstykker.kommunekode = kommuner.kode" +
 
       ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
       ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
-      ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)',
+      ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'],
     whereClauses: [],
     groupBy: 'vejstykker.kode, vejstykker.kommunekode',
     orderClauses: [],
@@ -90,7 +94,8 @@ exports.vejstykke = function() {
 dagiTemaer.forEach(function(tema) {
   exports[tema.singular] = function(parameters) {
     return {
-      select: 'SELECT kode, navn, ST_AsGeoJSON(ST_Transform(DagiTemaer.geom,$2)) as geom_json FROM DagiTemaer',
+      select: ['SELECT kode, navn, ST_AsGeoJSON(ST_Transform(DagiTemaer.geom,$2)) as geom_json'],
+      from: ['DagiTemaer'],
       whereClauses: ['tema = $1'],
       orderClauses: [],
       sqlParams: [tema.singular, parameters.srid || 4326]
