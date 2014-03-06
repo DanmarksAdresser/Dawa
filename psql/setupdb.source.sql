@@ -63,7 +63,7 @@ CREATE TYPE KommuneRef AS (
 );
 
 DROP TYPE IF EXISTS DagiTemaType CASCADE;
-CREATE TYPE DagiTemaType AS ENUM ('kommune', 'region', 'sogn', 'opstillingskreds', 'politikreds', 'retskreds', 'afstemningsområde');
+CREATE TYPE DagiTemaType AS ENUM ('kommune', 'region', 'sogn', 'opstillingskreds', 'politikreds', 'retskreds', 'afstemningsområde', 'postdistrikt');
 
 DROP TYPE IF EXISTS DagiTemaRef CASCADE;
 CREATE TYPE DagiTemaRef AS (
@@ -474,7 +474,9 @@ BEGIN
     INSERT INTO AdgangsadresserDagiRel(adgangsadresseid, dagitema, dagikode)
       (SELECT DISTINCT Adgangsadresser.id, GriddedDagiTemaer.tema, GriddedDagiTemaer.kode
        FROM Adgangsadresser
-         JOIN GriddedDagiTemaer ON ST_Contains(GriddedDagiTemaer.geom, Adgangsadresser.geom));
+         JOIN GriddedDagiTemaer ON ST_Contains(GriddedDagiTemaer.geom, Adgangsadresser.geom)
+      WHERE
+        GriddedDagiTemaer.tema = NEW.tema AND GriddedDagiTemaer.kode = NEW.kode);
   END IF;
   RETURN NULL;
 END;

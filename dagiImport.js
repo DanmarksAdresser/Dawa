@@ -32,28 +32,26 @@ var dagiKodeKolonne = {
 
 };
 
-function mapGmlCoordinates(str) {
-  var coordinateArray = str.split(' ');
-  return _.map(coordinateArray, function(c) {
-    var coordinates = c.split(',');
-    return _.map(coordinates, parseFloat);
-  });
+function as2DWkt(text) {
+  var points = text.split(' ');
+  return _.map(points, function(point) {
+    var coords = point.split(',');
+    return coords[0] + ' ' + coords[1];
+  }).join(',');
 }
 
-function extractCoordinates(boundaryIs) {
-  return boundaryIs.LinearRing[0].coordinates[0];
-}
-function mapGmlPolygon(json) {
+function gmlPolygonToWkt(json) {
   var polygon = json.Polygon[0];
-  var outerBoundaryIs = polygon.outerBoundaryIs[0];
-  var innerBoundaryIsList = polygon.innerBoundaryIs ? polygon.innerBoundaryIs : [];
+  var outerCoordsText = as2DWkt(polygon.outerBoundaryIs[0].LinearRing[0].coordinates[0]);
 
-  var outerCoords = mapGmlCoordinates(extractCoordinates(outerBoundaryIs));
-  var innerCoordsList = _.map(_.map(innerBoundaryIsList, extractCoordinates), mapGmlCoordinates);
-  return {
-    type: 'Polygon',
-    coordinates: [outerCoords].concat(innerCoordsList)
-  };
+  var innerBoundaryIsList = polygon.innerBoundaryIs ? polygon.innerBoundaryIs : [];
+  var innerCoordsTexts = _.map(_.map(innerBoundaryIsList, function(innerBoundaryIs) {
+    return innerBoundaryIs.LinearRing[0].coordinates[0];
+  }), as2DWkt);
+  var innerCoordsText = _.reduce(innerCoordsTexts, function(memo, text) {
+    return memo + ',(' + text + ')';
+  }, '');
+  return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
 }
 
 function removeAll(as, bs) {
@@ -129,22 +127,17 @@ function indlæsDagiTema(temaNavn, callback) {
           tema: temaNavn,
           kode: parseInt(f[dagiKodeKolonne[temaNavn]][0], 10),
           navn: f.Navn[0],
-          geom: mapGmlPolygon(f.geometri[0])
+          polygon: gmlPolygonToWkt(f.geometri[0])
         };
       });
       var dagiTemaFragmentMap = _.groupBy(dagiTemaFragments, 'kode'); dagiTemaFragments = null;
       var dagiTemaer = _.map(dagiTemaFragmentMap, function(fragments) {
-        var multiPolygonCoordinates = _.map(fragments, function(fragment) {
-          return fragment.geom.coordinates;
-        });
+        var polygons = _.pluck(fragments, 'polygon');
         return  {
           tema: temaNavn,
           kode: fragments[0].kode,
           navn: fragments[0].navn,
-          geom: {
-            type: 'MultiPolygon',
-            coordinates: multiPolygonCoordinates
-          }
+          polygons: polygons
         };
       });
       dagiTemaFragmentMap = null;

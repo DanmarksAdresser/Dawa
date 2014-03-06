@@ -11,14 +11,10 @@ var sampleTema = {
   tema: 'region',
   kode: 10,
   navn: 'Test Region',
-  geom: {"type": "MultiPolygon", "coordinates": [
-    [[
-      [582534.985506234, 6128945.80096767],
-      [588883.402508489, 6129068.80096925],
-      [588659.687757301, 6140196.17148899],
-      [582534.985506234, 6128945.80096767]
-    ]]
-  ]}
+  polygons: ['POLYGON((582534.985506234 6128945.80096767,' +
+    '588883.402508489 6129068.80096925,' +
+    '588659.687757301 6140196.17148899,' +
+    '582534.985506234 6128945.80096767))']
 };
 
 describe('DAGI updates', function() {
@@ -60,13 +56,10 @@ describe('DAGI updates', function() {
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
         var updated = _.clone(sampleTema);
-        updated.geom.coordinates =
-          [[[
-            [585534.985506234, 6128945.80096767],
-            [588883.402508489, 6129068.80096925],
-            [588659.687757301, 6140196.17148899],
-            [585534.985506234, 6128945.80096767]
-          ]]];
+        updated.polygons=['POLYGON((585534.985506234 6128945.80096767,' +
+          '588883.402508489 6129068.8009692,' +
+          '588659.687757301 6140196.17148899,' +
+          '585534.985506234 6128945.80096767))'];
         dagi.updateDagiTema(client, updated, function(err) {
           if(err) throw err;
           client.query("select count(*) as c FROM AdgangsAdresserDagiRel WHERE dagiTema = 'region' AND dagiKode = 10", [], function(err, result) {
