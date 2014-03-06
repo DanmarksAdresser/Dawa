@@ -30,10 +30,5 @@ module.exports = [
     singular: 'opstillingskreds',
     singularSpecific: 'opstillingskredsen',
     plural: 'opstillingskredse'
-  },
-  {
-    singular: 'afstemningsområde',
-    singularSpecific: 'afstemningsområdet',
-    plural: 'afstemningsområder'
   }
 ];
