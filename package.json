@@ -18,7 +18,8 @@
     "winston": "~0.7.2",
     "express-winston": "~0.2.4",
     "winston-loggly": "~1.0.1",
-    "xml2js": "~0.4.1"
+    "xml2js": "~0.4.1",
+    "aws-sdk": "~2.0.0"
   },
   "devDependencies": {
     "jasmine-node": "1.13.1",
