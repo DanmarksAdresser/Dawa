@@ -6,94 +6,118 @@ var AWS     = require('aws-sdk');
 var _       = require('underscore');
 var async   = require('async');
 
-var TABLE = 'dawatest';
-var hostPort = 'localhost:3333';
-var dd = new AWS.DynamoDB({apiVersion      : '2012-08-10',
-                           region          : 'eu-west-1',
-                           accessKeyId     : process.env.accessKeyId,
-                           secretAccessKey : process.env.secretAccessKey});
-
 winston.handleExceptions(new winston.transports.Console());
 
-winston.info('Start BBR input test...');
+var TABLE = 'dawatest';
+var hostPort = 'localhost:3333';
+var dd = new AWS.DynamoDB(
+  {apiVersion      : '2012-08-10',
+   region          : 'eu-west-1',
+   accessKeyId     : process.env.accessKeyId,
+   secretAccessKey : process.env.secretAccessKey});
+
+/*******************************************************************************
+***** Main function ************************************************************
+*******************************************************************************/
 
 function main(){
-  async.series([deleteAll,
-                wait,
+  async.series([print('Starting the BBR Facade test....'),
+                deleteAll,
+                print('Assert that the DB is empty'),
                 assertEmptyDB,
+                print('Run the test'),
                 test
                ],
                function (err, results){
-                 winston.info('Test results: %j %j', err, results, {});
+                 winston.info('Error in test commands: %j %j', err, results, {});
                }
               );
 }
 
-function wait(cb){
-  winston.info('Waiting a bit -- to ensure that deletes has completed....');
-  setTimeout(cb, 500);
+
+/*******************************************************************************
+***** Commands *****************************************************************
+*******************************************************************************/
+
+//TODO invalid data tests!
+
+var TD = {}; // TestData. This is modified later in the file
+
+function testSpec(){
+  // s=sekvensnummer, h=haendelse, c=http-status-code
+  return [{S: 1, H: TD.adgangsadresse,    C: 200},
+          {S: 2, H: TD.enhedsadresse,     C: 200},
+          {S: 3, H: TD.vejnavn,           C: 200},
+          {S: 4, H: TD.supplerendebynavn, C: 200},
+          {S: 5, H: TD.postnummer,        C: 200},
+          {S: 5, H: TD.vejnavn,           C: 400},
+          {S: 6, H: TD.vejnavn,           C: 200},
+          {S: 8, H: TD.vejnavn,           C: 400},
+          {S: 7, H: TD.vejnavn,           C: 200},
+          {S: 8, H: TD.vejnavn,           C: 200},
+          {S: 9, H: TD.vejnavn,           C: 200},
+         ];
 }
 
 function test(cb){
-  winston.info('starting test');
-  async.eachSeries([{data: withSerial(1, adgangsadresseEx),    willSucceed: true},
-                    {data: withSerial(2, enhedsadresseEx),     willSucceed: true},
-                    {data: withSerial(3, postnummerEx),        willSucceed: true},
-                    {data: withSerial(4, supplerendebynavnEx), willSucceed: true},
-                    {data: withSerial(5, vejnavnEx),           willSucceed: true},
-                    {data: withSerial(5, vejnavnEx),           willSucceed: false},
-                    {data: withSerial(6, vejnavnEx),           willSucceed: true},
-                    {data: withSerial(7, vejnavnEx),           willSucceed: true},
-                    {data: withSerial(9, vejnavnEx),           willSucceed: false},
-                    {data: withSerial(8, vejnavnEx),           willSucceed: true},
-                    {data: withSerial(9, vejnavnEx),           willSucceed: true},
-                   ],
-                   function(o, cb){
-                     post(o.data, function(err){
-                       if (err && o.willSucceed) {
-                         winston.error('Error %j', err,{});
-                         cb('excepted success, but got an error for serial: '+o.serial);
-                       } else if (!err && !o.willSucceed){
-                         cb('excepted error for serial='+o.serial+' but got success!');
-                       } else {
-                         winston.info('%s: serial=%s success! willSucceed=%j got=%j', o.data.type, o.serial, o.willSucceed, err, {});
-                         cb();
-                       }
-                     });
-                   },
-                   function(err){
-                     if (err) {
-                       winston.info('Error %s', err);
-                     } else {
-                       winston.info('***************');
-                       winston.info('Test SUCCESS!!!');
-                     }
-                   }
-                  );
+  async.eachSeries(
+    testSpec(),
+    function(spec, cb){
+      postTestSpec(spec, function(err, message){
+        if (err) {
+          winston.error('Error %j', err,{});
+          cb('Test error in spec: %j'+spec);
+        } else {
+          winston.info('%s: serial=%s statusCode=%j(%j) error=%j',
+                       spec.H.type, spec.S, spec.C, message, err, {});
+          cb();
+        }
+      });
+    },
+    function(err){
+      if (err) {
+        winston.error('Error %s', err);
+      } else {
+        winston.info('***************');
+        winston.info('Test SUCCESS!!!');
+      }
+    }
+  );
 }
 
 
 
-function post(haendelse, cb){
+function postTestSpec(spec, cb){
   request({ method         : 'POST',
             uri            : 'http://'+hostPort+'/haendelse',
             'content-type' : 'application/json',
-            json           : haendelse},
+            json           : withSerial(spec.S, spec.H)},
           function (error, response, body) {
-            if (response.statusCode !== 200){
-              cb(body);
+            if (error){return cb(error, body);}
+            if (response.statusCode === spec.C){
+              cb(null, body);
             } else {
-              cb(null);
+              cb(body, body);
             }
           });
 }
 
+
+function print(str){
+  return function (cb){
+    winston.info('***** '+str);
+    cb();
+  };
+}
+
 function getAll(cb) {
-  var params = {TableName: 'dawatest',
-                KeyConditions: {'key': {ComparisonOperator: 'EQ',
-                                        AttributeValueList: [{'S': 'haendelser' }]}},
-                ConsistentRead: true,
-               };
+  var params = {
+    TableName: 'dawatest',
+    KeyConditions: {
+      'key': {ComparisonOperator: 'EQ',
+              AttributeValueList: [{'S': 'haendelser' }]}},
+    ConsistentRead: true,
+  };
   dd.query(params, cb);
 }
 
@@ -106,8 +130,9 @@ function deleteAll(cb){
       async.eachSeries(data.Items,
                        function(item, cb){
                          winston.info('Delete item %j', item.serial.N, {});
-                         dd.deleteItem({TableName: TABLE, Key: {key:    {S: 'haendelser'},
-                                                                serial: {N: item.serial.N}}},
+                         dd.deleteItem({TableName: TABLE,
+                                        Key: {key:    {S: 'haendelser'},
+                                              serial: {N: item.serial.N}}},
                                        cb);
                        },
                        function(err) {cb(err);});
@@ -115,27 +140,22 @@ function deleteAll(cb){
   });
 }
 
-function logAll(cb){
-  getAll(function(error, data){
-    winston.info('items: error=%j itemCount=%j', error, data.Count, {});
-    _.each(data.Items, function(item){
-      winston.info('  item: %s %j', item.serial.N, item.data, {});
-    });
-    cb(null);
-  });
-}
-
 function assertEmptyDB(cb){
   getAll(function(error, data){
     if (error) {return cb(error);}
     if (data.Count === 0){
-      cb(null);
+      cb();
     } else {
       winston.error('DB not empty: %j', data, {});
       cb('DB not empty!');
     }
   });
 }
+
+
+/*******************************************************************************
+***** Test data and helper function ********************************************
+*******************************************************************************/
 
 function withSerial(serial, haendelse){
   var clone = _.clone(haendelse);
@@ -144,7 +164,7 @@ function withSerial(serial, haendelse){
 }
 
 
-var adgangsadresseEx = {
+TD.adgangsadresse = {
   "type": "adgangsadresse",
   "sekvensnummer": 1004,
   "lokaltsekvensnummer": 102,
@@ -183,7 +203,7 @@ var adgangsadresseEx = {
 };
 
 
-var enhedsadresseEx = {
+TD.enhedsadresse = {
   "type": "enhedsadresse",
   "sekvensnummer": 1004,
   "lokaltsekvensnummer": 102,
@@ -200,7 +220,7 @@ var enhedsadresseEx = {
   }
 };
 
-var postnummerEx = {
+TD.postnummer = {
   "type": "postnummer",
   "sekvensnummer": 1005,
   "lokaltsekvensnummer": 205,
@@ -220,7 +240,7 @@ var postnummerEx = {
   }
 };
 
-var vejnavnEx = {
+TD.vejnavn = {
   "type": "vejnavn",
   "sekvensnummer": 1005,
   "lokaltsekvensnummer": 205,
@@ -234,7 +254,7 @@ var vejnavnEx = {
   }
 };
 
-var supplerendebynavnEx = {
+TD.supplerendebynavn = {
   "type": "supplerendebynavn",
   "sekvensnummer": 1005,
   "lokaltsekvensnummer": 205,
@@ -254,4 +274,7 @@ var supplerendebynavnEx = {
   }
 };
 
+/**********************************************************************/
+
+// Run main!
 main();

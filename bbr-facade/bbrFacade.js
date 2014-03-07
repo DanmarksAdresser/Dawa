@@ -50,7 +50,7 @@ app.post('/haendelse', function (req, res) {
                           winston.error('DynamoDB put ERROR: %j %j', error, data, {});
                           return res.send(500, 'Error putting to DynamoDB: '+JSON.stringify([error, data]));
                         } else {
-                          return res.send('Hændelse modtaget: '+JSON.stringify(data));
+                          return res.send('Hændelse modtaget med sekvensnummer='+newSequenceNr);
                         }
                       });
             } else {
