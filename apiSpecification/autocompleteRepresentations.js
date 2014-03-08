@@ -65,8 +65,8 @@ exports.adresse = {
     return {
       tekst: adresseText(row),
       adresse: {
-        id: row.e_id,
-        href: makeHref(options.baseUrl, 'adresse', [row.e_id])
+        id: row.id,
+        href: makeHref(options.baseUrl, 'adresse', [row.id])
       }
     };
   }

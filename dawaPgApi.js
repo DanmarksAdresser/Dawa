@@ -16,6 +16,9 @@ var dbapi            = require('./dbapi');
 var Transform        = require('stream').Transform;
 var winston          = require('winston');
 var commonParameterGroups = require('./apiSpecification/commonParameterGroups');
+var csvRepresentations = require('./apiSpecification/csvRepresentations');
+
+var notNull = require('./apiSpecification/util').notNull;
 
 function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -268,7 +271,7 @@ function streamRowsHttpResponse(stream, res, spec, options, done) {
   if(format === 'csv') {
     streamCsvToHttpResponse(stream, spec, res, done);
   } else {
-    var objectStream = dbapi.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl });
+    var objectStream = exports.transformToObjects(stream, spec, format, { baseUrl: options.baseUrl });
     var textStream = transformToText(objectStream, format, callback, options);
     streamToHttpResponse(textStream, res, {}, done);
   }
@@ -289,7 +292,7 @@ function streamAutocompleteResponse(stream, res, spec, options, done) {
     // TODO autocomplete CSV responses?
     return sendInternalServerError(res, "CSV for autocomplete not supported");
   }
-  var objectStream = dbapi.transformToObjects(stream, spec, 'autocomplete', {baseUrl: options.baseUrl } );
+  var objectStream = exports.transformToObjects(stream, spec, 'autocomplete', {baseUrl: options.baseUrl } );
   var textStream = transformToText(objectStream, 'json', options.formatParams.callback, {});
   setAppropriateContentHeader(res, format, callback);
   streamToHttpResponse(textStream, res, {}, done);
@@ -305,17 +308,14 @@ function applyDefaultPagingForAutocomplete(pagingParams) {
 }
 
 function streamCsvToHttpResponse(rowStream, spec, res, cb) {
-  var fields = spec.fields;
   var csvTransformer = csv();
   csvTransformer.to.options({
     header: true,
     lineBreaks: 'windows',
-    columns: _.pluck(_.filter(fields, function(field) {
-      return field.selectable === undefined || field.selectable;
-    }),'name')
+    columns: csvRepresentations[spec.model.name].csvFields
   });
   var csvStream = eventStream.pipeline(
-    dbapi.transformToObjects(rowStream, spec, 'csv', {}),
+    exports.transformToObjects(rowStream, spec, 'csv', {}),
     csvTransformer
   );
   streamToHttpResponse(csvStream, res, {}, cb);
@@ -356,6 +356,19 @@ function publishAutocomplete(app, spec) {
     });
   });
 }
+
+/**
+ * Takes a stream of database rows and returns an object stream
+ * with the specified mapping ('csv', 'json' or 'autocomplete')
+ */
+exports.transformToObjects = function(stream, spec, format, options) {
+  if(!notNull(spec.mappers[format])) {
+    throw "No mapper for " + format;
+  }
+  return eventStream.pipeline(stream,
+    eventStream.mapSync(function(obj) { return spec.mappers[format](obj, options); })
+  );
+};
 
 /******************************************************************************/
 /*** Utility functions ********************************************************/

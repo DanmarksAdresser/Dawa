@@ -1,12 +1,12 @@
 "use strict";
 
-var columns = require('./columns');
 var columnsUtil = require('./columnsUtil');
 var common = require('./commonParameterGroups');
 var crsParameterSpec = common.crsParameterSpec;
 var dagiTemaer = require('./dagiTemaer');
 var dbapi = require('../dbapi');
 var schema = require('./parameterSchema');
+var sqlModels = require('./sql/sqlModels');
 
 var autocompleteParameterSpec = common.autocompleteParameterSpec;
 var geomWithinParameterSpec = common.geomWithinParameterSpec;
@@ -18,7 +18,8 @@ var searchParameterSpec = common.searchParameterSpec;
  * appropriate where clauses.
  */
 function applyParameters(spec, parameterSpec, params, query) {
-  var columnSpec = columns[spec.model.name];
+  var sqlModel = sqlModels[spec.model.name];
+  var columnSpec = sqlModel.columns;
   parameterSpec.forEach(function (parameter) {
     var name = parameter.name;
     if (params[name] !== undefined) {

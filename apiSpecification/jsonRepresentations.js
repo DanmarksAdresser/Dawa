@@ -262,26 +262,11 @@ exports.adgangsadresse = {
           }
         },
         docOrder: ['kode', 'navn']
-      }),
-      'afstemningsområde': schemaObject({
-        nullable: true,
-        description: 'Afstemningsområdet som adressen er beliggende i.',
-        properties: {
-          kode: {
-            description: 'Identifikation af afstemningsområdet',
-            $ref: '#/definitions/Kode4'
-          },
-          navn: {
-            description: 'Afstemningsområdet navn',
-            type: 'string'
-          }
-        },
-        docOrder: ['kode', 'navn']
       })
     },
     docOrder: ['href','id', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds','afstemningsområde']
+      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds']
   }),
   mapper: function (rs, options){
     function mapDagiTema(tema) {
@@ -292,8 +277,8 @@ exports.adgangsadresse = {
       };
     }
     var adr = {};
-    adr.href = makeHref(options.baseUrl, 'adgangsadresse', [rs.a_id]);
-    adr.id = rs.a_id;
+    adr.href = makeHref(options.baseUrl, 'adgangsadresse', [rs.id]);
+    adr.id = rs.id;
     adr.vejstykke = {
       href: makeHref(options.baseUrl, 'vejstykke', [rs.vejkode]),
       navn: maybeNull(rs.vejnavn),
@@ -315,22 +300,22 @@ exports.adgangsadresse = {
     adr.esrejendomsnr = maybeNull(rs.esrejendomsnr);
     adr.matrikelnr = maybeNull(rs.matrikelnr);
     adr.historik = {
-      oprettet: d(rs.a_oprettet),
-      ikrafttrædelse: d(rs.a_ikraftfra),
-      'ændret': d(rs.a_aendret)
+      oprettet: d(rs.oprettet),
+      ikrafttrædelse: d(rs.ikrafttrædelse),
+      ændret: d(rs.ændret)
     };
     adr.adgangspunkt = {
       koordinater: rs.geom_json ? JSON.parse(rs.geom_json).coordinates : null,
-      'nøjagtighed': maybeNull(rs.noejagtighed),
+      nøjagtighed: maybeNull(rs.nøjagtighed),
       kilde: maybeNull(rs.kilde),
       tekniskstandard: maybeNull(rs.tekniskstandard),
       tekstretning:    maybeNull(rs.tekstretning),
-      'ændret':        d(rs.adressepunktaendringsdato)
+      'ændret':        d(rs.adressepunktændringsdato)
     };
-    adr.DDKN = rs.kn100mdk || rs.kn1kmdk || rs.kn10kmdk ? {
-      m100: maybeNull(rs.kn100mdk),
-      km1:  maybeNull(rs.kn1kmdk),
-      km10: maybeNull(rs.kn10kmdk)
+    adr.DDKN = rs.ddkn_m100 || rs.ddkn_km1 || rs.ddkn_km10 ? {
+      m100: maybeNull(rs.ddkn_m100),
+      km1:  maybeNull(rs.ddkn_km1),
+      km10: maybeNull(rs.ddkn_km10)
     } : null;
 
     // DAGI temaer
@@ -339,15 +324,15 @@ exports.adgangsadresse = {
     adr.retskreds = null;
     adr.politikreds = null;
     adr.opstillingskreds = null;
-    adr.afstemningsområde = null;
     var dagiTemaArray = rs.dagitemaer ? rs.dagitemaer.filter(function(tema) { return util.notNull(tema.tema); }) : [];
     var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');
+    // kommune and postdistrikt are handled differently
+    delete dagiTemaMap.kommune;
+    delete dagiTemaMap.postdistrikt;
     var mappedDagiTemaer = _.reduce(dagiTemaMap, function(memo, tema, temaNavn) {
       memo[temaNavn] = mapDagiTema(tema);
       return memo;
     }, {});
-    // kommune is handled differently
-    delete dagiTemaer.kommune;
     _.extend(adr, mappedDagiTemaer);
     return adr;
   }
@@ -395,12 +380,19 @@ exports.adresse = {
   }),
   mapper: function (rs, options){
     var adr = {};
-    adr.id = rs.e_id;
-    adr.href = makeHref(options.baseUrl, 'adresse', [rs.e_id]);
+    adr.id = rs.id;
+    adr.href = makeHref(options.baseUrl, 'adresse', [rs.id]);
     adr.etage = maybeNull(rs.etage);
-    adr.dør = maybeNull(rs.doer);
+    adr.dør = maybeNull(rs.dør);
     adr.adressebetegnelse = adressebetegnelse(rs);
-    adr.adgangsadresse = exports.adgangsadresse.mapper(rs, options);
+    var adgangsadresseUnmapped = _.clone(rs);
+    _.extend(adgangsadresseUnmapped,{
+      id: rs.adgangsadresseid,
+      oprettet: rs.adgangsadresse_oprettet,
+      ændret: rs.adgangsadresse_ændret,
+      ikrafttrædelse: rs.adgangsadresse_ikrafttrædelse
+    });
+    adr.adgangsadresse = exports.adgangsadresse.mapper(adgangsadresseUnmapped, options);
     return adr;
   }
 };
@@ -434,8 +426,8 @@ exports.supplerendebynavn = {
   mapper: function(row, options) {
     var baseUrl = options.baseUrl;
     return {
-      href: makeHref(baseUrl, 'supplerendebynavn', [row.supplerendebynavn]),
-      navn: row.supplerendebynavn,
+      href: makeHref(baseUrl, 'supplerendebynavn', [row.navn]),
+      navn: row.navn,
       postnumre: mapPostnummerRefArray(row.postnumre, baseUrl),
       kommuner: mapKommuneRefArray(row.kommuner, baseUrl)
     };
@@ -517,7 +509,7 @@ exports.vejstykke = {
     return {
       href: makeHref(options.baseUrl, 'vejstykke', [row.kommunekode, row.kode]),
       kode: kode4String(row.kode),
-      navn: row.vejnavn,
+      navn: row.navn,
       kommune: mapKommuneRef({ kode: row.kommunekode, navn: row.kommunenavn}, options.baseUrl),
       postnumre: mapPostnummerRefArray(row.postnumre, options.baseUrl)
     };

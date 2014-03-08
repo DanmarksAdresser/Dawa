@@ -139,8 +139,6 @@ describe("Adresse schema validation", function () {
           "politikreds": {"kode": "7383",
             "navn": "Sorø"},
           "opstillingskreds": {"kode": "7383",
-            "navn": "Sorø"},
-          "afstemningsområde": {"kode": "7383",
             "navn": "Sorø"}
         }
       },

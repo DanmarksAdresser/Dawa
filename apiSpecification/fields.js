@@ -16,6 +16,15 @@ exports.adgangsadresse = [
     name: 'id'
   },
   {
+    name: 'oprettet'
+  },
+  {
+    name: 'ændret'
+  },
+  {
+    name: 'ikrafttrædelse'
+  },
+  {
     name: 'vejkode',
     formatter: kode4String
   },
@@ -79,6 +88,9 @@ exports.adgangsadresse = [
     name: 'tekstretning'
   },
   {
+    name: 'adressepunktændringsdato'
+  },
+  {
     name: 'DDKN_m100'
   },
   {
@@ -86,13 +98,19 @@ exports.adgangsadresse = [
   },
   {
     name: 'DDKN_km10'
+  },
+  {
+    name: 'dagitemaer',
+    multi: true
+  },
+  {
+    name: 'geom_json'
   }
 ];
 
 exports.adresse = [
   {
-    name: 'id',
-    column: 'e_id'
+    name: 'id'
   },
   {
     name: 'vejkode',
@@ -160,13 +178,19 @@ exports.adresse = [
     name: 'tekstretning'
   },
   {
-    name: 'DDKN_m100'
+    name: 'ddkn_m100'
   },
   {
-    name: 'DDKN_km1'
+    name: 'ddkn_km1'
   },
   {
-    name: 'DDKN_km10'
+    name: 'ddkn_km10'
+  },
+  {
+    name: 'adressepunktændringsdato'
+  },
+  {
+    name: 'geom_json'
   },
   {
     name: 'etage'
@@ -176,6 +200,19 @@ exports.adresse = [
   },
   {
     name: 'adgangsadresseid'
+  },
+  {
+    name: 'adgangsadresse_oprettet'
+  },
+  {
+    name: 'adgangsadresse_ændret'
+  },
+  {
+    name: 'adgangsadresse_ikrafttrædelse'
+  },
+  {
+    name: 'dagitemaer',
+    multi: true
   }
 ];
 
@@ -188,6 +225,14 @@ exports.supplerendebynavn = [
   },
   {
     name: 'postnr'
+  },
+  {
+    name: 'kommuner',
+    multi: true
+  },
+  {
+    name: 'postnumre',
+    multi: true
   }
 ];
 
@@ -200,6 +245,12 @@ exports.vejnavn = [
   },
   {
     name: 'kommunekode'
+  },{
+    name: 'kommuner',
+    multi: true
+  },{
+    name: 'postnumre',
+    multi: true
   }
 ];
 
@@ -213,10 +264,17 @@ exports.vejstykke = [
     formatter: kode4String
   },
   {
+    name: 'kommunenavn'
+  },
+  {
     name: 'navn'
   },
   {
     name: 'postnr'
+  },
+  {
+    name: 'postnumre',
+    multi: true
   }
 ];
 
@@ -233,6 +291,10 @@ exports.postnummer = [
   },
   {
     name: 'kommune'
+  },
+  {
+    name: 'kommuner',
+    multi: true
   }
 ];
 
@@ -244,6 +306,9 @@ dagiTemaer.forEach(function(tema) {
     },
     {
       name: 'navn'
+    },
+    {
+      name: 'geom_json'
     }
   ];
 });

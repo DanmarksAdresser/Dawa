@@ -1,12 +1,12 @@
 "use strict";
 
-var columns = require('./columns');
 var columnsUtil = require('./columnsUtil');
 var dbapi = require('../dbapi');
 var namesAndKeys = require('./namesAndKeys');
 var schema = require('./parameterSchema');
 var util = require('./util');
 var _ = require('underscore');
+var sqlModels = require('./sql/sqlModels');
 //var winston = require('winston');
 
 var notNull = util.notNull;
@@ -16,7 +16,7 @@ function getSearchColumn(columnSpec) {
 }
 
 function searchWhereClause(paramNumberString, spec) {
-  var columnSpec = columns[spec.model.name];
+  var columnSpec = sqlModels[spec.model.name].columns;
   var columnName = getSearchColumn(columnSpec);
   return "(" + columnName + " @@ to_tsquery('danish', " + paramNumberString + "))";
 }
@@ -241,10 +241,9 @@ function toOffsetLimit(paging) {
   }
 }
 function applyOrderByKey(spec, sqlParts) {
-  var columnSpec = columns[spec.model.name];
   var keyArray = namesAndKeys[spec.model.name].key;
   keyArray.forEach(function (key) {
-    sqlParts.orderClauses.push(columnsUtil.getColumnNameForSelect(columnSpec, key));
+    sqlParts.orderClauses.push(key);
   });
 }
 

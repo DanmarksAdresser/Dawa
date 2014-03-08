@@ -1,6 +1,8 @@
 "use strict";
 
 var _ = require('underscore');
+var sqlModels = require('./apiSpecification/sql/sqlModels');
+var sqlModelsUtil = require('./apiSpecification/sql/sqlModelsUtil');
 
 exports.getKeyForSelect = function(spec) {
   var keySpec = spec.model.key;
@@ -51,11 +53,16 @@ exports.getParameterGroupsForSpec = function(spec, groupNames, formatParameterSp
 };
 
 exports.createSqlParts = function(spec, parameterGroups, params) {
-  var sqlParts = exports.initialQuery(spec, params);
+  var sqlParts;
+  var sqlModel = sqlModels[spec.model.name];
+  sqlParts = sqlModel.baseQuery();
+  var fieldNames = _.pluck(spec.fields, 'name');
+  sqlModelsUtil.applySelect(sqlParts,sqlModel, sqlModelsUtil.allSelectableFields(fieldNames, sqlModel),params);
   _.each(parameterGroups, function(group) {
     if(group.applySql) {
       group.applySql(sqlParts, params, spec);
     }
   });
+
   return sqlParts;
 };

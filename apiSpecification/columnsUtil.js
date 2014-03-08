@@ -2,33 +2,6 @@
 
 var _ = require('underscore');
 
-exports.hasColumnForSelect = function(columnSpec, name) {
-  var spec = columnSpec[name];
-  if(_.isUndefined(spec)) {
-    return true;
-  }
-  if(!_.isUndefined(spec.column)) {
-    return true;
-  }
-  return spec.select ? true : false;
-};
-
-exports.getColumnNameForSelect = function (columnSpec, name) {
-  var spec = columnSpec[name];
-  if(_.isUndefined(spec)) {
-    return name;
-  }
-  if(!_.isUndefined(spec.column)) {
-    return spec.column;
-  }
-  if(!_.isUndefined(spec.select)) {
-    if(!spec.select) {
-      throw "Internal error: no column " + name + ' for select';
-    }
-    return spec.select;
-  }
-};
-
 exports.getColumnNameForWhere = function (columnSpec, name) {
   var spec = columnSpec[name];
   if (_.isUndefined(spec)) {

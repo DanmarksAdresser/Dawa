@@ -1,10 +1,6 @@
 "use strict";
 
-var columns = require('./apiSpecification/columns');
-var columnsUtil = require('./apiSpecification/columnsUtil');
 var util        = require('util');
-var eventStream = require('event-stream');
-var _           = require('underscore');
 var Readable    = require('stream').Readable;
 var pg          = require('pg.js');
 var winston     = require('winston');
@@ -17,10 +13,6 @@ var winston     = require('winston');
 var connString = process.env.pgConnectionUrl;
 winston.info("Loading dbapi with process.env.pgConnectionUrl=%s",connString);
 
-function notNull(v) {
-  return v !== undefined && v !== null;
-}
-
 exports.addSqlParameter = function(sqlParts, param) {
   sqlParts.sqlParams.push(param);
   return '$' + sqlParts.sqlParams.length;
@@ -31,7 +23,7 @@ exports.addWhereClause = function(sqlParts, clause) {
 };
 
 function createQuery(parts){
-  var sql = parts.select;
+  var sql =  'SELECT ' + parts.select.join(', ');
   if(parts.from && parts.from.length !== 0) {
     sql += ' FROM ' + parts.from.join(' ');
   }
@@ -128,44 +120,10 @@ function streamingQueryUsingCursor(client, sql, params, cb) {
       if(err) {
         return cb(err);
       }
-      cb(null, new CursorStream(client, 'c1'));
+      return cb(null, new CursorStream(client, 'c1'));
     }
   );
 }
-
-var transformToCsvObjects = function(rowStream, spec) {
-  var fields = spec.fields;
-  var columnSpec = columns[spec.model.name];
-  return eventStream.pipeline(
-    rowStream,
-    eventStream.mapSync(function(row) {
-      return _.reduce(fields, function(memo, field) {
-
-        // currently, all selectable fields are part of the CSV format
-        if(!columnsUtil.hasColumnForSelect(columnSpec, field.name)) {
-          return memo;
-        }
-
-        // except fields with cardinality greater than 1
-        if(columnSpec[field.name] && columnSpec[field.name].multi) {
-          return memo;
-        }
-
-        var columnName = columnsUtil.getColumnNameForSelect(columnSpec, field.name);
-        var dbValue = row[columnName];
-        var formattedValue;
-        if(field.formatter) {
-          formattedValue = field.formatter(dbValue);
-        }
-        else {
-          formattedValue = dbValue;
-        }
-        memo[field.name] = formattedValue;
-        return memo;
-      }, {});
-    })
-  );
-};
 
 exports.withReadonlyTransaction = function(cb) {
   return pg.connect(connString, function (err, client, done) {
@@ -237,20 +195,4 @@ exports.query = function(client, sqlParts, cb) {
 exports.stream = function(client, sqlParts, cb) {
   var query = createQuery(sqlParts);
   streamingQueryUsingCursor(client, query.sql, query.params, cb);
-};
-
-/**
- * Takes a stream of database rows and returns an object stream
- * with the specified mapping ('csv', 'json' or 'autocomplete')
- */
-exports.transformToObjects = function(stream, spec, format, options) {
-  if(format === 'csv') {
-    return transformToCsvObjects(stream, spec);
-  }
-  if(!notNull(spec.mappers[format])) {
-    throw "No mapper for " + format;
-  }
-  return eventStream.pipeline(stream,
-    eventStream.mapSync(function(obj) { return spec.mappers[format](obj, options); })
-  );
 };

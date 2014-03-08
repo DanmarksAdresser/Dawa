@@ -20,8 +20,8 @@ exports.adressebetegnelse = function(adresseRow, adgangOnly) {
     if(adresseRow.etage) {
       adresse += ' ' + adresseRow.etage + '.';
     }
-    if(adresseRow.doer) {
-      adresse += ' ' + adresseRow.doer;
+    if(adresseRow.dør) {
+      adresse += ' ' + adresseRow.dør;
     }
   }
   adresse += '\n';
