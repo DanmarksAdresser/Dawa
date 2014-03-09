@@ -4,6 +4,7 @@ var apiSpecUtil = require('../../apiSpecUtil');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
 var schemaValidationUtil = require('./schemaValidationUtil');
+var jsonRepresentations = require('../../apiSpecification/jsonRepresentations');
 
 /**
  * This test verifies that all testdata is valid according to JSON schema
@@ -94,7 +95,7 @@ describe('Validering af JSON-formatteret output', function() {
       console.log('validerer alle ' + spec.model.plural);
       var schema = spec.model.schema;
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {});
+        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {}, jsonRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
         dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
             var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
@@ -109,7 +110,7 @@ describe('Validering af JSON-formatteret output', function() {
       var schema = spec.model.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[spec.model.plural] || {};
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {});
+        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {}, jsonRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
         dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
             var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});

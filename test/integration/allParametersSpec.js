@@ -5,6 +5,7 @@ var apiSpecUtil = require('../../apiSpecUtil');
 var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
+var jsonRepresentations = require('../../apiSpecification/jsonRepresentations');
 
 var kode4String = require('../../apiSpecification/util').kode4String;
 
@@ -286,7 +287,10 @@ describe('Alle propertyFilter parametre skal virke', function() {
             rawQueryParams[paramName] = sampleValue;
             var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(propertyFilterParameters, 'name'));
             expect(parseResult.errors.length).toBe(0);
-            var sqlParts = apiSpecUtil.createSqlParts(spec, {propertyFilter: spec.parameterGroups.propertyFilter}, parseResult.params);
+            var sqlParts = apiSpecUtil.createSqlParts(spec,
+              {propertyFilter: spec.parameterGroups.propertyFilter},
+              parseResult.params,
+              jsonRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
             sqlParts.limit = 100;
             dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
               if(err) throw 'unable to open connection';

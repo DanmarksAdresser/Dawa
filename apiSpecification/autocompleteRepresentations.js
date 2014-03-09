@@ -201,7 +201,8 @@ dagiTemaer.forEach(function(tema) {
 
   exports[tema.singular] = {
     schema: dagiAutocompleteSchema(tema),
-    mapper: dagiTemaAutocompleteMapper(tema.singular, tema.plural)
+    mapper: dagiTemaAutocompleteMapper(tema.singular, tema.plural),
+    fields: ['kode, navn']
   };
 
 });

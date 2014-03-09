@@ -1,5 +1,6 @@
 "use strict";
 
+var fieldsUtil = require('./fieldsUtil');
 /*
  * This file specifies the JSON representation of each resource type in the form of a JSON schema and a
  * mapper function. The mapper function maps from database rows.
@@ -586,7 +587,9 @@ dagiTemaer.forEach(function(tema) {
 
   exports[tema.singular] = {
     schema: globalSchemaObject(dagiSchema(tema)),
-    mapper: commonMappers.dagiTemaJsonMapper(tema.plural)
+    mapper: commonMappers.dagiTemaJsonMapper(tema.plural),
+    // geomentry for the (huge) DAGI temaer is only returned in geojson format.
+    fields: _.chain(fieldsUtil.allSelectableFields(tema.singular)).pluck('name').without('geom_json').value()
   };
 });
 

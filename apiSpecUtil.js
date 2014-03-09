@@ -52,11 +52,14 @@ exports.getParameterGroupsForSpec = function(spec, groupNames, formatParameterSp
   return query;
 };
 
-exports.createSqlParts = function(spec, parameterGroups, params) {
+/*
+ * Creates a SQL query from the spec, using the parameterGroups and params to create where clauses.
+ * fieldNames specifies which fields to select.
+ */
+exports.createSqlParts = function(spec, parameterGroups, params, fieldNames) {
   var sqlParts;
   var sqlModel = sqlModels[spec.model.name];
   sqlParts = sqlModel.baseQuery();
-  var fieldNames = _.pluck(spec.fields, 'name');
   sqlModelsUtil.applySelect(sqlParts,sqlModel, sqlModelsUtil.allSelectableFields(fieldNames, sqlModel),params);
   _.each(parameterGroups, function(group) {
     if(group.applySql) {

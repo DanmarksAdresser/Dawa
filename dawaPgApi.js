@@ -17,6 +17,9 @@ var Transform        = require('stream').Transform;
 var winston          = require('winston');
 var commonParameterGroups = require('./apiSpecification/commonParameterGroups');
 var csvRepresentations = require('./apiSpecification/csvRepresentations');
+var geojsonRepresentations = require('./apiSpecification/geojsonRepresentations');
+var jsonRepresentations = require('./apiSpecification/jsonRepresentations');
+var autocompleteRepresentations = require('./apiSpecification/autocompleteRepresentations');
 
 var notNull = require('./apiSpecification/util').notNull;
 
@@ -99,9 +102,10 @@ function publishGetByKey(app, spec) {
       return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
+    var representation = chooseRepresenation(spec.model.name, parameterParseResult.params.format);
+    var fieldNames = representation.fields || _.pluck(spec.fields, 'name');
 
-
-    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, parameterParseResult.params);
+    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, parameterParseResult.params, fieldNames);
 
     // Getting the data
     withPsqlClient(res, function (client, done) {
@@ -134,6 +138,17 @@ function publishGetByKey(app, spec) {
   });
 }
 
+function chooseRepresenation(resourceTypeName, formatParam) {
+  if(formatParam === 'csv') {
+    return csvRepresentations[resourceTypeName];
+  }
+  else if (formatParam === 'geojson') {
+    return geojsonRepresentations[resourceTypeName];
+  }
+  else {
+    return jsonRepresentations[resourceTypeName];
+  }
+}
 
 function publishReverseGeocoding(app, spec) {
   app.get('/'+ spec.model.plural+'/reverse', function (req, res) {
@@ -148,9 +163,12 @@ function publishReverseGeocoding(app, spec) {
       return sendQueryParameterFormatError(res, parameterParseResult.errors);
     }
 
+    var representation = chooseRepresenation(spec.model.name, parameterParseResult.params.format);
+    var fieldNames = representation.fields || _.pluck(spec.fields, 'name');
+
     // Getting the data
     withPsqlClient(res, function (client, done) {
-      dbapi.query(client, apiSpecUtil.createSqlParts(spec, parameterGroups, parameterParseResult.params), function(err, rows) {
+      dbapi.query(client, apiSpecUtil.createSqlParts(spec, parameterGroups, parameterParseResult.params, fieldNames), function(err, rows) {
         done();
         if (err) {
           sendInternalServerError(res, err);
@@ -179,7 +197,10 @@ function publishQuery(app, spec) {
 
     var params = parameterParseResult.params;
 
-    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, params);
+    var representation = chooseRepresenation(spec.model.name, parameterParseResult.params.format);
+    var fieldNames = representation.fields || _.pluck(spec.fields, 'name');
+
+    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, params, fieldNames);
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
@@ -339,7 +360,9 @@ function publishAutocomplete(app, spec) {
 
     applyDefaultPagingForAutocomplete(params);
 
-    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, params);
+    var fields = autocompleteRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name');
+
+    var sqlParts = apiSpecUtil.createSqlParts(spec, parameterGroups, params, fields);
 
     // Getting the data
     withPsqlClient(res, function(client, done) {
