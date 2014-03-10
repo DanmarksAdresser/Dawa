@@ -154,6 +154,17 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION update_dagi_temaer_tsv()
+  RETURNS TRIGGER AS $$
+BEGIN
+  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
+  THEN
+    NEW.tsv = to_tsvector('danish', NEW.kode || ' ' || COALESCE(NEW.navn, ''));
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
 DROP TRIGGER IF EXISTS update_dagi_temaer_tsv ON DagiTemaer;
 CREATE TRIGGER update_dagi_temaer_tsv BEFORE INSERT OR UPDATE ON DagiTemaer
 FOR EACH ROW EXECUTE PROCEDURE update_dagi_temaer_tsv();
