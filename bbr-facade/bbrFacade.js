@@ -9,6 +9,7 @@ var ZSchema        = require("z-schema");
 var AWS            = require('aws-sdk');
 var util           = require('util');
 
+
 /********************************************************************************
 ***** Setup *********************************************************************
 ********************************************************************************/
@@ -48,7 +49,7 @@ app.get('/sidsteSekvensnummer', function (req, res) {
     if (error)
     {
       winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
-      res.send(500, util.format('Error reading from DynamoDB error=%j data=%j', error, latest));
+      res.send(500, error);
     }
     else
     {
@@ -71,7 +72,7 @@ app.post('/haendelse', function (req, res) {
     if (error)
     {
       winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
-      res.send(500, util.format('Error reading from DynamoDB error=%j data=%j', error, latest));
+      res.send(500, error);
     }
     else
     {
@@ -100,7 +101,7 @@ app.post('/haendelse', function (req, res) {
                           if (error)
                           {
                             winston.error('DynamoDB put ERROR: %j %j', error, data, {});
-                            res.send(500, 'Error inserting value in DynamoDB: '+JSON.stringify([error, data]));
+                            res.send(500, error);
                           }
                           else
                           {
@@ -128,7 +129,14 @@ function validateSequenceNumber(haendelse, latest, cb){
     }
     else
     {
-      cb(util.format('Inputfejl: en anden hændelse med samme sekvensnummer (%s) findes allerede: %j', lastSeqNr, lastJson));
+      cb({type: 'InputError',
+          title: 'Sequence number already known, but event differs',
+          details: {text: 'The sequence number exists, but the given event differs from the '+
+                    'existing event. Resending of events are allowed, but not changing'+
+                    'already send events.',
+                    sequenceNumber: lastSeqNr,
+                    existingEvent: lastJson,
+                    givenEvent: haendelse}});
     }
   }
   else
@@ -139,7 +147,13 @@ function validateSequenceNumber(haendelse, latest, cb){
     }
     else
     {
-      cb(util.format('Inputfejl: sekvensnummer ikke gyldigt. Modtog %s, men forventede: %s', newSeqNr, (lastSeqNr+1)));
+      cb({type: 'InputError',
+          title: 'Illegal sequence number',
+          details: {text: 'The given sequence number do not match the expected',
+                    currentSequenceNumber: lastSeqNr,
+                    expectedSequenceNumber: lastSeqNr + 1,
+                    givenSequenceNumber: newSeqNr,
+                    givenEvent: haendelse}});
     }
   }
 }
@@ -150,7 +164,19 @@ function putItem(seqNr, data, cb) {
               data:  {'S': JSON.stringify(data)}};
   winston.info('Putting item: %j', item, {});
   dd.putItem({TableName: TABLENAME, Item: item},
-             cb);
+             function(error, latest){
+               if (error)
+               {
+                 cb({type: 'InternalServerError',
+                     title: 'Error querying DynamoDB',
+                     details: util.format('Error reading from DynamoDB error=%j data=%j', error, latest)},
+                    latest);
+               }
+               else
+               {
+                 cb(error, latest);
+               }
+             });
 }
 
 function getLatest(cb) {
@@ -161,7 +187,19 @@ function getLatest(cb) {
                 ScanIndexForward: false,
                 Limit: 1,
                };
-  dd.query(params, cb);
+  dd.query(params, function(error, latest){
+    if (error)
+    {
+      cb({type: 'InternalServerError',
+          title: 'Error querying DynamoDB',
+          details: util.format('Error reading from DynamoDB error=%j data=%j', error, latest)},
+         latest);
+    }
+    else
+    {
+      cb(error, latest);
+    }
+  });
 }
 
 
@@ -217,14 +255,18 @@ function validateSchema(json, cb){
     case 'postnummer'        : validate(postnummerHaendelseSchema)        ; break;
     case 'adgangsadresse'    : validate(adgangsadresseHaendelseSchema)    ; break;
     default:
-      return cb('Ukendt hændelses type: '+json.type);
+      return cb({type: 'ValidationError',
+                 title: 'Unknown event type',
+                 details: 'Unknown event type: '+json.type});
     }
   }
   catch (error){
     if (validator.getLastError().valid === true){
       return cb();
     } else {
-      return cb(validator.getLastError());
+      return cb({type: 'ValidationError',
+                 title: 'Schema validation error',
+                 details: validator.getLastError()});
     }
   }
   return cb();
