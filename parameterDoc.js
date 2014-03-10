@@ -1,6 +1,7 @@
 "use strict";
 
 var _ = require('underscore');
+var dagiTemaer = require('./apiSpecification/dagiTemaer');
 
 /******************************************************************************/
 /*** Utils ********************************************************************/
@@ -376,7 +377,7 @@ var adresseParameters = [{name: 'q',
                          {name: 'adgangsadresseid',
                           doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'},
                          {name: 'etage',
-                          doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9',},
+                          doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9'},
                          {name: 'dør',
                           doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'}
                         ].concat(parametersForBothAdresseAndAdgangsAdresse);
@@ -484,3 +485,179 @@ module.exports = {
   postnummer: postnummerDoc,
   adresse: adresseDoc
 };
+
+function firstUpper(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function dagiParameters(tema) {
+  return [
+    {
+      name: 'kode',
+      doc: firstUpper(tema.singularSpecific)+'s kode. 4 cifre.'
+    },
+    {
+      name: 'navn',
+      doc: firstUpper(tema.singularSpecific) +'s navn. Der er forskel på store og små bogstaver.'
+    },
+    {
+      name: 'q',
+      doc: 'Søgetekst. Der søges i kode og navn. Alle ord i søgeteksten skal matche. ' +
+        'Wildcard * er tilladt i slutningen af hvert ord.'
+    }
+  ];
+}
+
+var dagiExamples = {
+  region: {
+    query: [{
+      description: 'Find alle regioner.',
+      query: []
+    }],
+    get: [{
+      description: 'Modtag Region Midtjylland (kode 1082)',
+      path: ['/regioner/1082']
+    }, {
+      description: 'Hent Region Midtjylland i GeoJSON format med ETRS89 Zone 32N som koordinatsystem',
+      path: ['/regioner/1082?format=geojson&srid=25832']
+    }],
+    autocomplete: [{
+      description: 'Find regioner der starter med <em>midt</em>',
+      query: [{
+        name: 'q',
+        value: 'midt'
+      }]
+    }]
+  },
+  opstillingskreds: {
+    query: [{
+      description: 'Hent alle opstillingskredse.',
+      query: []
+    }, {
+      description: 'Hent alle opstillingskredse der indeholder <em>esbjerg</em>',
+      query: [{
+        name: 'q',
+        value: 'esbjerg'
+      }]
+    }],
+    get: [{
+      description: 'Hent data for opstillingskredsen Vesterbro (kode 9) i GeoJSON format',
+      path: '/opstillingskredse/9',
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }],
+    autocomplete: [{
+      description: 'Find opstillingskredse der starter med es',
+      query: [{
+        name: 'q',
+        value: 'es'
+      }]
+    }]
+  },
+  retskreds: {
+    query: [{
+      description: 'Hent alle retskredse',
+      query: []
+    }, {
+      description: 'Find de retskredse, som indeholder <em>århus</em>',
+      query: [{
+        name: 'q',
+        value: 'århus'
+      }]
+    }],
+    get: [{
+      description: 'Modtag <em>Retten i Århus</em> (kode 1165) i GeoJSON format',
+      path: '/retskredse/1165',
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }],
+    autocomplete: {
+      description: 'Find retskredse der starter med <em>aa</em>',
+      query: [{
+        name: 'q',
+        value: 'aa'
+      }]
+    }
+  },
+  politikreds: {
+    query: [{
+      description: 'Hent alle politikredse',
+      query: []
+    }],
+    get: [{
+      description: 'Hent <em>Syd- og Sønderjyllands Politi</em> (kode 1464) i GeoJSON format.',
+      path: '/politikredse/1464',
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }],
+    autocomplete: [{
+      name: 'Find alle politikredse, der indeholder et ord der starter med sønd',
+      query: [{
+        name: 'q',
+        value: 'sønd'
+      }]
+    }]
+  },
+  sogn: {
+    query: [{
+      description: 'Find alle de sogne som starter med grøn',
+      query: [{
+        name: 'q',
+        value: 'grøn*'
+      }]
+    }, {
+      description: 'Returner alle sogne',
+      query: {}
+    }],
+    get: [{
+      description: 'Returner oplysninger om Grøndal sogn',
+      path: ['/sogne/7060']
+    }, {
+      description: 'Returnerer oplysninger om Grøndal sogn i GeoJSON format',
+      path: ['/sogne/7060'],
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }],
+    autocomplete: [{
+      description: 'Find alle de sogne som starter med grøn',
+      query: [{
+        name: 'q',
+        value: 'grøn'
+      }]
+    }]
+  }
+};
+
+['region', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'].forEach(function(dagiTemaNavn) {
+  var tema = _.findWhere(dagiTemaer, {singular: dagiTemaNavn});
+  var doc = {
+    docVersion: 2,
+    resources: {}
+  };
+  doc.resources['/' + tema.plural] = {
+    subtext: 'Søg efter ' + tema.plural +'. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
+    parameters: dagiParameters(tema).concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].query || []
+  };
+  doc.resources['/' + tema.plural + '/{kode}'] = {
+    subtext: 'Modtag ' + tema.singular + ' med kode.',
+    parameters: [_.find(dagiParameters(tema), function(p){ return p.name === 'kode'; })].concat(formatParameters),
+    examples: dagiExamples[tema.singular].get || []
+
+
+  };
+  doc.resources['/' + tema.plural + '/autocomplete'] = {
+    subtext: autocompleteSubtext(tema.plural),
+    parameters: overwriteWithAutocompleteQParameter(dagiParameters(tema)).concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].autocomplete || []
+  };
+  module.exports[tema.singular] = doc;
+});

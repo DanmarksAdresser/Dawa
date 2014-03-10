@@ -46,14 +46,9 @@ block content
                 li html (ikke muligt endnu!)
 
               ul
-            p Derudover understøtter <em>adresser</em> og <em>adgangsadresser</em> også:
-              ul
-                li geojson.
-                   PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
-                li mini (ikke muligt endnu!)
-
-              ul
-            p Angivelse af parameteren mini som query parametre returnerer udelukkende adressen med dens adgangspunkt uden de tilknyttede attributer.
+            p Derudover understøtter <em>adresser</em>, <em>adgangsadresser</em>, <em>postnumre</em>, <em>kommuner</em>, <em>regioner</em>, <em>sogne</em>, <em>politikredse</em>, <em>retskredse</em> og <em>opstillingskredse</em> også GeoJSON:
+              PRE <a href="/kommuner/0101?format=geojson">#{url}/kommuner/0101?format=geojson</a>
+              PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
 
             div.page-header
               h3.anchor-header#tidsformat Tidsformat

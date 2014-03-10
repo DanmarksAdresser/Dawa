@@ -41,72 +41,16 @@ block content
         div.span9
           section
             h3.anchor-header#regionsoegning Regionsøgning
-            p Søg efter regioner. Returnerer de regioner som opfylder kriteriet.
-            pre GET /regioner
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Regionens navn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de regioner, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bogstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                  tr
-                    td alternativstavning
-                    td Alternativ stavning af regionens navn. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td regionskode
-                    td Regionskoden. 4 cifre.
-              h4 Eksempler
-              p Find de regioner, hvis navn starter med h
-              pre
-                a(href='http://#{url}/regioner?navn=h*') http://#{url}/regioner?navn=h*
-              p Returner alle regioner
-              pre
-                a(href='http://#{url}/regioner') http://#{url}/regioner
-
+            +documentResource(parameterDoc.region.resources, '/regioner')
 
             div.page-header
             h3.anchor-header#regionopslag Regionopslag
-            p Modtag region.
-            pre GET /regioner/{regionskode}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td regionskode
-                  td Fircifret regionskode
-            h4 Eksempel
-            p Returner oplysniger om Region Syddanmark
-            pre
-              a(href='http://#{url}/regioner/1083') http://#{url}/regioner/1083
+            +documentResource(parameterDoc.region.resources, '/regioner/{kode}')
 
             div.page-header
             h3.anchor-header#regiondata Beskrivelse af regionsdata
             p Web API'et udstiller for hver region følgende informationer:
-
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td(colspan="3") kode
-                  td Fircifret regionskode.
-
-                tr
-                  td(colspan="3") navn
-                  td Regionens navn.
-
-                tr
-                  td(colspan="3") grænse
-                  td Regionens grænse i GeoJSON
-
+            +documentSchema(apiSpec.region.model.schema)
           section
 
             div.page-header
@@ -129,210 +73,51 @@ block content
           section
             div.page-header
             h3.anchor-header#sognsoegning Sognsøgning
-            p Søg efter sogne. Returnerer de sogne som opfylder kriteriet.
-            pre GET /sogne
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Sognets navn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de sogne, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bogstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                  tr
-                    td alternativstavning
-                    td Alternativ stavning af sognets navn. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td sognekode
-                    td Sognekoden. 4 cifre.
-              h4 Eksempler
-              p Find de sogne, hvis navn starter med grøn
-              pre
-                a(href='http://#{url}/sogne?navn=grøn*') http://#{url}/sogne?navn=grøn*
-              p Returner alle sogne
-              pre
-                a(href='http://#{url}/sogne') http://#{url}/sogne
-
-
+            +documentResource(parameterDoc.sogn.resources, '/sogne')
             div.page-header
             h3.anchor-header#sognopslag Sogneopslag
-            p Modtag sogn.
-            pre GET /sogne/{sognekode}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td sognekode
-                  td Fircifret sognekode
-            h4 Eksempel
-            p Returner oplysninger om Grøndal sogn
-            pre
-              a(href='http://#{url}/sogne/7060') http://#{url}/sogne/7060
+            +documentResource(parameterDoc.sogn.resources, '/sogne/{kode}')
 
             div.page-header
             h3.anchor-header#sogndata Beskrivelse af sognedata
             p Web API'et udstiller for hvert sogn følgende informationer:
-
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td(colspan="3") kode
-                  td Fircifret sognekode.
-
-                tr
-                  td(colspan="3") navn
-                  td Sognets navn.
-
-                tr
-                  td(colspan="3") grænse
-                  td Sognets grænse i GeoJSON
-
+            +documentSchema(apiSpec.sogn.model.schema)
 
           section
             div.page-header
             h3.anchor-header#retskredssoegning Retskredssøgning
-            p Søg efter retskredse. Returnerer de retskredse som opfylder kriteriet.
-            pre GET /retskredse
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Retskredsens navn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de sogne, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bogstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                  tr
-                    td alternativstavning
-                    td Alternativ stavning af sognets navn. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td sognekode
-                    td Retskredskoden. 4 cifre.
-              h4 Eksempler
-              p Find de retskredse, hvis navn indeholder med århus
-              pre
-                a(href='http://#{url}/retskredse?navn=*århus*') http://#{url}/retskredse?navn=*århus*
-              p Returner alle retskredse
-              pre
-                a(href='http://#{url}/retskredse') http://#{url}/retskredse
-
-
+            +documentResource(parameterDoc.retskreds.resources, '/retskredse')
             div.page-header
             h3.anchor-header#retskredsopslag Retskredsopslag
-            p Modtag sogn.
-            pre GET /retskredse/{retskredskode}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td retskredskode
-                  td Fircifret retskredskode
-            h4 Eksempel
-            p Returner oplysninger om Retten på Frederiksberg
-            pre
-              a(href='http://#{url}/retskredse/22') http://#{url}/retskredse/22
+            +documentResource(parameterDoc.retskreds.resources, '/retskredse/{kode}')
 
             div.page-header
             h3.anchor-header#retskredsdata Beskrivelse af retskredsdata
             p Web API'et udstiller for hver retskreds følgende informationer:
-
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td(colspan="3") kode
-                  td Tocifret retskredskode.
-
-                tr
-                  td(colspan="3") navn
-                  td Retskredsens navn.
-
-                tr
-                  td(colspan="3") grænse
-                  td Retkredsens grænse i GeoJSON
-
+            +documentSchema(apiSpec.retskreds.model.schema)
           section
             div.page-header
             h3.anchor-header#politikredssoegning Politikredssøgning
-            p Søg efter politikredse. Returnerer de politikredse, som opfylder kriteriet.
-            pre GET /politikredse
-            h4 Parametre
-            p
-              table.table.table-hover
-                thead
-                  th Navn
-                  th Beskrivelse
-                tbody
-                  tr
-                    td navn
-                    td Politikredsens navn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning. F.eks. navn=rød* returnerer alle de sogne, hvis navn starter med <em>rød</em>. Ved wildcard-søgning skelnes ikke mellem store og små bogstaver. Kan ikke anvendes sammen med <em>alternativstavning</em>.
-                  tr
-                    td alternativstavning
-                    td Alternativ stavning af politikredsens navn. Kan ikke anvendes sammen med <em>navn</em>.
-                  tr
-                    td sognekode
-                    td Politikredskoden. 4 cifre.
-              h4 Eksempler
-              p Find de politikredse, hvis navn indeholder med københavn
-              pre
-                a(href='http://#{url}/politikredse?navn=*københavn*') http://#{url}/politikredse?navn=*københavn*
-              p Returner alle politikredse
-              pre
-                a(href='http://#{url}/politikredse') http://#{url}/politikredse
-
-
+            +documentResource(parameterDoc.politikreds.resources, '/politikredse')
             div.page-header
             h3.anchor-header#politikredsopslag Politikredsopslag
-            p Modtag sogn.
-            pre GET /politikredse/{politikredskode}
-            h4 Parametre
-            table.table.table-hover
-              thead
-                th Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td politikredskode
-                  td Fircifret politikredskode
-            h4 Eksempel
-            p Returner oplysninger om Bornholms Politi
-            pre
-              a(href='http://#{url}/politikredse/12') http://#{url}/politikredse/12
-
+            +documentResource(parameterDoc.politikreds.resources, '/politikredse/{kode}')
             div.page-header
             h3.anchor-header#politikredsdata Beskrivelse af politikredsdata
             p Web API'et udstiller for hver politikreds følgende informationer:
+            +documentSchema(apiSpec.politikreds.model.schema)
 
-            table.table.table-hover
-              thead
-                th(colspan="3") Navn
-                th Beskrivelse
-              tbody
-                tr
-                  td(colspan="3") kode
-                  td Tocifret politikredskode.
-
-                tr
-                  td(colspan="3") navn
-                  td Politikredsens navn.
-
-                tr
-                  td(colspan="3") grænse
-                  td Politikredsens grænse i GeoJSON
+          section
+            h3.anchor-header#opstillingskredssoegning Opstillingskredssøgning
+            +documentResource(parameterDoc.opstillingskreds.resources, '/opstillingskredse')
+            div.page-header
+            h3.anchor-header#opstillingskredsopslag Opstillingskredsopslag
+            +documentResource(parameterDoc.opstillingskreds.resources, '/opstillingskredse/{kode}')
+            div.page-header
+            h3.anchor-header#regiondata Beskrivelse af opstillingskredsdata
+            p Web API'et udstiller for hver opstillingskreds følgende informationer:
+            +documentSchema(apiSpec.opstillingskreds.model.schema)
+          section
 
 block append scripts
   script.

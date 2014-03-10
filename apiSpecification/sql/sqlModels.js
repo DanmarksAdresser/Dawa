@@ -207,13 +207,13 @@ exports.adgangsadresse = {
     nøjagtighed: {
       column: 'noejagtighed'
     },
-    DDKN_m100: {
+    ddkn_m100: {
       column: 'kn100mdk'
     },
-    DDKN_km1: {
+    ddkn_km1: {
       column: 'kn1kmdk'
     },
-    DDKN_km10: {
+    ddkn_km10: {
       column: 'kn10kmdk'
     },
     adressepunktændringsdato: {

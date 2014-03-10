@@ -91,13 +91,13 @@ exports.adgangsadresse = [
     name: 'adressepunktændringsdato'
   },
   {
-    name: 'DDKN_m100'
+    name: 'ddkn_m100'
   },
   {
-    name: 'DDKN_km1'
+    name: 'ddkn_km1'
   },
   {
-    name: 'DDKN_km10'
+    name: 'ddkn_km10'
   },
   {
     name: 'dagitemaer',
