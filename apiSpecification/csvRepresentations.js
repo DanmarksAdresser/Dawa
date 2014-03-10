@@ -14,7 +14,7 @@ var excludedFields = {
   vejstykke: [],
   vejnavn: [],
   supplerendebynavn: [],
-  postnummer: [],
+  postnummer: ['geom_json'],
   adgangsadresse: ['geom_json'],
   adresse: ['geom_json']
 };

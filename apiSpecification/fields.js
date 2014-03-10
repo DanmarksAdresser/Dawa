@@ -293,6 +293,9 @@ exports.postnummer = [
     name: 'kommune'
   },
   {
+    name: 'geom_json'
+  },
+  {
     name: 'kommuner',
     multi: true
   }

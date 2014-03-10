@@ -551,6 +551,7 @@ exports.postnummer = {
     },
     'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresse', 'kommuner']
   }),
+  fields: _.chain(fieldsUtil.allSelectableFields('postnummer')).pluck('name').without('geom_json').value(),
   mapper: function (row, options) {
     return {
       href: makeHref(options.baseUrl, 'postnummer', [row.nr]),
