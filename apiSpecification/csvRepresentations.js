@@ -75,15 +75,15 @@ _.forEach(resourceTypesWithDefaultCsvMapping, function(resourceTypeName) {
  * dagiTemaer, which is a multi field.
  */
 ['adgangsadresse', 'adresse'].forEach(function(resourceTypeName) {
-  var defaultFields = csvCandidateFields(resourceTypeName);
-  var fieldList = _.difference(defaultFields, excludedFields[resourceTypeName]).concat(['dagitemaer']);
+  var defaultFields = _.difference(csvCandidateFields(resourceTypeName), excludedFields[resourceTypeName]);
+  var fieldList = defaultFields.concat(['dagitemaer']);
   var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds','opstillingskreds'];
   var csvFields = _.reduce(includedDagiTemaer, function(memo, temaNavn) {
     memo.push(temaNavn + '_kode');
     memo.push(temaNavn + '_navn');
     return memo;
   }, _.clone(defaultFields));
-  var defaultMapper = defaultCsvMapper(fieldList, fields[resourceTypeName]);
+  var defaultMapper = defaultCsvMapper(defaultFields, fields[resourceTypeName]);
   exports[resourceTypeName] = {
     requiredFields: fieldList,
     csvFields: csvFields,

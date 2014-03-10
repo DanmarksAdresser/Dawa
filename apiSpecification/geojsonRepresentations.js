@@ -1,7 +1,7 @@
 "use strict";
 
 var dagiTemaer = require('./dagiTemaer');
-var jsonRepresentations = require('./jsonRepresentations');
+var csvRepresentations = require('./csvRepresentations');
 
 exports.adgangsadresse = {
   mapper: function (row, options) {
@@ -16,7 +16,7 @@ exports.adgangsadresse = {
         name: 'EPSG:' + options.srid
       }
     };
-    result.properties = jsonRepresentations.adgangsadresse.mapper(row, options);
+    result.properties = csvRepresentations.adgangsadresse.mapper(row, options);
     return result;
   }
 };
@@ -36,7 +36,7 @@ exports.adresse = {
         }
       };
     }
-    result.properties = jsonRepresentations.adresse.mapper(row, options);
+    result.properties = csvRepresentations.adresse.mapper(row, options);
     return result;
   }
 };
@@ -56,7 +56,7 @@ exports.postnummer = {
         }
       };
     }
-    result.properties = jsonRepresentations.postnummer.mapper(row, options);
+    result.properties = csvRepresentations.postnummer.mapper(row, options);
     return result;
   }
 };
@@ -76,7 +76,7 @@ dagiTemaer.forEach(function (tema) {
         }
       };
     }
-    result.properties = jsonRepresentations[tema.singular].mapper(row, options);
+    result.properties = csvRepresentations[tema.singular].mapper(row, options);
     return result;
   }
   };
