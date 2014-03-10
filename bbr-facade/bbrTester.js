@@ -21,17 +21,19 @@ var dd = new AWS.DynamoDB(
 *******************************************************************************/
 
 function main(){
-  async.series([print('Starting the BBR Facade test....'),
-                deleteAll,
-                print('Assert that the DB is empty'),
-                assertEmptyDB,
-                print('Run the test'),
-                test
-               ],
-               function (err, results){
-                 winston.info('Error in test commands: %j %j', err, results, {});
-               }
-              );
+  async.series(
+    [
+      print('Starting the BBR Facade test....'),
+      deleteAll,
+      print('Assert that the DB is empty'),
+      assertEmptyDB,
+      print('Run the test'),
+      test
+    ],
+    function (err, results){
+      winston.info('Error in test commands: %j %j', err, results, {});
+    }
+  );
 }
 
 
