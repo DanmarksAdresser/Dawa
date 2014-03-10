@@ -38,9 +38,12 @@ app.use(express.bodyParser());
 ********************************************************************************/
 
 app.get('/', function (req, res) {
-  res.send("Dette er AWS endepunktet for BBR hændelser.<br>"+
-           "Brug POST /haendelse for at afgive en hændelse.<br>"+
-           'Mere dokumentation kan findes på <a href="http://dawa.aws.dk">dawa.aws.dk</a>');
+  res.send("<h4>Dette er AWS endepunktet for BBR hændelser</h4>"+
+           "Brug HTTP POST /haendelse for at afgive en hændelse.<br>"+
+           'Mere dokumentation kan findes på '+
+           '<a href="https://github.com/DanmarksAdresser/Dawa/tree/master/bbr-facade/doc">'+
+           'github.com/DanmarksAdresser/Dawa/tree/master/bbr-facade/doc</a><br>'+
+           'Se sekvensnummeret for sidste hændelse her: <a href="/sidsteSekvensnummer">/sidsteSekvensnummer</a>');
 });
 
 // Can be used for monitoring
