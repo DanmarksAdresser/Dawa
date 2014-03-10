@@ -7,6 +7,7 @@ var expressWinston = require('express-winston');
 var _              = require('underscore');
 var ZSchema        = require("z-schema");
 var AWS            = require('aws-sdk');
+var util           = require('util');
 
 /********************************************************************************
 ***** Setup *********************************************************************
@@ -44,46 +45,86 @@ app.post('/haendelse', function (req, res) {
   var haendelse = req.body;
   winston.info('Received haendelse: %j', haendelse, {});
   getLatest(function(error, latest){
-    if (error) {
+    if (error)
+    {
       winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
-      return res.send(500, 'Error putting to DynamoDB: '+JSON.stringify([error, latest]));
-    } else {
+      res.send(500, util.format('Error reading from DynamoDB error=%j data=%j', error, latest));
+    }
+    else
+    {
       winston.info('DynamoDB query latest: %j %j', error, latest, {});
       validateSchema(
         haendelse,
-        function(error){
-          if (error) {
-            return res.send(400, error);
-          } else {
-            var newSequenceNr = parseInt(haendelse.sekvensnummer);
-            var len = latest.Items.length;
-            var sequenceNr = parseInt(len > 0 ? latest.Items[0].serial.N : '0');
-            if (len === 0 || newSequenceNr === (sequenceNr+1)){
-              putItem(latest,  newSequenceNr,  haendelse,
-                      function(error, data){
-                        if (error) {
-                          winston.error('DynamoDB put ERROR: %j %j', error, data, {});
-                          return res.send(500, 'Error putting to DynamoDB: '+JSON.stringify([error, data]));
-                        } else {
-                          return res.send('Hændelse modtaget med sekvensnummer='+newSequenceNr);
-                        }
-                      });
-            } else {
-              winston.info('Error in sequence-number. The new sequenceNr must be 1+ the old.  old=%s new=%s',
-                           sequenceNr, newSequenceNr);
-              return res.send(400, 'Fejl: Sekvensnummer forskellig for det forventede.  Modtog: '+newSequenceNr+
-                              ', forventede: '+(sequenceNr+1));
-            }
+        function(error)
+        {
+          if (error)
+          {
+            winston.info(error);
+            res.send(400, error);
+          }
+          else
+          {
+            validateSequenceNumber(haendelse, latest, function(error, seqNr){
+              if (error)
+              {
+                winston.info(error);
+                res.send(400, error);
+              }
+              else
+              {
+                putItem(seqNr,  haendelse,
+                        function(error, data){
+                          if (error)
+                          {
+                            winston.error('DynamoDB put ERROR: %j %j', error, data, {});
+                            res.send(500, 'Error inserting value in DynamoDB: '+JSON.stringify([error, data]));
+                          }
+                          else
+                          {
+                            res.send('Hændelse modtaget med sekvensnummer='+seqNr);
+                          }
+                        });
+              }
+            });
           }
         });
     }
   });
 });
 
-function putItem(latest, sequenceNr, data, cb) {
-  var item = {key:    {'S': 'haendelser' },
-              serial: {'N': ''+sequenceNr },
-              data:   {'S': JSON.stringify(data)}};
+function validateSequenceNumber(haendelse, latest, cb){
+  var newSeqNr = parseInt(haendelse.sekvensnummer);
+  var len = latest.Items.length;
+  var lastSeqNr = parseInt(len > 0 ? latest.Items[0].seqnr.N : '0');
+  if (lastSeqNr === newSeqNr)
+  {
+    var lastJson = JSON.parse(latest.Items[0].data.S);
+    if (_.isEqual(haendelse, lastJson))
+    {
+      cb(null, newSeqNr);
+    }
+    else
+    {
+      cb(util.format('Inputfejl: en anden hændelse med samme sekvensnummer (%s) findes allerede: %j', lastSeqNr, lastJson));
+    }
+  }
+  else
+  {
+    if (len === 0 || newSeqNr === (lastSeqNr+1))
+    {
+      cb(null, newSeqNr);
+    }
+    else
+    {
+      cb(util.format('Inputfejl: sekvensnummer ikke gyldigt. Modtog %s, men forventede: %s', newSeqNr, (lastSeqNr+1)));
+    }
+  }
+}
+
+function putItem(seqNr, data, cb) {
+  var item = {key:   {'S': 'haendelser' },
+              seqnr: {'N': ''+seqNr },
+              data:  {'S': JSON.stringify(data)}};
   winston.info('Putting item: %j', item, {});
   dd.putItem({TableName: TABLENAME, Item: item},
              cb);

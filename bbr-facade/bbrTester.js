@@ -5,6 +5,7 @@ var winston = require('winston');
 var AWS     = require('aws-sdk');
 var _       = require('underscore');
 var async   = require('async');
+var util    = require('util');
 
 winston.handleExceptions(new winston.transports.Console());
 
@@ -52,6 +53,8 @@ function testSpec(){
           {S: 3, H: TD.vejnavn,           C: 200},
           {S: 4, H: TD.supplerendebynavn, C: 200},
           {S: 5, H: TD.postnummer,        C: 200},
+          {S: 5, H: TD.postnummer,        C: 200},
+          {S: 5, H: TD.postnummer,        C: 200},
           {S: 5, H: TD.vejnavn,           C: 400},
           {S: 6, H: TD.vejnavn,           C: 200},
           {S: 8, H: TD.vejnavn,           C: 400},
@@ -68,7 +71,7 @@ function test(cb){
       postTestSpec(spec, function(err, message){
         if (err) {
           winston.error('Error %j', err,{});
-          cb('Test error in spec: %j'+spec);
+          cb('Test error in spec: '+util.format('%j', spec));
         } else {
           winston.info('%s: serial=%s statusCode=%j(%j) error=%j',
                        spec.H.type, spec.S, spec.C, message, err, {});
@@ -93,7 +96,7 @@ function postTestSpec(spec, cb){
   request({ method         : 'POST',
             uri            : 'http://'+hostPort+'/haendelse',
             'content-type' : 'application/json',
-            json           : withSerial(spec.S, spec.H)},
+            json           : withSeqNr(spec.S, spec.H)},
           function (error, response, body) {
             if (error){return cb(error, body);}
             if (response.statusCode === spec.C){
@@ -131,10 +134,10 @@ function deleteAll(cb){
     } else {
       async.eachSeries(data.Items,
                        function(item, cb){
-                         winston.info('Delete item %j', item.serial.N, {});
+                         winston.info('Delete item %j', item.seqnr.N, {});
                          dd.deleteItem({TableName: TABLE,
-                                        Key: {key:    {S: 'haendelser'},
-                                              serial: {N: item.serial.N}}},
+                                        Key: {key:   {S: 'haendelser'},
+                                              seqnr: {N: item.seqnr.N}}},
                                        cb);
                        },
                        function(err) {cb(err);});
@@ -159,9 +162,9 @@ function assertEmptyDB(cb){
 ***** Test data and helper function ********************************************
 *******************************************************************************/
 
-function withSerial(serial, haendelse){
+function withSeqNr(seqNr, haendelse){
   var clone = _.clone(haendelse);
-  clone.sekvensnummer = serial;
+  clone.sekvensnummer = seqNr;
   return clone;
 }
 
