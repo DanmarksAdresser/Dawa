@@ -42,6 +42,28 @@ app.get('/', function (req, res) {
            'Mere dokumentation kan findes på <a href="http://dawa.aws.dk">dawa.aws.dk</a>');
 });
 
+// Can be used for monitoring
+app.get('/sidsteSekvensnummer', function (req, res) {
+  getLatest(function(error, latest){
+    if (error)
+    {
+      winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
+      res.send(500, util.format('Error reading from DynamoDB error=%j data=%j', error, latest));
+    }
+    else
+    {
+      if (latest.Items.length > 0)
+      {
+        res.send(""+latest.Items[0].seqnr.N);
+      }
+      else
+      {
+        res.send("0");
+      }
+    }
+  });
+});
+
 app.post('/haendelse', function (req, res) {
   var haendelse = req.body;
   winston.info('Received haendelse: %j', haendelse, {});
