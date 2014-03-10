@@ -49,6 +49,23 @@ Hent data filer fra aws.dk, og kør psql/setupdb.bash:
  $> bash psql/setupdb.bash
 ```
 
+### Indlæsning af DAGI temaer
+Scriptet dagiImport.js importerer temaerne (kommuner, regioner, sogne etc.) fra kortforsyningen:
+
+
+```
+pgConnectionUrl=<db url> dagiPassword=<password til kortforsyningen> node ./dagiImport.js
+```
+
+Parametre:
+
+ - pgConnectionUrl: URL til postgres-databasen, som DAGI-temaerne skal indlæses i
+ - dagiURL: URL på servicen hos kortforsyningen som kaldes, default http://kortforsyningen.kms.dk/service?servicename=dagi_gml2
+ - dagiLogin: Det brugernavn, som anvendes hos kortforsyningen (default dawa)
+ - dagiPassword: Det password som anvendes hos kortforsyningen
+
+Det tager ca. en time at indlæse DAGI-temaerne.
+
 ### Kør tests
 ```
  $> connectionstring=mongodb://<Mongo-settings> pgConnectionUrl=postgres://<PG-settings> npm test
