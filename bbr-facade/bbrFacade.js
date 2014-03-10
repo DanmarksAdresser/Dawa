@@ -19,6 +19,7 @@ var dd = new AWS.DynamoDB({apiVersion      : '2012-08-10',
                            secretAccessKey : process.env.secretAccessKey});
 
 var TABLENAME = process.env.dynamoDBTableName;
+var listenPort = process.env.PORT || 3333;
 
 var logglyOptions = {subdomain        : 'dawa',
                      inputToken       : process.env.DAWALOGGLY,
@@ -148,7 +149,6 @@ function getLatest(cb) {
 
 app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
 
-var listenPort = process.env.PORT || 3333;
 app.listen(listenPort);
 //TODO HTTPS,  need certificate!
 //https.createServer(app).listen(listenPort);
