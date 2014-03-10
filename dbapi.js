@@ -66,6 +66,9 @@ function CursorStream(client, cursorName) {
 
 CursorStream.prototype._doFetch = function(count) {
   var self = this;
+  if(self.closed) {
+    return;
+  }
   if(self.queryInProgress) {
     throw "Invalid state: Query already in progress";
   }
@@ -78,7 +81,11 @@ CursorStream.prototype._doFetch = function(count) {
   self.client.query(fetch, [], function(err, result) {
     self.queryInProgress = false;
     if(err) {
+      console.log('error fetching ' + err);
       self.emit('error', err);
+      self.push(null);
+      self.client = null;
+      self.closed = true;
       return;
     }
     if(result.rows.length < fetchSize) {
@@ -89,11 +96,12 @@ CursorStream.prototype._doFetch = function(count) {
     });
 
     if(!self.moreRowsAvailable && !self.closed) {
-      self.closed = true;
       self.push(null);
+      self.closed = true;
       var close = "CLOSE " + self.cursorName;
       winston.info("Closing cursor: %j", close, {});
       self.client.query(close, [], function() {});
+      self.client = null;
       return;
     }
   });
@@ -135,11 +143,13 @@ exports.withReadonlyTransaction = function(cb) {
         done();
         return cb(err);
       }
-      cb(err, client, function() {
-        /* jshint ignore:start */
-        client.query('ROLLBACK', function(err) {});
-        /* jshint ignore:end */
-        return done();
+      cb(err, client, function(err) {
+        if(err) {
+          return done(err);
+        }
+        client.query('ROLLBACK', function(err) {
+          return done(err);
+        });
       });
     });
   });
