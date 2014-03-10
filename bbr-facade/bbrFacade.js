@@ -49,7 +49,7 @@ app.post('/haendelse', function (req, res) {
       return res.send(500, 'Error putting to DynamoDB: '+JSON.stringify([error, latest]));
     } else {
       winston.info('DynamoDB query latest: %j %j', error, latest, {});
-      validateOrStop(
+      validateSchema(
         haendelse,
         function(error){
           if (error) {
@@ -139,7 +139,7 @@ function expressLogTransports(){
 }
 
 var validator = new ZSchema({ sync: true });
-function validateOrStop(json, cb){
+function validateSchema(json, cb){
   var validate = function(schema){
     if (!validator.validate(json, schema)) {
       throw validator.getLastError();
