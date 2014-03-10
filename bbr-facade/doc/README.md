@@ -2,5 +2,5 @@
 Dokumentation
 -------------
 
-Dokumentation til BBR Servicen kan findes i filerene i dette
+Dokumentation til BBR Servicen kan findes i filerne i dette
 bibliotek.
