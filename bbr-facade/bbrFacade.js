@@ -8,10 +8,16 @@ var _              = require('underscore');
 var ZSchema        = require("z-schema");
 var AWS            = require('aws-sdk');
 
+/********************************************************************************
+***** Setup *********************************************************************
+********************************************************************************/
+
 var dd = new AWS.DynamoDB({apiVersion      : '2012-08-10',
                            region          : 'eu-west-1',
                            accessKeyId     : process.env.accessKeyId,
                            secretAccessKey : process.env.secretAccessKey});
+
+var TABLENAME = process.env.dynamoDBTableName;
 
 var logglyOptions = {subdomain        : 'dawa',
                      inputToken       : process.env.DAWALOGGLY,
@@ -19,11 +25,20 @@ var logglyOptions = {subdomain        : 'dawa',
                      handleExceptions : true};
 
 var app = express();
-
 setupLogging(app);
-
 app.use(express.compress());
 app.use(express.bodyParser());
+
+
+/********************************************************************************
+***** Routes ********************************************************************
+********************************************************************************/
+
+app.get('/', function (req, res) {
+  res.send("Dette er AWS endepunktet for BBR hændelser.<br>"+
+           "Brug POST /haendelse for at afgive en hændelse.<br>"+
+           'Mere dokumentation kan findes på <a href="http://dawa.aws.dk">dawa.aws.dk</a>');
+});
 
 app.post('/haendelse', function (req, res) {
   var haendelse = req.body;
@@ -35,7 +50,7 @@ app.post('/haendelse', function (req, res) {
     } else {
       winston.info('DynamoDB query latest: %j %j', error, latest, {});
       validateOrStop(
-        res,  haendelse,
+        haendelse,
         function(error){
           if (error) {
             return res.send(400, error);
@@ -54,8 +69,10 @@ app.post('/haendelse', function (req, res) {
                         }
                       });
             } else {
-              winston.info('Error in sequence-number. The new sequenceNr must be 1+ the old.  old=%s new=%s', sequenceNr, newSequenceNr);
-              return res.send(400, 'Fejl: Sekvensnummer forskellig for det forventede.  Modtog: '+newSequenceNr+', forventede: '+(sequenceNr+1));
+              winston.info('Error in sequence-number. The new sequenceNr must be 1+ the old.  old=%s new=%s',
+                           sequenceNr, newSequenceNr);
+              return res.send(400, 'Fejl: Sekvensnummer forskellig for det forventede.  Modtog: '+newSequenceNr+
+                              ', forventede: '+(sequenceNr+1));
             }
           }
         });
@@ -68,12 +85,12 @@ function putItem(latest, sequenceNr, data, cb) {
               serial: {'N': ''+sequenceNr },
               data:   {'S': JSON.stringify(data)}};
   winston.info('Putting item: %j', item, {});
-  dd.putItem({TableName: 'dawatest', Item: item},
+  dd.putItem({TableName: TABLENAME, Item: item},
              cb);
 }
 
 function getLatest(cb) {
-  var params = {TableName: 'dawatest',
+  var params = {TableName: TABLENAME,
                 KeyConditions: {'key': {ComparisonOperator: 'EQ',
                                         AttributeValueList: [{'S': 'haendelser' }]}},
                 ConsistentRead: true,
@@ -83,11 +100,10 @@ function getLatest(cb) {
   dd.query(params, cb);
 }
 
-app.get('/', function (req, res) {
-  res.send("Dette er AWS endepunktet for BBR hændelser.<br>"+
-           "Brug POST /haendelse for at afgive en hændelse.<br>"+
-           'Mere dokumentation kan findes på <a href="http://dawa.aws.dk">dawa.aws.dk</a>');
-});
+
+/*******************************************************************************
+**** Some more setup. Have to be after the routes ******************************
+*******************************************************************************/
 
 app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
 
@@ -99,9 +115,9 @@ app.listen(listenPort);
 winston.info("Express server listening on port %d in %s mode", listenPort, app.settings.env);
 
 
-////////////////////////////////////////////////////////////////////////////////
-//// Helper functions //////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+/*******************************************************************************
+**** Helper functions **********************************************************
+*******************************************************************************/
 
 function setupLogging(app){
   require('winston-loggly');
@@ -123,7 +139,7 @@ function expressLogTransports(){
 }
 
 var validator = new ZSchema({ sync: true });
-function validateOrStop(response, json, cb){
+function validateOrStop(json, cb){
   var validate = function(schema){
     if (!validator.validate(json, schema)) {
       throw validator.getLastError();
@@ -151,6 +167,9 @@ function validateOrStop(response, json, cb){
   return cb();
 }
 
+/********************************************************************************
+***** Haendelse schemas *********************************************************
+********************************************************************************/
 // TODO: which fields are nullable?
 
 var vejnavnsHaendelseSchema = requireAllProperties({
@@ -239,33 +258,10 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
   })
 });
 
-function integer()      {return simpleType('integer');}
-function number()       {return simpleType('number');}
-function string()       {return simpleType('string');}
-function time()         {return string();}
-function simpleType(t)  {return {type: t};}
-function array(t)       {return {type: 'array', minItems:1, items: t};}
-function enumeration(l) {return {'enum': l};}
-function uuid() {
-  return {type: 'string',
-          pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'};
-}
 
-function requireAllProperties(object){
-  var properties = _.keys(object.properties);
-  object.required = properties;
-  return object;
-}
-
-function vejstykkeIntervaller(){
-  return array(requireAllProperties(
-    {type: 'object',
-     additionalProperties: false,
-     properties: {husnrFra : string(),
-                  husnrTil : string,
-                  side     : enumeration(['lige','ulige']),
-                  nummer   : integer()}}));
-}
+/********************************************************************************
+***** Schema helper functions ***************************************************
+********************************************************************************/
 
 function haendelsesHeader(type, data){
   var header = haendelsesHeaderNoAendringstype(type, data);
@@ -284,3 +280,34 @@ function haendelsesHeaderNoAendringstype(type, data){
          };
 }
 
+function requireAllProperties(object){
+  var properties = _.keys(object.properties);
+  object.required = properties;
+  return object;
+}
+
+function vejstykkeIntervaller(){
+  return array(requireAllProperties(
+    {type: 'object',
+     additionalProperties: false,
+     properties: {husnrFra : string(),
+                  husnrTil : string,
+                  side     : enumeration(['lige','ulige']),
+                  nummer   : integer()}}));
+}
+
+function integer()      {return simpleType('integer');}
+function number()       {return simpleType('number');}
+function string()       {return simpleType('string');}
+function time()         {return string();}
+function simpleType(t)  {return {type: t};}
+function array(t)       {return {type: 'array', minItems:1, items: t};}
+function enumeration(l) {return {'enum': l};}
+function uuid() {
+  return {type: 'string',
+          pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'};
+}
+
+/********************************************************************************
+***** EOF ***********************************************************************
+********************************************************************************/
