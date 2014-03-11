@@ -252,7 +252,8 @@ var dagiFilterParams = _.map(filterableDagiSkemaer, function(skemaNavn) {
   return {
     name: skemaNavn + 'kode',
     type: 'integer',
-    schema: schema.kode4
+    schema: schema.kode4,
+    multi: true
   };
 });
 
@@ -260,10 +261,13 @@ exports.dagiFilter = {
   parameters: dagiFilterParams,
   applySql: function(sqlParts, params, spec) {
     filterableDagiSkemaer.forEach(function(skemaNavn) {
-      if(notNull(params[skemaNavn + 'kode'])) {
-        var kodeAlias = dbapi.addSqlParameter(sqlParts, params[skemaNavn + 'kode']);
+      var paramArray = params[skemaNavn + 'kode'];
+      if(notNull(paramArray)) {
         var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
-        dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode = ' + kodeAlias + ' AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');
+        var kodeAliases = _.map(paramArray, function(param) {
+          return dbapi.addSqlParameter(sqlParts, param);
+        });
+        dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode IN (' + kodeAliases.join(', ') + ') AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');
       }
     });
   }
