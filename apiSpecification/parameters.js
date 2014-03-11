@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('underscore');
 var columnsUtil = require('./columnsUtil');
 var common = require('./commonParameterGroups');
 var crsParameterSpec = common.crsParameterSpec;
@@ -7,6 +8,7 @@ var dagiTemaer = require('./dagiTemaer');
 var dbapi = require('../dbapi');
 var schema = require('./parameterSchema');
 var sqlModels = require('./sql/sqlModels');
+var winston = require('winston');
 
 var autocompleteParameterSpec = common.autocompleteParameterSpec;
 var geomWithinParameterSpec = common.geomWithinParameterSpec;
@@ -22,10 +24,27 @@ function applyParameters(spec, parameterSpec, params, query) {
   var columnSpec = sqlModel.columns;
   parameterSpec.forEach(function (parameter) {
     var name = parameter.name;
-    if (params[name] !== undefined) {
-      var parameterAlias = dbapi.addSqlParameter(query, params[name]);
-      var column = columnsUtil.getColumnNameForWhere(columnSpec, name);
-      query.whereClauses.push(column + " = " + parameterAlias);
+    var values = params[name];
+
+    if (values !== undefined)
+    {
+      if (values.length === 1)
+      {
+        var value = values[0];
+        var parameterAlias = dbapi.addSqlParameter(query, value);
+        var column = columnsUtil.getColumnNameForWhere(columnSpec, name);
+        query.whereClauses.push(column + " = " + parameterAlias);
+      }
+      else
+      {
+        var orClauses = _.map(values,
+                              function(value){
+                                var parameterAlias = dbapi.addSqlParameter(query, value);
+                                var column = columnsUtil.getColumnNameForWhere(columnSpec, name);
+                                return (column + " = " + parameterAlias);
+                              });
+        query.whereClauses.push("("+orClauses.join(" OR ")+")");
+      }
     }
   });
 }
@@ -64,7 +83,8 @@ exports.adgangsadresse = {
     {
       name: 'postnr',
       type: 'integer',
-      schema: schema.postnr
+      schema: schema.postnr,
+      multi: true
     },
     {
       name: 'kommunekode',

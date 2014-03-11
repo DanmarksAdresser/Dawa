@@ -2,6 +2,7 @@
 
 var ZSchema     = require("z-schema");
 var _           = require('underscore');
+//var winston     = require('winston');
 
 /******************************************************************************/
 /*** Parameter parsing and validation *****************************************/
@@ -14,7 +15,7 @@ exports.parseParameters = function(params, parameterSpec, resourceSpec) {
   return _.reduce(paramNames,
     function(memo, name){
       try{
-        var val = parseParameter(params[name], parameterSpec[name], resourceSpec);
+        var val = parseParameterMulti(params[name], parameterSpec[name], resourceSpec);
         memo.params[name] = val;
       } catch(error){
         memo.errors.push([name, error]);
@@ -23,6 +24,17 @@ exports.parseParameters = function(params, parameterSpec, resourceSpec) {
     },
     {params: {}, errors: []});
 };
+
+function parseParameterMulti(valString, paramSpec, resourceSpec) {
+  if (paramSpec.multi === true)
+  {
+    return _.map(valString.split('|'), function(str){ return parseParameter(str, paramSpec, resourceSpec); });
+  }
+  else
+  {
+    return parseParameter(valString, paramSpec, resourceSpec);
+  }
+}
 
 function parseParameter(valString, paramSpec, resourceSpec) {
   var val = parseParameterType(valString, paramSpec.type);
