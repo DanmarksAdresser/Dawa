@@ -21,6 +21,12 @@ function searchWhereClause(paramNumberString, spec) {
   return "(" + columnName + " @@ to_tsquery('danish', " + paramNumberString + "))";
 }
 
+function searchOrderClause(paramAlias, spec) {
+  var columnSpec = sqlModels[spec.model.name].columns;
+  var columnName = getSearchColumn(columnSpec);
+  return 'ts_rank(' + columnName + ", to_tsquery('danish'," + paramAlias + ')) DESC';
+}
+
 function endsWith(str, suffix) {
   return str.indexOf(suffix, str.length - suffix.length) !== -1;
 }
@@ -106,6 +112,7 @@ exports.searchParameterSpec = {
     if(notNull(params.q)) {
       var parameterAlias = dbapi.addSqlParameter(sqlParts, toPgSearchQuery(params.q));
       dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, spec));
+      sqlParts.orderClauses.unshift(searchOrderClause(parameterAlias, spec));
     }
   }
 };
@@ -121,6 +128,7 @@ exports.autocompleteParameterSpec = {
     if(notNull(params.q)) {
       var parameterAlias = dbapi.addSqlParameter(sqlParts, toPgSuggestQuery(params.q));
       dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, spec));
+      sqlParts.orderClauses.unshift(searchOrderClause(parameterAlias, spec));
     }
   }
 };
