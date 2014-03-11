@@ -121,13 +121,13 @@ block content
 
               p
                 pre
-                  a(href='http://#{url}/adresser?sogn=7060&side=3&per_side=24') http://#{url}/adresser?sogn=7060&side=3&per_side=24
+                  a(href='#{url}/adresser?sogn=7060&side=3&per_side=24') #{url}/adresser?sogn=7060&side=3&per_side=24
 
               p Pagineringsinformation er inkluderet i <a href='http://tools.ietf.org/html/rfc5988'>Link header</a>'en. Brug link headeren fremfor at konstruerer URL'en selv.
 
               p
-                pre Link: &lt;http://#{url}/adresser?sogn=7060%side=2&per_side=24&gt;; rel="prev",
-                  &lt;http://#{url}/adresser?sogn=7060%side=4&per_side=24&gt;; rel="next"
+                pre Link: &lt;#{url}/adresser?sogn=7060%side=2&per_side=24&gt;; rel="prev",
+                  &lt;#{url}/adresser?sogn=7060%side=4&per_side=24&gt;; rel="next"
 
 
             div.page-header
@@ -141,7 +141,7 @@ block content
               p Web API'ets svar i JSON er formateret. Hvis formatering af f.eks. performancegrunde ikke ønskes, så kan parameteren <em>noformat</em> anvendes, som vist i eksemplet nedenfor:
               p
                 pre
-                  a(href='http://#{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat') http://#{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat
+                  a(href='#{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat') #{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat
 
 
             div.page-header
@@ -159,19 +159,19 @@ block content
             div.page-header
               h3.anchor-header#kodeeksempler Kodeeksempler
               p At se på kodeeksempler er en god måde at finde ud af hvordan DAWA anvendes. Du kan finde en række kodeeksempler på
-                a(href='https://github.com/DanmarksAdresser') https://github.com/DanmarksAdresser
+                | <a href='https://github.com/DanmarksAdresser'> https://github.com/DanmarksAdresser</a>
 
             div.page-header
               h3.anchor-header#kopiregister Etablering af opdateret kopiregister
               p Vi anbefaler, at den service baserede adgang til adressefunktionalitet sker via Web API'et anvendes, men i nogle tilfælde giver det mening at have en lokal kopi af adresse-, vejnavne- eller postnummerdata. I det følgende beskrives hvorledes et opdateret kopiregister etableres via et eksempel. Lad os sige vi ønsker en opdateret kopi af adresserne i København og Frederiksberg kommuners adresser. Det sker på følgende måde:
               ol
                 li
-                  | Gem det aktuelle hændelsesløbenummer for adresser: <a href='http://#{url}/adressehaendelser/loebenummer'>http://#{url}/adressehaendelser/loebenummer</a>
+                  | Gem det aktuelle hændelsesløbenummer for adresser: <a href='#{url}/adressehaendelser/loebenummer'>#{url}/adressehaendelser/loebenummer</a>
                   | Lad os sige at det aktuelle løbenummer er 2027.
                 li Hent adresserne i København og Frederiksberg kommuner:
-                  a(href='http://#{url}/adresser?kommune=0101,0147') http://#{url}/adresser?kommune=0101,0147
+                  a(href='#{url}/adresser?kommune=0101,0147') #{url}/adresser?kommune=0101,0147
                 li
-                  | Opdater adresserne vha. adressehændelserne fra følgende: <a href='http://#{url}/adresserhaendelser?fraloebenr=2027'>http://#{url}/adresserhaendelser?fraloebenr=2027</a>
+                  | Opdater adresserne vha. adressehændelserne fra følgende: <a href='#{url}/adresserhaendelser?fraloebenr=2027'>#{url}/adresserhaendelser?fraloebenr=2027</a>
                   | Opdateringen skal kun ske hvis hændelsens løbenummer er større end løbenummeret registreret på adressen.
                 li Sidste løbenummer i listen af adressehændelser fra ovenstående gemmes til næste opdatering.
 
