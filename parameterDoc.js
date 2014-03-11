@@ -1,5 +1,6 @@
 "use strict";
 
+var parameterSpec         = require('./apiSpecification/parameters');
 var _ = require('underscore');
 var dagiTemaer = require('./apiSpecification/dagiTemaer');
 
@@ -68,6 +69,7 @@ var vejnavneDoc = {
     '/vejnavne/{navn}': {
       subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
       parameters: [vejnavneIdParameter],
+      nomulti: true,
       examples:  [{description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
                    path: ['/vejnavne/Gammel%20Viborgvej']}]},
 
@@ -120,6 +122,7 @@ var vejstykkerDoc = {
     '/vejstykker/{kommunekode}/{kode}': {
       subtext: 'Opslag på enkelt vejstykke ud fra kommunekode og vejkode.',
       parameters: vejstykkerIdParameters,
+      nomulti: true,
       examples:  [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
                     path: ['/vejstykker/0101/316']}]},
 
@@ -165,6 +168,7 @@ var supplerendeBynavneDoc = {
     '/supplerendebynavne/{navn}': {
       subtext: 'Modtag supplerende bynavn.',
       parameters: [supplerendeBynavneIdParameters],
+      nomulti: true,
       examples: [{description: 'Hent det supplerende bynavn med navn <em>Aarsballe</em>',
                   path: ['/supplerendebynavne/Aarsballe']}]},
 
@@ -212,6 +216,7 @@ var kommuneDoc = {
     '/kommuner/{kode}': {
       subtext: 'Modtag kommune.',
       parameters: [kommuneIdParameters],
+      nomulti: true,
       examples: [{description: 'Hent Københavns kommune (kode 101)',
                   path: ['/kommuner/101']}]},
 
@@ -327,6 +332,7 @@ var adgangsadresseDoc = {
     '/adgangsadresser/{id}': {
       subtext: 'Modtag adresse med id.',
       parameters: [adgangsadresseIdParameter],
+      nomulti: true,
       examples:  [{description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
                    path: ['/adgangsadresser/0a3f507a-b2e6-32b8-e044-0003ba298018']}]},
 
@@ -436,6 +442,7 @@ var adresseDoc = {
     '/adresser/{id}': {
       subtext: 'Modtag adresse med id.',
       parameters: [_.find(adresseParameters, function(p){ return p.name === 'id'; })],
+      nomulti: true,
       examples: [{description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
                   path: ['/adresser/0255b942-f3ac-4969-a963-d2c4ed9ab943']}]},
 
@@ -486,6 +493,7 @@ var postnummerDoc = {
     '/postnumre/{nr}': {
       subtext: 'Modtag postnummer med id.',
       parameters: [_.find(postnummerParameters, function(p){ return p.name === 'nr'; })],
+      nomulti: true,
       examples: [{description: 'Hent postnummer for København NV',
                   path: ['/postnumre/2400']}]},
 
@@ -495,16 +503,6 @@ var postnummerDoc = {
       examples: [{description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
                   query: [{name:'q', value:'strand'}]}]}}};
 
-
-module.exports = {
-  vejnavn: vejnavneDoc,
-  vejstykke: vejstykkerDoc,
-  supplerendebynavn: supplerendeBynavneDoc,
-  kommune: kommuneDoc,
-  adgangsadresse: adgangsadresseDoc,
-  postnummer: postnummerDoc,
-  adresse: adresseDoc
-};
 
 function firstUpper(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
@@ -670,6 +668,7 @@ var dagiExamples = {
   doc.resources['/' + tema.plural + '/{kode}'] = {
     subtext: 'Modtag ' + tema.singular + ' med kode.',
     parameters: [_.find(dagiParameters(tema), function(p){ return p.name === 'kode'; })].concat(formatParameters),
+    nomulti: true,
     examples: dagiExamples[tema.singular].get || []
 
 
@@ -681,3 +680,50 @@ var dagiExamples = {
   };
   module.exports[tema.singular] = doc;
 });
+
+
+// Add multi flag if it exist in the parameter spec.
+addMultiFlag(vejnavneDoc           , parameterSpec.vejnavn.propertyFilter.parameters);
+addMultiFlag(vejstykkerDoc         , parameterSpec.vejstykke.propertyFilter.parameters);
+addMultiFlag(supplerendeBynavneDoc , parameterSpec.supplerendebynavn.propertyFilter.parameters);
+addMultiFlag(kommuneDoc            , parameterSpec.kommune.propertyFilter.parameters);
+addMultiFlag(adgangsadresseDoc     , parameterSpec.adgangsadresse.propertyFilter.parameters);
+addMultiFlag(adgangsadresseDoc     , parameterSpec.adgangsadresse.dagiFilter.parameters);
+addMultiFlag(adresseDoc            , parameterSpec.adresse.propertyFilter.parameters);
+addMultiFlag(adresseDoc            , parameterSpec.adresse.dagiFilter.parameters);
+addMultiFlag(postnummerDoc         , parameterSpec.postnummer.propertyFilter.parameters);
+dagiTemaer.forEach(function(tema) {
+  if (tema.singular !== 'kommune'){
+    addMultiFlag(module.exports[tema.singular], parameterSpec[tema.singular].propertyFilter.parameters);
+  }
+});
+
+function addMultiFlag(resourceDocs, parameterSpecsList){
+  var parameterSpecs = _.indexBy(parameterSpecsList, 'name');
+  _.each(_.values(resourceDocs.resources),
+         function(doc)
+         {
+           doc.parameters = JSON.parse(JSON.stringify(doc.parameters)); // Clone!
+           if (doc.nomulti !== true){
+             var docs = doc.parameters;
+             var newDocs = _.map(docs,
+                                 function(doc)
+                                 {
+                                   var name = doc.name;
+                                   if (parameterSpecs[name] && parameterSpecs[name].multi === true){
+                                     doc.multi = true;
+                                   }
+                                 });
+             docs.parameters = newDocs;
+           }
+         });
+}
+
+module.exports.vejnavn           = vejnavneDoc;
+module.exports.vejstykke         = vejstykkerDoc;
+module.exports.supplerendebynavn = supplerendeBynavneDoc;
+module.exports.kommune           = kommuneDoc;
+module.exports.adgangsadresse    = adgangsadresseDoc;
+module.exports.postnummer        = postnummerDoc;
+module.exports.adresse           = adresseDoc;
+

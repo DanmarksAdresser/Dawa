@@ -146,10 +146,15 @@ block content
 
             div.page-header
               h3.anchor-header#flervaerdisoegning  Flerværdisøgning
-              p Ved søgning med parametrene kommune, sogn, postnr, region, politikreds, retskreds og opstillingskreds er det muligt at angive flere værdier i søgeparameteren. Værdirne separeres med komma (','). Hvis man f.eks. ønsker at alle adresser med husnummmer 177 i både Københavns og Frederiksberg kommune gøres det på følgende måde:
+
+              p En række parametre understøtter flerværdisøgning, hvor søge værdierne er adskilt vha. pipe ('|'). (Se hvilke
+                | parametre som understøtter flerværdisøgning i dokumentationen for de specifikke API'er).<br>
+                | Hvis man f.eks. ønsker alle adresser med husnummmer 177  i både Københavns og
+                | Frederiksberg kommune gøres det på følgende måde:
+
               p
                 pre
-                  a(href='http://#{url}/adresser?kommune=0101,0147&husnr=177') http://#{url}/adresser?kommune=0101,0147&husnr=177
+                  a(href='#{url}/adresser?kommunekode=0101|0147&husnr=177') #{url}/adresser?kommunekode=0101|0147&husnr=177
 
             div.page-header
               h3.anchor-header#kodeeksempler Kodeeksempler
