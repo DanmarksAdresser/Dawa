@@ -271,7 +271,7 @@ exports.dagiFilter = {
       }
     });
   }
-}
+};
 
 exports.formatParameterSpec = {
   parameters: [
