@@ -64,21 +64,26 @@ exports.adgangsadresse = {
     {
       name: 'id',
       type: 'string',
-      schema: schema.uuid
+      schema: schema.uuid,
+      multi: true
     },
     {
       name: 'vejkode',
       type: 'integer',
-      schema: schema.kode4
+      schema: schema.kode4,
+      multi: true
     },
     {
-      name: 'vejnavn'
+      name: 'vejnavn',
+      multi: true
     },
     {
-      name: 'husnr'
+      name: 'husnr',
+      multi: true
     },
     {
-      name: 'supplerendebynavn'
+      name: 'supplerendebynavn',
+      multi: true
     },
     {
       name: 'postnr',
@@ -89,18 +94,22 @@ exports.adgangsadresse = {
     {
       name: 'kommunekode',
       type: 'integer',
-      schema: schema.kode4
+      schema: schema.kode4,
+      multi: true
     },
     {
       name: 'ejerlavkode',
-      type: 'integer'
+      type: 'integer',
+      multi: true
     },
     {
-      name: 'matrikelnr'
+      name: 'matrikelnr',
+      multi: true
     },
     {
       name: 'esrejendomsnr',
-      type: 'integer'
+      type: 'integer',
+      multi: true
     }
   ]),
   search: searchParameterSpec,
@@ -113,13 +122,16 @@ exports.adgangsadresse = {
 exports.adresse = {
   propertyFilter: propertyFilterParameterGroup(exports.adgangsadresse.propertyFilter.parameters.concat([
     {
-      name: 'etage'
+      name: 'etage',
+      multi: true
     },
     {
-      name: 'dør'
+      name: 'dør',
+      multi: true
     },
     {
-      name: 'adgangsadresseid'
+      name: 'adgangsadresseid',
+      multi: true
     }
   ])),
   search: searchParameterSpec,
@@ -131,15 +143,18 @@ exports.adresse = {
 exports.supplerendebynavn = {
   propertyFilter: propertyFilterParameterGroup([
     {
-      name: 'navn'
+      name: 'navn',
+      multi: true
     },
     {
       name: 'kommunekode',
       type: 'integer',
-      schema: schema.kode4
+      schema: schema.kode4,
+      multi: true
     },
     {
-      name: 'postnr'
+      name: 'postnr',
+      multi: true
     }
   ]),
   search: searchParameterSpec,
@@ -149,17 +164,20 @@ exports.supplerendebynavn = {
 exports.vejnavn = {
   propertyFilter: propertyFilterParameterGroup([
     {
-      name: 'navn'
+      name: 'navn',
+      multi: true
     },
     {
       name: 'postnr',
       type: 'integer',
-      schema: schema.postnr
+      schema: schema.postnr,
+      multi: true
     },
     {
       name: 'kommunekode',
       type: 'integer',
-      schema: schema.kode4
+      schema: schema.kode4,
+      multi: true
     }
   ]),
   search: searchParameterSpec,
@@ -169,20 +187,24 @@ exports.vejnavn = {
 exports.vejstykke = {
   propertyFilter: propertyFilterParameterGroup([
     {
-      name: 'kode'
+      name: 'kode',
+      multi: true
     },
     {
       name: 'kommunekode',
       type: 'integer',
-      schema: schema.kode4
+      schema: schema.kode4,
+      multi: true
     },
     {
-      name: 'navn'
+      name: 'navn',
+      multi: true
     },
     {
       name: 'postnr',
       type: 'integer',
-      schema: schema.postnr
+      schema: schema.postnr,
+      multi: true
     }
   ]),
   search: searchParameterSpec,
@@ -193,13 +215,16 @@ exports.postnummer = {
   propertyFilter: propertyFilterParameterGroup(
     [
       {
-        name: 'nr'
+        name: 'nr',
+        multi: true
       },
       {
-        name: 'navn'
+        name: 'navn',
+        multi: true
       },
       {
-        name: 'kommune'
+        name: 'kommune',
+        multi: true
       }
     ]),
   search: searchParameterSpec,
@@ -210,11 +235,13 @@ dagiTemaer.forEach(function(tema) {
   exports[tema.singular] = {
     propertyFilter: propertyFilterParameterGroup([
       {
-        name: 'navn'
+        name: 'navn',
+        multi: true
       },
       {
         name: 'kode',
-        type: 'integer'
+        type: 'integer',
+        multi: true
       }
     ]),
     search: searchParameterSpec,
