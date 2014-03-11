@@ -42,6 +42,7 @@ describe('Parameter documentation.', function() {
         checkPG(pg.propertyfilter, 'search',  searchDocParems(docSpec, spec));
         checkPG(pg.geomWithin,     'search',  searchDocParems(docSpec, spec));
         checkPG(pg.search,         'search',  searchDocParems(docSpec, spec));
+        checkPG(pg.dagiFilter,     'search',  searchDocParems(docSpec, spec));
 
         checkPG(pg.crs,            'autocomplete',  autocompleteDocParems(docSpec, spec));
         checkPG(pg.propertyfilter, 'autocomplete',  autocompleteDocParems(docSpec, spec));

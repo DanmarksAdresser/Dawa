@@ -14,6 +14,7 @@ var autocompleteParameterSpec = common.autocompleteParameterSpec;
 var geomWithinParameterSpec = common.geomWithinParameterSpec;
 var reverseGeocodingParameterSpec = common.reverseGeocodingParameterSpec;
 var searchParameterSpec = common.searchParameterSpec;
+var dagiFilter = common.dagiFilter;
 
 /**
  * Applies a list of property filter parameters to a query by generating the
@@ -116,7 +117,8 @@ exports.adgangsadresse = {
   autocomplete: autocompleteParameterSpec,
   crs: crsParameterSpec,
   geomWithin: geomWithinParameterSpec,
-  reverseGeocoding: reverseGeocodingParameterSpec
+  reverseGeocoding: reverseGeocodingParameterSpec,
+  dagiFilter: dagiFilter
 };
 
 exports.adresse = {
@@ -137,7 +139,8 @@ exports.adresse = {
   search: searchParameterSpec,
   autocomplete: autocompleteParameterSpec,
   crs: crsParameterSpec,
-  geomWithin: geomWithinParameterSpec
+  geomWithin: geomWithinParameterSpec,
+  dagiFilter: dagiFilter
 };
 
 exports.supplerendebynavn = {

@@ -283,6 +283,26 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'cirkel',
     doc: 'Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}. '
+  },
+  {
+    name: 'regionkode',
+    doc: 'Find de adresser som ligger indenfor regionen angivet ved regionkoden'
+  },
+  {
+    name: 'sognkode',
+    doc: 'Find de adresser som ligger indenfor sognet angivet ved sognkoden'
+  },
+  {
+    name: 'opstillingskredskode',
+    doc: 'Find de adresser som ligger indenfor opstillingskredsen angivet ved opstillingskredskoden'
+  },
+  {
+    name: 'retskredskode',
+    doc: 'Find de adresser som ligger indenfor retskredsen angivet ved retskredskoden'
+  },
+  {
+    name: 'politikredskode',
+    doc: 'Find de adresser som ligger indenfor politikredsen angivet ved politikredskoden'
   }
 ];
 

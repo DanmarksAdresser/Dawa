@@ -247,7 +247,27 @@ function applyOrderByKey(spec, sqlParts) {
   });
 }
 
+var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
+var dagiFilterParams = _.map(filterableDagiSkemaer, function(skemaNavn) {
+  return {
+    name: skemaNavn + 'kode',
+    type: 'integer',
+    schema: schema.kode4
+  };
+});
 
+exports.dagiFilter = {
+  parameters: dagiFilterParams,
+  applySql: function(sqlParts, params, spec) {
+    filterableDagiSkemaer.forEach(function(skemaNavn) {
+      if(notNull(params[skemaNavn + 'kode'])) {
+        var kodeAlias = dbapi.addSqlParameter(sqlParts, params[skemaNavn + 'kode']);
+        var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
+        dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode = ' + kodeAlias + ' AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');
+      }
+    });
+  }
+}
 
 exports.formatParameterSpec = {
   parameters: [
