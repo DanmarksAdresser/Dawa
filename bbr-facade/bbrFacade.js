@@ -92,7 +92,7 @@ app.post('/haendelse', function (req, res) {
           }
           else
           {
-            validateSequenceNumber(haendelse, latest, function(error, seqNr){
+            validateSequenceNumber(haendelse, latest, function(error, exists, seqNr){
               if (error)
               {
                 winston.info(error);
@@ -100,18 +100,25 @@ app.post('/haendelse', function (req, res) {
               }
               else
               {
-                putItem(seqNr,  haendelse,
-                        function(error, data){
-                          if (error)
-                          {
-                            winston.error('DynamoDB put ERROR: %j %j', error, data, {});
-                            res.send(500, error);
-                          }
-                          else
-                          {
-                            res.send('Hændelse modtaget med sekvensnummer='+seqNr);
-                          }
-                        });
+                if (exists)
+                {
+                  res.send('Hændelse modtaget med sekvensnummer='+seqNr);
+                }
+                else
+                {
+                  putItem(seqNr,  haendelse,
+                          function(error, data){
+                            if (error)
+                            {
+                              winston.error('DynamoDB put ERROR: %j %j', error, data, {});
+                              res.send(500, error);
+                            }
+                            else
+                            {
+                              res.send('Hændelse modtaget med sekvensnummer='+seqNr);
+                            }
+                          });
+                }
               }
             });
           }
@@ -129,7 +136,7 @@ function validateSequenceNumber(haendelse, latest, cb){
     var lastJson = JSON.parse(latest.Items[0].data.S);
     if (_.isEqual(haendelse, lastJson))
     {
-      cb(null, newSeqNr);
+      cb(null, true, newSeqNr);
     }
     else
     {
@@ -147,7 +154,7 @@ function validateSequenceNumber(haendelse, latest, cb){
   {
     if (len === 0 || newSeqNr === (lastSeqNr+1))
     {
-      cb(null, newSeqNr);
+      cb(null, false, newSeqNr);
     }
     else
     {
@@ -167,7 +174,9 @@ function putItem(seqNr, data, cb) {
               seqnr: {'N': ''+seqNr },
               data:  {'S': JSON.stringify(data)}};
   winston.info('Putting item: %j', item, {});
-  dd.putItem({TableName: TABLENAME, Item: item},
+  dd.putItem({TableName: TABLENAME,
+              Expected: {seqnr: {Exists: false}},
+              Item: item},
              function(error, latest){
                if (error)
                {
