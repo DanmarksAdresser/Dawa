@@ -268,11 +268,12 @@ var dagiFilterParams = _.map(filterableDagiSkemaer, function(skemaNavn) {
   };
 });
 
+var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
 exports.dagiFilter = {
   parameters: dagiFilterParams,
   applySql: function(sqlParts, params, spec) {
     filterableDagiSkemaer.forEach(function(skemaNavn) {
-      var paramArray = params[skemaNavn + 'kode'];
+      var paramArray = params[dagiTemaMap[skemaNavn].prefix + 'kode'];
       if(notNull(paramArray)) {
         var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
         var kodeAliases = _.map(paramArray, function(param) {

@@ -113,7 +113,7 @@ exports.vejnavn = {
     },
     postnr: {
       select: null,
-      where: 'vp1.postnr'
+      where: 'vp2.postnr'
     },
     kommunekode: {
       select: null,

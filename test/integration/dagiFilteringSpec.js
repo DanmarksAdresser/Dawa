@@ -29,7 +29,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
         if (err) throw err;
         dagi.addDagiTema(client, sampleTema, function (err) {
           if(err) throw err;
-          var params = { regionkode: [10] };
+          var params = { regionskode: [10] };
           var sqlParts = apiSpecUtil.createSqlParts(apiSpec[resourceTypeName], { dagiFilter: parameters[resourceTypeName].dagiFilter }, params, ['id']);
           dbapi.query(client, sqlParts, function(err, result) {
             if(err) throw err;
