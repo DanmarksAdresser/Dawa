@@ -1,6 +1,5 @@
 "use strict";
 
-//TODO https -- needs certificate
 //var https        = require('https');
 var express        = require('express');
 var winston        = require('winston');
@@ -223,7 +222,6 @@ function getLatest(cb) {
 app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
 
 app.listen(listenPort);
-//TODO HTTPS,  need certificate!
 //https.createServer(app).listen(listenPort);
 
 winston.info("Express server listening on port %d in %s mode", listenPort, app.settings.env);
