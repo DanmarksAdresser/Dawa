@@ -23,6 +23,19 @@ var autocompleteRepresentations = require('./apiSpecification/autocompleteRepres
 
 var notNull = require('./apiSpecification/util').notNull;
 
+var dayInSeconds = 24 * 60 * 60;
+var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
+
+function cachingMiddleware(req, res, next) {
+  if(req.query.cache === 'no-cache') {
+    res.setHeader('Cache-Control', 'no-cache');
+  }
+  else {
+    res.setHeader('Cache-Control',  's-maxage=' + cacheMaxAge);
+  }
+  next();
+}
+
 function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
@@ -43,6 +56,7 @@ exports.setupRoutes = function () {
   app.use(express.methodOverride());
   app.use(express.bodyParser());
   app.use(corsMiddleware);
+  app.use(cachingMiddleware);
 
   apiSpec.allSpecNames.forEach(function(specName) {
     var spec = apiSpec[specName];
