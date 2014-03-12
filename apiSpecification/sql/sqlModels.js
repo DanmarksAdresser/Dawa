@@ -58,7 +58,7 @@ exports.supplerendebynavn = {
         " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND s.kommunekode = k.kode" +
         ' LEFT JOIN postnumre p ON s.postnr = p.nr'],
       whereClauses: [],
-      groupBy: 's.supplerendebynavn',
+      groupBy: 's.supplerendebynavn, s.tsv',
       orderClauses: [],
       sqlParams: []
     };

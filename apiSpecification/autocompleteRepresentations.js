@@ -88,10 +88,10 @@ exports.supplerendebynavn = {
   }),
   mapper: function(row, options) {
     return {
-      tekst: row.supplerendebynavn,
+      tekst: row.navn,
       supplerendebynavn: {
-        href:  makeHref(options.baseUrl, 'supplerendebynavn', [row.supplerendebynavn]),
-        navn: row.supplerendebynavn
+        href:  makeHref(options.baseUrl, 'supplerendebynavn', [row.navn]),
+        navn: row.navn
       }
     };
   }
