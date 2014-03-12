@@ -37,8 +37,8 @@ exports.adgangsadresse = {
     return {
       tekst: adresseText(row),
       adgangsadresse: {
-        id: row.a_id,
-        href: makeHref(options.baseUrl, 'adgangsadresse', [row.a_id])
+        id: row.id,
+        href: makeHref(options.baseUrl, 'adgangsadresse', [row.id])
       }
     };
   }
@@ -138,12 +138,12 @@ exports.vejstykke = {
   }),
   mapper: function (row, options) {
     return {
-      tekst: row.vejnavn,
+      tekst: row.navn,
       vejstykke: {
         href: makeHref(options.baseUrl, 'vejstykke', [row.kommunekode, row.kode]),
         kommunekode: kode4String(row.kommunekode),
         kode: kode4String(row.kode),
-        navn: row.vejnavn
+        navn: row.navn
       }
     };
   }

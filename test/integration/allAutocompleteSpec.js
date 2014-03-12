@@ -1,6 +1,8 @@
 "use strict";
 
 var apiSpec = require('../../apiSpec');
+var apiSpecUtil = require('../../apiSpecUtil');
+var autocompleteRepresentations = require('../../apiSpecification/autocompleteRepresentations');
 var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
@@ -17,10 +19,10 @@ var sampleParameters = {
 };
 
 describe('Alle suggestable specs skal kunne autocomplete', function() {
-  var allSpecs = _.map(apiSpec.allSpecNames, function(specName) {
+  var allSpecs = _.map(_.keys(sampleParameters), function(specName) {
     return apiSpec[specName];
   });
-  var autocompleteSpecs = _.where(allSpecs, {suggestable: true});
+  var autocompleteSpecs = allSpecs;
   autocompleteSpecs.forEach(function(spec) {
     describe('Autocomplete på ' + spec.model.plural + ' skal virke', function(){
       sampleParameters[spec.model.name].forEach(function(sampleQueryParam) {
@@ -29,9 +31,13 @@ describe('Alle suggestable specs skal kunne autocomplete', function() {
           rawQueryParams.q = sampleQueryParam;
           var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(apiSpec.autocompleteParameterSpec));
           expect(parseResult.errors.length).toBe(0);
+          var sqlParts = apiSpecUtil.createSqlParts(spec,
+            {autocomplete: spec.parameterGroups.autocomplete},
+            parseResult.params,
+            autocompleteRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
           dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
             if(err) throw 'unable to open connection';
-            dbapi.query(client, spec, { autocomplete: parseResult.params }, {limit: 20}, function(err, rows) {
+            dbapi.query(client, sqlParts, function(err, rows) {
               transactionDone();
               expect(err).toBeFalsy();
               expect(rows.length).toBeGreaterThan(0);
