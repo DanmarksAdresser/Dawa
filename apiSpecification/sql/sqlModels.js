@@ -101,7 +101,7 @@ exports.vejnavn = {
           ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'
       ],
       whereClauses: [],
-      groupBy: 'vejstykker.vejnavn',
+      groupBy: 'vejstykker.vejnavn, vejstykker.tsv',
       orderClauses: [],
       sqlParams: []
     };
