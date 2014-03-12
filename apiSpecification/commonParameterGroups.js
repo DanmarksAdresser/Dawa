@@ -7,6 +7,7 @@ var schema = require('./parameterSchema');
 var util = require('./util');
 var _ = require('underscore');
 var sqlModels = require('./sql/sqlModels');
+var dagiTemaer = require('./dagiTemaer');
 //var winston = require('winston');
 
 var notNull = util.notNull;
@@ -256,9 +257,11 @@ function applyOrderByKey(spec, sqlParts) {
 }
 
 var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
+
+var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
 var dagiFilterParams = _.map(filterableDagiSkemaer, function(skemaNavn) {
   return {
-    name: skemaNavn + 'kode',
+    name: dagiTemaMap[skemaNavn].prefix + 'kode',
     type: 'integer',
     schema: schema.kode4,
     multi: true

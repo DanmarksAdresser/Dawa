@@ -78,9 +78,10 @@ _.forEach(resourceTypesWithDefaultCsvMapping, function(resourceTypeName) {
   var defaultFields = _.difference(csvCandidateFields(resourceTypeName), excludedFields[resourceTypeName]);
   var fieldList = defaultFields.concat(['dagitemaer']);
   var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds','opstillingskreds'];
+  var dagiTemaMap = _.indexBy(dagiTemaer,'singular');
   var csvFields = _.reduce(includedDagiTemaer, function(memo, temaNavn) {
-    memo.push(temaNavn + '_kode');
-    memo.push(temaNavn + '_navn');
+    memo.push(dagiTemaMap[temaNavn].prefix + 'kode');
+    memo.push(dagiTemaMap[temaNavn].prefix + 'navn');
     return memo;
   }, _.clone(defaultFields));
   var defaultMapper = defaultCsvMapper(defaultFields, fields[resourceTypeName]);
@@ -92,8 +93,8 @@ _.forEach(resourceTypesWithDefaultCsvMapping, function(resourceTypeName) {
       includedDagiTemaer.forEach(function(temaNavn) {
         var tema = _.findWhere(obj.dagitemaer, { tema: temaNavn});
         if(tema) {
-          result[temaNavn + '_kode'] = tema.kode;
-          result[temaNavn + '_navn'] = tema.navn;
+          result[dagiTemaMap[temaNavn].prefix + 'kode'] = tema.kode;
+          result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.navn;
         }
       });
       return result;

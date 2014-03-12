@@ -290,11 +290,11 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     doc: 'Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}. '
   },
   {
-    name: 'regionkode',
+    name: 'regionskode',
     doc: 'Find de adresser som ligger indenfor regionen angivet ved regionkoden'
   },
   {
-    name: 'sognkode',
+    name: 'sognekode',
     doc: 'Find de adresser som ligger indenfor sognet angivet ved sognkoden'
   },
   {
