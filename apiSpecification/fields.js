@@ -132,9 +132,6 @@ exports.adresse = [
     name: 'postnrnavn'
   },
   {
-    name: 'bygningsnavn'
-  },
-  {
     name: 'kommunekode',
     formatter: kode4String
   },
