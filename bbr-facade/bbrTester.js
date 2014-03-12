@@ -48,19 +48,22 @@ var TD = {}; // TestData. This is modified later in the file
 
 function testSpec(){
   // s=sekvensnummer, h=haendelse, c=http-status-code
-  return [{S: 1, H: TD.adgangsadresse,    C: 200},
-          {S: 2, H: TD.enhedsadresse,     C: 200},
-          {S: 3, H: TD.vejnavn,           C: 200},
-          {S: 4, H: TD.supplerendebynavn, C: 200},
-          {S: 5, H: TD.postnummer,        C: 200},
-          {S: 5, H: TD.postnummer,        C: 200},
-          {S: 5, H: TD.postnummer,        C: 200},
-          {S: 5, H: TD.vejnavn,           C: 400},
-          {S: 6, H: TD.vejnavn,           C: 200},
-          {S: 8, H: TD.vejnavn,           C: 400},
-          {S: 7, H: TD.vejnavn,           C: 200},
-          {S: 8, H: TD.vejnavn,           C: 200},
-          {S: 9, H: TD.vejnavn,           C: 200},
+  return [{S: 1,  H: TD.adgangsadresse,            C: 200},
+          {S: 2,  H: TD.enhedsadresse,             C: 200},
+          {S: 3,  H: TD.vejnavn,                   C: 200},
+          {S: 4,  H: TD.supplerendebynavn,         C: 200},
+          {S: 5,  H: TD.postnummer,                C: 200},
+          {S: 5,  H: TD.postnummer,                C: 200},
+          {S: 5,  H: TD.postnummer,                C: 200},
+          {S: 5,  H: TD.vejnavn,                   C: 400},
+          {S: 6,  H: TD.vejnavn,                   C: 200},
+          {S: 8,  H: TD.vejnavn,                   C: 400},
+          {S: 7,  H: TD.vejnavn,                   C: 200},
+          {S: 8,  H: TD.vejnavnNull,               C: 200},
+          {S: 9,  H: TD.enhedsadresseFail,         C: 400},
+          {S: 9,  H: TD.supplerendebynavnFail,     C: 400},
+          {S: 9,  H: TD.supplerendebynavnFail2,    C: 400},
+          {S: 9,  H: TD.vejnavn,                   C: 200},
          ];
 }
 
@@ -70,10 +73,10 @@ function test(cb){
     function(spec, cb){
       postTestSpec(spec, function(err, message){
         if (err) {
-          winston.error('Error %j', err,{});
+          winston.error('******* Error err=%j in spec=%j message=%j', err, spec, message, {});
           cb('Test error in spec: '+util.format('%j', spec));
         } else {
-          winston.info('%s: serial=%s statusCode=%j(%j) error=%j',
+          winston.info('******* %s: serial=%s statusCode=%j(%j) error=%j',
                        spec.H.type, spec.S, spec.C, message, err, {});
           cb();
         }
@@ -208,6 +211,21 @@ TD.adgangsadresse = {
 };
 
 
+TD.enhedsadresseFail = {
+  "type": "enhedsadresse",
+  "sekvensnummer": 1004,
+  "lokaltsekvensnummer": 102,
+  "aendringstype": "aendring",
+  "tidspunkt": "2000-02-05T12:00:00+00:00",
+  "data": {
+    "id": "0a3f50c1-d506-32b8-e044-0003ba298018",
+    "etage": "1",
+    "doer": null,
+    "objekttype": 1,
+    "oprettet":"1999-02-05T12:00:00+00:00",
+    "aendret":"2000-02-05T12:00:00+00:00"
+  }
+};
 TD.enhedsadresse = {
   "type": "enhedsadresse",
   "sekvensnummer": 1004,
@@ -259,6 +277,20 @@ TD.vejnavn = {
   }
 };
 
+TD.vejnavnNull = {
+  "type": "vejnavn",
+  "sekvensnummer": 1005,
+  "lokaltsekvensnummer": 205,
+  "aendringstype": "aendring",
+  "tidspunkt": "2000-02-05T12:00:00+00:00",
+  "data": {
+    "kommunekode": 101,
+    "vejkode": 1010,
+    "navn": "Niels Bohrs Alle",
+    "adresseringsnavn": null
+  }
+};
+
 TD.supplerendebynavn = {
   "type": "supplerendebynavn",
   "sekvensnummer": 1005,
@@ -266,6 +298,45 @@ TD.supplerendebynavn = {
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "kommunekode": 101,
+    "vejkode": 1010,
+    "intervaller": [{"husnrFra": "11",
+                     "husnrTil": "213",
+                     "side": "ulige",
+                     "nummer": 5000},
+                    {"husnrFra": "10",
+                     "husnrTil": "220",
+                     "side": "lige",
+                     "nummer": 4000}
+                   ]
+  }
+};
+
+TD.supplerendebynavnFail = {
+  "type": "supplerendebynavn",
+  "sekvensnummer": 1005,
+  "lokaltsekvensnummer": 205,
+  "tidspunkt": "2000-02-05T12:00:00+00:00",
+  "data": {
+    "kommunekode": null,
+    "vejkode": 1010,
+    "intervaller": [{"husnrFra": "11",
+                     "husnrTil": "213",
+                     "side": "ulige",
+                     "nummer": 5000},
+                    {"husnrFra": "10",
+                     "husnrTil": "220",
+                     "side": "lige",
+                     "nummer": 4000}
+                   ]
+  }
+};
+
+TD.supplerendebynavnFail2 = {
+  "type": "supplerendebynavn",
+  "sekvensnummer": 1005,
+  "lokaltsekvensnummer": 205,
+  "data": {
+    "kommunekode": null,
     "vejkode": 1010,
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",

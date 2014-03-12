@@ -1,5 +1,6 @@
 "use strict";
 
+//TODO https -- needs certificate
 //var https        = require('https');
 var express        = require('express');
 var winston        = require('winston');
@@ -278,15 +279,14 @@ function validateSchema(json, cb){
 /********************************************************************************
 ***** Haendelse schemas *********************************************************
 ********************************************************************************/
-// TODO: which fields are nullable?
 
 var vejnavnsHaendelseSchema = requireAllProperties({
   title : 'Hædelsesskema for vejnavne',
   type  : 'object',
   additionalProperties: false,
-  properties : haendelsesHeader('vejnavn', {
-    kommunekode      : integer(),
-    vejkode          : integer(),
+  properties : header('vejnavn', {
+    kommunekode      : notNull(integer()),
+    vejkode          : notNull(integer()),
     navn             : string(),
     adresseringsnavn : string()
   })
@@ -296,11 +296,11 @@ var adgangsadresseHaendelseSchema = requireAllProperties({
   title : 'Hændelseskema for adgangsadresser',
   type  : 'object',
   additionalProperties: false,
-  properties : haendelsesHeader('adgangsadresse', {
-    id: uuid(),
-    vejkode           : integer(),
-    husnummer         : string(),
-    kommunekode       : integer(),
+  properties : header('adgangsadresse', {
+    id                : uuid(),
+    vejkode           : notNull(integer()),
+    husnummer         : notNull(string()),
+    kommunekode       : notNull(integer()),
     landsejerlav_kode : integer(),
     landsejerlav_navn : string(),
     matrikelnr        : string(),
@@ -328,16 +328,15 @@ var adgangsadresseHaendelseSchema = requireAllProperties({
   })
 });
 
-
 var enhedsadresseHaendelseSchema = requireAllProperties({
   title : 'Hændelseskema for enhedsadresser',
   type  : 'object',
   additionalProperties: false,
-  properties : haendelsesHeader('enhedsadresse', {
+  properties : header('enhedsadresse', {
     id               : uuid(),
     adgangsadresseid : uuid(),
-    etage            : simpleType(['string', 'null']),
-    doer             : simpleType(['string', 'null']),
+    etage            : string(),
+    doer             : string(),
     objekttype       : integer(),
     oprettet         : time(),
     aendret          : time(),
@@ -348,10 +347,10 @@ var postnummerHaendelseSchema = requireAllProperties({
   title : 'Hændelseskema for postnumre',
   type  : 'object',
   additionalProperties: false,
-  properties : haendelsesHeaderNoAendringstype('postnummer', {
-    kommunekode : integer(),
-    vejkode     : integer(),
-    intervaller : vejstykkeIntervaller()
+  properties : headerNoAendringstype('postnummer', {
+    kommunekode : notNull(integer()),
+    vejkode     : notNull(integer()),
+    intervaller : notNull(vejstykkeIntervaller())
   })
 });
 
@@ -359,10 +358,10 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
   title : 'Hændelseskema for supplerende bynavne',
   type  : 'object',
   additionalProperties: false,
-  properties : haendelsesHeaderNoAendringstype('supplerendebynavn', {
-    kommunekode: integer(),
-    vejkode: integer(),
-    intervaller : vejstykkeIntervaller()
+  properties : headerNoAendringstype('supplerendebynavn', {
+    kommunekode : notNull(integer()),
+    vejkode     : notNull(integer()),
+    intervaller : notNull(vejstykkeIntervaller())
   })
 });
 
@@ -371,14 +370,14 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
 ***** Schema helper functions ***************************************************
 ********************************************************************************/
 
-function haendelsesHeader(type, data){
-  var header = haendelsesHeaderNoAendringstype(type, data);
-  header.aendringstype = enumeration(['aendring','oprettet','nedlagt']);
-  return header;
+function header(type, data){
+  var headerData = headerNoAendringstype(type, data);
+  headerData.aendringstype = notNull(enumeration(['aendring','oprettet','nedlagt']));
+  return headerData;
 }
 
-function haendelsesHeaderNoAendringstype(type, data){
-  return {type                : enumeration([type]),
+function headerNoAendringstype(type, data){
+  return {type                : notNull(enumeration([type])),
           sekvensnummer       : integer(),
           lokaltsekvensnummer : integer(),
           tidspunkt           : time(),
@@ -404,13 +403,23 @@ function vejstykkeIntervaller(){
                   nummer   : integer()}}));
 }
 
+function notNull(type){
+  if (_.isArray(type.type)){
+    type.type = _.filter(type.type, function(val) { return val !== 'null'; });
+  }
+  if (_.isArray(type.enum)){
+    type.enum = _.filter(type.enum, function(val) { return val !== 'null'; });
+  }
+  return type;
+}
+
 function integer()      {return simpleType('integer');}
 function number()       {return simpleType('number');}
 function string()       {return simpleType('string');}
 function time()         {return string();}
-function simpleType(t)  {return {type: t};}
-function array(t)       {return {type: 'array', minItems:1, items: t};}
-function enumeration(l) {return {'enum': l};}
+function simpleType(t)  {return {type: ['null', t]};}
+function array(t)       {return {type: ['null', 'array'], minItems:1, items: t};}
+function enumeration(l) {return {enum: ['null'].concat(l)};}
 function uuid() {
   return {type: 'string',
           pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'};
