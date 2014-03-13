@@ -74,14 +74,14 @@ exports.autocompleteResourceSpec = function(nameAndKey, parameters, autocomplete
   };
 };
 
-exports.getByKeyResourceSpec = function(nameAndKey, idParameters, representations, sqlModel) {
+exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameters, representations, sqlModel) {
   var path = _.reduce(nameAndKey.key, function(memo, key) {
     return memo + '/:' + key;
   }, '/' + nameAndKey.plural);
   return {
     path: path,
     pathParameters: idParameters,
-    queryParameters: commonParameters.format,
+    queryParameters: flattenParameters(_.extend({}, {format: commonParameters.format}, queryParameters)),
     representations: representations,
     sqlModel: sqlModel,
     singleResult: true,
@@ -95,4 +95,20 @@ exports.getByKeyResourceSpec = function(nameAndKey, idParameters, representation
       });
     }
   };
+};
+
+exports.defaultResources = function(nameAndKey, idParameters, propertyFilterParameters, representations, sqlModel) {
+  return [
+    // query
+    exports.queryResourceSpec(nameAndKey, {
+        propertyFilter: propertyFilterParameters,
+        search: commonParameters.search
+      }, representations,
+      sqlModel),
+    exports.autocompleteResourceSpec(nameAndKey, {
+      propertyFilter: propertyFilterParameters,
+      autocomplete: commonParameters.autocomplete
+    }, representations.autocomplete, sqlModel),
+    exports.getByKeyResourceSpec(nameAndKey, idParameters, {}, representations, sqlModel)
+  ];
 };

@@ -117,7 +117,7 @@ exports.createExpressHandler = function(resourceSpec) {
     var sqlParts = spec.sqlModel.createQuery(_.pluck(representation.fields, 'name'), params);
 
     // create a mapper function that maps results from the SQL layer to the requested representation
-    var mapObject = representation.mapper(baseUrl(req), params);
+    var mapObject = representation.mapper(baseUrl(req), params, spec.singleResult);
     withReadonlyTransaction(res, function(client, done) {
       if(spec.singleResult) {
         // create a function that can write the object to the HTTP response based on the format requrested by the

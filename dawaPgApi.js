@@ -24,6 +24,7 @@ var autocompleteRepresentations = require('./apiSpecification/autocompleteRepres
 var vejnavnResources = require('./apiSpecification/vejnavn/resources');
 var vejstykkeResources = require('./apiSpecification/vejstykke/resources');
 var supplerendebynavnResources = require('./apiSpecification/supplerendebynavn/resources');
+var postnummerResources = require('./apiSpecification/postnummer/resources');
 
 var notNull = require('./apiSpecification/util').notNull;
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
@@ -75,7 +76,7 @@ exports.setupRoutes = function () {
     publishQuery(app, spec);
   });
 
-  vejnavnResources.concat(vejstykkeResources).concat(supplerendebynavnResources).forEach(function(resourceSpec) {
+  vejnavnResources.concat(vejstykkeResources).concat(supplerendebynavnResources).concat(postnummerResources).forEach(function(resourceSpec) {
     app.get('/ng' + resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
   });
 

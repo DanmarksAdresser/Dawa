@@ -45,3 +45,10 @@ exports.autocomplete = [
     renameTo: 'autocomplete'
   }
 ];
+
+exports.crs = [
+  {
+    name: 'srid',
+    type: 'integer'
+  }
+];
