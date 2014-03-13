@@ -22,6 +22,7 @@ var jsonRepresentations = require('./apiSpecification/jsonRepresentations');
 var autocompleteRepresentations = require('./apiSpecification/autocompleteRepresentations');
 
 var vejnavnResources = require('./apiSpecification/vejnavn/resources');
+var vejstykkeResources = require('./apiSpecification/vejstykke/resources');
 
 var notNull = require('./apiSpecification/util').notNull;
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
@@ -73,7 +74,7 @@ exports.setupRoutes = function () {
     publishQuery(app, spec);
   });
 
-  vejnavnResources.forEach(function(resourceSpec) {
+  vejnavnResources.concat(vejstykkeResources).forEach(function(resourceSpec) {
     app.get('/ng' + resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
   });
 

@@ -9,3 +9,10 @@ exports.normalizeParameter = function(param) {
   }
   return param;
 };
+
+exports.normalizeParameters = function(params) {
+  params.forEach(function(param) {
+    exports.normalizeParameter(param);
+  });
+  return params;
+};

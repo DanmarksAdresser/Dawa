@@ -1,16 +1,14 @@
 var schema = require('../parameterSchema');
 
-var normalizeParameter = require('../common/parametersUtil').normalizeParameter;
-
-var _ = require('underscore');
+var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 
 module.exports = {
-  id: _.map([
+  id: normalizeParameters([
     {
       name: 'navn'
     }
-  ], normalizeParameter),
-  propertyFilter: _.map([
+  ]),
+  propertyFilter: normalizeParameters([
     {
       name: 'navn',
       multi: true
@@ -27,5 +25,5 @@ module.exports = {
       schema: schema.kode4,
       multi: true
     }
-  ], normalizeParameter)
+  ])
 };
