@@ -21,7 +21,10 @@ var geojsonRepresentations = require('./apiSpecification/geojsonRepresentations'
 var jsonRepresentations = require('./apiSpecification/jsonRepresentations');
 var autocompleteRepresentations = require('./apiSpecification/autocompleteRepresentations');
 
+var vejnavnResources = require('./apiSpecification/vejnavn/resources');
+
 var notNull = require('./apiSpecification/util').notNull;
+var resourceImpl = require('./apiSpecification/common/resourceImpl');
 
 var dayInSeconds = 24 * 60 * 60;
 var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
@@ -69,6 +72,11 @@ exports.setupRoutes = function () {
     publishGetByKey(app, spec);
     publishQuery(app, spec);
   });
+
+  vejnavnResources.forEach(function(resourceSpec) {
+    app.get('/ng' + resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
+  });
+
   return app;
 };
 
@@ -292,7 +300,7 @@ function setAppropriateContentHeader(res, format, callback) {
   res.setHeader('Content-Type', contentHeader(format, callback));
 }
 /**
- * Sends a stream DB query rows to the http response in the appropriate format
+ * Sends a zstream DB query rows to the http response in the appropriate format
  * @param stream a stream of database rows
  * @param res http response
  * @param spec the api spec

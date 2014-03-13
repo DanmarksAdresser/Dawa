@@ -8,15 +8,16 @@ var _           = require('underscore');
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
 
-exports.parseParameters = function(params, parameterSpec, resourceSpec) {
+exports.parseParameters = function(params, parameterSpec) {
   var paramNames = _.filter(_.keys(params), function(name) {
     return parameterSpec[name] ? true : false;
   });
   return _.reduce(paramNames,
     function(memo, name){
       try{
-        var val = parseParameterMulti(params[name], parameterSpec[name], resourceSpec);
-        memo.params[name] = val;
+        var val = parseParameterMulti(params[name], parameterSpec[name]);
+        var parsedName = parameterSpec[name].renameTo || name;
+        memo.params[parsedName] = val;
       } catch(error){
         memo.errors.push([name, error]);
       }
@@ -25,21 +26,20 @@ exports.parseParameters = function(params, parameterSpec, resourceSpec) {
     {params: {}, errors: []});
 };
 
-function parseParameterMulti(valString, paramSpec, resourceSpec) {
+function parseParameterMulti(valString, paramSpec) {
   if (paramSpec.multi === true)
   {
-    return _.map(valString.split('|'), function(str){ return parseParameter(str, paramSpec, resourceSpec); });
+    return _.map(valString.split('|'), function(str){ return parseParameter(str, paramSpec); });
   }
   else
   {
-    return parseParameter(valString, paramSpec, resourceSpec);
+    return parseParameter(valString, paramSpec);
   }
 }
 
-function parseParameter(valString, paramSpec, resourceSpec) {
+function parseParameter(valString, paramSpec) {
   var val = parseParameterType(valString, paramSpec.type);
   jsonSchemaValidation(val, paramSpec.schema);
-  if (paramSpec.validateFun) { paramSpec.validateFun(val, resourceSpec); }
   return val;
 }
 
