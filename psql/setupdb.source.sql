@@ -116,7 +116,8 @@ CREATE TABLE IF NOT EXISTS postnumre (
   nr integer NOT NULL PRIMARY KEY,
   version VARCHAR(255) NOT NULL,
   navn VARCHAR(20) NOT NULL,
-  tsv tsvector
+  tsv tsvector,
+  stormodtager boolean NOT NULL DEFAULT false
 );
 
 CREATE INDEX ON postnumre USING gin(tsv);
@@ -125,6 +126,15 @@ CREATE INDEX ON postnumre(navn);
 \echo '\n***** Loading postnumre data'
 \COPY postnumre (nr, version, navn) from program 'gunzip -c :DATADIR:/PostCode.csv.gz' WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 UPDATE postnumre SET tsv = to_tsvector('danish', coalesce(to_char(nr,'0000'), '') || ' ' || coalesce(navn, ''));
+
+DROP TABLE IF EXISTS stormodtagere;
+CREATE TABLE IF NOT EXISTS stormodtagere (
+  nr integer NOT NULL PRIMARY KEY,
+  version VARCHAR(255) NOT NULL,
+  navn VARCHAR(20) NOT NULL,
+  adgangsadresseid UUID NOT NULL
+);
+
 
 \echo ''
 \echo ''
