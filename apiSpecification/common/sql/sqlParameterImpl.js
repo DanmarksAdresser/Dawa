@@ -8,6 +8,8 @@ var util = require('../../util');
 
 var notNull = util.notNull;
 
+var dagiTemaer = require('../../dagitemaer/dagiTemaer');
+
 function toPgSearchQuery(q) {
   // remove all special chars
   q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
@@ -159,5 +161,67 @@ exports.paging = function(columnSpec, key) {
     if(params.per_side) {
       applyOrderByKey(sqlParts, key );
     }
+  };
+};
+
+function polygonTransformer(paramValue){
+  var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
+  var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
+  var mapPolygon = function(poly) { return "POLYGON("+_.map(poly, mapPoints).join(" ")+")"; };
+  return mapPolygon(paramValue);
+}
+
+exports.geomWithin = function() {
+  return function(sqlParts, params) {
+    var srid = params.srid || 4326;
+    var sridAlias;
+    if(params.polygon || params.cirkel) {
+      sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+    }
+    if(params.polygon) {
+      var polygonAlias = dbapi.addSqlParameter(sqlParts, polygonTransformer(params.polygon));
+      dbapi.addWhereClause(sqlParts, "ST_Contains(ST_Transform(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), 25832), geom)");
+    }
+    if(params.cirkel) {
+      var args = params.cirkel.split(',');
+      var x = parseFloat(args[0]);
+      var y = parseFloat(args[1]);
+      var r = parseFloat(args[2]);
+      var point = "POINT(" + x + " " + y + ")";
+      var pointAlias = dbapi.addSqlParameter(sqlParts, point);
+      var radiusAlias = dbapi.addSqlParameter(sqlParts, r);
+      dbapi.addWhereClause(sqlParts, "ST_DWithin(geom, ST_Transform(ST_GeomFromText(" + pointAlias + ","+sridAlias + "), 25832), " + radiusAlias + ")");
+    }
+  };
+};
+
+exports.reverseGeocoding = function() {
+  return function(sqlParts, params) {
+    if (!params.srid){ params.srid = 4326;}
+    var orderby =
+      "geom <-> ST_Transform(ST_SetSRID(ST_Point(" +
+        dbapi.addSqlParameter(sqlParts, params.x)+", " +
+        dbapi.addSqlParameter(sqlParts, params.y)+"), " +
+        dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)::geometry";
+    sqlParts.orderClauses.push(orderby);
+    sqlParts.limit = "1";
+  };
+};
+
+var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
+var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
+
+exports.dagiFilter = function() {
+  return function(sqlParts, params) {
+    filterableDagiSkemaer.forEach(function(skemaNavn) {
+      var paramArray = params[dagiTemaMap[skemaNavn].prefix + 'kode'];
+      if(notNull(paramArray)) {
+        var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
+        var kodeAliases = _.map(paramArray, function(param) {
+          return dbapi.addSqlParameter(sqlParts, param);
+        });
+        dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode IN (' + kodeAliases.join(', ') + ') AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');
+      }
+    });
   };
 };

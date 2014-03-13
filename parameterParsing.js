@@ -40,6 +40,9 @@ function parseParameterMulti(valString, paramSpec) {
 function parseParameter(valString, paramSpec) {
   var val = parseParameterType(valString, paramSpec.type);
   jsonSchemaValidation(val, paramSpec.schema);
+  if (paramSpec.validateFun) {
+    paramSpec.validateFun(val);
+  }
   return val;
 }
 

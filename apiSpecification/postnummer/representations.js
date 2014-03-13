@@ -2,7 +2,7 @@
 
 var _ = require('underscore');
 
-var flatRepresentationUtil = require('../common/flatRepresentationUtil');
+var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
@@ -17,14 +17,15 @@ var nullableType = schemaUtil.nullableType;
 var kode4String = require('../util').kode4String;
 
 var fieldsExcludedFromCsv = ['geom_json'];
-var flatFields = _.filter(flatRepresentationUtil.flatCandidateFields(fields), function(field) {
+var flatFields = _.filter(representationUtil.flatCandidateFields(fields), function(field) {
   return !_.contains(fieldsExcludedFromCsv, field.name);
 });
 
 exports.flat = {
   fields: flatFields,
+  outputFields: _.pluck(flatFields, 'name'),
   mapper: function(baseUrl, params) {
-    return flatRepresentationUtil.defaultFlatMapper(flatFields);
+    return representationUtil.defaultFlatMapper(flatFields);
   }
 };
 
@@ -108,26 +109,4 @@ exports.autocomplete = {
   }
 };
 
-exports.geojson = {
-  fields: _.where(fields, { selectable: true }),
-  mapper: function(baseUrl, params, singleResult) {
-    var flatMapper = exports.flat.mapper(baseUrl, params, singleResult);
-    return function(row) {
-      var result = {};
-      result.type = 'Feature';
-      if (row.geom_json) {
-        result.geometry = JSON.parse(row.geom_json);
-      }
-      if (singleResult) {
-        result.crs = {
-          type: 'name',
-          properties: {
-            name: 'EPSG:' + (params.srid || 4326)
-          }
-        };
-      }
-      result.properties = flatMapper(row);
-      return result;
-    };
-  }
-};
+exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);

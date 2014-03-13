@@ -2,7 +2,7 @@
 
 var _ = require('underscore');
 
-var flatRepresentationUtil = require('../common/flatRepresentationUtil');
+var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
@@ -12,12 +12,13 @@ var makeHref = commonMappers.makeHref;
 var mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
 var mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 
-var flatFields = flatRepresentationUtil.flatCandidateFields(fields);
+var flatFields = representationUtil.flatCandidateFields(fields);
 
 exports.flat = {
   fields: flatFields,
+  outputFields: _.pluck(flatFields, 'name'),
   mapper: function(baseUrl, params) {
-    return flatRepresentationUtil.defaultFlatMapper(flatFields);
+    return representationUtil.defaultFlatMapper(flatFields);
   }
 };
 

@@ -122,7 +122,7 @@ exports.createExpressHandler = function(resourceSpec) {
       if(spec.singleResult) {
         // create a function that can write the object to the HTTP response based on the format requrested by the
         // client
-        var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, representation.fields);
+        var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, representation);
         dbapi.query(client, sqlParts, function(err, rows) {
           done(err);
           if (err) {
@@ -144,7 +144,7 @@ exports.createExpressHandler = function(resourceSpec) {
         var serializeStream = serializers.createStreamSerializer(formatParam,
           params.callback,
           params.srid,
-          representation.fields);
+          representation);
         dbapi.stream(client, sqlParts, function(err, stream) {
           if(err) {
             winston.error("Error executing cursor query: %j", err, {});

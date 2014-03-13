@@ -146,14 +146,13 @@ function streamCsvToHttpResponse(rowStream, res, csvFieldNames, cb) {
 }
 
 
-exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, fields) {
+exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, representation) {
   formatParam = formatParam || 'json';
   sridParam = sridParam || 4326;
   return function(stream, res, callback) {
     setAppropriateContentHeader(res, formatParam, callbackParam);
     if(formatParam === 'csv') {
-      var csvFieldNames = _.pluck(fields, 'name');
-      streamCsvToHttpResponse(stream, res, csvFieldNames, callback);
+      streamCsvToHttpResponse(stream, res, representation.outputFields, callback);
     } else {
       var textStream = transformToText(stream, formatParam, callbackParam, sridParam);
       streamToHttpResponse(textStream, res, {}, callback);
@@ -161,12 +160,11 @@ exports.createStreamSerializer = function(formatParam, callbackParam, sridParam,
   };
 };
 
-exports.createSingleObjectSerializer = function(formatParam, callbackParam, fields) {
+exports.createSingleObjectSerializer = function(formatParam, callbackParam, representation) {
   return function(res, object) {
     setAppropriateContentHeader(res, formatParam, callbackParam);
     if(formatParam === 'csv') {
-      var csvFieldNames = _.pluck(fields, 'name');
-      streamCsvToHttpResponse(eventStream.readArray([object]), res, csvFieldNames, function() {});
+      streamCsvToHttpResponse(eventStream.readArray([object]), res, representation.outputFields, function() {});
     } else {
       var textObject = jsonStringifyPretty(object);
       if(callbackParam) {

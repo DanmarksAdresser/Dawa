@@ -291,11 +291,6 @@ exports.formatParameterSpec = {
       name: 'format',
       schema: {
         "enum": ['csv', 'json', 'geojson']
-      },
-      validateFun: function(formatString, resourceSpec){
-        if (formatString === 'geojson' && !resourceSpec.mappers.geojson){
-          throw 'geojson format not supported for '+resourceSpec.model.name;
-        }
       }
     },
     {

@@ -45,6 +45,8 @@ function flattenParameters(parameterGroups) {
   }, []);
 }
 
+exports.flattenParameters = flattenParameters;
+
 
 exports.queryResourceSpec = function(nameAndKey, parameterGroups, representations, sqlModel) {
   var allParameters = _.extend({}, parameterGroups, {format: commonParameters.format, paging: commonParameters.paging });
