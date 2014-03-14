@@ -27,6 +27,7 @@ var supplerendebynavnResources = require('./apiSpecification/supplerendebynavn/r
 var postnummerResources = require('./apiSpecification/postnummer/resources');
 var adgangsadresseResources = require('./apiSpecification/adgangsadresse/resources');
 var adresseResources = require('./apiSpecification/adresse/resources');
+var dagitemaResources = require('./apiSpecification/dagitemaer/resources');
 
 var notNull = require('./apiSpecification/util').notNull;
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
@@ -80,6 +81,12 @@ exports.setupRoutes = function () {
 
   vejnavnResources.concat(vejstykkeResources).concat(supplerendebynavnResources).concat(postnummerResources).concat(adgangsadresseResources).concat(adresseResources).forEach(function(resourceSpec) {
     app.get('/ng' + resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
+  });
+
+  _.each(dagitemaResources, function(resources) {
+    resources.forEach(function(resourceSpec) {
+      app.get('/ng' + resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
+    });
   });
 
   return app;
