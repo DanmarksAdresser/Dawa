@@ -4,6 +4,8 @@ var schema = require('../parameterSchema');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 
+var registry = require('../registry');
+
 module.exports = {
   id: normalizeParameters([{
     name: 'navn'
@@ -25,3 +27,5 @@ module.exports = {
     }
   ])
 };
+
+registry.addMultiple('supplerendebynavn', 'parameterGroup', module.exports);

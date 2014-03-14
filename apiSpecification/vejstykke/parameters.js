@@ -1,8 +1,9 @@
 "use strict";
 
 var schema = require('../parameterSchema');
-
+var registry = require('../registry');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
+
 
 module.exports =  {
   id: normalizeParameters([
@@ -38,3 +39,4 @@ module.exports =  {
   }
 ])
 };
+registry.addMultiple('vejstykke', 'parameterGroup', module.exports);

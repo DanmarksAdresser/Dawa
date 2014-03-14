@@ -82,3 +82,6 @@ exports.json = {
     };
   }
 };
+
+var registry = require('../registry');
+registry.addMultiple('vejnavn', 'representation', module.exports);

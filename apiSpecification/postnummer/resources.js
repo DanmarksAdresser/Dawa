@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('underscore');
 var parameters = require('./parameters');
 var nameAndKey = require('./nameAndKey');
 var representations = require('./representations');
@@ -21,3 +22,9 @@ module.exports = [
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {crs : commonParameters.crs }, representations, sqlModel)
 ];
+
+var registry = require('../registry');
+var qualifiers = ['query', 'autocomplete', 'getByKey'];
+_.zip(qualifiers, module.exports).forEach(function(pair) {
+  registry.add('postnummer', 'resource', pair[0], pair[1]);
+});

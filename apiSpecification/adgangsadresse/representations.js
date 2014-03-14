@@ -377,3 +377,6 @@ exports.autocomplete = {
 };
 
 exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
+
+var registry = require('../registry');
+registry.addMultiple('adgangsadresse', 'representation', module.exports);

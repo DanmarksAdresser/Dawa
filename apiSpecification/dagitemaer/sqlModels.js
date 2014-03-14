@@ -6,6 +6,7 @@ var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 var dbapi = require('../../dbapi');
+var registry = require('../registry');
 
 // no column mappings necessary for dagi temaer.
 dagiTemaer.forEach(function(tema) {
@@ -36,4 +37,6 @@ dagiTemaer.forEach(function(tema) {
   ];
 
   exports[tema.singular] = assembleSqlModel(columns, parameterImpls, baseQuery);
+
+  registry.add(tema.singular, 'sqlModel', undefined, exports[tema.singular]);
 });

@@ -79,3 +79,6 @@ var parameterImpls = [
 ];
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+
+var registry = require('../registry');
+registry.add('adgangsadresse', 'sqlModel', undefined, module.exports);

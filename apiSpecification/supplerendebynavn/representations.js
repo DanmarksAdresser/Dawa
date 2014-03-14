@@ -81,4 +81,5 @@ exports.autocomplete = {
   }
 };
 
-
+var registry = require('../registry');
+registry.addMultiple('supplerendebynavn', 'representation', module.exports);

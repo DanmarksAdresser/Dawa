@@ -102,3 +102,6 @@ exports.autocomplete = {
 };
 
 exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
+
+var registry = require('../registry');
+registry.addMultiple('postnummer', 'representation', module.exports);

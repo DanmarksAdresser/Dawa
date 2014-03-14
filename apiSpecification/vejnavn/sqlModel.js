@@ -56,3 +56,6 @@ var baseQuery = function() {
 };
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+
+var registry = require('../registry');
+registry.add('vejnavn', 'sqlModel', undefined, module.exports);

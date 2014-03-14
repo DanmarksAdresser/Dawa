@@ -1,13 +1,11 @@
 "use strict";
 
-var apiSpec = require('../../apiSpec');
-var apiSpecUtil = require('../../apiSpecUtil');
 var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
-var jsonRepresentations = require('../../apiSpecification/jsonRepresentations');
-
 var kode4String = require('../../apiSpecification/util').kode4String;
+var registry = require('../../apiSpecification/registry');
+require('../../apiSpecification/allSpecs');
 
 var sampleParameters = {
   vejstykke: {
@@ -271,8 +269,20 @@ var sampleParameters = {
 
 describe('Alle propertyFilter parametre skal virke', function() {
   _.keys(sampleParameters).forEach(function(specName) {
-    var spec = apiSpec[specName];
-    var propertyFilterParameters = spec.parameterGroups.propertyFilter.parameters;
+    var propertyFilterParameters = registry.findWhere({
+      entityName: specName,
+      type: 'parameterGroup',
+      qualifier: 'propertyFilter'
+    });
+    var jsonRepresentation = registry.findWhere({
+      entityName: specName,
+      type: 'representation',
+      qualifier: 'json'
+    });
+    var sqlModel = registry.findWhere({
+      entityName: specName,
+      type: 'sqlModel'
+    });
     describe('Alle parametre for ' + specName + ' skal virke', function() {
       it('Alle almindelige parametre for ' + specName + ' bliver testet', function() {
         var specifiedParameterNames = _.pluck(propertyFilterParameters, 'name');
@@ -287,10 +297,7 @@ describe('Alle propertyFilter parametre skal virke', function() {
             rawQueryParams[paramName] = sampleValue;
             var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(propertyFilterParameters, 'name'));
             expect(parseResult.errors.length).toBe(0);
-            var sqlParts = apiSpecUtil.createSqlParts(spec,
-              {propertyFilter: spec.parameterGroups.propertyFilter},
-              parseResult.params,
-              jsonRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
+            var sqlParts = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
             sqlParts.limit = 100;
             dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
               if(err) throw 'unable to open connection';
@@ -298,8 +305,8 @@ describe('Alle propertyFilter parametre skal virke', function() {
                 transactionDone();
                 expect(err).toBeFalsy();
                 expect(rows.length).toBeGreaterThan(0);
-                rows.forEach(function(row) {
-                  var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
+                var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
+                mappedRows.forEach(function(json) {
                   var verifyResult = verify(json, sampleValue);
                   expect(verifyResult).toBe(true);
                   if(!verifyResult) {

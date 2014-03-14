@@ -60,3 +60,6 @@ var parameterImpls = [
 ];
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+
+var registry = require('../registry');
+registry.add('postnummer', 'sqlModel', undefined, module.exports);

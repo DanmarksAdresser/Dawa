@@ -95,3 +95,6 @@ exports.json = {
     };
   }
 };
+
+var registry = require('../registry');
+registry.addMultiple('vejstykke', 'representation', module.exports);

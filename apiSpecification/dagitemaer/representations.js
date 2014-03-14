@@ -12,6 +12,9 @@ var makeHrefFromPath = commonMappers.makeHrefFromPath;
 
 var kode4String = require('../util').kode4String;
 
+var registry = require('../registry');
+
+
 dagiTemaer.forEach(function(tema) {
   var representations = {};
   var fieldsExcludedFromFlat = ['geom_json'];
@@ -93,4 +96,6 @@ dagiTemaer.forEach(function(tema) {
   };
   representations.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), representations.flat);
   exports[tema.singular] = representations;
-});
+
+  registry.addMultiple(tema.singular, 'representation', module.exports[tema.singular]);});
+

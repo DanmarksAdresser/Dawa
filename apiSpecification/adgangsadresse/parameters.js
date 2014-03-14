@@ -1,7 +1,7 @@
 "use strict";
 
 var schema = require('../parameterSchema');
-
+var registry = require('../registry');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 
 exports.id = normalizeParameters([
@@ -64,3 +64,5 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   }
 ]);
+
+registry.addMultiple('adgangsadresse', 'parameterGroup', module.exports);

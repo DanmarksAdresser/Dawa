@@ -3,3 +3,5 @@ module.exports = {
   key: ['id']
 };
 
+var registry = require('../registry');
+registry.add('adresse', 'nameAndKey', undefined, module.exports);

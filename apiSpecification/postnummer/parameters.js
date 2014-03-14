@@ -1,6 +1,6 @@
 "use strict";
 
-var schema = require('../parameterSchema');
+var registry = require('../registry');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 
@@ -28,3 +28,5 @@ module.exports = {
       }
     ])
 };
+
+registry.addMultiple('postnummer', 'parameterGroup', module.exports);

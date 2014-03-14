@@ -1,6 +1,8 @@
 "use strict";
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
+var dagiTemaer = require('./dagiTemaer');
+var registry = require('../registry');
 
 module.exports = {
   id: normalizeParameters([
@@ -21,3 +23,7 @@ module.exports = {
     }
   ])
 };
+
+dagiTemaer.forEach(function(tema) {
+  registry.addMultiple(tema.singular, 'parameterGroup', module.exports);
+});

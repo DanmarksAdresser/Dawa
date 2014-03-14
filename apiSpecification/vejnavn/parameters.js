@@ -1,4 +1,5 @@
 var schema = require('../parameterSchema');
+var registry = require('../registry');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 
@@ -27,3 +28,5 @@ module.exports = {
     }
   ])
 };
+
+registry.addMultiple('vejnavn', 'parameterGroup', module.exports);

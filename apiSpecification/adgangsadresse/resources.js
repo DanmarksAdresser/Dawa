@@ -1,5 +1,7 @@
 "use strict";
 
+var _ = require('underscore');
+
 var parameters = require('./parameters');
 var nameAndKey = require('./nameAndKey');
 var representations = require('./representations');
@@ -28,7 +30,7 @@ module.exports = [
    * Reverse geocoding resource
    */
   {
-    path: '/adgangsadresser/reverse',
+    path: 'adgangsadresser/reverse',
     pathParameters: {},
     queryParameters: resourcesUtil.flattenParameters(
       {
@@ -48,3 +50,9 @@ module.exports = [
     representations,
     sqlModel)
 ];
+
+var registry = require('../registry');
+var qualifiers = ['query', 'autocomplete', 'reverseGeocoding', 'getByKey'];
+_.zip(qualifiers, module.exports).forEach(function(pair) {
+  registry.add('adgangsadresse', 'resource', pair[0], pair[1]);
+});
