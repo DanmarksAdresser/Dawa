@@ -30,7 +30,7 @@ function sendQueryParameterFormatError(res, details){
 }
 
 function sendUriPathFormatError(res, details){
-  sendError(res, 400, {type: "ResourceKeyFormatError",
+  sendError(res, 400, {type: "ResourcePathFormatError",
     title: "The URI path was ill-formed.",
     details: details});
 }

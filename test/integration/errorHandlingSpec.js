@@ -20,16 +20,16 @@ describe('Ill-formed query parameters', function () {
 });
 
 describe('Ill-formed UUID', function () {
-  it('should result in ResourceKeyFormatError', function (done) {
+  it('should result in ResourcePathFormatError', function (done) {
     request.get('http://localhost:3000/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018',
                 function(err, response, body){
                   expect(response.statusCode).toBe(400);
                   var error = JSON.parse(body);
                   expect(error).toEqual(
                     {
-                      "type": "ResourceKeyFormatError",
-                      "title": "The resource-key was ill-formed.",
-                      "details": 'The resource-key is ill-formed: 0a3f50c1-deb6-32b8-e04-0003ba298018. String does not match pattern: ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'
+                      "type": "ResourcePathFormatError",
+                      "title": "The URI path was ill-formed.",
+                      "details": [ [ 'id', 'String does not match pattern: ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$' ] ]
                     });
                     done();
                 });
