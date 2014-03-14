@@ -26,7 +26,7 @@ var async     = require('async');
 // Ensure and extract arguments from argv.  Print a usage messag if
 // number of arguments is wrong.
 if (process.argv.length !== 4){
-  console.log('Usage: node loadStormodtagere.js <PG-connection-string><stormodtager.csv>');
+  console.log('Usage: node loadStormodtagere.js <PG-connection-string> <stormodtager.csv>');
   process.exit(0);
 }
 var connString = process.argv[2];
