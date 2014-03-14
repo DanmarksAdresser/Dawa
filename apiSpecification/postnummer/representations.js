@@ -16,18 +16,10 @@ var mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 var nullableType = schemaUtil.nullableType;
 var kode4String = require('../util').kode4String;
 
-var fieldsExcludedFromCsv = ['geom_json'];
-var flatFields = _.filter(representationUtil.flatCandidateFields(fields), function(field) {
-  return !_.contains(fieldsExcludedFromCsv, field.name);
-});
+var fieldsExcludedFromFlat = ['geom_json'];
+var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 
-exports.flat = {
-  fields: flatFields,
-  outputFields: _.pluck(flatFields, 'name'),
-  mapper: function(baseUrl, params) {
-    return representationUtil.defaultFlatMapper(flatFields);
-  }
-};
+exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
 var fieldsExcludedFromJson = ['geom_json'];
 exports.json = {

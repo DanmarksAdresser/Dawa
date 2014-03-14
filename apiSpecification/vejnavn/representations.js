@@ -12,15 +12,8 @@ var makeHref = commonMappers.makeHref;
 var mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
 var mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 
-var flatFields = representationUtil.flatCandidateFields(fields);
 
-exports.flat = {
-  fields: flatFields,
-  outputFields: _.pluck(flatFields, 'name'),
-  mapper: function(baseUrl, params) {
-    return representationUtil.defaultFlatMapper(flatFields);
-  }
-};
+exports.flat = representationUtil.defaultFlatRepresentation(fields);
 
 exports.autocomplete = {
   schema: globalSchemaObject({

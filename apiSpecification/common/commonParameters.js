@@ -52,7 +52,10 @@ exports.autocomplete = [
 exports.crs = [
   {
     name: 'srid',
-    type: 'integer'
+    type: 'integer',
+    schema: {
+      enum: [4326, 25832]
+    }
   }
 ];
 

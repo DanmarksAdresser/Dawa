@@ -24,24 +24,6 @@ module.exports = [
     dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete
   }, representations.autocomplete, sqlModel),
-  /*
-   * Reverse geocoding resource
-   */
-  {
-    path: '/adgangsadresser/reverse',
-    pathParameters: {},
-    queryParameters: resourcesUtil.flattenParameters(
-      {
-        format: commonParameters.format,
-        crs: commonParameters.crs,
-        reverseGeocoding: commonParameters.reverseGeocoding
-      }),
-    representations: representations,
-    sqlModel: sqlModel,
-    singleResult: true,
-    chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-    processParameters:  function() {}
-  },
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,
     {crs : commonParameters.crs },

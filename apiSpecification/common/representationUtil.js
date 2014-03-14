@@ -1,5 +1,6 @@
 "use strict";
 
+var dagiTemaer = require('../dagitemaer/dagiTemaer');
 var _ = require('underscore');
 
 /*
@@ -8,6 +9,18 @@ var _ = require('underscore');
 exports.flatCandidateFields = function(fields) {
   return fields.filter(function(field) {
     return !field.multi && field.selectable;
+  });
+};
+
+exports.fieldsWithNames = function(fields, names) {
+  return _.filter(fields, function(field) {
+    return _.contains(names,field.name);
+  });
+};
+
+exports.fieldsWithoutNames = function(fields, names) {
+  return _.reject(fields, function(field) {
+    return _.contains(names, field.name);
   });
 };
 
@@ -25,6 +38,17 @@ exports.defaultFlatMapper = function(flatFields) {
       memo[field.name] = formattedValue;
       return memo;
     }, {});
+  };
+};
+
+exports.defaultFlatRepresentation = function(fields) {
+  var flatFields = exports.flatCandidateFields(fields);
+  return {
+    fields: flatFields,
+    outputFields: _.pluck(flatFields, 'name'),
+    mapper: function (baseUrl, params) {
+      return exports.defaultFlatMapper(flatFields);
+    }
   };
 };
 
@@ -52,4 +76,41 @@ exports.geojsonRepresentation = function(geomJsonField, flatRepresentation) {
       };
     }
   };
+};
+
+exports.adresseFlatRepresentation = function(fields) {
+  var fieldsExcludedFromFlat = ['geom_json'];
+  var defaultFlatFields = exports.fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat);
+
+  var requiredFlatFields = defaultFlatFields.concat(_.where(fields, {name: 'dagitemaer'}));
+
+
+  var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds', 'opstillingskreds'];
+  var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
+  var outputFlatFields = _.reduce(includedDagiTemaer, function (memo, temaNavn) {
+    memo.push(dagiTemaMap[temaNavn].prefix + 'kode');
+    memo.push(dagiTemaMap[temaNavn].prefix + 'navn');
+    return memo;
+  }, _.pluck(defaultFlatFields, 'name'));
+
+  var defaultFlatMapper = exports.defaultFlatMapper(defaultFlatFields);
+
+  var flatRepresentation = {
+    fields: requiredFlatFields,
+    outputFields: outputFlatFields,
+    mapper: function () {
+      return function (obj) {
+        var result = defaultFlatMapper(obj);
+        includedDagiTemaer.forEach(function (temaNavn) {
+          var tema = _.findWhere(obj.dagitemaer, { tema: temaNavn});
+          if (tema) {
+            result[dagiTemaMap[temaNavn].prefix + 'kode'] = tema.kode;
+            result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.navn;
+          }
+        });
+        return result;
+      };
+    }
+  };
+  return flatRepresentation;
 };

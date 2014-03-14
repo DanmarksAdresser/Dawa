@@ -26,6 +26,7 @@ var vejstykkeResources = require('./apiSpecification/vejstykke/resources');
 var supplerendebynavnResources = require('./apiSpecification/supplerendebynavn/resources');
 var postnummerResources = require('./apiSpecification/postnummer/resources');
 var adgangsadresseResources = require('./apiSpecification/adgangsadresse/resources');
+var adresseResources = require('./apiSpecification/adresse/resources');
 
 var notNull = require('./apiSpecification/util').notNull;
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
@@ -77,7 +78,7 @@ exports.setupRoutes = function () {
     publishQuery(app, spec);
   });
 
-  vejnavnResources.concat(vejstykkeResources).concat(supplerendebynavnResources).concat(postnummerResources).concat(adgangsadresseResources).forEach(function(resourceSpec) {
+  vejnavnResources.concat(vejstykkeResources).concat(supplerendebynavnResources).concat(postnummerResources).concat(adgangsadresseResources).concat(adresseResources).forEach(function(resourceSpec) {
     app.get('/ng' + resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
   });
 

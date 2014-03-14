@@ -13,15 +13,7 @@ var mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
 var mapKommuneRef = commonMappers.mapKommuneRef;
 var kode4String = require('../util').kode4String;
 
-var flatFields = representationUtil.flatCandidateFields(fields);
-
-exports.flat = {
-  fields: flatFields,
-  outputFields: _.pluck(flatFields, 'name'),
-  mapper: function(baseUrl, params) {
-    return representationUtil.defaultFlatMapper(flatFields);
-  }
-};
+exports.flat = representationUtil.defaultFlatRepresentation(fields);
 
 var autocompleteFieldNames = ['navn', 'kommunekode', 'kode'];
 var autocompleteFields = _.filter(fields, function(field) {

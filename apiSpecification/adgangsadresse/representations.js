@@ -26,41 +26,7 @@ var kode4String = require('../util').kode4String;
 /*
  * flat format
  */
-var fieldsExcludedFromCsv = ['geom_json'];
-var defaultFlatFields = _.filter(representationUtil.flatCandidateFields(fields), function(field) {
-  return !_.contains(fieldsExcludedFromCsv, field.name);
-});
-
-var requiredFlatFields = defaultFlatFields.concat(_.where(fields, {name: 'dagitemaer'}));
-
-
-var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds','opstillingskreds'];
-var dagiTemaMap = _.indexBy(dagiTemaer,'singular');
-var outputFlatFields = _.reduce(includedDagiTemaer, function(memo, temaNavn) {
-  memo.push(dagiTemaMap[temaNavn].prefix + 'kode');
-  memo.push(dagiTemaMap[temaNavn].prefix + 'navn');
-  return memo;
-}, _.pluck(defaultFlatFields, 'name'));
-
-var defaultFlatMapper = representationUtil.defaultFlatMapper(defaultFlatFields);
-
-exports.flat = {
-  fields: requiredFlatFields,
-  outputFields: outputFlatFields,
-  mapper: function() {
-    return function(obj) {
-      var result = defaultFlatMapper(obj);
-      includedDagiTemaer.forEach(function(temaNavn) {
-        var tema = _.findWhere(obj.dagitemaer, { tema: temaNavn});
-        if(tema) {
-          result[dagiTemaMap[temaNavn].prefix + 'kode'] = tema.kode;
-          result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.navn;
-        }
-      });
-      return result;
-    };
-  }
-};
+exports.flat = representationUtil.adresseFlatRepresentation(fields);
 
 exports.json = {
   fields: _.where(fields, {selectable: true}),
@@ -379,9 +345,7 @@ exports.json = {
 
 var autocompleteFieldNames = ['id', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
 exports.autocomplete = {
-  fields: _.filter(fields, function(field) {
-    return _.contains(autocompleteFieldNames, field);
-  }),
+  fields: representationUtil.fieldsWithNames(fields, autocompleteFieldNames),
   schema: globalSchemaObject({
     properties: {
       tekst: {
