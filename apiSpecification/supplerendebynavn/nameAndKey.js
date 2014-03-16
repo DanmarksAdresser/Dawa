@@ -1,4 +1,5 @@
 module.exports = {
+  singular: 'supplerendebynavn',
   plural: 'supplerendebynavne',
   key: ['navn']
 };

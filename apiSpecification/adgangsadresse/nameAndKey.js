@@ -1,5 +1,6 @@
 
 module.exports = {
+  singular: 'adgangsadresse',
   plural: 'adgangsadresser',
   key: ['id']
 };

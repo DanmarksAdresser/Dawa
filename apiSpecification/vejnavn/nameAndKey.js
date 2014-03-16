@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'vejnavn',
+  singular: 'vejnavn',
   plural: 'vejnavne',
   key: ['navn']
 };

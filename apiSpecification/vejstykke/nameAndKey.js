@@ -1,7 +1,7 @@
 "use strict";
 
 module.exports =  {
-  name: 'vejstykke',
+  singular: 'vejstykke',
   plural: 'vejstykker',
   key: ['kommunekode', 'kode']
 };

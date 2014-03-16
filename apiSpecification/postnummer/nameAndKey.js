@@ -1,4 +1,5 @@
 module.exports = {
+  singular: 'postnummer',
   plural: 'postnumre',
   key: ['nr']
 };

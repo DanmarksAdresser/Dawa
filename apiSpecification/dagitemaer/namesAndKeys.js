@@ -5,6 +5,7 @@ var registry = require('../registry');
 
 dagiTemaer.forEach(function(tema) {
   exports[tema.singular] = {
+    singular: tema.singular,
     plural: tema.plural,
     key: ['kode']
   };

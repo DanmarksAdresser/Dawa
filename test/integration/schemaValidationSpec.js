@@ -1,18 +1,15 @@
 "use strict";
-var apiSpec = require('../../apiSpec');
-var apiSpecUtil = require('../../apiSpecUtil');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
 var schemaValidationUtil = require('./schemaValidationUtil');
-var jsonRepresentations = require('../../apiSpecification/jsonRepresentations');
 
+var registry = require('../../apiSpecification/registry');
+require('../../apiSpecification/allSpecs');
 /**
  * This test verifies that all testdata is valid according to JSON schema
  * and that all fields (except the ones specified in valuesNeverExpectedToBeSeen below)
  * is returned at least once.
  */
-
-var specsToTest = apiSpec.allSpecNames;
 
 var valuesNeverExpectedToBeSeen = {
   postnumre: {
@@ -89,16 +86,32 @@ function verifyAllValuesVisited(schema, record, prefix) {
 }
 
 describe('Validering af JSON-formatteret output', function() {
-  specsToTest.forEach(function(specName) {
-    var spec = apiSpec[specName];
-    it('Alle ' + spec.model.plural + ' skal validere', function(specDone) {
-      console.log('validerer alle ' + spec.model.plural);
-      var schema = spec.model.schema;
+  var allNamesAndKeys = registry.where({
+    type: 'nameAndKey'
+  });
+  allNamesAndKeys.forEach(function(nameAndKey) {
+    console.log(JSON.stringify(nameAndKey));
+    var entityName = nameAndKey.singular;
+    var sqlModel = registry.findWhere({
+      entityName: entityName,
+      type: 'sqlModel'
+    });
+    console.log(JSON.stringify(sqlModel));
+    var jsonRepresentation = registry.findWhere({
+      entityName: entityName,
+      type: 'representation',
+      qualifier: 'json'
+    });
+    console.log(JSON.stringify(jsonRepresentation));
+    var mapper = jsonRepresentation.mapper('BASE_URL', {});
+    it('Alle ' + nameAndKey.plural + ' skal validere', function(specDone) {
+      console.log('validerer alle ' + nameAndKey.plural);
+      var schema = jsonRepresentation.schema;
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {}, jsonRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
+        var sqlParts = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
         dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
-            var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
+            var json = mapper(row);
             expect(schemaValidationUtil.isSchemaValid(json, schema)).toBe(true);
           });
           transactionDone();
@@ -106,14 +119,14 @@ describe('Validering af JSON-formatteret output', function() {
         });
       });
     });
-    it('Alle felter i' + spec.model.plural + ' skal ses mindst en gang', function(specDone) {
-      var schema = spec.model.schema;
-      var valuesSeen = valuesNeverExpectedToBeSeen[spec.model.plural] || {};
+    it('Alle felter i' + nameAndKey.plural + ' skal ses mindst en gang', function(specDone) {
+      var schema = jsonRepresentation.schema;
+      var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-        var sqlParts = apiSpecUtil.createSqlParts(spec, {}, {}, jsonRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
+        var sqlParts = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
         dbapi.query(client, sqlParts, function(err, rows) {
           rows.forEach(function(row) {
-            var json = spec.mappers.json(row, {baseUrl: "BASE_URL"});
+            var json = mapper(row);
             recordVisitedValues(json, schema, valuesSeen);
           });
           transactionDone();

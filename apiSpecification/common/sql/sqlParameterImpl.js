@@ -197,14 +197,16 @@ exports.geomWithin = function() {
 
 exports.reverseGeocoding = function() {
   return function(sqlParts, params) {
-    if (!params.srid){ params.srid = 4326;}
-    var orderby =
-      "geom <-> ST_Transform(ST_SetSRID(ST_Point(" +
-        dbapi.addSqlParameter(sqlParts, params.x)+", " +
-        dbapi.addSqlParameter(sqlParts, params.y)+"), " +
-        dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)::geometry";
-    sqlParts.orderClauses.push(orderby);
-    sqlParts.limit = "1";
+    if(notNull(params.x) && notNull(params.y)) {
+      if (!params.srid){ params.srid = 4326;}
+      var orderby =
+        "geom <-> ST_Transform(ST_SetSRID(ST_Point(" +
+          dbapi.addSqlParameter(sqlParts, params.x)+", " +
+          dbapi.addSqlParameter(sqlParts, params.y)+"), " +
+          dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)::geometry";
+      sqlParts.orderClauses.push(orderby);
+      sqlParts.limit = "1";
+    }
   };
 };
 
