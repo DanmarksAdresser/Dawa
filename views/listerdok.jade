@@ -4,13 +4,13 @@ include includes/parameterDocMixins
 block content
   header.jumbotron.subhead
     div.container
-      h1 Regioner, kommuner, sogne, retskredse og politikredse
+      h1 Regioner, kommuner, sogne, retskredse, politikredse og opstillingskredse
       div.page-header
-        p.lead Web API'et udstiller lister over Danmarks regioner, kommuner, sogne, retskredse og politikredse. (ikke med i prototype)
+        p.lead Web API'et udstiller lister over Danmarks regioner, kommuner, sogne, retskredse, politikredse og opstillingskredse.
     div.container
       div.row
         div.span3
-          ul#indhold.nav.nav-list.affix
+          ul#indhold.nav.nav-list
             li(data-toggle='collapse', data-target='#region').nav-header Region API
             ul#region.nav.nav-list
               li <a href='#regionsoegning'>Regionsøgning</a>
@@ -37,6 +37,12 @@ block content
               li <a href='#politikredssoegning'>Politikredssøgning</a>
               li <a href='#politikredsopslag'>Politikredsopslag</a>
               li <a href='#politikredsdata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#opstillingskreds').nav-header Opstillingskreds API
+            ul#opstillingskreds.nav.nav-list
+              li <a href='#opstillingskredssoegning'>Opstillingskredssøgning</a>
+              li <a href='#opstillingskredsopslag'>Opstillingskredsopslag</a>
+              li <a href='#opstillingskredsdata'>Databeskrivelse</a>
+
 
         div.span9
           section
@@ -114,7 +120,7 @@ block content
             h3.anchor-header#opstillingskredsopslag Opstillingskredsopslag
             +documentResource(parameterDoc, '/opstillingskredse/{kode}')
             div.page-header
-            h3.anchor-header#regiondata Beskrivelse af opstillingskredsdata
+            h3.anchor-header#opstillingskredsdata Beskrivelse af opstillingskredsdata
             p Web API'et udstiller for hver opstillingskreds følgende informationer:
             +documentSchema(jsonSchemas.opstillingskreds)
           section
