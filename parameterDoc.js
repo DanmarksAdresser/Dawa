@@ -367,7 +367,19 @@ var adgangsadresseDoc = {
                   '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
                   query: [{name: 'polygon',
                            encodeValue: false,
-                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]}]},
+                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]},
+        {description: 'Hent alle adgangsadresser i Københavns kommune (kode 0101), i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+        query: [{
+          name: 'kommunekode',
+          value: '0101'
+        }, {
+          name: 'format',
+          value: 'geojson'
+        }, {
+          name: 'srid',
+          value: '25832'
+        }]}]},
+
 
 
     '/adgangsadresser/autocomplete':{
@@ -440,7 +452,18 @@ var adresseDoc = {
                   '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
                   query: [{name: 'polygon',
                            encodeValue: false,
-                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]}]},
+                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]},
+        {description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+          query: [{
+            name: 'postnr',
+            value: '8471'
+          }, {
+            name: 'format',
+            value: 'geojson'
+          }, {
+            name: 'srid',
+            value: '25832'
+          }]}]},
 
     '/adresser/{id}': {
       subtext: 'Modtag adresse med id.',
