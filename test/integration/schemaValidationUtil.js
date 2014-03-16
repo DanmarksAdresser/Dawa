@@ -2,7 +2,6 @@
 var ZSchema = require('z-schema');
 
 var zSchemaValidator = new ZSchema({noZeroLengthStrings: true,
-  noExtraKeywords: true,
   forceItems: true,
   forceProperties: true,
   sync: true

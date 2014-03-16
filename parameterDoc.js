@@ -96,12 +96,14 @@ var vejnavneDoc = {
 /*** Vejstykker ***************************************************************/
 /******************************************************************************/
 
-var vejstykkerIdParameters = [{name: 'navn',
-                               doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
-                               examples: ['Margrethepladsen', 'Viborgvej']},
-                              {name: 'kommunekode',
-                               doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-                               examples: ['0101']}];
+var vejstykkerIdParameters = [
+  {name: 'kommunekode',
+    doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+    examples: ['0101']},
+  {name: 'kode',
+    doc: 'vejkode. 4 cifre.',
+    examples: ['0052']}
+];
 var vejstykkerParameters = [{name: 'q',
                              doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
                              'Wildcard * er tilladt i slutningen af hvert ord. ' +
@@ -109,9 +111,9 @@ var vejstykkerParameters = [{name: 'q',
                              examples: ['tværvej']},
                             vejstykkerIdParameters[0],
                             vejstykkerIdParameters[1],
-                            {name: 'kode',
-                             doc: 'vejkode. 4 cifre.',
-                             examples: ['0052']},
+                            {name: 'navn',
+                             doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
+                             examples: ['Margrethepladsen', 'Viborgvej']},
                             {name: 'postnr',
                              doc: 'Postnummer. 4 cifre.',
                              examples: ['2700']}];
@@ -136,7 +138,7 @@ var vejstykkerDoc = {
 
     '/vejstykker/autocomplete': {
       subtext: autocompleteSubtext('vejstykker'),
-      parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatAndPagingParams),
+      parameters: overwriteWithAutocompleteQParameter(vejstykkerParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle vejstykker som indeholder <em>jolle</em>',
                   query: [{name:'q', value:'jolle'}]},
                  {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',

@@ -30,8 +30,8 @@ module.exports = [
    * Reverse geocoding resource
    */
   {
-    path: 'adgangsadresser/reverse',
-    pathParameters: {},
+    path: '/adgangsadresser/reverse',
+    pathParameters: [],
     queryParameters: resourcesUtil.flattenParameters(
       {
         format: commonParameters.format,

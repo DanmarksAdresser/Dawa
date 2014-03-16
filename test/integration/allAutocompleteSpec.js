@@ -1,40 +1,43 @@
 "use strict";
 
-var apiSpec = require('../../apiSpec');
-var apiSpecUtil = require('../../apiSpecUtil');
-var autocompleteRepresentations = require('../../apiSpecification/autocompleteRepresentations');
 var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
 var schemaValidationUtil = require('./schemaValidationUtil');
+var registry = require('../../apiSpecification/registry');
+require('../../apiSpecification/allSpecs');
 
 var sampleParameters = {
-  vejnavn: ['all'],
-  vejstykke: ['all'],
-  supplerendebynavn: ['all'],
-  kommune: ['aa'],
-  postnummer: ['so'],
-  adgangsadresse: ['skolevænget 2'],
-  adresse: [ 'kirkevej 56G st']
+  '/vejnavne/autocomplete': ['all'],
+  '/vejstykker/autocomplete': ['all'],
+  '/supplerendebynavne/autocomplete': ['all'],
+  '/kommuner/autocomplete': ['aa'],
+  '/postnumre/autocomplete': ['so'],
+  '/adgangsadresser/autocomplete': ['skolevænget 2'],
+  '/adresser/autocomplete': [ 'kirkevej 56G st'],
 };
 
-describe('Alle suggestable specs skal kunne autocomplete', function() {
-  var allSpecs = _.map(_.keys(sampleParameters), function(specName) {
-    return apiSpec[specName];
+describe('Alle autocomplete ressourcer skal virke', function() {
+  var autocompleteResources = registry.where({
+    type: 'resource',
+    qualifier: 'autocomplete'
   });
-  var autocompleteSpecs = allSpecs;
-  autocompleteSpecs.forEach(function(spec) {
-    describe('Autocomplete på ' + spec.model.plural + ' skal virke', function(){
-      sampleParameters[spec.model.name].forEach(function(sampleQueryParam) {
-        it('Autocomplete på ' + spec.model.plural + ' med parameteren q=' + sampleQueryParam + ' skal virke', function(specDone) {
+  console.log('found ' + autocompleteResources.length + ' autocomplete resources');
+  autocompleteResources.forEach(function(resource) {
+    if(!sampleParameters[resource.path]) {
+      console.log("No test specificed for autocomplete resource at " + resource.path);
+      return;
+    }
+    describe('Autocomplete på ' + resource.path + ' skal virke', function(){
+      sampleParameters[resource.path].forEach(function(sampleQueryParam) {
+        it('Autocomplete på ' + resource.path + ' med parameteren q=' + sampleQueryParam + ' skal virke', function(specDone) {
+          var autocompleteRepresentation = resource.representations.autocomplete;
           var rawQueryParams = {};
           rawQueryParams.q = sampleQueryParam;
-          var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(apiSpec.autocompleteParameterSpec));
+          var parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(resource.queryParameters, 'name'));
           expect(parseResult.errors.length).toBe(0);
-          var sqlParts = apiSpecUtil.createSqlParts(spec,
-            {autocomplete: spec.parameterGroups.autocomplete},
-            parseResult.params,
-            autocompleteRepresentations[spec.model.name].fields || _.pluck(spec.fields, 'name'));
+          var sqlParts = resource.sqlModel.createQuery(_.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params);
+          var mapper = autocompleteRepresentation.mapper("BASE_URL", parseResult.params, false);
           dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
             if(err) throw 'unable to open connection';
             dbapi.query(client, sqlParts, function(err, rows) {
@@ -42,8 +45,8 @@ describe('Alle suggestable specs skal kunne autocomplete', function() {
               expect(err).toBeFalsy();
               expect(rows.length).toBeGreaterThan(0);
               rows.forEach(function(row) {
-                var json = spec.mappers.autocomplete(row, {baseUrl: "BASE_URL"});
-                expect(schemaValidationUtil.isSchemaValid(json, spec.model.autocompleteSchema)).toBe(true);
+                var json = mapper(row);
+                expect(schemaValidationUtil.isSchemaValid(json, autocompleteRepresentation.schema)).toBe(true);
               });
               specDone();
             });
@@ -51,5 +54,6 @@ describe('Alle suggestable specs skal kunne autocomplete', function() {
         });
       });
     });
+
   });
 });

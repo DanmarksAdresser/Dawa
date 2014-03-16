@@ -66,7 +66,7 @@ exports.autocompleteResourceSpec = function(nameAndKey, parameters, autocomplete
   var allParameters = _.extend({}, parameters, {format: commonParameters.format, paging: commonParameters.paging });
   return {
     path: '/' + nameAndKey.plural + '/autocomplete',
-    pathParameters: {},
+    pathParameters: [],
     queryParameters: flattenParameters(allParameters),
     representations: { autocomplete: autocompleteRepresentation },
     sqlModel: sqlModel,
