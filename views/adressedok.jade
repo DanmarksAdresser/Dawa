@@ -29,15 +29,15 @@ block content
           section
 
             h3.anchor-header#adressesoegning Adressesøgning
-            +documentResource(parameterDoc.adresse.resources, '/adresser')
+            +documentResource(parameterDoc, '/adresser')
 
             div.page-header
             h3.anchor-header#adresseopslag Adresseopslag
-            +documentResource(parameterDoc.adresse.resources, '/adresser/{id}')
+            +documentResource(parameterDoc, '/adresser/{id}')
 
             div.page-header
             h3.anchor-header#adresseautocomplete Adresser autocomplete
-            +documentResource(parameterDoc.adresse.resources, '/adresser/autocomplete')
+            +documentResource(parameterDoc, '/adresser/autocomplete')
 
             div.page-header
             h3.anchor-header#adressedata Beskrivelse af adressedata
@@ -49,7 +49,7 @@ block content
               li en del af en bygning, fx en etage eller en bolig- eller erhvervs¬enhed i en bygning
             p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
             p Web API'et udstiller for hver adresse følgende informationer:
-            +documentSchema(apiSpec.adresse.model.schema)
+            +documentSchema(jsonSchemas.adresse)
 
             div.page-header
             h2.anchor-header#adressehaendelser Adressehændelser

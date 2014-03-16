@@ -5,17 +5,11 @@
 /******************************************************************************/
 
 var express          = require('express');
-var _                = require('underscore');
-
-var vejnavnResources = require('./apiSpecification/vejnavn/resources');
-var vejstykkeResources = require('./apiSpecification/vejstykke/resources');
-var supplerendebynavnResources = require('./apiSpecification/supplerendebynavn/resources');
-var postnummerResources = require('./apiSpecification/postnummer/resources');
-var adgangsadresseResources = require('./apiSpecification/adgangsadresse/resources');
-var adresseResources = require('./apiSpecification/adresse/resources');
-var dagitemaResources = require('./apiSpecification/dagitemaer/resources');
 
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
+
+var registry = require('./apiSpecification/registry');
+require('./apiSpecification/allSpecs');
 
 var dayInSeconds = 24 * 60 * 60;
 var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
@@ -47,16 +41,11 @@ exports.setupRoutes = function () {
   app.use(corsMiddleware);
   app.use(cachingMiddleware);
 
-
-  vejnavnResources.concat(vejstykkeResources).concat(supplerendebynavnResources).concat(postnummerResources).concat(adgangsadresseResources).concat(adresseResources).forEach(function(resourceSpec) {
-    app.get(resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
-  });
-
-  _.each(dagitemaResources, function(resources) {
-    resources.forEach(function(resourceSpec) {
-      app.get(resourceSpec.path, resourceImpl.createExpressHandler(resourceSpec));
+  registry.where({
+    type: 'resource'
+  }).forEach(function (resource) {
+      app.get(resource.path, resourceImpl.createExpressHandler(resource));
     });
-  });
 
   return app;
 };

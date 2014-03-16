@@ -2,10 +2,8 @@
 
 var dagi = require('../../dagi');
 var dbapi = require('../../dbapi');
-var apiSpec = require('../../apiSpec');
-var apiSpecUtil = require('../../apiSpecUtil');
-var parameters = require('../../apiSpecification/parameters');
-
+var registry = require('../../apiSpecification/registry');
+require('../../apiSpecification/allSpecs');
 
 describe('Filtrering af adresser ud fra DAGI tema kode', function() {
   // der er 390 adgangsadresser inden for denne polygon
@@ -23,17 +21,21 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adgangsadresse: 158,
     adresse: 390
   };
-  ['adgangsadresse', 'adresse'].forEach(function(resourceTypeName) {
-    it('Skal være muligt at filtrere '  + resourceTypeName + 'r ud fra DAGI tema', function (done) {
+  ['adgangsadresse', 'adresse'].forEach(function(entityName) {
+    var sqlModel = registry.findWhere({
+      entityName: entityName,
+      type: 'sqlModel'
+    });
+    it('Skal være muligt at filtrere '  + entityName + 'r ud fra DAGI tema', function (done) {
       dbapi.withRollbackTransaction(function (err, client, transactionDone) {
         if (err) throw err;
         dagi.addDagiTema(client, sampleTema, function (err) {
           if(err) throw err;
           var params = { regionskode: [10] };
-          var sqlParts = apiSpecUtil.createSqlParts(apiSpec[resourceTypeName], { dagiFilter: parameters[resourceTypeName].dagiFilter }, params, ['id']);
+          var sqlParts = sqlModel.createQuery(['id'], params);
           dbapi.query(client, sqlParts, function(err, result) {
             if(err) throw err;
-            expect(result.length).toBe(expectedResults[resourceTypeName]);
+            expect(result.length).toBe(expectedResults[entityName]);
             transactionDone();
             done();
           });

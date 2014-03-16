@@ -3,8 +3,6 @@
 var dagi = require('../../dagi');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
-//var apiSpec = require('../../apiSpec');
-//var apiSpecUtil = require('../../apiSpecUtil');
 
 // der er 390 adgangsadresser inden for denne polygon
 var sampleTema = {

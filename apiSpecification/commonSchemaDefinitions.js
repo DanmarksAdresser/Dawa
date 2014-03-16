@@ -1,6 +1,6 @@
 "use strict";
 
-var dagiTemaer = require('./dagiTemaer');
+var dagiTemaer = require('./dagitemaer/dagiTemaer');
 var schemaUtil = require('./schemaUtil');
 var _ = require('underscore');
 

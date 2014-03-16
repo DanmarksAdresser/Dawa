@@ -23,8 +23,12 @@ exports.addMultiple = function (entityName, type, objectMap) {
   });
 };
 
+exports.entriesWhere = function(spec) {
+  return _.where(registry, spec);
+};
+
 exports.where = function(spec) {
-  return _.pluck(_.where(registry, spec), 'object');
+  return _.pluck(exports.entriesWhere(spec), 'object');
 };
 
 exports.findWhere = function(spec) {

@@ -1,19 +1,6 @@
 "use strict";
 
 var _ = require('underscore');
-var apiSpecUtil = require('./apiSpecUtil');
-
-exports.computeGetUrlTemplate = function (baseUrl, spec) {
-  return baseUrl + '/' + spec.model.plural + _.map(apiSpecUtil.getKeyForSelect(spec),function (keyPart) {
-    return '/{' + keyPart + '}';
-  }).join('');
-};
-exports.computeGetParameters = function (apiSpec, docSpec) {
-  var parameterNames = apiSpecUtil.getKeyForSelect(apiSpec);
-  return _.map(parameterNames, function (parameterName) {
-    return _.findWhere(docSpec.parameters, {name: parameterName});
-  });
-};
 
 exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
   var url = baseUrl + path;
@@ -32,23 +19,6 @@ exports.computeQueryUrl = function (baseUrl, plural, query) {
       return encodeURIComponent(param.name) + '=' + encodeURIComponent(param.value);
     }).join('&');
   }
-  return url;
-};
-
-exports.computeGetUrl = function (baseUrl, spec, path) {
-  var url = baseUrl + '/' + spec.model.plural + '/';
-  var key = apiSpecUtil.getKeyForSelect(spec);
-  url += _.chain(_.zip(key, path)).map(function(pair) {
-    var fieldName = pair[0];
-    var fieldValue = pair[1];
-    var field = spec.fieldMap[fieldName];
-    if(field.formatter) {
-      return field.formatter(fieldValue);
-    }
-    else {
-      return fieldValue;
-    }
-  }).map(encodeURIComponent).value().join('/');
   return url;
 };
 

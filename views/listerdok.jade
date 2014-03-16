@@ -41,82 +41,82 @@ block content
         div.span9
           section
             h3.anchor-header#regionsoegning Regionsøgning
-            +documentResource(parameterDoc.region.resources, '/regioner')
+            +documentResource(parameterDoc, '/regioner')
 
             div.page-header
             h3.anchor-header#regionopslag Regionopslag
-            +documentResource(parameterDoc.region.resources, '/regioner/{kode}')
+            +documentResource(parameterDoc, '/regioner/{kode}')
 
             div.page-header
             h3.anchor-header#regiondata Beskrivelse af regionsdata
             p Web API'et udstiller for hver region følgende informationer:
-            +documentSchema(apiSpec.region.model.schema)
+            +documentSchema(jsonSchemas.region)
           section
 
             div.page-header
             h3.anchor-header#kommunesoegning Kommunesøgning
-            +documentResource(parameterDoc.kommune.resources, '/kommuner')
+            +documentResource(parameterDoc, '/kommuner')
 
             div.page-header
             h3.anchor-header#kommuneopslag Kommuneopslag
-            +documentResource(parameterDoc.kommune.resources, '/kommuner/{kode}')
+            +documentResource(parameterDoc, '/kommuner/{kode}')
 
             div.page-header
             h3.anchor-header#kommuneautocomplete Kommune autocomplete
-            +documentResource(parameterDoc.kommune.resources, '/kommuner/autocomplete')
+            +documentResource(parameterDoc, '/kommuner/autocomplete')
 
             div.page-header
             h3.anchor-header#kommunedata Beskrivelse af kommunedata
             p Web API'et udstiller for hver kommune følgende informationer:
-            +documentSchema(apiSpec.kommune.model.schema)
+            +documentSchema(jsonSchemas.kommune)
 
           section
             div.page-header
             h3.anchor-header#sognsoegning Sognsøgning
-            +documentResource(parameterDoc.sogn.resources, '/sogne')
+            +documentResource(parameterDoc, '/sogne')
             div.page-header
             h3.anchor-header#sognopslag Sogneopslag
-            +documentResource(parameterDoc.sogn.resources, '/sogne/{kode}')
+            +documentResource(parameterDoc, '/sogne/{kode}')
 
             div.page-header
             h3.anchor-header#sogndata Beskrivelse af sognedata
             p Web API'et udstiller for hvert sogn følgende informationer:
-            +documentSchema(apiSpec.sogn.model.schema)
+            +documentSchema(jsonSchemas.sogn)
 
           section
             div.page-header
             h3.anchor-header#retskredssoegning Retskredssøgning
-            +documentResource(parameterDoc.retskreds.resources, '/retskredse')
+            +documentResource(parameterDoc, '/retskredse')
             div.page-header
             h3.anchor-header#retskredsopslag Retskredsopslag
-            +documentResource(parameterDoc.retskreds.resources, '/retskredse/{kode}')
+            +documentResource(parameterDoc, '/retskredse/{kode}')
 
             div.page-header
             h3.anchor-header#retskredsdata Beskrivelse af retskredsdata
             p Web API'et udstiller for hver retskreds følgende informationer:
-            +documentSchema(apiSpec.retskreds.model.schema)
+            +documentSchema(jsonSchemas.retskreds)
           section
             div.page-header
             h3.anchor-header#politikredssoegning Politikredssøgning
-            +documentResource(parameterDoc.politikreds.resources, '/politikredse')
+            +documentResource(parameterDoc, '/politikredse')
             div.page-header
             h3.anchor-header#politikredsopslag Politikredsopslag
-            +documentResource(parameterDoc.politikreds.resources, '/politikredse/{kode}')
+            +documentResource(parameterDoc, '/politikredse/{kode}')
             div.page-header
             h3.anchor-header#politikredsdata Beskrivelse af politikredsdata
             p Web API'et udstiller for hver politikreds følgende informationer:
-            +documentSchema(apiSpec.politikreds.model.schema)
+            +documentSchema(jsonSchemas.politikreds)
 
           section
             h3.anchor-header#opstillingskredssoegning Opstillingskredssøgning
-            +documentResource(parameterDoc.opstillingskreds.resources, '/opstillingskredse')
+            +documentResource(parameterDoc, '/opstillingskredse')
             div.page-header
             h3.anchor-header#opstillingskredsopslag Opstillingskredsopslag
-            +documentResource(parameterDoc.opstillingskreds.resources, '/opstillingskredse/{kode}')
+            +documentResource(parameterDoc, '/opstillingskredse/{kode}')
             div.page-header
             h3.anchor-header#regiondata Beskrivelse af opstillingskredsdata
             p Web API'et udstiller for hver opstillingskreds følgende informationer:
-            +documentSchema(apiSpec.opstillingskreds.model.schema)
+            +documentSchema(jsonSchemas.opstillingskreds)
           section
 
 block append scripts

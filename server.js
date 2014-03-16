@@ -4,10 +4,13 @@ var express        = require("express");
 var winston        = require('winston');
 var expressWinston = require('express-winston');
 var dawaPgApi      = require('./dawaPgApi');
-var apiSpec        = require('./apiSpec');
-var apiSpecUtil    = require('./apiSpecUtil');
 var parameterDoc   = require('./parameterDoc');
 var docUtil        = require('./docUtil');
+var registry = require('./apiSpecification/registry');
+var _ = require('underscore');
+var schemaUtil = require('./apiSpecification/schemaUtil');
+
+require('./apiSpecification/allSpecs');
 
 var logglyOptions = {subdomain        : 'dawa',
                      inputToken       : process.env.DAWALOGGLY,
@@ -107,10 +110,26 @@ function setupJadePage(path, page, optionsFun){
 }
 
 function jadeDocumentationParams(req) {
+  var jsonSchemas = _.reduce(registry.entriesWhere({
+    type: 'representation',
+    qualifier: 'json'
+  }), function(memo, entry) {
+    memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
+    return memo;
+  }, {});
+
+  var autocompleteSchemas = _.reduce(registry.entriesWhere({
+    type: 'representation',
+    qualifier: 'autocomplete'
+  }), function(memo, entry) {
+    memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
+    return memo;
+  }, {});
+
   var protocol = req.connection.encrypted ? 'https' : 'http';
   return {url: protocol + '://' + req.headers.host,
-          apiSpec: apiSpec,
+    jsonSchemas: jsonSchemas,
+    autocompleteSchemas: autocompleteSchemas,
           parameterDoc: parameterDoc,
-          apiSpecUtil: apiSpecUtil,
           docUtil: docUtil};
 }

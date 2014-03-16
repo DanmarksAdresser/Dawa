@@ -37,41 +37,41 @@ block content
             div.page-header
             h2 Vejnavne
             h3.anchor-header#vejnavnsoegning Vejnavnesøgning
-            +documentResource(parameterDoc.vejnavn.resources, '/vejnavne')
+            +documentResource(parameterDoc, '/vejnavne')
 
             div.page-header
             h3.anchor-header#vejnavneopslag Vejnavneopslag
-            +documentResource(parameterDoc.vejnavn.resources, '/vejnavne/{navn}')
+            +documentResource(parameterDoc, '/vejnavne/{navn}')
 
             div.page-header
             h3.anchor-header#vejnavneautocomplete Vejnavne autocomplete
-            +documentResource(parameterDoc.vejnavn.resources, '/vejnavne/autocomplete')
+            +documentResource(parameterDoc, '/vejnavne/autocomplete')
 
 
             div.page-header
             h3.anchor-header#vejnavnedata Beskrivelse af vejnavnedata
             p Ovenstående Web API udstiller vejnavne.
             p Web API'et udstiller for hver vejnavn følgende informationer:
-            +documentSchema(apiSpec.vejnavn.model.schema)
+            +documentSchema(jsonSchemas.vejnavn)
 
             div.page-header
             h2 Vejstykker
             h3.anchor-header#vejstykkesoegning Vejstykkesøgning
-            +documentResource(parameterDoc.vejstykke.resources, '/vejstykker')
+            +documentResource(parameterDoc, '/vejstykker')
 
             div.page-header
             h3.anchor-header#vejstykkeopslag Vejstykkeopslag
-            +documentResource(parameterDoc.vejstykke.resources, '/vejstykker/{kommunekode}/{kode}')
+            +documentResource(parameterDoc, '/vejstykker/{kommunekode}/{kode}')
 
             div.page-header
             h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
-            +documentResource(parameterDoc.vejstykke.resources, '/vejstykker/autocomplete')
+            +documentResource(parameterDoc, '/vejstykker/autocomplete')
 
             div.page-header
             h3.anchor-header#vejstykkedata Beskrivelse af vejstykkedata
             p Ovenstående Web API udstiller vejstykker.
             p Web API'et udstiller for hver vejstykke følgende informationer:
-            +documentSchema(apiSpec.vejstykke.model.schema)
+            +documentSchema(jsonSchemas.vejstykke)
 
 block append scripts
   script(type='text/javascript').

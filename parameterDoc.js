@@ -1,8 +1,9 @@
 "use strict";
 
-var parameterSpec         = require('./apiSpecification/parameters');
 var _ = require('underscore');
-var dagiTemaer = require('./apiSpecification/dagiTemaer');
+var dagiTemaer = require('./apiSpecification/dagitemaer/dagiTemaer');
+var registry = require('./apiSpecification/registry');
+require('./apiSpecification/allSpecs');
 
 /******************************************************************************/
 /*** Utils ********************************************************************/
@@ -680,52 +681,37 @@ var dagiExamples = {
     parameters: overwriteWithAutocompleteQParameter(dagiParameters(tema)).concat(formatAndPagingParams),
     examples: dagiExamples[tema.singular].autocomplete || []
   };
-  module.exports[tema.singular] = doc;
+  _.extend(module.exports, doc.resources);
 });
 
 
-// Add multi flag if it exist in the parameter spec.
-addMultiFlag(vejnavneDoc           , parameterSpec.vejnavn.propertyFilter.parameters);
-addMultiFlag(vejstykkerDoc         , parameterSpec.vejstykke.propertyFilter.parameters);
-addMultiFlag(supplerendeBynavneDoc , parameterSpec.supplerendebynavn.propertyFilter.parameters);
-addMultiFlag(kommuneDoc            , parameterSpec.kommune.propertyFilter.parameters);
-addMultiFlag(adgangsadresseDoc     , parameterSpec.adgangsadresse.propertyFilter.parameters);
-addMultiFlag(adgangsadresseDoc     , parameterSpec.adgangsadresse.dagiFilter.parameters);
-addMultiFlag(adresseDoc            , parameterSpec.adresse.propertyFilter.parameters);
-addMultiFlag(adresseDoc            , parameterSpec.adresse.dagiFilter.parameters);
-addMultiFlag(postnummerDoc         , parameterSpec.postnummer.propertyFilter.parameters);
-dagiTemaer.forEach(function(tema) {
-  if (tema.singular !== 'kommune'){
-    addMultiFlag(module.exports[tema.singular], parameterSpec[tema.singular].propertyFilter.parameters);
-  }
+_.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
+  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources);
+
+var allResources = registry.where({
+  type: 'resource'
 });
 
-function addMultiFlag(resourceDocs, parameterSpecsList){
-  var parameterSpecs = _.indexBy(parameterSpecsList, 'name');
-  _.each(_.values(resourceDocs.resources),
-         function(doc)
-         {
-           doc.parameters = JSON.parse(JSON.stringify(doc.parameters)); // Clone!
-           if (doc.nomulti !== true){
-             var docs = doc.parameters;
-             var newDocs = _.map(docs,
-                                 function(doc)
-                                 {
-                                   var name = doc.name;
-                                   if (parameterSpecs[name] && parameterSpecs[name].multi === true){
-                                     doc.multi = true;
-                                   }
-                                 });
-             docs.parameters = newDocs;
-           }
-         });
+function addMultiParameters() {
+  _.each(module.exports, function (doc, path) {
+    var resourcePath = path.replace(/\{([^\{\}]+)}/g, ':$1');
+    var resource = _.findWhere(allResources, {
+      path: resourcePath
+    });
+    var queryParameters = resource.queryParameters;
+    var parameterSpecs = _.indexBy(queryParameters, 'name');
+    doc.parameters = JSON.parse(JSON.stringify(doc.parameters)); // Clone!
+    if (doc.nomulti !== true) {
+      var docs = doc.parameters;
+      var newDocs = _.map(docs,
+        function (doc) {
+          var name = doc.name;
+          if (parameterSpecs[name] && parameterSpecs[name].multi === true) {
+            doc.multi = true;
+          }
+        });
+      docs.parameters = newDocs;
+    }
+  });
 }
-
-module.exports.vejnavn           = vejnavneDoc;
-module.exports.vejstykke         = vejstykkerDoc;
-module.exports.supplerendebynavn = supplerendeBynavneDoc;
-module.exports.kommune           = kommuneDoc;
-module.exports.adgangsadresse    = adgangsadresseDoc;
-module.exports.postnummer        = postnummerDoc;
-module.exports.adresse           = adresseDoc;
-
+addMultiParameters();

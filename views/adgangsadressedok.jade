@@ -27,26 +27,26 @@ block content
           section
 
             h3.anchor-header#adressesoegning Adgangsadressesøgning
-            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser')
+            +documentResource(parameterDoc, '/adgangsadresser')
 
             div.page-header
             h3.anchor-header#adresseopslag Adgangsadresseopslag
-            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser/{id}')
+            +documentResource(parameterDoc, '/adgangsadresser/{id}')
 
             div.page-header
             h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
-            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser/autocomplete')
+            +documentResource(parameterDoc, '/adgangsadresser/autocomplete')
 
             div.page-header
             h3.anchor-header#reversegeokodning Reverse geokodning
-            +documentResource(parameterDoc.adgangsadresse.resources, '/adgangsadresser/reverse')
+            +documentResource(parameterDoc, '/adgangsadresser/reverse')
 
             div.page-header
             h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
             p Ovenstående Web API udstiller adgangsadresser. En <em>adgangsadresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal eller en bygning efter reglerne i adressebekendtgørelsen.
             p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
             p Web API'et udstiller for hver adgangsadresse følgende informationer:
-            +documentSchema(apiSpec.adgangsadresse.model.schema)
+            +documentSchema(jsonSchemas.adgangsadresse)
 
 block append scripts
   script.

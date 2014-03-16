@@ -14,10 +14,8 @@ describe('Parameter documentation.', function() {
     type: 'resource'
   });
 
-  var docs = _.reduce(parameterDoc, function(memo, typeDoc) {
-    _.extend(memo, typeDoc.resources);
-    return memo;
-  }, {});
+  var docs = parameterDoc;
+
   console.log(JSON.stringify(docs));
   resources.forEach(function(resource) {
     describe('Documentation for ' + resource.path, function() {

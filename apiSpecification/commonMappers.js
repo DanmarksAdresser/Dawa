@@ -1,7 +1,7 @@
 "use strict";
 
-var namesAndKeys = require('./namesAndKeys');
 var util = require('./util');
+var paths = require('./paths');
 var _ = require('underscore');
 
 var kode4String = util.kode4String;
@@ -14,7 +14,7 @@ exports.makeHrefFromPath = function(baseUrl, path, idArray) {
 };
 
 exports.makeHref = function(baseUrl, resourceName, idArray) {
-  return exports.makeHrefFromPath(baseUrl, namesAndKeys[resourceName].plural, idArray);
+  return paths.getByKey(baseUrl, resourceName, idArray);
 };
 
 exports.mapKommuneRef = function(dbJson, baseUrl) {
