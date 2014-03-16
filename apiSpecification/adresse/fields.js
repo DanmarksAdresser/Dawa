@@ -20,6 +20,12 @@ var fields = [
     name: 'husnr'
   },
   {
+    name: 'etage'
+  },
+  {
+    name: 'dør'
+  },
+  {
     name: 'supplerendebynavn'
   },
   {
@@ -85,12 +91,6 @@ var fields = [
   },
   {
     name: 'geom_json'
-  },
-  {
-    name: 'etage'
-  },
-  {
-    name: 'dør'
   },
   {
     name: 'adgangsadresseid'
