@@ -47,13 +47,3 @@ exports.mapPostnummerRef = function(dbJson, baseUrl) {
   }
   return null;
 };
-
-exports.dagiTemaJsonMapper = function(path) {
-  return function (row, options) {
-    return {
-      href: exports.makeHrefFromPath(options.baseUrl, path, [row.kode]),
-      kode: kode4String(row.kode),
-      navn: row.navn
-    };
-  };
-};
