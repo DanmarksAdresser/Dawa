@@ -276,7 +276,7 @@ exports.json = {
       function mapDagiTema(tema) {
         return {
           href: makeHref(baseUrl, tema.tema, [tema.kode]),
-          kode: tema.kode,
+          kode: kode4String(tema.kode),
           navn: tema.navn
         };
       }

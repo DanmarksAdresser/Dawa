@@ -3,6 +3,8 @@
 var dagiTemaer = require('../dagitemaer/dagiTemaer');
 var _ = require('underscore');
 
+var kode4String = require('../util').kode4String;
+
 /*
  * Computes the list of fields that should be included in the CSV representation for the given type
  */
@@ -104,7 +106,7 @@ exports.adresseFlatRepresentation = function(fields) {
         includedDagiTemaer.forEach(function (temaNavn) {
           var tema = _.findWhere(obj.dagitemaer, { tema: temaNavn});
           if (tema) {
-            result[dagiTemaMap[temaNavn].prefix + 'kode'] = tema.kode;
+            result[dagiTemaMap[temaNavn].prefix + 'kode'] = kode4String(tema.kode);
             result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.navn;
           }
         });

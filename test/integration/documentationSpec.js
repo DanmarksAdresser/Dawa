@@ -16,10 +16,8 @@ describe('Parameter documentation.', function() {
 
   var docs = parameterDoc;
 
-  console.log(JSON.stringify(docs));
   resources.forEach(function(resource) {
     describe('Documentation for ' + resource.path, function() {
-      console.log(resource.path.replace(/:([\w]+)/g, '{$1}'));
       var docSpec = docs[resource.path.replace(/:([\w]+)/g, '{$1}')];
       it('There should be documentation for ' + resource.path, function() {
         expect(docSpec).toBeDefined();
