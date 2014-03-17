@@ -11,7 +11,7 @@ var zlib = require('zlib');
 var pg        = require('pg.js');
 
 if (process.argv.length < 6){
-  console.log('Usage: node schema-bbr.js <dbhost> <dbname> <dbuser> <data-dir> ["crlf"]');
+  console.log('Usage: node base.js <dbhost> <dbname> <dbuser> <data-dir> ["crlf"]');
   console.log(process.argv);
   process.exit(0);
 }
@@ -34,12 +34,12 @@ var postnummerTranslation = {'PostCodeIdentifier': 'nr','VersionId': 'version' ,
 function main(cfg){
   async.series(
     [
-      script(cfg, 'schema-bbr.sql'),
+      script(cfg, 'base.sql'),
       load  (cfg, 'PostCode.csv.gz',        'postnumre'),
       load  (cfg, 'RoadName.csv.gz',        'vejstykker'),
       load  (cfg, 'AddressSpecific.csv.gz', 'enhedsadresser'),
       load  (cfg, 'AddressAccess.csv.gz',   'adgangsadresser'),
-      script(cfg, 'schema-bbr-postload-updates.sql'),
+      script(cfg, 'base-postload-updates.sql'),
     ],
     function(err){
       doExitOnErr(err);
