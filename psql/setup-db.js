@@ -37,7 +37,6 @@ function main(cfg){
       script(cfg, 'types.sql'),
       script(cfg, 'base.sql'),
       script(cfg, 'text-search.sql'),
-      script(cfg, 'ejerlav-view.sql'),
       script(cfg, 'vejstykker-postnr-view.sql'),
       script(cfg, 'postnumre-mini-view.sql'),
       script(cfg, 'vejstykker-view.sql'),
@@ -60,8 +59,6 @@ function main(cfg){
       script(cfg, 'vejstykker-postnumre-load.sql'),
       script(cfg, 'postnumre-kommunekoder-load.sql'),
       script(cfg, 'supplerendebynavne-load.sql'),
-      script(cfg, 'ejerlav-load.sql'),
-      script(cfg, 'drop-columns.sql'),
 
       script(cfg, 'enable-base-triggers.sql'),
       script(cfg, 'load-data-into-dagitemaer.sql'),
