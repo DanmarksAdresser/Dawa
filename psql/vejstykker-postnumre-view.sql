@@ -9,8 +9,6 @@ CREATE TABLE VejstykkerPostnumreMat(
   postnr INTEGER
 );
 
-INSERT INTO VejstykkerPostnumreMat SELECT DISTINCT kommunekode, vejkode, postnr FROM adgangsadresser;
-
 DROP FUNCTION IF EXISTS update_vejstykker_postnumre_mat() CASCADE;
 
 CREATE FUNCTION update_vejstykker_postnumre_mat() RETURNS trigger AS $$

@@ -34,13 +34,38 @@ var postnummerTranslation = {'PostCodeIdentifier': 'nr','VersionId': 'version' ,
 function main(cfg){
   async.series(
     [
+      script(cfg, 'types.sql'),
       script(cfg, 'base.sql'),
+      script(cfg, 'text-search.sql'),
+      script(cfg, 'ejerlav-view.sql'),
+      script(cfg, 'vejstykker-postnr-view.sql'),
+      script(cfg, 'postnumre-mini-view.sql'),
+      script(cfg, 'vejstykker-view.sql'),
+      script(cfg, 'vejstykker-postnumre-view.sql'),
+      script(cfg, 'postnumre-kommunekoder-view.sql'),
+      script(cfg, 'supplerendebynavne-view.sql'),
+      script(cfg, 'adgangsadresser-dagi-view.sql'),
+      script(cfg, 'gridded-dagi-view.sql'),
+      script(cfg, 'adgangsadresser-view.sql'),
+      script(cfg, 'adresse-view.sql'),
+      script(cfg, 'disable-base-triggers.sql'),
+
       load  (cfg, 'PostCode.csv.gz',        'postnumre'),
       load  (cfg, 'RoadName.csv.gz',        'vejstykker'),
       load  (cfg, 'AddressSpecific.csv.gz', 'enhedsadresser'),
       load  (cfg, 'AddressAccess.csv.gz',   'adgangsadresser'),
+
+      // TODO: these scripts should be trigger based instead!
       script(cfg, 'base-postload-updates.sql'),
-    ],
+      script(cfg, 'vejstykker-postnumre-load.sql'),
+      script(cfg, 'postnumre-kommunekoder-load.sql'),
+      script(cfg, 'supplerendebynavne-load.sql'),
+      script(cfg, 'ejerlav-load.sql'),
+      script(cfg, 'drop-columns.sql'),
+
+      script(cfg, 'enable-base-triggers.sql'),
+      script(cfg, 'load-data-into-dagitemaer.sql'),
+     ],
     function(err){
       doExitOnErr(err);
     });
@@ -112,21 +137,24 @@ Inserter.prototype._write = function(row, encoding, cb) {
 };
 
 function insertRows(rows, tablename, dbClient, cb){
-  var fields = _.keys(rows[0]);
-  var fieldNames = _.map(fields, function(name){
-    if (postnummerTranslation[name]){
-      return postnummerTranslation[name];
-    } else {
-      return name;
-    }
-  });
-  var valueLines = _.map(rows, function(row){
-    return valueLine(_.map(fields, function(field){
-      return emptyToNull(row[field]);
-    }));
-  });
-  var sql = "INSERT INTO "+tablename+"("+fieldNames.join(",")+") VALUES\n  "+valueLines.join(',\n  ');
-  execSQL(sql, dbClient, false, cb);
+  if (rows.length > 0){
+    var fields = _.keys(rows[0]);
+    var fieldNames = _.map(fields, function(name){
+      if (postnummerTranslation[name]){
+        return postnummerTranslation[name];
+      } else {
+        return name;
+      }
+    });
+    var valueLines = _.map(rows, function(row){
+      return valueLine(_.map(fields, function(field){
+        return emptyToNull(row[field]);
+      }));
+    });
+    var sql = "INSERT INTO "+tablename+"("+fieldNames.join(",")+") VALUES\n  "+valueLines.join(',\n  ');
+    console.log(sql);
+    execSQL(sql, dbClient, false, cb);
+  }
 }
 
 function valueLine(values){
@@ -174,7 +202,10 @@ function script(cfg, scriptfile){
       console.log('' + data);
     });
     ls.on('close', function (code) {
-      console.log('child process exited with code ' + code);
+      if (code !== 0){
+        winston.error('Error: script failed, script=%s code=code', scriptfile, code);
+        process.exit(code);
+      }
       cb();
     });
   };
