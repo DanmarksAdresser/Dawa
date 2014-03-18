@@ -1,14 +1,15 @@
 "use strict";
+
 var Writable = require('stream').Writable;
-var util = require('util');
-var winston   = require('winston');
-var _         = require('underscore');
-var fs = require('fs');
-var csv = require('csv-streamify');
-var async     = require('async');
-var spawn = require('child_process').spawn;
-var zlib = require('zlib');
-var pg        = require('pg.js');
+var util     = require('util');
+var winston  = require('winston');
+var _        = require('underscore');
+var fs       = require('fs');
+var csv      = require('csv-streamify');
+var async    = require('async');
+var spawn    = require('child_process').spawn;
+var zlib     = require('zlib');
+var pg       = require('pg.js');
 
 if (process.argv.length < 6){
   console.log('Usage: node base.js <dbhost> <dbname> <dbuser> <data-dir> ["crlf"]');
