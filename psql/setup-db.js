@@ -30,51 +30,49 @@ cfg.newline = (process.argv[6] === 'crlf') ? '\r\n' : '\n';
 winston.info("Configuration: %j", cfg, {});
 
 var postnummerTranslation = {'PostCodeIdentifier': 'nr','VersionId': 'version' ,'DistrictName': 'navn'};
-//adgangsadresser-dagi-view.sql:CREATE TABLE AdgangsAdresserDagiRel(
-//adgangsadresser.sql:CREATE TABLE  adgangsadresser (
-//adgangsadresser-view.sql:CREATE VIEW AdgangsadresserView AS
-//adresse-view.sql:CREATE VIEW adresser AS
-//base-postload-updates.sql:CREATE temp TABLE tmp  AS SELECT id,
-//createdb.sql:CREATE EXTENSION postgis;
-//createdb.sql:CREATE EXTENSION postgis_topology;
-//dagitemaer.sql:CREATE TABLE DagiTemaer (
-//enhedsadresser.sql:CREATE TABLE IF NOT EXISTS enhedsadresser (
-//gridded-dagi-view.sql:CREATE TABLE GriddedDagiTemaer(
-//postnumre-kommunekoder-mat.sql:CREATE TABLE postnumre_kommunekoder_mat(
-//postnumre-kommunekoder-view.sql:CREATE TABLE postnumre_kommunekoder_mat(
-//postnumre-mini-view.sql:CREATE VIEW PostnumreMini AS
-//postnumre.sql:CREATE TABLE IF NOT EXISTS postnumre (
-//stormodtagere.sql:CREATE TABLE IF NOT EXISTS stormodtagere (
-//supplerendebynavne-view.sql:CREATE TABLE SupplerendeBynavne (
-//text-search.sql:CREATE TEXT SEARCH CONFIGURATION vejnavne (copy=simple);
-//vejstykker-postnr-view.sql:CREATE VIEW vejstykkerPostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
-//vejstykker-postnumre-view.sql:CREATE TABLE VejstykkerPostnumreMat(
-//vejstykker.sql:CREATE TABLE IF NOT EXISTS vejstykker (
-//vejstykker-view.sql:CREATE VIEW vejstykkerView AS
-//
+
+function normaliseTableSpec(specs){
+  return _.map(
+    specs,
+    function(spec){
+      if (!spec.scriptFile){
+        spec.scriptFile = spec.name+".sql";
+      }
+      if (!spec.type){
+        spec.type = 'table';
+      }
+      return spec;
+    });
+}
+
+
+var tableSpecs = normaliseTableSpec([
+  {name: 'adgangsadresser'},
+  {name: 'stormodtagere'},
+  {name: 'vejstykker'},
+  {name: 'postnumre'},
+  {name: 'enhedsadresser'},
+  {name: 'dagitemaer'},
+  {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
+  {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql', type: 'view'},
+  {name: 'vejstykkerview',             scriptFile: 'vejstykker-view.sql', type: 'view'},
+  {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql'},
+  {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql'},
+  {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql'},
+  {name: 'adgangsadresserdagirel',     scriptFile: 'adgangsadresser-dagi-view.sql'},
+  {name: 'griddeddagitemaer',          scriptFile: 'gridded-dagi-view.sql'},
+  {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql', type: 'view'},
+  {name: 'adresser',                   scriptFile: 'adresse-view.sql', type: 'view'},
+]);
+
+
 
 function main(cfg){
   async.series(
     [
-      script(cfg, 'types.sql'),
-      script(cfg, 'vejstykker.sql'),
-      script(cfg, 'postnumre.sql'),
-      script(cfg, 'stormodtagere.sql'),
-      script(cfg, 'adgangsadresser.sql'),
-      script(cfg, 'enhedsadresser.sql'),
-      script(cfg, 'dagitemaer.sql'),
-      script(cfg, 'text-search.sql'),
-      script(cfg, 'vejstykker-postnr-view.sql'),
-      script(cfg, 'postnumre-mini-view.sql'),
-      script(cfg, 'vejstykker-view.sql'),
-      script(cfg, 'vejstykker-postnumre-view.sql'),
-      script(cfg, 'postnumre-kommunekoder-mat.sql'),
-      script(cfg, 'supplerendebynavne-view.sql'),
-      script(cfg, 'adgangsadresser-dagi-view.sql'),
-      script(cfg, 'gridded-dagi-view.sql'),
-      script(cfg, 'adgangsadresser-view.sql'),
-      script(cfg, 'adresse-view.sql'),
-      script(cfg, 'disable-base-triggers.sql'),
+      script(cfg, 'misc.sql'),
+      loadSchemas,
+      disableTriggers,
 
       load  (cfg, 'PostCode.csv.gz',        'postnumre'),
       load  (cfg, 'RoadName.csv.gz',        'vejstykker'),
@@ -86,8 +84,10 @@ function main(cfg){
       script(cfg, 'vejstykker-postnumre-load.sql'),
       script(cfg, 'supplerendebynavne-load.sql'),
 
-      script(cfg, 'enable-base-triggers.sql'),
+//      initializeTables,
+      enableTriggers,
       script(cfg, 'load-data-into-dagitemaer.sql'),
+      function(cb) {console.log('Main is done!'); cb(); },
      ],
     function(err){
       doExitOnErr(err);
@@ -233,6 +233,67 @@ function script(cfg, scriptfile){
   };
 }
 
+
+function forAllTableSpecs(callback, done){
+  var client = new pg.Client(cfg.connectiosnString);
+  client.connect(function(err){
+    doExitOnErr(err);
+    async.eachSeries(
+      tableSpecs,
+      function(spec, cb){
+        callback(client, spec, cb);
+      },
+      function(err){
+        doExitOnErr(err);
+        client.end();
+        done();
+      });
+  });
+}
+
+function loadSchemas(done){
+  forAllTableSpecs(
+    function (client, spec, cb){
+      return (script(cfg, spec.scriptFile))(cb);
+    },
+    done);
+}
+
+function disableTriggers(done){
+  forAllTableSpecs(
+    function (client, spec, cb){
+      if (spec.type !== 'view'){
+        execSQL("ALTER TABLE "+spec.name+" DISABLE TRIGGER ALL", client, true, cb);
+      } else {
+        cb();
+      }
+    },
+    done);
+}
+
+function enableTriggers(done){
+  forAllTableSpecs(
+    function (client, spec, cb){
+      if (spec.type !== 'view'){
+        execSQL("ALTER TABLE "+spec.name+" ENABLE TRIGGER ALL", client, true, cb);
+      } else {
+        cb();
+      }
+    },
+    done);
+}
+
+function initializeTables(done){
+  forAllTableSpecs(
+    function (client, spec, cb){
+      if (spec.type !== 'view'){
+        execSQL("select "+spec.name+"_initialize()", client, true, cb);
+      } else {
+        cb();
+      }
+    },
+    done);
+}
 
 
 main(cfg);
