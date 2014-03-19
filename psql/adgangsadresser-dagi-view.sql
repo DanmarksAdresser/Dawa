@@ -1,4 +1,7 @@
 
+\set ON_ERROR_STOP on
+\set ECHO queries
+
 DROP TABLE IF EXISTS AdgangsadresserDagiRel CASCADE;
 CREATE TABLE AdgangsAdresserDagiRel(
   adgangsadresseid uuid not null,
