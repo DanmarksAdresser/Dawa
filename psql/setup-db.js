@@ -30,7 +30,28 @@ cfg.newline = (process.argv[6] === 'crlf') ? '\r\n' : '\n';
 winston.info("Configuration: %j", cfg, {});
 
 var postnummerTranslation = {'PostCodeIdentifier': 'nr','VersionId': 'version' ,'DistrictName': 'navn'};
-
+//adgangsadresser-dagi-view.sql:CREATE TABLE AdgangsAdresserDagiRel(
+//adgangsadresser.sql:CREATE TABLE  adgangsadresser (
+//adgangsadresser-view.sql:CREATE VIEW AdgangsadresserView AS
+//adresse-view.sql:CREATE VIEW adresser AS
+//base-postload-updates.sql:CREATE temp TABLE tmp  AS SELECT id,
+//createdb.sql:CREATE EXTENSION postgis;
+//createdb.sql:CREATE EXTENSION postgis_topology;
+//dagitemaer.sql:CREATE TABLE DagiTemaer (
+//enhedsadresser.sql:CREATE TABLE IF NOT EXISTS enhedsadresser (
+//gridded-dagi-view.sql:CREATE TABLE GriddedDagiTemaer(
+//postnumre-kommunekoder-mat.sql:CREATE TABLE postnumre_kommunekoder_mat(
+//postnumre-kommunekoder-view.sql:CREATE TABLE postnumre_kommunekoder_mat(
+//postnumre-mini-view.sql:CREATE VIEW PostnumreMini AS
+//postnumre.sql:CREATE TABLE IF NOT EXISTS postnumre (
+//stormodtagere.sql:CREATE TABLE IF NOT EXISTS stormodtagere (
+//supplerendebynavne-view.sql:CREATE TABLE SupplerendeBynavne (
+//text-search.sql:CREATE TEXT SEARCH CONFIGURATION vejnavne (copy=simple);
+//vejstykker-postnr-view.sql:CREATE VIEW vejstykkerPostnr AS SELECT DISTINCT vejkode, kommunekode, postnr FROM AdgangsAdresser;
+//vejstykker-postnumre-view.sql:CREATE TABLE VejstykkerPostnumreMat(
+//vejstykker.sql:CREATE TABLE IF NOT EXISTS vejstykker (
+//vejstykker-view.sql:CREATE VIEW vejstykkerView AS
+//
 
 function main(cfg){
   async.series(
@@ -47,7 +68,6 @@ function main(cfg){
       script(cfg, 'postnumre-mini-view.sql'),
       script(cfg, 'vejstykker-view.sql'),
       script(cfg, 'vejstykker-postnumre-view.sql'),
-      script(cfg, 'postnumre-kommunekoder-view.sql'),
       script(cfg, 'postnumre-kommunekoder-mat.sql'),
       script(cfg, 'supplerendebynavne-view.sql'),
       script(cfg, 'adgangsadresser-dagi-view.sql'),
@@ -64,7 +84,6 @@ function main(cfg){
       // TODO: these scripts should be trigger based instead!
       script(cfg, 'base-postload-updates.sql'),
       script(cfg, 'vejstykker-postnumre-load.sql'),
-      script(cfg, 'postnumre-kommunekoder-load.sql'),
       script(cfg, 'supplerendebynavne-load.sql'),
 
       script(cfg, 'enable-base-triggers.sql'),

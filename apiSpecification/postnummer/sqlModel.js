@@ -40,8 +40,8 @@ var columns = {
 var baseQuery = function () {
   return {
     select: [],
-    from: ['PostnumreKommunekoderMat m ' +
-      'LEFT JOIN PostnumreKommunekoderMat n ON m.postnr = n.postnr ' +
+    from: ['postnumre_kommunekoder_mat m ' +
+      'LEFT JOIN postnumre_kommunekoder_mat n ON m.postnr = n.postnr ' +
       'LEFT JOIN postnumre p ON p.nr = m.postnr ' +
       " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND m.kommunekode = k.kode",
       " LEFT JOIN DagiTemaer dagi ON dagi.tema = 'postdistrikt' AND dagi.kode = m.postnr"],
