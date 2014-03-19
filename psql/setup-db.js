@@ -43,6 +43,7 @@ function main(cfg){
       script(cfg, 'vejstykker-view.sql'),
       script(cfg, 'vejstykker-postnumre-view.sql'),
       script(cfg, 'postnumre-kommunekoder-view.sql'),
+      script(cfg, 'postnumre-kommunekoder-mat.sql'),
       script(cfg, 'supplerendebynavne-view.sql'),
       script(cfg, 'adgangsadresser-dagi-view.sql'),
       script(cfg, 'gridded-dagi-view.sql'),
