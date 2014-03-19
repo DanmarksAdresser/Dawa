@@ -22,5 +22,5 @@ before_script:
   - psql -c 'CREATE DATABASE dawaintegrationtest;'             -U postgres
   - psql -c 'CREATE EXTENSION IF NOT EXISTS postgis;'          -U postgres dawaintegrationtest
   - psql -c 'CREATE EXTENSION IF NOT EXISTS postgis_topology;' -U postgres dawaintegrationtest
-  - bash psql/setupdb.bash test/data/ localhost dawaintegrationtest postgres
+  - node psql/setup-db.js localhost dawaintegrationtest travis test/data/
 
