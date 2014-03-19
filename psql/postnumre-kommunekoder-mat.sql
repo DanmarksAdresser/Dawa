@@ -10,14 +10,6 @@ CREATE TABLE postnumre_kommunekoder_mat(
   PRIMARY KEY(postnr, kommunekode)
 );
 
--- Initialize function
-DROP FUNCTION IF EXISTS postnumre_kommunekoder_mat_initialize() CASCADE;
-CREATE FUNCTION postnumre_kommunekoder_mat_initialize() RETURNS void
-LANGUAGE SQL AS
-$$
-INSERT INTO postnumre_kommunekoder_mat SELECT DISTINCT postnr, kommunekode FROM adgangsadresser
-$$;
-
 -- Triggers
 
 -- Delete trigger
