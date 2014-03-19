@@ -31,20 +31,6 @@ winston.info("Configuration: %j", cfg, {});
 
 var postnummerTranslation = {'PostCodeIdentifier': 'nr','VersionId': 'version' ,'DistrictName': 'navn'};
 
-function normaliseTableSpec(specs){
-  return _.map(
-    specs,
-    function(spec){
-      if (!spec.scriptFile){
-        spec.scriptFile = spec.name+".sql";
-      }
-      if (!spec.type){
-        spec.type = 'table';
-      }
-      return spec;
-    });
-}
-
 
 var tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresser'},
@@ -295,5 +281,19 @@ function initializeTables(done){
     done);
 }
 
+
+function normaliseTableSpec(specs){
+  return _.map(
+    specs,
+    function(spec){
+      if (!spec.scriptFile){
+        spec.scriptFile = spec.name+".sql";
+      }
+      if (!spec.type){
+        spec.type = 'table';
+      }
+      return spec;
+    });
+}
 
 main(cfg);
