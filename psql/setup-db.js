@@ -22,6 +22,7 @@ var cfg =
    dbname:  process.argv[3],
    dbuser:  process.argv[4],
    dataDir: process.argv[5]+'/',
+   scriptDir: __dirname,
    loadBatchSize: 1000,
   };
 cfg.connectiosnString = 'postgres://'+cfg.dbuser+'@'+cfg.dbhost+':5432/'+cfg.dbname;
@@ -201,7 +202,7 @@ function execSQL(sql, client, echo, done){
 
 function script(cfg, scriptfile){
   return function(cb){
-    var ls = spawn('psql', ['-h', cfg.dbhost, '-f', scriptfile, cfg.dbname, cfg.dbuser]);
+    var ls = spawn('psql', ['-h', cfg.dbhost, '-f', cfg.scriptDir+"/"+scriptfile, cfg.dbname, cfg.dbuser]);
     ls.stdout.on('data', function (data) {
       console.log(""+data);
     });
