@@ -40,9 +40,7 @@ FOR EACH ROW EXECUTE PROCEDURE postnumre_kommunekoder_mat_trigger();
 -- Init function
 DROP FUNCTION IF EXISTS postnumre_kommunekoder_mat_init() CASCADE;
 CREATE FUNCTION postnumre_kommunekoder_mat_init() RETURNS void
-LANGUAGE plpgsql AS
+LANGUAGE SQL AS
 $$
-  BEGIN
-    NULL;
-  END;
+INSERT INTO postnumre_kommunekoder_mat SELECT DISTINCT postnr, kommunekode FROM adgangsadresser
 $$;
