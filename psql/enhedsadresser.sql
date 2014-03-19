@@ -18,3 +18,13 @@ CREATE INDEX ON enhedsadresser(adgangsadresseid);
 CREATE INDEX ON enhedsadresser USING gin(tsv);
 CREATE INDEX ON enhedsadresser(etage, id);
 CREATE INDEX ON enhedsadresser(doer, id);
+
+-- Init function
+DROP FUNCTION IF EXISTS enhedsadresser_init() CASCADE;
+CREATE FUNCTION enhedsadresser_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

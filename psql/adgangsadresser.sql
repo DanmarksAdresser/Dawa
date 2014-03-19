@@ -48,3 +48,14 @@ CREATE INDEX ON adgangsadresser(matrikelnr);
 CREATE INDEX ON adgangsadresser(husnr, id);
 CREATE INDEX ON adgangsadresser(esrejendomsnr);
 CREATE INDEX ON adgangsadresser USING gin(tsv);
+
+
+-- Init function
+DROP FUNCTION IF EXISTS adgangsadresser_init() CASCADE;
+CREATE FUNCTION adgangsadresser_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

@@ -15,3 +15,12 @@ CREATE TABLE IF NOT EXISTS vejstykker (
 CREATE INDEX ON vejstykker USING gin(tsv);
 CREATE INDEX ON vejstykker(kode);
 
+-- Init function
+DROP FUNCTION IF EXISTS vejstykker_init() CASCADE;
+CREATE FUNCTION vejstykker_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

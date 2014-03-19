@@ -34,14 +34,14 @@ FOR EACH STATEMENT EXECUTE PROCEDURE stormodtager_delete_trigger();
 -- table, and then re-insert every stormodtager again.  The
 -- stormodtager table being quite small, this approach is feasible.
 DROP FUNCTION IF EXISTS stormodtager_insert_trigger() CASCADE;
-CREATE FUNCTION stormodtager_insert_trigger() RETURNS trigger AS $$
+CREATE FUNCTION stormodtager_insert_trigger() RETURNS trigger
+LANGUAGE plpgsql AS
+$$
   BEGIN
-    DELETE FROM postnumre p WHERE p.stormodtager = true;
-    INSERT INTO postnumre (nr, version, navn, stormodtager)
-      SELECT nr, version, navn, true FROM stormodtagere;
+    PERFORM stormodtagere_init();
     RETURN NULL;
   END;
-$$ LANGUAGE plpgsql;
+$$;
 CREATE TRIGGER stormodtager_insert_trigger AFTER INSERT ON stormodtagere
 FOR EACH STATEMENT EXECUTE PROCEDURE stormodtager_insert_trigger();
 
@@ -56,3 +56,16 @@ CREATE FUNCTION stormodtager_update_trigger() RETURNS trigger AS $$
 $$ LANGUAGE plpgsql;
 CREATE TRIGGER stormodtager_update_trigger AFTER UPDATE ON stormodtagere
 FOR EACH ROW EXECUTE PROCEDURE stormodtager_update_trigger();
+
+
+-- Init function
+DROP FUNCTION IF EXISTS stormodtagere_init() CASCADE;
+CREATE FUNCTION stormodtagere_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    DELETE FROM postnumre p WHERE p.stormodtager = true;
+    INSERT INTO postnumre (nr, version, navn, stormodtager)
+      SELECT nr, version, navn, true FROM stormodtagere;
+  END;
+$$;

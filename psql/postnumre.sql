@@ -13,3 +13,13 @@ CREATE TABLE IF NOT EXISTS postnumre (
 
 CREATE INDEX ON postnumre USING gin(tsv);
 CREATE INDEX ON postnumre(navn);
+
+-- Init function
+DROP FUNCTION IF EXISTS postnumre_init() CASCADE;
+CREATE FUNCTION postnumre_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

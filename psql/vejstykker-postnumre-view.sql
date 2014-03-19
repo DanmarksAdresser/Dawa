@@ -33,3 +33,14 @@ FOR EACH ROW EXECUTE PROCEDURE update_vejstykker_postnumre_mat();
 
 CREATE UNIQUE INDEX ON VejstykkerPostnumreMat(postnr, kommunekode, vejkode);
 CREATE INDEX ON vejstykkerpostnumremat(kommunekode, vejkode);
+
+
+-- Init function
+DROP FUNCTION IF EXISTS vejstykkerpostnumremat_init() CASCADE;
+CREATE FUNCTION vejstykkerpostnumremat_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

@@ -36,3 +36,13 @@ $$;
 
 CREATE TRIGGER postnumre_kommunekoder_mat_trigger AFTER DELETE ON adgangsadresser
 FOR EACH ROW EXECUTE PROCEDURE postnumre_kommunekoder_mat_trigger();
+
+-- Init function
+DROP FUNCTION IF EXISTS postnumre_kommunekoder_mat_init() CASCADE;
+CREATE FUNCTION postnumre_kommunekoder_mat_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

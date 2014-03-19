@@ -15,3 +15,12 @@ CREATE TABLE DagiTemaer (
 CREATE INDEX ON DagiTemaer USING gist(geom);
 CREATE INDEX ON DagiTemaer(navn);
 
+-- Init function
+DROP FUNCTION IF EXISTS dagitemaer_init() CASCADE;
+CREATE FUNCTION dagitemaer_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

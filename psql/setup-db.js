@@ -84,7 +84,7 @@ function main(cfg){
       script(cfg, 'vejstykker-postnumre-load.sql'),
       script(cfg, 'supplerendebynavne-load.sql'),
 
-//      initializeTables,
+      initializeTables,
       enableTriggers,
       script(cfg, 'load-data-into-dagitemaer.sql'),
       function(cb) {console.log('Main is done!'); cb(); },
@@ -287,7 +287,7 @@ function initializeTables(done){
   forAllTableSpecs(
     function (client, spec, cb){
       if (spec.type !== 'view'){
-        execSQL("select "+spec.name+"_initialize()", client, true, cb);
+        execSQL("select "+spec.name+"_init()", client, true, cb);
       } else {
         cb();
       }

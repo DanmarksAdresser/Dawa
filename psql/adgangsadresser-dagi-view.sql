@@ -11,3 +11,13 @@ CREATE TABLE AdgangsAdresserDagiRel(
 );
 
 CREATE INDEX ON AdgangsadresserDagiRel(dagiTema, dagiKode, adgangsadresseid);
+
+-- Init function
+DROP FUNCTION IF EXISTS adgangsadresserdagirel_init() CASCADE;
+CREATE FUNCTION adgangsadresserdagirel_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;

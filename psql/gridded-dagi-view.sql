@@ -147,3 +147,14 @@ DROP TRIGGER IF EXISTS update_adgangsadresser_dagi_rel_dagitemaer ON DagiTemaer;
 DROP TRIGGER IF EXISTS update_gridded_dagi_temaer ON DagiTemaer;
 CREATE TRIGGER update_gridded_dagi_temaer AFTER INSERT OR UPDATE OR DELETE ON DagiTemaer
 FOR EACH ROW EXECUTE PROCEDURE update_gridded_dagi_temaer();
+
+
+-- Init function
+DROP FUNCTION IF EXISTS griddeddagitemaer_init() CASCADE;
+CREATE FUNCTION griddeddagitemaer_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    NULL;
+  END;
+$$;
