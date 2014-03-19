@@ -10,12 +10,15 @@
 -- Delete all stormodtager rows in postnumre that do not have a
 -- corresponding row in stormodtagere.
 DROP FUNCTION IF EXISTS stormodtager_delete_trigger() CASCADE;
-CREATE FUNCTION stormodtager_delete_trigger() RETURNS trigger AS $$
+CREATE FUNCTION stormodtager_delete_trigger() RETURNS trigger AS
+$$
   BEGIN
     DELETE FROM postnumre p WHERE p.stormodtager = true AND p.nr in (select nr from stormodtagere);
     RETURN NULL;
   END;
-$$ LANGUAGE plpgsql;
+$$
+LANGUAGE plpgsql;
+
 CREATE TRIGGER stormodtager_delete_trigger AFTER DELETE ON stormodtagere
 FOR EACH STATEMENT EXECUTE PROCEDURE stormodtager_delete_trigger();
 
