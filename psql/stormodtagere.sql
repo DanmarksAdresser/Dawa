@@ -2,6 +2,14 @@
 \set ON_ERROR_STOP on
 \set ECHO queries
 
+DROP TABLE IF EXISTS stormodtagere;
+CREATE TABLE IF NOT EXISTS stormodtagere (
+  nr integer NOT NULL PRIMARY KEY,
+  version VARCHAR(255) NOT NULL,
+  navn VARCHAR(20) NOT NULL,
+  adgangsadresseid UUID NOT NULL
+);
+
 -- This set of triggers will ensure that the postnumre table is always
 -- consistent with the stormodtagere table.  The stormodtagere tables
 -- is expected to be small, under 100 rows.

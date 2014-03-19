@@ -36,7 +36,12 @@ function main(cfg){
   async.series(
     [
       script(cfg, 'types.sql'),
-      script(cfg, 'base.sql'),
+      script(cfg, 'vejstykker.sql'),
+      script(cfg, 'postnumre.sql'),
+      script(cfg, 'stormodtagere.sql'),
+      script(cfg, 'adgangsadresser.sql'),
+      script(cfg, 'enhedsadresser.sql'),
+      script(cfg, 'dagitemaer.sql'),
       script(cfg, 'text-search.sql'),
       script(cfg, 'vejstykker-postnr-view.sql'),
       script(cfg, 'postnumre-mini-view.sql'),
@@ -49,7 +54,6 @@ function main(cfg){
       script(cfg, 'gridded-dagi-view.sql'),
       script(cfg, 'adgangsadresser-view.sql'),
       script(cfg, 'adresse-view.sql'),
-      script(cfg, 'stormodtagere-triggers.sql'),
       script(cfg, 'disable-base-triggers.sql'),
 
       load  (cfg, 'PostCode.csv.gz',        'postnumre'),
