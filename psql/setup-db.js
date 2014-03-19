@@ -48,6 +48,7 @@ function main(cfg){
       script(cfg, 'gridded-dagi-view.sql'),
       script(cfg, 'adgangsadresser-view.sql'),
       script(cfg, 'adresse-view.sql'),
+      script(cfg, 'stormodtagere-triggers.sql'),
       script(cfg, 'disable-base-triggers.sql'),
 
       load  (cfg, 'PostCode.csv.gz',        'postnumre'),
@@ -150,7 +151,6 @@ function insertRows(rows, tablename, dbClient, cb){
       }));
     });
     var sql = "INSERT INTO "+tablename+"("+fieldNames.join(",")+") VALUES\n  "+valueLines.join(',\n  ');
-    console.log(sql);
     execSQL(sql, dbClient, false, cb);
   }
 }

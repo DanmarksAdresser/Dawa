@@ -54,12 +54,8 @@ function updateStormodtagere(stormodtagere){
   withWriteTransaction(function(client, done){
     async.series(
       [
-        asyncExecSQL(client, "DELETE FROM postnumre p WHERE p.nr in (SELECT nr FROM stormodtagere)"),
         asyncExecSQL(client, "DELETE FROM stormodtagere"),
         asyncExecSQL(client, createInsertStormodtagereSQL(stormodtagere)),
-        asyncExecSQL(client, createInsertPostnumreSQL(stormodtagere)),
-        asyncExecSQL(client, "UPDATE postnumre SET tsv = to_tsvector('danish', "+
-                     "coalesce(to_char(nr,'0000'), '') || ' ' || coalesce(navn, ''))"),
       ],
       function(err){
         if (err) { winston.error("Error: %j", err, {}); }
