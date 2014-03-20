@@ -73,7 +73,7 @@ $$
   END;
 $$;
 
-DROP FUNCTION adgangsadresser_refresh_tsv(uuid[]);
+DROP FUNCTION IF EXISTS adgangsadresser_refresh_tsv(uuid[]) CASCADE;
 CREATE OR REPLACE FUNCTION adgangsadresser_refresh_tsv(uuids uuid[])
   RETURNS VOID
 LANGUAGE plpgsql AS
