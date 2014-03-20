@@ -42,9 +42,10 @@ exports.json = {
       'version' : {
         '$ref': '#/definitions/DateTime'
       },
-      'stormodtageradresse': {
-        description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.',
-        type: nullableType('string')
+      'stormodtageradresser': {
+        description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adresserne på stormodtageren.',
+        type: nullableType('array'),
+        items: { type: 'string'}
       },
       'kommuner': {
         description: 'De kommuner hvis areal overlapper postnumeret areal.',
@@ -54,7 +55,7 @@ exports.json = {
         }
       }
     },
-    'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresse', 'kommuner']
+    'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresser', 'kommuner']
   }),
   fields: _.filter(_.where(fields, { selectable: true }), function(field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -66,8 +67,8 @@ exports.json = {
         nr:  kode4String(row.nr),
         navn: row.navn,
         version: row.version,
-        stormodtageradresse: null,
-        kommuner: mapKommuneRefArray(row.kommuner,baseUrl)
+        stormodtageradresser: row.stormodtageradresser ? row.stormodtageradresser : null,
+        kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : null
       };
     };
   }

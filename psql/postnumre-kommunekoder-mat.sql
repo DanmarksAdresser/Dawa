@@ -21,12 +21,25 @@ $$
     nr integer;
     kode integer;
   BEGIN
-    DELETE FROM postnumre p WHERE p.stormodtager = true AND p.nr in (select nr from stormodtagere);
+    IF TG_OP='UPDATE' OR TG_OP='DELETE'
+    THEN
+      nr := OLD.postnr;
+      kode := OLD.kommunekode;
+    ELSE
+      nr := NEW.postnr;
+      kode := NEW.kommunekode;
+    END IF;
+
+    DELETE FROM postnumre_kommunekoder_mat WHERE kommunekode = kode AND postnr = nr;
+
+    INSERT INTO postnumre_kommunekoder_mat
+    SELECT DISTINCT postnr, kommunekode FROM adgangsadresser WHERE postnr IS NOT NULL AND kommunekode = kode AND postnr = nr;
+
     RETURN NULL;
   END;
 $$;
 
-CREATE TRIGGER postnumre_kommunekoder_mat_trigger AFTER DELETE ON adgangsadresser
+CREATE TRIGGER postnumre_kommunekoder_mat_trigger AFTER INSERT OR UPDATE OR DELETE ON adgangsadresser
 FOR EACH ROW EXECUTE PROCEDURE postnumre_kommunekoder_mat_trigger();
 
 -- Init function

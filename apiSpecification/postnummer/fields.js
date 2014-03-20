@@ -20,6 +20,9 @@ var fields = [
     name: 'kommune'
   },
   {
+    name: 'stormodtageradresser'
+  },
+  {
     name: 'geom_json'
   },
   {

@@ -22,6 +22,9 @@ var columns = {
     select: null,
     where: 'n.kommunekode'
   },
+  stormodtageradresser: {
+    select: 's.stormodtageradresser'
+  },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
@@ -29,7 +32,7 @@ var columns = {
     }
   },
   kommuner: {
-    select: 'json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef))'
+    select: 'k.kommuner'
   },
   tsv: {
     select: null,
@@ -40,17 +43,26 @@ var columns = {
 var baseQuery = function () {
   return {
     select: [],
-    from: ['postnumre_kommunekoder_mat m ' +
-      'LEFT JOIN postnumre_kommunekoder_mat n ON m.postnr = n.postnr ' +
-      'LEFT JOIN postnumre p ON p.nr = m.postnr ' +
-      " LEFT JOIN DagiTemaer k ON k.tema = 'kommune' AND m.kommunekode = k.kode",
-      " LEFT JOIN DagiTemaer dagi ON dagi.tema = 'postdistrikt' AND dagi.kode = m.postnr"],
-    whereClauses: [],
-    groupBy: 'p.nr, p.navn, p.version, dagi.tema, dagi.kode',
-    orderClauses: [],
+    from: [''+
+          // 'SELECT p.nr AS nr, p.navn AS navn, s.adrs, p.version AS version, k.kommuner AS kommuner '+
+           'postnumre p '+
+           'LEFT JOIN (SELECT s.nr AS nr, json_agg(s.adgangsadresseid) AS stormodtageradresser '+
+           '           FROM stormodtagere s '+
+           '           GROUP BY s.nr) s '+
+           '  ON s.nr = p.nr '+
+           'LEFT JOIN (SELECT m.postnr AS postnr, json_agg((m.kommunekode, d.navn)::kommuneRef) AS kommuner '+
+           '           FROM postnumre_kommunekoder_mat m '+
+           '           LEFT JOIN dagitemaer d '+
+           "             ON d.tema = 'kommune' AND d.kode = m.kommunekode "+
+           '           GROUP BY m.postnr) k '+
+           '  ON  k.postnr = p.nr '
+          ],
+    whereClauses: ["p.navn <> 'Ukendt' "],
+    orderClauses: ['p.nr'],
     sqlParams: []
   };
 };
+
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
