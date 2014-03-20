@@ -6,14 +6,6 @@
 // This script will re-load all large-mail-recievers into a given
 // database.
 //
-// Usage
-// -----
-//
-// This script need to parameters to
-//
-// Detailed script descriptions
-// ----------------------------
-//
 // Required modules
 var util      = require('util');
 var pg        = require('pg.js');
@@ -54,7 +46,9 @@ function updateStormodtagere(stormodtagere){
   withWriteTransaction(function(client, done){
     async.series(
       [
+        //Delete all
         asyncExecSQL(client, "DELETE FROM stormodtagere"),
+        //Insert all
         asyncExecSQL(client, createInsertStormodtagereSQL(stormodtagere)),
       ],
       function(err){
@@ -75,13 +69,6 @@ function createInsertStormodtagereSQL(stormodtagere){
     }).join(",\n");
 }
 
-function createInsertPostnumreSQL(stormodtagere){
-  return "INSERT INTO postnumre VALUES\n"+
-    _.map(stormodtagere, function(sm){
-      return util.format("  ('%s', '%s', '%s', 'null', 'true')",
-                         sm.Firmapostnr, now, sm.Bynavn);
-    }).join(",\n");
-}
 
 function asyncExecSQL(client, sql){
   return function(cb){

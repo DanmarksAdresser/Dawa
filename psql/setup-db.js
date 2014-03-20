@@ -30,9 +30,6 @@ cfg.newline = (process.argv[6] === 'crlf') ? '\r\n' : '\n';
 
 winston.info("Configuration: %j", cfg, {});
 
-var postnummerTranslation = {'PostCodeIdentifier': 'nr','VersionId': 'version' ,'DistrictName': 'navn'};
-
-
 var tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresser'},
   {name: 'stormodtagere'},
@@ -148,16 +145,9 @@ Inserter.prototype._write = function(row, encoding, cb) {
 
 function insertRows(rows, tablename, dbClient, cb){
   if (rows.length > 0){
-    var fields = _.keys(rows[0]);
-    var fieldNames = _.map(fields, function(name){
-      if (postnummerTranslation[name]){
-        return postnummerTranslation[name];
-      } else {
-        return name;
-      }
-    });
+    var fieldNames = _.keys(rows[0]);
     var valueLines = _.map(rows, function(row){
-      return valueLine(_.map(fields, function(field){
+      return valueLine(_.map(fieldNames, function(field){
         return emptyToNull(row[field]);
       }));
     });
