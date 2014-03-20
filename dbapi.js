@@ -165,9 +165,12 @@ exports.withRollbackTransaction = function(cb) {
         done();
         return cb(err);
       }
-      cb(err, client, function() {
+      cb(err, client, function(cb) {
         client.query('ROLLBACK', function(err) {});
-        return done();
+        done();
+        if(cb) {
+          cb(null);
+        }
       });
     });
   });
