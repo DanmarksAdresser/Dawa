@@ -27,7 +27,7 @@ CREATE TYPE DagiTemaRef AS (
   navn varchar(255)
 );
 
+DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser;
+CREATE TEXT SEARCH CONFIGURATION adresser (copy=simple);
+ALTER  TEXT SEARCH CONFIGURATION adresser ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;
 
-DROP   TEXT SEARCH CONFIGURATION IF EXISTS vejnavne;
-CREATE TEXT SEARCH CONFIGURATION vejnavne (copy=simple);
-ALTER  TEXT SEARCH CONFIGURATION vejnavne ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;

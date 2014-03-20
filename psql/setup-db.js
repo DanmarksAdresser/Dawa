@@ -34,12 +34,12 @@ winston.info("Configuration: %j", CFG, {});
 
 // Note, the sequence of the tables matter!
 var tableSpecs = normaliseTableSpec([
-  {name: 'adgangsadresser'},
-  {name: 'stormodtagere'},
+  {name: 'dagitemaer'},
   {name: 'vejstykker'},
   {name: 'postnumre'},
+  {name: 'stormodtagere'},
+  {name: 'adgangsadresser'},
   {name: 'enhedsadresser'},
-  {name: 'dagitemaer'},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerview',             scriptFile: 'vejstykker-view.sql',        type: 'view'},
@@ -64,8 +64,6 @@ function main(){
       loadCsv('AddressSpecific.csv.gz', 'enhedsadresser'),
       loadCsv('AddressAccess.csv.gz',   'adgangsadresser'),
 
-      // TODO: these scripts should be trigger-based instead!
-      psqlScript('base-postload-updates.sql'),
       psqlScript('vejstykker-postnumre-load.sql'),
       psqlScript('supplerendebynavne-load.sql'),
 

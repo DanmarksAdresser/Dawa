@@ -71,17 +71,6 @@ CREATE TABLE GriddedDagiTemaer(
 CREATE INDEX ON GriddedDagiTemaer(tema, kode);
 CREATE INDEX ON GriddedDagiTemaer USING GIST(geom);
 
-CREATE OR REPLACE FUNCTION update_dagi_temaer_tsv()
-  RETURNS TRIGGER AS $$
-BEGIN
-  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
-  THEN
-    NEW.tsv = to_tsvector('danish', NEW.kode || ' ' || COALESCE(NEW.navn, ''));
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE PLPGSQL;
-
 CREATE OR REPLACE FUNCTION update_gridded_dagi_temaer()
   RETURNS TRIGGER AS $$
 BEGIN
@@ -134,10 +123,6 @@ BEGIN
   RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS update_dagi_temaer_tsv ON DagiTemaer;
-CREATE TRIGGER update_dagi_temaer_tsv BEFORE INSERT OR UPDATE ON DagiTemaer
-FOR EACH ROW EXECUTE PROCEDURE update_dagi_temaer_tsv();
 
 DROP TRIGGER IF EXISTS update_adgangsadresser_dagi_rel_adgangsadresser ON adgangsadresser;
 CREATE TRIGGER update_adgangsadresser_dagi_rel_adgangsadresser AFTER INSERT OR UPDATE OR DELETE ON adgangsadresser

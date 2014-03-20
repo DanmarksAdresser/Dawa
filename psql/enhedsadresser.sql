@@ -25,6 +25,50 @@ CREATE FUNCTION enhedsadresser_init() RETURNS void
 LANGUAGE plpgsql AS
 $$
   BEGIN
-    NULL;
+    UPDATE enhedsadresser
+    SET tsv = adgangsadresser.tsv ||
+              setweight(to_tsvector('adresser',
+                                    COALESCE(etage, '') || ' ' ||
+                                    COALESCE(doer, '')), 'B')
+    FROM
+      adgangsadresser
+    WHERE
+      adgangsadresser.id = adgangsadresseid;
   END;
 $$;
+
+-- Trigger which maintains the tsv column
+DROP FUNCTION IF EXISTS enhedsadresser_tsv_update() CASCADE;
+CREATE OR REPLACE FUNCTION enhedsadresser_tsv_update()
+  RETURNS TRIGGER AS $$
+BEGIN
+  NEW.tsv = (SELECT adgangsadresser.tsv ||
+                    setweight(to_tsvector('adresser',
+                                          COALESCE(NEW.etage, '') || ' ' ||
+                                          COALESCE(NEW.doer, '')), 'B')
+  FROM
+  adgangsadresser
+  WHERE
+    adgangsadresser.id = NEW.adgangsadresseid);
+  RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER enhedsadresser_tsv_update BEFORE INSERT OR UPDATE
+ON enhedsadresser FOR EACH ROW EXECUTE PROCEDURE
+  enhedsadresser_tsv_update();
+
+
+-- Triggers which maintains the tsv column when adgangs changes
+DROP FUNCTION IF EXISTS enhedsadresser_tsv_update_on_adgangsadresse() CASCADE;
+CREATE OR REPLACE FUNCTION enhedsadresser_tsv_update_on_adgangsadresse()
+  RETURNS TRIGGER AS $$
+BEGIN
+
+  RETURN NULL;
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER enhedsadresser_tsv_update_on_adgangsadresse AFTER INSERT OR UPDATE
+ON adgangsadresser FOR EACH ROW EXECUTE PROCEDURE
+  enhedsadresser_tsv_update_on_adgangsadresse();
