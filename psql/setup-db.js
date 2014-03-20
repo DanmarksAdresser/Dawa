@@ -11,13 +11,15 @@ var spawn    = require('child_process').spawn;
 var zlib     = require('zlib');
 var pg       = require('pg.js');
 
+// Assert the correct arguments
 if (process.argv.length < 6){
   console.log('Usage: node base.js <dbhost> <dbname> <dbuser> <data-dir> ["crlf"]');
   console.log(process.argv);
-  process.exit(0);
+  process.exit(1);
 }
 
-var cfg =
+// Setup the configuration
+var CFG =
   {dbhost:  process.argv[2],
    dbname:  process.argv[3],
    dbuser:  process.argv[4],
@@ -25,11 +27,12 @@ var cfg =
    scriptDir: __dirname,
    loadBatchSize: 1000,
   };
-cfg.connectiosnString = 'postgres://'+cfg.dbuser+'@'+cfg.dbhost+':5432/'+cfg.dbname;
-cfg.newline = (process.argv[6] === 'crlf') ? '\r\n' : '\n';
+CFG.connectiosnString = 'postgres://'+CFG.dbuser+'@'+CFG.dbhost+':5432/'+CFG.dbname;
+CFG.newline = (process.argv[6] === 'crlf') ? '\r\n' : '\n';
 
-winston.info("Configuration: %j", cfg, {});
+winston.info("Configuration: %j", CFG, {});
 
+// Note, the sequence of the tables matter!
 var tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresser'},
   {name: 'stormodtagere'},
@@ -38,68 +41,58 @@ var tableSpecs = normaliseTableSpec([
   {name: 'enhedsadresser'},
   {name: 'dagitemaer'},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
-  {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql', type: 'view'},
-  {name: 'vejstykkerview',             scriptFile: 'vejstykker-view.sql', type: 'view'},
+  {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
+  {name: 'vejstykkerview',             scriptFile: 'vejstykker-view.sql',        type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql'},
   {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql'},
   {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql'},
   {name: 'adgangsadresserdagirel',     scriptFile: 'adgangsadresser-dagi-view.sql'},
   {name: 'griddeddagitemaer',          scriptFile: 'gridded-dagi-view.sql'},
-  {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql', type: 'view'},
-  {name: 'adresser',                   scriptFile: 'adresse-view.sql', type: 'view'},
+  {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
+  {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
 ]);
 
-
-
-function main(cfg){
+function main(){
   async.series(
     [
-      script(cfg, 'misc.sql'),
+      psqlScript('misc.sql'),
       loadSchemas,
       disableTriggers,
 
-      load  (cfg, 'PostCode.csv.gz',        'postnumre'),
-      load  (cfg, 'RoadName.csv.gz',        'vejstykker'),
-      load  (cfg, 'AddressSpecific.csv.gz', 'enhedsadresser'),
-      load  (cfg, 'AddressAccess.csv.gz',   'adgangsadresser'),
+      loadCsv('PostCode.csv.gz',        'postnumre'),
+      loadCsv('RoadName.csv.gz',        'vejstykker'),
+      loadCsv('AddressSpecific.csv.gz', 'enhedsadresser'),
+      loadCsv('AddressAccess.csv.gz',   'adgangsadresser'),
 
-      // TODO: these scripts should be trigger based instead!
-      script(cfg, 'base-postload-updates.sql'),
-      script(cfg, 'vejstykker-postnumre-load.sql'),
-      script(cfg, 'supplerendebynavne-load.sql'),
+      // TODO: these scripts should be trigger-based instead!
+      psqlScript('base-postload-updates.sql'),
+      psqlScript('vejstykker-postnumre-load.sql'),
+      psqlScript('supplerendebynavne-load.sql'),
 
       initializeTables,
       enableTriggers,
-      script(cfg, 'load-data-into-dagitemaer.sql'),
+      psqlScript('load-data-into-dagitemaer.sql'),
       function(cb) {console.log('Main is done!'); cb(); },
      ],
     function(err){
-      doExitOnErr(err);
+      exitOnErr(err);
     });
 }
 
-function doExitOnErr(err, cb){
-  if (err){
-    winston.error("Error: %j", err, {});
-    process.exit(1);
-  }
-}
-
-function load(cfg, f, tablename){
-  var file = cfg.dataDir+f;
+function loadCsv(gzCsvFile, tablename){
+  var file = CFG.dataDir+gzCsvFile;
   return function(cb){
-    var client = new pg.Client(cfg.connectiosnString);
+    var client = new pg.Client(CFG.connectiosnString);
     client.connect(function(err){
-      doExitOnErr(err);
+      exitOnErr(err);
 
       var fsStream = fs.createReadStream(file);
       var gzipStream = zlib.createGunzip();
       var csvStream = csv({delimiter: ';',
-                           newline: cfg.newline,
+                           newline: CFG.newline,
                            columns: true,
                            objectMode: true});
-      var insertStream = new Inserter(tablename, client, cfg.loadBatchSize, {objectMode: true});
-
+      var insertStream = new Inserter(tablename, client, CFG.loadBatchSize, {objectMode: true});
       insertStream.on('finish', function(){
         insertRows(insertStream.rowBuffer, insertStream.tablename, insertStream.dbClient,
                    function(){ client.end(); console.log("\nrows="+(csvStream.lineNo-1)); cb(); });
@@ -127,7 +120,9 @@ Inserter.prototype._write = function(row, encoding, cb) {
   this.rowBuffer.push(row);
   if (this.rowBuffer.length === this.batchSize)
   {
-    if (this.count % 10000 === 0) {
+    if (this.count % 10000 === 0)
+    {
+      // Print progress
       var now = new Date().getTime();
       console.log("rows: "+this.count/1000+'K, '+Math.round((10000/(now-this.now)*1000))+" rows/sec"+
                   ", total: "+Math.round((now-this.start)/1000)+" sec");
@@ -148,7 +143,7 @@ function insertRows(rows, tablename, dbClient, cb){
     var fieldNames = _.keys(rows[0]);
     var valueLines = _.map(rows, function(row){
       return valueLine(_.map(fieldNames, function(field){
-        return emptyToNull(row[field]);
+        return emptyToNullAndEscapePing(row[field]);
       }));
     });
     var sql = "INSERT INTO "+tablename+"("+fieldNames.join(",")+") VALUES\n  "+valueLines.join(',\n  ');
@@ -160,7 +155,7 @@ function valueLine(values){
   return "("+values.join(",")+")";
 }
 
-function emptyToNull(val){
+function emptyToNullAndEscapePing(val){
       if (val === ''){
         return 'null';
       } else {
@@ -190,9 +185,9 @@ function execSQL(sql, client, echo, done){
   }
 }
 
-function script(cfg, scriptfile){
+function psqlScript(scriptfile){
   return function(cb){
-    var ls = spawn('psql', ['-h', cfg.dbhost, '-f', cfg.scriptDir+"/"+scriptfile, cfg.dbname, cfg.dbuser]);
+    var ls = spawn('psql', ['-h', CFG.dbhost, '-f', CFG.scriptDir+"/"+scriptfile, CFG.dbname, CFG.dbuser]);
     ls.stdout.on('data', function (data) {
       console.log(""+data);
     });
@@ -210,18 +205,17 @@ function script(cfg, scriptfile){
   };
 }
 
-
 function forAllTableSpecs(callback, done){
-  var client = new pg.Client(cfg.connectiosnString);
+  var client = new pg.Client(CFG.connectiosnString);
   client.connect(function(err){
-    doExitOnErr(err);
+    exitOnErr(err);
     async.eachSeries(
       tableSpecs,
       function(spec, cb){
         callback(client, spec, cb);
       },
       function(err){
-        doExitOnErr(err);
+        exitOnErr(err);
         client.end();
         done();
       });
@@ -231,7 +225,7 @@ function forAllTableSpecs(callback, done){
 function loadSchemas(done){
   forAllTableSpecs(
     function (client, spec, cb){
-      return (script(cfg, spec.scriptFile))(cb);
+      return (psqlScript(spec.scriptFile))(cb);
     },
     done);
 }
@@ -287,4 +281,11 @@ function normaliseTableSpec(specs){
     });
 }
 
-main(cfg);
+function exitOnErr(err, cb){
+  if (err){
+    winston.error("Error: %j", err, {});
+    process.exit(1);
+  }
+}
+
+main();
