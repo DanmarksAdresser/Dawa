@@ -42,7 +42,6 @@ $$;
 
 -- And then wrap an aggregate around it
 DROP AGGREGATE IF EXISTS public.first(anyelement) CASCADE;
-
 CREATE AGGREGATE public.first (
         sfunc    = public.first_agg,
         basetype = anyelement,
