@@ -186,7 +186,10 @@ exports.withWriteTransaction = function(cb) {
         done();
         return cb(err);
       }
-      cb(err, client, function(committedCallback) {
+      cb(err, client, function(err, committedCallback) {
+        if(err) {
+          return done(err);
+        }
         client.query('COMMIT', committedCallback);
         return done();
       });

@@ -140,7 +140,7 @@ function handleSupplerendebynavnEvent(sqlClient, event, callback) {
   return handleIntervalEvent(sqlClient, event, createSupplerendebynavnUpdate, callback);
 }
 var eventHandlers = {
-  adresse: handleSimpleEvent,
+  enhedsadresse: handleSimpleEvent,
   adgangsadresse: handleSimpleEvent,
   vejnavn: function(sqlClient, event, callback) {
     return performSqlQuery(sqlClient,event,  datamodels.vejstykke, allRenames.vejnavn, callback);

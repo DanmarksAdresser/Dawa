@@ -1,6 +1,6 @@
 "use strict";
 
-var handleBbrEvent = require('../../eventHandling/handleBbrEvent');
+var handleBbrEvent = require('../../importBbrEvents/handleBbrEvent');
 var dbapi = require('../../dbapi');
 var datamodels = require('../../crud/datamodel');
 var crud = require('../../crud/crud');
@@ -85,7 +85,7 @@ describe('Håndtering af BBR events', function() {
       });
     });
     afterEach(function(done) {
-      transactionDone(done);
+      transactionDone(null, done);
     });
   });
   describe('vejnavn events', function() {

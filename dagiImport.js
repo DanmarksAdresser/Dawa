@@ -98,7 +98,7 @@ function putDagiTemaer(temaNavn, temaer, callback) {
           }, callback);
         },
         function(callback) {
-          done(callback);
+          done(null, callback);
         }
       ], callback);
     });
