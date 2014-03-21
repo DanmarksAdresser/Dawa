@@ -100,34 +100,6 @@ BEGIN
 END;
 $$ LANGUAGE PLPGSQL;
 
-CREATE OR REPLACE FUNCTION update_adgangsadresser_dagi_rel_adgangsadresser()
-  RETURNS TRIGGER AS $$
-BEGIN
-  IF (TG_OP = 'UPDATE' AND OLD.geom = NEW.geom) THEN
-    RETURN NULL;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'
-  THEN
-    DELETE FROM AdgangsadresserDagiRel WHERE adgangsadresseid = OLD.id;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
-  THEN
-    INSERT INTO AdgangsadresserDagiRel (adgangsadresseid, dagiTema, dagiKode)
-      (SELECT DISTINCT
-         Adgangsadresser.id,
-         Dagitemaer.tema,
-         Dagitemaer.kode
-       FROM Adgangsadresser, GriddedDagitemaer
-       WHERE Adgangsadresser.id = NEW.id AND ST_Contains(GriddedDagitemaer.geom, Adgangsadresser.geom));
-  END IF;
-  RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS update_adgangsadresser_dagi_rel_adgangsadresser ON adgangsadresser;
-CREATE TRIGGER update_adgangsadresser_dagi_rel_adgangsadresser AFTER INSERT OR UPDATE OR DELETE ON adgangsadresser
-FOR EACH ROW EXECUTE PROCEDURE update_adgangsadresser_dagi_rel_adgangsadresser();
-
 DROP TRIGGER IF EXISTS update_adgangsadresser_dagi_rel_dagitemaer ON DagiTemaer;
 DROP TRIGGER IF EXISTS update_gridded_dagi_temaer ON DagiTemaer;
 CREATE TRIGGER update_gridded_dagi_temaer AFTER INSERT OR UPDATE OR DELETE ON DagiTemaer

@@ -5,7 +5,7 @@
 DROP TABLE IF EXISTS postnumre CASCADE;
 CREATE TABLE IF NOT EXISTS postnumre (
   nr integer NOT NULL PRIMARY KEY,
-  version VARCHAR(255) NOT NULL,
+  version VARCHAR(255),
   navn VARCHAR(20) NOT NULL,
   tsv tsvector,
   stormodtager boolean NOT NULL DEFAULT false

@@ -5,11 +5,11 @@
 DROP TABLE IF EXISTS enhedsadresser;
 CREATE TABLE IF NOT EXISTS enhedsadresser (
   id uuid NOT NULL PRIMARY KEY,
-  version timestamp NOT NULL,
+  version timestamp,
   adgangsadresseid UUID NOT NULL,
   oprettet timestamp,
   ikraftfra timestamp,
-  aendret timestamp NOT NULL,
+  aendret timestamp,
   etage VARCHAR(3),
   doer VARCHAR(4),
   tsv tsvector
@@ -64,7 +64,15 @@ DROP FUNCTION IF EXISTS enhedsadresser_tsv_update_on_adgangsadresse() CASCADE;
 CREATE OR REPLACE FUNCTION enhedsadresser_tsv_update_on_adgangsadresse()
   RETURNS TRIGGER AS $$
 BEGIN
-
+  UPDATE enhedsadresser
+  SET tsv = adgangsadresser.tsv ||
+            setweight(to_tsvector('adresser',
+                                  COALESCE(etage, '') || ' ' ||
+                                  COALESCE(doer, '')), 'B')
+  FROM
+    adgangsadresser
+  WHERE
+    adgangsadresseid = NEW.id;
   RETURN NULL;
 END;
 $$ LANGUAGE PLPGSQL;
