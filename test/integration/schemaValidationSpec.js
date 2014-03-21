@@ -13,7 +13,7 @@ require('../../apiSpecification/allSpecs');
 
 var valuesNeverExpectedToBeSeen = {
   postnumre: {
-    stormodtageradresse: true
+    stormodtageradresser: true
   },
   adgangsadresser: {
     sogn: {
@@ -119,7 +119,7 @@ describe('Validering af JSON-formatteret output', function() {
         });
       });
     });
-    it('Alle felter i' + nameAndKey.plural + ' skal ses mindst en gang', function(specDone) {
+    it('Alle felter i ' + nameAndKey.plural + ' skal ses mindst en gang', function(specDone) {
       var schema = jsonRepresentation.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
