@@ -38,31 +38,30 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
   async.doWhilst(function(callback) {
     foundEvent = false;
     errorHappened = false;
-    var lastProcessedSeqNum, client, transactionDone, event;
-    async.series([
+    var transactionDone;
+    async.waterfall([
       // start the transaction
       function(callback) {
-        dbapi.withWriteTransaction(function(err, _client, _transactionDone) {
+        dbapi.withWriteTransaction(function(err, client, _transactionDone) {
           if(err) {
             return callback(err);
           }
-          client = _client;
           transactionDone = _transactionDone;
-          callback(null);
+          callback(null, client);
         });
       },
       // get the sequence number of the last processed event
-      function(callback) {
+      function(client, callback) {
         client.query("SELECT MAX(sekvensnummer) FROM bbr_events", [], function(err, result) {
           if(err) {
             return callback(err);
           }
-          lastProcessedSeqNum = result.rows[0].max;
-          callback(null);
+          var lastProcessedSeqNum = result.rows[0].max;
+          callback(null, client, lastProcessedSeqNum);
         });
       },
       // fetch the event from dynamodb
-      function(callback) {
+      function(client, lastProcessedSeqNum, callback) {
         var nextSeqNum;
         console.log("Last processed " + JSON.stringify(lastProcessedSeqNum));
         if(lastProcessedSeqNum) {
@@ -92,15 +91,16 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
           if(err) {
             return callback(err);
           }
+          var event = null;
           if(result.Items.length === 1) {
             event = JSON.parse(result.Items[0].data.S);
             foundEvent = true;
           }
-          callback(null);
+          callback(null, client, event);
         });
       },
       // process the event
-      function(callback) {
+      function(client, event, callback) {
         if(foundEvent) {
           processEvent(client, event, callback);
         }
