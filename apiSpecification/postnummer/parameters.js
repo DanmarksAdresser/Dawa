@@ -25,6 +25,13 @@ module.exports = {
       {
         name: 'kommune',
         multi: true
+      },
+      {
+        name: 'stormodtagere',
+        defaultValue: 'false',
+        schema: {
+          "enum": ['true', 'false']
+        }
       }
     ])
 };

@@ -23,7 +23,10 @@ var columns = {
     where: 'n.kommunekode'
   },
   stormodtageradresser: {
-    select: 'first(s.stormodtageradresser)'
+    select: 'first(s.stormodtageradresser)',
+  },
+  stormodtagere: {
+    where: 'p.stormodtager'
   },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {

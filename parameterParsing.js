@@ -9,6 +9,12 @@ var _           = require('underscore');
 /******************************************************************************/
 
 exports.parseParameters = function(params, parameterSpec) {
+  _.each(_.keys(parameterSpec),
+         function(name){
+           if (!params[name] && parameterSpec[name].defaultValue){
+             params[name] = parameterSpec[name].defaultValue;
+           }
+         });
   var paramNames = _.filter(_.keys(params), function(name) {
     return parameterSpec[name] ? true : false;
   });
@@ -29,7 +35,8 @@ exports.parseParameters = function(params, parameterSpec) {
 function parseParameterMulti(valString, paramSpec) {
   if (paramSpec.multi === true)
   {
-    return _.map(valString.split('|'), function(str){ return parseParameter(str, paramSpec); });
+    return {_multi_: true,
+            values: _.map(valString.split('|'), function(str){ return parseParameter(str, paramSpec); })};
   }
   else
   {

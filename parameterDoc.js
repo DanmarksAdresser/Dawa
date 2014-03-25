@@ -496,7 +496,9 @@ var postnummerParameters = [{name: 'nr',
                              examples: ['0101']},
                             {name: 'q',
                              doc: 'Søgetekst. Der søges i postnummernavnet. Alle ord i søgeteksten skal matche postnummernavnet. ' +
-                             'Wildcard * er tilladt i slutningen af hvert ord.'}];
+                             'Wildcard * er tilladt i slutningen af hvert ord.'},
+                            {name: 'stormodtagere',
+                             doc: "Hvis denne parameter er sat til 'true', vil stormodtager-postnumre medtages i resultatet."}];
 
 var postnummerDoc = {
   docVersion: 2,

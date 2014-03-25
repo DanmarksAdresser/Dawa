@@ -81,20 +81,26 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
   return function(sqlParts, params) {
     parameterSpec.forEach(function (parameter) {
       var name = parameter.name;
-      var values = params[name];
+      var value = params[name];
 
-      if (values !== undefined)
+      if (value !== undefined)
       {
-        if (values.length === 1)
+        if (value._multi_ === undefined)
         {
-          var value = values[0];
+          if (name === 'stormodtagere' && value === "true")
+          {
+            // when stormodtagere is true both normal and
+            // stormodtager postnumbers should be returned -- no
+            // where clause.
+            return;
+          }
           var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
           var column = sqlUtil.getColumnNameForWhere(columnSpec, name);
           sqlParts.whereClauses.push(column + " = " + parameterAlias);
         }
         else
         {
-          var orClauses = _.map(values,
+          var orClauses = _.map(value.values,
             function(value){
               var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
               var column = sqlUtil.getColumnNameForWhere(columnSpec, name);

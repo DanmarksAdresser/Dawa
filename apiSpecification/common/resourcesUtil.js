@@ -88,14 +88,7 @@ exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameter
     sqlModel: sqlModel,
     singleResult: true,
     chooseRepresentation: exports.chooseRepresentationForQuery,
-    processParameters:  function(params) {
-      // the id parameters are not multi parameters, but
-      // the sql layer expects them to be, because the same parameters
-      // are also used for filtering
-      nameAndKey.key.forEach(function(keyPart) {
-        params[keyPart] = [params[keyPart]];
-      });
-    }
+    processParameters:  function(params) { return; }
   };
 };
 

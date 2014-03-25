@@ -81,6 +81,12 @@ var sampleParameters = {
           return kommune.kode === kode4String(kommunekode);
         });
       }
+    },
+    stormodtagere: {
+      values: ['true', 'false'],
+      verifier: function(postnummer, paramVal) {
+        return paramVal ? true : postnummer.stormodtageradresser === null;
+      }
     }
   },
   supplerendebynavn: {
