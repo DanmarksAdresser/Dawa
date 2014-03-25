@@ -1,6 +1,6 @@
 "use strict";
 
-var dagi = require('../../dagi');
+var dagi = require('../../dagiImport/dagi');
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');

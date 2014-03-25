@@ -1,6 +1,6 @@
 "use strict";
 
-var dagi = require('../../dagi');
+var dagi = require('../../dagiImport/dagi');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
 
