@@ -12,11 +12,10 @@ Se [DAWA](http://dawa.aws.dk)
 install
 =======
 
-### Install mongodb, nodejs, PostgreSQL og npm
+### Install nodejs, PostgreSQL og npm
 
 ##### On Ubuntu 12.04
 ```
- $> sudo apt-get install mongodb
  $> sudo apt-get install python-software-properties python g++ make
  $> sudo add-apt-repository ppa:chris-lea/node.js # needed for Ubuntu 12.04, which doesn't have the newest npm
  $> sudo apt-get update
@@ -50,7 +49,7 @@ Hent data filer fra aws.dk, og kør psql/setupdb.bash:
 ```
 
 ### Indlæsning af DAGI temaer
-Scriptet dagiImport.js importerer temaerne (kommuner, regioner, sogne etc.) fra kortforsyningen:
+Scriptet dagiImport/dagiImport.js importerer temaerne (kommuner, regioner, sogne etc.) fra kortforsyningen:
 
 
 ```
@@ -68,8 +67,8 @@ Det tager ca. en time at indlæse DAGI-temaerne.
 
 ### Kør tests
 ```
- $> connectionstring=mongodb://<Mongo-settings> pgConnectionUrl=postgres://<PG-settings> npm test
- # Ex: connectionstring=mongodb://localhost/dawatest pgConnectionUrl=postgres://dawa:dawa@localhost:5432/dawa
+ $>  pgConnectionUrl=postgres://<PG-settings> npm test
+ # Ex:  pgConnectionUrl=postgres://dawa:dawa@localhost:5432/dawa
 ```
 
 ### Deployment
