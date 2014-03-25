@@ -4,6 +4,10 @@ var async = require('async');
 var dbapi = require('../dbapi');
 var crud = require('../crud/crud');
 var handleBbrEvent = require('./handleBbrEvent');
+var winston = require('winston');
+var eventSchemas = require('../bbr-facade/eventSchemas');
+var ZSchema = require("z-schema");
+
 
 var bbrEventsDatamodel = {
   table: 'bbr_events',
@@ -19,11 +23,19 @@ function storeEvent(client, event, callback) {
     created: new Date().toISOString(),
     data: JSON.stringify(event.data)
   };
+  winston.debug("storing bbr event in bbr_events table");
   crud.create(client, bbrEventsDatamodel, dbRow, callback);
 }
 
 function processEvent(client, event, callback) {
+  winston.info("Processing event with sequence number %d", event.sekvensnummer);
   async.series([
+    function(callback) {
+      console.log(JSON.stringify(event));
+      console.log(JSON.stringify(eventSchemas[event.type]));
+      var validator = new ZSchema();
+      validator.validate(event, eventSchemas[event.type], callback);
+    },
     function(callback) {
       storeEvent(client, event, callback);
     },
@@ -34,6 +46,7 @@ function processEvent(client, event, callback) {
 }
 
 module.exports = function(dd, tablename, initialSequenceNumber, callback) {
+  winston.debug("importing bbr events, initial sequence number %d", initialSequenceNumber);
   var foundEvent, errorHappened;
   async.doWhilst(function(callback) {
     foundEvent = false;
@@ -57,6 +70,7 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
             return callback(err);
           }
           var lastProcessedSeqNum = result.rows[0].max;
+          winston.debug("Last processed event number: %d", lastProcessedSeqNum);
           callback(null, client, lastProcessedSeqNum);
         });
       },
@@ -70,6 +84,7 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
         else {
           nextSeqNum = initialSequenceNumber + 1;
         }
+        winston.debug("Next sequence number: %d", nextSeqNum);
         var params = {
           TableName: tablename,
           KeyConditions: {
@@ -113,12 +128,15 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
         errorHappened = true;
       }
       // commit / rollback transaction
+      winston.debug("Committing transaction, error: " + err, err);
       transactionDone(err, callback);
     });
   }, function() {
     return foundEvent && !errorHappened;
   }, function(err) {
-    console.log(err);
+    if(err) {
+      winston.error("An error happened");
+    }
     callback(err);
   });
 };

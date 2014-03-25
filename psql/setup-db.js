@@ -34,6 +34,7 @@ winston.info("Configuration: %j", CFG, {});
 
 // Note, the sequence of the tables matter!
 var tableSpecs = normaliseTableSpec([
+  {name: 'transaction_history'},
   {name: 'bbr_events'},
   {name: 'dagitemaer'},
   {name: 'vejstykker'},

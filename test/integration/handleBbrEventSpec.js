@@ -16,7 +16,7 @@ describe('Håndtering af BBR events', function() {
       "data": {
         "kommunekode": 420,
         "vejkode": 481,
-        "interval": [{
+        "intervaller": [{
           "husnrFra": "4",
           "husnrTil": "8",
           "side": "lige",

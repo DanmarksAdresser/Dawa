@@ -183,15 +183,26 @@ exports.withWriteTransaction = function(cb) {
     }
     client.query('BEGIN', [], function(err) {
       if(err) {
-        done();
+        done(err);
         return cb(err);
       }
       cb(err, client, function(err, committedCallback) {
         if(err) {
-          return done(err);
+          winston.error("Error during transaction, discarding postgres connection", err);
+          done(err);
+          committedCallback(err);
+          return;
         }
-        client.query('COMMIT', committedCallback);
-        return done();
+        client.query('COMMIT', function(err) {
+          if(err) {
+            winston.error("Error when committing transaction: %j", err);
+          }
+          else {
+            winston.debug("write transaction commited, err: " + JSON.stringify(err));
+          }
+          done(err);
+          committedCallback(err);
+        });
       });
     });
   });

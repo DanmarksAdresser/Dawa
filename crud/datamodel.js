@@ -1,12 +1,14 @@
 module.exports = {
   adgangsadresse: {
     table: 'adgangsadresser',
-    columns: ['id', 'kommunekode', 'vejkode', 'husnr', 'supplerendebynavn', 'postnr'],
+    columns: ['id', 'kommunekode', 'vejkode', 'husnr', 'supplerendebynavn', 'postnr', 'oprettet', 'aendret', 'ikraftfra', 'ejerlavkode', 'ejerlavnavn',
+    'matrikelnr', 'esrejendomsnr', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long', 'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning',
+    'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
     key: ['id']
   },
   enhedsadresse: {
     table: 'enhedsadresser',
-    columns: ['id', 'etage', 'doer', 'adgangsadresseid'],
+    columns: ['id', 'oprettet', 'aendret', 'etage', 'doer', 'adgangsadresseid'],
     key: ['id']
   },
   postnummer: {

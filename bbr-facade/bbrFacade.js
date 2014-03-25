@@ -7,7 +7,9 @@ var expressWinston = require('express-winston');
 var _              = require('underscore');
 var ZSchema        = require("z-schema");
 var AWS            = require('aws-sdk');
-var util           = require('util');
+var async = require('async');
+var dynamoEvents = require('./dynamoEvents');
+var eventSchemas = require('./eventSchemas');
 
 
 /********************************************************************************
@@ -16,8 +18,8 @@ var util           = require('util');
 
 var dd = new AWS.DynamoDB({apiVersion      : '2012-08-10',
                            region          : 'eu-west-1',
-                           accessKeyId     : process.env.accessKeyId,
-                           secretAccessKey : process.env.secretAccessKey});
+                           accessKeyId     : process.env.awsAccessKeyId,
+                           secretAccessKey : process.env.awsSecretAccessKey});
 
 var TABLENAME = process.env.dynamoDBTableName;
 var listenPort = process.env.PORT || 3333;
@@ -48,7 +50,7 @@ app.get('/', function (req, res) {
 
 // Can be used for monitoring
 app.get('/sidsteSekvensnummer', function (req, res) {
-  getLatest(function(error, latest){
+  dynamoEvents.getLatest(dd, TABLENAME, function(error, latest){
     if (error)
     {
       winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
@@ -68,10 +70,49 @@ app.get('/sidsteSekvensnummer', function (req, res) {
   });
 });
 
+function validateAndStore(haendelse, res, latest) {
+  validateSchema(
+    haendelse,
+    function (error) {
+      if (error) {
+        winston.info(error);
+        res.send(400, error);
+      }
+      else {
+        validateSequenceNumber(haendelse, latest, function (error, exists, seqNr) {
+          if (error) {
+            winston.info(error);
+            res.send(400, error);
+          }
+          else {
+            if (exists) {
+              res.send('Hændelse modtaget med sekvensnummer=' + seqNr);
+            }
+            else {
+              dynamoEvents.putItem(dd, TABLENAME, seqNr, haendelse,
+                function (error, data) {
+                  if (error) {
+                    winston.error('DynamoDB put ERROR: %j %j', error, data, {});
+                    res.send(500, error);
+                  }
+                  else {
+                    res.send('Hændelse modtaget med sekvensnummer=' + seqNr);
+                  }
+                });
+            }
+          }
+        });
+      }
+    });
+}
 app.post('/haendelse', function (req, res) {
   var haendelse = req.body;
   winston.info('Received haendelse: %j', haendelse, {});
-  getLatest(function(error, latest){
+  async.waterfall([
+  ], function(err) {
+
+  });
+  dynamoEvents.getLatest(dd, TABLENAME, function(error, latest){
     if (error)
     {
       winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
@@ -80,48 +121,7 @@ app.post('/haendelse', function (req, res) {
     else
     {
       winston.info('DynamoDB query latest: %j %j', error, latest, {});
-      validateSchema(
-        haendelse,
-        function(error)
-        {
-          if (error)
-          {
-            winston.info(error);
-            res.send(400, error);
-          }
-          else
-          {
-            validateSequenceNumber(haendelse, latest, function(error, exists, seqNr){
-              if (error)
-              {
-                winston.info(error);
-                res.send(400, error);
-              }
-              else
-              {
-                if (exists)
-                {
-                  res.send('Hændelse modtaget med sekvensnummer='+seqNr);
-                }
-                else
-                {
-                  putItem(seqNr,  haendelse,
-                          function(error, data){
-                            if (error)
-                            {
-                              winston.error('DynamoDB put ERROR: %j %j', error, data, {});
-                              res.send(500, error);
-                            }
-                            else
-                            {
-                              res.send('Hændelse modtaget med sekvensnummer='+seqNr);
-                            }
-                          });
-                }
-              }
-            });
-          }
-        });
+      validateAndStore(haendelse, res, latest);
     }
   });
 });
@@ -168,53 +168,6 @@ function validateSequenceNumber(haendelse, latest, cb){
   }
 }
 
-function putItem(seqNr, data, cb) {
-  var item = {key:   {'S': 'haendelser' },
-              seqnr: {'N': ''+seqNr },
-              data:  {'S': JSON.stringify(data)}};
-  winston.info('Putting item: %j', item, {});
-  dd.putItem({TableName: TABLENAME,
-              Expected: {seqnr: {Exists: false}},
-              Item: item},
-             function(error, latest){
-               if (error)
-               {
-                 cb({type: 'InternalServerError',
-                     title: 'Error querying DynamoDB',
-                     details: util.format('Error reading from DynamoDB error=%j data=%j', error, latest)},
-                    latest);
-               }
-               else
-               {
-                 cb(error, latest);
-               }
-             });
-}
-
-function getLatest(cb) {
-  var params = {TableName: TABLENAME,
-                KeyConditions: {'key': {ComparisonOperator: 'EQ',
-                                        AttributeValueList: [{'S': 'haendelser' }]}},
-                ConsistentRead: true,
-                ScanIndexForward: false,
-                Limit: 1,
-               };
-  dd.query(params, function(error, latest){
-    if (error)
-    {
-      cb({type: 'InternalServerError',
-          title: 'Error querying DynamoDB',
-          details: util.format('Error reading from DynamoDB error=%j data=%j', error, latest)},
-         latest);
-    }
-    else
-    {
-      cb(error, latest);
-    }
-  });
-}
-
-
 /*******************************************************************************
 **** Some more setup. Have to be after the routes ******************************
 *******************************************************************************/
@@ -260,11 +213,12 @@ function validateSchema(json, cb){
 
   try {
     switch (json.type) {
-    case 'enhedsadresse'     : validate(enhedsadresseHaendelseSchema)     ; break;
-    case 'vejnavn'           : validate(vejnavnsHaendelseSchema)          ; break;
-    case 'supplerendebynavn' : validate(supplerendebynavnHaendelseSchema) ; break;
-    case 'postnummer'        : validate(postnummerHaendelseSchema)        ; break;
-    case 'adgangsadresse'    : validate(adgangsadresseHaendelseSchema)    ; break;
+    case 'enhedsadresse'     : validate(eventSchemas.enhedsadresse)     ; break;
+    case 'vejnavn'           : validate(eventSchemas.vejnavn)          ; break;
+    case 'supplerendebynavn' : validate(eventSchemas.supplerendebynavn) ; break;
+    case 'postnummer' : validate(eventSchemas.postnummer); break;
+    case 'postnummertilknytning' : validate(eventSchemas.postnummertilknytning) ; break;
+    case 'adgangsadresse'    : validate(eventSchemas.adgangsadresse)    ; break;
     default:
       return cb({type: 'ValidationError',
                  title: 'Unknown event type',
@@ -281,155 +235,6 @@ function validateSchema(json, cb){
     }
   }
   return cb();
-}
-
-/********************************************************************************
-***** Haendelse schemas *********************************************************
-********************************************************************************/
-
-var vejnavnsHaendelseSchema = requireAllProperties({
-  title : 'Hædelsesskema for vejnavne',
-  type  : 'object',
-  additionalProperties: false,
-  properties : header('vejnavn', {
-    kommunekode      : notNull(integer()),
-    vejkode          : notNull(integer()),
-    navn             : string(),
-    adresseringsnavn : string()
-  })
-});
-
-var adgangsadresseHaendelseSchema = requireAllProperties({
-  title : 'Hændelseskema for adgangsadresser',
-  type  : 'object',
-  additionalProperties: false,
-  properties : header('adgangsadresse', {
-    id                : uuid(),
-    vejkode           : notNull(integer()),
-    husnummer         : notNull(string()),
-    kommunekode       : notNull(integer()),
-    landsejerlav_kode : integer(),
-    landsejerlav_navn : string(),
-    matrikelnr        : string(),
-    esrejendomsnr     : string(),
-    postnummer        : integer(),
-    postdistrikt      : string(),
-    supplerendebynavn : string(),
-    objekttype        : integer(),
-    oprettet          : time(),
-    aendret           : time(),
-    adgangspunkt_id                     : uuid(),
-    adgangspunkt_kilde                  : string(),
-    adgangspunkt_noejagtighedsklasse    : string(),
-    adgangspunkt_tekniskstandard        : string(),
-    adgangspunkt_retning                : number(),
-    adgangspunkt_placering              : string(),
-    adgangspunkt_revisionsdato          : time(),
-    adgangspunkt_etrs89koordinat_oest   : number(),
-    adgangspunkt_etrs89koordinat_nord   : number(),
-    adgangspunkt_wgs84koordinat_bredde  : number(),
-    adgangspunkt_wgs84koordinat_laengde : number(),
-    DDKN_m100 : string(),
-    DDKN_km1  : string(),
-    DDKN_km10 : string()
-  })
-});
-
-var enhedsadresseHaendelseSchema = requireAllProperties({
-  title : 'Hændelseskema for enhedsadresser',
-  type  : 'object',
-  additionalProperties: false,
-  properties : header('enhedsadresse', {
-    id               : uuid(),
-    adgangsadresseid : uuid(),
-    etage            : string(),
-    doer             : string(),
-    objekttype       : integer(),
-    oprettet         : time(),
-    aendret          : time(),
-  })
-});
-
-var postnummerHaendelseSchema = requireAllProperties({
-  title : 'Hændelseskema for postnumre',
-  type  : 'object',
-  additionalProperties: false,
-  properties : headerNoAendringstype('postnummer', {
-    kommunekode : notNull(integer()),
-    vejkode     : notNull(integer()),
-    intervaller : notNull(vejstykkeIntervaller())
-  })
-});
-
-var supplerendebynavnHaendelseSchema = requireAllProperties({
-  title : 'Hændelseskema for supplerende bynavne',
-  type  : 'object',
-  additionalProperties: false,
-  properties : headerNoAendringstype('supplerendebynavn', {
-    kommunekode : notNull(integer()),
-    vejkode     : notNull(integer()),
-    intervaller : notNull(vejstykkeIntervaller())
-  })
-});
-
-
-/********************************************************************************
-***** Schema helper functions ***************************************************
-********************************************************************************/
-
-function header(type, data){
-  var headerData = headerNoAendringstype(type, data);
-  headerData.aendringstype = notNull(enumeration(['aendring','oprettet','nedlagt']));
-  return headerData;
-}
-
-function headerNoAendringstype(type, data){
-  return {type                : notNull(enumeration([type])),
-          sekvensnummer       : integer(),
-          lokaltsekvensnummer : integer(),
-          tidspunkt           : time(),
-          data                : requireAllProperties({type: 'object',
-                                                      additionalProperties: false,
-                                                      properties: data})
-         };
-}
-
-function requireAllProperties(object){
-  var properties = _.keys(object.properties);
-  object.required = properties;
-  return object;
-}
-
-function vejstykkeIntervaller(){
-  return array(requireAllProperties(
-    {type: 'object',
-     additionalProperties: false,
-     properties: {husnrFra : string(),
-                  husnrTil : string,
-                  side     : enumeration(['lige','ulige']),
-                  nummer   : integer()}}));
-}
-
-function notNull(type){
-  if (_.isArray(type.type)){
-    type.type = _.filter(type.type, function(val) { return val !== 'null'; });
-  }
-  if (_.isArray(type.enum)){
-    type.enum = _.filter(type.enum, function(val) { return val !== 'null'; });
-  }
-  return type;
-}
-
-function integer()      {return simpleType('integer');}
-function number()       {return simpleType('number');}
-function string()       {return simpleType('string');}
-function time()         {return string();}
-function simpleType(t)  {return {type: ['null', t]};}
-function array(t)       {return {type: ['null', 'array'], minItems:1, items: t};}
-function enumeration(l) {return {enum: ['null'].concat(l)};}
-function uuid() {
-  return {type: 'string',
-          pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'};
 }
 
 /********************************************************************************

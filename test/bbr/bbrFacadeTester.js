@@ -7,6 +7,8 @@ var _       = require('underscore');
 var async   = require('async');
 var util    = require('util');
 
+var dynamoEvents = require('../../bbr-facade/dynamoEvents');
+
 winston.handleExceptions(new winston.transports.Console());
 
 var TABLE = 'dawatest';
@@ -14,8 +16,8 @@ var hostPort = 'localhost:3333';
 var dd = new AWS.DynamoDB(
   {apiVersion      : '2012-08-10',
    region          : 'eu-west-1',
-   accessKeyId     : process.env.accessKeyId,
-   secretAccessKey : process.env.secretAccessKey});
+   accessKeyId     : process.env.awsAccessKeyId,
+   secretAccessKey : process.env.awsSecretAccessKey});
 
 /*******************************************************************************
 ***** Main function ************************************************************
@@ -25,7 +27,9 @@ function main(){
   async.series(
     [
       print('Starting the BBR Facade test....'),
-      deleteAll,
+      function(callback) {
+        dynamoEvents.deleteAll(dd, TABLE, callback);
+      },
       print('Assert that the DB is empty'),
       assertEmptyDB,
       print('Run the test'),
@@ -118,38 +122,8 @@ function print(str){
   };
 }
 
-function getAll(cb) {
-  var params = {
-    TableName: 'dawatest',
-    KeyConditions: {
-      'key': {ComparisonOperator: 'EQ',
-              AttributeValueList: [{'S': 'haendelser' }]}},
-    ConsistentRead: true,
-  };
-  dd.query(params, cb);
-}
-
-function deleteAll(cb){
-  winston.info('Deleting all items');
-  getAll(function(error, data){
-    if (data.Count === 0){
-      cb(null);
-    } else {
-      async.eachSeries(data.Items,
-                       function(item, cb){
-                         winston.info('Delete item %j', item.seqnr.N, {});
-                         dd.deleteItem({TableName: TABLE,
-                                        Key: {key:   {S: 'haendelser'},
-                                              seqnr: {N: item.seqnr.N}}},
-                                       cb);
-                       },
-                       function(err) {cb(err);});
-    }
-  });
-}
-
 function assertEmptyDB(cb){
-  getAll(function(error, data){
+  dynamoEvents.getAll(dd, TABLE, function(error, data){
     if (error) {return cb(error);}
     if (data.Count === 0){
       cb();
@@ -175,7 +149,7 @@ function withSeqNr(seqNr, haendelse){
 TD.adgangsadresse = {
   "type": "adgangsadresse",
   "sekvensnummer": 1004,
-  "lokaltsekvensnummer": 102,
+  "lokaltSekvensnummer": 102,
   "aendringstype": "aendring",
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
@@ -214,7 +188,7 @@ TD.adgangsadresse = {
 TD.enhedsadresseFail = {
   "type": "enhedsadresse",
   "sekvensnummer": 1004,
-  "lokaltsekvensnummer": 102,
+  "lokaltSekvensnummer": 102,
   "aendringstype": "aendring",
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
@@ -229,7 +203,7 @@ TD.enhedsadresseFail = {
 TD.enhedsadresse = {
   "type": "enhedsadresse",
   "sekvensnummer": 1004,
-  "lokaltsekvensnummer": 102,
+  "lokaltSekvensnummer": 102,
   "aendringstype": "aendring",
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
@@ -246,7 +220,7 @@ TD.enhedsadresse = {
 TD.postnummer = {
   "type": "postnummer",
   "sekvensnummer": 1005,
-  "lokaltsekvensnummer": 205,
+  "lokaltSekvensnummer": 205,
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "kommunekode": 101,
@@ -266,35 +240,39 @@ TD.postnummer = {
 TD.vejnavn = {
   "type": "vejnavn",
   "sekvensnummer": 1005,
-  "lokaltsekvensnummer": 205,
+  "lokaltSekvensnummer": 205,
   "aendringstype": "aendring",
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "kommunekode": 101,
     "vejkode": 1010,
     "navn": "Niels Bohrs Alle",
-    "adresseringsnavn": "Niels Bohrs Alle"
+    "adresseringsnavn": "Niels Bohrs Alle",
+    "oprettet": "2000-02-05T12:00:00+00:00",
+    "aendret": "2000-02-05T12:00:00+00:00"
   }
 };
 
 TD.vejnavnNull = {
   "type": "vejnavn",
   "sekvensnummer": 1005,
-  "lokaltsekvensnummer": 205,
+  "lokaltSekvensnummer": 205,
   "aendringstype": "aendring",
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "kommunekode": 101,
     "vejkode": 1010,
     "navn": "Niels Bohrs Alle",
-    "adresseringsnavn": null
+    "adresseringsnavn": null,
+    "oprettet": "2000-02-05T12:00:00+00:00",
+    "aendret": "2000-02-05T12:00:00+00:00"
   }
 };
 
 TD.supplerendebynavn = {
   "type": "supplerendebynavn",
   "sekvensnummer": 1005,
-  "lokaltsekvensnummer": 205,
+  "lokaltSekvensnummer": 205,
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "kommunekode": 101,
@@ -314,7 +292,7 @@ TD.supplerendebynavn = {
 TD.supplerendebynavnFail = {
   "type": "supplerendebynavn",
   "sekvensnummer": 1005,
-  "lokaltsekvensnummer": 205,
+  "lokaltSekvensnummer": 205,
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "kommunekode": null,
@@ -334,7 +312,7 @@ TD.supplerendebynavnFail = {
 TD.supplerendebynavnFail2 = {
   "type": "supplerendebynavn",
   "sekvensnummer": 1005,
-  "lokaltsekvensnummer": 205,
+  "lokaltSekvensnummer": 205,
   "data": {
     "kommunekode": null,
     "vejkode": 1010,

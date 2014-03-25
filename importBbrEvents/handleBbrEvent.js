@@ -4,12 +4,35 @@ var datamodels = require('../crud/datamodel');
 var crud = require('../crud/crud');
 var async = require('async');
 var _ = require('underscore');
+var winston = require('winston');
 
 
 var allRenames = {
   vejnavn: {
     kode: 'vejkode',
     vejnavn: 'navn'
+  },
+  adgangsadresse: {
+    husnr: 'husnummer',
+    ejerlavkode: 'landsejerlav_kode',
+    ejerlavnavn: 'landsejerlav_navn',
+    adgangspunktid: 'adgangspunkt_id',
+    kilde: 'adgangspunkt_kilde',
+    noejagtighed: 'adgangspunkt_noejagtighedsklasse',
+    tekniskstandard: 'adgangspunkt_tekniskstandard',
+    tekstretning: 'adgangspunkt_retning',
+    placering: 'adgangspunkt_placering',
+    adressepunktaendringsdato: 'adgangspunkt_revisionsdato',
+    etrs89oest: 'adgangspunkt_etrs89koordinat_oest',
+    etrs89nord: 'adgangspunkt_etrs89koordinat_nord',
+    wgs84lat: 'adgangspunkt_wgs84koordinat_bredde',
+    wgs84long: 'adgangspunkt_wgs84koordinat_laengde',
+    kn100mdk: 'adgangspunkt_DDKN_m100',
+    kn1kmdk: 'adgangspunkt_DDKN_km1',
+    kn10kmdk: 'adgangspunkt_DDKN_km10'
+  },
+  postnummer: {
+    nr: 'postnummer'
   }
 };
 
@@ -78,6 +101,7 @@ function compareHusnr(a, b) {
 }
 
 function adresseWithinInterval(adgangsadresse, interval) {
+  winston.debug('husnr %s within interval %j', adgangsadresse.husnr, interval);
   if(!adgangsadresse.husnr) {
     return false;
   }
@@ -119,7 +143,7 @@ function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
       return callback(err);
     }
     var updates = _.reduce(adgangsadresser, function(memo, adgangsadresse) {
-      var interval = _.find(data.interval, function(interval) {
+      var interval = _.find(data.intervaller, function(interval) {
         return adresseWithinInterval(adgangsadresse, interval);
       });
       var update = createUpdate(adgangsadresse, interval);
@@ -132,7 +156,7 @@ function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
   });
 }
 
-function handlePostnummerTilknytningEvent(sqlClient, event, callback) {
+function handlePostnummerEvent(sqlClient, event, callback) {
   return handleIntervalEvent(sqlClient, event, createPostnrUpdate, callback);
 }
 
@@ -145,8 +169,7 @@ var eventHandlers = {
   vejnavn: function(sqlClient, event, callback) {
     return performSqlQuery(sqlClient,event,  datamodels.vejstykke, allRenames.vejnavn, callback);
   },
-  postnummer: handleSimpleEvent,
-  postnummertilknytning: handlePostnummerTilknytningEvent,
+  postnummer: handlePostnummerEvent,
   supplerendebynavn: handleSupplerendebynavnEvent
 };
 

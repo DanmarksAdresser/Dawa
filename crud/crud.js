@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 var dbapi = require('../dbapi');
+var winston = require('winston');
 
 exports.query = function(client, datamodel, filter, callback) {
   var sqlParts = {
@@ -19,6 +20,12 @@ exports.query = function(client, datamodel, filter, callback) {
 };
 
 exports.create = function(client, datamodel, object, callback) {
+  var datamodelFields = datamodel.columns;
+  var objectFields = _.keys(object);
+  var invalidFields = _.difference(objectFields, datamodelFields);
+  if(invalidFields.length > 0) {
+    return callback(new Error("Invalid fields encountered in crud.create " + JSON.stringify(invalidFields)));
+  }
   var columns = _.reject(_.keys(object), function(column) {
     return _.isUndefined(column) || _.isNull(column);
   });
@@ -29,6 +36,7 @@ exports.create = function(client, datamodel, object, callback) {
   var params = _.map(columns, function(column) {
     return object[column];
   });
+  winston.debug("Executing SQL %s", sql);
   client.query(sql, params, callback);
 };
 
