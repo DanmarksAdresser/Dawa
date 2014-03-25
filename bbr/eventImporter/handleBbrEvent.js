@@ -1,7 +1,7 @@
 "use strict";
 
-var datamodels = require('../crud/datamodel');
-var crud = require('../crud/crud');
+var datamodels = require('../../crud/datamodel');
+var crud = require('../../crud/crud');
 var async = require('async');
 var _ = require('underscore');
 var winston = require('winston');

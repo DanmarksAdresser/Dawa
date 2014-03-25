@@ -7,7 +7,7 @@ var _       = require('underscore');
 var async   = require('async');
 var util    = require('util');
 
-var dynamoEvents = require('../../bbr-facade/dynamoEvents');
+var dynamoEvents = require('../../bbr/common/dynamoEvents');
 
 winston.handleExceptions(new winston.transports.Console());
 

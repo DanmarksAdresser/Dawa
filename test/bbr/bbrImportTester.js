@@ -4,8 +4,8 @@ var AWS = require('aws-sdk');
 var fs = require('fs');
 var async = require('async');
 
-var dynamoEvents = require('../../bbr-facade/dynamoEvents');
-var importBbrEvents = require('../../importBbrEvents/importBbrEvents');
+var dynamoEvents = require('../../bbr/common/dynamoEvents');
+var importBbrEvents = require('../../bbr/eventImporter/importBbrEvents');
 var winston = require('winston');
 
 winston.handleExceptions(new winston.transports.Console());

@@ -1,6 +1,6 @@
 "use strict";
 
-var handleBbrEvent = require('../../importBbrEvents/handleBbrEvent');
+var handleBbrEvent = require('../../bbr/eventImporter/handleBbrEvent');
 var dbapi = require('../../dbapi');
 var datamodels = require('../../crud/datamodel');
 var crud = require('../../crud/crud');

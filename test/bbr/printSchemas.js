@@ -1,5 +1,5 @@
 "use strict";
 
-var eventSchemas = require('../../bbr-facade/eventSchemas');
+var eventSchemas = require('../../bbr/common/eventSchemas');
 
 console.log(JSON.stringify(eventSchemas));

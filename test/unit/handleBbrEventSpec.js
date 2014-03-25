@@ -1,6 +1,6 @@
 "use strict";
 
-var handleBbrEvent = require('../../importBbrEvents/handleBbrEvent');
+var handleBbrEvent = require('../../bbr/eventImporter/handleBbrEvent');
 
 var adresseWithinInterval = handleBbrEvent.internal.adresseWithinInterval;
 function compareHusnr(a, b) {

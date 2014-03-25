@@ -1,11 +1,11 @@
 "use strict";
 
 var async = require('async');
-var dbapi = require('../dbapi');
-var crud = require('../crud/crud');
+var dbapi = require('../../dbapi');
+var crud = require('../../crud/crud');
 var handleBbrEvent = require('./handleBbrEvent');
 var winston = require('winston');
-var eventSchemas = require('../bbr-facade/eventSchemas');
+var eventSchemas = require('../common/eventSchemas');
 var ZSchema = require("z-schema");
 
 
