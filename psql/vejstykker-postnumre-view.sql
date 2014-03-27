@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS VejstykkerPostnumreMat CASCADE;
 CREATE TABLE VejstykkerPostnumreMat(
   kommunekode INTEGER,
@@ -41,6 +37,6 @@ CREATE FUNCTION vejstykkerpostnumremat_init() RETURNS void
 LANGUAGE plpgsql AS
 $$
   BEGIN
-    NULL;
+    INSERT INTO VejstykkerPostnumreMat SELECT DISTINCT kommunekode, vejkode, postnr FROM adgangsadresser;
   END;
 $$;

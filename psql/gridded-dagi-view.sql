@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 CREATE OR REPLACE FUNCTION makeRectangle(xmin DOUBLE PRECISION,
                                          ymin DOUBLE PRECISION, xmax DOUBLE PRECISION,
                                          ymax DOUBLE PRECISION, srid integer)

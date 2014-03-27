@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS vejstykker CASCADE;
 CREATE TABLE IF NOT EXISTS vejstykker (
   kommunekode integer NOT NULL,
@@ -27,6 +23,10 @@ CREATE TABLE IF NOT EXISTS vejstykker_history (
   oprettet timestamp,
   aendret timestamp
 );
+
+CREATE INDEX ON vejstykker_history(valid_from);
+CREATE INDEX ON vejstykker_history(valid_to);
+CREATE INDEX ON vejstykker_history(kommunekode, kode);
 
 -- Init function
 DROP FUNCTION IF EXISTS vejstykker_init() CASCADE;

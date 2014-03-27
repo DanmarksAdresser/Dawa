@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 ALTER TABLE adgangsadresser ENABLE TRIGGER ALL;
 ALTER TABLE enhedsadresser ENABLE TRIGGER ALL;
 ALTER TABLE postnumre ENABLE TRIGGER ALL;

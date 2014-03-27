@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS stormodtagere;
 CREATE TABLE IF NOT EXISTS stormodtagere (
   nr integer NOT NULL,

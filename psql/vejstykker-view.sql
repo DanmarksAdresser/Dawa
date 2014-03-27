@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP VIEW IF EXISTS vejstykkerView;
 CREATE VIEW vejstykkerView AS
   SELECT

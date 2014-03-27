@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 CREATE TEMP TABLE IDs AS
 SELECT e_id, a_id, kommunekode, vejkode, postnr
 FROM adresser

@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS enhedsadresser;
 CREATE TABLE IF NOT EXISTS enhedsadresser (
   id uuid NOT NULL PRIMARY KEY,
@@ -31,6 +27,11 @@ CREATE TABLE IF NOT EXISTS enhedsadresser_history (
   etage VARCHAR(3),
   doer VARCHAR(4)
 );
+
+CREATE INDEX ON enhedsadresser_history(valid_to);
+CREATE INDEX ON enhedsadresser_history(valid_from);
+CREATE INDEX ON enhedsadresser_history(id);
+
 -- Init function
 DROP FUNCTION IF EXISTS enhedsadresser_init() CASCADE;
 CREATE FUNCTION enhedsadresser_init() RETURNS void

@@ -1,6 +1,3 @@
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TYPE IF EXISTS operation_type CASCADE;
 DROP TABLE IF EXISTS transaction_history CASCADE;
 create type operation_type as enum('insert', 'update', 'delete');

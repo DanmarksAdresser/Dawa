@@ -1,8 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
-
 DROP TYPE IF EXISTS PostnummerRef CASCADE;
 CREATE TYPE PostnummerRef AS (
   nr integer,

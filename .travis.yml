@@ -12,15 +12,12 @@ node_js:
 addons:
   postgresql: 9.3
 
-services:
-  - mongodb
-
 env:
-  - connectionstring=mongodb://localhost/dawatest pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
+  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
 
 before_script:
-  - psql -c 'CREATE DATABASE dawaintegrationtest;'             -U postgres
-  - psql -c 'CREATE EXTENSION IF NOT EXISTS postgis;'          -U postgres dawaintegrationtest
-  - psql -c 'CREATE EXTENSION IF NOT EXISTS postgis_topology;' -U postgres dawaintegrationtest
-  - node psql/setup-db.js localhost dawaintegrationtest travis test/data/
+  - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
+  - node psql/setup-db.js
+  - node psql/load-adresse-data.js --dataDir=test/data --format=bbr
+  - psql -U travis dawatest < load-dagi-test-data.sql
 

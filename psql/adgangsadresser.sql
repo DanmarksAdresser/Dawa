@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS adgangsadresser CASCADE;
 CREATE TABLE  adgangsadresser (
   id uuid NOT NULL PRIMARY KEY,
@@ -40,6 +36,19 @@ CREATE TABLE  adgangsadresser (
   tsv tsvector
 );
 
+CREATE INDEX ON Adgangsadresser USING GIST (geom);
+CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
+CREATE INDEX ON Adgangsadresser(wgs84lat);
+CREATE INDEX ON Adgangsadresser(wgs84long);
+CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
+CREATE INDEX ON adgangsadresser(postnr, kommunekode);
+CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
+CREATE INDEX ON adgangsadresser(matrikelnr);
+CREATE INDEX ON adgangsadresser(husnr, id);
+CREATE INDEX ON adgangsadresser(esrejendomsnr);
+CREATE INDEX ON adgangsadresser USING gin(tsv);
+
+
 DROP TABLE IF EXISTS adgangsadresser_history CASCADE;
 CREATE TABLE adgangsadresser_history(
   valid_from integer,
@@ -74,19 +83,9 @@ CREATE TABLE adgangsadresser_history(
   adressepunktaendringsdato TIMESTAMP NULL
 );
 
-CREATE INDEX ON Adgangsadresser USING GIST (geom);
-CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
-CREATE INDEX ON Adgangsadresser(wgs84lat);
-CREATE INDEX ON Adgangsadresser(wgs84long);
-CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
-CREATE INDEX ON adgangsadresser(postnr, kommunekode);
-CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
-CREATE INDEX ON adgangsadresser(matrikelnr);
-CREATE INDEX ON adgangsadresser(husnr, id);
-CREATE INDEX ON adgangsadresser(esrejendomsnr);
-CREATE INDEX ON adgangsadresser USING gin(tsv);
-
-
+CREATE INDEX ON adgangsadresser_history(valid_to);
+CREATE INDEX ON adgangsadresser_history(valid_from);
+CREATE INDEX ON adgangsadresser_history(id);
 -- Init function
 DROP FUNCTION IF EXISTS adgangsadresser_init() CASCADE;
 CREATE FUNCTION adgangsadresser_init() RETURNS void

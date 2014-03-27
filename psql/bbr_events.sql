@@ -1,6 +1,3 @@
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS bbr_events CASCADE;
 
 CREATE TABLE bbr_events(

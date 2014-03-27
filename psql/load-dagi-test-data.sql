@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 INSERT INTO DagiTemaer (tema, kode, navn)
 VALUES ('kommune', 165, 'Albertslund'),
 ('kommune', 201, 'Allerød'),

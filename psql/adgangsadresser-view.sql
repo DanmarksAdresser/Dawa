@@ -1,8 +1,3 @@
-
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP VIEW IF EXISTS AdgangsadresserView CASCADE;
 CREATE VIEW AdgangsadresserView AS
   SELECT

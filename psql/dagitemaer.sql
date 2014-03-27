@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS DagiTemaer CASCADE;
 CREATE TABLE DagiTemaer (
   tema DagiTemaType not null,

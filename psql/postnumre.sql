@@ -1,7 +1,3 @@
-
-\set ON_ERROR_STOP on
-\set ECHO queries
-
 DROP TABLE IF EXISTS postnumre CASCADE;
 CREATE TABLE IF NOT EXISTS postnumre (
   nr integer NOT NULL PRIMARY KEY,
