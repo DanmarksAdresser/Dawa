@@ -8,7 +8,7 @@ if [ "$#" != "3" ]; then
 fi
 
 DIR=`dirname $0`
-DB_HOST = $1
+DB_HOST=$1
 DB_NAME=$2
 DB_USER=$3
 
