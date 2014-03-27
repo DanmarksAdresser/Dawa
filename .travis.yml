@@ -20,5 +20,5 @@ before_script:
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
   - node psql/setup-db.js
   - node psql/load-adresse-data.js --dataDir=test/data --format=bbr
-  - psql -U travis dawatest < load-dagi-test-data.sql
+  - psql -U travis dawatest < psql/load-dagi-test-data.sql
 
