@@ -4,12 +4,7 @@ var express        = require("express");
 var winston        = require('winston');
 var expressWinston = require('express-winston');
 var dawaPgApi      = require('./dawaPgApi');
-var parameterDoc   = require('./parameterDoc');
-var docUtil        = require('./docUtil');
-var registry = require('./apiSpecification/registry');
-var _ = require('underscore');
-var schemaUtil = require('./apiSpecification/schemaUtil');
-
+var documentation = require('./documentation');
 require('./apiSpecification/allSpecs');
 
 var logglyOptions = {subdomain        : 'dawa',
@@ -23,26 +18,7 @@ setupLogging(app);
 
 app.use(express.compress());
 app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
 
-app.get('/', function (req, res) {
-  res.render('home.jade', {url: req.headers.host});
-});
-
-setupJadePage('/generelt'             , 'generelt.jade');
-setupJadePage('/adressedok'           , 'adressedok.jade');
-setupJadePage('/adgangsadressedok'    , 'adgangsadressedok.jade');
-setupJadePage('/vejedok'              , 'vejedok.jade');
-setupJadePage('/supplerendebynavndok' , 'supplerendebynavndok.jade');
-setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
-setupJadePage('/listerdok'            , 'listerdok.jade');
-setupJadePage('/om'                   , 'om.jade');
-
-//(\/[^\.])
-app.get(/html$/i, function (req, res) {
-  res.render('kort.jade', {url: decodeURIComponent(req.originalUrl.replace('.html','.json'))});
-});
 
 var cluster = require('cluster');
 var workers = {};
@@ -66,6 +42,7 @@ if (cluster.isMaster && !cluseringDisabled) {
   var listenPort = process.env.PORT || 3000;
 
   app.use('', dawaPgApi.setupRoutes());
+  app.use('', documentation);
 
   app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
 
@@ -101,35 +78,4 @@ function expressLogTransports(){
   }
   transports.push(new winston.transports.Console());
   return transports;
-}
-
-function setupJadePage(path, page, optionsFun){
-  app.get(path, function (req, res) {
-    res.render(page, jadeDocumentationParams(req));
-  });
-}
-
-function jadeDocumentationParams(req) {
-  var jsonSchemas = _.reduce(registry.entriesWhere({
-    type: 'representation',
-    qualifier: 'json'
-  }), function(memo, entry) {
-    memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
-    return memo;
-  }, {});
-
-  var autocompleteSchemas = _.reduce(registry.entriesWhere({
-    type: 'representation',
-    qualifier: 'autocomplete'
-  }), function(memo, entry) {
-    memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
-    return memo;
-  }, {});
-
-  var protocol = req.connection.encrypted ? 'https' : 'http';
-  return {url: protocol + '://' + req.headers.host,
-    jsonSchemas: jsonSchemas,
-    autocompleteSchemas: autocompleteSchemas,
-          parameterDoc: parameterDoc,
-          docUtil: docUtil};
 }
