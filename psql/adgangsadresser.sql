@@ -22,7 +22,6 @@ CREATE TABLE  adgangsadresser (
   etrs89nord DECIMAL(9,2) NULL,
   wgs84lat DECIMAL(16,14) NULL,
   wgs84long DECIMAL(16,14) NULL,
-  wgs84 GEOGRAPHY(POINT, 4326),
   noejagtighed CHAR(1) NULL,
   kilde CHAR(1) NULL,
   placering char(1),
@@ -71,7 +70,6 @@ CREATE TABLE adgangsadresser_history(
   etrs89nord DECIMAL(9,2) NULL,
   wgs84lat DECIMAL(16,14) NULL,
   wgs84long DECIMAL(16,14) NULL,
-  wgs84 GEOGRAPHY(POINT, 4326),
   noejagtighed CHAR(1) NULL,
   kilde CHAR(1) NULL,
   placering char(1),
@@ -101,9 +99,6 @@ $$
     WHERE
       postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
       vejstykker.kode = adgangsadresser.vejkode;
-
-    UPDATE adgangsadresser SET wgs84 = ST_GeometryFromText('POINT('||wgs84long||' '||wgs84lat||')', 4326)
-    WHERE wgs84lat IS NOT NULL AND wgs84long IS NOT NULL;
 
     UPDATE adgangsadresser SET geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
   END;

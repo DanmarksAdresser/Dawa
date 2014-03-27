@@ -15,7 +15,6 @@ CREATE VIEW AdgangsadresserView AS
     A.etrs89nord::double precision AS nord,
     A.wgs84lat::double precision   AS lat,
     A.wgs84long::double precision  AS long,
-    A.wgs84,
     A.geom       AS geom,
     A.noejagtighed,
     A.kilde::smallint,
