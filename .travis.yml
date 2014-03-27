@@ -16,6 +16,7 @@ env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
 
 before_script:
+  - sudo locale-gen da_DK.UTF-8
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
   - node psql/setup-db.js
   - node psql/load-adresse-data.js --dataDir=test/data --format=bbr
