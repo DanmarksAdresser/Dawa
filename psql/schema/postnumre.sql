@@ -22,11 +22,10 @@ CREATE TABLE IF NOT EXISTS postnumre_history (
 -- Init function
 DROP FUNCTION IF EXISTS postnumre_init() CASCADE;
 CREATE FUNCTION postnumre_init() RETURNS void
-LANGUAGE plpgsql AS
+LANGUAGE sql AS
 $$
   BEGIN
     UPDATE postnumre SET tsv = to_tsvector('adresser', coalesce(to_char(nr, '0000'), '') || ' ' || coalesce(navn, ''));
-    NULL;
   END;
 $$;
 

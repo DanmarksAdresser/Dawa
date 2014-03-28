@@ -35,7 +35,7 @@ CREATE INDEX ON enhedsadresser_history(id);
 -- Init function
 DROP FUNCTION IF EXISTS enhedsadresser_init() CASCADE;
 CREATE FUNCTION enhedsadresser_init() RETURNS void
-LANGUAGE plpgsql AS
+LANGUAGE sql AS
 $$
   BEGIN
     UPDATE enhedsadresser

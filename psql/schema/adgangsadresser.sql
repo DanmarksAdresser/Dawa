@@ -85,21 +85,28 @@ CREATE INDEX ON adgangsadresser_history(valid_to);
 CREATE INDEX ON adgangsadresser_history(valid_from);
 CREATE INDEX ON adgangsadresser_history(id);
 -- Init function
+
+DROP FUNCTION IF EXISTS adgangsadresser_init_tsv() CASCADE;
+CREATE FUNCTION adgangsadresser_init_tsv()
+  RETURNS VOID LANGUAGE SQL AS
+  $$
+  UPDATE adgangsadresser
+  SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
+            setweight(to_tsvector('adresser', COALESCE(supplerendebynavn, '')), 'C') ||
+            setweight(postnumre.tsv, 'D')
+  FROM
+    postnumre, vejstykker
+  WHERE
+    postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
+    vejstykker.kode = adgangsadresser.vejkode;
+  $$;
+
 DROP FUNCTION IF EXISTS adgangsadresser_init() CASCADE;
 CREATE FUNCTION adgangsadresser_init() RETURNS void
 LANGUAGE plpgsql AS
 $$
   BEGIN
-    UPDATE adgangsadresser
-    SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
-        setweight(to_tsvector('adresser', COALESCE(supplerendebynavn, '')), 'C') ||
-        setweight(postnumre.tsv, 'D')
-    FROM
-      postnumre, vejstykker
-    WHERE
-      postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
-      vejstykker.kode = adgangsadresser.vejkode;
-
+    PERFORM adgangsadresser_init_tsv();
     UPDATE adgangsadresser SET geom = ST_SetSRID(ST_MakePoint(etrs89oest, etrs89nord), 25832);
   END;
 $$;

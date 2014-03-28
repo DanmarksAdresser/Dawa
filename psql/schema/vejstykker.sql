@@ -31,11 +31,10 @@ CREATE INDEX ON vejstykker_history(kommunekode, kode);
 -- Init function
 DROP FUNCTION IF EXISTS vejstykker_init() CASCADE;
 CREATE FUNCTION vejstykker_init() RETURNS void
-LANGUAGE plpgsql AS
+LANGUAGE sql AS
 $$
   BEGIN
     UPDATE vejstykker SET tsv = to_tsvector('adresser', coalesce(vejnavn, ''));
-    NULL;
   END;
 $$;
 
