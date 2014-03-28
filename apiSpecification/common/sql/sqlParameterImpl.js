@@ -59,6 +59,10 @@ function toPgSuggestQuery(q) {
   return tsq;
 }
 
+function queryForRanking(tsq) {
+  return tsq.replace(/ & /g, ' | ');
+}
+
 function getSearchColumn(columnSpec) {
   return sqlUtil.getColumnNameForWhere(columnSpec, 'tsv');
 }
@@ -70,7 +74,7 @@ function searchWhereClause(paramAlias, columnSpec) {
 
 function searchOrderClause(paramAlias, columnSpec) {
   var columnName = getSearchColumn(columnSpec);
-  return 'ts_rank(' + columnName + ", to_tsquery('adresser'," + paramAlias + ')) DESC';
+  return 'ts_rank(' + columnName + ", to_tsquery('adresser'," + paramAlias + '), 16) DESC';
 }
 
 
@@ -115,8 +119,9 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
 
 function applyTsQuery(sqlParts, tsQuery, columnSpec) {
   var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
+  var rankAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
   dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
-  sqlParts.orderClauses.unshift(searchOrderClause(parameterAlias, columnSpec));
+  sqlParts.orderClauses.unshift(searchOrderClause(rankAlias, columnSpec));
 }
 
 /*
