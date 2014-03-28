@@ -32,6 +32,7 @@ function loadSchemas(client, scriptDir){
   return function(done){
     sqlCommon.forAllTableSpecs(client,
       function (client, spec, cb){
+        console.log("loading script " + spec.scriptFile);
         return (psqlScript(client, scriptDir, spec.scriptFile))(cb);
       },
       done);

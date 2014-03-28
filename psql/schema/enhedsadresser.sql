@@ -37,7 +37,6 @@ DROP FUNCTION IF EXISTS enhedsadresser_init() CASCADE;
 CREATE FUNCTION enhedsadresser_init() RETURNS void
 LANGUAGE sql AS
 $$
-  BEGIN
     UPDATE enhedsadresser
     SET tsv = adgangsadresser.tsv ||
               setweight(to_tsvector('adresser',
@@ -47,7 +46,6 @@ $$
       adgangsadresser
     WHERE
       adgangsadresser.id = adgangsadresseid;
-  END;
 $$;
 
 -- Trigger which maintains the tsv column

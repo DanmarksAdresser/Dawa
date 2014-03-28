@@ -33,9 +33,7 @@ DROP FUNCTION IF EXISTS vejstykker_init() CASCADE;
 CREATE FUNCTION vejstykker_init() RETURNS void
 LANGUAGE sql AS
 $$
-  BEGIN
     UPDATE vejstykker SET tsv = to_tsvector('adresser', coalesce(vejnavn, ''));
-  END;
 $$;
 
 -- Trigger which maintains the tsv column

@@ -24,9 +24,7 @@ DROP FUNCTION IF EXISTS postnumre_init() CASCADE;
 CREATE FUNCTION postnumre_init() RETURNS void
 LANGUAGE sql AS
 $$
-  BEGIN
     UPDATE postnumre SET tsv = to_tsvector('adresser', coalesce(to_char(nr, '0000'), '') || ' ' || coalesce(navn, ''));
-  END;
 $$;
 
 -- Trigger which maintains the tsv column
