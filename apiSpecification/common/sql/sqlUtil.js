@@ -27,36 +27,41 @@ exports.getSearchColumn = function(columnSpec) {
   return exports.getColumnNameForWhere(columnSpec, 'tsv');
 };
 
-var applySelect = function(sqlParts, columnSpec, fieldNames, params) {
-  fieldNames.forEach( function(fieldName) {
-    var clause;
-    if(!columnSpec[fieldName]) {
-      clause = fieldName;
-    }
-    else {
-      var column = columnSpec[fieldName];
-      var select = column.select || column.column;
-      if(select) {
-        if(_.isFunction(select)) {
-          clause = select(sqlParts, columnSpec, params);
-        }
-        else {
-          clause = select;
-        }
-        if(column.as) {
-          clause += ' as ' + column.as;
-        }
-        else if (clause !== fieldName) {
-          clause += ' as ' + fieldName;
-        }
+function addSelect(columnSpec, fieldName, sqlParts, params) {
+  var clause;
+  if (!columnSpec[fieldName]) {
+    clause = fieldName;
+  }
+  else {
+    var column = columnSpec[fieldName];
+    var select = column.select || column.column;
+    if (select) {
+      if (_.isFunction(select)) {
+        clause = select(sqlParts, columnSpec, params);
       }
       else {
-        throw "Unable to create select clause for field name " + fieldName;
+        clause = select;
+      }
+      if (column.as) {
+        clause += ' as ' + column.as;
+      }
+      else if (clause !== fieldName) {
+        clause += ' as ' + fieldName;
       }
     }
-    sqlParts.select.push(clause);
+    else {
+      throw "Unable to create select clause for field name " + fieldName;
+    }
+  }
+  sqlParts.select.push(clause);
+}
+var applySelect = function(sqlParts, columnSpec, fieldNames, params) {
+  fieldNames.forEach( function(fieldName) {
+    addSelect(columnSpec, fieldName, sqlParts, params);
   });
 };
+
+exports.addSelect = addSelect;
 
 exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
   return {

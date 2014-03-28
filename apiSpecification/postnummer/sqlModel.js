@@ -38,8 +38,7 @@ var columns = {
     select: 'first(k.kommuner)'
   },
   tsv: {
-    select: null,
-    where: 'p.tsv'
+    column: 'p.tsv'
   }
 };
 

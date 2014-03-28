@@ -10,6 +10,8 @@ var notNull = util.notNull;
 
 var dagiTemaer = require('../../dagitemaer/dagiTemaer');
 
+var sqlUtil = require('./sqlUtil');
+
 function toPgSearchQuery(q) {
   // remove all special chars
   q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
@@ -72,8 +74,8 @@ function searchWhereClause(paramAlias, columnSpec) {
   return "(" + columnName + " @@ to_tsquery('adresser', " + paramAlias + "))";
 }
 
-function searchOrderClause(paramAlias, columnSpec) {
-  var columnName = getSearchColumn(columnSpec);
+function searchOrderClause(paramAlias) {
+  var columnName = 'tsv';
   return 'ts_rank(' + columnName + ", to_tsquery('adresser'," + paramAlias + '), 16) DESC';
 }
 
@@ -117,11 +119,28 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
   };
 };
 
-function applyTsQuery(sqlParts, tsQuery, columnSpec) {
+function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
-  var rankAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
   dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
-  sqlParts.orderClauses.unshift(searchOrderClause(rankAlias, columnSpec));
+  // In order to not examine too many results,
+  // we first fetch at most 1000 rows without ranking them in a subselect,
+  // and the ranks that result, rather than ranking a very large
+  // number of results.
+  sqlUtil.addSelect(columnSpec, 'tsv', sqlParts, params);
+  sqlParts.limit = Math.max(1000, params.per_side ? params.per_side : 0);
+  var query = dbapi.createQuery(sqlParts);
+  var transformedQuery =    {
+    select: ['*'],
+    from: ['(' + query.sql + ') AS searchResult'],
+    whereClauses: [],
+    groupBy: '',
+    orderClauses: [],
+    sqlParams: query.params
+  };
+  var rankAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
+  transformedQuery.orderClauses.unshift(searchOrderClause(rankAlias));
+  _.extend(sqlParts, transformedQuery);
+
 }
 
 /*
@@ -133,7 +152,7 @@ exports.search = function(columnSpec) {
   return function(sqlParts, params) {
     if(notNull(params.search)) {
       var tsQuery = toPgSearchQuery(params.search);
-      applyTsQuery(sqlParts, tsQuery, columnSpec);
+      applyTsQuery(sqlParts, params, tsQuery, columnSpec);
     }
   };
 };
@@ -142,7 +161,7 @@ exports.autocomplete = function(columnSpec) {
   return function(sqlParts, params) {
     if(notNull(params.autocomplete)) {
       var tsQuery = toPgSuggestQuery(params.autocomplete);
-      applyTsQuery(sqlParts, tsQuery, columnSpec);
+      applyTsQuery(sqlParts, params, tsQuery, columnSpec);
     }
   };
 };

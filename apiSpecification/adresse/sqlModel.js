@@ -17,8 +17,7 @@ var columns = {
     column: 'doer'
   },
   tsv: {
-    select: null,
-    where: 'e_tsv'
+    column: 'e_tsv'
   },
   etrs89koordinat_øst: {
     column: 'oest'
@@ -74,13 +73,14 @@ var baseQuery = function () {
   };
 };
 
+// WARNING: order matters!
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+  sqlParameterImpl.geomWithin(),
+  sqlParameterImpl.dagiFilter(),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),
-  sqlParameterImpl.paging(columns, nameAndKey.key),
-  sqlParameterImpl.geomWithin(),
-  sqlParameterImpl.dagiFilter()
+  sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);

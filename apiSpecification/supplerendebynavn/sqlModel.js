@@ -25,8 +25,7 @@ var columns = {
     select: 'json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef))'
   },
   tsv: {
-    select: null,
-    where: 's.tsv'
+    column: 's.tsv'
   }
 };
 

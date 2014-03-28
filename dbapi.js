@@ -50,6 +50,8 @@ function createQuery(parts){
   };
 }
 
+exports.createQuery = createQuery;
+
 util.inherits(CursorStream, Readable);
 function CursorStream(client, cursorName) {
   Readable.call(this, {

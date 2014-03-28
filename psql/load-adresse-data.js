@@ -143,15 +143,20 @@ var bbrTransformers = {
   }
 };
 
+function loadAdditionalBbrFiles(client, callback) {
+  callback();
+}
+
 cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
   process.env.pgConnectionUrl = options.pgConnectionUrl;
 
-  var transformers = options.format === 'legacy' ? legacyTransformers : bbrTransformers;
+  var format = options.format;
+  var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
   cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
 
   var dataDir = options.dataDir;
-  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, callback) {
+  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     async.series([
       sqlCommon.disableTriggers(client),
@@ -193,16 +198,25 @@ cli.main(function(args, options) {
             'husnr', 'supplerendebynavn',
             'postnr', 'ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'esrejendomsnr',
             'oprettet', 'ikraftfra', 'aendret', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
-          'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
+            'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
           transformer: transformers.adgangsadresse
 
         }, callback);
+      },
+      function(callback) {
+        if(format === 'bbr') {
+          loadAdditionalBbrFiles(client, callback);
+        }
+        else {
+          callback();
+        }
       },
       sqlCommon.initializeTables(client),
       sqlCommon.enableTriggers(client)
     ], function(err) {
       exitOnErr(err);
-      callback(err, function(err) {
+
+      commit(err, function(err) {
         exitOnErr(err);
       });
     });

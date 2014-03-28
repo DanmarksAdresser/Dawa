@@ -53,8 +53,7 @@ var columns =  {
     select: 'a_ikraftfra'
   },
   tsv: {
-    select: null,
-      where: 'tsv'
+    column: 'tsv'
   }
 };
 
@@ -70,12 +69,12 @@ var baseQuery = function () {
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
-  sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns),
-  sqlParameterImpl.paging(columns, nameAndKey.key),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.reverseGeocoding(),
-  sqlParameterImpl.dagiFilter()
+  sqlParameterImpl.dagiFilter(),
+  sqlParameterImpl.search(columns),
+  sqlParameterImpl.autocomplete(columns),
+  sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
