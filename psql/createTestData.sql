@@ -1,41 +1,46 @@
 CREATE TEMP TABLE IDs AS
 SELECT e_id, a_id, kommunekode, vejkode, postnr
 FROM adresser
-WHERE ST_Contains(ST_GeomFromText('POLYGON((55.3 9.4,  55.6 12.7, 55.601 12.7, 55.301 9.4, 55.3 9.4))',
-                                      4326)::geometry,
-                      wgs84geom);
+WHERE ST_Contains(ST_Transform(ST_GeomFromText('POLYGON((9.4 55.3, 12.7 55.6, 12.7 55.601, 9.4 55.301, 9.4 55.3))',
+                                      4326), 25832),
+                      geom);
 
 CREATE TEMP TABLE enhedsadresser_out AS
-SELECT id, version, e.adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer
+SELECT id, e.adgangsadresseid, etage, doer, 1 as objekttype, oprettet, aendret, ikraftfra as ikrafttraedelsesdato
 FROM enhedsadresser e
 JOIN IDs ON e.id = IDs.e_id;
 
-\copy enhedsadresser_out  TO 'AddressSpecific.csv'  WITH  (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
+\copy enhedsadresser_out  TO 'Enhedsadresse.CSV'  WITH  (ENCODING 'iso-8859-1',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 CREATE TEMP TABLE adgangsadresser_out AS
-SELECT id, a.version, bygningsnavn, a.kommunekode, a.vejkode, v.vejnavn, husnr, supplerendebynavn, a.postnr, p.navn AS postnrnavn,
-       a.ejerlavkode, e.navn AS ejerlavnavn, matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret, etrs89oest, etrs89nord,
-       wgs84lat, wgs84long, noejagtighed, kilde, tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk, adressepunktaendringsdato
+SELECT id, a.vejkode, husnr as husnummer, a.kommunekode,
+  ejerlavkode as landsejerlav_kode, ejerlavnavn AS landsejerlav_navn, matrikelnr, esrejendomsnr,
+  a.postnr as postnummer, p.navn AS postdistrikt, supplerendebynavn,
+  1 as objekttype, oprettet, aendret, ikraftfra as ikrafttraedelsesdato,
+  adgangspunktid as adgangspunkt_id, kilde as adgangspunkt_kilde, noejagtighed as adgangspunkt_noejagtighedsklasse,
+  tekniskstandard as adgangspunkt_tekniskstandard, tekstretning as adgangspunkt_retning,
+  placering as adgangspunkt_placering, adressepunktaendringsdato as adgangspunkt_revisionsdato,
+  etrs89oest as adgangspunkt_etrs89koordinat_oest, etrs89nord as adgangspunkt_etrs89koordinat_nord,
+  wgs84lat as adgangspunkt_wgs84koordinat_bredde, wgs84long as adgangspunkt_wgs84koordinat_laengde,
+  kn100mdk as adgangspunkt_DDKN_m100, kn1kmdk as adgangspunkt_DDKN_km1, kn10kmdk as adgangspunkt_DDKN_km10
 FROM adgangsadresser a
-JOIN (SELECT DISTINCT a_id from IDs) T ON a.id = T.a_id
-LEFT JOIN vejnavne v ON v.kode = a.vejkode AND v.kommunekode = a.kommunekode
-LEFT JOIN postnumre p ON p.nr = a.postnr
-LEFT JOIN ejerlav e ON e.kode = a.ejerlavkode;
+JOIN (select distinct a_id from IDs) as ids ON (a.id = a_id)
+LEFT JOIN postnumre p ON p.nr = a.postnr;
 
-\copy adgangsadresser_out TO 'AddressAccess.csv' WITH  (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
+\copy adgangsadresser_out TO 'Adgangsadresse.CSV' WITH  (ENCODING 'iso-8859-1',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 CREATE TEMP TABLE postnumre_out AS
-SELECT distinct nr, version, navn
+SELECT nr, navn
 FROM postnumre p
-JOIN IDs ON p.nr = IDs.postnr;
+    JOIN (select distinct postnr from Ids) as IDs ON p.nr = IDs.postnr;
 
-\copy postnumre_out TO 'PostCode.csv' WITH  (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
+\copy postnumre_out TO 'Postnummer.CSV' WITH  (ENCODING 'iso-8859-1',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 CREATE TEMP TABLE vejnavne_out AS
-SELECT DISTINCT v.kommunekode, kode, vejnavn, version
-FROM vejnavne v
-JOIN IDs ON v.kode = IDs.vejkode AND v.kommunekode = IDs.kommunekode;
+SELECT v.kommunekode, kode, vejnavn as navn, adresseringsnavn
+FROM vejstykker v
+    JOIN (select distinct kommunekode, vejkode from IDs) as IDs ON v.kode = IDs.vejkode AND v.kommunekode = IDs.kommunekode;
 
-\copy vejnavne_out TO 'RoadName.csv' WITH  (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
+\copy vejnavne_out TO 'Vejnavn.CSV' WITH  (ENCODING 'iso-8859-1',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '"');
 
 

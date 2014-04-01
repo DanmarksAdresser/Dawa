@@ -1,7 +1,14 @@
 "use strict";
 
+var moment = require("moment");
+
 exports.kode4String = function(kodeAsInteger) {
-  return ("0000" + kodeAsInteger).slice(-4);
+  if(exports.notNull(kodeAsInteger)) {
+    return ("0000" + kodeAsInteger).slice(-4);
+  }
+  else {
+    return null;
+  }
 };
 
 exports.maybeNull = function(val) {
@@ -33,15 +40,10 @@ exports.adressebetegnelse = function(adresseRow, adgangOnly) {
 };
 
 exports.d = function(date) {
-  if(date instanceof Date) {
-    return date.toString();
+  if(date) {
+    return moment(date).toISOString();
   }
-  else if(date) {
-    return date;
-  }
-  else {
-    return null;
-  }
+  return date;
 };
 
 exports.notNull = function (obj) {

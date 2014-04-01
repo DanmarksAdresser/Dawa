@@ -13,8 +13,8 @@ var sampleParameters = {
   '/supplerendebynavne/autocomplete': ['all'],
   '/kommuner/autocomplete': ['aa'],
   '/postnumre/autocomplete': ['so'],
-  '/adgangsadresser/autocomplete': ['skolevænget 2'],
-  '/adresser/autocomplete': [ 'kirkevej 56G st'],
+  '/adgangsadresser/autocomplete': ['Strandmarken 43'],
+  '/adresser/autocomplete': [ 'strandmarken 43 st']
 };
 
 describe('Alle autocomplete ressourcer skal virke', function() {

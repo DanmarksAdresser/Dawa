@@ -1,8 +1,6 @@
 DROP TABLE IF EXISTS adgangsadresser CASCADE;
 CREATE TABLE  adgangsadresser (
   id uuid NOT NULL PRIMARY KEY,
-  version VARCHAR(255),
-  bygningsnavn VARCHAR(255) NULL,
   kommunekode INTEGER NOT NULL,
   vejkode INTEGER NOT NULL,
   vejnavn VARCHAR(255),
@@ -13,15 +11,15 @@ CREATE TABLE  adgangsadresser (
   ejerlavkode INTEGER,
   ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
-  esrejendomsnr CHAR(6) NULL,
+  esrejendomsnr integer NULL,
   oprettet timestamp,
   ikraftfra timestamp,
   aendret timestamp,
   adgangspunktid uuid,
-  etrs89oest DECIMAL(8,2) NULL,
-  etrs89nord DECIMAL(9,2) NULL,
-  wgs84lat DECIMAL(16,14) NULL,
-  wgs84long DECIMAL(16,14) NULL,
+  etrs89oest double precision NULL,
+  etrs89nord double precision NULL,
+  wgs84lat double precision NULL,
+  wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
   kilde CHAR(1) NULL,
   placering char(1),
@@ -66,10 +64,10 @@ CREATE TABLE adgangsadresser_history(
   ikraftfra timestamp,
   aendret timestamp,
   adgangspunktid uuid,
-  etrs89oest DECIMAL(8,2) NULL,
-  etrs89nord DECIMAL(9,2) NULL,
-  wgs84lat DECIMAL(16,14) NULL,
-  wgs84long DECIMAL(16,14) NULL,
+  etrs89oest double precision NULL,
+  etrs89nord double precision NULL,
+  wgs84lat double precision NULL,
+  wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
   kilde CHAR(1) NULL,
   placering char(1),
@@ -197,12 +195,12 @@ BEGIN
       valid_from, id, kommunekode, vejkode, husnr, supplerendebynavn, postnr, ejerlavkode, ejerlavnavn,
       matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret,
       adgangspunktid, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, placering,
-      tekniskstandard, tekstretning, kn100mdk, kn1kmdk, kn10kmdk)
+      tekniskstandard, tekstretning, adressepunktaendringsdato, kn100mdk, kn1kmdk, kn10kmdk)
     VALUES (
       seqnum, NEW.id, NEW.kommunekode, NEW.vejkode, NEW.husnr, NEW.supplerendebynavn, NEW.postnr, NEW.ejerlavkode, NEW.ejerlavnavn,
       NEW.matrikelnr, NEW.esrejendomsnr, NEW.oprettet, NEW.ikraftfra, NEW.aendret,
       NEW.adgangspunktid, NEW.etrs89oest, NEW.etrs89nord, NEW.wgs84lat, NEW.wgs84long, NEW.noejagtighed, NEW.kilde, NEW.placering,
-      NEW.tekniskstandard, NEW.tekstretning, NEW.kn100mdk, NEW.kn1kmdk, NEW.kn10kmdk);
+      NEW.tekniskstandard, NEW.tekstretning, NEW.adressepunktaendringsdato, NEW.kn100mdk, NEW.kn1kmdk, NEW.kn10kmdk);
   END IF;
   INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'adgangsadresse', optype);
   RETURN NULL;

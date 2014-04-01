@@ -11,15 +11,17 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     tema: 'region',
     kode: 10,
     navn: 'Test Region',
-    polygons: ['POLYGON((582534.985506234 6128945.80096767,' +
-      '588883.402508489 6129068.80096925,' +
-      '588659.687757301 6140196.17148899,' +
-      '582534.985506234 6128945.80096767))']
+    polygons: ['POLYGON((' +
+      '725025.18 6166264.37,' +
+      '725025.18 6167537.76,' +
+      '731289.6 6167537.76,' +
+      '731289.6 6166264.37,' +
+      '725025.18 6166264.37))']
   };
 
   var expectedResults = {
-    adgangsadresse: 158,
-    adresse: 390
+    adgangsadresse: 277,
+    adresse: 279
   };
   ['adgangsadresse', 'adresse'].forEach(function(entityName) {
     var sqlModel = registry.findWhere({

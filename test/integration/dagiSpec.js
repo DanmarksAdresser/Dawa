@@ -9,10 +9,12 @@ var sampleTema = {
   tema: 'region',
   kode: 10,
   navn: 'Test Region',
-  polygons: ['POLYGON((582534.985506234 6128945.80096767,' +
-    '588883.402508489 6129068.80096925,' +
-    '588659.687757301 6140196.17148899,' +
-    '582534.985506234 6128945.80096767))']
+  polygons: ['POLYGON((' +
+    '725025.18 6166264.37,' +
+    '725025.18 6167537.76,' +
+    '731289.6 6167537.76,' +
+    '731289.6 6166264.37,' +
+    '725025.18 6166264.37))']
 };
 
 describe('DAGI updates', function() {
@@ -24,7 +26,7 @@ describe('DAGI updates', function() {
         client.query("select count(*) as c FROM AdgangsAdresserDagiRel WHERE dagiTema = 'region' AND dagiKode = 10", [], function(err, result) {
           if(err) throw err;
           transactionDone();
-          expect(result.rows[0].c).toBe('158');
+          expect(result.rows[0].c).toBe('277');
           done();
         });
       });
@@ -54,16 +56,18 @@ describe('DAGI updates', function() {
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
         var updated = _.clone(sampleTema);
-        updated.polygons=['POLYGON((585534.985506234 6128945.80096767,' +
-          '588883.402508489 6129068.8009692,' +
-          '588659.687757301 6140196.17148899,' +
-          '585534.985506234 6128945.80096767))'];
+        updated.polygons=['POLYGON((' +
+          '725025.18 6166264.37,' +
+          '725025.18 6167400.76,' +
+          '731289.6 6167400.76,' +
+          '731289.6 6166264.37,' +
+          '725025.18 6166264.37))'];
         dagi.updateDagiTema(client, updated, function(err) {
           if(err) throw err;
           client.query("select count(*) as c FROM AdgangsAdresserDagiRel WHERE dagiTema = 'region' AND dagiKode = 10", [], function(err, result) {
             if(err) throw err;
             transactionDone();
-            expect(result.rows[0].c).toBe('66');
+            expect(result.rows[0].c).toBe('226');
             done();
           });
         });

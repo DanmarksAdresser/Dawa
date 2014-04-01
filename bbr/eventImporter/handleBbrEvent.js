@@ -45,19 +45,50 @@ function extractObjectFromSimpleEvent(eventData, datamodel, renames) {
 
 function performSqlQuery(sqlClient, event, datamodel, renames, callback) {
   var object = extractObjectFromSimpleEvent(event.data, datamodel, renames);
-  switch (event.aendringstype) {
-    case "oprettelse":
-      crud.create(sqlClient, datamodel, object, callback);
-      break;
-    case 'aendring':
-      crud.update(sqlClient, datamodel, object, callback);
-      break;
-    case 'nedlaeggelse':
-      crud.delete(sqlClient, datamodel, object, callback);
-      break;
-    default:
-      throw 'handleSimpleEvent with unknown event type, insufficient input validation?!';
-  }
+  var key = _.reduce(object, function(memo, value, fieldName) {
+    if(_.contains(datamodel.key, fieldName)) {
+      memo[fieldName] = value;
+    }
+    return memo;
+  }, {});
+  console.log("key: " + JSON.stringify(key));
+  crud.query(sqlClient, datamodel, key, function(err, results) {
+    var existing = results.length > 0 ? results[0] : null;
+    switch (event.aendringstype) {
+      case "oprettelse":
+        if(!_.isNull(existing)) {
+          winston.warn("Fik en oprettelse event, men objektet findes allerede. " +
+            "event: %d, Eksisterende: %j, oprettelse: %j",
+          event.sekvensnummer, existing, object);
+          crud.update(sqlClient, datamodel, object, callback);
+        }
+        else {
+          console.log('creating ' + JSON.stringify(event));
+          crud.create(sqlClient, datamodel, object, callback);
+        }
+        break;
+      case 'aendring':
+        if(_.isNull(existing)) {
+          winston.warn("Fik en aendring event, men objektet findes ikke. " +
+            "event: %d, objekt: %j", event.sekvensnummer, object);
+          crud.create(sqlClient, datamodel, object, callback);
+
+        }
+        else {
+          crud.update(sqlClient, datamodel, object, callback);
+        }
+        break;
+      case 'nedlaeggelse':
+        if(_.isNull(existing)) {
+          winston.warn("Fik en nedlaeggelse event, men objektet findes ikke. " +
+            "Event: %d, Objekt: %j", event.sekvensnummer, object);
+        }
+        crud.delete(sqlClient, datamodel, object, callback);
+        break;
+      default:
+        throw 'handleSimpleEvent with unknown event type, insufficient input validation?!';
+    }
+  });
 }
 
 function handleSimpleEvent(sqlClient, event, callback) {

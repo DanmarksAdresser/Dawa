@@ -240,6 +240,20 @@ exports.reverseGeocoding = function() {
   };
 };
 
+exports.reverseGeocodingWithin = function() {
+  return function(sqlParts, params) {
+    if(notNull(params.x) && notNull(params.y)) {
+      if (!params.srid){ params.srid = 4326;}
+      var xAlias = dbapi.addSqlParameter(sqlParts, params.x);
+      var yAlias = dbapi.addSqlParameter(sqlParts, params.y);
+      dbapi.addWhereClause(sqlParts, "ST_Contains(geom, ST_Transform(ST_SetSRID(ST_Point(" +
+        xAlias+", " +
+        yAlias+"), " +
+        dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)");
+    }
+  };
+}
+
 var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
 var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
 

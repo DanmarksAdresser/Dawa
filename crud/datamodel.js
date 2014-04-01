@@ -13,12 +13,12 @@ module.exports = {
   },
   postnummer: {
     table: 'postnumre',
-    columns: ['nr', 'navn'],
+    columns: ['nr', 'navn', 'stormodtager'],
     key: ['nr']
   },
   vejstykke: {
     table: 'vejstykker',
-    columns: ['kommunekode', 'kode', 'vejnavn'],
+    columns: ['kommunekode', 'kode', 'vejnavn', 'adresseringsnavn'],
     key: ['kommunekode', 'kode']
   }
 };

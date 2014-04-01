@@ -1,7 +1,6 @@
 "use strict";
 
 var request = require("request");
-var _       = require("underscore");
 
 describe("AdresserApi", function() {
   describe("Opslag på ID", function() {
@@ -20,14 +19,13 @@ describe('When searching for polygons and zipcodes', function () {
 
   it('both should be used', function (done) {
     request.get('http://localhost:3000/adresser'+
-                '?polygon=[[[10.3,55.3], [10.4,55.3], [10.4,55.4], [10.4,55.4], [10.3,55.3]]]&postnr=5000',
+                '?polygon=[[[12.5,55.59], [12.6,55.59], [12.6,55.595], [12.5,55.595], [12.5,55.59]]]&postnr=2791',
                 function(error, response, body){
                   if (response.statusCode != "200"){
                     done(response.statusCode);
                   } else {
                     var adrs = JSON.parse(body);
-                    // TODO Naar alle enhedsadresser er oprettet vil dette resultere i flere adresser
-                    expect(adrs.length).toBe(390);
+                    expect(adrs.length).toBe(106);
                     done();
                   }
                 });
@@ -37,7 +35,7 @@ describe('When searching for polygons and zipcodes', function () {
 describe('The query-parameter', function () {
 
   it('vejkode should succeed', function (done) {
-    request.get('http://localhost:3000/adresser?vejkode=0801',
+    request.get('http://localhost:3000/adresser?vejkode=0689',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
                   expect(response.statusCode).toBe(200);
@@ -47,7 +45,7 @@ describe('The query-parameter', function () {
   });
 
   it('vejkode should succeed without leading 0s', function (done) {
-    request.get('http://localhost:3000/adresser?vejkode=801',
+    request.get('http://localhost:3000/adresser?vejkode=689',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
                   expect(response.statusCode).toBe(200);
@@ -65,36 +63,3 @@ describe('The query-parameter', function () {
                 });
   });
 });
-
-describe('All paremetrs should succeed. ', function () {
-
-  var params = [
-    ['id', '0a3f50aa-e376-32b8-e044-0003ba298018'],
-    ['vejkode', '0801'],
-    ['vejnavn', 'Solvej'],
-    ['husnr', '8'],
-    ['etage', 'st'],
-    ['dør', 'th'],
-    ['adgangsadresseid', '0a3f5081-166b-32b8-e044-0003ba298018'],
-    ['kommunekode', '253'],
-    ['ejerlavkode', '40453'],
-    ['matrikel', '2cv'],
-    ['q', 'Engparken'],
-    // polygon and postnr is // Tested elsewhere!
-    //TODO supplerendebynavn. No data yet!
-  ];
-
-  _.each(params, queryParamTest);
-});
-
-function queryParamTest(param){
-  it(param+' should succeed', function(done){
-    request.get('http://localhost:3000/adresser?postnr=2690&'+param[0]+'='+encodeURIComponent(param[1]),
-                function(error, response, body){
-                  var adrs = JSON.parse(body);
-                  expect(response.statusCode).toBe(200);
-                  expect(adrs.length).toBeGreaterThan(0);
-                  done();
-                });
-  });
-}

@@ -14,9 +14,6 @@ var fields = [
     name: 'navn'
   },
   {
-    name: 'version'
-  },
-  {
     name: 'kommune'
   },
   {

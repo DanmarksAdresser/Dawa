@@ -3,11 +3,21 @@
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
-var kode4String = require('../util').kode4String;
+var util = require('../util');
+var kode4String = util.kode4String;
+var d = util.d;
 
 var fields = [
   {
     name: 'id'
+  },
+  {
+    name: 'oprettet',
+    formatter: d
+  },
+  {
+    name: 'ændret',
+    formatter: d
   },
   {
     name: 'vejkode',
@@ -87,7 +97,8 @@ var fields = [
     name: 'ddkn_km10'
   },
   {
-    name: 'adressepunktændringsdato'
+    name: 'adressepunktændringsdato',
+    formatter: d
   },
   {
     name: 'geom_json'
@@ -96,13 +107,12 @@ var fields = [
     name: 'adgangsadresseid'
   },
   {
-    name: 'adgangsadresse_oprettet'
+    name: 'adgangsadresse_oprettet',
+    formatter: d
   },
   {
-    name: 'adgangsadresse_ændret'
-  },
-  {
-    name: 'adgangsadresse_ikrafttrædelse'
+    name: 'adgangsadresse_ændret',
+    formatter: d
   },
   {
     name: 'dagitemaer',

@@ -12,8 +12,14 @@ require('../../apiSpecification/allSpecs');
  */
 
 var valuesNeverExpectedToBeSeen = {
+  vejstykker: {
+    adresseringsnavn: true
+  },
   postnumre: {
     stormodtageradresser: true
+  },
+  vejnavne: {
+    adresseringsnavn: true
   },
   adgangsadresser: {
     sogn: {

@@ -21,7 +21,9 @@
     "xml2js": "~0.4.1",
     "aws-sdk": "~2.0.0",
     "cli": "~0.4.5",
-    "pg-copy-streams": "~0.2.1"
+    "pg-copy-streams": "~0.2.1",
+    "iconv": "~2.0.7",
+    "moment": "~2.5.1"
   },
   "devDependencies": {
     "jasmine-node": "1.14.2",

@@ -39,9 +39,6 @@ exports.json = {
         type: 'string',
         maxLength: 20
       },
-      'version' : {
-        '$ref': '#/definitions/DateTime'
-      },
       'stormodtageradresser': {
         description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adresserne på stormodtageren.',
         type: nullableType('array'),
@@ -55,7 +52,7 @@ exports.json = {
         }
       }
     },
-    'docOrder': ['href','nr', 'navn', 'version', 'stormodtageradresser', 'kommuner']
+    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'kommuner']
   }),
   fields: _.filter(_.where(fields, { selectable: true }), function(field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -66,7 +63,6 @@ exports.json = {
         href: makeHref(baseUrl, 'postnummer', [row.nr]),
         nr:  kode4String(row.nr),
         navn: row.navn,
-        version: row.version,
         stormodtageradresser: row.stormodtageradresser ? row.stormodtageradresser : null,
         kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : null
       };

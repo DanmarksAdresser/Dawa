@@ -10,6 +10,15 @@ var columns = {
   id: {
     column: 'e_id'
   },
+  oprettet: {
+    column: 'e_oprettet'
+  },
+  ændret:{
+    column: 'e_aendret'
+  },
+  ikrafttrædelse: {
+    column: 'e_ikraftfra'
+  },
   adgangsadresseid: {
     column: 'a_id'
   },

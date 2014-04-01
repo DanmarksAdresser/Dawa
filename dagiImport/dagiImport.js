@@ -55,7 +55,7 @@ cli.main(function (args, options) {
     sogn: 'Navn',
     opstillingskreds: 'Navn',
     politikreds: 'Navn',
-    postdistrikt: 'DistrictName',
+    postdistrikt: null,
     retskreds: 'Navn'
   };
 
@@ -160,7 +160,7 @@ cli.main(function (args, options) {
           return {
             tema: temaNavn,
             kode: parseInt(f[dagiKodeKolonne[temaNavn]][0], 10),
-            navn: f[dagiNavnKolonne[temaNavn]][0],
+            navn: dagiNavnKolonne[temaNavn] ? f[dagiNavnKolonne[temaNavn]][0] : null,
             polygon: gmlPolygonToWkt(f.geometri[0])
           };
         });

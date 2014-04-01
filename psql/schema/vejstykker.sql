@@ -2,10 +2,8 @@ DROP TABLE IF EXISTS vejstykker CASCADE;
 CREATE TABLE IF NOT EXISTS vejstykker (
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
-  version VARCHAR(255),
   vejnavn VARCHAR(255) NOT NULL,
-  oprettet timestamp,
-  aendret timestamp,
+  adresseringsnavn VARCHAR(255),
   tsv tsvector,
   PRIMARY KEY(kommunekode, kode)
 );
@@ -20,8 +18,7 @@ CREATE TABLE IF NOT EXISTS vejstykker_history (
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
   vejnavn VARCHAR(255) NOT NULL,
-  oprettet timestamp,
-  aendret timestamp
+  adresseringsnavn VARCHAR(255)
 );
 
 CREATE INDEX ON vejstykker_history(valid_from);
@@ -64,9 +61,9 @@ BEGIN
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
     INSERT INTO vejstykker_history(
-      valid_from, kommunekode, kode, vejnavn, oprettet, aendret)
+      valid_from, kommunekode, kode, vejnavn)
     VALUES (
-      seqnum, NEW.kommunekode, NEW.kode, NEW.vejnavn, NEW.oprettet, NEW.aendret);
+      seqnum, NEW.kommunekode, NEW.kode, NEW.vejnavn);
   END IF;
   INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'vejstykke', optype);
   RETURN NULL;

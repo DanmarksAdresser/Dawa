@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS stormodtagere;
 CREATE TABLE IF NOT EXISTS stormodtagere (
   nr integer NOT NULL,
-  version VARCHAR(255) NOT NULL,
   navn VARCHAR(20) NOT NULL,
   adgangsadresseid UUID NOT NULL
 );
@@ -61,7 +60,7 @@ LANGUAGE plpgsql AS
 $$
   BEGIN
     DELETE FROM postnumre p WHERE p.stormodtager = true;
-    INSERT INTO postnumre (nr, version, navn, stormodtager)
-      SELECT nr, max(version), max(navn), true FROM stormodtagere GROUP BY nr;
+    INSERT INTO postnumre (nr, navn, stormodtager)
+      SELECT nr, max(navn), true FROM stormodtagere GROUP BY nr;
   END;
 $$;

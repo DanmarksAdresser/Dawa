@@ -2,6 +2,7 @@
 var _ = require('underscore');
 var pg = require('pg.js');
 var async = require('async');
+var fs = require('fs');
 var winston = require('winston');
 
 function normaliseTableSpec(specs){
@@ -156,3 +157,14 @@ exports.withWriteTranaction = function (connString, cb) {
     });
   });
 };
+
+function psqlScript(client, scriptDir, scriptfile){
+  return function(cb){
+    var script = fs.readFileSync(scriptDir + '/' + scriptfile, {
+      encoding: 'utf8'
+    });
+    client.query(script, [], cb);
+  };
+}
+
+exports.psqlScript = psqlScript;

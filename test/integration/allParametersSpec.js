@@ -23,7 +23,7 @@ var sampleParameters = {
       }
     },
     navn: {
-      values: ['Jens Nielsens Vej'],
+      values: ['Strandmarken'],
       verifier: function(vejstykke, navn) {
         return vejstykke.navn === navn;
       }
@@ -39,7 +39,7 @@ var sampleParameters = {
   },
   vejnavn: {
     navn: {
-      values: ['Allégade', 'Birkede Brovej'],
+      values: ['Birkede Brovej'],
       verifier: function(vejnavn, navn) {
         return vejnavn.navn === navn;
       }
@@ -91,7 +91,7 @@ var sampleParameters = {
   },
   supplerendebynavn: {
     navn: {
-      values: ['Elmelund'],
+      values: ['Skallebølle'],
       verifier: function(supplerendeBynavn, navn) {
         return supplerendeBynavn.navn === navn;
       }
@@ -129,7 +129,7 @@ var sampleParameters = {
   },
   adgangsadresse: {
     id: {
-      values: ['0a3f507b-b8f7-32b8-e044-0003ba298018'],
+      values: ['0a3f507b-b8ea-32b8-e044-0003ba298018'],
       verifier: function (adr, id) {
         return adr.id === id;
       }
@@ -141,20 +141,20 @@ var sampleParameters = {
       }
     },
     vejnavn: {
-      values: ['Allégade'],
+      values: ['Birkede Brovej'],
       verifier: function(adr, vejnavn) {
         return adr.vejstykke.navn === vejnavn;
       }
 
     },
     husnr: {
-      values: ['70B'],
+      values: ['130A'],
       verifier: function(adr, husnr) {
         return adr.husnr === husnr;
       }
     },
     supplerendebynavn: {
-      values: ['Rynkeby'],
+      values: ['Kerte'],
       verifier: function(adr, supplerendeBynavn) {
         return adr.supplerendebynavn === supplerendeBynavn;
       }
@@ -178,21 +178,21 @@ var sampleParameters = {
       }
     },
     matrikelnr: {
-      values: ['302by'],
+      values: ['10ae'],
       verifier: function(adr, matrikelnr) {
         return adr.matrikelnr === matrikelnr;
       }
     },
     esrejendomsnr: {
-      values: ['189180'],
+      values: ['002626', '2626'],
       verifier: function(adr, esrejendomsnr) {
-        return adr.esrejendomsnr === esrejendomsnr;
+        return parseInt(adr.esrejendomsnr, 10) === parseInt(esrejendomsnr, 10);
       }
     }
   },
   adresse: {
     id: {
-      values: ['04d92d98-a576-4cc0-abc9-2d059b8285ff'],
+      values: ['07839141-fca3-49ef-8747-2e9a5551dd6d'],
       verifier: function(adr, id) {
         return adr.id === id;
       }
@@ -210,7 +210,7 @@ var sampleParameters = {
       }
     },
     adgangsadresseid: {
-      values: ['0a3f507b-b8f7-32b8-e044-0003ba298018'],
+      values: ['0a3f507b-b8f0-32b8-e044-0003ba298018'],
       verifier: function (adr, id) {
         return adr.adgangsadresse.id === id;
       }
@@ -222,20 +222,20 @@ var sampleParameters = {
       }
     },
     vejnavn: {
-      values: ['Allégade'],
+      values: ['Birkede Brovej'],
       verifier: function(adr, vejnavn) {
         return adr.adgangsadresse.vejstykke.navn === vejnavn;
       }
 
     },
     husnr: {
-      values: ['70B'],
+      values: ['130A'],
       verifier: function(adr, husnr) {
         return adr.adgangsadresse.husnr === husnr;
       }
     },
     supplerendebynavn: {
-      values: ['Rynkeby'],
+      values: ['Kerte'],
       verifier: function(adr, supplerendeBynavn) {
         return adr.adgangsadresse.supplerendebynavn === supplerendeBynavn;
       }
@@ -259,15 +259,15 @@ var sampleParameters = {
       }
     },
     matrikelnr: {
-      values: ['302by'],
+      values: ['10ae'],
       verifier: function(adr, matrikelnr) {
         return adr.adgangsadresse.matrikelnr === matrikelnr;
       }
     },
     esrejendomsnr: {
-      values: ['189180'],
+      values: ['002626', '2626'],
       verifier: function(adr, esrejendomsnr) {
-        return adr.adgangsadresse.esrejendomsnr === esrejendomsnr;
+        return parseInt(adr.adgangsadresse.esrejendomsnr, 10) === parseInt(esrejendomsnr, 10);
       }
     }
   }

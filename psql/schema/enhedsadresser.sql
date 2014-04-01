@@ -1,7 +1,6 @@
 DROP TABLE IF EXISTS enhedsadresser;
 CREATE TABLE IF NOT EXISTS enhedsadresser (
   id uuid NOT NULL PRIMARY KEY,
-  version timestamp,
   adgangsadresseid UUID NOT NULL,
   oprettet timestamp,
   ikraftfra timestamp,

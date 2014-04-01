@@ -14,10 +14,6 @@ var columns = {
   navn: {
     select: 'p.navn'
   },
-  version: {
-    select: 'p.version',
-    where: 'p.version'
-  },
   kommune: {
     select: null,
     where: 'n.kommunekode'
@@ -60,7 +56,7 @@ var baseQuery = function () {
            'LEFT JOIN postnumre_kommunekoder_mat n ON n.postnr = p.nr '
           ],
     whereClauses: ["p.navn <> 'Ukendt' "],
-    groupBy: 'p.nr, p.navn, p.version',
+    groupBy: 'p.nr, p.navn',
     orderClauses: ['p.nr'],
     sqlParams: []
   };

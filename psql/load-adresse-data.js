@@ -4,6 +4,7 @@ var async = require('async');
 var cli = require('cli');
 var csv = require('csv');
 var copyFrom = require('pg-copy-streams').from;
+var Iconv  = require('iconv').Iconv;
 var fs = require('fs');
 var winston = require('winston');
 var zlib = require('zlib');
@@ -11,24 +12,23 @@ var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var sqlCommon = require('./common');
+var bbrFieldMappings = require('../bbr/common/fieldMappings');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med CSV-filer (gzippede)', 'string'],
+  filePrefix: [false, 'Prefix paa BBR-filer, f.eks. \'T_20140328_\'', 'string'],
   format: [false, 'CSV format (legacy eller bbr)', 'string', 'bbr']
 };
 
 cli.parse(optionSpec, []);
 
-function loadCsv(client, gzippedInputStream, options, callback) {
-
-  var unzipped = gzippedInputStream.pipe(zlib.createGunzip());
-  unzipped.setEncoding("utf8");
-
-  var sql = "COPY " + options.tableName + "("  + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"')";
+function loadCsv(client, inputStream, options, callback) {
+  var sql = "COPY " + options.tableName + "(" + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"')";
+  console.log("executing sql %s", sql);
   var pgStream = client.query(copyFrom(sql));
 
-  csv().from.stream(unzipped, {
+  csv().from.stream(inputStream, {
     delimiter: ';',
     quote: '"',
     escape: '\\',
@@ -59,14 +59,17 @@ function exitOnErr(err){
 
 var legacyTransformers = {
   postnummer: function(row, idx) {
-    if(idx % 1000 === 0) {
+    console.log(JSON.stringify(row));
+    if(idx % 100 === 0) {
       console.log(idx + ", " + row.PostCodeIdentifier);
     }
-    return {
-      nr : row.PostCodeIdentifier,
-      version: row.VersionId,
-      navn : row.DistrictName
+    var result = {
+      nr: row.PostCodeIdentifier,
+      navn: row.DistrictName,
+      stormodtager: 0
     };
+    console.log(JSON.stringify(result));
+    return  result;
   },
   vejstykke: function(row, idx) {
     if(idx % 1000 === 0) {
@@ -75,8 +78,8 @@ var legacyTransformers = {
     return {
       kode : row.StreetCode,
       kommunekode: row.MunicipalityCode,
-      version: row.VersionId,
-      vejnavn : row.StreetName
+      vejnavn : row.StreetName,
+      adresseringsnavn: null
     };
   },
   enhedsadresse: function(row, idx) {
@@ -85,7 +88,6 @@ var legacyTransformers = {
     }
     return {
       id : row.AddressSpecificIdentifier,
-      version: row.VersionId,
       adgangsadresseid : row.AddressAccessReference,
       oprettet : row.AddressSpecificCreateDate,
       aendret : row.AddressSpecificChangeDate,
@@ -99,7 +101,6 @@ var legacyTransformers = {
     }
     return {
       id: row.AddressAccessIdentifier,
-      version: row.VersionId,
       vejkode: row.StreetCode,
       kommunekode: row.MunicipalityCode,
       husnr: row.StreetBuildingIdentifier,
@@ -128,19 +129,90 @@ var legacyTransformers = {
   }
 };
 
+function transformBbr(fieldMapping) {
+  var mapping = _.invert(fieldMapping);
+  return function(row) {
+    return _.reduce(row, function(memo, value, key) {
+      if(value === 'null') {
+        value = null;
+      }
+      memo[mapping[key] || key] = value;
+      return memo;
+    }, {});
+  };
+}
+
+var transformBbrAdgangsadresse = transformBbr(bbrFieldMappings.adgangsadresse);
+var transformEnhedsadresse = transformBbr(bbrFieldMappings.enhedsadresse);
+function removePrefixZeroes(str) {
+  while (str && str.charAt(0) === '0') {
+    str = str.substring(1);
+  }
+  return str;
+}
+
 var bbrTransformers = {
   postnummer: function(row) {
-    return row;
+    var result = transformBbr(bbrFieldMappings.postnummer)(row);
+    result.stormodtager = 0;
+    return result;
   },
-  vejstykke: function(row) {
-    return row;
-  },
+  vejstykke: transformBbr(bbrFieldMappings.vejstykke),
   enhedsadresse: function(row) {
-    return row;
+    var result = transformEnhedsadresse(row);
+    if(!_.isUndefined(result.etage) && !_.isNull(result.etage)) {
+      result.etage = removePrefixZeroes(result.etage);
+      result.etage = result.etage.toLowerCase();
+    }
+    if(!_.isUndefined(result.doer) && !_.isNull(result.doer)) {
+      result.doer = result.doer.toLowerCase();
+    }
+    return result;
   },
   adgangsadresse: function(row) {
-    return row;
+    var result = transformBbrAdgangsadresse(row);
+    // vi skal lige have fjernet de foranstillede 0'er
+    result.husnr = removePrefixZeroes(result.husnr);
+    return result;
   }
+};
+
+var bbrFileNames = {
+  vejstykke: 'Vejnavn.CSV',
+  adgangsadresse: 'Adgangsadresse.CSV',
+  enhedsadresse: 'Enhedsadresse.CSV',
+  postnummer: 'Postnummer.CSV'
+};
+
+var legacyFileNames = {
+  vejstykke: 'RoadName.csv.gz',
+  adgangsadresse: 'AddressAccess.csv.gz',
+  enhedsadresse: 'AddressSpecific.csv.gz',
+  postnummer: 'PostCode.csv.gz'
+};
+
+var bbrFileStreams = function(dataDir, filePrefix) {
+  return _.reduce(bbrFileNames, function(memo, filename, key) {
+    memo[key] = function() {
+      var stream = fs.createReadStream(dataDir + '/' + filePrefix + filename);
+      // If BBR has not yet changed encoding...
+      //  return stream.pipe(new Iconv('ISO-8859-1', 'UTF-8'));
+      return stream;
+    };
+    return memo;
+  }, {});
+};
+
+var legacyFileStreams = function(dataDir) {
+  return _.reduce(legacyFileNames, function(memo, filename, key) {
+    memo[key] = function() {
+      var stream = fs.createReadStream(dataDir +'/' + filename);
+      var unzipped = stream.pipe(zlib.createGunzip());
+      unzipped.setEncoding('utf8');
+      return unzipped;
+    };
+    return memo;
+  }, {});
 };
 
 function loadAdditionalBbrFiles(client, callback) {
@@ -149,57 +221,57 @@ function loadAdditionalBbrFiles(client, callback) {
 
 cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
-  process.env.pgConnectionUrl = options.pgConnectionUrl;
-
+  cliParameterParsing.checkRequiredOptions(options, ['pgConnectionUrl', 'dataDir', 'format']);
   var format = options.format;
-  var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
-  cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
-
   var dataDir = options.dataDir;
+  var filePrefix = options.filePrefix || '';
+  var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
+  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
+
   sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     async.series([
       sqlCommon.disableTriggers(client),
       function(callback) {
         console.log("Indlæser postnumre....");
-        var postnumreStream = fs.createReadStream( dataDir + '/PostCode.csv.gz');
+        var postnumreStream = fileStreams.postnummer();
         loadCsv(client, postnumreStream, {
           tableName : 'Postnumre',
-          columns : ['nr', 'version', 'navn'],
+          columns : ['nr', 'navn', 'stormodtager'],
           transformer: transformers.postnummer
         }, callback);
       },
       function(callback) {
-        console.log("Indlæser vejnavne....");
-        var vejnavneStream = fs.createReadStream(dataDir + '/RoadName.csv.gz');
-        loadCsv(client, vejnavneStream, {
+        console.log("Indlæser vejstykker....");
+        var vejstykkerStream = fileStreams.vejstykke();
+        loadCsv(client, vejstykkerStream, {
           tableName : 'Vejstykker',
-          columns : ['kode', 'kommunekode', 'version', 'vejnavn'],
+          columns : ['kode', 'kommunekode', 'vejnavn'],
           transformer: transformers.vejstykke
 
         }, callback);
       },
       function(callback) {
-        console.log("Indlæser enhedsadresser....");
-        var enhedsadresserStream = fs.createReadStream(dataDir + '/AddressSpecific.csv.gz');
-        loadCsv(client, enhedsadresserStream, {
-          tableName : 'Enhedsadresser',
-          columns : ['id', 'version', 'adgangsadresseid', 'oprettet', 'aendret', 'etage', 'doer'],
-          transformer: transformers.enhedsadresse
-
-        }, callback);
-      },
-      function(callback) {
         console.log("Indlæser adgangsadresser....");
-        var adgangsAdresserStream = fs.createReadStream(dataDir + '/AddressAccess.csv.gz');
+        var adgangsAdresserStream = fileStreams.adgangsadresse();
         loadCsv(client, adgangsAdresserStream, {
           tableName : 'Adgangsadresser',
-          columns : ['id', 'version', 'vejkode', 'kommunekode',
+          columns : ['id', 'vejkode', 'kommunekode',
             'husnr', 'supplerendebynavn',
             'postnr', 'ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'esrejendomsnr',
             'oprettet', 'ikraftfra', 'aendret', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
             'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
           transformer: transformers.adgangsadresse
+
+        }, callback);
+      },
+      function(callback) {
+        console.log("Indlæser enhedsadresser....");
+        var enhedsadresserStream = fileStreams.enhedsadresse();
+        loadCsv(client, enhedsadresserStream, {
+          tableName : 'Enhedsadresser',
+          columns : ['id', 'adgangsadresseid', 'oprettet', 'aendret', 'ikraftfra', 'etage', 'doer'],
+          transformer: transformers.enhedsadresse
 
         }, callback);
       },
@@ -211,6 +283,7 @@ cli.main(function(args, options) {
           callback();
         }
       },
+      sqlCommon.psqlScript(client, __dirname, 'initialize-history.sql'),
       sqlCommon.initializeTables(client),
       sqlCommon.enableTriggers(client)
     ], function(err) {

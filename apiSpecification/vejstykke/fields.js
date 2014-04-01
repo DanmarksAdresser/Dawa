@@ -22,6 +22,9 @@ var fields = [
     name: 'navn'
   },
   {
+    name: 'adresseringsnavn'
+  },
+  {
     name: 'postnr'
   },
   {

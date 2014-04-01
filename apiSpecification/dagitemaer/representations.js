@@ -34,7 +34,7 @@ dagiTemaer.forEach(function(tema) {
           $ref: '#/definitions/Kode4'
         },
         'navn': {
-          description: tema + tema.singularSpecific + 's navn.',
+          description: tema.singularSpecific + 's navn.',
           type: 'string'
         }
       },

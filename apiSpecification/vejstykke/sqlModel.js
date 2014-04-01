@@ -16,9 +16,6 @@ var columns = {
     select: 'max(kommuner.navn)',
     where: null
   },
-  version: {
-    column: 'vejstykker.version'
-  },
   navn: {
     column: 'vejstykker.vejnavn'
   },

@@ -1,6 +1,7 @@
 "use strict";
 
 var request = require("request");
+var _ = require('underscore');
 //var _       = require("underscore");
 
 var kommuner = [ { href : 'http://localhost:3000/kommuner/253', kode : "0253", navn : 'Greve' },
@@ -45,8 +46,8 @@ describe("PostnumreApi", function() {
   });
   it('It is possible to search for postnumre by kommunekode', function(done) {
     request.get({url: "http://localhost:3000/postnumre?kommune=253", json: true}, function(error, response, result) {
-      var postnummer = result[0];
-      expect(postnummer.nr).toBe("2690");
+      var postnummer = _.findWhere(result, {nr: "2690"});
+      expect(postnummer.nr).toBeDefined();
       expect(postnummer.navn).toBe('Karlslunde');
       expect(postnummer.kommuner).toEqual(kommuner);
       done();

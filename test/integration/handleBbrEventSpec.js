@@ -14,16 +14,16 @@ describe('Håndtering af BBR events', function() {
       "lokaltsekvensnummer": 205,
       "tidspunkt": "2000-02-05T12:00:00+00:00",
       "data": {
-        "kommunekode": 420,
-        "vejkode": 481,
+        "kommunekode": 461,
+        "vejkode": 4194,
         "intervaller": [{
-          "husnrFra": "4",
-          "husnrTil": "8",
+          "husnrFra": "190",
+          "husnrTil": "194",
           "side": "lige",
           "navn": "Østby"
         }, {
-          "husnrFra": "9",
-          husnrTil: "15B",
+          "husnrFra": "101",
+          husnrTil: "107",
           side: 'ulige',
           navn: 'Vestby'
         }]
@@ -43,8 +43,8 @@ describe('Håndtering af BBR events', function() {
             throw err;
           }
           crud.query(client, datamodels.adgangsadresse, {
-            kommunekode: 420,
-            vejkode: 481
+            kommunekode: 461,
+            vejkode: 4194
           }, function(err, adresser) {
             if(err) {
               throw err;
@@ -55,8 +55,8 @@ describe('Håndtering af BBR events', function() {
         });
       });
     });
-    var husnumreILigeInterval = ['4', '6', '8'];
-    var husnumreIUligeInterval = ['9', '11', '13', '15', '15B'];
+    var husnumreILigeInterval = ['190', '192', '194'];
+    var husnumreIUligeInterval = ['101', '103', '105', '107'];
     it('Skal sætte supplerende bynavn (lige husnummerinterval)', function() {
       var adresserILigeInterval = _.filter(resultingAdresser, function(adresse) {
         return _.contains(husnumreILigeInterval, adresse.husnr);
@@ -79,7 +79,7 @@ describe('Håndtering af BBR events', function() {
       var adresserUdenforInterval = _.reject(resultingAdresser, function(adresse) {
         return _.contains(husnumreILigeInterval.concat(husnumreIUligeInterval), adresse.husnr);
       });
-      expect(adresserUdenforInterval.length).toBe(15);
+      expect(adresserUdenforInterval.length).toBe(35);
       adresserUdenforInterval.forEach(function(adresse) {
         expect(adresse.supplerendebynavn).toBeNull();
       });

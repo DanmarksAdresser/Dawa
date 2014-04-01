@@ -1,13 +1,13 @@
 "use strict";
 
 var cli = require('cli');
-var fs = require('fs');
 var winston  = require('winston');
 var _        = require('underscore');
 var async    = require('async');
 var sqlCommon = require('./common');
 
 var initializeTables = sqlCommon.initializeTables;
+var psqlScript = sqlCommon.psqlScript;
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
@@ -19,14 +19,6 @@ cli.parse(optionSpec, []);
 
 
 
-function psqlScript(client, scriptDir, scriptfile){
-  return function(cb){
-    var script = fs.readFileSync(scriptDir + '/' + scriptfile, {
-      encoding: 'utf8'
-    });
-    client.query(script, [], cb);
-  };
-}
 
 function loadSchemas(client, scriptDir){
   return function(done){

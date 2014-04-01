@@ -99,23 +99,19 @@ exports.json = {
         pattern: '^[0-9]{1,6}'
       },
       'historik' : schemaObject({
-        'description': 'Væsentlige tidspunkter for adressen',
+        'description': 'Væsentlige tidspunkter for adgangsadressen',
         properties: {
           'oprettet': {
-            description: 'Dato og tid for adressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
-            '$ref': '#/definitions/NullableDateTime'
-          },
-          'ikrafttrædelse': {
-            description: 'Dato og tid for adressens ikrafttrædelse. Eksempel: 2002-01-01T00:00:00.',
+            description: 'Dato og tid for adgangsadressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
             '$ref': '#/definitions/NullableDateTime'
           },
           'ændret': {
-            description: 'Dato og tid hvor der sidst er ændret i adressen. Eksempel: 2002-04-08T00:00:00.',
+            description: 'Dato og tid hvor der sidst er ændret i adgangsadressen. Eksempel: 2002-04-08T00:00:00.',
             type: nullableType('string'),
             '$ref': '#/definitions/NullableDateTime'
           }
         },
-        docOrder: ['oprettet', 'ikrafttrædelse', 'ændret']
+        docOrder: ['oprettet', 'ændret']
 
       }),
       'adgangspunkt': schemaObject({
@@ -301,11 +297,10 @@ exports.json = {
       else {
         adr.ejerlav = null;
       }
-      adr.esrejendomsnr = maybeNull(rs.esrejendomsnr);
+      adr.esrejendomsnr = maybeNull("" + rs.esrejendomsnr);
       adr.matrikelnr = maybeNull(rs.matrikelnr);
       adr.historik = {
         oprettet: d(rs.oprettet),
-        ikrafttrædelse: d(rs.ikrafttrædelse),
         ændret: d(rs.ændret)
       };
       adr.adgangspunkt = {

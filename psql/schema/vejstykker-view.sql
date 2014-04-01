@@ -3,7 +3,6 @@ CREATE VIEW vejstykkerView AS
   SELECT
     vejstykker.kode,
     vejstykker.kommunekode,
-    vejstykker.version,
     vejnavn,
     vejstykker.tsv,
     max(kommuner.navn) AS kommunenavn,

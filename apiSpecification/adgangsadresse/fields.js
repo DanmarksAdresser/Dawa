@@ -3,20 +3,21 @@
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
-var kode4String = require('../util').kode4String;
+var util = require('../util');
+var kode4String = util.kode4String;
+var d = util.d;
 
 var fields = [
   {
     name: 'id'
   },
   {
-    name: 'oprettet'
+    name: 'oprettet',
+    formatter: d
   },
   {
-    name: 'ændret'
-  },
-  {
-    name: 'ikrafttrædelse'
+    name: 'ændret',
+    formatter: d
   },
   {
     name: 'vejkode',
@@ -82,7 +83,8 @@ var fields = [
     name: 'tekstretning'
   },
   {
-    name: 'adressepunktændringsdato'
+    name: 'adressepunktændringsdato',
+    formatter: d
   },
   {
     name: 'ddkn_m100'

@@ -2,7 +2,6 @@ DROP VIEW IF EXISTS Adresser CASCADE;
 CREATE VIEW adresser AS
   SELECT
     E.id        AS e_id,
-    E.version   AS e_version,
     E.oprettet  AS e_oprettet,
     E.ikraftfra AS e_ikraftfra,
     E.aendret   AS e_aendret,
