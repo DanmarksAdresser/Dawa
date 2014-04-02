@@ -12,8 +12,6 @@ var cluster = require('cluster');
 var workers = {};
 var count = require('os').cpus().length;
 
-var cluseringDisabled = process.env.clusteringDisabled === 'true';
-
 function setupWorker() {
   var express        = require("express");
   var expressWinston = require('express-winston');
