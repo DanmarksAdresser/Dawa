@@ -38,7 +38,7 @@ function setupWorker() {
   app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
 
 
-  var listenPort = process.env.PORT || 3000;
+  var listenPort = process.env.listenPort || 3000;
 
   app.use('', dawaPgApi.setupRoutes());
   app.use('', documentation);
@@ -53,11 +53,16 @@ function setupMaster() {
   var cliParameterParsing = require('./bbr/common/cliParameterParsing');
   var optionSpec = {
     pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-    listenPort: [false, 'TCP port der lyttes på', 'number', 3000]
+    listenPort: [false, 'TCP port der lyttes på', 'number', 3000],
+    disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean']
   };
 
   cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
-
+    if(options.disableClustering) {
+      _.extend(process.env, options);
+      setupWorker();
+      return;
+    }
     for (var i = 0; i < count; i++) {
       console.log("spawning with options %j", options);
       spawn(options);
@@ -72,13 +77,7 @@ function setupMaster() {
 }
 
 if (cluster.isMaster) {
-  if(cluseringDisabled) {
-    setupWorker();
-  }
-  else {
-    setupMaster();
-  }
-
+  setupMaster();
 } else {
   setupWorker();
 }
