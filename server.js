@@ -55,7 +55,7 @@ function setupMaster() {
     disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean']
   };
 
-  cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+  cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
     if(options.disableClustering) {
       _.extend(process.env, options);
       setupWorker();

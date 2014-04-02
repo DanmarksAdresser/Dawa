@@ -1,5 +1,6 @@
 "use strict";
 
+var cliParameterParsing = require('../../bbr/common/cliParameterParsing');
 var request = require('request');
 var winston = require('winston');
 var AWS     = require('aws-sdk');
@@ -11,19 +12,83 @@ var dynamoEvents = require('../../bbr/common/dynamoEvents');
 
 winston.handleExceptions(new winston.transports.Console());
 
-var TABLE = 'dawatest';
-var hostPort = 'localhost:3333';
-var dd = new AWS.DynamoDB(
-  {apiVersion      : '2012-08-10',
-   region          : 'eu-west-1',
-   accessKeyId     : process.env.awsAccessKeyId,
-   secretAccessKey : process.env.awsSecretAccessKey});
+var optionSpec = {
+  awsRegion: [false, 'AWS region, hvor Dynamo databasen befinder sig', 'string', 'eu-west-1'],
+  awsAccessKeyId: [false, 'Access key der anvendes for at tilgå Dynamo', 'string'],
+  awsSecretAccessKey: [false, 'Secret der anvendes for at tilgå Dynamo', 'string'],
+  dynamoTable: [false, 'Navn på dynamo table hvori hændelserne gemmes', 'string']
+};
 
-/*******************************************************************************
-***** Main function ************************************************************
-*******************************************************************************/
+cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
 
-function main(){
+  var hostPort = 'localhost:3333';
+
+  var dd = new AWS.DynamoDB(
+    {apiVersion      : '2012-08-10',
+      region          : options.awsRegion,
+      accessKeyId     : options.awsAccessKeyId,
+      secretAccessKey : options.awsSecretAccessKey});
+
+
+  var TABLE = options.dynamoTable;
+
+  function postTestSpec(spec, cb){
+    request({ method         : 'POST',
+        uri            : 'http://'+hostPort+'/haendelse',
+        'content-type' : 'application/json',
+        json           : withSeqNr(spec.S, spec.H)},
+      function (error, response, body) {
+        if (error){return cb(error, body);}
+        if (response.statusCode === spec.C){
+          cb(null, body);
+        } else {
+          cb(body, body);
+        }
+      });
+  }
+
+  function assertEmptyDB(cb){
+    dynamoEvents.getAll(dd, TABLE, function(error, data){
+      if (error) {return cb(error);}
+      if (data.Count === 0){
+        cb();
+      } else {
+        winston.error('DB not empty: %j', data, {});
+        cb('DB not empty!');
+      }
+    });
+  }
+
+  function test(cb){
+    async.eachSeries(
+      testSpec(),
+      function(spec, cb){
+        postTestSpec(spec, function(err, message){
+          if (err) {
+            winston.error('******* Error err=%j in spec=%j message=%j', err, spec, message, {});
+            cb('Test error in spec: '+util.format('%j', spec));
+          } else {
+            winston.info('******* %s: serial=%s statusCode=%j(%j) error=%j',
+              spec.H.type, spec.S, spec.C, message, err, {});
+            cb();
+          }
+        });
+      },
+      function(err){
+        if (err) {
+          winston.error('Error %s', err);
+        } else {
+          winston.info('***************');
+          winston.info('Test SUCCESS!!!');
+        }
+      }
+    );
+  }
+
+  /*******************************************************************************
+   ***** Main function ************************************************************
+   *******************************************************************************/
+
   async.series(
     [
       print('Starting the BBR Facade test....'),
@@ -39,7 +104,7 @@ function main(){
       winston.info('Error in test commands: %j %j', err, results, {});
     }
   );
-}
+});
 
 
 /*******************************************************************************
@@ -67,52 +132,10 @@ function testSpec(){
           {S: 9,  H: TD.enhedsadresseFail,         C: 400},
           {S: 9,  H: TD.supplerendebynavnFail,     C: 400},
           {S: 9,  H: TD.supplerendebynavnFail2,    C: 400},
-          {S: 9,  H: TD.vejnavn,                   C: 200},
+          {S: 9,  H: TD.vejnavn,                   C: 200}
          ];
 }
 
-function test(cb){
-  async.eachSeries(
-    testSpec(),
-    function(spec, cb){
-      postTestSpec(spec, function(err, message){
-        if (err) {
-          winston.error('******* Error err=%j in spec=%j message=%j', err, spec, message, {});
-          cb('Test error in spec: '+util.format('%j', spec));
-        } else {
-          winston.info('******* %s: serial=%s statusCode=%j(%j) error=%j',
-                       spec.H.type, spec.S, spec.C, message, err, {});
-          cb();
-        }
-      });
-    },
-    function(err){
-      if (err) {
-        winston.error('Error %s', err);
-      } else {
-        winston.info('***************');
-        winston.info('Test SUCCESS!!!');
-      }
-    }
-  );
-}
-
-
-
-function postTestSpec(spec, cb){
-  request({ method         : 'POST',
-            uri            : 'http://'+hostPort+'/haendelse',
-            'content-type' : 'application/json',
-            json           : withSeqNr(spec.S, spec.H)},
-          function (error, response, body) {
-            if (error){return cb(error, body);}
-            if (response.statusCode === spec.C){
-              cb(null, body);
-            } else {
-              cb(body, body);
-            }
-          });
-}
 
 
 function print(str){
@@ -121,19 +144,6 @@ function print(str){
     cb();
   };
 }
-
-function assertEmptyDB(cb){
-  dynamoEvents.getAll(dd, TABLE, function(error, data){
-    if (error) {return cb(error);}
-    if (data.Count === 0){
-      cb();
-    } else {
-      winston.error('DB not empty: %j', data, {});
-      cb('DB not empty!');
-    }
-  });
-}
-
 
 /*******************************************************************************
 ***** Test data and helper function ********************************************
@@ -327,8 +337,3 @@ TD.supplerendebynavnFail2 = {
                    ]
   }
 };
-
-/**********************************************************************/
-
-// Run main!
-main();
