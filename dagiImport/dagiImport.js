@@ -4,7 +4,6 @@ var request = require('request');
 var _ = require('underscore');
 var xml2js = require('xml2js');
 var async = require('async');
-var cli = require('cli');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
 var optionSpec = {
@@ -13,13 +12,9 @@ var optionSpec = {
   dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string']
 };
-cli.parse(optionSpec, []);
 
-cli.main(function (args, options) {
-  cliParameterParsing.addEnvironmentOptions(optionSpec, options);
+cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
   process.env.pgConnectionUrl = options.pgConnectionUrl;
-
-  cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
 
   // we need to set the pgConnectionUrl before importing these. TODO That should be fixed.
   var dagi = require('./dagi');
