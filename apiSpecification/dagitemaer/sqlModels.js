@@ -31,6 +31,7 @@ dagiTemaer.forEach(function(tema) {
 
   var parameterImpls = [
     sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+    sqlParameterImpl.reverseGeocodingWithin(),
     sqlParameterImpl.search(columns),
     sqlParameterImpl.autocomplete(columns),
     sqlParameterImpl.paging(columns, namesAndKeys[tema.singular].key)

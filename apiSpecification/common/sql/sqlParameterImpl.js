@@ -249,7 +249,7 @@ exports.reverseGeocodingWithin = function() {
       dbapi.addWhereClause(sqlParts, "ST_Contains(geom, ST_Transform(ST_SetSRID(ST_Point(" +
         xAlias+", " +
         yAlias+"), " +
-        dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)");
+        dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832))");
     }
   };
 }

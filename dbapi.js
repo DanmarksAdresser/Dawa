@@ -212,6 +212,7 @@ exports.withWriteTransaction = function(cb) {
 
 exports.query = function(client, sqlParts, cb) {
   var query = createQuery(sqlParts);
+  winston.info('executing sql: %j with params: %j', query.sql, query.params, {});
   client.query(
     query.sql,
     query.params,
