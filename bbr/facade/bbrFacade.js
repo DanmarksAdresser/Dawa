@@ -10,7 +10,6 @@ var AWS            = require('aws-sdk');
 var async = require('async');
 var dynamoEvents = require('./../common/dynamoEvents');
 var eventSchemas = require('./../common/eventSchemas');
-var cli = require('cli');
 var cliParameterParsing = require('../common/cliParameterParsing');
 
 var optionSpec = {
@@ -21,12 +20,7 @@ var optionSpec = {
   listenPort: [false, 'TCP port hvor der tages imod hændelser fra BBR via HTTP kald', 'number', 3333]
 };
 
-cli.parse(optionSpec, []);
-
-cli.main(function(args, options) {
-  cliParameterParsing.addEnvironmentOptions(optionSpec, options);
-  cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
-
+cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
   /********************************************************************************
    ***** Setup *********************************************************************
    ********************************************************************************/

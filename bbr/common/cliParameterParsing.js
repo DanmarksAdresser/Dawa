@@ -1,5 +1,7 @@
 "use strict";
 
+var cli = require('cli');
+var fs = require('fs');
 var _ = require('underscore');
 
 exports.checkRequiredOptions = function(options, requiredOptions) {
@@ -28,6 +30,19 @@ exports.parseOptionValue = function(format, value) {
   }
 };
 
+exports.addFileOptions = function(parameterSpec, options) {
+  var file = options.configurationFile;
+  if(file) {
+    var configuration = JSON.parse(fs.readFileSync(file));
+    _.each(parameterSpec, function(spec, key) {
+      if(_.isUndefined(options[key]) || _.isNull(options[key])) {
+        var format = spec[2];
+        options[key] = exports.parseOptionValue(format, configuration[key]);
+      }
+    });
+  }
+};
+
 exports.addEnvironmentOptions = function(parameterSpec, options) {
   _.each(parameterSpec, function(spec, key) {
     if(_.isUndefined(options[key]) || _.isNull(options[key])) {
@@ -37,3 +52,22 @@ exports.addEnvironmentOptions = function(parameterSpec, options) {
   });
 };
 
+exports.addFileAndEnvironmentOptions = function(parameterSpec, options) {
+  exports.addFileOptions(parameterSpec, options);
+  exports.addEnvironmentOptions(parameterSpec, options);
+};
+
+exports.addConfigurationFileParameter = function(optionSpec) {
+  optionSpec.configurationFile = [false, 'Konfigurationsfil med yderligere parametre', 'string'];
+};
+
+exports.main = function(optionSpec, requiredParams, mainFunc) {
+  optionSpec = _.clone(optionSpec);
+  exports.addConfigurationFileParameter(optionSpec);
+  cli.parse(optionSpec);
+  cli.main(function(args, options) {
+    exports.addFileAndEnvironmentOptions(optionSpec, options);
+    exports.checkRequiredOptions(options, requiredParams);
+    mainFunc(args, options);
+  });
+};
