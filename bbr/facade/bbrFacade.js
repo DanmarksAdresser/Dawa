@@ -2,8 +2,7 @@
 
 //var https        = require('https');
 var express        = require('express');
-var winston        = require('winston');
-var expressWinston = require('express-winston');
+var facadeLogger        = require('../../logger').forCategory('bbrFacade');
 var _              = require('underscore');
 var ZSchema        = require("z-schema");
 var AWS            = require('aws-sdk');
@@ -33,13 +32,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   var TABLENAME = options.dynamoTable;
   var listenPort = options.listenPort;
 
-  var logglyOptions = {subdomain        : 'dawa',
-    inputToken       : process.env.DAWALOGGLY,
-    json             : true,
-    handleExceptions : true};
-
   var app = express();
-  setupLogging(app);
   app.use(express.compress());
   app.use(express.bodyParser());
 
@@ -62,7 +55,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     dynamoEvents.getLatest(dd, TABLENAME, function(error, latest){
       if (error)
       {
-        winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
+        facadeLogger.error('DynamoDB query ERROR: %j %j', error, latest, {});
         res.send(500, error);
       }
       else
@@ -84,13 +77,13 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       haendelse,
       function (error) {
         if (error) {
-          winston.info(error);
+          facadeLogger.warn("Kunne ikke validere hændelse", {error: error});
           res.send(400, error);
         }
         else {
           validateSequenceNumber(haendelse, latest, function (error, exists, seqNr) {
             if (error) {
-              winston.info(error);
+              facadeLogger.warn("Ugyldigt hændelsesnr", error);
               res.send(400, error);
             }
             else {
@@ -101,7 +94,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
                 dynamoEvents.putItem(dd, TABLENAME, seqNr, haendelse,
                   function (error, data) {
                     if (error) {
-                      winston.error('DynamoDB put ERROR: %j %j', error, data, {});
+                      facadeLogger.error('DynamoDB put ERROR', {data: data});
                       res.send(500, error);
                     }
                     else {
@@ -116,7 +109,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   }
   app.post('/haendelse', function (req, res) {
     var haendelse = req.body;
-    winston.info('Received haendelse: %j', haendelse, {});
+    facadeLogger.info('Received haendelse', {haendelse:haendelse});
     async.waterfall([
     ], function(err) {
 
@@ -124,12 +117,12 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     dynamoEvents.getLatest(dd, TABLENAME, function(error, latest){
       if (error)
       {
-        winston.error('DynamoDB query ERROR: %j %j', error, latest, {});
+        facadeLogger.error('DynamoDB query ERROR', {latest: latest});
         res.send(500, error);
       }
       else
       {
-        winston.info('DynamoDB query latest: %j %j', error, latest, {});
+        facadeLogger.debug('DynamoDB query latest',{ latest: latest});
         validateAndStore(haendelse, res, latest);
       }
     });
@@ -181,36 +174,16 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
    **** Some more setup. Have to be after the routes ******************************
    *******************************************************************************/
 
-  app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
 
   app.listen(listenPort);
 //https.createServer(app).listen(listenPort);
 
-  winston.info("Express server listening on port %d in %s mode", listenPort, app.settings.env);
+  facadeLogger.info("Express server listening for connections", {listenPort: listenPort, mode: app.settings.env});
 
 
   /*******************************************************************************
    **** Helper functions **********************************************************
    *******************************************************************************/
-
-  function setupLogging(app){
-    require('winston-loggly');
-    if (process.env.DAWALOGGLY){
-      winston.add(winston.transports.Loggly, logglyOptions);
-      winston.info("Production mode. Setting up Loggly logging %s", process.env.DAWALOGGLY);
-    }
-    app.use(expressWinston.logger({transports: expressLogTransports()}));
-    winston.handleExceptions(new winston.transports.Console());
-  }
-
-  function expressLogTransports(){
-    var transports = [];
-    if (process.env.DAWALOGGLY){
-      transports.push(new winston.transports.Loggly(logglyOptions));
-    }
-    transports.push(new winston.transports.Console());
-    return transports;
-  }
 
   var validator = new ZSchema({ sync: true });
   function validateSchema(json, cb){

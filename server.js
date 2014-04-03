@@ -1,12 +1,8 @@
 "use strict";
 
-var winston        = require('winston');
+var fs = require('fs');
+var logger = require('./logger');
 var _ = require('underscore');
-
-var logglyOptions = {subdomain        : 'dawa',
-                     inputToken       : process.env.DAWALOGGLY,
-                     json             : true,
-                     handleExceptions : true};
 
 var cluster = require('cluster');
 var workers = {};
@@ -14,23 +10,11 @@ var count = require('os').cpus().length;
 
 function setupWorker() {
   var express        = require("express");
-  var expressWinston = require('express-winston');
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
   require('./apiSpecification/allSpecs');
   var app = express();
 
-  function setupLogging(app){
-    require('winston-loggly');
-    if (process.env.DAWALOGGLY){
-      winston.add(winston.transports.Loggly, logglyOptions);
-      winston.info("Production mode. Setting up Loggly logging %s", process.env.DAWALOGGLY);
-    }
-    app.use(expressWinston.logger({transports: expressLogTransports()}));
-    winston.handleExceptions(new winston.transports.Console());
-  }
-
-  setupLogging(app);
 
   app.use(express.compress());
   app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
@@ -41,10 +25,8 @@ function setupWorker() {
   app.use('', dawaPgApi.setupRoutes());
   app.use('', documentation);
 
-  app.use(expressWinston.errorLogger({transports: expressLogTransports()}));
-
   app.listen(listenPort);
-  winston.info("Express server listening on port %d in %s mode", listenPort, app.settings.env);
+  logger.info("startup", "Express server listening for connections", {listenPort: listenPort, mode: app.settings.env});
 }
 
 function setupMaster() {
@@ -56,20 +38,34 @@ function setupMaster() {
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
+    var logOptions;
+    if(options.logConfiguration) {
+      var logOptionsStr = fs.readFileSync(options.logConfiguration);
+      logOptions = JSON.parse(logOptionsStr);
+    }
+    else {
+      logOptions = {};
+    }
+    logger.initialize(logOptions);
     if(options.disableClustering) {
       _.extend(process.env, options);
       setupWorker();
       return;
     }
+
+    var workerOptions = {
+      pgConnectionUrl: options.pgConnectionUrl,
+      listenPort: options.listenPort,
+      logOptions: JSON.stringify(logOptions)
+    };
     for (var i = 0; i < count; i++) {
-      console.log("spawning with options %j", options);
-      spawn(options);
+      spawn(workerOptions);
     }
 
     cluster.on('exit', function (worker, code, signal) {
-      winston.info('worker %d died (%s %s). restarting...', worker.process.pid, signal, code);
+      logger.error('master', 'Worker died. Restarting worker.', { pid: worker.process.pid, signal: signal, code: code});
       delete workers[worker.pid];
-      spawn(options);
+      spawn(workerOptions);
     });
   });
 }
@@ -77,6 +73,7 @@ function setupMaster() {
 if (cluster.isMaster) {
   setupMaster();
 } else {
+  logger.initialize(JSON.parse(process.env.logOptions));
   setupWorker();
 }
 
@@ -89,13 +86,4 @@ function spawn(options){
   var worker = cluster.fork(options);
   workers[worker.pid] = worker;
   return worker;
-}
-
-function expressLogTransports(){
-  var transports = [];
-  if (process.env.DAWALOGGLY){
-    transports.push(new winston.transports.Loggly(logglyOptions));
-  }
-  transports.push(new winston.transports.Console());
-  return transports;
 }

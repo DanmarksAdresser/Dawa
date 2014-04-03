@@ -3,6 +3,7 @@
 var cli = require('cli');
 var fs = require('fs');
 var _ = require('underscore');
+var logger = require('../../logger');
 
 exports.checkRequiredOptions = function(options, requiredOptions) {
   var suppliedOptions = _.reduce(options, function(memo, value, key) {
@@ -61,9 +62,14 @@ exports.addConfigurationFileParameter = function(optionSpec) {
   optionSpec.configurationFile = [false, 'Konfigurationsfil med yderligere parametre', 'string'];
 };
 
+exports.addLogOptionsParameter = function(optionSpec) {
+  optionSpec.logConfiguration = [false, 'Konfigurationsfil med logkonfiguration', 'string'];
+}
+
 exports.main = function(optionSpec, requiredParams, mainFunc) {
   optionSpec = _.clone(optionSpec);
   exports.addConfigurationFileParameter(optionSpec);
+  exports.addLogOptionsParameter(optionSpec);
   cli.parse(optionSpec);
   cli.main(function(args, options) {
     exports.addFileAndEnvironmentOptions(optionSpec, options);
