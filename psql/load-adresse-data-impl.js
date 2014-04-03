@@ -200,7 +200,7 @@ function loadAdditionalBbrFiles(client, callback) {
   callback();
 }
 
-module.exports = function(client, options, callback) {
+exports.loadCsvOnly = function(client, options, callback) {
   var format = options.format;
   var dataDir = options.dataDir;
   var filePrefix = options.filePrefix || '';
@@ -209,9 +209,7 @@ module.exports = function(client, options, callback) {
 
   var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
   var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix, encoding);
-
   async.series([
-    sqlCommon.disableTriggers(client),
     function(callback) {
       console.log("Indlæser postnumre....");
       var postnumreStream = fileStreams.postnummer();
@@ -262,6 +260,16 @@ module.exports = function(client, options, callback) {
       else {
         callback();
       }
+    }
+  ], callback);
+};
+
+module.load = function(client, options, callback) {
+
+  async.series([
+    sqlCommon.disableTriggers(client),
+    function(cb) {
+      exports.loadCsvOnly(client, options, cb);
     },
     sqlCommon.psqlScript(client, __dirname, 'initialize-history.sql'),
     sqlCommon.initializeTables(client),
