@@ -16,12 +16,13 @@ var optionSpec = {
   awsRegion: [false, 'AWS region, hvor Dynamo databasen befinder sig', 'string', 'eu-west-1'],
   awsAccessKeyId: [false, 'Access key der anvendes for at tilgå Dynamo', 'string'],
   awsSecretAccessKey: [false, 'Secret der anvendes for at tilgå Dynamo', 'string'],
-  dynamoTable: [false, 'Navn på dynamo table hvori hændelserne gemmes', 'string']
+  dynamoTable: [false, 'Navn på dynamo table hvori hændelserne gemmes', 'string'],
+  bbrFacadeUrl: [false, 'URL til bbr facaden der testes', 'string', 'http://localhost:3333']
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
 
-  var hostPort = 'localhost:3333';
+  var hostPort = options.bbrFacadeUrl;
 
   var dd = new AWS.DynamoDB(
     {apiVersion      : '2012-08-10',
@@ -34,7 +35,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
   function postTestSpec(spec, cb){
     request({ method         : 'POST',
-        uri            : 'http://'+hostPort+'/haendelse',
+        uri            : hostPort+'/haendelse',
         'content-type' : 'application/json',
         json           : withSeqNr(spec.S, spec.H)},
       function (error, response, body) {
