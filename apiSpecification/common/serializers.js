@@ -1,10 +1,9 @@
 "use strict";
 var csv              = require('csv');
 var eventStream = require('event-stream');
+var logger = require('../../logger');
 var Transform        = require('stream').Transform;
 var util             = require('util');
-var winston          = require('winston');
-var _ = require('underscore');
 
 function jsonStringifyPretty(object){
   return JSON.stringify(object, undefined, 2);
@@ -94,11 +93,10 @@ function transformToText(objectStream, formatParam, callbackParam, sridParam) {
 function streamToHttpResponse(stream, res, options, cb) {
 
   res.on('error', function (err) {
-    winston.error("An error occured while streaming data to HTTP response: %j", new Error(err), {});
+    logger.error("serializer", "An error occured while streaming data to HTTP response", err);
     cb(err);
   });
   res.on('close', function () {
-    winston.info("Client closed connection");
     cb("Client closed connection");
   });
   if(options.end === false) {

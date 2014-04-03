@@ -64,6 +64,7 @@ module.exports = function(options) {
   var withReadonlyTransaction = function(cb) {
     return pg.connect(connString, function (err, client, done) {
       if (err) {
+        logger.error("sql", "Failed to obtain PostgreSQL connection", err);
         return cb(err);
       }
       client.query('BEGIN READ ONLY', [], function(err) {

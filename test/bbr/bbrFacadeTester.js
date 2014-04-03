@@ -39,7 +39,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         'content-type' : 'application/json',
         json           : withSeqNr(spec.S, spec.H)},
       function (error, response, body) {
-        if (error){return cb(error, body);}
+        if (error){
+          return cb(error, body);
+        }
         if (response.statusCode === spec.C){
           cb(null, body);
         } else {

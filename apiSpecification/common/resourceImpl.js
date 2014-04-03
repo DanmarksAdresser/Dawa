@@ -1,7 +1,7 @@
 "use strict";
 
 var eventStream = require('event-stream');
-var winston = require('winston');
+var logger = require('../../logger');
 var _ = require('underscore');
 
 var dbapi = require('../../dbapi');
@@ -39,7 +39,6 @@ function sendPostgresQueryError(res, details) {
   var msg = {type: "InvalidRequestError",
     title: "The request resulted in an invalid database query, probably due to bad query parameters",
     details: details.hint};
-  winston.info("Postgres query error %j", msg, {});
   sendError(res, 400, msg);
 }
 
@@ -70,8 +69,7 @@ function withReadonlyTransaction(res, callback) {
       // We do not have a connection to PostgreSQL.
       // Abort!
       sendInternalServerError(res, err);
-      winston.error("Failed to obtain postgresql connection: %j", err, {});
-      return done();
+      return;
     }
     return callback(client, done);
   });
