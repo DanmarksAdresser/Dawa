@@ -43,9 +43,9 @@ function sendPostgresQueryError(res, details) {
   sendError(res, 400, msg);
 }
 
-function sendAddressNotFoundError(res, details){
-  sendError(res, 404, {type: "AddressNotFoundError",
-    title: "The given UUID does not match any address.",
+function sendObjectNotFoundError(res, details){
+  sendError(res, 404, {type: "ResourceNotFoundError",
+    title: "The resource was not found",
     details: details});
 }
 
@@ -128,9 +128,9 @@ exports.createExpressHandler = function(resourceSpec) {
           if (err) {
             return sendPostgresQueryError(res, err);
           } else if (rows.length > 1) {
-            sendInternalServerError(res, "UUID: "+req.params.id+", results in more than one address: "+rows);
+            sendInternalServerError(res, "The request resulted in more than one response", rows);
           } else if (rows.length === 0) {
-            sendAddressNotFoundError(res, "UUID: "+req.params.id+", match no address");
+            sendObjectNotFoundError(res, pathParameterParseResult.params);
           } else {
             // map the object and send it to the client
             var mappedResult = mapObject(rows[0]);
