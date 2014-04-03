@@ -9,5 +9,5 @@ var map = _.indexBy(registry.where({
 }),'singular');
 
 exports.getByKey = function(baseUrl, entityName, keyArray) {
-  return baseUrl +'/' + map[entityName].plural + '/' + keyArray.join('/');
+  return baseUrl +'/' + encodeURIComponent(map[entityName].plural) + '/' + _.map(keyArray, encodeURIComponent).join('/');
 };

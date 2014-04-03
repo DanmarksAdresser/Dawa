@@ -45,9 +45,11 @@ describe('When getting single addresses', function () {
                   var error = JSON.parse(body);
                   expect(error).toEqual(
                     {
-                      type: "AddressNotFoundError",
-                      title: "The given UUID does not match any address.",
-                      details: "UUID: 0a3f50ae-aaaa-bbbb-cccc-0003ba298019, match no address"
+                      type: "ResourceNotFoundError",
+                      title: "The resource was not found",
+                      details: {
+                        id : '0a3f50ae-aaaa-bbbb-cccc-0003ba298019'
+                      }
                     });
                   done();
                 });
