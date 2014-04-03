@@ -65,6 +65,9 @@ function getAll(dd, table, cb) {
 function deleteAll(dd, tableName, cb){
   winston.info('Deleting all items');
   getAll(dd, tableName, function(error, data){
+    if(error) {
+      return cb(error);
+    }
     if (data.Count === 0){
       cb(null);
     } else {
