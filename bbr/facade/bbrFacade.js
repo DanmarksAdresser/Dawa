@@ -1,15 +1,16 @@
 "use strict";
 
-//var https        = require('https');
-var express        = require('express');
-var facadeLogger        = require('../../logger').forCategory('bbrFacade');
-var _              = require('underscore');
-var ZSchema        = require("z-schema");
 var AWS            = require('aws-sdk');
-var async = require('async');
+var express        = require('express');
+var Q = require('q');
+var ZSchema        = require("z-schema");
+var _              = require('underscore');
+
+var cliParameterParsing = require('../common/cliParameterParsing');
 var dynamoEvents = require('./../common/dynamoEvents');
 var eventSchemas = require('./../common/eventSchemas');
-var cliParameterParsing = require('../common/cliParameterParsing');
+var facadeLogger        = require('../../logger').forCategory('bbrFacade');
+var facadeLoggerIncidents = require('../../logger').forCategory('bbrFacadeIncidents');
 
 var optionSpec = {
   awsRegion: [false, 'AWS region, hvor Dynamo databasen befinder sig', 'string', 'eu-west-1'],
@@ -18,6 +19,8 @@ var optionSpec = {
   dynamoTable: [false, 'Navn på dynamo table hvori hændelserne gemmes', 'string'],
   listenPort: [false, 'TCP port hvor der tages imod hændelser fra BBR via HTTP kald', 'number', 3333]
 };
+
+Q.longStackSupport = true;
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
   /********************************************************************************
@@ -52,83 +55,55 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
 // Can be used for monitoring
   app.get('/sidsteSekvensnummer', function (req, res) {
-    dynamoEvents.getLatest(dd, TABLENAME, function(error, latest){
-      if (error)
+    dynamoEvents.getLatestQ(dd, TABLENAME,function(latest) {
+      if (latest.Items.length > 0)
       {
-        facadeLogger.error('DynamoDB query ERROR: %j %j', error, latest, {});
-        res.send(500, error);
+        res.send(""+latest.Items[0].seqnr.N);
       }
       else
       {
-        if (latest.Items.length > 0)
-        {
-          res.send(""+latest.Items[0].seqnr.N);
-        }
-        else
-        {
-          res.send("0");
-        }
+        res.send("0");
       }
+    }, function(error) {
+      facadeLogger.error('DynamoDB query ERROR', error);
+      res.json(500, error);
     });
   });
 
-  function validateAndStore(haendelse, res, latest) {
-    validateSchema(
-      haendelse,
-      function (error) {
-        if (error) {
-          facadeLogger.warn("Kunne ikke validere hændelse", {error: error});
-          res.send(400, error);
-        }
-        else {
-          validateSequenceNumber(haendelse, latest, function (error, exists, seqNr) {
-            if (error) {
-              facadeLogger.warn("Ugyldigt hændelsesnr", error);
-              res.send(400, error);
-            }
-            else {
-              if (exists) {
-                res.send('Hændelse modtaget med sekvensnummer=' + seqNr);
-              }
-              else {
-                dynamoEvents.putItem(dd, TABLENAME, seqNr, haendelse,
-                  function (error, data) {
-                    if (error) {
-                      facadeLogger.error('DynamoDB put ERROR', {data: data});
-                      res.send(500, error);
-                    }
-                    else {
-                      res.send('Hændelse modtaget med sekvensnummer=' + seqNr);
-                    }
-                  });
-              }
-            }
-          });
-        }
-      });
-  }
   app.post('/haendelse', function (req, res) {
     var haendelse = req.body;
     facadeLogger.info('Received haendelse', {haendelse:haendelse});
-    async.waterfall([
-    ], function(err) {
-
-    });
-    dynamoEvents.getLatest(dd, TABLENAME, function(error, latest){
-      if (error)
-      {
-        facadeLogger.error('DynamoDB query ERROR', {latest: latest});
-        res.send(500, error);
+    var validationResult = validateSchemaQ(haendelse);
+    if(validationResult.error) {
+      facadeLoggerIncidents.error(validationResult.message, validationResult.details);
+    }
+    if(validationResult.ignore) {
+      return res.sendJson(200, validationResult);
+    }
+    dynamoEvents.getLatestQ(dd, TABLENAME).then(function(latest) {
+      return [latest, validateSequenceNumberQ(haendelse, latest)];
+    }).spread(function(latest, sequenceValidationResult) {
+      if(sequenceValidationResult.error) {
+        facadeLoggerIncidents.error(sequenceValidationResult.message, sequenceValidationResult.details);
       }
-      else
-      {
-        facadeLogger.debug('DynamoDB query latest',{ latest: latest});
-        validateAndStore(haendelse, res, latest);
+      var result = validationResult.error ? validationResult : sequenceValidationResult;
+      result.ignore = result.ignore || sequenceValidationResult.ignore;
+      if(sequenceValidationResult.ignore) {
+        return result;
       }
+      else {
+        return dynamoEvents.putItemQ(dd, TABLENAME, haendelse.sekvensnummer, haendelse).then(function() {
+          return result;
+        });
+      }
+    }).then(function(result) {
+      res.json(200, result);
+    }, function(error) {
+      res.json(500, error);
     });
   });
 
-  function validateSequenceNumber(haendelse, latest, cb){
+  function validateSequenceNumberQ(haendelse, latest) {
     var newSeqNr = parseInt(haendelse.sekvensnummer);
     var len = latest.Items.length;
     var lastSeqNr = parseInt(len > 0 ? latest.Items[0].seqnr.N : '0');
@@ -137,36 +112,57 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       var lastJson = JSON.parse(latest.Items[0].data.S);
       if (_.isEqual(haendelse, lastJson))
       {
-        cb(null, true, newSeqNr);
+        return {
+          ignore: true,
+          error: false,
+          message: "Sequence number already known",
+          details: {
+            sequenceNumber: newSeqNr
+          }
+        };
       }
-      else
-      {
-        cb({type: 'InputError',
-          title: 'Sequence number already known, but event differs',
-          details: {text: 'The sequence number exists, but the given event differs from the '+
-            'existing event. Resending of events are allowed, but not changing'+
-            'already send events.',
-            sequenceNumber: lastSeqNr,
+      else {
+        return {
+          ignore: true,
+          error: true,
+          message: 'Sequence number already known, but event differs',
+          details: {
             existingEvent: lastJson,
-            givenEvent: haendelse}});
+            newEvent: haendelse,
+            seqNr: newSeqNr
+          }
+        };
       }
     }
-    else
-    {
-      if (len === 0 || newSeqNr === (lastSeqNr+1))
-      {
-        cb(null, false, newSeqNr);
-      }
-      else
-      {
-        cb({type: 'InputError',
-          title: 'Illegal sequence number',
-          details: {text: 'The given sequence number do not match the expected',
-            currentSequenceNumber: lastSeqNr,
-            expectedSequenceNumber: lastSeqNr + 1,
-            givenSequenceNumber: newSeqNr,
-            givenEvent: haendelse}});
-      }
+    else if(lastSeqNr + 1 === newSeqNr) {
+      return {
+        ignore: false,
+        error: false
+      };
+    }
+    else if (lastSeqNr > newSeqNr) {
+      return {
+        ignore: true,
+        error: true,
+        message: "Received message out of order, sequence number too small",
+        details: {
+          newEvent: haendelse,
+          lastSeqNr: lastSeqNr,
+          newSeqNr: newSeqNr
+        }
+      };
+    }
+    else { // lastSeqNr < newSeqNr
+      return {
+        ignore: false,
+        error: true,
+        message: 'Received message out of order, sequence number too large',
+        details: {
+          newEvent: haendelse,
+          lastSeqNr: lastSeqNr,
+          newSeqNr: newSeqNr
+        }
+      };
     }
   }
 
@@ -186,37 +182,46 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
    *******************************************************************************/
 
   var validator = new ZSchema({ sync: true });
-  function validateSchema(json, cb){
-    var validate = function(schema){
-      if (!validator.validate(json, schema)) {
-        throw validator.getLastError();
-      }
-    };
 
-    try {
-      switch (json.type) {
-        case 'enhedsadresse'     : validate(eventSchemas.enhedsadresse)     ; break;
-        case 'vejnavn'           : validate(eventSchemas.vejnavn)          ; break;
-        case 'supplerendebynavn' : validate(eventSchemas.supplerendebynavn) ; break;
-        case 'postnummer' : validate(eventSchemas.postnummer); break;
-        case 'postnummertilknytning' : validate(eventSchemas.postnummertilknytning) ; break;
-        case 'adgangsadresse'    : validate(eventSchemas.adgangsadresse)    ; break;
-        default:
-          return cb({type: 'ValidationError',
-            title: 'Unknown event type',
-            details: 'Unknown event type: '+json.type});
+  function validateSchemaQ(json) {
+    if(!validator.validate(json, eventSchemas.basicHaendelseSchema)) {
+      return {
+        ignore: true,
+        error: true,
+        message: "Kunne ikke validere hændelse",
+        details: {
+          schemaValidationError: validator.getLastError()
+        }
+      };
+    }
+    function validate(schema){
+      if (!validator.validate(json, schema)) {
+        return {
+          ignore: false,
+            error: true,
+          message: "Kunne ikke validere hændelse",
+          details: {
+            schemaValidationError: validator.getLastError()
+          }
+        };
+      }
+      else {
+        return {
+          ignore: false,
+          error: false
+        };
       }
     }
-    catch (error){
-      if (validator.getLastError().valid === true){
-        return cb();
-      } else {
-        return cb({type: 'ValidationError',
-          title: 'Schema validation error',
-          details: validator.getLastError()});
-      }
+    switch (json.type) {
+      case 'enhedsadresse'     : return validate(eventSchemas.enhedsadresse);
+      case 'vejnavn'           : return validate(eventSchemas.vejnavn);
+      case 'supplerendebynavn' : return validate(eventSchemas.supplerendebynavn);
+      case 'postnummer' : return validate(eventSchemas.postnummer);
+      case 'adgangsadresse'    : return validate(eventSchemas.adgangsadresse);
+      default:
+        // cannot happen, because we validated it.
+        throw new Error("Haendelse havde uventet type");
     }
-    return cb();
   }
 
   /********************************************************************************

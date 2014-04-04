@@ -64,6 +64,19 @@ function vejstykkeIntervaller(){
 /********************************************************************************
  ***** Haendelse schemas *********************************************************
  ********************************************************************************/
+/**
+ * Basic event properties
+ */
+var basicHaendelseSchema = requireAllProperties({
+  title: 'Schema for alle hændelser',
+  type: 'object',
+  additionalProperties: true,
+  properties: {
+    type: enumeration(['enhedsadresse', 'adgangsadresse', 'supplerendebynavn', 'postnummer', 'vejnavn']),
+    sekvensnummer: integer()
+  }
+});
+
 var vejnavnsHaendelseSchema = requireAllProperties({
   title : 'Hædelsesskema for vejnavne',
   type  : 'object',
@@ -151,6 +164,7 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
   })
 });
 
+exports.basicHaendelseSchema = basicHaendelseSchema;
 exports.vejnavn = vejnavnsHaendelseSchema;
 exports.postnummer = postnummerHaendelseSchema;
 exports.adgangsadresse = adgangsadresseHaendelseSchema;

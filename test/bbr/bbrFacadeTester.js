@@ -42,7 +42,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         if (error){
           return cb(error, body);
         }
-        if (response.statusCode === spec.C){
+        if(response.statusCode !== 200) {
+          return cb(new Error("Unexpected status code: " + response.statusCode), body);
+        }
+        if (body.ignore === spec.C.ignore && body.error === spec.C.error && body.message === spec.C.message) {
           cb(null, body);
         } else {
           cb(body, body);
@@ -120,22 +123,22 @@ var TD = {}; // TestData. This is modified later in the file
 
 function testSpec(){
   // s=sekvensnummer, h=haendelse, c=http-status-code
-  return [{S: 1,  H: TD.adgangsadresse,            C: 200},
-          {S: 2,  H: TD.enhedsadresse,             C: 200},
-          {S: 3,  H: TD.vejnavn,                   C: 200},
-          {S: 4,  H: TD.supplerendebynavn,         C: 200},
-          {S: 5,  H: TD.postnummer,                C: 200},
-          {S: 5,  H: TD.postnummer,                C: 200},
-          {S: 5,  H: TD.postnummer,                C: 200},
-          {S: 5,  H: TD.vejnavn,                   C: 400},
-          {S: 6,  H: TD.vejnavn,                   C: 200},
-          {S: 8,  H: TD.vejnavn,                   C: 400},
-          {S: 7,  H: TD.vejnavn,                   C: 200},
-          {S: 8,  H: TD.vejnavnNull,               C: 200},
-          {S: 9,  H: TD.enhedsadresseFail,         C: 400},
-          {S: 9,  H: TD.supplerendebynavnFail,     C: 400},
-          {S: 9,  H: TD.supplerendebynavnFail2,    C: 400},
-          {S: 9,  H: TD.vejnavn,                   C: 200}
+  return [{S: 1,  H: TD.adgangsadresse,            C: {error: false, ignore: false}},
+          {S: 2,  H: TD.enhedsadresse,             C: {error: false, ignore: false}},
+          {S: 3,  H: TD.vejnavn,                   C: {error: false, ignore: false}},
+          {S: 4,  H: TD.supplerendebynavn,         C: {error: false, ignore: false}},
+          {S: 5,  H: TD.postnummer,                C: {error: false, ignore: false}},
+          {S: 5,  H: TD.postnummer,                C: {error: false, ignore: true, message: 'Sequence number already known' }},
+          {S: 5,  H: TD.postnummer,                C: {error: false, ignore: true, message: 'Sequence number already known' }},
+          {S: 5,  H: TD.vejnavn,                   C: {error: true, ignore: true, message: 'Sequence number already known, but event differs' }},
+          {S: 6,  H: TD.vejnavn,                   C: {error: false, ignore: false}},
+          {S: 8,  H: TD.vejnavn,                   C: {error: true, ignore: false, message: 'Received message out of order, sequence number too large'}},
+          {S: 7,  H: TD.vejnavn,                   C: {error: true, ignore: true, message: 'Received message out of order, sequence number too small'}},
+          {S: 9,  H: TD.vejnavnNull,               C: {error: false, ignore: false}},
+          {S: 10,  H: TD.enhedsadresseFail,         C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
+          {S: 11,  H: TD.supplerendebynavnFail,     C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
+          {S: 12,  H: TD.supplerendebynavnFail2,    C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
+          {S: 13,  H: TD.vejnavn,                   C: {error: false, ignore: false}}
          ];
 }
 
@@ -202,7 +205,7 @@ TD.enhedsadresseFail = {
   "type": "enhedsadresse",
   "sekvensnummer": 1004,
   "lokaltSekvensnummer": 102,
-  "aendringstype": "aendring",
+  "aendringstype": "ændring",
   "tidspunkt": "2000-02-05T12:00:00+00:00",
   "data": {
     "id": "0a3f50c1-d506-32b8-e044-0003ba298018",

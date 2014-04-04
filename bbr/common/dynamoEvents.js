@@ -1,9 +1,19 @@
 "use strict";
 
-var winston        = require('winston');
-var util = require('util');
 var async = require('async');
+var util = require('util');
+var Q = require('q');
+var winston        = require('winston');
 
+function putItemQ(dd, tablename, seqNr, data) {
+  var item = {key:   {'S': 'haendelser' },
+    seqnr: {'N': ''+seqNr },
+    data:  {'S': JSON.stringify(data)}};
+  winston.info('Putting item: %j', item, {});
+  return Q.ninvoke(dd, 'putItem', {TableName: tablename,
+    Expected: {seqnr: {Exists: false}},
+    Item: item});
+}
 
 function putItem(dd, tablename, seqNr, data, cb) {
   var item = {key:   {'S': 'haendelser' },
@@ -26,6 +36,17 @@ function putItem(dd, tablename, seqNr, data, cb) {
         cb(error, latest);
       }
     });
+}
+
+function getLatestQ(dd, tablename) {
+  var params = {TableName: tablename,
+    KeyConditions: {'key': {ComparisonOperator: 'EQ',
+      AttributeValueList: [{'S': 'haendelser' }]}},
+    ConsistentRead: true,
+    ScanIndexForward: false,
+    Limit: 1
+  };
+  return Q.ninvoke(dd, 'query', params);
 }
 
 function getLatest(dd, tablename, cb) {
@@ -51,6 +72,17 @@ function getLatest(dd, tablename, cb) {
   });
 }
 
+function getAllQ(dd, table) {
+  var params = {
+    TableName: table,
+    KeyConditions: {
+      'key': {ComparisonOperator: 'EQ',
+        AttributeValueList: [{'S': 'haendelser' }]}},
+    ConsistentRead: true
+  };
+  return Q.ninvoke(dd, 'query', params);
+}
+
 function getAll(dd, table, cb) {
   var params = {
     TableName: table,
@@ -60,6 +92,33 @@ function getAll(dd, table, cb) {
     ConsistentRead: true
   };
   dd.query(params, cb);
+}
+
+function deleteItem(dd, tableName, item) {
+  winston.info('Delete item %j', item.seqnr.N, {});
+  return Q.ninvoke(dd, 'deleteItem', {TableName: tableName,
+      Key: {key:   {S: 'haendelser'},
+        seqnr: {N: item.seqnr.N}}});
+}
+
+function deleteItems(dd, tableName, items) {
+  return items.map(function(item) {
+    return function() {
+      return deleteItem(dd, tableName, item);
+    };
+  }).reduce(Q.when, null);
+}
+
+function deleteAllQ(dd, tableName) {
+  winston.info('Deleting all items');
+  return getAllQ(dd, tableName).then(function(data) {
+    if(data.Count === 0) {
+      return;
+    }
+    else {
+      return deleteItems(dd, tableName, data.Items);
+    }
+  });
 }
 
 function deleteAll(dd, tableName, cb){
@@ -88,3 +147,8 @@ exports.putItem = putItem;
 exports.getLatest = getLatest;
 exports.deleteAll = deleteAll;
 exports.getAll = getAll;
+
+exports.putItemQ = putItemQ;
+exports.getLatestQ = getLatestQ;
+exports.deleteAllQ = deleteAllQ;
+exports.getAllQ = getAllQ;

@@ -23,7 +23,8 @@
     "cli": "~0.4.5",
     "pg-copy-streams": "~0.2.1",
     "iconv": "~2.0.7",
-    "moment": "~2.5.1"
+    "moment": "~2.5.1",
+    "q": "^1.0.1"
   },
   "devDependencies": {
     "jasmine-node": "1.14.2",
