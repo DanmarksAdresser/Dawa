@@ -264,7 +264,7 @@ exports.loadCsvOnly = function(client, options, callback) {
   ], callback);
 };
 
-module.load = function(client, options, callback) {
+exports.load = function(client, options, callback) {
 
   async.series([
     sqlCommon.disableTriggers(client),
