@@ -52,7 +52,7 @@ function sendInternalServerError(res, details){
   var msg = {type: "InternalServerError",
     title: "Something unexpected happened inside the server.",
     details: details};
-  winston.error("Internal server error: %j", msg, {});
+  logger.error('http', "Internal server error: %j", {});
   sendError(res, 500, msg);
 }
 
@@ -145,7 +145,6 @@ exports.createExpressHandler = function(resourceSpec) {
           representation);
         dbapi.stream(client, sqlParts, function(err, stream) {
           if(err) {
-            winston.error("Error executing cursor query: %j", err, {});
             done(err);
             return sendPostgresQueryError(res, err);
           }
