@@ -49,7 +49,7 @@ module.exports = function (grunt) {
         commitMessage: 'new Release <%= version %>', //default: 'release <%= version %>'
         tagMessage: 'tagging version <%= version %>', //default: 'Version <%= version %>',
         github: {
-          repo: 'dawa/DanmarksAdresser'
+          repo: 'DanmarksAdresser/Dawa'
         }
       }
     }
