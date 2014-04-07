@@ -6,8 +6,10 @@ var crud = require('../../crud/crud');
 var handleBbrEvent = require('./handleBbrEvent');
 var winston = require('winston');
 var eventSchemas = require('../common/eventSchemas');
+var Q = require('q');
 var ZSchema = require("z-schema");
 
+var dynamoEvents = require('../common/dynamoEvents');
 
 var bbrEventsDatamodel = {
   table: 'bbr_events',
@@ -77,7 +79,6 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
       // fetch the event from dynamodb
       function(client, lastProcessedSeqNum, callback) {
         var nextSeqNum;
-        console.log("Last processed " + JSON.stringify(lastProcessedSeqNum));
         if(lastProcessedSeqNum) {
           nextSeqNum = lastProcessedSeqNum + 1;
         }
@@ -85,43 +86,17 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
           nextSeqNum = initialSequenceNumber + 1;
         }
         winston.debug("Next sequence number: %d", nextSeqNum);
-        var params = {
-          TableName: tablename,
-          KeyConditions: {
-            'key': {
-              ComparisonOperator: 'EQ',
-              AttributeValueList: [{
-                'S': 'haendelser' }]
-            },
-            'seqnr': {
-              ComparisonOperator: 'EQ',
-              AttributeValueList: [{
-                N: "" +nextSeqNum
-              }]
-            }
-          },
-          ConsistentRead: true
-        };
-        dd.query(params, function(err, result) {
-          if(err) {
-            return callback(err);
-          }
-          var event = null;
-          if(result.Items.length === 1) {
-            event = JSON.parse(result.Items[0].data.S);
+        dynamoEvents.query(dd, tablename, nextSeqNum, null).then(function(result) {
+          if(result.Items.length > 0) {
             foundEvent = true;
+            return Q.nfcall(async.eachSeries, result.Items, function(item, callback) {
+              var event = JSON.parse(item.data.S);
+              processEvent(client, event, callback);
+            });
           }
-          callback(null, client, event);
-        });
-      },
-      // process the event
-      function(client, event, callback) {
-        if(foundEvent) {
-          processEvent(client, event, callback);
-        }
-        else {
-          callback(null);
-        }
+        }).then(function() {
+          callback();
+        }).catch(callback);
       }
     ], function(err) {
       if(err) {

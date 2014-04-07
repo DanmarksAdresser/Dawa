@@ -121,9 +121,9 @@ var adgangsadresseHaendelseSchema = requireAllProperties({
     adgangspunkt_etrs89koordinat_nord   : number(),
     adgangspunkt_wgs84koordinat_bredde  : number(),
     adgangspunkt_wgs84koordinat_laengde : number(),
-    DDKN_m100 : string(),
-    DDKN_km1  : string(),
-    DDKN_km10 : string()
+    adgangspunkt_DDKN_m100 : string(),
+    adgangspunkt_DDKN_km1  : string(),
+    adgangspunkt_DDKN_km10 : string()
   })
 });
 

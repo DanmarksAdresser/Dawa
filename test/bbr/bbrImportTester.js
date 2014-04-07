@@ -1,54 +1,66 @@
 "use strict";
 
+var async = require('async');
 var AWS = require('aws-sdk');
 var fs = require('fs');
-var async = require('async');
-
-var dynamoEvents = require('../../bbr/common/dynamoEvents');
-var importBbrEvents = require('../../bbr/eventImporter/importBbrEvents');
 var winston = require('winston');
 
-winston.handleExceptions(new winston.transports.Console());
+var cliParameterParsing = require('../../bbr/common/cliParameterParsing');
 
 winston.remove(winston.transports.Console);
 winston.add(winston.transports.Console, {level: 'debug'});
-winston.cli();
 
-var dd = new AWS.DynamoDB(
-  {apiVersion      : '2012-08-10',
-    region          : 'eu-west-1',
-    accessKeyId     : process.env.awsAccessKeyId,
-    secretAccessKey : process.env.awsSecretAccessKey});
+var optionSpec = {
+  awsRegion: [false, 'AWS region, hvor Dynamo databasen befinder sig', 'string', 'eu-west-1'],
+  awsAccessKeyId: [false, 'Access key der anvendes for at tilgå Dynamo', 'string'],
+  awsSecretAccessKey: [false, 'Secret der anvendes for at tilgå Dynamo', 'string'],
+  dynamoTable: [false, 'Navn på dynamo table hvori hændelserne gemmes', 'string'],
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
+};
 
-var tableName = 'dawatest';
+cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
+  process.env.pgConnectionUrl = options.pgConnectionUrl;
 
-var events = JSON.parse(fs.readFileSync(__dirname + '/validEventSequence.json', {
-  encoding: "UTF-8"
-}));
+  var dynamoEvents = require('../../bbr/common/dynamoEvents');
+  var importBbrEvents = require('../../bbr/eventImporter/importBbrEvents');
 
-function storeEventsInDynamo(dd, tableName, events, callback) {
-  winston.debug("Storing events in dynamo");
-  async.eachSeries(events, function(event, callback) {
-    dynamoEvents.putItem(dd, tableName, event.sekvensnummer, event, callback);
-  }, callback);
-}
+  var dd = new AWS.DynamoDB(
+    {apiVersion      : '2012-08-10',
+      region          : options.awsRegion,
+      accessKeyId     : options.awsAccessKeyId,
+      secretAccessKey : options.awsSecretAccessKey});
 
-async.series([
-  function(callback) {
-    dynamoEvents.deleteAll(dd, tableName, callback);
-  },
-  function(callback) {
-    storeEventsInDynamo(dd, tableName, events, callback);
-  },
-  function(callback) {
-    importBbrEvents(dd, tableName, 9, callback);
-  }],
-  function(err) {
-    if(err) {
-      winston.error(err);
-      process.exit(1);
-    }
-    winston.info("BBR import completed");
-    process.exit(0);
+  var tableName = options.dynamoTable;
+
+  var events = JSON.parse(fs.readFileSync(__dirname + '/validEventSequence.json', {
+    encoding: "UTF-8"
+  }));
+
+  function storeEventsInDynamo(dd, tableName, events, callback) {
+    winston.debug("Storing events in dynamo");
+    async.eachSeries(events, function(event, callback) {
+      dynamoEvents.putItem(dd, tableName, event.sekvensnummer, event, callback);
+    }, callback);
   }
-);
+
+  async.series([
+    function(callback) {
+      dynamoEvents.deleteAll(dd, tableName, callback);
+    },
+    function(callback) {
+      storeEventsInDynamo(dd, tableName, events, callback);
+    },
+    function(callback) {
+      importBbrEvents(dd, tableName, 9, callback);
+    }],
+    function(err) {
+      if(err) {
+        winston.error(err);
+        process.exit(1);
+      }
+      winston.info("BBR import completed");
+      process.exit(0);
+    }
+  );
+});
+

@@ -15,4 +15,5 @@ Indtil videre kan URL'en /sidsteSekvensnummer benyttes som overvågningsURL. Den
 DynamoDB.
 
 ## Mulige incidents
-Som bbrFacaden er implementeret vil den afvise hændelser fra BBR som ikke kan valideres.
+Der bør holdes øje med fejllogninger i 'bbrFacadeIncidents' categorien, da disse indikerer fejl der skal følges op på.
+Det kan være uventede sekvensnumre i hændelser modtaget fra BBR, eller hændelser som ikke validerer.

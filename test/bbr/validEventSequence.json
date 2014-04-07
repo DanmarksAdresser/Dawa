@@ -32,9 +32,9 @@
       "adgangspunkt_etrs89koordinat_nord": 451234.89,
       "adgangspunkt_wgs84koordinat_bredde": 6.8865950053481,
       "adgangspunkt_wgs84koordinat_laengde": 8.55860108915762,
-      "DDKN_m100": "100m_61768_6435",
-      "DDKN_km1": "1km_6176_643",
-      "DDKN_km10": "10km_617_64"
+      "adgangspunkt_DDKN_m100": "100m_61768_6435",
+      "adgangspunkt_DDKN_km1": "1km_6176_643",
+      "adgangspunkt_DDKN_km10": "10km_617_64"
     }
   },
   {
@@ -69,9 +69,9 @@
       "adgangspunkt_etrs89koordinat_nord": 451234.89,
       "adgangspunkt_wgs84koordinat_bredde": 6.8865950053481,
       "adgangspunkt_wgs84koordinat_laengde": 8.55860108915762,
-      "DDKN_m100": "100m_61768_6435",
-      "DDKN_km1": "1km_6176_643",
-      "DDKN_km10": "10km_617_64"
+      "adgangspunkt_DDKN_m100": "100m_61768_6435",
+      "adgangspunkt_DDKN_km1": "1km_6176_643",
+      "adgangspunkt_DDKN_km10": "10km_617_64"
     }
   },
   {
@@ -215,9 +215,9 @@
       "adgangspunkt_etrs89koordinat_nord": 451234.89,
       "adgangspunkt_wgs84koordinat_bredde": 6.8865950053481,
       "adgangspunkt_wgs84koordinat_laengde": 8.55860108915762,
-      "DDKN_m100": "100m_61768_6435",
-      "DDKN_km1": "1km_6176_643",
-      "DDKN_km10": "10km_617_64"
+      "adgangspunkt_DDKN_m100": "100m_61768_6435",
+      "adgangspunkt_DDKN_km1": "1km_6176_643",
+      "adgangspunkt_DDKN_km10": "10km_617_64"
     }
   }
 ]

@@ -4,6 +4,7 @@ var async = require('async');
 var util = require('util');
 var Q = require('q');
 var winston        = require('winston');
+var _ = require('underscore');
 
 function putItemQ(dd, tablename, seqNr, data) {
   var item = {key:   {'S': 'haendelser' },
@@ -72,17 +73,6 @@ function getLatest(dd, tablename, cb) {
   });
 }
 
-function getAllQ(dd, table) {
-  var params = {
-    TableName: table,
-    KeyConditions: {
-      'key': {ComparisonOperator: 'EQ',
-        AttributeValueList: [{'S': 'haendelser' }]}},
-    ConsistentRead: true
-  };
-  return Q.ninvoke(dd, 'query', params);
-}
-
 function getAll(dd, table, cb) {
   var params = {
     TableName: table,
@@ -92,6 +82,45 @@ function getAll(dd, table, cb) {
     ConsistentRead: true
   };
   dd.query(params, cb);
+}
+
+function existy(sekvensnummerTilInclusive) {
+  return !_.isUndefined(sekvensnummerTilInclusive) && !_.isNull(sekvensnummerTilInclusive);
+}
+function queryQ(dd, table, sekvensnummerFraInclusive, sekvensnummerTilInclusive) {
+  var sekvensnummerClause;
+  if(existy(sekvensnummerFraInclusive) && !existy(sekvensnummerTilInclusive)) {
+    sekvensnummerClause = {
+      ComparisonOperator: 'GE',
+      AttributeValueList: [{N: ""+sekvensnummerFraInclusive}]
+    };
+  }
+  else if(!existy(sekvensnummerFraInclusive) && existy(sekvensnummerTilInclusive)) {
+    sekvensnummerClause = {
+      ComparisonOperator: 'LE',
+      AttributeValueList: [{N: ""+sekvensnummerTilInclusive}]
+    };
+  }
+  else if(existy(sekvensnummerFraInclusive) && existy(sekvensnummerTilInclusive)) {
+    sekvensnummerClause = {
+      ComparisonOperator: 'BETWEEN',
+      AttributeValueList: [{N: sekvensnummerFraInclusive}, {N: sekvensnummerTilInclusive}]
+    };
+  }
+  var params = {
+    TableName: table,
+    KeyConditions: {
+      'key': {
+        ComparisonOperator: 'EQ',
+        AttributeValueList: [{'S': 'haendelser' }]
+      }
+    },
+    ConsistentRead: true
+  };
+  if(sekvensnummerClause) {
+    params.KeyConditions.seqnr = sekvensnummerClause;
+  }
+  return Q.ninvoke(dd, 'query', params);
 }
 
 function deleteItem(dd, tableName, item) {
@@ -151,4 +180,4 @@ exports.getAll = getAll;
 exports.putItemQ = putItemQ;
 exports.getLatestQ = getLatestQ;
 exports.deleteAllQ = deleteAllQ;
-exports.getAllQ = getAllQ;
+exports.query = queryQ;

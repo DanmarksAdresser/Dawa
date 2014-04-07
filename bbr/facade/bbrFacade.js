@@ -99,6 +99,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     }).then(function(result) {
       res.json(200, result);
     }, function(error) {
+      facadeLoggerIncidents.error("An error happened when trying to save event to dynamodb", error);
       res.json(500, error);
     });
   });
