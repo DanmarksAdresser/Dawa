@@ -38,9 +38,24 @@ module.exports = function (grunt) {
 //          spawn: false // Without this option specified express won't be reloaded
 //        }
       }
+    },
+    release: {
+      options: {
+        push: false, //default: true
+        pushTags: false, //default: true
+        npm: false, //default: true
+        npmtag: false, //default: no tag
+        tagName: 'v<%= version %>', //default: '<%= version %>'
+        commitMessage: 'new Release <%= version %>', //default: 'release <%= version %>'
+        tagMessage: 'tagging version <%= version %>', //default: 'Version <%= version %>',
+        github: {
+          repo: 'dawa/DanmarksAdresser'
+        }
+      }
     }
   });
 
+  grunt.loadNpmTasks('grunt-release');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-watch');
