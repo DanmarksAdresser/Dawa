@@ -107,3 +107,4 @@ exports.putItemQ = putItemQ;
 exports.getLatestQ = getLatestQ;
 exports.deleteAllQ = deleteAllQ;
 exports.query = queryQ;
+exports.getAllQ = getAllQ;

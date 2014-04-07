@@ -7,6 +7,7 @@ var AWS     = require('aws-sdk');
 var _       = require('underscore');
 var async   = require('async');
 var util    = require('util');
+var Q = require('q');
 
 var dynamoEvents = require('../../bbr/common/dynamoEvents');
 
@@ -53,20 +54,19 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       });
   }
 
-  function assertEmptyDB(cb){
-    dynamoEvents.getAll(dd, TABLE, function(error, data){
-      if (error) {return cb(error);}
+  function assertEmptyDB(){
+    dynamoEvents.getAllQ(dd, TABLE).then(function(data) {
       if (data.Count === 0){
-        cb();
-      } else {
-        winston.error('DB not empty: %j', data, {});
-        cb('DB not empty!');
+        return;
+      }
+      else {
+        throw new Error("DB not empty!");
       }
     });
   }
 
-  function test(cb){
-    async.eachSeries(
+  function test(){
+    return Q.nfcall(async.eachSeries,
       testSpec(),
       function(spec, cb){
         postTestSpec(spec, function(err, message){
@@ -79,14 +79,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
             cb();
           }
         });
-      },
-      function(err){
-        if (err) {
-          winston.error('Error %s', err);
-        } else {
-          winston.info('***************');
-          winston.info('Test SUCCESS!!!');
-        }
       }
     );
   }
@@ -95,21 +87,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
    ***** Main function ************************************************************
    *******************************************************************************/
 
-  async.series(
-    [
-      print('Starting the BBR Facade test....'),
-      function(callback) {
-        dynamoEvents.deleteAll(dd, TABLE, callback);
-      },
-      print('Assert that the DB is empty'),
-      assertEmptyDB,
-      print('Run the test'),
-      test
-    ],
-    function (err, results){
-      winston.info('Error in test commands: %j %j', err, results, {});
-    }
-  );
+  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(test).done();
 });
 
 
@@ -194,9 +172,9 @@ TD.adgangsadresse = {
     "adgangspunkt_etrs89koordinat_nord": 451234.89,
     "adgangspunkt_wgs84koordinat_bredde":  6.8865950053481,
     "adgangspunkt_wgs84koordinat_laengde": 8.55860108915762,
-    "DDKN_m100": "100m_61768_6435",
-    "DDKN_km1": "1km_6176_643",
-    "DDKN_km10": "10km_617_64"
+    "adgangspunkt_DDKN_m100": "100m_61768_6435",
+    "adgangspunkt_DDKN_km1": "1km_6176_643",
+    "adgangspunkt_DDKN_km10": "10km_617_64"
   }
 };
 
