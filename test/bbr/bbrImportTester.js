@@ -39,13 +39,13 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
   function storeEventsInDynamo(dd, tableName, events, callback) {
     winston.debug("Storing events in dynamo");
     async.eachSeries(events, function(event, callback) {
-      dynamoEvents.putItem(dd, tableName, event.sekvensnummer, event, callback);
+      dynamoEvents.putItemQ(dd, tableName, event.sekvensnummer, event).then(function() { callback(); }).catch(callback);
     }, callback);
   }
 
   async.series([
     function(callback) {
-      dynamoEvents.deleteAll(dd, tableName, callback);
+      dynamoEvents.deleteAllQ(dd, tableName).then(function() {callback(); }).catch(callback);
     },
     function(callback) {
       storeEventsInDynamo(dd, tableName, events, callback);
