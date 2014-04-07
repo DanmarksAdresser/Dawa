@@ -49,7 +49,9 @@ module.exports = function (grunt) {
         commitMessage: 'new Release <%= version %>', //default: 'release <%= version %>'
         tagMessage: 'tagging version <%= version %>', //default: 'Version <%= version %>',
         github: {
-          repo: 'DanmarksAdresser/Dawa'
+          repo: 'DanmarksAdresser/Dawa',
+          usernameVar: 'GITHUB_USERNAME', //ENVIRONMENT VARIABLE that contains Github username
+          passwordVar: 'GITHUB_PASSWORD' //ENVIRONMENT VARIABLE that contains Github password
         }
       }
     }
