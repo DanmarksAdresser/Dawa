@@ -154,6 +154,16 @@ module.exports = function(options) {
     streamingQueryUsingCursor(client, query.sql, query.params, cb);
   };
 
+  function getPoolStatus() {
+    var pool = pg.pools.getOrCreate(connString);
+    return {
+      name: pool.getName(),
+      size: pool.getPoolSize(),
+      availableObjectsCount: pool.availableObjectsCount(),
+      waitingClientsCount: pool.waitingClientsCount()
+    };
+  }
+
   return {
     addSqlParameter: addSqlParameter,
     addWhereClause: addWhereClause,
@@ -163,6 +173,7 @@ module.exports = function(options) {
     withRollbackTransaction: withRollbackTransaction,
     withWriteTransaction: withWriteTransaction,
     query: query,
-    stream: stream
+    stream: stream,
+    getPoolStatus: getPoolStatus
   };
 };

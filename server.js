@@ -1,18 +1,36 @@
 "use strict";
 
+var express        = require("express");
 var fs = require('fs');
 var logger = require('./logger');
+var Q = require('q');
 var _ = require('underscore');
 
 var cluster = require('cluster');
-var workers = {};
 var count = require('os').cpus().length;
+var uuid = require('node-uuid');
+
+var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
 function setupWorker() {
-  var express        = require("express");
+  var dbapi = require('./dbapi');
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
   require('./apiSpecification/allSpecs');
+
+  process.on('message', function(message) {
+    if(message.type === 'getStatus') {
+      process.send({
+        type: 'status',
+        requestId: message.requestId,
+        data: {
+          status: 'up',
+          postgresPool: dbapi.getPoolStatus()
+        }
+      });
+    }
+  });
+
   var app = express();
 
 
@@ -34,6 +52,7 @@ function setupMaster() {
   var optionSpec = {
     pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
     listenPort: [false, 'TCP port der lyttes på', 'number', 3000],
+    masterListenPort: [false, 'TCP port hvor master processen lytter (isalive)', 'number', 3001],
     disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean']
   };
 
@@ -64,10 +83,63 @@ function setupMaster() {
 
     cluster.on('exit', function (worker, code, signal) {
       logger.error('master', 'Worker died. Restarting worker.', { pid: worker.process.pid, signal: signal, code: code});
-      delete workers[worker.pid];
       spawn(workerOptions);
     });
+
+    var isaliveApp = express();
+    isaliveApp.get('/isalive', function(req, res) {
+      var result = {
+        name: packageJson.name,
+        version: packageJson.version,
+        generation_time: new Date().toISOString(),
+        workers: []
+
+      };
+      var workerIds = Object.keys(cluster.workers);
+      var statusPromises =
+      _.map(workerIds, function(workerId) {
+        var worker = cluster.workers[workerId];
+        return getStatus(worker);
+      });
+      Q.allSettled(statusPromises).then(function(statuses) {
+        for(var i = 0; i < workerIds.length; ++i) {
+          var workerId = workerIds[i];
+          var worker = cluster.workers[workerId];
+          var status = statuses[i];
+          result.workers.push({
+            id: workerId,
+            pid: worker.process.pid,
+            isalive: status.state === 'fulfilled' ? status.value : {
+              status: 'down',
+              reason: 'Could not get status from worker process'
+            }
+          });
+        }
+        res.json(result);
+      }).done();
+    });
+    isaliveApp.listen(3001);
+    logger.info("startup", "Express server listening for connections", {listenPort: 3001});
   });
+}
+
+function getStatus(worker) {
+  var deferred = Q.defer();
+  var request = {
+    type: 'getStatus',
+    requestId: uuid.v4(),
+    data: {}
+  };
+  function listener(response) {
+    if (response.type === 'status' && response.requestId === request.requestId) {
+      worker.removeListener('message', listener);
+      deferred.resolve(response.data);
+    }
+  }
+  worker.on('message', listener);
+  worker.send(request);
+  //return Q.timeout(deferred.promise, 5000);
+  return deferred.promise;
 }
 
 if (cluster.isMaster) {
@@ -84,6 +156,5 @@ if (cluster.isMaster) {
 
 function spawn(options){
   var worker = cluster.fork(options);
-  workers[worker.pid] = worker;
   return worker;
 }
