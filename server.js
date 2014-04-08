@@ -3,6 +3,7 @@
 var express        = require("express");
 var fs = require('fs');
 var logger = require('./logger');
+var statistics = require('./statistics');
 var Q = require('q');
 var _ = require('underscore');
 
@@ -25,7 +26,8 @@ function setupWorker() {
         requestId: message.requestId,
         data: {
           status: 'up',
-          postgresPool: dbapi.getPoolStatus()
+          postgresPool: dbapi.getPoolStatus(),
+          statistics: statistics.getStatistics(),
         }
       });
     }

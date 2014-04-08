@@ -2,6 +2,7 @@
 
 var pg          = require('pg.js');
 var logger = require('./logger');
+var statistics = require('./statistics');
 
 var CursorStream = require('./cursor-stream');
 
@@ -56,13 +57,21 @@ module.exports = function(options) {
         if(err) {
           return cb(err);
         }
-        return cb(null, new CursorStream(client, 'c1'));
+        return cb(null, new CursorStream(client, 'c1', sql));
       }
     );
   }
 
-  var withReadonlyTransaction = function(cb) {
+  var withConnection = function(cb) {
+    var before = Date.now();
     return pg.connect(connString, function (err, client, done) {
+      statistics.emit('psql_acquire_connection', Date.now() - before, err);
+      cb(err, client, done);
+    });
+  };
+
+  var withReadonlyTransaction = function(cb) {
+    return withConnection(function(err, client, done) {
       if (err) {
         logger.error("sql", "Failed to obtain PostgreSQL connection", err);
         return cb(err);
@@ -85,7 +94,7 @@ module.exports = function(options) {
   };
 
   var withRollbackTransaction = function(cb) {
-    return pg.connect(connString, function (err, client, done) {
+    return withConnection(function(err, client, done) {
       if (err) {
         return cb(err);
       }
@@ -106,7 +115,7 @@ module.exports = function(options) {
   };
 
   var withWriteTransaction = function(cb) {
-    return pg.connect(connString, function (err, client, done) {
+    return withConnection(function(err, client, done) {
       if (err) {
         return cb(err);
       }
@@ -140,10 +149,12 @@ module.exports = function(options) {
   var query = function(client, sqlParts, cb) {
     var query = createQuery(sqlParts);
     logger.info('sql', 'executing sql query', {sql: query.sql, params: query.params});
+    var before = Date.now();
     client.query(
       query.sql,
       query.params,
       function (err, result) {
+        statistics.emit('psql_query', Date.now() - before, err, { query: query });
         if(err) { return cb(err); }
         cb(null, result.rows || []);
       });

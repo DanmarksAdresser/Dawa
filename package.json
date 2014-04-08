@@ -1,5 +1,5 @@
 {
-  "name": "DAWA - Danmarks Adressers Web API",
+  "name": "DAWA",
   "version": "0.9.1",
   "private": true,
   "author": "Ministeriet for By, Bolig og Landdistrikter",
@@ -25,7 +25,8 @@
     "iconv": "~2.0.7",
     "moment": "~2.5.1",
     "q": "^1.0.1",
-    "node-uuid": "^1.4.1"
+    "node-uuid": "^1.4.1",
+    "moving-average": "0.0.4"
   },
   "devDependencies": {
     "jasmine-node": "1.14.2",
