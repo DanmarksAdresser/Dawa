@@ -17,12 +17,26 @@ var dayInSeconds = 24 * 60 * 60;
 var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
 
 function cachingMiddleware(req, res, next) {
-  if(req.query.cache === 'no-cache') {
-    res.setHeader('Cache-Control', 'no-cache');
-  }
-  else {
-    res.setHeader('Cache-Control',  's-maxage=' + cacheMaxAge);
-  }
+  // this looks like a mess, but we cannot set the caching headers before we
+  // know the response code
+  var baseFunc = res.writeHead;
+  res.writeHead = function(statusCode, reasonPhrase, headers) {
+    var header;
+    if(statusCode >= 300 || req.query.cache === 'no-cache') {
+      header = 'no-cache';
+    }
+    else {
+      header = 's-maxage=' + cacheMaxAge;
+    }
+    res.setHeader('Cache-Control', header);
+    if(headers) {
+      headers['Cache-Control'] = header;
+    }
+    if(!headers && reasonPhrase) {
+      reasonPhrase['Cache-Control'] = header;
+    }
+    baseFunc.call(res, statusCode, reasonPhrase, headers);
+  };
   next();
 }
 
