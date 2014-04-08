@@ -119,7 +119,7 @@ function setupMaster() {
       }).done();
     });
     isaliveApp.listen(3001);
-    logger.info("startup", "Express server listening for connections", {listenPort: 3001});
+    logger.info("startup", "Master listening for isalive", {listenPort: 3001});
   });
 }
 
