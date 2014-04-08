@@ -168,7 +168,6 @@ module.exports = function(options) {
   function getPoolStatus() {
     var pool = pg.pools.getOrCreate(connString);
     return {
-      name: pool.getName(),
       size: pool.getPoolSize(),
       availableObjectsCount: pool.availableObjectsCount(),
       waitingClientsCount: pool.waitingClientsCount()
