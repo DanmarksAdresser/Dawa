@@ -4,7 +4,7 @@ var async = require('async');
 var dbapi = require('../../dbapi');
 var crud = require('../../crud/crud');
 var handleBbrEvent = require('./handleBbrEvent');
-var winston = require('winston');
+var importLogger = require('../../logger').forCategory('importBbrEvents');
 var eventSchemas = require('../common/eventSchemas');
 var Q = require('q');
 var ZSchema = require("z-schema");
@@ -25,26 +25,29 @@ function storeEvent(client, event, callback) {
     created: new Date().toISOString(),
     data: JSON.stringify(event.data)
   };
-  winston.debug("storing bbr event in bbr_events table");
   crud.create(client, bbrEventsDatamodel, dbRow, callback);
 }
 
 function processEvent(client, event, callback) {
-  winston.info("Processing event with sequence number %d", event.sekvensnummer);
-  async.series([
-    function(callback) {
-      console.log(JSON.stringify(event));
-      console.log(JSON.stringify(eventSchemas[event.type]));
-      var validator = new ZSchema();
-      validator.validate(event, eventSchemas[event.type], callback);
-    },
-    function(callback) {
-      storeEvent(client, event, callback);
-    },
-    function(callback) {
-      handleBbrEvent(client, event, callback);
-    }
-  ], callback);
+  importLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
+  console.log(JSON.stringify(event));
+  console.log(JSON.stringify(eventSchemas[event.type]));
+  var validator = new ZSchema();
+  validator.validate(event, eventSchemas[event.type]).then(function(report) {
+    async.series([
+      function(callback) {
+        storeEvent(client, event, callback);
+      },
+      function(callback) {
+        handleBbrEvent(client, event, callback);
+      }
+    ], callback);
+  }).catch(function(err) {
+    importLogger.error('Invalid event', err);
+    // We ignore invalid events
+    callback(null);
+  });
+
 }
 
 module.exports = function(dd, tablename, initialSequenceNumber, callback) {
@@ -76,7 +79,7 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
           callback(null, client, lastProcessedSeqNum);
         });
       },
-      // fetch the event from dynamodb
+      // fetch the events from dynamodb
       function(client, lastProcessedSeqNum, callback) {
         var nextSeqNum;
         if(lastProcessedSeqNum) {

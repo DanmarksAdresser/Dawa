@@ -13,9 +13,9 @@ function header(type, data){
 
 function headerNoAendringstype(type, data){
   return {type                : notNull(enumeration([type])),
-    sekvensnummer       : integer(),
-    lokaltSekvensnummer : integer(),
-    tidspunkt           : time(),
+    sekvensnummer       : notNull(integer()),
+    lokaltSekvensnummer : notNull(integer()),
+    tidspunkt           : notNull(time()),
     data                : requireAllProperties({type: 'object',
       additionalProperties: false,
       properties: data})
@@ -72,8 +72,8 @@ var basicHaendelseSchema = requireAllProperties({
   type: 'object',
   additionalProperties: true,
   properties: {
-    type: enumeration(['enhedsadresse', 'adgangsadresse', 'supplerendebynavn', 'postnummer', 'vejnavn']),
-    sekvensnummer: integer()
+    type: notNull(enumeration(['enhedsadresse', 'adgangsadresse', 'supplerendebynavn', 'postnummer', 'vejnavn'])),
+    sekvensnummer: notNull(integer())
   }
 });
 
