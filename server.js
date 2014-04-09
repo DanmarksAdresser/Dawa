@@ -149,8 +149,7 @@ function getStatus(worker) {
   }
   worker.on('message', listener);
   worker.send(request);
-  //return Q.timeout(deferred.promise, 5000);
-  return deferred.promise;
+  return Q.timeout(deferred.promise, 5000);
 }
 
 if (cluster.isMaster) {
