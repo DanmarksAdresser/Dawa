@@ -2,53 +2,11 @@
 
 var async = require('async');
 var dbapi = require('../../dbapi');
-var crud = require('../../crud/crud');
-var handleBbrEvent = require('./handleBbrEvent');
-var importLogger = require('../../logger').forCategory('importBbrEvents');
-var eventSchemas = require('../common/eventSchemas');
+var bbrEvents = require('./bbrEvents');
 var Q = require('q');
-var ZSchema = require("z-schema");
+var winston = require('winston');
 
 var dynamoEvents = require('../common/dynamoEvents');
-
-var bbrEventsDatamodel = {
-  table: 'bbr_events',
-    columns: ['sekvensnummer', 'type', 'bbrTidspunkt', 'created', 'data'],
-  key: ['sekvensnummer']
-};
-
-function storeEvent(client, event, callback) {
-  var dbRow = {
-    sekvensnummer: event.sekvensnummer,
-    type: event.type,
-    bbrTidspunkt: event.tidspunkt,
-    created: new Date().toISOString(),
-    data: JSON.stringify(event.data)
-  };
-  crud.create(client, bbrEventsDatamodel, dbRow, callback);
-}
-
-function processEvent(client, event, callback) {
-  importLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
-  console.log(JSON.stringify(event));
-  console.log(JSON.stringify(eventSchemas[event.type]));
-  var validator = new ZSchema();
-  validator.validate(event, eventSchemas[event.type]).then(function(report) {
-    async.series([
-      function(callback) {
-        storeEvent(client, event, callback);
-      },
-      function(callback) {
-        handleBbrEvent(client, event, callback);
-      }
-    ], callback);
-  }).catch(function(err) {
-    importLogger.error('Invalid event', err);
-    // We ignore invalid events
-    callback(null);
-  });
-
-}
 
 module.exports = function(dd, tablename, initialSequenceNumber, callback) {
   winston.debug("importing bbr events, initial sequence number %d", initialSequenceNumber);
@@ -94,7 +52,7 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
             foundEvent = true;
             return Q.nfcall(async.eachSeries, result.Items, function(item, callback) {
               var event = JSON.parse(item.data.S);
-              processEvent(client, event, callback);
+              bbrEvents.processEvent(client, event, callback);
             });
           }
         }).then(function() {

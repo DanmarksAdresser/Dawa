@@ -1,10 +1,15 @@
 "use strict";
 
-var datamodels = require('../../crud/datamodel');
-var crud = require('../../crud/crud');
 var async = require('async');
-var _ = require('underscore');
 var winston = require('winston');
+var ZSchema = require("z-schema");
+var _ = require('underscore');
+
+var bbrEventsLogger = require('../../logger').forCategory('bbrEvents');
+var crud = require('../../crud/crud');
+var datamodels = require('../../crud/datamodel');
+var eventSchemas = require('../common/eventSchemas');
+
 
 
 var allRenames = {
@@ -204,9 +209,47 @@ var eventHandlers = {
   supplerendebynavn: handleSupplerendebynavnEvent
 };
 
-module.exports = function(sqlClient, event, callback) {
+function applyBbrEvent(sqlClient, event, callback) {
   eventHandlers[event.type](sqlClient, event, callback);
+}
+
+var bbrEventsDatamodel = {
+  table: 'bbr_events',
+  columns: ['sekvensnummer', 'type', 'bbrTidspunkt', 'created', 'data'],
+  key: ['sekvensnummer']
 };
+
+function storeEvent(client, event, callback) {
+  var dbRow = {
+    sekvensnummer: event.sekvensnummer,
+    type: event.type,
+    bbrTidspunkt: event.tidspunkt,
+    created: new Date().toISOString(),
+    data: JSON.stringify(event.data)
+  };
+  crud.create(client, bbrEventsDatamodel, dbRow, callback);
+}
+
+function processEvent(client, event, callback) {
+  bbrEventsLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
+  var validator = new ZSchema();
+  validator.validate(event, eventSchemas[event.type]).then(function(report) {
+    async.series([
+      function(callback) {
+        storeEvent(client, event, callback);
+      },
+      function(callback) {
+        applyBbrEvent(client, event, callback);
+      }
+    ], callback);
+  }).catch(function(err) {
+    bbrEventsLogger.error('Invalid event', err);
+    // We ignore invalid events
+    callback(null);
+  });
+}
+
+module.exports.processEvent = processEvent;
 
 // for testing purporses
 module.exports.internal = {

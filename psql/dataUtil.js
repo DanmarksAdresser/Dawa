@@ -51,9 +51,15 @@ exports.csvToTable = function(client, csvStream, tableName, datamodel, callback)
 exports.tableToCsv = function(client, csvStream, tableName, datamodel, callback) {
   var sql = "COPY " + tableName + "(" + datamodel.columns.join(',') + ") TO STDOUT WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL 'null')";
   var pgStream = client.query(copyTo(sql));
-  var stream = eventStream.pipeline(pgStream, csvStream);
-  stream.on('error', callback);
-  stream.on('end', callback);
+  pgStream.pipe(csvStream);
+  pgStream.on('error', function(err) {
+    console.log('error!', err);
+    callback(err);
+  });
+  pgStream.on('end', function() {
+    console.log('end!');
+    callback();
+  });
 };
 
 exports.snapshotQuery = function(datamodel, sequenceNumberAlias) {
