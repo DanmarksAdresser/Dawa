@@ -254,5 +254,6 @@ module.exports.processEvent = processEvent;
 // for testing purporses
 module.exports.internal = {
   compareHusnr: compareHusnr,
-  adresseWithinInterval: adresseWithinInterval
+  adresseWithinInterval: adresseWithinInterval,
+  applyBbrEvent: applyBbrEvent
 };

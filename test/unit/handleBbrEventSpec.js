@@ -1,15 +1,15 @@
 "use strict";
 
-var handleBbrEvent = require('../../bbr/eventImporter/handleBbrEvent');
+var bbrEvents = require('../../bbr/eventImporter/bbrEvents');
 
-var adresseWithinInterval = handleBbrEvent.internal.adresseWithinInterval;
+var adresseWithinInterval = bbrEvents.internal.adresseWithinInterval;
 function compareHusnr(a, b) {
-  var result = handleBbrEvent.internal.compareHusnr(a, b);
+  var result = bbrEvents.internal.compareHusnr(a, b);
   if(result < 0) {
-    expect(handleBbrEvent.internal.compareHusnr(b, a)).toBeGreaterThan(0);
+    expect(bbrEvents.internal.compareHusnr(b, a)).toBeGreaterThan(0);
   }
   else if(result === 0) {
-    expect(handleBbrEvent.internal.compareHusnr(b, a)).toBe(0);
+    expect(bbrEvents.internal.compareHusnr(b, a)).toBe(0);
   }
   return result;
 }

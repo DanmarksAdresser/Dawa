@@ -1,10 +1,12 @@
 "use strict";
 
-var handleBbrEvent = require('../../bbr/eventImporter/handleBbrEvent');
+var bbrEvents = require('../../bbr/eventImporter/bbrEvents');
 var dbapi = require('../../dbapi');
 var datamodels = require('../../crud/datamodel');
 var crud = require('../../crud/crud');
 var _ = require('underscore');
+
+var handleBbrEvent = bbrEvents.internal.applyBbrEvent;
 
 describe('Håndtering af BBR events', function() {
   describe('supplerendebynavn events', function() {
