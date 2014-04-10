@@ -61,3 +61,20 @@ DAWA startes op ved at køre
 ```
  $> node server.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname>
 ```
+
+## Optionelt: Indlæsning af ordbøger
+Der kan anvendes synonym-ordbog og unaccent-regler som er specielt lavet til DAWA. Disse ordbøger findes i folderen psql/dictionaries .
+ For at anvende disse skal de placeres i folderen $SHAREDIR/tsearch_data , hvor $SHAREDIR er Postgres-installationens folder til delte filer.
+ Ordbøgerne kopieres fra psql/dictionaries folderen og over i den angivne folder.
+
+ For at aktivere ordbøgerne køres:
+
+ ```
+  $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/dictionaries/enable-custom-dict.sql
+ ```
+
+Efter der sker en ændring i orbøgerne skal der reindekseres:
+
+ ```
+  $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname>  --disableTriggers psql/dictionaries/reindex-search.sql
+ ```
