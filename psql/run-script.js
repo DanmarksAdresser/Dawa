@@ -1,5 +1,6 @@
 "use strict";
 
+var async = require('async');
 var cli = require('cli');
 var fs = require('fs');
 var sqlCommon = require('./common');
@@ -8,7 +9,8 @@ var _ = require('underscore');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
 var optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
+  disableTriggers: [false, 'Whether triggers should be disabled when running the scripts', 'boolean']
 };
 
 cli.parse(optionSpec, []);
@@ -24,8 +26,9 @@ cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
   cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
 
-  var script = fs.readFileSync(args[0], {encoding: 'utf8'});
-  console.log('executing script\n%s\n', script);
+  var scripts = _.map(args, function(arg) {
+    return fs.readFileSync(args[0], {encoding: 'utf8'});
+  });
   sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     client.on('error', function(err) {
@@ -36,12 +39,29 @@ cli.main(function(args, options) {
     });
     client.query("SET client_min_messages='INFO'",[], function(err) {
       exitOnErr(err);
-      client.query(script, [], function(err) {
-        exitOnErr(err);
-        commit(null, function(err) {
+      async.series([
+        function(callback) {
+          console.log('disabling triggers');
+          callback();
+        },
+        sqlCommon.disableTriggers(client),
+        function(callback) {
+          async.eachSeries(scripts, function(script, callback) {
+            console.log('executing script\n%s\n', script);
+            client.query(script, [], callback);
+          }, callback);
+        },
+        function(callback) {
+          console.log('enabling triggers');
+          callback();
+        },
+        sqlCommon.enableTriggers(client)
+        ],function(err) {
           exitOnErr(err);
+          commit(null, function(err) {
+            exitOnErr(err);
+          });
         });
       });
     });
-  });
 });
