@@ -72,7 +72,7 @@ function setupMaster() {
     listenPort: [false, 'TCP port der lyttes på', 'number', 3000],
     masterListenPort: [false, 'TCP port hvor master processen lytter (isalive)', 'number', 3001],
     disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean'],
-    pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 10],
+    pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 25],
     pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
     socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 10000]
   };

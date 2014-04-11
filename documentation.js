@@ -2,6 +2,7 @@
 
 var express = require('express');
 var parameterDoc   = require('./parameterDoc');
+var paths = require('./apiSpecification/paths');
 var docUtil        = require('./docUtil');
 var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
@@ -30,8 +31,7 @@ function jadeDocumentationParams(req) {
     return memo;
   }, {});
 
-  var protocol = req.connection.encrypted ? 'https' : 'http';
-  return {url: protocol + '://' + req.headers.host,
+  return {url: paths.baseUrl(req),
     jsonSchemas: jsonSchemas,
     autocompleteSchemas: autocompleteSchemas,
     parameterDoc: parameterDoc,

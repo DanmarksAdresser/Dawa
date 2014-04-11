@@ -72,21 +72,25 @@ module.exports = function(options) {
 
   var withReadonlyTransaction = function(cb) {
     return withConnection(function(err, client, done) {
+      function endTransaction(err) {
+        client.emit('transactionEnd', err);
+        done(err);
+      }
       if (err) {
         logger.error("sql", "Failed to obtain PostgreSQL connection", err);
         return cb(err);
       }
       client.query('BEGIN READ ONLY', [], function(err) {
         if(err) {
-          done();
+          endTransaction();
           return cb(err);
         }
         cb(err, client, function(err) {
           if(err) {
-            return done(err);
+            return endTransaction(err);
           }
           client.query('ROLLBACK', function(err) {
-            return done(err);
+            return endTransaction(err);
           });
         });
       });
@@ -95,17 +99,21 @@ module.exports = function(options) {
 
   var withRollbackTransaction = function(cb) {
     return withConnection(function(err, client, done) {
+      function endTransaction(err) {
+        client.emit('transactionEnd', err);
+        done(err);
+      }
       if (err) {
         return cb(err);
       }
       client.query('BEGIN', [], function(err) {
         if(err) {
-          done();
+          endTransaction();
           return cb(err);
         }
         cb(err, client, function(cb) {
           client.query('ROLLBACK', function(err) {});
-          done();
+          endTransaction();
           if(cb) {
             cb(null);
           }
@@ -116,18 +124,22 @@ module.exports = function(options) {
 
   var withWriteTransaction = function(cb) {
     return withConnection(function(err, client, done) {
+      function endTransaction(err) {
+        client.emit('transactionEnd', err);
+        done(err);
+      }
       if (err) {
         return cb(err);
       }
-      client.query('BEGIN', [], function(err) {
+      client.query('BEGIN ISOLATION LEVEL SERIALIZABLE', [], function(err) {
         if(err) {
-          done(err);
+          endTransaction(err);
           return cb(err);
         }
         cb(err, client, function(err, committedCallback) {
           if(err) {
             logger.error('sql', "Error during transaction, discarding postgres connection", err);
-            done(err);
+            endTransaction(err);
             committedCallback(err);
             return;
           }
@@ -138,7 +150,7 @@ module.exports = function(options) {
             else {
               logger.debug('sql', "write transaction commited successfully");
             }
-            done(err);
+            endTransaction(err);
             committedCallback(err);
           });
         });

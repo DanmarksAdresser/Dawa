@@ -1,5 +1,6 @@
 "use strict";
 
+var paths = require('../paths');
 var eventStream = require('event-stream');
 var logger = require('../../logger');
 var _ = require('underscore');
@@ -76,11 +77,6 @@ function withReadonlyTransaction(res, callback) {
 }
 
 
-function baseUrl(req) {
-  var protocol = req.connection.encrypted ? 'https' : 'http';
-  return protocol + '://' + req.headers.host;
-}
-
 exports.createExpressHandler = function(resourceSpec) {
   var spec = resourceSpec;
   return function(req, res) {
@@ -115,7 +111,7 @@ exports.createExpressHandler = function(resourceSpec) {
     var sqlParts = spec.sqlModel.createQuery(_.pluck(representation.fields, 'name'), params);
 
     // create a mapper function that maps results from the SQL layer to the requested representation
-    var mapObject = representation.mapper(baseUrl(req), params, spec.singleResult);
+    var mapObject = representation.mapper(paths.baseUrl(req), params, spec.singleResult);
     withReadonlyTransaction(res, function(client, done) {
       if(spec.singleResult) {
         // create a function that can write the object to the HTTP response based on the format requrested by the
