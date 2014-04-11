@@ -37,14 +37,14 @@ CREATE FUNCTION enhedsadresser_init() RETURNS void
 LANGUAGE sql AS
 $$
     UPDATE enhedsadresser
-    SET tsv = adgangsadresser.tsv ||
-              setweight(to_tsvector('adresser',
-                                    COALESCE(etage, '') || ' ' ||
-                                    COALESCE(doer, '')), 'B')
+    SET tsv = newtsvs.tsv
     FROM
-      adgangsadresser
+      (SELECT enhedsadresser.id,
+         adgangsadresser.tsv ||
+         setweight(to_tsvector('adresser', COALESCE(etage, '') ||' ' || COALESCE(doer, '')), 'B') as tsv
+       FROM enhedsadresser left join adgangsadresser on enhedsadresser.adgangsadresseid = adgangsadresser.id) as newtsvs
     WHERE
-      adgangsadresser.id = adgangsadresseid;
+      newtsvs.id = enhedsadresser.id and newtsvs.tsv is distinct from enhedsadresser.tsv;
 $$;
 
 -- Trigger which maintains the tsv column

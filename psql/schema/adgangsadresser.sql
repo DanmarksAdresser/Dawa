@@ -89,14 +89,14 @@ CREATE FUNCTION adgangsadresser_init_tsv()
   RETURNS VOID LANGUAGE SQL AS
   $$
   UPDATE adgangsadresser
-  SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
-            setweight(to_tsvector('adresser', COALESCE(supplerendebynavn, '')), 'C') ||
-            setweight(postnumre.tsv, 'D')
+  SET tsv = newtsvs.tsv
   FROM
-    postnumre, vejstykker
+    (select adgangsadresser.id, setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
+                                setweight(to_tsvector('adresser', COALESCE(supplerendebynavn, '')), 'C') ||
+                                setweight(postnumre.tsv, 'D') AS tsv FROM adgangsadresser left join postnumre on adgangsadresser.postnr = postnumre.nr
+      left join vejstykker ON adgangsadresser.kommunekode = vejstykker.kommunekode and adgangsadresser.vejkode = vejstykker.kode) as newtsvs
   WHERE
-    postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
-    vejstykker.kode = adgangsadresser.vejkode;
+      adgangsadresser.id = newtsvs.id and adgangsadresser.tsv is distinct from newtsvs.tsv;
   $$;
 
 DROP FUNCTION IF EXISTS adgangsadresser_init() CASCADE;
