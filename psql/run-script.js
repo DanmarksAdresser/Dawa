@@ -44,11 +44,18 @@ cli.main(function(args, options) {
           console.log('disabling triggers');
           callback();
         },
+        function(callback) {
+          client.query("set work_mem='500MB'; set maintenance_work_mem='500MB'", [], callback);
+        },
         sqlCommon.disableTriggers(client),
         function(callback) {
           async.eachSeries(scripts, function(script, callback) {
-            console.log('executing script\n%s\n', script);
-            client.query(script, [], callback);
+            var commands = script.split(';');
+            async.eachSeries(commands, function(command, callback) {
+              command = command.trim();
+              console.log('executing command %s', command);
+              client.query(command, [], callback);
+            }, callback);
           }, callback);
         },
         function(callback) {
