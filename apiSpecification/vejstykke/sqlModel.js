@@ -12,6 +12,9 @@ var columns = {
   kommunekode: {
     column: 'vejstykker.kommunekode'
   },
+  ændret: {
+    column: 'aendret'
+  },
   kommunenavn: {
     select: 'max(kommuner.navn)',
     where: null

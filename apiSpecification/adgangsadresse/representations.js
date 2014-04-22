@@ -7,7 +7,6 @@ var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
-var dagiTemaer = require('../dagitemaer/dagiTemaer');
 var util = require('../util');
 
 var adressebetegnelse = util.adressebetegnelse;

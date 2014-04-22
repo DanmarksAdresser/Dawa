@@ -41,13 +41,19 @@ cli.main(function(args, options) {
       exitOnErr(err);
       async.series([
         function(callback) {
-          console.log('disabling triggers');
-          callback();
-        },
-        function(callback) {
+          console.log("set work_mem='500MB'; set maintenance_work_mem='500MB'");
           client.query("set work_mem='500MB'; set maintenance_work_mem='500MB'", [], callback);
         },
-        sqlCommon.disableTriggers(client),
+        function(callback) {
+          if(options.disableTriggers) {
+            console.log('disabling triggers');
+            sqlCommon.disableTriggers(client)(callback);
+          }
+          else {
+            console.log('running script with triggers enabled');
+            callback();
+          }
+        },
         function(callback) {
           async.eachSeries(scripts, function(script, callback) {
             var commands = script.split(';');
@@ -59,10 +65,14 @@ cli.main(function(args, options) {
           }, callback);
         },
         function(callback) {
-          console.log('enabling triggers');
-          callback();
-        },
-        sqlCommon.enableTriggers(client)
+          if(options.disableTriggers) {
+            console.log('enabling triggers');
+            sqlCommon.enableTriggers(client)(callback);
+          }
+          else {
+            callback();
+          }
+        }
         ],function(err) {
           exitOnErr(err);
           commit(null, function(err) {

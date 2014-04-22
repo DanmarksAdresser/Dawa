@@ -2,6 +2,8 @@ DROP TABLE IF EXISTS vejstykker CASCADE;
 CREATE TABLE IF NOT EXISTS vejstykker (
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
+  oprettet timestamp,
+  aendret timestamp,
   vejnavn VARCHAR(255) NOT NULL,
   adresseringsnavn VARCHAR(255),
   tsv tsvector,
@@ -17,6 +19,8 @@ CREATE TABLE IF NOT EXISTS vejstykker_history (
   valid_to integer,
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
+  oprettet timestamp,
+  aendret timestamp,
   vejnavn VARCHAR(255) NOT NULL,
   adresseringsnavn VARCHAR(255)
 );

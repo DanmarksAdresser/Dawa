@@ -7,12 +7,15 @@ var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
+var util = require('../util');
 
+var d = util.d;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHref = commonMappers.makeHref;
 var mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
 var mapKommuneRef = commonMappers.mapKommuneRef;
 var kode4String = require('../util').kode4String;
+var schemaObject = schemaUtil.schemaObject;
 
 var nullableType = schemaUtil.nullableType;
 
@@ -86,9 +89,25 @@ exports.json = {
         items: {
           $ref: '#/definitions/PostnummerRef'
         }
-      }
+      },
+      'historik' : schemaObject({
+        'description': 'Væsentlige tidspunkter for adgangsadressen',
+        properties: {
+          'oprettet': {
+            description: 'Dato og tid for adgangsadressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
+            '$ref': '#/definitions/NullableDateTime'
+          },
+          'ændret': {
+            description: 'Dato og tid hvor der sidst er ændret i adgangsadressen. Eksempel: 2002-04-08T00:00:00.',
+            type: nullableType('string'),
+            '$ref': '#/definitions/NullableDateTime'
+          }
+        },
+        docOrder: ['oprettet', 'ændret']
+
+      })
     },
-    docOrder: ['href', 'kode', 'navn', 'adresseringsnavn', 'kommune', 'postnumre']
+    docOrder: ['href', 'kode', 'navn', 'adresseringsnavn', 'kommune', 'postnumre', 'historik']
   }),
   fields: _.where(fields, {'selectable' : true}),
   mapper: function(baseUrl) {
@@ -99,7 +118,11 @@ exports.json = {
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
         kommune: mapKommuneRef({ kode: row.kommunekode, navn: row.kommunenavn}, baseUrl),
-        postnumre: mapPostnummerRefArray(row.postnumre, baseUrl)
+        postnumre: mapPostnummerRefArray(row.postnumre, baseUrl),
+        historik: {
+          oprettet: d(row.oprettet),
+          ændret: d(row.ændret)
+        }
       };
     };
   }

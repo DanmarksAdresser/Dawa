@@ -13,7 +13,11 @@ require('../../apiSpecification/allSpecs');
 
 var valuesNeverExpectedToBeSeen = {
   vejstykker: {
-    adresseringsnavn: true
+    adresseringsnavn: true,
+    historik: {
+      oprettet: true,
+      ændret: true
+    }
   },
   postnumre: {
     stormodtageradresser: true
