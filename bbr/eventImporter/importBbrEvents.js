@@ -8,8 +8,7 @@ var winston = require('winston');
 
 var dynamoEvents = require('../common/dynamoEvents');
 
-module.exports = function(dd, tablename, initialSequenceNumber, callback) {
-  winston.debug("importing bbr events, initial sequence number %d", initialSequenceNumber);
+module.exports = function(dd, tablename, callback) {
   var foundEvent, errorHappened;
   async.doWhilst(function(callback) {
     foundEvent = false;
@@ -28,24 +27,21 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
       },
       // get the sequence number of the last processed event
       function(client, callback) {
-        client.query("SELECT MAX(sekvensnummer) FROM bbr_events", [], function(err, result) {
+        client.query("SELECT GREATEST((SELECT MAX(sekvensnummer) FROM bbr_events), (SELECT sequence_number FROM udtraek_sekvensnummer)) as max", [], function(err, result) {
           if(err) {
             return callback(err);
           }
           var lastProcessedSeqNum = result.rows[0].max;
+          if(lastProcessedSeqNum === undefined) {
+            lastProcessedSeqNum = 0;
+          }
           winston.debug("Last processed event number: %d", lastProcessedSeqNum);
           callback(null, client, lastProcessedSeqNum);
         });
       },
       // fetch the events from dynamodb
       function(client, lastProcessedSeqNum, callback) {
-        var nextSeqNum;
-        if(lastProcessedSeqNum) {
-          nextSeqNum = lastProcessedSeqNum + 1;
-        }
-        else {
-          nextSeqNum = initialSequenceNumber + 1;
-        }
+        var nextSeqNum = lastProcessedSeqNum + 1;
         winston.debug("Next sequence number: %d", nextSeqNum);
         dynamoEvents.query(dd, tablename, nextSeqNum, null).then(function(result) {
           if(result.Items.length > 0) {

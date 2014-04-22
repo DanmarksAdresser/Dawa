@@ -1,6 +1,5 @@
 "use strict";
 
-var cli = require('cli');
 var _ = require('underscore');
 
 var cliParameterParsing = require('../common/cliParameterParsing');
@@ -10,7 +9,6 @@ var optionSpec = {
   awsAccessKeyId: [false, 'Access key der anvendes for at tilgå Dynamo', 'string'],
   awsSecretAccessKey: [false, 'Secret der anvendes for at tilgå Dynamo', 'string'],
   dynamoTable: [false, 'Dynamo table hvori hændelserne er', 'string'],
-  initialSequenceNumber: [false, 'Hændelsessekvensnummeret som er tilknyttet totaludtrækket i databasen', 'number'],
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
@@ -28,7 +26,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     secretAccessKey : options.awsSecretAccessKey
   });
 
-  importBbrEvents(dd, options.dynamoTable, options.initialSequenceNumber, function(err) {
+  importBbrEvents(dd, options.dynamoTable, function(err) {
     if(err) {
       console.log(err);
       process.exit(1);
