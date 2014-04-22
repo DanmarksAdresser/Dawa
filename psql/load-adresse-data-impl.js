@@ -161,7 +161,8 @@ var bbrFileNames = {
   vejstykke: 'Vejnavn.CSV',
   adgangsadresse: 'Adgangsadresse.CSV',
   enhedsadresse: 'Enhedsadresse.CSV',
-  postnummer: 'Postnummer.CSV'
+  postnummer: 'Postnummer.CSV',
+  meta: 'SenesteHaendelse.CSV'
 };
 
 var legacyFileNames = {
@@ -196,8 +197,25 @@ var legacyFileStreams = function(dataDir) {
   }, {});
 };
 
-function loadAdditionalBbrFiles(client, callback) {
-  callback();
+function loadAdditionalBbrFiles(client, fileStreams, callback) {
+  csv().from.stream(fileStreams.meta(), {
+    delimiter: ';',
+    quote: '"',
+    escape: '\\',
+    columns: true,
+    encoding: 'utf8'
+  }).to.array(function(data) {
+      var senesteHaendelse = null;
+      if(data.length > 1) {
+        throw new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length);
+      }
+      if(data.length === 1) {
+        var meta = data[0];
+        senesteHaendelse = meta.sidstSendtHaendelsesNummer;
+      }
+      console.log('Seneste sekvensnummer: ' + senesteHaendelse);
+      client.query('UPDATE udtraek_sekvensnummer SET sequence_number = $1', [senesteHaendelse], callback);
+    });
 }
 
 exports.loadCsvOnly = function(client, options, callback) {
@@ -255,7 +273,7 @@ exports.loadCsvOnly = function(client, options, callback) {
     },
     function(callback) {
       if(format === 'bbr') {
-        loadAdditionalBbrFiles(client, callback);
+        loadAdditionalBbrFiles(client, fileStreams, callback);
       }
       else {
         callback();
