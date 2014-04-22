@@ -24,7 +24,7 @@ function exitOnErr(err){
 
 cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
-  cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
+  cliParameterParsing.checkRequiredOptions(options, _.without(_.keys(optionSpec), 'disableTriggers'));
 
   var scripts = _.map(args, function(arg) {
     return fs.readFileSync(args[0], {encoding: 'utf8'});
