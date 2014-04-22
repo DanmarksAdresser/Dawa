@@ -9,6 +9,15 @@ create table transaction_history(
   bbr_event integer
 );
 
+DROP TABLE IF EXISTS udtraek_sekvensnummer CASCADE;
+
+create table udtraek_sekvensnummer(
+  sequence_number integer not null
+);
+
+CREATE UNIQUE INDEX udtraek_sekvensnummer_one_row
+ON udtraek_sekvensnummer((true));
+
 -- Init function
 DROP FUNCTION IF EXISTS transaction_history_init() CASCADE;
 CREATE FUNCTION transaction_history_init() RETURNS void
