@@ -43,7 +43,7 @@ app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 
 app.get('/', function (req, res) {
-  res.render('home.jade', {url: req.headers.host});
+  res.render('home.jade', {url: paths.baseUrl(req)});
 });
 
 setupJadePage('/generelt'             , 'generelt.jade');
