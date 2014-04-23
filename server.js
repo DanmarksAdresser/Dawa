@@ -19,7 +19,6 @@ function asInteger(stringOrNumber) {
 
 function socketTimeoutMiddleware(timeoutMillis) {
   return function(req, res, next) {
-    console.log("setting socket timeout to " + timeoutMillis);
     res.socket.setTimeout(timeoutMillis);
     next();
   };
@@ -78,7 +77,6 @@ function setupMaster() {
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
-    console.log('socket timeout' + options.socketTimeout);
     var logOptions;
     if(options.logConfiguration) {
       var logOptionsStr = fs.readFileSync(options.logConfiguration);
