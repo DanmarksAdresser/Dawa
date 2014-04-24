@@ -12,9 +12,12 @@ var dagiTemaer = require('../../dagitemaer/dagiTemaer');
 
 var sqlUtil = require('./sqlUtil');
 
+function removeSpecialSearchChars(q) {
+  return q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
+}
 function toPgSearchQuery(q) {
   // remove all special chars
-  q = q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
+  q = removeSpecialSearchChars(q);
 
   // replace '*' not at the end of a token with ' '
   q = q.replace(/[\*]([^ ])/g, ' $1');
@@ -47,6 +50,9 @@ function endsWith (str, suffix) {
 }
 
 function toPgSuggestQuery(q) {
+  // remove all special chars
+  q = removeSpecialSearchChars(q);
+
   // normalize whitespace
   q = q.replace(/\s+/g, ' ');
 
@@ -55,7 +61,7 @@ function toPgSuggestQuery(q) {
 
   // Since we do suggest, if there is no trailing whitespace,
   // the last search clause should be a prefix search
-  if (!hasTrailingWhitespace && !endsWith(tsq, '*')) {
+  if (!hasTrailingWhitespace && !endsWith(tsq, '*') && tsq.length > 0) {
     tsq += ":*";
   }
   return tsq;
