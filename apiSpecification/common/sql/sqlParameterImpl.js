@@ -260,10 +260,12 @@ var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
 exports.dagiFilter = function() {
   return function(sqlParts, params) {
     filterableDagiSkemaer.forEach(function(skemaNavn) {
-      var paramArray = params[dagiTemaMap[skemaNavn].prefix + 'kode'];
-      if(notNull(paramArray)) {
+      var param = params[dagiTemaMap[skemaNavn].prefix + 'kode'];
+      if(notNull(param)) {
+        var paramArray = param.values;
         var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
         var kodeAliases = _.map(paramArray, function(param) {
+          console.log('param: ' + param);
           return dbapi.addSqlParameter(sqlParts, param);
         });
         dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode IN (' + kodeAliases.join(', ') + ') AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');
