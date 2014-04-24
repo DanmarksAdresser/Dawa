@@ -30,14 +30,15 @@ exports.queryDifferences = function(client, expectedTable, actualTable, datamode
   query.whereClauses.push(_.map(datamodel.columns, function(column) {
     return 'e.' + column + ' IS DISTINCT FROM a.' + column;
   }).join(' OR '));
-  query.limit = 100;
   console.log(JSON.stringify(query));
   dbapi.query(client, query, callback);
 };
 
 exports.createTempTable = function(client, tableName, sourceTableName, callback) {
-  logger.info('dataUtil', 'creating temp table' + tableName);
-  client.query('CREATE TEMP TABLE ' + tableName  +'( LIKE ' + sourceTableName + ') ON COMMIT DROP', [], callback);
+  logger.info('dataUtil', 'creating temp table ' + tableName);
+  var sql = 'CREATE TEMP TABLE ' + tableName + '( LIKE ' + sourceTableName + ') ON COMMIT DROP';
+  logger.info('dataUtil', sql);
+  client.query(sql, [], callback);
 };
 
 exports.csvToTable = function(client, csvStream, tableName, datamodel, callback) {
