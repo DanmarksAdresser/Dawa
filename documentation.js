@@ -1,12 +1,15 @@
 "use strict";
 
 var express = require('express');
+var fs = require('fs');
 var parameterDoc   = require('./parameterDoc');
 var paths = require('./apiSpecification/paths');
 var docUtil        = require('./docUtil');
 var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
+
+var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
 function setupJadePage(path, page){
   app.get(path, function (req, res) {
@@ -35,7 +38,9 @@ function jadeDocumentationParams(req) {
     jsonSchemas: jsonSchemas,
     autocompleteSchemas: autocompleteSchemas,
     parameterDoc: parameterDoc,
-    docUtil: docUtil};
+    docUtil: docUtil,
+    packageJson: packageJson
+  };
 }
 
 var app = express();
