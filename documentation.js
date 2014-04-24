@@ -60,10 +60,4 @@ setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
 setupJadePage('/listerdok'            , 'listerdok.jade');
 setupJadePage('/om'                   , 'om.jade');
 
-
-//(\/[^\.])
-app.get(/html$/i, function (req, res) {
-  res.render('kort.jade', {url: decodeURIComponent(req.originalUrl.replace('.html','.json'))});
-});
-
 module.exports = app;
