@@ -45,7 +45,9 @@ cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(arg
           'ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword ' +
           'WITH adresser_unaccent_' + options.version + ', adresser_xsyn_' + options.version + ', simple;', [], callback);
       },
+      sqlCommon.disableTriggers(client),
       sqlCommon.psqlScript(client, __dirname, 'reindex-search.sql'),
+      sqlCommon.enableTriggers(client),
       function(callback) {
         commit(null, function(err) {
           callback(err);
