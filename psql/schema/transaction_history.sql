@@ -5,8 +5,7 @@ create table transaction_history(
   sequence_number integer not null,
   time timestamp not null DEFAULT CURRENT_TIMESTAMP,
   entity varchar(255) not null,
-  operation operation_type not null,
-  bbr_event integer
+  operation operation_type not null
 );
 
 DROP TABLE IF EXISTS udtraek_sekvensnummer CASCADE;

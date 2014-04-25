@@ -215,13 +215,15 @@ function applyBbrEvent(sqlClient, event, callback) {
 
 var bbrEventsDatamodel = {
   table: 'bbr_events',
-  columns: ['sekvensnummer', 'type', 'bbrTidspunkt', 'created', 'data'],
+  columns: ['sekvensnummer', 'sequence_number_from', 'sequence_number_to', 'type', 'bbrTidspunkt', 'created', 'data'],
   key: ['sekvensnummer']
 };
 
-function storeEvent(client, event, callback) {
+function storeEvent(client, event, localSeqnumFrom, localSeqnumTo, callback) {
   var dbRow = {
     sekvensnummer: event.sekvensnummer,
+    sequence_number_from: localSeqnumFrom,
+    sequence_number_to: localSeqnumTo,
     type: event.type,
     bbrTidspunkt: event.tidspunkt,
     created: new Date().toISOString(),
@@ -230,16 +232,44 @@ function storeEvent(client, event, callback) {
   crud.create(client, bbrEventsDatamodel, dbRow, callback);
 }
 
+function getLocalSeqNum(client, callback) {
+  client.query("SELECT MAX(sequence_number) as max FROM transaction_history", [], function (err, result) {
+    if (err) {
+      return callback(err);
+    }
+    callback(null, result.rows[0].max ? result.rows[0].max : 0);
+  });
+}
 function processEvent(client, event, callback) {
   bbrEventsLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
   var validator = new ZSchema();
   validator.validate(event, eventSchemas[event.type]).then(function(report) {
+    var localSeqnumFrom, localSeqnumTo;
     async.series([
+      // get the latest local sequence number
       function(callback) {
-        storeEvent(client, event, callback);
+        getLocalSeqNum(client, function(err, seqnum) {
+          if(err) {
+            return callback(err);
+          }
+          localSeqnumFrom = seqnum;
+          callback();
+        });
       },
       function(callback) {
         applyBbrEvent(client, event, callback);
+      },
+      function(callback) {
+        getLocalSeqNum(client, function(err, seqnum) {
+          if(err) {
+            return callback(err);
+          }
+          localSeqnumTo = seqnum;
+          callback();
+        });
+      },
+      function(callback) {
+        storeEvent(client, event, localSeqnumFrom+1, localSeqnumTo, callback);
       }
     ], callback);
   }).catch(function(err) {

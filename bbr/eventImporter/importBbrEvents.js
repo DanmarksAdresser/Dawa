@@ -40,10 +40,10 @@ module.exports = function(dd, tablename, callback) {
         });
       },
       // fetch the events from dynamodb
-      function(client, lastProcessedSeqNum, callback) {
-        var nextSeqNum = lastProcessedSeqNum + 1;
-        winston.debug("Next sequence number: %d", nextSeqNum);
-        dynamoEvents.query(dd, tablename, nextSeqNum, null).then(function(result) {
+      function(client, lastProcessedBbrSeqNum, callback) {
+        var nextBbrSeqNum = lastProcessedBbrSeqNum + 1;
+        winston.debug("Next BBR sequence number: %d", nextBbrSeqNum);
+        dynamoEvents.query(dd, tablename, nextBbrSeqNum, null).then(function(result) {
           if(result.Items.length > 0) {
             foundEvent = true;
             return Q.nfcall(async.eachSeries, result.Items, function(item, callback) {
