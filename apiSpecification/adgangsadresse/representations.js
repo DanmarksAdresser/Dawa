@@ -93,7 +93,7 @@ exports.json = {
       'esrejendomsnr': {
         description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ' +
           'ESR, som det matrikelnummer som adressen ligger på, er en del af. ' +
-          'Repræsenteret ved seks cifre. Eksempel ”001388”.',
+          'Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
         type: nullableType('string'),
         pattern: '^[0-9]{1,6}'
       },

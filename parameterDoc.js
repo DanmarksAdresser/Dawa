@@ -273,7 +273,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'esrejendomsnr',
-    doc: 'ESR Ejendomsnummer. Indtil 6 cifre.'
+    doc: 'ESR Ejendomsnummer. Indtil 7 cifre.'
   },
   SRIDParameter,
   {
