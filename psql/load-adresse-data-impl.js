@@ -197,25 +197,28 @@ var legacyFileStreams = function(dataDir) {
   }, {});
 };
 
-function loadAdditionalBbrFiles(client, fileStreams, callback) {
-  csv().from.stream(fileStreams.meta(), {
+function loadBbrMeta(bbrFileStreams, callback) {
+  csv().from.stream(bbrFileStreams.meta(), {
     delimiter: ';',
     quote: '"',
     escape: '\\',
     columns: true,
     encoding: 'utf8'
   }).to.array(function(data) {
-      var senesteHaendelse = null;
       if(data.length > 1) {
-        throw new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length);
+        callback(new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length));
       }
       if(data.length === 1) {
-        var meta = data[0];
-        senesteHaendelse = meta.sidstSendtHaendelsesNummer;
+        callback(null, data);
       }
-      console.log('Seneste sekvensnummer: ' + senesteHaendelse);
-      client.query('UPDATE udtraek_sekvensnummer SET sequence_number = $1', [senesteHaendelse], callback);
     });
+}
+
+function loadLastSequenceNumber(client, fileStreams, callback) {
+  loadBbrMeta(fileStreams, function(err, meta) {
+    console.log('Seneste sekvensnummer: ' + meta.sidstSendtHaendelsesNummer);
+    client.query('UPDATE udtraek_sekvensnummer SET sequence_number = $1', [meta.sidstSendtHaendelsesNummer], callback);
+  });
 }
 
 exports.loadCsvOnly = function(client, options, callback) {
@@ -270,27 +273,35 @@ exports.loadCsvOnly = function(client, options, callback) {
         transformer: transformers.enhedsadresse
 
       }, callback);
-    },
-    function(callback) {
-      if(format === 'bbr') {
-        loadAdditionalBbrFiles(client, fileStreams, callback);
-      }
-      else {
-        callback();
-      }
     }
   ], callback);
 };
 
 exports.load = function(client, options, callback) {
+  var format = options.format;
+  var dataDir = options.dataDir;
+  var filePrefix = options.filePrefix;
+  var encoding = options.encoding;
+  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix, encoding);
 
   async.series([
     sqlCommon.disableTriggers(client),
     function(cb) {
       exports.loadCsvOnly(client, options, cb);
     },
+    function(callback) {
+      if(options.format === 'bbr') {
+        loadLastSequenceNumber(client, fileStreams, callback);
+      }
+      else {
+        callback();
+      }
+    },
     sqlCommon.psqlScript(client, __dirname, 'initialize-history.sql'),
     sqlCommon.initializeTables(client),
     sqlCommon.enableTriggers(client)
   ], callback);
 };
+
+exports.bbrFileStreams = bbrFileStreams;
+exports.loadBbrMeta = loadBbrMeta;

@@ -31,24 +31,25 @@ block content
           section
             div.page-header
               h3.anchor-header#baseadresse Baseadresse
-              p Som DAWA's baseadresse kan enten anvendes #{url} eller #{url}.
 
-              div.page-header
-                h3.anchor-header#dataformater Dataformater
-              p Alle typer data kan returneres i følgende formater:
-                ul
-                  li json. Default.
-                     PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej">#{url}/adresser?postnr=8830&vejnavn=Bakkevej</a>
-                  li jsonp.
-                     PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun</a>
-                  li csv.
-                    PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=csv">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=csv</a>
-                  li html (ikke muligt endnu!)
+            p Som DAWA's baseadresse kan enten anvendes http://dawa.aws.dk eller https://dawa.aws.dk.
 
-                ul
-              p Derudover understøtter <em>adresser</em>, <em>adgangsadresser</em>, <em>postnumre</em>, <em>kommuner</em>, <em>regioner</em>, <em>sogne</em>, <em>politikredse</em>, <em>retskredse</em> og <em>opstillingskredse</em> også GeoJSON:
-                PRE <a href="/kommuner/0101?format=geojson">#{url}/kommuner/0101?format=geojson</a>
-                PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
+            div.page-header
+              h3.anchor-header#dataformater Dataformater
+            p Alle typer data kan returneres i følgende formater:
+              ul
+                li json. Default.
+                   PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej">#{url}/adresser?postnr=8830&vejnavn=Bakkevej</a>
+                li jsonp.
+                   PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun</a>
+                li csv.
+                  PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=csv">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=csv</a>
+                li html (ikke muligt endnu!)
+
+              ul
+            p Derudover understøtter <em>adresser</em>, <em>adgangsadresser</em>, <em>postnumre</em>, <em>kommuner</em>, <em>regioner</em>, <em>sogne</em>, <em>politikredse</em>, <em>retskredse</em> og <em>opstillingskredse</em> også GeoJSON:
+              PRE <a href="/kommuner/0101?format=geojson">#{url}/kommuner/0101?format=geojson</a>
+              PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
 
             div.page-header
               h3.anchor-header#tidsformat Tidsformat

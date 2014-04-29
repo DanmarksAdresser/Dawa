@@ -59,7 +59,7 @@ CREATE TABLE adgangsadresser_history(
   ejerlavkode INTEGER,
   ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
-  esrejendomsnr CHAR(6) NULL,
+  esrejendomsnr integer NULL,
   oprettet timestamp,
   ikraftfra timestamp,
   aendret timestamp,
