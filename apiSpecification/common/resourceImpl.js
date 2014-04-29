@@ -110,6 +110,11 @@ exports.internal = {
   parseAndProcessParameters: parseAndProcessParameters
 };
 
+function logPostgresQueryError(req, sqlParts, err) {
+  var query = dbapi.createQuery(sqlParts);
+  logger.error('sql', 'query failed', {url: req.url, sql: query.sql, params: query.params, error: err});
+}
+
 exports.createExpressHandler = function(resourceSpec) {
   var spec = resourceSpec;
   return function(req, res) {
@@ -144,6 +149,7 @@ exports.createExpressHandler = function(resourceSpec) {
         dbapi.query(client, sqlParts, function(err, rows) {
           done(err);
           if (err) {
+            logPostgresQueryError(req, sqlParts, err);
             return sendPostgresQueryError(res, err);
           } else if (rows.length > 1) {
             sendInternalServerError(res, "The request resulted in more than one response", rows);
@@ -166,6 +172,7 @@ exports.createExpressHandler = function(resourceSpec) {
         dbapi.stream(client, sqlParts, function(err, stream) {
           if(err) {
             done(err);
+            logPostgresQueryError(req, sqlParts, err);
             return sendPostgresQueryError(res, err);
           }
 
