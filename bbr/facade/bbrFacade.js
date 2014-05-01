@@ -55,7 +55,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
 // Can be used for monitoring
   app.get('/sidsteSekvensnummer', function (req, res) {
-    dynamoEvents.getLatestQ(dd, TABLENAME,function(latest) {
+    dynamoEvents.getLatestQ(dd, TABLENAME).then(function(latest) {
       if (latest.Items.length > 0)
       {
         res.send(""+latest.Items[0].seqnr.N);

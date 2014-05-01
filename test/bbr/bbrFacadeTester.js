@@ -21,6 +21,16 @@ var optionSpec = {
   bbrFacadeUrl: [false, 'URL til bbr facaden der testes', 'string', 'http://localhost:3333']
 };
 
+function getLatestSequenceNumber(hostPort) {
+  return Q.nfcall(function (callback) {
+    return request.get(hostPort + '/sidsteSekvensnummer', function (err, response, body) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, parseInt(body));
+    });
+  });
+}
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
 
   var hostPort = options.bbrFacadeUrl;
@@ -83,11 +93,23 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     );
   }
 
+  function verifyLatestSequenceNumber(expected) {
+    return function() {
+      return getLatestSequenceNumber(hostPort).then(function(sequenceNumber) {
+        winston.info('Verifying /sidsteSekvensnummer === 13');
+        if(sequenceNumber !== expected) {
+          throw new Error('Unexpected sequence number ' + expected);
+        }
+        return true;
+      });
+    }
+  }
+
   /*******************************************************************************
    ***** Main function ************************************************************
    *******************************************************************************/
 
-  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(test).done();
+  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(test).then(verifyLatestSequenceNumber(13)).done();
 });
 
 
