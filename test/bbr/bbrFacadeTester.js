@@ -102,7 +102,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         }
         return true;
       });
-    }
+    };
   }
 
   /*******************************************************************************
