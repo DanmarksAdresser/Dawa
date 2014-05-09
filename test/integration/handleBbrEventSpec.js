@@ -1,5 +1,6 @@
 "use strict";
 
+var async = require('async');
 var bbrEvents = require('../../bbr/eventImporter/bbrEvents');
 var dbapi = require('../../dbapi');
 var datamodels = require('../../crud/datamodel');
@@ -10,7 +11,7 @@ var handleBbrEvent = bbrEvents.internal.applyBbrEvent;
 
 describe('Håndtering af BBR events', function() {
   describe('supplerendebynavn events', function() {
-    var event = {
+    var events = [{
       "type": "supplerendebynavn",
       "sekvensnummer": 1005,
       "lokaltsekvensnummer": 205,
@@ -18,21 +19,41 @@ describe('Håndtering af BBR events', function() {
       "data": {
         "kommunekode": 461,
         "vejkode": 4194,
+        "side": "lige",
         "intervaller": [{
           "husnrFra": "190",
           "husnrTil": "194",
-          "side": "lige",
           "navn": "Østby"
+        }]
+      }
+    }, {
+      "type": "supplerendebynavn",
+      "sekvensnummer": 1006,
+      "lokaltsekvensnummer": 206,
+      "tidspunkt": "2000-02-05T12:00:00+00:00",
+      "data": {
+        "kommunekode": 461,
+        "vejkode": 4194,
+        "side": "ulige",
+        "intervaller": [{
+          "husnrFra": "105",
+          husnrTil: "107",
+          navn: 'Vestby'
         }, {
           "husnrFra": "101",
-          husnrTil: "107",
-          side: 'ulige',
+          husnrTil: "103",
           navn: 'Vestby'
         }]
       }
-    };
+    }];
     var transactionDone;
     var resultingAdresser;
+
+    function handleBbrEvents(client, events, cb) {
+      async.eachSeries(events, function(event, cb) {
+        handleBbrEvent(client, event, cb);
+      }, cb);
+    }
 
     beforeEach(function(done) {
       dbapi.withWriteTransaction(function(err, client, tDone) {
@@ -40,7 +61,7 @@ describe('Håndtering af BBR events', function() {
           throw err;
         }
         transactionDone = tDone;
-        handleBbrEvent(client, event, function(err) {
+        handleBbrEvents(client, events, function(err) {
           if(err) {
             throw err;
           }
