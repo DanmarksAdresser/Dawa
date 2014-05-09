@@ -168,6 +168,14 @@ function createPostnrUpdate(adgangsadresse, interval) {
   };
 }
 
+// returns true if the adress is on the side specified (either 'lige' or 'ulige')
+function isOnSide(eventSide, adgangsadresse) {
+  var numberShouldBeOdd = eventSide === 'ulige';
+  var number = parseHusnr(adgangsadresse.husnr).nr;
+  var numberIsOdd = ((number % 2) === 1);
+  var isOnCorrectSide = numberShouldBeOdd === numberIsOdd;
+  return isOnCorrectSide;
+}
 function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
   var data = event.data;
   var filter = {
@@ -179,6 +187,9 @@ function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
       return callback(err);
     }
     var updates = _.reduce(adgangsadresser, function(memo, adgangsadresse) {
+      if(!isOnSide(data.side, adgangsadresse)) {
+        return memo;
+      }
       var interval = _.find(data.intervaller, function(interval) {
         return adresseWithinInterval(adgangsadresse, interval);
       });
