@@ -57,7 +57,6 @@ function vejstykkeIntervaller(){
       properties: {
         husnrFra : string(),
         husnrTil : string(),
-        side     : enumeration(['lige','ulige']),
         nummer   : integer()}}));
 }
 
@@ -149,6 +148,7 @@ var postnummerHaendelseSchema = requireAllProperties({
   properties : headerNoAendringstype('postnummer', {
     kommunekode : notNull(integer()),
     vejkode     : notNull(integer()),
+    side     : enumeration(['lige','ulige']),
     intervaller : notNull(vejstykkeIntervaller())
   })
 });
@@ -160,6 +160,7 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
   properties : headerNoAendringstype('supplerendebynavn', {
     kommunekode : notNull(integer()),
     vejkode     : notNull(integer()),
+    side     : enumeration(['lige','ulige']),
     intervaller : notNull(vejstykkeIntervaller())
   })
 });

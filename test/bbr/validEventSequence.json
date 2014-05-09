@@ -82,10 +82,10 @@
     "data": {
       "kommunekode": 999,
       "vejkode": 9999,
+      "side": "lige",
       "intervaller": [{
         "husnrFra": "10",
         "husnrTil": "20",
-        "side": "lige",
         "nummer": 9998
       }]
     }

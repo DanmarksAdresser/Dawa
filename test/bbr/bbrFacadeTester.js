@@ -234,13 +234,12 @@ TD.postnummer = {
   "data": {
     "kommunekode": 101,
     "vejkode": 1010,
+    "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
                      "nummer": 5000},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
                      "nummer": 4000}
                    ]
   }
@@ -286,13 +285,12 @@ TD.supplerendebynavn = {
   "data": {
     "kommunekode": 101,
     "vejkode": 1010,
+    "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
                      "nummer": 5000},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
                      "nummer": 4000}
                    ]
   }
@@ -306,13 +304,12 @@ TD.supplerendebynavnFail = {
   "data": {
     "kommunekode": null,
     "vejkode": 1010,
+    "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
                      "nummer": 5000},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
                      "nummer": 4000}
                    ]
   }
@@ -325,13 +322,12 @@ TD.supplerendebynavnFail2 = {
   "data": {
     "kommunekode": null,
     "vejkode": 1010,
+    "side": "lige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
                      "nummer": 5000},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
                      "nummer": 4000}
                    ]
   }
