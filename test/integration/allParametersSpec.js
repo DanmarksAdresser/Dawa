@@ -74,7 +74,7 @@ var sampleParameters = {
         return postnummer.navn === navn;
       }
     },
-    kommune: {
+    kommunekode: {
       values: ['461', '0461'],
       verifier: function(postnummer, kommunekode) {
         return _.some(postnummer.kommuner, function(kommune) {

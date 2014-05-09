@@ -14,7 +14,7 @@ var fields = [
     name: 'navn'
   },
   {
-    name: 'kommune'
+    name: 'kommunekode'
   },
   {
     name: 'stormodtageradresser'

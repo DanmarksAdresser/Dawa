@@ -14,7 +14,7 @@ var columns = {
   navn: {
     select: 'p.navn'
   },
-  kommune: {
+  kommunekode: {
     select: null,
     where: 'n.kommunekode'
   },
