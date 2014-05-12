@@ -52,6 +52,7 @@ cli.main(function(args, options) {
       [
         psqlScript(client, scriptDir, 'misc.sql'),
         loadSchemas(client, scriptDir),
+        psqlScript(client, scriptDir, 'geoserver_views.sql'),
         sqlCommon.disableTriggers(client),
         initializeTables(client),
         sqlCommon.enableTriggers(client),
