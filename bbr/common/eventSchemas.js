@@ -50,7 +50,7 @@ function requireAllProperties(object){
   return object;
 }
 
-function vejstykkeIntervaller(){
+function postnummerIntervaller(){
   return array(requireAllProperties(
     {type: 'object',
       additionalProperties: false,
@@ -58,6 +58,16 @@ function vejstykkeIntervaller(){
         husnrFra : string(),
         husnrTil : string(),
         nummer   : integer()}}));
+}
+
+function supplerendebynavnIntervaller(){
+  return array(requireAllProperties(
+    {type: 'object',
+      additionalProperties: false,
+      properties: {
+        husnrFra : string(),
+        husnrTil : string(),
+        navn   : string()}}));
 }
 
 /********************************************************************************
@@ -150,7 +160,7 @@ var postnummerHaendelseSchema = requireAllProperties({
     kommunekode : notNull(integer()),
     vejkode     : notNull(integer()),
     side     : enumeration(['lige','ulige']),
-    intervaller : notNull(vejstykkeIntervaller())
+    intervaller : notNull(postnummerIntervaller())
   })
 });
 
@@ -162,7 +172,7 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
     kommunekode : notNull(integer()),
     vejkode     : notNull(integer()),
     side     : enumeration(['lige','ulige']),
-    intervaller : notNull(vejstykkeIntervaller())
+    intervaller : notNull(supplerendebynavnIntervaller())
   })
 });
 

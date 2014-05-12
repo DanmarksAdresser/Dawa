@@ -240,6 +240,22 @@ var enhedsadresseTests = [{
   }
 }];
 
+var supplerendebynavneTests = [{
+  description: 'Upon insertion, the TSV column should be set',
+  verify: {
+    model: 'supplerendebynavn',
+    query: {
+      supplerendebynavn: 'Testby',
+      kommunekode: 999,
+      postnr: 9998
+
+    },
+    expect: function(updated) {
+      expect(updated.tsv).toBe("'testby':1");
+    }
+  }
+}];
+
 function verify(testSpec, client, callback) {
   var updated;
   async.series([
@@ -312,5 +328,8 @@ describe('PostgreSQL tsv columns', function() {
   });
   describe('update of tsv column for enhedsadresser', function() {
     verifyAll(function() { return client; } , enhedsadresseTests);
+  });
+  describe('update of tsv column for supplerendebynavne', function() {
+    verifyAll(function() { return client; } , supplerendebynavneTests);
   });
 });

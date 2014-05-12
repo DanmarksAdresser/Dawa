@@ -20,5 +20,10 @@ module.exports = {
     table: 'vejstykker',
     columns: ['kommunekode', 'kode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn'],
     key: ['kommunekode', 'kode']
+  },
+  supplerendebynavn: {
+    table: 'supplerendebynavne',
+    columns: ['supplerendebynavn', 'kommunekode', 'postnr'],
+    key: ['supplerendebynavn', 'kommunekode', 'postnr']
   }
 };
