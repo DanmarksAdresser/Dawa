@@ -51,7 +51,12 @@ function setupWorker() {
 
   app.use(socketTimeoutMiddleware(asInteger(process.env.socketTimeout)));
 
-  app.use(express.compress());
+  // Hackish: We reduce memlevel to prevent zLib from caching too much internally
+  // Otherwise, it will take too long for our application to start responding to JSON requests,
+  // potentially resulting in a TCP disconnection.
+  app.use(express.compress( {
+    memLevel: 3
+  }));
   app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
 
 
