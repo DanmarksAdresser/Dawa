@@ -23,6 +23,7 @@ var allRenames = {
     ejerlavnavn: 'landsejerlav_navn',
     adgangspunktid: 'adgangspunkt_id',
     kilde: 'adgangspunkt_kilde',
+    ikraftfra: 'ikrafttraedelsesdato',
     noejagtighed: 'adgangspunkt_noejagtighedsklasse',
     tekniskstandard: 'adgangspunkt_tekniskstandard',
     tekstretning: 'adgangspunkt_retning',

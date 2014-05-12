@@ -21,7 +21,7 @@ CREATE TABLE  adgangsadresser (
   wgs84lat double precision NULL,
   wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
-  kilde CHAR(1) NULL,
+  kilde integer NULL,
   placering char(1),
   tekniskstandard CHAR(2) NULL,
   tekstretning DECIMAL(5,2) NULL,

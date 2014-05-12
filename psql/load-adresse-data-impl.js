@@ -217,7 +217,8 @@ function loadBbrMeta(bbrFileStreams, callback) {
 function loadLastSequenceNumber(client, fileStreams, callback) {
   loadBbrMeta(fileStreams, function(err, meta) {
     console.log('Seneste sekvensnummer: ' + meta.sidstSendtHaendelsesNummer);
-    client.query('UPDATE udtraek_sekvensnummer SET sequence_number = $1', [meta.sidstSendtHaendelsesNummer], callback);
+
+    client.query('UPDATE bbr_sekvensnummer SET sequence_number = $1', [meta.sidstSendtHaendelsesNummer || 0], callback);
   });
 }
 

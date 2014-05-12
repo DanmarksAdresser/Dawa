@@ -8,16 +8,16 @@ create table transaction_history(
   operation operation_type not null
 );
 
-DROP TABLE IF EXISTS udtraek_sekvensnummer CASCADE;
+DROP TABLE IF EXISTS bbr_sekvensnummer CASCADE;
 
-create table udtraek_sekvensnummer(
-  sequence_number integer
+create table bbr_sekvensnummer(
+  sequence_number integer NOT NULL
 );
 
-INSERT INTO udtraek_sekvensnummer VALUES (null);
+INSERT INTO bbr_sekvensnummer VALUES (0);
 
-CREATE UNIQUE INDEX udtraek_sekvensnummer_one_row
-ON udtraek_sekvensnummer((true));
+CREATE UNIQUE INDEX
+ON bbr_sekvensnummer((true));
 
 -- Init function
 DROP FUNCTION IF EXISTS transaction_history_init() CASCADE;
