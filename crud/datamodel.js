@@ -8,7 +8,7 @@ module.exports = {
   },
   enhedsadresse: {
     table: 'enhedsadresser',
-    columns: ['id', 'oprettet', 'aendret', 'etage', 'doer', 'adgangsadresseid'],
+    columns: ['id', 'oprettet', 'aendret', 'ikraftfra', 'etage', 'doer', 'adgangsadresseid'],
     key: ['id']
   },
   postnummer: {

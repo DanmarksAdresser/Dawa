@@ -39,6 +39,9 @@ var allRenames = {
   },
   postnummer: {
     nr: 'postnummer'
+  },
+  enhedsadresse: {
+    ikraftfra: 'ikrafttraedelsesdato'
   }
 };
 

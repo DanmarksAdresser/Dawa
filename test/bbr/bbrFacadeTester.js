@@ -207,7 +207,8 @@ TD.enhedsadresseFail = {
     "doer": null,
     "objekttype": 1,
     "oprettet":"1999-02-05T12:00:00+00:00",
-    "aendret":"2000-02-05T12:00:00+00:00"
+    "aendret":"2000-02-05T12:00:00+00:00",
+    "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00"
   }
 };
 TD.enhedsadresse = {
@@ -223,6 +224,7 @@ TD.enhedsadresse = {
     "doer": null,
     "objekttype": 1,
     "oprettet":"1999-02-05T12:00:00+00:00",
+    "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
     "aendret":"2000-02-05T12:00:00+00:00"
   }
 };
@@ -289,10 +291,10 @@ TD.supplerendebynavn = {
     "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "nummer": 5000},
+                     "navn": "Østby"},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "nummer": 4000}
+                     "navn": "Vestby"}
                    ]
   }
 };
@@ -308,10 +310,10 @@ TD.supplerendebynavnFail = {
     "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "nummer": 5000},
+                     "navn": "Østby"},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "nummer": 4000}
+                     "navn": "Vestby"}
                    ]
   }
 };
@@ -326,10 +328,10 @@ TD.supplerendebynavnFail2 = {
     "side": "lige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "nummer": 5000},
+                     "navn": "Østby"},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "nummer": 4000}
+                     "navn": "Vestby"}
                    ]
   }
 };

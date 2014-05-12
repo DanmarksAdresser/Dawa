@@ -148,7 +148,8 @@ var enhedsadresseHaendelseSchema = requireAllProperties({
     doer             : string(),
     objekttype       : integer(),
     oprettet         : time(),
-    aendret          : time()
+    aendret          : time(),
+    ikrafttraedelsesdato : time()
   })
 });
 
