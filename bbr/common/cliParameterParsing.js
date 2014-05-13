@@ -90,6 +90,7 @@ exports.main = function(optionSpec, requiredParams, mainFunc) {
     }
     logger.initialize(logOptions);
 
+    options.logOptions = logOptions;
     exports.addFileAndEnvironmentOptions(optionSpec, options);
     exports.checkRequiredOptions(options, requiredParams);
     mainFunc(args, options);

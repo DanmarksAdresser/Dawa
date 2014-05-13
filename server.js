@@ -91,7 +91,7 @@ function setupMaster() {
     var workerOptions = {
       pgConnectionUrl: options.pgConnectionUrl,
       listenPort: options.listenPort,
-      logOptions: JSON.stringify(logOptions),
+      logOptions: JSON.stringify(options.logOptions),
       socketTimeout: options.socketTimeout,
       pgPoolSize: options.pgPoolSize,
       pgPoolIdleTimeout: options.pgPoolIdleTimeout

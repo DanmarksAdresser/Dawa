@@ -4,7 +4,6 @@ var async = require('async');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 var dbapi = require('../../dbapi');
-var _ = require('underscore');
 
 var setupFixture = require('../util/testUtil').setupFixture;
 
