@@ -6,6 +6,8 @@ var datamodels = require('../../crud/datamodel');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
 
+var setupFixture = require('../util/testUtil').setupFixture;
+
 var testFixture = {
   vejstykke: [{
     kommunekode: 999,
@@ -36,21 +38,6 @@ var testFixture = {
   }]
 };
 
-function setupFixture(client, fixture, callback){
-  async.eachSeries(_.keys(fixture),
-    function(datamodelName, callback) {
-      var objects = fixture[datamodelName];
-      var datamodel = datamodels[datamodelName];
-      async.eachSeries(objects, function(object, callback) {
-        crud.create(client, datamodel, object, callback);
-      }, callback);
-    }, function(err) {
-      if(err) {
-        throw err;
-      }
-      callback();
-    });
-}
 
 // all the tests in this file follows the following format:
 // first, an updated is performed (or the test is verifying something
