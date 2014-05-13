@@ -24,7 +24,7 @@ module.exports = function(options) {
       sql += ' FROM ' + parts.from.join(' ');
     }
     if(parts.whereClauses.length > 0) {
-      sql +=  " WHERE " + parts.whereClauses.join(" AND ");
+      sql +=  " WHERE (" + parts.whereClauses.join(") AND( ") + ')';
     }
     if(parts.groupBy) {
       sql += ' GROUP BY ' + parts.groupBy;
