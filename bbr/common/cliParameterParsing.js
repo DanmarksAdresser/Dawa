@@ -29,6 +29,12 @@ exports.parseOptionValue = function(format, value) {
   if(format === 'number') {
     return parseFloat(value);
   }
+  if(format === 'boolean' || format === 'bool') {
+    if(value === undefined || value === null) {
+      return value;
+    }
+    return value.toLowerCase() === 'true';
+  }
 };
 
 exports.addFileOptions = function(parameterSpec, options) {
@@ -36,7 +42,7 @@ exports.addFileOptions = function(parameterSpec, options) {
   if(file) {
     var configuration = JSON.parse(fs.readFileSync(file));
     _.each(parameterSpec, function(spec, key) {
-      if(_.isUndefined(options[key]) || _.isNull(options[key])) {
+      if( configuration[key] !== undefined && (_.isUndefined(options[key]) || _.isNull(options[key]) || options[key] === spec[3])) {
         var format = spec[2];
         options[key] = exports.parseOptionValue(format, configuration[key]);
       }
