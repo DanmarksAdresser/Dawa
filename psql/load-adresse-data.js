@@ -11,8 +11,7 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med CSV-filer (gzippede)', 'string'],
   filePrefix: [false, 'Prefix paa BBR-filer, f.eks. \'T_20140328_\'', 'string', ''],
-  format: [false, 'CSV format (legacy eller bbr)', 'string', 'bbr'],
-  encoding: [false, 'Encoding af BBR filer (UTF-8 eller ISO-8859-1)', 'string', 'UTF-8']
+  format: [false, 'CSV format (legacy eller bbr)', 'string', 'bbr']
 };
 
 function exitOnErr(err){

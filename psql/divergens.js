@@ -196,7 +196,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
     async.series([
       function(cb) {
         if(options.format === 'bbr') {
-          var fileStreams = loadAdresseData.bbrFileStreams(options.dataDir, options.filePrefix, options.encoding);
+          var fileStreams = loadAdresseData.bbrFileStreams(options.dataDir, options.filePrefix);
           loadAdresseData.loadBbrMeta(fileStreams, function(err, meta) {
             if(err) {
               cb(err);

@@ -3,7 +3,6 @@
 var async = require('async');
 var csv = require('csv');
 var copyFrom = require('pg-copy-streams').from;
-var Iconv  = require('iconv').Iconv;
 var fs = require('fs');
 var zlib = require('zlib');
 var _ = require('underscore');
@@ -172,14 +171,10 @@ var legacyFileNames = {
   postnummer: 'PostCode.csv.gz'
 };
 
-var bbrFileStreams = function(dataDir, filePrefix, encoding) {
+var bbrFileStreams = function(dataDir, filePrefix) {
   return _.reduce(bbrFileNames, function(memo, filename, key) {
     memo[key] = function() {
-      var stream = fs.createReadStream(dataDir + '/' + filePrefix + filename);
-      if(encoding && encoding !== 'UTF-8') {
-        return stream.pipe(new Iconv(encoding, 'UTF-8'));
-      }
-      return stream;
+      return fs.createReadStream(dataDir + '/' + filePrefix + filename);
     };
     return memo;
   }, {});
@@ -226,11 +221,10 @@ exports.loadCsvOnly = function(client, options, callback) {
   var format = options.format;
   var dataDir = options.dataDir;
   var filePrefix = options.filePrefix || '';
-  var encoding = options.encoding;
   var tablePrefix = options.tablePrefix || '';
 
   var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
-  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix, encoding);
+  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
   async.series([
     function(callback) {
       console.log("Indlæser postnumre....");
@@ -282,8 +276,7 @@ exports.load = function(client, options, callback) {
   var format = options.format;
   var dataDir = options.dataDir;
   var filePrefix = options.filePrefix;
-  var encoding = options.encoding;
-  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix, encoding);
+  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
 
   async.series([
     sqlCommon.disableTriggers(client),
