@@ -1,6 +1,7 @@
 "use strict";
 
 var async = require('async');
+var fs = require('fs');
 var winston = require('winston');
 var _ = require('underscore');
 
@@ -27,7 +28,8 @@ var optionSpec = {
   format: [false, 'CSV format (legacy eller bbr)', 'string', 'bbr'],
   compareWithCurrent: [false, 'Angiver, at sammenligningen skal ske med den aktuelle tilstand af databasen, uanset evt. sekvensnummer' +
     'angivet i udtrækket', 'boolean'],
-  rectify: [false, 'Korriger forskelle ved at foretage de noedvendige ændringer i data', 'boolean' ]
+  rectify: [false, 'Korriger forskelle ved at foretage de noedvendige ændringer i data', 'boolean' ],
+  reportFile: [false, 'Fil, som JSON rapport skrives i', 'string']
 };
 
 function exitOnErr(err){
@@ -37,6 +39,12 @@ function exitOnErr(err){
   }
 }
 
+function isPostgresValuesEqual(expectedValue, actualValue) {
+  if(_.isDate(expectedValue) && _.isDate(actualValue)) {
+    return expectedValue.getTime() === actualValue.getTime();
+  }
+  return expectedValue === actualValue;
+}
 function interpretDifferences(datamodel, queryResult) {
   return _.reduce(queryResult, function(memo, row) {
     var actual_id = _.reduce(datamodel.key, function(memo, keyColumn) {
@@ -47,15 +55,13 @@ function interpretDifferences(datamodel, queryResult) {
       memo[keyColumn] = row['e_' + keyColumn];
       return memo;
     }, {});
-    console.log(JSON.stringify(actual_id));
-    console.log(JSON.stringify(expected_id));
     if(_.isEqual(actual_id, expected_id)) {
       // an update
       var differences = _.reduce(datamodel.columns, function(memo, column) {
         var expectedValue = row['e_' + column];
         var actualValue = row['a_' + column];
         console.log('expected: ' + expectedValue + ' actual: ' + actualValue);
-        if(expectedValue !== actualValue) {
+        if(!isPostgresValuesEqual(expectedValue, actualValue)) {
           memo[column] = {
             expected: expectedValue,
             actual: actualValue
@@ -89,21 +95,21 @@ function interpretDifferences(datamodel, queryResult) {
 
 function hasLaterUpdates(client, datamodel, sequenceNumber, key, callback) {
   var sqlParts  = {
-    select: ['count(*) > 0'],
-    from: [datamodel.table],
+    select: ['count(*) > 0 as has_later_updates'],
+    from: [datamodel.table + "_history"],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
   };
 
-  crud.applyFilter(key);
+  crud.applyFilter(datamodel, sqlParts, key);
   var sequenceNumberAlias = dbapi.addSqlParameter(sqlParts, sequenceNumber);
   dbapi.addWhereClause(sqlParts, 'valid_from > ' + sequenceNumberAlias + ' OR valid_to > ' + sequenceNumberAlias);
   dbapi.query(client, sqlParts, function(err, result) {
     if(err) {
       return callback(err);
     }
-    callback(null, result[0]);
+    callback(null, result[0].has_later_updates);
   });
 
 }
@@ -116,30 +122,52 @@ function rectifyDifferences(client, datamodel, differences, udtraekDawaSequenceN
         if(err) {
           return callback(err);
         }
+        update.rectified = !hasLaterUpdates;
+
         if(hasLaterUpdates) {
-          console.log('Object had later updates, skipping');
+          console.log('object ' + JSON.stringify(update.id) + ' had later updates');
           return callback(null);
         }
         var object = _.clone(update.id);
         _.extend(object, _.reduce(update.differences, function (memo, value, key) {
-          memo[key] = value.expectedValue;
+          memo[key] = value.expected;
           return memo;
         }, {}));
 
         crud.update(client, datamodel, object, callback);
       });
-    }, callback);
+    }, function(err) {
+      callback(err, differences);
+    });
   }
 
   function rectifyInserts(callback) {
     async.eachSeries(differences.inserts, function(insert, callback) {
-      crud.create(client, datamodel, insert.object, callback);
+      hasLaterUpdates(client, datamodel, udtraekDawaSequenceNumber, insert.id, function(err, hasLaterUpdates) {
+        if(err) {
+          return callback(err);
+        }
+        insert.rectified = !hasLaterUpdates;
+        if(hasLaterUpdates) {
+          return callback(null);
+        }
+        crud.create(client, datamodel, insert.object, callback);
+      });
     }, callback);
   }
 
   function rectifyDeletes(callback) {
     async.eachSeries(differences.deletes, function(del, callback) {
-      crud.delete(client, datamodel, del.id, callback);
+      hasLaterUpdates(client, datamodel, udtraekDawaSequenceNumber, del.id, function(err, hasLaterUpdates) {
+        if(err) {
+          return callback(err);
+        }
+        del.rectified = !hasLaterUpdates;
+        if(hasLaterUpdates) {
+          return callback(null);
+        }
+        crud.delete(client, datamodel, del.id, callback);
+      });
     }, callback);
   }
 
@@ -148,7 +176,9 @@ function rectifyDifferences(client, datamodel, differences, udtraekDawaSequenceN
     rectifyUpdates,
     rectifyInserts,
     rectifyDeletes
-  ], callback);
+  ], function(err) {
+    callback(err, differences);
+  });
 }
 
 function queryDawaSequenceNumberForBbrEvent(client, udtraekBbrSekvensnummer, callback) {
@@ -165,13 +195,13 @@ function queryDawaSequenceNumberForBbrEvent(client, udtraekBbrSekvensnummer, cal
   });
 }
 
-function getLastDawaSequenceNumber(client, callback) {
+function getNextDawaSequenceNumber(client, callback) {
   client.query('SELECT MAX(sequence_number) as last_sequence_number FROM transaction_history', [], function(err, result) {
     if(err) {
       return callback(err);
     }
     console.log(JSON.stringify(result));
-    callback(null, result.rows[0].last_sequence_number || 0);
+    callback(null, (result.rows[0].last_sequence_number || 0) + 1);
   });
 }
 
@@ -192,6 +222,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
   };
 
   sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, done) {
+    var report = {};
     var udtraekBbrSekvensnummer;
     async.series([
       function(cb) {
@@ -237,7 +268,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
                 queryDawaSequenceNumberForBbrEvent(client, udtraekBbrSekvensnummer, callback);
               }
               else {
-                getLastDawaSequenceNumber(client, callback);
+                getNextDawaSequenceNumber(client, callback);
               }
             },
             function(udtraekDawaSequenceNumber, callback) {
@@ -262,14 +293,17 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
               });
             },
             function(udtraekDawaSequencenumber, differences, callback) {
-              console.log('differences: ' + differences.length);
                 console.log(JSON.stringify(differences));
               if(options.rectify) {
                 rectifyDifferences(client, datamodel, differences, udtraekDawaSequencenumber, callback);
               }
               else {
-                callback();
+                callback(null, differences);
               }
+            },
+            function(differences, callback) {
+              report[dataModelName] = differences;
+              callback();
             }
           ], cb);
         }, cb);
@@ -278,6 +312,9 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
       exitOnErr(err);
       done(null, function(err) {
         exitOnErr(err);
+        if(options.reportFile) {
+          fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
+        }
         winston.info("done!");
       });
     });
