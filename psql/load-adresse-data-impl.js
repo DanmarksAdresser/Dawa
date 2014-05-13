@@ -253,7 +253,7 @@ exports.loadCsvOnly = function(client, options, callback) {
         columns : ['id', 'vejkode', 'kommunekode',
           'husnr', 'supplerendebynavn',
           'postnr', 'ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'esrejendomsnr',
-          'oprettet', 'ikraftfra', 'aendret', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
+          'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
           'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse
 
