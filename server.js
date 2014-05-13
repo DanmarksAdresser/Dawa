@@ -82,15 +82,6 @@ function setupMaster() {
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
-    var logOptions;
-    if(options.logConfiguration) {
-      var logOptionsStr = fs.readFileSync(options.logConfiguration);
-      logOptions = JSON.parse(logOptionsStr);
-    }
-    else {
-      logOptions = {};
-    }
-    logger.initialize(logOptions);
     if(options.disableClustering) {
       _.extend(process.env, options);
       setupWorker();

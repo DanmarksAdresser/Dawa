@@ -77,7 +77,19 @@ exports.main = function(optionSpec, requiredParams, mainFunc) {
   exports.addConfigurationFileParameter(optionSpec);
   exports.addLogOptionsParameter(optionSpec);
   cli.parse(optionSpec);
+
+
   cli.main(function(args, options) {
+    var logOptions;
+    if(options.logConfiguration) {
+      var logOptionsStr = fs.readFileSync(options.logConfiguration);
+      logOptions = JSON.parse(logOptionsStr);
+    }
+    else {
+      logOptions = {};
+    }
+    logger.initialize(logOptions);
+
     exports.addFileAndEnvironmentOptions(optionSpec, options);
     exports.checkRequiredOptions(options, requiredParams);
     mainFunc(args, options);
