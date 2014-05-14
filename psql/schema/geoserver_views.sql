@@ -33,7 +33,8 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser AS
     kn100mdk                  AS GeometryDDKNcell100mText,
     kn1kmdk                   AS GeometryDDKNcell1kmText,
     kn10kmdk                  AS GeometryDDKNcell10kmText,
-    adressepunktaendringsdato AS AddressPointRevisionDateTime
+    adressepunktaendringsdato AS AddressPointRevisionDateTime,
+    geom
   FROM adgangsadresser;
 
 CREATE OR REPLACE VIEW wfs_adresser AS
@@ -68,5 +69,6 @@ CREATE OR REPLACE VIEW wfs_adresser AS
     kn100mdk                  AS GeometryDDKNcell100mText,
     kn1kmdk                   AS GeometryDDKNcell1kmText,
     kn10kmdk                  AS GeometryDDKNcell10kmText,
-    adressepunktaendringsdato AS AddressPointRevisionDateTime
+    adressepunktaendringsdato AS AddressPointRevisionDateTime,
+    geom
   FROM Adresser;
