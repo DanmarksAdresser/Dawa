@@ -12,4 +12,4 @@ DB_HOST=$1
 DB_NAME=$2
 DB_USER=$3
 
-sed "s/DB_NAME/$DB_NAME/g" < "$DIR/createdb.sql" | psql -U "$DB_USER" -h "$DB_HOST"
+sed "s/DB_NAME/$DB_NAME/g" < "$DIR/createdb.sql" | psql -U "$DB_USER" -h "$DB_HOST" -d "postgres"
