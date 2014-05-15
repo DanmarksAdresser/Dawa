@@ -4,6 +4,7 @@ var async = require('async');
 var csv = require('csv');
 var copyFrom = require('pg-copy-streams').from;
 var fs = require('fs');
+var moment = require('moment');
 var zlib = require('zlib');
 var _ = require('underscore');
 
@@ -130,13 +131,22 @@ function removePrefixZeroes(str) {
   return str;
 }
 
+function transformDate(bbrDateWithoutTz) {
+  return moment.utc(bbrDateWithoutTz).toISOString();
+}
+
 var bbrTransformers = {
   postnummer: function(row) {
     var result = transformBbr(bbrFieldMappings.postnummer)(row);
     result.stormodtager = 0;
     return result;
   },
-  vejstykke: transformBbr(bbrFieldMappings.vejstykke),
+  vejstykke: function(row) {
+    var result = transformBbr(bbrFieldMappings.vejstykke)(row);
+    result.oprettet = transformDate(result.oprettet);
+    result.aendret = transformDate(result.aendret);
+    return result;
+  },
   enhedsadresse: function(row) {
     var result = transformEnhedsadresse(row);
     if(!_.isUndefined(result.etage) && !_.isNull(result.etage)) {
@@ -146,12 +156,20 @@ var bbrTransformers = {
     if(!_.isUndefined(result.doer) && !_.isNull(result.doer)) {
       result.doer = result.doer.toLowerCase();
     }
+    result.oprettet = transformDate(result.oprettet);
+    result.aendret = transformDate(result.aendret);
+    result.ikraftfra = transformDate(result.ikraftfra);
     return result;
   },
   adgangsadresse: function(row) {
     var result = transformBbrAdgangsadresse(row);
     // vi skal lige have fjernet de foranstillede 0'er
     result.husnr = removePrefixZeroes(result.husnr);
+
+    result.oprettet = transformDate(result.oprettet);
+    result.aendret = transformDate(result.aendret);
+    result.ikraftfra = transformDate(result.ikraftfra);
+    result.adressepunktaendringsdato = transformDate(result.adressepunktaendringsdato);
     return result;
   }
 };

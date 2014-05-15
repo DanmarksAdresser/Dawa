@@ -1,98 +1,103 @@
-{"meta": {
-  "dawaSequenceNumber": 7
-}, "vejstykke": {
-  "updates": [
-    {
-      "id": {
-        "kommunekode": 101,
-        "kode": 64
-      },
-      "differences": {
-        "vejnavn": {
-          "expected": "Ahlemannsgade",
-          "actual": "Ahlmannsgade"
-        }
-      },
-      "rectified": true
-    }
-  ],
-  "inserts": [],
-  "deletes": [
-    {
-      "id": {
-        "kommunekode": 101,
-        "kode": 60
-      },
-      "rectified": true
-    }
-  ]
-}, "adgangsadresse": {
-  "updates": [
-    {
-      "id": {
-        "id": "0a3f508b-3f91-32b8-e044-0003ba298018"
-      },
-      "differences": {
-        "matrikelnr": {
-          "expected": "487c",
-          "actual": "487"
-        }
-      },
-      "rectified": true
-    }
-  ],
-  "inserts": [
-    {
-      "id": {
-        "id": "0a3f508b-1ee6-32b8-e044-0003ba298018"
-      },
-      "object": {
-        "id": "0a3f508b-1ee6-32b8-e044-0003ba298018",
-        "kommunekode": 540,
-        "vejkode": 458,
-        "husnr": "39A",
-        "supplerendebynavn": null,
-        "postnr": 6440,
-        "oprettet": "2000-02-05T16:55:10.000Z",
-        "aendret": "2000-02-16T20:56:11.000Z",
-        "ikraftfra": "2000-02-04T23:00:00.000Z",
-        "ejerlavkode": 2008551,
-        "ejerlavnavn": "AUGUSTENBORG",
-        "matrikelnr": "1081",
-        "esrejendomsnr": 2523,
-        "adgangspunktid": "0a3f508b-1ee6-32b8-e044-0003ba298018",
-        "etrs89oest": 555744.64,
-        "etrs89nord": 6089186.57,
-        "wgs84lat": 54.9465176473884,
-        "wgs84long": 9.87029262674409,
-        "noejagtighed": "A",
-        "kilde": 5,
-        "tekniskstandard": "UF",
-        "tekstretning": "200.00",
-        "kn100mdk": "100m_60891_5557",
-        "kn1kmdk": "1km_6089_555",
-        "kn10kmdk": "10km_608_55",
-        "adressepunktaendringsdato": "2005-10-19T22:00:00.000Z"
-      },
-      "rectified": true
-    }
-  ],
-  "deletes": []
-}, "enhedsadresse": {
-  "updates": [
-    {
-      "id": {
-        "id": "0a3f50b6-42dc-32b8-e044-0003ba298018"
-      },
-      "differences": {
-        "doer": {
-          "expected": "tv",
-          "actual": "mf"
-        }
-      },
-      "rectified": true
-    }
-  ],
-  "inserts": [],
-  "deletes": []
-}}
+{
+  "meta": {
+    "dawaSequenceNumber": 7
+  },
+  "vejstykke": {
+    "updates": [
+      {
+        "id": {
+          "kommunekode": 101,
+          "kode": 64
+        },
+        "differences": {
+          "vejnavn": {
+            "expected": "Ahlemannsgade",
+            "actual": "Ahlmannsgade"
+          }
+        },
+        "rectified": true
+      }
+    ],
+    "inserts": [],
+    "deletes": [
+      {
+        "id": {
+          "kommunekode": 101,
+          "kode": 60
+        },
+        "rectified": true
+      }
+    ]
+  },
+  "adgangsadresse": {
+    "updates": [
+      {
+        "id": {
+          "id": "0a3f508b-3f91-32b8-e044-0003ba298018"
+        },
+        "differences": {
+          "matrikelnr": {
+            "expected": "487c",
+            "actual": "487"
+          }
+        },
+        "rectified": true
+      }
+    ],
+    "inserts": [
+      {
+        "id": {
+          "id": "0a3f508b-1ee6-32b8-e044-0003ba298018"
+        },
+        "object": {
+          "id": "0a3f508b-1ee6-32b8-e044-0003ba298018",
+          "kommunekode": 540,
+          "vejkode": 458,
+          "husnr": "39A",
+          "supplerendebynavn": null,
+          "postnr": 6440,
+          "oprettet": "2000-02-05T17:55:10.000Z",
+          "aendret": "2000-02-16T21:56:11.000Z",
+          "ikraftfra": "2000-02-05T00:00:00.000Z",
+          "ejerlavkode": 2008551,
+          "ejerlavnavn": "AUGUSTENBORG",
+          "matrikelnr": "1081",
+          "esrejendomsnr": 2523,
+          "adgangspunktid": "0a3f508b-1ee6-32b8-e044-0003ba298018",
+          "etrs89oest": 555744.64,
+          "etrs89nord": 6089186.57,
+          "wgs84lat": 54.9465176473884,
+          "wgs84long": 9.87029262674409,
+          "noejagtighed": "A",
+          "kilde": 5,
+          "tekniskstandard": "UF",
+          "tekstretning": "200.00",
+          "kn100mdk": "100m_60891_5557",
+          "kn1kmdk": "1km_6089_555",
+          "kn10kmdk": "10km_608_55",
+          "adressepunktaendringsdato": "2005-10-20T00:00:00.000Z"
+        },
+        "rectified": true
+      }
+    ],
+    "deletes": []
+  },
+  "enhedsadresse": {
+    "updates": [
+      {
+        "id": {
+          "id": "0a3f50b6-42dc-32b8-e044-0003ba298018"
+        },
+        "differences": {
+          "doer": {
+            "expected": "tv",
+            "actual": "mf"
+          }
+        },
+        "rectified": true
+      }
+    ],
+    "inserts": [],
+    "deletes": []
+  }
+}
