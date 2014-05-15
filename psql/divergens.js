@@ -1,13 +1,10 @@
 "use strict";
 
-var async = require('async');
 var fs = require('fs');
-var winston = require('winston');
 var _ = require('underscore');
+var Q = require('q');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var datamodels = require('../crud/datamodel');
-var dbapi;
 var sqlCommon = require('./common');
 var divergensImpl = require('./divergensImpl');
 
@@ -22,15 +19,7 @@ var optionSpec = {
   reportFile: [false, 'Fil, som JSON rapport skrives i', 'string']
 };
 
-function exitOnErr(err){
-  if (err){
-    winston.error("Error: %j", err, {});
-    process.exit(1);
-  }
-}
-
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix', 'sekvensnummer', 'rectify', 'compareWithCurrent'), function(args, options) {
-  dbapi = require('../dbapi');
 
   if(options.format !== 'bbr' && options.sekvensnummer === undefined) {
     throw new Error('Hvis format ikke er bbr skal der angives et sekvensnummer for udtrækket');
@@ -43,23 +32,20 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
       format: options.format
     };
 
-    divergensImpl.divergence(client, loadAdresseDataOptions, options.compareWithCurrent, function(err, report) {
-      exitOnErr(err);
-      if(options.rectify) {
-        async.eachSeries(['vejstykke', 'adgangsadresse', 'enhedsadresse'], function(dataModelName, callback) {
-          var datamodel = datamodels[dataModelName];
-          divergensImpl.rectifyDifferences(client, datamodel, report[dataModelName], report.meta.dawaSequenceNumber, callback);
-        }, function(err) {
-          exitOnErr(err);
-          done(null, function(err) {
-            exitOnErr(err);
-            if(options.reportFile) {
-              fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
-            }
-            winston.info("done!");
-          });
-        });
-      }
-    });
+    divergensImpl.divergenceReport(client, loadAdresseDataOptions, options.compareWithCurrent).then(
+      function(report) {
+        if (options.rectify) {
+          return divergensImpl.rectifyAll(client, report);
+        }
+        else {
+          return report;
+        }
+      }).then(function(report) {
+        if (options.reportFile) {
+          fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
+        }
+      }).then(function() {
+        return Q.nfcall(done, null);
+      }).done();
   });
 });

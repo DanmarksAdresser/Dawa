@@ -41,6 +41,11 @@ exports.createTempTable = function(client, tableName, sourceTableName, callback)
   client.query(sql, [], callback);
 };
 
+exports.dropTable = function(client, tableName, callback) {
+  var sql = 'DROP TABLE ' + tableName;
+  client.query(sql, [], callback);
+}
+
 exports.csvToTable = function(client, csvStream, tableName, datamodel, callback) {
   var sql = "COPY " + tableName + "(" + datamodel.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL 'null')";
   var pgStream = client.query(copyFrom(sql));
