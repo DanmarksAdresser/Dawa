@@ -21,7 +21,7 @@ cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(arg
     exitOnErr(err);
     async.series([
       function(callback){
-        client.query('CREATE EXTENSION IF NOT EXISTS dict_xsyn', [], callback);
+        client.query('CREATE EXTENSION IF NOT EXISTS dict_xsyn; CREATE EXTENSION IF NOT EXISTS unaccent;', [], callback);
       },
       function(callback) {
         client.query(
