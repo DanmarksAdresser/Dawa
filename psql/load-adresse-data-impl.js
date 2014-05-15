@@ -132,7 +132,12 @@ function removePrefixZeroes(str) {
 }
 
 function transformDate(bbrDateWithoutTz) {
-  return moment.utc(bbrDateWithoutTz).toISOString();
+  if(bbrDateWithoutTz) {
+    return moment.utc(bbrDateWithoutTz).toISOString();
+  }
+  else {
+    return undefined;
+  }
 }
 
 var bbrTransformers = {
