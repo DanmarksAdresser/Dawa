@@ -1,7 +1,6 @@
 
 notifications:
   email:
-    - peter.mechlenborg@gmail.com
     - ahj@trifork.com
 
 language: node_js
@@ -14,11 +13,13 @@ addons:
 
 env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
+  - pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty
 
 before_script:
   - sudo locale-gen --no-archive da_DK.UTF-8
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
+  - bash psql/createdb/createdb.bash localhost dawaempty postgres
   - node psql/setup-db.js
+  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaempty node psql/setup-db.js
   - node psql/load-adresse-data.js --dataDir=test/data --format=bbr
   - psql -U travis dawaintegrationtest < psql/load-dagi-test-data.sql
-

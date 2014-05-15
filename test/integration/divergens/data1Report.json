@@ -1,0 +1,146 @@
+{"meta": {
+  "dawaSequenceNumber": 1
+}, "vejstykke": {
+  "updates": [],
+  "inserts": [
+    {
+      "id": {
+        "kommunekode": 101,
+        "kode": 60
+      },
+      "object": {
+        "kommunekode": 101,
+        "kode": 60,
+        "oprettet": "2010-01-17T10:17:27.537Z",
+        "aendret": "2010-01-17T10:17:27.537Z",
+        "vejnavn": "Ahlefeldtsgade",
+        "adresseringsnavn": null
+      },
+      "rectified": true
+    },
+    {
+      "id": {
+        "kommunekode": 101,
+        "kode": 64
+      },
+      "object": {
+        "kommunekode": 101,
+        "kode": 64,
+        "oprettet": "2010-01-17T10:17:27.537Z",
+        "aendret": "2010-01-17T10:17:27.537Z",
+        "vejnavn": "Ahlmannsgade",
+        "adresseringsnavn": null
+      },
+      "rectified": true
+    }
+  ],
+  "deletes": []
+}, "adgangsadresse": {
+  "updates": [],
+  "inserts": [
+    {
+      "id": {
+        "id": "0a3f508b-3f91-32b8-e044-0003ba298018"
+      },
+      "object": {
+        "id": "0a3f508b-3f91-32b8-e044-0003ba298018",
+        "kommunekode": 550,
+        "vejkode": 408,
+        "husnr": "8",
+        "supplerendebynavn": "Ballum",
+        "postnr": 6261,
+        "oprettet": "2000-02-05T16:56:37.000Z",
+        "aendret": "2000-02-16T20:56:28.000Z",
+        "ikraftfra": "2000-02-04T23:00:00.000Z",
+        "ejerlavkode": 1470151,
+        "ejerlavnavn": "HUSUM-BALLUM",
+        "matrikelnr": "487",
+        "esrejendomsnr": 1766,
+        "adgangspunktid": "0a3f508b-3f91-32b8-e044-0003ba298018",
+        "etrs89oest": 478334,
+        "etrs89nord": 6103044,
+        "wgs84lat": 55.0736880081506,
+        "wgs84long": 8.66067938598797,
+        "noejagtighed": "A",
+        "kilde": 5,
+        "tekniskstandard": "UF",
+        "tekstretning": "200.00",
+        "kn100mdk": "100m_61030_4783",
+        "kn1kmdk": "1km_6103_478",
+        "kn10kmdk": "10km_610_47",
+        "adressepunktaendringsdato": "2005-11-01T23:00:00.000Z"
+      },
+      "rectified": true
+    },
+    {
+      "id": {
+        "id": "0a3f508b-3e90-32b8-e044-0003ba298018"
+      },
+      "object": {
+        "id": "0a3f508b-3e90-32b8-e044-0003ba298018",
+        "kommunekode": 550,
+        "vejkode": 157,
+        "husnr": "42",
+        "supplerendebynavn": null,
+        "postnr": 6261,
+        "oprettet": "2000-02-05T16:56:16.000Z",
+        "aendret": "2000-02-16T20:56:28.000Z",
+        "ikraftfra": "2000-02-04T23:00:00.000Z",
+        "ejerlavkode": 1470253,
+        "ejerlavnavn": "BORG",
+        "matrikelnr": "18",
+        "esrejendomsnr": 78,
+        "adgangspunktid": "0a3f508b-3e90-32b8-e044-0003ba298018",
+        "etrs89oest": 487392,
+        "etrs89nord": 6099453,
+        "wgs84lat": 55.0417308864853,
+        "wgs84long": 8.80269812715005,
+        "noejagtighed": "A",
+        "kilde": 5,
+        "tekniskstandard": "UF",
+        "tekstretning": "200.00",
+        "kn100mdk": "100m_60994_4873",
+        "kn1kmdk": "1km_6099_487",
+        "kn10kmdk": "10km_609_48",
+        "adressepunktaendringsdato": "2005-11-01T23:00:00.000Z"
+      },
+      "rectified": true
+    }
+  ],
+  "deletes": []
+}, "enhedsadresse": {
+  "updates": [],
+  "inserts": [
+    {
+      "id": {
+        "id": "0a3f50b6-42dc-32b8-e044-0003ba298018"
+      },
+      "object": {
+        "id": "0a3f50b6-42dc-32b8-e044-0003ba298018",
+        "oprettet": "2000-02-05T16:54:48.000Z",
+        "aendret": "2000-02-16T20:56:13.000Z",
+        "ikraftfra": "2000-02-04T23:00:00.000Z",
+        "etage": "1",
+        "doer": "mf",
+        "adgangsadresseid": "0a3f508b-22f2-32b8-e044-0003ba298018"
+      },
+      "rectified": true
+    },
+    {
+      "id": {
+        "id": "0a3f50b6-42dd-32b8-e044-0003ba298018"
+      },
+      "object": {
+        "id": "0a3f50b6-42dd-32b8-e044-0003ba298018",
+        "oprettet": "2000-02-05T16:54:48.000Z",
+        "aendret": "2000-02-16T20:56:13.000Z",
+        "ikraftfra": "2000-02-04T23:00:00.000Z",
+        "etage": "1",
+        "doer": "th",
+        "adgangsadresseid": "0a3f508b-22f2-32b8-e044-0003ba298018"
+      },
+      "rectified": true
+    }
+  ],
+  "deletes": []
+}}

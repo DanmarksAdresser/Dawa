@@ -270,6 +270,15 @@ function computeDifferenceReport(client, datamodel, dawaSequenceNumber, expected
   });
 }
 
+function dropTempTables(client, tablePrefix) {
+  var ops = Object.keys(baseDatamodels).map(function(datamodelName) {
+    return function() {
+      return Q.nfcall(dataUtil.dropTable, client, tablePrefix + datamodels[datamodelName].table);
+    };
+  });
+  return callSequentially(ops);
+}
+
 exports.divergenceReport = function (client, loadAdresseDataOptions, compareWithCurrent) {
   var expectedTablePrefix = 'expected_';
   var dawaSequenceNumber = getDawaSequenceNumber(client, loadAdresseDataOptions, compareWithCurrent);
@@ -292,6 +301,10 @@ exports.divergenceReport = function (client, loadAdresseDataOptions, compareWith
         meta: {
           dawaSequenceNumber: dawaSequenceNumber
         }
-      }));
+      })).then(function(report) {
+        return dropTempTables(client, expectedTablePrefix).then(function() {
+          return report;
+        });
+    });
   });
 };
