@@ -12,8 +12,7 @@ addons:
   postgresql: 9.3
 
 env:
-  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest
-  - pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty
+  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty
 
 before_script:
   - sudo locale-gen --no-archive da_DK.UTF-8
