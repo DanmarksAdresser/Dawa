@@ -1,6 +1,7 @@
 "use strict";
 
 var pg          = require('pg.js');
+require('./setupDbConnection');
 var logger = require('./logger');
 var statistics = require('./statistics');
 

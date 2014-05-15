@@ -5,6 +5,8 @@ var async = require('async');
 var fs = require('fs');
 var winston = require('winston');
 
+require('../setupDbConnection');
+
 function normaliseTableSpec(specs){
   return _.map(
     specs,

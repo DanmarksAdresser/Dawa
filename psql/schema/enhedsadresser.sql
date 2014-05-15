@@ -2,9 +2,9 @@ DROP TABLE IF EXISTS enhedsadresser;
 CREATE TABLE IF NOT EXISTS enhedsadresser (
   id uuid NOT NULL PRIMARY KEY,
   adgangsadresseid UUID NOT NULL,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
+  oprettet timestamptz,
+  ikraftfra timestamptz,
+  aendret timestamptz,
   etage VARCHAR(3),
   doer VARCHAR(4),
   tsv tsvector
@@ -20,9 +20,9 @@ CREATE TABLE IF NOT EXISTS enhedsadresser_history (
   valid_to integer,
   id uuid NOT NULL,
   adgangsadresseid UUID NOT NULL,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
+  oprettet timestamptz,
+  ikraftfra timestamptz,
+  aendret timestamptz,
   etage VARCHAR(3),
   doer VARCHAR(4)
 );

@@ -12,9 +12,9 @@ CREATE TABLE  adgangsadresser (
   ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr integer NULL,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
+  oprettet timestamptz,
+  ikraftfra timestamptz,
+  aendret timestamptz,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
@@ -28,7 +28,7 @@ CREATE TABLE  adgangsadresser (
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
-  adressepunktaendringsdato TIMESTAMP NULL,
+  adressepunktaendringsdato timestamptz NULL,
   geom  geometry(point, 25832),
   tsv tsvector
 );
@@ -60,9 +60,9 @@ CREATE TABLE adgangsadresser_history(
   ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr integer NULL,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
+  oprettet timestamptz,
+  ikraftfra timestamptz,
+  aendret timestamptz,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
@@ -76,7 +76,7 @@ CREATE TABLE adgangsadresser_history(
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
-  adressepunktaendringsdato TIMESTAMP NULL
+  adressepunktaendringsdato timestamptz NULL
 );
 
 CREATE INDEX ON adgangsadresser_history(valid_to);
