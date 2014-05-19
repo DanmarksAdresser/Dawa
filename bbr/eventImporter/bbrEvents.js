@@ -1,10 +1,15 @@
 "use strict";
 
-var datamodels = require('../../crud/datamodel');
-var crud = require('../../crud/crud');
 var async = require('async');
-var _ = require('underscore');
 var winston = require('winston');
+var ZSchema = require("z-schema");
+var _ = require('underscore');
+
+var bbrEventsLogger = require('../../logger').forCategory('bbrEvents');
+var crud = require('../../crud/crud');
+var datamodels = require('../../crud/datamodel');
+var eventSchemas = require('../common/eventSchemas');
+
 
 
 var allRenames = {
@@ -18,6 +23,7 @@ var allRenames = {
     ejerlavnavn: 'landsejerlav_navn',
     adgangspunktid: 'adgangspunkt_id',
     kilde: 'adgangspunkt_kilde',
+    ikraftfra: 'ikrafttraedelsesdato',
     noejagtighed: 'adgangspunkt_noejagtighedsklasse',
     tekniskstandard: 'adgangspunkt_tekniskstandard',
     tekstretning: 'adgangspunkt_retning',
@@ -33,6 +39,9 @@ var allRenames = {
   },
   postnummer: {
     nr: 'postnummer'
+  },
+  enhedsadresse: {
+    ikraftfra: 'ikrafttraedelsesdato'
   }
 };
 
@@ -163,6 +172,14 @@ function createPostnrUpdate(adgangsadresse, interval) {
   };
 }
 
+// returns true if the adress is on the side specified (either 'lige' or 'ulige')
+function isOnSide(eventSide, adgangsadresse) {
+  var numberShouldBeOdd = eventSide === 'ulige';
+  var number = parseHusnr(adgangsadresse.husnr).nr;
+  var numberIsOdd = ((number % 2) === 1);
+  var isOnCorrectSide = numberShouldBeOdd === numberIsOdd;
+  return isOnCorrectSide;
+}
 function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
   var data = event.data;
   var filter = {
@@ -174,6 +191,9 @@ function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
       return callback(err);
     }
     var updates = _.reduce(adgangsadresser, function(memo, adgangsadresse) {
+      if(!isOnSide(data.side, adgangsadresse)) {
+        return memo;
+      }
       var interval = _.find(data.intervaller, function(interval) {
         return adresseWithinInterval(adgangsadresse, interval);
       });
@@ -204,12 +224,81 @@ var eventHandlers = {
   supplerendebynavn: handleSupplerendebynavnEvent
 };
 
-module.exports = function(sqlClient, event, callback) {
+function applyBbrEvent(sqlClient, event, callback) {
   eventHandlers[event.type](sqlClient, event, callback);
+}
+
+var bbrEventsDatamodel = {
+  table: 'bbr_events',
+  columns: ['sekvensnummer', 'sequence_number_from', 'sequence_number_to', 'type', 'bbrTidspunkt', 'created', 'data'],
+  key: ['sekvensnummer']
 };
+
+function storeEvent(client, event, localSeqnumFrom, localSeqnumTo, callback) {
+  var dbRow = {
+    sekvensnummer: event.sekvensnummer,
+    sequence_number_from: localSeqnumFrom,
+    sequence_number_to: localSeqnumTo,
+    type: event.type,
+    bbrTidspunkt: event.tidspunkt,
+    created: new Date().toISOString(),
+    data: JSON.stringify(event.data)
+  };
+  crud.create(client, bbrEventsDatamodel, dbRow, callback);
+}
+
+function getLocalSeqNum(client, callback) {
+  client.query("SELECT MAX(sequence_number) as max FROM transaction_history", [], function (err, result) {
+    if (err) {
+      return callback(err);
+    }
+    callback(null, result.rows[0].max ? result.rows[0].max : 0);
+  });
+}
+function processEvent(client, event, callback) {
+  bbrEventsLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
+  var validator = new ZSchema();
+  validator.validate(event, eventSchemas[event.type]).then(function(report) {
+    var localSeqnumFrom, localSeqnumTo;
+    async.series([
+      // get the latest local sequence number
+      function(callback) {
+        getLocalSeqNum(client, function(err, seqnum) {
+          if(err) {
+            return callback(err);
+          }
+          localSeqnumFrom = seqnum;
+          callback();
+        });
+      },
+      function(callback) {
+        applyBbrEvent(client, event, callback);
+      },
+      function(callback) {
+        getLocalSeqNum(client, function(err, seqnum) {
+          if(err) {
+            return callback(err);
+          }
+          localSeqnumTo = seqnum;
+          callback();
+        });
+      },
+      function(callback) {
+        storeEvent(client, event, localSeqnumFrom+1, localSeqnumTo, callback);
+      }
+    ], callback);
+  }).catch(function(err) {
+    bbrEventsLogger.error('Invalid event', err);
+    // We ignore invalid events
+    callback(null);
+  });
+}
+
+module.exports.processEvent = processEvent;
 
 // for testing purporses
 module.exports.internal = {
   compareHusnr: compareHusnr,
-  adresseWithinInterval: adresseWithinInterval
+  adresseWithinInterval: adresseWithinInterval,
+  applyBbrEvent: applyBbrEvent
 };

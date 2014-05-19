@@ -127,7 +127,7 @@ exports.autocomplete = {
   mapper: function(baseUrl) {
     return function (row) {
       function adresseText(row) {
-        return adressebetegnelse(row).replace(/\n/g, ', ');
+        return adressebetegnelse(row);
       }
       return {
         tekst: adresseText(row),

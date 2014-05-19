@@ -273,7 +273,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'esrejendomsnr',
-    doc: 'ESR Ejendomsnummer. Indtil 6 cifre.'
+    doc: 'ESR Ejendomsnummer. Indtil 7 cifre.'
   },
   SRIDParameter,
   {
@@ -491,7 +491,7 @@ var postnummerParameters = [{name: 'nr',
                             {name: 'navn',
                              doc: 'Postnummernavn',
                              examples: ['Aarhus', 'København']},
-                            {name: 'kommune',
+                            {name: 'kommunekode',
                              doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
                              examples: ['0101']},
                             {name: 'q',

@@ -1,5 +1,6 @@
 "use strict";
 
+var paths = require('../paths');
 var eventStream = require('event-stream');
 var logger = require('../../logger');
 var _ = require('underscore');
@@ -75,33 +76,57 @@ function withReadonlyTransaction(res, callback) {
   });
 }
 
+function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
+  /*
+   * Parse and validate the parameters
+   */
+  var pathParameterParseResult = parseParameters(resourceSpec.pathParameters, pathParams);
+  if(pathParameterParseResult.errors.length > 0) {
+    return {
+      pathErrors: pathParameterParseResult.errors
+    };
+  }
+  var parameterParseResult = parseParameters(resourceSpec.queryParameters, queryParams);
+  if (parameterParseResult.errors.length > 0){
+    return {
+      queryErrors: parameterParseResult.errors
+    };
+  }
 
-function baseUrl(req) {
-  var protocol = req.connection.encrypted ? 'https' : 'http';
-  return protocol + '://' + req.headers.host;
+  var params = _.extend({}, parameterParseResult.params, pathParameterParseResult.params);
+  params.format = params.format || 'json';
+
+  // each actual resource impl may need some additional processing of the parameters
+  // before they are passed on to the SQL layer
+  resourceSpec.processParameters(params);
+  return {
+    pathParams: pathParameterParseResult.params,
+    queryParams: parameterParseResult.params,
+    processedParams: params
+  };
+}
+
+exports.internal = {
+  parseAndProcessParameters: parseAndProcessParameters
+};
+
+function logPostgresQueryError(req, sqlParts, err) {
+  var query = dbapi.createQuery(sqlParts);
+  logger.error('sql', 'query failed', {url: req.url, sql: query.sql, params: query.params, error: err});
 }
 
 exports.createExpressHandler = function(resourceSpec) {
   var spec = resourceSpec;
   return function(req, res) {
-    /*
-     * Parse and validate the parameters
-     */
-    var pathParameterParseResult = parseParameters(spec.pathParameters, req.params);
-    if(pathParameterParseResult.errors.length > 0) {
-      return sendUriPathFormatError(res, pathParameterParseResult.errors);
+    var parseResult = parseAndProcessParameters(resourceSpec, req.params, req.query);
+    if(parseResult.pathErrors) {
+      return sendUriPathFormatError(res, parseResult.pathErrors);
     }
-    var parameterParseResult = parseParameters(spec.queryParameters, req.query);
-    if (parameterParseResult.errors.length > 0){
-      return sendQueryParameterFormatError(res, parameterParseResult.errors);
+    else if(parseResult.queryErrors) {
+      return sendQueryParameterFormatError(res, parseResult.queryErrors);
     }
+    var params = parseResult.processedParams;
 
-    var params = _.extend({}, parameterParseResult.params, pathParameterParseResult.params);
-    params.format = params.format || 'json';
-
-    // each actual resource impl may need some additional processing of the parameters
-    // before they are passed on to the SQL layer
-    spec.processParameters(params);
     var formatParam = params.format;
 
     // choose the right representation based on the format requested by client
@@ -110,12 +135,12 @@ exports.createExpressHandler = function(resourceSpec) {
       return sendQueryParameterFormatError(res,
         'Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
     }
-
+    logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
     // build the query
     var sqlParts = spec.sqlModel.createQuery(_.pluck(representation.fields, 'name'), params);
 
     // create a mapper function that maps results from the SQL layer to the requested representation
-    var mapObject = representation.mapper(baseUrl(req), params, spec.singleResult);
+    var mapObject = representation.mapper(paths.baseUrl(req), params, spec.singleResult);
     withReadonlyTransaction(res, function(client, done) {
       if(spec.singleResult) {
         // create a function that can write the object to the HTTP response based on the format requrested by the
@@ -124,11 +149,12 @@ exports.createExpressHandler = function(resourceSpec) {
         dbapi.query(client, sqlParts, function(err, rows) {
           done(err);
           if (err) {
+            logPostgresQueryError(req, sqlParts, err);
             return sendPostgresQueryError(res, err);
           } else if (rows.length > 1) {
             sendInternalServerError(res, "The request resulted in more than one response", rows);
           } else if (rows.length === 0) {
-            sendObjectNotFoundError(res, pathParameterParseResult.params);
+            sendObjectNotFoundError(res, parseResult.pathParams);
           } else {
             // map the object and send it to the client
             var mappedResult = mapObject(rows[0]);
@@ -146,6 +172,7 @@ exports.createExpressHandler = function(resourceSpec) {
         dbapi.stream(client, sqlParts, function(err, stream) {
           if(err) {
             done(err);
+            logPostgresQueryError(req, sqlParts, err);
             return sendPostgresQueryError(res, err);
           }
 

@@ -12,12 +12,16 @@ exports.query = function(client, datamodel, filter, callback) {
     orderClauses: [],
     sqlParams: []
   };
+  exports.applyFilter(datamodel, sqlParts, filter);
+  dbapi.query(client, sqlParts, callback);
+};
+
+exports.applyFilter = function(datamodel, sqlParts, filter) {
   _.each(filter, function(value, key) {
     var alias = dbapi.addSqlParameter(sqlParts, value);
     dbapi.addWhereClause(sqlParts, key + ' = ' + alias);
   });
-  dbapi.query(client, sqlParts, callback);
-};
+}
 
 exports.create = function(client, datamodel, object, callback) {
   var datamodelFields = datamodel.columns;

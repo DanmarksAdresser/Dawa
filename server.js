@@ -13,7 +13,21 @@ var uuid = require('node-uuid');
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
+function asInteger(stringOrNumber) {
+  return _.isNumber(stringOrNumber) ? stringOrNumber : parseInt(stringOrNumber);
+}
+
+function socketTimeoutMiddleware(timeoutMillis) {
+  return function(req, res, next) {
+    res.socket.setTimeout(timeoutMillis);
+    next();
+  };
+}
+
 function setupWorker() {
+  var pg = require('pg.js');
+  pg.defaults.poolSize = asInteger(process.env.pgPoolSize);
+  pg.defaults.poolIdleTimeout = asInteger(process.env.pgPoolIdleTimeout);
   var dbapi = require('./dbapi');
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
@@ -27,7 +41,7 @@ function setupWorker() {
         data: {
           status: 'up',
           postgresPool: dbapi.getPoolStatus(),
-          statistics: statistics.getStatistics(),
+          statistics: statistics.getStatistics()
         }
       });
     }
@@ -35,8 +49,14 @@ function setupWorker() {
 
   var app = express();
 
+  app.use(socketTimeoutMiddleware(asInteger(process.env.socketTimeout)));
 
-  app.use(express.compress());
+  // Hackish: We reduce memlevel to prevent zLib from caching too much internally
+  // Otherwise, it will take too long for our application to start responding to JSON requests,
+  // potentially resulting in a TCP disconnection.
+  app.use(express.compress( {
+    memLevel: 3
+  }));
   app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
 
 
@@ -55,19 +75,13 @@ function setupMaster() {
     pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
     listenPort: [false, 'TCP port der lyttes på', 'number', 3000],
     masterListenPort: [false, 'TCP port hvor master processen lytter (isalive)', 'number', 3001],
-    disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean']
+    disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean'],
+    pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 25],
+    pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
+    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 10000]
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
-    var logOptions;
-    if(options.logConfiguration) {
-      var logOptionsStr = fs.readFileSync(options.logConfiguration);
-      logOptions = JSON.parse(logOptionsStr);
-    }
-    else {
-      logOptions = {};
-    }
-    logger.initialize(logOptions);
     if(options.disableClustering) {
       _.extend(process.env, options);
       setupWorker();
@@ -77,7 +91,10 @@ function setupMaster() {
     var workerOptions = {
       pgConnectionUrl: options.pgConnectionUrl,
       listenPort: options.listenPort,
-      logOptions: JSON.stringify(logOptions)
+      logOptions: JSON.stringify(options.logOptions),
+      socketTimeout: options.socketTimeout,
+      pgPoolSize: options.pgPoolSize,
+      pgPoolIdleTimeout: options.pgPoolIdleTimeout
     };
     for (var i = 0; i < count; i++) {
       spawn(workerOptions);
@@ -140,8 +157,7 @@ function getStatus(worker) {
   }
   worker.on('message', listener);
   worker.send(request);
-  //return Q.timeout(deferred.promise, 5000);
-  return deferred.promise;
+  return Q.timeout(deferred.promise, 5000);
 }
 
 if (cluster.isMaster) {

@@ -2,56 +2,13 @@
 
 var async = require('async');
 var dbapi = require('../../dbapi');
-var crud = require('../../crud/crud');
-var handleBbrEvent = require('./handleBbrEvent');
-var importLogger = require('../../logger').forCategory('importBbrEvents');
-var eventSchemas = require('../common/eventSchemas');
+var bbrEvents = require('./bbrEvents');
 var Q = require('q');
-var ZSchema = require("z-schema");
+var winston = require('winston');
 
 var dynamoEvents = require('../common/dynamoEvents');
 
-var bbrEventsDatamodel = {
-  table: 'bbr_events',
-    columns: ['sekvensnummer', 'type', 'bbrTidspunkt', 'created', 'data'],
-  key: ['sekvensnummer']
-};
-
-function storeEvent(client, event, callback) {
-  var dbRow = {
-    sekvensnummer: event.sekvensnummer,
-    type: event.type,
-    bbrTidspunkt: event.tidspunkt,
-    created: new Date().toISOString(),
-    data: JSON.stringify(event.data)
-  };
-  crud.create(client, bbrEventsDatamodel, dbRow, callback);
-}
-
-function processEvent(client, event, callback) {
-  importLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
-  console.log(JSON.stringify(event));
-  console.log(JSON.stringify(eventSchemas[event.type]));
-  var validator = new ZSchema();
-  validator.validate(event, eventSchemas[event.type]).then(function(report) {
-    async.series([
-      function(callback) {
-        storeEvent(client, event, callback);
-      },
-      function(callback) {
-        handleBbrEvent(client, event, callback);
-      }
-    ], callback);
-  }).catch(function(err) {
-    importLogger.error('Invalid event', err);
-    // We ignore invalid events
-    callback(null);
-  });
-
-}
-
-module.exports = function(dd, tablename, initialSequenceNumber, callback) {
-  winston.debug("importing bbr events, initial sequence number %d", initialSequenceNumber);
+module.exports = function(dd, tablename, callback) {
   var foundEvent, errorHappened;
   async.doWhilst(function(callback) {
     foundEvent = false;
@@ -70,31 +27,28 @@ module.exports = function(dd, tablename, initialSequenceNumber, callback) {
       },
       // get the sequence number of the last processed event
       function(client, callback) {
-        client.query("SELECT MAX(sekvensnummer) FROM bbr_events", [], function(err, result) {
+        client.query("SELECT GREATEST((SELECT MAX(sekvensnummer) FROM bbr_events), (SELECT sequence_number FROM udtraek_sekvensnummer)) as max", [], function(err, result) {
           if(err) {
             return callback(err);
           }
           var lastProcessedSeqNum = result.rows[0].max;
+          if(lastProcessedSeqNum === undefined) {
+            lastProcessedSeqNum = 0;
+          }
           winston.debug("Last processed event number: %d", lastProcessedSeqNum);
           callback(null, client, lastProcessedSeqNum);
         });
       },
       // fetch the events from dynamodb
-      function(client, lastProcessedSeqNum, callback) {
-        var nextSeqNum;
-        if(lastProcessedSeqNum) {
-          nextSeqNum = lastProcessedSeqNum + 1;
-        }
-        else {
-          nextSeqNum = initialSequenceNumber + 1;
-        }
-        winston.debug("Next sequence number: %d", nextSeqNum);
-        dynamoEvents.query(dd, tablename, nextSeqNum, null).then(function(result) {
+      function(client, lastProcessedBbrSeqNum, callback) {
+        var nextBbrSeqNum = lastProcessedBbrSeqNum + 1;
+        winston.debug("Next BBR sequence number: %d", nextBbrSeqNum);
+        dynamoEvents.query(dd, tablename, nextBbrSeqNum, null).then(function(result) {
           if(result.Items.length > 0) {
             foundEvent = true;
             return Q.nfcall(async.eachSeries, result.Items, function(item, callback) {
               var event = JSON.parse(item.data.S);
-              processEvent(client, event, callback);
+              bbrEvents.processEvent(client, event, callback);
             });
           }
         }).then(function() {

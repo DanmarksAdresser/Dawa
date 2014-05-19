@@ -1,0 +1,49 @@
+{"meta": {
+  "dawaSequenceNumber": 1
+}, "vejstykke": {
+  "updates": [
+    {
+      "id": {
+        "kommunekode": 1,
+        "kode": 1
+      },
+      "differences": {
+        "vejnavn": {
+          "expected": "Gade1updated",
+          "actual": "Gade1"
+        },
+        "adresseringsnavn": {
+          "expected": "Gade1updated",
+          "actual": "Gade1"
+        }
+      },
+      "rectified": true
+    }
+  ],
+  "inserts": [
+    {
+      "id": {
+        "kommunekode": 1,
+        "kode": 3
+      },
+      "object": {
+        "kommunekode": 1,
+        "kode": 3,
+        "oprettet": "2010-01-17T11:17:27.537Z",
+        "aendret": "2010-01-17T11:17:27.537Z",
+        "vejnavn": "Gade3updated",
+        "adresseringsnavn": "Gade3updated"
+      },
+      "rectified": false
+    }
+  ],
+  "deletes": []
+}, "adgangsadresse": {
+  "updates": [],
+  "inserts": [],
+  "deletes": []
+}, "enhedsadresse": {
+  "updates": [],
+  "inserts": [],
+  "deletes": []
+}}

@@ -2,6 +2,8 @@ DROP TABLE IF EXISTS vejstykker CASCADE;
 CREATE TABLE IF NOT EXISTS vejstykker (
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
+  oprettet timestamptz,
+  aendret timestamptz,
   vejnavn VARCHAR(255) NOT NULL,
   adresseringsnavn VARCHAR(255),
   tsv tsvector,
@@ -17,6 +19,8 @@ CREATE TABLE IF NOT EXISTS vejstykker_history (
   valid_to integer,
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
+  oprettet timestamptz,
+  aendret timestamptz,
   vejnavn VARCHAR(255) NOT NULL,
   adresseringsnavn VARCHAR(255)
 );
@@ -30,7 +34,7 @@ DROP FUNCTION IF EXISTS vejstykker_init() CASCADE;
 CREATE FUNCTION vejstykker_init() RETURNS void
 LANGUAGE sql AS
 $$
-    UPDATE vejstykker SET tsv = to_tsvector('adresser', coalesce(vejnavn, ''));
+    UPDATE vejstykker SET tsv = to_tsvector('adresser', coalesce(vejnavn, '')) WHERE tsv IS DISTINCT FROM to_tsvector('adresser', coalesce(vejnavn, ''));
 $$;
 
 -- Trigger which maintains the tsv column
@@ -61,9 +65,9 @@ BEGIN
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
     INSERT INTO vejstykker_history(
-      valid_from, kommunekode, kode, vejnavn)
+      valid_from, kommunekode, kode, oprettet, aendret, vejnavn, adresseringsnavn)
     VALUES (
-      seqnum, NEW.kommunekode, NEW.kode, NEW.vejnavn);
+      seqnum, NEW.kommunekode, NEW.kode, NEW.oprettet, NEW.aendret, NEW.vejnavn, NEW.adresseringsnavn);
   END IF;
   INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'vejstykke', optype);
   RETURN NULL;

@@ -21,8 +21,9 @@
       "objekttype": 1,
       "oprettet": "1999-02-05T12:00:00+00:00",
       "aendret": "2000-02-05T12:00:00+00:00",
+      "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
       "adgangspunkt_id": "2CB20550-E0F9-405B-BB42-50D0CC4C44C1",
-      "adgangspunkt_kilde": "1",
+      "adgangspunkt_kilde": 1,
       "adgangspunkt_noejagtighedsklasse": "A",
       "adgangspunkt_tekniskstandard": "TD",
       "adgangspunkt_retning": 128.34,
@@ -58,8 +59,9 @@
       "objekttype": 1,
       "oprettet": "1999-02-05T12:00:00+00:00",
       "aendret": "2000-02-05T12:00:00+00:00",
+      "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
       "adgangspunkt_id": "2CB20550-E0F9-405B-BB42-50D0CC4C44C1",
-      "adgangspunkt_kilde": "1",
+      "adgangspunkt_kilde": 1,
       "adgangspunkt_noejagtighedsklasse": "A",
       "adgangspunkt_tekniskstandard": "TD",
       "adgangspunkt_retning": 128.34,
@@ -82,10 +84,10 @@
     "data": {
       "kommunekode": 999,
       "vejkode": 9999,
+      "side": "lige",
       "intervaller": [{
         "husnrFra": "10",
         "husnrTil": "20",
-        "side": "lige",
         "nummer": 9998
       }]
     }
@@ -131,6 +133,7 @@
       "adgangsadresseid": "11111111-1111-1111-1111-111111111111",
       "oprettet":"1999-02-05T12:00:00+00:00",
       "aendret":"2000-02-05T12:00:00+00:00",
+      "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
       "etage": "1",
       "doer": null,
       "objekttype": 1
@@ -162,6 +165,7 @@
       "adgangsadresseid": "11111111-1111-1111-1111-111111111111",
       "oprettet":"1999-02-05T12:00:00+00:00",
       "aendret":"2000-02-05T12:00:00+00:00",
+      "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
       "etage": "1",
       "doer": "mf",
       "objekttype": 1
@@ -178,6 +182,7 @@
       "adgangsadresseid": "11111111-1111-1111-1111-111111111111",
       "oprettet":"1999-02-05T12:00:00+00:00",
       "aendret":"2000-02-05T12:00:00+00:00",
+      "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
       "etage": "1",
       "doer": "mf",
       "objekttype": 1
@@ -204,8 +209,9 @@
       "objekttype": 1,
       "oprettet": "1999-02-05T12:00:00+00:00",
       "aendret": "2000-02-05T12:00:00+00:00",
+      "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
       "adgangspunkt_id": "2CB20550-E0F9-405B-BB42-50D0CC4C44C1",
-      "adgangspunkt_kilde": "1",
+      "adgangspunkt_kilde": 1,
       "adgangspunkt_noejagtighedsklasse": "A",
       "adgangspunkt_tekniskstandard": "TD",
       "adgangspunkt_retning": 128.34,

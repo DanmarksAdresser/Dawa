@@ -7,7 +7,6 @@ var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
-var dagiTemaer = require('../dagitemaer/dagiTemaer');
 var util = require('../util');
 
 var adressebetegnelse = util.adressebetegnelse;
@@ -94,7 +93,7 @@ exports.json = {
       'esrejendomsnr': {
         description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ' +
           'ESR, som det matrikelnummer som adressen ligger på, er en del af. ' +
-          'Repræsenteret ved seks cifre. Eksempel ”001388”.',
+          'Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
         type: nullableType('string'),
         pattern: '^[0-9]{1,6}'
       },
@@ -357,7 +356,7 @@ exports.autocomplete = {
   mapper: function(baseUrl) {
     return function (row) {
       function adresseText(row) {
-        return adressebetegnelse(row, true).replace(/\n/g, ', ');
+        return adressebetegnelse(row, true);
       }
 
       return {

@@ -3,8 +3,8 @@
 var async = require('async');
 var csv = require('csv');
 var copyFrom = require('pg-copy-streams').from;
-var Iconv  = require('iconv').Iconv;
 var fs = require('fs');
+var moment = require('moment');
 var zlib = require('zlib');
 var _ = require('underscore');
 
@@ -131,13 +131,27 @@ function removePrefixZeroes(str) {
   return str;
 }
 
+function transformDate(bbrDateWithoutTz) {
+  if(bbrDateWithoutTz) {
+    return moment.utc(bbrDateWithoutTz).toISOString();
+  }
+  else {
+    return undefined;
+  }
+}
+
 var bbrTransformers = {
   postnummer: function(row) {
     var result = transformBbr(bbrFieldMappings.postnummer)(row);
     result.stormodtager = 0;
     return result;
   },
-  vejstykke: transformBbr(bbrFieldMappings.vejstykke),
+  vejstykke: function(row) {
+    var result = transformBbr(bbrFieldMappings.vejstykke)(row);
+    result.oprettet = transformDate(result.oprettet);
+    result.aendret = transformDate(result.aendret);
+    return result;
+  },
   enhedsadresse: function(row) {
     var result = transformEnhedsadresse(row);
     if(!_.isUndefined(result.etage) && !_.isNull(result.etage)) {
@@ -147,12 +161,20 @@ var bbrTransformers = {
     if(!_.isUndefined(result.doer) && !_.isNull(result.doer)) {
       result.doer = result.doer.toLowerCase();
     }
+    result.oprettet = transformDate(result.oprettet);
+    result.aendret = transformDate(result.aendret);
+    result.ikraftfra = transformDate(result.ikraftfra);
     return result;
   },
   adgangsadresse: function(row) {
     var result = transformBbrAdgangsadresse(row);
     // vi skal lige have fjernet de foranstillede 0'er
     result.husnr = removePrefixZeroes(result.husnr);
+
+    result.oprettet = transformDate(result.oprettet);
+    result.aendret = transformDate(result.aendret);
+    result.ikraftfra = transformDate(result.ikraftfra);
+    result.adressepunktaendringsdato = transformDate(result.adressepunktaendringsdato);
     return result;
   }
 };
@@ -161,7 +183,8 @@ var bbrFileNames = {
   vejstykke: 'Vejnavn.CSV',
   adgangsadresse: 'Adgangsadresse.CSV',
   enhedsadresse: 'Enhedsadresse.CSV',
-  postnummer: 'Postnummer.CSV'
+  postnummer: 'Postnummer.CSV',
+  meta: 'SenesteHaendelse.CSV'
 };
 
 var legacyFileNames = {
@@ -171,14 +194,10 @@ var legacyFileNames = {
   postnummer: 'PostCode.csv.gz'
 };
 
-var bbrFileStreams = function(dataDir, filePrefix, encoding) {
+var bbrFileStreams = function(dataDir, filePrefix) {
   return _.reduce(bbrFileNames, function(memo, filename, key) {
     memo[key] = function() {
-      var stream = fs.createReadStream(dataDir + '/' + filePrefix + filename);
-      if(encoding && encoding !== 'UTF-8') {
-        return stream.pipe(new Iconv(encoding, 'UTF-8'));
-      }
-      return stream;
+      return fs.createReadStream(dataDir + '/' + filePrefix + filename);
     };
     return memo;
   }, {});
@@ -196,19 +215,39 @@ var legacyFileStreams = function(dataDir) {
   }, {});
 };
 
-function loadAdditionalBbrFiles(client, callback) {
-  callback();
+function loadBbrMeta(bbrFileStreams, callback) {
+  csv().from.stream(bbrFileStreams.meta(), {
+    delimiter: ';',
+    quote: '"',
+    escape: '\\',
+    columns: true,
+    encoding: 'utf8'
+  }).to.array(function(data) {
+      if(data.length > 1) {
+        callback(new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length));
+      }
+      if(data.length === 1) {
+        callback(null, data);
+      }
+    });
+}
+
+function loadLastSequenceNumber(client, fileStreams, callback) {
+  loadBbrMeta(fileStreams, function(err, meta) {
+    console.log('Seneste sekvensnummer: ' + meta.sidstSendtHaendelsesNummer);
+
+    client.query('UPDATE bbr_sekvensnummer SET sequence_number = $1', [meta.sidstSendtHaendelsesNummer || 0], callback);
+  });
 }
 
 exports.loadCsvOnly = function(client, options, callback) {
   var format = options.format;
   var dataDir = options.dataDir;
   var filePrefix = options.filePrefix || '';
-  var encoding = options.encoding;
   var tablePrefix = options.tablePrefix || '';
 
   var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
-  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix, encoding);
+  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
   async.series([
     function(callback) {
       console.log("Indlæser postnumre....");
@@ -224,7 +263,7 @@ exports.loadCsvOnly = function(client, options, callback) {
       var vejstykkerStream = fileStreams.vejstykke();
       loadCsv(client, vejstykkerStream, {
         tableName : tablePrefix + 'Vejstykker',
-        columns : ['kode', 'kommunekode', 'vejnavn'],
+        columns : ['kode', 'kommunekode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn'],
         transformer: transformers.vejstykke
 
       }, callback);
@@ -237,7 +276,7 @@ exports.loadCsvOnly = function(client, options, callback) {
         columns : ['id', 'vejkode', 'kommunekode',
           'husnr', 'supplerendebynavn',
           'postnr', 'ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'esrejendomsnr',
-          'oprettet', 'ikraftfra', 'aendret', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
+          'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
           'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse
 
@@ -252,27 +291,34 @@ exports.loadCsvOnly = function(client, options, callback) {
         transformer: transformers.enhedsadresse
 
       }, callback);
-    },
-    function(callback) {
-      if(format === 'bbr') {
-        loadAdditionalBbrFiles(client, callback);
-      }
-      else {
-        callback();
-      }
     }
   ], callback);
 };
 
 exports.load = function(client, options, callback) {
+  var format = options.format;
+  var dataDir = options.dataDir;
+  var filePrefix = options.filePrefix;
+  var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
 
   async.series([
     sqlCommon.disableTriggers(client),
     function(cb) {
       exports.loadCsvOnly(client, options, cb);
     },
+    function(callback) {
+      if(options.format === 'bbr') {
+        loadLastSequenceNumber(client, fileStreams, callback);
+      }
+      else {
+        callback();
+      }
+    },
     sqlCommon.psqlScript(client, __dirname, 'initialize-history.sql'),
     sqlCommon.initializeTables(client),
     sqlCommon.enableTriggers(client)
   ], callback);
 };
+
+exports.bbrFileStreams = bbrFileStreams;
+exports.loadBbrMeta = loadBbrMeta;

@@ -273,8 +273,10 @@ function inverseGeocoding()
     });
  	}
 
+  var protocol  = ("https:" == document.location.protocol) ?
+  "https" : "http";
   map = L.map('map');
-  var osmUrl='http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  var osmUrl=protocol + '://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   var osmAttrib='Map data &copy; OpenStreetMap contributors';
   var osm = new L.TileLayer(osmUrl, {maxZoom: 18, attribution: osmAttrib});
   map.setView(new L.LatLng(55.0014602722233, 14.9985934015052),16);

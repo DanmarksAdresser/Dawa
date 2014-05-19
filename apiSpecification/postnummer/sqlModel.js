@@ -14,12 +14,12 @@ var columns = {
   navn: {
     select: 'p.navn'
   },
-  kommune: {
+  kommunekode: {
     select: null,
     where: 'n.kommunekode'
   },
   stormodtageradresser: {
-    select: 'first(s.stormodtageradresser)',
+    select: 'first(s.stormodtageradresser)'
   },
   stormodtagere: {
     where: 'p.stormodtager'
@@ -53,10 +53,11 @@ var baseQuery = function () {
            "             ON d.tema = 'kommune' AND d.kode = m.kommunekode "+
            '           GROUP BY m.postnr) k '+
            '  ON  k.postnr = p.nr '+
-           'LEFT JOIN postnumre_kommunekoder_mat n ON n.postnr = p.nr '
+           'LEFT JOIN postnumre_kommunekoder_mat n ON n.postnr = p.nr ' +
+           "LEFT JOIN dagitemaer dagi ON dagi.tema = 'postdistrikt' AND dagi.kode = p.nr"
           ],
     whereClauses: ["p.navn <> 'Ukendt' "],
-    groupBy: 'p.nr, p.navn',
+    groupBy: 'p.nr, p.navn, dagi.geom',
     orderClauses: ['p.nr'],
     sqlParams: []
   };

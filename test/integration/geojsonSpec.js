@@ -38,6 +38,21 @@ describe('GeoJSON format', function() {
       done();
     });
   });
+  it('Kan hente postnumre i GeoJSON format', function(done) {
+    request.get('http://localhost:3000/postnumre?format=geojson', function(error, response, body) {
+        expect(response.statusCode).toBe(200);
+        var featureCollection = JSON.parse(body);
+        expect(featureCollection.type).toBe('FeatureCollection');
+        expect(featureCollection.crs).toEqual({
+          "type": "name",
+          "properties": {
+            "name": "EPSG:4326"
+          }
+        });
+      expect(featureCollection.features.length).toBeGreaterThan(0);
+      done();
+    });
+  });
   it('srid parameteren respekteres ved geojson FeatureCollection', function(done) {
     request.get({url: 'http://localhost:3000/adresser?format=geojson&srid=25832&per_side=10', json: true}, function(error, response, body) {
       expect(body.crs).toEqual({

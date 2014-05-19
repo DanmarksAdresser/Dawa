@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "dawaSequenceNumber": 12
+  },
+  "vejstykke": {
+    "updates": [],
+    "inserts": [],
+    "deletes": []
+  },
+  "adgangsadresse": {
+    "updates": [],
+    "inserts": [],
+    "deletes": []
+  },
+  "enhedsadresse": {
+    "updates": [],
+    "inserts": [],
+    "deletes": []
+  }
+}

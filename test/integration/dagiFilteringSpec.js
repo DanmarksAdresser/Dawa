@@ -3,6 +3,7 @@
 var dagi = require('../../dagiImport/dagi');
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
+var resourceImpl = require('../../apiSpecification/common/resourceImpl');
 require('../../apiSpecification/allSpecs');
 
 describe('Filtrering af adresser ud fra DAGI tema kode', function() {
@@ -24,17 +25,19 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adresse: 279
   };
   ['adgangsadresse', 'adresse'].forEach(function(entityName) {
-    var sqlModel = registry.findWhere({
+    var resourceSpec = registry.findWhere({
       entityName: entityName,
-      type: 'sqlModel'
+      type: 'resource',
+      qualifier: 'query'
     });
     it('Skal være muligt at filtrere '  + entityName + 'r ud fra DAGI tema', function (done) {
       dbapi.withRollbackTransaction(function (err, client, transactionDone) {
         if (err) throw err;
         dagi.addDagiTema(client, sampleTema, function (err) {
           if(err) throw err;
-          var params = { regionskode: [10] };
-          var sqlParts = sqlModel.createQuery(['id'], params);
+          var params = { regionskode: "10" };
+          var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
+          var sqlParts = resourceSpec.sqlModel.createQuery(['id'], processedParams);
           dbapi.query(client, sqlParts, function(err, result) {
             if(err) throw err;
             expect(result.length).toBe(expectedResults[entityName]);

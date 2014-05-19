@@ -91,13 +91,17 @@ function transformToText(objectStream, formatParam, callbackParam, sridParam) {
 
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
 function streamToHttpResponse(stream, res, options, cb) {
-
-  res.on('error', function (err) {
-    logger.error("serializer", "An error occured while streaming data to HTTP response", err);
-    cb(err);
+  var closed = false;
+  stream.on('error', function (err) {
+    if(!closed) {
+      logger.error("serializer", "An error occured while streaming data to HTTP response", err);
+      res.socket.destroy();
+      cb(err);
+    }
   });
   res.on('close', function () {
-    cb("Client closed connection");
+    closed = true;
+    cb(new Error("Client closed connection"));
   });
   if(options.end === false) {
     stream.on('end', cb);

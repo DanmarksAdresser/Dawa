@@ -50,15 +50,24 @@ function requireAllProperties(object){
   return object;
 }
 
-function vejstykkeIntervaller(){
+function postnummerIntervaller(){
   return array(requireAllProperties(
     {type: 'object',
       additionalProperties: false,
       properties: {
         husnrFra : string(),
         husnrTil : string(),
-        side     : enumeration(['lige','ulige']),
         nummer   : integer()}}));
+}
+
+function supplerendebynavnIntervaller(){
+  return array(requireAllProperties(
+    {type: 'object',
+      additionalProperties: false,
+      properties: {
+        husnrFra : string(),
+        husnrTil : string(),
+        navn   : string()}}));
 }
 
 /********************************************************************************
@@ -110,8 +119,9 @@ var adgangsadresseHaendelseSchema = requireAllProperties({
     objekttype        : integer(),
     oprettet          : time(),
     aendret           : time(),
+    ikrafttraedelsesdato : time(),
     adgangspunkt_id                     : uuid(),
-    adgangspunkt_kilde                  : string(),
+    adgangspunkt_kilde                  : integer(),
     adgangspunkt_noejagtighedsklasse    : string(),
     adgangspunkt_tekniskstandard        : string(),
     adgangspunkt_retning                : number(),
@@ -138,7 +148,8 @@ var enhedsadresseHaendelseSchema = requireAllProperties({
     doer             : string(),
     objekttype       : integer(),
     oprettet         : time(),
-    aendret          : time()
+    aendret          : time(),
+    ikrafttraedelsesdato : time()
   })
 });
 
@@ -149,7 +160,8 @@ var postnummerHaendelseSchema = requireAllProperties({
   properties : headerNoAendringstype('postnummer', {
     kommunekode : notNull(integer()),
     vejkode     : notNull(integer()),
-    intervaller : notNull(vejstykkeIntervaller())
+    side     : enumeration(['lige','ulige']),
+    intervaller : notNull(postnummerIntervaller())
   })
 });
 
@@ -160,7 +172,8 @@ var supplerendebynavnHaendelseSchema = requireAllProperties({
   properties : headerNoAendringstype('supplerendebynavn', {
     kommunekode : notNull(integer()),
     vejkode     : notNull(integer()),
-    intervaller : notNull(vejstykkeIntervaller())
+    side     : enumeration(['lige','ulige']),
+    intervaller : notNull(supplerendebynavnIntervaller())
   })
 });
 

@@ -3,7 +3,9 @@
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
-var kode4String = require('../util').kode4String;
+var util = require('../util');
+var kode4String = util.kode4String;
+var d = util.d;
 
 
 var fields = [
@@ -14,6 +16,14 @@ var fields = [
   {
     name: 'kommunekode',
     formatter: kode4String
+  },
+  {
+    name: 'oprettet',
+    formatter: d
+  },
+  {
+    name: 'ændret',
+    formatter: d
   },
   {
     name: 'kommunenavn'

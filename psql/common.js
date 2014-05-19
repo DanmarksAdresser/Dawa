@@ -5,6 +5,8 @@ var async = require('async');
 var fs = require('fs');
 var winston = require('winston');
 
+require('../setupDbConnection');
+
 function normaliseTableSpec(specs){
   return _.map(
     specs,
@@ -77,29 +79,13 @@ exports.initializeTables = function(client){
 
 exports.disableTriggers = function(client){
   return function(done) {
-    exports.forAllTableSpecs(client,
-      function (client, spec, cb){
-        if (spec.type !== 'view'){
-          exports.execSQL("ALTER TABLE "+spec.name+" DISABLE TRIGGER ALL", client, true, cb);
-        } else {
-          cb();
-        }
-      },
-      done);
+    client.query("SET SESSION_REPLICATION_ROLE ='replica'",[], done);
   };
 };
 
 exports.enableTriggers = function(client){
   return function(done) {
-    exports.forAllTableSpecs(client,
-      function (client, spec, cb){
-        if (spec.type !== 'view'){
-          exports.execSQL("ALTER TABLE "+spec.name+" ENABLE TRIGGER ALL", client, true, cb);
-        } else {
-          cb();
-        }
-      },
-      done);
+    client.query("SET SESSION_REPLICATION_ROLE ='origin'",[], done);
   };
 };
 

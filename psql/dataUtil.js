@@ -30,15 +30,21 @@ exports.queryDifferences = function(client, expectedTable, actualTable, datamode
   query.whereClauses.push(_.map(datamodel.columns, function(column) {
     return 'e.' + column + ' IS DISTINCT FROM a.' + column;
   }).join(' OR '));
-  query.limit = 100;
   console.log(JSON.stringify(query));
   dbapi.query(client, query, callback);
 };
 
 exports.createTempTable = function(client, tableName, sourceTableName, callback) {
-  logger.info('dataUtil', 'creating temp table' + tableName);
-  client.query('CREATE TEMP TABLE ' + tableName  +'( LIKE ' + sourceTableName + ') ON COMMIT DROP', [], callback);
+  logger.info('dataUtil', 'creating temp table ' + tableName);
+  var sql = 'CREATE TEMP TABLE ' + tableName + '( LIKE ' + sourceTableName + ') ON COMMIT DROP';
+  logger.info('dataUtil', sql);
+  client.query(sql, [], callback);
 };
+
+exports.dropTable = function(client, tableName, callback) {
+  var sql = 'DROP TABLE ' + tableName;
+  client.query(sql, [], callback);
+}
 
 exports.csvToTable = function(client, csvStream, tableName, datamodel, callback) {
   var sql = "COPY " + tableName + "(" + datamodel.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL 'null')";
@@ -51,9 +57,15 @@ exports.csvToTable = function(client, csvStream, tableName, datamodel, callback)
 exports.tableToCsv = function(client, csvStream, tableName, datamodel, callback) {
   var sql = "COPY " + tableName + "(" + datamodel.columns.join(',') + ") TO STDOUT WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL 'null')";
   var pgStream = client.query(copyTo(sql));
-  var stream = eventStream.pipeline(pgStream, csvStream);
-  stream.on('error', callback);
-  stream.on('end', callback);
+  pgStream.pipe(csvStream);
+  pgStream.on('error', function(err) {
+    console.log('error!', err);
+    callback(err);
+  });
+  pgStream.on('end', function() {
+    console.log('end!');
+    callback();
+  });
 };
 
 exports.snapshotQuery = function(datamodel, sequenceNumberAlias) {

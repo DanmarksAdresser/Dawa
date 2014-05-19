@@ -12,23 +12,23 @@ CREATE TABLE  adgangsadresser (
   ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr integer NULL,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
+  oprettet timestamptz,
+  ikraftfra timestamptz,
+  aendret timestamptz,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
   wgs84lat double precision NULL,
   wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
-  kilde CHAR(1) NULL,
+  kilde integer NULL,
   placering char(1),
   tekniskstandard CHAR(2) NULL,
   tekstretning DECIMAL(5,2) NULL,
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
-  adressepunktaendringsdato TIMESTAMP NULL,
+  adressepunktaendringsdato timestamptz NULL,
   geom  geometry(point, 25832),
   tsv tsvector
 );
@@ -59,24 +59,24 @@ CREATE TABLE adgangsadresser_history(
   ejerlavkode INTEGER,
   ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
-  esrejendomsnr CHAR(6) NULL,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
+  esrejendomsnr integer NULL,
+  oprettet timestamptz,
+  ikraftfra timestamptz,
+  aendret timestamptz,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
   wgs84lat double precision NULL,
   wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
-  kilde CHAR(1) NULL,
+  kilde integer NULL,
   placering char(1),
   tekniskstandard CHAR(2) NULL,
   tekstretning DECIMAL(5,2) NULL,
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
-  adressepunktaendringsdato TIMESTAMP NULL
+  adressepunktaendringsdato timestamptz NULL
 );
 
 CREATE INDEX ON adgangsadresser_history(valid_to);
@@ -89,14 +89,14 @@ CREATE FUNCTION adgangsadresser_init_tsv()
   RETURNS VOID LANGUAGE SQL AS
   $$
   UPDATE adgangsadresser
-  SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
-            setweight(to_tsvector('adresser', COALESCE(supplerendebynavn, '')), 'C') ||
-            setweight(postnumre.tsv, 'D')
+  SET tsv = newtsvs.tsv
   FROM
-    postnumre, vejstykker
+    (select adgangsadresser.id, setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
+                                setweight(to_tsvector('adresser', COALESCE(supplerendebynavn, '')), 'C') ||
+                                setweight(postnumre.tsv, 'D') AS tsv FROM adgangsadresser left join postnumre on adgangsadresser.postnr = postnumre.nr
+      left join vejstykker ON adgangsadresser.kommunekode = vejstykker.kommunekode and adgangsadresser.vejkode = vejstykker.kode) as newtsvs
   WHERE
-    postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
-    vejstykker.kode = adgangsadresser.vejkode;
+      adgangsadresser.id = newtsvs.id and adgangsadresser.tsv is distinct from newtsvs.tsv;
   $$;
 
 DROP FUNCTION IF EXISTS adgangsadresser_init() CASCADE;

@@ -55,7 +55,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
 // Can be used for monitoring
   app.get('/sidsteSekvensnummer', function (req, res) {
-    dynamoEvents.getLatestQ(dd, TABLENAME,function(latest) {
+    dynamoEvents.getLatestQ(dd, TABLENAME).then(function(latest) {
       if (latest.Items.length > 0)
       {
         res.send(""+latest.Items[0].seqnr.N);
@@ -71,6 +71,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   app.post('/haendelse', function (req, res) {
+    if(!req.is('json')) {
+      return res.send(400, 'Request content type must be json');
+    }
     var haendelse = req.body;
     facadeLogger.info('Received haendelse', {haendelse:haendelse});
     var validationResult = validateSchemaQ(haendelse);
@@ -78,7 +81,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       facadeLoggerIncidents.error(validationResult.message, validationResult.details);
     }
     if(validationResult.ignore) {
-      return res.sendJson(200, validationResult);
+      return res.json(200, validationResult);
     }
     dynamoEvents.getLatestQ(dd, TABLENAME).then(function(latest) {
       return [latest, validateSequenceNumberQ(haendelse, latest)];

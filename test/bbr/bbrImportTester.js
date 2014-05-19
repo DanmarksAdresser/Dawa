@@ -51,7 +51,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       storeEventsInDynamo(dd, tableName, events, callback);
     },
     function(callback) {
-      importBbrEvents(dd, tableName, 9, callback);
+      importBbrEvents(dd, tableName, callback);
     }],
     function(err) {
       if(err) {

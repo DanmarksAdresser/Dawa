@@ -24,6 +24,9 @@ exports.adressebetegnelse = function(adresseRow, adgangOnly) {
     adresse += ' ' + adresseRow.husnr;
   }
   if(!adgangOnly) {
+    if(exports.notNull(adresseRow.etage) || exports.notNull(adresseRow.dør)) {
+      adresse += ',';
+    }
     if(adresseRow.etage) {
       adresse += ' ' + adresseRow.etage + '.';
     }
@@ -31,9 +34,9 @@ exports.adressebetegnelse = function(adresseRow, adgangOnly) {
       adresse += ' ' + adresseRow.dør;
     }
   }
-  adresse += '\n';
+  adresse += ', ';
   if(adresseRow.supplerendebynavn) {
-    adresse += adresseRow.supplerendebynavn + '\n';
+    adresse += adresseRow.supplerendebynavn + ', ';
   }
   adresse += adresseRow.postnr + ' ' + adresseRow.postnrnavn;
   return adresse;

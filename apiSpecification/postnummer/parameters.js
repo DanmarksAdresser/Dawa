@@ -23,7 +23,7 @@ module.exports = {
         multi: true
       },
       {
-        name: 'kommune',
+        name: 'kommunekode',
         multi: true
       },
       {

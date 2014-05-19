@@ -21,6 +21,16 @@ var optionSpec = {
   bbrFacadeUrl: [false, 'URL til bbr facaden der testes', 'string', 'http://localhost:3333']
 };
 
+function getLatestSequenceNumber(hostPort) {
+  return Q.nfcall(function (callback) {
+    return request.get(hostPort + '/sidsteSekvensnummer', function (err, response, body) {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, parseInt(body));
+    });
+  });
+}
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
 
   var hostPort = options.bbrFacadeUrl;
@@ -83,11 +93,23 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     );
   }
 
+  function verifyLatestSequenceNumber(expected) {
+    return function() {
+      return getLatestSequenceNumber(hostPort).then(function(sequenceNumber) {
+        winston.info('Verifying /sidsteSekvensnummer === 13');
+        if(sequenceNumber !== expected) {
+          throw new Error('Unexpected sequence number ' + expected);
+        }
+        return true;
+      });
+    };
+  }
+
   /*******************************************************************************
    ***** Main function ************************************************************
    *******************************************************************************/
 
-  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(test).done();
+  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(test).then(verifyLatestSequenceNumber(13)).done();
 });
 
 
@@ -154,8 +176,9 @@ TD.adgangsadresse = {
     "objekttype": 1,
     "oprettet":"1999-02-05T12:00:00+00:00",
     "aendret":"2000-02-05T12:00:00+00:00",
+    "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
     "adgangspunkt_id": "2CB20550-E0F9-405B-BB42-50D0CC4C44C1",
-    "adgangspunkt_kilde": "1",
+    "adgangspunkt_kilde": 1,
     "adgangspunkt_noejagtighedsklasse": "A",
     "adgangspunkt_tekniskstandard": "TD",
     "adgangspunkt_retning": 128.34,
@@ -184,7 +207,8 @@ TD.enhedsadresseFail = {
     "doer": null,
     "objekttype": 1,
     "oprettet":"1999-02-05T12:00:00+00:00",
-    "aendret":"2000-02-05T12:00:00+00:00"
+    "aendret":"2000-02-05T12:00:00+00:00",
+    "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00"
   }
 };
 TD.enhedsadresse = {
@@ -200,6 +224,7 @@ TD.enhedsadresse = {
     "doer": null,
     "objekttype": 1,
     "oprettet":"1999-02-05T12:00:00+00:00",
+    "ikrafttraedelsesdato":"2000-02-05T12:00:00+00:00",
     "aendret":"2000-02-05T12:00:00+00:00"
   }
 };
@@ -212,13 +237,12 @@ TD.postnummer = {
   "data": {
     "kommunekode": 101,
     "vejkode": 1010,
+    "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
                      "nummer": 5000},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
                      "nummer": 4000}
                    ]
   }
@@ -264,14 +288,13 @@ TD.supplerendebynavn = {
   "data": {
     "kommunekode": 101,
     "vejkode": 1010,
+    "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
-                     "nummer": 5000},
+                     "navn": "Østby"},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
-                     "nummer": 4000}
+                     "navn": "Vestby"}
                    ]
   }
 };
@@ -284,14 +307,13 @@ TD.supplerendebynavnFail = {
   "data": {
     "kommunekode": null,
     "vejkode": 1010,
+    "side": "ulige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
-                     "nummer": 5000},
+                     "navn": "Østby"},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
-                     "nummer": 4000}
+                     "navn": "Vestby"}
                    ]
   }
 };
@@ -303,14 +325,13 @@ TD.supplerendebynavnFail2 = {
   "data": {
     "kommunekode": null,
     "vejkode": 1010,
+    "side": "lige",
     "intervaller": [{"husnrFra": "11",
                      "husnrTil": "213",
-                     "side": "ulige",
-                     "nummer": 5000},
+                     "navn": "Østby"},
                     {"husnrFra": "10",
                      "husnrTil": "220",
-                     "side": "lige",
-                     "nummer": 4000}
+                     "navn": "Vestby"}
                    ]
   }
 };

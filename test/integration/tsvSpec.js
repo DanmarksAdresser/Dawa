@@ -4,7 +4,8 @@ var async = require('async');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 var dbapi = require('../../dbapi');
-var _ = require('underscore');
+
+var setupFixture = require('../util/testUtil').setupFixture;
 
 var testFixture = {
   vejstykke: [{
@@ -36,21 +37,6 @@ var testFixture = {
   }]
 };
 
-function setupFixture(client, fixture, callback){
-  async.eachSeries(_.keys(fixture),
-    function(datamodelName, callback) {
-      var objects = fixture[datamodelName];
-      var datamodel = datamodels[datamodelName];
-      async.eachSeries(objects, function(object, callback) {
-        crud.create(client, datamodel, object, callback);
-      }, callback);
-    }, function(err) {
-      if(err) {
-        throw err;
-      }
-      callback();
-    });
-}
 
 // all the tests in this file follows the following format:
 // first, an updated is performed (or the test is verifying something
@@ -240,6 +226,22 @@ var enhedsadresseTests = [{
   }
 }];
 
+var supplerendebynavneTests = [{
+  description: 'Upon insertion, the TSV column should be set',
+  verify: {
+    model: 'supplerendebynavn',
+    query: {
+      supplerendebynavn: 'Testby',
+      kommunekode: 999,
+      postnr: 9998
+
+    },
+    expect: function(updated) {
+      expect(updated.tsv).toBe("'testby':1");
+    }
+  }
+}];
+
 function verify(testSpec, client, callback) {
   var updated;
   async.series([
@@ -312,5 +314,8 @@ describe('PostgreSQL tsv columns', function() {
   });
   describe('update of tsv column for enhedsadresser', function() {
     verifyAll(function() { return client; } , enhedsadresseTests);
+  });
+  describe('update of tsv column for supplerendebynavne', function() {
+    verifyAll(function() { return client; } , supplerendebynavneTests);
   });
 });
