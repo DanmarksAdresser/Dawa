@@ -263,7 +263,7 @@ exports.loadCsvOnly = function(client, options, callback) {
       var vejstykkerStream = fileStreams.vejstykke();
       loadCsv(client, vejstykkerStream, {
         tableName : tablePrefix + 'Vejstykker',
-        columns : ['kode', 'kommunekode', 'oprettet', 'aendret', 'vejnavn'],
+        columns : ['kode', 'kommunekode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn'],
         transformer: transformers.vejstykke
 
       }, callback);

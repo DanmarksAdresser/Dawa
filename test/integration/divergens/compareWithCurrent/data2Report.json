@@ -13,6 +13,10 @@
           "vejnavn": {
             "expected": "Ahlemannsgade",
             "actual": "Ahlmannsgade"
+          },
+          "adresseringsnavn": {
+            "expected": "Ahlemannsgade",
+            "actual": "Ahlmannsgade"
           }
         },
         "rectified": true

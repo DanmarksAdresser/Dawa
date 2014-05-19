@@ -65,9 +65,9 @@ BEGIN
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
     INSERT INTO vejstykker_history(
-      valid_from, kommunekode, kode, oprettet, aendret, vejnavn)
+      valid_from, kommunekode, kode, oprettet, aendret, vejnavn, adresseringsnavn)
     VALUES (
-      seqnum, NEW.kommunekode, NEW.kode, NEW.oprettet, NEW.aendret, NEW.vejnavn);
+      seqnum, NEW.kommunekode, NEW.kode, NEW.oprettet, NEW.aendret, NEW.vejnavn, NEW.adresseringsnavn);
   END IF;
   INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'vejstykke', optype);
   RETURN NULL;

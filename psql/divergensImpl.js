@@ -28,7 +28,9 @@ function callSequentially(funcs, initialValue) {
   return funcs.reduce(Q.when, Q(initialValue));
 }
 
-function getDawaSequenceNumber(client, udtraekOptions, compareWithCurrent) {
+function getDawaSequenceNumber(client, udtraekOptions, comparisonOptions) {
+  var compareWithCurrent  = comparisonOptions.compareWithCurrent;
+  var forceDawaSequenceNumber = comparisonOptions.forceDawaSequenceNumber;
 
   function getBbrSequenceNumber () {
     var fileStreams = loadAdresseData.bbrFileStreams(udtraekOptions.dataDir, udtraekOptions.filePrefix);
@@ -54,6 +56,10 @@ function getDawaSequenceNumber(client, udtraekOptions, compareWithCurrent) {
 
   if(compareWithCurrent) {
     return getNextDawaSequenceNumber();
+  }
+  else if (forceDawaSequenceNumber !== undefined) {
+    console.log("FORCING DAWA SEQUENCE NUMBER " + forceDawaSequenceNumber);
+    return forceDawaSequenceNumber;
   }
   else {
     return getDawaSequenceNumberForBbrEvent(getBbrSequenceNumber());
@@ -163,7 +169,7 @@ function unlessUpdatedLater(client, datamodel, dawaSequenceNumber, id, func) {
 exports.rectifyAll = function(client, report) {
   var ops = ['vejstykke', 'adgangsadresse', 'enhedsadresse'].map(function(datamodelName) {
     return function() {
-      return exports.rectifyDifferences(client, datamodels[datamodelName], report[datamodelName], report.dawaSequenceNumber);
+      return exports.rectifyDifferences(client, datamodels[datamodelName], report[datamodelName], report.meta.dawaSequenceNumber);
     };
   });
   return callSequentially(ops).then(function() {
@@ -279,9 +285,10 @@ function dropTempTables(client, tablePrefix) {
   return callSequentially(ops);
 }
 
-exports.divergenceReport = function (client, loadAdresseDataOptions, compareWithCurrent) {
+exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonOptions) {
+  console.log("Comparison options: " + JSON.stringify(comparisonOptions));
   var expectedTablePrefix = 'expected_';
-  var dawaSequenceNumber = getDawaSequenceNumber(client, loadAdresseDataOptions, compareWithCurrent);
+  var dawaSequenceNumber = getDawaSequenceNumber(client, loadAdresseDataOptions, comparisonOptions);
 
   var loadDataPromise = createTempTables(client, expectedTablePrefix).then(function () {
     return loadDataIntoTempTables(client, loadAdresseDataOptions, expectedTablePrefix);
@@ -290,7 +297,6 @@ exports.divergenceReport = function (client, loadAdresseDataOptions, compareWith
   return Q.spread([dawaSequenceNumber, loadDataPromise], function (dawaSequenceNumber) {
     return ['vejstykke', 'adgangsadresse', 'enhedsadresse'].map(function (dataModelName) {
       return function (fullReport) {
-        console.log(JSON.stringify(fullReport));
         return computeDifferenceReport(client, datamodels[dataModelName], dawaSequenceNumber, expectedTablePrefix + datamodels[dataModelName].table)
           .then(function (entityReport) {
             fullReport[dataModelName] = entityReport;
