@@ -3,6 +3,7 @@
 var express        = require("express");
 var fs = require('fs');
 var logger = require('./logger');
+var memwatch = require('memwatch');
 var statistics = require('./statistics');
 var Q = require('q');
 var _ = require('underscore');
@@ -12,6 +13,25 @@ var count = require('os').cpus().length;
 var uuid = require('node-uuid');
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
+
+/**
+ * We log memory statistics, so we can monitor memory consumption in splunk
+ */
+memwatch.on('stats', function(stats) {
+  var logMeta = {
+    pid: process.pid,
+    current_base: stats.current_base,
+    estimated_base: stats.estimated_base,
+    min: stats.min,
+    max: stats.max,
+    usage_trend: stats.usage_trend
+  };
+  logger.info('memory', 'stats', logMeta);
+  if(stats.current_base > 768 * 1024 * 1024) {
+    logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
+    process.exit(1);
+  }
+});
 
 function asInteger(stringOrNumber) {
   return _.isNumber(stringOrNumber) ? stringOrNumber : parseInt(stringOrNumber);
@@ -57,7 +77,7 @@ function setupWorker() {
   app.use(express.compress( {
     memLevel: 3
   }));
-  app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
+  app.use(express.static(__dirname + '/public', {maxAge: 10000}));
 
 
   var listenPort = process.env.listenPort || 3000;
