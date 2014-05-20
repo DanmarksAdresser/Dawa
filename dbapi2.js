@@ -161,11 +161,15 @@ module.exports = function(options) {
 
   var query = function(client, sqlParts, cb) {
     var query = createQuery(sqlParts);
-    logger.info('sql', 'executing sql query', {sql: query.sql, params: query.params});
+    queryRaw(client, query.sql, query.params, cb);
+  };
+
+  var queryRaw = function(client, sql, params, cb) {
+    logger.info('sql', 'executing sql query', {sql: sql, params: params});
     var before = Date.now();
     client.query(
-      query.sql,
-      query.params,
+      sql,
+      params,
       function (err, result) {
         statistics.emit('psql_query', Date.now() - before, err, { query: query });
         if(err) { return cb(err); }
@@ -177,6 +181,7 @@ module.exports = function(options) {
     var query = createQuery(sqlParts);
     streamingQueryUsingCursor(client, query.sql, query.params, cb);
   };
+
 
   function getPoolStatus() {
     var pool = pg.pools.getOrCreate(connString);
@@ -196,7 +201,9 @@ module.exports = function(options) {
     withRollbackTransaction: withRollbackTransaction,
     withWriteTransaction: withWriteTransaction,
     query: query,
+    queryRaw: queryRaw,
     stream: stream,
+    streamRaw: streamingQueryUsingCursor,
     getPoolStatus: getPoolStatus
   };
 };

@@ -3,75 +3,64 @@
 var _ = require('underscore');
 
 var datamodels = { vejstykke: require('../../crud/datamodel').vejstykke };
+var dbapi = require('dbapi');
 var mappings = require('./columnMappings');
+var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 
 // maps column names to field names
 var columnNameMaps = _.reduce(mappings, function(memo, columnSpec, key) {
   memo[key] = _.reduce(columnSpec, function(memo, col) {
-    memo[col.column] = memo[col.name] || col.name;
+    memo[col.column || col.name] = memo[col.name] || col.name;
     return memo;
   }, {});
   return memo;
 }, {});
 
-function createSqlString(dataModelName, datamodel, seqFromAlias, seqToAlias) {
-  function whereClause(column, seqFromAlias, seqToAlias) {
-    if(_.isUndefined(seqFromAlias) && _.isUndefined(seqToAlias)) {
-      return '';
-    }
-    else {
-      var clauses = [];
-      if(!_.isUndefined(seqFromAlias)) {
-        clauses.push(column + ' >= ' + seqFromAlias);
-      }
-      if(!_.isUndefined(seqToAlias)) {
-        clauses.push(column + ' <= ' + seqToAlias);
-      }
-      return clauses.join(' AND ');
-    }
-  }
-  var hasClause = !_.isUndefined(seqFromAlias) || !_.isUndefined(seqToAlias);
-
+var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
+  var datamodelName = datamodel.name;
   function selectFields() {
     return datamodel.columns.map(function(columnName) {
-      return columnName + ' AS ' + columnNameMaps[dataModelName][columnName];
-    }).join(', ');
+      return 'COALESCE(i.'+columnName + ', d.'+columnName + ') AS ' + columnNameMaps[datamodelName][columnName];
+    });
   }
 
-  return "(SELECT h.operation as operation, h.time as time, valid_from AS sekvensnummer, " + selectFields() +
-    "  FROM vejstykker_history main JOIN transaction_history h ON (main.valid_from = h.sequence_number)) " + (hasClause ? " WHERE " + whereClause('main.valid_from', seqFromAlias, seqToAlias) : '') + " UNION " +
-    "(SELECT 'delete' AS type, h.time as time, valid_to AS sekvensnummer, " + datamodel.columns.join(', ') + " " +
-    " FROM vejstykker_history main JOIN transaction_history h ON (main.valid_to = h.sequence_number) " +
-    " WHERE NOT EXISTS(SELECT 1 FROM vejstykker_history h2 WHERE " +
-    (hasClause ? whereClause('main.valid_from', seqFromAlias, seqToAlias) + ' AND ' : '') +
-    " h2.valid_from = main.valid_to AND main.kommunekode = h2.kommunekode AND main.kode = h2.kode)) ORDER BY sekvensnummer;";
-}
-
-var sqlModels = _.reduce(datamodels, function(memo, datamodel, dataModelName) {
-  memo[dataModelName] = {
+  var baseQuery = function () {
+    var query = {
+      select: ['h.operation as operation', 'h.time as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
+      from: [" FROM transaction_history h" +
+        " LEFT JOIN " + datamodel.table + "_history i ON (h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from)" +
+        " LEFT JOIN " + datamodel.table + "_history d ON (h.operation = 'delete' AND h.sequence_number = d.valid_to)"],
+      whereClauses: [],
+      orderClauses: ['sekvensnummer'],
+      sqlParams: []
+    };
+    var datamodelAlias = dbapi.addSqlParameter(query, datamodelName);
+    dbapi.addWhereClause(query, "h.entity = " + datamodelAlias);
+    return query;
+  };
+  memo[datamodelName] = {
     allSelectableFieldNames: function() {
-      return ['sekvensnummer', 'operation'].concat(_.map(datamodel.columns, function(colName) {
-        return columnNameMaps[dataModelName][colName];
+      return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.map(datamodel.columns, function(colName) {
+        return columnNameMaps[datamodelName][colName];
       }));
     },
     createQuery: function(fieldNames, params) {
-      var seqFromAlias, seqToAlias, sqlParams = [];
+      var query = baseQuery();
       if(params.sekvensnummerfra) {
-        sqlParams.push(params.sekvensnummerfra);
-        seqFromAlias = sqlParams.length;
+        var fromAlias = dbapi.addSqlParameter(query, params.sekvensnummerfra);
+        dbapi.addWhereClause(query, 'h.sequence_number >= ' + fromAlias);
       }
       if(params.sekvensnummertil) {
-        sqlParams.push(params.sekvensnummertil);
-        seqToAlias = sqlParams.length;
+        var toAlias = dbapi.addSqlParameter(query, params.sekvensnummertil);
+        dbapi.addWhereClause(query, 'h.sequence_number <= ' + toAlias);
       }
-      return {
-        sql: createSqlString(dataModelName, datamodel, seqFromAlias, seqToAlias),
-        params: sqlParams
-      };
+
     }
   };
   return memo;
 }, {});
+
+module.exports = sqlModels;
 
 var registry = require('../registry');
 _.each(sqlModels, function(sqlModel, key) {

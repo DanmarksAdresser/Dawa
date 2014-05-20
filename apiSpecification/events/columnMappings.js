@@ -1,6 +1,6 @@
 "use strict";
 
-exports.mappings = {
+module.exports = {
   vejstykke: [{
     name: 'kode'
   }, {
@@ -10,6 +10,11 @@ exports.mappings = {
     column: 'vejnavn'
   }, {
     name: 'adresseringsnavn'
+  }, {
+    name: 'oprettet'
+  }, {
+    name: 'ændret',
+    column: 'aendret'
   }]
 };
 

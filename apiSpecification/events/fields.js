@@ -8,7 +8,7 @@ var mappings = require('./columnMappings');
 
 var d = require('../util').d;
 
-var fields = _.reduce(sqlModels, function(memo, sqlModel, dataModelName) {
+var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
   var commonFields = [{
     name: 'sekvensnummer'
   }, {
@@ -18,14 +18,14 @@ var fields = _.reduce(sqlModels, function(memo, sqlModel, dataModelName) {
     name: 'operation'
   }];
 
-  var entityFields = _.map(mappings[dataModelName], function(columnMapping) {
+  var entityFields = _.map(mappings[datamodelName], function(columnMapping) {
     return {
       name: columnMapping.name,
       selectable: true
     };
   });
 
-  memo[dataModelName] = commonFields.concat(entityFields);
+  memo[datamodelName] = commonFields.concat(entityFields);
   return memo;
 }, {});
 
