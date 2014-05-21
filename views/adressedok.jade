@@ -18,7 +18,7 @@ block content
               li <a href='#adresseopslag'>Adresseopslag</a>
               li <a href='#adresseautocomplete'>Adresser autocomplete</a>
               li <a href='#adressedata'>Beskrivelse af adressedata</a>
-
+          //
             li(data-toggle='collapse', data-target='#adressehaendelser').nav-header Adressehændelser<br>(stadig under udvikling)
             ul#adressehaendelser.nav.nav-list
               li <a href='#adressehaendelsessoegning'>Adressehændelsessøgning</a>
@@ -51,6 +51,7 @@ block content
             p Web API'et udstiller for hver adresse følgende informationer:
             +documentSchema(jsonSchemas.adresse)
 
+          //
             div.page-header
             h2.anchor-header#adressehaendelser Adressehændelser
             p Ikke med i prototypen: Adresser oprettes, ændres og nedlægges. Nedenfor beskrevne funktionalitet gør det muligt at følge disse hændelser. Hændelser kan f.eks. anvendes til at etablere en opdateret kopi af adresserdata. Hvordan dette gøres kan du læse om
