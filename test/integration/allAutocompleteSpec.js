@@ -36,11 +36,11 @@ describe('Alle autocomplete ressourcer skal virke', function() {
           rawQueryParams.q = sampleQueryParam;
           var parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(resource.queryParameters, 'name'));
           expect(parseResult.errors.length).toBe(0);
-          var sqlParts = resource.sqlModel.createQuery(_.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params);
+          var query = resource.sqlModel.createQuery(_.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params);
           var mapper = autocompleteRepresentation.mapper("BASE_URL", parseResult.params, false);
           dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
             if(err) throw 'unable to open connection';
-            dbapi.query(client, sqlParts, function(err, rows) {
+            dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
               transactionDone();
               expect(err).toBeFalsy();
               expect(rows.length).toBeGreaterThan(0);

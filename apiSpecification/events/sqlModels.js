@@ -3,7 +3,7 @@
 var _ = require('underscore');
 
 var datamodels = { vejstykke: require('../../crud/datamodel').vejstykke };
-var dbapi = require('dbapi');
+var dbapi = require('../../dbapi');
 var mappings = require('./columnMappings');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 

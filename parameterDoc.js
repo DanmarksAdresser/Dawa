@@ -709,6 +709,24 @@ var dagiExamples = {
   _.extend(module.exports, doc.resources);
 });
 
+['vejstykke'].forEach(function(replicatedModelName) {
+  var nameAndKey = registry.findWhere({
+    entityName: replicatedModelName,
+    type: 'nameAndKey'
+  });
+  exports['/replikering/' + nameAndKey.plural + '/haendelser'] = {
+    subtekst: 'Hændelser for ' + nameAndKey.plural + '.',
+    parameters: [{
+      name: 'sekvensnummerfra',
+      doc: 'Heltal. Returner hændelser med sekvensnummer større eller lig det angivne'
+    },{
+      name: 'sekvensnummertil',
+      doc: 'Heltal. Returner hændelser med sekvensnummer mindre eller lig det angivne'
+    }]
+  };
+
+});
+
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
   adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources);
