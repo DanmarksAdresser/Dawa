@@ -4,6 +4,7 @@ var express        = require("express");
 var fs = require('fs');
 var logger = require('./logger');
 var memwatch = require('memwatch');
+require('heapdump');
 var statistics = require('./statistics');
 var Q = require('q');
 var _ = require('underscore');
