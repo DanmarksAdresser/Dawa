@@ -3,6 +3,8 @@
 var express        = require("express");
 var fs = require('fs');
 var logger = require('./logger');
+var memwatch = require('memwatch');
+require('heapdump');
 var statistics = require('./statistics');
 var Q = require('q');
 var _ = require('underscore');
@@ -13,6 +15,25 @@ var uuid = require('node-uuid');
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
+/**
+ * We log memory statistics, so we can monitor memory consumption in splunk
+ */
+memwatch.on('stats', function(stats) {
+  var logMeta = {
+    pid: process.pid,
+    current_base: stats.current_base,
+    estimated_base: stats.estimated_base,
+    min: stats.min,
+    max: stats.max,
+    usage_trend: stats.usage_trend
+  };
+  logger.info('memory', 'stats', logMeta);
+  if(stats.current_base > 768 * 1024 * 1024) {
+    logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
+    process.exit(1);
+  }
+});
+
 function asInteger(stringOrNumber) {
   return _.isNumber(stringOrNumber) ? stringOrNumber : parseInt(stringOrNumber);
 }
@@ -20,6 +41,7 @@ function asInteger(stringOrNumber) {
 function socketTimeoutMiddleware(timeoutMillis) {
   return function(req, res, next) {
     res.socket.setTimeout(timeoutMillis);
+    res.socket.setKeepAlive(true, 1000);
     next();
   };
 }
@@ -57,7 +79,7 @@ function setupWorker() {
   app.use(express.compress( {
     memLevel: 3
   }));
-  app.use(express.static(__dirname + '/public', {maxAge: 86400000}));
+  app.use(express.static(__dirname + '/public', {maxAge: 10000}));
 
 
   var listenPort = process.env.listenPort || 3000;
@@ -78,7 +100,7 @@ function setupMaster() {
     disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean'],
     pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 25],
     pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
-    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 10000]
+    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 30000]
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
