@@ -25,15 +25,15 @@ module.exports = {
       {
         name: 'kommunekode',
         multi: true
-      },
-      {
-        name: 'stormodtagere',
-        defaultValue: 'false',
-        schema: {
-          "enum": ['true', 'false']
-        }
       }
-    ])
+    ]),
+  stormodtagerFilter: normalizeParameters([
+    {
+      name: 'stormodtagere',
+      defaultValue: "false",
+      type: 'boolean'
+    }
+  ])
 };
 
 registry.addMultiple('postnummer', 'parameterGroup', module.exports);

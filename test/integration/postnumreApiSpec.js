@@ -54,4 +54,20 @@ describe("PostnumreApi", function() {
     });
   });
 
+  it('Jeg kan hente stormodtagerpostnumre', function(done) {
+    request.get({url: "http://localhost:3000/postnumre?stormodtagere=true", json: true}, function(error, response, result) {
+      var fandtStormodtager = _.some(result, function(postnummer) {
+        return _.isArray(postnummer.stormodtageradresser) && postnummer.stormodtageradresser.length > 0;
+      });
+      expect(fandtStormodtager).toBeTruthy();
+      done();
+    });
+  });
+  it('Jeg kan hente et enkelt stormodtagerpostnummer', function(done) {
+    request.get({url: "http://localhost:3000/postnumre/1786", json: true}, function(error, response, result) {
+      expect(result.nr).toBe('1786');
+      done();
+    });
+  });
+
 });

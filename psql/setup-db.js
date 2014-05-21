@@ -44,7 +44,7 @@ cli.main(function(args, options) {
   cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
 
   var scriptDir = __dirname + '/schema';
-  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, callback) {
+  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, callback) {
     if(err) {
       exitOnErr(err);
     }

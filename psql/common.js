@@ -111,7 +111,7 @@ exports.execSQL = function(sql, client, echo, done){
   }
 };
 
-exports.withWriteTranaction = function (connString, cb) {
+exports.withWriteTransaction = function (connString, cb) {
   var client = new pg.Client(connString);
   return client.connect(function (err) {
     if (err) {

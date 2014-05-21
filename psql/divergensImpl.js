@@ -285,6 +285,8 @@ function dropTempTables(client, tablePrefix) {
   return callSequentially(ops);
 }
 
+exports.computeTableDifferences = computeTableDifferences;
+
 exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonOptions) {
   console.log("Comparison options: " + JSON.stringify(comparisonOptions));
   var expectedTablePrefix = 'expected_';

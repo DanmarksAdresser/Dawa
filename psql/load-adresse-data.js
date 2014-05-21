@@ -21,7 +21,7 @@ function exitOnErr(err){
   }
 }
 cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'dataDir', 'format'], function(args, options) {
-  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, commit) {
+  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     loadAdresseDataImpl.load(client, options, function(err) {
       exitOnErr(err);

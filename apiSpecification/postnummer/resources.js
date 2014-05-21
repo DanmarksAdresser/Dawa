@@ -13,12 +13,14 @@ module.exports = [
   resourcesUtil.queryResourceSpec(nameAndKey, {
       propertyFilter: parameters.propertyFilter,
       search: commonParameters.search,
-      crs: commonParameters.crs
+      crs: commonParameters.crs,
+      stormodtagerFilter: parameters.stormodtagerFilter
     }, representations,
     sqlModel),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
-    autocomplete: commonParameters.autocomplete
+    autocomplete: commonParameters.autocomplete,
+    stormodtagerFilter: parameters.stormodtagerFilter
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {crs : commonParameters.crs }, representations, sqlModel)
 ];

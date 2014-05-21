@@ -62,6 +62,7 @@ exports.update = function(client, datamodel, object, callback) {
     return object[column];
   });
   var params = updateParams.concat(keyParams);
+  winston.info(sql);
   client.query(sql, params, callback);
 };
 

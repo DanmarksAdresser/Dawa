@@ -29,7 +29,7 @@ cli.main(function(args, options) {
   var scripts = _.map(args, function(arg) {
     return fs.readFileSync(args[0], {encoding: 'utf8'});
   });
-  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, commit) {
+  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     client.on('error', function(err) {
       exitOnErr(err);

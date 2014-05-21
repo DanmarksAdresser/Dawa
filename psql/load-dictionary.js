@@ -17,7 +17,7 @@ function exitOnErr(err){
   }
 }
 cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(args, options) {
-  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, commit) {
+  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     async.series([
       function(callback){

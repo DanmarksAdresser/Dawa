@@ -21,4 +21,6 @@ before_script:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest node psql/setup-db.js
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaempty node psql/setup-db.js
   - node psql/load-adresse-data.js --dataDir=test/data --format=bbr
+  - node psql/updatePostnumre.js data/postnumre.csv
+  - node psql/loadStormodtagere.js data/stormodtagere.csv
   - psql -U travis dawaintegrationtest < psql/load-dagi-test-data.sql

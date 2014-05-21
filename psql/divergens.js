@@ -26,7 +26,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
     throw new Error('Hvis format ikke er bbr skal der angives et sekvensnummer for udtrækket');
   }
 
-  sqlCommon.withWriteTranaction(options.pgConnectionUrl, function(err, client, done) {
+  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, done) {
     var loadAdresseDataOptions = {
       dataDir: options.dataDir,
       filePrefix: options.filePrefix,

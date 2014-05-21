@@ -11,7 +11,7 @@ var _           = require('underscore');
 exports.parseParameters = function(params, parameterSpec) {
   _.each(_.keys(parameterSpec),
          function(name){
-           if (!params[name] && parameterSpec[name].defaultValue){
+           if (!params[name] && parameterSpec[name].defaultValue !== undefined){
              params[name] = parameterSpec[name].defaultValue;
            }
          });
@@ -69,6 +69,17 @@ function parseParameterType(valString, type) {
     }
     return parseFloat(valString);
   }
+  if(type === 'boolean') {
+    if(valString === 'true') {
+      return true;
+    }
+    else if (valString === 'false') {
+      return false;
+    }
+    else {
+      throw 'notBoolean';
+    }
+  }
   if(type === 'json') {
     try {
       return JSON.parse(valString);
@@ -77,6 +88,7 @@ function parseParameterType(valString, type) {
       throw 'notJson';
     }
   }
+
   throw 'Internal error: Invalid type ' + type + ' specified for parameter';
 }
 

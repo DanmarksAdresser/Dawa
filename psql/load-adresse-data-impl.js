@@ -38,19 +38,6 @@ function loadCsv(client, inputStream, options, callback) {
 }
 
 var legacyTransformers = {
-  postnummer: function(row, idx) {
-    console.log(JSON.stringify(row));
-    if(idx % 100 === 0) {
-      console.log(idx + ", " + row.PostCodeIdentifier);
-    }
-    var result = {
-      nr: row.PostCodeIdentifier,
-      navn: row.DistrictName,
-      stormodtager: 0
-    };
-    console.log(JSON.stringify(result));
-    return  result;
-  },
   vejstykke: function(row, idx) {
     if(idx % 1000 === 0) {
       console.log(idx);
@@ -141,11 +128,6 @@ function transformDate(bbrDateWithoutTz) {
 }
 
 var bbrTransformers = {
-  postnummer: function(row) {
-    var result = transformBbr(bbrFieldMappings.postnummer)(row);
-    result.stormodtager = 0;
-    return result;
-  },
   vejstykke: function(row) {
     var result = transformBbr(bbrFieldMappings.vejstykke)(row);
     result.oprettet = transformDate(result.oprettet);
@@ -183,7 +165,6 @@ var bbrFileNames = {
   vejstykke: 'Vejnavn.CSV',
   adgangsadresse: 'Adgangsadresse.CSV',
   enhedsadresse: 'Enhedsadresse.CSV',
-  postnummer: 'Postnummer.CSV',
   meta: 'SenesteHaendelse.CSV'
 };
 
@@ -191,7 +172,6 @@ var legacyFileNames = {
   vejstykke: 'RoadName.csv.gz',
   adgangsadresse: 'AddressAccess.csv.gz',
   enhedsadresse: 'AddressSpecific.csv.gz',
-  postnummer: 'PostCode.csv.gz'
 };
 
 var bbrFileStreams = function(dataDir, filePrefix) {
@@ -249,15 +229,6 @@ exports.loadCsvOnly = function(client, options, callback) {
   var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
   var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
   async.series([
-    function(callback) {
-      console.log("Indlæser postnumre....");
-      var postnumreStream = fileStreams.postnummer();
-      loadCsv(client, postnumreStream, {
-        tableName : tablePrefix + 'Postnumre',
-        columns : ['nr', 'navn', 'stormodtager'],
-        transformer: transformers.postnummer
-      }, callback);
-    },
     function(callback) {
       console.log("Indlæser vejstykker....");
       var vejstykkerStream = fileStreams.vejstykke();
@@ -322,3 +293,4 @@ exports.load = function(client, options, callback) {
 
 exports.bbrFileStreams = bbrFileStreams;
 exports.loadBbrMeta = loadBbrMeta;
+exports.loadCsv = loadCsv;

@@ -64,7 +64,7 @@ exports.json = {
         nr:  kode4String(row.nr),
         navn: row.navn,
         stormodtageradresser: row.stormodtageradresser ? row.stormodtageradresser : null,
-        kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : null
+        kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : []
       };
     };
   }

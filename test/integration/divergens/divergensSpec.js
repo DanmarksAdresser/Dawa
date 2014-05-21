@@ -23,7 +23,7 @@ describe('divergenscheck', function() {
     var data2ReportSecondRun = JSON.parse(fs.readFileSync(__dirname + '/compareWithCurrent/data2ReportSecondRun.json'));
 
     it('Should correctly detect and rectify differences', function(done) {
-      sqlCommon.withWriteTranaction(process.env.pgEmptyDbUrl, function(err, client, transactionDone) {
+      sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function(err, client, transactionDone) {
         divergensImpl.divergenceReport(client, data1Options, {
           compareWithCurrent: true
         }).then(function(report) {
@@ -82,7 +82,7 @@ describe('divergenscheck', function() {
      * and gade3 is modified, which should not be rectified since gade 3 has sequence number 3.
      */
     it('If an object has been modified later than the sequence number indicated, it will not be rectified', function (done) {
-      sqlCommon.withWriteTranaction(process.env.pgEmptyDbUrl, function (err, client, transactionDone) {
+      sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function (err, client, transactionDone) {
         return divergensImpl.divergenceReport(client, initialOptions, {
           compareWithCurrent: true
         }).then(function (report) {

@@ -258,7 +258,16 @@ exports.reverseGeocodingWithin = function() {
         dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832))");
     }
   };
-}
+};
+
+exports.postnummerStormodtagerFilter = function() {
+  return function(sqlParts, params) {
+    console.log(JSON.stringify(params));
+    if(params.stormodtagere !== undefined && !params.stormodtagere) {
+      dbapi.addWhereClause(sqlParts, 'NOT stormodtager');
+    }
+  };
+};
 
 var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
 var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
