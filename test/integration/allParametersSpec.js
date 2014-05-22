@@ -303,11 +303,11 @@ describe('Alle propertyFilter parametre skal virke', function() {
             rawQueryParams[paramName] = sampleValue;
             var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(propertyFilterParameters, 'name'));
             expect(parseResult.errors.length).toBe(0);
-            var sqlParts = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
-            sqlParts.limit = 100;
+            parseResult.params.per_side=100;
+            var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
             dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
               if(err) throw 'unable to open connection';
-              dbapi.query(client, sqlParts, function(err, rows) {
+              dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
                 transactionDone();
                 expect(err).toBeFalsy();
                 expect(rows.length).toBeGreaterThan(0);

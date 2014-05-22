@@ -2,6 +2,8 @@
 
 var _ = require('underscore');
 
+var dbapi = require('../../../dbapi');
+
 function existy(obj) {
   return !_.isUndefined(obj) && !_.isNull(obj);
 }
@@ -74,7 +76,7 @@ exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
       parameterImpls.forEach(function(parameterImpl) {
         parameterImpl(sqlParts, params);
       });
-      return sqlParts;
+      return dbapi.createQuery(sqlParts);
     }
   };
 };

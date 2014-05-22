@@ -118,8 +118,8 @@ describe('Validering af JSON-formatteret output', function() {
       console.log('validerer alle ' + nameAndKey.plural);
       var schema = jsonRepresentation.schema;
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-        var sqlParts = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
-        dbapi.query(client, sqlParts, function(err, rows) {
+        var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
+        dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
             expect(schemaValidationUtil.isSchemaValid(json, schema)).toBe(true);
@@ -133,8 +133,8 @@ describe('Validering af JSON-formatteret output', function() {
       var schema = jsonRepresentation.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-        var sqlParts = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
-        dbapi.query(client, sqlParts, function(err, rows) {
+        var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
+        dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
             recordVisitedValues(json, schema, valuesSeen);

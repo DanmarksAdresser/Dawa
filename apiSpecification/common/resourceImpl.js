@@ -110,8 +110,7 @@ exports.internal = {
   parseAndProcessParameters: parseAndProcessParameters
 };
 
-function logPostgresQueryError(req, sqlParts, err) {
-  var query = dbapi.createQuery(sqlParts);
+function logPostgresQueryError(req, query, err) {
   logger.error('sql', 'query failed', {url: req.url, sql: query.sql, params: query.params, error: err});
 }
 
@@ -137,7 +136,7 @@ exports.createExpressHandler = function(resourceSpec) {
     }
     logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
     // build the query
-    var sqlParts = spec.sqlModel.createQuery(_.pluck(representation.fields, 'name'), params);
+    var query = spec.sqlModel.createQuery(_.pluck(representation.fields, 'name'), params);
 
     // create a mapper function that maps results from the SQL layer to the requested representation
     var mapObject = representation.mapper(paths.baseUrl(req), params, spec.singleResult);
@@ -146,10 +145,10 @@ exports.createExpressHandler = function(resourceSpec) {
         // create a function that can write the object to the HTTP response based on the format requrested by the
         // client
         var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, representation);
-        dbapi.query(client, sqlParts, function(err, rows) {
+        dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
           done(err);
           if (err) {
-            logPostgresQueryError(req, sqlParts, err);
+            logPostgresQueryError(req, query, err);
             return sendPostgresQueryError(res, err);
           } else if (rows.length > 1) {
             sendInternalServerError(res, "The request resulted in more than one response", rows);
@@ -169,10 +168,10 @@ exports.createExpressHandler = function(resourceSpec) {
           params.callback,
           params.srid,
           representation);
-        dbapi.stream(client, sqlParts, function(err, stream) {
+        dbapi.streamRaw(client, query.sql, query.params, function(err, stream) {
           if(err) {
             done(err);
-            logPostgresQueryError(req, sqlParts, err);
+            logPostgresQueryError(req, query, err);
             return sendPostgresQueryError(res, err);
           }
 
