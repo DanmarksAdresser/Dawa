@@ -48,17 +48,10 @@ exports.json = {
         $ref: '#/definitions/VejstykkeKodeOgNavn'
       },
       'husnr'  : {
-        description: 'Husnummer der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +
-          ' Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A..Z, og fastsættes i stigende orden, ' +
-          'normalt med lige og ulige numre på hver side af vejen. Eksempel: "11", "12A", "187B".',
-        type: 'string',
-        pattern: '([1-9]|[1-9]\\d|[1-9]\\d{2})[A-Z]?'
+        $ref: '#/definitions/husnr'
       },
       'supplerendebynavn': {
-        description: 'Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af ' +
-          'kommunen for at præcisere adressens beliggenhed indenfor postnummeret. ' +
-          'Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.',
-        type: nullableType('string'), maxLength: 34
+        $ref: '#/definitions/Nullablesupplerendebynavn'
       },
       'postnummer': {
         description: 'Postnummeret som adressen er beliggende i.',
@@ -347,8 +340,38 @@ exports.autocomplete = {
         type: 'string'
       },
       adgangsadresse: {
-        description: 'Link og id for adgangsadressen.',
-        $ref: '#/definitions/AdgangsadresseRef'
+        description: 'Udvalgte informationer for adgangsadressen.',
+        properties: {
+          href: {
+            description: 'Adgangsadressens unikke URL.',
+            type: 'string'
+          },
+          id: {
+            description: 'Adgangsadressens unikke UUID.',
+            $ref: '#/definitions/UUID'
+          },
+          vejnavn: {
+            description: 'Vejnavnet',
+            type: nullableType('string')
+          },
+          husnr: {
+            description: 'Husnummer',
+            $ref: '#/definitions/husnr'
+          },
+          supplerendebynavn: {
+            $ref: '#/definitions/Nullablesupplerendebynavn'
+          },
+          postnr: {
+            description: 'Postnummer',
+            type: nullableType('string')
+          },
+          postnrnavn: {
+            description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
+              'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
+            type: nullableType('string')
+          }
+        },
+        docOrder: ['id', 'href', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn']
       }
     },
     docOrder: ['tekst', 'adgangsadresse']
@@ -363,11 +386,41 @@ exports.autocomplete = {
         tekst: adresseText(row),
         adgangsadresse: {
           id: row.id,
-          href: makeHref(baseUrl, 'adgangsadresse', [row.id])
+          href: makeHref(baseUrl, 'adgangsadresse', [row.id]),
+          vejnavn: row.vejnavn,
+          husnr: row.husnr,
+          supplerendebynavn: row.supplerendebynavn,
+          postnr: kode4String(row.postnr),
+          postnrnavn: row.postnrnavn
         }
       };
     };
   }
+};
+
+
+exports.adressebetegnelse = function(adresseRow, adgangOnly) {
+  var adresse = adresseRow.vejnavn;
+  if(adresseRow.husnr) {
+    adresse += ' ' + adresseRow.husnr;
+  }
+  if(!adgangOnly) {
+    if(exports.notNull(adresseRow.etage) || exports.notNull(adresseRow.dør)) {
+      adresse += ',';
+    }
+    if(adresseRow.etage) {
+      adresse += ' ' + adresseRow.etage + '.';
+    }
+    if(adresseRow.dør) {
+      adresse += ' ' + adresseRow.dør;
+    }
+  }
+  adresse += ', ';
+  if(adresseRow.supplerendebynavn) {
+    adresse += adresseRow.supplerendebynavn + ', ';
+  }
+  adresse += adresseRow.postnr + ' ' + adresseRow.postnrnavn;
+  return adresse;
 };
 
 exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);

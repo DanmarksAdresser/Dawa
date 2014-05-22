@@ -13,12 +13,36 @@ var definitions = {
   'Href' : {
     type: 'string'
   },
-  'Etage': {type: 'string', pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'},
   'Kode4': {type: 'string', pattern: '^[\\d]{4}$'},
   'UpTo7': {type: 'integer', minimum: 1, maximum: 9999999},
   'DateTime': {
     type: 'string'
   },
+  'husnr'  : {
+    description: 'Husnummer der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +
+      ' Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A..Z, og fastsættes i stigende orden, ' +
+      'normalt med lige og ulige numre på hver side af vejen. Eksempel: "11", "12A", "187B".',
+    type: 'string',
+    pattern: '([1-9]|[1-9]\\d|[1-9]\\d{2})[A-Z]?'
+  },
+  'supplerendebynavn': {
+    description: 'Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af ' +
+      'kommunen for at præcisere adressens beliggenhed indenfor postnummeret. ' +
+      'Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.',
+    type: 'string', maxLength: 34
+  },
+  'Etage':   {
+    description: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
+      'tal fra 1 til 99, st, kl, kl2 op til kl9.',
+    type: 'string',
+    pattern: '^([1-9]|[1-9][0-9]|st|kl[1-9]?)$'
+  },
+  'Dør':     {
+    description: 'Dørbetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
+      'tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
+    type: 'string'
+  },
+
   GeoJsonCoordinates: {
     type: 'array',
     items: {

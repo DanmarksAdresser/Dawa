@@ -20,6 +20,7 @@ var schemaObject = schemaUtil.schemaObject;
 
 
 var nullableType = schemaUtil.nullableType;
+var kode4String = util.kode4String;
 
 exports.flat = representationUtil.adresseFlatRepresentation(fields);
 
@@ -44,14 +45,10 @@ exports.json = {
       },
 
       'etage':   {
-        description: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
-          'tal fra 1 til 99, st, kl, kl2 op til kl9.',
         '$ref': '#/definitions/NullableEtage'
       },
       'dør':     {
-        description: 'Dørbetnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
-          'tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
-        type: nullableType('string')
+        '$ref': '#/definitions/NullableDør'
       },
 
       'adressebetegnelse': {
@@ -99,7 +96,7 @@ exports.json = {
       _.extend(adgangsadresseUnmapped,{
         id: rs.adgangsadresseid,
         oprettet: rs.adgangsadresse_oprettet,
-        ændret: rs.adgangsadresse_ændret,
+        ændret: rs.adgangsadresse_ændret
       });
       adr.adgangsadresse = adgangsadresseMapper(adgangsadresseUnmapped);
       return adr;
@@ -118,8 +115,45 @@ exports.autocomplete = {
         type: 'string'
       },
       adresse: {
-        description: 'Link og id for adressen.',
-        $ref: '#/definitions/AdresseRef'
+        description: 'Udvalge informationer om adressen.',
+        properties: {
+          href: {
+            description: 'Adressens unikke URL.',
+            type: 'string'
+          },
+          id: {
+            description: 'Adressens unikke UUID.',
+            $ref: '#/definitions/UUID'
+          },
+          vejnavn: {
+            description: 'Vejnavnet',
+            type: nullableType('string')
+          },
+          'etage':   {
+            '$ref': '#/definitions/NullableEtage'
+          },
+          'dør':     {
+            '$ref': '#/definitions/NullableDør'
+          },
+          husnr: {
+            description: 'Husnummer',
+            $ref: '#/definitions/husnr'
+          },
+          supplerendebynavn: {
+            $ref: '#/definitions/Nullablesupplerendebynavn'
+          },
+          postnr: {
+            description: 'Postnummer',
+            type: nullableType('string')
+          },
+          postnrnavn: {
+            description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
+              'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
+            type: nullableType('string')
+          }
+        },
+        docOrder: ['id', 'href', 'vejnavn', 'etage', 'dør','husnr', 'supplerendebynavn', 'postnr', 'postnrnavn']
+
       }
     },
     docOrder: ['tekst', 'adresse']
@@ -133,7 +167,14 @@ exports.autocomplete = {
         tekst: adresseText(row),
         adresse: {
           id: row.id,
-          href: makeHref(baseUrl, 'adresse', [row.id])
+          href: makeHref(baseUrl, 'adresse', [row.id]),
+          vejnavn: maybeNull(row.vejnavn),
+          husnr: row.husnr,
+          etage: maybeNull(row.etage),
+          dør: maybeNull(row.doer),
+          supplerendebynavn: maybeNull(row.supplerendebynavn),
+          postnr: kode4String(row.postnr),
+          postnrnavn: maybeNull(row.postnrnavn)
         }
       };
     };
