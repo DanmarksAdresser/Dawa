@@ -198,3 +198,9 @@ function spawn(options){
   var worker = cluster.fork(options);
   return worker;
 }
+
+process.on('uncaughtException', function(err) {
+  logger.error('uncaughtException', err);
+  process.exit(1);
+});
+
