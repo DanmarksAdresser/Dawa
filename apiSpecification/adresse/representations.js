@@ -171,7 +171,7 @@ exports.autocomplete = {
           vejnavn: maybeNull(row.vejnavn),
           husnr: row.husnr,
           etage: maybeNull(row.etage),
-          dør: maybeNull(row.doer),
+          dør: maybeNull(row.dør),
           supplerendebynavn: maybeNull(row.supplerendebynavn),
           postnr: kode4String(row.postnr),
           postnrnavn: maybeNull(row.postnrnavn)
