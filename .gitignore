@@ -5,8 +5,6 @@
 
 node_modules/*
 performanceTest/*.csv
-data/*.csv
-data/*.csv.gz
 .Rhistory
 *.pem
 
