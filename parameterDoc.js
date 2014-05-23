@@ -709,22 +709,39 @@ var dagiExamples = {
   _.extend(module.exports, doc.resources);
 });
 
+var keyParams = {
+  vejstykke: vejstykkerIdParameters,
+  adgangsadresse: [adgangsadresseIdParameter],
+  adresse: [adgangsadresseIdParameter]
+};
 ['vejstykke'].forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({
     entityName: replicatedModelName,
     type: 'nameAndKey'
   });
-  exports['/replikering/' + nameAndKey.plural + '/haendelser'] = {
+  var parameterDocs = {
     subtekst: 'Hændelser for ' + nameAndKey.plural + '.',
-    parameters: [{
-      name: 'sekvensnummerfra',
-      doc: 'Heltal. Returner hændelser med sekvensnummer større eller lig det angivne'
-    },{
-      name: 'sekvensnummertil',
-      doc: 'Heltal. Returner hændelser med sekvensnummer mindre eller lig det angivne'
-    }]
+    parameters: [
+      {
+        name: 'sekvensnummerfra',
+        doc: 'Heltal. Returner hændelser med sekvensnummer større eller lig det angivne'
+      },
+      {
+        name: 'sekvensnummertil',
+        doc: 'Heltal. Returner hændelser med sekvensnummer mindre eller lig det angivne'
+      },
+      {
+        name: 'tidspunktfra',
+        doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er senere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z.'
+      },
+      {
+        name: 'tidspunkttil',
+        doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er tidligere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z.'
+      }
+    ]
   };
-
+  parameterDocs.parameters = parameterDocs.parameters.concat(keyParams[replicatedModelName]);
+  exports['/replikering/' + nameAndKey.plural + '/haendelser'] = parameterDocs;
 });
 
 

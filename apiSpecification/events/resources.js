@@ -18,7 +18,11 @@ _.each(['vejstykke'], function(entityName) {
     hændelser:   {
       path: '/replikering/' + nameAndKey.plural + '/haendelser',
       pathParameters: [],
-      queryParameters: parameters.sekvensnummer,
+      queryParameters: resourcesUtil.flattenParameters({
+        sekvensnummer: parameters.sekvensnummer,
+        tidspunkt: parameters.tidspunkt,
+        keyParameters: parameters.keyParameters[entityName]
+      }),
       representations: representations[entityName],
       sqlModel: sqlModels[entityName],
       singleResult: false,

@@ -15,6 +15,13 @@ module.exports = {
   }, {
     name: 'ændret',
     column: 'aendret'
+  }],
+  postnummer: [{
+    name: 'nr'
+  }, {
+    name: 'navn'
+  },{
+    name: 'stormodtager'
   }]
 };
 

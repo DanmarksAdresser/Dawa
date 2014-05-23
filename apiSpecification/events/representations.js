@@ -9,7 +9,7 @@ _.each(datamodels, function(datamodel, datamodelName) {
   var jsonMapper = function(row) {
     var result = {
       operation: row.operation,
-      tidspunkt: row.time,
+      tidspunkt: row.tidspunkt,
       sekvensnummer: row.sekvensnummer
     };
     result.data = _.reduce(columnMappings.vejstykke, function(memo, columnMapping) {

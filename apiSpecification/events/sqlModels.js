@@ -6,6 +6,7 @@ var datamodels = { vejstykke: require('../../crud/datamodel').vejstykke };
 var dbapi = require('../../dbapi');
 var mappings = require('./columnMappings');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+var parameters = require('./parameters');
 
 // maps column names to field names
 var columnNameMaps = _.reduce(mappings, function(memo, columnSpec, key) {
@@ -16,18 +17,21 @@ var columnNameMaps = _.reduce(mappings, function(memo, columnSpec, key) {
   return memo;
 }, {});
 
+function coaleseFields(columnName) {
+  return 'COALESCE(i.' + columnName + ', d.' + columnName + ')';
+}
 var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   var datamodelName = datamodel.name;
   function selectFields() {
     return datamodel.columns.map(function(columnName) {
-      return 'COALESCE(i.'+columnName + ', d.'+columnName + ') AS ' + columnNameMaps[datamodelName][columnName];
+      return coaleseFields(columnName) + ' AS ' + columnNameMaps[datamodelName][columnName];
     });
   }
 
   var baseQuery = function () {
     var query = {
       select: ['h.operation as operation', 'h.time as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
-      from: [" FROM transaction_history h" +
+      from: [" transaction_history h" +
         " LEFT JOIN " + datamodel.table + "_history i ON (h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from)" +
         " LEFT JOIN " + datamodel.table + "_history d ON (h.operation = 'delete' AND h.sequence_number = d.valid_to)"],
       whereClauses: [],
@@ -54,7 +58,25 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
         var toAlias = dbapi.addSqlParameter(query, params.sekvensnummertil);
         dbapi.addWhereClause(query, 'h.sequence_number <= ' + toAlias);
       }
+      if(params.tidspunktfra) {
+        var timeFromAlias = dbapi.addSqlParameter(query, params.tidspunktfra);
+        dbapi.addWhereClause(query, 'h.time >=' + timeFromAlias);
+      }
 
+      if(params.tidspunkttil) {
+        var timeToAlias = dbapi.addSqlParameter(query, params.tidspunkttil);
+        dbapi.addWhereClause(query, 'h.time <=' + timeToAlias);
+      }
+      // we want to be able to find events for a specific ID.
+      var keyColumns = _.reduce(mappings[datamodelName], function(memo, mapping) {
+        memo[mapping.name] = {
+          where: coaleseFields(mapping.name)
+        };
+        return memo;
+      }, {});
+      var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
+      propertyFilter(query, params);
+      return dbapi.createQuery(query);
     }
   };
   return memo;
