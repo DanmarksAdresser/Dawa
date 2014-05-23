@@ -10,6 +10,7 @@ var _ = require('underscore');
 
 var sqlCommon = require('./common');
 var bbrFieldMappings = require('../bbr/common/fieldMappings');
+var datamodels = require('../crud/datamodel');
 
 function loadCsv(client, inputStream, options, callback) {
   var sql = "COPY " + options.tableName + "(" + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"')";
@@ -266,6 +267,16 @@ exports.loadCsvOnly = function(client, options, callback) {
   ], callback);
 };
 
+function initializeHistory(client) {
+  return function(callback) {
+    async.eachSeries(['vejstykke', 'adgangsadresse', 'enhedsadresse'], function(entityName, callback) {
+      var datamodel = datamodels[entityName];
+      var query = 'INSERT INTO ' + datamodel.table + '_history (' + datamodel.columns.join(', ') + ') (select ' + datamodel.columns.join(', ') + ' from ' + datamodel.table + ')';
+      client.query(query, [], callback);
+    }, callback);
+  };
+}
+
 exports.load = function(client, options, callback) {
   var format = options.format;
   var dataDir = options.dataDir;
@@ -285,7 +296,7 @@ exports.load = function(client, options, callback) {
         callback();
       }
     },
-    sqlCommon.psqlScript(client, __dirname, 'initialize-history.sql'),
+    initializeHistory(client),
     sqlCommon.initializeTables(client),
     sqlCommon.enableTriggers(client)
   ], callback);
