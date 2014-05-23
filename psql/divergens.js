@@ -7,6 +7,7 @@ var Q = require('q');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var sqlCommon = require('./common');
 var divergensImpl = require('./divergensImpl');
+var logger = require('../logger').forCategory('divergens');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -17,9 +18,20 @@ var optionSpec = {
     'angivet i udtrækket', 'boolean'],
   rectify: [false, 'Korriger forskelle ved at foretage de noedvendige ændringer i data', 'boolean' ],
   forceDawaSequenceNumber: [false, 'Sammenlign med tilstand ved dette sekvensnummer', 'number'],
-  reportFile: [false, 'Fil, som JSON rapport skrives i', 'string']
+  reportFile: [false, 'Fil, som JSON rapport skrives i', 'string'],
+  maxUpdates: [false, 'Maksimalt antal tilladte ændringer', 'number', 10000]
 };
 
+function countUpdates(report) {
+  return _.reduce(['adgangsadresse', 'enhedsadresse', 'vejstykke'], function(memo, datamodelName) {
+    var datamodelReport = report[datamodelName];
+    return memo + datamodelReport.inserts.length + datamodelReport.updates.length + datamodelReport.deletes.length;
+  }, 0);
+}
+
+function saveReport(options, report) {
+  fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
+}
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix', 'sekvensnummer', 'rectify', 'compareWithCurrent', 'forceDawaSequenceNumber'), function(args, options) {
 
   if(options.format !== 'bbr' && options.sekvensnummer === undefined) {
@@ -38,8 +50,16 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
         forceDawaSequenceNumber: options.forceDawaSequenceNumber
       }).then(
       function(report) {
-        console.log(JSON.stringify(report));
         if (options.rectify) {
+          if(options.maxUpdates < countUpdates(report)) {
+            logger.error('Divergence check resulted in too many changes. Aborting.', {
+              maxUpdates: options.maxUpdates,
+              actualUpdates: countUpdates(report),
+              reportFileName: options.reportFile
+            });
+            saveReport(options, report);
+            throw new Error('Divergence check resulted in too many changes. Aborting.');
+          }
           return divergensImpl.rectifyAll(client, report);
         }
         else {
@@ -47,7 +67,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
         }
       }).then(function(report) {
         if (options.reportFile) {
-          fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
+          saveReport(options, report);
         }
       }).then(function() {
         return Q.nfcall(done, null);
