@@ -7,7 +7,7 @@ module.exports = {
   postnummer: {
     nr: 'nummer'
   },
-  enhedsadresse: {
+  adresse: {
     ikraftfra: 'ikrafttraedelsesdato'
   },
   vejstykke: {

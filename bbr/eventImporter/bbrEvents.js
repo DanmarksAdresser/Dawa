@@ -10,7 +10,14 @@ var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 var eventSchemas = require('../common/eventSchemas');
 
-
+function getDatamodel(eventType) {
+  if(eventType === 'enhedsadresse') {
+    return datamodels.adresse;
+  }
+  else {
+    return datamodels[eventType];
+  }
+}
 
 var allRenames = {
   vejnavn: {
@@ -101,7 +108,7 @@ function performSqlQuery(sqlClient, event, datamodel, renames, callback) {
 }
 
 function handleSimpleEvent(sqlClient, event, callback) {
-  var datamodel = datamodels[event.type];
+  var datamodel = getDatamodel([event.type]);
   var renames = allRenames[event.type] || {};
   performSqlQuery(sqlClient, event, datamodel, renames, callback);
 }

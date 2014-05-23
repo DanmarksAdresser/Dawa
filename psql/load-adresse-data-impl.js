@@ -50,7 +50,7 @@ var legacyTransformers = {
       adresseringsnavn: null
     };
   },
-  enhedsadresse: function(row, idx) {
+  adresse: function(row, idx) {
     if(idx % 1000 === 0) {
       console.log(idx);
     }
@@ -111,7 +111,7 @@ function transformBbr(fieldMapping) {
 }
 
 var transformBbrAdgangsadresse = transformBbr(bbrFieldMappings.adgangsadresse);
-var transformEnhedsadresse = transformBbr(bbrFieldMappings.enhedsadresse);
+var transformAdresse = transformBbr(bbrFieldMappings.adresse);
 function removePrefixZeroes(str) {
   while (str && str.charAt(0) === '0') {
     str = str.substring(1);
@@ -135,8 +135,8 @@ var bbrTransformers = {
     result.aendret = transformDate(result.aendret);
     return result;
   },
-  enhedsadresse: function(row) {
-    var result = transformEnhedsadresse(row);
+  adresse: function(row) {
+    var result = transformAdresse(row);
     if(!_.isUndefined(result.etage) && !_.isNull(result.etage)) {
       result.etage = removePrefixZeroes(result.etage);
       result.etage = result.etage.toLowerCase();
@@ -165,14 +165,14 @@ var bbrTransformers = {
 var bbrFileNames = {
   vejstykke: 'Vejnavn.CSV',
   adgangsadresse: 'Adgangsadresse.CSV',
-  enhedsadresse: 'Enhedsadresse.CSV',
+  adresse: 'Enhedsadresse.CSV',
   meta: 'SenesteHaendelse.CSV'
 };
 
 var legacyFileNames = {
   vejstykke: 'RoadName.csv.gz',
   adgangsadresse: 'AddressAccess.csv.gz',
-  enhedsadresse: 'AddressSpecific.csv.gz',
+  adresse: 'AddressSpecific.csv.gz'
 };
 
 var bbrFileStreams = function(dataDir, filePrefix) {
@@ -255,12 +255,12 @@ exports.loadCsvOnly = function(client, options, callback) {
       }, callback);
     },
     function(callback) {
-      console.log("Indlæser enhedsadresser....");
-      var enhedsadresserStream = fileStreams.enhedsadresse();
-      loadCsv(client, enhedsadresserStream, {
+      console.log("Indlæser adresser....");
+      var adresserStream = fileStreams.adresse();
+      loadCsv(client, adresserStream, {
         tableName : tablePrefix + 'Enhedsadresser',
         columns : ['id', 'adgangsadresseid', 'oprettet', 'aendret', 'ikraftfra', 'etage', 'doer'],
-        transformer: transformers.enhedsadresse
+        transformer: transformers.adresse
 
       }, callback);
     }
@@ -269,7 +269,7 @@ exports.loadCsvOnly = function(client, options, callback) {
 
 function initializeHistory(client) {
   return function(callback) {
-    async.eachSeries(['vejstykke', 'adgangsadresse', 'enhedsadresse'], function(entityName, callback) {
+    async.eachSeries(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName, callback) {
       var datamodel = datamodels[entityName];
       var query = 'INSERT INTO ' + datamodel.table + '_history (' + datamodel.columns.join(', ') + ') (select ' + datamodel.columns.join(', ') + ' from ' + datamodel.table + ')';
       client.query(query, [], callback);

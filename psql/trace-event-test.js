@@ -16,7 +16,7 @@ var optionSpec = {
 };
 
 function extractResult(client, path, callback) {
-  async.eachSeries(['vejstykke', 'adgangsadresse', 'enhedsadresse'], function(dataModelName, callback) {
+  async.eachSeries(['vejstykke', 'adgangsadresse', 'adresse'], function(dataModelName, callback) {
     var filename = dataModelName + '.csv';
     console.log('outputting ' + filename);
     var stream = fs.createWriteStream(path + '/' + filename);

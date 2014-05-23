@@ -11,9 +11,8 @@ var loadAdresseData = require('./load-adresse-data-impl');
 
 var baseDatamodels = {
   adgangsadresse: datamodels.adgangsadresse,
-  enhedsadresse: datamodels.enhedsadresse,
-  vejstykke: datamodels.vejstykke,
-  postnummer: datamodels.postnummer
+  adresse: datamodels.adresse,
+  vejstykke: datamodels.vejstykke
 };
 
 function resolveArguments(func) {
@@ -167,7 +166,7 @@ function unlessUpdatedLater(client, datamodel, dawaSequenceNumber, id, func) {
  * rectified. The report is updated to indicate whether each difference has been rectified.
  */
 exports.rectifyAll = function(client, report) {
-  var ops = ['vejstykke', 'adgangsadresse', 'enhedsadresse'].map(function(datamodelName) {
+  var ops = ['vejstykke', 'adgangsadresse', 'adresse'].map(function(datamodelName) {
     return function() {
       return exports.rectifyDifferences(client, datamodels[datamodelName], report[datamodelName], report.meta.dawaSequenceNumber);
     };
@@ -297,7 +296,7 @@ exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonO
   });
 
   return Q.spread([dawaSequenceNumber, loadDataPromise], function (dawaSequenceNumber) {
-    return ['vejstykke', 'adgangsadresse', 'enhedsadresse'].map(function (dataModelName) {
+    return ['vejstykke', 'adgangsadresse', 'adresse'].map(function (dataModelName) {
       return function (fullReport) {
         return computeDifferenceReport(client, datamodels[dataModelName], dawaSequenceNumber, expectedTablePrefix + datamodels[dataModelName].table)
           .then(function (entityReport) {

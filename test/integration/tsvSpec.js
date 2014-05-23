@@ -29,7 +29,7 @@ var testFixture = {
     vejkode: 9999,
     postnr: 9998
   }],
-  enhedsadresse: [{
+  adresse: [{
     id: '11111111-1111-1111-1111-111111111112',
     etage: null,
     doer: 'tv',
@@ -177,10 +177,10 @@ var adgangsadresseTests = [{
   }
 }];
 
-var enhedsadresseTests = [{
+var adresseTests = [{
   description: 'Upon insertion, the TSV column should be set',
   verify: {
-    model: 'enhedsadresse',
+    model: 'adresse',
     query: {
       id: '11111111-1111-1111-1111-111111111112'
     },
@@ -191,14 +191,14 @@ var enhedsadresseTests = [{
 }, {
   description: 'Upon update, the TSV column should be set',
   update: {
-    model: 'enhedsadresse',
+    model: 'adresse',
     update: {
       id: '11111111-1111-1111-1111-111111111112',
       etage: '3'
     }
   },
   verify: {
-    model: 'enhedsadresse',
+    model: 'adresse',
     query: {
       id: '11111111-1111-1111-1111-111111111112'
     },
@@ -216,7 +216,7 @@ var enhedsadresseTests = [{
     }
   },
   verify: {
-    model: 'enhedsadresse',
+    model: 'adresse',
     query: {
       id: '11111111-1111-1111-1111-111111111112'
     },
@@ -312,8 +312,8 @@ describe('PostgreSQL tsv columns', function() {
   describe('update of tsv column for adgangsadresser', function() {
     verifyAll(function() { return client; }, adgangsadresseTests);
   });
-  describe('update of tsv column for enhedsadresser', function() {
-    verifyAll(function() { return client; } , enhedsadresseTests);
+  describe('update of tsv column for adresser', function() {
+    verifyAll(function() { return client; } , adresseTests);
   });
   describe('update of tsv column for supplerendebynavne', function() {
     verifyAll(function() { return client; } , supplerendebynavneTests);

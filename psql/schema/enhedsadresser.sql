@@ -75,12 +75,10 @@ CREATE OR REPLACE FUNCTION enhedsadresser_tsv_update_on_adgangsadresse()
   RETURNS TRIGGER AS $$
 BEGIN
   UPDATE enhedsadresser
-  SET tsv = adgangsadresser.tsv ||
+  SET tsv = NEW.tsv ||
             setweight(to_tsvector('adresser',
                                   COALESCE(etage, '') || ' ' ||
                                   COALESCE(doer, '')), 'B')
-  FROM
-    adgangsadresser
   WHERE
     adgangsadresseid = NEW.id;
   RETURN NULL;
@@ -110,7 +108,7 @@ BEGIN
     VALUES (
       seqnum, NEW.id, NEW.adgangsadresseid, NEW.oprettet, NEW.ikraftfra, NEW.aendret, NEW.etage, NEW.doer);
   END IF;
-  INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'enhedsadresse', optype);
+  INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'adresse', optype);
   RETURN NULL;
 END;
 $$ LANGUAGE PLPGSQL;

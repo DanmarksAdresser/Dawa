@@ -2,17 +2,18 @@
 
 var columnMappings = require('./columnMappings');
 var _ = require('underscore');
+var eventDatamodels = require('./eventDatamodels');
 
-var datamodels = { vejstykke: require('../../crud/datamodel').vejstykke };
+var datamodelNames = Object.keys(eventDatamodels);
 
-_.each(datamodels, function(datamodel, datamodelName) {
+_.each(datamodelNames, function(datamodelName) {
   var jsonMapper = function(row) {
     var result = {
       operation: row.operation,
       tidspunkt: row.tidspunkt,
       sekvensnummer: row.sekvensnummer
     };
-    result.data = _.reduce(columnMappings.vejstykke, function(memo, columnMapping) {
+    result.data = _.reduce(columnMappings[datamodelName], function(memo, columnMapping) {
       memo[columnMapping.name] = row[columnMapping.name];
       if(memo[columnMapping.name] === undefined) {
         memo[columnMapping.name] = null;

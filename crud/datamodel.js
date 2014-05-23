@@ -7,8 +7,8 @@ module.exports = {
     'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
     key: ['id']
   },
-  enhedsadresse: {
-    name: 'enhedsadresse',
+  adresse: {
+    name: 'adresse',
     table: 'enhedsadresser',
     columns: ['id', 'oprettet', 'aendret', 'ikraftfra', 'etage', 'doer', 'adgangsadresseid'],
     key: ['id']

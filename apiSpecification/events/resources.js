@@ -8,8 +8,9 @@ var sqlModels = require('./sqlModels');
 var resourcesUtil = require('../common/resourcesUtil');
 require('../allNamesAndKeys');
 var registry = require('../registry');
+var eventDatamodels = require('./eventDatamodels');
 
-_.each(['vejstykke'], function(entityName) {
+_.each(Object.keys(eventDatamodels), function(entityName) {
   var nameAndKey = registry.findWhere({
     entityName: entityName,
     type: 'nameAndKey'

@@ -500,6 +500,10 @@ var postnummerParameters = [{name: 'nr',
                             {name: 'stormodtagere',
                              doc: "Hvis denne parameter er sat til 'true', vil stormodtager-postnumre medtages i resultatet. Default er false."}];
 
+var postnummerIdParameter =_.find(postnummerParameters, function (p) {
+    return p.name === 'nr';
+  });
+
 var postnummerDoc = {
   docVersion: 2,
   resources: {
@@ -520,7 +524,7 @@ var postnummerDoc = {
 
     '/postnumre/{nr}': {
       subtext: 'Modtag postnummer med id.',
-      parameters: [_.find(postnummerParameters, function(p){ return p.name === 'nr'; })],
+      parameters: [postnummerIdParameter],
       nomulti: true,
       examples: [{description: 'Hent postnummer for København NV',
                   path: ['/postnumre/2400']}]},
@@ -711,10 +715,11 @@ var dagiExamples = {
 
 var keyParams = {
   vejstykke: vejstykkerIdParameters,
+  postnummer: postnummerIdParameter,
   adgangsadresse: [adgangsadresseIdParameter],
   adresse: [adgangsadresseIdParameter]
 };
-['vejstykke'].forEach(function(replicatedModelName) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse'].forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({
     entityName: replicatedModelName,
     type: 'nameAndKey'

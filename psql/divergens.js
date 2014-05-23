@@ -23,7 +23,7 @@ var optionSpec = {
 };
 
 function countUpdates(report) {
-  return _.reduce(['adgangsadresse', 'enhedsadresse', 'vejstykke'], function(memo, datamodelName) {
+  return _.reduce(['adgangsadresse', 'adresse', 'vejstykke'], function(memo, datamodelName) {
     var datamodelReport = report[datamodelName];
     return memo + datamodelReport.inserts.length + datamodelReport.updates.length + datamodelReport.deletes.length;
   }, 0);
