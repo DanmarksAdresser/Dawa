@@ -42,7 +42,9 @@ exports.json = {
       'stormodtageradresser': {
         description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adresserne på stormodtageren.',
         type: nullableType('array'),
-        items: { type: 'string'}
+        items: {
+          '$ref': '#/definitions/AdgangsadresseRef'
+        }
       },
       'kommuner': {
         description: 'De kommuner hvis areal overlapper postnumeret areal.',
@@ -63,7 +65,9 @@ exports.json = {
         href: makeHref(baseUrl, 'postnummer', [row.nr]),
         nr:  kode4String(row.nr),
         navn: row.navn,
-        stormodtageradresser: row.stormodtageradresser ? row.stormodtageradresser : null,
+        stormodtageradresser: row.stormodtageradresser ? _.map(row.stormodtageradresser, function(adgangsadresseid) {
+          return commonMappers.mapAdgangsadresseRef(adgangsadresseid, baseUrl);
+        }) : null,
         kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : []
       };
     };

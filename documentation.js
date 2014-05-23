@@ -22,7 +22,9 @@ function jadeDocumentationParams(req) {
     type: 'representation',
     qualifier: 'json'
   }), function(memo, entry) {
-    memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
+    if(entry.object.schema) {
+      memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
+    }
     return memo;
   }, {});
 
