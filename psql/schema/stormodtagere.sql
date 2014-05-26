@@ -12,6 +12,6 @@ CREATE FUNCTION stormodtagere_init() RETURNS void
 LANGUAGE plpgsql AS
 $$
   BEGIN
-    RETURN NULL;
+    RETURN;
   END;
 $$;
