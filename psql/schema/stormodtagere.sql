@@ -4,3 +4,14 @@ CREATE TABLE IF NOT EXISTS stormodtagere (
   navn VARCHAR(20) NOT NULL,
   adgangsadresseid UUID NOT NULL
 );
+
+
+-- Init function
+DROP FUNCTION IF EXISTS stormodtagere_init() CASCADE;
+CREATE FUNCTION stormodtagere_init() RETURNS void
+LANGUAGE plpgsql AS
+$$
+  BEGIN
+    RETURN NULL;
+  END;
+$$;
