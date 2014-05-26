@@ -30,7 +30,6 @@ function loadPostnummerCsv(client, inputFile, tableName) {
     return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
       tableName: tableName,
       transformer: function(row) {
-        console.log('transforming ' + JSON.stringify(row));
         return {
           nr: row.postnr,
           navn: row.navn,

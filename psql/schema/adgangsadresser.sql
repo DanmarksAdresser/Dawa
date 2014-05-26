@@ -176,37 +176,3 @@ $$ LANGUAGE PLPGSQL;
 CREATE TRIGGER adgangsadresser_tsv_update_on_postnummer AFTER INSERT OR UPDATE
 ON postnumre FOR EACH ROW EXECUTE PROCEDURE
   adgangsadresser_tsv_update_on_postnummer();
-
--- Trigger which maintain history
-DROP FUNCTION IF EXISTS adgangsadresser_history_update() CASCADE;
-CREATE OR REPLACE FUNCTION adgangsadresser_history_update()
-  RETURNS TRIGGER AS $$
-DECLARE
-  seqnum integer;
-  optype operation_type;
-BEGIN
-  seqnum = (SELECT COALESCE((SELECT MAX(sequence_number) FROM transaction_history), 0) + 1);
-  optype = lower(TG_OP);
-  IF TG_OP = 'DELETE' OR TG_OP = 'UPDATE' THEN
-    UPDATE adgangsadresser_history SET valid_to = seqnum WHERE id = OLD.id AND valid_to IS NULL;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT' THEN
-    INSERT INTO adgangsadresser_history(
-      valid_from, id, kommunekode, vejkode, husnr, supplerendebynavn, postnr, ejerlavkode, ejerlavnavn,
-      matrikelnr, esrejendomsnr, oprettet, ikraftfra, aendret,
-      adgangspunktid, etrs89oest, etrs89nord, wgs84lat, wgs84long, noejagtighed, kilde, placering,
-      tekniskstandard, tekstretning, adressepunktaendringsdato, kn100mdk, kn1kmdk, kn10kmdk)
-    VALUES (
-      seqnum, NEW.id, NEW.kommunekode, NEW.vejkode, NEW.husnr, NEW.supplerendebynavn, NEW.postnr, NEW.ejerlavkode, NEW.ejerlavnavn,
-      NEW.matrikelnr, NEW.esrejendomsnr, NEW.oprettet, NEW.ikraftfra, NEW.aendret,
-      NEW.adgangspunktid, NEW.etrs89oest, NEW.etrs89nord, NEW.wgs84lat, NEW.wgs84long, NEW.noejagtighed, NEW.kilde, NEW.placering,
-      NEW.tekniskstandard, NEW.tekstretning, NEW.adressepunktaendringsdato, NEW.kn100mdk, NEW.kn1kmdk, NEW.kn10kmdk);
-  END IF;
-  INSERT INTO transaction_history(sequence_number, entity, operation) VALUES(seqnum, 'adgangsadresse', optype);
-  RETURN NULL;
-END;
-$$ LANGUAGE PLPGSQL;
-
-CREATE TRIGGER adgangsadresser_history_update AFTER INSERT OR UPDATE OR DELETE
-ON adgangsadresser FOR EACH ROW EXECUTE PROCEDURE
-  adgangsadresser_history_update();

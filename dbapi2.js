@@ -171,7 +171,7 @@ module.exports = function(options) {
       sql,
       params,
       function (err, result) {
-        statistics.emit('psql_query', Date.now() - before, err, { query: query });
+        statistics.emit('psql_query', Date.now() - before, err, { sql: sql, params: params });
         if(err) { return cb(err); }
         cb(null, result.rows || []);
       });
