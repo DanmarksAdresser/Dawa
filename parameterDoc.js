@@ -724,7 +724,15 @@ var keyParams = {
     entityName: replicatedModelName,
     type: 'nameAndKey'
   });
-  var parameterDocs = {
+
+  var udtraekParameterDoc = {
+    subtekst: 'Udtraek for ' + nameAndKey.plural + '.',
+    parameters: []
+  };
+
+  exports['/replikering/' + nameAndKey.plural] = udtraekParameterDoc;
+
+  var eventParameterDocs = {
     subtekst: 'Hændelser for ' + nameAndKey.plural + '.',
     parameters: [
       {
@@ -745,8 +753,8 @@ var keyParams = {
       }
     ]
   };
-  parameterDocs.parameters = parameterDocs.parameters.concat(keyParams[replicatedModelName]);
-  exports['/replikering/' + nameAndKey.plural + '/haendelser'] = parameterDocs;
+  eventParameterDocs.parameters = eventParameterDocs.parameters.concat(keyParams[replicatedModelName]);
+  exports['/replikering/' + nameAndKey.plural + '/haendelser'] = eventParameterDocs;
 });
 
 

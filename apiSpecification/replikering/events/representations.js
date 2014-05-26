@@ -1,8 +1,8 @@
 "use strict";
 
-var columnMappings = require('./columnMappings');
+var columnMappings = require('./../columnMappings');
 var _ = require('underscore');
-var eventDatamodels = require('./eventDatamodels');
+var eventDatamodels = require('./../eventDatamodels');
 
 var datamodelNames = Object.keys(eventDatamodels);
 
@@ -31,7 +31,7 @@ _.each(datamodelNames, function(datamodelName) {
   };
 });
 
-var registry = require('../registry');
+var registry = require('../../registry');
 _.each(exports, function(representation, key) {
   registry.add(key + '_hændelse', 'representation', 'json', representation.json);
 });

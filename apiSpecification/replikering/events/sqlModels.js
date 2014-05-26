@@ -2,10 +2,10 @@
 
 var _ = require('underscore');
 
-var datamodels = require('./eventDatamodels');
-var dbapi = require('../../dbapi');
-var mappings = require('./columnMappings');
-var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+var datamodels = require('./../eventDatamodels');
+var dbapi = require('../../../dbapi');
+var mappings = require('./../columnMappings');
+var sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 
 // maps column names to field names
@@ -84,7 +84,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
 
 module.exports = sqlModels;
 
-var registry = require('../registry');
+var registry = require('../../registry');
 _.each(sqlModels, function(sqlModel, key) {
   registry.add(key + '_hændelse', 'sqlModel', undefined, sqlModel);
 });

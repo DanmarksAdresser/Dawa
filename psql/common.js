@@ -117,7 +117,8 @@ exports.withWriteTransaction = function (connString, cb) {
     if (err) {
       return cb(err);
     }
-    client.query('BEGIN', [], function (err) {
+    // we obtain an exclusive lock to prevent any concurrent write access to the db
+    client.query('BEGIN;SELECT pg_advisory_xact_lock(1);', [], function (err) {
       if (err) {
         client.end();
         return cb(err);

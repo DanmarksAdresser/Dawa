@@ -5,10 +5,10 @@ var _ = require('underscore');
 var parameters = require('./parameters');
 var representations = require('./representations');
 var sqlModels = require('./sqlModels');
-var resourcesUtil = require('../common/resourcesUtil');
-require('../allNamesAndKeys');
-var registry = require('../registry');
-var eventDatamodels = require('./eventDatamodels');
+var resourcesUtil = require('../../common/resourcesUtil');
+require('../../allNamesAndKeys');
+var registry = require('../../registry');
+var eventDatamodels = require('./../eventDatamodels');
 
 _.each(Object.keys(eventDatamodels), function(entityName) {
   var nameAndKey = registry.findWhere({
@@ -33,7 +33,6 @@ _.each(Object.keys(eventDatamodels), function(entityName) {
   };
 });
 
-var registry = require('../registry');
 _.each(exports, function(resources, entityName) {
   registry.add(entityName + '_hændelse', 'resource', 'hændelser', resources['hændelser']);
 });

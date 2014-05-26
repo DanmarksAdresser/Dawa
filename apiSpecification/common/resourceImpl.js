@@ -114,6 +114,8 @@ function logPostgresQueryError(req, query, err) {
   logger.error('sql', 'query failed', {url: req.url, sql: query.sql, params: query.params, error: err});
 }
 
+exports.sendInternalServerError = sendInternalServerError;
+
 exports.createExpressHandler = function(resourceSpec) {
   var spec = resourceSpec;
   return function(req, res) {

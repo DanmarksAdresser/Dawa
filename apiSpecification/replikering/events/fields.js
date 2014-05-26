@@ -2,9 +2,9 @@
 
 var _ = require('underscore');
 
-var fieldsUtil = require('../common/fieldsUtil');
+var fieldsUtil = require('../../common/fieldsUtil');
 var sqlModels = require('./sqlModels');
-var mappings = require('./columnMappings');
+var mappings = require('./../columnMappings');
 
 var d = require('../util').d;
 

@@ -12,7 +12,7 @@ var resourceImpl = require('./apiSpecification/common/resourceImpl');
 var registry = require('./apiSpecification/registry');
 var url = require('url');
 require('./apiSpecification/allSpecs');
-require('./apiSpecification/events/resources');
+require('./apiSpecification/replikering/events/resources');
 
 var dayInSeconds = 24 * 60 * 60;
 var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
@@ -106,6 +106,12 @@ exports.setupRoutes = function () {
     console.log('adding resource ' + resource.path);
       app.get(resource.path, resourceImpl.createExpressHandler(resource));
     });
+
+  registry.where({
+    type: 'resourceImpl'
+  }).forEach(function(resourceImpl) {
+    app.get(resourceImpl.path, resourceImpl.expressHandler);
+  });
 
   return app;
 };
