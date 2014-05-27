@@ -4,12 +4,11 @@ var async = require('async');
 var csv = require('csv');
 var copyFrom = require('pg-copy-streams').from;
 var fs = require('fs');
-var moment = require('moment');
 var zlib = require('zlib');
 var _ = require('underscore');
 
 var sqlCommon = require('./common');
-var bbrFieldMappings = require('../bbr/common/fieldMappings');
+var bbrTransformers = require('../bbr/common/bbrTransformers');
 var datamodels = require('../crud/datamodel');
 
 function loadCsv(client, inputStream, options, callback) {
@@ -94,71 +93,6 @@ var legacyTransformers = {
       kn10kmdk: row.GeometryDDKNcell10kmText,
       adressepunktaendringsdato: row.AddressPointRevisionDateTime
     };
-  }
-};
-
-function transformBbr(fieldMapping) {
-  var mapping = _.invert(fieldMapping);
-  return function(row) {
-    return _.reduce(row, function(memo, value, key) {
-      if(value === 'null') {
-        value = null;
-      }
-      memo[mapping[key] || key] = value;
-      return memo;
-    }, {});
-  };
-}
-
-var transformBbrAdgangsadresse = transformBbr(bbrFieldMappings.adgangsadresse);
-var transformAdresse = transformBbr(bbrFieldMappings.adresse);
-function removePrefixZeroes(str) {
-  while (str && str.charAt(0) === '0') {
-    str = str.substring(1);
-  }
-  return str;
-}
-
-function transformDate(bbrDateWithoutTz) {
-  if(bbrDateWithoutTz) {
-    return moment.utc(bbrDateWithoutTz).toISOString();
-  }
-  else {
-    return undefined;
-  }
-}
-
-var bbrTransformers = {
-  vejstykke: function(row) {
-    var result = transformBbr(bbrFieldMappings.vejstykke)(row);
-    result.oprettet = transformDate(result.oprettet);
-    result.aendret = transformDate(result.aendret);
-    return result;
-  },
-  adresse: function(row) {
-    var result = transformAdresse(row);
-    if(!_.isUndefined(result.etage) && !_.isNull(result.etage)) {
-      result.etage = removePrefixZeroes(result.etage);
-      result.etage = result.etage.toLowerCase();
-    }
-    if(!_.isUndefined(result.doer) && !_.isNull(result.doer)) {
-      result.doer = result.doer.toLowerCase();
-    }
-    result.oprettet = transformDate(result.oprettet);
-    result.aendret = transformDate(result.aendret);
-    result.ikraftfra = transformDate(result.ikraftfra);
-    return result;
-  },
-  adgangsadresse: function(row) {
-    var result = transformBbrAdgangsadresse(row);
-    // vi skal lige have fjernet de foranstillede 0'er
-    result.husnr = removePrefixZeroes(result.husnr);
-
-    result.oprettet = transformDate(result.oprettet);
-    result.aendret = transformDate(result.aendret);
-    result.ikraftfra = transformDate(result.ikraftfra);
-    result.adressepunktaendringsdato = transformDate(result.adressepunktaendringsdato);
-    return result;
   }
 };
 

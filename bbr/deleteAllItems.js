@@ -1,22 +1,19 @@
-"use strict";
-
 var _ = require('underscore');
 
-var cliParameterParsing = require('../common/cliParameterParsing');
+var cliParameterParsing = require('./common/cliParameterParsing');
+var dynamoEvents = require('./common/dynamoEvents');
 
 var optionSpec = {
   awsRegion: [false, 'AWS region, hvor Dynamo databasen befinder sig', 'string', 'eu-west-1'],
   awsAccessKeyId: [false, 'Access key der anvendes for at tilgå Dynamo', 'string'],
   awsSecretAccessKey: [false, 'Secret der anvendes for at tilgå Dynamo', 'string'],
-  dynamoTable: [false, 'Dynamo table hvori hændelserne er', 'string'],
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
+  dynamoTable: [false, 'Dynamo table hvori hændelserne er', 'string']
 };
 
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
 
   var AWS            = require('aws-sdk');
-  var importBbrEvents = require('./importBbrEvents');
 
   var dd = new AWS.DynamoDB({
     apiVersion      : '2012-08-10',
@@ -25,12 +22,5 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     secretAccessKey : options.awsSecretAccessKey
   });
 
-  importBbrEvents(options.pgConnectionUrl, dd, options.dynamoTable, function(err) {
-    if(err) {
-      console.log(err);
-      process.exit(1);
-    }
-    process.exit(0);
-  });
+  dynamoEvents.deleteAllQ(dd, options.dynamoTable).done();
 });
-

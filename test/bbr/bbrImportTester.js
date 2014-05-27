@@ -51,7 +51,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       storeEventsInDynamo(dd, tableName, events, callback);
     },
     function(callback) {
-      importBbrEvents(dd, tableName, callback);
+      importBbrEvents(options.pgConnectionUrl, dd, tableName, callback);
     }],
     function(err) {
       if(err) {

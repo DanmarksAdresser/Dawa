@@ -3,12 +3,14 @@
 var async = require('async');
 var winston = require('winston');
 var ZSchema = require("z-schema");
+var util = require('util');
 var _ = require('underscore');
 
 var bbrEventsLogger = require('../../logger').forCategory('bbrEvents');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 var eventSchemas = require('../common/eventSchemas');
+var bbrTransformers = require('../common/bbrTransformers');
 
 function getDatamodel(eventType) {
   if(eventType === 'enhedsadresse') {
@@ -19,52 +21,17 @@ function getDatamodel(eventType) {
   }
 }
 
-var allRenames = {
-  vejnavn: {
-    kode: 'vejkode',
-    vejnavn: 'navn'
-  },
-  adgangsadresse: {
-    husnr: 'husnummer',
-    ejerlavkode: 'landsejerlav_kode',
-    ejerlavnavn: 'landsejerlav_navn',
-    adgangspunktid: 'adgangspunkt_id',
-    kilde: 'adgangspunkt_kilde',
-    ikraftfra: 'ikrafttraedelsesdato',
-    noejagtighed: 'adgangspunkt_noejagtighedsklasse',
-    tekniskstandard: 'adgangspunkt_tekniskstandard',
-    tekstretning: 'adgangspunkt_retning',
-    placering: 'adgangspunkt_placering',
-    adressepunktaendringsdato: 'adgangspunkt_revisionsdato',
-    etrs89oest: 'adgangspunkt_etrs89koordinat_oest',
-    etrs89nord: 'adgangspunkt_etrs89koordinat_nord',
-    wgs84lat: 'adgangspunkt_wgs84koordinat_bredde',
-    wgs84long: 'adgangspunkt_wgs84koordinat_laengde',
-    kn100mdk: 'adgangspunkt_DDKN_m100',
-    kn1kmdk: 'adgangspunkt_DDKN_km1',
-    kn10kmdk: 'adgangspunkt_DDKN_km10'
-  },
-  postnummer: {
-    nr: 'postnummer'
-  },
-  enhedsadresse: {
-    ikraftfra: 'ikrafttraedelsesdato'
-  }
-};
 
-function extractObjectFromSimpleEvent(eventData, datamodel, renames) {
-  return _.reduce(datamodel.columns, function(memo, column) {
-    memo[column] = eventData[renames[column] || column];
-    return memo;
-  }, {});
+function extractObjectFromSimpleEvent(eventData, datamodel) {
+  var result =  bbrTransformers[datamodel.name](eventData);
+  console.log(util.format('transformed %j to %j', eventData, result));
+  return result;
 }
 
-function performSqlQuery(sqlClient, event, datamodel, renames, callback) {
-  var object = extractObjectFromSimpleEvent(event.data, datamodel, renames);
-  var key = _.reduce(object, function(memo, value, fieldName) {
-    if(_.contains(datamodel.key, fieldName)) {
-      memo[fieldName] = value;
-    }
+function performSqlQuery(sqlClient, event, datamodel, callback) {
+  var object = extractObjectFromSimpleEvent(event.data, datamodel);
+  var key = _.reduce(datamodel.key, function(memo, keyColumn) {
+    memo[keyColumn] = object[keyColumn];
     return memo;
   }, {});
   console.log("key: " + JSON.stringify(key));
@@ -108,9 +75,8 @@ function performSqlQuery(sqlClient, event, datamodel, renames, callback) {
 }
 
 function handleSimpleEvent(sqlClient, event, callback) {
-  var datamodel = getDatamodel([event.type]);
-  var renames = allRenames[event.type] || {};
-  performSqlQuery(sqlClient, event, datamodel, renames, callback);
+  var datamodel = getDatamodel(event.type);
+  performSqlQuery(sqlClient, event, datamodel, callback);
 }
 
 function parseHusnr(husnr) {
@@ -225,7 +191,7 @@ var eventHandlers = {
   enhedsadresse: handleSimpleEvent,
   adgangsadresse: handleSimpleEvent,
   vejnavn: function(sqlClient, event, callback) {
-    return performSqlQuery(sqlClient,event,  datamodels.vejstykke, allRenames.vejnavn, callback);
+    return performSqlQuery(sqlClient,event,  datamodels.vejstykke, callback);
   },
   postnummer: handlePostnummerEvent,
   supplerendebynavn: handleSupplerendebynavnEvent

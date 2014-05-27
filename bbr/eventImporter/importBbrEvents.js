@@ -1,14 +1,14 @@
 "use strict";
 
 var async = require('async');
-var dbapi = require('../../dbapi');
+var sqlCommon  = require('../../psql/common');
 var bbrEvents = require('./bbrEvents');
 var Q = require('q');
 var winston = require('winston');
 
 var dynamoEvents = require('../common/dynamoEvents');
 
-module.exports = function(dd, tablename, callback) {
+module.exports = function(pgConnectionUrl, dd, tablename, callback) {
   var foundEvent, errorHappened;
   async.doWhilst(function(callback) {
     foundEvent = false;
@@ -17,7 +17,7 @@ module.exports = function(dd, tablename, callback) {
     async.waterfall([
       // start the transaction
       function(callback) {
-        dbapi.withWriteTransaction(function(err, client, _transactionDone) {
+        sqlCommon.withWriteTransaction(pgConnectionUrl, function(err, client, _transactionDone) {
           if(err) {
             return callback(err);
           }
@@ -27,7 +27,7 @@ module.exports = function(dd, tablename, callback) {
       },
       // get the sequence number of the last processed event
       function(client, callback) {
-        client.query("SELECT GREATEST((SELECT MAX(sekvensnummer) FROM bbr_events), (SELECT sequence_number FROM udtraek_sekvensnummer)) as max", [], function(err, result) {
+        client.query("SELECT GREATEST((SELECT MAX(sekvensnummer) FROM bbr_events), (SELECT sequence_number FROM bbr_sekvensnummer)) as max", [], function(err, result) {
           if(err) {
             return callback(err);
           }
