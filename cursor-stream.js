@@ -13,7 +13,7 @@ function CursorStream(client, cursorName, query) {
   };
   Readable.call(this, {
     objectMode: true,
-    highWaterMark: 1000
+    highWaterMark: 400
   });
   this.client = client;
   this.cursorName = cursorName;

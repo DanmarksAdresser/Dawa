@@ -12,7 +12,8 @@ function jsonStringifyPretty(object){
 util.inherits(JsonStringifyStream, Transform);
 function JsonStringifyStream(replacer, space, sep) {
   Transform.call(this, {
-    objectMode: true
+    objectMode: true,
+    highWaterMark: 0
   });
   this.replacer = replacer;
   this.space = space;
