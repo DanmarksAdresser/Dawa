@@ -142,16 +142,18 @@ function loadBbrMeta(bbrFileStreams, callback) {
         callback(new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length));
       }
       if(data.length === 1) {
-        callback(null, data);
+        callback(null, data[0]);
       }
     });
 }
 
 function loadLastSequenceNumber(client, fileStreams, callback) {
   loadBbrMeta(fileStreams, function(err, meta) {
-    console.log('Seneste sekvensnummer: ' + meta.sidstSendtHaendelsesNummer);
+    // navngivningen i BBR filen er mærkelig. Vi skal bruge totalSendteHaendelser. sidstSendtHaendelsesNummer
+    // er et internt felt, som vi ikke kan bruge til ngoet.
+    console.log('Seneste sekvensnummer: ' + meta.totalSendteHaendelser);
 
-    client.query('UPDATE bbr_sekvensnummer SET sequence_number = $1', [meta.sidstSendtHaendelsesNummer || 0], callback);
+    client.query('UPDATE bbr_sekvensnummer SET sequence_number = $1', [(meta.totalSendteHaendelser || 1)-1], callback);
   });
 }
 
