@@ -23,7 +23,7 @@ describe('Ill-formed UUID', function () {
   it('should result in ResourcePathFormatError', function (done) {
     request.get('http://localhost:3000/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018',
                 function(err, response, body){
-                  expect(response.statusCode).toBe(400);
+                  expect(response.statusCode).toBe(404);
                   var error = JSON.parse(body);
                   expect(error).toEqual(
                     {

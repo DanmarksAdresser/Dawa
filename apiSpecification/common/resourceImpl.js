@@ -31,7 +31,7 @@ function sendQueryParameterFormatError(res, details){
 }
 
 function sendUriPathFormatError(res, details){
-  sendError(res, 400, {type: "ResourcePathFormatError",
+  sendError(res, 404, {type: "ResourcePathFormatError",
     title: "The URI path was ill-formed.",
     details: details});
 }
@@ -40,7 +40,7 @@ function sendPostgresQueryError(res, details) {
   var msg = {type: "InvalidRequestError",
     title: "The request resulted in an invalid database query, probably due to bad query parameters",
     details: details.hint};
-  sendError(res, 400, msg);
+  sendError(res, 500, msg);
 }
 
 function sendObjectNotFoundError(res, details){

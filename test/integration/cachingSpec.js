@@ -10,12 +10,19 @@ describe("Caching", function() {
       done();
     });
   });
-  it('fejlsvar skal ikke caches', function(done) {
+  it('Not found skal ikke caches', function(done) {
     request.get('http://localhost:3000/adresser/foobar', function(error, response, body) {
-      expect(response.statusCode).toBe(400);
+      expect(response.statusCode).toBe(404);
       expect(response.headers['cache-control']).toEqual('no-cache');
       done();
     });
   });
 
+  it('Fejlsvar skal ikke caches', function(done) {
+    request.get('http://localhost:3000/adresser?cirkel=invalid', function(error, response, body) {
+      expect(response.statusCode).toBe(400);
+      expect(response.headers['cache-control']).toEqual('no-cache');
+      done();
+    });
+  });
 });
