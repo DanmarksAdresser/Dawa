@@ -21,7 +21,7 @@ exports.applyFilter = function(datamodel, sqlParts, filter) {
     var alias = dbapi.addSqlParameter(sqlParts, value);
     dbapi.addWhereClause(sqlParts, key + ' = ' + alias);
   });
-}
+};
 
 exports.create = function(client, datamodel, object, callback) {
   var datamodelFields = datamodel.columns;
@@ -42,6 +42,13 @@ exports.create = function(client, datamodel, object, callback) {
   });
   winston.debug("Executing SQL %s", sql);
   client.query(sql, params, callback);
+};
+
+exports.getKey = function(datamodel, object) {
+  _.reduce(datamodel.columns, function(memo, keyColumn) {
+    memo[keyColumn] = object[keyColumn];
+    return memo;
+  }, {});
 };
 
 // note: undefined properties on object are not modified,

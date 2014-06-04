@@ -1,5 +1,7 @@
 "use strict";
 
+// maps of field names to database column names
+
 module.exports = {
   vejstykke: [{
     name: 'kode'

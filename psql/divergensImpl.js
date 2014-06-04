@@ -33,7 +33,9 @@ function getDawaSequenceNumber(client, udtraekOptions, comparisonOptions) {
 
   function getBbrSequenceNumber () {
     var fileStreams = loadAdresseData.bbrFileStreams(udtraekOptions.dataDir, udtraekOptions.filePrefix);
-    return Q.nfcall(loadAdresseData.loadBbrMeta, fileStreams);
+    return Q.nfcall(loadAdresseData.loadBbrMeta, fileStreams).then(function(bbrMeta) {
+      return bbrMeta.totalSendteHaendelser - 1;
+    });
   }
 
   var getDawaSequenceNumberForBbrEvent = resolveArguments(function(bbrSequenceNumber) {
