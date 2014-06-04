@@ -1,6 +1,7 @@
 "use strict";
 
 var express        = require("express");
+var http = require('http');
 var fs = require('fs');
 var logger = require('./logger');
 var memwatch = require('memwatch');
@@ -57,14 +58,17 @@ function setupWorker() {
 
   process.on('message', function(message) {
     if(message.type === 'getStatus') {
-      process.send({
-        type: 'status',
-        requestId: message.requestId,
-        data: {
-          status: 'up',
-          postgresPool: dbapi.getPoolStatus(),
-          statistics: statistics.getStatistics()
-        }
+      server.getConnections(function(err, count) {
+        process.send({
+          type: 'status',
+          requestId: message.requestId,
+          data: {
+            status: 'up',
+            postgresPool: dbapi.getPoolStatus(),
+            statistics: statistics.getStatistics(),
+            connections: count
+          }
+        });
       });
     }
   });
@@ -87,7 +91,11 @@ function setupWorker() {
   app.use('', dawaPgApi.setupRoutes());
   app.use('', documentation);
 
-  app.listen(listenPort);
+  var server = http.createServer(app);
+  server.listen(listenPort);
+  server.getConnections(function(err, count) {
+    console.log('number of connections: ' + count);
+  });
   logger.info("startup", "Express server listening for connections", {listenPort: listenPort, mode: app.settings.env});
 }
 
