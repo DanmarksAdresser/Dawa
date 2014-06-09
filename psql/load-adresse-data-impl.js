@@ -8,6 +8,7 @@ var zlib = require('zlib');
 var _ = require('underscore');
 
 var sqlCommon = require('./common');
+var initialization = require('./initialization');
 var bbrTransformers = require('../bbr/common/bbrTransformers');
 var datamodels = require('../crud/datamodel');
 
@@ -233,7 +234,7 @@ exports.load = function(client, options, callback) {
       }
     },
     initializeHistory(client),
-    sqlCommon.initializeTables(client),
+    initialization.initializeTables(client),
     sqlCommon.enableTriggers(client)
   ], callback);
 };
