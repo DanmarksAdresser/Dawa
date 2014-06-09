@@ -262,7 +262,6 @@ exports.reverseGeocodingWithin = function() {
 
 exports.postnummerStormodtagerFilter = function() {
   return function(sqlParts, params) {
-    console.log(JSON.stringify(params));
     if(params.stormodtagere !== undefined && !params.stormodtagere) {
       dbapi.addWhereClause(sqlParts, 'NOT stormodtager');
     }
@@ -280,7 +279,6 @@ exports.dagiFilter = function() {
         var paramArray = param.values;
         var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
         var kodeAliases = _.map(paramArray, function(param) {
-          console.log('param: ' + param);
           return dbapi.addSqlParameter(sqlParts, param);
         });
         dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode IN (' + kodeAliases.join(', ') + ') AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');

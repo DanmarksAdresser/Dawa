@@ -71,8 +71,12 @@ module.exports = function(options) {
     });
   };
 
-  var withReadonlyTransaction = function(cb) {
+  var withReadonlyTransaction = function(cb, shouldAbort) {
     return withConnection(function(err, client, done) {
+      if(shouldAbort && shouldAbort()) {
+        done();
+        return cb(new Error('Connection acquisition aborted, probably because it can no longer be used (e.g. client has closed connection'));
+      }
       function endTransaction(err) {
         client.emit('transactionEnd', err);
         done(err);
@@ -83,7 +87,7 @@ module.exports = function(options) {
       }
       client.query('BEGIN READ ONLY', [], function(err) {
         if(err) {
-          endTransaction();
+          done(err);
           return cb(err);
         }
         cb(err, client, function(err) {

@@ -12,7 +12,6 @@ require('../../allNamesAndKeys');
 var registry = require('../../registry');
 
 module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelName) {
-  console.log('datamodelName: %s', datamodelName);
   var nameAndKey = registry.findWhere({
     entityName: datamodelName,
     type: 'nameAndKey'

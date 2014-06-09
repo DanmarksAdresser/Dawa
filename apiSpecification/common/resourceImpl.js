@@ -6,6 +6,7 @@ var logger = require('../../logger');
 var _ = require('underscore');
 
 var dbapi = require('../../dbapi');
+var pipeline = require('../../pipeline');
 var parameterParsing = require('../../parameterParsing');
 var serializers = require('./serializers');
 
@@ -53,18 +54,22 @@ function sendInternalServerError(res, details){
   var msg = {type: "InternalServerError",
     title: "Something unexpected happened inside the server.",
     details: details};
-  logger.error('http', "Internal server error: %j", {});
+  logger.error('http', "Internal server error", details);
   sendError(res, 500, msg);
 }
 
 function sendError(res, code, message){
   res.statusCode = code;
-//  winston.debug("Sending error message %j", message, {});
   res.setHeader('Content-Type', 'application/json; charset=UTF-8');
   res.end(jsonStringifyPretty(message));
 }
 
 function withReadonlyTransaction(res, callback) {
+  // In case the HTTP connection has been reset before we get a psql connection,
+  // we do not want to actually acquire it.
+  function shouldAbort() {
+    return !res.connection.writable;
+  }
   return dbapi.withReadonlyTransaction(function(err, client, done) {
     if (err) {
       // We do not have a connection to PostgreSQL.
@@ -73,7 +78,7 @@ function withReadonlyTransaction(res, callback) {
       return;
     }
     return callback(client, done);
-  });
+  }, shouldAbort);
 }
 
 function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
@@ -178,11 +183,9 @@ exports.createExpressHandler = function(resourceSpec) {
           }
 
           // map the query results to the correct representation and serialize to http response
-          var mappedStream = eventStream.pipeline(
-            stream,
-            eventStream.mapSync(mapObject)
-          );
-          serializeStream(mappedStream, res, done);
+          var pipe = pipeline(stream);
+          pipe.map(mapObject);
+          serializeStream(pipe, res, done);
         });
       }
     });

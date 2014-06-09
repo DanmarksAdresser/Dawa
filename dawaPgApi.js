@@ -49,9 +49,16 @@ function corsMiddleware(req, res, next) {
 function requestLoggingMiddleware(req, res, next) {
   var startTime = new Date();
   var streamingStarted;
+
+  // we want to log when we start delivering data to the client
+  // this hack was the best I could do, because responses does not emit any
+  // useful events when data is streamed to the response.
   res.once('pipe', function(src) {
-    src.once('data', function() {
+    src.unpipe(res);
+    src.once('data', function(chunk) {
       streamingStarted = new Date();
+      res.write(chunk);
+      src.pipe(res);
     });
   });
   function logRequest(closedPrematurely) {
@@ -103,7 +110,6 @@ exports.setupRoutes = function () {
   registry.where({
     type: 'resource'
   }).forEach(function (resource) {
-    console.log('adding resource ' + resource.path);
       app.get(resource.path, resourceImpl.createExpressHandler(resource));
     });
 

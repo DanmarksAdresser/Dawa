@@ -1,9 +1,9 @@
 "use strict";
-var csv              = require('csv');
+var csvStringify = require('csv-stringify');
 var eventStream = require('event-stream');
-var logger = require('../../logger');
 var Transform        = require('stream').Transform;
 var util             = require('util');
+var pipeline = require('../../pipeline');
 
 function jsonStringifyPretty(object){
   return JSON.stringify(object, undefined, 2);
@@ -82,35 +82,20 @@ function computeSeparator(formatParam, callbackParam, sridParam) {
   return sep;
 }
 
-function transformToText(objectStream, formatParam, callbackParam, sridParam) {
+function transformToText(pipe, formatParam, callbackParam, sridParam) {
   var sep = computeSeparator(formatParam, callbackParam, sridParam);
-  return eventStream.pipeline(
-    objectStream,
-    new JsonStringifyStream(undefined, 2, sep)
-  );
+  pipe.add(new JsonStringifyStream(undefined, 2, sep));
+  return pipe;
 }
 
 // pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
-function streamToHttpResponse(stream, res, options, cb) {
-  var closed = false;
-  stream.on('error', function (err) {
-    if(!closed) {
-      logger.error("serializer", "An error occured while streaming data to HTTP response", err);
-      res.socket.destroy();
-      cb(err);
-    }
+function streamToHttpResponse(pipe, res, cb) {
+  pipe.toHttpResponse(res);
+  pipe.completed().then(function() {
+    cb(null);
+  }, function(err) {
+    cb(err);
   });
-  res.on('close', function () {
-    closed = true;
-    cb(new Error("Client closed connection"));
-  });
-  if(options.end === false) {
-    stream.on('end', cb);
-  }
-  else {
-    res.on('finish', cb);
-  }
-  stream.pipe(res, options);
 }
 
 /**
@@ -133,18 +118,11 @@ function setAppropriateContentHeader(res, format, callback) {
 }
 
 
-function streamCsvToHttpResponse(rowStream, res, csvFieldNames, cb) {
-  var csvTransformer = csv();
-  csvTransformer.to.options({
-    header: true,
-    lineBreaks: 'windows',
-    columns: csvFieldNames
-  });
-  var csvStream = eventStream.pipeline(
-    rowStream,
-    csvTransformer
-  );
-  streamToHttpResponse(csvStream, res, {}, cb);
+function streamCsvToHttpResponse(pipe, res, csvFieldNames, cb) {
+  var csvStringifier = csvStringify({header: true, columns: csvFieldNames, rowDelimiter: '\r\n'});
+
+  pipe.add(csvStringifier);
+  streamToHttpResponse(pipe, res, cb);
 
 }
 
@@ -152,13 +130,13 @@ function streamCsvToHttpResponse(rowStream, res, csvFieldNames, cb) {
 exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, representation) {
   formatParam = formatParam || 'json';
   sridParam = sridParam || 4326;
-  return function(stream, res, callback) {
+  return function(pipe, res, callback) {
     setAppropriateContentHeader(res, formatParam, callbackParam);
     if(formatParam === 'csv') {
-      streamCsvToHttpResponse(stream, res, representation.outputFields, callback);
+      streamCsvToHttpResponse(pipe, res, representation.outputFields, callback);
     } else {
-      var textStream = transformToText(stream, formatParam, callbackParam, sridParam);
-      streamToHttpResponse(textStream, res, {}, callback);
+      transformToText(pipe, formatParam, callbackParam, sridParam);
+      streamToHttpResponse(pipe, res, callback);
     }
   };
 };
@@ -167,7 +145,10 @@ exports.createSingleObjectSerializer = function(formatParam, callbackParam, repr
   return function(res, object) {
     setAppropriateContentHeader(res, formatParam, callbackParam);
     if(formatParam === 'csv') {
-      streamCsvToHttpResponse(eventStream.readArray([object]), res, representation.outputFields, function() {});
+
+      var stream = eventStream.readArray([object]);
+      var pipe = pipeline(stream);
+      streamCsvToHttpResponse(pipe, res, representation.outputFields, function() {});
     } else {
       var textObject = jsonStringifyPretty(object);
       if(callbackParam) {

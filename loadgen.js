@@ -17,6 +17,7 @@ var optionSpec = {
   vejstykkeStreams: [false, 'Antal samtidige requests til /vejstykker', 'number', 2],
   vejnavnStreams: [false, 'Antal samtidige requests til /vejnavne', 'number', 2],
   postnummerStreams: [false, 'Antal samtidige requests til /postnumre', 'number', 2],
+  regionerStreams: [false, 'Antal samtidige requests til /regioner?format=geojson', 'number', 2],
   adresseAutocompletePerSecond: [false, 'Antal kald til autocomplete pr. sekund', 'number', 30]
 };
 
@@ -56,6 +57,9 @@ function getRepeatedly(baseUrl, path, parallelCount) {
     function getToDevNull(callback) {
       var requestStream = request(baseUrl + path);
       requestStream.pipe(new DevNull());
+      requestStream.on('error', function(err) {
+        callback(err);
+      });
       requestStream.on('end', function(err) {
         callback(err);
       });
@@ -82,7 +86,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
     getRepeatedly(baseUrl, '/adgangsadresser', options.adgangsadresseStreams),
     getRepeatedly(baseUrl, '/vejstykker', options.vejstykkeStreams),
     getRepeatedly(baseUrl, '/vejnavne', options.vejnavnStreams),
-    getRepeatedly(baseUrl, '/postnumre', options.postnummerStreams)
+    getRepeatedly(baseUrl, '/postnumre', options.postnummerStreams),
+    getRepeatedly(baseUrl, '/regioner?format=geojson', options.regionerStreams)
   ], function(err) {
     if(err) {
       throw err;

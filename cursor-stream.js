@@ -85,7 +85,6 @@ CursorStream.prototype._close = function(err) {
     self.push(null);
     self.closed = true;
     var close = "CLOSE " + self.cursorName;
-    winston.info("Closing cursor: %j", close, {});
     self.client.query(close, [], function() {});
     self.client = null;
     return;

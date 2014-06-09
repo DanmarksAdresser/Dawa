@@ -91,11 +91,9 @@ function setupWorker() {
   app.use('', dawaPgApi.setupRoutes());
   app.use('', documentation);
 
+
   var server = http.createServer(app);
   server.listen(listenPort);
-  server.getConnections(function(err, count) {
-    console.log('number of connections: ' + count);
-  });
   logger.info("startup", "Express server listening for connections", {listenPort: listenPort, mode: app.settings.env});
 }
 
