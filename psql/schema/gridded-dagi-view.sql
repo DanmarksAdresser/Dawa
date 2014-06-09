@@ -57,16 +57,6 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
   END;
   $$ LANGUAGE plpgsql IMMUTABLE STRICT;
 
-DROP TABLE IF EXISTS GriddedDagiTemaer;
-CREATE TABLE GriddedDagiTemaer(
-  tema dagiTemaType not null,
-  kode integer not null,
-  geom geometry
-);
-
-CREATE INDEX ON GriddedDagiTemaer(tema, kode);
-CREATE INDEX ON GriddedDagiTemaer USING GIST(geom);
-
 CREATE OR REPLACE FUNCTION update_gridded_dagi_temaer()
   RETURNS TRIGGER AS $$
 BEGIN

@@ -47,7 +47,10 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresserdagirel',     scriptFile: 'adgangsadresser-dagi-view.sql'},
   {name: 'griddeddagitemaer',          scriptFile: 'gridded-dagi-view.sql'},
   {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
-  {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'}
+  {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
+  {name: 'wms_adgangsadresser', type: 'view'},
+  {name: 'wfs_adgangsadresser', type: 'view'},
+  {name: 'wfs_adresser', type: 'view'}
 ]);
 
 exports.forAllTableSpecs = function(client, func, callback){

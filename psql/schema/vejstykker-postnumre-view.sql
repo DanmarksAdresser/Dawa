@@ -1,10 +1,3 @@
-DROP TABLE IF EXISTS VejstykkerPostnumreMat CASCADE;
-CREATE TABLE VejstykkerPostnumreMat(
-  kommunekode INTEGER,
-  vejkode INTEGER,
-  postnr INTEGER
-);
-
 DROP FUNCTION IF EXISTS update_vejstykker_postnumre_mat() CASCADE;
 
 CREATE FUNCTION update_vejstykker_postnumre_mat() RETURNS trigger AS $$
@@ -26,10 +19,6 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS update_vejstykker_postnumre_mat ON adgangsadresser;
 CREATE TRIGGER update_vejstykker_postnumre_mat AFTER INSERT OR UPDATE OR DELETE ON adgangsadresser
 FOR EACH ROW EXECUTE PROCEDURE update_vejstykker_postnumre_mat();
-
-CREATE UNIQUE INDEX ON VejstykkerPostnumreMat(postnr, kommunekode, vejkode);
-CREATE INDEX ON vejstykkerpostnumremat(kommunekode, vejkode);
-
 
 -- Init function
 DROP FUNCTION IF EXISTS vejstykkerpostnumremat_init() CASCADE;

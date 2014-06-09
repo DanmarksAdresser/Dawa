@@ -1,0 +1,37 @@
+DROP VIEW IF EXISTS wfs_adresser CASCADE;
+
+CREATE OR REPLACE VIEW wfs_adresser AS
+  SELECT
+    e_id                      AS AddressIdentifier,
+    etage                     AS FloorIdentifier,
+    doer                      AS SuiteIdentifier,
+    e_oprettet                AS AddressSpecificCreateDate,
+    e_ikraftfra               AS AddressSpecificValidDate,
+    e_aendret                 AS AddressSpecificChangeDate,
+    a_id                      AS AddressAccessIdentifier,
+    kommunekode               AS MunicipalityCode,
+    vejkode                   AS StreetCode,
+    vejnavn                   AS StreetName,
+    husnr                     AS StreetBuildingIdentifier,
+    supplerendebynavn         AS DistrictSubdivisionIdentifier,
+    postnr                    AS PostCodeIdentifier,
+    postnrnavn                AS DistrictName,
+    ejerlavkode               AS CadastralDistrictIdentifier,
+    ejerlavnavn               AS CadastralDistrictName,
+    matrikelnr                AS LandParcelIdentifier,
+    esrejendomsnr             AS MunicipalRealPropertyIdentifier,
+    a_oprettet                AS AddressAccessCreateDate,
+    a_ikraftfra               AS AddressAccessValidDate,
+    a_aendret                 AS AddressAccessChangeDate,
+    oest                      AS GeographicEastingMeasure,
+    nord                      AS GeographicNorthingMeasure,
+    noejagtighed              AS AddressCoordinateQualityClassCode,
+    kilde                     AS AddressGeometrySourceCode,
+    tekniskstandard           AS AddressCoordinateTechnicalStandardCode,
+    tekstretning              AS AddressTextAngleMeasure,
+    kn100mdk                  AS GeometryDDKNcell100mText,
+    kn1kmdk                   AS GeometryDDKNcell1kmText,
+    kn10kmdk                  AS GeometryDDKNcell10kmText,
+    adressepunktaendringsdato AS AddressPointRevisionDateTime,
+    geom
+  FROM Adresser;

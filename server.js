@@ -106,7 +106,7 @@ function setupMaster() {
     disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean'],
     pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 25],
     pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
-    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 30000]
+    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 60000]
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {

@@ -73,7 +73,7 @@ var parameterImpls = [
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.dagiFilter(),
   sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns),
+  sqlParameterImpl.autocomplete(columns, ['husnr']),
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 

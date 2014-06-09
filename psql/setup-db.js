@@ -1,5 +1,6 @@
 "use strict";
 
+var path = require('path');
 var format = require('util').format;
 var cli = require('cli');
 var winston  = require('winston');
@@ -21,16 +22,42 @@ var optionSpec = {
 cli.parse(optionSpec, []);
 
 
+function loadTables(client, scriptDir) {
+  return function(callback) {
+    console.log('creating tables');
+    sqlCommon.forAllTableSpecs(client,
+    function(client, spec, callback) {
+      if(spec.type !== 'view') {
+        console.log("loading script tables/" + spec.scriptFile);
+        return (psqlScript(client, path.join(scriptDir, 'tables'), spec.scriptFile))(callback);
+      }
+      else {
+        return callback();
+      }
+    }, callback);
+  };
+}
 
-
-function loadSchemas(client, scriptDir){
-  return function(done){
+function reloadDatabaseCode(client, scriptDir) {
+  return function(callback) {
+    console.log('loading database functions');
     sqlCommon.forAllTableSpecs(client,
       function (client, spec, cb){
         console.log("loading script " + spec.scriptFile);
         return (psqlScript(client, scriptDir, spec.scriptFile))(cb);
       },
-      done);
+      callback);
+  };
+}
+
+function loadSchemas(client, scriptDir){
+  return function(callback){
+    loadTables(client, scriptDir)(function(err) {
+      if(err) {
+        throw err;
+      }
+      reloadDatabaseCode(client, scriptDir)(callback);
+    });
   };
 }
 
@@ -43,6 +70,8 @@ function exitOnErr(err){
 
 /*
  * For each table that has a history table, generate a trigger to maintain it.
+ * This is horrible, but generic code in plpgsql is even worse. Perhaps
+ * plv8 would be an option?
  */
 function createHistoryTriggers(client) {
   return function(callback) {
@@ -123,7 +152,6 @@ cli.main(function(args, options) {
       [
         psqlScript(client, scriptDir, 'misc.sql'),
         loadSchemas(client, scriptDir),
-        psqlScript(client, scriptDir, 'geoserver_views.sql'),
         sqlCommon.disableTriggers(client),
         initializeTables(client),
         createHistoryTriggers(client),

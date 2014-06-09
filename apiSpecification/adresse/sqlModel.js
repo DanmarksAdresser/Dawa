@@ -88,7 +88,7 @@ var parameterImpls = [
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.dagiFilter(),
   sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns),
+  sqlParameterImpl.autocomplete(columns, ['husnr', 'etage', 'dør']),
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 

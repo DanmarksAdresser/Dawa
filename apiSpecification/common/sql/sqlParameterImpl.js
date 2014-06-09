@@ -163,11 +163,15 @@ exports.search = function(columnSpec) {
   };
 };
 
-exports.autocomplete = function(columnSpec) {
+// The orderFields parameter specifies a list of fields the result is ordered by,
+// if the rank is equal.
+exports.autocomplete = function(columnSpec, orderFields) {
+  orderFields = orderFields || [];
   return function(sqlParts, params) {
     if(notNull(params.autocomplete)) {
       var tsQuery = toPgSuggestQuery(params.autocomplete);
       applyTsQuery(sqlParts, params, tsQuery, columnSpec);
+      sqlParts.orderClauses = sqlParts.orderClauses.concat(orderFields);
     }
   };
 };
