@@ -1,5 +1,6 @@
 "use strict";
 
+var util = require('util');
 var _ = require('underscore');
 
 var dbapi = require('../../../dbapi');
@@ -65,6 +66,12 @@ var applySelect = function(sqlParts, columnSpec, fieldNames, params) {
 
 exports.addSelect = addSelect;
 
+exports.InvalidParametersError = function(message) {
+  this.name = 'InvalidParametersError';
+  this.message = message || 'Invalid parameter';
+};
+util.inherits(exports.InvalidParametersError, Error);
+
 exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
   return {
     allSelectableFieldNames: function(allFieldNames) {
@@ -77,6 +84,14 @@ exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
         parameterImpl(sqlParts, params);
       });
       return dbapi.createQuery(sqlParts);
+    },
+    query: function(client, fieldNames, params, callback) {
+      var query = this.createQuery(fieldNames, params);
+      dbapi.queryRaw(client, query.sql, query.params, callback);
+    },
+    stream: function(client, fieldNames, params, callback) {
+      var query = this.createQuery(fieldNames, params);
+      dbapi.streamRaw(client, query.sql, query.params, callback);
     }
   };
 };

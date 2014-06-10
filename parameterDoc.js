@@ -727,7 +727,10 @@ var keyParams = {
 
   var udtraekParameterDoc = {
     subtekst: 'Udtraek for ' + nameAndKey.plural + '.',
-    parameters: []
+    parameters: [{
+      name: 'sekvensnummer',
+      doc: 'Angiver sekvensnummeret for udtrækket. Alle hændelser til og med det angivne sekvensnummer er med i udtrækket.'
+    }]
   };
 
   exports['/replikering/' + nameAndKey.plural] = udtraekParameterDoc;

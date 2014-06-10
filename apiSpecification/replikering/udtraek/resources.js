@@ -5,7 +5,7 @@ var _ = require('underscore');
 var sqlModels = require('./sqlModels');
 var columnMappings = require('../columnMappings');
 var representations = require('./representations');
-var datamodels = require('../../../crud/datamodel');
+var parameters = require('./parameters');
 var resourcesUtil = require('../../common/resourcesUtil');
 
 require('../../allNamesAndKeys');
@@ -21,7 +21,7 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
   {
     path: '/replikering/' + nameAndKey.plural,
       pathParameters: [],
-    queryParameters: [],
+    queryParameters: parameters.sekvensnummer,
     representations: representations[datamodelName],
     sqlModel: sqlModels[datamodelName],
     singleResult: false,

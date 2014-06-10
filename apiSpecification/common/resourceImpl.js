@@ -1,7 +1,7 @@
 "use strict";
 
 var paths = require('../paths');
-var eventStream = require('event-stream');
+var sqlUtil = require('./sql/sqlUtil');
 var logger = require('../../logger');
 var _ = require('underscore');
 
@@ -113,7 +113,7 @@ function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
   var validationErrors = validateParameters(resourceSpec.queryParameters, params);
   if(validationErrors.length > 0) {
     return {
-      queryErrors: parameterParseResult.errors
+      queryErrors: validationErrors
     };
   }
   return {
@@ -127,8 +127,18 @@ exports.internal = {
   parseAndProcessParameters: parseAndProcessParameters
 };
 
-function logPostgresQueryError(req, query, err) {
-  logger.error('sql', 'query failed', {url: req.url, sql: query.sql, params: query.params, error: err});
+function logPostgresQueryError(req, err) {
+  logger.error('sql', 'query failed', {url: req.url, error: err});
+}
+
+function handleModelError(req, res, err) {
+  if(err instanceof sqlUtil.InvalidParametersError) {
+    sendQueryParameterFormatError(res, err.message);
+  }
+  else {
+    logPostgresQueryError(req, err);
+    sendPostgresQueryError(res, err);
+  }
 }
 
 exports.sendInternalServerError = sendInternalServerError;
@@ -154,8 +164,9 @@ exports.createExpressHandler = function(resourceSpec) {
         'Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
     }
     logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
-    // build the query
-    var query = spec.sqlModel.createQuery(_.pluck(representation.fields, 'name'), params);
+
+    // The list of fields we want to retrieve from database
+    var fieldNames = _.pluck(representation.fields, 'name');
 
     // create a mapper function that maps results from the SQL layer to the requested representation
     var mapObject = representation.mapper(paths.baseUrl(req), params, spec.singleResult);
@@ -164,11 +175,10 @@ exports.createExpressHandler = function(resourceSpec) {
         // create a function that can write the object to the HTTP response based on the format requrested by the
         // client
         var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, representation);
-        dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
+        spec.sqlModel.query(client, fieldNames, params, function(err, rows) {
           done(err);
           if (err) {
-            logPostgresQueryError(req, query, err);
-            return sendPostgresQueryError(res, err);
+            handleModelError(req, res, err);
           } else if (rows.length > 1) {
             sendInternalServerError(res, "The request resulted in more than one response", rows);
           } else if (rows.length === 0) {
@@ -187,11 +197,10 @@ exports.createExpressHandler = function(resourceSpec) {
           params.callback,
           params.srid,
           representation);
-        dbapi.streamRaw(client, query.sql, query.params, function(err, stream) {
+        spec.sqlModel.stream(client, fieldNames, params, function(err, stream) {
           if(err) {
             done(err);
-            logPostgresQueryError(req, query, err);
-            return sendPostgresQueryError(res, err);
+            return handleModelError(req, res, err);
           }
 
           // map the query results to the correct representation and serialize to http response

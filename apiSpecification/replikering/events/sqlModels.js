@@ -48,7 +48,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
         return columnNameMaps[datamodelName][colName];
       }));
     },
-    createQuery: function(fieldNames, params) {
+    stream: function(client, fieldNames, params, callback) {
       var query = baseQuery();
       if(params.sekvensnummerfra) {
         var fromAlias = dbapi.addSqlParameter(query, params.sekvensnummerfra);
@@ -76,7 +76,8 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
       }, {});
       var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
       propertyFilter(query, params);
-      return dbapi.createQuery(query);
+      var dbQuery = dbapi.createQuery(query);
+      dbapi.streamRaw(client, dbQuery.sql, dbQuery.params, callback);
     }
   };
   return memo;

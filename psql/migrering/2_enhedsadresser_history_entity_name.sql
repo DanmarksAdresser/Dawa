@@ -1,0 +1,1 @@
+update transaction_history  set entity = 'adresse' where entity = 'enhedsadresse';

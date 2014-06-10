@@ -2,10 +2,13 @@
 
 var _ = require('underscore');
 
+var async = require('async');
+var querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
 var datamodels = require('../eventDatamodels');
 var dbapi = require('../../../dbapi');
 var mappings = require('./../columnMappings');
 var registry = require('../../registry');
+var sqlUtil = require('../../common/sql/sqlUtil');
 
 // maps column names to field names
 var columnNameMaps = _.reduce(mappings, function(memo, columnSpec, key) {
@@ -25,7 +28,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
         return columnName + ' AS ' + columnNameMap[columnName];
       }),
       from: [datamodel.table + '_history'],
-      whereClauses: ['valid_to IS NULL'],
+      whereClauses: [],
       orderClauses: datamodel.key,
       sqlParams: []
     };
@@ -36,9 +39,31 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
         return columnNameMaps[datamodelName][colName];
       });
     },
-    createQuery: function(fieldNames, params) {
-      var query = baseQuery();
-      return dbapi.createQuery(query);
+    stream: function(client, fieldNames, params, callback) {
+      async.waterfall([
+        function(callback) {
+          querySenesteSekvensnummer(client, callback);
+        },
+        function(senesteHaendelse, callback) {
+          console.log("seneste haendelse: " + JSON.stringify(senesteHaendelse));
+          if(params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
+            callback(new sqlUtil.InvalidParametersError("hændelse med sekvensnummer " + params.sekvensnummer + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer));
+          }
+          else {
+            var sqlParts = baseQuery();
+            if(params.sekvensnummer) {
+              var sekvensnummerAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummer);
+              dbapi.addWhereClause(sqlParts, 'valid_from <= ' + sekvensnummerAlias);
+              dbapi.addWhereClause(sqlParts, '(valid_to > ' + sekvensnummerAlias + ' OR valid_to IS NULL)');
+            }
+            else {
+              dbapi.addWhereClause(sqlParts, 'valid_to IS NULL');
+            }
+            var query = dbapi.createQuery(sqlParts);
+            dbapi.streamRaw(client, query.sql, query.params, callback);
+          }
+        }
+      ], callback);
     }
   };
   return memo;
