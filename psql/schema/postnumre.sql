@@ -7,6 +7,7 @@ $$
 $$;
 
 -- Trigger which maintains the tsv column
+DROP FUNCTION IF EXISTS postnumre_tsv_update() CASCADE;
 CREATE OR REPLACE FUNCTION postnumre_tsv_update()
   RETURNS TRIGGER AS $$
 BEGIN

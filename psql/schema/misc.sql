@@ -31,6 +31,6 @@ CREATE AGGREGATE public.last (
 
 CREATE OR REPLACE FUNCTION processForIndexing(text) RETURNS text AS $$
 BEGIN
-  RETURN REGEXP_REPLACE($1, '[\\.''\\-\\/]', ' ', 'g');
+  RETURN REGEXP_REPLACE($1, '[\\.\\/\\-]', ' ', 'g');
 END;
   $$ language plpgsql;

@@ -27,6 +27,7 @@ LANGUAGE plpgsql AS
 $$;
 
 -- Trigger which maintains the tsv column
+DROP FUNCTION IF EXISTS supplerendebynavne_tsv_update() CASCADE;
 CREATE OR REPLACE FUNCTION supplerendebynavne_tsv_update()
   RETURNS TRIGGER AS $$
 BEGIN

@@ -1,9 +1,7 @@
 "use strict";
 
-var cli = require('cli');
+var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var winston  = require('winston');
-var _        = require('underscore');
-var async    = require('async');
 var sqlCommon = require('./common');
 var initialization = require('./initialization');
 
@@ -13,7 +11,6 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-cli.parse(optionSpec, []);
 
 function exitOnErr(err){
   if (err){
@@ -22,12 +19,14 @@ function exitOnErr(err){
   }
 }
 
-cli.main(function(args, options) {
+cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
+  console.log(options.pgConnectionUrl);
+  console.log(JSON.stringify(options));
   sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
     initialization.reloadDatabaseCode(client, 'psql/schema')(function(err) {
       exitOnErr(err);
-      commit(function(err) {
+      commit(null, function(err) {
         exitOnErr(err);
       });
     });
