@@ -8,7 +8,7 @@ $$
     FROM
       (SELECT enhedsadresser.id,
          adgangsadresser.tsv ||
-         setweight(to_tsvector('adresser', COALESCE(etage, '') ||' ' || COALESCE(doer, '')), 'B') as tsv
+         setweight(to_tsvector('adresser', processforindexing(COALESCE(etage, '') ||' ' || COALESCE(doer, ''))), 'B') as tsv
        FROM enhedsadresser left join adgangsadresser on enhedsadresser.adgangsadresseid = adgangsadresser.id) as newtsvs
     WHERE
       newtsvs.id = enhedsadresser.id and newtsvs.tsv is distinct from enhedsadresser.tsv;
@@ -21,8 +21,8 @@ CREATE OR REPLACE FUNCTION enhedsadresser_tsv_update()
 BEGIN
   NEW.tsv = (SELECT adgangsadresser.tsv ||
                     setweight(to_tsvector('adresser',
-                                          COALESCE(NEW.etage, '') || ' ' ||
-                                          COALESCE(NEW.doer, '')), 'B')
+                                          processForIndexing(COALESCE(NEW.etage, '') || ' ' ||
+                                          COALESCE(NEW.doer, ''))), 'B')
   FROM
   adgangsadresser
   WHERE
@@ -44,8 +44,8 @@ BEGIN
   UPDATE enhedsadresser
   SET tsv = NEW.tsv ||
             setweight(to_tsvector('adresser',
-                                  COALESCE(etage, '') || ' ' ||
-                                  COALESCE(doer, '')), 'B')
+                                  processForIndexing(COALESCE(etage, '') || ' ' ||
+                                  COALESCE(doer, ''))), 'B')
   WHERE
     adgangsadresseid = NEW.id;
   RETURN NULL;
