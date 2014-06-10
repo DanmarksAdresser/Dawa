@@ -25,6 +25,10 @@ function parseParameters(parameterSpec, rawParams) {
     return parameterParsing.parseParameters(rawParams, _.indexBy(parameterSpec, 'name'));
 }
 
+function validateParameters(parameterSpec, parsedParams) {
+  return parameterParsing.validateParameters(parsedParams, _.indexBy(parameterSpec, 'name'));
+}
+
 function sendQueryParameterFormatError(res, details){
   sendError(res, 400, {type: "QueryParameterFormatError",
     title: "One or more query parameters was ill-formed.",
@@ -104,6 +108,14 @@ function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
   // each actual resource impl may need some additional processing of the parameters
   // before they are passed on to the SQL layer
   resourceSpec.processParameters(params);
+
+  // we run parameter validation functions after the processing
+  var validationErrors = validateParameters(resourceSpec.queryParameters, params);
+  if(validationErrors.length > 0) {
+    return {
+      queryErrors: parameterParseResult.errors
+    };
+  }
   return {
     pathParams: pathParameterParseResult.params,
     queryParams: parameterParseResult.params,

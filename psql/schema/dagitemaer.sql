@@ -9,6 +9,7 @@ $$
 $$;
 
 -- Trigger which maintains the tsv column
+DROP FUNCTION IF EXISTS dagitemaer_tsv_update() CASCADE;
 CREATE OR REPLACE FUNCTION dagitemaer_tsv_update()
   RETURNS TRIGGER AS $$
 BEGIN

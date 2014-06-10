@@ -8,7 +8,12 @@ exports.paging = [
   {
     name: 'side',
     type: 'integer',
-    schema: schema.positiveInteger
+    schema: schema.positiveInteger,
+    validateFun: function(sideParam, params) {
+      if(sideParam > 1 && params.per_side * sideParam > 10000) {
+        throw "Der kan højst pagineres i de første 10000 elementer";
+      }
+    }
   },
   {
     name: 'per_side',

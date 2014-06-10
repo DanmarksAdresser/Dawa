@@ -18,7 +18,7 @@ exports.parseParameters = function(params, parameterSpec) {
   var paramNames = _.filter(_.keys(params), function(name) {
     return parameterSpec[name] ? true : false;
   });
-  return _.reduce(paramNames,
+  var parsedParameters = _.reduce(paramNames,
     function(memo, name){
       try{
         var val = parseParameterMulti(params[name], parameterSpec[name]);
@@ -30,6 +30,29 @@ exports.parseParameters = function(params, parameterSpec) {
       return memo;
     },
     {params: {}, errors: []});
+  return parsedParameters;
+};
+
+exports.validateParameters = function(params, parameterSpec) {
+    return _.reduce(params, function(memo, paramValue, paramKey) {
+      var spec = parameterSpec[paramKey];
+      if(spec && spec.validateFun) {
+        try {
+          if(spec.multi) {
+            _.each(paramValue.values, function(value) {
+              spec.validateFun(value, params);
+            });
+          }
+          else {
+            spec.validateFun(paramValue, params);
+          }
+        }
+        catch(error) {
+          memo.push([paramKey, error]);
+        }
+      }
+      return memo;
+    },[]);
 };
 
 function parseParameterMulti(valString, paramSpec) {
@@ -47,9 +70,6 @@ function parseParameterMulti(valString, paramSpec) {
 function parseParameter(valString, paramSpec) {
   var val = parseParameterType(valString, paramSpec.type);
   jsonSchemaValidation(val, paramSpec.schema);
-  if (paramSpec.validateFun) {
-    paramSpec.validateFun(val);
-  }
   return val;
 }
 

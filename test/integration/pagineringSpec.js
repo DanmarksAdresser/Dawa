@@ -65,4 +65,16 @@ describe('Paginering', function () {
       done();
     });
   });
+  it("Paging further than 10K elements should result in an error", function(done) {
+    request.get('http://localhost:3000/adresser?side=101&per_side=100', function(error, response) {
+      expect(response.statusCode).toBe(400);
+      done();
+    });
+  });
+  it("It should be possible to limit results further than 10K", function(done) {
+    request.get('http://localhost:3000/adresser?per_side=11000', function(error, response) {
+      expect(response.statusCode).toBe(200);
+      done();
+    });
+  });
 });
