@@ -3,6 +3,7 @@
 var dbapi = require('../../../dbapi');
 
 var d = require('../../util').d;
+var querySenesteSekvensnummer = require('./querySenesteSekvensnummer');
 var resourceImpl = require('../../common/resourceImpl');
 
 module.exports = {

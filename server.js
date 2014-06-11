@@ -1,6 +1,7 @@
 "use strict";
 
 var express        = require("express");
+var compression = require('compression');
 var http = require('http');
 var fs = require('fs');
 var logger = require('./logger');
@@ -80,7 +81,7 @@ function setupWorker() {
   // Hackish: We reduce memlevel to prevent zLib from caching too much internally
   // Otherwise, it will take too long for our application to start responding to JSON requests,
   // potentially resulting in a TCP disconnection.
-  app.use(express.compress( {
+  app.use(compression( {
     memLevel: 3
   }));
   app.use(express.static(__dirname + '/public', {maxAge: 10000}));
@@ -165,6 +166,9 @@ function setupMaster() {
         res.json(result);
       }).done();
     });
+
+    isaliveApp.set('json spaces', 2);
+
     isaliveApp.listen(3001);
     logger.info("startup", "Master listening for isalive", {listenPort: 3001});
   });

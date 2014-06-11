@@ -5,6 +5,8 @@
 /******************************************************************************/
 
 var express          = require('express');
+var methodOverride = require('method-override');
+var bodyParser = require('body-parser');
 
 var logger = require('./logger');
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
@@ -54,11 +56,11 @@ function requestLoggingMiddleware(req, res, next) {
   // this hack was the best I could do, because responses does not emit any
   // useful events when data is streamed to the response.
   res.once('pipe', function(src) {
-    src.unpipe(res);
-    src.once('data', function(chunk) {
-      streamingStarted = new Date();
-      res.write(chunk);
-      src.pipe(res);
+    // setImmediate is apparently required, for reasons not understood.
+    setImmediate(function() {
+      src.once('data', function() {
+        streamingStarted = new Date();
+      });
     });
   });
   function logRequest(closedPrematurely) {
@@ -101,8 +103,8 @@ function requestLoggingMiddleware(req, res, next) {
 exports.setupRoutes = function () {
   var app = express();
   app.set('jsonp callback', true);
-  app.use(express.methodOverride());
-  app.use(express.bodyParser());
+  app.use(methodOverride());
+  app.use(bodyParser());
   app.use(requestLoggingMiddleware);
   app.use(corsMiddleware);
   app.use(cachingMiddleware);
