@@ -61,5 +61,6 @@ setupJadePage('/supplerendebynavndok' , 'supplerendebynavndok.jade');
 setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
 setupJadePage('/listerdok'            , 'listerdok.jade');
 setupJadePage('/om'                   , 'om.jade');
+setupJadePage('/replikeringdok', 'replikeringdok.jade');
 
 module.exports = app;

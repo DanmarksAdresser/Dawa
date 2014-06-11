@@ -119,7 +119,7 @@ function setAppropriateContentHeader(res, format, callback) {
 
 
 function streamCsvToHttpResponse(pipe, res, csvFieldNames, cb) {
-  var csvStringifier = csvStringify({header: true, columns: csvFieldNames, rowDelimiter: '\r\n'});
+  var csvStringifier = csvStringify({header: true, columns: csvFieldNames, rowDelimiter: '\r\n', highWaterMark: 0});
 
   pipe.add(csvStringifier);
   streamToHttpResponse(pipe, res, cb);

@@ -65,8 +65,8 @@ describe('Paginering', function () {
       done();
     });
   });
-  it("Paging further than 10K elements should result in an error", function(done) {
-    request.get('http://localhost:3000/adresser?side=101&per_side=100', function(error, response) {
+  it("Paging further than 400K elements should result in an error", function(done) {
+    request.get('http://localhost:3000/adresser?side=401&per_side=1000', function(error, response) {
       expect(response.statusCode).toBe(400);
       done();
     });

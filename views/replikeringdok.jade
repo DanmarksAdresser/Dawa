@@ -1,0 +1,56 @@
+extends layout
+block content
+  header.jumbotron.subhead
+    div.container
+      h1 Etablering af adressekopiregister
+      div.page-header
+        p.lead Etablering af lokal kopi af Danmarks adresser
+    div.container
+      div.row
+        div.span3
+          ul#indhold.nav.nav-list.affix
+            li(data-toggle='collapse', data-target='#generelt').nav-header Replikering
+            ul#generelt.nav.nav-list
+              li <a href='#introduktion'>Introduktion</a>
+              li <a href='#fremgangsmaade'>Fremgangsmåde</a>
+              li <a href='#detaljer'>Detaljer</a>
+        div.span9
+          section
+            div.page-header
+              h3.anchor-header#introduktion Introduktion
+            p DAWA udstiller adresser, adgangsadresse, vejstykker og postnumre i et format, som er velegnet til etablering og vedligehold af en lokal kopi af Danmarks adresser.
+            p I DAWA tilknyttes alle ændringer af adresser et unikt, fortløbende <em>sekvensnummer</em>. Et sekvensnummer svarer dermed til en unik hændelse (oprettelse, ændring eller nedlæggelse) på et objekt.
+            p Når et klientsystem skal vedligeholde et kopiregister anvendes sekvensnummeret til at holde styr på hvilke adresseændringer klientsystemet har udført i den lokale kopi og hvilke ændringer klientsystemet mangler at udføre.
+            p API'erne til replikering udstiller <em>normaliserede</em> adresser. Hvis kopien gemmes i en SQL database vil det være hensigtsmæssigt at have én tabel til hver type.
+            p Udtræk leveres i det kompakte CSV-format, der er velegnet til direkte indlæsning i en SQL-database. Hændelserne leveres i JSON format.
+            div.page-header
+              h3.anchor-header#fremgangsmaade Fremgangsmåde
+            p Fremgangsmåden for etablering og vedligehold af lokalt kopiregister er som følgende:
+              ul
+                li Klienten henter det aktuelle sekvensnummer:
+                  PRE <a href="/replikering/senestesekvensnummer">/replikering/senestesekvensnummer</a>
+                li Klienten henter dataudtræk for sekvensnummeret:
+                  PRE <a href="/replikering/postnumre?sekvensnummer=990">/replikering/postnumre?sekvensnummer=990</a>
+                  PRE <a href="/replikering/vejstykker?sekvensnummer=990">/replikering/vejstykker?sekvensnummer=990</a>
+                  PRE <a href="/replikering/adgangsadresser?sekvensnummer=990">/replikering/adgangsadresser?sekvensnummer=990</a>
+                  PRE <a href="/replikering/adresser?sekvensnummer=990">/replikering/adresser?sekvensnummer=990</a>
+                li Klienten indlæser data i databasen, og har nu etableret et lokalt kopiregister.
+                li Klienten kan undersøge, om der er sket ændringer ved at <em>polle</em> seneste sekvensnummer:
+                  PRE <a href="/replikering/senestesekvensnummer">/replikering/senestesekvensnummer</a>
+                li Hvis klienten konstanterer, at der er sket adresseændringer hentes hændelserne:
+                  PRE <a href="/replikering/postnumre/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/postnumre?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE <a href="/replikering/vejstykker/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/vejstykker?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE <a href="/replikering/adgangsadresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adgangsadresser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE <a href="/replikering/adresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adresser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                li Klienten opdaterer den lokale kopi på baggrund af hændelserne. Anvendes der en SQL-database hvor der anvendes en tabel pr. datatype vil hver hændelse resultere i ét INSERT, UPDATE eller DELETE statement.
+                li Med jævne mellemrum (f.eks. dagligt eller ugentligt) bør klienten hente nye udtræk og verificere, at den lokale kopi er opdateret korrekt.
+            div.page-header
+              h3.anchor-header#detaljer Detaljer
+            p DAWA garanterer ikke <em>referentiel integritet</em>. F.eks. er det muligt at der kan være oprettet adresser med en vejkode og kommunekode, som endnu ikke refererer til et vejstykke. Klientsystemet bør håndtere dette.
+            p Hændelser udstilles i <em>nær realtid</em>. Kildesystemet der ligger til grund for hændelserne er BBR. Klientsystemer skal være opmærksom på, at adressers postnumre og supplerende bynavne p.t. kun opdateres en gang i døgnet.
+            p Hvis man ønsker at vedligeholde en lokal kopi af en <em>delmængde</em> af adresserne (f.eks. en kommune) skal man være opmærksom på, at det er noget mere kompliceret at vedligeholde en lokal kopi, da det i princippet er muligt for en adresse at flytte fra en kommune til en anden. Hvis der anvendes en SQL-database kan det overvejes at replikere alle adresserne og anvende et <em>View</em>, som evt. kan være et <a href="http://en.wikipedia.org/wiki/Materialized_view">Materialized View</>.
+  block append scripts
+  script.
+    $('#topbar li').removeClass('active');
+    var a= $("#topbar li a[href='generelt']")[0];
+    var li= $(a).parent().addClass('active');

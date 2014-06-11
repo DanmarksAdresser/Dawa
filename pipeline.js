@@ -7,7 +7,7 @@ var util = require('util');
 util.inherits(MapperStream, stream.Transform);
 function MapperStream(mapFunc) {
   this.mapFunc = mapFunc;
-  stream.Transform.call(this, {objectMode: true});
+  stream.Transform.call(this, {objectMode: true, highWaterMark: 0});
 }
 MapperStream.prototype._transform = function(chunk, enc, cb) {
   this.push(this.mapFunc(chunk));

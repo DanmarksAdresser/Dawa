@@ -10,8 +10,9 @@ exports.paging = [
     type: 'integer',
     schema: schema.positiveInteger,
     validateFun: function(sideParam, params) {
-      if(sideParam > 1 && params.per_side * sideParam > 10000) {
-        throw "Der kan højst pagineres i de første 10000 elementer";
+      var PAGING_LIMIT = 400000;
+      if(sideParam > 1 && params.per_side * sideParam > PAGING_LIMIT) {
+        throw "Der kan højst pagineres i de første " + PAGING_LIMIT +" elementer";
       }
     }
   },
