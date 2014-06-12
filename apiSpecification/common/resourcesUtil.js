@@ -91,6 +91,23 @@ exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameter
     processParameters:  function(params) { return; }
   };
 };
+exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel) {
+  return {
+    path: path,
+    pathParameters: [],
+    queryParameters: exports.flattenParameters(
+      {
+        format: commonParameters.format,
+        crs: commonParameters.crs,
+        reverseGeocoding: commonParameters.reverseGeocoding
+      }),
+    representations: representations,
+    sqlModel: sqlModel,
+    singleResult: true,
+    chooseRepresentation: exports.chooseRepresentationForQuery,
+    processParameters:  function() {}
+  };
+};
 
 exports.defaultResources = function(nameAndKey, idParameters, propertyFilterParameters, representations, sqlModel) {
   return [

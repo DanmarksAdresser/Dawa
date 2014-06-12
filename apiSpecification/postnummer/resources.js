@@ -22,6 +22,7 @@ module.exports = [
     autocomplete: commonParameters.autocomplete,
     stormodtagerFilter: parameters.stormodtagerFilter
   }, representations.autocomplete, sqlModel),
+  resourcesUtil.reverseGeocodingResourceSpec('/postnumre/reverse', representations, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {crs : commonParameters.crs }, representations, sqlModel)
 ];
 

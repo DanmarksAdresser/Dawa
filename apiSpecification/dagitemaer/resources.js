@@ -25,25 +25,7 @@ dagiTemaer.forEach(function(tema) {
       propertyFilter: parameters.propertyFilter,
       autocomplete: commonParameters.autocomplete
     }, representations.autocomplete, sqlModel),
-    /*
-     * Reverse geocoding resource
-     */
-    // not enabled yet
-//    {
-//      path: '/' + nameAndKey.plural + '/reverse',
-//      pathParameters: [],
-//      queryParameters: resourcesUtil.flattenParameters(
-//        {
-//          format: commonParameters.format,
-//          crs: commonParameters.crs,
-//          reverseGeocoding: commonParameters.reverseGeocoding
-//        }),
-//      representations: representations,
-//      sqlModel: sqlModel,
-//      singleResult: true,
-//      chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-//      processParameters:  function() {}
-//    },
+    resourcesUtil.reverseGeocodingResourceSpec('/' + nameAndKey.plural + '/reverse', representations, sqlModel),
     resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {crs : commonParameters.crs }, representations, sqlModel)
     ];
   exports[tema.singular] = resources;

@@ -67,6 +67,7 @@ var baseQuery = function () {
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
+  sqlParameterImpl.reverseGeocodingWithin(),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key)
