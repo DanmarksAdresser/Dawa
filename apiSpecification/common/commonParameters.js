@@ -106,11 +106,13 @@ exports.reverseGeocoding =
   [
     {
       name: 'x',
-      type: 'float'
+      type: 'float',
+      required: true
     },
     {
       name: 'y',
-      type: 'float'
+      type: 'float',
+      required: true
     }
   ];
 

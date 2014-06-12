@@ -34,7 +34,7 @@ exports.parseParameters = function(params, parameterSpec) {
 };
 
 exports.validateParameters = function(params, parameterSpec) {
-    return _.reduce(params, function(memo, paramValue, paramKey) {
+    var validationErrors = _.reduce(params, function(memo, paramValue, paramKey) {
       var spec = parameterSpec[paramKey];
       if(spec && spec.validateFun) {
         try {
@@ -53,6 +53,13 @@ exports.validateParameters = function(params, parameterSpec) {
       }
       return memo;
     },[]);
+  var missingRequiredErrors = _.reduce(parameterSpec, function(memo, spec) {
+    if(spec.required && params[spec.name] === undefined) {
+      memo.push([spec.name, 'Parameteren '+ spec.name + ' skal angives']);
+    }
+    return memo;
+  }, []);
+  return validationErrors.concat(missingRequiredErrors);
 };
 
 function parseParameterMulti(valString, paramSpec) {

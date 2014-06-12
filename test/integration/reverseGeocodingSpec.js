@@ -25,6 +25,21 @@ describe('Reverse geocoding', function () {
         done();
       });
     });
+    it('Hvis en parameter udelades skal returneres en fejlkode 400', function(done) {
+      request.get("http://localhost:3000/" + entityPlural + "/reverse?y=59&srid=25832", function(error, response) {
+        if(error) throw error;
+        expect(response.statusCode).toBe(400);
+        done();
+      });
+    });
+  });
+
+  it('Skal kunne lave reverse geocoding paa adgangsadresse', function(done) {
+    getJson("http://localhost:3000/adgangsadresser/reverse?x=61&y=61&srid=25832", function(body) {
+      expect(body).toBeDefined();
+      expect(body.id).toBeDefined();
+      done();
+    });
   });
 
 });
