@@ -29,27 +29,54 @@ function validateParameters(parameterSpec, parsedParams) {
   return parameterParsing.validateParameters(parsedParams, _.indexBy(parameterSpec, 'name'));
 }
 
-function sendQueryParameterFormatError(res, details){
-  sendError(res, 400, {type: "QueryParameterFormatError",
-    title: "One or more query parameters was ill-formed.",
-    details: details});
+function jsonResponse(status, errorObject) {
+  return {
+    status: status,
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8'
+    },
+    body: jsonStringifyPretty(errorObject)
+  };
 }
 
-function sendUriPathFormatError(res, details){
-  sendError(res, 404, {type: "ResourcePathFormatError",
+function uriPathFormatErrorResponse(details){
+  return jsonResponse(404,{type: "ResourcePathFormatError",
     title: "The URI path was ill-formed.",
     details: details});
 }
 
-function sendPostgresQueryError(res, details) {
+function queryParameterFormatErrorResponse(details) {
+  return jsonResponse(400, {type: "QueryParameterFormatError",
+    title: "One or more query parameters was ill-formed.",
+    details: details});
+}
+
+function internalServerErrorResponse(details){
+  var msg = {type: "InternalServerError",
+    title: "Something unexpected happened inside the server.",
+    details: details};
+  logger.error('http', "Internal server error", details);
+  return jsonResponse(500, msg);
+}
+
+function postgresQueryErrorResponse(details) {
   var msg = {type: "InvalidRequestError",
     title: "The request resulted in an invalid database query, probably due to bad query parameters",
     details: details.hint};
-  sendError(res, 500, msg);
+  return jsonResponse(500, msg);
 }
 
-function sendObjectNotFoundError(res, details){
-  sendError(res, 404, {type: "ResourceNotFoundError",
+function modelErrorResponse(err) {
+  if(err instanceof sqlUtil.InvalidParametersError) {
+    return queryParameterFormatErrorResponse(err.message);
+  }
+  else {
+    return postgresQueryErrorResponse(err);
+  }
+}
+
+function objectNotFoundResponse(details){
+  return jsonResponse(404, {type: "ResourceNotFoundError",
     title: "The resource was not found",
     details: details});
 }
@@ -66,23 +93,6 @@ function sendError(res, code, message){
   res.statusCode = code;
   res.setHeader('Content-Type', 'application/json; charset=UTF-8');
   res.end(jsonStringifyPretty(message));
-}
-
-function withReadonlyTransaction(res, callback) {
-  // In case the HTTP connection has been reset before we get a psql connection,
-  // we do not want to actually acquire it.
-  function shouldAbort() {
-    return !res.connection.writable;
-  }
-  return dbapi.withReadonlyTransaction(function(err, client, done) {
-    if (err) {
-      // We do not have a connection to PostgreSQL.
-      // Abort!
-      sendInternalServerError(res, err);
-      return;
-    }
-    return callback(client, done);
-  }, shouldAbort);
 }
 
 function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
@@ -127,87 +137,138 @@ exports.internal = {
   parseAndProcessParameters: parseAndProcessParameters
 };
 
-function logPostgresQueryError(req, err) {
-  logger.error('sql', 'query failed', {url: req.url, error: err});
-}
-
-function handleModelError(req, res, err) {
-  if(err instanceof sqlUtil.InvalidParametersError) {
-    sendQueryParameterFormatError(res, err.message);
-  }
-  else {
-    logPostgresQueryError(req, err);
-    sendPostgresQueryError(res, err);
-  }
-}
-
 exports.sendInternalServerError = sendInternalServerError;
 
+function singleResultResponse(
+  resourceSpec,
+  dbClient,
+  validatedPathParams,
+  validatedParams,
+  fieldNames,
+  mapObject,
+  serialize,
+  callback,
+  releaseDbClient) {
+  // create a function that can write the object to the HTTP response based on the format requrested by the
+  // client
+  resourceSpec.sqlModel.query(dbClient, fieldNames, validatedParams, function(err, rows) {
+    releaseDbClient(err);
+    if (err) {
+      return callback(null, modelErrorResponse(err));
+    } else if (rows.length > 1) {
+      return callback(null, internalServerErrorResponse("The request resulted in more than one response"));
+    } else if (rows.length === 0) {
+      return callback(null, objectNotFoundResponse(validatedPathParams));
+    } else {
+      // map the object and send it to the client
+      var mappedResult = mapObject(rows[0]);
+      return serialize(mappedResult, callback);
+    }
+  });
+}
+
+function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize, callback, releaseDbClient) {
+  resourceSpec.sqlModel.stream(dbClient, fieldNames, params, function(err, stream) {
+    if(err) {
+      releaseDbClient(err);
+      return callback(null, modelErrorResponse(err));
+    }
+
+    // map the query results to the correct representation and serialize to http response
+    var pipe = pipeline(stream);
+    pipe.map(mapObject);
+    pipe.completed().then(function() {
+      releaseDbClient();
+    }, function(err) {
+      releaseDbClient(err);
+    });
+    serialize(pipe, callback);
+  });
+
+}
+
+function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, callback) {
+  var parseResult = parseAndProcessParameters(resourceSpec, req.params, req.query);
+  if(parseResult.pathErrors) {
+    return callback(null, uriPathFormatErrorResponse(parseResult.pathErrors));
+  }
+  else if(parseResult.queryErrors) {
+    return callback(null, queryParameterFormatErrorResponse(parseResult.queryErrors));
+  }
+  var params = parseResult.processedParams;
+
+  var formatParam = params.format;
+
+  // choose the right representation based on the format requested by client
+  var representation = resourceSpec.chooseRepresentation(formatParam, resourceSpec.representations);
+  if(_.isUndefined(representation) || _.isNull(representation)){
+    return callback(null, queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource'));
+  }
+  logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
+  // The list of fields we want to retrieve from database
+  var fieldNames = _.pluck(representation.fields, 'name');
+
+  // create a mapper function that maps results from the SQL layer to the requested representation
+  var mapObject = representation.mapper(paths.baseUrl(req), params, resourceSpec.singleResult);
+
+  withDatabaseClient(function(err, dbClient, releaseDbClient) {
+    if(err) {
+      return internalServerErrorResponse(err);
+    }
+    // we do not want to produce a response if it is no longer needed
+    if(shouldAbort()) {
+      return releaseDbClient();
+    }
+    if(resourceSpec.singleResult) {
+      // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
+      // client
+      var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, representation);
+      return singleResultResponse(resourceSpec, dbClient,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult, callback, releaseDbClient);
+    }
+    else {
+      // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
+      // client
+      var serializeStream = serializers.createStreamSerializer(formatParam,
+        params.callback,
+        params.srid,
+        representation);
+      return arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serializeStream, callback, releaseDbClient);
+    }
+  });
+}
+
+exports.resourceResponse = resourceResponse;
+
 exports.createExpressHandler = function(resourceSpec) {
-  var spec = resourceSpec;
   return function(req, res) {
-    var parseResult = parseAndProcessParameters(resourceSpec, req.params, req.query);
-    if(parseResult.pathErrors) {
-      return sendUriPathFormatError(res, parseResult.pathErrors);
+    // In case the HTTP connection has been reset before we get a psql connection,
+    // we do not want to actually acquire it.
+    function shouldAbort() {
+      return !res.connection.writable;
     }
-    else if(parseResult.queryErrors) {
-      return sendQueryParameterFormatError(res, parseResult.queryErrors);
+    function withDbClient(callback) {
+      dbapi.withReadonlyTransaction(callback, shouldAbort);
     }
-    var params = parseResult.processedParams;
 
-    var formatParam = params.format;
-
-    // choose the right representation based on the format requested by client
-    var representation = spec.chooseRepresentation(formatParam, spec.representations);
-    if(_.isUndefined(representation) || _.isNull(representation)){
-      return sendQueryParameterFormatError(res,
-        'Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
-    }
-    logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
-
-    // The list of fields we want to retrieve from database
-    var fieldNames = _.pluck(representation.fields, 'name');
-
-    // create a mapper function that maps results from the SQL layer to the requested representation
-    var mapObject = representation.mapper(paths.baseUrl(req), params, spec.singleResult);
-    withReadonlyTransaction(res, function(client, done) {
-      if(spec.singleResult) {
-        // create a function that can write the object to the HTTP response based on the format requrested by the
-        // client
-        var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, representation);
-        spec.sqlModel.query(client, fieldNames, params, function(err, rows) {
-          done(err);
-          if (err) {
-            handleModelError(req, res, err);
-          } else if (rows.length > 1) {
-            sendInternalServerError(res, "The request resulted in more than one response", rows);
-          } else if (rows.length === 0) {
-            sendObjectNotFoundError(res, parseResult.pathParams);
-          } else {
-            // map the object and send it to the client
-            var mappedResult = mapObject(rows[0]);
-            serializeSingleResult(res, mappedResult);
-          }
-        });
+    resourceResponse(withDbClient, resourceSpec, req, shouldAbort, function(err, response) {
+      if(shouldAbort()) {
+        return;
+      }
+      if(err) {
+        response = internalServerErrorResponse(err);
+      }
+      res.statusCode = response.status || 200;
+      _.each(response.headers, function(headerValue, headerName) {
+        res.setHeader(headerName, headerValue);
+      });
+      if(response.body) {
+        res.end(response.body);
+      }
+      else if(response.bodyPipe) {
+        response.bodyPipe.toHttpResponse(res);
       }
       else {
-        // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
-        // client
-        var serializeStream = serializers.createStreamSerializer(formatParam,
-          params.callback,
-          params.srid,
-          representation);
-        spec.sqlModel.stream(client, fieldNames, params, function(err, stream) {
-          if(err) {
-            done(err);
-            return handleModelError(req, res, err);
-          }
-
-          // map the query results to the correct representation and serialize to http response
-          var pipe = pipeline(stream);
-          pipe.map(mapObject);
-          serializeStream(pipe, res, done);
-        });
+        res.end();
       }
     });
   };

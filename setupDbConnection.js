@@ -2,7 +2,7 @@
 
 var pg = require('pg.js');
 
-// We want timestamps to be parsed into text (ISO format in UTZ).
+// We want timestamps to be parsed into text (ISO format in UTC).
 
 var TIMESTAMPTZ_OID = 1184;
 var standardDateParser = pg.types.getTypeParser(TIMESTAMPTZ_OID, 'text');

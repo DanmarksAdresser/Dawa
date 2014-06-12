@@ -37,7 +37,7 @@ function number()       {return simpleType('number');}
 function string()       {return simpleType('string');}
 function time()         {return string();}
 function simpleType(t)  {return {type: ['null', t]};}
-function array(t)       {return {type: ['null', 'array'], minItems:1, items: t};}
+function array(t)       {return {type: ['null', 'array'], minItems:0, items: t};}
 function enumeration(l) {return {enum: ['null'].concat(l)};}
 function uuid() {
   return {type: 'string',

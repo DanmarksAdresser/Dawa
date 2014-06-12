@@ -88,16 +88,6 @@ function transformToText(pipe, formatParam, callbackParam, sridParam) {
   return pipe;
 }
 
-// pipe stream to HTTP response. Invoke cb when done. Pass error, if any, to cb.
-function streamToHttpResponse(pipe, res, cb) {
-  pipe.toHttpResponse(res);
-  pipe.completed().then(function() {
-    cb(null);
-  }, function(err) {
-    cb(err);
-  });
-}
-
 /**
  * Compute the appropriate Content-Type header based on the format and
  */
@@ -118,48 +108,57 @@ function setAppropriateContentHeader(res, format, callback) {
 }
 
 
-function streamCsvToHttpResponse(pipe, res, csvFieldNames, cb) {
+function streamCsv(pipe, csvFieldNames) {
   var csvStringifier = csvStringify({header: true, columns: csvFieldNames, rowDelimiter: '\r\n', highWaterMark: 0});
 
   pipe.add(csvStringifier);
-  streamToHttpResponse(pipe, res, cb);
-
 }
 
 
 exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, representation) {
   formatParam = formatParam || 'json';
   sridParam = sridParam || 4326;
-  return function(pipe, res, callback) {
-    setAppropriateContentHeader(res, formatParam, callbackParam);
+  return function(pipe, callback) {
     if(formatParam === 'csv') {
-      streamCsvToHttpResponse(pipe, res, representation.outputFields, callback);
+      streamCsv(pipe, representation.outputFields);
     } else {
       transformToText(pipe, formatParam, callbackParam, sridParam);
-      streamToHttpResponse(pipe, res, callback);
     }
+    var response = {
+      status: 200,
+      headers: {
+        'Content-Type': contentHeader(formatParam, callbackParam)
+      },
+      bodyPipe: pipe
+    };
+    callback(null, response);
   };
 };
 
 exports.createSingleObjectSerializer = function(formatParam, callbackParam, representation) {
-  return function(res, object) {
-    setAppropriateContentHeader(res, formatParam, callbackParam);
-    if(formatParam === 'csv') {
+  return function(object, callback) {
+    var response = {
+      status: 200,
+      headers: {
+        'Content-Type': contentHeader(formatParam, callbackParam)
+      }
+    };
 
+    if(formatParam === 'csv') {
       var stream = eventStream.readArray([object]);
       var pipe = pipeline(stream);
-      streamCsvToHttpResponse(pipe, res, representation.outputFields, function() {});
+      streamCsv(pipe, representation.outputFields);
+      response.bodyPipe = pipe;
     } else {
       var textObject = jsonStringifyPretty(object);
       if(callbackParam) {
         var sep = jsonpSep(callbackParam, {open: '', separator: '', close: ''});
-        res.write(sep.open);
-        res.write(textObject);
-        res.end(sep.close);
+        response.body = sep.open + textObject + sep.close;
       }
       else {
-        res.end(textObject);
+        response.body = textObject;
       }
     }
+    callback(null, response);
   };
 };

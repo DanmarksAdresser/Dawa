@@ -2,6 +2,7 @@
 
 var Q = require('q');
 var stream = require('stream');
+var eventStream = require('event-stream');
 var util = require('util');
 
 util.inherits(MapperStream, stream.Transform);
@@ -57,6 +58,15 @@ module.exports = function(readableStream) {
         completionDeferred.reject(new Error('HTTP client closed connection'));
       });
       this.add(res);
+    },
+    toArray: function(callback) {
+      eventStream.writeArray(function(err, result) {
+        if(err) {
+          return completionDeferred.reject(err);
+        }
+        completionDeferred.resolve();
+        callback(err, result);
+      });
     },
     completed: function() {
       return completionDeferred.promise;
