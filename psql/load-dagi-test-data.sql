@@ -98,11 +98,14 @@ VALUES ('kommune', 165, 'Albertslund'),
 ('kommune', 851, 'Aalborg'),
 ('kommune', 751, 'Aarhus');
 
-INSERT INTO DagiTemaer (tema, kode, navn)
+INSERT INTO DagiTemaer (tema, kode, navn, geom)
 VALUES
-  ('region', 1, 'Region'),
-  ('sogn', 1, 'Sogn'),
-  ('opstillingskreds', 1 , 'Opstillingskreds'),
-  ('retskreds', 1, 'Retskreds'),
-  ('politikreds', 1, 'Politikreds'),
-  ('afstemningsområde', 1, 'Afstemningsområde');
+  ('region', 1, 'Region', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
+  ('kommune', 999, 'Testkommune', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
+  ('postdistrikt', 999, 'Testpostdistrikt', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
+  ('sogn', 1, 'Sogn', null),
+  ('opstillingskreds', 1 , 'Opstillingskreds', null),
+  ('retskreds', 1, 'Retskreds', null),
+  ('politikreds', 1, 'Politikreds', null),
+  ('afstemningsområde', 1, 'Afstemningsområde', null);
+
