@@ -3,7 +3,9 @@
 var nameAndKey = require('./nameAndKey');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
-var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
+var sqlUtil = require('../common/sql/sqlUtil');
+var assembleSqlModel = sqlUtil.assembleSqlModel;
+var selectIsoTimestamp = sqlUtil.selectIsoDate;
 var dbapi = require('../../dbapi');
 
 var columns = {
@@ -11,13 +13,13 @@ var columns = {
     column: 'e_id'
   },
   oprettet: {
-    column: 'e_oprettet'
+    select: selectIsoTimestamp('e_oprettet')
   },
   ændret:{
-    column: 'e_aendret'
+    select: selectIsoTimestamp('e_aendret')
   },
   ikrafttrædelse: {
-    column: 'e_ikraftfra'
+    select: selectIsoTimestamp('e_ikraftfra')
   },
   adgangsadresseid: {
     column: 'a_id'
@@ -62,13 +64,13 @@ var columns = {
     }
   },
   adgangsadresse_oprettet: {
-    select: 'a_oprettet'
+    select: selectIsoTimestamp('a_oprettet')
   },
   adgangsadresse_ændret: {
-    select: 'a_aendret'
+    select: selectIsoTimestamp('a_aendret')
   },
   adgangsadresse_ikrafttrædelse: {
-    select: 'a_ikraftfra'
+    select: selectIsoTimestamp('a_ikraftfra')
   }
 };
 

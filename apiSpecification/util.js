@@ -43,6 +43,9 @@ exports.adressebetegnelse = function(adresseRow, adgangOnly) {
 };
 
 exports.d = function(date) {
+  if(typeof date === 'string') {
+    return date;
+  }
   if(date) {
     return moment(date).toISOString();
   }

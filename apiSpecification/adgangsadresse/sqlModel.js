@@ -3,7 +3,9 @@
 var nameAndKey = require('./nameAndKey');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
-var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
+var sqlUtil = require('../common/sql/sqlUtil');
+var assembleSqlModel = sqlUtil.assembleSqlModel;
+var selectIsoTimestamp = sqlUtil.selectIsoDate;
 var dbapi = require('../../dbapi');
 
 var columns =  {
@@ -44,13 +46,13 @@ var columns =  {
     }
   },
   oprettet: {
-    select: 'a_oprettet'
+    select: selectIsoTimestamp('a_oprettet')
   },
   ændret: {
-    select: 'a_aendret'
+    select: selectIsoTimestamp('a_aendret')
   },
   ikrafttrædelse: {
-    select: 'a_ikraftfra'
+    select: selectIsoTimestamp('a_ikraftfra')
   },
   tsv: {
     column: 'tsv'

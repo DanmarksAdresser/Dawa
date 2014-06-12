@@ -3,7 +3,9 @@
 var nameAndKey = require('./nameAndKey');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
-var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
+var sqlUtil = require('../common/sql/sqlUtil');
+var assembleSqlModel = sqlUtil.assembleSqlModel;
+var selectIsoTimestamp = sqlUtil.selectIsoDate;
 
 var columns = {
   kode: {
@@ -12,8 +14,11 @@ var columns = {
   kommunekode: {
     column: 'vejstykker.kommunekode'
   },
+  oprettet: {
+    select: selectIsoTimestamp('oprettet')
+  },
   ændret: {
-    column: 'aendret'
+    select: selectIsoTimestamp('aendret')
   },
   kommunenavn: {
     select: 'max(kommuner.navn)',

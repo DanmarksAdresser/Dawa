@@ -9,6 +9,10 @@ function existy(obj) {
   return !_.isUndefined(obj) && !_.isNull(obj);
 }
 
+exports.selectIsoDate = function(col) {
+  return "to_char(" + col + " at time zone 'UTC', 'YYYY-MM-DD\"T\"HH:MI:SS.MSZ')"
+};
+
 var allSelectableFieldNames = function(allFieldNames, columns) {
   return allFieldNames.filter(function(fieldName) {
     return _.isUndefined(columns[fieldName]) || existy(columns[fieldName].select) || existy(columns[fieldName].column);
