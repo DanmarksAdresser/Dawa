@@ -23,7 +23,6 @@ function overwriteWithAutocompleteQParameter(properties){
                });
 }
 
-
 /******************************************************************************/
 /*** Format parameters ********************************************************/
 /******************************************************************************/
@@ -63,6 +62,18 @@ var vejnavneParameters = [{name: 'q',
                           {name: 'postnr',
                            doc: 'Postnummer. 4 cifre.',
                            examples: ['2700']}];
+
+var SRIDParameter = {name: 'srid',
+  doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
+    ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
+};
+
+var reverseGeocodingParameters = [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '+
+  'anvendex angives bredde-værdien.'},
+  {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '+
+    'anvendex angives længde-værdien.'},
+  SRIDParameter].concat(formatParameters);
+
 
 var vejnavneDoc = {
   docVersion: 2,
@@ -227,12 +238,15 @@ var kommuneDoc = {
       subtext: autocompleteSubtext('kommuner'),
       parameters: overwriteWithAutocompleteQParameter(kommuneParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
-                  query: [{name:'q', value:'8'}]}]}}};
+                  query: [{name:'q', value:'8'}]}]},
+    '/kommuner/reverse': {
+      subtext: 'Modtage kommunen for det punkt der angives med x- og y-parametrene',
+      parameters: reverseGeocodingParameters,
+      nomulti: true,
+      examples: []
+    }
 
-var SRIDParameter = {name: 'srid',
-                     doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
-                     ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
-                    };
+  }};
 
 /******************************************************************************/
 /*** Adresser og adgangsadresser **********************************************/
@@ -395,11 +409,7 @@ var adgangsadresseDoc = {
       subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes '+
         'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller '+
         'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
-      parameters: [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '+
-                    'anvendex angives bredde-værdien.'},
-                   {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '+
-                    'anvendex angives længde-værdien.'},
-                   SRIDParameter].concat(formatParameters),
+      parameters: reverseGeocodingParameters,
       examples: [{description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
                   query: [{name:'x', value:'12.5851471984198'},
                           {name:'y', value:'55.6832383751223'}]},
@@ -533,7 +543,15 @@ var postnummerDoc = {
       subtext: autocompleteSubtext('postnumre'),
       parameters: overwriteWithAutocompleteQParameter(postnummerParameters).concat(formatAndPagingParams),
       examples: [{description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
-                  query: [{name:'q', value:'strand'}]}]}}};
+                  query: [{name:'q', value:'strand'}]}]},
+    '/postnumre/reverse': {
+      subtext: 'Modtage postnummeret for det punkt der angives med x- og y-parametrene',
+      parameters: reverseGeocodingParameters,
+      nomulti: true,
+      examples: []
+    }
+  }
+};
 
 
 function firstUpper(str) {
@@ -702,13 +720,17 @@ var dagiExamples = {
     parameters: [_.find(dagiParameters(tema), function(p){ return p.name === 'kode'; })].concat(formatParameters),
     nomulti: true,
     examples: dagiExamples[tema.singular].get || []
-
-
   };
   doc.resources['/' + tema.plural + '/autocomplete'] = {
     subtext: autocompleteSubtext(tema.plural),
     parameters: overwriteWithAutocompleteQParameter(dagiParameters(tema)).concat(formatAndPagingParams),
     examples: dagiExamples[tema.singular].autocomplete || []
+  };
+  doc.resources['/' + tema.plural + '/reverse'] = {
+    subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
+    parameters: reverseGeocodingParameters,
+    nomulti: true,
+    examples: []
   };
   _.extend(module.exports, doc.resources);
 });
