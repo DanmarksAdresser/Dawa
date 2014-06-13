@@ -60,13 +60,15 @@ module.exports = function(readableStream) {
       this.add(res);
     },
     toArray: function(callback) {
-      eventStream.writeArray(function(err, result) {
+      var arrayStream = eventStream.writeArray(function(err, result) {
         if(err) {
-          return completionDeferred.reject(err);
+          completionDeferred.reject(err);
+          return callback(err);
         }
         completionDeferred.resolve();
         callback(err, result);
       });
+      this.add(arrayStream);
     },
     completed: function() {
       return completionDeferred.promise;
