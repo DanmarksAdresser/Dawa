@@ -45,7 +45,7 @@ exports.create = function(client, datamodel, object, callback) {
 };
 
 exports.getKey = function(datamodel, object) {
-  _.reduce(datamodel.columns, function(memo, keyColumn) {
+  return _.reduce(datamodel.key, function(memo, keyColumn) {
     memo[keyColumn] = object[keyColumn];
     return memo;
   }, {});
@@ -74,6 +74,7 @@ exports.update = function(client, datamodel, object, callback) {
 };
 
 exports.delete = function(client, datamodel, key, callback) {
+
   var sql = 'DELETE FROM ' + datamodel.table + ' WHERE ' + _.map(datamodel.key, function(column, idx) {
     return column + ' = $' + (1 + idx);
   }).join(" AND ");
