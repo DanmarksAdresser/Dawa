@@ -85,7 +85,11 @@ CursorStream.prototype._close = function(err) {
     self.push(null);
     self.closed = true;
     var close = "CLOSE " + self.cursorName;
-    self.client.query(close, [], function() {});
+    self.client.query(close, [], function(err) {
+      if(err) {
+        winston.error('could not close cursor: ' + JSON.stringify(err));
+      }
+    });
     self.client = null;
     return;
   }

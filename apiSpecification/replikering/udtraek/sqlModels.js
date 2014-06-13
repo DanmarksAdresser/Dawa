@@ -44,7 +44,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
             var sqlParts = baseQuery();
             if(params.sekvensnummer) {
               var sekvensnummerAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummer);
-              dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR VA');
+              dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR valid_from IS NULL)');
               dbapi.addWhereClause(sqlParts, '(valid_to > ' + sekvensnummerAlias + ' OR valid_to IS NULL)');
             }
             else {
