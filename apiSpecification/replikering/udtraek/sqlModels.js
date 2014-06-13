@@ -10,22 +10,13 @@ var mappings = require('./../columnMappings');
 var registry = require('../../registry');
 var sqlUtil = require('../../common/sql/sqlUtil');
 
-// maps column names to field names
-var columnNameMaps = _.reduce(mappings, function(memo, columnSpec, key) {
-  memo[key] = _.reduce(columnSpec, function(memo, col) {
-    memo[col.column || col.name] = memo[col.name] || col.name;
-    return memo;
-  }, {});
-  return memo;
-}, {});
-
 var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   var datamodelName = datamodel.name;
-  var columnNameMap = columnNameMaps[datamodelName];
+  var columnNameMap = mappings.columnToFieldName[datamodelName];
   var baseQuery = function() {
     return {
       select: _.map(datamodel.columns, function(columnName) {
-        return columnName + ' AS ' + columnNameMap[columnName];
+        return mappings.columnToSelect[datamodelName][columnName] + ' AS ' + columnNameMap[columnName];
       }),
       from: [datamodel.table + '_history'],
       whereClauses: [],
@@ -53,7 +44,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
             var sqlParts = baseQuery();
             if(params.sekvensnummer) {
               var sekvensnummerAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummer);
-              dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR valid_from IS NULL)');
+              dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR VA');
               dbapi.addWhereClause(sqlParts, '(valid_to > ' + sekvensnummerAlias + ' OR valid_to IS NULL)');
             }
             else {

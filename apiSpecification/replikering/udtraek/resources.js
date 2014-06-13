@@ -3,7 +3,7 @@
 var _ = require('underscore');
 
 var sqlModels = require('./sqlModels');
-var columnMappings = require('../columnMappings');
+var columnMappings = require('../columnMappings').columnMappings;
 var representations = require('./representations');
 var parameters = require('./parameters');
 var resourcesUtil = require('../../common/resourcesUtil');

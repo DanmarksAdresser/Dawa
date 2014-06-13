@@ -2,7 +2,7 @@
 
 var _ = require('underscore');
 
-var columnMappings = require('../columnMappings');
+var columnMappings = require('../columnMappings').columnMappings;
 
 module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelName) {
   var columnMapping = columnMappings[datamodelName];

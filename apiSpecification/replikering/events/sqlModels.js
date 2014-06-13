@@ -6,16 +6,8 @@ var datamodels = require('./../eventDatamodels');
 var dbapi = require('../../../dbapi');
 var mappings = require('./../columnMappings');
 var sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
+var sqlUtil = require('../../common/sql/sqlUtil');
 var parameters = require('./parameters');
-
-// maps column names to field names
-var columnNameMaps = _.reduce(mappings, function(memo, columnSpec, key) {
-  memo[key] = _.reduce(columnSpec, function(memo, col) {
-    memo[col.column || col.name] = memo[col.name] || col.name;
-    return memo;
-  }, {});
-  return memo;
-}, {});
 
 function coaleseFields(columnName) {
   return 'COALESCE(i.' + columnName + ', d.' + columnName + ')';
@@ -24,13 +16,16 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   var datamodelName = datamodel.name;
   function selectFields() {
     return datamodel.columns.map(function(columnName) {
-      return coaleseFields(columnName) + ' AS ' + columnNameMaps[datamodelName][columnName];
+      var selectTransform = mappings.columnToTransform[datamodelName][columnName];
+      var coalescedColumn = coaleseFields(columnName);
+      var transformedColumn = selectTransform ? selectTransform(coalescedColumn) : coalescedColumn;
+      return transformedColumn + ' AS ' + mappings.columnToFieldName[datamodelName][columnName];
     });
   }
 
   var baseQuery = function () {
     var query = {
-      select: ['h.operation as operation', 'h.time as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
+      select: ['h.operation as operation', sqlUtil.selectIsoDate('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
       from: [" transaction_history h" +
         " LEFT JOIN " + datamodel.table + "_history i ON (h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from)" +
         " LEFT JOIN " + datamodel.table + "_history d ON (h.operation = 'delete' AND h.sequence_number = d.valid_to)"],

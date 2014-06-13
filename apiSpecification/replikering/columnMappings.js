@@ -1,8 +1,11 @@
 "use strict";
 
+var _ = require('underscore');
 // maps of field names to database column names
 
-module.exports = {
+var selectIsoTimestamp = require('../common/sql/sqlUtil').selectIsoDate;
+
+exports.columnMappings = {
   vejstykke: [{
     name: 'kode'
   }, {
@@ -13,10 +16,12 @@ module.exports = {
   }, {
     name: 'adresseringsnavn'
   }, {
-    name: 'oprettet'
+    name: 'oprettet',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ændret',
-    column: 'aendret'
+    column: 'aendret',
+    selectTransform: selectIsoTimestamp
   }],
   postnummer: [{
     name: 'nr'
@@ -38,13 +43,16 @@ module.exports = {
   }, {
     name: 'postnr'
   }, {
-    name: 'oprettet'
+    name: 'oprettet',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ændret',
-    column: 'aendret'
+    column: 'aendret',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ikrafttrædelsesdato',
-    column: 'ikraftfra'
+    column: 'ikraftfra',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ejerlavkode'
   }, {
@@ -53,6 +61,8 @@ module.exports = {
     name: 'matrikelnr'
   }, {
     name: 'esrejendomsnr'
+  }, {
+    name: 'adgangspunktid'
   }, {
     name: 'etrs89koordinat_øst',
     column: 'etrs89oest'
@@ -76,7 +86,8 @@ module.exports = {
     name: 'tekstretning'
   }, {
     name: 'adressepunktændringsdato',
-    column: 'adressepunktaendringsdato'
+    column: 'adressepunktaendringsdato',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ddkn_m100',
     column: 'kn100mdk'
@@ -91,13 +102,16 @@ module.exports = {
   adresse: [{
     name: 'id'
   }, {
-    name: 'oprettet'
+    name: 'oprettet',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ændret',
-    column: 'aendret'
+    column: 'aendret',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'ikrafttrædelsesdato',
-    column: 'ikraftfra'
+    column: 'ikraftfra',
+    selectTransform: selectIsoTimestamp
   }, {
     name: 'etage'
   }, {
@@ -109,3 +123,33 @@ module.exports = {
   ]
 };
 
+// maps column names to field names
+exports.columnToFieldName = _.reduce(exports.columnMappings, function(memo, columnSpec, key) {
+  memo[key] = _.reduce(columnSpec, function(memo, col) {
+    memo[col.column || col.name] = memo[col.name] || col.name;
+    return memo;
+  }, {});
+  return memo;
+}, {});
+
+// maps column names to transform function
+exports.columnToTransform =  _.reduce(exports.columnMappings, function(memo, columnSpec, key) {
+  memo[key] = _.reduce(columnSpec, function(memo, col) {
+    memo[col.column || col.name] = col.selectTransform;
+    return memo;
+  }, {});
+  return memo;
+}, {});
+
+// maps column names to the select expression used
+exports.columnToSelect = _.reduce(exports.columnMappings, function(memo, columnSpec, key) {
+  memo[key] = _.reduce(columnSpec, function(memo, col) {
+
+    var columnName = col.column || col.name;
+    var select = col.selectTransform ? col.selectTransform(columnName) : columnName;
+
+    memo[col.column || col.name] = select;
+    return memo;
+  }, {});
+  return memo;
+}, {});

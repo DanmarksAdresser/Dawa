@@ -1,6 +1,6 @@
 "use strict";
 
-var columnMappings = require('./../columnMappings');
+var columnMappings = require('./../columnMappings').columnMappings;
 var _ = require('underscore');
 var eventDatamodels = require('./../eventDatamodels');
 
