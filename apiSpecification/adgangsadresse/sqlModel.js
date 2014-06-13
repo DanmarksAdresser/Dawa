@@ -37,7 +37,7 @@ var columns =  {
     column: 'kn10kmdk'
   },
   adressepunktændringsdato: {
-    column: 'adressepunktaendringsdato'
+    column: selectIsoTimestamp('adressepunktaendringsdato')
   },
   geom_json: {
     select: function(sqlParts, sqlModel, params) {
