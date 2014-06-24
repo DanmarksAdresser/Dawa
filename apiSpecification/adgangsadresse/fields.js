@@ -3,98 +3,46 @@
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
-var util = require('../util');
-var kode4String = util.kode4String;
-var d = util.d;
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+var normalizedField = function(fieldName) {
+  return normalizedFieldSchemas.normalizedField('adgangsadresse', fieldName);
+};
 
 var fields = [
-  {
-    name: 'id'
-  },
-  {
-    name: 'oprettet',
-    formatter: d
-  },
-  {
-    name: 'ændret',
-    formatter: d
-  },
-  {
-    name: 'vejkode',
-    formatter: kode4String
-  },
+  normalizedField('id'),
+  normalizedField('oprettet'),
+  normalizedField('ændret'),
+  normalizedField('vejkode'),
   {
     name: 'vejnavn'
   },
-  {
-    name: 'husnr'
-  },
-  {
-    name: 'supplerendebynavn'
-  },
-  {
-    name: 'postnr',
-    formatter: kode4String
-  },
+  normalizedField('husnr'),
+  normalizedField('supplerendebynavn'),
+  normalizedField('postnr'),
   {
     name: 'postnrnavn'
   },
-  {
-    name: 'kommunekode',
-    formatter: kode4String
-  },
+  normalizedField('kommunekode'),
   {
     name: 'kommunenavn'
   },
-  {
-    name: 'ejerlavkode'
-  },
-  {
-    name: 'ejerlavnavn'
-  },
-  {
-    name: 'matrikelnr'
-  },
-  {
-    name: 'esrejendomsnr'
-  },
-  {
-    name: 'etrs89koordinat_øst'
-  },
-  {
-    name: 'etrs89koordinat_nord'
-  },
-  {
-    name: 'wgs84koordinat_bredde'
-  },
-  {
-    name: 'wgs84koordinat_længde'
-  },
-  {
-    name: 'nøjagtighed'
-  },
-  {
-    name: 'kilde'
-  },
-  {
-    name: 'tekniskstandard'
-  },
-  {
-    name: 'tekstretning'
-  },
-  {
-    name: 'adressepunktændringsdato',
-    formatter: d
-  },
-  {
-    name: 'ddkn_m100'
-  },
-  {
-    name: 'ddkn_km1'
-  },
-  {
-    name: 'ddkn_km10'
-  },
+  normalizedField('ejerlavkode'),
+  normalizedField('ejerlavnavn'),
+  normalizedField('matrikelnr'),
+  normalizedField('esrejendomsnr'),
+  normalizedField('etrs89koordinat_øst'),
+  normalizedField('etrs89koordinat_nord'),
+  normalizedField('wgs84koordinat_bredde'),
+  normalizedField('wgs84koordinat_længde'),
+  normalizedField('nøjagtighed'),
+  normalizedField('kilde'),
+  normalizedField('tekniskstandard'),
+  normalizedField('tekstretning'),
+  normalizedField('adressepunktændringsdato'),
+  normalizedField('ddkn_m100'),
+  normalizedField('ddkn_km1'),
+  normalizedField('ddkn_km10'),
   {
     name: 'dagitemaer',
     multi: true

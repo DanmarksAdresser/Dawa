@@ -31,7 +31,7 @@ exports.json = {
         '$ref': '#/definitions/Href'
       },
       'nr'      : {
-        description: 'Unik identifikation af det postnummer som postnummeret er beliggende i. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
+        description: 'Unik identifikation af det postnummeret. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
         '$ref': '#/definitions/Postnr'
       },
       'navn'    : {

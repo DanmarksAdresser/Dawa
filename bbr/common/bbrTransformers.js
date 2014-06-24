@@ -48,6 +48,10 @@ module.exports = {
     var result = transformBbr(datamodels.vejstykke, bbrFieldMappings.vejstykke)(row);
     result.oprettet = transformDate(result.oprettet);
     result.aendret = transformDate(result.aendret);
+    // BBR sometimes send untrimmed road names.
+    if(result.vejnavn) {
+      result.vejnavn = result.vejnavn.trim();
+    }
     return result;
   },
   adresse: function(row) {

@@ -741,6 +741,80 @@ var keyParams = {
   adgangsadresse: [adgangsadresseIdParameter],
   adresse: [adgangsadresseIdParameter]
 };
+
+var eventExamples = {
+  vejstykke: [{
+    description: 'Find alle vejstykkehændelser med sekvensnummer større eller lig 990 og sekvensnummer mindre eller lig 1000',
+    query: [{
+      name: 'sekvensnummerfra',
+      value: '990'
+    }, {
+      name: 'sekvensnummertil',
+      value: '1000'
+    }]
+  }, {
+    description: 'Find alle hændelser for vejstykket med kommunekode 0840 og vejkode 1183',
+    query: [{
+      name: 'kommunekode',
+      value: '0840'
+    }, {
+      name: 'kode',
+      value: '1183'
+    }]
+  }
+  ],
+  postnummer: [{
+    description: 'Find alle postnummerhændelser med sekvensnummer større eller lig 990 og sekvensnummer mindre eller lig 1000',
+    query: [{
+      name: 'sekvensnummerfra',
+      value: '990'
+    }, {
+      name: 'sekvensnummertil',
+      value: '1000'
+    }]
+  }, {
+    description: 'Find alle hændelser for postnummeret 8000',
+    query: [{
+      name: 'nr',
+      value: '8000'
+    }]
+  }
+  ],
+  adgangsadresse: [{
+    description: 'Find alle adgangsadressehændelser med sekvensnummer større eller lig 990 og sekvensnummer mindre eller lig 1000',
+    query: [{
+      name: 'sekvensnummerfra',
+      value: '990'
+    }, {
+      name: 'sekvensnummertil',
+      value: '1000'
+    }]
+  }, {
+    description: 'Find alle adgangsadressehændelser for adgangsadressen med id 038edf0e-001b-4d9d-a1c7-b71cb354680f',
+    query: [{
+      name: 'id',
+      value: '038edf0e-001b-4d9d-a1c7-b71cb354680f'
+    }]
+  }
+  ],
+  adresse: [{
+    description: 'Find alle adressehændelser med sekvensnummer større eller lig 990 og sekvensnummer mindre eller lig 1000',
+    query: [{
+      name: 'sekvensnummerfra',
+      value: '990'
+    }, {
+      name: 'sekvensnummertil',
+      value: '1000'
+    }]
+  }, {
+    description: 'Find alle adressehændelser for adressen med id 0a3f50aa-db61-32b8-e044-0003ba298018',
+    query: [{
+      name: 'id',
+      value: '0a3f50aa-db61-32b8-e044-0003ba298018'
+    }]
+  }
+  ]
+};
 ['vejstykke', 'postnummer', 'adgangsadresse', 'adresse'].forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({
     entityName: replicatedModelName,
@@ -770,13 +844,14 @@ var keyParams = {
       },
       {
         name: 'tidspunktfra',
-        doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er senere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z.'
+        doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er senere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z. Det anbefales at anvende sekvensnumre fremfor tidspunkter til fremsøgning af hændelser.'
       },
       {
         name: 'tidspunkttil',
-        doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er tidligere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z.'
+        doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er tidligere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z. Det anbefales at anvende sekvensnumre fremfor tidspunkter til fremsøgning af hændelser.'
       }
-    ]
+    ],
+    examples: eventExamples[replicatedModelName]
   };
   eventParameterDocs.parameters = eventParameterDocs.parameters.concat(keyParams[replicatedModelName]);
   exports['/replikering/' + nameAndKey.plural + '/haendelser'] = eventParameterDocs;

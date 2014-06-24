@@ -127,24 +127,20 @@ block content
 
             div.page-header
               h3.anchor-header#paginering  Paginering
-              p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kaldes paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.
+            p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kaldes paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.
+            p
+              pre
+                a(href='#{url}/adresser?sogn=7060&side=3&per_side=24') #{url}/adresser?sogn=7060&side=3&per_side=24
 
-              p
-                pre
-                  a(href='#{url}/adresser?sogn=7060&side=3&per_side=24') #{url}/adresser?sogn=7060&side=3&per_side=24
-
-              p Pagineringsinformation er inkluderet i <a href='http://tools.ietf.org/html/rfc5988'>Link header</a>'en. Brug link headeren fremfor at konstruerer URL'en selv.
-
-              p
-                pre Link: &lt;#{url}/adresser?sogn=7060%side=2&per_side=24&gt;; rel="prev",
-                  &lt;#{url}/adresser?sogn=7060%side=4&per_side=24&gt;; rel="next"
+            p Af tekniske årsager er det ikke muligt at understøtte paginering i det fulde adressesæt. P.t. er det muligt at paginere i de første 400.000 adresser. Denne grænse kan blive reduceret yderligere.
+            p Såfremt man ønsker at få adressesættet delt op i flere mindre dele og hente hver enkelt del i en separat HTTP forespørgsel, så anbefales det, at hente listen af sogne først, og dernæst hente adresserne for hvert sogn.
 
             div.page-header
               h3.anchor-header#fejlhaandtering  Fejlhåndtering
-              p Følger <a href="http://www.mnot.net/blog/2013/05/15/http_problem">Problem Details for HTTP APIs</a>
-              p Eksempel på returneret fejlbeskrivelse:
-              <pre>{<br>  "type": "ResourceNotFoundError",<br>  "title": "The resource was not found",<br>  "details": {<br>    "id": "0254b942-f3ac-4969-a963-d2c4ed9ab943"<br>  }<br>}
-              </pre>
+            p Følger <a href="http://www.mnot.net/blog/2013/05/15/http_problem">Problem Details for HTTP APIs</a>
+            p Eksempel på returneret fejlbeskrivelse:
+            <pre>{<br>  "type": "ResourceNotFoundError",<br>  "title": "The resource was not found",<br>  "details": {<br>    "id": "0254b942-f3ac-4969-a963-d2c4ed9ab943"<br>  }<br>}
+            </pre>
 
             div.page-header
               h3.anchor-header#formatering  Formatering

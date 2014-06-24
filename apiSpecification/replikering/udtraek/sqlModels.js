@@ -27,7 +27,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   memo[datamodelName] = {
     allSelectableFields: function() {
       return _.map(datamodel.columns, function(colName) {
-        return columnNameMaps[datamodelName][colName];
+        return mappings.columnToFieldName[datamodelName][colName];
       });
     },
     stream: function(client, fieldNames, params, callback) {
@@ -36,7 +36,6 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
           querySenesteSekvensnummer(client, callback);
         },
         function(senesteHaendelse, callback) {
-          console.log("seneste haendelse: " + JSON.stringify(senesteHaendelse));
           if(params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
             callback(new sqlUtil.InvalidParametersError("hændelse med sekvensnummer " + params.sekvensnummer + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer));
           }

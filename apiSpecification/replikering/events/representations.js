@@ -3,10 +3,32 @@
 var columnMappings = require('./../columnMappings').columnMappings;
 var _ = require('underscore');
 var eventDatamodels = require('./../eventDatamodels');
+var schemaUtil = require('../../schemaUtil');
+var globalSchemaObject = require('../../commonSchemaDefinitionsUtil').globalSchemaObject;
+var normalizedFieldSchemas = require('../normalizedFieldSchemas');
 
 var datamodelNames = Object.keys(eventDatamodels);
 
 _.each(datamodelNames, function(datamodelName) {
+  var schema = globalSchemaObject({
+    title: datamodelName + "hændelse",
+    properties: {
+      sekvensnummer: {
+        description: 'Unikt sekvensnummer for hændelsen.',
+        type: 'integer'
+      },
+      tidspunkt: {
+        description: 'Tidspunktet hvor hændelsen blev indlæst af DAWA.',
+        $ref: '#/definitions/DateTime'
+      },
+      operation: {
+        description: 'Hvilken type operation hændelsen vedrører: indsættelse, opdatering eller sletning.',
+        enum: ['oprettelse', 'sletning', 'ændring']
+      },
+      data: normalizedFieldSchemas.schemas[datamodelName]
+    },
+    docOrder: ['sekvensnummer', 'tidspunkt', 'operation', 'data']
+  });
   var jsonMapper = function(row) {
     var result = {
       operation: row.operation,
@@ -24,6 +46,7 @@ _.each(datamodelNames, function(datamodelName) {
   };
   exports[datamodelName] = {
     json: {
+      schema: schema,
       mapper: function(baseUrl, params) {
         return jsonMapper;
       }

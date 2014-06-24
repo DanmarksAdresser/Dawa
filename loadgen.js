@@ -18,7 +18,8 @@ var optionSpec = {
   vejnavnStreams: [false, 'Antal samtidige requests til /vejnavne', 'number', 2],
   postnummerStreams: [false, 'Antal samtidige requests til /postnumre', 'number', 2],
   regionerStreams: [false, 'Antal samtidige requests til /regioner?format=geojson', 'number', 2],
-  adresseAutocompletePerSecond: [false, 'Antal kald til autocomplete pr. sekund', 'number', 30]
+  adgangsadresseUdtraekStreams: [false, 'Antal samtidige requests til /replikering/adgangsadresser', 'number', 2],
+  adresseAutocompletePerSecond: [false, 'Antal kald til autocomplete pr. sekund', 'number', 15]
 };
 
 util.inherits(DevNull, Writable);
@@ -87,7 +88,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
     getRepeatedly(baseUrl, '/vejstykker', options.vejstykkeStreams),
     getRepeatedly(baseUrl, '/vejnavne', options.vejnavnStreams),
     getRepeatedly(baseUrl, '/postnumre', options.postnummerStreams),
-    getRepeatedly(baseUrl, '/regioner?format=geojson', options.regionerStreams)
+    getRepeatedly(baseUrl, '/regioner?format=geojson', options.regionerStreams),
+    getRepeatedly(baseUrl, '/replikering/adgangsadresser', options.adgangsadresseUdtraekStreams)
   ], function(err) {
     if(err) {
       throw err;

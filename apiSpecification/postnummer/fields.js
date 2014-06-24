@@ -3,16 +3,15 @@
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
-var kode4String = require('../util').kode4String;
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+var normalizedField = function(fieldName) {
+  return normalizedFieldSchemas.normalizedField('postnummer', fieldName);
+};
 
 var fields = [
-  {
-    name: 'nr',
-    formatter: kode4String
-  },
-  {
-    name: 'navn'
-  },
+  normalizedField('nr'),
+  normalizedField('navn'),
   {
     name: 'kommunekode'
   },

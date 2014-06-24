@@ -3,37 +3,23 @@
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
-var util = require('../util');
-var kode4String = util.kode4String;
-var d = util.d;
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+var normalizedField = function(fieldName) {
+  return normalizedFieldSchemas.normalizedField('vejstykke', fieldName);
+};
 
 
 var fields = [
-  {
-    name: 'kode',
-    formatter: kode4String
-  },
-  {
-    name: 'kommunekode',
-    formatter: kode4String
-  },
-  {
-    name: 'oprettet',
-    formatter: d
-  },
-  {
-    name: 'ændret',
-    formatter: d
-  },
+  normalizedField('kode'),
+  normalizedField('kommunekode'),
+  normalizedField('oprettet'),
+  normalizedField('ændret'),
   {
     name: 'kommunenavn'
   },
-  {
-    name: 'navn'
-  },
-  {
-    name: 'adresseringsnavn'
-  },
+  normalizedField('navn'),
+  normalizedField('adresseringsnavn'),
   {
     name: 'postnr'
   },

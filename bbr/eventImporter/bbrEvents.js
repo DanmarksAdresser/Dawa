@@ -79,7 +79,15 @@ function handleSimpleEvent(sqlClient, event, callback) {
   performSqlQuery(sqlClient, event, datamodel, callback);
 }
 
+function removePrefixZeroes(str) {
+  while (str && str.charAt(0) === '0') {
+    str = str.substring(1);
+  }
+  return str;
+}
+
 function parseHusnr(husnr) {
+  husnr = removePrefixZeroes(husnr).trim();
   var husnrRegex = /^([\d]{1,3})([A-Z]?)$/;
   var match = husnrRegex.exec(husnr);
   return {
@@ -215,7 +223,7 @@ function storeEvent(client, event, localSeqnumFrom, localSeqnumTo, callback) {
     type: event.type,
     bbrTidspunkt: event.tidspunkt,
     created: new Date().toISOString(),
-    data: JSON.stringify(event.data)
+    data: JSON.stringify(event)
   };
   crud.create(client, bbrEventsDatamodel, dbRow, callback);
 }
@@ -228,6 +236,11 @@ function getLocalSeqNum(client, callback) {
     callback(null, result.rows[0].max ? result.rows[0].max : 0);
   });
 }
+
+function updateBbrSekvensnummer(client, sekvensnummer, callback) {
+  client.query('UPDATE bbr_sekvensnummer SET sequence_number=$1', [sekvensnummer], callback);
+}
+
 function processEvent(client, event, callback) {
   bbrEventsLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
   var validator = new ZSchema();
@@ -246,6 +259,9 @@ function processEvent(client, event, callback) {
       },
       function(callback) {
         applyBbrEvent(client, event, callback);
+      },
+      function(callback) {
+        updateBbrSekvensnummer(client, event.sekvensnummer, callback);
       },
       function(callback) {
         getLocalSeqNum(client, function(err, seqnum) {

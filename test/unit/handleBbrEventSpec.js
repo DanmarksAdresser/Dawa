@@ -19,7 +19,7 @@ describe('compareHusnr', function() {
     expect(compareHusnr('28', '28A')).toBeLessThan(0);
   });
   it('28 skal være lig 28', function() {
-    expect(compareHusnr(28, 28)).toBe(0);
+    expect(compareHusnr("28", "28")).toBe(0);
   });
   it('28A skal være før 28B', function() {
     expect(compareHusnr('28A', '28B')).toBeLessThan(0);

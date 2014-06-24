@@ -7,18 +7,19 @@ var util = require('../util');
 var kode4String = util.kode4String;
 var d = util.d;
 
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+var normalizedField = function(fieldName) {
+  return normalizedFieldSchemas.normalizedField('adresse', fieldName);
+};
+
 var fields = [
   {
     name: 'id'
   },
-  {
-    name: 'oprettet',
-    formatter: d
-  },
-  {
-    name: 'ændret',
-    formatter: d
-  },
+  normalizedField('oprettet'),
+  normalizedField('ændret'),
+  normalizedField('adgangsadresseid'),
   {
     name: 'vejkode',
     formatter: kode4String
@@ -29,12 +30,8 @@ var fields = [
   {
     name: 'husnr'
   },
-  {
-    name: 'etage'
-  },
-  {
-    name: 'dør'
-  },
+  normalizedField('etage'),
+  normalizedField('dør'),
   {
     name: 'supplerendebynavn'
   },
@@ -103,9 +100,7 @@ var fields = [
   {
     name: 'geom_json'
   },
-  {
-    name: 'adgangsadresseid'
-  },
+  normalizedField('adgangsadresseid'),
   {
     name: 'adgangsadresse_oprettet',
     formatter: d
