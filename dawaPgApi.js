@@ -25,7 +25,7 @@ function cachingMiddleware(req, res, next) {
   var baseFunc = res.writeHead;
   res.writeHead = function(statusCode, reasonPhrase, headers) {
     var header;
-    if(statusCode >= 300 || req.query.cache === 'no-cache') {
+    if(statusCode >= 300 || req.query.cache === 'no-cache' || req.path.indexOf('/replikering') === 0) {
       header = 'no-cache';
     }
     else {
