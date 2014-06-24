@@ -2,13 +2,13 @@ DROP VIEW IF EXISTS wfs_adresser CASCADE;
 
 CREATE OR REPLACE VIEW wfs_adresser AS
   SELECT
-    e_id                      AS "AddressIdentifier",
+    e_id::varchar             AS "AddressIdentifier",
     etage                     AS "FloorIdentifier",
     doer                      AS "SuiteIdentifier",
     e_oprettet                AS "AddressSpecificCreateDate",
     e_ikraftfra               AS "AddressSpecificValidDate",
     e_aendret                 AS "AddressSpecificChangeDate",
-    a_id                      AS "AddressAccessIdentifier",
+    a_id::varchar             AS "AddressAccessIdentifier",
     kommunekode               AS "MunicipalityCode",
     vejkode                   AS "StreetCode",
     vejnavn                   AS "StreetName",

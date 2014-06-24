@@ -2,7 +2,7 @@ DROP VIEW IF EXISTS wfs_adgangsadresser CASCADE;
 
 CREATE OR REPLACE VIEW wfs_adgangsadresser AS
   SELECT
-    id                        AS "AddressAccessIdentifier",
+    id::varchar               AS "AddressAccessIdentifier",
     kommunekode               AS "MunicipalityCode",
     vejkode                   AS "StreetCode",
     vejnavn                   AS "StreetName",
