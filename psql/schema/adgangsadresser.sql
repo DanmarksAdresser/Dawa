@@ -91,3 +91,17 @@ $$ LANGUAGE PLPGSQL;
 CREATE TRIGGER adgangsadresser_tsv_update_on_postnummer AFTER INSERT OR UPDATE
 ON postnumre FOR EACH ROW EXECUTE PROCEDURE
   adgangsadresser_tsv_update_on_postnummer();
+
+-- Trigger which maintains the geom column
+DROP FUNCTION IF EXISTS adgangsadresser_geom_update() CASCADE;
+CREATE OR REPLACE FUNCTION adgangsadresser_geom_update()
+  RETURNS TRIGGER AS $$
+BEGIN
+  NEW.geom = ST_SetSRID(ST_MakePoint(NEW.etrs89oest, NEW.etrs89nord), 25832);
+  RETURN NEW;
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE TRIGGER adgangsadresser_geom_update BEFORE INSERT OR UPDATE
+ON adgangsadresser FOR EACH ROW EXECUTE PROCEDURE
+  adgangsadresser_geom_update();
