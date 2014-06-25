@@ -40,7 +40,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   memo[datamodelName] = {
     allSelectableFieldNames: function() {
       return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.map(datamodel.columns, function(colName) {
-        return columnNameMaps[datamodelName][colName];
+        return mappings.columnToFieldName[datamodelName][colName];
       }));
     },
     stream: function(client, fieldNames, params, callback) {
@@ -63,12 +63,13 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
         dbapi.addWhereClause(query, 'h.time <=' + timeToAlias);
       }
       // we want to be able to find events for a specific ID.
-      var keyColumns = _.reduce(mappings[datamodelName], function(memo, mapping) {
+      var keyColumns = _.reduce(mappings.columnMappings[datamodelName], function(memo, mapping) {
         memo[mapping.name] = {
           where: coaleseFields(mapping.name)
         };
         return memo;
       }, {});
+      console.log(JSON.stringify(keyColumns));
       var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
       propertyFilter(query, params);
       var dbQuery = dbapi.createQuery(query);
