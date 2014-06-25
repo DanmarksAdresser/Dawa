@@ -34,5 +34,5 @@ _.each(Object.keys(eventDatamodels), function(entityName) {
 });
 
 _.each(exports, function(resources, entityName) {
-  registry.add(entityName + '_hændelse', 'resource', 'hændelser', resources['hændelser']);
+  registry.add(entityName, 'resource', 'hændelser', resources['hændelser']);
 });

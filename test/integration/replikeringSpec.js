@@ -18,6 +18,8 @@ var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 
+
+
 var insert = {
   postnummer: {
     "nr": 8260,
@@ -124,6 +126,38 @@ var update = {
   }
 };
 
+var existingIds = {
+  adresse: {
+    "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f"
+  },
+  adgangsadresse: {
+    "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f"
+  },
+  vejstykke: {
+    "kode": 2640,
+    "kommunekode": 846
+  },
+  postnummer: {
+    "nr": 8260
+  }
+};
+
+var nonexistingIds = {
+  adresse: {
+    "id": "00000000-e6a3-49c8-98b0-4da64a82ac0f"
+  },
+  adgangsadresse: {
+    "id": "00000000-001b-4d9d-a1c7-b71cb354680f"
+  },
+  vejstykke: {
+    "kode": 1234,
+    "kommunekode": 1234
+  },
+  postnummer: {
+    "nr": 1234
+  }
+};
+
 
 function toSqlModel(datamodelName, apiObject) {
   return _.reduce(columnMappings.columnMappings[datamodelName], function (memo, mapping) {
@@ -180,21 +214,21 @@ function getStringResponse(dbClient, resourceSpec, pathParams, queryParams, call
   });
 }
 
-//function getJson(dbClient, resourceSpec, pathParams, queryParams, callback) {
-//  getStringResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, str) {
-//    if(err) {
-//      return callback(err);
-//    }
-//    var json;
-//    try {
-//       json = JSON.parse(str);
-//    }
-//    catch(parseError) {
-//      return callback(parseError);
-//    }
-//    callback(null, json);
-//  });
-//}
+function getJson(dbClient, resourceSpec, pathParams, queryParams, callback) {
+  getStringResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, str) {
+    if(err) {
+      return callback(err);
+    }
+    var json;
+    try {
+       json = JSON.parse(str);
+    }
+    catch(parseError) {
+      return callback(parseError);
+    }
+    callback(null, json);
+  });
+}
 
 function getCsv(dbClient, resourceSpec, pathParams, queryParams, callback) {
   console.log('getCsv');
@@ -298,6 +332,33 @@ describe('ReplikeringsAPI', function() {
         var sekvensnummer = (index * 3) + 3;
         getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
           expect(objects.length).toBe(0);
+          done();
+        });
+      });
+
+      var eventResource = registry.findWhere({
+        entityName: datamodelName,
+        type: 'resource',
+        qualifier: 'hændelser'
+      });
+      it('sequence number filtering should work when retrieving events', function(done) {
+        var sekvensnummer = (index * 3) + 2;
+        getJson(client, eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
+          expect(objects.length).toBe(1);
+          expect(objects[0].sekvensnummer).toBe(sekvensnummer);
+          expect(objects[0].data).toEqual(update[datamodelName]);
+          done();
+        });
+      });
+      it('When adding id field(s) when retrieving events, events without the specified id should not be returned', function(done) {
+        getJson(client, eventResource, {}, nonexistingIds[datamodelName], function(err, objects) {
+          expect(objects.length).toBe(0);
+          done();
+        });
+      });
+      it('When adding id field(s) when retrieving events, events with the specified id should be returned', function(done) {
+        getJson(client, eventResource, {}, existingIds[datamodelName], function(err, objects) {
+          expect(objects.length).toBe(3);
           done();
         });
       });

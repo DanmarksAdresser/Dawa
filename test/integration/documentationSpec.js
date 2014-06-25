@@ -2,8 +2,7 @@
 
 var _            = require('underscore');
 var parameterDoc = require('../../parameterDoc');
-//var winston      = require('winston');
-//var request    = require('request');
+var request    = require('request');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
@@ -42,6 +41,19 @@ describe('Parameter documentation.', function() {
           expect(paramDoc).toBeDefined();
           expect(paramDoc.doc).toBeDefined();
         });
+      });
+    });
+  });
+});
+
+describe('Documentation pages', function() {
+  ['generelt', 'adressedok', 'adgangsadressedok', 'vejedok', 'supplerendebynavndok', 'postnummerdok', 'listerdok', 'om', 'replikeringdok'].forEach(function(docPageName) {
+    it('It should be possible to retrieve the documentation page ' + docPageName, function(done) {
+      request.get("http://localhost:3000/"+ docPageName, function(error, response, body) {
+        expect(error).toBeNull();
+        expect(response.statusCode).toEqual(200);
+        expect(response.headers['content-type']).toBe("text/html; charset=utf-8");
+        done();
       });
     });
   });
