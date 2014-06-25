@@ -19,7 +19,6 @@ var fields = [
   },
   normalizedField('oprettet'),
   normalizedField('ændret'),
-  normalizedField('adgangsadresseid'),
   {
     name: 'vejkode',
     formatter: kode4String
@@ -97,10 +96,10 @@ var fields = [
     name: 'adressepunktændringsdato',
     formatter: d
   },
+  normalizedField('adgangsadresseid'),
   {
     name: 'geom_json'
   },
-  normalizedField('adgangsadresseid'),
   {
     name: 'adgangsadresse_oprettet',
     formatter: d
