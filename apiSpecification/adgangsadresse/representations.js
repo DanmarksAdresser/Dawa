@@ -44,7 +44,7 @@ exports.json = {
         '$ref': '#/definitions/UUID'
       },
       'vejstykke'    : {
-        description: 'Vejstykket som adressen er knyttet til. Udgår og bliver erstattet af Navngiven vej.',
+        description: 'Vejstykket som adressen er knyttet til.',
         $ref: '#/definitions/VejstykkeKodeOgNavn'
       },
       'husnr'  : {
@@ -181,7 +181,7 @@ exports.json = {
       }),
       'sogn': schemaObject({
         nullable: true,
-        description: 'Sognet som adressen er beliggende i.',
+        description: 'Sognet som adressen er beliggende i. Beregnes udfra adgangspunktet og sogneinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
         properties: {
           kode: {
             description: 'Identifikation af sognet',
@@ -196,7 +196,7 @@ exports.json = {
       }),
       'region': schemaObject({
         nullable: true,
-        description: 'Regionen som adressen er beliggende i.',
+        description: 'Regionen som adressen er beliggende i. Beregnes udfra adgangspunktet og regionsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
         properties: {
           kode: {
             description: 'Identifikation af regionen',
@@ -211,7 +211,7 @@ exports.json = {
       }),
       'retskreds': schemaObject({
         nullable: true,
-        description: 'Retskredsen som adressen er beliggende i.',
+        description: 'Retskredsen som adressen er beliggende i. Beregnes udfra adgangspunktet og retskredsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
         properties: {
           kode: {
             description: 'Identifikation af retskredsen',
@@ -226,7 +226,7 @@ exports.json = {
       }),
       'politikreds': schemaObject({
         nullable: true,
-        description: 'Politikredsen som adressen er beliggende i.',
+        description: 'Politikredsen som adressen er beliggende i. Beregnes udfra adgangspunktet og politikredsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
         properties: {
           kode: {
             description: 'Identifikation af politikredsen',
@@ -241,7 +241,7 @@ exports.json = {
       }),
       'opstillingskreds': schemaObject({
         nullable: true,
-        description: 'Opstillingskresen som adressen er beliggende i.',
+        description: 'Opstillingskresen som adressen er beliggende i. Beregnes udfra adgangspunktet og opstillingskredsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
         properties: {
           kode: {
             description: 'Identifikation af opstillingskredsen.',
