@@ -66,7 +66,7 @@ exports.disableTriggersAndInitializeTables = function(client) {
       sqlCommon.enableTriggers(client)
     ], callback);
   };
-}
+};
 
 exports.initializeTables = function(client){
   return function(callback) {
