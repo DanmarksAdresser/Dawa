@@ -2,7 +2,7 @@ DROP VIEW IF EXISTS wfs_adgangsadresser CASCADE;
 
 CREATE OR REPLACE VIEW wfs_adgangsadresser AS
   SELECT
-    id::varchar               AS "AddressAccessIdentifier",
+    a_id::varchar               AS "AddressAccessIdentifier",
     kommunekode               AS "MunicipalityCode",
     vejkode                   AS "StreetCode",
     vejnavn                   AS "StreetName",
@@ -14,11 +14,11 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser AS
     ejerlavnavn               AS "CadastralDistrictName",
     matrikelnr                AS "LandParcelIdentifier",
     esrejendomsnr             AS "MunicipalRealPropertyIdentifier",
-    oprettet                  AS "AddressAccessCreateDate",
-    ikraftfra                 AS "AddressAccessValidDate",
-    aendret                   AS "AddressAccessChangeDate",
-    etrs89oest                AS "GeographicEastingMeasure",
-    etrs89nord                AS "GeographicNorthingMeasure",
+    a_oprettet                  AS "AddressAccessCreateDate",
+    a_ikraftfra                 AS "AddressAccessValidDate",
+    a_aendret                   AS "AddressAccessChangeDate",
+    oest                AS "GeographicEastingMeasure",
+    nord                AS "GeographicNorthingMeasure",
     noejagtighed              AS "AddressCoordinateQualityClassCode",
     kilde                     AS "AddressGeometrySourceCode",
     tekniskstandard           AS "AddressCoordinateTechnicalStandardCode",
@@ -28,4 +28,4 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser AS
     kn10kmdk                  AS "GeometryDDKNcell10kmText",
     adressepunktaendringsdato AS "AddressPointRevisionDateTime",
     geom
-  FROM adgangsadresser;
+  FROM AdgangsadresserView;
