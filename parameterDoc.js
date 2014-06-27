@@ -548,7 +548,21 @@ var postnummerDoc = {
       subtext: 'Modtage postnummeret for det punkt der angives med x- og y-parametrene',
       parameters: reverseGeocodingParameters,
       nomulti: true,
-      examples: []
+      examples: [
+        {
+          description: 'Returner postnummeret for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+          query: [
+            {name:'x', value:'12.5851471984198'},
+            {name:'y', value:'55.6832383751223'}
+          ]
+        },
+        {
+          description: 'Returner postnummeret for punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
+          query: [
+            {name:'x'     , value: '6176652.55'},
+            {name:'y'     , value: '725369.59'},
+            {name: 'srid' , value: '25832'}]}
+      ]
     }
   }
 };
@@ -730,8 +744,23 @@ var dagiExamples = {
     subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
     parameters: reverseGeocodingParameters,
     nomulti: true,
-    examples: []
+    examples: [
+      {
+        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+        query: [
+          {name:'x', value:'12.5851471984198'},
+          {name:'y', value:'55.6832383751223'}
+        ]
+      },
+      {
+        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
+        query: [
+          {name:'x'     , value: '6176652.55'},
+          {name:'y'     , value: '725369.59'},
+          {name: 'srid' , value: '25832'}]}
+    ]
   };
+
   _.extend(module.exports, doc.resources);
 });
 

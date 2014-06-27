@@ -16,7 +16,8 @@ block content
               li <a href='#postnummersoegning'>Postnummersøgning</a>
               li <a href='#postnummeropslag'>Postnummeropslag</a>
               li <a href='#postnummerautocomplete'>Postnummer autocomplete</a>
-                li <a href='#postnummerdata'>Beskrivelse af postnummerdata</a>
+              li <a href='#postnummerreverse'>Postnummer reverse geocoding</a>
+              li <a href='#postnummerdata'>Beskrivelse af postnummerdata</a>
           //
             li(data-toggle='collapse', data-target='#haendelser').nav-header postnummer hændelse
             ul#haendelser.nav.nav-list
@@ -27,12 +28,17 @@ block content
             +documentResource(parameterDoc, '/postnumre')
 
             div.page-header
-            h3.anchor-header#postnummeropslag Postnummeropslag
+              h3.anchor-header#postnummeropslag Postnummeropslag
             +documentResource(parameterDoc, '/postnumre/{nr}')
 
             div.page-header
-            h3.anchor-header#postnummerautocomplete Postnummer autocomplete
+              h3.anchor-header#postnummerautocomplete Postnummer autocomplete
             +documentResource(parameterDoc, '/postnumre/autocomplete')
+
+            div.page-header
+              h3.anchor-header#postnummerreverse Postnummer autocomplete
+            +documentResource(parameterDoc, '/postnumre/reverse')
+
 
             div.page-header
             h3.anchor-header#postnummerdata Beskrivelse af postnummerdata
