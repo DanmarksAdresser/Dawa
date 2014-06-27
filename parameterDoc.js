@@ -243,7 +243,23 @@ var kommuneDoc = {
       subtext: 'Modtage kommunen for det punkt der angives med x- og y-parametrene',
       parameters: reverseGeocodingParameters,
       nomulti: true,
-      examples: []
+      examples: [
+        {
+          description: 'Returner kommunen for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+          query: [
+            {name: 'x', value: '12.5851471984198'},
+            {name: 'y', value: '55.6832383751223'}
+          ]
+        },
+        {
+          description: 'Returner kommunen for punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
+          query: [
+            {name: 'x', value: '6176652.55'},
+            {name: 'y', value: '725369.59'},
+            {name: 'srid', value: '25832'}
+          ]}
+      ]
+
     }
 
   }};

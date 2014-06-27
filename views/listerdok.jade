@@ -21,6 +21,7 @@ block content
               li <a href='#kommunesoegning'>Kommunesøgning</a>
               li <a href='#kommuneopslag'>Kommuneopslag</a>
               li <a href='#kommuneautocomplete'>Kommune autocomplete</a>
+              li <a href='#kommunereverse'>Kommune reverse geocoding</a>
               li <a href='#kommunedata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#sogn').nav-header Sogn API
             ul#sogn.nav.nav-list
@@ -68,8 +69,12 @@ block content
             +documentResource(parameterDoc, '/kommuner/{kode}')
 
             div.page-header
-            h3.anchor-header#kommuneautocomplete Kommune autocomplete
+              h3.anchor-header#kommuneautocomplete Kommune autocomplete
             +documentResource(parameterDoc, '/kommuner/autocomplete')
+
+            div.page-header
+              h3.anchor-header#kommunereverse Kommune reverse geocoding
+            +documentResource(parameterDoc, '/kommuner/reverse')
 
             div.page-header
             h3.anchor-header#kommunedata Beskrivelse af kommunedata
