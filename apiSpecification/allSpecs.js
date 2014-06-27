@@ -10,3 +10,4 @@ require('./vejstykke/resources');
 require('./replikering/events/resources');
 require('./replikering/sekvensnummer/senesteSekvensnummer');
 require('./replikering/udtraek/resources');
+require('./consistency');
