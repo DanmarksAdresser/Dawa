@@ -12,6 +12,9 @@ function transformBbr(datamodel, fieldMapping) {
       if(value === 'null') {
         value = null;
       }
+      if(value === '') {
+        value = null;
+      }
       var datamodelKey = mapping[key] || key;
       
       if(!_.contains(datamodel.columns, datamodelKey)) {
@@ -77,6 +80,9 @@ module.exports = {
     result.aendret = transformDate(result.aendret);
     result.ikraftfra = transformDate(result.ikraftfra);
     result.adressepunktaendringsdato = transformDate(result.adressepunktaendringsdato);
+    if(result.noejagtighed === 'U') {
+      result.etrs89oest = result.etrs89nord = result.wgs84long = result.wgs84lat = result.kn100mdk = result.kn1kmdk = result.kn10kmdk = null;
+    }
     return result;
   }
 };
