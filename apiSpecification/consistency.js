@@ -17,6 +17,11 @@ var consistencyChecks = [
     query: "SELECT id, vejkode, kommunekode, temaer.kode AS geografisk_kommunekode, oprettet, aendret FROM adgangsadresser JOIN griddeddagitemaer temaer ON (st_contains(temaer.geom, adgangsadresser.geom) AND temaer.tema = 'kommune') WHERE adgangsadresser.kommunekode IS DISTINCT FROM temaer.kode ORDER BY aendret DESC"
   },
   {
+    key: 'AdresserUdenRegion',
+    description: 'Find alle adresser med adgangspunkt der ikke har en tilknyttet region',
+    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresserdagirel rel  ON (rel.adgangsadresseid = adgangsadresser.id AND rel.dagitema = 'region') where rel.adgangsadresseid is null AND adgangsadresser.noejagtighed <> 'U'"
+  },
+  {
     key: 'AdresserInkonsistentPostnr',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i et andet postnummer',
     query: "SELECT id, vejkode, kommunekode, postnr, temaer.kode AS geografisk_postnr, oprettet, aendret FROM adgangsadresser JOIN griddeddagitemaer temaer ON (st_contains(temaer.geom, adgangsadresser.geom) AND temaer.tema = 'postdistrikt') WHERE adgangsadresser.postnr IS DISTINCT FROM temaer.kode AND temaer.kode <> 1000 AND temaer.kode <> 1500 and temaer.kode <> 1800 ORDER BY aendret DESC"
