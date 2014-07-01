@@ -7,7 +7,7 @@ var resourceImpl = require('./common/resourceImpl');
 
 var consistencyChecks = [
   {
-    key: 'AdresserUdenAdgangsapunkt',
+    key: 'AdresserUdenAdgangspunkt',
     description: 'Adgangsadresser, som ikke har angivet et geografisk adgangspunkt',
     query: "select id, kommunekode, vejkode, oprettet, aendret FROM adgangsadresser WHERE noejagtighed = 'U'"
   },
