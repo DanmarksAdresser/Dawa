@@ -27,6 +27,7 @@ var dagiFeatureNames = {
 
 var dagiKodeKolonne = {
   kommune: 'kommunekode',
+  danmark: null,
   region: 'regionskode',
   sogn: 'sognekode',
   opstillingskreds: 'Opstillingskredsnummer',
@@ -37,6 +38,7 @@ var dagiKodeKolonne = {
 
 var dagiNavnKolonne = {
   kommune: 'navn',
+  danmark: 'navn',
   region: 'navn',
   sogn: 'navn',
   opstillingskreds: 'navn',
@@ -116,7 +118,15 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
           function (callback) {
             async.eachSeries(temaerToUpdate, function (tema, callback) {
               console.log('updating: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
-              dagi.updateDagiTema(client, tema, callback);
+              dagi.updateDagiTema(client, tema, function(err, result) {
+                if(err) {
+                  return callback(err);
+                }
+                if(result.rowCount === 0){
+                  console.log('no change');
+                }
+                callback(err, result);
+              });
             }, callback);
           },
           function (callback) {
@@ -145,9 +155,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
       var features = result.FeatureCollection.featureMember;
       var dagiTemaFragments = _.map(features, function (feature) {
         var f = feature[dagiFeatureNames[temaNavn]][0];
+        var kodekolonne = dagiKodeKolonne[temaNavn];
         return {
           tema: temaNavn,
-          kode: parseInt(f[dagiKodeKolonne[temaNavn]][0], 10),
+          kode: kodekolonne === null ? 1 : parseInt(f[kodekolonne][0], 10),
           navn: dagiNavnKolonne[temaNavn] ? f[dagiNavnKolonne[temaNavn]][0] : null,
           polygon: gmlPolygonToWkt(f.geometri[0])
         };

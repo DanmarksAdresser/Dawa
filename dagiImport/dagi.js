@@ -29,7 +29,7 @@ exports.addDagiTema = function(client, tema, cb) {
 
 exports.updateDagiTema = function(client, tema, cb) {
   var sql, params;
-  sql = 'UPDATE DagiTemaer SET navn = $1, geom = ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length) + ', 25832)) WHERE tema = $2 AND kode = $3';
+  sql = 'UPDATE DagiTemaer SET navn = $1, geom = ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length) + ', 25832)) WHERE tema = $2 AND kode = $3 AND (geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length) + ', 25832))))';
   params = [tema.navn, tema.tema, tema.kode].concat(tema.polygons);
   client.query(sql, params, cb);
 };
