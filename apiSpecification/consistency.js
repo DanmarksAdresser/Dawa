@@ -7,6 +7,11 @@ var resourceImpl = require('./common/resourceImpl');
 
 var consistencyChecks = [
   {
+    key: 'AdresserUdenAdgangsapunkt',
+    description: 'Adgangsadresser, som ikke har angivet et geografisk adgangspunkt',
+    query: "select id, kommunekode, vejkode, oprettet, aendret FROM adgangsadresser WHERE noejagtighed = 'U'"
+  },
+  {
     key: 'AdresserUdenVejstykke',
     description: 'Adresser uden vejstykke',
     query: 'SELECT id,adgangsadresser.kommunekode, vejkode, adgangsadresser.oprettet, adgangsadresser.aendret FROM adgangsadresser LEFT JOIN vejstykker ON (adgangsadresser.kommunekode = vejstykker.kommunekode AND adgangsadresser.vejkode = vejstykker.kode) WHERE vejstykker.vejnavn IS NULL ORDER BY aendret DESC'
