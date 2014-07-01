@@ -80,7 +80,7 @@ describe('DAGI updates', function() {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
-        client.query("select count(*) as c FROM DagiTemaer WHERE to_tsquery('danish', 'Test') @@ tsv", function(err, result) {
+        client.query("select count(*) as c FROM DagiTemaer WHERE to_tsquery('adresser', 'Test') @@ tsv", function(err, result) {
           if(err) throw err;
           transactionDone();
           expect(result.rows[0].c).toBe('1');
@@ -99,7 +99,7 @@ describe('DAGI updates', function() {
         updated.navn = 'Foo';
         dagi.updateDagiTema(client, updated, function(err) {
           if(err) throw err;
-          client.query("select count(*) as c FROM DagiTemaer WHERE to_tsquery('danish', 'Foo') @@ tsv", function(err, result) {
+          client.query("select count(*) as c FROM DagiTemaer WHERE to_tsquery('adresser', 'Foo') @@ tsv", function(err, result) {
             if(err) throw err;
             transactionDone();
             expect(result.rows[0].c).toBe('1');

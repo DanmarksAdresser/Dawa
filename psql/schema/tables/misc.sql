@@ -13,7 +13,9 @@ CREATE TYPE KommuneRef AS (
 DROP TYPE IF EXISTS DagiTemaType CASCADE;
 CREATE TYPE DagiTemaType AS
 ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
-  'politikreds', 'retskreds', 'afstemningsområde', 'postdistrikt', 'danmark', 'afstemningsomraade','menighedsraadsafstemningsomraade','samlepostnummer','storkreds','supplerendebynavn','valglandsdel');
+  'politikreds', 'retskreds', 'afstemningsområde', 'postdistrikt',
+  'danmark', 'afstemningsomraade', 'menighedsraadsafstemningsomraade',
+  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel');
 
 DROP TYPE IF EXISTS DagiTemaRef CASCADE;
 CREATE TYPE DagiTemaRef AS (
