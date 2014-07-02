@@ -2,6 +2,7 @@
 
 var AWS            = require('aws-sdk');
 var express        = require('express');
+var bodyParser = require('body-parser');
 var Q = require('q');
 var ZSchema        = require("z-schema");
 var _              = require('underscore');
@@ -36,8 +37,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   var listenPort = options.listenPort;
 
   var app = express();
-  app.use(express.compress());
-  app.use(express.bodyParser());
+  app.use(bodyParser());
 
 
   /********************************************************************************
@@ -62,7 +62,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       }
       else
       {
-        res.send("0");
+        res.send("-1");
       }
     }, function(error) {
       facadeLogger.error('DynamoDB query ERROR', error);
@@ -110,10 +110,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   function validateSequenceNumberQ(haendelse, latest) {
     var newSeqNr = parseInt(haendelse.sekvensnummer);
     var len = latest.Items.length;
-    var lastSeqNr = parseInt(len > 0 ? latest.Items[0].seqnr.N : '0');
+    var lastSeqNr = parseInt(len > 0 ? latest.Items[0].seqnr.N : '-1');
     if (lastSeqNr === newSeqNr)
     {
-      var lastJson = JSON.parse(latest.Items[0].data.S);
+      var lastJson = len > 0 ? JSON.parse(latest.Items[0].data.S) : null;
       if (_.isEqual(haendelse, lastJson))
       {
         return {

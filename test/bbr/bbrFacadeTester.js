@@ -96,7 +96,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   function verifyLatestSequenceNumber(expected) {
     return function() {
       return getLatestSequenceNumber(hostPort).then(function(sequenceNumber) {
-        winston.info('Verifying /sidsteSekvensnummer === 13');
+        winston.info('Verifying /sidsteSekvensnummer === ' + expected);
         if(sequenceNumber !== expected) {
           throw new Error('Unexpected sequence number ' + expected);
         }
@@ -109,7 +109,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
    ***** Main function ************************************************************
    *******************************************************************************/
 
-  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(test).then(verifyLatestSequenceNumber(13)).done();
+  dynamoEvents.deleteAllQ(dd, TABLE).then(assertEmptyDB).then(verifyLatestSequenceNumber(-1)).then(test).then(verifyLatestSequenceNumber(12)).done();
 });
 
 
@@ -123,22 +123,22 @@ var TD = {}; // TestData. This is modified later in the file
 
 function testSpec(){
   // s=sekvensnummer, h=haendelse, c=http-status-code
-  return [{S: 1,  H: TD.adgangsadresse,            C: {error: false, ignore: false}},
-          {S: 2,  H: TD.enhedsadresse,             C: {error: false, ignore: false}},
-          {S: 3,  H: TD.vejnavn,                   C: {error: false, ignore: false}},
-          {S: 4,  H: TD.supplerendebynavn,         C: {error: false, ignore: false}},
-          {S: 5,  H: TD.postnummer,                C: {error: false, ignore: false}},
-          {S: 5,  H: TD.postnummer,                C: {error: false, ignore: true, message: 'Sequence number already known' }},
-          {S: 5,  H: TD.postnummer,                C: {error: false, ignore: true, message: 'Sequence number already known' }},
-          {S: 5,  H: TD.vejnavn,                   C: {error: true, ignore: true, message: 'Sequence number already known, but event differs' }},
-          {S: 6,  H: TD.vejnavn,                   C: {error: false, ignore: false}},
-          {S: 8,  H: TD.vejnavn,                   C: {error: true, ignore: false, message: 'Received message out of order, sequence number too large'}},
-          {S: 7,  H: TD.vejnavn,                   C: {error: true, ignore: true, message: 'Received message out of order, sequence number too small'}},
-          {S: 9,  H: TD.vejnavnNull,               C: {error: false, ignore: false}},
-          {S: 10,  H: TD.enhedsadresseFail,         C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
-          {S: 11,  H: TD.supplerendebynavnFail,     C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
-          {S: 12,  H: TD.supplerendebynavnFail2,    C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
-          {S: 13,  H: TD.vejnavn,                   C: {error: false, ignore: false}}
+  return [{S: 0,  H: TD.adgangsadresse,            C: {error: false, ignore: false}},
+          {S: 1,  H: TD.enhedsadresse,             C: {error: false, ignore: false}},
+          {S: 2,  H: TD.vejnavn,                   C: {error: false, ignore: false}},
+          {S: 3,  H: TD.supplerendebynavn,         C: {error: false, ignore: false}},
+          {S: 4,  H: TD.postnummer,                C: {error: false, ignore: false}},
+          {S: 4,  H: TD.postnummer,                C: {error: false, ignore: true, message: 'Sequence number already known' }},
+          {S: 4,  H: TD.postnummer,                C: {error: false, ignore: true, message: 'Sequence number already known' }},
+          {S: 4,  H: TD.vejnavn,                   C: {error: true, ignore: true, message: 'Sequence number already known, but event differs' }},
+          {S: 5,  H: TD.vejnavn,                   C: {error: false, ignore: false}},
+          {S: 7,  H: TD.vejnavn,                   C: {error: true, ignore: false, message: 'Received message out of order, sequence number too large'}},
+          {S: 6,  H: TD.vejnavn,                   C: {error: true, ignore: true, message: 'Received message out of order, sequence number too small'}},
+          {S: 8,  H: TD.vejnavnNull,               C: {error: false, ignore: false}},
+          {S: 9,  H: TD.enhedsadresseFail,         C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
+          {S: 10,  H: TD.supplerendebynavnFail,     C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
+          {S: 11,  H: TD.supplerendebynavnFail2,    C: {error: true, ignore: false, message: 'Kunne ikke validere hændelse' }},
+          {S: 12,  H: TD.vejnavn,                   C: {error: false, ignore: false}}
          ];
 }
 
