@@ -100,13 +100,13 @@ block content
 
             div.page-header
               h3.anchor-header#versionering  Versionering
-              p DAWA er ikke statisk. Det ændres med tiden pga. nye ønsker, fejlrettelser, nye data, ændring af de bagvedliggende data osv. Vi har af flere grunde ikke ønsket at have flere versioner af DAWA i  drift samtidigt. Vi ønsker heller ikke at bryde DAWA's klienter ved opdatering af dets API. For at opnå dette følger vi følgende verioneringsprincipper:
+              p DAWA ændres med tiden pga. nye ønsker, fejlrettelser, nye data, ændring af de bagvedliggende data osv. Vi ønsker af flere grunde ikke at have flere versioner af DAWA i  drift samtidigt. Vi ønsker heller ikke, at de klientprogrammer, som anvender DAWA, holder op med at fungere, når DAWA opdateres. For at undgå for mange forskellige versioner af DAWA og undgå at klientprogrammer fejler, når DAWA opdateres, overholder vi følgende verioneringsprincipper:
               ul
                 li Det er tilladt at tilføje noget til API'et. Nye ressourcer, nye data, nye søgeparametre mm.
                 li Det er ikke tilladt at fjerne noget fra API'et.
-              p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper atableres en ny version, som i en periode driftes samtidig med den tidligere version.
+              p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper etableres en ny version, som i en periode driftes samtidig med den tidligere version.
 
-              p Det er vigtigt at de klienter, som anvender Geoservicens API, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det der ofte skaber de største problemer er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Det kunne f.eks. være XPath i forbindelse med XML.
+              p Det er vigtigt, at de klientprogrammer, som anvender DAWA, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det, der ofte skaber de største problemer, er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Klientprogrammer skal kunne håndterer nye name/value par i JSON. Nye kolonner i CSV. Hvis Klientprogrammerne er robuste over for det, vil de fejlfrit kunne fungere når DAWA opdateres indenfor en version.   
 
             div.page-header
               h3.anchor-header#kompression  Kompression
