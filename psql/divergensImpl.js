@@ -27,16 +27,16 @@ function callSequentially(funcs, initialValue) {
   return funcs.reduce(Q.when, Q(initialValue));
 }
 
+function getBbrSequenceNumber (udtraekOptions) {
+  var fileStreams = loadAdresseData.bbrFileStreams(udtraekOptions.dataDir, udtraekOptions.filePrefix);
+  return Q.nfcall(loadAdresseData.loadBbrMeta, fileStreams).then(function(bbrMeta) {
+    return bbrMeta.totalSendteHaendelser - 1;
+  });
+}
+
 function getDawaSequenceNumber(client, udtraekOptions, comparisonOptions) {
   var compareWithCurrent  = comparisonOptions.compareWithCurrent;
   var forceDawaSequenceNumber = comparisonOptions.forceDawaSequenceNumber;
-
-  function getBbrSequenceNumber () {
-    var fileStreams = loadAdresseData.bbrFileStreams(udtraekOptions.dataDir, udtraekOptions.filePrefix);
-    return Q.nfcall(loadAdresseData.loadBbrMeta, fileStreams).then(function(bbrMeta) {
-      return bbrMeta.totalSendteHaendelser - 1;
-    });
-  }
 
   var getDawaSequenceNumberForBbrEvent = resolveArguments(function(bbrSequenceNumber) {
     return Q.ninvoke(client, 'query', 'SELECT sequence_number_to FROM bbr_events WHERE sekvensnummer = $1', [bbrSequenceNumber]).then(function(result) {
@@ -63,7 +63,7 @@ function getDawaSequenceNumber(client, udtraekOptions, comparisonOptions) {
     return forceDawaSequenceNumber;
   }
   else {
-    return getDawaSequenceNumberForBbrEvent(getBbrSequenceNumber());
+    return getDawaSequenceNumberForBbrEvent(getBbrSequenceNumber(udtraekOptions));
   }
 }
 
@@ -173,6 +173,11 @@ exports.rectifyAll = function(client, report) {
       return exports.rectifyDifferences(client, datamodels[datamodelName], report[datamodelName], report.meta.dawaSequenceNumber);
     };
   });
+  if(report.meta.compareWithCurrent) {
+    ops.push(function() {
+      return Q.ninvoke(client, 'query', 'UPDATE bbr_sekvensnummer SET  sequence_number = $1', [report.meta.bbrSequenceNumber]);
+    });
+  }
   return callSequentially(ops).then(function() {
     return report;
   });
@@ -297,7 +302,9 @@ exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonO
     return loadDataIntoTempTables(client, loadAdresseDataOptions, expectedTablePrefix);
   });
 
-  return Q.spread([dawaSequenceNumber, loadDataPromise], function (dawaSequenceNumber) {
+  var bbrSequenceNumberPromise = getBbrSequenceNumber(loadAdresseDataOptions);
+
+  return Q.spread([dawaSequenceNumber, bbrSequenceNumberPromise, loadDataPromise], function (dawaSequenceNumber, bbrSequenceNumber) {
     return ['vejstykke', 'adgangsadresse', 'adresse'].map(function (dataModelName) {
       return function (fullReport) {
         return computeDifferenceReport(client, datamodels[dataModelName], dawaSequenceNumber, expectedTablePrefix + datamodels[dataModelName].table)
@@ -308,7 +315,9 @@ exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonO
       };
     }).reduce(Q.when, Q.when({
         meta: {
-          dawaSequenceNumber: dawaSequenceNumber
+          dawaSequenceNumber: dawaSequenceNumber,
+          bbrSequenceNumber: bbrSequenceNumber,
+          compareWithCurrent: !!comparisonOptions.compareWithCurrent
         }
       })).then(function(report) {
         return dropTempTables(client, expectedTablePrefix).then(function() {

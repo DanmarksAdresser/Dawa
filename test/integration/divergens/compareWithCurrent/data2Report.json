@@ -1,6 +1,8 @@
 {
   "meta": {
-    "dawaSequenceNumber": 7
+    "dawaSequenceNumber": 7,
+    "bbrSequenceNumber" : -1,
+    "compareWithCurrent" : true
   },
   "vejstykke": {
     "updates": [
