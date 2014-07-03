@@ -5,8 +5,6 @@ var compression = require('compression');
 var http = require('http');
 var fs = require('fs');
 var logger = require('./logger');
-var memwatch = require('memwatch');
-require('heapdump');
 var statistics = require('./statistics');
 var Q = require('q');
 var _ = require('underscore');
@@ -18,24 +16,29 @@ var uuid = require('node-uuid');
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
 /**
- * We log memory statistics, so we can monitor memory consumption in splunk
+ * We log memory statistics, so we can monitor memory consumption in splunk.
+ * This does not work on windows.
  */
-memwatch.on('stats', function(stats) {
-  var logMeta = {
-    pid: process.pid,
-    current_base: stats.current_base,
-    estimated_base: stats.estimated_base,
-    min: stats.min,
-    max: stats.max,
-    usage_trend: stats.usage_trend
-  };
-  logger.info('memory', 'stats', logMeta);
-  if(stats.current_base > 768 * 1024 * 1024) {
-    logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
-    process.exit(1);
-  }
-});
+if(process.platform !== 'win32') {
+  var memwatch = require('memwatch');
+  require('heapdump');
+  memwatch.on('stats', function(stats) {
+    var logMeta = {
+      pid: process.pid,
+      current_base: stats.current_base,
+      estimated_base: stats.estimated_base,
+      min: stats.min,
+      max: stats.max,
+      usage_trend: stats.usage_trend
+    };
+    logger.info('memory', 'stats', logMeta);
+    if(stats.current_base > 768 * 1024 * 1024) {
+      logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
+      process.exit(1);
+    }
+  });
 
+}
 function asInteger(stringOrNumber) {
   return _.isNumber(stringOrNumber) ? stringOrNumber : parseInt(stringOrNumber);
 }
