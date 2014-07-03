@@ -1,12 +1,11 @@
 "use strict";
 
 var async = require('async');
-var winston = require('winston');
 var ZSchema = require("z-schema");
 var util = require('util');
 var _ = require('underscore');
 
-var bbrEventsLogger = require('../../logger').forCategory('bbrEvents');
+var bbrEventsLogger = require('../../logger').forCategory('bbrEventsProcessing');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 var eventSchemas = require('../common/eventSchemas');
@@ -40,7 +39,7 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
     switch (event.aendringstype) {
       case "oprettelse":
         if(!_.isNull(existing)) {
-          winston.warn("Fik en oprettelse event, men objektet findes allerede. " +
+          bbrEventsLogger.error("Fik en oprettelse event, men objektet findes allerede. " +
             "event: %d, Eksisterende: %j, oprettelse: %j",
           event.sekvensnummer, existing, object);
           crud.update(sqlClient, datamodel, object, callback);
@@ -52,7 +51,7 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
         break;
       case 'aendring':
         if(_.isNull(existing)) {
-          winston.warn("Fik en aendring event, men objektet findes ikke. " +
+          bbrEventsLogger.error("Fik en aendring event, men objektet findes ikke. " +
             "event: %d, objekt: %j", event.sekvensnummer, object);
           crud.create(sqlClient, datamodel, object, callback);
 
@@ -63,7 +62,7 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
         break;
       case 'nedlaeggelse':
         if(_.isNull(existing)) {
-          winston.warn("Fik en nedlaeggelse event, men objektet findes ikke. " +
+          bbrEventsLogger.error("Fik en nedlaeggelse event, men objektet findes ikke. " +
             "Event: %d, Objekt: %j", event.sekvensnummer, object);
         }
         crud.delete(sqlClient, datamodel, object, callback);
@@ -122,7 +121,6 @@ function compareHusnr(a, b) {
 }
 
 function adresseWithinInterval(adgangsadresse, interval) {
-  winston.debug('husnr %s within interval %j', adgangsadresse.husnr, interval);
   if(!adgangsadresse.husnr) {
     return false;
   }
