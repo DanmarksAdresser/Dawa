@@ -37,20 +37,25 @@ function removePrefixZeroes(str) {
   return str;
 }
 
-function transformDate(bbrDateWithoutTz) {
-  if(bbrDateWithoutTz) {
-    return moment.utc(bbrDateWithoutTz).toISOString();
+var TIMESTAMP_REGEX = /^([\d]{4}-[\d]{2}-[\d]{2})T[\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3}$/;
+
+function transformTimestamp(bbrTimestampWithoutTz) {
+  if(!bbrTimestampWithoutTz) {
+    return null;
   }
-  else {
-    return undefined;
+
+  if(TIMESTAMP_REGEX.test(bbrTimestampWithoutTz)) {
+    return bbrTimestampWithoutTz + 'Z';
   }
+  console.log('unexpected timestamp, trying moment: ' + bbrTimestampWithoutTz);
+  return moment.utc(bbrTimestampWithoutTz).toISOString();
 }
 
 module.exports = {
   vejstykke: function(row) {
     var result = transformBbr(datamodels.vejstykke, bbrFieldMappings.vejstykke)(row);
-    result.oprettet = transformDate(result.oprettet);
-    result.aendret = transformDate(result.aendret);
+    result.oprettet = transformTimestamp(result.oprettet);
+    result.aendret = transformTimestamp(result.aendret);
     // BBR sometimes send untrimmed road names.
     if(result.vejnavn) {
       result.vejnavn = result.vejnavn.trim();
@@ -66,9 +71,9 @@ module.exports = {
     if(!_.isUndefined(result.doer) && !_.isNull(result.doer)) {
       result.doer = result.doer.toLowerCase();
     }
-    result.oprettet = transformDate(result.oprettet);
-    result.aendret = transformDate(result.aendret);
-    result.ikraftfra = transformDate(result.ikraftfra);
+    result.oprettet = transformTimestamp(result.oprettet);
+    result.aendret = transformTimestamp(result.aendret);
+    result.ikraftfra = transformTimestamp(result.ikraftfra);
     return result;
   },
   adgangsadresse: function(row) {
@@ -76,10 +81,10 @@ module.exports = {
     // vi skal lige have fjernet de foranstillede 0'er
     result.husnr = removePrefixZeroes(result.husnr);
 
-    result.oprettet = transformDate(result.oprettet);
-    result.aendret = transformDate(result.aendret);
-    result.ikraftfra = transformDate(result.ikraftfra);
-    result.adressepunktaendringsdato = transformDate(result.adressepunktaendringsdato);
+    result.oprettet = transformTimestamp(result.oprettet);
+    result.aendret = transformTimestamp(result.aendret);
+    result.ikraftfra = transformTimestamp(result.ikraftfra);
+    result.adressepunktaendringsdato = transformTimestamp(result.adressepunktaendringsdato);
     if(result.noejagtighed === 'U') {
       result.etrs89oest = result.etrs89nord = result.wgs84long = result.wgs84lat = result.kn100mdk = result.kn1kmdk = result.kn10kmdk = null;
     }
