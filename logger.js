@@ -124,3 +124,7 @@ exports.forCategory = function(category) {
   });
   return categoryLogger;
 };
+
+exports.setThreshold = function(category, threshold) {
+  thresholds[category] = levels[threshold];
+};

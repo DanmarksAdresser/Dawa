@@ -11,6 +11,7 @@ var datamodels = require('../crud/datamodel');
 var dataUtil = require('./dataUtil');
 var divergensImpl = require('./divergensImpl');
 var loadAdresseImpl = require('./load-adresse-data-impl');
+var logger = require('../logger');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var optionSpec = {
@@ -46,6 +47,9 @@ function createReport(client, inputFile) {
 }
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+  logger.setThreshold('sql', 'warn');
+  logger.setThreshold('stat', 'warn');
+
   var inputFile = args[0];
   var connString = options.pgConnectionUrl;
   sqlCommon.withWriteTransaction(connString, function(err, client, commit) {
