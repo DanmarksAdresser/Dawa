@@ -56,8 +56,6 @@ exports.columnMappings = {
   }, {
     name: 'ejerlavkode'
   }, {
-    name: 'ejerlavnavn'
-  }, {
     name: 'matrikelnr'
   }, {
     name: 'esrejendomsnr'

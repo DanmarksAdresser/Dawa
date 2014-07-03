@@ -34,6 +34,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'stormodtagere'},
   {name: 'adgangsadresser'},
   {name: 'enhedsadresser'},
+  {name: 'ejerlav'},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerview',             scriptFile: 'vejstykker-view.sql',        type: 'view'},
@@ -111,7 +112,7 @@ exports.loadTables = function(client, scriptDir) {
  */
 function createHistoryTriggers(client) {
   return function(callback) {
-    var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse'], function(sql, datamodelName) {
+    var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav'], function(sql, datamodelName) {
       var datamodel = datamodels[datamodelName];
       var table = datamodel.table;
       sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);

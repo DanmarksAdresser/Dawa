@@ -1,1 +1,0 @@
-ALTER TABLE transaction_history ALTER time SET DEFAULT CURRENT_TIMESTAMP(3);

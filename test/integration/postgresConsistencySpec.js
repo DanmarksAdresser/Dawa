@@ -30,7 +30,6 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function()
         "aendret": "2014-05-22T15:50:49.437Z",
         "ikraftfra": "2014-05-22T00:00:00.000Z",
         "ejerlavkode": 1160252,
-        "ejerlavnavn": "HENN.LADEGÅRD,ER",
         "matrikelnr": "18a",
         "esrejendomsnr": 35466,
         "adgangspunktid": "12345678-1234-1234-1234-123456789012",

@@ -30,7 +30,7 @@ CREATE VIEW AdgangsadresserView AS
     V.vejnavn AS vejnavn,
 
     A.ejerlavkode,
-    A.ejerlavnavn,
+    EL.navn AS ejerlavnavn,
 
     K.kode AS kommunekode,
     K.navn AS kommunenavn,
@@ -38,6 +38,7 @@ CREATE VIEW AdgangsadresserView AS
     A.tsv
 
   FROM adgangsadresser A
+    LEFT JOIN ejerlav AS EL ON (A.ejerlavkode = EL.kode)
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN DagiTemaer AS K ON (K.tema = 'kommune' AND K.kode = A.kommunekode);

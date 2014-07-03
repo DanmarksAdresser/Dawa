@@ -16,14 +16,15 @@ function loadCsv(client, inputStream, options, callback) {
   var sql = "COPY " + options.tableName + "(" + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL '')";
   console.log("executing sql %s", sql);
   var pgStream = client.query(copyFrom(sql));
-
-  csv().from.stream(inputStream, {
+  var csvOptions = options.csvOptions ? options.csvOptions : {
     delimiter: ';',
     quote: '"',
     escape: '\\',
     columns: true,
     encoding: 'utf8'
-  }).transform(options.transformer).to(pgStream, {
+  };
+
+  csv().from.stream(inputStream, csvOptions).transform(options.transformer).to(pgStream, {
       delimiter: ';',
       quote: '"',
       escape: '\\',
@@ -75,7 +76,6 @@ var legacyTransformers = {
       supplerendebynavn: row.DistrictSubdivisionIdentifier,
       postnr: row.PostCodeIdentifier,
       ejerlavkode: row.CadastralDistrictIdentifier,
-      ejerlavnavn: row.CadastralDistrictName,
       matrikelnr: row.LandParcelIdentifier,
       esrejendomsnr: row.MunicipalRealPropertyIdentifier,
       oprettet: row.AddressAccessCreateDate,
@@ -184,7 +184,7 @@ exports.loadCsvOnly = function(client, options, callback) {
         tableName : tablePrefix + 'Adgangsadresser',
         columns : ['id', 'vejkode', 'kommunekode',
           'husnr', 'supplerendebynavn',
-          'postnr', 'ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'esrejendomsnr',
+          'postnr', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr',
           'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
           'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse

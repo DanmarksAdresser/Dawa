@@ -117,8 +117,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 ***** Commands *****************************************************************
 *******************************************************************************/
 
-//TODO invalid data tests!
-
 var TD = {}; // TestData. This is modified later in the file
 
 function testSpec(){

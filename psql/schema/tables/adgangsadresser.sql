@@ -9,7 +9,6 @@ CREATE TABLE  adgangsadresser (
   postnr INTEGER NULL,
   postnrnavn VARCHAR(20) NULL,
   ejerlavkode INTEGER,
-  ejerlavnavn VARCHAR(255) NULL,
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr integer NULL,
   oprettet timestamptz,

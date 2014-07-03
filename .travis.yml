@@ -23,4 +23,5 @@ before_script:
   - node psql/load-adresse-data.js --dataDir=test/data --format=bbr
   - node psql/updatePostnumre.js data/postnumre.csv
   - node psql/loadStormodtagere.js data/stormodtagere.csv
+  - node psql/updateEjerlav.js data/ejerlav.csv
   - psql -U travis dawaintegrationtest < psql/load-dagi-test-data.sql

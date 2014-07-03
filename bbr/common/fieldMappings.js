@@ -17,7 +17,6 @@ module.exports = {
   adgangsadresse: {
     husnr: 'husnummer',
     ejerlavkode: 'landsejerlav_kode',
-    ejerlavnavn: 'landsejerlav_navn',
     postnr: 'postnummer',
     ikraftfra: 'ikrafttraedelsesdato',
     adgangspunktid: 'adgangspunkt_id',

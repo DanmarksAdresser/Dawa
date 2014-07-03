@@ -19,34 +19,27 @@ var optionSpec = {
 
 var MAX_INT = 2147483647;
 
-function loadPostnummerCsv(client, inputFile, tableName) {
+function loadEjerlavCsv(client, inputFile, tableName) {
   return function() {
     console.log('indlæser CSV');
     var stream = fs.createReadStream(inputFile);
     return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
       tableName: tableName,
-      transformer: function(row) {
-        return {
-          nr: row.postnr,
-          navn: row.navn,
-          stormodtager: row.stormodtager
-        };
-      },
-      columns: ['nr', 'navn', 'stormodtager']
+      columns: ['kode', 'navn']
     });
   };
 }
 
 function createReport(client, inputFile) {
-  var report = Q.nfcall(dataUtil.createTempTable, client, 'updated_postnumre', 'postnumre')
-    .then(loadPostnummerCsv(client, inputFile, 'updated_postnumre'))
+  var report = Q.nfcall(dataUtil.createTempTable, client, 'updated_ejerlav', 'ejerlav')
+    .then(loadEjerlavCsv(client, inputFile, 'updated_ejerlav'))
     .then(function() {
       console.log('Beregner forskel');
-      return divergensImpl.computeTableDifferences(client, datamodels.postnummer, 'postnumre', 'updated_postnumre');
+      return divergensImpl.computeTableDifferences(client, datamodels.ejerlav, 'ejerlav', 'updated_ejerlav');
     });
 
   return report.then(function() {
-    return Q.nfcall(dataUtil.dropTable,client, 'updated_postnumre');
+    return Q.nfcall(dataUtil.dropTable,client, 'updated_ejerlav');
   }).then(function() {
     return report;
   });
@@ -60,7 +53,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       throw err;
     }
     createReport(client, inputFile).then(function(report) {
-      return divergensImpl.rectifyDifferences(client, datamodels.postnummer, report, MAX_INT);
+      return divergensImpl.rectifyDifferences(client, datamodels.ejerlav, report, MAX_INT);
     }).then(function() {
       return Q.nfcall(commit, null);
     }).then(function() {
