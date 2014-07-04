@@ -17,3 +17,4 @@ CREATE INDEX ON ejerlav_history(valid_from);
 CREATE INDEX ON ejerlav_history(valid_to);
 
 ALTER TABLE adgangsadresser DROP COLUMN ejerlavnavn CASCADE;
+ALTER TABLE adgangsadresser_history DROP COLUMN ejerlavnavn CASCADE;

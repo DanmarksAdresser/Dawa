@@ -120,15 +120,9 @@ function compareHusnr(a, b) {
   }
 }
 
+// Note: denne funktion checker IKKE om adressen er på den rigtige side
 function adresseWithinInterval(adgangsadresse, interval) {
   if(!adgangsadresse.husnr) {
-    return false;
-  }
-  var husnr = parseHusnr(adgangsadresse.husnr);
-  if((husnr.nr % 2 === 0) && interval.side === 'ulige') {
-    return false;
-  }
-  else if((husnr.nr % 2 === 1) && interval.side === 'lige') {
     return false;
   }
   return compareHusnr(adgangsadresse.husnr, interval.husnrFra) >= 0 &&
@@ -137,18 +131,27 @@ function adresseWithinInterval(adgangsadresse, interval) {
 
 function createSupplerendebynavnUpdate(adgangsadresse, interval) {
   var supplerendebynavn = interval ? interval.navn : null;
-  return {
-    id: adgangsadresse.id,
-    supplerendebynavn: supplerendebynavn
-  };
+  if(supplerendebynavn) {
+    supplerendebynavn = supplerendebynavn.trim();
+  }
+  if(adgangsadresse.supplerendebynavn !== supplerendebynavn) {
+    return {
+      id: adgangsadresse.id,
+      supplerendebynavn: supplerendebynavn
+    };
+  }
+  return null;
 }
 
 function createPostnrUpdate(adgangsadresse, interval) {
-  var postnr = interval ? interval.postnr : null;
-  return {
-    id: adgangsadresse.id,
-    postnr: postnr
-  };
+  var postnr = interval ? interval.nummer : null;
+  if(postnr !== adgangsadresse.postnr) {
+    return {
+      id: adgangsadresse.id,
+      postnr: postnr
+    };
+  }
+  return null;
 }
 
 // returns true if the adress is on the side specified (either 'lige' or 'ulige')
@@ -159,6 +162,31 @@ function isOnSide(eventSide, adgangsadresse) {
   var isOnCorrectSide = numberShouldBeOdd === numberIsOdd;
   return isOnCorrectSide;
 }
+
+/**
+ * Beregner de updates, som skal udføres på grund af en interval (postnummer eller supplerendebynavn) event.
+ * @param adgangsadresserPaaVejstykke De adgangsadresser, der findes på vejstykket
+ * @param eventData data fra eventet
+ * @param createUpdate funktion, der tager en adgangsadresse og et interval fra eventet og returnerer
+ * en update operation.
+ * @returns Array af updates der skal udføres
+ */
+function intervalEventChanges(adgangsadresserPaaVejstykke, eventData, createUpdate) {
+  return _.reduce(adgangsadresserPaaVejstykke, function (memo, adgangsadresse) {
+    if (!isOnSide(eventData.side, adgangsadresse)) {
+      return memo;
+    }
+    var interval = _.find(eventData.intervaller, function (interval) {
+      return adresseWithinInterval(adgangsadresse, interval);
+    });
+    var update = createUpdate(adgangsadresse, interval);
+    if(update) {
+      memo.push(update);
+    }
+    return memo;
+  }, []);
+}
+
 function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
   var data = event.data;
   var filter = {
@@ -169,17 +197,7 @@ function handleIntervalEvent(sqlClient, event, createUpdate, callback) {
     if(err) {
       return callback(err);
     }
-    var updates = _.reduce(adgangsadresser, function(memo, adgangsadresse) {
-      if(!isOnSide(data.side, adgangsadresse)) {
-        return memo;
-      }
-      var interval = _.find(data.intervaller, function(interval) {
-        return adresseWithinInterval(adgangsadresse, interval);
-      });
-      var update = createUpdate(adgangsadresse, interval);
-      memo.push(update);
-      return memo;
-    }, []);
+    var updates = intervalEventChanges(adgangsadresser, data, createUpdate);
     async.eachSeries(updates, function(update, callback) {
       crud.update(sqlClient, datamodels.adgangsadresse, update, callback);
     }, callback);
@@ -287,5 +305,9 @@ module.exports.processEvent = processEvent;
 module.exports.internal = {
   compareHusnr: compareHusnr,
   adresseWithinInterval: adresseWithinInterval,
-  applyBbrEvent: applyBbrEvent
+  applyBbrEvent: applyBbrEvent,
+  isOnSide: isOnSide,
+  intervalEventChanges: intervalEventChanges,
+  createPostnrUpdate: createPostnrUpdate,
+  createSupplerendebynavnUpdate: createSupplerendebynavnUpdate
 };
