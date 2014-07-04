@@ -60,6 +60,9 @@ module.exports = {
     if(result.vejnavn) {
       result.vejnavn = result.vejnavn.trim();
     }
+    if(result.adresseringsnavn) {
+      result.adresseringsnavn = result.adresseringsnavn.trim();
+    }
     return result;
   },
   adresse: function(row) {
@@ -85,6 +88,9 @@ module.exports = {
     result.aendret = transformTimestamp(result.aendret);
     result.ikraftfra = transformTimestamp(result.ikraftfra);
     result.adressepunktaendringsdato = transformTimestamp(result.adressepunktaendringsdato);
+    if(result.supplerendebynavn) {
+      result.supplerendebynavn = result.supplerendebynavn.trim();
+    }
     if(result.noejagtighed === 'U') {
       result.etrs89oest = result.etrs89nord = result.wgs84long = result.wgs84lat = result.kn100mdk = result.kn1kmdk = result.kn10kmdk = null;
     }
