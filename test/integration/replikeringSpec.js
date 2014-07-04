@@ -69,6 +69,10 @@ var insert = {
     "etage": "st",
     "dør": "th",
     "adgangsadresseid": "0dd9a7db-c962-4952-b501-4820dadfc4a1"
+  },
+  ejerlav: {
+    kode: 20551,
+    navn: "Herstedvester By, Herstedvester"
   }
 };
 
@@ -121,6 +125,10 @@ var update = {
     "etage": "1",
     "dør": "tv",
     "adgangsadresseid": "11111111-c962-4952-b501-4820dadfc4a1"
+  },
+  ejerlav: {
+    kode: 20551,
+    navn: "Herstedvester By, Herstedvester (opdateret)"
   }
 };
 
@@ -137,6 +145,9 @@ var existingIds = {
   },
   postnummer: {
     "nr": 8260
+  },
+  ejerlav: {
+    kode: 20551
   }
 };
 
@@ -153,6 +164,9 @@ var nonexistingIds = {
   },
   postnummer: {
     "nr": 1234
+  },
+  ejerlav: {
+    kode: 1234
   }
 };
 

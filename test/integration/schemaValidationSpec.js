@@ -95,6 +95,8 @@ function verifyAllValuesVisited(schema, record, prefix) {
   }, true);
 }
 
+var entitiesWithoutJsonRepresentation = ['ejerlav'];
+
 describe('Validering af JSON-formatteret output', function() {
   var allNamesAndKeys = registry.where({
     type: 'nameAndKey'
@@ -102,6 +104,9 @@ describe('Validering af JSON-formatteret output', function() {
   allNamesAndKeys.forEach(function(nameAndKey) {
     console.log(JSON.stringify(nameAndKey));
     var entityName = nameAndKey.singular;
+    if(_.contains(entitiesWithoutJsonRepresentation, entityName)) {
+      return;
+    }
     var sqlModel = registry.findWhere({
       entityName: entityName,
       type: 'sqlModel'

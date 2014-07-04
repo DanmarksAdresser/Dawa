@@ -780,11 +780,17 @@ var dagiExamples = {
   _.extend(module.exports, doc.resources);
 });
 
+var ejerlavIdParameter =   {
+  name: 'kode',
+  doc: 'Ejerlavets unikke kode. Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.'
+};
+
 var keyParams = {
   vejstykke: vejstykkerIdParameters,
   postnummer: postnummerIdParameter,
   adgangsadresse: [adgangsadresseIdParameter],
-  adresse: [adgangsadresseIdParameter]
+  adresse: [adgangsadresseIdParameter],
+  ejerlav: [ejerlavIdParameter]
 };
 
 var eventExamples = {
@@ -858,9 +864,28 @@ var eventExamples = {
       value: '0a3f50aa-db61-32b8-e044-0003ba298018'
     }]
   }
+  ],
+  ejerlav: [
+    {
+      description: 'Find alle ejerlavhændelser med sekvensnummer større eller lig 990 og sekvensnummer mindre eller lig 1000',
+      query: [{
+        name: 'sekvensnummerfra',
+        value: '990'
+      }, {
+        name: 'sekvensnummertil',
+        value: '1000'
+      }]
+    },
+    {
+      description: 'Find alle ejerlavhændelser for ejerlav med kode 20551',
+      query: [{
+        name: 'kode',
+        value: '20551'
+      }]
+    }
   ]
 };
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse'].forEach(function(replicatedModelName) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({
     entityName: replicatedModelName,
     type: 'nameAndKey'
@@ -917,6 +942,7 @@ function addMultiParameters() {
       path: resourcePath
     });
     var queryParameters = resource.queryParameters;
+    console.log(path);
     var parameterSpecs = _.indexBy(queryParameters, 'name');
     doc.parameters = JSON.parse(JSON.stringify(doc.parameters)); // Clone!
     if (doc.nomulti !== true) {

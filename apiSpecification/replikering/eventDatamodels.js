@@ -4,5 +4,6 @@ module.exports = {
   vejstykke: datamodels.vejstykke,
   postnummer: datamodels.postnummer,
   adgangsadresse: datamodels.adgangsadresse,
-  adresse: datamodels.adresse
+  adresse: datamodels.adresse,
+  ejerlav: datamodels.ejerlav
 };

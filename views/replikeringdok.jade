@@ -20,7 +20,7 @@ block content
           section
             div.page-header
               h3.anchor-header#introduktion Introduktion
-            p DAWA udstiller adresser, adgangsadresse, vejstykker og postnumre i et format, som er velegnet til etablering og vedligehold af en lokal kopi af Danmarks adresser.
+            p DAWA udstiller adresser, adgangsadresse, vejstykker, postnumre og ejerlav i et format, som er velegnet til etablering og vedligehold af en lokal kopi af Danmarks adresser.
             p I DAWA tilknyttes alle ændringer af adresser et unikt, fortløbende <em>sekvensnummer</em>. Et sekvensnummer svarer dermed til en unik hændelse (oprettelse, ændring eller nedlæggelse) på et objekt.
             p Når et klientsystem skal vedligeholde et kopiregister anvendes sekvensnummeret til at holde styr på hvilke adresseændringer klientsystemet har udført i den lokale kopi og hvilke ændringer klientsystemet mangler at udføre.
             p API'erne til replikering udstiller <em>normaliserede</em> adresser. Hvis kopien gemmes i en SQL database vil det være hensigtsmæssigt at have én tabel til hver type.
@@ -36,6 +36,7 @@ block content
                   PRE GET <a href="/replikering/vejstykker?sekvensnummer=990">/replikering/vejstykker?sekvensnummer=990</a>
                   PRE GET <a href="/replikering/adgangsadresser?sekvensnummer=990">/replikering/adgangsadresser?sekvensnummer=990</a>
                   PRE GET <a href="/replikering/adresser?sekvensnummer=990">/replikering/adresser?sekvensnummer=990</a>
+                  PRE GET <a href="/replikering/ejerlav?sekvensnummer=990">/replikering/ejerlav?sekvensnummer=990</a>
                 li Klienten indlæser data i databasen, og har nu etableret et lokalt kopiregister.
             p For efterfølgende at kunnd indlæse opdateringer skal sekvensnummeret for udtrækket også gemmes i databasen.
             div.page-header
@@ -45,10 +46,11 @@ block content
                 li Klienten undersøger, om der er sket ændringer ved at <em>polle</em> seneste sekvensnummer:
                   PRE GET <a href="/replikering/senestesekvensnummer">/replikering/senestesekvensnummer</a>
                 li Hvis klienten konstanterer, at der er sket adresseændringer hentes hændelserne:
-                  PRE GET <a href="/replikering/postnumre/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/postnumre?sekvensnummerfra=990&sekvensnummertil=1000</a>
-                  PRE GET <a href="/replikering/vejstykker/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/vejstykker?sekvensnummerfra=990&sekvensnummertil=1000</a>
-                  PRE GET <a href="/replikering/adgangsadresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adgangsadresser?sekvensnummerfra=990&sekvensnummertil=1000</a>
-                  PRE GET <a href="/replikering/adresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adresser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE GET <a href="/replikering/postnumre/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/postnumre/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE GET <a href="/replikering/vejstykker/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/vejstykker/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE GET <a href="/replikering/adgangsadresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adgangsadresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE GET <a href="/replikering/adresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+                  PRE GET <a href="/replikering/ejerlav/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/ejerlav/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
                 li Klienten opdaterer den lokale kopi på baggrund af hændelserne. Anvendes der en SQL-database hvor der anvendes en tabel pr. datatype vil hver hændelse resultere i ét INSERT, UPDATE eller DELETE statement.
                 li Med jævne mellemrum (f.eks. dagligt eller ugentligt) bør klienten hente nye udtræk og verificere, at den lokale kopi er opdateret korrekt.
             div.page-header
@@ -89,6 +91,11 @@ block content
               +documentResource(parameterDoc, '/replikering/adresser/haendelser')
               h4 Hændelsesformat for adresser
               +documentSchema(jsonSchemas.adresse_hændelse)
+            section
+              h4 Ejerlavhændelser
+              +documentResource(parameterDoc, '/replikering/ejerlav/haendelser')
+              h4 Hændelsesformat for ejerlav
+              +documentSchema(jsonSchemas.ejerlav_hændelse)
 
 
   block append scripts

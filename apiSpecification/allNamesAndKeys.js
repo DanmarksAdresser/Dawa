@@ -5,3 +5,4 @@ require('./postnummer/nameAndKey');
 require('./supplerendebynavn/nameAndKey');
 require('./vejnavn/nameAndKey');
 require('./vejstykke/nameAndKey');
+require('./ejerlav/nameAndKey');

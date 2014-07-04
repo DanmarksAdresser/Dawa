@@ -28,7 +28,9 @@ var fields = [
     name: 'kommunenavn'
   },
   normalizedField('ejerlavkode'),
-  normalizedField('ejerlavnavn'),
+  {
+    name: 'ejerlavnavn'
+  },
   normalizedField('matrikelnr'),
   normalizedField('esrejendomsnr'),
   normalizedField('etrs89koordinat_øst'),

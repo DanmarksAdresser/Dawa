@@ -138,12 +138,6 @@ var fields = {
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
       schema: definitions.UpTo7
     }, {
-      name: 'ejerlavnavn',
-      description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
-      schema: {
-        type: nullableType('string')
-      }
-    }, {
       name: 'matrikelnr',
       description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på.' +
         ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
@@ -304,7 +298,19 @@ var fields = {
         ' tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
       schema: definitions.NullableDør
     }
-  ]
+  ],
+  ejerlav: [{
+    name: 'kode',
+    description: 'Unik identifikation af det matrikulære ”ejerlav”.' +
+      ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
+    schema: definitions.UpTo7
+  }, {
+    name: 'navn',
+    description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
+    schema: {
+      type: nullableType('string')
+    }
+  }]
 };
 
 exports.schemas = _.reduce(fields, function(memo, fieldList, datamodelName) {

@@ -7,6 +7,7 @@ keyParameters.vejstykke = require('../../vejstykke/parameters').id;
 keyParameters.postnummer = require('../../postnummer/parameters').id;
 keyParameters.adgangsadresse = require('../../adgangsadresse/parameters').id;
 keyParameters.adresse = require('../../adresse/parameters').id;
+keyParameters.ejerlav = require('../../ejerlav/parameters').id;
 
 exports.keyParameters = keyParameters;
 

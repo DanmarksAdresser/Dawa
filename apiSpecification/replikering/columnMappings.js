@@ -118,7 +118,12 @@ exports.columnMappings = {
   }, {
     name: 'adgangsadresseid'
   }
-  ]
+  ],
+  ejerlav: [{
+    name: 'kode'
+  }, {
+    name: 'navn'
+  }]
 };
 
 // maps column names to field names
