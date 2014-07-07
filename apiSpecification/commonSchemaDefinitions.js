@@ -17,7 +17,7 @@ var definitions = {
   'UpTo7': {type: 'integer', minimum: 1, maximum: 9999999},
   'DateTime': {
     type: 'string',
-    pattern: '^[\\d]{4}-[\\d]{2}-[\\d]{2}T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{3}Z$'
+    pattern: '^[\\d]{4}-[\\d]{2}-[\\d]{2}T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{3}$'
   },
   'husnr'  : {
     description: 'Husnummer der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +

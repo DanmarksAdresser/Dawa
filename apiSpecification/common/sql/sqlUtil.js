@@ -10,7 +10,7 @@ function existy(obj) {
 }
 
 exports.selectIsoDate = function(col) {
-  return "to_char(" + col + " at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MSZ')"
+  return "to_char(" + col + ", 'YYYY-MM-DD\"T\"HH24:MI:SS.MS')";
 };
 
 var allSelectableFieldNames = function(allFieldNames, columns) {

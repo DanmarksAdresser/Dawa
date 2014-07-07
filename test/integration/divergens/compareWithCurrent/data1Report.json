@@ -15,8 +15,8 @@
         "object": {
           "kommunekode": 101,
           "kode": 60,
-          "oprettet": "2010-01-17T11:17:27.537Z",
-          "aendret": "2010-01-17T11:17:27.537Z",
+          "oprettet": "2010-01-17T11:17:27.537",
+          "aendret": "2010-01-17T11:17:27.537",
           "vejnavn": "Ahlefeldtsgade",
           "adresseringsnavn": "Ahlefeldtsgade"
         },
@@ -30,8 +30,8 @@
         "object": {
           "kommunekode": 101,
           "kode": 64,
-          "oprettet": "2010-01-17T11:17:27.537Z",
-          "aendret": "2010-01-17T11:17:27.537Z",
+          "oprettet": "2010-01-17T11:17:27.537",
+          "aendret": "2010-01-17T11:17:27.537",
           "vejnavn": "Ahlmannsgade",
           "adresseringsnavn": "Ahlmannsgade"
         },
@@ -54,9 +54,9 @@
           "husnr": "8",
           "supplerendebynavn": "Ballum",
           "postnr": 6261,
-          "oprettet": "2000-02-05T17:56:37.000Z",
-          "aendret": "2000-02-16T21:56:28.000Z",
-          "ikraftfra": "2000-02-05T00:00:00.000Z",
+          "oprettet": "2000-02-05T17:56:37.000",
+          "aendret": "2000-02-16T21:56:28.000",
+          "ikraftfra": "2000-02-05T00:00:00.000",
           "ejerlavkode": 1470151,
           "matrikelnr": "487",
           "esrejendomsnr": 1766,
@@ -68,11 +68,11 @@
           "noejagtighed": "A",
           "kilde": 5,
           "tekniskstandard": "UF",
-          "tekstretning": "200.00",
+          "tekstretning": 200.00,
           "kn100mdk": "100m_61030_4783",
           "kn1kmdk": "1km_6103_478",
           "kn10kmdk": "10km_610_47",
-          "adressepunktaendringsdato": "2005-11-02T00:00:00.000Z"
+          "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
         },
         "rectified": true
       },
@@ -87,9 +87,9 @@
           "husnr": "42",
           "supplerendebynavn": null,
           "postnr": 6261,
-          "oprettet": "2000-02-05T17:56:16.000Z",
-          "aendret": "2000-02-16T21:56:28.000Z",
-          "ikraftfra": "2000-02-05T00:00:00.000Z",
+          "oprettet": "2000-02-05T17:56:16.000",
+          "aendret": "2000-02-16T21:56:28.000",
+          "ikraftfra": "2000-02-05T00:00:00.000",
           "ejerlavkode": 1470253,
           "matrikelnr": "18",
           "esrejendomsnr": 78,
@@ -101,11 +101,11 @@
           "noejagtighed": "A",
           "kilde": 5,
           "tekniskstandard": "UF",
-          "tekstretning": "200.00",
+          "tekstretning": 200.00,
           "kn100mdk": "100m_60994_4873",
           "kn1kmdk": "1km_6099_487",
           "kn10kmdk": "10km_609_48",
-          "adressepunktaendringsdato": "2005-11-02T00:00:00.000Z"
+          "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
         },
         "rectified": true
       }
@@ -121,9 +121,9 @@
         },
         "object": {
           "id": "0a3f50b6-42dc-32b8-e044-0003ba298018",
-          "oprettet": "2000-02-05T17:54:48.000Z",
-          "aendret": "2000-02-16T21:56:13.000Z",
-          "ikraftfra": "2000-02-05T00:00:00.000Z",
+          "oprettet": "2000-02-05T17:54:48.000",
+          "aendret": "2000-02-16T21:56:13.000",
+          "ikraftfra": "2000-02-05T00:00:00.000",
           "etage": "1",
           "doer": "mf",
           "adgangsadresseid": "0a3f508b-22f2-32b8-e044-0003ba298018"
@@ -136,9 +136,9 @@
         },
         "object": {
           "id": "0a3f50b6-42dd-32b8-e044-0003ba298018",
-          "oprettet": "2000-02-05T17:54:48.000Z",
-          "aendret": "2000-02-16T21:56:13.000Z",
-          "ikraftfra": "2000-02-05T00:00:00.000Z",
+          "oprettet": "2000-02-05T17:54:48.000",
+          "aendret": "2000-02-16T21:56:13.000",
+          "ikraftfra": "2000-02-05T00:00:00.000",
           "etage": "1",
           "doer": "th",
           "adgangsadresseid": "0a3f508b-22f2-32b8-e044-0003ba298018"

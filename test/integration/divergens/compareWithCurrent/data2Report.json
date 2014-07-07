@@ -62,9 +62,9 @@
           "husnr": "39A",
           "supplerendebynavn": null,
           "postnr": 6440,
-          "oprettet": "2000-02-05T17:55:10.000Z",
-          "aendret": "2000-02-16T21:56:11.000Z",
-          "ikraftfra": "2000-02-05T00:00:00.000Z",
+          "oprettet": "2000-02-05T17:55:10.000",
+          "aendret": "2000-02-16T21:56:11.000",
+          "ikraftfra": "2000-02-05T00:00:00.000",
           "ejerlavkode": 2008551,
           "matrikelnr": "1081",
           "esrejendomsnr": 2523,
@@ -76,11 +76,11 @@
           "noejagtighed": "A",
           "kilde": 5,
           "tekniskstandard": "UF",
-          "tekstretning": "200.00",
+          "tekstretning": 200.00,
           "kn100mdk": "100m_60891_5557",
           "kn1kmdk": "1km_6089_555",
           "kn10kmdk": "10km_608_55",
-          "adressepunktaendringsdato": "2005-10-20T00:00:00.000Z"
+          "adressepunktaendringsdato": "2005-10-20T00:00:00.000"
         },
         "rectified": true
       }

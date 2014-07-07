@@ -45,10 +45,10 @@ function transformTimestamp(bbrTimestampWithoutTz) {
   }
 
   if(TIMESTAMP_REGEX.test(bbrTimestampWithoutTz)) {
-    return bbrTimestampWithoutTz + 'Z';
+    return bbrTimestampWithoutTz;
   }
   console.log('unexpected timestamp, trying moment: ' + bbrTimestampWithoutTz);
-  return moment.utc(bbrTimestampWithoutTz).toISOString();
+  return moment.utc(bbrTimestampWithoutTz).format('YYYY-MM-DDTHH:mm:ss.SSS');
 }
 
 module.exports = {
@@ -96,4 +96,8 @@ module.exports = {
     }
     return result;
   }
+};
+
+module.exports.internal = {
+  transformTimestamp: transformTimestamp
 };

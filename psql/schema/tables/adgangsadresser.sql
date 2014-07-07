@@ -9,9 +9,9 @@ CREATE TABLE  adgangsadresser (
   ejerlavkode INTEGER,
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr integer NULL,
-  oprettet timestamptz,
-  ikraftfra timestamptz,
-  aendret timestamptz,
+  oprettet timestamp,
+  ikraftfra timestamp,
+  aendret timestamp,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
@@ -25,7 +25,7 @@ CREATE TABLE  adgangsadresser (
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
-  adressepunktaendringsdato timestamptz NULL,
+  adressepunktaendringsdato timestamp NULL,
   geom  geometry(point, 25832),
   tsv tsvector
 );
