@@ -17,7 +17,7 @@ CREATE VIEW AdgangsadresserView AS
     A.noejagtighed,
     A.kilde::smallint,
     A.tekniskstandard,
-    A.tekstretning::double precision,
+    A.tekstretning,
     A.kn100mdk,
     A.kn1kmdk,
     A.kn10kmdk,

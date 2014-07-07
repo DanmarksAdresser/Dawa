@@ -27,5 +27,6 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser AS
     kn1kmdk                   AS "GeometryDDKNcell1kmText",
     kn10kmdk                  AS "GeometryDDKNcell10kmText",
     adressepunktaendringsdato AS "AddressPointRevisionDateTime",
+    round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "Angle360",
     geom
   FROM AdgangsadresserView;
