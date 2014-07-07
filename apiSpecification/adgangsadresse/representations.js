@@ -315,11 +315,9 @@ exports.json = {
       adr.retskreds = null;
       adr.politikreds = null;
       adr.opstillingskreds = null;
-      var dagiTemaArray = rs.dagitemaer ? rs.dagitemaer.filter(function(tema) { return util.notNull(tema.tema); }) : [];
+      var includedDagiTemaer = ['sogn', 'region', 'retskreds','politikreds','opstillingskreds'];
+      var dagiTemaArray = rs.dagitemaer ? rs.dagitemaer.filter(function(tema) { return _.contains(includedDagiTemaer, 'tema.tema'); }) : [];
       var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');
-      // kommune and postdistrikt are handled differently
-      delete dagiTemaMap.kommune;
-      delete dagiTemaMap.postdistrikt;
       var mappedDagiTemaer = _.reduce(dagiTemaMap, function(memo, tema, temaNavn) {
         memo[temaNavn] = mapDagiTema(tema);
         return memo;

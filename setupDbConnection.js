@@ -14,6 +14,7 @@ pg.types.setTypeParser(TIMESTAMPTZ_OID, function(val) {
 });
 
 pg.types.setTypeParser(TIMESTAMP_OID, function(val) {
+  console.log('PARSING ' + val);
     var timestampRegex = /(\d{1,}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})(\.(\d{1,}))?/;
 
   var match = timestampRegex.exec(val);
