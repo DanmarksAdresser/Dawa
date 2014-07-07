@@ -12,6 +12,8 @@ var _ = require('underscore');
 var cluster = require('cluster');
 var count = require('os').cpus().length;
 var uuid = require('node-uuid');
+var pg = require('pg.js');
+require('pg-parse-float')(pg);
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 

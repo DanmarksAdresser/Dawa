@@ -25,6 +25,7 @@
     "moving-average": "0.0.4",
     "node-uuid": "^1.4.1",
     "pg-copy-streams": "~0.2.4",
+    "pg-parse-float": "0.0.1",
     "pg.js": "~3.3.0",
     "q": "^1.0.1",
     "request": "~2.34.0",

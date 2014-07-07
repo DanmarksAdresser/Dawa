@@ -21,7 +21,7 @@ CREATE TABLE  adgangsadresser (
   kilde integer NULL,
   placering char(1),
   tekniskstandard CHAR(2) NULL,
-  tekstretning DECIMAL(5,2) NULL,
+  tekstretning float4 NULL,
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
