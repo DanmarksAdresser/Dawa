@@ -32,6 +32,7 @@ var optionSpec = {
   dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string', 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2?'],
   dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
+  retries: [false, 'Antal forsøg på kald til WFS service før der gives op', 'number', 5],
   temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string', _.keys(dagiFeatureNames).join(',')]
 
 };
@@ -61,23 +62,31 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     }).join('&');
     var url = dagiUrl + '&' + paramString;
     console.log("URL: " + url);
-    request.get(url, function (err, response, body) {
+    function getDagiTema( callback) {
+      request.get(url, function (err, response, body) {
+        if (err) {
+          return callback(err);
+        }
+        if (response.statusCode >= 300) {
+          return callback(new Error('Unexpected status code from WFS service: ' + response.statusCode + ' response: ' + body));
+        }
+        xml2js.parseString(body, {
+          tagNameProcessors: [xml2js.processors.stripPrefix],
+          trim: true
+        }, function (err) {
+          if (err) {
+            return callback(err);
+          }
+          callback(null, body);
+        });
+      });
+    }
+    async.retry(options.retries, getDagiTema, function(err, temaXml) {
       if(err) {
         return callback(err);
       }
-      if(response.statusCode >= 300) {
-        return callback(new Error('Unexpected status code from WFS service: ' + response.statusCode + ' response: ' + body));
-      }
-      xml2js.parseString(body, {
-        tagNameProcessors: [xml2js.processors.stripPrefix],
-        trim: true
-      }, function (err) {
-        if(err) {
-          return callback(err);
-        }
-        var filename = options.filePrefix + temaNavn;
-        fs.writeFile(path.join(directory, filename), body, callback);
-      });
+      var filename = options.filePrefix + temaNavn;
+      fs.writeFile(path.join(directory, filename), temaXml, callback);
     });
   }
 
