@@ -23,7 +23,7 @@ function getDatamodel(eventType) {
 
 function extractObjectFromSimpleEvent(eventData, datamodel) {
   var result =  bbrTransformers[datamodel.name](eventData);
-  console.log(util.format('transformed %j to %j', eventData, result));
+  bbrEventsLogger.debug(util.format('Transformed object', {eventData: eventData, result: result}));
   return result;
 }
 
@@ -33,7 +33,6 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
     memo[keyColumn] = object[keyColumn];
     return memo;
   }, {});
-  console.log("key: " + JSON.stringify(key));
   crud.query(sqlClient, datamodel, key, function(err, results) {
     var existing = results.length > 0 ? results[0] : null;
     switch (event.aendringstype) {
@@ -45,7 +44,7 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
           crud.update(sqlClient, datamodel, object, callback);
         }
         else {
-          console.log('creating ' + JSON.stringify(event));
+          bbrEventsLogger.debug('creating object', {event: event});
           crud.create(sqlClient, datamodel, object, callback);
         }
         break;

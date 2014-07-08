@@ -4,7 +4,7 @@ var async = require('async');
 var sqlCommon  = require('../../psql/common');
 var bbrEvents = require('./bbrEvents');
 var Q = require('q');
-var winston = require('winston');
+var logger = require('../../logger').forCategory('bbrEventImporter');
 
 var dynamoEvents = require('../common/dynamoEvents');
 
@@ -35,14 +35,14 @@ module.exports = function(pgConnectionUrl, dd, tablename, callback) {
           if(lastProcessedSeqNum === undefined) {
             lastProcessedSeqNum = 0;
           }
-          winston.debug("Last processed event number: %d", lastProcessedSeqNum);
+          logger.debug("Last processed event number", {lastProcessedSeqNum: lastProcessedSeqNum});
           callback(null, client, lastProcessedSeqNum);
         });
       },
       // fetch the events from dynamodb
       function(client, lastProcessedBbrSeqNum, callback) {
         var nextBbrSeqNum = lastProcessedBbrSeqNum + 1;
-        winston.debug("Next BBR sequence number: %d", nextBbrSeqNum);
+        logger.debug("Next BBR sequence number", {nextBbrSeqNum: nextBbrSeqNum});
         dynamoEvents.query(dd, tablename, nextBbrSeqNum, null).then(function(result) {
           if(result.Items.length > 0) {
             foundEvent = true;
@@ -60,15 +60,9 @@ module.exports = function(pgConnectionUrl, dd, tablename, callback) {
         errorHappened = true;
       }
       // commit / rollback transaction
-      winston.debug("Committing transaction, error: " + err, err);
       transactionDone(err, callback);
     });
   }, function() {
     return foundEvent && !errorHappened;
-  }, function(err) {
-    if(err) {
-      winston.error("An error happened");
-    }
-    callback(err);
-  });
+  }, callback );
 };

@@ -4,6 +4,7 @@ var datamodels = require('../../crud/datamodel');
 var moment = require('moment');
 var bbrFieldMappings = require('./fieldMappings');
 var _ = require('underscore');
+var logger = require('../../logger').forCategory('bbrTransformer');
 
 function transformBbr(datamodel, fieldMapping) {
   var mapping = _.invert(fieldMapping);
@@ -37,17 +38,28 @@ function removePrefixZeroes(str) {
   return str;
 }
 
-var TIMESTAMP_REGEX = /^([\d]{4}-[\d]{2}-[\d]{2})T[\d]{2}:[\d]{2}:[\d]{2}\.[\d]{3}$/;
+var TIMESTAMP_REGEX = /(\d{1,}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.(\d{1,}))?/;
 
 function transformTimestamp(bbrTimestampWithoutTz) {
   if(!bbrTimestampWithoutTz) {
     return null;
   }
+  var match = TIMESTAMP_REGEX.exec(bbrTimestampWithoutTz);
 
-  if(TIMESTAMP_REGEX.test(bbrTimestampWithoutTz)) {
-    return bbrTimestampWithoutTz;
+  if(match) {
+    var datePart = match[1];
+    var timePart = match[2];
+    var milliPart = match[4];
+    if(!milliPart) {
+      milliPart = '000';
+    }
+    while(milliPart.length < 3) {
+      milliPart = milliPart + '0';
+    }
+    return datePart + 'T' + timePart + '.' + milliPart;
   }
-  console.log('unexpected timestamp, trying moment: ' + bbrTimestampWithoutTz);
+
+  logger.error('unexpected timestamp, trying moment', {bbrTimestampWithoutTz: bbrTimestampWithoutTz});
   return moment.utc(bbrTimestampWithoutTz).format('YYYY-MM-DDTHH:mm:ss.SSS');
 }
 

@@ -3,6 +3,7 @@
 var _ = require('underscore');
 
 var cliParameterParsing = require('../common/cliParameterParsing');
+var logger = require('../../logger').forCategory('bbrEventImporter');
 
 var optionSpec = {
   awsRegion: [false, 'AWS region, hvor Dynamo databasen befinder sig', 'string', 'eu-west-1'],
@@ -27,10 +28,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
   importBbrEvents(options.pgConnectionUrl, dd, options.dynamoTable, function(err) {
     if(err) {
-      console.log(err);
+      logger.error('Fejl under indlæsning af BBR hændelser', err);
       process.exit(1);
     }
-    process.exit(0);
   });
 });
 
