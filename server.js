@@ -215,7 +215,7 @@ function spawn(options){
 }
 
 process.on('uncaughtException', function(err) {
-  logger.error('uncaughtException', err);
+  logger.error('uncaughtException', 'An uncaught exception occured, terminating process', err);
   process.exit(1);
 });
 
