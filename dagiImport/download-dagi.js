@@ -6,6 +6,7 @@ var fs = require('fs');
 var path = require('path');
 var async = require('async');
 var xml2js = require('xml2js');
+var logger = require('../logger');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
@@ -83,8 +84,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   async.eachSeries(_.keys(dagiFeatureNames), function (temaNavn, callback) {
     saveDagiTema(temaNavn, callback);
   }, function (err) {
-    if (err) {
-      throw err;
+    if(err) {
+      logger.error('downloadDagi', 'Fejl ved download af DAGI temaer', err);
+      process.exit(1);
     }
+    logger.info('downloadDagi', 'download af dagi temaer afsluttet');
   });
 });

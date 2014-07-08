@@ -7,6 +7,7 @@ var sqlCommon = require('../psql/common');
 var xml2js = require('xml2js');
 var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+var logger = require('../logger').forCategory('dagiToDb');
 
 var dagiFeatureNames = {
   kommune: 'Kommuneinddeling',
@@ -82,8 +83,8 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
   }
 
-  function removeAll(as, bs) {
-    return _.filter(as, function (a) {
+  function removeAll(aas, bs) {
+    return _.filter(aas, function (a) {
       return _.every(bs, function (newTema) {
         return newTema.kode !== a.kode;
       });
@@ -105,25 +106,28 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
         async.series([
           function (callback) {
             async.eachSeries(temaerToRemove, function (tema, callback) {
-              console.log('removing: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
+              logger.info('Removing dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
               dagi.deleteDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
             async.eachSeries(temaerToCreate, function (tema, callback) {
-              console.log('adding: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
+              logger.info('Adding dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
               dagi.addDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
             async.eachSeries(temaerToUpdate, function (tema, callback) {
-              console.log('updating: ' + JSON.stringify({ tema: tema.tema, kode: tema.kode, navn: tema.navn }));
+              logger.debug('opdaterer dagitema',{ tema: tema.tema, kode: tema.kode, navn: tema.navn });
               dagi.updateDagiTema(client, tema, function(err, result) {
                 if(err) {
                   return callback(err);
                 }
                 if(result.rowCount === 0){
-                  console.log('no change');
+                  logger.debug('dagitema uændret');
+                }
+                else {
+                  logger.info('Opdaterede dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
                 }
                 callback(err, result);
               });
@@ -138,7 +142,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   }
 
   function indlæsDagiTema(temaNavn, callback) {
-    console.log("gemmer DAGI tema " + temaNavn + ' i databasen');
+    logger.debug("gemmer DAGI tema  i databasen", {temaNavn: temaNavn});
     var directory = path.resolve(options.dataDir);
     var filename = options.filePrefix + temaNavn;
     var body = fs.readFileSync(path.join(directory, filename));
@@ -147,10 +151,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
       trim: true
     }, function (err, result) {
       if (err) {
-        throw err;
+        return callback(err);
       }
       if (!result.FeatureCollection) {
-        throw 'Unexpected result from DAGI: ' + JSON.stringify(result);
+        return callback(new Error('Unexpected result from DAGI: ' + JSON.stringify(result)));
       }
       var features = result.FeatureCollection.featureMember;
       var dagiTemaFragments = _.map(features, function (feature) {
@@ -176,7 +180,12 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
       });
       dagiTemaFragmentMap = null;
       putDagiTemaer(temaNavn, dagiTemaer, function (err) {
-        console.log('put dagi temaer complete: ' + err);
+        if(err) {
+          logger.error('Indlæsning af dagitema fejlet', { temaNavn: temaNavn, error: err});
+        }
+        else {
+          logger.debug('Indlæsning af DAGI temaer afsluttet', {temaNavn: temaNavn });
+        }
         callback(err);
       });
     });
@@ -185,8 +194,12 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   async.eachSeries(options.temaer.split(','), function (temaNavn, callback) {
     indlæsDagiTema(temaNavn, callback);
   }, function (err) {
-    if (err) {
-      throw err;
+    if(err) {
+      logger.error('Indlæsning af dagitema fejlet', err);
+      process.exit(1);
+    }
+    else {
+      logger.info('Indlæsning af dagitemaer gennemført', { temaer: options.temaer.split(',')});
     }
   });
 });
