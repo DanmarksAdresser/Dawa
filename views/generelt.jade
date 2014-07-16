@@ -104,7 +104,7 @@ block content
               ul
                 li Det er tilladt at tilføje noget til API'et. Nye ressourcer, nye data, nye søgeparametre mm.
                 li Det er ikke tilladt at fjerne noget fra API'et.
-              p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper etableres en ny version, som i en periode driftes samtidig med den tidligere version.
+              p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper etableres en ny version, som i en periode driftes samtidig med den tidligere version. Nedlæggelse af aktuel version med information om skift til ny version varsles 1 år før.
 
               p Det er vigtigt, at de klientprogrammer, som anvender DAWA, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det, der ofte skaber de største problemer, er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Klientprogrammer skal kunne håndterer nye name/value par i JSON. Nye kolonner i CSV. Hvis Klientprogrammerne er robuste over for det, vil de fejlfrit kunne fungere når DAWA opdateres indenfor en version.   
 
@@ -165,7 +165,11 @@ block content
             div.page-header
               h3.anchor-header#kodeeksempler Kodeeksempler
               p At se på kodeeksempler er en god måde at finde ud af hvordan DAWA anvendes. Du kan finde en række kodeeksempler på
-                | <a href='https://github.com/DanmarksAdresser'> https://github.com/DanmarksAdresser</a>
+                | <a href='https://github.com/DanmarksAdresser'> https://github.com/DanmarksAdresser</a>:
+              ul
+                li <em>C# og .NET</em>. Kodeeksemplet viser hvorledes man i C# programmere enkle opslag i DAWA, samt hvordan man vha. af streaming kan modtage en større datamængde uden at modtage det som et samlet hele. Du kan finde <a href='https://github.com/DanmarksAdresser/DawaDotnetClient'>C# kodeeksemplet i vort GitHub repositorie</a>. 
+                li <em>JavaScript og jQuery</em>. Kodeeksemplet er en lille mobil web applikation, <a href='http://dail.aws.dk'>Danmarks adresser i lommen</a>, som viser hvorledes DAWA kan kaldes fra JavaScript ved brug af jQuery. Du kan finde <a href='https://github.com/DanmarksAdresser/DanmarksAdresserILommen'>JavaScript kodeeksemplet i vort GitHub repositorie</a>.
+              p Vi planlægger at tilføje kodeeksempler i andre sprog og platforme. Hvis du vil bidrage med et kodeeksempel i dit favorit programmeringssprog, er du meget velkommen.
 
             div.page-header
             //
