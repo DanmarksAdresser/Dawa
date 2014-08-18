@@ -81,6 +81,6 @@ exports.snapshotQuery = function(datamodel, sequenceNumberAlias) {
   });
   query.from.push(datamodel.table + "_history");
   query.whereClauses.push("valid_from is null OR valid_from <= " + sequenceNumberAlias);
-  query.whereClauses.push("valid_to is null OR valid_to >= " + sequenceNumberAlias);
+  query.whereClauses.push("valid_to is null OR valid_to > " + sequenceNumberAlias);
   return dbapi.createQuery(query).sql;
 };
