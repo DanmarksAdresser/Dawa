@@ -27,10 +27,19 @@ function overwriteWithAutocompleteQParameter(properties){
 /*** Format parameters ********************************************************/
 /******************************************************************************/
 
-var formatParameters = [{name: 'callback',
-                        doc: 'Output leveres i <em>JSONP</em> format. Se <a href=generelt#dataformater>Dataformater</a>.'},
-                       {name: 'format',
-                        doc: 'Output leveres i andet format end <em>JSON</em>. Se <a href=generelt#dataformater>Dataformater</a>.'}];
+var formatParameters = [
+  {
+    name: 'callback',
+    doc: 'Output leveres i <em>JSONP</em> format. Se <a href=generelt#dataformater>Dataformater</a>.'
+  },
+  {
+    name: 'format',
+    doc: 'Output leveres i andet format end <em>JSON</em>. Se <a href=generelt#dataformater>Dataformater</a>.'},
+  {
+    name: 'noformat',
+    doc: 'Parameteren angiver, at whitespaceformatering skal udelades'
+  }
+ ];
 
 var pagingParameters = [{name: 'side',
                         doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt##paginering>Paginering</a>.'},

@@ -7,7 +7,7 @@ var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
 describe('Parameter documentation.', function() {
-  var undocumented = ['format', 'callback', 'srid'];
+  var undocumented = ['format', 'callback', 'srid', 'noformat'];
 
   var resources = registry.where({
     type: 'resource'

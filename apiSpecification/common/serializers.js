@@ -5,8 +5,8 @@ var Transform        = require('stream').Transform;
 var util             = require('util');
 var pipeline = require('../../pipeline');
 
-function jsonStringifyPretty(object){
-  return JSON.stringify(object, undefined, 2);
+function jsonStringify(object, prettyPrint){
+  return JSON.stringify(object, undefined, prettyPrint ? 2 : 0);
 }
 
 util.inherits(JsonStringifyStream, Transform);
@@ -42,30 +42,50 @@ JsonStringifyStream.prototype._transform = function(chunk, encoding, cb) {
   cb();
 };
 
-var jsonSep = {
-  open: '[\n',
-  separator: ', ',
-  close: '\n]'
-};
-
-function geojsonFeatureSep(crsUri) {
-  return {
-    open: '{\n' +
-      '  "type": "FeatureCollection",\n' +
-      '  "crs": {\n' +
-      '    "type": "name",\n' +
-      '    "properties": {"name": "' + crsUri + '"}\n'+
-      '  },\n'+
-      '  "features": [\n',
-    separator: ', ',
-    close: ']\n}'
-  };
+function jsonSep(prettyPrint) {
+  if(prettyPrint) {
+    return {
+      open: '[\n',
+      separator: ', ',
+      close: '\n]'
+    };
+  }
+  else {
+    return {
+      open: '[',
+      separator: ',',
+      close: ']'
+    };
+  }
 }
 
-function jsonpSep(callbackName, sep) {
+function geojsonFeatureSep(crsUri, prettyPrint) {
+  if(prettyPrint) {
+    return {
+      open: '{\n' +
+        '  "type": "FeatureCollection",\n' +
+        '  "crs": {\n' +
+        '    "type": "name",\n' +
+        '    "properties": {"name": "' + crsUri + '"}\n'+
+        '  },\n'+
+        '  "features": [\n',
+      separator: ', ',
+      close: ']\n}'
+    };
+  }
+  else {
+    return {
+      open: '{"type":"FeatureCollection","crs":{"type":"name","properties":{"name":"'+crsUri+'"}},"features":[',
+      separator: ',',
+      close:']}'
+    };
+  }
+}
+
+function jsonpSep(callbackName, sep, prettyPrint) {
   return {
     open: callbackName +'(' + sep.open,
-    separator: jsonSep.separator,
+    separator: jsonSep(prettyPrint).separator,
     close: sep.close + ');'
   };
 }
@@ -74,17 +94,17 @@ function toGeoJsonUrn(srid) {
   return 'EPSG:' + srid;
 }
 
-function computeSeparator(formatParam, callbackParam, sridParam) {
-  var sep = formatParam === 'geojson' ? geojsonFeatureSep(toGeoJsonUrn(sridParam)) : jsonSep;
+function computeSeparator(formatParam, callbackParam, sridParam, prettyPrint) {
+  var sep = formatParam === 'geojson' ? geojsonFeatureSep(toGeoJsonUrn(sridParam), prettyPrint) : jsonSep(prettyPrint);
   if (callbackParam) {
-    sep = jsonpSep(callbackParam, sep);
+    sep = jsonpSep(callbackParam, sep, prettyPrint);
   }
   return sep;
 }
 
-function transformToText(pipe, formatParam, callbackParam, sridParam) {
-  var sep = computeSeparator(formatParam, callbackParam, sridParam);
-  pipe.add(new JsonStringifyStream(undefined, 2, sep));
+function transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrint) {
+  var sep = computeSeparator(formatParam, callbackParam, sridParam, prettyPrint);
+  pipe.add(new JsonStringifyStream(undefined, prettyPrint ? 2 : 0, sep));
   return pipe;
 }
 
@@ -103,11 +123,6 @@ function contentHeader(format, jsonpCallbackName) {
   }
 }
 
-function setAppropriateContentHeader(res, format, callback) {
-  res.setHeader('Content-Type', contentHeader(format, callback));
-}
-
-
 function streamCsv(pipe, csvFieldNames) {
   var csvStringifier = csvStringify({header: true, columns: csvFieldNames, rowDelimiter: '\r\n', highWaterMark: 0});
 
@@ -115,14 +130,14 @@ function streamCsv(pipe, csvFieldNames) {
 }
 
 
-exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, representation) {
+exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, prettyPrint, representation) {
   formatParam = formatParam || 'json';
   sridParam = sridParam || 4326;
   return function(pipe, callback) {
     if(formatParam === 'csv') {
       streamCsv(pipe, representation.outputFields);
     } else {
-      transformToText(pipe, formatParam, callbackParam, sridParam);
+      transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrint);
     }
     var response = {
       status: 200,
@@ -135,7 +150,7 @@ exports.createStreamSerializer = function(formatParam, callbackParam, sridParam,
   };
 };
 
-exports.createSingleObjectSerializer = function(formatParam, callbackParam, representation) {
+exports.createSingleObjectSerializer = function(formatParam, callbackParam, prettyPrint, representation) {
   return function(object, callback) {
     var response = {
       status: 200,
@@ -150,7 +165,7 @@ exports.createSingleObjectSerializer = function(formatParam, callbackParam, repr
       streamCsv(pipe, representation.outputFields);
       response.bodyPipe = pipe;
     } else {
-      var textObject = jsonStringifyPretty(object);
+      var textObject = jsonStringify(object, prettyPrint);
       if(callbackParam) {
         var sep = jsonpSep(callbackParam, {open: '', separator: '', close: ''});
         response.body = sep.open + textObject + sep.close;

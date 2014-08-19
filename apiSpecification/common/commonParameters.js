@@ -36,6 +36,12 @@ exports.format = [
       type: 'string',
       pattern: '^[\\$_a-zA-Z0-9]+$'
     }
+  },
+  {
+    name: 'noformat',
+    schema: {
+      enum: ['']
+    }
   }
 ];
 
