@@ -2,6 +2,7 @@
 
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
+var nullableType = require('../schemaUtil').nullableType;
 
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
@@ -35,8 +36,20 @@ var fields = [
   normalizedField('esrejendomsnr'),
   normalizedField('etrs89koordinat_øst'),
   normalizedField('etrs89koordinat_nord'),
-  normalizedField('wgs84koordinat_bredde'),
-  normalizedField('wgs84koordinat_længde'),
+  {
+    name: 'wgs84koordinat_bredde',
+    description: 'Adgangspunktets breddegrad angivet i koordinatsystemet WGS84/geografisk',
+    schema: {
+      type: nullableType('number')
+    }
+  },
+  {
+    name: 'wgs84koordinat_længde',
+    description: 'Adgangspunktets længdegrad angivet i koordinatsystemet WGS84/geografisk',
+    schema: {
+      type: nullableType('number')
+    }
+  },
   normalizedField('nøjagtighed'),
   normalizedField('kilde'),
   normalizedField('tekniskstandard'),

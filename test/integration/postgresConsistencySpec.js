@@ -35,8 +35,6 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function()
         "adgangspunktid": "12345678-1234-1234-1234-123456789012",
         "etrs89oest": 542187.19,
         "etrs89nord": 6155336.05,
-        "wgs84long": 9.66855050231446,
-        "wgs84lat": 55.5422315147133,
         "noejagtighed": "A",
         "kilde": 5,
         "tekniskstandard": "TK",

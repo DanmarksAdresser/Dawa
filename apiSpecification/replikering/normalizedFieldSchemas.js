@@ -173,18 +173,6 @@ var fields = {
         type: nullableType('number')
       }
     }, {
-      name: 'wgs84koordinat_længde',
-      description: 'Adgangspunktets længdegrad angivet i koordinatsystemet WGS84/geografisk',
-      schema: {
-        type: nullableType('number')
-      }
-    }, {
-      name: 'wgs84koordinat_bredde',
-      description: 'Adgangspunktets breddegrad angivet i koordinatsystemet WGS84/geografisk',
-      schema: {
-        type: nullableType('number')
-      }
-    }, {
       name: 'nøjagtighed',
       description: 'Kode der angiver nøjagtigheden for adressepunktet. Et tegn.' +
         ' ”A” betyder at adressepunktet er absolut placeret på et detaljeret grundkort,' +

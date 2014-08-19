@@ -15,8 +15,6 @@ CREATE TABLE  adgangsadresser (
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
-  wgs84lat double precision NULL,
-  wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
   kilde integer NULL,
   placering char(1),
@@ -32,8 +30,6 @@ CREATE TABLE  adgangsadresser (
 
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
 CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
-CREATE INDEX ON Adgangsadresser(wgs84lat);
-CREATE INDEX ON Adgangsadresser(wgs84long);
 CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
 CREATE INDEX ON adgangsadresser(postnr, kommunekode);
 CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
@@ -63,8 +59,6 @@ CREATE TABLE adgangsadresser_history(
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
-  wgs84lat double precision NULL,
-  wgs84long double precision NULL,
   noejagtighed CHAR(1) NULL,
   kilde integer NULL,
   placering char(1),

@@ -19,10 +19,10 @@ var columns =  {
     column: 'nord'
   },
   wgs84koordinat_bredde: {
-    column: 'lat'
+    column: 'ST_Y(ST_Transform(AdgangsadresserView.geom, 4326))'
   },
   wgs84koordinat_længde: {
-    column: 'long'
+    column: 'ST_X(ST_Transform(AdgangsadresserView.geom, 4326))'
   },
   nøjagtighed: {
     column: 'noejagtighed'

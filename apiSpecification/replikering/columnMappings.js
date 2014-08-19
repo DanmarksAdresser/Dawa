@@ -68,12 +68,6 @@ exports.columnMappings = {
     name: 'etrs89koordinat_nord',
     column: 'etrs89nord'
   }, {
-    name: 'wgs84koordinat_længde',
-    column: 'wgs84long'
-  }, {
-    name: 'wgs84koordinat_bredde',
-    column: 'wgs84lat'
-  }, {
     name: 'nøjagtighed',
     column: 'noejagtighed'
   }, {

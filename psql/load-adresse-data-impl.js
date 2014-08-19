@@ -83,8 +83,6 @@ var legacyTransformers = {
       aendret: row.AddressAccessChangeDate,
       etrs89oest: row.ETRS89utm32Easting,
       etrs89nord: row.ETRS89utm32Northing,
-      wgs84lat: row.WGS84GeographicLatitude,
-      wgs84long: row.WGS84GeographicLongitude,
       noejagtighed: row.AddressCoordinateQualityClassCode,
       kilde: row.AddressGeometrySourceCode,
       tekniskstandard: row.AddressCoordinateTechnicalStandardCode,
@@ -185,7 +183,7 @@ exports.loadCsvOnly = function(client, options, callback) {
         columns : ['id', 'vejkode', 'kommunekode',
           'husnr', 'supplerendebynavn',
           'postnr', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr',
-          'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'wgs84lat', 'wgs84long',
+          'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord',
           'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse
 
