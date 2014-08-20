@@ -185,25 +185,20 @@ function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) 
     return false;
   }
   resourceImpl.resourceResponse(withDbClient, resourceSpec, {params: pathParams, query: queryParams, headers: {}}, shouldAbort, function(err, response) {
-    console.log('got resource response');
     if(err) {
       return callback(err);
     }
     if(response.bodyPipe) {
-      console.log('response had body pipe');
       response.bodyPipe.toArray(function(err, result) {
-        console.log('piped response to array');
         if(err) {
           return callback(err);
         }
         delete response.bodyPipe;
         response.body = result.join('');
-        console.log('response body: ' + response.body);
         callback(null, response);
       });
     }
     else {
-      console.log(JSON.stringify(response));
       callback(null, response);
     }
   });
@@ -211,7 +206,6 @@ function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) 
 
 function getStringResponse(dbClient, resourceSpec, pathParams, queryParams, callback) {
   getResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, res) {
-    console.log('got response');
     if(err) {
       return callback(err);
     }
@@ -239,9 +233,8 @@ function getJson(dbClient, resourceSpec, pathParams, queryParams, callback) {
 }
 
 function getCsv(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  console.log('getCsv');
+  queryParams.format = 'csv';
   getStringResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, str) {
-    console.log('got csv response. err: ' + JSON.stringify(err));
     if(err) {
       return callback(err);
     }
@@ -249,7 +242,6 @@ function getCsv(dbClient, resourceSpec, pathParams, queryParams, callback) {
       if(err) {
         return callback(err);
       }
-      console.log('parsed csv: ' + JSON.stringify(result));
       callback(err, result);
     });
   });
@@ -305,7 +297,6 @@ describe('ReplikeringsAPI', function() {
       }).then(function() {
         done();
       }, function(err) {
-        console.log('ERROR: ' + JSON.stringify(err));
         throw err;
       });
     });

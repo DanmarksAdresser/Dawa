@@ -7,6 +7,7 @@ var columnMappings = require('../columnMappings').columnMappings;
 var representations = require('./representations');
 var parameters = require('./parameters');
 var resourcesUtil = require('../../common/resourcesUtil');
+var commonParameters = require('../../common/commonParameters');
 
 require('../../allNamesAndKeys');
 var registry = require('../../registry');
@@ -21,12 +22,14 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
   {
     path: '/replikering/' + nameAndKey.plural,
       pathParameters: [],
-    queryParameters: parameters.sekvensnummer,
+    queryParameters: resourcesUtil.flattenParameters({
+      sekvensnummer: parameters.sekvensnummer,
+      formatParameters: commonParameters.format
+    }),
     representations: representations[datamodelName],
     sqlModel: sqlModels[datamodelName],
     singleResult: false,
     processParameters: function(params) {
-      params.format = 'csv';
     },
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
