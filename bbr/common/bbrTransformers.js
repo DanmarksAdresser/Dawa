@@ -38,13 +38,18 @@ function removePrefixZeroes(str) {
   return str;
 }
 
-var TIMESTAMP_REGEX = /(\d{1,}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.(\d{1,}))?/;
 
-function transformTimestamp(bbrTimestampWithoutTz) {
-  if(!bbrTimestampWithoutTz) {
+var TIMESTAMP_REGEX = /^(\d{1,}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2})(\.(\d{1,}))?(Z|(\+|\-)\d{2}(:\d{2})?)?$/;
+
+// The timestamps we receive from BBR are actually local datetimes, i.e. not stored with a timezone offset.
+// They are stored in "Danish time" (CET or CEST), corresponding to normal- and summertime. Offsets are +01 or +02.
+// When received as events, they are sent WITH timezone offset, but when received in CSV, they are WITHOUT timezone
+// offset. Since they are really local times, we ignore any timezone offset and store them as local times as well.
+function transformTimestamp(bbrTimestamp) {
+  if(!bbrTimestamp) {
     return null;
   }
-  var match = TIMESTAMP_REGEX.exec(bbrTimestampWithoutTz);
+  var match = TIMESTAMP_REGEX.exec(bbrTimestamp);
 
   if(match) {
     var datePart = match[1];
@@ -59,8 +64,8 @@ function transformTimestamp(bbrTimestampWithoutTz) {
     return datePart + 'T' + timePart + '.' + milliPart;
   }
 
-  logger.error('unexpected timestamp, trying moment', {bbrTimestampWithoutTz: bbrTimestampWithoutTz});
-  return moment.utc(bbrTimestampWithoutTz).format('YYYY-MM-DDTHH:mm:ss.SSS');
+  logger.error('unexpected timestamp, trying moment', {bbrTimestampWithoutTz: bbrTimestamp});
+  return moment.utc(bbrTimestamp).format('YYYY-MM-DDTHH:mm:ss.SSS');
 }
 
 module.exports = {
