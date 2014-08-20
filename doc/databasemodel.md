@@ -156,8 +156,9 @@ Tabellen `bbr_events` indeholder alle de hændelser, som er modtaget fra BBR og 
     <tr><td>type</td><td>Hvilken type hændelse der er tale om (f.eks. 'adgangsadresse')</td></tr>
     <tr><td>bbrtidspunkt</td><td>Det tidspunkt, som BBR har angivet for hændelsen</td></tr>
     <tr><td>created</td><td>Det tidspunkt hændelsen blev indlæst i databasen</td><tr>
-    <tr><td>sequence_number_from, sequence_number_to</td>En BBR hændelse kan resultere i flere ændringer i data. Disse to kolonner angiver
-    *sekvensnummeret* for de ændringer der er udført ved indlæsning af hændelsen (se dokumentation for transaction_history tabellen).
+    <tr><td>sequence_number_from, sequence_number_to</td><td>En BBR hændelse kan resultere i flere ændringer i data.
+    Disse to kolonner angiver *sekvensnummrene* for de ændringer der er udført ved indlæsning af hændelsen
+    (se dokumentation for transaction_history tabellen).</td>
   </tbody>
 </table>
 
