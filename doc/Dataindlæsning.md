@@ -87,7 +87,8 @@ sekvensnummer 0.
 
 ### BBR-grænseflade - hændelser
 Ændringer til adressedata leveres som hændelser. Hændelser leveres i JSON-format over HTTP, hvor BBR agerer klient
-og DAWA agerer server. Der er ingen autentifikation, men HTTP-endpointet beskyttes med IP-adressefiltrering.
+og DAWA agerer server. Det er altså BBR der kalder AWS4 for at levere disse hændelser (en "push"-mekanisme).
+Der er ingen autentifikation, men HTTP-endpointet beskyttes med IP-adressefiltrering.
 
 BBR laver ét HTTP POST kald til DAWA pr. hændelse. Body i kaldet er selve hændelsen i JSON-format. Kaldet indeholder
 desuden korrekt MIME-type i Content-Type headeren.
@@ -278,6 +279,10 @@ at tilknytningen er baseret på adgangsadressens kommunekode hhv. postnummer. Fo
 geografisk, dvs. en adresse er tilknyttet de DAGI temaer, som adressen er geografisk placeret på. Enkelte adresser er uden
 adgangspunkt eller har angivet et forkert adgangspunkt. Sådanne adresser kan have angivet ingen eller forkerte
 tilknyttede DAGI-temaer.
+
+Det er p.t. servicen `http://kortforsyningen.kms.dk/service?servicename=dagi_gml2` der anvendes som kilde til DAGI-temaer,
+men der forventes at skifte til servicen `http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2` i den nærmeste fremtid.
+Denne service er dog endnu ikke helt klar til brug.
 
 Programmet `download-dagi.js` anvendes til at downloade DAGI-temaerne fra WFS-servicen. Programmet `dagi-to-db.js` anvendes
 til at indlæse og opdatere DAGI-temaerne i databasen. Beregningen af hvilke DAGI-temaer som adgangsadresserne er
