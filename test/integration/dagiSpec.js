@@ -8,7 +8,7 @@ var _ = require('underscore');
 var sampleTema = {
   tema: 'region',
   kode: 10,
-  navn: 'Test Region',
+  navn: 'Test Region xxyyzz',
   polygons: ['POLYGON((' +
     '725025.18 6166264.37,' +
     '725025.18 6167537.76,' +
@@ -80,7 +80,7 @@ describe('DAGI updates', function() {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err) {
         if(err) throw err;
-        client.query("select count(*) as c FROM DagiTemaer WHERE to_tsquery('adresser', 'Test') @@ tsv", function(err, result) {
+        client.query("select count(*) as c FROM DagiTemaer WHERE to_tsquery('adresser', 'xxyyzz') @@ tsv", function(err, result) {
           if(err) throw err;
           transactionDone();
           expect(result.rows[0].c).toBe('1');

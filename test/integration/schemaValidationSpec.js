@@ -20,36 +20,10 @@ var valuesNeverExpectedToBeSeen = {
     }
   },
   postnumre: {
-    stormodtageradresser: true
   },
   vejnavne: {
-    adresseringsnavn: true
   },
   adgangsadresser: {
-    sogn: {
-      kode: true,
-      navn: true
-    },
-    retskreds: {
-      kode: true,
-      navn: true
-    },
-    politikreds: {
-      kode: true,
-      navn: true
-    },
-    opstillingskreds: {
-      kode: true,
-      navn: true
-    },
-    afstemningsområde: {
-      kode: true,
-      navn: true
-    },
-    region: {
-      kode: true,
-      navn: true
-    }
   }
 };
 
