@@ -23,12 +23,18 @@ function getDatamodel(eventType) {
 
 function extractObjectFromSimpleEvent(eventData, datamodel) {
   var result =  bbrTransformers[datamodel.name](eventData);
-  bbrEventsLogger.debug(util.format('Transformed object', {eventData: eventData, result: result}));
+  bbrEventsLogger.debug('Transformed object', {eventData: eventData, result: result});
   return result;
 }
 
 function performSqlQuery(sqlClient, event, datamodel, callback) {
   var object = extractObjectFromSimpleEvent(event.data, datamodel);
+  if(!object) {
+    bbrEventsLogger.info('Ignored event because it was filtered', {
+      event: event
+    });
+    callback(null);
+  }
   var key = _.reduce(datamodel.key, function(memo, keyColumn) {
     memo[keyColumn] = object[keyColumn];
     return memo;

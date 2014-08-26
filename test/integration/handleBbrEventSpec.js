@@ -119,7 +119,7 @@ describe('Håndtering af BBR events', function() {
       tidspunkt: '2000-02-05T12:00:00+00:00',
       data: {
         kommunekode: 999,
-        vejkode: 9999,
+        vejkode: 9899,
         navn: 'Niels Bohrs Alle',
         adresseringsnavn: 'Niels Bohrs Alle'
       }
@@ -131,7 +131,7 @@ describe('Håndtering af BBR events', function() {
       tidspunkt: '2000-02-05T12:00:00+00:00',
       data: {
         kommunekode: 999,
-        vejkode: 9999,
+        vejkode: 9899,
         navn: 'Einsteins gade',
         adresseringsnavn: 'Einsteins gade'
       }
@@ -144,11 +144,26 @@ describe('Håndtering af BBR events', function() {
       tidspunkt: '2000-02-05T12:00:00+00:00',
       data: {
         kommunekode: 999,
-        vejkode: 9999,
+        vejkode: 9899,
         navn: 'Einsteins gade',
         adresseringsnavn: 'Einsteins gade'
       }
     };
+
+    // this event will be filtered because vejkode >= 9900
+    var filteredEvent = {
+      type: 'vejnavn',
+      sekvensnummer: 1,
+      aendringstype: 'oprettelse',
+      tidspunkt: '2000-02-05T12:00:00+00:00',
+      data: {
+        kommunekode: 999,
+        vejkode: 9999,
+        navn: 'Niels Bohrs Alle',
+        adresseringsnavn: 'Niels Bohrs Alle'
+      }
+    };
+
     it('Ved modtagelse af en oprettelse event oprettes vejstykket', function(done) {
       dbapi.withRollbackTransaction(function(err, client, transactionDone) {
         handleBbrEvent(client, createEvent, function(err) {
@@ -157,7 +172,7 @@ describe('Håndtering af BBR events', function() {
           }
           crud.query(client, datamodels.vejstykke, {
             kommunekode: 999,
-            kode: 9999
+            kode: 9899
           }, function (err, queryResult) {
             if(err) {
               throw err;
@@ -165,7 +180,7 @@ describe('Håndtering af BBR events', function() {
             expect(queryResult.length).toBe(1);
             var created = queryResult[0];
             expect(created.kommunekode).toEqual(999);
-            expect(created.kode).toEqual(9999);
+            expect(created.kode).toEqual(9899);
             expect(created.vejnavn).toEqual('Niels Bohrs Alle');
             transactionDone();
             done();
@@ -185,7 +200,7 @@ describe('Håndtering af BBR events', function() {
             }
             crud.query(client, datamodels.vejstykke, {
               kommunekode: 999,
-              kode: 9999
+              kode: 9899
             }, function (err, queryResult) {
               if(err) {
                 throw err;
@@ -200,27 +215,50 @@ describe('Håndtering af BBR events', function() {
         });
       });
     });
+
     it('Ved modtagelse af en nedlaeggelse event udføres en delete', function(done) {
-      dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-        handleBbrEvent(client, createEvent, function(err) {
-          if(err) {
+      dbapi.withRollbackTransaction(function (err, client, transactionDone) {
+        handleBbrEvent(client, createEvent, function (err) {
+          if (err) {
             throw err;
           }
-          handleBbrEvent(client, deleteEvent, function(err) {
-            if(err) {
+          handleBbrEvent(client, deleteEvent, function (err) {
+            if (err) {
               throw err;
             }
             crud.query(client, datamodels.vejstykke, {
               kommunekode: 999,
-              kode: 9999
+              kode: 9899
             }, function (err, queryResult) {
-              if(err) {
+              if (err) {
                 throw err;
               }
               expect(queryResult.length).toBe(0);
               transactionDone();
               done();
             });
+          });
+        });
+      });
+    });
+
+    it('Ved modtagelse af en vejnavn event hvor kode  >= 9900 ignoreres den', function(done) {
+      done();
+      dbapi.withRollbackTransaction(function(err, client, transactionDone) {
+        handleBbrEvent(client, filteredEvent, function (err) {
+          if (err) {
+            throw err;
+          }
+          crud.query(client, datamodels.vejstykke, {
+            kommunekode: 999,
+            kode: filteredEvent.data.vejkode
+          }, function (err, queryResult) {
+            if(err) {
+              throw err;
+            }
+            expect(queryResult.length).toBe(0);
+            transactionDone();
+            done();
           });
         });
       });

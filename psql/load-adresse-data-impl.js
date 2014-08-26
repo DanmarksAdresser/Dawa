@@ -1,7 +1,10 @@
 "use strict";
 
 var async = require('async');
-var csv = require('csv');
+var csvParse = require('csv-parse');
+var csvStringify = require('csv-stringify');
+var combine = require('stream-combiner');
+var es      = require('event-stream');
 var copyFrom = require('pg-copy-streams').from;
 var fs = require('fs');
 var zlib = require('zlib');
@@ -14,36 +17,31 @@ var datamodels = require('../crud/datamodel');
 
 function loadCsv(client, inputStream, options, callback) {
   var sql = "COPY " + options.tableName + "(" + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL '')";
-  console.log("executing sql %s", sql);
   var pgStream = client.query(copyFrom(sql));
   var csvOptions = options.csvOptions ? options.csvOptions : {
     delimiter: ';',
     quote: '"',
     escape: '\\',
-    columns: true,
-    encoding: 'utf8'
+    columns: true
   };
-
-  csv().from.stream(inputStream, csvOptions).transform(options.transformer).to(pgStream, {
-      delimiter: ';',
-      quote: '"',
-      escape: '\\',
-      columns: options.columns,
-      header: true,
-      encoding: 'utf8'
-    }).on('error', function (error) {
-      callback(error);
-    });
-
-
-  pgStream.on('end', callback);
+  inputStream.pipe(csvParse(csvOptions)).pipe(es.mapSync(options.transformer)).pipe(csvStringify({
+    delimiter: ';',
+    quote: '"',
+    escape: '\\',
+    columns: options.columns,
+    header: true,
+    encoding: 'utf8'
+  })).pipe(pgStream);
+  pgStream.on('error', function(err) {
+    callback(err);
+  });
+  pgStream.on('end', function() {
+    callback();
+  });
 }
 
 var legacyTransformers = {
   vejstykke: function(row, idx) {
-    if(idx % 1000 === 0) {
-      console.log(idx);
-    }
     return {
       kode : row.StreetCode,
       kommunekode: row.MunicipalityCode,
@@ -52,9 +50,6 @@ var legacyTransformers = {
     };
   },
   adresse: function(row, idx) {
-    if(idx % 1000 === 0) {
-      console.log(idx);
-    }
     return {
       id : row.AddressSpecificIdentifier,
       adgangsadresseid : row.AddressAccessReference,
@@ -65,9 +60,6 @@ var legacyTransformers = {
     };
   },
   adgangsadresse: function(row, idx) {
-    if(idx % 1000 === 0) {
-      console.log(idx);
-    }
     return {
       id: row.AddressAccessIdentifier,
       vejkode: row.StreetCode,
@@ -111,7 +103,7 @@ var legacyFileNames = {
 var bbrFileStreams = function(dataDir, filePrefix) {
   return _.reduce(bbrFileNames, function(memo, filename, key) {
     memo[key] = function() {
-      return fs.createReadStream(dataDir + '/' + filePrefix + filename);
+      return fs.createReadStream(dataDir + '/' + filePrefix + filename, { encoding: 'utf8'});
     };
     return memo;
   }, {});
@@ -130,27 +122,31 @@ var legacyFileStreams = function(dataDir) {
 };
 
 function loadBbrMeta(bbrFileStreams, callback) {
-  csv().from.stream(bbrFileStreams.meta(), {
+  var parser = csvParse({
     delimiter: ';',
     quote: '"',
     escape: '\\',
-    columns: true,
-    encoding: 'utf8'
-  }).to.array(function(data) {
-      if(data.length > 1) {
-        callback(new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length));
-      }
-      if(data.length === 1) {
-        callback(null, data[0]);
-      }
-    });
+    columns: true
+  });
+  combine(bbrFileStreams.meta(), parser, es.writeArray(function(err, data) {
+    if(err) {
+      return callback(err);
+    }
+    if(data.length > 1) {
+      console.log(JSON.stringify(data));
+      return callback(new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length));
+    }
+    if(data.length === 1) {
+      return callback(null, data[0]);
+    }
+    return callback(null, {totalSendteHaendelser: 0});
+  }));
 }
 
 function loadLastSequenceNumber(client, fileStreams, callback) {
   loadBbrMeta(fileStreams, function(err, meta) {
     // navngivningen i BBR filen er mærkelig. Vi skal bruge totalSendteHaendelser. sidstSendtHaendelsesNummer
     // er et internt felt, som vi ikke kan bruge til ngoet.
-    console.log('Seneste sekvensnummer: ' + meta.totalSendteHaendelser);
 
     client.query('UPDATE bbr_sekvensnummer SET sequence_number = $1', [(meta.totalSendteHaendelser || 1)-1], callback);
   });
@@ -166,7 +162,6 @@ exports.loadCsvOnly = function(client, options, callback) {
   var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
   async.series([
     function(callback) {
-      console.log("Indlæser vejstykker....");
       var vejstykkerStream = fileStreams.vejstykke();
       loadCsv(client, vejstykkerStream, {
         tableName : tablePrefix + 'Vejstykker',
@@ -176,7 +171,6 @@ exports.loadCsvOnly = function(client, options, callback) {
       }, callback);
     },
     function(callback) {
-      console.log("Indlæser adgangsadresser....");
       var adgangsAdresserStream = fileStreams.adgangsadresse();
       loadCsv(client, adgangsAdresserStream, {
         tableName : tablePrefix + 'Adgangsadresser',
@@ -190,7 +184,6 @@ exports.loadCsvOnly = function(client, options, callback) {
       }, callback);
     },
     function(callback) {
-      console.log("Indlæser adresser....");
       var adresserStream = fileStreams.adresse();
       loadCsv(client, adresserStream, {
         tableName : tablePrefix + 'Enhedsadresser',

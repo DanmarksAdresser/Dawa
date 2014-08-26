@@ -16,6 +16,7 @@ var optionSpec = {
 
 function exitOnErr(err){
   if (err){
+    console.dir(err);
     winston.error("Error: %j", err, {});
     process.exit(1);
   }

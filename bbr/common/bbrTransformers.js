@@ -71,6 +71,10 @@ function transformTimestamp(bbrTimestamp) {
 module.exports = {
   vejstykke: function(row) {
     var result = transformBbr(datamodels.vejstykke, bbrFieldMappings.vejstykke)(row);
+    var kode = parseInt(result.kode, 10);
+    if(kode >= 9900) {
+      return null;
+    }
     result.oprettet = transformTimestamp(result.oprettet);
     result.aendret = transformTimestamp(result.aendret);
     // BBR sometimes send untrimmed road names.
