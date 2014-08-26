@@ -176,7 +176,7 @@ exports.loadCsvOnly = function(client, options, callback) {
         tableName : tablePrefix + 'Adgangsadresser',
         columns : ['id', 'vejkode', 'kommunekode',
           'husnr', 'supplerendebynavn',
-          'postnr', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr',
+          'postnr', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'objekttype',
           'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord',
           'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse
@@ -187,7 +187,7 @@ exports.loadCsvOnly = function(client, options, callback) {
       var adresserStream = fileStreams.adresse();
       loadCsv(client, adresserStream, {
         tableName : tablePrefix + 'Enhedsadresser',
-        columns : ['id', 'adgangsadresseid', 'oprettet', 'aendret', 'ikraftfra', 'etage', 'doer'],
+        columns : ['id', 'adgangsadresseid', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'etage', 'doer'],
         transformer: transformers.adresse
 
       }, callback);

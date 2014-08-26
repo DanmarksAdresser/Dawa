@@ -26,7 +26,8 @@ function loadEjerlavCsv(client, inputFile, tableName) {
     var stream = fs.createReadStream(inputFile);
     return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
       tableName: tableName,
-      columns: ['kode', 'navn']
+      columns: ['kode', 'navn'],
+      transformer: _.identity
     });
   };
 }
