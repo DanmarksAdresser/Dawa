@@ -33,6 +33,8 @@ exports.columnMappings = {
   adgangsadresse: [{
     name: 'id'
   }, {
+    name: 'objekttype'
+  }, {
     name: 'kommunekode'
   },{
     name: 'vejkode'
@@ -93,6 +95,8 @@ exports.columnMappings = {
   ],
   adresse: [{
     name: 'id'
+  }, {
+    name: 'objekttype'
   }, {
     name: 'oprettet',
     selectTransform: selectIsoTimestamp

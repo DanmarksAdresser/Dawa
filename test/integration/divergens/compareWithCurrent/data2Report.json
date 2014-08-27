@@ -57,6 +57,7 @@
         },
         "object": {
           "id": "0a3f508b-1ee6-32b8-e044-0003ba298018",
+          "objekttype": 1,
           "kommunekode": 540,
           "vejkode": 458,
           "husnr": "39A",

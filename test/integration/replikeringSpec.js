@@ -36,6 +36,7 @@ var insert = {
   },
   adgangsadresse: {
     "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
+    "objekttype": 1,
     "kommunekode": 607,
     "vejkode": 4899,
     "husnr": "22",
@@ -61,6 +62,7 @@ var insert = {
   },
   adresse: {
     "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f",
+    "objekttype": 1,
     "oprettet": "2014-05-23T09:50:40.167",
     "ændret": "2014-05-26T09:55:01.157",
     "ikrafttrædelsesdato": null,
@@ -90,6 +92,7 @@ var update = {
   },
   adgangsadresse: {
     "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
+    "objekttype": 1,
     "kommunekode": 100,
     "vejkode": 200,
     "husnr": "22B",
@@ -115,6 +118,7 @@ var update = {
   },
   adresse: {
     "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f",
+    "objekttype": 1,
     "oprettet": "2013-05-23T09:50:40.167",
     "ændret": "2015-05-26T09:55:01.157",
     "ikrafttrædelsesdato": "2015-05-26T09:55:01.157",
