@@ -33,7 +33,7 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
     bbrEventsLogger.info('Ignored event because it was filtered', {
       event: event
     });
-    callback(null);
+    return callback(null);
   }
   var key = _.reduce(datamodel.key, function(memo, keyColumn) {
     memo[keyColumn] = object[keyColumn];

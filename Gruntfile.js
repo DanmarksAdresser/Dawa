@@ -19,7 +19,13 @@ module.exports = function (grunt) {
       },
       integration: {
         specFolders: ['test/integration'],
-        includeStackTrace: true
+        includeStackTrace: true,
+        captureExceptions: true,
+        junitreport: {
+          report: true,
+          savePath: 'build/reports/jasmine',
+          useDotNotation: true
+        }
       }
     },
     express: {
@@ -67,14 +73,20 @@ module.exports = function (grunt) {
     var done = this.async();
     var options = this.data;
     var previousListeners = process.listeners('uncaughtException');
-    var globalExceptionCount = 0;
+    var globalExceptions = [];
     options.onComplete = function(runner) {
       var exitCode;
-      if (runner.results().failedCount === 0 && globalExceptionCount === 0) {
+      if (runner.results().failedCount === 0 && globalExceptions.length === 0) {
         exitCode = 0;
       } else {
         exitCode = 1;
-
+        globalExceptions.forEach(function(exception) {
+          console.log('Global exception: ');
+          console.dir(exception);
+          if(exception.stack) {
+            console.log(exception.stack);
+          }
+        });
         process.exit(exitCode);
       }
       process.removeListener('uncaughtException', jasmineExceptionHandler);
@@ -85,7 +97,7 @@ module.exports = function (grunt) {
     };
     var jasmineExceptionHandler = function(e) {
       console.error(e.stack || e);
-      globalExceptionCount++;
+      globalExceptions.push(e);
     };
     process.removeAllListeners('uncaughtException');
     process.addListener('uncaughtException', jasmineExceptionHandler);
