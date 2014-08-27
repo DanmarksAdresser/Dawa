@@ -85,6 +85,11 @@ var fields = {
       schema: definitions.UUID
     },
     {
+      name: 'status',
+      description: 'Adgangsadressens status. 1 indikerer en gældende adresse, 3 indikerer en foreløbig adresse.',
+      schema: definitions.Status
+    },
+    {
       name: 'oprettet',
       description: 'Dato og tid for adgangsadressens oprettelse,' +
         ' som registreret i BBR. Eksempel: 2001-12-23T00:00:00.',
@@ -256,6 +261,10 @@ var fields = {
         ' dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode.' +
         ' Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”.',
       schema: definitions.UUID
+    }, {
+      name: 'status',
+      description: 'Adressens status. 1 indikerer en gældende adresse, 3 indikerer en foreløbig adresse.',
+      schema: definitions.Status
     }, {
       name: 'oprettet',
       description: 'Dato og tid for adressens oprettelse, som registreret hos BBR. Eksempel: 2001-12-23T00:00:00Z.',

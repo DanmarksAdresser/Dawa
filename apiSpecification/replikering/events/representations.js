@@ -19,11 +19,11 @@ _.each(datamodelNames, function(datamodelName) {
       },
       tidspunkt: {
         description: 'Tidspunktet hvor hændelsen blev indlæst af DAWA.',
-        $ref: '#/definitions/DateTime'
+        $ref: '#/definitions/DateTimeUtc'
       },
       operation: {
         description: 'Hvilken type operation hændelsen vedrører: indsættelse, opdatering eller sletning.',
-        enum: ['oprettelse', 'sletning', 'ændring']
+        enum: ['insert', 'update', 'delete']
       },
       data: normalizedFieldSchemas.schemas[datamodelName]
     },
@@ -36,7 +36,8 @@ _.each(datamodelNames, function(datamodelName) {
       sekvensnummer: row.sekvensnummer
     };
     result.data = _.reduce(columnMappings[datamodelName], function(memo, columnMapping) {
-      memo[columnMapping.name] = row[columnMapping.name];
+      var formatFn = columnMapping.formatter || _.identity;
+      memo[columnMapping.name] = formatFn(row[columnMapping.name]);
       if(memo[columnMapping.name] === undefined) {
         memo[columnMapping.name] = null;
       }

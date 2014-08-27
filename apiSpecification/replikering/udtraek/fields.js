@@ -10,7 +10,8 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
     return {
       name: mapping.name,
       selectable: true,
-      multi: false
+      multi: false,
+      formatter: columnMapping.formatter
     };
   });
   return memo;

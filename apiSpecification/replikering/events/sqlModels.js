@@ -25,7 +25,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
 
   var baseQuery = function () {
     var query = {
-      select: ['h.operation as operation', sqlUtil.selectIsoDate('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
+      select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
       from: [" transaction_history h" +
         " LEFT JOIN " + datamodel.table + "_history i ON (h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from)" +
         " LEFT JOIN " + datamodel.table + "_history d ON (h.operation = 'delete' AND h.sequence_number = d.valid_to)"],

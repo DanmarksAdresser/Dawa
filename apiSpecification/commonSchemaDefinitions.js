@@ -19,6 +19,10 @@ var definitions = {
     type: 'string',
     pattern: '^[\\d]{4}-[\\d]{2}-[\\d]{2}T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{3}$'
   },
+  'DateTimeUtc': {
+    type: 'string',
+    pattern: '^[\\d]{4}-[\\d]{2}-[\\d]{2}T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{3}Z$'
+  },
   'husnr'  : {
     description: 'Husnummer der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +
       ' Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A..Z, og fastsættes i stigende orden, ' +
@@ -43,7 +47,9 @@ var definitions = {
       'tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
     type: 'string'
   },
-
+  'Status': {
+    type: 'integer'
+  },
   GeoJsonCoordinates: {
     type: 'array',
     items: {

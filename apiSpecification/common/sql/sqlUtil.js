@@ -13,6 +13,10 @@ exports.selectIsoDate = function(col) {
   return "to_char(" + col + ", 'YYYY-MM-DD\"T\"HH24:MI:SS.MS')";
 };
 
+exports.selectIsoDateUtc = function(col) {
+  return "to_char(" + col + " AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"')";
+};
+
 var allSelectableFieldNames = function(allFieldNames, columns) {
   return allFieldNames.filter(function(fieldName) {
     return _.isUndefined(columns[fieldName]) || existy(columns[fieldName].select) || existy(columns[fieldName].column);

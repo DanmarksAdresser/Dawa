@@ -1,5 +1,6 @@
 "use strict";
 
+var kode4String = require('../util').kode4String;
 var _ = require('underscore');
 // maps of field names to database column names
 
@@ -7,9 +8,11 @@ var selectIsoTimestamp = require('../common/sql/sqlUtil').selectIsoDate;
 
 exports.columnMappings = {
   vejstykke: [{
-    name: 'kode'
+    name: 'kode',
+    formatter: kode4String
   }, {
-    name: 'kommunekode'
+    name: 'kommunekode',
+    formatter: kode4String
   }, {
     name: 'navn',
     column: 'vejnavn'
@@ -24,7 +27,8 @@ exports.columnMappings = {
     selectTransform: selectIsoTimestamp
   }],
   postnummer: [{
-    name: 'nr'
+    name: 'nr',
+    formatter: kode4String
   }, {
     name: 'navn'
   },{
@@ -33,17 +37,21 @@ exports.columnMappings = {
   adgangsadresse: [{
     name: 'id'
   }, {
-    name: 'objekttype'
+    name: 'status',
+    column: 'objekttype'
   }, {
-    name: 'kommunekode'
+    name: 'kommunekode',
+    formatter: kode4String
   },{
-    name: 'vejkode'
+    name: 'vejkode',
+    formatter: kode4String
   }, {
     name: 'husnr'
   }, {
     name: 'supplerendebynavn'
   }, {
-    name: 'postnr'
+    name: 'postnr',
+    formatter: kode4String
   }, {
     name: 'oprettet',
     selectTransform: selectIsoTimestamp
@@ -60,7 +68,10 @@ exports.columnMappings = {
   }, {
     name: 'matrikelnr'
   }, {
-    name: 'esrejendomsnr'
+    name: 'esrejendomsnr',
+    formatter: function(num) {
+      return num ? "" + num : null;
+    }
   }, {
     name: 'adgangspunktid'
   }, {
@@ -96,7 +107,8 @@ exports.columnMappings = {
   adresse: [{
     name: 'id'
   }, {
-    name: 'objekttype'
+    name: 'status',
+    column: 'objekttype'
   }, {
     name: 'oprettet',
     selectTransform: selectIsoTimestamp

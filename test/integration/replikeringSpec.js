@@ -18,6 +18,8 @@ var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 
+var schemaValidationUtil = require('./schemaValidationUtil');
+
 
 
 var insert = {
@@ -36,7 +38,7 @@ var insert = {
   },
   adgangsadresse: {
     "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
-    "objekttype": 1,
+    "status": 1,
     "kommunekode": 607,
     "vejkode": 4899,
     "husnr": "22",
@@ -62,7 +64,7 @@ var insert = {
   },
   adresse: {
     "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f",
-    "objekttype": 1,
+    "status": 1,
     "oprettet": "2014-05-23T09:50:40.167",
     "ændret": "2014-05-26T09:55:01.157",
     "ikrafttrædelsesdato": null,
@@ -92,7 +94,7 @@ var update = {
   },
   adgangsadresse: {
     "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
-    "objekttype": 1,
+    "status": 1,
     "kommunekode": 100,
     "vejkode": 200,
     "husnr": "22B",
@@ -109,7 +111,7 @@ var update = {
     "etrs89koordinat_nord": 6155300.00,
     "nøjagtighed": "B",
     "kilde": 4,
-    "tekniskstandard": "AA",
+    "tekniskstandard": "TD",
     "tekstretning": 100.00,
     "adressepunktændringsdato": "2015-05-22T23:59:00.000",
     "ddkn_m100": "100m_61553_0000",
@@ -118,7 +120,7 @@ var update = {
   },
   adresse: {
     "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f",
-    "objekttype": 1,
+    "status": 1,
     "oprettet": "2013-05-23T09:50:40.167",
     "ændret": "2015-05-26T09:55:01.157",
     "ikrafttrædelsesdato": "2015-05-26T09:55:01.157",
@@ -273,6 +275,14 @@ function jsToCsv(obj) {
   },{});
 }
 
+function formatJson(columnMapping, obj) {
+  return _.reduce(obj, function(memo, value, key) {
+    var formatFn = _.findWhere(columnMapping, { name: key}).formatter || _.identity;
+    memo[key] = formatFn(value);
+    return memo;
+  }, {});
+}
+
 describe('ReplikeringsAPI', function() {
   var client;
   var transactionDone;
@@ -344,12 +354,31 @@ describe('ReplikeringsAPI', function() {
         type: 'resource',
         qualifier: 'hændelser'
       });
+
+      var eventRepresentation = registry.findWhere({
+        entityName: datamodelName + '_hændelse',
+        type: 'representation',
+        qualifier: 'json'
+      });
+
+      var eventSchema = eventRepresentation.schema;
+
+      it('All events should be valid according to schema', function(done) {
+        getJson(client, eventResource, {}, {}, function(err, objects) {
+          expect(objects.length).toBeGreaterThan(0);
+          objects.forEach(function(object) {
+            expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).toBeTruthy();
+          });
+          done();
+        });
+      });
+
       it('sequence number filtering should work when retrieving events', function(done) {
         var sekvensnummer = (index * 3) + 2;
         getJson(client, eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
           expect(objects.length).toBe(1);
           expect(objects[0].sekvensnummer).toBe(sekvensnummer);
-          expect(objects[0].data).toEqual(update[datamodelName]);
+          expect(objects[0].data).toEqual(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName]));
           done();
         });
       });
