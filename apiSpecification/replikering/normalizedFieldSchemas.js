@@ -36,7 +36,7 @@ var fields = {
     description: 'Vejens navn som det er fastsat og registreret af kommunen. ' +
       'Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.',
     schema: {
-      type: 'string',
+      type: nullableType('string'),
       maxLength: 40
     }
   }, {
@@ -44,7 +44,7 @@ var fields = {
     description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn,' +
       ' som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.',
     schema: {
-      type: 'string',
+      type: nullableType('string'),
       maxLength: 20
     }
   }

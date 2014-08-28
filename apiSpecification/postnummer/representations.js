@@ -8,6 +8,12 @@ var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+var normalizedFieldSchema = function(fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('postnummer', fieldName);
+};
+
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHref = commonMappers.makeHref;
 var mapPostnummerRef = commonMappers.mapPostnummerRef;
@@ -30,15 +36,8 @@ exports.json = {
         description: 'Postnummerets unikke URL.',
         '$ref': '#/definitions/Href'
       },
-      'nr'      : {
-        description: 'Unik identifikation af det postnummeret. Postnumre fastsættes af Post Danmark. Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
-        '$ref': '#/definitions/Postnr'
-      },
-      'navn'    : {
-        description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
-        type: 'string',
-        maxLength: 20
-      },
+      'nr'      : normalizedFieldSchema('nr'),
+      'navn'    : normalizedFieldSchema('navn'),
       'stormodtageradresser': {
         description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adresserne på stormodtageren.',
         type: nullableType('array'),

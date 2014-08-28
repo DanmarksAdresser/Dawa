@@ -8,6 +8,12 @@ var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+var normalizedFieldSchema = function(fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('vejstykke', fieldName);
+};
+
 
 var d = util.d;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
@@ -16,8 +22,6 @@ var mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
 var mapKommuneRef = commonMappers.mapKommuneRef;
 var kode4String = require('../util').kode4String;
 var schemaObject = schemaUtil.schemaObject;
-
-var nullableType = schemaUtil.nullableType;
 
 exports.flat = representationUtil.defaultFlatRepresentation(fields);
 
@@ -63,22 +67,9 @@ exports.json = {
         description: 'Vejstykkets unikke URL.',
         $ref: '#/definitions/Href'
       },
-      'kode': {
-        description: 'Identifikation af vejstykke. ' +
-          'Er unikt indenfor den pågældende kommune. Repræsenteret ved fire cifre. ' +
-          'Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.',
-        '$ref': '#/definitions/Kode4'
-      },
-      'navn' : {
-        description: 'Vejens navn som det er fastsat og registreret af kommunen. Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.',
-        type: 'string',
-        maxLength: 40
-      },
-      'adresseringsnavn': {
-        description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn, som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.',
-        type: nullableType('string'),
-        maxLength: 20
-      },
+      'kode': normalizedFieldSchema('kode'),
+      'navn' : normalizedFieldSchema('navn'),
+      'adresseringsnavn': normalizedFieldSchema('adresseringsnavn'),
       'kommune': {
         description: 'Kommunen som vejstykket er beliggende i.',
         $ref: '#/definitions/KommuneRef'
@@ -91,17 +82,10 @@ exports.json = {
         }
       },
       'historik' : schemaObject({
-        'description': 'Væsentlige tidspunkter for adgangsadressen',
+        'description': 'Væsentlige tidspunkter for vejstykket',
         properties: {
-          'oprettet': {
-            description: 'Dato og tid for adgangsadressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
-            '$ref': '#/definitions/NullableDateTime'
-          },
-          'ændret': {
-            description: 'Dato og tid hvor der sidst er ændret i adgangsadressen. Eksempel: 2002-04-08T00:00:00.',
-            type: nullableType('string'),
-            '$ref': '#/definitions/NullableDateTime'
-          }
+          'oprettet': normalizedFieldSchema('oprettet'),
+          'ændret': normalizedFieldSchema('ændret')
         },
         docOrder: ['oprettet', 'ændret']
 
