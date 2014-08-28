@@ -289,7 +289,6 @@ exports.json = {
         };
       }
       var adr = {};
-      console.log(JSON.stringify(rs));
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
       adr.status = rs.status;

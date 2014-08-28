@@ -69,7 +69,6 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
         };
         return memo;
       }, {});
-      console.log(JSON.stringify(keyColumns));
       var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
       propertyFilter(query, params);
       var dbQuery = dbapi.createQuery(query);
