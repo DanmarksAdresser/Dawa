@@ -21,7 +21,7 @@ var maybeNull = util.maybeNull;
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 var normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('adgangsadresse', fieldName);
-}
+};
 
 
 var nullableType = schemaUtil.nullableType;
@@ -47,12 +47,8 @@ exports.json = {
         description: 'Vejstykket som adressen er knyttet til.',
         $ref: '#/definitions/VejstykkeKodeOgNavn'
       },
-      'husnr'  : {
-        $ref: '#/definitions/husnr'
-      },
-      'supplerendebynavn': {
-        $ref: '#/definitions/Nullablesupplerendebynavn'
-      },
+      'husnr'  : normalizedFieldSchema('husnr'),
+      'supplerendebynavn': normalizedFieldSchema('supplerendebynavn'),
       'postnummer': {
         description: 'Postnummeret som adressen er beliggende i.',
         $ref: '#/definitions/NullablePostnummerRef'
@@ -65,11 +61,7 @@ exports.json = {
         description: 'Det matrikulære ejerlav som adressen ligger i.',
         nullable: true,
         properties: {
-          'kode': {
-            description: 'Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i. ' +
-              'Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
-            '$ref': '#/definitions/UpTo7'
-          },
+          'kode': normalizedFieldSchema('ejerlavkode'),
           'navn': {
             description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
             type: 'string'
@@ -77,31 +69,13 @@ exports.json = {
         },
         docOrder: ['kode', 'navn']
       }),
-      'matrikelnr': {
-        description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på. ' +
-          'Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
-        type: nullableType('string'),
-        pattern: '^[0-9a-zæøå]{1,7}$'
-      },
-      'esrejendomsnr': {
-        description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ' +
-          'ESR, som det matrikelnummer som adressen ligger på, er en del af. ' +
-          'Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
-        type: nullableType('string'),
-        pattern: '^[0-9]{1,6}'
-      },
+      'matrikelnr': normalizedFieldSchema('matrikelnr'),
+      'esrejendomsnr': normalizedFieldSchema('esrejendomsnr'),
       'historik' : schemaObject({
         'description': 'Væsentlige tidspunkter for adgangsadressen',
         properties: {
-          'oprettet': {
-            description: 'Dato og tid for adgangsadressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
-            '$ref': '#/definitions/NullableDateTime'
-          },
-          'ændret': {
-            description: 'Dato og tid hvor der sidst er ændret i adgangsadressen. Eksempel: 2002-04-08T00:00:00.',
-            type: nullableType('string'),
-            '$ref': '#/definitions/NullableDateTime'
-          }
+          'oprettet': normalizedFieldSchema('oprettet'),
+          'ændret': normalizedFieldSchema('ændret')
         },
         docOrder: ['oprettet', 'ændret']
 
@@ -113,47 +87,11 @@ exports.json = {
             description: 'Adgangspunktets koordinater som array [x,y].',
             $ref: '#/definitions/NullableGeoJsonCoordinates'
           },
-          nøjagtighed: {
-            description: 'Kode der angiver nøjagtigheden for adressepunktet. ' +
-              'Et tegn. ”A” betyder at adressepunktet er absolut placeret på et detaljeret grundkort, ' +
-              'tyisk med en nøjagtighed bedre end +/- 2 meter. ”B” betyder at adressepunktet er beregnet – ' +
-              'typisk på basis af matrikelkortet, således at adressen ligger midt på det pågældende matrikelnummer. ' +
-              'I så fald kan nøjagtigheden være ringere en end +/- 100 meter afhængig af forholdene. ' +
-              '”U” betyder intet adressepunkt.',
-            type: 'string',
-            pattern: '^A|B|U$'
-          },
-          kilde: {
-            description: 'Kode der angiver kilden til adressepunktet. Et tegn. ' +
-              '”1” = oprettet maskinelt fra teknisk kort; ' +
-              '”2” = Oprettet maskinelt fra af matrikelnummer tyngdepunkt; ' +
-              '”3” = Eksternt indberettet af konsulent på vegne af kommunen; ' +
-              '”4” = Eksternt indberettet af kommunes kortkontor o.l. ' +
-              '”5” = Oprettet af teknisk forvaltning."',
-            type: nullableType('integer'), minimum: 1, maximum: 5
-
-          },
-          tekniskstandard: {
-            description: 'Kode der angiver den specifikation adressepunktet skal opfylde. 2 tegn. ' +
-              '”TD” = 3 meter inde i bygningen ved det sted hvor indgangsdør e.l. skønnes placeret; ' +
-              '”TK” = Udtrykkelig TK-standard: 3 meter inde i bygning, midt for længste side mod vej; ' +
-              '”TN” Alm. teknisk standard: bygningstyngdepunkt eller blot i bygning; ' +
-              '”UF” = Uspecificeret/foreløbig: ikke nødvendigvis placeret i bygning."',
-            type: nullableType('string'),
-            pattern: '^TD|TK|TN|UF$'
-          },
-          tekstretning: {
-            description: 'Angiver en evt. retningsvinkel for adressen i ”gon” ' +
-              'dvs. hvor hele cirklen er 400 gon og 200 er vandret. ' +
-              'Værdier 0.00-400.00: Eksempel: ”128.34”.',
-            type: nullableType('number'),
-            minimum: 0,
-            maximum: 400
-          },
-          ændret: {
-            description: 'Dato og tid for sidste ændring i adressepunktet. Eksempel: ”1998-11-17T00:00:00”',
-            '$ref': '#/definitions/NullableDateTime'
-          }
+          nøjagtighed: normalizedFieldSchema('nøjagtighed'),
+          kilde: normalizedFieldSchema('kilde'),
+          tekniskstandard: normalizedFieldSchema('tekniskstandard'),
+          tekstretning: normalizedFieldSchema('tekstretning'),
+          ændret: normalizedFieldSchema('adressepunktændringsdato')
         },
         docOrder: ['koordinater','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
       }),
@@ -161,21 +99,9 @@ exports.json = {
         nullable: true,
         description: 'Adressens placering i Det Danske Kvadratnet (DDKN).',
         properties: {
-          'm100': {
-            description: 'Angiver betegnelsen for den 100 m celle som adressen er beliggende i. 15 tegn. Eksempel: ”100m_61768_6435”.',
-            type: 'string',
-            pattern: '^100m_(\\d{5})_(\\d{4})$'
-          },
-          'km1' : {
-            description: 'Angiver betegnelsen for den 1 km celle som adressen er beliggende i. 12 tegn. Eksempel: ”1km_6176_643”.',
-            type: 'string',
-            pattern:  '^1km_(\\d{4})_(\\d{3})$'
-          },
-          'km10': {
-            description: 'Angiver betegnelsen for den 10 km celle som adressen er beliggende i. 11 tegn. Eksempel: ”10km_617_64”.',
-            type: 'string',
-            pattern: '^10km_(\\d{3})_(\\d{2})$'
-          }
+          'm100': normalizedFieldSchema('ddkn_m100'),
+          'km1' : normalizedFieldSchema('ddkn_km1'),
+          'km10': normalizedFieldSchema('ddkn_km10')
         },
         docOrder: ['m100', 'km1', 'km10']
       }),

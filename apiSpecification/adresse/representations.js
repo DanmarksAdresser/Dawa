@@ -17,6 +17,10 @@ var maybeNull = util.maybeNull;
 var d = util.d;
 var schemaObject = schemaUtil.schemaObject;
 
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+var normalizedFieldSchema = function(fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('adresse', fieldName);
+};
 
 
 var nullableType = schemaUtil.nullableType;
@@ -36,25 +40,10 @@ exports.json = {
         description: 'Adressens unikke URL.',
         $ref: '#/definitions/Href'
       },
-      'id':      {
-        description: 'Universel, unik identifikation af adressen af datatypen UUID . ' +
-          'Er stabil over hele adressens levetid (ligesom et CPR-nummer) ' +
-          'dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode. ' +
-          'Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”.',
-        '$ref': '#/definitions/UUID'
-      },
-      status: {
-        description: 'Angiver adressens status som registreret i BBR. "1" angiver en endelig adresse, "3" angiver en ' +
-          'foreløbig adresse. Adresser med status "2" og status "4" er ikke med i DAWA.',
-        type: 'integer'
-      },
-      'etage':   {
-        '$ref': '#/definitions/NullableEtage'
-      },
-      'dør':     {
-        '$ref': '#/definitions/NullableDør'
-      },
-
+      'id': normalizedFieldSchema('id'),
+      status: normalizedFieldSchema('status'),
+      'etage': normalizedFieldSchema('etage'),
+      'dør': normalizedFieldSchema('dør'),
       'adressebetegnelse': {
         description: '',
         type: 'string'
@@ -62,15 +51,8 @@ exports.json = {
       'historik' : schemaObject({
         'description': 'Væsentlige tidspunkter for adressen',
         properties: {
-          'oprettet': {
-            description: 'Dato og tid for adressens oprettelse. Eksempel: 2001-12-23T00:00:00.',
-            '$ref': '#/definitions/NullableDateTime'
-          },
-          'ændret': {
-            description: 'Dato og tid hvor der sidst er ændret i adressen. Eksempel: 2002-04-08T00:00:00.',
-            type: nullableType('string'),
-            '$ref': '#/definitions/NullableDateTime'
-          }
+          'oprettet': normalizedFieldSchema('oprettet'),
+          'ændret': normalizedFieldSchema('ændret')
         },
         docOrder: ['oprettet', 'ændret']
 
