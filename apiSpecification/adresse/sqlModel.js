@@ -12,6 +12,9 @@ var columns = {
   id: {
     column: 'e_id'
   },
+  status: {
+    column: 'e_objekttype'
+  },
   oprettet: {
     select: selectIsoTimestamp('e_oprettet')
   },
@@ -62,6 +65,9 @@ var columns = {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
     }
+  },
+  adgangsadresse_status: {
+    column: 'a_objekttype'
   },
   adgangsadresse_oprettet: {
     select: selectIsoTimestamp('a_oprettet')

@@ -18,6 +18,11 @@ var mapKommuneRef = commonMappers.mapKommuneRef;
 var d = util.d;
 var maybeNull = util.maybeNull;
 
+var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+var normalizedFieldSchema = function(fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('adgangsadresse', fieldName);
+}
+
 
 var nullableType = schemaUtil.nullableType;
 var kode4String = require('../util').kode4String;
@@ -36,13 +41,8 @@ exports.json = {
         description: 'Adgangsadressens URL.',
         $ref: '#/definitions/Href'
       },
-      'id'     : {
-        description: 'Universel, unik identifikation af adressen af datatypen UUID. ' +
-          'Er stabil over hele adressens levetid (ligesom et CPR-nummer) ' +
-          'dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode. ' +
-          'Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”.',
-        '$ref': '#/definitions/UUID'
-      },
+      'id'     : normalizedFieldSchema('id'),
+      status: normalizedFieldSchema('status'),
       'vejstykke'    : {
         description: 'Vejstykket som adressen er knyttet til.',
         $ref: '#/definitions/VejstykkeKodeOgNavn'
@@ -275,7 +275,7 @@ exports.json = {
         docOrder: ['href', 'kode', 'navn']
       })
     },
-    docOrder: ['href','id', 'vejstykke', 'husnr','supplerendebynavn',
+    docOrder: ['href','id', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds']
   }),
@@ -289,8 +289,10 @@ exports.json = {
         };
       }
       var adr = {};
+      console.log(JSON.stringify(rs));
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
+      adr.status = rs.status;
       adr.vejstykke = {
         href: makeHref(baseUrl, 'vejstykke', [rs.kommunekode, rs.vejkode]),
         navn: maybeNull(rs.vejnavn),

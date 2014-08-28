@@ -43,7 +43,11 @@ exports.json = {
           'Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”.',
         '$ref': '#/definitions/UUID'
       },
-
+      status: {
+        description: 'Angiver adressens status som registreret i BBR. "1" angiver en endelig adresse, "3" angiver en ' +
+          'foreløbig adresse. Adresser med status "2" og status "4" er ikke med i DAWA.',
+        type: 'integer'
+      },
       'etage':   {
         '$ref': '#/definitions/NullableEtage'
       },
@@ -76,7 +80,7 @@ exports.json = {
         $ref: '#/definitions/Adgangsadresse'
       }
     },
-    docOrder: ['href','id', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
+    docOrder: ['href','id', 'status', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
     definitions: adresseDefinitions
   }),
   mapper: function(baseUrl, params, singleResult) {
@@ -84,6 +88,7 @@ exports.json = {
     return function(rs) {
       var adr = {};
       adr.id = rs.id;
+      adr.status = rs.status;
       adr.href = makeHref(baseUrl, 'adresse', [rs.id]);
       adr.historik = {
         oprettet: d(rs.oprettet),
@@ -95,6 +100,7 @@ exports.json = {
       var adgangsadresseUnmapped = _.clone(rs);
       _.extend(adgangsadresseUnmapped,{
         id: rs.adgangsadresseid,
+        status: rs.adgangsadresse_status,
         oprettet: rs.adgangsadresse_oprettet,
         ændret: rs.adgangsadresse_ændret
       });

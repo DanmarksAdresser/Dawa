@@ -12,6 +12,7 @@ var normalizedField = function(fieldName) {
 
 var fields = [
   normalizedField('id'),
+  normalizedField('status'),
   normalizedField('oprettet'),
   normalizedField('ændret'),
   normalizedField('vejkode'),

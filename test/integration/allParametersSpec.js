@@ -134,6 +134,12 @@ var sampleParameters = {
         return adr.id === id;
       }
     },
+    status: {
+      values: ['1'],
+      verifier: function(adr, status) {
+        return adr.status === parseInt(status, 10);
+      }
+    },
     vejkode: {
       values: ['1010'],
       verifier: function(adr, vejkode) {
@@ -195,6 +201,12 @@ var sampleParameters = {
       values: ['07839141-fca3-49ef-8747-2e9a5551dd6d'],
       verifier: function(adr, id) {
         return adr.id === id;
+      }
+    },
+    status: {
+      values: ['1'],
+      verifier: function(adr, status) {
+        return adr.status === parseInt(status, 10);
       }
     },
     etage: {

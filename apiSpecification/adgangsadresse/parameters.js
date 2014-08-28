@@ -20,6 +20,10 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
+    name: 'status',
+    type: 'integer'
+  },
+  {
     name: 'vejkode',
     type: 'integer',
     schema: schema.kode4,

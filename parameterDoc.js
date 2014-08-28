@@ -279,6 +279,11 @@ var kommuneDoc = {
 
 var parametersForBothAdresseAndAdgangsAdresse = [
   {
+    name: 'status',
+    doc: 'Adressens status, som modtaget fra BBR. "1" angiver en endelig adresse og "3" angiver en foreløbig adresse". ' +
+      'Adresser med status "2" eller "4" er ikke med i DAWA.'
+  },
+  {
     name: 'vejkode',
     doc: 'Vejkoden. 4 cifre.'
   },

@@ -2,6 +2,7 @@ DROP VIEW IF EXISTS AdgangsadresserView CASCADE;
 CREATE VIEW AdgangsadresserView AS
   SELECT
     A.id as a_id,
+    A.objekttype as a_objekttype,
     A.husnr,
     A.supplerendebynavn,
     A.matrikelnr,

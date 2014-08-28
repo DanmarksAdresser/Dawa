@@ -17,6 +17,7 @@ var fields = [
   {
     name: 'id'
   },
+  normalizedField('status'),
   normalizedField('oprettet'),
   normalizedField('ændret'),
   {
@@ -97,6 +98,9 @@ var fields = [
     formatter: d
   },
   normalizedField('adgangsadresseid'),
+  {
+    name: 'adgangsadresse_status'
+  },
   {
     name: 'geom_json'
   },

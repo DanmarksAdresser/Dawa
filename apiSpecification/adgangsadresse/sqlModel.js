@@ -12,6 +12,9 @@ var columns =  {
   id: {
     column: 'a_id'
   },
+  status: {
+    column: 'a_objekttype'
+  },
   etrs89koordinat_øst: {
     column: 'oest'
   },
