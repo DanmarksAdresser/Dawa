@@ -8,6 +8,10 @@ var assembleSqlModel = sqlUtil.assembleSqlModel;
 var selectIsoTimestamp = sqlUtil.selectIsoDate;
 var dbapi = require('../../dbapi');
 
+var util = require('../util');
+
+var notNull = util.notNull;
+
 var columns = {
   id: {
     column: 'e_id'
@@ -90,13 +94,42 @@ var baseQuery = function () {
   };
 };
 
+function addAdditionalAdresseOrdering(sqlParts, rawQuery) {
+// we order according to levenshtein distance when the addresses have same rank.
+  // This improves ordering of addresses with identical rank, especially if
+  // several addresses matches 100%.
+  var rawQueryAlias = dbapi.addSqlParameter(sqlParts, rawQuery);
+  sqlParts.orderClauses.push("levenshtein(adressebetegnelse(vejnavn, husnr, etage, dør, supplerendebynavn, postnr::varchar, postnrnavn), " + rawQueryAlias + ") ASC");
+  sqlParts.orderClauses.push('husnr');
+  sqlParts.orderClauses.push('etage');
+  sqlParts.orderClauses.push('dør');
+}
+var searchAdresse = function(columnSpec) {
+  var searchFn = sqlParameterImpl.search(columnSpec);
+  return function(sqlParts, params) {
+    if(notNull(params.search)) {
+      searchFn(sqlParts, params);
+      addAdditionalAdresseOrdering(sqlParts, params.search);
+    }
+  };
+};
+
+var autocompleteAdresse = function(columnSpec) {
+  var autocompleteFn = sqlParameterImpl.autocomplete(columnSpec);
+  return function(sqlParts, params) {
+    if(notNull(params.autocomplete)) {
+      autocompleteFn(sqlParts, params);
+      addAdditionalAdresseOrdering(sqlParts, params.autocomplete);
+    }
+  };
+};
 // WARNING: order matters!
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.dagiFilter(),
-  sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns, ['husnr', 'etage', 'dør']),
+  searchAdresse(columns),
+  autocompleteAdresse(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 

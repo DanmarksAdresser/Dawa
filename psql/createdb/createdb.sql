@@ -6,3 +6,4 @@ ALTER DATABASE DB_NAME SET effective_cache_size='7GB';
 \c DB_NAME ;
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
+CREATE EXTENSION fuzzystrmatch;

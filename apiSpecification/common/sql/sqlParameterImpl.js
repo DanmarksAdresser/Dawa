@@ -154,14 +154,17 @@ function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
  * assumes the search query parameter is 'q',
  * and that the search field is 'tsv'.
  */
-exports.search = function(columnSpec) {
+exports.search = function(columnSpec, orderFields) {
+  orderFields = orderFields || [];
   return function(sqlParts, params) {
     if(notNull(params.search)) {
       var tsQuery = toPgSearchQuery(params.search);
       applyTsQuery(sqlParts, params, tsQuery, columnSpec);
+      sqlParts.orderClauses = sqlParts.orderClauses.concat(orderFields);
     }
   };
 };
+
 
 // The orderFields parameter specifies a list of fields the result is ordered by,
 // if the rank is equal.
