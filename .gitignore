@@ -226,3 +226,5 @@ pip-log.txt
 .elasticbeanstalk/
 
 /psql/setupdb.GENERATED.sql
+/public/lib
+/bower_components

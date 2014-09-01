@@ -12,11 +12,11 @@ html(lang='da')
     //if lt IE 9
       script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
 
-    link(href="bootstrap/css/bootstrap.css", rel="stylesheet")
-    link(href="bootstrap/css/bootstrap-responsive.css", rel="stylesheet")
     link(href="css/jquery-ui-1.10.3.custom.min.css", rel="stylesheet")
+    link(href="lib/bootstrap/css/bootstrap.css", rel="stylesheet")
+    link(href="lib/bootstrap/css/bootstrap-responsive.css", rel="stylesheet")
     link(href="css/style.css", rel="stylesheet")
-    link(href="leaflet/leaflet.css", rel="stylesheet")
+    link(href="lib/leaflet/leaflet.css", rel="stylesheet")
 
     link(rel="shortcut icon", href="img/favicon.ico")
 
@@ -54,10 +54,10 @@ html(lang='da')
     block content
 
     block scripts
-      script(src="bootstrap/js/jquery.min.js")
-      script(src="bootstrap/js/bootstrap.min.js")
+      script(src="lib/jquery/js/jquery.min.js")
       script(src="js/jquery-ui-1.10.3.custom.min.js")
-      script(src="leaflet/leaflet.js")
+      script(src="lib/bootstrap/js/bootstrap.min.js")
+      script(src="lib/leaflet/leaflet.js")
 
     script(type='text/javascript').
       var _gaq = _gaq || [];

@@ -55,6 +55,14 @@ module.exports = function (grunt) {
         commitMessage: 'new Release <%= version %>', //default: 'release <%= version %>'
         tagMessage: 'tagging version <%= version %>', //default: 'Version <%= version %>',
       }
+    },
+    bower: {
+      install: {
+        options: {
+          targetDir: 'public/lib',
+          layout: 'byComponent'
+        }
+      }
     }
   });
 
@@ -63,10 +71,12 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-express-server');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
+  grunt.loadNpmTasks('grunt-bower-task');
+
   grunt.registerTask('unitTest', ['jshint', 'jasmine_node:unit']);
   grunt.registerTask('integrationtest', ['express:test', 'jasmine_node:integration', 'express:test:stop']);
   grunt.registerTask('test', ['unitTest', 'integrationtest']);
-  grunt.registerTask('default', ['test']);
+  grunt.registerTask('default', ['bower','test']);
 
   grunt.registerMultiTask('jasmine_node', 'Run jasmine-node', function() {
     var jasmine = require('jasmine-node');
