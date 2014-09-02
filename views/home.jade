@@ -20,14 +20,15 @@ block content
             p Indtastning af adresser er et væsentligt element i mange applikationer.Det skal både være let for brugeren at indtaste en gyldig adresse og for udvikleren at implementere denne funktionalitet. DAWA er designet med dette for øje. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan implementeres.
             form
               fieldset
-                legend Autocomplete
-                p Autocomplete giver mulighed for indtastning af en adresse i ét inputfelt. Brugeren præsenteres løbende for en række valgmuligheder baseret på det indtastede. Nedenfor er dels et eksempel på indtastning af en adresse blandt alle Danmarks adresser; dels et eksempel på indtastning af en adresse blandt Københavns adresser.
+                legend Autocomplete af adresse
                 label(for='q') Adresse
-                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer', id='q')
-
-                label(for='qk') Adresse i København
-                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer', id='qk')
-
+                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer', id='autocomplete-adresse')
+                p Valgt adresse: <span id="autocomplete-adresse-choice"></span>
+              fieldset
+                legend Autocomplete af adgangsadresse
+                label(for='q') Adgangsadresse
+                input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, postnummer', id='autocomplete-adgangsadresse')
+                p Valgt adgangsadresse: <span id="autocomplete-adgangsadresse-choice"></span>
             form
               fieldset
                 legend Feltindtastning
@@ -176,6 +177,7 @@ block content
             p Vi planlægger at tilføje kodeeksempler i andre sprog og platforme. Hvis du vil bidrage med et kodeeksempel i dit favorit programmeringssprog, er du meget velkommen.
 
 block append scripts
+  script(src="lib/dawa-autocomplete/dawa-autocomplete.js")
   script(src="lib/underscore/js/underscore-min.js")
 
   script(src="js/forside.js")

@@ -2,84 +2,6 @@ var senesteloebenr= 0;
 
 var apiBase = '';
 
-function makeshow(loebenr,input,process) {
-  return function (adresser)
-  {
-    console.log("loebenr: %d, seneste: %d",loebenr,senesteloebenr);
-    if (loebenr < senesteloebenr) return;
-    var items= [];
-    $.each(adresser, function (i, adresse) {
-      items.push(adresse.vej.navn + (adresse.husnr.length > 0?' '+adresse.husnr:"") + (adresse.etage.length > 0?', '+adresse.etage+'.':"") + (adresse.dør.length > 0?' '+adresse.dør:"") + (adresse.postnummer.nr.length > 0?' - '+adresse.postnummer.nr+' '+adresse.postnummer.navn:""));
-    });
-    if (items[0]) {
-      var qs= $(input).val();
-      var l= qs.length;
-      // if (qs.charAt(l-1) !== items[0].charAt(l-1)) {
-      //  l= l+1;
-      // }
-      var s= items[0].substring(0,l);
-      console.log('qs: '+qs+', s: '+s);
-      if (qs.toLocaleLowerCase() === s.toLocaleLowerCase()) $(input).val(s);
-    }
-    process(items);
-  };
-}
-function search(input,kommunekode) {
-  var antaladresser= 12;
-  // loebenummer for de viste forslag
-  var loebenummerViste = 0;
-  // loebenummer for naeste query der laves
-  var loebenummerNaeste = 1;
-	$(input).typeahead({
-		items: antaladresser,
-    matcher: function() { return true; },
-    sorter: function(items) { return items; },
-		source: function (query, process) {
-      var loebenummer = loebenummerNaeste++;
-			var parametre= {q: query};
-      parametre.side= 1;
-      parametre.per_side= antaladresser;
-			if (kommunekode) parametre.kommunekode= kommunekode;
-			$.ajax({
-				cache: true,
-	  url: apiBase+'vejnavne/autocomplete',
-				data: parametre,
-			  dataType: "json",
-			  error: function (xhr, status, errorThrown) {
-  				var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
-  				alert(text);
-				} ,
-				success: function(vejnavneResults) {
-          function showSuggestions(suggestions) {
-            if(loebenummer > loebenummerViste) {
-              loebenummerViste = loebenummer;
-              return process(suggestions);
-            }
-          }
-
-          if(vejnavneResults.length > 1) {
-            return showSuggestions(_.map(_.pluck(vejnavneResults, 'tekst'), function(sugg) {
-              return sugg + ' ';
-            }));
-          }
-          $.ajax({
-            cache: true,
-            url: apiBase+'adresser/autocomplete',
-            data: parametre,
-            dataType: "json",
-            error: function (xhr, status, errorThrown) {
-              var text= xhr.status + " " + xhr.statusText + " " + status + " " + errorThrown;
-              alert(text);
-            } ,
-            success: function(adresseResults) {
-              return showSuggestions(_.pluck(adresseResults, 'tekst'));
-            }
-          });
-        }
-      });
-    }
-	});
-}
 
 function searchPostnr(input) {
   $.ajax({
@@ -337,8 +259,19 @@ function valider(pnr,vej,husnr,etage,doer) {
 }
 
 $(function () {
-	search('#q',null);
-  search('#qk','0101');
+  $('#autocomplete-adresse').dawaautocomplete({
+    baseUrl: '',
+    select: function(event, data) {
+      $('#autocomplete-adresse-choice').text(data.tekst);
+    }
+  });
+  $('#autocomplete-adgangsadresse').dawaautocomplete({
+    adgangsadresserOnly: true,
+    baseUrl: '',
+    select: function(event, data) {
+      $('#autocomplete-adgangsadresse-choice').text(data.tekst);
+    }
+  });
   searchPostnr('#postnummer');
   $('#vej').focus(function () {
     searchVejnavn('#postnummer','#vej');
