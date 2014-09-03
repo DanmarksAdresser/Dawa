@@ -28,6 +28,10 @@
     "jquery": {
       "js": "dist/*.js"
     },
+    "jquery-ui": {
+      "js": "*.js",
+      "themes": "themes"
+    },
     "underscore": {
       "js": [
         "*.js",
