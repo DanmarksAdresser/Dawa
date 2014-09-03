@@ -272,6 +272,15 @@ $(function () {
       $('#autocomplete-adgangsadresse-choice').text(data.tekst);
     }
   });
+  $('#autocomplete-adresse-kbh').dawaautocomplete({
+    baseUrl: '',
+    params: {
+      kommunekode: "101"
+    },
+    select: function(event, data) {
+      $('#autocomplete-adresse-kbh-choice').text(data.tekst);
+    }
+  });
   searchPostnr('#postnummer');
   $('#vej').focus(function () {
     searchVejnavn('#postnummer','#vej');
