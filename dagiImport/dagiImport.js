@@ -6,11 +6,22 @@ var xml2js = require('xml2js');
 var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
+var dagiFeatureNames = {
+  kommune: 'KOMMUNE10',
+  opstillingskreds: 'OPSTILLINGSKREDS10',
+  politikreds: 'POLITIKREDS10',
+  postdistrikt: 'POSTDISTRIKT10',
+  region: 'REGION10',
+  retskreds: 'RETSKREDS10',
+  sogn: 'SOGN10'
+};
+
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string', 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2'],
   dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
-  dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string']
+  dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
+  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string', _.keys(dagiFeatureNames).join(',')]
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
@@ -23,16 +34,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   var dagiUrl = options.dagiUrl || 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2';
   var dagiLogin = options.dagiLogin || 'dawa';
   var dagiPassword = options.dagiPassword;
-
-  var dagiFeatureNames = {
-    kommune: 'KOMMUNE10',
-    opstillingskreds: 'OPSTILLINGSKREDS10',
-    politikreds: 'POLITIKREDS10',
-    postdistrikt: 'POSTDISTRIKT10',
-    region: 'REGION10',
-    retskreds: 'RETSKREDS10',
-    sogn: 'SOGN10'
-  };
 
   var dagiKodeKolonne = {
     kommune: 'CPR_noegle',
@@ -76,9 +77,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
   }
 
-  function removeAll(as, bs) {
-    return _.filter(as, function (a) {
-      return _.every(bs, function (newTema) {
+  function removeAll(xs, ys) {
+    return _.filter(xs, function (a) {
+      return _.every(ys, function (newTema) {
         return newTema.kode !== a.kode;
       });
     });
@@ -179,11 +180,12 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     });
   }
 
-  async.eachSeries(_.keys(dagiFeatureNames), function (temaNavn, callback) {
+  async.eachSeries(options.temaer.split(','), function( temaNavn, callback) {
     indlæsDagiTema(temaNavn, callback);
   }, function (err) {
     if (err) {
       throw err;
     }
+
   });
 });
