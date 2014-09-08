@@ -1,0 +1,38 @@
+DROP VIEW IF EXISTS wfs_adresser2 CASCADE;
+
+CREATE OR REPLACE VIEW wfs_adresser2 AS
+  SELECT
+    e_id::varchar             AS "id",
+    etage,
+    doer                      AS "doer",
+    e_oprettet                AS "oprettet",
+    e_ikraftfra               AS "ikrafttraedelsesdato",
+    e_aendret                 AS "aendret",
+    a_id::varchar             AS "adgangsadresseid",
+    kommunekode,
+    vejkode,
+    vejnavn,
+    husnr,
+    supplerendebynavn,
+    postnr,
+    postnrnavn,
+    ejerlavkode,
+    ejerlavnavn,
+    matrikelnr,
+    esrejendomsnr,
+    a_oprettet                AS "adgangsadresse_oprettet",
+    a_ikraftfra               AS "adgangsadresse_ikrafttraedelsesdato",
+    a_aendret                 AS "adgangsadresse_aendret",
+    oest                AS "etrs89koordinat_oest",
+    nord                AS "etrs89koordinat_nord",
+    noejagtighed              AS "noejagtighed",
+    kilde,
+    tekniskstandard,
+    tekstretning,
+    kn100mdk                  AS "ddkn_m100",
+    kn1kmdk                   AS "ddkn_km1",
+    kn10kmdk                  AS "ddkn_km10",
+    adressepunktaendringsdato AS "adressepunktaendringsdato",
+    round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "tekstretninggrader",
+    geom
+  FROM Adresser;
