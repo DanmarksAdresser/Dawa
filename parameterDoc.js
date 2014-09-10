@@ -263,8 +263,8 @@ var kommuneDoc = {
         {
           description: 'Returner kommunen for punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
           query: [
-            {name: 'x', value: '6176652.55'},
-            {name: 'y', value: '725369.59'},
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
             {name: 'srid', value: '25832'}
           ]}
       ]
@@ -443,9 +443,10 @@ var adgangsadresseDoc = {
       examples: [{description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
                   query: [{name:'x', value:'12.5851471984198'},
                           {name:'y', value:'55.6832383751223'}]},
-                 {description: 'Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
-                  query: [{name:'x'     , value: '6176652.55'},
-                          {name:'y'     , value: '725369.59'},
+                 {description: 'Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+                  query: [
+                          {name: 'x', value: '725369.59'},
+                          {name: 'y', value: '6176652.55'},
                           {name: 'srid' , value: '25832'}]}]}}};
 
 var adresseParameters = [{name: 'q',
@@ -587,10 +588,10 @@ var postnummerDoc = {
           ]
         },
         {
-          description: 'Returner postnummeret for punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
+          description: 'Returner postnummeret for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
           query: [
-            {name:'x'     , value: '6176652.55'},
-            {name:'y'     , value: '725369.59'},
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
             {name: 'srid' , value: '25832'}]}
       ]
     }
@@ -783,10 +784,10 @@ var dagiExamples = {
         ]
       },
       {
-        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (6176652.55, 725369.59)',
+        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
         query: [
-          {name:'x'     , value: '6176652.55'},
-          {name:'y'     , value: '725369.59'},
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
           {name: 'srid' , value: '25832'}]}
     ]
   };
