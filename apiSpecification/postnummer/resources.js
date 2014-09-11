@@ -27,7 +27,7 @@ module.exports = [
 ];
 
 var registry = require('../registry');
-var qualifiers = ['query', 'autocomplete', 'getByKey'];
+var qualifiers = ['query', 'autocomplete', 'reverseGeocoding', 'getByKey'];
 _.zip(qualifiers, module.exports).forEach(function(pair) {
   registry.add('postnummer', 'resource', pair[0], pair[1]);
 });

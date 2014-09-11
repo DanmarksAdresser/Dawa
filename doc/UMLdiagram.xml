@@ -1,0 +1,185 @@
+<umldiagrams>
+    <UMLClassDiagram name="Class diagram" backgroundNodes="#ffffbb">
+        <UMLClass id="0.7810479351319373:UMLClass_8" x="730" y="215" width="177" height="88" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="DAGI tema"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»tema"/>
+                <item value="«key»kode"/>
+                <item value="navn"/>
+                <item value="geometri:multipolygon"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_7" x="420" y="205" width="120" height="105" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Adgangsadresse"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»id"/>
+                <item value="husnr"/>
+                <item value="adgangspunkt"/>
+                <item value="matrikelnr"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_6" x="485" y="361" width="137" height="85" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Vejstykke"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»kommunekode"/>
+                <item value="«key»vejkode"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_5" x="115" y="221" width="129" height="75" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Adresse"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»id"/>
+                <item value="etage"/>
+                <item value="dør"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_4" x="540" y="498" width="113" height="70" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Vejnavn"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»navn"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_3" x="210" y="399" width="150" height="52" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Supplerende bynavn"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»navn"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_2" x="420" y="88" width="113" height="62" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Ejerlav"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»kode"/>
+                <item value="navn"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_1" x="620" y="105" width="113" height="62" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Postnummer"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»nr"/>
+                <item value="navn"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLClass id="0.7810479351319373:UMLClass_0" x="745" y="373" width="113" height="62" backgroundColor="#ffffbb"
+                  lineColor="#294253" lineWidth="1" tagValues="" abstract="false">
+            <superitem id="stereotypes" visibleSubComponents="true"/>
+            <item id="name" value="Kommune"/>
+            <superitem id="attributes" visibleSubComponents="true">
+                <item value="«key»kode"/>
+                <item value="navn"/>
+            </superitem>
+            <superitem id="operations" visibleSubComponents="true"/>
+        </UMLClass>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_0" side_A="0.7810479351319373:UMLClass_7"
+                        side_B="0.7810479351319373:UMLClass_5">
+            <point x="420" y="257.69966722129783"/>
+            <point x="244" y="258.28535773710485"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="1"/>
+            <item id="multiplicityB" value="1...*"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_1" side_A="0.7810479351319373:UMLClass_7"
+                        side_B="0.7810479351319373:UMLClass_2">
+            <point x="478.67328519855596" y="205"/>
+            <point x="477.28339350180505" y="150"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="0...*"/>
+            <item id="multiplicityB" value="1"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_2" side_A="0.7810479351319373:UMLClass_7"
+                        side_B="0.7810479351319373:UMLClass_3">
+            <point x="420" y="309.03846153846155"/>
+            <point x="315.2686567164179" y="399"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="0...*"/>
+            <item id="multiplicityB" value="0...1"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_3" side_A="0.7810479351319373:UMLClass_7"
+                        side_B="0.7810479351319373:UMLClass_6">
+            <point x="506.42979452054794" y="310"/>
+            <point x="532.1044520547945" y="361"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="0...*"/>
+            <item id="multiplicityB" value="1"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_4" side_A="0.7810479351319373:UMLClass_6"
+                        side_B="0.7810479351319373:UMLClass_4">
+            <point x="567.6119691119691" y="446"/>
+            <point x="584.8783783783783" y="498"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="1...*"/>
+            <item id="multiplicityB" value="1"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_5" side_A="0.7810479351319373:UMLClass_6"
+                        side_B="0.7810479351319373:UMLClass_0">
+            <point x="622" y="403.6381048387097"/>
+            <point x="745" y="403.88608870967744"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="0...*"/>
+            <item id="multiplicityB" value="1"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_6" side_A="0.7810479351319373:UMLClass_7"
+                        side_B="0.7810479351319373:UMLClass_1">
+            <point x="540" y="220.40076335877862"/>
+            <point x="626.3641975308642" y="167"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="0...*"/>
+            <item id="multiplicityB" value="1"/>
+        </UMLAssociation>
+        <UMLAssociation id="0.7810479351319373:UMLAssociation_7" side_A="0.7810479351319373:UMLClass_8"
+                        side_B="0.7810479351319373:UMLClass_7">
+            <point x="730" y="258.60782865583457"/>
+            <point x="540" y="257.76587887740027"/>
+            <superitem id="stereotype" visibleSubComponents="true"/>
+            <item id="name" value=""/>
+            <item id="roleA" value=""/>
+            <item id="roleB" value=""/>
+            <item id="multiplicityA" value="0...*"/>
+            <item id="multiplicityB" value="0...*"/>
+        </UMLAssociation>
+    </UMLClassDiagram>
+</umldiagrams>

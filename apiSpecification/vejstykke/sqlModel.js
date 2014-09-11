@@ -15,13 +15,13 @@ var columns = {
     column: 'vejstykker.kommunekode'
   },
   oprettet: {
-    select: selectIsoTimestamp('oprettet')
+    select: selectIsoTimestamp('vejstykker.oprettet')
   },
   ændret: {
-    select: selectIsoTimestamp('aendret')
+    select: selectIsoTimestamp('vejstykker.aendret')
   },
   kommunenavn: {
-    select: 'max(kommuner.navn)',
+    select: "max(kommuner.fields->>'navn')",
     where: null
   },
   navn: {
@@ -50,7 +50,7 @@ var baseQuery = function() {
   return {
     select: [],
     from: ['vejstykker' +
-      " LEFT JOIN DagiTemaer kommuner ON kommuner.tema = 'kommune' AND vejstykker.kommunekode = kommuner.kode" +
+      " LEFT JOIN temaer kommuner ON kommuner.tema = 'kommune' AND vejstykker.kommunekode::text = kommuner.fields->>'kode'" +
       ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
       ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
       ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'],

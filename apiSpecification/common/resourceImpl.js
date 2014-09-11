@@ -205,7 +205,7 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
     return callback(null, queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource'));
   }
   logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
-  // The list of fields we want to retrieve from database
+  // The list of fieldMap we want to retrieve from database
   var fieldNames = _.pluck(representation.fields, 'name');
 
   // create a mapper function that maps results from the SQL layer to the requested representation

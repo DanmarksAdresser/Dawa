@@ -60,7 +60,7 @@ var fields = [
   normalizedField('ddkn_km1'),
   normalizedField('ddkn_km10'),
   {
-    name: 'dagitemaer',
+    name: 'temaer',
     multi: true
   },
   {

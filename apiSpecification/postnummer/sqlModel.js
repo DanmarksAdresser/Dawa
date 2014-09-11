@@ -6,20 +6,31 @@ var parameters = require('./parameters');
 var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 var dbapi = require('../../dbapi');
 
+var geomQuery = "(select geom from temaer where tema = 'postnummer' and (fields->>'nr')::integer = nr limit 1)";
+
 var columns = {
-  nr: {
-    select: 'p.nr',
-    where: 'p.nr'
-  },
-  navn: {
-    select: 'p.navn'
-  },
   kommunekode: {
     select: null,
-    where: 'n.kommunekode'
+    where: function(sqlParts, parameterArray) {
+      console.log(JSON.stringify(parameterArray));
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      var subquery = {
+        select: ["*"],
+        from: ['postnumre_kommunekoder_mat'],
+        whereClauses: ['postnr = nr'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{name: 'kommunekode', multi: true}], {});
+      propertyFilterFn(subquery, {kommunekode: parameterArray});
+      var subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
   },
   stormodtageradresser: {
-    select: 'first(s.stormodtageradresser)'
+    select: '(select json_agg(adgangsadresseid) from stormodtagere where stormodtagere.nr = postnumre.nr)'
   },
   stormodtagere: {
     where: 'p.stormodtager'
@@ -27,47 +38,36 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(dagi.geom,' + sridAlias + '))';
+      return 'ST_AsGeoJSON(ST_Transform(' + geomQuery + ',' + sridAlias + '))';
     }
   },
   kommuner: {
-    select: 'first(k.kommuner)'
+    select: "(select json_agg((kommunekode, temaer.fields->>'navn')::kommuneref order by kommunekode)" +
+      " from postnumre_kommunekoder_mat" +
+      " left join temaer on postnumre_kommunekoder_mat.kommunekode = (temaer.fields->>'kode')::integer and temaer.tema = 'kommune'" +
+      " where  postnr = nr)"
   },
   tsv: {
-    column: 'p.tsv'
+    column: 'tsv'
   }
 };
 
 var baseQuery = function () {
   return {
     select: [],
-    from: [''+
-           'postnumre p '+
-           'LEFT JOIN (SELECT s.nr AS nr, json_agg(s.adgangsadresseid) AS stormodtageradresser '+
-           '           FROM stormodtagere s '+
-           '           GROUP BY s.nr) s '+
-           '  ON s.nr = p.nr '+
-           'LEFT JOIN (SELECT m.postnr AS postnr, json_agg((m.kommunekode, d.navn)::kommuneRef ORDER BY m.kommunekode) AS kommuner '+
-           '           FROM postnumre_kommunekoder_mat m '+
-           '           LEFT JOIN dagitemaer d '+
-           "             ON d.tema = 'kommune' AND d.kode = m.kommunekode "+
-           '           GROUP BY m.postnr) k '+
-           '  ON  k.postnr = p.nr '+
-           'LEFT JOIN postnumre_kommunekoder_mat n ON n.postnr = p.nr ' +
-           "LEFT JOIN dagitemaer dagi ON dagi.tema = 'postdistrikt' AND dagi.kode = p.nr"
-          ],
-    whereClauses: ["p.navn <> 'Ukendt' "],
-    groupBy: 'p.nr, p.navn, dagi.geom',
-    orderClauses: ['p.nr'],
+    from: ['postnumre'],
+    whereClauses: [],
+    orderClauses: [],
     sqlParams: []
   };
 };
 
 
+var geomQuery = "(select geom from temaer where tema = 'postnummer' and (fields->>'nr')::integer = nr limit 1)";
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
-  sqlParameterImpl.reverseGeocodingWithin(),
+  sqlParameterImpl.reverseGeocodingWithin(geomQuery),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key)

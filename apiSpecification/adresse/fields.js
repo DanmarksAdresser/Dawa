@@ -113,7 +113,7 @@ var fields = [
     formatter: d
   },
   {
-    name: 'dagitemaer',
+    name: 'temaer',
     multi: true
   }
 ];

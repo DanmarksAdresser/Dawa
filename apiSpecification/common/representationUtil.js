@@ -1,12 +1,12 @@
 "use strict";
 
-var dagiTemaer = require('../dagitemaer/dagiTemaer');
+var dagiTemaer = require('../temaer/temaer');
 var _ = require('underscore');
 
 var kode4String = require('../util').kode4String;
 
 /*
- * Computes the list of fields that should be included in the CSV representation for the given type
+ * Computes the list of fieldMap that should be included in the CSV representation for the given type
  */
 exports.flatCandidateFields = function(fields) {
   return fields.filter(function(field) {

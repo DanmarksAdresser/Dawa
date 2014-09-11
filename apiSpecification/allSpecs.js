@@ -2,7 +2,7 @@
 
 require('./adgangsadresse/resources');
 require('./adresse/resources');
-require('./dagitemaer/resources');
+require('./temaer/resources');
 require('./postnummer/resources');
 require('./supplerendebynavn/resources');
 require('./vejnavn/resources');

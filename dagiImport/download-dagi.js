@@ -10,40 +10,74 @@ var logger = require('../logger');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
-var dagiFeatureNames = {
-  kommune: 'Kommuneinddeling',
-  opstillingskreds: 'Opstillingskreds',
-  politikreds: 'Politikreds',
-  postdistrikt: 'Postnummerinddeling',
-  region: 'Regionsinddeling',
-  retskreds: 'Retskreds',
-  sogn: 'Sogneinddeling',
-  afstemningsomraade: 'Afstemningsomraade',
-  storkreds: 'Storkreds',
-  danmark: 'Danmark',
-  menighedsraadsafstemningsomraade: 'Menighedsraadsafstemningsomraade',
-  valglandsdel: 'Valglandsdel',
-  samlepostnummer: 'Samlepostnummer',
-  supplerendebynavn: 'SupplerendeBynavn'
+var wfsServices = {
+  newDagi: {
+    defaultUrl: 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2?',
+    loginRequired: true,
+    defaultLogin: 'dawa',
+    featureNames: {
+      kommune: 'Kommuneinddeling',
+      opstillingskreds: 'Opstillingskreds',
+      politikreds: 'Politikreds',
+      postnummer: 'Postnummerinddeling',
+      region: 'Regionsinddeling',
+      retskreds: 'Retskreds',
+      sogn: 'Sogneinddeling',
+      afstemningsomraade: 'Afstemningsomraade',
+      storkreds: 'Storkreds',
+      danmark: 'Danmark',
+      menighedsraadsafstemningsomraade: 'Menighedsraadsafstemningsomraade',
+      valglandsdel: 'Valglandsdel',
+      samlepostnummer: 'Samlepostnummer',
+      supplerendebynavn: 'SupplerendeBynavn'
+    }
+  },
+  oldDagi: {
+    defaultUrl: 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2',
+    loginRequired: true,
+    defaultLogin: 'dawa',
+    featureNames: {
+      kommune: 'KOMMUNE10',
+      opstillingskreds: 'OPSTILLINGSKREDS10',
+      politikreds: 'POLITIKREDS10',
+      postnummer: 'POSTDISTRIKT10',
+      region: 'REGION10',
+      retskreds: 'RETSKREDS10',
+      sogn: 'SOGN10'
+    }
+  }
 };
 var optionSpec = {
   targetDir: [false, 'Folder hvor DAGI-temaerne gemmes', 'string', '.'],
   filePrefix: [false, 'Prefix, som tilføjes filerne med de gemte DAGI-temaer', 'string', ''],
-  dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string', 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2?'],
+  dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string'],
   dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
   retries: [false, 'Antal forsøg på kald til WFS service før der gives op', 'number', 5],
-  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string', _.keys(dagiFeatureNames).join(',')]
-
+  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string'],
+  service: [false, 'Angiver, om der anvendes ny eller gammel service (oldDagi eller newDagi)', 'string']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
+cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
   process.env.pgConnectionUrl = options.pgConnectionUrl;
 
-  var dagiUrl = options.dagiUrl;
-  var dagiLogin = options.dagiLogin;
+  var serviceSpec = wfsServices[options.service];
+
+  if(!serviceSpec) {
+    throw new Error('ugyldig service parameter');
+  }
+
+  var dagiUrl = options.dagiUrl || serviceSpec.defaultUrl;
+  var dagiLogin = options.dagiLogin || serviceSpec.defaultLogin;
   var dagiPassword = options.dagiPassword;
 
+  if(serviceSpec.loginRequired && !dagiPassword) {
+    throw new Error("Intet kodeord angivet");
+  }
+
+  var featureNames = serviceSpec.featureNames;
+
+  var featuresToDownload = options.temaer ? options.temaer.split(',') : _.keys(serviceSpec.featureNames);
 
   var directory = path.resolve(options.targetDir);
 
@@ -55,7 +89,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
       SERVICE: 'WFS',
       VERSION: '1.0.0',
       REQUEST: 'GetFeature',
-      TYPENAME: dagiFeatureNames[temaNavn]
+      TYPENAME: featureNames[temaNavn]
     };
     var paramString = _.map(queryParams,function (value, name) {
       return name + '=' + encodeURIComponent(value);
@@ -90,7 +124,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     });
   }
 
-  async.eachSeries(_.keys(dagiFeatureNames), function (temaNavn, callback) {
+  async.eachSeries(featuresToDownload, function (temaNavn, callback) {
     saveDagiTema(temaNavn, callback);
   }, function (err) {
     if(err) {

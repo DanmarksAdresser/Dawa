@@ -1,7 +1,11 @@
 "use strict";
 
+var dagiTemaer = require('../apiSpecification/temaer/temaer');
+var temaFieldsMap = require('../apiSpecification/temaer/fields');
+var _ = require('underscore');
+
 exports.getDagiTemaer = function(client, temaNavn, cb) {
-  var sql = "SELECT tema, kode, navn, ST_AsGeoJSON(geom) FROM DagiTemaer WHERE tema = $1";
+  var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1";
   var params = [temaNavn];
   client.query(sql, params, function(err, result) {
     if(err) cb(err);
@@ -12,30 +16,85 @@ exports.getDagiTemaer = function(client, temaNavn, cb) {
   });
 };
 
-function makeUnionSql(count) {
-  var firstAlias = 4;
+function findTema(temaNavn) {
+  return _.findWhere(dagiTemaer, { singular: temaNavn });
+}
+
+function makeUnionSql(count, firstAlias) {
   var items = [];
   for(var i = 0; i < count; ++i) {
-    items.push('st_geomfromtext($' + (firstAlias + i) +')' );
+    items.push('ST_GeomFromText($' + (firstAlias + i) +')' );
   }
   return 'ST_union(ARRAY[' + items.join(',') + '])';
 }
+
 exports.addDagiTema = function(client, tema, cb) {
-  var sql, params;
-  sql = 'INSERT INTO DagiTemaer(tema, kode, navn, geom) VALUES ($1, $2, $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length) +', 25832)))';
-  params = [tema.tema, tema.kode, tema.navn].concat(tema.polygons);
-  client.query(sql, params, cb);
+  var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
+    'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
+  var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
+  client.query(sql, params, function(err, result) {
+    if(err) {
+      return cb(err);
+    }
+    else {
+      return cb(null, result.rows[0].id);
+    }
+  });
 };
 
 exports.updateDagiTema = function(client, tema, cb) {
-  var sql, params;
-  sql = 'UPDATE DagiTemaer SET navn = $1, geom = ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length) + ', 25832)) WHERE tema = $2 AND kode = $3 AND ((DagiTemaer.navn is distinct from $1::varchar) OR geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length) + ', 25832))))';
-  params = [tema.navn, tema.tema, tema.kode].concat(tema.polygons);
-  client.query(sql, params, cb);
+  var key = findTema(tema.tema).key;
+  var jsonFields = _.filter(temaFieldsMap[tema.tema], function(field) {
+    return field.name !== 'geom_json';
+  });
+  var fieldsNotChangedClause = jsonFields.map(function(field) {
+    return "(fields->>'" + field.name + "') IS DISTINCT FROM ($2::json->>'" + field.name + "')";
+  }).join(' OR ');
+  var geoChangedClause = "geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, 3) + ", 25832)))";
+  var changedSql = "SELECT " + geoChangedClause + " AS geo_changed, (" + fieldsNotChangedClause + ") as fields_changed, geo_version FROM temaer WHERE tema = '" + tema.tema + "' and fields->>'" + key + "' = $1";
+  var changedParams = [tema.fields[key], JSON.stringify(tema.fields)].concat(tema.polygons);
+  client.query(changedSql, changedParams, function(err, result) {
+    if(err) {
+      return cb(err);
+    }
+    if(!result.rows) {
+      return cb('Could not update DAGI tema, it was not found.');
+    }
+    if(result.rows.length !== 1) {
+      console.log(JSON.stringify(tema.fields));
+      return cb(new Error('Could not update DAGI tema, unexpected number of rows to update'));
+    }
+    var geoChanged = result.rows[0].geo_changed;
+    var fieldsChanged = result.rows[0].fields_changed;
+    var geo_version = result.rows[0].geo_version;
+    if(!geoChanged && !fieldsChanged) {
+      return cb(null, {
+        rowCount: 0
+      });
+    }
+    var updates = [];
+    var updateParams = [];
+    if(fieldsChanged) {
+      updates.push("aendret = NOW()");
+      updateParams.push(tema.fields);
+      updates.push("fields = $" + updateParams.length);
+    }
+    if(geoChanged) {
+      updates.push("geo_aendret = NOW()");
+      updateParams.push(geo_version + 1);
+      updates.push("geo_version = $" + updateParams.length);
+      updates.push("geom = ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, updateParams.length + 1) + ", 25832))");
+      updateParams = updateParams.concat(tema.polygons);
+    }
+    updateParams.push(tema.fields[key]);
+    var updateSql = "UPDATE temaer SET " + updates.join(', ') + " WHERE fields->>'" + key + "' = $" + updateParams.length + "::text";
+    client.query(updateSql, updateParams, cb);
+  });
 };
 
 exports.deleteDagiTema = function(client, tema, cb) {
-  var sql = 'DELETE FROM DagiTemaer WHERE tema = $1 AND kode = $2';
-  var params = [tema.tema, tema.kode];
+  var key = findTema(tema.tema).key;
+  var sql = "DELETE FROM temaer WHERE tema = $1 AND fields->>'" + key + "' = $2::text";
+  var params = [tema.tema, tema.fields[key]];
   client.query(sql, params, cb);
 };

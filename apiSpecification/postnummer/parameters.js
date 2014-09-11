@@ -24,6 +24,7 @@ module.exports = {
       },
       {
         name: 'kommunekode',
+        type: 'integer',
         multi: true
       }
     ]),

@@ -9,89 +9,83 @@ var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var logger = require('../logger').forCategory('dagiToDb');
 
-var dagiFeatureNames = {
-  kommune: 'Kommuneinddeling',
-  opstillingskreds: 'Opstillingskreds',
-  politikreds: 'Politikreds',
-  postdistrikt: 'Postnummerinddeling',
-  region: 'Regionsinddeling',
-  retskreds: 'Retskreds',
-  sogn: 'Sogneinddeling',
-  afstemningsomraade: 'Afstemningsomraade',
-  storkreds: 'Storkreds',
-  danmark: 'Danmark',
-  menighedsraadsafstemningsomraade: 'Menighedsraadsafstemningsomraade',
-  valglandsdel: 'Valglandsdel',
-  samlepostnummer: 'Samlepostnummer',
-  supplerendebynavn: 'SupplerendeBynavn'
-};
+var dagiTemaer = require('../apiSpecification/temaer/temaer');
+var featureMappingsNew = require('./featureMappingsNew');
+var featureMappingsOld = require('./featureMappingsOld');
 
-var dagiKodeKolonne = {
-  kommune: 'kommunekode',
-  danmark: null,
-  region: 'regionskode',
-  sogn: 'sognekode',
-  opstillingskreds: 'Opstillingskredsnummer',
-  politikreds: 'myndighedskode',
-  postdistrikt: 'postnummer',
-  retskreds: 'myndighedskode'
+var featureMappingsMap = {
+  oldDagi: featureMappingsOld,
+  newDagi: featureMappingsNew
 };
-
-var dagiNavnKolonne = {
-  kommune: 'navn',
-  danmark: 'navn',
-  region: 'navn',
-  sogn: 'navn',
-  opstillingskreds: 'navn',
-  politikreds: 'navn',
-  postdistrikt: 'navn',
-  retskreds: 'navn'
-};
-
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med dagitema-filer', 'string', '.'],
   filePrefix: [false, 'Prefix på dagitema-filer', 'string', ''],
-  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string', _.keys(dagiNavnKolonne).join(',')]
+  wfsSource: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
+  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
+function findTema(temaNavn) {
+  return _.findWhere(dagiTemaer, { singular: temaNavn });
+}
+
+function as2DWkt(text) {
+  var points = text.split(' ');
+  return _.map(points,function (point) {
+    var coords = point.split(',');
+    return coords[0] + ' ' + coords[1];
+  }).join(',');
+}
+
+function gmlPolygonToWkt(json) {
+  var polygon = json.Polygon[0];
+  var outerCoordsText = as2DWkt(polygon.outerBoundaryIs[0].LinearRing[0].coordinates[0]);
+
+  var innerBoundaryIsList = polygon.innerBoundaryIs ? polygon.innerBoundaryIs : [];
+  var innerCoordsTexts = _.map(_.map(innerBoundaryIsList, function (innerBoundaryIs) {
+    return innerBoundaryIs.LinearRing[0].coordinates[0];
+  }), as2DWkt);
+  var innerCoordsText = _.reduce(innerCoordsTexts, function (memo, text) {
+    return memo + ',(' + text + ')';
+  }, '');
+  return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
+}
+
+function removeAll(aas, bs, keyProperty) {
+  return _.filter(aas, function (a) {
+    return _.every(bs, function (newTema) {
+      return newTema.fields[keyProperty] !== a.fields[keyProperty];
+    });
+  });
+}
+
+function wfsFeatureToDagi(feature, mapping) {
+  var wfsFeature = feature[mapping.wfsName][0];
+
+  var result = {
+    polygon: gmlPolygonToWkt(wfsFeature[mapping.geometry][0])
+  };
+
+  result.fields = _.reduce(mapping.fields, function(memo, fieldMapping, dawaFieldName) {
+    memo[dawaFieldName] = fieldMapping.parseFn(wfsFeature[fieldMapping.name][0]);
+    return memo;
+  }, {});
+  return result;
+}
+
+cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
   var dagi = require('./dagi');
 
-
-
-  function as2DWkt(text) {
-    var points = text.split(' ');
-    return _.map(points,function (point) {
-      var coords = point.split(',');
-      return coords[0] + ' ' + coords[1];
-    }).join(',');
+  var featureMappings = featureMappingsMap[options.wfsSource];
+  if(!featureMappings) {
+    throw new Error("Ugyldig værdi for parameter wfsSource");
   }
 
-  function gmlPolygonToWkt(json) {
-    var polygon = json.Polygon[0];
-    var outerCoordsText = as2DWkt(polygon.outerBoundaryIs[0].LinearRing[0].coordinates[0]);
-
-    var innerBoundaryIsList = polygon.innerBoundaryIs ? polygon.innerBoundaryIs : [];
-    var innerCoordsTexts = _.map(_.map(innerBoundaryIsList, function (innerBoundaryIs) {
-      return innerBoundaryIs.LinearRing[0].coordinates[0];
-    }), as2DWkt);
-    var innerCoordsText = _.reduce(innerCoordsTexts, function (memo, text) {
-      return memo + ',(' + text + ')';
-    }, '');
-    return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
-  }
-
-  function removeAll(aas, bs) {
-    return _.filter(aas, function (a) {
-      return _.every(bs, function (newTema) {
-        return newTema.kode !== a.kode;
-      });
-    });
-  }
+  var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
 
   function putDagiTemaer(temaNavn, temaer, callback) {
+    var key = findTema(temaNavn).key;
     sqlCommon.withWriteTransaction(options.pgConnectionUrl, function (err, client, done) {
       if (err) {
         throw err;
@@ -100,31 +94,31 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
         if (err) {
           throw err;
         }
-        var temaerToRemove = removeAll(existingTemaer, temaer);
-        var temaerToCreate = removeAll(temaer, existingTemaer);
-        var temaerToUpdate = removeAll(temaer, temaerToCreate);
+        var temaerToRemove = removeAll(existingTemaer, temaer, key);
+        var temaerToCreate = removeAll(temaer, existingTemaer, key);
+        var temaerToUpdate = removeAll(temaer, temaerToCreate, key);
         async.series([
           function (callback) {
             async.eachSeries(temaerToRemove, function (tema, callback) {
-              logger.info('Removing dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
+              logger.info('Removing dagitema', { tema: tema.tema, fields: tema.fields });
               dagi.deleteDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
             async.eachSeries(temaerToCreate, function (tema, callback) {
-              logger.info('Adding dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
+              logger.info('Adding dagitema', { tema: tema.tema, fields: tema.fields });
               dagi.addDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
             async.eachSeries(temaerToUpdate, function (tema, callback) {
-              logger.debug('opdaterer dagitema',{ tema: tema.tema, kode: tema.kode, navn: tema.navn });
+              logger.debug('opdaterer dagitema',{ tema: tema.tema, fields: tema.fields });
               dagi.updateDagiTema(client, tema, function(err, result) {
                 if(err) {
                   return callback(err);
                 }
                 if(result.rowCount === 0){
-                  logger.debug('dagitema uændret');
+                  logger.info('dagitema uændret');
                 }
                 else {
                   logger.info('Opdaterede dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
@@ -142,6 +136,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   }
 
   function indlæsDagiTema(temaNavn, callback) {
+    console.log('temaNavn: ' + temaNavn);
+    var mapping = featureMappings[temaNavn];
+    var key = findTema(temaNavn).key;
     logger.debug("gemmer DAGI tema  i databasen", {temaNavn: temaNavn});
     var directory = path.resolve(options.dataDir);
     var filename = options.filePrefix + temaNavn;
@@ -158,23 +155,17 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
       }
       var features = result.FeatureCollection.featureMember;
       var dagiTemaFragments = _.map(features, function (feature) {
-        var f = feature[dagiFeatureNames[temaNavn]][0];
-        var kodekolonne = dagiKodeKolonne[temaNavn];
-        return {
-          tema: temaNavn,
-          kode: kodekolonne === null ? 1 : parseInt(f[kodekolonne][0], 10),
-          navn: dagiNavnKolonne[temaNavn] ? f[dagiNavnKolonne[temaNavn]][0] : null,
-          polygon: gmlPolygonToWkt(f.geometri[0])
-        };
+        return wfsFeatureToDagi(feature, mapping);
       });
-      var dagiTemaFragmentMap = _.groupBy(dagiTemaFragments, 'kode');
+      var dagiTemaFragmentMap = _.groupBy(dagiTemaFragments, function(fragment) {
+        return fragment.fields[key];
+      });
       dagiTemaFragments = null;
       var dagiTemaer = _.map(dagiTemaFragmentMap, function (fragments) {
         var polygons = _.pluck(fragments, 'polygon');
         return  {
           tema: temaNavn,
-          kode: fragments[0].kode,
-          navn: fragments[0].navn,
+          fields: fragments[0].fields,
           polygons: polygons
         };
       });
@@ -191,7 +182,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     });
   }
 
-  async.eachSeries(options.temaer.split(','), function (temaNavn, callback) {
+  async.eachSeries(temaer, function (temaNavn, callback) {
     indlæsDagiTema(temaNavn, callback);
   }, function (err) {
     if(err) {

@@ -3,7 +3,7 @@
 var _ = require('underscore');
 var schema = require('../parameterSchema');
 
-var dagiTemaer = require('../dagitemaer/dagiTemaer');
+var dagiTemaer = require('../temaer/temaer');
 exports.paging = [
   {
     name: 'side',

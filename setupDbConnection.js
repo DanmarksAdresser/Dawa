@@ -6,6 +6,8 @@ var pg = require('pg.js');
 
 var TIMESTAMPTZ_OID = 1184;
 var TIMESTAMP_OID = 1114;
+var JSONB_OID = 3802;
+var JSON_OID = 114;
 var standardTimestampTzParser = pg.types.getTypeParser(TIMESTAMPTZ_OID, 'text');
 
 pg.types.setTypeParser(TIMESTAMPTZ_OID, function(val) {
@@ -26,3 +28,14 @@ pg.types.setTypeParser(TIMESTAMP_OID, function(val) {
   }
   return datePart + 'T' + timePart + '.' + milliPart;
 });
+
+var parseJsonFn = function (val) {
+  if (val) {
+    return JSON.parse(val);
+  }
+  else {
+    return null;
+  }
+};
+pg.types.setTypeParser(JSONB_OID, parseJsonFn);
+pg.types.setTypeParser(JSON_OID, parseJsonFn);

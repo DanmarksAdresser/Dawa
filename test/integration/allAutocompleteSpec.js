@@ -22,7 +22,6 @@ describe('Alle autocomplete ressourcer skal virke', function() {
     type: 'resource',
     qualifier: 'autocomplete'
   });
-  console.log('found ' + autocompleteResources.length + ' autocomplete resources');
   autocompleteResources.forEach(function(resource) {
     if(!sampleParameters[resource.path]) {
       console.log("No test specificed for autocomplete resource at " + resource.path);

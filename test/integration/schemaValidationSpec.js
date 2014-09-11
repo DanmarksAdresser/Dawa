@@ -7,7 +7,7 @@ var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 /**
  * This test verifies that all testdata is valid according to JSON schema
- * and that all fields (except the ones specified in valuesNeverExpectedToBeSeen below)
+ * and that all fieldMap (except the ones specified in valuesNeverExpectedToBeSeen below)
  * is returned at least once.
  */
 
@@ -56,7 +56,6 @@ function verifyAllValuesVisited(schema, record, prefix) {
   return _.reduce(schema.properties, function(memo, typeDef, key) {
     var keyPath = prefix + '.' + key;
     if(record[key] === undefined) {
-      console.log('no value ever seen for ' + keyPath);
       return false;
     }
     if(hasType(typeDef, 'object')) {
@@ -76,7 +75,6 @@ describe('Validering af JSON-formatteret output', function() {
     type: 'nameAndKey'
   });
   allNamesAndKeys.forEach(function(nameAndKey) {
-    console.log(JSON.stringify(nameAndKey));
     var entityName = nameAndKey.singular;
     if(_.contains(entitiesWithoutJsonRepresentation, entityName)) {
       return;
@@ -85,16 +83,13 @@ describe('Validering af JSON-formatteret output', function() {
       entityName: entityName,
       type: 'sqlModel'
     });
-    console.log(JSON.stringify(sqlModel));
     var jsonRepresentation = registry.findWhere({
       entityName: entityName,
       type: 'representation',
       qualifier: 'json'
     });
-    console.log(JSON.stringify(jsonRepresentation));
     var mapper = jsonRepresentation.mapper('BASE_URL', {});
     it('Alle ' + nameAndKey.plural + ' skal validere', function(specDone) {
-      console.log('validerer alle ' + nameAndKey.plural);
       var schema = jsonRepresentation.schema;
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
         var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});

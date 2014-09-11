@@ -1,9 +1,9 @@
 "use strict";
 
 var _ = require('underscore');
-var dagiTemaer = require('./dagiTemaer');
+var dagiTemaer = require('./temaer');
 var representationUtil = require('../common/representationUtil');
-var fields = require('./fields');
+var fieldMap = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 
@@ -15,7 +15,11 @@ var kode4String = require('../util').kode4String;
 var registry = require('../registry');
 
 
-dagiTemaer.forEach(function(tema) {
+// postnumre eksporteres ikke
+_.filter(dagiTemaer, function(tema) {
+  return tema.singular !== 'postnummer';
+}).forEach(function(tema) {
+  var fields = fieldMap[tema.singular];
   var representations = {};
   var fieldsExcludedFromFlat = ['geom_json'];
   var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
@@ -98,4 +102,3 @@ dagiTemaer.forEach(function(tema) {
   exports[tema.singular] = representations;
 
   registry.addMultiple(tema.singular, 'representation', module.exports[tema.singular]);});
-

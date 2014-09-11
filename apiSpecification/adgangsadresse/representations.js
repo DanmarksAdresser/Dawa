@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 
+var temaNameAndKeys = require('../temaer/namesAndKeys');
 var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
@@ -208,11 +209,13 @@ exports.json = {
   mapper: function (baseUrl){
     return function(rs) {
       function mapDagiTema(tema) {
-        return {
-          href: makeHref(baseUrl, tema.tema, [tema.kode]),
-          kode: kode4String(tema.kode),
-          navn: tema.navn
-        };
+        var result = _.clone(tema.fields);
+        // this is a hack, and should be fixed.
+        if(result.kode) {
+          result.kode = kode4String(result.kode);
+        }
+        result.href = makeHref(baseUrl, tema.tema, [tema.fields[temaNameAndKeys[tema.tema].key[0]]]);
+        return result;
       }
       var adr = {};
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
@@ -263,7 +266,7 @@ exports.json = {
       adr.politikreds = null;
       adr.opstillingskreds = null;
       var includedDagiTemaer = ['sogn', 'region', 'retskreds','politikreds','opstillingskreds'];
-      var dagiTemaArray = rs.dagitemaer ? rs.dagitemaer.filter(function(tema) { return _.contains(includedDagiTemaer, tema.tema); }) : [];
+      var dagiTemaArray = rs.temaer ? rs.temaer.filter(function(tema) { return _.contains(includedDagiTemaer, tema.tema); }) : [];
       var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');
       var mappedDagiTemaer = _.reduce(dagiTemaMap, function(memo, tema, temaNavn) {
         memo[temaNavn] = mapDagiTema(tema);

@@ -1,7 +1,7 @@
 "use strict";
 
 var _ = require('underscore');
-var dagiTemaer = require('./apiSpecification/dagitemaer/dagiTemaer');
+var dagiTemaer = require('./apiSpecification/temaer/temaer');
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
 
@@ -956,8 +956,10 @@ function addMultiParameters() {
     var resource = _.findWhere(allResources, {
       path: resourcePath
     });
+    if(!resource) {
+      throw new Error("Could not find a resource for path " + resourcePath);
+    }
     var queryParameters = resource.queryParameters;
-    console.log(path);
     var parameterSpecs = _.indexBy(queryParameters, 'name');
     doc.parameters = JSON.parse(JSON.stringify(doc.parameters)); // Clone!
     if (doc.nomulti !== true) {

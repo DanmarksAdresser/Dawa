@@ -31,13 +31,13 @@ CREATE VIEW AdgangsadresserView AS
     A.ejerlavkode,
     EL.navn AS ejerlavnavn,
 
-    K.kode AS kommunekode,
-    K.navn AS kommunenavn,
-    array_to_json((select array_agg(DISTINCT CAST((D.tema, D.kode, D.navn) AS DagiTemaRef)) FROM AdgangsadresserDagiRel DR JOIN DagiTemaer D  ON (DR.adgangsadresseid = A.id AND D.tema = DR.dagiTema AND D.kode = DR.dagiKode))) AS dagitemaer,
+    cast(K.fields->>'kode' as integer) AS kommunekode,
+    K.fields->>'navn' AS kommunenavn,
+    array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
     A.tsv
 
   FROM adgangsadresser A
     LEFT JOIN ejerlav AS EL ON (A.ejerlavkode = EL.kode)
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-    LEFT JOIN DagiTemaer AS K ON (K.tema = 'kommune' AND K.kode = A.kommunekode);
+    LEFT JOIN temaer AS K ON (K.tema = 'kommune' AND cast(K.fields->>'kode' as integer) = A.kommunekode);

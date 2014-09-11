@@ -5,36 +5,48 @@ module.exports = [
     singular: 'region',
     singularSpecific: 'regionen',
     plural: 'regioner',
-    prefix:'regions' // e.g. regionskode, regionsnavn
+    prefix:'regions',
+    key: 'kode'
   },
   {
     singular: 'kommune',
     singularSpecific: 'kommunen',
     plural: 'kommuner',
-    prefix: 'kommune'
+    key: 'kode'
   },
   {
     singular: 'sogn',
     singularSpecific: 'sognet',
     plural: 'sogne',
-    prefix: 'sogne'
+    prefix: 'sogne',
+    key: 'kode'
   },
   {
     singular: 'politikreds',
     singularSpecific: 'politikredsen',
     plural: 'politikredse',
-    prefix: 'politikreds'
+    prefix: 'politikreds',
+    key: 'kode'
   },
   {
     singular: 'retskreds',
     singularSpecific: 'retskredsen',
     plural: 'retskredse',
-    prefix: 'retskreds'
+    prefix: 'retskreds',
+    key: 'kode'
   },
   {
     singular: 'opstillingskreds',
     singularSpecific: 'opstillingskredsen',
     plural: 'opstillingskredse',
-    prefix: 'opstillingskreds'
+    prefix: 'opstillingskreds',
+    key: 'kode'
+  },
+  {
+    singular: 'postnummer',
+    singularSpecific: 'postnummeret',
+    plural: 'postnumre',
+    prefix: 'postnummer',
+    key: 'nr'
   }
 ];

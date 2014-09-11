@@ -10,8 +10,10 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
   // der er 390 adgangsadresser inden for denne polygon
   var sampleTema = {
     tema: 'region',
-    kode: 10,
-    navn: 'Test Region',
+    fields: {
+      kode: 10,
+      navn: 'Test Region'
+    },
     polygons: ['POLYGON((' +
       '725025.18 6166264.37,' +
       '725025.18 6167537.76,' +

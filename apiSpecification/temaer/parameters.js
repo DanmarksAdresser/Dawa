@@ -1,7 +1,8 @@
 "use strict";
 
+var _ = require('underscore');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
-var dagiTemaer = require('./dagiTemaer');
+var dagiTemaer = require('./temaer');
 var registry = require('../registry');
 
 module.exports = {
@@ -24,6 +25,8 @@ module.exports = {
   ])
 };
 
-dagiTemaer.forEach(function(tema) {
+_.filter(dagiTemaer, function(tema) {
+  return tema.singular !== 'postnummer';
+}).forEach(function(tema) {
   registry.addMultiple(tema.singular, 'parameterGroup', module.exports);
 });

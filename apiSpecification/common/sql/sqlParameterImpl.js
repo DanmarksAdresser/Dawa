@@ -8,7 +8,7 @@ var util = require('../../util');
 
 var notNull = util.notNull;
 
-var dagiTemaer = require('../../dagitemaer/dagiTemaer');
+var dagiTemaer = require('../../temaer/temaer');
 
 var sqlUtil = require('./sqlUtil');
 
@@ -93,29 +93,19 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
   return function(sqlParts, params) {
     parameterSpec.forEach(function (parameter) {
       var name = parameter.name;
-      var value = params[name];
-
-      if (value !== undefined)
+      var param = params[name];
+      if (param !== undefined)
       {
-        if (value._multi_ === undefined)
-        {
-          if (name === 'stormodtagere' && value === "true")
-          {
-            // when stormodtagere is true both normal and
-            // stormodtager postnumbers should be returned -- no
-            // where clause.
-            return;
-          }
-          var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
-          var column = sqlUtil.getColumnNameForWhere(columnSpec, name);
-          sqlParts.whereClauses.push(column + " = " + parameterAlias);
+        var whereSpec = sqlUtil.getColumnNameForWhere(columnSpec, name);
+        if(_.isFunction(whereSpec)) {
+          whereSpec(sqlParts, param, params);
         }
-        else
-        {
-          var orClauses = _.map(value.values,
+        else {
+          var paramValues = param._multi_ ? param.values : [param];
+          var orClauses = _.map(paramValues,
             function(value){
               var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
-              var column = sqlUtil.getColumnNameForWhere(columnSpec, name);
+              var column = whereSpec;
               return (column + " = " + parameterAlias);
             });
           sqlParts.whereClauses.push("("+orClauses.join(" OR ")+")");
@@ -124,6 +114,30 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
     });
   };
 };
+
+//exports.jsonPropertyFilter = function(parameterSpec, fieldsColumnName) {
+//
+//  return function(sqlParts, params) {
+//    parameterSpec.forEach(function (parameter) {
+//      var name = parameter.name;
+//      var value = params[name];
+//
+//      function whereClause(parameterAlias) {
+//        return fieldsColumnName + "->>'" + name + "'= " + parameterAlias;
+//      }
+//
+//      if (value !== undefined) {
+//        var values = value._multi_ ? value.values : [value];
+//        var orClauses = _.map(values,
+//          function(value){
+//            var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
+//            return (whereClause(parameterAlias));
+//          });
+//        sqlParts.whereClauses.push("("+orClauses.join(" OR ")+")");
+//      }
+//    });
+//  };
+//};
 
 function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
@@ -166,7 +180,7 @@ exports.search = function(columnSpec, orderFields) {
 };
 
 
-// The orderFields parameter specifies a list of fields the result is ordered by,
+// The orderFields parameter specifies a list of fieldMap the result is ordered by,
 // if the rank is equal.
 exports.autocomplete = function(columnSpec, orderFields) {
   orderFields = orderFields || [];
@@ -253,13 +267,14 @@ exports.reverseGeocoding = function() {
   };
 };
 
-exports.reverseGeocodingWithin = function() {
+exports.reverseGeocodingWithin = function(geom) {
+  geom = geom || 'geom';
   return function(sqlParts, params) {
     if(notNull(params.x) && notNull(params.y)) {
       if (!params.srid){ params.srid = 4326;}
       var xAlias = dbapi.addSqlParameter(sqlParts, params.x);
       var yAlias = dbapi.addSqlParameter(sqlParts, params.y);
-      dbapi.addWhereClause(sqlParts, "ST_Contains(geom, ST_Transform(ST_SetSRID(ST_Point(" +
+      dbapi.addWhereClause(sqlParts, "ST_Contains(" + geom + ", ST_Transform(ST_SetSRID(ST_Point(" +
         xAlias+", " +
         yAlias+"), " +
         dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832))");
@@ -288,7 +303,7 @@ exports.dagiFilter = function() {
         var kodeAliases = _.map(paramArray, function(param) {
           return dbapi.addSqlParameter(sqlParts, param);
         });
-        dbapi.addWhereClause(sqlParts, 'EXISTS( SELECT * FROM AdgangsadresserDagiRel WHERE dagikode IN (' + kodeAliases.join(', ') + ') AND dagitema = ' + temaAlias + ' AND adgangsadresseid = a_id)');
+        dbapi.addWhereClause(sqlParts, "EXISTS( SELECT * FROM adgangsadresser_temaer_matview JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias + " WHERE temaer.fields->>'kode' IN (" + kodeAliases.map(function(alias) {return alias + '::varchar'; }).join(', ') + ') AND adgangsadresse_id = a_id)');
       }
     });
   };

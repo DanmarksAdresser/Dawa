@@ -28,7 +28,7 @@ function normaliseTableSpec(specs){
 exports.tableSpecs = normaliseTableSpec([
   {name: 'transaction_history'},
   {name: 'bbr_events'},
-  {name: 'dagitemaer'},
+  {name: 'temaer'},
   {name: 'vejstykker'},
   {name: 'postnumre'},
   {name: 'stormodtagere'},
@@ -37,12 +37,11 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'ejerlav'},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
-  {name: 'vejstykkerview',             scriptFile: 'vejstykker-view.sql',        type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql'},
   {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql'},
   {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql'},
-  {name: 'adgangsadresserdagirel',     scriptFile: 'adgangsadresser-dagi-view.sql'},
-  {name: 'griddeddagitemaer',          scriptFile: 'gridded-dagi-view.sql'},
+  {name: 'gridded_temaer_matview',     scriptFile: 'gridded-temaer-matview.sql'},
+  {name: 'adgangsadresser_temaer_matview' },
   {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
   {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
   {name: 'wms_adgangsadresser', type: 'view'},
@@ -123,7 +122,7 @@ function createHistoryTriggers(client) {
       sql += 'optype operation_type;\n';
       sql += "BEGIN\n";
 
-      // we need to verify that one of the history fields have changed, not just the tsv- or geom columns
+      // we need to verify that one of the history fieldMap have changed, not just the tsv- or geom columns
       var isNotDistinctCond = datamodel.columns.map(function(column) {
         return format("OLD.%s IS NOT DISTINCT FROM NEW.%s", column, column);
       }).join(" AND ");

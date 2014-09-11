@@ -1,28 +1,46 @@
 "use strict";
 
-var dagiTemaer = require('./dagiTemaer');
+var _ = require('underscore');
+
+var temaer = require('./temaer');
 var namesAndKeys = require('./namesAndKeys');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 var dbapi = require('../../dbapi');
 var registry = require('../registry');
+var fields = require('./fields');
 
-// no column mappings necessary for dagi temaer.
-dagiTemaer.forEach(function(tema) {
-  var columns =  {
-    geom_json: {
-      select: function(sqlParts, sqlModel, params) {
-        var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-        return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
-      }
+var jsonFieldMap = _.reduce(fields, function(memo, temaFields, temaNavn) {
+  memo[temaNavn] = _.filter(temaFields, function(field) {
+    return field.name !== 'geom_json';
+  });
+  return memo;
+}, {});
+
+var publishedTemaer = _.filter(temaer, function(tema) {
+  return tema.singular !== 'postnummer';
+});
+
+publishedTemaer.forEach(function(tema) {
+  var jsonFields = jsonFieldMap[tema.singular];
+  var columns = jsonFields.reduce(function(memo, fieldSpec) {
+    memo[fieldSpec.name] = {
+      column: "fields->>'" + fieldSpec.name + "'"
+    };
+    return memo;
+  }, {});
+  columns.geom_json = {
+    select: function(sqlParts, sqlModel, params) {
+      var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
     }
   };
 
   var baseQuery = function() {
     return {
       select: [],
-      from: ['DagiTemaer'],
+      from: ['temaer'],
       whereClauses: ['tema = $1'],
       orderClauses: [],
       sqlParams: [tema.singular]

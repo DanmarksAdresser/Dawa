@@ -57,7 +57,7 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
   END;
   $$ LANGUAGE plpgsql IMMUTABLE STRICT;
 
-CREATE OR REPLACE FUNCTION update_gridded_dagi_temaer()
+CREATE OR REPLACE FUNCTION update_gridded_temaer_matview()
   RETURNS TRIGGER AS $$
 BEGIN
   IF TG_OP = 'UPDATE' AND OLD.geom = NEW.geom THEN
@@ -65,38 +65,38 @@ BEGIN
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'
   THEN
-    DELETE FROM GriddedDagiTemaer WHERE tema = OLD.tema AND kode = OLD.kode;
-    DELETE FROM AdgangsAdresserDagiRel WHERE dagiTema = OLD.tema AND dagiKode = OLD.kode;
+    DELETE FROM gridded_temaer_matview WHERE tema = OLD.tema AND id = OLD.id;
+
+    DELETE FROM adgangsadresser_temaer_matview WHERE tema = OLD.tema AND tema_id = OLD.id;
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
   THEN
-    INSERT INTO GriddedDagiTemaer (tema, kode, geom)
+    INSERT INTO gridded_temaer_matview (tema, id, geom)
       (SELECT
          NEW.tema,
-        NEW.kode,
+        NEW.id,
          splitToGridRecursive(NEW.geom, 100) as geom);
-    INSERT INTO AdgangsadresserDagiRel(adgangsadresseid, dagitema, dagikode)
-      (SELECT DISTINCT Adgangsadresser.id, GriddedDagiTemaer.tema, GriddedDagiTemaer.kode
+    INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema, tema_id)
+      (SELECT DISTINCT Adgangsadresser.id, gridded_temaer_matview.tema, gridded_temaer_matview.id
        FROM Adgangsadresser
-         JOIN GriddedDagiTemaer ON ST_Contains(GriddedDagiTemaer.geom, Adgangsadresser.geom)
+         JOIN gridded_temaer_matview ON ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom)
       WHERE
-        GriddedDagiTemaer.tema = NEW.tema AND GriddedDagiTemaer.kode = NEW.kode);
+        gridded_temaer_matview.tema = NEW.tema AND gridded_temaer_matview.id = NEW.id);
   END IF;
   RETURN NULL;
 END;
 $$ LANGUAGE PLPGSQL;
 
-DROP TRIGGER IF EXISTS update_adgangsadresser_dagi_rel_dagitemaer ON DagiTemaer;
-DROP TRIGGER IF EXISTS update_gridded_dagi_temaer ON DagiTemaer;
-CREATE TRIGGER update_gridded_dagi_temaer AFTER INSERT OR UPDATE OR DELETE ON DagiTemaer
-FOR EACH ROW EXECUTE PROCEDURE update_gridded_dagi_temaer();
+DROP TRIGGER IF EXISTS update_gridded_temaer_matview_on_temaer ON temaer;
+CREATE TRIGGER update_gridded_temaer_matview_on_temaer AFTER INSERT OR UPDATE OR DELETE ON temaer
+FOR EACH ROW EXECUTE PROCEDURE update_gridded_temaer_matview();
 
 
 -- Init function
-DROP FUNCTION IF EXISTS griddeddagitemaer_init() CASCADE;
-CREATE FUNCTION griddeddagitemaer_init() RETURNS void
+DROP FUNCTION IF EXISTS gridded_temaer_matview_init() CASCADE;
+CREATE FUNCTION gridded_temaer_matview_init() RETURNS void
 LANGUAGE plpgsql AS
-$$
+  $$
   BEGIN
     NULL;
   END;

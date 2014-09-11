@@ -17,11 +17,24 @@ ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
   'danmark', 'afstemningsomraade', 'menighedsraadsafstemningsomraade',
   'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel');
 
+DROP TYPE IF EXISTS tema_type CASCADE;
+CREATE TYPE tema_type AS
+ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
+  'politikreds', 'retskreds', 'afstemningsomraade', 'postnummer',
+  'danmark', 'menighedsraadsafstemningsomraade',
+  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel');
+
 DROP TYPE IF EXISTS DagiTemaRef CASCADE;
 CREATE TYPE DagiTemaRef AS (
   tema DagiTemaType,
   kode integer,
   navn varchar(255)
+);
+
+DROP TYPE IF EXISTS tema_data CASCADE;
+CREATE TYPE tema_data AS (
+  tema tema_type,
+  fields json
 );
 
 DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser;
