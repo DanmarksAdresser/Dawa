@@ -68,7 +68,7 @@ function verifyAllValuesVisited(schema, record, prefix) {
   }, true);
 }
 
-var entitiesWithoutJsonRepresentation = ['ejerlav'];
+var entitiesWithoutJsonRepresentation = ['ejerlav', 'zone'];
 
 describe('Validering af JSON-formatteret output', function() {
   var allNamesAndKeys = registry.where({

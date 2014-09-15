@@ -95,7 +95,7 @@ exports.retskreds = {
 };
 
 exports.postnummer = {
-  name: 'postdistrikt',
+  name: 'postnummer',
   wfsName: 'POSTDISTRIKT10',
   geometry: 'geometri',
   fields: {

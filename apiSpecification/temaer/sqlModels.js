@@ -19,7 +19,7 @@ var jsonFieldMap = _.reduce(fields, function(memo, temaFields, temaNavn) {
 }, {});
 
 var publishedTemaer = _.filter(temaer, function(tema) {
-  return tema.singular !== 'postnummer';
+  return tema.published;
 });
 
 publishedTemaer.forEach(function(tema) {

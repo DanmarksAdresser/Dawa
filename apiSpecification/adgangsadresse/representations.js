@@ -200,11 +200,15 @@ exports.json = {
           }
         },
         docOrder: ['href', 'kode', 'navn']
-      })
+      }),
+      zone: {
+        description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone"',
+        enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
+      }
     },
     docOrder: ['href','id', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds']
+      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -266,12 +270,32 @@ exports.json = {
       adr.politikreds = null;
       adr.opstillingskreds = null;
       var includedDagiTemaer = ['sogn', 'region', 'retskreds','politikreds','opstillingskreds'];
-      var dagiTemaArray = rs.temaer ? rs.temaer.filter(function(tema) { return _.contains(includedDagiTemaer, tema.tema); }) : [];
+      var temaer = rs.temaer || [];
+      var dagiTemaArray =temaer.filter(function(tema) { return _.contains(includedDagiTemaer, tema.tema); });
       var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');
       var mappedDagiTemaer = _.reduce(dagiTemaMap, function(memo, tema, temaNavn) {
         memo[temaNavn] = mapDagiTema(tema);
         return memo;
       }, {});
+      var zoneTemaer = _.where(temaer, {tema: 'zone'});
+      if(zoneTemaer.length <= 1) {
+        var zoneTema = zoneTemaer[0];
+        var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
+        if(zoneKode === 1) {
+          adr.zone = 'Byzone';
+        }
+        else if(zoneKode === 2) {
+          adr.zone = 'Sommerhusområde';
+        }
+        else if(zoneKode === 3) {
+          adr.zone = 'Landzone';
+        }
+      }
+      // hvis mere en én zone overlapper, eller ingen, så sætter vi zone til null.
+      if(adr.zone === undefined) {
+        adr.zone = null;
+      }
+
       _.extend(adr, mappedDagiTemaer);
       return adr;
     };

@@ -4,6 +4,14 @@ DROP TABLE GriddedDagiTemaer CASCADE;
 DROP TABLE AdgangsadresserDagiRel CASCADE;
 DROP FUNCTION adgangsadresserdagirel_update_on_adgangsadresse() CASCADE;
 
+
+DROP TYPE IF EXISTS tema_type CASCADE;
+CREATE TYPE tema_type AS
+ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
+  'politikreds', 'retskreds', 'afstemningsomraade', 'postnummer',
+  'danmark', 'menighedsraadsafstemningsomraade',
+  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel', 'zone');
+
 DROP TABLE IF EXISTS temaer CASCADE;
 CREATE TABLE temaer (
   tema tema_type not null,

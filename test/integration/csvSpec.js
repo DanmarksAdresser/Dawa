@@ -28,15 +28,16 @@ describe('CSV udtræk', function() {
     });
   });
 
+  // the expected set of columns output in CSV format
+  var expectedColumns = {
+    adresse: ['id','status', 'oprettet','ændret','vejkode','vejnavn','husnr','etage','dør','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','ddkn_m100','ddkn_km1','ddkn_km10','adressepunktændringsdato','adgangsadresseid','adgangsadresse_status','adgangsadresse_oprettet','adgangsadresse_ændret','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone'],
+    adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn','husnr','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone'],
+    vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
+    postnummer: ['nr','navn','stormodtageradresser'],
+    kommune: ['kode','navn']
+  };
+
   it('CSV udtræk har korrekte kolonnenavne', function() {
-    // the expected set of columns output in CSV format
-    var expectedColumns = {
-      adresse: ['id','status', 'oprettet','ændret','vejkode','vejnavn','husnr','etage','dør','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','ddkn_m100','ddkn_km1','ddkn_km10','adressepunktændringsdato','adgangsadresseid','adgangsadresse_status','adgangsadresse_oprettet','adgangsadresse_ændret','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn'],
-      adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn','husnr','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn'],
-      vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
-      postnummer: ['nr','navn','stormodtageradresser'],
-      kommune: ['kode','navn']
-    };
     _.each(expectedColumns, function(colNames, datamodelName) {
       var csvRep = registry.findWhere({
         type: 'representation',

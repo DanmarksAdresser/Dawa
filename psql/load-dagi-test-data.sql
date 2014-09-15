@@ -119,4 +119,5 @@ VALUES
   ('opstillingskreds', now(), 1, '{ "kode":99, "navn": "Opstillingskreds test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('retskreds', now(), 1, '{ "kode":99, "navn": "retskreds test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('politikreds', now(), 1, '{ "kode":99, "navn": "Politikreds test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
+  ('zone', now(), 1, '{ "zone":1 }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('afstemningsomraade', now(), 1, '{ "kode":99, "navn": "Afstemningsomraade test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832));

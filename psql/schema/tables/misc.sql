@@ -10,26 +10,12 @@ CREATE TYPE KommuneRef AS (
   navn varchar
 );
 
-DROP TYPE IF EXISTS DagiTemaType CASCADE;
-CREATE TYPE DagiTemaType AS
-ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
-  'politikreds', 'retskreds', 'afstemningsområde', 'postdistrikt',
-  'danmark', 'afstemningsomraade', 'menighedsraadsafstemningsomraade',
-  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel');
-
 DROP TYPE IF EXISTS tema_type CASCADE;
 CREATE TYPE tema_type AS
 ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
   'politikreds', 'retskreds', 'afstemningsomraade', 'postnummer',
   'danmark', 'menighedsraadsafstemningsomraade',
-  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel');
-
-DROP TYPE IF EXISTS DagiTemaRef CASCADE;
-CREATE TYPE DagiTemaRef AS (
-  tema DagiTemaType,
-  kode integer,
-  navn varchar(255)
-);
+  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel', 'zone');
 
 DROP TYPE IF EXISTS tema_data CASCADE;
 CREATE TYPE tema_data AS (

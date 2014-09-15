@@ -13,9 +13,26 @@ var dagiTemaer = require('../apiSpecification/temaer/temaer');
 var featureMappingsNew = require('./featureMappingsNew');
 var featureMappingsOld = require('./featureMappingsOld');
 
+function parseInteger(str) {
+  return parseInt(str, 10);
+}
+
 var featureMappingsMap = {
   oldDagi: featureMappingsOld,
-  newDagi: featureMappingsNew
+  newDagi: featureMappingsNew,
+  zone: {
+    zone: {
+      name: 'theme_pdk_zonekort_v',
+      wfsName: 'theme_pdk_zonekort_v',
+      geometry: 'geometri',
+      fields: {
+        zone: {
+          name: 'zone',
+          parseFn: parseInteger
+        }
+      }
+    }
+  }
 };
 
 var optionSpec = {
@@ -31,6 +48,7 @@ function findTema(temaNavn) {
 }
 
 function as2DWkt(text) {
+  text = text._ || text;
   var points = text.split(' ');
   return _.map(points,function (point) {
     var coords = point.split(',');
@@ -38,18 +56,44 @@ function as2DWkt(text) {
   }).join(',');
 }
 
-function gmlPolygonToWkt(json) {
-  var polygon = json.Polygon[0];
-  var outerCoordsText = as2DWkt(polygon.outerBoundaryIs[0].LinearRing[0].coordinates[0]);
+function gmlGeometryToWkt(json) {
+  if(json.Polygon) {
+    var polygon = json.Polygon[0];
+    return gmlPolygonToWkt(polygon);
+  }
+  if(json.MultiPolygon) {
+    var multiPolygon = json.MultiPolygon[0];
+    return gmlMultiPolygonToWkt(multiPolygon);
+  }
+  throw new Error('Unsupported geometry type');
+}
 
-  var innerBoundaryIsList = polygon.innerBoundaryIs ? polygon.innerBoundaryIs : [];
+function polygonWktCoordsText(gmlPolygon) {
+  var coordinates = gmlPolygon.outerBoundaryIs[0].LinearRing[0].coordinates[0];
+  var outerCoordsText = as2DWkt(coordinates);
+
+  var innerBoundaryIsList = gmlPolygon.innerBoundaryIs ? gmlPolygon.innerBoundaryIs : [];
   var innerCoordsTexts = _.map(_.map(innerBoundaryIsList, function (innerBoundaryIs) {
     return innerBoundaryIs.LinearRing[0].coordinates[0];
   }), as2DWkt);
   var innerCoordsText = _.reduce(innerCoordsTexts, function (memo, text) {
     return memo + ',(' + text + ')';
   }, '');
-  return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
+  return '((' + outerCoordsText + ')' + innerCoordsText + ')';
+}
+
+function gmlMultiPolygonToWkt(gmlMultiPolygon) {
+  var texts = gmlMultiPolygon.polygonMember.map(function(polygonMember) {
+    var polygon = polygonMember.Polygon[0];
+    return polygonWktCoordsText(polygon);
+  });
+  var result = 'MULTIPOLYGON(' + texts.join(', ') + ')';
+  console.log(result);
+  return  result;
+}
+
+function gmlPolygonToWkt(gmlPolygon) {
+  return 'POLYGON' + polygonWktCoordsText(gmlPolygon);
 }
 
 function removeAll(aas, bs, keyProperty) {
@@ -64,7 +108,7 @@ function wfsFeatureToDagi(feature, mapping) {
   var wfsFeature = feature[mapping.wfsName][0];
 
   var result = {
-    polygon: gmlPolygonToWkt(wfsFeature[mapping.geometry][0])
+    polygon: gmlGeometryToWkt(wfsFeature[mapping.geometry][0])
   };
 
   result.fields = _.reduce(mapping.fields, function(memo, fieldMapping, dawaFieldName) {
@@ -94,17 +138,20 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
         if (err) {
           throw err;
         }
+        console.log('retrieved existing dagi temaer');
         var temaerToRemove = removeAll(existingTemaer, temaer, key);
         var temaerToCreate = removeAll(temaer, existingTemaer, key);
         var temaerToUpdate = removeAll(temaer, temaerToCreate, key);
         async.series([
           function (callback) {
+            console.log('removing');
             async.eachSeries(temaerToRemove, function (tema, callback) {
               logger.info('Removing dagitema', { tema: tema.tema, fields: tema.fields });
               dagi.deleteDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
+            console.log('adding');
             async.eachSeries(temaerToCreate, function (tema, callback) {
               logger.info('Adding dagitema', { tema: tema.tema, fields: tema.fields });
               dagi.addDagiTema(client, tema, callback);
@@ -190,7 +237,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
       process.exit(1);
     }
     else {
-      logger.info('Indlæsning af dagitemaer gennemført', { temaer: options.temaer.split(',')});
+      logger.info('Indlæsning af dagitemaer gennemført', { temaer: temaer});
     }
   });
 });

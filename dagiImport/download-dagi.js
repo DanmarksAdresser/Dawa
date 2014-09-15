@@ -45,6 +45,13 @@ var wfsServices = {
       retskreds: 'RETSKREDS10',
       sogn: 'SOGN10'
     }
+  },
+  zone: {
+    loginRequired: false,
+    defaultUrl: 'http://geoservice.plansystem.dk/wfs?',
+    featureNames: {
+      zone: "pdk:theme_pdk_zonekort_v"
+    }
   }
 };
 var optionSpec = {
@@ -55,7 +62,7 @@ var optionSpec = {
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
   retries: [false, 'Antal forsøg på kald til WFS service før der gives op', 'number', 5],
   temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string'],
-  service: [false, 'Angiver, om der anvendes ny eller gammel service (oldDagi eller newDagi)', 'string']
+  service: [false, 'Angiver, om der anvendes ny eller gammel service (zone, oldDagi eller newDagi)', 'string']
 };
 
 cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
@@ -84,13 +91,17 @@ cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
   function saveDagiTema(temaNavn, callback) {
     console.log("Downloader DAGI tema " + temaNavn);
     var queryParams = {
-      login: dagiLogin,
-      password: dagiPassword,
       SERVICE: 'WFS',
       VERSION: '1.0.0',
       REQUEST: 'GetFeature',
       TYPENAME: featureNames[temaNavn]
     };
+    if(serviceSpec.loginRequired){
+      _.extend(queryParams, {
+        login: dagiLogin,
+        password: dagiPassword
+      });
+    }
     var paramString = _.map(queryParams,function (value, name) {
       return name + '=' + encodeURIComponent(value);
     }).join('&');

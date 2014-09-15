@@ -12,7 +12,7 @@ var _ = require('underscore');
 
 var publishedTemaer = _.filter(dagiTemaer, function(tema) {
   // postnumre er ikke med, de udskilles med en anden mekanisme
-  return tema.singular !== 'postnummer';
+  return tema.published;
 });
 
 publishedTemaer.forEach(function(tema) {

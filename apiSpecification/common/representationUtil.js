@@ -84,7 +84,7 @@ exports.adresseFlatRepresentation = function(fields) {
   var fieldsExcludedFromFlat = ['geom_json'];
   var defaultFlatFields = exports.fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat);
 
-  var requiredFlatFields = defaultFlatFields.concat(_.where(fields, {name: 'dagitemaer'}));
+  var requiredFlatFields = defaultFlatFields.concat(_.where(fields, {name: 'temaer'}));
 
 
   var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds', 'opstillingskreds'];
@@ -95,6 +95,8 @@ exports.adresseFlatRepresentation = function(fields) {
     return memo;
   }, _.pluck(defaultFlatFields, 'name'));
 
+  outputFlatFields.push('zone');
+
   var defaultFlatMapper = exports.defaultFlatMapper(defaultFlatFields);
 
   var flatRepresentation = {
@@ -104,12 +106,23 @@ exports.adresseFlatRepresentation = function(fields) {
       return function (obj) {
         var result = defaultFlatMapper(obj);
         includedDagiTemaer.forEach(function (temaNavn) {
-          var tema = _.findWhere(obj.dagitemaer, { tema: temaNavn});
+          var tema = _.findWhere(obj.temaer, { tema: temaNavn});
           if (tema) {
-            result[dagiTemaMap[temaNavn].prefix + 'kode'] = kode4String(tema.kode);
-            result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.navn;
+            result[dagiTemaMap[temaNavn].prefix + 'kode'] = kode4String(tema.fields.kode);
+            result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.fields.navn;
           }
         });
+        var zoneTema = _.findWhere(obj.temaer, {tema: 'zone'});
+        var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
+        if(zoneKode === 1) {
+          result.zone = 'Byzone';
+        }
+        else if (zoneKode === 2) {
+          result.zone = 'Sommerhusområde';
+        }
+        else if(zoneKode === 3) {
+          result.zone = 'Landzone';
+        }
         return result;
       };
     }

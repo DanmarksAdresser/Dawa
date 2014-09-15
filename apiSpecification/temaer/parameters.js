@@ -26,7 +26,7 @@ module.exports = {
 };
 
 _.filter(dagiTemaer, function(tema) {
-  return tema.singular !== 'postnummer';
+  return tema.published;
 }).forEach(function(tema) {
   registry.addMultiple(tema.singular, 'parameterGroup', module.exports);
 });
