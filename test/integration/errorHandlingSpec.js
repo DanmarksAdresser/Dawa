@@ -4,7 +4,7 @@ var request = require("request");
 
 describe('Ill-formed query parameters', function () {
   it('should result in QueryParameterFormatError', function (done) {
-    request.get('http://localhost:3000/adresser?postnr=860',
+    request.get('http://localhost:3000/adresser?postnr=12345',
                 function(err, response, body){
                   expect(response.statusCode).toBe(400);
                   var error = JSON.parse(body);
@@ -12,7 +12,7 @@ describe('Ill-formed query parameters', function () {
                     {
                       "type": "QueryParameterFormatError",
                       "title": "One or more query parameters was ill-formed.",
-                      "details": [['postnr', 'Value 860 is less than minimum 1000']]
+                      "details": [['postnr', 'Value 12345 is greater than maximum 9999']]
                     });
                   done();
                 });
