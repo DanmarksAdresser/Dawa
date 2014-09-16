@@ -115,30 +115,6 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
   };
 };
 
-//exports.jsonPropertyFilter = function(parameterSpec, fieldsColumnName) {
-//
-//  return function(sqlParts, params) {
-//    parameterSpec.forEach(function (parameter) {
-//      var name = parameter.name;
-//      var value = params[name];
-//
-//      function whereClause(parameterAlias) {
-//        return fieldsColumnName + "->>'" + name + "'= " + parameterAlias;
-//      }
-//
-//      if (value !== undefined) {
-//        var values = value._multi_ ? value.values : [value];
-//        var orClauses = _.map(values,
-//          function(value){
-//            var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
-//            return (whereClause(parameterAlias));
-//          });
-//        sqlParts.whereClauses.push("("+orClauses.join(" OR ")+")");
-//      }
-//    });
-//  };
-//};
-
 function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
   dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
