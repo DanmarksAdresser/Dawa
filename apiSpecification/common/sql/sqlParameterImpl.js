@@ -13,7 +13,7 @@ var dagiTemaer = require('../../temaer/temaer');
 var sqlUtil = require('./sqlUtil');
 
 function removeSpecialSearchChars(q) {
-  return q.replace(/[^a-zA-Z0-9ÆæØøÅåéE\*]/g, ' ');
+  return q.replace(/[^a-zA-Z0-9ÆæØøÅåéEüUäAöO\*]/g, ' ');
 }
 function toPgSearchQuery(q) {
   // remove all special chars
