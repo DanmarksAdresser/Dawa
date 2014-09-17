@@ -32,9 +32,6 @@ var columns = {
   stormodtageradresser: {
     select: '(select json_agg(adgangsadresseid) from stormodtagere where stormodtagere.nr = postnumre.nr)'
   },
-  stormodtagere: {
-    where: 'p.stormodtager'
-  },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);

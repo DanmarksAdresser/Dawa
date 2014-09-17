@@ -2,6 +2,14 @@
 
 var _ = require('underscore');
 
+/**
+ * Et register over  forskellige typer af objekter der definerer DAWA APIet.
+ * Hvert  objekt har tilknyttede metadata
+ *  - entityName: hvilken entitet relaterer objektet sig til (adresse, adgangsadresse, ejerlav m.v)
+ *  - type: Hvilken slags objekt er det ('nameAndKey', 'resource', 'representation', 'sqlModel')
+ *  - qualifier: Nærmere specifikation af objektet (f.eks. for representation: 'flat', 'json', 'autocomplete')
+ */
+
 var registry = [];
 
 exports.add = function(entityName, type, qualifier, object) {

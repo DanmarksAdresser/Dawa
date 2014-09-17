@@ -3,7 +3,6 @@
 var columnMappings = require('./../columnMappings').columnMappings;
 var _ = require('underscore');
 var eventDatamodels = require('./../eventDatamodels');
-var schemaUtil = require('../../schemaUtil');
 var globalSchemaObject = require('../../commonSchemaDefinitionsUtil').globalSchemaObject;
 var normalizedFieldSchemas = require('../normalizedFieldSchemas');
 

@@ -22,8 +22,9 @@ var mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 var nullableType = schemaUtil.nullableType;
 var kode4String = require('../util').kode4String;
 
-var fieldsExcludedFromFlat = ['geom_json'];
-var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
+var fieldsExcludedFromFlat = ['geom_json', 'stormodtageradresser'];
+var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat).concat('stormodtager');
+
 
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 

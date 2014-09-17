@@ -103,7 +103,7 @@ exports.postnummer = {
       name: 'postnummer',
       parseFn: parseInteger
     },
-    navn: 'DistrictName'
+    navn: 'navn'
   }
 };
 

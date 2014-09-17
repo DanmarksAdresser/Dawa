@@ -29,7 +29,7 @@ var consistencyChecks = [
   {
     key: 'AdresserInkonsistentPostnr',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i et andet postnummer',
-    query: "SELECT id, vejkode, kommunekode, postnr, temaer.kode AS geografisk_postnr, oprettet, aendret FROM adgangsadresser JOIN griddeddagitemaer temaer ON (st_contains(temaer.geom, adgangsadresser.geom) AND temaer.tema = 'postdistrikt') WHERE adgangsadresser.postnr IS DISTINCT FROM temaer.kode AND temaer.kode <> 1000 AND temaer.kode <> 1500 and temaer.kode <> 1800 ORDER BY aendret DESC"
+    query: "SELECT adgangsadresser.id, vejkode, kommunekode, postnr, (temaer.fields->>'nr')::integer AS geografisk_postnr, oprettet, adgangsadresser.aendret FROM adgangsadresser JOIN gridded_temaer_matview gridded ON (st_contains(gridded.geom, adgangsadresser.geom) AND gridded.tema = 'postnummer') JOIN temaer ON temaer.id = gridded.id WHERE adgangsadresser.postnr IS DISTINCT FROM (temaer.fields->>'nr')::integer ORDER BY postnr, id DESC"
   },
   {
     key: 'AdgangsadresserUdenEnhedsadresser',

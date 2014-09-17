@@ -1,5 +1,8 @@
 "use strict";
 
+// This file contains an implementation of the varius SQL WHERE and ORDER clauses that needs
+// to be generated based on input parameters.
+
 var _ = require('underscore');
 
 var sqlUtil = require('./sqlUtil');
@@ -197,6 +200,7 @@ exports.paging = function(columnSpec, key) {
   };
 };
 
+// Transform a JSON polygon parameter to a WKT
 function polygonTransformer(paramValue){
   var mapPoint   = function(point) { return ""+point[0]+" "+point[1]; };
   var mapPoints  = function(points) { return "("+_.map(points, mapPoint).join(", ")+")"; };
@@ -204,6 +208,8 @@ function polygonTransformer(paramValue){
   return mapPolygon(paramValue);
 }
 
+// Generates WHERE clauses for whether the queried object is inside a given geometric shape
+// Supported shapes are a poloygon or a circle.
 exports.geomWithin = function() {
   return function(sqlParts, params) {
     var srid = params.srid || 4326;
@@ -228,6 +234,8 @@ exports.geomWithin = function() {
   };
 };
 
+// Adds an ORDER BY clause which returns the object closest to the specified X- and Y parameters.
+// Sets limit to 1.
 exports.reverseGeocoding = function() {
   return function(sqlParts, params) {
     if(notNull(params.x) && notNull(params.y)) {
@@ -243,6 +251,7 @@ exports.reverseGeocoding = function() {
   };
 };
 
+// Adds a where clause which requires the queried object to contain the point specified by the x and y parameters
 exports.reverseGeocodingWithin = function(geom) {
   geom = geom || 'geom';
   return function(sqlParts, params) {

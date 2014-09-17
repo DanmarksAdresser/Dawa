@@ -1,8 +1,8 @@
 "use strict";
-var _ = require('underscore');
-var datamodels = require('../../../crud/datamodel');
+
 var keyParameters = {};
 
+// For events we support retrieval of the events by object id
 keyParameters.vejstykke = require('../../vejstykke/parameters').id;
 keyParameters.postnummer = require('../../postnummer/parameters').id;
 keyParameters.adgangsadresse = require('../../adgangsadresse/parameters').id;
@@ -11,6 +11,7 @@ keyParameters.ejerlav = require('../../ejerlav/parameters').id;
 
 exports.keyParameters = keyParameters;
 
+// sequence number filtering is supported for all events
 exports.sekvensnummer = [
   {
     name: 'sekvensnummerfra',
@@ -22,6 +23,7 @@ exports.sekvensnummer = [
   }
 ];
 
+// timestamp filtering is supported for all events
 exports.tidspunkt = [
   {
     name: 'tidspunktfra',

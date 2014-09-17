@@ -2,8 +2,10 @@
 
 var _ = require('underscore');
 
+var dbapi = require('../../dbapi');
 var request = require("request");
 var csv = require('csv');
+var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
@@ -33,7 +35,7 @@ describe('CSV udtræk', function() {
     adresse: ['id','status', 'oprettet','ændret','vejkode','vejnavn','husnr','etage','dør','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','ddkn_m100','ddkn_km1','ddkn_km10','adressepunktændringsdato','adgangsadresseid','adgangsadresse_status','adgangsadresse_oprettet','adgangsadresse_ændret','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone'],
     adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn','husnr','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone'],
     vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
-    postnummer: ['nr','navn','stormodtageradresser'],
+    postnummer: ['nr','navn','stormodtager'],
     kommune: ['kode','navn']
   };
 
@@ -45,6 +47,41 @@ describe('CSV udtræk', function() {
         qualifier: 'flat'
       });
       expect(csvRep.outputFields).toEqual(colNames);
+    });
+  });
+
+  describe('Alle CSV felter ses mindst én gang', function() {
+
+    // Disse felter mangler i vores testdata
+    var neverExpectedToBeSeen = {
+      vejstykke: ['oprettet', 'ændret', 'adresseringsnavn']
+    };
+
+    // for at se et felt hvor stormodtager er angivet skal vi have dem med ud for postnumrene
+    var additionalParams = {
+      postnummer: {
+        stormodtagere: 'true'
+      }
+    };
+    _.each(expectedColumns, function(colNames, datamodelName) {
+      var seenFields = {};
+      var resource = registry.findWhere({entityName: datamodelName, type: 'resource', qualifier: 'query'});
+      it('Alle CSV felter i ' + datamodelName + ' skal ses mindst en gang', function(done) {
+        dbapi.withRollbackTransaction(function(err, client, releaseConnectionFn) {
+          helpers.getCsv(client, resource, [], _.extend({}, additionalParams[datamodelName] || {}, { format: 'csv'}), function(err, result) {
+            releaseConnectionFn();
+            result.forEach(function(csvRow) {
+              _.each(csvRow, function(value, key) {
+                if(value !== undefined && value !== null && value.trim() !== '') {
+                  seenFields[key] = true;
+                }
+              });
+            });
+            expect(Object.keys(seenFields).concat(neverExpectedToBeSeen[datamodelName] || []).sort()).toEqual(colNames.slice().sort());
+            done();
+          });
+        });
+      });
     });
   });
 });

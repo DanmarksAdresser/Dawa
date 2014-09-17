@@ -1,5 +1,10 @@
 "use strict";
 
+/**
+ * This file contains JSON schema definitions and descriptions of the normalized fields of the model
+ * They are reused for the non-normalized representations.
+ */
+
 var _ = require('underscore');
 
 var definitions = require('../commonSchemaDefinitions');

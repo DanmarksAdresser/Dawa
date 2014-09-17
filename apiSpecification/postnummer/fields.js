@@ -16,6 +16,9 @@ var fields = [
     name: 'kommunekode'
   },
   {
+    name: 'stormodtager'
+  },
+  {
     name: 'stormodtageradresser'
   },
   {

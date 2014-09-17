@@ -1,5 +1,8 @@
 "use strict";
 
+// CursorStream his is an implementation of a NodeJS stream which is backed by a PostgreSQL Cursor.
+
+
 var util = require('util');
 var Readable    = require('stream').Readable;
 var statistics = require('./statistics');

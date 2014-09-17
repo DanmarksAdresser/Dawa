@@ -9,6 +9,8 @@ var mappings = require('./../columnMappings');
 var d = require('../util').d;
 
 var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
+
+  // All events has these fields
   var commonFields = [{
     name: 'sekvensnummer'
   }, {
@@ -18,6 +20,9 @@ var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
     name: 'operation'
   }];
 
+  // The fields specific for this entity are retrieved from the SQL model,
+  // because there is a 1-1 correspondence between the internal and external model
+  // on the replication APIs.
   var entityFields = _.map(mappings[datamodelName], function(columnMapping) {
     return {
       name: columnMapping.name,
