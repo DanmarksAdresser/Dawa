@@ -39,7 +39,7 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med dagitema-filer', 'string', '.'],
   filePrefix: [false, 'Prefix på dagitema-filer', 'string', ''],
-  wfsSource: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
+  service: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
   temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string']
 };
 
@@ -88,7 +88,6 @@ function gmlMultiPolygonToWkt(gmlMultiPolygon) {
     return polygonWktCoordsText(polygon);
   });
   var result = 'MULTIPOLYGON(' + texts.join(', ') + ')';
-  console.log(result);
   return  result;
 }
 
@@ -121,9 +120,9 @@ function wfsFeatureToDagi(feature, mapping) {
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
   var dagi = require('./dagi');
 
-  var featureMappings = featureMappingsMap[options.wfsSource];
+  var featureMappings = featureMappingsMap[options.service];
   if(!featureMappings) {
-    throw new Error("Ugyldig værdi for parameter wfsSource");
+    throw new Error("Ugyldig værdi for parameter service");
   }
 
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
@@ -138,20 +137,17 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
         if (err) {
           throw err;
         }
-        console.log('retrieved existing dagi temaer');
         var temaerToRemove = removeAll(existingTemaer, temaer, key);
         var temaerToCreate = removeAll(temaer, existingTemaer, key);
         var temaerToUpdate = removeAll(temaer, temaerToCreate, key);
         async.series([
           function (callback) {
-            console.log('removing');
             async.eachSeries(temaerToRemove, function (tema, callback) {
               logger.info('Removing dagitema', { tema: tema.tema, fields: tema.fields });
               dagi.deleteDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
-            console.log('adding');
             async.eachSeries(temaerToCreate, function (tema, callback) {
               logger.info('Adding dagitema', { tema: tema.tema, fields: tema.fields });
               dagi.addDagiTema(client, tema, callback);
@@ -185,8 +181,10 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
   function indlæsDagiTema(temaNavn, callback) {
     console.log('temaNavn: ' + temaNavn);
     var mapping = featureMappings[temaNavn];
+    if(!mapping) {
+      throw new Error('Tema ' + temaNavn + ' ikke specificeret for den angivne service');
+    }
     var key = findTema(temaNavn).key;
-    logger.debug("gemmer DAGI tema  i databasen", {temaNavn: temaNavn});
     var directory = path.resolve(options.dataDir);
     var filename = options.filePrefix + temaNavn;
     var body = fs.readFileSync(path.join(directory, filename));

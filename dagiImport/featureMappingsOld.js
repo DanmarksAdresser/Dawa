@@ -87,7 +87,7 @@ exports.retskreds = {
   geometry: 'geometri',
   fields: {
     kode: {
-      name: 'CPR_noegleq',
+      name: 'CPR_noegle',
       parseFn: parseInteger
     },
     navn: 'Navn'

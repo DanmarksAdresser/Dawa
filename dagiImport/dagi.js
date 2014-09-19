@@ -1,7 +1,7 @@
 "use strict";
 
 var dagiTemaer = require('../apiSpecification/temaer/temaer');
-var temaFieldsMap = require('../apiSpecification/temaer/fields');
+var jsonFieldMap = require('../apiSpecification/temaer/additionalFields');
 var _ = require('underscore');
 
 exports.getDagiTemaer = function(client, temaNavn, cb) {
@@ -32,7 +32,6 @@ exports.addDagiTema = function(client, tema, cb) {
   var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
     'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
   var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
-  console.log(sql);
   client.query(sql, params, function(err, result) {
     if(err) {
       return cb(err);
@@ -44,12 +43,8 @@ exports.addDagiTema = function(client, tema, cb) {
 };
 
 exports.updateDagiTema = function(client, tema, cb) {
-  console.log('updateDagiTema');
   var key = findTema(tema.tema).key;
-  var jsonFields = _.filter(temaFieldsMap[tema.tema], function(field) {
-    return field.name !== 'geom_json';
-  });
-  var fieldsNotChangedClause = jsonFields.map(function(field) {
+  var fieldsNotChangedClause = jsonFieldMap[tema.tema].map(function(field) {
     return "(fields->>'" + field.name + "') IS DISTINCT FROM ($2::json->>'" + field.name + "')";
   }).join(' OR ');
   var geoChangedClause = "geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, 3) + ", 25832)))";
@@ -63,7 +58,6 @@ exports.updateDagiTema = function(client, tema, cb) {
       return cb('Could not update DAGI tema, it was not found.');
     }
     if(result.rows.length !== 1) {
-      console.log(JSON.stringify(tema.fields));
       return cb(new Error('Could not update DAGI tema, unexpected number of rows to update'));
     }
     var geoChanged = result.rows[0].geo_changed;
@@ -95,7 +89,6 @@ exports.updateDagiTema = function(client, tema, cb) {
 };
 
 exports.deleteDagiTema = function(client, tema, cb) {
-  console.log('deleteDagiTema');
   var key = findTema(tema.tema).key;
   var sql = "DELETE FROM temaer WHERE tema = $1 AND fields->>'" + key + "' = $2::text";
   var params = [tema.tema, tema.fields[key]];
