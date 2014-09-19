@@ -13,6 +13,12 @@ ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
   'danmark', 'menighedsraadsafstemningsomraade',
   'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel', 'zone');
 
+DROP TYPE IF EXISTS tema_data CASCADE;
+CREATE TYPE tema_data AS (
+  tema tema_type,
+  fields json
+);
+
 DROP TABLE IF EXISTS temaer CASCADE;
 CREATE TABLE temaer (
   tema tema_type not null,
