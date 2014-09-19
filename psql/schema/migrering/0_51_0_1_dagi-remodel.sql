@@ -3,6 +3,7 @@ DROP TABLE DagiTemaer CASCADE;
 DROP TABLE GriddedDagiTemaer CASCADE;
 DROP TABLE AdgangsadresserDagiRel CASCADE;
 DROP FUNCTION adgangsadresserdagirel_update_on_adgangsadresse() CASCADE;
+DROP TYPE DagiTemaType CASCADE;
 
 
 DROP TYPE IF EXISTS tema_type CASCADE;
