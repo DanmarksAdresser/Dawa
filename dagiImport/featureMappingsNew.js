@@ -25,6 +25,10 @@ exports.kommune = {
       name: 'kommunekode',
       parseFn: parseInteger
     },
+    regionskode: {
+      name: 'regionskode',
+      parseFn: parseInteger
+    },
     navn: 'navn'
   }
 };

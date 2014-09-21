@@ -20,7 +20,11 @@ var kodeAndNavn = [
 
 var fieldMap = {
   region: kodeAndNavn,
-  kommune: kodeAndNavn,
+  kommune: kodeAndNavn.concat({
+    name: 'regionskode',
+    formatter: kode4String,
+    selectable: true
+  }),
   sogn: kodeAndNavn,
   politikreds: kodeAndNavn,
   retskreds: kodeAndNavn,

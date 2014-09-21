@@ -36,7 +36,7 @@ describe('CSV udtræk', function() {
     adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn','husnr','supplerendebynavn','postnr','postnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone'],
     vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
     postnummer: ['nr','navn','stormodtager'],
-    kommune: ['kode','navn']
+    kommune: ['kode','navn', 'regionskode']
   };
 
   it('CSV udtræk har korrekte kolonnenavne', function() {

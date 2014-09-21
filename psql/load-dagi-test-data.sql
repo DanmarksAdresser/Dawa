@@ -113,7 +113,7 @@ VALUES
 insert into temaer(tema, aendret, geo_version, fields, geom)
 VALUES
   ('region', now(), 1, '{"kode":99, "navn":"Region test"}', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
-  ('kommune', now(), 1, '{ "kode":99, "navn": "Kommune test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
+  ('kommune', now(), 1, '{ "kode":99, "navn": "Kommune test", "regionskode": 99 }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('postnummer', now(), 1, '{ "nr":99, "navn": "Postdistrikt test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('sogn', now(), 1, '{ "kode":99, "navn": "Sogn test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('opstillingskreds', now(), 1, '{ "kode":99, "navn": "Opstillingskreds test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
