@@ -170,7 +170,7 @@ exports.columnToSelect = _.reduce(exports.columnMappings, function(memo, columnS
     var columnName = col.column || col.name;
     var select = col.selectTransform ? col.selectTransform(columnName) : columnName;
 
-    memo[col.column || col.name] = select;
+    memo[columnName] = select;
     return memo;
   }, {});
   return memo;

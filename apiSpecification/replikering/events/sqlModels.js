@@ -12,12 +12,10 @@ var parameters = require('./parameters');
 function coaleseFields(columnName) {
   return 'COALESCE(i.' + columnName + ', d.' + columnName + ')';
 }
-function createSqlModel(columns, datamodelName, baseQuery) {
+function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
   return {
     allSelectableFieldNames: function () {
-      return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.map(columns, function (colName) {
-        return mappings.columnToFieldName[datamodelName][colName];
-      }));
+      return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.pluck(columnMappings, 'name'));
     },
     stream: function (client, fieldNames, params, callback) {
       var query = baseQuery();
@@ -39,13 +37,13 @@ function createSqlModel(columns, datamodelName, baseQuery) {
         dbapi.addWhereClause(query, 'h.time <=' + timeToAlias);
       }
       // we want to be able to find events for a specific ID.
-      var keyColumns = _.reduce(mappings.columnMappings[datamodelName], function (memo, mapping) {
+      var keyColumns = _.reduce(columnMappings, function (memo, mapping) {
         memo[mapping.name] = {
           where: coaleseFields(mapping.name)
         };
         return memo;
       }, {});
-      var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
+      var propertyFilter = sqlParameterImpl.simplePropertyFilter(simpleFilterParameters, keyColumns);
       propertyFilter(query, params);
       var dbQuery = dbapi.createQuery(query);
       dbapi.streamRaw(client, dbQuery.sql, dbQuery.params, callback);
@@ -54,12 +52,14 @@ function createSqlModel(columns, datamodelName, baseQuery) {
 }
 var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   var datamodelName = datamodel.name;
+  var columnMappings = mappings.columnMappings[datamodelName];
   function selectFields() {
-    return datamodel.columns.map(function(columnName) {
-      var selectTransform = mappings.columnToTransform[datamodelName][columnName];
+    return columnMappings.map(function(columnMapping) {
+      var selectTransform = columnMapping.selectTransform;
+      var columnName = columnMapping.column || columnMapping.name;
       var coalescedColumn = coaleseFields(columnName);
       var transformedColumn = selectTransform ? selectTransform(coalescedColumn) : coalescedColumn;
-      return transformedColumn + ' AS ' + mappings.columnToFieldName[datamodelName][columnName];
+      return transformedColumn + ' AS ' + columnMapping.name;
     });
   }
 
@@ -77,7 +77,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
     dbapi.addWhereClause(query, "h.entity = " + datamodelAlias);
     return query;
   };
-  memo[datamodelName] = createSqlModel(datamodel.columns, datamodelName, baseQuery);
+  memo[datamodelName] = createSqlModel( mappings.columnMappings[datamodelName], parameters.keyParameters[datamodelName], baseQuery);
   return memo;
 }, {});
 
