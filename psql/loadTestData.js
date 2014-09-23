@@ -12,6 +12,7 @@ var loadAdresseDataImpl = require('./load-adresse-data-impl');
 var runScriptImpl = require('./run-script-impl');
 var temaer = require('../apiSpecification/temaer/temaer');
 var dagi = require('../dagiImport/dagi');
+var logger = require('../logger');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -28,6 +29,10 @@ function exitOnErr(err){
 var scriptDir = __dirname + '/schema';
 
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
+
+  logger.setThreshold('sql', 'warn');
+  logger.setThreshold('stat', 'warn');
+
   sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commitFn) {
     if (err) {
       exitOnErr(err);
