@@ -195,13 +195,19 @@ exports.loadCsvOnly = function(client, options, callback) {
   ], callback);
 };
 
+var initializeHistoryTable = function (client, entityName, callback) {
+  var datamodel = datamodels[entityName];
+  var query = 'INSERT INTO ' + datamodel.table + '_history (' + datamodel.columns.join(', ') + ') (select ' + datamodel.columns.join(', ') + ' from ' + datamodel.table + ')';
+  client.query(query, [], callback);
+};
+
 function initializeHistory(client) {
   return function(callback) {
-    async.eachSeries(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName, callback) {
-      var datamodel = datamodels[entityName];
-      var query = 'INSERT INTO ' + datamodel.table + '_history (' + datamodel.columns.join(', ') + ') (select ' + datamodel.columns.join(', ') + ' from ' + datamodel.table + ')';
-      client.query(query, [], callback);
-    }, callback);
+    async.eachSeries(['vejstykke', 'adgangsadresse', 'adresse'],
+      function(entityName, callback) {
+        initializeHistoryTable(client, entityName, callback);
+      },
+      callback);
   };
 }
 
@@ -233,3 +239,4 @@ exports.load = function(client, options, callback) {
 exports.bbrFileStreams = bbrFileStreams;
 exports.loadBbrMeta = loadBbrMeta;
 exports.loadCsv = loadCsv;
+exports.initializeHistoryTable = initializeHistoryTable;

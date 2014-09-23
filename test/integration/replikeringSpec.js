@@ -198,7 +198,7 @@ describe('ReplikeringsAPI', function() {
   beforeEach(function(done) {
     sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function(err, _client, _transactionDone){
       if(err) {
-        return done(err);
+        throw err;
       }
       client = _client;
       transactionDone = _transactionDone;

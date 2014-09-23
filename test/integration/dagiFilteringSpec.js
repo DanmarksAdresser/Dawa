@@ -37,14 +37,17 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
         if (err) throw err;
         dagi.addDagiTema(client, sampleTema, function (err) {
           if(err) throw err;
-          var params = { regionskode: "10" };
-          var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
-          var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
-          dbapi.queryRaw(client, query.sql, query.params, function(err, result) {
+          dagi.updateAdresserTemaerView(client, 'region', function(err) {
             if(err) throw err;
-            expect(result.length).toBe(expectedResults[entityName]);
-            transactionDone();
-            done();
+            var params = { regionskode: "10" };
+            var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
+            var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
+            dbapi.queryRaw(client, query.sql, query.params, function(err, result) {
+              if(err) throw err;
+              expect(result.length).toBe(expectedResults[entityName]);
+              transactionDone();
+              done();
+            });
           });
         });
       });

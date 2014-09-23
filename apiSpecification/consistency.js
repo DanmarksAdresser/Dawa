@@ -24,7 +24,7 @@ var consistencyChecks = [
   {
     key: 'AdresserUdenRegion',
     description: 'Find alle adresser med adgangspunkt der ikke har en tilknyttet region',
-    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresserdagirel rel  ON (rel.adgangsadresseid = adgangsadresser.id AND rel.dagitema = 'region') where rel.adgangsadresseid is null AND adgangsadresser.noejagtighed <> 'U'"
+    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresser_temaer_matview rel  ON (rel.adgangsadresse_id = adgangsadresser.id AND rel.tema = 'region') where rel.adgangsadresse_id is null AND adgangsadresser.noejagtighed <> 'U'"
   },
   {
     key: 'AdresserInkonsistentPostnr',

@@ -25,11 +25,14 @@ describe('DAGI updates', function() {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err, createdTemaId) {
         if(err) throw err;
-        client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
+        dagi.updateAdresserTemaerView(client, 'region', function(err) {
           if(err) throw err;
-          transactionDone();
-          expect(result.rows[0].c).toBe('277');
-          done();
+          client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
+            if(err) throw err;
+            transactionDone();
+            expect(result.rows[0].c).toBe('277');
+            done();
+          });
         });
       });
     });
@@ -56,7 +59,6 @@ describe('DAGI updates', function() {
     var transactionDone, updated, client, createdTemaId;
 
     beforeEach(function(done) {
-      console.log('BEFORE EACH NESTED');
       dbapi.withRollbackTransaction(function(err, _client, _transactionDone) {
         if(err) throw err;
         transactionDone = _transactionDone;
@@ -71,7 +73,10 @@ describe('DAGI updates', function() {
             '731289.6 6167400.76,' +
             '731289.6 6166264.37,' +
             '725025.18 6166264.37))'];
-          dagi.updateDagiTema(client, updated, done);
+          dagi.updateDagiTema(client, updated, function(err) {
+            if (err) throw err;
+            dagi.updateAdresserTemaerView(client, 'region', done);
+          });
         });
       });
     });

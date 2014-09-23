@@ -40,7 +40,8 @@ var optionSpec = {
   dataDir: [false, 'Folder med dagitema-filer', 'string', '.'],
   filePrefix: [false, 'Prefix på dagitema-filer', 'string', ''],
   service: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
-  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string']
+  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string'],
+  init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
 };
 
 function findTema(temaNavn) {
@@ -126,6 +127,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
   }
 
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
+  var initializing = options.init;
 
   function putDagiTemaer(temaNavn, temaer, callback) {
     var key = findTema(temaNavn).key;
@@ -169,6 +171,14 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
                 callback(err, result);
               });
             }, callback);
+          },
+          function (callback) {
+            if(initializing) {
+              dagi.initAdresserTemaerView(client, temaNavn, callback);
+            }
+            else {
+              dagi.updateAdresserTemaerView(client, temaNavn, callback);
+            }
           },
           function (callback) {
             done(null, callback);

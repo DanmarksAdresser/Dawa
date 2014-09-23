@@ -3,6 +3,14 @@
 var dagiTemaer = require('../apiSpecification/temaer/temaer');
 var jsonFieldMap = require('../apiSpecification/temaer/additionalFields');
 var _ = require('underscore');
+var dataUtil = require('../psql/dataUtil');
+var divergensImpl = require('../psql/divergensImpl');
+var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
+var datamodels = require('../crud/datamodel');
+var async = require('async');
+var sqlCommon = require('../psql/common');
+
+var MAX_INT =  2147483647;
 
 exports.getDagiTemaer = function(client, temaNavn, cb) {
   var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1";
@@ -93,4 +101,46 @@ exports.deleteDagiTema = function(client, tema, cb) {
   var sql = "DELETE FROM temaer WHERE tema = $1 AND fields->>'" + key + "' = $2::text";
   var params = [tema.tema, tema.fields[key]];
   client.query(sql, params, cb);
+};
+
+exports.initAdresserTemaerView = function(client, temaName, cb) {
+  async.series([
+    sqlCommon.disableTriggers(client),
+    function(cb) {
+      client.query('INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema)'+
+          ' (SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
+          'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
+        [temaName],
+        cb);
+    },
+    function(cb) {
+      loadAdresseDataImpl.initializeHistoryTable(client, 'adgangsadresse_tema', cb);
+    },
+    sqlCommon.enableTriggers(client)
+  ], cb);
+};
+
+exports.updateAdresserTemaerView = function(client, temaName, cb) {
+  dataUtil.createTempTable(client, 'tema_mapping_temp', 'adgangsadresser_temaer_matview', function(err) {
+    if(err) {
+      return cb(err);
+    }
+    client.query('INSERT INTO tema_mapping_temp(adgangsadresse_id, tema_id, tema) ' +
+      '(SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
+      'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
+      [temaName],
+      function(err, result) {
+        if(err) {
+          return cb(err);
+        }
+        var datamodel = datamodels.adgangsadresse_tema;
+        divergensImpl.computeTableDifferences(client, datamodel, 'adgangsadresser_temaer_matview', 'tema_mapping_temp').then(function(report) {
+          return divergensImpl.rectifyDifferences(client, datamodel, report, MAX_INT);
+        }).then(function() {
+          dataUtil.dropTable(client, 'tema_mapping_temp', cb);
+        }, function(err) {
+          return cb(err);
+        });
+    });
+  });
 };

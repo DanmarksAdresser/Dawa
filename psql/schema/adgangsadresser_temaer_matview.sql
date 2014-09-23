@@ -8,7 +8,8 @@ LANGUAGE plpgsql AS
   END;
 $$;
 
-CREATE OR REPLACE FUNCTION adgangsadresser_temaer_matview_update_on_adgangsadresse()
+DROP FUNCTION IF EXISTS adgangsadresser_temaer_matview_update_on_adgangsadresse() CASCADE;
+CREATE FUNCTION adgangsadresser_temaer_matview_update_on_adgangsadresse()
   RETURNS TRIGGER AS $$
 BEGIN
   IF (TG_OP = 'UPDATE' AND OLD.geom = NEW.geom) THEN

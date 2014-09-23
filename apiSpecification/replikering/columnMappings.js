@@ -134,6 +134,15 @@ exports.columnMappings = {
   }, {
     name: 'navn'
   }]
+//  ,
+//  regionstilknytning: [{
+//    name: 'adgangsadresseid',
+//    column: 'adgangsadresse_id'
+//  }, {
+//    name: 'regionskode',
+//    column: "(fields->>'kode')::integer",
+//    formatter: kode4String
+//  }]
 };
 
 // maps column names to field names

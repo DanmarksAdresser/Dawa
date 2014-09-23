@@ -37,4 +37,11 @@ module.exports = {
     columns: ['kode', 'navn'],
     key: ['kode']
   }
+  ,
+  adgangsadresse_tema: {
+    name: 'adgangsadresse_tema',
+    table: 'adgangsadresser_temaer_matview',
+    columns: ['adgangsadresse_id', 'tema', 'tema_id'],
+    key: ['adgangsadresse_id', 'tema', 'tema_id']
+  }
 };

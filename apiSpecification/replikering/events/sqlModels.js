@@ -12,6 +12,46 @@ var parameters = require('./parameters');
 function coaleseFields(columnName) {
   return 'COALESCE(i.' + columnName + ', d.' + columnName + ')';
 }
+function createSqlModel(columns, datamodelName, baseQuery) {
+  return {
+    allSelectableFieldNames: function () {
+      return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.map(columns, function (colName) {
+        return mappings.columnToFieldName[datamodelName][colName];
+      }));
+    },
+    stream: function (client, fieldNames, params, callback) {
+      var query = baseQuery();
+      if (params.sekvensnummerfra) {
+        var fromAlias = dbapi.addSqlParameter(query, params.sekvensnummerfra);
+        dbapi.addWhereClause(query, 'h.sequence_number >= ' + fromAlias);
+      }
+      if (params.sekvensnummertil) {
+        var toAlias = dbapi.addSqlParameter(query, params.sekvensnummertil);
+        dbapi.addWhereClause(query, 'h.sequence_number <= ' + toAlias);
+      }
+      if (params.tidspunktfra) {
+        var timeFromAlias = dbapi.addSqlParameter(query, params.tidspunktfra);
+        dbapi.addWhereClause(query, 'h.time >=' + timeFromAlias);
+      }
+
+      if (params.tidspunkttil) {
+        var timeToAlias = dbapi.addSqlParameter(query, params.tidspunkttil);
+        dbapi.addWhereClause(query, 'h.time <=' + timeToAlias);
+      }
+      // we want to be able to find events for a specific ID.
+      var keyColumns = _.reduce(mappings.columnMappings[datamodelName], function (memo, mapping) {
+        memo[mapping.name] = {
+          where: coaleseFields(mapping.name)
+        };
+        return memo;
+      }, {});
+      var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
+      propertyFilter(query, params);
+      var dbQuery = dbapi.createQuery(query);
+      dbapi.streamRaw(client, dbQuery.sql, dbQuery.params, callback);
+    }
+  };
+}
 var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
   var datamodelName = datamodel.name;
   function selectFields() {
@@ -37,44 +77,7 @@ var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
     dbapi.addWhereClause(query, "h.entity = " + datamodelAlias);
     return query;
   };
-  memo[datamodelName] = {
-    allSelectableFieldNames: function() {
-      return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.map(datamodel.columns, function(colName) {
-        return mappings.columnToFieldName[datamodelName][colName];
-      }));
-    },
-    stream: function(client, fieldNames, params, callback) {
-      var query = baseQuery();
-      if(params.sekvensnummerfra) {
-        var fromAlias = dbapi.addSqlParameter(query, params.sekvensnummerfra);
-        dbapi.addWhereClause(query, 'h.sequence_number >= ' + fromAlias);
-      }
-      if(params.sekvensnummertil) {
-        var toAlias = dbapi.addSqlParameter(query, params.sekvensnummertil);
-        dbapi.addWhereClause(query, 'h.sequence_number <= ' + toAlias);
-      }
-      if(params.tidspunktfra) {
-        var timeFromAlias = dbapi.addSqlParameter(query, params.tidspunktfra);
-        dbapi.addWhereClause(query, 'h.time >=' + timeFromAlias);
-      }
-
-      if(params.tidspunkttil) {
-        var timeToAlias = dbapi.addSqlParameter(query, params.tidspunkttil);
-        dbapi.addWhereClause(query, 'h.time <=' + timeToAlias);
-      }
-      // we want to be able to find events for a specific ID.
-      var keyColumns = _.reduce(mappings.columnMappings[datamodelName], function(memo, mapping) {
-        memo[mapping.name] = {
-          where: coaleseFields(mapping.name)
-        };
-        return memo;
-      }, {});
-      var propertyFilter = sqlParameterImpl.simplePropertyFilter(parameters.keyParameters[datamodelName], keyColumns);
-      propertyFilter(query, params);
-      var dbQuery = dbapi.createQuery(query);
-      dbapi.streamRaw(client, dbQuery.sql, dbQuery.params, callback);
-    }
-  };
+  memo[datamodelName] = createSqlModel(datamodel.columns, datamodelName, baseQuery);
   return memo;
 }, {});
 

@@ -66,8 +66,6 @@ BEGIN
   IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'
   THEN
     DELETE FROM gridded_temaer_matview WHERE tema = OLD.tema AND id = OLD.id;
-
-    DELETE FROM adgangsadresser_temaer_matview WHERE tema = OLD.tema AND tema_id = OLD.id;
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
   THEN
@@ -76,12 +74,6 @@ BEGIN
          NEW.tema,
         NEW.id,
          splitToGridRecursive(NEW.geom, 100) as geom);
-    INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema, tema_id)
-      (SELECT DISTINCT Adgangsadresser.id, gridded_temaer_matview.tema, gridded_temaer_matview.id
-       FROM Adgangsadresser
-         JOIN gridded_temaer_matview ON ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom)
-      WHERE
-        gridded_temaer_matview.tema = NEW.tema AND gridded_temaer_matview.id = NEW.id);
   END IF;
   RETURN NULL;
 END;

@@ -111,7 +111,7 @@ exports.loadTables = function(client, scriptDir) {
  */
 function createHistoryTriggers(client) {
   return function(callback) {
-    var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav'], function(sql, datamodelName) {
+    var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema'], function(sql, datamodelName) {
       var datamodel = datamodels[datamodelName];
       var table = datamodel.table;
       sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);

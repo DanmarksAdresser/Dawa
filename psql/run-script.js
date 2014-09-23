@@ -1,11 +1,10 @@
 "use strict";
 
-var async = require('async');
 var cli = require('cli');
-var fs = require('fs');
 var sqlCommon = require('./common');
 var _ = require('underscore');
 
+var runScriptImpl = require('./run-script-impl');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
 var optionSpec = {
@@ -26,59 +25,19 @@ cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
   cliParameterParsing.checkRequiredOptions(options, _.without(_.keys(optionSpec), 'disableTriggers'));
 
-  var scripts = _.map(args, function(arg) {
-    return fs.readFileSync(args[0], {encoding: 'utf8'});
-  });
   sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);
+    runScriptImpl(client, args, options.disableTriggers, function(err) {
+      exitOnErr(err);
+      commit(null, function(err) {
+        exitOnErr(err);
+      });
+    });
     client.on('error', function(err) {
       exitOnErr(err);
     });
     client.on('notice', function(msg) {
       console.log("notice: %j", msg);
     });
-    client.query("SET client_min_messages='INFO'",[], function(err) {
-      exitOnErr(err);
-      async.series([
-        function(callback) {
-          console.log("set work_mem='500MB'; set maintenance_work_mem='500MB'");
-          client.query("set work_mem='500MB'; set maintenance_work_mem='500MB'", [], callback);
-        },
-        function(callback) {
-          if(options.disableTriggers) {
-            console.log('disabling triggers');
-            sqlCommon.disableTriggers(client)(callback);
-          }
-          else {
-            console.log('running script with triggers enabled');
-            callback();
-          }
-        },
-        function(callback) {
-          async.eachSeries(scripts, function(script, callback) {
-            var commands = script.split(';');
-            async.eachSeries(commands, function(command, callback) {
-              command = command.trim();
-              console.log('executing command %s', command);
-              client.query(command, [], callback);
-            }, callback);
-          }, callback);
-        },
-        function(callback) {
-          if(options.disableTriggers) {
-            console.log('enabling triggers');
-            sqlCommon.enableTriggers(client)(callback);
-          }
-          else {
-            callback();
-          }
-        }
-        ],function(err) {
-          exitOnErr(err);
-          commit(null, function(err) {
-            exitOnErr(err);
-          });
-        });
-      });
     });
 });
