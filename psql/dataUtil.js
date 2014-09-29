@@ -8,7 +8,7 @@ var _ = require('underscore');
 
 var dbapi = require('../dbapi');
 
-exports.queryDifferences = function(client, expectedTable, actualTable, datamodel, callback) {
+exports.queryDifferences = function(client, expectedTable, actualTable, datamodel, batchSize, callback) {
   var query = {
     select: [],
     from: [],
@@ -30,6 +30,9 @@ exports.queryDifferences = function(client, expectedTable, actualTable, datamode
   query.whereClauses.push(_.map(datamodel.columns, function(column) {
     return 'e.' + column + ' IS DISTINCT FROM a.' + column;
   }).join(' OR '));
+  if(batchSize) {
+    query.limit = batchSize;
+  }
   console.log(JSON.stringify(query));
   dbapi.query(client, query, callback);
 };

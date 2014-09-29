@@ -102,6 +102,9 @@ module.exports = {
   },
   adgangsadresse: function(row) {
     var result = transformBbrAdgangsadresse(row);
+    if(!result.husnr) {
+      return null;
+    }
     // vi skal lige have fjernet de foranstillede 0'er
     result.husnr = removePrefixZeroes(result.husnr);
 

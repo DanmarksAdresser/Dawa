@@ -19,7 +19,8 @@ var optionSpec = {
   rectify: [false, 'Korriger forskelle ved at foretage de noedvendige ændringer i data', 'boolean' ],
   forceDawaSequenceNumber: [false, 'Sammenlign med tilstand ved dette sekvensnummer', 'number'],
   reportFile: [false, 'Fil, som JSON rapport skrives i', 'string'],
-  maxUpdates: [false, 'Maksimalt antal tilladte ændringer', 'number', 10000]
+  maxUpdates: [false, 'Maksimalt antal tilladte ændringer', 'number', 10000],
+  batchSize: [false, 'Max antal ændringer pr. datatype der udføres/rapporteres', 'number']
 };
 
 function countUpdates(report) {
@@ -32,7 +33,7 @@ function countUpdates(report) {
 function saveReport(options, report) {
   fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
 }
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix', 'sekvensnummer', 'rectify', 'compareWithCurrent', 'forceDawaSequenceNumber'), function(args, options) {
+cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix', 'sekvensnummer', 'rectify', 'compareWithCurrent', 'forceDawaSequenceNumber', 'batchSize'), function(args, options) {
 
   if(options.format !== 'bbr' && options.sekvensnummer === undefined) {
     throw new Error('Hvis format ikke er bbr skal der angives et sekvensnummer for udtrækket');
@@ -47,6 +48,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
 
     divergensImpl.divergenceReport(client, loadAdresseDataOptions, {
         compareWithCurrent: options.compareWithCurrent,
+        batchSize: options.batchSize,
         forceDawaSequenceNumber: options.forceDawaSequenceNumber
       }).then(
       function(report) {

@@ -264,17 +264,17 @@ function createSnapshot(client, datamodel, dawaSequenceNumber, snapshotTableName
   });
 }
 
-function computeTableDifferences(client, datamodel, actualTableName, expectedTableName) {
-  return Q.nfcall(dataUtil.queryDifferences, client, expectedTableName, actualTableName, datamodel).then(function(result) {
+function computeTableDifferences(client, datamodel, actualTableName, expectedTableName, batchSize) {
+  return Q.nfcall(dataUtil.queryDifferences, client, expectedTableName, actualTableName, datamodel, batchSize).then(function(result) {
     return interpretDifferences(datamodel, result);
   });
 }
 
-function computeDifferenceReport(client, datamodel, dawaSequenceNumber, expectedTableName) {
+function computeDifferenceReport(client, datamodel, dawaSequenceNumber, expectedTableName, batchSize) {
   var actualTablePrefix = 'actual_';
   var snapshotTableName = actualTablePrefix + datamodel.table;
   return createSnapshot(client, datamodel, dawaSequenceNumber, snapshotTableName).then(function() {
-    return computeTableDifferences(client, datamodel, snapshotTableName, expectedTableName);
+    return computeTableDifferences(client, datamodel, snapshotTableName, expectedTableName, batchSize);
   }).then(function(report) {
     return Q.nfcall(dataUtil.dropTable, client, snapshotTableName).then(function() {
       return report;
@@ -307,7 +307,7 @@ exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonO
   return Q.spread([dawaSequenceNumber, bbrSequenceNumberPromise, loadDataPromise], function (dawaSequenceNumber, bbrSequenceNumber) {
     return ['vejstykke', 'adgangsadresse', 'adresse'].map(function (dataModelName) {
       return function (fullReport) {
-        return computeDifferenceReport(client, datamodels[dataModelName], dawaSequenceNumber, expectedTablePrefix + datamodels[dataModelName].table)
+        return computeDifferenceReport(client, datamodels[dataModelName], dawaSequenceNumber, expectedTablePrefix + datamodels[dataModelName].table, comparisonOptions.batchSize)
           .then(function (entityReport) {
             fullReport[dataModelName] = entityReport;
             return fullReport;
