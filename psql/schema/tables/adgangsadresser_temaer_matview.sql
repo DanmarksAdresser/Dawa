@@ -7,4 +7,4 @@ CREATE TABLE adgangsadresser_temaer_matview(
 );
 
 CREATE INDEX ON adgangsadresser_temaer_matview(tema, tema_id, adgangsadresse_id);
-CREATE UNIQUE INDEX ON adgangsadresser_temaer_matview(tema, adgangsadresse_id);
+CREATE INDEX ON adgangsadresser_temaer_matview(tema, adgangsadresse_id);
