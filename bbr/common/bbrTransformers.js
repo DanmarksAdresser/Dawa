@@ -105,6 +105,9 @@ module.exports = {
     if(!result.husnr) {
       return null;
     }
+    if(!result.postnr) {
+      return null;
+    }
     // vi skal lige have fjernet de foranstillede 0'er
     result.husnr = removePrefixZeroes(result.husnr);
 
