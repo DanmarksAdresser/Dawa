@@ -3,7 +3,7 @@ CREATE TABLE  adgangsadresser (
   id uuid NOT NULL PRIMARY KEY,
   kommunekode INTEGER NOT NULL,
   vejkode INTEGER NOT NULL,
-  husnr VARCHAR(6) NOT NULL,
+  husnr VARCHAR(6),
   supplerendebynavn VARCHAR(34) NULL,
   postnr INTEGER NULL,
   ejerlavkode INTEGER,
@@ -37,6 +37,7 @@ CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
 CREATE INDEX ON adgangsadresser(matrikelnr);
 CREATE INDEX ON adgangsadresser(husnr, id);
 CREATE INDEX ON adgangsadresser(esrejendomsnr);
+CREATE INDEX ON adgangsadresser(objekttype);
 CREATE INDEX ON adgangsadresser USING gin(tsv);
 
 
@@ -47,7 +48,7 @@ CREATE TABLE adgangsadresser_history(
   id uuid NOT NULL,
   kommunekode INTEGER NOT NULL,
   vejkode INTEGER NOT NULL,
-  husnr VARCHAR(6) NOT NULL,
+  husnr VARCHAR(6),
   supplerendebynavn VARCHAR(34) NULL,
   postnr INTEGER NULL,
   ejerlavkode INTEGER,

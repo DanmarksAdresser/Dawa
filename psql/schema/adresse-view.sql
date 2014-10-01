@@ -11,7 +11,7 @@ CREATE VIEW adresser AS
     E.doer,
     A.*
   FROM enhedsadresser E
-    LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
+    JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
 CREATE OR REPLACE FUNCTION adressebetegnelse(vejnavn VARCHAR, husnr VARCHAR, etage VARCHAR, dør VARCHAR, supplerendebynavn VARCHAR, postnr VARCHAR, postnrnavn VARCHAR)
   RETURNS varchar AS
