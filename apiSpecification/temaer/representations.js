@@ -6,11 +6,10 @@ var representationUtil = require('../common/representationUtil');
 var fieldMap = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+var additionalFields = require('./additionalFields');
 
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHrefFromPath = commonMappers.makeHrefFromPath;
-
-var kode4String = require('../util').kode4String;
 
 var registry = require('../registry');
 
@@ -25,34 +24,34 @@ _.filter(dagiTemaer, function(tema) {
   var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 
   representations.flat = representationUtil.defaultFlatRepresentation(flatFields);
-  function dagiSchema() {
-    return  {
-      'title': tema.singular,
-      'properties': {
+  function jsonSchema(additionalFields) {
+    var result = {
+      title: tema.singular,
+      properties: {
         'href': {
           description: tema.singularSpecific + 's unikke URL.',
           $ref: '#/definitions/Href'
-        },
-        'kode': {
-          description: 'Fircifret ' + tema.singular + 'kode.',
-          $ref: '#/definitions/Kode4'
-        },
-        'navn': {
-          description: tema.singularSpecific + 's navn.',
-          type: 'string'
         }
       },
-      'docOrder': ['href', 'kode', 'navn']
+      docOrder: ['href']
     };
+    additionalFields.forEach(function(fieldSpec) {
+      result.properties[fieldSpec.name] = fieldSpec.schema;
+      result.docOrder.push(fieldSpec.name);
+    });
+    return result;
   }
-  function dagiTemaJsonMapper() {
+  function dagiTemaJsonMapper(keyFieldName, additionalFields) {
     return function(baseUrl) {
       return function(row) {
-        return {
-          href: makeHrefFromPath(baseUrl, tema.plural, [row.kode]),
-          kode: kode4String(row.kode),
-          navn: row.navn
-        };
+        var result = {};
+        additionalFields.forEach(function(fieldSpec) {
+          result[fieldSpec.name] = fieldSpec.formatter(row[fieldSpec.name]);
+        });
+
+        result.href = makeHrefFromPath(baseUrl, tema.plural, [result[keyFieldName]]);
+
+        return result;
       };
     };
   }
@@ -64,10 +63,7 @@ _.filter(dagiTemaer, function(tema) {
         type: 'string'
       }
     };
-    properties[tema.singular] = {
-      description: tema.singularSpecific,
-      $ref: '#/definitions/' + tema.singular + 'Ref'
-    };
+    properties[tema.singular] = jsonSchema(additionalFields[tema.singular]);
     return globalSchemaObject({
       properties: properties,
       docOrder: ['tekst', tema.singular]
@@ -90,8 +86,8 @@ _.filter(dagiTemaer, function(tema) {
   representations.json = {
     // geomentry for the (huge) DAGI temaer is only returned in geojson format.
     fields: representationUtil.fieldsWithoutNames(fields, ['geom_json']),
-    schema: globalSchemaObject(dagiSchema(tema)),
-    mapper: dagiTemaJsonMapper()
+    schema: globalSchemaObject(jsonSchema(additionalFields[tema.singular])),
+    mapper: dagiTemaJsonMapper(tema.key, additionalFields[tema.singular])
   };
   representations.autocomplete = {
     fields: representations.json.fields,

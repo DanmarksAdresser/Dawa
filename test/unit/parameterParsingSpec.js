@@ -27,7 +27,7 @@ describe("Parsing types with schemas", function () {
 
   it("should fail on invalid data ", function (done) {
     expect(parameterParsing.parseParameters({uuid: '98239823-982-982-982-982398239823'}, parameterSpec))
-      .toEqual({params: {}, errors: [['uuid', 'String does not match pattern: ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$']]});
+      .toEqual({params: {}, errors: [['uuid', 'String does not match pattern ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$: 98239823-982-982-982-982398239823']]});
     done();
   });
 });

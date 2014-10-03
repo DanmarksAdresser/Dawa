@@ -2,6 +2,9 @@
 
 var kode4String = require('../util').kode4String;
 var _ = require('underscore');
+var temaer = require('../temaer/temaer');
+var tilknytninger = require('../tematilknytninger/tilknytninger');
+var datamodels = require('../../crud/datamodel');
 // maps of field names to database column names
 
 var selectIsoTimestamp = require('../common/sql/sqlUtil').selectIsoDate;
@@ -134,16 +137,33 @@ exports.columnMappings = {
   }, {
     name: 'navn'
   }]
-//  ,
-//  regionstilknytning: [{
-//    name: 'adgangsadresseid',
-//    column: 'adgangsadresse_id'
-//  }, {
-//    name: 'regionskode',
-//    column: "(fields->>'kode')::integer",
-//    formatter: kode4String
-//  }]
 };
+
+exports.tables = {};
+exports.keys = {};
+
+['vejstykke', 'adgangsadresse', 'adresse', 'postnummer', 'ejerlav'].forEach(function(entityName) {
+  exports.tables[entityName] = datamodels[entityName].table;
+  exports.keys[entityName] = datamodels[entityName].key;
+});
+
+temaer.forEach(function(tema) {
+ var keyColumn = "(fields->>'" + tema.key + "')::integer"; // note, future keys may not be integer
+  var tilknytningKey = (tema.prefix + 'tilknytning');
+  exports.columnMappings[tilknytningKey] =
+    [{
+      name: 'adgangsadresseid',
+      column: 'adgangsadresse_id'
+    }].concat([{
+        name: tilknytninger[tema.singular].keyFieldName,
+        column: keyColumn,
+        fromJoinedTable: true,
+        formatter: tilknytninger[tema.singular].keyFormatter
+      }]);
+
+  exports.tables[ tilknytningKey] = 'adgangsadresser_temaer_matview';
+  exports.keys[tilknytningKey] = ['adgangsadresseid', tema.key];
+});
 
 // maps column names to field names
 exports.columnToFieldName = _.reduce(exports.columnMappings, function(memo, columnSpec, key) {

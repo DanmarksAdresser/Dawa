@@ -33,6 +33,7 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
     },
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
+
   return memo;
 }, {});
 

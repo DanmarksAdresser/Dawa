@@ -101,7 +101,7 @@ VALUES ('kommune', now(), 1, '{ "kode":165, "navn": "Albertslund" }'),
 INSERT INTO temaer (tema, aendret, geo_version, fields, geom)
 VALUES
   ('region', now(), 1, '{"kode":1, "navn": "Region"}', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
-  ('kommune', now(), 1, '{ "kode":999, "navn": "Testkommune" }', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
+  ('kommune', now(), 1, '{ "kode":999, "navn": "Testkommune", "regionskode": 1 }', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
   ('postnummer', now(), 1, '{ "nr":999, "navn": "Testpostdistrikt" }', ST_GeomFromText('MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))', 25832)),
   ('sogn', now(), 1, '{ "kode": 1, "navn": "Sogn" }', null),
   ('opstillingskreds', now(), 1, '{ "kode": 1, "navn": "Opstillingskreds" }', null),

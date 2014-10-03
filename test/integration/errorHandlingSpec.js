@@ -29,7 +29,7 @@ describe('Ill-formed UUID', function () {
                     {
                       "type": "ResourcePathFormatError",
                       "title": "The URI path was ill-formed.",
-                      "details": [ [ 'id', 'String does not match pattern: ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$' ] ]
+                      "details": [ [ 'id', 'String does not match pattern ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$: 0a3f50c1-deb6-32b8-e04-0003ba298018' ] ]
                     });
                     done();
                 });

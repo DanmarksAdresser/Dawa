@@ -12,7 +12,6 @@ var columns = {
   kommunekode: {
     select: null,
     where: function(sqlParts, parameterArray) {
-      console.log(JSON.stringify(parameterArray));
       // this is a bit hackish, we add the parameters from
       // the parent query to the subquery to get
       // correct parameter indices for the subquery

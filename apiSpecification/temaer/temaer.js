@@ -13,6 +13,7 @@ module.exports = [
     singular: 'kommune',
     singularSpecific: 'kommunen',
     plural: 'kommuner',
+    prefix: 'kommune',
     key: 'kode',
     published: true
   },

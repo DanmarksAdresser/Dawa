@@ -177,7 +177,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
               dagi.initAdresserTemaerView(client, temaNavn, callback);
             }
             else {
-              dagi.updateAdresserTemaerView(client, temaNavn, callback);
+              dagi.updateAdresserTemaerView(client, temaNavn).nodeify(callback);
             }
           },
           function (callback) {

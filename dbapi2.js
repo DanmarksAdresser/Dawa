@@ -1,5 +1,6 @@
 "use strict";
 
+var Q = require('q');
 var pg          = require('pg.js');
 require('./setupDbConnection');
 var logger = require('./logger');
@@ -181,6 +182,7 @@ module.exports = function(options) {
       });
   };
 
+
   var stream = function(client, sqlParts, cb) {
     var query = createQuery(sqlParts);
     streamingQueryUsingCursor(client, query.sql, query.params, cb);
@@ -206,6 +208,7 @@ module.exports = function(options) {
     withWriteTransaction: withWriteTransaction,
     query: query,
     queryRaw: queryRaw,
+    queryRawQ: Q.denodeify(queryRaw),
     stream: stream,
     streamRaw: streamingQueryUsingCursor,
     getPoolStatus: getPoolStatus

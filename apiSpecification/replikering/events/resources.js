@@ -8,10 +8,10 @@ var sqlModels = require('./sqlModels');
 var resourcesUtil = require('../../common/resourcesUtil');
 require('../../allNamesAndKeys');
 var registry = require('../../registry');
-var eventDatamodels = require('./../eventDatamodels');
 var commonParameters = require('../../common/commonParameters');
+var columnMappings = require('../columnMappings').columnMappings;
 
-_.each(Object.keys(eventDatamodels), function(entityName) {
+_.each(Object.keys(columnMappings), function(entityName) {
   var nameAndKey = registry.findWhere({
     entityName: entityName,
     type: 'nameAndKey'
@@ -23,7 +23,7 @@ _.each(Object.keys(eventDatamodels), function(entityName) {
       queryParameters: resourcesUtil.flattenParameters({
         sekvensnummer: parameters.sekvensnummer,
         tidspunkt: parameters.tidspunkt,
-        keyParameters: parameters.keyParameters[entityName],
+        keyParameters: parameters.keyParameters[entityName] || [],
         formatParameters: commonParameters.format
       }),
       representations: representations[entityName],

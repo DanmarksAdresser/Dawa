@@ -124,17 +124,17 @@ function jsonSchemaValidation(val, schema){
     try{
       zsValidate(val, schema);
     }
-    catch(error){
-      throw error.errors[0].message;
+    catch(errors){
+      throw errors[0].message;
     }
   }
 }
 
-var validator = new ZSchema({ sync: true });
+var validator = new ZSchema();
 function zsValidate(json, schema){
   var valid = validator.validate(json, schema);
   if (!valid) {
-    throw validator.getLastError();
+    throw validator.getLastErrors();
   } else {
     return true;
   }

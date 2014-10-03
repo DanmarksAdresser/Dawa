@@ -40,14 +40,14 @@ describe('Documentation generation utilities', function() {
               }
             },
             required: ['href', 'kode'],
-            docOrder: ['href', 'kode']
-          },
-          'additionalProperties': false
+            docOrder: ['href', 'kode'],
+            'additionalProperties': false
+          }
         }
       };
 
-      var schema = new ZSchema().compileSchemasSync([sampleSchema])[0];
-      var doc = docUtil.extractDocumentationForObject(schema);
+      expect(new ZSchema().validateSchema(sampleSchema)).toBeTruthy();
+      var doc = docUtil.extractDocumentationForObject(sampleSchema);
       expect(doc).toEqual([
         { name: 'stormodtageradresse', description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.', type: 'string', required: true },
         { name: 'kommuner', description: 'De kommuner hvis areal overlapper postnumeret areal.', type: 'array', required: true, items: [

@@ -2,11 +2,10 @@
 
 var columnMappings = require('./../columnMappings').columnMappings;
 var _ = require('underscore');
-var eventDatamodels = require('./../eventDatamodels');
 var globalSchemaObject = require('../../commonSchemaDefinitionsUtil').globalSchemaObject;
 var normalizedFieldSchemas = require('../normalizedFieldSchemas');
 
-var datamodelNames = Object.keys(eventDatamodels);
+var datamodelNames = Object.keys(columnMappings);
 
 _.each(datamodelNames, function(datamodelName) {
   var schema = globalSchemaObject({

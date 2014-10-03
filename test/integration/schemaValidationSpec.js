@@ -68,17 +68,12 @@ function verifyAllValuesVisited(schema, record, prefix) {
   }, true);
 }
 
-var entitiesWithoutJsonRepresentation = ['ejerlav', 'zone'];
-
 describe('Validering af JSON-formatteret output', function() {
   var allNamesAndKeys = registry.where({
     type: 'nameAndKey'
   });
   allNamesAndKeys.forEach(function(nameAndKey) {
     var entityName = nameAndKey.singular;
-    if(_.contains(entitiesWithoutJsonRepresentation, entityName)) {
-      return;
-    }
     var sqlModel = registry.findWhere({
       entityName: entityName,
       type: 'sqlModel'
@@ -88,9 +83,18 @@ describe('Validering af JSON-formatteret output', function() {
       type: 'representation',
       qualifier: 'json'
     });
+    if(!jsonRepresentation) {
+      return;
+    }
+    if(!sqlModel) {
+      return;
+    }
     var mapper = jsonRepresentation.mapper('BASE_URL', {});
+    var schema = jsonRepresentation.schema;
+    if(!schema) {
+      throw new Error('no schema for ' + nameAndKey.singular);
+    }
     it('Alle ' + nameAndKey.plural + ' skal validere', function(specDone) {
-      var schema = jsonRepresentation.schema;
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
         var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
         dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {

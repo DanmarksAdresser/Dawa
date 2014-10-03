@@ -13,6 +13,9 @@ var nullableType = require('../schemaUtil').nullableType;
 var util = require('../util');
 var kode4String = util.kode4String;
 var timestampFormatter = util.d;
+var temaer = require('../temaer/temaer');
+var tilknytninger = require('../tematilknytninger/tilknytninger');
+var additionalFieldsMap = require('../temaer/additionalFields');
 
 var fields = {
   vejstykke: [{
@@ -314,6 +317,24 @@ var fields = {
     }
   }]
 };
+
+_.each(tilknytninger, function(tilknytning, temaNavn) {
+  var tema = _.findWhere(temaer, { singular: temaNavn});
+  var additionalFields = additionalFieldsMap[temaNavn];
+  var temaKeyFieldName = tema.key;
+  var temaKeyField = _.findWhere(additionalFields, {name: temaKeyFieldName});
+
+  var tilknytningKeyFieldName = tilknytning.keyFieldName;
+  var tilknytningFields = [{
+    name: 'adgangsadresseid',
+    description: 'Adgangsadressens id.',
+    schema: definitions.UUID
+  }];
+  var tilknytningKeyField = _.clone(temaKeyField);
+  tilknytningKeyField.name = tilknytningKeyFieldName;
+  tilknytningFields.push(tilknytningKeyField);
+  fields[tema.prefix + 'tilknytning'] = tilknytningFields;
+});
 
 exports.schemas = _.reduce(fields, function(memo, fieldList, datamodelName) {
   var properties = fieldList.reduce(function(acc, field) {

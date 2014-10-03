@@ -46,5 +46,8 @@ exports.schemaObject = function(def) {
 
 
 exports.compileSchema = function(schema) {
-  return new ZSchema().compileSchemasSync([schema])[0];
+  if(!new ZSchema().validateSchema(schema)) {
+    throw new Error("Invalid schema: " + JSON.stringify(schema));
+  }
+  return schema;
 };

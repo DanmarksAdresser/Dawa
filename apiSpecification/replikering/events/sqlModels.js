@@ -2,12 +2,12 @@
 
 var _ = require('underscore');
 
-var datamodels = require('./../eventDatamodels');
 var dbapi = require('../../../dbapi');
 var mappings = require('./../columnMappings');
 var sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
 var sqlUtil = require('../../common/sql/sqlUtil');
 var parameters = require('./parameters');
+var temaer = require('../../temaer/temaer');
 
 function coaleseFields(columnName) {
   return 'COALESCE(i.' + columnName + ', d.' + columnName + ')';
@@ -38,8 +38,10 @@ function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
       }
       // we want to be able to find events for a specific ID.
       var keyColumns = _.reduce(columnMappings, function (memo, mapping) {
+        var columnName = mapping.column || mapping.name;
+        var coalescedColumn = mapping .fromJoinedTable ? columnName : coaleseFields(columnName);
         memo[mapping.name] = {
-          where: coaleseFields(mapping.name)
+          where: coalescedColumn
         };
         return memo;
       }, {});
@@ -56,7 +58,7 @@ function baseQuery(datamodelName, tableName, columnMappings) {
     return columnMappings.map(function(columnMapping) {
       var selectTransform = columnMapping.selectTransform;
       var columnName = columnMapping.column || columnMapping.name;
-      var coalescedColumn = coaleseFields(columnName);
+      var coalescedColumn = columnMapping .fromJoinedTable ? columnName : coaleseFields(columnName);
       var transformedColumn = selectTransform ? selectTransform(coalescedColumn) : coalescedColumn;
       return transformedColumn + ' AS ' + columnMapping.name;
     });
@@ -77,17 +79,36 @@ function baseQuery(datamodelName, tableName, columnMappings) {
 
 }
 
-var sqlModels = _.reduce(datamodels, function(memo, datamodel) {
-  var datamodelName = datamodel.name;
+var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav'], function(memo, datamodelName) {
   var columnMappings = mappings.columnMappings[datamodelName];
-
   var baseQueryFn = function() {
-    return baseQuery(datamodelName, datamodel.table, columnMappings);
+    return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);
   };
 
-  memo[datamodelName] = createSqlModel( mappings.columnMappings[datamodelName], parameters.keyParameters[datamodelName], baseQueryFn);
+  memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName] || [], baseQueryFn);
   return memo;
 }, {});
+
+function createTilknytningModel(tema) {
+  var sqlModelName = tema.prefix + 'tilknytning';
+  var columnMappings = mappings.columnMappings[sqlModelName];
+
+  var baseQueryFn = function() {
+    var query = baseQuery('adgangsadresse_tema', 'adgangsadresser_temaer_matview', columnMappings);
+    query.from.push('LEFT JOIN temaer ON temaer.id = ' + coaleseFields('tema_id'));
+    var temaNameAlias = dbapi.addSqlParameter(query, tema.singular);
+    dbapi.addWhereClause(query, coaleseFields('tema') + ' = ' + temaNameAlias);
+    return query;
+  };
+
+  var result = {};
+  result[tema.prefix + 'tilknytning'] = createSqlModel(columnMappings, [], baseQueryFn);
+  return result;
+}
+
+temaer.forEach(function(tema) {
+  _.extend(sqlModels, createTilknytningModel(tema));
+});
 
 module.exports = sqlModels;
 

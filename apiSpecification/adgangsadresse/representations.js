@@ -17,6 +17,7 @@ var makeHref = commonMappers.makeHref;
 var mapPostnummerRef = commonMappers.mapPostnummerRef;
 var mapKommuneRef = commonMappers.mapKommuneRef;
 var d = util.d;
+
 var maybeNull = util.maybeNull;
 
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
@@ -243,7 +244,7 @@ exports.json = {
       else {
         adr.ejerlav = null;
       }
-      adr.esrejendomsnr = maybeNull("" + rs.esrejendomsnr);
+      adr.esrejendomsnr = rs.esrejendomsnr ? "" + rs.esrejendomsnr : null;
       adr.matrikelnr = maybeNull(rs.matrikelnr);
       adr.historik = {
         oprettet: d(rs.oprettet),
@@ -281,15 +282,7 @@ exports.json = {
       if(zoneTemaer.length <= 1) {
         var zoneTema = zoneTemaer[0];
         var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
-        if(zoneKode === 1) {
-          adr.zone = 'Byzone';
-        }
-        else if(zoneKode === 2) {
-          adr.zone = 'Sommerhusområde';
-        }
-        else if(zoneKode === 3) {
-          adr.zone = 'Landzone';
-        }
+        adr.zone = util.zoneKodeFormatter(zoneKode);
       }
       // hvis mere en én zone overlapper, eller ingen, så sætter vi zone til null.
       if(adr.zone === undefined) {

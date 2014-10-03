@@ -181,7 +181,7 @@ function toSqlModel(datamodelName, apiObject) {
   }, {});
 }
 
-var ENTITY_NAMES = Object.keys(columnMappings.columnMappings);
+var ENTITY_NAMES = ['adresse','adgangsadresse','vejstykke','postnummer','ejerlav'];
 
 
 function formatJson(columnMapping, obj) {

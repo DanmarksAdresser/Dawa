@@ -73,7 +73,7 @@ function performSqlQuery(sqlClient, event, datamodel, callback) {
         crud.delete(sqlClient, datamodel, object, callback);
         break;
       default:
-        throw 'handleSimpleEvent with unknown event type, insufficient input validation?!';
+        throw new Error('handleSimpleEvent with unknown event type, insufficient input validation?!');
     }
   });
 }

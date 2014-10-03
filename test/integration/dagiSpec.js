@@ -25,7 +25,7 @@ describe('DAGI updates', function() {
       if(err) throw err;
       dagi.addDagiTema(client, sampleTema, function(err, createdTemaId) {
         if(err) throw err;
-        dagi.updateAdresserTemaerView(client, 'region', function(err) {
+        dagi.updateAdresserTemaerView(client, 'region').nodeify(function(err) {
           if(err) throw err;
           client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
             if(err) throw err;
@@ -75,7 +75,7 @@ describe('DAGI updates', function() {
             '725025.18 6166264.37))'];
           dagi.updateDagiTema(client, updated, function(err) {
             if (err) throw err;
-            dagi.updateAdresserTemaerView(client, 'region', done);
+            dagi.updateAdresserTemaerView(client, 'region').nodeify( done);
           });
         });
       });

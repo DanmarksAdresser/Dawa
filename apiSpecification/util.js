@@ -56,3 +56,14 @@ exports.notNull = function (obj) {
   return obj !== undefined && obj !== null;
 };
 
+exports.zoneKodeFormatter = function(zoneKode) {
+  if (zoneKode === 1) {
+    return 'Byzone';
+  }
+  else if (zoneKode === 2) {
+    return 'Sommerhusområde';
+  }
+  else if (zoneKode === 3) {
+    return 'Landzone';
+  }
+}

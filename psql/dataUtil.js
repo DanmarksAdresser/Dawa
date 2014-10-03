@@ -5,6 +5,7 @@ var copyFrom = require('pg-copy-streams').from;
 var copyTo = require('pg-copy-streams').to;
 var logger = require('../logger');
 var _ = require('underscore');
+var Q = require('q');
 
 var dbapi = require('../dbapi');
 
@@ -30,7 +31,6 @@ exports.queryDifferences = function(client, expectedTable, actualTable, datamode
   query.whereClauses.push(_.map(datamodel.columns, function(column) {
     return 'e.' + column + ' IS DISTINCT FROM a.' + column;
   }).join(' OR '));
-  console.log(JSON.stringify(query));
   dbapi.query(client, query, callback);
 };
 
@@ -41,10 +41,14 @@ exports.createTempTable = function(client, tableName, sourceTableName, callback)
   client.query(sql, [], callback);
 };
 
+exports.createTempTableQ = Q.denodeify(exports.createTempTable);
+
 exports.dropTable = function(client, tableName, callback) {
   var sql = 'DROP TABLE ' + tableName;
   client.query(sql, [], callback);
-}
+};
+
+exports.dropTableQ = Q.denodeify(exports.dropTable);
 
 exports.csvToTable = function(client, csvStream, tableName, datamodel, callback) {
   var sql = "COPY " + tableName + "(" + datamodel.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL 'null')";
@@ -59,11 +63,9 @@ exports.tableToCsv = function(client, csvStream, tableName, datamodel, callback)
   var pgStream = client.query(copyTo(sql));
   pgStream.pipe(csvStream);
   pgStream.on('error', function(err) {
-    console.log('error!', err);
     callback(err);
   });
   pgStream.on('end', function() {
-    console.log('end!');
     callback();
   });
 };

@@ -6,3 +6,4 @@ require('./supplerendebynavn/nameAndKey');
 require('./vejnavn/nameAndKey');
 require('./vejstykke/nameAndKey');
 require('./ejerlav/nameAndKey');
+require('./tematilknytninger/namesAndKeys');

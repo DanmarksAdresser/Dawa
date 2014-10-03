@@ -9,6 +9,7 @@ var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
 var datamodels = require('../crud/datamodel');
 var async = require('async');
 var sqlCommon = require('../psql/common');
+var dbapi = require('../dbapi');
 
 var MAX_INT =  2147483647;
 
@@ -120,27 +121,22 @@ exports.initAdresserTemaerView = function(client, temaName, cb) {
   ], cb);
 };
 
-exports.updateAdresserTemaerView = function(client, temaName, cb) {
-  dataUtil.createTempTable(client, 'tema_mapping_temp', 'adgangsadresser_temaer_matview', function(err) {
-    if(err) {
-      return cb(err);
-    }
-    client.query('INSERT INTO tema_mapping_temp(adgangsadresse_id, tema_id, tema) ' +
-      '(SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
-      'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
-      [temaName],
-      function(err, result) {
-        if(err) {
-          return cb(err);
-        }
-        var datamodel = datamodels.adgangsadresse_tema;
-        divergensImpl.computeTableDifferences(client, datamodel, 'adgangsadresser_temaer_matview', 'tema_mapping_temp').then(function(report) {
-          return divergensImpl.rectifyDifferences(client, datamodel, report, MAX_INT);
-        }).then(function() {
-          dataUtil.dropTable(client, 'tema_mapping_temp', cb);
-        }, function(err) {
-          return cb(err);
-        });
-    });
+exports.updateAdresserTemaerView = function(client, temaName) {
+  var datamodel = datamodels.adgangsadresse_tema;
+  return dataUtil.createTempTableQ(client, 'tema_mapping_temp', 'adgangsadresser_temaer_matview').then(function() {
+    return dbapi.queryRawQ(client, 'INSERT INTO tema_mapping_temp(adgangsadresse_id, tema_id, tema) ' +
+        '(SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
+        'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
+      [temaName]);
+  }).then(function() {
+    return dbapi.queryRawQ(client, "CREATE TEMP VIEW tema_mapping_view_temp AS SELECT * FROM adgangsadresser_temaer_matview WHERE tema = '" + temaName + "'", []);
+  }).then(function() {
+    return divergensImpl.computeTableDifferences(client, datamodel, 'tema_mapping_view_temp', 'tema_mapping_temp');
+  }).then(function(report) {
+    return divergensImpl.rectifyDifferences(client, datamodel, report, MAX_INT);
+  }).then(function() {
+      return dataUtil.dropTableQ(client, 'tema_mapping_temp');
+  }).then(function() {
+    return dbapi.queryRawQ(client, 'DROP VIEW tema_mapping_view_temp', []);
   });
 };

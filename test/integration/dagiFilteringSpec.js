@@ -37,7 +37,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
         if (err) throw err;
         dagi.addDagiTema(client, sampleTema, function (err) {
           if(err) throw err;
-          dagi.updateAdresserTemaerView(client, 'region', function(err) {
+          dagi.updateAdresserTemaerView(client, 'region').nodeify( function(err) {
             if(err) throw err;
             var params = { regionskode: "10" };
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;

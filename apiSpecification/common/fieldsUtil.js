@@ -14,5 +14,8 @@ exports.normalize = function(fields) {
     if(_.isUndefined(field.multi)) {
       field.multi = false;
     }
+    if(!field.formatter) {
+      field.formatter = _.identity;
+    }
   });
 };

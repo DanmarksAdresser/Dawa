@@ -65,6 +65,10 @@ exports.propertyFilter = normalizeParameters([
   {
     name: 'esrejendomsnr',
     type: 'integer',
+    schema: {
+      type: 'integer',
+      maximum: 9999999
+    },
     multi: true
   }
 ]);

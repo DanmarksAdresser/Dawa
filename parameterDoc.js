@@ -900,7 +900,11 @@ var eventExamples = {
     }
   ]
 };
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].forEach(function(replicatedModelName) {
+
+
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(dagiTemaer.map(function(tema) {
+  return tema.prefix + 'tilknytning';
+})).forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({
     entityName: replicatedModelName,
     type: 'nameAndKey'
@@ -938,7 +942,7 @@ var eventExamples = {
     ],
     examples: eventExamples[replicatedModelName]
   };
-  eventParameterDocs.parameters = eventParameterDocs.parameters.concat(keyParams[replicatedModelName]);
+  eventParameterDocs.parameters = eventParameterDocs.parameters.concat(keyParams[replicatedModelName] ? keyParams[replicatedModelName] : []);
   exports['/replikering/' + nameAndKey.plural + '/haendelser'] = eventParameterDocs;
 });
 

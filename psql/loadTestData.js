@@ -71,7 +71,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       function(callback) {
         var temaNames = _.pluck(temaer, 'singular');
         async.eachSeries(temaNames, function(temaName, callback) {
-          dagi.initAdresserTemaerView(client, temaName, callback);
+          dagi.initAdresserTemaerView(client, temaName, callback  );
         }, callback);
       }
     ], function(err) {
