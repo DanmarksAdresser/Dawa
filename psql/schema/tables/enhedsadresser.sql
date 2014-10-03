@@ -14,6 +14,7 @@ CREATE INDEX ON enhedsadresser(adgangsadresseid);
 CREATE INDEX ON enhedsadresser USING gin(tsv);
 CREATE INDEX ON enhedsadresser(etage, id);
 CREATE INDEX ON enhedsadresser(doer, id);
+CREATE INDEX ON enhedsadresser(objekttype);
 
 DROP TABLE IF EXISTS enhedsadresser_history;
 CREATE TABLE IF NOT EXISTS enhedsadresser_history (

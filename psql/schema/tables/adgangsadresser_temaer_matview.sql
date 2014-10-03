@@ -7,7 +7,6 @@ CREATE TABLE adgangsadresser_temaer_matview(
 );
 
 CREATE INDEX ON adgangsadresser_temaer_matview(tema, tema_id, adgangsadresse_id);
-CREATE UNIQUE INDEX ON adgangsadresser_temaer_matview(tema, adgangsadresse_id);
 
 DROP TABLE IF EXISTS adgangsadresser_temaer_matview_history CASCADE;
 CREATE TABLE adgangsadresser_temaer_matview_history(
@@ -24,3 +23,4 @@ CREATE INDEX ON adgangsadresser_temaer_matview_history(adgangsadresse_id, tema_i
 CREATE INDEX ON adgangsadresser_temaer_matview_history(tema, valid_from);
 CREATE INDEX ON adgangsadresser_temaer_matview_history(tema, valid_to);
 CREATE INDEX ON adgangsadresser_temaer_matview_history(tema, tema_id);
+CREATE INDEX ON adgangsadresser_temaer_matview(tema, adgangsadresse_id);

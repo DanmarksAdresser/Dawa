@@ -40,4 +40,5 @@ CREATE VIEW AdgangsadresserView AS
     LEFT JOIN ejerlav AS EL ON (A.ejerlavkode = EL.kode)
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-    LEFT JOIN temaer AS K ON (K.tema = 'kommune' AND cast(K.fields->>'kode' as integer) = A.kommunekode);
+    LEFT JOIN temaer AS K ON (K.tema = 'kommune' AND cast(K.fields->>'kode' as integer) = A.kommunekode)
+  WHERE postnr IS NOT NULL AND husnr IS NOT NULL;
