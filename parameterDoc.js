@@ -946,6 +946,12 @@ var eventExamples = {
   exports['/replikering/' + nameAndKey.plural + '/haendelser'] = eventParameterDocs;
 });
 
+module.exports['/replikering/senesteSekvensnummer'] = {
+  subtekst: 'Henter seneste sekvensnummer',
+  parameters: [],
+  exanples: []
+};
+
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
   adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources);

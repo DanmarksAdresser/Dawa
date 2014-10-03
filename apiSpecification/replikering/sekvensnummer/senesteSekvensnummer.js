@@ -1,28 +1,46 @@
 "use strict";
 
-var dbapi = require('../../../dbapi');
-
 var querySenesteSekvensnummer = require('./querySenesteSekvensnummer');
-var resourceImpl = require('../../common/resourceImpl');
+var _ = require('underscore');
+var commonParameters = require('../../common/commonParameters');
 
-module.exports = {
-  path: '/replikering/senestesekvensnummer',
-  expressHandler: function(req, res) {
-    dbapi.withReadonlyTransaction(function(err, client, done){
+var representation = {
+  fields: ['sekvensnummer', 'tidspunkt'],
+  mapper: function() {
+    return _.identity;
+  }
+};
+
+var sqlModel = {
+  query: function(client, fieldNames, params, callback) {
+    querySenesteSekvensnummer(client, function(err, result) {
       if(err) {
-        return resourceImpl.sendInternalServerError(res, "Kunne ikke forbinde til databasen");
+        return callback(err);
       }
-      querySenesteSekvensnummer(client, function(err, result) {
-        done(err);
-        if(err) {
-          return resourceImpl.sendInternalServerError(res, "Fejl under udførelse af database query");
-        }
-        res.json(result);
-      });
+      callback(null, [result]);
     });
   }
 };
 
+var resource = {
+  path: '/replikering/senesteSekvensnummer',
+  pathParameters: [],
+  queryParameters: commonParameters.format,
+  representations: {flat: representation},
+  sqlModel: sqlModel,
+  singleResult: true,
+  chooseRepresentation: function(formatParam) {
+    if(!formatParam || formatParam === 'json' || formatParam === 'csv') {
+      return representation;
+    }
+    else {
+      return null;
+    }
+  },
+  processParameters:  _.identity
+};
+
+module.exports = resource;
 var registry = require('../../registry');
 
-registry.add(null, 'resourceImpl','senesteSekvensnummer', module.exports);
+registry.add('senestesekvensnummer', 'resource',null, module.exports);
