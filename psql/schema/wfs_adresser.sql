@@ -3,6 +3,7 @@ DROP VIEW IF EXISTS wfs_adresser CASCADE;
 CREATE OR REPLACE VIEW wfs_adresser AS
   SELECT
     e_id::varchar             AS "id",
+    e_objekttype AS status,
     etage,
     doer                      AS "dør",
     e_oprettet                AS "oprettet",
@@ -23,6 +24,7 @@ CREATE OR REPLACE VIEW wfs_adresser AS
     a_oprettet                AS "adgangsadresse_oprettet",
     a_ikraftfra               AS "adgangsadresse_ikrafttrædelsesdato",
     a_aendret                 AS "adgangsadresse_ændret",
+    a_objekttype AS adgangsadresse_status,
     oest                AS "etrs89koordinat_øst",
     nord                AS "etrs89koordinat_nord",
     noejagtighed              AS "nøjagtighed",
