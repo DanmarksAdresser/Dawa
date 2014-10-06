@@ -1,5 +1,10 @@
 "use strict";
 
+var _ = require('underscore');
+var schema = require('../../parameterSchema');
+var temaer = require('../../temaer/temaer');
+var tilknytninger = require('../../tematilknytninger/tilknytninger');
+
 var keyParameters = {};
 
 // For events we support retrieval of the events by object id
@@ -10,6 +15,17 @@ keyParameters.adresse = require('../../adresse/parameters').id;
 keyParameters.ejerlav = require('../../ejerlav/parameters').id;
 
 exports.keyParameters = keyParameters;
+
+_.each(tilknytninger, function(tilknytning, temaNavn) {
+  var tema = _.findWhere(temaer, {singular: temaNavn});
+  keyParameters[tema.prefix + 'tilknytning'] = [
+    {
+      name: 'adgangsadresseid',
+      type: 'string',
+      schema: schema.uuid
+    }
+  ];
+});
 
 // sequence number filtering is supported for all events
 exports.sekvensnummer = [

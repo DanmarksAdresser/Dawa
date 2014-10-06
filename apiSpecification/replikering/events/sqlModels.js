@@ -85,7 +85,7 @@ var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer',
     return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);
   };
 
-  memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName] || [], baseQueryFn);
+  memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName], baseQueryFn);
   return memo;
 }, {});
 
@@ -102,7 +102,7 @@ function createTilknytningModel(tema) {
   };
 
   var result = {};
-  result[tema.prefix + 'tilknytning'] = createSqlModel(columnMappings, [], baseQueryFn);
+  result[tema.prefix + 'tilknytning'] = createSqlModel(columnMappings, parameters.keyParameters[sqlModelName], baseQueryFn);
   return result;
 }
 

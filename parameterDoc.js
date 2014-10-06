@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 var dagiTemaer = require('./apiSpecification/temaer/temaer');
+var tilknytninger = require('./apiSpecification/tematilknytninger/tilknytninger');
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
 
@@ -807,6 +808,18 @@ var keyParams = {
   adresse: [adgangsadresseIdParameter],
   ejerlav: [ejerlavIdParameter]
 };
+
+_.each(tilknytninger, function (tilknytning, temaNavn) {
+  var tema = _.findWhere(dagiTemaer, {singular: temaNavn});
+  keyParams[tema.prefix + 'tilknytning'] = [
+    {
+      name: 'adgangsadresseid',
+      doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
+    }
+  ];
+});
+
+
 
 var eventExamples = {
   vejstykke: [{
