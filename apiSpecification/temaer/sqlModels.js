@@ -6,24 +6,19 @@ var temaer = require('./temaer');
 var namesAndKeys = require('./namesAndKeys');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
-var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
+var sqlUtil = require('../common/sql/sqlUtil');
+var assembleSqlModel = sqlUtil.assembleSqlModel;
+var selectIsoTimestampUtc = sqlUtil.selectIsoDateUtc;
 var dbapi = require('../../dbapi');
 var registry = require('../registry');
-var fields = require('./fields');
-
-var jsonFieldMap = _.reduce(fields, function(memo, temaFields, temaNavn) {
-  memo[temaNavn] = _.filter(temaFields, function(field) {
-    return field.name !== 'geom_json';
-  });
-  return memo;
-}, {});
+var additionalFields = require('./additionalFields');
 
 var publishedTemaer = _.filter(temaer, function(tema) {
   return tema.published;
 });
 
 publishedTemaer.forEach(function(tema) {
-  var jsonFields = jsonFieldMap[tema.singular];
+  var jsonFields = additionalFields[tema.singular];
   var columns = jsonFields.reduce(function(memo, fieldSpec) {
     memo[fieldSpec.name] = {
       column: "fields->>'" + fieldSpec.name + "'"
@@ -35,6 +30,14 @@ publishedTemaer.forEach(function(tema) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
     }
+  };
+
+  columns.ændret = {
+    column: selectIsoTimestampUtc('aendret')
+  };
+
+  columns.geo_ændret = {
+    select: selectIsoTimestampUtc('geo_aendret')
   };
 
   var baseQuery = function() {

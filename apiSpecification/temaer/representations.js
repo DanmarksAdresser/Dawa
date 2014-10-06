@@ -31,14 +31,28 @@ _.filter(dagiTemaer, function(tema) {
         'href': {
           description: tema.singularSpecific + 's unikke URL.',
           $ref: '#/definitions/Href'
+        },
+        'ændret': {
+          description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
+            ' geometrien (se felterne geo_ændret og geo_version).',
+          $ref: '#/definitions/DateTimeUtc'
+        },
+        'geo_ændret': {
+          description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
+          $ref: '#/definitions/DateTimeUtc'
+        },
+        geo_version: {
+          description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
+          type: 'integer'
         }
       },
-      docOrder: ['href']
+      docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version']
     };
     additionalFields.forEach(function(fieldSpec) {
       result.properties[fieldSpec.name] = fieldSpec.schema;
       result.docOrder.push(fieldSpec.name);
     });
+
     return result;
   }
   function dagiTemaJsonMapper(keyFieldName, additionalFields) {
@@ -48,6 +62,10 @@ _.filter(dagiTemaer, function(tema) {
         additionalFields.forEach(function(fieldSpec) {
           result[fieldSpec.name] = fieldSpec.formatter(row[fieldSpec.name]);
         });
+
+        result.ændret =  row.ændret;
+        result.geo_version = row.geo_version;
+        result.geo_ændret = row.geo_ændret;
 
         result.href = makeHrefFromPath(baseUrl, tema.plural, [result[keyFieldName]]);
 

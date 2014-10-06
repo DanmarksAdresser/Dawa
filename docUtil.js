@@ -23,6 +23,7 @@ exports.computeQueryUrl = function (baseUrl, plural, query) {
 };
 
 exports.extractDocumentationForObject = function (schema) {
+
   var result = _.map(schema.docOrder, function (propertyName) {
     var property = schema.properties[propertyName];
     return exports.extractDocumentationForProperty(property, propertyName);
@@ -35,6 +36,7 @@ function resolveProperty(property) {
   var propertyDef;
   // use resolved $ref . Description not from $ref overrides.
   if (property.$ref) {
+    console.log(JSON.stringify(property));
     propertyDef = _.clone(property.__$refResolved);
     if (property.description) {
       propertyDef.description = property.description;
