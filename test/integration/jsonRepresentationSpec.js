@@ -271,41 +271,41 @@ var expectedResultsMap = {
   region: [{
     "kode": "0099",
     "navn": "Region test",
-    "ændret": "2014-10-06T12:25:00.973Z",
+    "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,
-    "geo_ændret": "2014-10-06T12:25:00.973Z",
+    "geo_ændret": ANY_TIMESTAMP_UTC,
     "href": BASE_URL + "/regioner/0099"
   }],
   sogn: [{
     "kode": "0099",
     "navn": "Sogn test",
-    "ændret": "2014-10-06T12:25:00.973Z",
+    "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,
-    "geo_ændret": "2014-10-06T12:25:00.973Z",
+    "geo_ændret": ANY_TIMESTAMP_UTC,
     "href": BASE_URL + "/sogne/0099"
   }],
   opstillingskreds: [{
     "kode": "0099",
     "navn": "Opstillingskreds test",
-    "ændret": "2014-10-06T12:25:00.973Z",
+    "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,
-    "geo_ændret": "2014-10-06T12:25:00.973Z",
+    "geo_ændret": ANY_TIMESTAMP_UTC,
     "href": BASE_URL + "/opstillingskredse/0099"
   }],
   retskreds: [{
     "kode": "0099",
     "navn": "retskreds test",
-    "ændret": "2014-10-06T12:25:00.973Z",
+    "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,
-    "geo_ændret": "2014-10-06T12:25:00.973Z",
+    "geo_ændret": ANY_TIMESTAMP_UTC,
     "href": BASE_URL + "/retskredse/0099"
   }],
   politikreds: [{
     "kode": "0099",
     "navn": "Politikreds test",
-    "ændret": "2014-10-06T12:25:00.973Z",
+    "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,
-    "geo_ændret": "2014-10-06T12:25:00.973Z",
+    "geo_ændret": ANY_TIMESTAMP_UTC,
     "href": BASE_URL + "/politikredse/0099"
   }]
 };
