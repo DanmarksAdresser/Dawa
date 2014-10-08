@@ -23,9 +23,9 @@ CREATE TABLE IF NOT EXISTS enhedsadresser_history (
   id uuid NOT NULL,
   adgangsadresseid UUID NOT NULL,
   objekttype smallint,
-  oprettet timestamptz,
-  ikraftfra timestamptz,
-  aendret timestamptz,
+  oprettet timestamp,
+  ikraftfra timestamp,
+  aendret timestamp,
   etage VARCHAR(3),
   doer VARCHAR(4)
 );
