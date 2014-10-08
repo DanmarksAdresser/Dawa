@@ -1,0 +1,9 @@
+ALTER TABLE enhedsadresser_history ALTER COLUMN oprettet TYPE timestamp without time zone;
+ALTER TABLE enhedsadresser_history ALTER COLUMN aendret TYPE timestamp without time zone;
+ALTER TABLE enhedsadresser_history ALTER COLUMN ikraftfra TYPE timestamp without time zone;
+ALTER TABLE adgangsadresser_history ALTER COLUMN oprettet TYPE timestamp without time zone;
+ALTER TABLE adgangsadresser_history ALTER COLUMN aendret TYPE timestamp without time zone;
+ALTER TABLE adgangsadresser_history ALTER COLUMN ikraftfra TYPE timestamp without time zone;
+ALTER TABLE adgangsadresser_history ALTER COLUMN adressepunktaendringsdato TYPE timestamp without time zone;
+ALTER TABLE vejstykker_history ALTER COLUMN oprettet TYPE timestamp without time zone;
+ALTER TABLE vejstykker_history ALTER COLUMN aendret TYPE timestamp without time zone;

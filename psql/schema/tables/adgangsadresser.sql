@@ -56,9 +56,9 @@ CREATE TABLE adgangsadresser_history(
   matrikelnr VARCHAR(7) NULL,
   esrejendomsnr integer NULL,
   objekttype smallint,
-  oprettet timestamptz,
-  ikraftfra timestamptz,
-  aendret timestamptz,
+  oprettet timestamp,
+  ikraftfra timestamp,
+  aendret timestamp,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
@@ -70,7 +70,7 @@ CREATE TABLE adgangsadresser_history(
   kn100mdk VARCHAR(15) NULL,
   kn1kmdk VARCHAR(15) NULL,
   kn10kmdk VARCHAR(15) NULL,
-  adressepunktaendringsdato timestamptz NULL
+  adressepunktaendringsdato timestamp NULL
 );
 
 CREATE INDEX ON adgangsadresser_history(valid_to);
