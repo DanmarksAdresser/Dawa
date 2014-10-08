@@ -75,7 +75,7 @@ var tilknytningModels = _.reduce(temaer, function(memo, tema) {
     query.from.push('JOIN temaer ON temaer.id = tema_id');
     query.orderClauses=['adgangsadresse_id, tema_id'];
     var temaAlias = dbapi.addSqlParameter(query, tema.singular);
-    dbapi.addWhereClause(query, 'adgangsadresser_temaer_matview.tema = ' + temaAlias);
+    dbapi.addWhereClause(query, 'adgangsadresser_temaer_matview_history.tema = ' + temaAlias);
     return query;
   };
   memo[name] = createSqlModel(columnMappings, baseQueryFn);
