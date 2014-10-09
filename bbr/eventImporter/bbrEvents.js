@@ -265,43 +265,43 @@ function updateBbrSekvensnummer(client, sekvensnummer, callback) {
 function processEvent(client, event, callback) {
   bbrEventsLogger.info("Processing event", { sekvensnummer: event.sekvensnummer });
   var validator = new ZSchema();
-  validator.validate(event, eventSchemas[event.type]).then(function(report) {
-    var localSeqnumFrom, localSeqnumTo;
-    async.series([
-      // get the latest local sequence number
-      function(callback) {
-        getLocalSeqNum(client, function(err, seqnum) {
-          if(err) {
-            return callback(err);
-          }
-          localSeqnumFrom = seqnum;
-          callback();
-        });
-      },
-      function(callback) {
-        applyBbrEvent(client, event, callback);
-      },
-      function(callback) {
-        updateBbrSekvensnummer(client, event.sekvensnummer, callback);
-      },
-      function(callback) {
-        getLocalSeqNum(client, function(err, seqnum) {
-          if(err) {
-            return callback(err);
-          }
-          localSeqnumTo = seqnum;
-          callback();
-        });
-      },
-      function(callback) {
-        storeEvent(client, event, localSeqnumFrom+1, localSeqnumTo, callback);
-      }
-    ], callback);
-  }).catch(function(err) {
-    bbrEventsLogger.error('Invalid event', err);
-    // We ignore invalid events
-    callback(null);
-  });
+  var valid = validator.validate(event, eventSchemas[event.type]);
+  if(!valid) {
+    bbrEventsLogger.error('Invalid event', { errors: validator.getLastErrors() });
+    // we ignore invalid events
+    return callback(null);
+  }
+  var localSeqnumFrom, localSeqnumTo;
+  async.series([
+    // get the latest local sequence number
+    function(callback) {
+      getLocalSeqNum(client, function(err, seqnum) {
+        if(err) {
+          return callback(err);
+        }
+        localSeqnumFrom = seqnum;
+        callback();
+      });
+    },
+    function(callback) {
+      applyBbrEvent(client, event, callback);
+    },
+    function(callback) {
+      updateBbrSekvensnummer(client, event.sekvensnummer, callback);
+    },
+    function(callback) {
+      getLocalSeqNum(client, function(err, seqnum) {
+        if(err) {
+          return callback(err);
+        }
+        localSeqnumTo = seqnum;
+        callback();
+      });
+    },
+    function(callback) {
+      storeEvent(client, event, localSeqnumFrom+1, localSeqnumTo, callback);
+    }
+  ], callback);
 }
 
 module.exports.processEvent = processEvent;
