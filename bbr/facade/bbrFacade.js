@@ -185,7 +185,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
    **** Helper functions **********************************************************
    *******************************************************************************/
 
-  var validator = new ZSchema({ sync: true });
+  var validator = new ZSchema();
 
   function validateSchemaQ(json) {
     if(!validator.validate(json, eventSchemas.basicHaendelseSchema)) {
@@ -194,7 +194,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         error: true,
         message: "Kunne ikke validere hændelse",
         details: {
-          schemaValidationError: validator.getLastError()
+          schemaValidationError: validator.getLastErrors()
         }
       };
     }
@@ -205,7 +205,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
             error: true,
           message: "Kunne ikke validere hændelse",
           details: {
-            schemaValidationError: validator.getLastError()
+            schemaValidationError: validator.getLastErrors()
           }
         };
       }
