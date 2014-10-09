@@ -232,7 +232,7 @@ exports.rectifyDifferences = function (client, datamodel, differences, udtraekDa
     });
     return callSequentially(ops);
   }
-  return callSequentially([rectifyUpdates, rectifyInserts, rectifyDeletes]);
+  return callSequentially([rectifyDeletes, rectifyInserts, rectifyUpdates ]);
 };
 
 function createTempTable(client, tempTableName, srcTable) {

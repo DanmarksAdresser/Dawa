@@ -4,6 +4,8 @@ var kode4String = require('../util').kode4String;
 var _ = require('underscore');
 var temaer = require('../temaer/temaer');
 var tilknytninger = require('../tematilknytninger/tilknytninger');
+var additionalFieldsMap = require('../temaer/additionalFields');
+
 var datamodels = require('../../crud/datamodel');
 // maps of field names to database column names
 
@@ -150,6 +152,7 @@ exports.keys = {};
 temaer.forEach(function(tema) {
  var keyColumn = "(fields->>'" + tema.key + "')::integer"; // note, future keys may not be integer
   var tilknytningKey = (tema.prefix + 'tilknytning');
+  var temaKeyField = _.findWhere(additionalFieldsMap[tema.singular], {name: tema.key});
   exports.columnMappings[tilknytningKey] =
     [{
       name: 'adgangsadresseid',
@@ -158,7 +161,7 @@ temaer.forEach(function(tema) {
         name: tilknytninger[tema.singular].keyFieldName,
         column: keyColumn,
         fromJoinedTable: true,
-        formatter: tilknytninger[tema.singular].keyFormatter
+        formatter: temaKeyField.formatter
       }]);
 
   exports.tables[ tilknytningKey] = 'adgangsadresser_temaer_matview';

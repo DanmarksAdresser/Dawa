@@ -11,7 +11,7 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
       name: mapping.name,
       selectable: true,
       multi: false,
-      formatter: columnMapping.formatter
+      formatter: mapping.formatter
     };
   });
   return memo;

@@ -12,9 +12,7 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
     flat: flatRepresentation,
     json: {
       fields: flatRepresentation.fields,
-      mapper: function() {
-        return _.identity;
-      }
+      mapper: flatRepresentation.mapper
     }
   };
   return memo;

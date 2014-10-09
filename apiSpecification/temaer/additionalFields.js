@@ -72,7 +72,7 @@ var fieldMap = {
       name: 'zone',
       description: 'Zonestatus. 1: Byzone, 2: Sommerhusområde, 3: Landzone.',
       schema: {
-        type: 'integer'
+        type: 'string'
       },
       formatter: util.zoneKodeFormatter
     }

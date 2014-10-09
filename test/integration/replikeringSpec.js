@@ -173,14 +173,6 @@ var nonexistingIds = {
 };
 
 
-function toSqlModel(datamodelName, apiObject) {
-  return _.reduce(columnMappings.columnMappings[datamodelName], function (memo, mapping) {
-    var sqlColumn = mapping.column || mapping.name;
-    memo[sqlColumn] = apiObject[mapping.name];
-    return memo;
-  }, {});
-}
-
 var ENTITY_NAMES = ['adresse','adgangsadresse','vejstykke','postnummer','ejerlav'];
 
 
@@ -211,8 +203,8 @@ describe('ReplikeringsAPI', function() {
   ENTITY_NAMES.forEach(function(datamodelName) {
     beforeEach(function(done) {
       var datamodel = datamodels[datamodelName];
-      var objectToInsert = toSqlModel(datamodelName, insert[datamodelName]);
-      var objectToUpdate = toSqlModel(datamodelName, update[datamodelName]);
+      var objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
+      var objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
       Q.nfcall(crud.create, client, datamodel, objectToInsert).then(function() {
         return Q.nfcall(crud.update, client, datamodel, objectToUpdate);
       }).then(function() {
@@ -237,7 +229,7 @@ describe('ReplikeringsAPI', function() {
         helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
           expect(objects.length).toBe(1);
           var obj = objects[0];
-          expect(obj).toEqual(helpers.jsToCsv(insert[datamodelName]));
+          expect(obj).toEqual(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
           done();
         });
       });
@@ -246,7 +238,7 @@ describe('ReplikeringsAPI', function() {
         helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
           expect(objects.length).toBe(1);
           var obj = objects[0];
-          expect(obj).toEqual(helpers.jsToCsv(update[datamodelName]));
+          expect(obj).toEqual(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
           done();
         });
       });

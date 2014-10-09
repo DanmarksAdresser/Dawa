@@ -5,6 +5,7 @@ var _ = require('underscore');
 var fieldsUtil = require('../../common/fieldsUtil');
 var sqlModels = require('./sqlModels');
 var mappings = require('./../columnMappings');
+var additionalFieldsMap = require('../../temaer/additionalFields');
 
 var d = require('../util').d;
 
@@ -26,7 +27,8 @@ var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
   var entityFields = _.map(mappings[datamodelName], function(columnMapping) {
     return {
       name: columnMapping.name,
-      selectable: true
+      selectable: true,
+      formatter: columnMapping.formatter
     };
   });
 

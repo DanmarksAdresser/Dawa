@@ -3,6 +3,7 @@
 var _ = require('underscore');
 var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
+var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 
 function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) {
   function withDbClient(callback) {
@@ -99,3 +100,13 @@ exports.jsToCsv = function(obj) {
     return memo;
   },{});
 };
+
+
+exports.toSqlModel = function(datamodelName, apiObject) {
+  return _.reduce(columnMappings.columnMappings[datamodelName], function (memo, mapping) {
+    var sqlColumn = mapping.column || mapping.name;
+    memo[sqlColumn] = apiObject[mapping.name];
+    return memo;
+  }, {});
+};
+

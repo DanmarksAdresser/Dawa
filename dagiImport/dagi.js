@@ -3,6 +3,7 @@
 var dagiTemaer = require('../apiSpecification/temaer/temaer');
 var jsonFieldMap = require('../apiSpecification/temaer/additionalFields');
 var _ = require('underscore');
+var Q = require('q');
 var dataUtil = require('../psql/dataUtil');
 var divergensImpl = require('../psql/divergensImpl');
 var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
@@ -51,6 +52,8 @@ exports.addDagiTema = function(client, tema, cb) {
   });
 };
 
+exports.addDagiTemaQ =  Q.denodeify(exports.addDagiTema);
+
 exports.updateDagiTema = function(client, tema, cb) {
   var key = findTema(tema.tema).key;
   var fieldsNotChangedClause = jsonFieldMap[tema.tema].map(function(field) {
@@ -97,6 +100,8 @@ exports.updateDagiTema = function(client, tema, cb) {
   });
 };
 
+exports.updateDagiTemaQ = Q.denodeify(exports.updateDagiTema);
+
 exports.deleteDagiTema = function(client, tema, cb) {
   var key = findTema(tema.tema).key;
   var sql = "DELETE FROM temaer WHERE tema = $1 AND fields->>'" + key + "' = $2::text";
@@ -114,8 +119,12 @@ exports.initAdresserTemaerView = function(client, temaName, cb) {
         [temaName],
         cb);
     },
-    function(cb) {
-      loadAdresseDataImpl.initializeHistoryTable(client, 'adgangsadresse_tema', cb);
+    function (cb) {
+      client.query(
+          'INSERT INTO adgangsadresser_temaer_matview_history(adgangsadresse_id, tema_id, tema) ' +
+          '(SELECT adgangsadresse_id, tema_id, tema FROM adgangsadresser_temaer_matview WHERE tema = $1)',
+        [temaName],
+        cb);
     },
     sqlCommon.enableTriggers(client)
   ], cb);
