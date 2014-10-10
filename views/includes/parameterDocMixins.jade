@@ -14,12 +14,13 @@ mixin documentResource(specs, path)
                     tr
                         td= parameter.name
                         td!= parameter.doc+(parameter.multi === true ? ' (<a href="/generelt#flervaerdisoegning">Flerværdisøgning</a> muligt).' : '')
-    h4 Eksempler
-    - each example in spec.examples
-        p!= example.description
-        pre
-            a(href=docUtil.addBaseUrlAndParameters(url, example.path || path, example.query))
-              =    docUtil.addBaseUrlAndParameters(url, example.path || path, example.query)
+    if spec.examples > 0
+      h4 Eksempler
+      - each example in spec.examples
+          p!= example.description
+          pre
+              a(href=docUtil.addBaseUrlAndParameters(url, example.path || path, example.query))
+                =    docUtil.addBaseUrlAndParameters(url, example.path || path, example.query)
 
 mixin parameterDocQuery(apiSpec, docSpec)
     pre= 'GET ' + url + '/' + apiSpec.model.plural
@@ -34,24 +35,26 @@ mixin parameterDocQuery(apiSpec, docSpec)
                     tr
                         td= parameter.name
                         td!= parameter.doc
-    h4 Eksempler
-    - each example in docSpec.examples.query
-        p!= example.description
-        pre
-            a(href=docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query))
-              = docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query)
+    if docSpec.examples.length > 0
+      h4 Eksempler
+      - each example in docSpec.examples.query
+          p!= example.description
+          pre
+              a(href=docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query))
+                = docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query)
 
 mixin autocompleteDoc(autocompleteSchema, plural, examples)
     p Autocomplete på #{plural}. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
     pre GET #{url}/#{plural}/autocomplete
 
     div.page-header
-    h4 Eksempler
-    - each example in examples
-        p!= example.description
-        pre
-            a(href=docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query))
-              = docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query)
+    if examples > 0
+      h4 Eksempler
+      - each example in examples
+          p!= example.description
+          pre
+              a(href=docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query))
+                = docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query)
 
     div.page-header
     h4 Autocomplete return data
@@ -72,12 +75,13 @@ mixin parameterDocGet(apiSpec, docSpec)
                     tr
                         td= parameter.name
                         td!= parameter.doc
-    h4 Eksempler
-    - each example in docSpec.examples.get
-      p!= example.description
-      pre
-        a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
-          = docUtil.computeGetUrl(url, apiSpec, example.path)
+    if docSpec.examples.length > 0
+      h4 Eksempler
+      - each example in docSpec.examples.get
+        p!= example.description
+        pre
+          a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
+            = docUtil.computeGetUrl(url, apiSpec, example.path)
 
 mixin documentProperties(props, indent)
   - each property in props

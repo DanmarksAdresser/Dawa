@@ -928,7 +928,8 @@ var eventExamples = {
     parameters: [{
       name: 'sekvensnummer',
       doc: 'Angiver sekvensnummeret for udtrækket. Alle hændelser til og med det angivne sekvensnummer er med i udtrækket.'
-    }]
+    }],
+    examples: []
   };
 
   exports['/replikering/' + nameAndKey.plural] = udtraekParameterDoc;
@@ -953,7 +954,7 @@ var eventExamples = {
         doc: 'Returnerer hændelser hvor tidspunktet for hændelsen er tidligere eller lig det angivne tidspunkt. Eksempel: 2014-05-23T08:39:36.181Z. Det anbefales at anvende sekvensnumre fremfor tidspunkter til fremsøgning af hændelser.'
       }
     ],
-    examples: eventExamples[replicatedModelName]
+    examples: eventExamples[replicatedModelName] || []
   };
   eventParameterDocs.parameters = eventParameterDocs.parameters.concat(keyParams[replicatedModelName] ? keyParams[replicatedModelName] : []);
   exports['/replikering/' + nameAndKey.plural + '/haendelser'] = eventParameterDocs;

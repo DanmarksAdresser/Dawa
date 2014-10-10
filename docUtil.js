@@ -36,7 +36,6 @@ function resolveProperty(property) {
   var propertyDef;
   // use resolved $ref . Description not from $ref overrides.
   if (property.$ref) {
-    console.log(JSON.stringify(property));
     propertyDef = _.clone(property.__$refResolved);
     if (property.description) {
       propertyDef.description = property.description;

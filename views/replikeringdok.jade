@@ -96,8 +96,81 @@ block content
               +documentResource(parameterDoc, '/replikering/ejerlav/haendelser')
               h4 Hændelsesformat for ejerlav
               +documentSchema(jsonSchemas.ejerlav_hændelse)
-
-
+          section
+            h3 Adressetilknytninger
+            p Adgangsadresser er tilknyttet administrative inddelinger, så som sogn, region, retskreds, politikreds m.v. På replikerings-API'et er disse tilknytninger ikke en del af adgangsadressen - de udstilles separat. Bemærk, at disse tilknytninger alle er beregnet ud fra adressens og den administrative inddelings <em>geografi</em>. Hvis adressens adgangspunkt eller inddelingens geografi ikke er korrekt vil det resultere i en forkert tilknytning.
+            section
+              h4 Regionstilknytninger
+              p Her udstilles adgangsadressernes tilknyttede region. Bemærk,at tilknytningerne er beregnet ud fra adgangspunktets koordinater, der kan være manglende eller forkert. Det er derfor bedre at benytte adressens kommunekode til at finde den tilknyttede kommune, og så anvende regionskoden for kommunen.
+              h5 Regionstilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/regionstilknytninger')
+              h5 Regionstilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/regionstilknytninger/haendelser')
+              h5 Hændelsesformat for regionstilknytninger
+              +documentSchema(jsonSchemas.regionstilknytning_hændelse)
+            section
+              h4 Kommunetilknytninger
+              p Her udstilles adgangsadressernes tilknyttede kommune, som den beregnes ud fra adgangspunktets koordinater og kommunens geografi. Advarsel: I langt de fleste tilfælde er det bedre at benytte adressens kommunekode i stedet, da denne altid er korrekt også selvom adressen har et forkert adgangspunkt.
+              h5 Kommunetilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/kommunetilknytninger')
+              h5 Kommunetilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/kommunetilknytninger/haendelser')
+              h5 Hændelsesformat for kommunetilknytninger
+              +documentSchema(jsonSchemas.kommunetilknytning_hændelse)
+            section
+              h4 Postnummertilknytninger
+              p Her udstilles adgangsadressernes tilknyttede postnummer, som den beregnes ud fra adgangspunktet og postnummerets geografi. Advarsel: I langt de fleste tilfælde er det bedre at benytte adressens postnummer i stedet, da denne altid er korrekt også selvom adressen har et forkert adgangspunkt.
+              h5 Postnummertilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/postnummertilknytninger')
+              h5 Postnummertilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/postnummertilknytninger/haendelser')
+              h5 Hændelsesformat for postnummertilknytninger
+              +documentSchema(jsonSchemas.postnummertilknytning_hændelse)
+            section
+              h4 Sognetilknytninger
+              p Her udstilles adgangsadressernes tilknyttede sogne, som den beregnes ud fra adgangspunktet og sognets geografi.
+              h5 Sognetilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/sognetilknytninger')
+              h5 Sognetilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/sognetilknytninger/haendelser')
+              h5 Hændelsesformat for sognetilknytninger
+              +documentSchema(jsonSchemas.sognetilknytning_hændelse)
+            section
+              h4 Retskredstilknytninger
+              p Her udstilles adgangsadressernes tilknyttede retskredse, som den beregnes ud fra adgangspunktet og retskredsens geografi.
+              h5 Retskredstilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/retskredstilknytninger')
+              h5 Retskredstilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/retskredstilknytninger/haendelser')
+              h5 Hændelsesformat for retskredstilknytninger
+              +documentSchema(jsonSchemas.retskredstilknytning_hændelse)
+            section
+              h4 Politikredstilknytninger
+              p Her udstilles adgangsadressernes tilknyttede politikredse, som den beregnes ud fra adgangspunktet og politikredsens geografi.
+              h5 Politikredstilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/politikredstilknytninger')
+              h5 Politikredstilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/politikredstilknytninger/haendelser')
+              h5 Hændelsesformat for politikredstilknytninger
+              +documentSchema(jsonSchemas.politikredstilknytning_hændelse)
+            section
+              h4 Opstillingskredstilknytninger
+              p Her udstilles adgangsadressernes tilknyttede opstillingskredse, som den beregnes ud fra adgangspunktet og opstillingskredsens geografi.
+              h5 Opstillingskredstilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/opstillingskredstilknytninger')
+              h5 Opstillingskredstilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/opstillingskredstilknytninger/haendelser')
+              h5 Hændelsesformat for opstillingskredstilknytninger
+              +documentSchema(jsonSchemas.opstillingskredstilknytning_hændelse)
+            section
+              h4 Zonetilknytninger
+              p Her udstilles adgangsadressernes tilknyttede zonestatus, som den beregnes ud fra adgangspunktet og zonekortet.
+              h5 Zonetilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/zonetilknytninger')
+              h5 Zonetilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/zonetilknytninger/haendelser')
+              h5 Hændelsesformat for zonetilknytninger
+              +documentSchema(jsonSchemas.zonetilknytning_hændelse)
   block append scripts
     script.
       $('#topbar li').removeClass('active');
