@@ -271,12 +271,12 @@ var fields = {
       schema: definitions.Status
     }, {
       name: 'oprettet',
-      description: 'Dato og tid for adressens oprettelse, som registreret hos BBR. Eksempel: 2001-12-23T00:00:00Z.',
+      description: 'Dato og tid for adressens oprettelse, som registreret hos BBR. Eksempel: 2001-12-23T00:00:00.',
       schema: definitions.NullableDateTime,
       formatter: timestampFormatter
     }, {
       name: 'ændret',
-      description: 'Dato og tid hvor der sidst er ændret i adgangsadressen. Eksempel: 2002-04-08T00:00:00Z.',
+      description: 'Dato og tid hvor der sidst er ændret i adgangsadressen, som registreret hos BBR. Eksempel: 2002-04-08T00:00:00.',
       schema: definitions.NullableDateTime,
       formatter: timestampFormatter
     }, {

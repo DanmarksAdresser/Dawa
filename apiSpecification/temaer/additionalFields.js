@@ -70,7 +70,7 @@ var fieldMap = {
   zone: [
     {
       name: 'zone',
-      description: 'Zonestatus. 1: Byzone, 2: Sommerhusområde, 3: Landzone.',
+      description: '"Byzone", "Sommerhusområde" eller "Landzone".',
       schema: {
         type: 'string'
       },
