@@ -78,8 +78,6 @@ exports.columnMappings = {
       return num ? "" + num : null;
     }
   }, {
-    name: 'adgangspunktid'
-  }, {
     name: 'etrs89koordinat_øst',
     column: 'etrs89oest'
   }, {

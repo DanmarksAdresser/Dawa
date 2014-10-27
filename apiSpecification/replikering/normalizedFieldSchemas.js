@@ -168,10 +168,6 @@ var fields = {
         pattern: '^[0-9]{1,6}'
       }
     }, {
-      name: 'adgangspunktid',
-      description: 'Adgangspunktets id',
-      schema: definitions.NullableUUID
-    }, {
       name: 'etrs89koordinat_øst',
       description: 'Adgangspunktets østlige koordiat angivet i koordinatsystemet UTM zone 32' +
         ' og ved brug af det fælles europæiske terrestriale referencesystem EUREF89/ETRS89.',
