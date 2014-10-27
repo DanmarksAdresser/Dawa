@@ -91,15 +91,30 @@ function removePrefixZeroes(str) {
 }
 
 function parseHusnr(husnr) {
+  if(!_.isString(husnr)) {
+    return {
+      nr: null,
+      bogstav: null
+    };
+  }
   husnr = removePrefixZeroes(husnr).trim();
   var husnrRegex = /^([\d]{1,3})([A-Z]?)$/;
   var match = husnrRegex.exec(husnr);
+  if(!match){
+    return {
+      nr: null,
+      bogstav: null
+    };
+  }
   return {
     nr: parseInt(match[1]),
     bogstav: match[2] !== "" ? match[2] : null
   };
 }
 function compareHusnr(a, b) {
+  if(_.isUndefined(a) || _.isUndefined(b)) {
+    return undefined;
+  }
   var pa = parseHusnr(a);
   var pb = parseHusnr(b);
   if(pa.nr < pb.nr) {
@@ -127,9 +142,6 @@ function compareHusnr(a, b) {
 
 // Note: denne funktion checker IKKE om adressen er på den rigtige side
 function adresseWithinInterval(adgangsadresse, interval) {
-  if(!adgangsadresse.husnr) {
-    return false;
-  }
   return compareHusnr(adgangsadresse.husnr, interval.husnrFra) >= 0 &&
     compareHusnr(adgangsadresse.husnr, interval.husnrTil) <= 0;
 }
@@ -163,6 +175,9 @@ function createPostnrUpdate(adgangsadresse, interval) {
 function isOnSide(eventSide, adgangsadresse) {
   var numberShouldBeOdd = eventSide === 'ulige';
   var number = parseHusnr(adgangsadresse.husnr).nr;
+  if(!number) {
+    return false;
+  }
   var numberIsOdd = ((number % 2) === 1);
   var isOnCorrectSide = numberShouldBeOdd === numberIsOdd;
   return isOnCorrectSide;
