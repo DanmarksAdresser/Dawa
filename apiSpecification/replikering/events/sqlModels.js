@@ -9,9 +9,6 @@ var sqlUtil = require('../../common/sql/sqlUtil');
 var parameters = require('./parameters');
 var temaer = require('../../temaer/temaer');
 
-function coaleseFields(columnName) {
-  return 'COALESCE(i.' + columnName + ', d.' + columnName + ')';
-}
 function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
   return {
     allSelectableFieldNames: function () {
@@ -39,9 +36,8 @@ function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
       // we want to be able to find events for a specific ID.
       var keyColumns = _.reduce(columnMappings, function (memo, mapping) {
         var columnName = mapping.column || mapping.name;
-        var coalescedColumn = mapping .fromJoinedTable ? columnName : coaleseFields(columnName);
         memo[mapping.name] = {
-          where: coalescedColumn
+          where: columnName
         };
         return memo;
       }, {});
@@ -58,8 +54,7 @@ function baseQuery(datamodelName, tableName, columnMappings) {
     return columnMappings.map(function(columnMapping) {
       var selectTransform = columnMapping.selectTransform;
       var columnName = columnMapping.column || columnMapping.name;
-      var coalescedColumn = columnMapping .fromJoinedTable ? columnName : coaleseFields(columnName);
-      var transformedColumn = selectTransform ? selectTransform(coalescedColumn) : coalescedColumn;
+      var transformedColumn = selectTransform ? selectTransform(columnName) : columnName;
       return transformedColumn + ' AS ' + columnMapping.name;
     });
   }
@@ -67,8 +62,7 @@ function baseQuery(datamodelName, tableName, columnMappings) {
   var query = {
     select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
     from: [" transaction_history h" +
-      " LEFT JOIN " + tableName + "_history i ON (h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from)" +
-      " LEFT JOIN " + tableName + "_history d ON (h.operation = 'delete' AND h.sequence_number = d.valid_to)"],
+      " LEFT JOIN " + tableName + "_history i ON ((h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from) OR (h.operation = 'delete' AND h.sequence_number = i.valid_to))"],
     whereClauses: [],
     orderClauses: ['sekvensnummer'],
     sqlParams: []
@@ -95,9 +89,9 @@ function createTilknytningModel(tema) {
 
   var baseQueryFn = function() {
     var query = baseQuery('adgangsadresse_tema', 'adgangsadresser_temaer_matview', columnMappings);
-    query.from.push('LEFT JOIN temaer ON temaer.id = ' + coaleseFields('tema_id'));
+    query.from.push('LEFT JOIN temaer ON temaer.id = tema_id');
     var temaNameAlias = dbapi.addSqlParameter(query, tema.singular);
-    dbapi.addWhereClause(query, coaleseFields('tema') + ' = ' + temaNameAlias);
+    dbapi.addWhereClause(query, 'i.tema = ' + temaNameAlias);
     return query;
   };
 

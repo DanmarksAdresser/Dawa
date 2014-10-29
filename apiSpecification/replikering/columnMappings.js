@@ -158,7 +158,6 @@ temaer.forEach(function(tema) {
     }].concat([{
         name: tilknytninger[tema.singular].keyFieldName,
         column: keyColumn,
-        fromJoinedTable: true,
         formatter: temaKeyField.formatter
       }]);
 
