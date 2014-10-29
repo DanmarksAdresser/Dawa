@@ -104,12 +104,17 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
           whereSpec(sqlParts, param, params);
         }
         else {
-          var paramValues = param._multi_ ? param.values : [param];
+          var column = whereSpec;
+          var paramValues = param === null ? [null] : (param._multi_ ? param.values : [param]);
           var orClauses = _.map(paramValues,
             function(value){
-              var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
-              var column = whereSpec;
-              return (column + " = " + parameterAlias);
+              if(value !== null) {
+                var parameterAlias = dbapi.addSqlParameter(sqlParts, value);
+                return (column + " = " + parameterAlias);
+              }
+              else {
+                return (column + ' IS NULL');
+              }
             });
           sqlParts.whereClauses.push("("+orClauses.join(" OR ")+")");
         }

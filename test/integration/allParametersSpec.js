@@ -7,6 +7,15 @@ var kode4String = require('../../apiSpecification/util').kode4String;
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
+function multiVerifier(verifierFn) {
+  return function(object, paramString) {
+    var values = paramString.split('|');
+    return values.some(function(value){
+      return verifierFn(object, value);
+    });
+  };
+}
+
 var sampleParameters = {
   vejstykke: {
     kode: {
@@ -210,10 +219,15 @@ var sampleParameters = {
       }
     },
     etage: {
-      values: ['kl', '1'],
-      verifier: function(adr, etage) {
-        return adr.etage === etage;
-      }
+      values: ['kl', '1', '', 'st|'],
+      verifier:  multiVerifier(function(adr, etage) {
+        if(etage === '') {
+          return adr.etage === null;
+        }
+        else {
+          return adr.etage === etage;
+        }
+      })
     },
     dør: {
       values: ['tv', '1'],

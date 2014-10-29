@@ -81,6 +81,9 @@ function parseParameter(valString, paramSpec) {
 }
 
 function parseParameterType(valString, type) {
+  if(valString === '') {
+    return null;
+  }
   if (type === undefined || type === 'string') {
     return valString;
   }
