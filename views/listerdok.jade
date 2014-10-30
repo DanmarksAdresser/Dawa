@@ -48,6 +48,12 @@ block content
               li <a href='#opstillingskredsopslag'>Opstillingskredsopslag</a>
               li <a href='#opstillingskredsreverse'>Opstillingskreds reverse geocoding</a>
               li <a href='#opstillingskredsdata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#valglandsdel').nav-header Valglandsdels API
+            ul#valglandsdel.nav.nav-list
+              li <a href='#valglandsdelsoegning'>Valglandsdelssøgning</a>
+              li <a href='#valglandsdelopslag'>Valglandsdelsopslag</a>
+              li <a href='#valglandsdelreverse'>Valglandsdel reverse geocoding</a>
+              li <a href='#valglandsdeldata'>Databeskrivelse</a>
 
 
         div.span9
@@ -147,6 +153,21 @@ block content
             h3.anchor-header#opstillingskredsdata Beskrivelse af opstillingskredsdata
             p Web API'et udstiller for hver opstillingskreds følgende informationer:
             +documentSchema(jsonSchemas.opstillingskreds)
+
+          section
+              h3.anchor-header#valglandsdelsoegning Valglandsdelssøgning
+              +documentResource(parameterDoc, '/valglandsdele')
+              div.page-header
+              h3.anchor-header#valglandsdelopslag Valglandsdelsopslag
+              +documentResource(parameterDoc, '/valglandsdele/{bogstav}')
+              div.page-header
+                  h3.anchor-header#valglandsdelreverse Valglandsdel reverse geocoding
+              +documentResource(parameterDoc, '/valglandsdele/reverse')
+              div.page-header
+              h3.anchor-header#valglandsdeldata Beskrivelse af valglandsdelsdata
+              p Web API'et udstiller for hver valglandsdels følgende informationer:
+              +documentSchema(jsonSchemas.valglandsdel)
+
           section
 
 block append scripts

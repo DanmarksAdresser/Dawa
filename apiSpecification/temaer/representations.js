@@ -72,7 +72,8 @@ _.filter(dagiTemaer, function(tema) {
       docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version']
     };
     additionalFields.forEach(function(fieldSpec) {
-      result.properties[fieldSpec.name] = fieldSpec.schema;
+      result.properties[fieldSpec.name] = _.clone(fieldSpec.schema);
+      result.properties[fieldSpec.name].description = fieldSpec.description;
       result.docOrder.push(fieldSpec.name);
     });
 
