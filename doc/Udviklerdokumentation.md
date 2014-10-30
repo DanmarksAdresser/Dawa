@@ -73,8 +73,8 @@ Der kan anvendes synonym-ordbog og unaccent-regler som er specielt lavet til DAW
   $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/dictionaries/enable-custom-dict.sql
  ```
 
-Efter der sker en ændring i orbøgerne skal der reindekseres:
+Efter der sker en ændring i ordbøgerne skal der reindekseres:
 
  ```
-  $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname>  --disableTriggers psql/dictionaries/reindex-search.sql
+  $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/reindex-search.sql
  ```
