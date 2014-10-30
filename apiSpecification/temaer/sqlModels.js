@@ -51,7 +51,7 @@ publishedTemaer.forEach(function(tema) {
   };
 
   var parameterImpls = [
-    sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+    sqlParameterImpl.simplePropertyFilter(parameters[tema.singular].propertyFilter, columns),
     sqlParameterImpl.reverseGeocodingWithin(),
     sqlParameterImpl.search(columns),
     sqlParameterImpl.autocomplete(columns),

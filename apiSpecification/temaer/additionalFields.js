@@ -4,7 +4,6 @@ var _ = require('underscore');
 
 var fieldsUtil = require('../common/fieldsUtil');
 var commonSchemaDefinitions = require('../commonSchemaDefinitions');
-var schemaUtil = require('../schemaUtil');
 var util = require('../util');
 
 var kode4String = require('../util').kode4String;
@@ -76,7 +75,17 @@ var fieldMap = {
       },
       formatter: util.zoneKodeFormatter
     }
-  ]
+	],
+	valglandsdel: [
+	  {
+		name: 'bogstav',
+		description: 'Valgslandsdelens bogstav, udgør nøglen.',
+		schema: {
+			type: 'string'
+		}
+	  },
+      describe(navn, 'Valglandsdelens navn.')
+	]
 };
 
 _.each(fieldMap, function(fields) {

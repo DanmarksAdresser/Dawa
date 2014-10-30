@@ -24,6 +24,9 @@ module.exports =  {
   },
   zone: {
     keyFieldName: 'zone'
+  },
+  valglandsdel: {
+	keyFieldName: 'valglandsdelsbogstav'
   }
 };
 

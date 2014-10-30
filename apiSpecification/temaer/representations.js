@@ -14,9 +14,32 @@ var makeHrefFromPath = commonMappers.makeHrefFromPath;
 var registry = require('../registry');
 
 
-// postnumre eksporteres ikke
+var autocompleteTekst = {
+  valglandsdel: {
+    description: function(tema) {
+      return 'Bogstav efterfulgt af navnet på ' + tema.singularSpecific;
+    },
+    mapper: function (row) {
+      return '' + row.bogstav + ' ' + row.navn;
+    }
+  }
+};
+var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
+kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
+  autocompleteTekst[dagiTemaNavn] = {
+      description: function(tema) {
+        return 'Koden efterfulgt af navnet på ' + tema.singularSpecific;
+    },
+    mapper: function(row) {
+      return '' + row.kode + ' ' + row.navn;
+    }
+  }
+});
+
+
+// postnumre, zoner eksporteres ikke
 _.filter(dagiTemaer, function(tema) {
-  return tema.singular !== 'postnummer';
+  return tema.published;
 }).forEach(function(tema) {
   var fields = fieldMap[tema.singular];
   var representations = {};
@@ -77,7 +100,7 @@ _.filter(dagiTemaer, function(tema) {
   function dagiAutocompleteSchema() {
     var properties = {
       tekst: {
-        description: 'Koden efterfulgt af navnet på ' + tema.singularSpecific,
+        description: autocompleteTekst[tema.singular].description(tema),
         type: 'string'
       }
     };
@@ -93,8 +116,8 @@ _.filter(dagiTemaer, function(tema) {
       var dagiTemaMapper = representations.json.mapper(baseUrl);
       return function(row) {
         var result = {
-          tekst: '' + row.kode + ' ' + row.navn
-        };
+			    tekst: autocompleteTekst[tema.singular].mapper(row)
+		    };
         result[tema.singular] = dagiTemaMapper(row);
         return result;
       };
@@ -115,4 +138,5 @@ _.filter(dagiTemaer, function(tema) {
   representations.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), representations.flat);
   exports[tema.singular] = representations;
 
-  registry.addMultiple(tema.singular, 'representation', module.exports[tema.singular]);});
+  registry.addMultiple(tema.singular, 'representation', module.exports[tema.singular]);
+});

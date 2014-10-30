@@ -111,6 +111,16 @@ exports.postnummer = {
   }
 };
 
+exports.valglandsdel = {
+	name: 'valglandsdel',
+	wfsName: 'Valglandsdel',
+	geometry: 'geometri',
+	fields: {
+		navn: 'navn',
+		bogstav: 'valglandsdelsbogstav'
+	}
+};
+
 // normalize, such that every field has a name and a parseFn.
 _.each(exports, function(mapping) {
   mapping.fields = _.reduce(mapping.fields, function(memo, value, key) {

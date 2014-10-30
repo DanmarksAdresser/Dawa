@@ -64,5 +64,13 @@ module.exports = [
     prefix: 'zone',
     key: 'zone',
     published: false
+  },
+  {
+	singular: 'valglandsdel',
+	singularSpecific: 'valglandsdelen',
+	plural: 'valglandsdele',
+	prefix: 'valglandsdels',
+	key: 'bogstav',
+	published: true
   }
 ];

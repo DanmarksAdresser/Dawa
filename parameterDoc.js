@@ -604,23 +604,41 @@ function firstUpper(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function dagiParameters(tema) {
+function dagiNavnParameter(tema) {
+	return {
+		name: 'navn',
+		doc: firstUpper(tema.singularSpecific) + 's navn. Der er forskel på store og små bogstaver.'
+	};
+}
+function dagiQParameter() {
+	return {
+		name: 'q',
+		doc: 'Søgetekst. Der søges i kode og navn. Alle ord i søgeteksten skal matche. ' +
+			'Wildcard * er tilladt i slutningen af hvert ord.'
+	};
+}
+function dagiKodeNavnParameters(tema) {
   return [
     {
       name: 'kode',
       doc: firstUpper(tema.singularSpecific)+'s kode. 4 cifre.'
     },
-    {
-      name: 'navn',
-      doc: firstUpper(tema.singularSpecific) +'s navn. Der er forskel på store og små bogstaver.'
-    },
-    {
-      name: 'q',
-      doc: 'Søgetekst. Der søges i kode og navn. Alle ord i søgeteksten skal matche. ' +
-        'Wildcard * er tilladt i slutningen af hvert ord.'
-    }
+    dagiNavnParameter(tema),
+    dagiQParameter()
   ];
 }
+
+function dagiBogstavNavnParameters(tema) {
+	return [
+		{
+			name: 'bogstav',
+			doc: firstUpper(tema.singularSpecific)+'s bogstav.'
+		},
+		dagiNavnParameter(tema),
+		dagiQParameter()
+	];
+}
+
 
 var dagiExamples = {
   region: {
@@ -747,8 +765,86 @@ var dagiExamples = {
         value: 'grøn'
       }]
     }]
+  },
+  valglandsdel: {
+		query: [{
+			description: 'Find alle valglandsdele som starter med Midt',
+			query: [{
+				name: 'q',
+				value: 'Midt*'
+			}]
+		}, {
+			description: 'Returner alle valglandsdele',
+			query: {}
+		}],
+		get: [{
+			description: 'Returner oplysninger om valglandsdel Hovedstaden',
+			path: ['/valglandsdele/A']
+		}, {
+			description: 'Returnerer oplysninger om valglandsdel Hovedstaden i GeoJSON format',
+			path: ['/valglandsdele/A'],
+			query: [{
+				name: 'format',
+				value: 'geojson'
+			}]
+		}],
+		autocomplete: [{
+			description: 'Find oplysninger om alle valglandsdele der starter med Midt',
+			query: [{
+				name: 'q',
+				value: 'Midt'
+			}]
+		}]
   }
 };
+
+function dagiListEndpointDoc(tema) {
+	return {
+		subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
+		parameters: dagiKodeNavnParameters(tema).concat(formatAndPagingParams),
+		examples: dagiExamples[tema.singular].query || []
+	};
+}
+function dagiByKodeEndpointDoc(tema) {
+	return {
+		subtext: 'Modtag ' + tema.singular + ' med kode.',
+		parameters: [_.find(dagiKodeNavnParameters(tema), function (p) {
+			return p.name === 'kode';
+		})].concat(formatParameters),
+		nomulti: true,
+		examples: dagiExamples[tema.singular].get || []
+	};
+}
+function dagiAutocompleteEndpointDoc(tema) {
+	return {
+		subtext: autocompleteSubtext(tema.plural),
+		parameters: overwriteWithAutocompleteQParameter(dagiKodeNavnParameters(tema)).concat(formatAndPagingParams),
+		examples: dagiExamples[tema.singular].autocomplete || []
+	};
+}
+function dagiReverseEndpointDoc(tema) {
+	return {
+		subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
+		parameters: reverseGeocodingParameters,
+		nomulti: true,
+		examples: [
+			{
+				description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+				query: [
+					{name: 'x', value: '12.5851471984198'},
+					{name: 'y', value: '55.6832383751223'}
+				]
+			},
+			{
+				description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+				query: [
+					{name: 'x', value: '725369.59'},
+					{name: 'y', value: '6176652.55'},
+					{name: 'srid', value: '25832'}
+				]}
+		]
+	};
+}
 
 ['region', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'].forEach(function(dagiTemaNavn) {
   var tema = _.findWhere(dagiTemaer, {singular: dagiTemaNavn});
@@ -756,45 +852,45 @@ var dagiExamples = {
     docVersion: 2,
     resources: {}
   };
-  doc.resources['/' + tema.plural] = {
-    subtext: 'Søg efter ' + tema.plural +'. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-    parameters: dagiParameters(tema).concat(formatAndPagingParams),
-    examples: dagiExamples[tema.singular].query || []
-  };
-  doc.resources['/' + tema.plural + '/{kode}'] = {
-    subtext: 'Modtag ' + tema.singular + ' med kode.',
-    parameters: [_.find(dagiParameters(tema), function(p){ return p.name === 'kode'; })].concat(formatParameters),
-    nomulti: true,
-    examples: dagiExamples[tema.singular].get || []
-  };
-  doc.resources['/' + tema.plural + '/autocomplete'] = {
-    subtext: autocompleteSubtext(tema.plural),
-    parameters: overwriteWithAutocompleteQParameter(dagiParameters(tema)).concat(formatAndPagingParams),
-    examples: dagiExamples[tema.singular].autocomplete || []
-  };
-  doc.resources['/' + tema.plural + '/reverse'] = {
-    subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
-    parameters: reverseGeocodingParameters,
-    nomulti: true,
-    examples: [
-      {
-        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
-        query: [
-          {name:'x', value:'12.5851471984198'},
-          {name:'y', value:'55.6832383751223'}
-        ]
-      },
-      {
-        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
-        query: [
-            {name: 'x', value: '725369.59'},
-            {name: 'y', value: '6176652.55'},
-          {name: 'srid' , value: '25832'}]}
-    ]
-  };
+  doc.resources['/' + tema.plural] = dagiListEndpointDoc(tema);
+  doc.resources['/' + tema.plural + '/{kode}'] = dagiByKodeEndpointDoc(tema);
+  doc.resources['/' + tema.plural + '/autocomplete'] = dagiAutocompleteEndpointDoc(tema);
+  doc.resources['/' + tema.plural + '/reverse'] = dagiReverseEndpointDoc(tema);
 
   _.extend(module.exports, doc.resources);
 });
+
+function dagiValglandsDelsDoc() {
+	var tema = _.findWhere(dagiTemaer, {singular: 'valglandsdel'});
+	var doc = {
+		docVersion: 2,
+		resources: {}
+	};
+	doc.resources['/' + tema.plural] = {
+		subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
+		parameters: dagiBogstavNavnParameters(tema).concat(formatAndPagingParams),
+		examples: dagiExamples[tema.singular].query || []
+	};
+	doc.resources['/' + tema.plural + '/{bogstav}'] = {
+		subtext: 'Modtag ' + tema.singular + ' ud fra bogstav.',
+		parameters: [_.find(dagiBogstavNavnParameters(tema), function (p) {
+			return p.name === 'bogstav';
+		})].concat(formatParameters),
+		nomulti: true,
+		examples: dagiExamples[tema.singular].get
+	};
+	doc.resources['/' + tema.plural + '/autocomplete'] = {
+		subtext: autocompleteSubtext(tema.plural),
+		parameters: overwriteWithAutocompleteQParameter(dagiBogstavNavnParameters(tema)).concat(formatAndPagingParams),
+		examples: dagiExamples[tema.singular].autocomplete || []
+	};
+	doc.resources['/' + tema.plural + '/reverse'] = dagiReverseEndpointDoc(tema);
+
+	return doc;
+}
+
+_.extend(module.exports, dagiValglandsDelsDoc().resources);
+
 
 var ejerlavIdParameter =   {
   name: 'kode',

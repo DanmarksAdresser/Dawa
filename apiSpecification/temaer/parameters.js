@@ -5,7 +5,7 @@ var normalizeParameters = require('../common/parametersUtil').normalizeParameter
 var dagiTemaer = require('./temaer');
 var registry = require('../registry');
 
-module.exports = {
+var kodeAndNavn = {
   id: normalizeParameters([
     {
       name: 'kode',
@@ -25,8 +25,29 @@ module.exports = {
   ])
 };
 
-_.filter(dagiTemaer, function(tema) {
-  return tema.published;
-}).forEach(function(tema) {
-  registry.addMultiple(tema.singular, 'parameterGroup', module.exports);
+var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
+kodeAndNavnTemaer.forEach(function(dagiTemaNavn) {
+  module.exports[dagiTemaNavn] = kodeAndNavn;
+});
+
+module.exports.valglandsdel = {
+  id: normalizeParameters([
+    {
+      name: 'bogstav'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'navn',
+      multi: true
+    },
+    {
+      name: 'bogstav',
+      multi: true
+    }
+  ])
+};
+
+_.each(module.exports, function(parameterGroup, temaName) {
+  registry.addMultiple(temaName, 'parameterGroup', parameterGroup);
 });
