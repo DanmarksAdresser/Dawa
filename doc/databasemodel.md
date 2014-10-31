@@ -214,7 +214,7 @@ Historiktabellerne vedligeholdes ved hjælp af triggers.
 Der vedligeholdes et antal afledte tabeller, som anvendes til effektivt at kunne udføre de nødvendige queries.
 
 ### GriddedDagiTemaer
-Dagitemaerne er voldsomt store (op mod 300,000 punkter). PostgreSQL er ikke i stand til effektivt at indeksere så store
+DAGI temaerne er voldsomt store (op mod 300,000 punkter). PostgreSQL er ikke i stand til effektivt at indeksere så store
 multipolygoner. Derfor inddeles DAGI temaerne i mindre polygoner. Tabellen GriddedDagiTemaer indeholder disse. Tabellen
 vedligeholdes ved hjælp af triggeren `update_gridded_dagi_temaer` på tabellen `dagitemaer`.
 

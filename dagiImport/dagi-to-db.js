@@ -37,8 +37,8 @@ var featureMappingsMap = {
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  dataDir: [false, 'Folder med dagitema-filer', 'string', '.'],
-  filePrefix: [false, 'Prefix på dagitema-filer', 'string', ''],
+  dataDir: [false, 'Folder med DAGI tema-filer', 'string', '.'],
+  filePrefix: [false, 'Prefix på DAGI tema-filer', 'string', ''],
   service: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
   temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string'],
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
@@ -145,28 +145,28 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
         async.series([
           function (callback) {
             async.eachSeries(temaerToRemove, function (tema, callback) {
-              logger.info('Removing dagitema', { tema: tema.tema, fields: tema.fields });
+              logger.info('Removing DAGI tema', { tema: tema.tema, fields: tema.fields });
               dagi.deleteDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
             async.eachSeries(temaerToCreate, function (tema, callback) {
-              logger.info('Adding dagitema', { tema: tema.tema, fields: tema.fields });
+              logger.info('Adding DAGI tema', { tema: tema.tema, fields: tema.fields });
               dagi.addDagiTema(client, tema, callback);
             }, callback);
           },
           function (callback) {
             async.eachSeries(temaerToUpdate, function (tema, callback) {
-              logger.debug('opdaterer dagitema',{ tema: tema.tema, fields: tema.fields });
+              logger.debug('opdaterer DAGI tema',{ tema: tema.tema, fields: tema.fields });
               dagi.updateDagiTema(client, tema, function(err, result) {
                 if(err) {
                   return callback(err);
                 }
                 if(result.rowCount === 0){
-                  logger.info('dagitema uændret');
+                  logger.info('DAGI tema uændret');
                 }
                 else {
-                  logger.info('Opdaterede dagitema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
+                  logger.info('Opdaterede DAGI tema', { tema: tema.tema, kode: tema.kode, navn: tema.navn });
                 }
                 callback(err, result);
               });
@@ -227,7 +227,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
       dagiTemaFragmentMap = null;
       putDagiTemaer(temaNavn, dagiTemaer, function (err) {
         if(err) {
-          logger.error('Indlæsning af dagitema fejlet', { temaNavn: temaNavn, error: err});
+          logger.error('Indlæsning af DAGI tema fejlet', { temaNavn: temaNavn, error: err});
         }
         else {
           logger.debug('Indlæsning af DAGI temaer afsluttet', {temaNavn: temaNavn });
@@ -241,11 +241,11 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
     indlæsDagiTema(temaNavn, callback);
   }, function (err) {
     if(err) {
-      logger.error('Indlæsning af dagitema fejlet', err);
+      logger.error('Indlæsning af DAGI tema fejlet', err);
       process.exit(1);
     }
     else {
-      logger.info('Indlæsning af dagitemaer gennemført', { temaer: temaer});
+      logger.info('Indlæsning af DAGI temaer gennemført', { temaer: temaer});
     }
   });
 });
