@@ -1059,7 +1059,7 @@ var eventExamples = {
 module.exports['/replikering/senesteSekvensnummer'] = {
   subtekst: 'Henter seneste sekvensnummer',
   parameters: [],
-  exanples: []
+  examples: []
 };
 
 
