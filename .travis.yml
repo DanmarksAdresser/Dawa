@@ -1,7 +1,7 @@
 
 notifications:
   email:
-    - ahj@trifork.com
+    - jrf@trifork.com
 
 language: node_js
 
