@@ -14,7 +14,7 @@ mixin documentResource(specs, path)
                     tr
                         td= parameter.name
                         td!= parameter.doc+(parameter.multi === true ? ' (<a href="/generelt#flervaerdisoegning">Flerværdisøgning</a> muligt).' : '')
-    if spec.examples > 0
+    if spec.examples.length > 0
       h4 Eksempler
       - each example in spec.examples
           p!= example.description
