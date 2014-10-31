@@ -173,20 +173,6 @@ block content
               p Vi planlægger at tilføje kodeeksempler i andre sprog og platforme. Hvis du vil bidrage med et kodeeksempel i dit favorit programmeringssprog, er du meget velkommen.
 
             div.page-header
-            //
-              h3.anchor-header#kopiregister Etablering af opdateret kopiregister
-              p Vi anbefaler, at den service baserede adgang til adressefunktionalitet sker via Web API'et anvendes, men i nogle tilfælde giver det mening at have en lokal kopi af adresse-, vejnavne- eller postnummerdata. I det følgende beskrives hvorledes et opdateret kopiregister etableres via et eksempel. Lad os sige vi ønsker en opdateret kopi af adresserne i København og Frederiksberg kommuners adresser. Det sker på følgende måde:
-              ol
-                li
-                  | Gem det aktuelle hændelsesløbenummer for adresser: <a href='#{url}/adressehaendelser/loebenummer'>#{url}/adressehaendelser/loebenummer</a>
-                  | Lad os sige at det aktuelle løbenummer er 2027.
-                li Hent adresserne i København og Frederiksberg kommuner:
-                  a(href='#{url}/adresser?kommune=0101,0147') #{url}/adresser?kommune=0101,0147
-                li
-                  | Opdater adresserne vha. adressehændelserne fra følgende: <a href='#{url}/adresserhaendelser?fraloebenr=2027'>#{url}/adresserhaendelser?fraloebenr=2027</a>
-                  | Opdateringen skal kun ske hvis hændelsens løbenummer er større end løbenummeret registreret på adressen.
-                li Sidste løbenummer i listen af adressehændelser fra ovenstående gemmes til næste opdatering.
-
 
 block append scripts
 
