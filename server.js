@@ -174,8 +174,8 @@ function setupMaster() {
 
     isaliveApp.set('json spaces', 2);
 
-    isaliveApp.listen(3001);
-    logger.info("startup", "Master listening for isalive", {listenPort: 3001});
+    isaliveApp.listen(options.masterListenPort);
+    logger.info("startup", "Master listening for isalive", {listenPort: options.masterListenPort});
   });
 }
 

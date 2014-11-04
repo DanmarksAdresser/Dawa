@@ -600,6 +600,52 @@ var postnummerDoc = {
 };
 
 
+/******************************************************************************/
+/*** Ejerlavsnavne ************************************************************/
+/******************************************************************************/
+
+var ejerlavParameters = [
+  {name: 'kode',
+    doc: 'Ejerlavets unikke kode. Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
+    examples: ['170354', '80652']},
+  {name: 'navn',
+    doc: 'Postnummernavn',
+    examples: ['Aarhus', 'København']},
+  {name: 'q',
+    doc: 'Søgetekst. Der søges i ejerlavsnavnet. Alle ord i søgeteksten skal matche ejerlavsnavnet. ' +
+      'Wildcard * er tilladt i slutningen af hvert ord.'}];
+
+var ejerlavIdParameter =_.find(ejerlavParameters, function (p) {
+  return p.name === 'kode';
+});
+
+var ejerlavDoc = {
+  docVersion: 2,
+  resources: {
+    '/ejerlav': {
+      subtext: 'Søg efter ejerlav. Returnerer de ejerlav som opfylder kriteriet.',
+      parameters: ejerlavParameters.concat(formatAndPagingParams),
+      examples: [{description: 'Hent alle ejerlav', query: []},
+        {description: 'Find ejerlav <em>80652</em>',
+          query: [{ name: 'kode', value: "80652"}]},
+        {description: 'Find ejerlavet <em>Lynge By, Lynge</em>',
+          query: [{ name: 'navn', value: "Lynge By, Lynge"}]}]},
+
+    '/ejerlav/{kode}': {
+      subtext: 'Modtag ejerlav med angivet kode.',
+      parameters: [ejerlavIdParameter],
+      nomulti: true,
+      examples: [{description: 'Hent ejerlav 80652',
+        path: ['/ejerlav/80652']}]},
+
+    '/ejerlav/autocomplete': {
+      subtext: autocompleteSubtext('ejerlav'),
+      parameters: overwriteWithAutocompleteQParameter(ejerlavParameters).concat(formatAndPagingParams),
+      examples: [{description: 'Find alle ejerlav som indeholder <em>by</em> i navnet',
+        query: [{name:'q', value:'by'}]}]}
+  }
+};
+
 function firstUpper(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -892,11 +938,6 @@ function dagiValglandsDelsDoc() {
 _.extend(module.exports, dagiValglandsDelsDoc().resources);
 
 
-var ejerlavIdParameter =   {
-  name: 'kode',
-  doc: 'Ejerlavets unikke kode. Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.'
-};
-
 var keyParams = {
   vejstykke: vejstykkerIdParameters,
   postnummer: postnummerIdParameter,
@@ -1064,7 +1105,7 @@ module.exports['/replikering/senesteSekvensnummer'] = {
 
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
-  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources);
+  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources);
 
 var allResources = registry.where({
   type: 'resource'

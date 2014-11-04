@@ -13,5 +13,5 @@ module.exports = resourcesUtil.defaultResources(nameAndKey, parameters.id, param
 var registry = require('../registry');
 var qualifiers = ['query', 'autocomplete', 'getByKey'];
 _.zip(qualifiers, module.exports).forEach(function(pair) {
-  registry.add('vejstykke', 'resource', pair[0], pair[1]);
+  registry.add('ejerlav', 'resource', pair[0], pair[1]);
 });
