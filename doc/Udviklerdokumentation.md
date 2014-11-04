@@ -78,3 +78,26 @@ Efter der sker en ændring i ordbøgerne skal der reindekseres:
  ```
   $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/reindex-search.sql
  ```
+
+##Release
+For at lave et release køres 
+
+ ```
+  $> grunt release:<patch|minor|major>
+ ```
+ 
+Herved rettes app-versionen automatisk så det matcher det angivne level - ved patch rettes fx 0.52.4->0.52.5, ved
+minor rettes fx 0.52.4->0.53.0, ved major rettes fx 0.52.4->1.0.0.
+Rettelsen committes automatisk, og der laves et tag på formen v{det nye versionsnummer}, og dette tag committes automatisk.
+
+Rettelserne pushes ikke automatisk, så man skal køre
+
+ ```
+  $> git push
+ ```
+ 
+ ```
+  $> git push --tags
+ ```
+
+Bagefter, før releaset kan ses.
