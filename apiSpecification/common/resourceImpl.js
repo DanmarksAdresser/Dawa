@@ -16,7 +16,7 @@ function jsonStringifyPretty(object){
 
 /**
  * Parses multiple groups of parameters.
- * @param parameterGroups a hash where values are lists of parameter specifications
+ * @param parameterSpec a hash where values are lists of parameter specifications
  * @param rawParams the query parameters
  * @returns a hash where the values are the parsed parameters, plus an additional errors key that contains
  * an array of parsing errors.
