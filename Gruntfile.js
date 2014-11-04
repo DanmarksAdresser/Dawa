@@ -54,7 +54,7 @@ module.exports = function (grunt) {
         npmtag: false, //default: no tag
         tagName: 'v<%= version %>', //default: '<%= version %>'
         commitMessage: 'new Release <%= version %>', //default: 'release <%= version %>'
-        tagMessage: 'tagging version <%= version %>', //default: 'Version <%= version %>',
+        tagMessage: 'tagging version <%= version %>' //default: 'Version <%= version %>',
       }
     },
     bower: {
@@ -87,9 +87,7 @@ module.exports = function (grunt) {
     var globalExceptions = [];
     options.onComplete = function(runner) {
       var exitCode;
-      if (runner.results().failedCount === 0 && globalExceptions.length === 0) {
-        exitCode = 0;
-      } else {
+      if (!(runner.results().failedCount === 0 && globalExceptions.length === 0)) {
         exitCode = 1;
         globalExceptions.forEach(function(exception) {
           console.log('Global exception: ');
