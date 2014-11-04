@@ -171,8 +171,11 @@ block content
               +documentResource(parameterDoc, '/replikering/zonetilknytninger/haendelser')
               h5 Hændelsesformat for zonetilknytninger
               +documentSchema(jsonSchemas.zonetilknytning_hændelse)
+
+            section
+
   block append scripts
     script.
       $('#topbar li').removeClass('active');
-      var a= $("#topbar li a[href='generelt']")[0];
+      var a= $("#topbar li a[href='replikeringdok']")[0];
       var li= $(a).parent().addClass('active');
