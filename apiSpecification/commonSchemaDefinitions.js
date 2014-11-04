@@ -145,6 +145,23 @@ var definitions = {
     },
     docOrder: ['href', 'kommunekode', 'kode','navn']
   }),
+  EjerlavRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Ejerlavets unikke URL.',
+        type: 'string'
+      },
+      kode: {
+        description: 'Ejerlavets kode. Op til 7 cifre.',
+        $ref: '#/definitions/UpTo7'
+      },
+      navn: {
+        description: 'Ejerlavets navn.',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'kode','navn']
+  }),
   SupplerendeBynavnRef: schemaObject({
     properties: {
       href: {
