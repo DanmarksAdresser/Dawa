@@ -12,6 +12,9 @@ var columns = {
   },
   navn: {
     column: 'ejerlav.navn'
+  },
+  tsv: {
+    column: 'ejerlav.tsv'
   }
 };
 
