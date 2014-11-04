@@ -17,7 +17,7 @@ describe('CSV udtræk', function() {
     });
     resources.forEach(function(resource) {
       it('søgning i ' + resource.path + ' kan leveres i CSV-format', function(done) {
-        request.get("http://localhost:3000"+ resource.path +"?per_side=1&format=csv", function(error, response, body) {
+        request.get("http://localhost:3002"+ resource.path +"?per_side=1&format=csv", function(error, response, body) {
           expect(response.headers['content-type']).toBe("text/csv; charset=UTF-8");
           csv()
             .from.string(body, {columns: true})

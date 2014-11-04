@@ -49,7 +49,7 @@ describe('Parameter documentation.', function() {
 describe('Documentation pages', function() {
   ['generelt', 'adressedok', 'adgangsadressedok', 'vejedok', 'supplerendebynavndok', 'postnummerdok', 'listerdok', 'om', 'replikeringdok'].forEach(function(docPageName) {
     it('It should be possible to retrieve the documentation page ' + docPageName, function(done) {
-      request.get("http://localhost:3000/"+ docPageName, function(error, response, body) {
+      request.get("http://localhost:3002/"+ docPageName, function(error, response, body) {
         expect(error).toBeNull();
         expect(response.statusCode).toEqual(200);
         expect(response.headers['content-type']).toBe("text/html; charset=utf-8");

@@ -32,6 +32,7 @@ module.exports = function (grunt) {
       test: {
         options: {
           script: 'server.js',
+          args: ['--listenPort=3002', '--masterListenPort=3003'],
           output: 'Express server listening'
         }
       }
