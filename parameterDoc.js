@@ -600,6 +600,79 @@ var postnummerDoc = {
 };
 
 
+/******************************************************************************/
+/*** Ejerlavsnavne ************************************************************/
+/******************************************************************************/
+
+var ejerlavParametre = [
+  {name: 'kode',
+    doc: 'Postnummer. 4 cifre.',
+    examples: ['2690', '8600']},
+  {name: 'navn',
+    doc: 'Postnummernavn',
+    examples: ['Aarhus', 'København']},
+  {name: 'q',
+    doc: 'Søgetekst. Der søges i ejerlavsnavnet. Alle ord i søgeteksten skal matche ejerlavsnavnet. ' +
+      'Wildcard * er tilladt i slutningen af hvert ord.'}];
+
+var ejerlavIdParameter =_.find(postnummerParameters, function (p) {
+  return p.name === 'kode';
+});
+
+var ejerlavDoc = {
+  docVersion: 2,
+  resources: {
+    '/postnumre': {
+      subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
+      parameters: postnummerParameters.concat(formatAndPagingParams),
+      examples: [{description: 'Hent alle postnumre', query: []},
+        {description: 'Find postnummer <em>8600</em>',
+          query: [{ name: 'nr', value: "8600"}]},
+        {description: 'Find alle postnumre som benyttes i kommune <em>751</em> Aarhus',
+          query: [{ name: 'kommunekode', value: "751"}]},
+        {description: 'Find postnummer for postnummernavn <em>Silkeborg</em>',
+          query: [{ name: 'navn', value: "Silkeborg"}]},
+        {description: 'Find alle postnumre som indeholder ordet <em>strand</em>',
+          query: [{ name: 'q', value: "strand"}]},
+        {description: 'Find alle postnumre som indeholder <em>aar*</em>',
+          query: [{ name: 'q', value: "aar*"}]}]},
+
+    '/postnumre/{nr}': {
+      subtext: 'Modtag postnummer med id.',
+      parameters: [postnummerIdParameter],
+      nomulti: true,
+      examples: [{description: 'Hent postnummer for København NV',
+        path: ['/postnumre/2400']}]},
+
+    '/postnumre/autocomplete': {
+      subtext: autocompleteSubtext('postnumre'),
+      parameters: overwriteWithAutocompleteQParameter(postnummerParameters).concat(formatAndPagingParams),
+      examples: [{description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
+        query: [{name:'q', value:'strand'}]}]},
+    '/postnumre/reverse': {
+      subtext: 'Modtage postnummeret for det punkt der angives med x- og y-parametrene',
+      parameters: reverseGeocodingParameters,
+      nomulti: true,
+      examples: [
+        {
+          description: 'Returner postnummeret for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+          query: [
+            {name:'x', value:'12.5851471984198'},
+            {name:'y', value:'55.6832383751223'}
+          ]
+        },
+        {
+          description: 'Returner postnummeret for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+          query: [
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
+            {name: 'srid' , value: '25832'}]}
+      ]
+    }
+  }
+};
+
+
 function firstUpper(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
