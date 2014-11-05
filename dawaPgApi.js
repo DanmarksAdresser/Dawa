@@ -105,7 +105,7 @@ exports.setupRoutes = function () {
   var app = express();
   app.set('jsonp callback', true);
   app.use(methodOverride());
-  app.use(bodyParser.urlencoded());
+  app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
   app.use(requestLoggingMiddleware);
   app.use(corsMiddleware);
