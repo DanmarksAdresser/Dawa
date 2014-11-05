@@ -43,6 +43,7 @@ function cachingMiddleware(req, res, next) {
   next();
 }
 
+//noinspection JSUnusedLocalSymbols
 function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
@@ -104,7 +105,8 @@ exports.setupRoutes = function () {
   var app = express();
   app.set('jsonp callback', true);
   app.use(methodOverride());
-  app.use(bodyParser());
+  app.use(bodyParser.urlencoded());
+  app.use(bodyParser.json());
   app.use(requestLoggingMiddleware);
   app.use(corsMiddleware);
   app.use(cachingMiddleware);
