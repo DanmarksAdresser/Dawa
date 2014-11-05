@@ -63,6 +63,7 @@ function postgresQueryErrorResponse(details) {
   var msg = {type: "InvalidRequestError",
     title: "The request resulted in an invalid database query, probably due to bad query parameters",
     details: details.hint};
+  logger.error('http', 'Internal server error running DB query', {code: details.code, message: details.message});
   return jsonResponse(500, msg);
 }
 
