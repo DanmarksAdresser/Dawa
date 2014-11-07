@@ -203,7 +203,7 @@ exports.json = {
         docOrder: ['href', 'kode', 'navn']
       }),
       zone: {
-        description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone"',
+        description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone". Beregnes udfra adgangspunktet og zoneinddelingerne fra <a href="http://naturstyrelsen.dk/planlaegning/plansystemdk/services/wfs/">PlansystemDK</a>',
         enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
       }
     },
