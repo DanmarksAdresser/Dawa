@@ -48,6 +48,7 @@ block content
 
 block append scripts
   script(type='text/javascript').
-    $('#topbar li').removeClass('active');
-    var a= $("#topbar li a[href='postnummerdok']")[0];
-    var li= $(a).parent().addClass('active');
+    var topbar = $('#topbar');
+    topbar.find('li').removeClass('active');
+    var a = topbar.find("li a[href='postnummerdok']")[0];
+    var li = $(a).parent().addClass('active');

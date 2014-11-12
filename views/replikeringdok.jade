@@ -176,6 +176,7 @@ block content
 
   block append scripts
     script.
-      $('#topbar li').removeClass('active');
-      var a= $("#topbar li a[href='replikeringdok']")[0];
-      var li= $(a).parent().addClass('active');
+      var topbar = $('#topbar');
+      topbar.find('li').removeClass('active');
+      var a = topbar.find("li a[href='replikeringdok']")[0];
+      var li = $(a).parent().addClass('active');
