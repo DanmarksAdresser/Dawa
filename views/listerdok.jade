@@ -54,6 +54,11 @@ block content
               li <a href='#valglandsdelopslag'>Valglandsdelsopslag</a>
               li <a href='#valglandsdelreverse'>Valglandsdel reverse geocoding</a>
               li <a href='#valglandsdeldata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#ejerlav').nav-header Ejerlav API
+            ul#ejerlav.nav.nav-list
+              li <a href='#ejerlavsoegning'>Ejerlavssøgning</a>
+              li <a href='#ejerlavopslag'>Ejerlavsopslag</a>
+              li <a href='#ejerlavdata'>Databeskrivelse</a>
 
 
         div.span9
@@ -165,9 +170,19 @@ block content
               +documentResource(parameterDoc, '/valglandsdele/reverse')
               div.page-header
               h3.anchor-header#valglandsdeldata Beskrivelse af valglandsdelsdata
-              p Web API'et udstiller for hver valglandsdels følgende informationer:
               p Web API'et udstiller for hver valglandsdel følgende informationer:
               +documentSchema(jsonSchemas.valglandsdel)
+
+          section
+            h3.anchor-header#ejerlavsoegning Ejerlavssøgning
+            +documentResource(parameterDoc, '/ejerlav')
+            div.page-header
+            h3.anchor-header#valglandsdelopslag Ejerlavsopslag
+            +documentResource(parameterDoc, '/ejerlav/{kode}')
+            div.page-header
+            h3.anchor-header#valglandsdeldata Beskrivelse af ejerlav
+            p Web API'et udstiller for hver ejerlav følgende informationer:
+            +documentSchema(jsonSchemas.ejerlav)
 
           section
 
