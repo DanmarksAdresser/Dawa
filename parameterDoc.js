@@ -628,7 +628,7 @@ var ejerlavDoc = {
       examples: [{description: 'Hent alle ejerlav', query: []},
         {description: 'Find ejerlav <em>80652</em>',
           query: [{ name: 'kode', value: "80652"}]},
-        {description: 'Find ejerlavet <em>Lynge By, Lynge</em>',
+        {description: 'Find ejerlav med navn <em>Lynge By, Lynge</em>',
           query: [{ name: 'navn', value: "Lynge By, Lynge"}]}]},
 
     '/ejerlav/{kode}': {
