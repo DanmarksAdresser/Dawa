@@ -4,7 +4,7 @@ var parameterParsing = require("../../parameterParsing");
 
 var schema =  {
   uuid: {type: 'string',
-         pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'},
+         pattern: '^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$'}
 };
 
 var parameterSpec =  {
@@ -80,7 +80,7 @@ describe("Parsing parameters of type 'undefined'", function () {
   });
 });
 
-describe("When parsing unkonwn parameters'", function () {
+describe("When parsing unknown parameters'", function () {
   it("they should just be ignored", function (done) {
     expect(parameterParsing.parseParameters({anyValue: "42", unknownParam: ""}, parameterSpec))
       .toEqual({params: {anyValue: "42"}, errors: []});
