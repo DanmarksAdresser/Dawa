@@ -223,7 +223,10 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
     if(resourceSpec.singleResult) {
       // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
       // client
-      var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, params.noformat !== '', representation);
+      var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam,
+        params.callback,
+        params.noformat !== '',
+        representation);
       return singleResultResponse(resourceSpec, dbClient,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult, callback, releaseDbClient);
     }
     else {
