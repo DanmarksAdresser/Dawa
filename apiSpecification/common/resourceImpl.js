@@ -63,6 +63,7 @@ function postgresQueryErrorResponse(details) {
   var msg = {type: "InvalidRequestError",
     title: "The request resulted in an invalid database query, probably due to bad query parameters",
     details: details.hint};
+  logger.error('http', 'Internal server error running DB query', {code: details.code, message: details.message});
   return jsonResponse(500, msg);
 }
 
@@ -222,16 +223,19 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
     if(resourceSpec.singleResult) {
       // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
       // client
-      var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam, params.callback, params.noformat !== '', representation);
+      var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam,
+        params.callback,
+        params.noformat === undefined,
+        representation);
       return singleResultResponse(resourceSpec, dbClient,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult, callback, releaseDbClient);
     }
     else {
-      // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
+      // create a serializer function that can stream the objects to the HTTP response in the format requested by the
       // client
       var serializeStream = serializers.createStreamSerializer(formatParam,
         params.callback,
         params.srid,
-        params.noformat !== '',
+        params.noformat === undefined,
         representation);
       return arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serializeStream, callback, releaseDbClient);
     }
