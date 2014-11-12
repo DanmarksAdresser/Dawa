@@ -22,6 +22,16 @@ describe('Format selection', function () {
     });
   });
 
+  it("Returns JSON without any spacing if instructed to by noformat parameter", function(done) {
+    request.get("http://localhost:3002/adresser?per_side=10&noformat", function(error, response, body) {
+      expect(response.headers['content-type']).toBe("application/json; charset=UTF-8");
+      expect(body).not.toContain("[\n{");
+      var bodyJson = JSON.parse(body);
+      expect(_.isArray(bodyJson)).toBe(true);
+      done();
+    });
+  });
+
   it("By default, JSON should be returned (single result mode)", function(done) {
     var id = "0a3f50b4-2737-32b8-e044-0003ba298018";
     request.get("http://localhost:3002/adresser/" + id, function(error, response, body) {

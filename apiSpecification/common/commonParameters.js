@@ -38,10 +38,7 @@ exports.format = [
     }
   },
   {
-    name: 'noformat',
-    schema: {
-      enum: ['']
-    }
+    name: 'noformat'
   }
 ];
 
