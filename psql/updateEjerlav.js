@@ -1,6 +1,6 @@
 "use strict";
 
-// This script loads postnumre into the database from a CSV-file.
+// This script loads ejerlav into the database from a CSV-file.
 
 var _         = require('underscore');
 var Q = require('q');
