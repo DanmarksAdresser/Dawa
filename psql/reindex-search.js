@@ -10,11 +10,8 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-function exitOnErr(err){
-  if (err){
-    throw new Error(err);
-  }
-}
+var exitOnErr = sqlCommon.exitOnErr;
+
 cliParameterParsing.main(optionSpec,['pgConnectionUrl'], function(args, options) {
   sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);

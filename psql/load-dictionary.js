@@ -11,11 +11,8 @@ var optionSpec = {
   version: [false, 'Version af ordbøger, som skal anvendes', 'string']
 };
 
-function exitOnErr(err){
-  if (err){
-    throw new Error(err);
-  }
-}
+var exitOnErr = sqlCommon.exitOnErr;
+
 cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(args, options) {
   sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
     exitOnErr(err);

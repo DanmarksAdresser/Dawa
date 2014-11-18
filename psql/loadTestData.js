@@ -19,12 +19,7 @@ var optionSpec = {
 };
 
 
-function exitOnErr(err){
-  if (err){
-    console.dir(err);
-    process.exit(1);
-  }
-}
+var exitOnErr = sqlCommon.exitOnErr;
 
 var scriptDir = __dirname + '/schema';
 

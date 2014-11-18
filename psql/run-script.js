@@ -14,12 +14,7 @@ var optionSpec = {
 
 cli.parse(optionSpec, []);
 
-function exitOnErr(err) {
-  if (err) {
-    console.log("Error: %j", err, {});
-    process.exit(1);
-  }
-}
+var exitOnErr = sqlCommon.exitOnErr;
 
 cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);

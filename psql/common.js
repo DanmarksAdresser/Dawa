@@ -7,12 +7,15 @@ var winston = require('winston');
 
 require('../setupDbConnection');
 
-function exitOnErr(err, cb){
+function exitOnErr(err){
   if (err){
+    console.dir(err);
     winston.error("Error: %j", err, {});
     process.exit(1);
   }
 }
+
+exports.exitOnErr = exitOnErr;
 
 exports.disableTriggers = function(client){
   return function(done) {

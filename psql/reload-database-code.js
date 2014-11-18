@@ -5,19 +5,11 @@ var winston  = require('winston');
 var sqlCommon = require('./common');
 var initialization = require('./initialization');
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-
-function exitOnErr(err){
-  if (err){
-    winston.error("Error: %j", err, {});
-    process.exit(1);
-  }
-}
+var exitOnErr = sqlCommon.exitOnErr;
 
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
   console.log(options.pgConnectionUrl);

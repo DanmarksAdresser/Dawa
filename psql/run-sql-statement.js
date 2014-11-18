@@ -3,6 +3,7 @@
 var cli = require('cli');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var run_sql_statement = require('./run-sql-statement-impl.js');
+var sqlCommon = require('./common');
 var _ = require('underscore');
 
 var optionSpec = {
@@ -12,12 +13,7 @@ var optionSpec = {
 
 cli.parse(optionSpec, []);
 
-function exitOnErr(err){
-  if (err){
-    console.log("Error: %j", err, {});
-    process.exit(1);
-  }
-}
+var exitOnErr = sqlCommon.exitOnErr;
 
 cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
