@@ -16,44 +16,21 @@ Check koden ud fra github og installer afhængigheder:
 ## Importer data i PostgreSQL
 Dette skridt tager lidt tid.
 
-Først oprettes en database. Der ligger er et script DAWA_SRC/psql/createdb.sql til dette.
-Tilpas databasenavnet i dette script og kør det med psql.
-
-
-Herefter intialiseres databaseschemaet:
+Først oprettes en database, ved at køre scriptet createdb.bash
 
 ```
- $> node psql/setup-db.js --pgConnectionUrl=postgres://<user>:<password>@<host>:<port>/<dbname>
+ $> bash psql/createdb/createdb.bash localhost <dbname> <user>
 ```
 
-Hent data filer fra aws.dk
+Herefter initialiseres databaseschemaet:
 
 ```
- $> wget http://file.aws.dk/csv/PostCode.csv.gz -O data/PostCode.csv.gz
- $> wget http://file.aws.dk/csv/AddressAccess.csv.gz -O data/AddressAccess.csv.gz
- $> wget http://file.aws.dk/csv/RoadName.csv.gz -O data/RoadName.csv.gz
- $> wget http://file.aws.dk/csv/AddressSpecific.csv.gz -O data/AddressSpecific.csv.gz
+ $> node psql/setup-db.js --pgConnectionUrl=postgres://<user>@localhost/<dbname>
 ```
 
-Der er en fejl i AddressAccess.csv.gz, hvor der ikke er escapet korrekt i en af rækkerne. Dette problem kan fikses med sed:
-
-```
- $> unzip < AddressAccess.csv.gz | sed -f DAWA_SRC/psql/replaceDoubleQuotes.sed.txt | gzip > AddressAccessFixed.csv.gz
-```
-
-For at indlæse adresserne køres:
-
-```
- $> node psql/load-adresse-data.sql --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> --dataDir=<directory med gzippede CSV-filer> --format=legacy
-```
-
-Herefter indlæses kommunerne:
-
-```
- $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/load-dagi-test-data.sql
-```
-
-PostgreSQL databasen er nu klar til brug. Der er dog ikke importeret DAGI-temaer.
+Dette giver en tom, men korrekt initialiseret databasen.
+Proceduren for at indlæse adressedata findes indtil videre kun i den interne driftsdokumentation for DAWA, og det
+udestår at tilføje den her.
 
 ## Start serveren
 DAWA startes op ved at køre
@@ -61,23 +38,6 @@ DAWA startes op ved at køre
 ```
  $> node server.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname>
 ```
-
-## Optionelt: Indlæsning af ordbøger
-Der kan anvendes synonym-ordbog og unaccent-regler som er specielt lavet til DAWA. Disse ordbøger findes i folderen psql/dictionaries .
- For at anvende disse skal de placeres i folderen $SHAREDIR/tsearch_data , hvor $SHAREDIR er Postgres-installationens folder til delte filer.
- Ordbøgerne kopieres fra psql/dictionaries folderen og over i den angivne folder.
-
- For at aktivere ordbøgerne køres:
-
- ```
-  $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/dictionaries/enable-custom-dict.sql
- ```
-
-Efter der sker en ændring i ordbøgerne skal der reindekseres:
-
- ```
-  $> node psql/run-script.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname> psql/reindex-search.sql
- ```
 
 ##Release
 For at lave et release køres 
@@ -100,4 +60,4 @@ Rettelserne pushes ikke automatisk, så man skal køre
   $> git push --tags
  ```
 
-Bagefter, før releaset kan ses.
+før releaset kan ses på Github.
