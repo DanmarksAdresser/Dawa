@@ -14,8 +14,8 @@ var optionSpec = {
 
 cli.parse(optionSpec, []);
 
-function exitOnErr(err){
-  if (err){
+function exitOnErr(err) {
+  if (err) {
     console.log("Error: %j", err, {});
     process.exit(1);
   }
@@ -39,5 +39,5 @@ cli.main(function(args, options) {
     client.on('notice', function(msg) {
       console.log("notice: %j", msg);
     });
-    });
+  });
 });
