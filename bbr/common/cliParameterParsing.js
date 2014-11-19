@@ -70,7 +70,7 @@ exports.addConfigurationFileParameter = function(optionSpec) {
 
 exports.addLogOptionsParameter = function(optionSpec) {
   optionSpec.logConfiguration = [false, 'Konfigurationsfil med logkonfiguration', 'string'];
-}
+};
 
 exports.main = function(optionSpec, requiredParams, mainFunc) {
   optionSpec = _.clone(optionSpec);
@@ -81,7 +81,7 @@ exports.main = function(optionSpec, requiredParams, mainFunc) {
 
   cli.main(function(args, options) {
     var logOptions;
-    if(options.logConfiguration) {
+    if (options.logConfiguration) {
       var logOptionsStr = fs.readFileSync(options.logConfiguration);
       logOptions = JSON.parse(logOptionsStr);
     }
@@ -95,4 +95,8 @@ exports.main = function(optionSpec, requiredParams, mainFunc) {
     exports.checkRequiredOptions(options, requiredParams);
     mainFunc(args, options);
   });
+};
+
+exports.mainMandatory = function(optionSpec, mainFunc) {
+  exports.main(optionSpec, _.keys(optionSpec), mainFunc);
 };
