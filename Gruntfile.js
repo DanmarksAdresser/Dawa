@@ -41,9 +41,6 @@ module.exports = function (grunt) {
       test: {
         files:  [ 'test/**/*.js', '*.js', 'public/**/*' ],
         tasks:  [ 'test' ]
-//        options: {
-//          spawn: false // Without this option specified express won't be reloaded
-//        }
       }
     },
     release: {
