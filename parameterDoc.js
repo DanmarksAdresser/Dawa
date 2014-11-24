@@ -314,7 +314,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'matrikelnr',
-    doc: 'matrikelnummer. Unikt indenfor et ejerlav.'
+    doc: 'Matrikelnummer. Unikt indenfor et ejerlav.'
   },
   {
     name: 'esrejendomsnr',
