@@ -25,8 +25,8 @@ block content
               li <a href='#fejlhaandtering'>Fejlhåndtering</a>
               li <a href='#formatering'>Formatering</a>
               li <a href='#flervaerdisoegning'>Flerværdisøgning</a>
+              li <a href='#nullsoegning'>Søgning på <i>ingen værdi</i></a>
               li <a href='#kodeeksempler'>Kodeeksempler</a>
-              // li <a href='#kopiregister'>Etablering af opdateret kopiregister</a>
         div.span9
           section
             div.page-header
@@ -154,14 +154,28 @@ block content
             div.page-header
               h3.anchor-header#flervaerdisoegning  Flerværdisøgning
 
-              p En række parametre understøtter flerværdisøgning, hvor søgeværdierne er adskilt vha. pipe ('|'). (Se hvilke
-                | parametre som understøtter flerværdisøgning i dokumentationen for de specifikke API'er).<br>
+              p En række parametre understøtter flerværdisøgning, hvor søgeværdierne er adskilt vha. pipe ('|').
+                | Se hvilke parametre som understøtter flerværdisøgning i dokumentationen for de specifikke API'er.<br>
                 | Hvis man f.eks. ønsker alle adresser med husnummmer 177  i både Københavns og
                 | Frederiksberg kommune gøres det på følgende måde:
 
               p
                 pre
                   a(href='#{url}/adresser?kommunekode=0101|0147&husnr=177') #{url}/adresser?kommunekode=0101|0147&husnr=177
+
+            div.page-header
+              h3.anchor-header#nullsoegning Søgning efter <i>ingen værdi</i>
+
+              p En række parametre understøtter søgning med match på <i>ingen værdi</i>.
+                | Se hvilke parametre som understøtter søgning efter ingen værdi i dokumentationen for de specifikke API'er.<br>
+                | Søgning angives som en normal query
+                | parameter, men med den tomme streng som værdi.<br>
+                | Hvis man f.eks. ønsker alle adresser på Gammel Kongevej 177 der <i>ikke</i> har angivet en etage gøres det
+                | følgende måde:
+
+              p
+                pre
+                  a(href='#{url}/adresser?vejnavn=Gammel%20Kongevej&husnr=177&etage=') #{url}/adresser?vejnavn=Gammel%20Kongevej&husnr=177&etage=
 
             div.page-header
               h3.anchor-header#kodeeksempler Kodeeksempler

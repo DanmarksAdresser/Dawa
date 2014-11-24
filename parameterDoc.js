@@ -75,7 +75,7 @@ var vejnavneParameters = [{name: 'q',
 
 var SRIDParameter = {name: 'srid',
   doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
-    ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84)'
+    ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84).'
 };
 
 var reverseGeocodingParameters = [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '+
@@ -335,33 +335,38 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'cirkel',
-    doc: 'Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}. '
+    doc: 'Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.'
   },
   {
     name: 'regionskode',
-    doc: 'Find de adresser som ligger indenfor regionen angivet ved regionkoden'
+    doc: 'Find de adresser som ligger indenfor regionen angivet ved regionkoden.',
+    nullable: true
   },
   {
     name: 'sognekode',
-    doc: 'Find de adresser som ligger indenfor sognet angivet ved sognkoden'
+    doc: 'Find de adresser som ligger indenfor sognet angivet ved sognkoden.',
+    nullable: true
   },
   {
     name: 'opstillingskredskode',
-    doc: 'Find de adresser som ligger indenfor opstillingskredsen angivet ved opstillingskredskoden'
+    doc: 'Find de adresser som ligger indenfor opstillingskredsen angivet ved opstillingskredskoden.',
+    nullable: true
   },
   {
     name: 'retskredskode',
-    doc: 'Find de adresser som ligger indenfor retskredsen angivet ved retskredskoden'
+    doc: 'Find de adresser som ligger indenfor retskredsen angivet ved retskredskoden.',
+    nullable: true
   },
   {
     name: 'politikredskode',
-    doc: 'Find de adresser som ligger indenfor politikredsen angivet ved politikredskoden'
+    doc: 'Find de adresser som ligger indenfor politikredsen angivet ved politikredskoden.',
+    nullable: true
   }
 ];
 
 var adgangsadresseIdParameter =   {
   name: 'id',
-  doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
+  doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
 };
 
 var adgangsadresseParameters =  [
@@ -456,11 +461,12 @@ var adresseParameters = [{name: 'q',
                           'Der skelnes ikke mellem store og små bogstaver.',
                           examples: ['tværv*']},
                          {name: 'id',
-                          doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'},
+                          doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'},
                          {name: 'adgangsadresseid',
                           doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'},
                          {name: 'etage',
-                          doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9'},
+                          doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9.',
+                          nullable: true},
                          {name: 'dør',
                           doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'}
                         ].concat(parametersForBothAdresseAndAdgangsAdresse);
@@ -951,7 +957,7 @@ _.each(tilknytninger, function (tilknytning, temaNavn) {
   keyParams[tema.prefix + 'tilknytning'] = [
     {
       name: 'adgangsadresseid',
-      doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018'
+      doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
     }
   ];
 });
