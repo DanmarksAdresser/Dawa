@@ -288,10 +288,22 @@ exports.dagiFilter = function() {
       if(notNull(param)) {
         var paramArray = param.values;
         var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
-        var kodeAliases = _.map(paramArray, function(param) {
-          return dbapi.addSqlParameter(sqlParts, param);
-        });
-        dbapi.addWhereClause(sqlParts, "EXISTS( SELECT * FROM adgangsadresser_temaer_matview JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias + " WHERE temaer.fields->>'kode' IN (" + kodeAliases.map(function(alias) {return alias + '::varchar'; }).join(', ') + ') AND adgangsadresse_id = a_id)');
+        if (paramArray.length == 1 && paramArray[0] == null) {
+          // case where the param in the query string is <dagiTema>kode=, ie. we need to find entities with /no/ association to the tema
+          dbapi.addWhereClause(sqlParts, "NOT EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
+          "JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias +
+          " AND adgangsadresse_id = a_id)");
+        } else {
+          var kodeAliases = _.map(paramArray, function(param) {
+            return dbapi.addSqlParameter(sqlParts, param);
+          });
+          dbapi.addWhereClause(sqlParts, "EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
+          "JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias +
+          " WHERE temaer.fields->>'kode' IN (" + kodeAliases.map(function(alias) {
+            return alias + '::varchar';
+          }).join(', ') + ')' +
+          " AND adgangsadresse_id = a_id)");
+        }
       }
     });
   };

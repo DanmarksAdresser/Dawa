@@ -4,6 +4,7 @@ var dagi = require('../../dagiImport/dagi');
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
+var request = require("request");
 require('../../apiSpecification/allSpecs');
 
 describe('Filtrering af adresser ud fra DAGI tema kode', function() {
@@ -50,6 +51,28 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
             });
           });
         });
+      });
+    });
+  });
+});
+
+describe('Fremsøgning af entiteter uden dagitilknytning', function() {
+  // kun 1 adgangsadresse har en regionstilknytning i adgangsadresser_temaer_matview. We har 1320 adgangsadresser, 2802 adresser i alt
+  var entitiesCountWithoutRegion = {
+    adgangsadresse: 1319,
+    adresse: 2801
+  };
+
+  ['adresse', 'adgangsadresse'].forEach(function(entityName) {
+    var resourceSpec = registry.findWhere({
+      entityName: entityName,
+      type: 'resource',
+      qualifier: 'query'
+    });
+    it('er muligt for '  + entityName + 'r uden regionstilknytning', function (done) {
+      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?regionskode=', json: true}, function(error, response, result) {
+        expect(result.length).toBe(entitiesCountWithoutRegion[entityName]);
+        done();
       });
     });
   });
