@@ -290,7 +290,8 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'vejnavn',
-    doc: 'Vejnavn. Der skelnes mellem store og små bogstaver.'
+    doc: 'Vejnavn. Der skelnes mellem store og små bogstaver.',
+    nullable: true
   },
   {
     name: 'husnr',
@@ -298,7 +299,8 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'supplerendebynavn',
-    doc: 'Det supplerende bynavn.'
+    doc: 'Det supplerende bynavn.',
+    nullable: true
   },
   {
     name: 'postnr',
@@ -468,7 +470,8 @@ var adresseParameters = [{name: 'q',
                           doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, kl2 op til kl9.',
                           nullable: true},
                          {name: 'dør',
-                          doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'}
+                          doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
+                          nullable: true}
                         ].concat(parametersForBothAdresseAndAdgangsAdresse);
 
 var adresseDoc = {
