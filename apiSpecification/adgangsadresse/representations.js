@@ -363,31 +363,6 @@ exports.autocomplete = {
   }
 };
 
-
-exports.adressebetegnelse = function(adresseRow, adgangOnly) {
-  var adresse = adresseRow.vejnavn;
-  if(adresseRow.husnr) {
-    adresse += ' ' + adresseRow.husnr;
-  }
-  if(!adgangOnly) {
-    if(exports.notNull(adresseRow.etage) || exports.notNull(adresseRow.dør)) {
-      adresse += ',';
-    }
-    if(adresseRow.etage) {
-      adresse += ' ' + adresseRow.etage + '.';
-    }
-    if(adresseRow.dør) {
-      adresse += ' ' + adresseRow.dør;
-    }
-  }
-  adresse += ', ';
-  if(adresseRow.supplerendebynavn) {
-    adresse += adresseRow.supplerendebynavn + ', ';
-  }
-  adresse += adresseRow.postnr + ' ' + adresseRow.postnrnavn;
-  return adresse;
-};
-
 exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
 
 var registry = require('../registry');
