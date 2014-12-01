@@ -62,4 +62,14 @@ describe('The query-parameter', function () {
                   done();
                 });
   });
+
+  it('ejerlav should allow query for null values', function (done) {
+    request.get('http://localhost:3002/adresser?ejerlav=',
+      function(error, response, body){
+        var adrs = JSON.parse(body);
+        expect(response.statusCode).toBe(200);
+        expect(adrs.length).toBeGreaterThan(1);
+        done();
+      });
+  });
 });
