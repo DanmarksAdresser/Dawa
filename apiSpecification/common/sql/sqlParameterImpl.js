@@ -278,7 +278,15 @@ exports.postnummerStormodtagerFilter = function() {
   };
 };
 
-var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
+var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'zone'];
+function dagiSkemaKodeJsonField(skemaNavn) {
+  if (skemaNavn === 'zone') {
+    return "zone";
+  } else {
+    return "kode";
+  }
+}
+
 var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
 
 exports.dagiFilter = function() {
@@ -299,7 +307,7 @@ exports.dagiFilter = function() {
           });
           dbapi.addWhereClause(sqlParts, "EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
           "JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias +
-          " WHERE temaer.fields->>'kode' IN (" + kodeAliases.map(function(alias) {
+          " WHERE temaer.fields->>'" + dagiSkemaKodeJsonField(skemaNavn) + "' IN (" + kodeAliases.map(function(alias) {
             return alias + '::varchar';
           }).join(', ') + ')' +
           " AND adgangsadresse_id = a_id)");

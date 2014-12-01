@@ -119,7 +119,7 @@ exports.reverseGeocoding =
     }
   ];
 
-var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
+var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'zone'];
 
 var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
 exports.dagiFilter = _.map(filterableDagiSkemaer, function(skemaNavn) {

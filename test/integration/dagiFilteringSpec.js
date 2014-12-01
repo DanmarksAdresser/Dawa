@@ -23,9 +23,17 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       '725025.18 6166264.37))']
   };
 
-  var expectedResults = {
+  var expectedResultsRegion = {
     adgangsadresse: 277,
     adresse: 279
+  };
+  var expectedResultsZone1 = {
+    adgangsadresse: 1,
+    adresse: 1
+  };
+  var expectedResultWithoutRegion = {
+    adgangsadresse: 1319,
+    adresse: 2801
   };
   ['adgangsadresse', 'adresse'].forEach(function(entityName) {
     var resourceSpec = registry.findWhere({
@@ -33,7 +41,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       type: 'resource',
       qualifier: 'query'
     });
-    it('Skal være muligt at filtrere '  + entityName + 'r ud fra DAGI tema', function (done) {
+    it(' for region på '  + entityName, function (done) {
       dbapi.withRollbackTransaction(function (err, client, transactionDone) {
         if (err) throw err;
         dagi.addDagiTema(client, sampleTema, function (err) {
@@ -45,7 +53,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
             var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
             dbapi.queryRaw(client, query.sql, query.params, function(err, result) {
               if(err) throw err;
-              expect(result.length).toBe(expectedResults[entityName]);
+              expect(result.length).toBe(expectedResultsRegion[entityName]);
               transactionDone();
               done();
             });
@@ -53,26 +61,29 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
         });
       });
     });
-  });
-});
 
-describe('Fremsøgning af entiteter uden dagitilknytning', function() {
-  // kun 1 adgangsadresse har en regionstilknytning i adgangsadresser_temaer_matview. We har 1320 adgangsadresser, 2802 adresser i alt
-  var entitiesCountWithoutRegion = {
-    adgangsadresse: 1319,
-    adresse: 2801
-  };
-
-  ['adresse', 'adgangsadresse'].forEach(function(entityName) {
-    var resourceSpec = registry.findWhere({
-      entityName: entityName,
-      type: 'resource',
-      qualifier: 'query'
-    });
-    it('er muligt for '  + entityName + 'r uden regionstilknytning', function (done) {
+    it(' for '  + entityName + 'r uden regionstilknytning', function (done) {
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?regionskode=', json: true}, function(error, response, result) {
-        expect(result.length).toBe(entitiesCountWithoutRegion[entityName]);
+        expect(result.length).toBe(expectedResultWithoutRegion[entityName]);
         done();
+      });
+    });
+
+    it(' for zone på '  + entityName, function (done) {
+      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=1', json: true}, function(error, response, result) {
+        expect(result.length).toBe(expectedResultsZone1[entityName]);
+        done();
+      });
+    });
+
+    it(' for '  + entityName + 'r uden zonetilknytning', function (done) {
+      request.get({url: 'http://localhost:3002' + resourceSpec.path, json: true}, function(error, response, result) {
+        var totalCount = result.length;
+        // we know that only associations to zone 1 exists, so the expected count can be computed from totalCount and the expected number of hits for zone 1
+        request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=', json: true}, function(error, response, result) {
+          expect(result.length).toBe(totalCount - expectedResultsZone1[entityName]);
+          done();
+        });
       });
     });
   });

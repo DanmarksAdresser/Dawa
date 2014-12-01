@@ -315,6 +315,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     doc: 'Koden på det matrikulære ejerlav som adressen skal ligge på.'
   },
   {
+    name: 'zonekode',
+    doc: 'Heltalskoden for den zone som adressen skal ligge i. Mulige værdier er 1 for byzone, 2 for sommerhusområde og 3 for landzone.'
+  },
+  {
     name: 'matrikelnr',
     doc: 'Matrikelnummer. Unikt indenfor et ejerlav.'
   },
