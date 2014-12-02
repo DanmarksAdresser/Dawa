@@ -28,6 +28,7 @@ var normalizedFieldSchema = function(fieldName) {
 
 var nullableType = schemaUtil.nullableType;
 var kode4String = require('../util').kode4String;
+var kvhFormat = require('./kvhTransformer').format;
 
 /*
  * flat format
@@ -207,7 +208,14 @@ exports.json = {
         enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
       },
       kvh: {
-        description: 'Sammensat nøgle for adressen. TODO',
+        description: 'Sammensat nøgle for adgangsadressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
+                     'KVH-nøglen er sammen således:' +
+                     '<dl>' +
+                     '<dt>Index 0-3: Komunekode</dt><dd>Adressens kommunekode (TODO her mangler link). Hvis kommunekoden har mindre end 4 cifre, foranstilles med nuller, kommunekode 175 repræsenteres altså fx som "0175". Hvis en adresse ikke har et tilknyttet kommunenr er værdien "0000"</dd>' +
+                     '<dt>Index 4-7: Vejstykkekode</dt><dd>Kode for adressens vejstykke (TODO her mangler link). Hvis vejstykkets kode har mindre end 4 cifre, foranstilles med nuller, vejstykkekode 370 repræsenteres altså fx som "0370".</dd>' +
+                     '<dt>Index 8-11: Husnr</dt><dd>Husnr (inklusive evt. bogstav) (TODO her mangler link). Hvis husnummeret har mindre end 4 cifre, foranstilles med nuller, 1C repræsenteres altså fx som ‘001C’. Husnumre uden bogstav repræsenteres blot med foranstillede nuller, så fx 17 repræsenteres som "0017".</dd>' +
+                     '</dl>' +
+                     'En adresse på vejstykke 1074 (Melvej) nummer 6 i kommune 420 (Assens) vil altså få KVH-nøgle "042010740006"',
         type: 'string'
       }
     },
@@ -229,7 +237,7 @@ exports.json = {
       var adr = {};
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
-      adr.kvh = 'TODO KVH';
+      adr.kvh = kvhFormat(rs);
       adr.status = rs.status;
       adr.vejstykke = {
         href: makeHref(baseUrl, 'vejstykke', [rs.kommunekode, rs.vejkode]),

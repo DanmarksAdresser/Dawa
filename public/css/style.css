@@ -19,3 +19,7 @@ footer
 	padding-top: 60px; 
 	margin-top: -60px;
 }
+
+dt {
+	font-weight: normal;
+}
