@@ -23,6 +23,7 @@ var normalizedFieldSchema = function(fieldName) {
 };
 
 var kvhxFieldsDts = require('./kvhxTransformer').kvhxFieldsDts;
+var kvhxFormat = require('./kvhxTransformer').format;
 
 var nullableType = schemaUtil.nullableType;
 var kode4String = util.kode4String;
@@ -79,7 +80,7 @@ exports.json = {
     return function(rs) {
       var adr = {};
       adr.id = rs.id;
-      adr.kvhx = "TODO KVHX";
+      adr.kvhx = kvhxFormat(rs);
       adr.status = rs.status;
       adr.href = makeHref(baseUrl, 'adresse', [rs.id]);
       adr.historik = {
