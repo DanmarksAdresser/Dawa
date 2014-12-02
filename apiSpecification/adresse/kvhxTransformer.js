@@ -4,7 +4,8 @@ var kvhTransformer = require('../adgangsadresse/kvhTransformer');
 
 exports.format = function(rs) {
   return kvhTransformer.format(rs) +
-         pad(rs.etage, 3);
+         pad(rs.etage, 3) +
+         pad(rs.dør, 4);
 };
 
 function pad(val, length) {
