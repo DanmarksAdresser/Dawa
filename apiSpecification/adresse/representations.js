@@ -34,35 +34,38 @@ adresseDefinitions.Adgangsadresse = adgangsadresseRepresentations.json.schema;
 exports.json = {
   fields: _.where(fields, {selectable: true}),
   schema: globalSchemaObject({
-    'title': 'Adresse',
-    'properties': {
-      'href': {
+    title: 'Adresse',
+    properties: {
+      href: {
         description: 'Adressens unikke URL.',
         $ref: '#/definitions/Href'
       },
-      'id': normalizedFieldSchema('id'),
+      id: normalizedFieldSchema('id'),
+      rkvhx: {
+        description: 'Sammensat nøgle for adressen. TODO',
+        type: 'string'
+      },
       status: normalizedFieldSchema('status'),
-      'etage': normalizedFieldSchema('etage'),
-      'dør': normalizedFieldSchema('dør'),
-      'adressebetegnelse': {
+      etage: normalizedFieldSchema('etage'),
+      dør: normalizedFieldSchema('dør'),
+      adressebetegnelse: {
         description: '',
         type: 'string'
       },
-      'historik' : schemaObject({
-        'description': 'Væsentlige tidspunkter for adressen',
+      historik : schemaObject({
+        description: 'Væsentlige tidspunkter for adressen',
         properties: {
-          'oprettet': normalizedFieldSchema('oprettet'),
-          'ændret': normalizedFieldSchema('ændret')
+          oprettet: normalizedFieldSchema('oprettet'),
+          ændret: normalizedFieldSchema('ændret')
         },
         docOrder: ['oprettet', 'ændret']
-
       }),
-      'adgangsadresse': {
+      adgangsadresse: {
         description: 'Adressens adgangsadresse',
         $ref: '#/definitions/Adgangsadresse'
       }
     },
-    docOrder: ['href','id', 'status', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
+    docOrder: ['href','id', 'rkvhx', 'status', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
     definitions: adresseDefinitions
   }),
   mapper: function(baseUrl, params, singleResult) {
@@ -70,6 +73,7 @@ exports.json = {
     return function(rs) {
       var adr = {};
       adr.id = rs.id;
+      adr.rkvhx = "TODO RKVHX";
       adr.status = rs.status;
       adr.href = makeHref(baseUrl, 'adresse', [rs.id]);
       adr.historik = {

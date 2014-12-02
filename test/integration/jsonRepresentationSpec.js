@@ -16,6 +16,7 @@ var expectedResultsMap = {
   adgangsadresse: [{
     "href": BASE_URL + "/adgangsadresser/0a3f507d-f270-32b8-e044-0003ba298018",
     "id": "0a3f507d-f270-32b8-e044-0003ba298018",
+    "rkvh": "TODO RKVH",
     "status": 1,
     "vejstykke": {
       "href": BASE_URL + "/vejstykker/185/1640",
@@ -89,6 +90,7 @@ var expectedResultsMap = {
   }],
   adresse: [{
     "id": "0a3f50a7-44a6-32b8-e044-0003ba298018",
+    "rkvhx": "TODO RKVHX",
     "status": 1,
     "href": BASE_URL + "/adresser/0a3f50a7-44a6-32b8-e044-0003ba298018",
     "historik": {
@@ -101,6 +103,7 @@ var expectedResultsMap = {
     "adgangsadresse": {
       "href": BASE_URL + "/adgangsadresser/0a3f507d-f270-32b8-e044-0003ba298018",
       "id": "0a3f507d-f270-32b8-e044-0003ba298018",
+      "rkvh": "TODO RKVH",
       "status": 1,
       "vejstykke": {
         "href": BASE_URL + "/vejstykker/185/1640",
