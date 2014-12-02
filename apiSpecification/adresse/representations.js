@@ -41,7 +41,7 @@ exports.json = {
         $ref: '#/definitions/Href'
       },
       id: normalizedFieldSchema('id'),
-      rkvhx: {
+      kvhx: {
         description: 'Sammensat nøgle for adressen. TODO',
         type: 'string'
       },
@@ -65,7 +65,7 @@ exports.json = {
         $ref: '#/definitions/Adgangsadresse'
       }
     },
-    docOrder: ['href','id', 'rkvhx', 'status', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
+    docOrder: ['href','id', 'kvhx', 'status', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
     definitions: adresseDefinitions
   }),
   mapper: function(baseUrl, params, singleResult) {
@@ -73,7 +73,7 @@ exports.json = {
     return function(rs) {
       var adr = {};
       adr.id = rs.id;
-      adr.rkvhx = "TODO RKVHX";
+      adr.kvhx = "TODO KVHX";
       adr.status = rs.status;
       adr.href = makeHref(baseUrl, 'adresse', [rs.id]);
       adr.historik = {

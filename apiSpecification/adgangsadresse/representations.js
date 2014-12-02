@@ -206,12 +206,12 @@ exports.json = {
         description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone". Beregnes udfra adgangspunktet og zoneinddelingerne fra <a href="http://naturstyrelsen.dk/planlaegning/plansystemdk/services/wfs/">PlansystemDK</a>',
         enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
       },
-      rkvh: {
+      kvh: {
         description: 'Sammensat nøgle for adressen. TODO',
         type: 'string'
       }
     },
-    docOrder: ['href','id', 'rkvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
+    docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone']
   }),
@@ -229,7 +229,7 @@ exports.json = {
       var adr = {};
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
-      adr.rkvh = 'TODO RKVH';
+      adr.kvh = 'TODO KVH';
       adr.status = rs.status;
       adr.vejstykke = {
         href: makeHref(baseUrl, 'vejstykke', [rs.kommunekode, rs.vejkode]),
