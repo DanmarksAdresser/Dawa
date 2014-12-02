@@ -9,7 +9,7 @@ exports.format = function(rs) {
 };
 
 function pad(val, length) {
-  return ("____" + val).slice(-1 * length);
+  return ('____' + (val||'')).slice(-1 * length);
 }
 
 exports.kvhxFieldsDts = kvhTransformer.kvhFieldsDts +
