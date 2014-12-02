@@ -18,6 +18,10 @@ exports.maybeNull = function(val) {
   return val;
 };
 
+exports.padUnderscore = function(val, length) {
+  return ('____' + (val||'')).slice(-1 * length);
+};
+
 exports.adressebetegnelse = function(adresseRow, adgangOnly) {
   var adresse = adresseRow.vejnavn;
   if(adresseRow.husnr) {
@@ -66,4 +70,4 @@ exports.zoneKodeFormatter = function(zoneKode) {
   else if (zoneKode === 3) {
     return 'Landzone';
   }
-}
+};

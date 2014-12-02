@@ -1,16 +1,13 @@
 "use strict";
 
 var kvhTransformer = require('../adgangsadresse/kvhTransformer');
+var pad = require('../util.js').padUnderscore;
 
 exports.format = function(rs) {
   return kvhTransformer.format(rs) +
          pad(rs.etage, 3) +
          pad(rs.dør, 4);
 };
-
-function pad(val, length) {
-  return ('____' + (val||'')).slice(-1 * length);
-}
 
 exports.kvhxFieldsDts = kvhTransformer.kvhFieldsDts +
 '<dt>Index 12-14: Etage</dt><dd>Adressens etage (TODO her mangler link. Hvis etageangivelsen fylder mindre end 3 tegn, foranstilles med underscore, ‘st’ repræsenteres altså som "_st"</dd>' +

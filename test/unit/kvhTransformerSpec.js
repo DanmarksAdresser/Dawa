@@ -25,7 +25,7 @@ function kvhSpecs(transformer) {
       expect(transformer.format({vejkode: 5678}).substring(4, 8)).toBe('5678');
     });
 
-    it('should prepend husnr with zeroes to fill 4 characters', function() {
+    it('should prepend vejkode with zeroes to fill 4 characters', function() {
       expect(transformer.format({vejkode: 7}).substring(4, 8)).toBe('0007');
     });
 
@@ -33,8 +33,8 @@ function kvhSpecs(transformer) {
       expect(transformer.format({husnr: '134B'}).substring(8, 12)).toBe('134B');
     });
 
-    it('should prepend husnr with zeroes to fill 4 characters', function() {
-      expect(transformer.format({husnr: '13'}).substring(8, 12)).toBe('0013');
+    it('should prepend husnr with underscores to fill 4 characters', function() {
+      expect(transformer.format({husnr: '13'}).substring(8, 12)).toBe('__13');
     });
   };
 }
