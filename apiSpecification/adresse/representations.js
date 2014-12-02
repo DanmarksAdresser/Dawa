@@ -22,6 +22,7 @@ var normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('adresse', fieldName);
 };
 
+var kvhxFieldsDts = require('./kvhxTransformer').kvhxFieldsDts;
 
 var nullableType = schemaUtil.nullableType;
 var kode4String = util.kode4String;
@@ -42,7 +43,12 @@ exports.json = {
       },
       id: normalizedFieldSchema('id'),
       kvhx: {
-        description: 'Sammensat nøgle for adressen. TODO',
+        description: 'Sammensat nøgle for adressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
+        'KVHX-nøglen er sammen således:' +
+        '<dl>' +
+        kvhxFieldsDts +
+        '</dl>' +
+        'En adresse på vejstykke 1074 (Melvej) 6, st. tv i kommune 420 (Assens) vil altså få KVH-nøgle "042010740006_st__tv"',
         type: 'string'
       },
       status: normalizedFieldSchema('status'),
