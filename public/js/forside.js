@@ -1,7 +1,7 @@
-var senesteloebenr= 0;
+"use strict";
+/*global L:false */
 
 var apiBase = '';
-
 
 function searchPostnr(input) {
   $.ajax({
@@ -27,11 +27,10 @@ function searchPostnr(input) {
 }
 
 function searchVejnavn(pnr,vej) {
-  var update;
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
-  match = reg.exec(ptext);
-  if (match === null) return;
+  var match = reg.exec(ptext);
+  if (match === null) { return; }
   var parametre= {postnr: match[1]};
   $.ajax({
     url: apiBase + 'vejnavne',
@@ -58,10 +57,10 @@ function searchVejnavn(pnr,vej) {
 function searchHusnr(pnr,vej,husnr) {
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
-  match = reg.exec(ptext);
-  if (match === null) return;
+  var match = reg.exec(ptext);
+  if (match === null) { return; }
   var vtext = $(vej).val();
-  if (vtext===null || vtext.length === 0) return;
+  if (vtext===null || vtext.length === 0) { return; }
   var parametre= {postnr: match[1], vejnavn: vtext};
   $.ajax({
     cache: true,
@@ -75,20 +74,19 @@ function searchHusnr(pnr,vej,husnr) {
     success: function (adresser) {
       var husnumre= [];
       $.each(adresser, function (i, adresse) {
-        if (husnumre.indexOf(adresse.adgangsadresse.husnr) === -1) husnumre.push(adresse.adgangsadresse.husnr);
+        if (husnumre.indexOf(adresse.adgangsadresse.husnr) === -1) { husnumre.push(adresse.adgangsadresse.husnr); }
       });
       husnumre= husnumre.sort(function(a,b) {
-                              var reg= /(\d+)([A-Z]*)/gi;
-                              var ma= reg.exec(a);
-                              reg.lastIndex= 0;
-                              var mb= reg.exec(b);
-                              if (ma === null || mb === null) return 0;
+                              var husnrreg= /(\d+)([A-Z]*)/gi;
+                              var ma= husnrreg.exec(a);
+                              husnrreg.lastIndex= 0;
+                              var mb= husnrreg.exec(b);
+                              if (ma === null || mb === null) { return 0; }
                               var ahusnr= ma[1];
                               var bhusnr= mb[1];
-                              abok= (ma[2] === '')?' ':ma[2];
-                              bbok= (mb[2] === '')?' ':mb[2];
-                              return (ahusnr !== bhusnr)?(parseInt(ahusnr) - parseInt(bhusnr)):abok.localeCompare(bbok);
-                              //return parseInt(ahusnr) - parseInt(bhusnr);
+                              var abok= (ma[2] === '')?' ':ma[2];
+                              var bbok= (mb[2] === '')?' ':mb[2];
+                              return (ahusnr !== bhusnr)?(parseInt(ahusnr, 10) - parseInt(bhusnr, 10)):abok.localeCompare(bbok);
                             });
       $(husnr).autocomplete({
         source: husnumre,
@@ -103,12 +101,12 @@ function searchHusnr(pnr,vej,husnr) {
 function searchEtage(pnr,vej,husnr,etage) {
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
-  match = reg.exec(ptext);
-  if (match === null) return;
+  var match = reg.exec(ptext);
+  if (match === null) { return; }
   var vtext = $(vej).val();
-  if (vtext===null || vtext.length === 0) return;
+  if (vtext===null || vtext.length === 0) { return; }
   var htext = $(husnr).val();
-  if (htext===null || htext.length === 0) return;
+  if (htext===null || htext.length === 0) { return; }
   var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext};
   $.ajax({
     cache: true,
@@ -122,7 +120,7 @@ function searchEtage(pnr,vej,husnr,etage) {
     success: function (adresser) {
       var etager= [];
       $.each(adresser, function (i, adresse) {
-        if (etager.indexOf(adresse.etage) === -1) etager.push(adresse.etage);
+        if (etager.indexOf(adresse.etage) === -1) { etager.push(adresse.etage); }
       });
       $(etage).autocomplete({
         source: etager,
@@ -138,8 +136,8 @@ function searchEtage(pnr,vej,husnr,etage) {
 function searchDør(pnr,vej,husnr,etage,doer) {
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
-  match = reg.exec(ptext);
-  if (match === null) return;
+  var match = reg.exec(ptext);
+  if (match === null) { return; }
   var vtext = $(vej).val();
   if (vtext===null || vtext.length === 0) return;
   var htext = $(husnr).val();
@@ -174,11 +172,8 @@ function searchDør(pnr,vej,husnr,etage,doer) {
 function inverseGeocoding()
 {
 	var map;
-  var marker;
 
   function onMapClick(e) {
-    // marker= L.marker(e.latlng).addTo(map);
-    // marker.bindPopup(e.latlng.toString()).openPopup();
     var url = "/adgangsadresser/reverse?x=" + e.latlng.lng.toString() + "&y=" + e.latlng.lat.toString();
     $.ajax({
       url: url,
@@ -216,26 +211,26 @@ function valider(pnr,vej,husnr,etage,doer) {
   var parametre= {per_side: 2};
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
-  match = reg.exec(ptext);
+  var match = reg.exec(ptext);
   if (match !== null) {
     parametre.postnr= match[1];
   }
   var vtext = $(vej).val();
   if (vtext!==null && vtext.length > 0) {
     parametre.vejnavn= vtext;
-  };
+  }
   var htext = $(husnr).val();
   if (htext!==null && htext.length > 0) {
     parametre.husnr= htext;
-  };
+  }
   var etext = $(etage).val();
   if (etext!==null && etext.length > 0) {
     parametre.etage= etext;
-  };
+  }
   var dtext = $(doer).val();
   if (dtext!==null && dtext.length > 0) {
     parametre.dør= dtext;
-  };
+  }
   $.ajax({
     cache: true,
     url:'/adresser',
