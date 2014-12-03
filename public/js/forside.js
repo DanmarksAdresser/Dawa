@@ -259,18 +259,26 @@ function valider(pnr,vej,husnr,etage,doer) {
 }
 
 $(function () {
+  function errorHandler(query) {
+    return function(xhr, status, error) {
+      $(query).text('(Fejl - ' + xhr.status + " " + xhr.statusText + " " + status + " " + error + ")");
+    };
+  }
+
   $('#autocomplete-adresse').dawaautocomplete({
     baseUrl: '',
     select: function(event, data) {
       $('#autocomplete-adresse-choice').text(data.tekst);
-    }
+    },
+    error: errorHandler('#autocomplete-adresse-choice')
   });
   $('#autocomplete-adgangsadresse').dawaautocomplete({
     adgangsadresserOnly: true,
     baseUrl: '',
     select: function(event, data) {
       $('#autocomplete-adgangsadresse-choice').text(data.tekst);
-    }
+    },
+    error: errorHandler('#autocomplete-adgangsadresse-choice')
   });
   $('#autocomplete-adresse-kbh').dawaautocomplete({
     baseUrl: '',
@@ -279,7 +287,8 @@ $(function () {
     },
     select: function(event, data) {
       $('#autocomplete-adresse-kbh-choice').text(data.tekst);
-    }
+    },
+    error: errorHandler('#autocomplete-adresse-kbh-choice')
   });
   searchPostnr('#postnummer');
   $('#vej').focus(function () {
