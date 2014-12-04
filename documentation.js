@@ -1,6 +1,3 @@
-/*jslint node: true, stupid: true */
-/*stupid:true makes JSLint allow use of .readFileSync */
-
 "use strict";
 
 var express = require('express');
@@ -12,7 +9,10 @@ var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
 
+/*jslint stupid: true */
+/*stupid:true makes JSLint allow use of .readFileSync */
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
+/*jslint stupid: false */
 
 var app = express();
 app.set('views', __dirname + '/views');
