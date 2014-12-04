@@ -13,8 +13,8 @@ mixin documentResource(specs, path)
                 - each parameter in spec.parameters
                     tr
                         td= parameter.name
-                        td!= parameter.doc + (parameter.multi === true ? ' <a href="/generelt#flervaerdisoegning">Flerværdisøgning</a> muligt.' : '') + (parameter.nullable === true ? ' <a href="/generelt#nullsoegning">Søgning efter ingen værdi</a> muligt.' : '')
-if spec.examples.length > 0
+                        td!= parameter.doc+(parameter.multi === true ? ' (<a href="/generelt#flervaerdisoegning">Flerværdisøgning</a> muligt).' : '')+(parameter.nullable === true ? ' <a href="/generelt#nullsoegning">Søgning efter ingen værdi</a> muligt.' : '')
+    if spec.examples.length > 0
       h4 Eksempler
       - each example in spec.examples
           p!= example.description
