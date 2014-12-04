@@ -1,3 +1,6 @@
+/*jslint node: true, stupid: true */
+/*stupid:true makes JSLint allow use of .readFileSync */
+
 "use strict";
 
 var express = require('express');
@@ -11,11 +14,13 @@ var schemaUtil = require('./apiSpecification/schemaUtil');
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
-function setupJadePage(path, page){
-  app.get(path, function (req, res) {
-    res.render(page, jadeDocumentationParams(req));
-  });
-}
+var app = express();
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+
+app.get('/', function (req, res) {
+  res.render('home.jade', {url: paths.baseUrl(req)});
+});
 
 function jadeDocumentationParams(req) {
   var jsonSchemas = _.reduce(registry.entriesWhere({
@@ -45,13 +50,11 @@ function jadeDocumentationParams(req) {
   };
 }
 
-var app = express();
-app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
-
-app.get('/', function (req, res) {
-  res.render('home.jade', {url: paths.baseUrl(req)});
-});
+function setupJadePage(path, page){
+  app.get(path, function (req, res) {
+    res.render(page, jadeDocumentationParams(req));
+  });
+}
 
 setupJadePage('/generelt'             , 'generelt.jade');
 setupJadePage('/adressedok'           , 'adressedok.jade');
