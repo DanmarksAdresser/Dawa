@@ -34,7 +34,7 @@ cliParameterParsing.mainMandatory(optionSpec, function(args, options) {
         },
         function(callback) {
           winston.info('Migration done');
-          callback()
+          callback();
         }
       ],
       exitOnErr);
