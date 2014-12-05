@@ -46,13 +46,22 @@ describe('Parameter documentation.', function() {
   });
 });
 
-describe('Documentation pages', function() {
+describe('Documentation page', function() {
   ['generelt', 'adressedok', 'adgangsadressedok', 'vejedok', 'supplerendebynavndok', 'postnummerdok', 'listerdok', 'om', 'replikeringdok'].forEach(function(docPageName) {
-    it('It should be possible to retrieve the documentation page ' + docPageName, function(done) {
-      request.get("http://localhost:3002/"+ docPageName, function(error, response, body) {
+    it(docPageName + ' should be retrievable', function(done) {
+      request.get("http://localhost:3002/"+ docPageName, function(error, response) {
         expect(error).toBeNull();
         expect(response.statusCode).toEqual(200);
         expect(response.headers['content-type']).toBe("text/html; charset=utf-8");
+        done();
+      });
+    });
+  });
+
+  ['adressedok', 'adgangsadressedok', 'vejedok', 'supplerendebynavndok', 'postnummerdok', 'listerdok'].forEach(function(docPageName) {
+    it(docPageName + ' should contain examples', function(done) {
+      request.get("http://localhost:3002/"+ docPageName, function(error, response, body) {
+        expect(body).toContain('<h4>Eksempler</h4>');
         done();
       });
     });
