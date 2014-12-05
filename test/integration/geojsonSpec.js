@@ -2,7 +2,6 @@
 
 var request = require("request");
 var _       = require("underscore");
-              require('../../apiSpecification/allSpecs');
 
 describe('GeoJSON format', function() {
   it('Kan hente adresser i GeoJSON format', function(done) {
