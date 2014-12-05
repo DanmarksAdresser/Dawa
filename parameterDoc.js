@@ -383,6 +383,10 @@ var adgangsadresseParameters =  [
       'Der skelnes ikke mellem store og små bogstaver.',
     examples: ['tværv*']
   },
+  {name: 'kvh',
+    doc: 'KVH-nøgle. 12 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode efterfulgt af 4 tegn der repræsenter husnr',
+    examples: ['01016378__33']
+  },
   adgangsadresseIdParameter].concat(parametersForBothAdresseAndAdgangsAdresse);
 
 var adgangsadresseDoc = {

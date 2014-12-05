@@ -6,10 +6,7 @@ var kvhxTransformer = require('../../apiSpecification/adresse/kvhxTransformer');
 // As the kvhxTransformer reuses the kvhTransformer functionality for the first 3 fields of the
 // generated keys, we test both transformers with the same set of tests
 
-describe('Formatting kvh from an adgangsadresse recordset', kvhSpecs(kvhTransformer));
-describe('Formatting kvhx from an adresse recordset', kvhSpecs(kvhxTransformer));
-
-function kvhSpecs(transformer) {
+function kvhFormattingSpecs(transformer) {
   return function() {
     it('should place kommunekode in in positions 0-3', function() {
       expect(transformer.format({kommunekode: 1234}).substring(0, 4)).toBe('1234');
@@ -38,3 +35,25 @@ function kvhSpecs(transformer) {
     });
   };
 }
+
+function kvhParsingSpecs(transformer) {
+  return function() {
+    it('should extract kommunekode', function() {
+      expect(transformer.parse('12340000____').kommunekode).toBe('1234');
+    });
+    it('should extract vejkode', function() {
+      expect(transformer.parse('00004321____').vejkode).toBe('4321');
+    });
+    it('should extract husnr', function() {
+      expect(transformer.parse('00000000143B').husnr).toBe('143B');
+    });
+    it('should remove leading underscores from husnr', function() {
+      expect(transformer.parse('00000000__7B').husnr).toBe('7B');
+    });
+  };
+}
+
+describe('Formatting kvh from an adgangsadresse recordset', kvhFormattingSpecs(kvhTransformer));
+describe('Formatting kvhx from an adresse recordset', kvhFormattingSpecs(kvhxTransformer));
+
+describe('Parsing kvh for an adgangsadresse query', kvhParsingSpecs(kvhTransformer));

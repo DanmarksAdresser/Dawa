@@ -8,18 +8,41 @@ var representations = require('./representations');
 var sqlModel = require('./sqlModel');
 var resourcesUtil = require('../common/resourcesUtil');
 var commonParameters = require('../common/commonParameters');
+var kvhTransformer = require('./kvhTransformer');
 
+function kvhDecorator(resourceSpec) {
+  var decorated = resourceSpec.processParameters;
+  resourceSpec.processParameters = function(params) {
+    if (decorated) {
+      console.log("!!!calling decorated processParameters");
+      decorated(params);
+    }
+
+    if (params.kvh) {
+      _.extend(params, kvhTransformer.parse(params.kvh));
+    }
+  };
+
+  return resourceSpec;
+}
 
 module.exports = [
   // query
+  kvhDecorator(
   resourcesUtil.queryResourceSpec(nameAndKey, {
       propertyFilter: parameters.propertyFilter,
       search: commonParameters.search,
       crs: commonParameters.crs,
       geomWithin: commonParameters.geomWithin,
-      dagiFilter: commonParameters.dagiFilter
-    }, representations,
-    sqlModel),
+      dagiFilter: commonParameters.dagiFilter,
+      kvh:   {
+        name: 'kvh',
+        type: 'string',
+        validateFun: kvhTransformer.validate
+      }
+    },
+    representations,
+    sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     geomWithin: commonParameters.geomWithin,
