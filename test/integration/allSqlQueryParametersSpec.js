@@ -1,16 +1,19 @@
 "use strict";
 
+/**
+ * Tests all SQL based query parameters
+ */
+
 var _ = require('underscore');
 var parameterParsing = require('../../parameterParsing');
 var dbapi = require('../../dbapi');
 var kode4String = require('../../apiSpecification/util').kode4String;
 var registry = require('../../apiSpecification/registry');
-require('../../apiSpecification/allSpecs');
 
 function multiVerifier(verifierFn) {
   return function(object, paramString) {
     var values = paramString.split('|');
-    return values.some(function(value){
+    return values.some(function(value) {
       return verifierFn(object, value);
     });
   };
@@ -64,7 +67,7 @@ var sampleParameters = {
     kommunekode: {
       values: ['461', '0461'],
       verifier: function(vejnavn, kommunekode) {
-        return _.some(vejnavn.kommuner, function(kommune){
+        return _.some(vejnavn.kommuner, function(kommune) {
           return kommune.kode === kode4String(kommunekode);
         });
       }
@@ -116,7 +119,7 @@ var sampleParameters = {
     postnr: {
       values: ['5200'],
       verifier: function(supplerendeBynavn, nr) {
-        return _.some(supplerendeBynavn.postnumre, function(postnummer){
+        return _.some(supplerendeBynavn.postnumre, function(postnummer) {
           return postnummer.nr === nr;
         });
       }
@@ -139,7 +142,7 @@ var sampleParameters = {
   adgangsadresse: {
     id: {
       values: ['0a3f507b-b8ea-32b8-e044-0003ba298018'],
-      verifier: function (adr, id) {
+      verifier: function(adr, id) {
         return adr.id === id;
       }
     },
@@ -220,13 +223,12 @@ var sampleParameters = {
     },
     etage: {
       values: ['kl', '1', '', 'st|'],
-      verifier:  multiVerifier(function(adr, etage) {
-        if(etage === '') {
+      verifier: multiVerifier(function(adr, etage) {
+        if (etage === '') {
           return adr.etage === null;
         }
-        else {
-          return adr.etage === etage;
-        }
+
+        return adr.etage === etage;
       })
     },
     dør: {
@@ -237,7 +239,7 @@ var sampleParameters = {
     },
     adgangsadresseid: {
       values: ['0a3f507b-b8f0-32b8-e044-0003ba298018'],
-      verifier: function (adr, id) {
+      verifier: function(adr, id) {
         return adr.adgangsadresse.id === id;
       }
     },
@@ -299,53 +301,57 @@ var sampleParameters = {
   }
 };
 
-describe('Alle propertyFilter parametre skal virke', function() {
-  _.keys(sampleParameters).forEach(function(specName) {
-    var propertyFilterParameters = registry.findWhere({
-      entityName: specName,
-      type: 'parameterGroup',
-      qualifier: 'propertyFilter'
+_.keys(sampleParameters).forEach(function(specName) {
+  var propertyFilterParameters = registry.findWhere({
+    entityName: specName,
+    type: 'parameterGroup',
+    qualifier: 'propertyFilter'
+  });
+  var jsonRepresentation = registry.findWhere({
+    entityName: specName,
+    type: 'representation',
+    qualifier: 'json'
+  });
+  var sqlModel = registry.findWhere({
+    entityName: specName,
+    type: 'sqlModel'
+  });
+  describe('Query for ' + specName, function() {
+    it('tester alle parametre', function() {
+      var specifiedParameterNames = _.pluck(propertyFilterParameters, 'name');
+      var testedParameterNames = _.keys(sampleParameters[specName]);
+      expect(_.difference(specifiedParameterNames, testedParameterNames)).toEqual([]);
     });
-    var jsonRepresentation = registry.findWhere({
-      entityName: specName,
-      type: 'representation',
-      qualifier: 'json'
-    });
-    var sqlModel = registry.findWhere({
-      entityName: specName,
-      type: 'sqlModel'
-    });
-    describe('Alle parametre for ' + specName + ' skal virke', function() {
-      it('Alle almindelige parametre for ' + specName + ' bliver testet', function() {
-        var specifiedParameterNames = _.pluck(propertyFilterParameters, 'name');
-        var testedParameterNames = _.keys(sampleParameters[specName]);
-        expect(_.difference(specifiedParameterNames, testedParameterNames)).toEqual([]);
-      });
-      _.each(sampleParameters[specName], function(sample, paramName) {
-        var verify = sample.verifier;
-        sample.values.forEach(function(sampleValue) {
-          it('Parameteren ' + paramName + '=' + sampleValue + ' skal virke', function(specDone) {
+    _.each(sampleParameters[specName], function(sample, paramName) {
+      var verify = sample.verifier;
+      sample.values.forEach(function(sampleValue) {
+        describe('case ' + paramName + '=' + sampleValue, function() {
+          it('kan parse parametre', function(parseDone) {
             var rawQueryParams = {};
             rawQueryParams[paramName] = sampleValue;
-            var parseResult = parameterParsing.parseParameters(rawQueryParams,  _.indexBy(propertyFilterParameters, 'name'));
+            var parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(propertyFilterParameters, 'name'));
             expect(parseResult.errors.length).toBe(0);
-            parseResult.params.per_side=100;
+            parseDone();
+
+            parseResult.params.per_side = 100;
             var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
             dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-              if(err) throw 'unable to open connection';
+              expect(err).toBeFalsy();
+              if (err) throw 'unable to open connection';
               dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
                 transactionDone();
                 expect(err).toBeFalsy();
                 expect(rows.length).toBeGreaterThan(0);
                 var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
-                mappedRows.forEach(function(json) {
-                  var verifyResult = verify(json, sampleValue);
-                  expect(verifyResult).toBe(true);
-                  if(!verifyResult) {
-                    console.log(JSON.stringify(json));
-                  }
+                describe('Query for ' + specName + ' case ' + paramName + '=' + sampleValue + ', query resultat', function() {
+                  mappedRows.forEach(function(json) {
+                    it(JSON.stringify(json), function(rowSpecDone) {
+                      var verifyResult = verify(json, sampleValue);
+                      expect(verifyResult).toBe(true);
+                      rowSpecDone();
+                    });
+                  });
                 });
-                specDone();
               });
             });
           });
