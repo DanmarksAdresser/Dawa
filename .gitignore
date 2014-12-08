@@ -232,3 +232,5 @@ pip-log.txt
 /psql/setupdb.GENERATED.sql
 /public/lib
 /bower_components
+
+scratch*.*
