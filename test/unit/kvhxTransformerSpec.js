@@ -51,9 +51,12 @@ describe('Parsing kvhx for an adresse query', function() {
     // querying for null values depends on this, and the parameters have already been parsed, so the transformer needs to do it
     expect(transformer.parse('123412341234123____').dør).toBe(null);
   });
+  it('should not throw exceptions because of a malformed parameter value', function() {
+    transformer.parse('4201074006_st__tv'); // this is one character short of being a proper kvhx value
+  });
 });
 
-describe('Validating kvh', function() {
+describe('Validating kvhx', function() {
   it('fails for length less than 19', function() {
     try {
       transformer.validate('12341234123');

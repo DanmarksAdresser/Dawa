@@ -27,6 +27,11 @@ exports.kvhFieldsDts = '<dt>Index 0-3: Kommunekode</dt><dd>Kommunekode for adres
 
 exports.parse = function(kvh) {
   var groups = regExp.exec(kvh);
+
+  if (!groups) {
+    return; // the validate function will be called by the resourceImpl and give the user a error message, so we just bail out to allow the parsing code to expect well formed kvh values
+  }
+
   return {
     kommunekode: groups[1],
     vejkode: groups[2],

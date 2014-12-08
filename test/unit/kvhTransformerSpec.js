@@ -53,6 +53,9 @@ function kvhParsingSpecs(transformer, trailingFiller) {
     it('should represent husnr consisting of all underscores as null', function() {
       expect(transformer.parse('00000000____' + trailingFiller).husnr).toBe(null);
     });
+    it('should not throw exceptions because of a malformed parameter value', function() {
+      transformer.parse('4201074006'); // this is one character short of being a proper kvh value
+    });
   };
 }
 
