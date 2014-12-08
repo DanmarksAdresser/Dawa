@@ -2,6 +2,7 @@
 
 var kode4String = require('../util').kode4String;
 var pad = require('../util.js').padUnderscore;
+var clean = require('../util.js').removeLeadingUnderscores;
 
 var regExp = /^(\d{4})(\d{4})(.{4})/;
 
@@ -13,7 +14,7 @@ exports.format = function(rs) {
 
 exports.validate = function(kvh) {
   if (kvh.length !== 12) {
-    throw "KVH key must be a string of length 12, but supplied value was '"+kvh+"' with a lenght of " + kvh.length;
+    throw "KVH key must be a string of length 12, but supplied value was '"+kvh+"' with a length of " + kvh.length;
   }
   if (!kvh.match(regExp)) {
     throw "Must consist of 8 digits followed by 4 arbitrary characters, but supplied value was '"+kvh+"'";
@@ -26,12 +27,9 @@ exports.kvhFieldsDts = '<dt>Index 0-3: Kommunekode</dt><dd>Kommunekode for adres
 
 exports.parse = function(kvh) {
   var groups = regExp.exec(kvh);
-  console.log('');
-  console.dir(groups[3]);
-  console.log('');
   return {
     kommunekode: groups[1],
     vejkode: groups[2],
-    husnr: groups[3].replace(/_/g, '')
+    husnr: clean(groups[3])
   };
 };

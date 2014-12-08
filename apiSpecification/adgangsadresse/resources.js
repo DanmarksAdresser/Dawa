@@ -14,7 +14,6 @@ function kvhDecorator(resourceSpec) {
   var decorated = resourceSpec.processParameters;
   resourceSpec.processParameters = function(params) {
     if (decorated) {
-      console.log("!!!calling decorated processParameters");
       decorated(params);
     }
 

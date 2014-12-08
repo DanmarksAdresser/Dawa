@@ -16,6 +16,14 @@ var sampleParameters = {
         return adr.kvh === kvh;
       }
     }
+  },
+  adresse: {
+    kvhx: {
+      values: ['04619664__26_st___6', '02533712__27__2___7', '04615588_27B_______'],
+      verifier: function(adr, kvhx) {
+        return adr.kvhx === kvhx;
+      }
+    }
   }
 };
 

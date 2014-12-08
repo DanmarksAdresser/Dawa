@@ -479,8 +479,12 @@ var adresseParameters = [{name: 'q',
                           nullable: true},
                          {name: 'dør',
                           doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
-                          nullable: true}
-                        ].concat(parametersForBothAdresseAndAdgangsAdresse);
+                          nullable: true},
+                         {name: 'kvhx',
+                          doc: 'KVHX-nøgle. 19 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode, 4 tegn der repræsenter husnr, 3 tegn der repræsenterer etage og 4 tegn der repræsenter dør',
+                          examples: ['04619664__26_st___6']
+                         }
+].concat(parametersForBothAdresseAndAdgangsAdresse);
 
 var adresseDoc = {
   docVersion: 2,

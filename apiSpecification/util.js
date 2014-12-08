@@ -22,6 +22,16 @@ exports.padUnderscore = function(val, length) {
   return ('____' + (val||'')).slice(-1 * length);
 };
 
+exports.removeLeadingUnderscores = function(val) {
+  var cleaned = val.replace(/_/g, '');
+
+  if (cleaned === '') {
+    return null;
+  }
+
+  return cleaned;
+}
+
 exports.adressebetegnelse = function(adresseRow, adgangOnly) {
   var adresse = adresseRow.vejnavn;
   if(adresseRow.husnr) {
