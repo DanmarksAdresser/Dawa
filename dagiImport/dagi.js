@@ -6,7 +6,6 @@ var _ = require('underscore');
 var Q = require('q');
 var dataUtil = require('../psql/dataUtil');
 var divergensImpl = require('../psql/divergensImpl');
-var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
 var datamodels = require('../crud/datamodel');
 var async = require('async');
 var sqlCommon = require('../psql/common');
