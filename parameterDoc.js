@@ -428,17 +428,13 @@ var adgangsadresseDoc = {
                   query: [{name: 'polygon',
                            encodeValue: false,
                            value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]},
-        {description: 'Hent alle adgangsadresser i Københavns kommune (kode 0101), i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
-        query: [{
-          name: 'kommunekode',
-          value: '0101'
-        }, {
-          name: 'format',
-          value: 'geojson'
-        }, {
-          name: 'srid',
-          value: '25832'
-        }]}]},
+                 {description: 'Hent alle adgangsadresser i Københavns kommune (kode 0101), i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+                  query: [{name: 'kommunekode', value: '0101'},
+                          {name: 'format', value: 'geojson'},
+                          {name: 'srid', value: '25832'}]},
+                 {description: 'Find den adresse, som har KVH-nøgle 04615319__93',
+                  query: [{name: 'kvh', value: '04615319__93'}]}
+      ]},
 
 
 
@@ -516,18 +512,13 @@ var adresseDoc = {
                   query: [{name: 'polygon',
                            encodeValue: false,
                            value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]},
-        {description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
-          query: [{
-            name: 'postnr',
-            value: '8471'
-          }, {
-            name: 'format',
-            value: 'geojson'
-          }, {
-            name: 'srid',
-            value: '25832'
-          }]}]},
-
+                {description: 'Find den adresse, som har KVHX-nøgle 04615319__93__1____',
+                  query: [{name: 'kvhx', value: '04615319__93__1____'}]},
+                {description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+                  query: [{name: 'postnr', value: '8471'},
+                          {name: 'format', value: 'geojson'},
+                          {name: 'srid', value: '25832'}]}
+      ]},
     '/adresser/{id}': {
       subtext: 'Modtag adresse med id.',
       parameters: [_.find(adresseParameters, function(p){ return p.name === 'id'; })],
