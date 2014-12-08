@@ -21,7 +21,7 @@ var optionSpec = {
   dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string', 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2'],
   dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
-  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string', _.keys(dagiFeatureNames).join(',')]
+  temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string', _.keys(dagiFeatureNames).join(',')]
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {

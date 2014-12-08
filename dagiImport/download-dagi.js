@@ -61,7 +61,7 @@ var optionSpec = {
   dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
   retries: [false, 'Antal forsøg på kald til WFS service før der gives op', 'number', 5],
-  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string'],
+  temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string'],
   service: [false, 'Angiver, om der anvendes ny eller gammel service (zone, oldDagi eller newDagi)', 'string']
 };
 

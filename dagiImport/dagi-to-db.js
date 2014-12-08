@@ -40,7 +40,7 @@ var optionSpec = {
   dataDir: [false, 'Folder med DAGI tema-filer', 'string', '.'],
   filePrefix: [false, 'Prefix på DAGI tema-filer', 'string', ''],
   service: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
-  temaer: [false, 'Inkluderede DAGI temaer, adskildt af komma','string'],
+  temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string'],
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
 };
 
