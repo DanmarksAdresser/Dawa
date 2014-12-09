@@ -5,6 +5,7 @@ var FeedParser = require('feedparser');
 var http = require('http');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var ejerlav = require('./ejerlav.js');
+var moment = require('moment');
 var _ = require('underscore');
 
 var feedMeta;
@@ -27,6 +28,8 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   var username = options.matrikelUsername || 'dawa';
   var password = options.matrikelPassword;
 
+  var lastUpdated = moment("2014-12-09T00:23:09.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
+
   http.get(feedUrl, function(res) {
     res.pipe(new FeedParser({}))
       .on('error', function(error) {
@@ -36,27 +39,25 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
         feedMeta = meta;
       })
       .on('readable', function() {
-        var stream = this, item;
+        var stream = this, item, itemPubdate;
         while (null !== (item = stream.read())) {
           // Each 'readable' event will contain 1 feed entry, ie. an ejerlav
-          updatedEjerlav.push({
-            'title': item.title,
-            'link': item.link,
-            'publicationDate': item.pubDate
-
-          });
-          console.log("Ejerlav %d: %s", updatedEjerlav.length, JSON.stringify(updatedEjerlav[updatedEjerlav.length-1]));
+          itemPubdate = moment(item.pubDate, moment.ISO_8601, true);
+          if (itemPubdate.isAfter(lastUpdated)) {
+            updatedEjerlav.push({
+              title: item.title,
+              link: item.link,
+              publicationDate: itemPubdate
+            });
+            console.log("Ejerlav %d added: %s", updatedEjerlav.length, JSON.stringify(updatedEjerlav[updatedEjerlav.length-1]));
+          } else {
+            console.log("Ignored ejerlav with pubDate %s", itemPubdate);
+          }
         }
       })
       .on('end', function() {
-        var result = {
-          'feedName': feedMeta.title,
-          "count": updatedEjerlav.length
-        };
-
-        console.dir(result);
-
-        _.each(updatedEjerlav.slice(0,5), function(updatedEjerlav) {
+        console.log("Found %d updated ejerlav since %s", updatedEjerlav.length, lastUpdated);
+        _.each(updatedEjerlav, function(updatedEjerlav) {
           ejerlav.processEjerlav(updatedEjerlav.link, username, password);
         });
       });
