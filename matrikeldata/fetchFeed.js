@@ -13,19 +13,19 @@ var updatedEjerlav = [];
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   feedUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string', 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2'],
-  username: [false, 'Brugernavn til webservicen hvor matrikelfeedet hentes fra', 'string', 'dawa'],
-  password: [false, 'Password til webservicen hvor matrikelfeedet hentes fra', 'string']
+  matrikelUsername: [false, 'Brugernavn til webservicen hvor matrikelfeedet hentes fra', 'string', 'dawa'],
+  matrikelPassword: [false, 'Password til webservicen hvor matrikelfeedet hentes fra', 'string']
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
   process.env.pgConnectionUrl = options.pgConnectionUrl;
 
-  // we need to set the pgConnectionUrl before importing the dbapi
+  // we need to set the pgConnectionUrl before importing the dbapi, so we import it here
   // var dbapi = require('./../dbapi');
 
   var feedUrl = options.dagiUrl || 'http://download.kortforsyningen.dk/sites/default/files/feeds/MATRIKELKORT_GML.xml';
-  var username = options.username || 'dawa';
-  var password = options.password;
+  var username = options.matrikelUsername || 'dawa';
+  var password = options.matrikelPassword;
 
   http.get(feedUrl, function(res) {
     res.pipe(new FeedParser({}))
