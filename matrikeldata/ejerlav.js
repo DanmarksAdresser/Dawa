@@ -1,44 +1,59 @@
 "use strict";
 
-var http = require("http");
+var JSFtp = require("jsftp");
 var url = require("url");
 var JSZip = require("jszip");
 
 exports.processEjerlav = function(link, username, password) {
-  var linkUrl = url.parse(link.replace(/ftp:\/\//g, 'ftp://' + username + ':' + password + "@"));
-  console.log("Not downloading yet: " + JSON.stringify(linkUrl));
-  return;
+  var linkUrl = url.parse(link);
+  console.log("Downloading: " + url.format(linkUrl));
 
-  var req = http.get(linkUrl, function(res) {
-    if (res.statusCode !== 200) {
-      throw 'Unable to fetch ' + url + ", HTTP status: " + res.statusCode;
+  var ftp = new JSFtp({
+    host: linkUrl.hostname,
+    port: linkUrl.port || 21,
+    user: username,
+    pass: password,
+    debugMode: true
+  });
+
+  ftp.get(linkUrl.pathname, function(err, socket) {
+    if (err) {
+      throw "Unable to fetch " + url.format(linkUrl) + ": " + err;
     }
-    var data = [], dataLen = 0;
 
-    // don't set the encoding, it will break everything !
-    // or, if you must, set it to null. In that case the chunk will be a string.
+    console.log("Connected for: " + url.format(linkUrl));
 
-    res.on("data", function (chunk) {
-      data.push(chunk);
+    var chunks = [], dataLen = 0;
+
+    socket.on("data", function(chunk) {
+      console.log("Received %d bytes from: %s", chunk.length, url.format(linkUrl));
+      chunks.push(chunk);
       dataLen += chunk.length;
     });
-
-    res.on("end", function () {
-      var i,len,pos;
-      var buf = new Buffer(dataLen);
-      for (i=0,len=data.length,pos=0; i<len; i++) {
-        data[i].copy(buf, pos);
-        pos += data[i].length;
-      }
-
-      // here we go !
-      var zip = new JSZip(buf);
-      console.log(zip.file("content.txt").asText());
+    socket.on("error", function(err) {
+      throw "Error reading zip contents from " + url.format(linkUrl) + ": " + err;
     });
-  });
+    socket.on("end", function(hadError) {
+      var i,len,pos;
+      if (!hadError) {
+        var buf = new Buffer(dataLen);
+        for (i=0,len=chunks.length,pos=0; i<len; i += 1) {
+          chunks[i].copy(buf, pos);
+          pos += chunks[i].length;
+        }
 
-  req.on("error", function(err) {
-    throw "Unable to fetch " + url + ": " + err;
+        var zip = new JSZip(buf);
+        console.log("Unzipping %d bytes from: %s", dataLen, url.format(linkUrl));
+        var gmlFiles = zip.file(/.*\.gml/);
+        if (gmlFiles.length !== 1) {
+          throw 'Found ' + gmlFiles.length + " gml files in zip file from " + url.format(linkUrl) + ", expected exactly 1";
+        }
+        console.log(gmlFiles[0].asText());
+      } else {
+        console.log("Not unzipping, socket had errors");
+      }
+    });
+    socket.resume();
   });
-}
+};
 

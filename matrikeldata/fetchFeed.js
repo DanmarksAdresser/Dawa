@@ -28,7 +28,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   var username = options.matrikelUsername || 'dawa';
   var password = options.matrikelPassword;
 
-  var lastUpdated = moment("2014-12-09T00:23:09.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
+  var lastUpdated = moment("2014-12-09T00:24:00.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
 
   http.get(feedUrl, function(res) {
     res.pipe(new FeedParser({}))
