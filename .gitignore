@@ -233,4 +233,5 @@ pip-log.txt
 /public/lib
 /bower_components
 
+scratch.*
 scratch*.*
