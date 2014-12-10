@@ -99,7 +99,8 @@ block content
 
             div.page-header
               h3.anchor-header#version Version
-            p Den aktuelle version af DAWA er #{packageJson.version}.
+            p Den aktuelle version af DAWA er
+              a(href='https://github.com/DanmarksAdresser/Dawa/releases/tag/v#{packageJson.version}') #{packageJson.version}.
 
 block append scripts
   script(type='text/javascript').
