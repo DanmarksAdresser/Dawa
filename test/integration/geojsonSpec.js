@@ -47,7 +47,7 @@ describe('GeoJSON format', function() {
     });
   });
   it('medtager kvh i adresse output', function(done) {
-    request.get('http://localhost:3000/adgangsadresser/0a3f507b-b8e2-32b8-e044-0003ba298018?format=geojson', function(error, response, body) {
+    request.get('http://localhost:3002/adgangsadresser/0a3f507b-b8e2-32b8-e044-0003ba298018?format=geojson', function(error, response, body) {
       expect(response.statusCode).toBe(200);
       var feature = JSON.parse(body);
       expect(feature.properties.kvh).toEqual("01550966___6");
