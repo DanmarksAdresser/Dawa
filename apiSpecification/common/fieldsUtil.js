@@ -5,7 +5,9 @@ var _ = require('underscore');
 exports.applySelectability = function(fields, sqlModel) {
   var allSelectableFieldNames = sqlModel.allSelectableFieldNames(_.pluck(fields, 'name'));
   fields.forEach(function(field) {
-    field.selectable = _.contains(allSelectableFieldNames, field.name);
+    if (field.selectable === undefined) {
+      field.selectable = _.contains(allSelectableFieldNames, field.name);
+    }
   });
 };
 

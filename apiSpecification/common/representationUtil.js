@@ -81,12 +81,14 @@ exports.geojsonRepresentation = function(geomJsonField, flatRepresentation) {
   };
 };
 
-exports.adresseFlatRepresentation = function(fields) {
+exports.adresseFlatRepresentation = function(fields, additionalFieldsMapper) {
   var fieldsExcludedFromFlat = ['geom_json'];
-  var defaultFlatFields = exports.fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat);
+  var defaultFlatFields = exports
+    .fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat)
+    .concat(exports.fieldsWithNames(fields, ['kvh', 'kvhx']));
 
-  var requiredFlatFields = defaultFlatFields.concat(_.where(fields, {name: 'temaer'}));
-
+  var requiredFlatFields = defaultFlatFields
+    .concat(exports.fieldsWithNames(fields, ['temaer', 'kvh', 'kvhx']));
 
   var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds', 'opstillingskreds'];
   var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
@@ -106,6 +108,9 @@ exports.adresseFlatRepresentation = function(fields) {
     mapper: function() {
       return function(obj) {
         var result = defaultFlatMapper(obj);
+        if (additionalFieldsMapper) {
+          result = _.extend(result, additionalFieldsMapper(obj));
+        }
         includedDagiTemaer.forEach(function(temaNavn) {
           var tema = _.findWhere(obj.temaer, {tema: temaNavn});
           if (tema) {

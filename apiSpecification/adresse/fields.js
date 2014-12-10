@@ -17,6 +17,10 @@ var fields = [
   {
     name: 'id'
   },
+  {
+    name: 'kvhx',
+    selectable: false
+  },
   normalizedField('status'),
   normalizedField('oprettet'),
   normalizedField('ændret'),

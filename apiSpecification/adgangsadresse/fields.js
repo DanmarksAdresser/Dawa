@@ -12,6 +12,10 @@ var normalizedField = function(fieldName) {
 
 var fields = [
   normalizedField('id'),
+  {
+    name: 'kvh',
+    selectable: false
+  },
   normalizedField('status'),
   normalizedField('oprettet'),
   normalizedField('ændret'),

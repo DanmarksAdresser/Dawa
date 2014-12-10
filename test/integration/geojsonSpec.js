@@ -38,6 +38,23 @@ describe('GeoJSON format', function() {
       done();
     });
   });
+  it('medtager kvhx i adresse output', function(done) {
+    request.get('http://localhost:3002/adresser/0a3f50a3-823b-32b8-e044-0003ba298018?format=geojson', function(error, response, body) {
+      expect(response.statusCode).toBe(200);
+      var feature = JSON.parse(body);
+      expect(feature.properties.kvhx).toEqual("01551010__37_______");
+      done();
+    });
+  });
+  it('medtager kvh i adresse output', function(done) {
+    request.get('http://localhost:3000/adgangsadresser/0a3f507b-b8e2-32b8-e044-0003ba298018?format=geojson', function(error, response, body) {
+      expect(response.statusCode).toBe(200);
+      var feature = JSON.parse(body);
+      expect(feature.properties.kvh).toEqual("01550966___6");
+      done();
+    });
+  });
+
   it('Kan hente postnumre i GeoJSON format', function(done) {
     request.get('http://localhost:3002/postnumre?format=geojson', function(error, response, body) {
         expect(response.statusCode).toBe(200);

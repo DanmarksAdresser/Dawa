@@ -28,7 +28,11 @@ var kvhxFormat = require('./kvhxTransformer').format;
 var nullableType = schemaUtil.nullableType;
 var kode4String = util.kode4String;
 
-exports.flat = representationUtil.adresseFlatRepresentation(fields);
+exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs) {
+  return {
+    kvhx: kvhxFormat(rs)
+  };
+});
 
 var adresseDefinitions = _.clone(definitions);
 adresseDefinitions.Adgangsadresse = adgangsadresseRepresentations.json.schema;

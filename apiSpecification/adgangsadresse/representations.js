@@ -33,7 +33,11 @@ var kvhFieldsDts = require('./kvhTransformer').kvhFieldsDts;
   /*
    * flat format
    */
-exports.flat = representationUtil.adresseFlatRepresentation(fields);
+exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs) {
+  return {
+    kvh: kvhFormat(rs)
+  };
+});
 
 exports.json = {
   fields: _.where(fields, {selectable: true}),
