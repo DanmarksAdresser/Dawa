@@ -17,7 +17,7 @@ exports.getDagiTemaer = function(client, temaNavn, cb) {
   var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1";
   var params = [temaNavn];
   client.query(sql, params, function(err, result) {
-    if(err) cb(err);
+    if(err) { cb(err); }
     if(result.rows) {
       return cb(null, result.rows);
     }
