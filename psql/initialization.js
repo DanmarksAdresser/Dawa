@@ -44,6 +44,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresser_temaer_matview' },
   {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
   {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
+  {name: 'wms_housenumber_inspire', type: 'view'},
   {name: 'wms_adgangsadresser', type: 'view'},
   {name: 'wfs_adgangsadresser', type: 'view'},
   {name: 'wfs_adresser', type: 'view'}
