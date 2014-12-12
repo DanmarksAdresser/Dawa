@@ -11,7 +11,7 @@ require('../../apiSpecification/allSpecs');
 
 var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
-var dagi = require('../../dagiImport/dagi');
+var tema = require('../../temaer/tema');
 var datamodels = require('../../crud/datamodel');
 var temaer = require('../../apiSpecification/temaer/temaer');
 var tilknytninger = require('../../apiSpecification/tematilknytninger/tilknytninger');
@@ -117,7 +117,7 @@ describe('Replikering af tilknytninger', function () {
   });
 
   afterEach(function(done) {
-    transactionDone('rollback', function(err) {
+    transactionDone('rollback', function() {
       done();
     });
   });
@@ -132,9 +132,9 @@ describe('Replikering af tilknytninger', function () {
 
 
   _.each(temaObjects, function(temaObject, temaName) {
-    var tema = _.findWhere(temaer, {singular: temaName});
+    var temaDef = _.findWhere(temaer, {singular: temaName});
     var tilknytning = tilknytninger[temaName];
-    var datamodelName = tema.prefix + 'tilknytning';
+    var datamodelName = temaDef.prefix + 'tilknytning';
     var udtraekResource = registry.findWhere({
       entityName: datamodelName,
       type: 'resource',
@@ -146,8 +146,8 @@ describe('Replikering af tilknytninger', function () {
       qualifier: 'hændelser'
     });
     it('Skal replikere adgangsadressetilknytninger for ' + temaName, function(done) {
-      dagi.addDagiTemaQ(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
-        return Q.nfcall(dagi.initAdresserTemaerView, client, temaName);
+      tema.addTemaQ(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
+        return Q.nfcall(tema.initAdresserTemaerView, client, temaName);
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {
@@ -157,9 +157,9 @@ describe('Replikering af tilknytninger', function () {
         };
         expectedResult[keyFieldName] = expectedKeys[temaName];
         expect(jsonResult).toEqual([expectedResult]);
-        return dagi.updateDagiTemaQ(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
+        return tema.updateTemaQ(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
       }).then(function () {
-        return dagi.updateAdresserTemaerView(client, temaName);
+        return tema.updateAdresserTemaerView(client, temaName);
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {

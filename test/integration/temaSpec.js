@@ -1,6 +1,7 @@
 "use strict";
 
-var dagi = require('../../dagiImport/dagi');
+var tema = require('../../temaer/tema');
+var dagiTemaer = require('../../apiSpecification/temaer/temaer');
 var dbapi = require('../../dbapi');
 var _ = require('underscore');
 
@@ -19,16 +20,18 @@ var sampleTema = {
     '725025.18 6166264.37))']
 };
 
+var sampleTemaDef = _.findWhere(dagiTemaer, { singular: sampleTema.tema });
+
 describe('DAGI updates', function() {
   it('When adding a new DAGI tema, the adgangsadresser_temaer_matview table should be updated', function(done) {
     dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-      if(err) throw err;
-      dagi.addDagiTema(client, sampleTema, function(err, createdTemaId) {
-        if(err) throw err;
-        dagi.updateAdresserTemaerView(client, 'region').nodeify(function(err) {
-          if(err) throw err;
+      if(err) { throw err; }
+      tema.addTema(client, sampleTema, function(err, createdTemaId) {
+        if(err) { throw err; }
+        tema.updateAdresserTemaerView(client, 'region').nodeify(function(err) {
+          if(err) { throw err; }
           client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
-            if(err) throw err;
+            if(err) { throw err; }
             transactionDone();
             expect(result.rows[0].c).toBe('277');
             done();
@@ -40,12 +43,13 @@ describe('DAGI updates', function() {
 
   it('When deleting a DAGI tema, the adgangsadresser_temaer_matview table should be updated', function(done) {
     dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-      if(err) throw err;
-      dagi.addDagiTema(client, sampleTema, function(err, createdTemaId) {
-        if(err) throw err;
-        dagi.deleteDagiTema(client, sampleTema, function(err) {
+      if(err) { throw err; }
+      tema.addTema(client, sampleTema, function(err, createdTemaId) {
+        if(err) { throw err; }
+        tema.deleteTema(client, sampleTemaDef, sampleTema, function(err) {
+          if(err) { throw err; }
           client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
-            if(err) throw err;
+            if(err) { throw err; }
             transactionDone();
             expect(result.rows[0].c).toBe('0');
             done();
@@ -60,12 +64,12 @@ describe('DAGI updates', function() {
 
     beforeEach(function(done) {
       dbapi.withRollbackTransaction(function(err, _client, _transactionDone) {
-        if(err) throw err;
+        if(err) { throw err; }
         transactionDone = _transactionDone;
         client = _client;
-        dagi.addDagiTema(client, sampleTema, function(err, _createdTemaId) {
+        tema.addTema(client, sampleTema, function(err, _createdTemaId) {
           createdTemaId = _createdTemaId;
-          if(err) throw err;
+          if(err) { throw err; }
           updated = _.clone(sampleTema);
           updated.polygons=['POLYGON((' +
             '725025.18 6166264.37,' +
@@ -73,9 +77,9 @@ describe('DAGI updates', function() {
             '731289.6 6167400.76,' +
             '731289.6 6166264.37,' +
             '725025.18 6166264.37))'];
-          dagi.updateDagiTema(client, updated, function(err) {
-            if (err) throw err;
-            dagi.updateAdresserTemaerView(client, 'region').nodeify( done);
+          tema.updateTema(client, sampleTemaDef, updated, function(err) {
+            if (err) { throw err; }
+            tema.updateAdresserTemaerView(client, 'region').nodeify( done);
           });
         });
       });
@@ -86,7 +90,7 @@ describe('DAGI updates', function() {
         "select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1",
         [createdTemaId],
         function (err, result) {
-          if (err) throw err;
+          if (err) { throw err; }
           transactionDone();
           expect(result.rows[0].c).toBe('226');
           done();
@@ -95,7 +99,7 @@ describe('DAGI updates', function() {
 
     it('When updating a tema, the geo_version should be updated', function(done) {
       client.query("select geo_version from temaer where id = $1", [createdTemaId], function(err, result) {
-        if(err) throw err;
+        if(err) { throw err; }
         expect(result.rows[0].geo_version).toBe(2);
         transactionDone();
         done();
@@ -105,11 +109,11 @@ describe('DAGI updates', function() {
 
   it('When adding a new DAGI tema, the tsv column should be populated', function(done) {
     dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-      if(err) throw err;
-      dagi.addDagiTema(client, sampleTema, function(err) {
-        if(err) throw err;
+      if(err) { throw err; }
+      tema.addTema(client, sampleTema, function(err) {
+        if(err) { throw err; }
         client.query("select count(*) as c FROM temaer WHERE to_tsquery('adresser', 'xxyyzz') @@ tsv", function(err, result) {
-          if(err) throw err;
+          if(err) { throw err; }
           transactionDone();
           expect(result.rows[0].c).toBe('1');
           done();
@@ -120,15 +124,15 @@ describe('DAGI updates', function() {
 
   it('When updating a DAGI tema, the tsv column should be updated', function(done) {
     dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-      if(err) throw err;
-      dagi.addDagiTema(client, sampleTema, function(err) {
-        if(err) throw err;
+      if(err) { throw err; }
+      tema.addTema(client, sampleTema, function(err) {
+        if(err) { throw err; }
         var updated = _.clone(sampleTema);
         updated.fields.navn = 'Foo';
-        dagi.updateDagiTema(client, updated, function(err) {
-          if(err) throw err;
+        tema.updateTema(client, sampleTemaDef, updated, function(err) {
+          if(err) { throw err; }
           client.query("select count(*) as c FROM temaer WHERE to_tsquery('adresser', 'Foo') @@ tsv", function(err, result) {
-            if(err) throw err;
+            if(err) { throw err; }
             transactionDone();
             expect(result.rows[0].c).toBe('1');
             done();

@@ -1,6 +1,6 @@
 "use strict";
 
-var dagi = require('../../dagiImport/dagi');
+var tema = require('../../temaer/tema');
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
@@ -43,16 +43,16 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     });
     it(' for region på '  + entityName, function (done) {
       dbapi.withRollbackTransaction(function (err, client, transactionDone) {
-        if (err) throw err;
-        dagi.addDagiTema(client, sampleTema, function (err) {
-          if(err) throw err;
-          dagi.updateAdresserTemaerView(client, 'region').nodeify( function(err) {
-            if(err) throw err;
+        if (err) { throw err; }
+        tema.addTema(client, sampleTema, function (err) {
+          if(err) { throw err; }
+          tema.updateAdresserTemaerView(client, 'region').nodeify( function(err) {
+            if(err) { throw err; }
             var params = { regionskode: "10" };
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
             var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
             dbapi.queryRaw(client, query.sql, query.params, function(err, result) {
-              if(err) throw err;
+              if(err) { throw err; }
               expect(result.length).toBe(expectedResultsRegion[entityName]);
               transactionDone();
               done();
