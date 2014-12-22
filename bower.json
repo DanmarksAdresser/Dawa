@@ -3,7 +3,8 @@
   "version": "0.52.19",
   "homepage": "https://github.com/DanmarksAdresser/Dawa",
   "authors": [
-    "Anders Hessellund Jensen <ahj@trifork.com>"
+    "Anders Hessellund Jensen <ahj@trifork.com>",
+    "Jakob Roesgaard Færch <jrf@trifork.com>"
   ],
   "description": "Danmarks Adressers Web API",
   "license": "MIT",
