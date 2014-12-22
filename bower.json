@@ -15,7 +15,7 @@
     "bootstrap": "~2.3.2",
     "leaflet": "~0.7.3",
     "jquery-ui": "~1.11.2",
-    "dawa-autocomplete": "~0.4.0"
+    "dawa-autocomplete": "~0.4.1"
   },
   "exportsOverride": {
     "bootstrap": {
