@@ -113,13 +113,20 @@ block content
             h4 Autocomplete af adresser
             p Du kan prøve et eksempel på autocompleteindtastningen ovenfor i 
               a(href='#anvendelser') afsnittet om anvendelser.
-            p Etablering af autocomplete af adresser baseres på to forskellige typer forespørgelser. Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'rød' anvendes følgende URL:
+            p Etablering af autocomplete af adresser baseres på en kæde af forespørgelser med tiltagende specifikhed.
+              Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'rød' anvendes følgende URL:
             pre
               a(href='#{url}/vejnavne/autocomplete?q=rød') #{url}/vejnavne/autocomplete?q=rød
-            p Når brugeren har valgt det aktuelle vejnavn overgår forspørgelser fra autocomplete på vejnavne til autocomplete på adresser. Lad os sige at brugeren har valgt Rødkildevej som vejnavn, og forsætter med indtastning af husnummer med 4 som første cifre, så skal følgende URL bruges:
+            p Når brugeren har valgt det aktuelle vejnavn (eller har tastet nok til at identificere ét unikt vejnavn) overgår forespørgelser fra autocomplete på vejnavne til autocomplete på adresser. Lad os sige at brugeren har valgt Rødkildevej som vejnavn, og forsætter med indtastning af husnummer med 4 som første cifre, så skal følgende URL bruges:
             pre
-              a(href='#{url}/adresser/autocomplete?vejnavn=Rødkildevej&q=Rødkildevej 4') #{url}/adresser/autocomplete?vejnavn=Rødkildevej&q=Rødkildevej 4
-            p Denne forespørgelse begrænser autocomplete-søgningen til søgning efter adresser med vejnavnet lig Rødkildevej. 
+              a(href='#{url}/adresser/autocomplete?q=Rødkildevej 4') #{url}/adresser/autocomplete?q=Rødkildevej 4
+            p Denne forespørgelse begrænser autocomplete-søgningen til søgning efter adresser der matcher "Rødkildevej 4".
+              | Alternativt kunne autocomplete-komponenten have lavet en søgning, der formaliserede at vejnavnet skal være Rødkildevej, altså
+            pre
+              a(href='#{url}/adresser/autocomplete?q=Rødkildevej 4&vejnavn=Rødkildevej') #{url}/adresser/autocomplete?q=Rødkildevej 4&vejnavn=Rødkildevej
+            p Den returnerede mængde adresser vil i de fleste tilfælde være ens for de to queries, men fordi komponenten er designet til at bruges interaktivt,
+              | er det valgt at udføre den første, simple søgning.
+
             p Hvis din applikation kun er rettet mod adresser i f.eks. Københavns kommune, kan du i dine forespørgelser begrænse udsnittet af adresser og vejnavne, der kan autocompletes på til Københavns kommunes adresser. Det sker på følgende måde:
             pre
               a(href='#{url}/vejnavne/autocomplete?kommunekode=0101&q=rød') #{url}/vejnavne/autocomplete?kommunekode=0101&q=rød
