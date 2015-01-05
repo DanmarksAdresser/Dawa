@@ -1,7 +1,5 @@
 "use strict";
-var _ = require('underscore');
 var pg = require('pg.js');
-var async = require('async');
 var fs = require('fs');
 var winston = require('winston');
 
