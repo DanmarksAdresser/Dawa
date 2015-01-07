@@ -11,7 +11,7 @@ var updateEjerlavImpl = require('./updateEjerlavImpl');
 var loadAdresseDataImpl = require('./load-adresse-data-impl');
 var runScriptImpl = require('./run-script-impl');
 var temaer = require('../apiSpecification/temaer/temaer');
-var dagi = require('../dagiImport/dagi');
+var tema = require('../temaer/tema');
 var logger = require('../logger');
 
 var optionSpec = {
@@ -66,7 +66,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       function(callback) {
         var temaNames = _.pluck(temaer, 'singular');
         async.eachSeries(temaNames, function(temaName, callback) {
-          dagi.initAdresserTemaerView(client, temaName, callback  );
+          tema.initAdresserTemaerView(client, temaName, callback  );
         }, callback);
       }
     ], function(err) {
