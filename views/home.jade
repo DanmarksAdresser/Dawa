@@ -10,7 +10,7 @@ block content
           section#intro
             div.page-header
               h2 Hvad er DAWA?
-            p Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks adresser, adgangsadresser, vejnavne samt postnumre. DAWA anvendes til etablering af adressefunktionalitet i it-systemer. Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressefunktionalitet i deres it-systemer.
+            p Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks adresser, adgangsadresser, vejnavne samt postnumre. DAWA anvendes til at etablere adressefunktionalitet i it-systemer. Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressefunktionalitet i deres it-systemer. DAWA er en del af <a href='http://aws.dk'>AWS Suiten</a>.
             
           section#anvendelser
             div.page-header
@@ -100,7 +100,7 @@ block content
               a(href='#{url}/adresser?kommunekode=0101|0147&format=geojson') GeoJSON fil med København og Frederiksberg kommuners adresser.
 
             h3 Etablering af opdateret kopiadresseregister
-            p I nogle situationer er der behov for at have et lokalt opdateret kopiadresseregister. DAWA kan anvendes til at etablere og opdatere kopiregisteret.
+            p Nogle har behov for at have en lokal, opdateret kopi af adressedata. DAWA kan anvendes til at etablere og holde kopien af adressedata opdateret. Til dette anvendes <a href='http://dawa.aws.dk/replikeringdok'>Replikerings API'et</a>.
 
           section#eksempler
             div.page-header
@@ -133,7 +133,7 @@ block content
             p og
             pre
               a(href='#{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4') #{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4
-            p Hvis du ikke ønsker selv at designe din autocomplete ud fra DAWA's Web API, har vi lavet en komponent, som gør det nemmere at etablere adresseindtastning med autocomplete i web applikationer. Du kan finde <a href='https://github.com/DanmarksAdresser/autocomplete'>autocomplete komponenten på Danmarks Adressers GitHub repositorie</a>.  
+            p Hvis du ikke ønsker selv at designe din autocomplete ud fra DAWA's Web API, har vi lavet en komponent, som gør det nemmere at etablere adresseindtastning med autocomplete i web applikationer. Find mere information på <a href='http://autocomplete.aws.dk/'>AWS Autocomplete komponentens web site</a>.  
 
             h4 Feltindtastning af adresser
             p  Du kan se et eksempel på feltindtastning af adresser i 
