@@ -2,6 +2,7 @@
 notifications:
   email:
     - jrf@trifork.com
+    - fij@mbbl.dk
 
 language: node_js
 
