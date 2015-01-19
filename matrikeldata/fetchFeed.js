@@ -7,6 +7,8 @@ var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var ejerlav = require('./ejerlav.js');
 var moment = require('moment');
 var _ = require('underscore');
+var async = require('async');
+var logger = require('../logger').forCategory('fetchFeed');
 
 var feedMeta;
 var updatedEjerlav = [];
@@ -28,7 +30,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   var username = options.matrikelUsername || 'dawa';
   var password = options.matrikelPassword;
 
-  var lastUpdated = moment("2014-12-09T00:24:00.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
+  var lastUpdated = moment("2014-12-24T00:22:13.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
 
   http.get(feedUrl, function(res) {
     res.pipe(new FeedParser({}))
@@ -49,16 +51,23 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
               link: item.link,
               publicationDate: itemPubdate
             });
-            console.log("Ejerlav %d added: %s", updatedEjerlav.length, JSON.stringify(updatedEjerlav[updatedEjerlav.length-1]));
+            logger.info("Ejerlav %d added" + JSON.stringify(updatedEjerlav[updatedEjerlav.length-1]), updatedEjerlav.length);
           } else {
-            console.log("Ignored ejerlav with pubDate %s", itemPubdate);
+            logger.info("Ignored ejerlav with pubDate " + itemPubdate);
           }
         }
       })
       .on('end', function() {
-        console.log("Found %d updated ejerlav since %s", updatedEjerlav.length, lastUpdated);
-        _.each(updatedEjerlav, function(updatedEjerlav) {
-          ejerlav.processEjerlav(updatedEjerlav.link, username, password);
+        logger.info("Fandt " + updatedEjerlav.length + " opdaterede ejerlav siden %s", lastUpdated);
+        async.eachSeries(updatedEjerlav, function(anUpdatedEjerlav, asyncCallback) {
+          ejerlav.processEjerlav(anUpdatedEjerlav.link, username, password, asyncCallback);
+        }, function (err) {
+          if(err) {
+            logger.error('Indlæsning af matrikeldata fejlet', err);
+            process.exit(1);
+          } else {
+            logger.info('Indlæsning af matrikeldata gennemført', { updatedEjerlav: updatedEjerlav.map(function(ejerlav) { return ejerlav.title; })});
+          }
         });
       });
   }).on('error', function(error) {

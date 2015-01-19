@@ -3,8 +3,9 @@
 var JSFtp = require("jsftp");
 var url = require("url");
 var JSZip = require("jszip");
+var fs = require('fs');
 
-exports.processEjerlav = function(link, username, password) {
+exports.processEjerlav = function(link, username, password, callback) {
   var linkUrl = url.parse(link);
   console.log("Downloading: " + url.format(linkUrl));
 
@@ -31,7 +32,7 @@ exports.processEjerlav = function(link, username, password) {
       dataLen += chunk.length;
     });
     socket.on("error", function(err) {
-      throw "Error reading zip contents from " + url.format(linkUrl) + ": " + err;
+      callback("Error reading zip contents from " + url.format(linkUrl) + ": " + err);
     });
     socket.on("end", function(hadError) {
       var i,len,pos;
@@ -49,6 +50,7 @@ exports.processEjerlav = function(link, username, password) {
           throw 'Found ' + gmlFiles.length + " gml files in zip file from " + url.format(linkUrl) + ", expected exactly 1";
         }
         console.log(gmlFiles[0].asText());
+        fs.writeFile('/Users/jrf/tmp/matrikel.xml', gmlFiles[0].asText(), function() { callback(); });
       } else {
         console.log("Not unzipping, socket had errors");
       }
