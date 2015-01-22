@@ -30,7 +30,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
   var username = options.matrikelUsername || 'dawa';
   var password = options.matrikelPassword;
 
-  var lastUpdated = moment("2014-12-24T00:22:13.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
+  var lastUpdated = moment("2015-01-21T00:39:50.000Z"); // TODO this is for now a made up lastUpdated, we need to persist it
 
   http.get(feedUrl, function(res) {
     res.pipe(new FeedParser({}))
@@ -51,16 +51,16 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
               link: item.link,
               publicationDate: itemPubdate
             });
-            logger.info("Ejerlav %d added" + JSON.stringify(updatedEjerlav[updatedEjerlav.length-1]), updatedEjerlav.length);
+            logger.info("Modified ejerlav %d added" + JSON.stringify(updatedEjerlav[updatedEjerlav.length-1]), updatedEjerlav.length);
           } else {
-            logger.info("Ignored ejerlav with pubDate " + itemPubdate);
+            logger.debug("Ignored unmodified ejerlav with pubDate " + itemPubdate.format());
           }
         }
       })
       .on('end', function() {
-        logger.info("Fandt " + updatedEjerlav.length + " opdaterede ejerlav siden %s", lastUpdated);
+        logger.info("Fandt " + updatedEjerlav.length + " opdaterede ejerlav siden %s", lastUpdated.format());
         async.eachSeries(updatedEjerlav, function(anUpdatedEjerlav, asyncCallback) {
-          ejerlav.processEjerlav(anUpdatedEjerlav.link, username, password, asyncCallback);
+            ejerlav.processEjerlav(anUpdatedEjerlav.link, username, password, options, asyncCallback);
         }, function (err) {
           if(err) {
             logger.error('Indlæsning af matrikeldata fejlet', err);

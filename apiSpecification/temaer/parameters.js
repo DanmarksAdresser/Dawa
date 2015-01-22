@@ -48,6 +48,15 @@ module.exports.valglandsdel = {
   ])
 };
 
+module.exports.jordstykke = {
+  id: normalizeParameters([
+    {
+      name: 'featureID'
+    }
+  ]),
+  propertyFilter: []
+};
+
 _.each(module.exports, function(parameterGroup, temaName) {
   registry.addMultiple(temaName, 'parameterGroup', parameterGroup);
 });

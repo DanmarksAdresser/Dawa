@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports =  {
+module.exports = {
   region: {
     keyFieldName: 'regionskode'
   },
@@ -26,7 +26,10 @@ module.exports =  {
     keyFieldName: 'zone'
   },
   valglandsdel: {
-	keyFieldName: 'valglandsdelsbogstav'
+    keyFieldName: 'valglandsdelsbogstav'
+  },
+  jordstykke: {
+    keyFieldName: 'featureID'
   }
 };
 

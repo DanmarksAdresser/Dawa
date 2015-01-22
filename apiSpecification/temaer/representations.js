@@ -20,7 +20,7 @@ var autocompleteTekst = {
       return 'Bogstav efterfulgt af navnet på ' + tema.singularSpecific;
     },
     mapper: function (row) {
-      return '' + row.bogstav + ' ' + row.navn;
+      return "" + row.bogstav + ' ' + row.navn;
     }
   }
 };
@@ -33,8 +33,18 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
     mapper: function(row) {
       return '' + row.kode + ' ' + row.navn;
     }
-  }
+  };
 });
+
+autocompleteTekst.jordstykke = {
+  description: function(tema) {
+    return 'FeatureID efterfulgt af navnet på ' + tema.singularSpecific;
+  },
+  mapper: function(row) {
+    return '' + row.featureID + ' ' + row.navn;
+  }
+}
+
 
 
 // postnumre, zoner eksporteres ikke

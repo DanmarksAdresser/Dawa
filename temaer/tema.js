@@ -11,6 +11,8 @@ var datamodels = require('../crud/datamodel');
 var dbapi = require('../dbapi');
 var divergensImpl = require('../psql/divergensImpl');
 var Q = require('q');
+var temaerApi = require('../apiSpecification/temaer/temaer');
+
 
 var MAX_INT =  2147483647;
 
@@ -165,7 +167,13 @@ exports.updateTema = function(client, temaDef, tema, cb) {
 };
 
 exports.wfsFeatureToTema = function(feature, mapping) {
-  var wfsFeature = feature[mapping.wfsName][0];
+  var featureCandidates = feature[mapping.wfsName];
+  if (!featureCandidates) {
+    logger.error("found no features, feature[" + mapping.wfsName + "], feature = ", JSON.stringify(feature));
+  } else {
+    logger.debug("found " + featureCandidates.length + " features, feature[" + mapping.wfsName + "], feature = ", JSON.stringify(feature));
+  }
+  var wfsFeature = featureCandidates[0];
 
   var result = {
     polygon: gml.gmlGeometryToWkt(wfsFeature[mapping.geometry][0])
@@ -175,6 +183,7 @@ exports.wfsFeatureToTema = function(feature, mapping) {
     memo[fieldName] = fieldMapping.parseFn(wfsFeature[fieldMapping.name][0]);
     return memo;
   }, {});
+
   return result;
 };
 
@@ -223,3 +232,8 @@ exports.updateAdresserTemaerView = function(client, temaName) {
 exports.addTemaQ =  Q.denodeify(exports.addTema);
 
 exports.updateTemaQ = Q.denodeify(exports.updateTema);
+
+exports.findTema = function(temaNavn) {
+  return _.findWhere(temaerApi, { singular: temaNavn });
+}
+

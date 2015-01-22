@@ -8,7 +8,7 @@ var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var logger = require('../logger').forCategory('dagiToDb');
 
-var dagiTemaer = require('../apiSpecification/temaer/temaer');
+var dagiTemaer = require('../temaer/tema');
 var featureMappingsNew = require('./featureMappingsNew');
 var featureMappingsOld = require('./featureMappingsOld');
 
@@ -43,10 +43,6 @@ var optionSpec = {
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
 };
 
-function findTema(temaNavn) {
-  return _.findWhere(dagiTemaer, { singular: temaNavn });
-}
-
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
   var tema = require('./../temaer/tema'); // needs to be required after the parameterParsing has setup the pgConnectionUrl
 
@@ -58,7 +54,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
 
   function putDagiTemaer(temaNavn, temaer, callback) {
-    tema.putTemaer(findTema(temaNavn), temaer, options.pgConnectionUrl, options.init, callback);
+    tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, options.pgConnectionUrl, options.init, callback);
   }
 
   function indlaesDagiTema(temaNavn, callback) {
@@ -67,7 +63,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
     if(!mapping) {
       throw new Error('Tema ' + temaNavn + ' ikke specificeret for den angivne service');
     }
-    var key = findTema(temaNavn).key;
+    var key = dagiTemaer.findTema(temaNavn).key;
     var directory = path.resolve(options.dataDir);
     var filename = options.filePrefix + temaNavn;
     /*jslint stupid: true */ // allows the readFileSync call

@@ -1,0 +1,1 @@
+ALTER TYPE tema_type ADD VALUE 'jordstykke' AFTER 'zone';

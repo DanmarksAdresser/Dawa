@@ -78,14 +78,23 @@ var fieldMap = {
 	],
 	valglandsdel: [
 	  {
-		name: 'bogstav',
-		description: 'Valgslandsdelens bogstav, udgør nøglen.',
-		schema: {
-			type: 'string'
-		}
+      name: 'bogstav',
+      description: 'Valgslandsdelens bogstav, udgør nøglen.',
+      schema: {
+        type: 'string'
+      }
 	  },
-      describe(navn, 'Valglandsdelens navn.')
-	]
+    describe(navn, 'Valglandsdelens navn.')
+	],
+  jordstykke: [
+    {
+      name: 'featureID',
+      description: 'Jordstykkets identifier, udgør nøglen.',
+      schema: {
+        type: 'string'
+      }
+    }
+  ]
 };
 
 _.each(fieldMap, function(fields) {

@@ -113,6 +113,8 @@ describe('Validering af JSON-formatteret output', function() {
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
         var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
         dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
+          expect(err).toBe(null);
+
           rows.forEach(function(row) {
             var json = mapper(row);
             recordVisitedValues(json, schema, valuesSeen);

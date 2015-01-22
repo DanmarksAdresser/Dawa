@@ -5,7 +5,7 @@ module.exports = [
     singular: 'region',
     singularSpecific: 'regionen',
     plural: 'regioner',
-    prefix:'regions',
+    prefix: 'regions',
     key: 'kode',
     published: true
   },
@@ -66,11 +66,19 @@ module.exports = [
     published: false
   },
   {
-	singular: 'valglandsdel',
-	singularSpecific: 'valglandsdelen',
-	plural: 'valglandsdele',
-	prefix: 'valglandsdels',
-	key: 'bogstav',
-	published: true
+    singular: 'valglandsdel',
+    singularSpecific: 'valglandsdelen',
+    plural: 'valglandsdele',
+    prefix: 'valglandsdels',
+    key: 'bogstav',
+    published: true
+  },
+  {
+    singular: 'jordstykke',
+    singularSpecific: 'jordstykket',
+    plural: 'jordstykker',
+    prefix: 'jordstykke',
+    key: 'featureID',
+    published: true
   }
 ];
