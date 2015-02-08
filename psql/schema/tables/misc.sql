@@ -15,7 +15,7 @@ CREATE TYPE tema_type AS
 ENUM ('kommune', 'region', 'sogn', 'opstillingskreds',
   'politikreds', 'retskreds', 'afstemningsomraade', 'postnummer',
   'danmark', 'menighedsraadsafstemningsomraade',
-  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel', 'zone');
+  'samlepostnummer', 'storkreds', 'supplerendebynavn', 'valglandsdel', 'zone', 'jordstykke');
 
 DROP TYPE IF EXISTS tema_data CASCADE;
 CREATE TYPE tema_data AS (

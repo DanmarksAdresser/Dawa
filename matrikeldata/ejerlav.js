@@ -4,34 +4,50 @@ var JSFtp = require("jsftp");
 var url = require("url");
 var JSZip = require("jszip");
 var xml2js = require('xml2js');
+var Q = require('q');
 var _ = require('underscore');
 var tema = require('../temaer/tema');
 var logger = require('../logger').forCategory('ejerlav');
+var sqlCommon = require('../psql/common');
 
-function storeEjerlav(body, options, callback) {
-  xml2js.parseString(body, {
+
+function parseInteger(str) {
+  return parseInt(str, 10);
+}
+
+exports.parseEjerlav = function(body) {
+  return Q.nfcall(xml2js.parseString, body, {
     tagNameProcessors: [xml2js.processors.stripPrefix],
     trim: true
-  }, function (err, result) {
-    if (err) {
-      return callback(err);
-    }
-
+  }).then(function(result) {
     if (!result.FeatureCollection) {
-      return callback(new Error('Unexpected contents in ejerlav file: ' + JSON.stringify(result)));
+      return Q.reject(new Error('Unexpected contents in ejerlav file: ' + JSON.stringify(result)));
     }
-
     var mapping = {
       name: 'jordstykke',
       geometry: 'surfaceProperty',
       wfsName: 'Jordstykke',
-      fields: {}
+      fields: {
+        ejerlavkode: {
+          name: 'landsejerlavskode',
+          parseFn: parseInteger
+        },
+        matrikelnr: {
+          name: 'matrikelnummer',
+          parseFn: _.identity
+        },
+        featureID: {
+          name: 'featureID',
+          parseFn: parseInteger
+        }
+      }
     };
+
     var temaDef = tema.findTema('jordstykke');
 
     var features = result.FeatureCollection.featureMember;
 
-    var jordstykker = _.chain(features)
+    return _.chain(features)
       .filter(function (feature) {
         // the ejerlav GML might as well as Jordstykke objects contain Centroide objects which we do not want
         return feature[mapping.wfsName];
@@ -39,29 +55,25 @@ function storeEjerlav(body, options, callback) {
       .map(function (feature) {
         return tema.wfsFeatureToTema(feature, mapping);
       })
-      .groupBy(function(fragment) {
+      .groupBy(function (fragment) {
         return fragment.fields[temaDef.key];
       })
-      .map(function(fragments) {
-        return  {
+      .map(function (fragments) {
+        return {
           tema: temaDef.singular,
           fields: fragments[0].fields,
           polygons: _.pluck(fragments, 'polygon')
         };
       })
-    .value();
-
-    tema.putTemaer(temaDef, jordstykker, options.pgConnectionUrl, options.init, callback, function (err) {
-      if(err) {
-        logger.error('Indlæsning af ejerlav fejlet', { error: err});
-      }
-      else {
-        logger.debug('Indlæsning af ejerlav afsluttet', { ejerlavCount: jordstykker.length });
-      }
-      callback(err);
-    });
+      .value();
   });
 }
+
+exports.storeEjerlav = function(jordstykker, client, options) {
+  var temaDef = tema.findTema('jordstykke');
+  return tema.putTemaer(temaDef, jordstykker, client, options.init).then(function() {
+  });
+};
 
 exports.processEjerlav = function(link, username, password, options, callback) {
   try {
@@ -106,7 +118,18 @@ exports.processEjerlav = function(link, username, password, options, callback) {
           if (gmlFiles.length !== 1) {
             throw 'Found ' + gmlFiles.length + " gml files in zip file from " + url.format(linkUrl) + ", expected exactly 1";
           }
-          storeEjerlav(gmlFiles[0].asText(), options, callback);
+          exports.parseEjerlav(gmlFiles[0].asText(), function(err, jordstykker) {
+            if(err) {
+              return callback(err);
+            }
+            sqlCommon.withTransaction(callback, {
+              connString: options.pgConnectionUrl,
+              pooled: false,
+              mode: 'READ_WRITE'
+            }, function(client, callback) {
+              exports.storeEjerlav(jordstykker, client, options, callback);
+            });
+          });
         } else {
           callback("Not unzipping, socket had errors");
         }

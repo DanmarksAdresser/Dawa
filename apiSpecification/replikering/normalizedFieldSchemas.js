@@ -149,15 +149,12 @@ var fields = {
       name: 'ejerlavkode',
       description: 'Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i.' +
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
-      schema: definitions.UpTo7
+      schema: definitions.NullableUpTo7
     }, {
       name: 'matrikelnr',
       description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på.' +
         ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
-      schema: {
-        type: nullableType('string'),
-        pattern: '^[0-9a-zæøå]{1,7}$'
-      }
+      schema: definitions.Nullablematrikelnr
     }, {
       name: 'esrejendomsnr',
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +

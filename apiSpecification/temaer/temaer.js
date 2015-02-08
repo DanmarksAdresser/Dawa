@@ -79,6 +79,6 @@ module.exports = [
     plural: 'jordstykker',
     prefix: 'jordstykke',
     key: 'featureID',
-    published: true
+    published: false
   }
 ];

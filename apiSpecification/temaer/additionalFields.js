@@ -93,6 +93,14 @@ var fieldMap = {
       schema: {
         type: 'string'
       }
+    }, {
+      name: 'ejerlavkode',
+      description: 'Landsejerlavkode for det ejerlav, som jordstykket tilhører',
+      schema: commonSchemaDefinitions.UpTo7
+    }, {
+      name: 'matrikelnr',
+      description: 'Matrikelnummeret for jordstykket. Udgør sammen med ejerlavkoden en unik nøgle for jordstykket.',
+      schema: commonSchemaDefinitions.matrikelnr
     }
   ]
 };

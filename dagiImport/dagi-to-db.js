@@ -7,6 +7,7 @@ var xml2js = require('xml2js');
 var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var logger = require('../logger').forCategory('dagiToDb');
+var transactions = require('../psql/transactions');
 
 var dagiTemaer = require('../temaer/tema');
 var featureMappingsNew = require('./featureMappingsNew');
@@ -54,7 +55,13 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
 
   function putDagiTemaer(temaNavn, temaer, callback) {
-    tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, options.pgConnectionUrl, options.init, callback);
+    return transactions.withTransaction({
+      connString: options.pgConnectionUrl,
+      pooled: false,
+      mode: 'READ_WRITE'
+    }, function(client) {
+      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init);
+    }).nodeify(callback);
   }
 
   function indlaesDagiTema(temaNavn, callback) {

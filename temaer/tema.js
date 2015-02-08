@@ -32,64 +32,64 @@ function removeAll(aas, bs, keyProperty) {
   });
 }
 
-function getTemaer(client, temaNavn, cb) {
+function getTemaer(client, temaNavn, callback) {
+  console.log('getTemaer');
   var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1";
   var params = [temaNavn];
-  client.query(sql, params, function(err, result) {
-    if(err) { cb(err); }
+  return Q.ninvoke(client, 'query', sql, params).then(function(result) {
+    console.log('got result');
     if(result.rows) {
-      return cb(null, result.rows);
+      return result.rows;
     }
-    return cb(null, []);
-  });
+    else {
+      return [];
+    }
+  }).nodeify(callback);
 }
 
-exports.addTema = function(client, tema, cb) {
+exports.addTema = function(client, tema, callback) {
   var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
     'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
   var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
-  client.query(sql, params, function(err, result) {
-    if(err) {
-      return cb(err);
-    }
-
-    return cb(null, result.rows[0].id);
-  });
+  return Q.ninvoke(client, 'query', sql, params).then(function(result) {
+    return result.rows[0].id;
+  }).nodeify(callback);
 };
 
-exports.deleteTema = function(client, temaDef, tema, cb) {
+exports.deleteTema = function(client, temaDef, tema, callback) {
   var sql = "DELETE FROM temaer WHERE tema = $1 AND fields->>'" + temaDef.key + "' = $2::text";
   var params = [tema.tema, tema.fields[temaDef.key]];
-  client.query(sql, params, cb);
+  return Q.ninvoke(client, 'query', sql, params).nodeify(callback);
 };
 
-exports.putTemaer = function(temaDef, temaer, pgConnectionUrl, initializing, callback) {
-  sqlCommon.withWriteTransaction(pgConnectionUrl, function(err, client, done) {
-    if (err) {
-      throw err;
-    }
-    getTemaer(client, temaDef.singular, function(err, existingTemaer) {
-      if (err) {
-        throw err;
-      }
-      var temaerToRemove = removeAll(existingTemaer, temaer, temaDef.key);
-      var temaerToCreate = removeAll(temaer, existingTemaer, temaDef.key);
-      var temaerToUpdate = removeAll(temaer, temaerToCreate, temaDef.key);
+exports.putTemaer = function(temaDef, temaer, client, initializing, callback) {
+  return getTemaer(client, temaDef.singular).then(function(existingTemaer) {
+    console.log('got existing');
+    var temaerToRemove = removeAll(existingTemaer, temaer, temaDef.key);
+    var temaerToCreate = removeAll(temaer, existingTemaer, temaDef.key);
+    var temaerToUpdate = removeAll(temaer, temaerToCreate, temaDef.key);
+    return Q.nfcall(function(callback) {
+      console.log('async.series');
       async.series([
         function(callback) {
+          console.log('removing!');
           async.eachSeries(temaerToRemove, function(tema, callback) {
             logger.info('Removing DAGI tema', {tema: tema.tema, fields: tema.fields});
             exports.deleteTema(client, tema, callback);
           }, callback);
         },
         function(callback) {
+          console.log('adding!');
           async.eachSeries(temaerToCreate, function(tema, callback) {
             logger.info('Adding DAGI tema', {tema: tema.tema, fields: tema.fields});
             exports.addTema(client, tema, callback);
           }, callback);
         },
         function(callback) {
+          console.log('udpating!');
+          console.log(JSON.stringify(temaerToUpdate));
           async.eachSeries(temaerToUpdate, function(tema, callback) {
+            console.log('opdaterer DAGI tema');
             logger.debug('opdaterer DAGI tema', {tema: tema.tema, fields: tema.fields});
             exports.updateTema(client, temaDef, tema, function(err, result) {
               if (err) {
@@ -106,6 +106,7 @@ exports.putTemaer = function(temaDef, temaer, pgConnectionUrl, initializing, cal
           }, callback);
         },
         function(callback) {
+          console.log('initializing');
           if (initializing) {
             exports.initAdresserTemaerView(client, temaDef.singular, callback);
           }
@@ -113,38 +114,32 @@ exports.putTemaer = function(temaDef, temaer, pgConnectionUrl, initializing, cal
             exports.updateAdresserTemaerView(client, temaDef.singular).nodeify(callback);
           }
         },
-        function(callback) {
-          done(null, callback);
-        }
       ], callback);
     });
-  });
+  }).nodeify(callback);
 };
 
-exports.updateTema = function(client, temaDef, tema, cb) {
+exports.updateTema = function(client, temaDef, tema, callback) {
   var fieldsNotChangedClause = jsonFieldMap[temaDef.singular].map(function(field) {
     return "(fields->>'" + field.name + "') IS DISTINCT FROM ($2::json->>'" + field.name + "')";
   }).join(' OR ');
   var geoChangedClause = "geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, 3) + ", 25832)))";
   var changedSql = "SELECT " + geoChangedClause + " AS geo_changed, (" + fieldsNotChangedClause + ") as fields_changed, geo_version FROM temaer WHERE tema = '" + tema.tema + "' and fields->>'" + temaDef.key + "' = $1";
   var changedParams = [tema.fields[temaDef.key], JSON.stringify(tema.fields)].concat(tema.polygons);
-  client.query(changedSql, changedParams, function(err, result) {
-    if(err) {
-      return cb(err);
-    }
+  return Q.ninvoke(client, 'query', changedSql, changedParams).then(function(result) {
     if(!result.rows) {
-      return cb('Could not update DAGI tema, it was not found.');
+      return Q.reject(new Error('Could not update DAGI tema, it was not found.'));
     }
     if(result.rows.length !== 1) {
-      return cb(new Error('Could not update DAGI tema, unexpected number of rows to update'));
+      return Q.reject(new Error('Could not update DAGI tema, unexpected number of rows to update'));
     }
     var geoChanged = result.rows[0].geo_changed;
     var fieldsChanged = result.rows[0].fields_changed;
     var geo_version = result.rows[0].geo_version;
     if(!geoChanged && !fieldsChanged) {
-      return cb(null, {
+      return  {
         rowCount: 0
-      });
+      };
     }
     var updates = [];
     var updateParams = [];
@@ -162,8 +157,8 @@ exports.updateTema = function(client, temaDef, tema, cb) {
     }
     updateParams.push(tema.fields[temaDef.key]);
     var updateSql = "UPDATE temaer SET " + updates.join(', ') + " WHERE fields->>'" + temaDef.key + "' = $" + updateParams.length + "::text";
-    client.query(updateSql, updateParams, cb);
-  });
+    return Q.ninvoke(client, 'query', updateSql, updateParams);
+  }).nodeify(callback);
 };
 
 exports.wfsFeatureToTema = function(feature, mapping) {
@@ -178,7 +173,6 @@ exports.wfsFeatureToTema = function(feature, mapping) {
   var result = {
     polygon: gml.gmlGeometryToWkt(wfsFeature[mapping.geometry][0])
   };
-
   result.fields = _.reduce(mapping.fields, function(memo, fieldMapping, fieldName) {
     memo[fieldName] = fieldMapping.parseFn(wfsFeature[fieldMapping.name][0]);
     return memo;
@@ -228,10 +222,6 @@ exports.updateAdresserTemaerView = function(client, temaName) {
     return dbapi.queryRawQ(client, 'DROP VIEW tema_mapping_view_temp', []);
   });
 };
-
-exports.addTemaQ =  Q.denodeify(exports.addTema);
-
-exports.updateTemaQ = Q.denodeify(exports.updateTema);
 
 exports.findTema = function(temaNavn) {
   return _.findWhere(temaerApi, { singular: temaNavn });

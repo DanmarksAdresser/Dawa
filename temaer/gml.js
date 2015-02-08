@@ -15,7 +15,7 @@ function poslistAs2DWkt(text) {
   text = text._ || text;
 
   // transform "x1 y1 x2 y2..." into [['x1','y1'],['x2','y2]]
-  var points = _.chain(text.split(' ')).groupBy(function(element, index) {
+  var points = _.chain(text.split(/[ \n]+/)).groupBy(function(element, index) {
     return Math.floor(index/2);
   }).toArray().value();
 
@@ -64,7 +64,7 @@ function gmlSurfaceToWkt(gmlSurface) {
   }, '');
 */
   var innerCoordsText = '';
-  return '((' + outerCoordsText + ')' + innerCoordsText + ')';
+  return 'POLYGON((' + outerCoordsText + ')' + innerCoordsText + ')';
 
 
   /*

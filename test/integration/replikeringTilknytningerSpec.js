@@ -146,7 +146,7 @@ describe('Replikering af tilknytninger', function () {
       qualifier: 'hændelser'
     });
     it('Skal replikere adgangsadressetilknytninger for ' + temaName, function(done) {
-      tema.addTemaQ(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
+      tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
         return Q.nfcall(tema.initAdresserTemaerView, client, temaName);
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
@@ -157,7 +157,7 @@ describe('Replikering af tilknytninger', function () {
         };
         expectedResult[keyFieldName] = expectedKeys[temaName];
         expect(jsonResult).toEqual([expectedResult]);
-        return tema.updateTemaQ(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
+        return tema.updateTema(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
       }).then(function () {
         return tema.updateAdresserTemaerView(client, temaName);
       }).then(function () {

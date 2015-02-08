@@ -36,6 +36,10 @@ var definitions = {
       'Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.',
     type: 'string', maxLength: 34
   },
+  'matrikelnr': {
+    type: 'string',
+    pattern: '^[0-9a-zæøå]{1,7}$'
+  },
   'Etage':   {
     description: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
       'tal fra 1 til 99, st, kl, kl2 op til kl9.',

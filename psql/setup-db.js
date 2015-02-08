@@ -1,10 +1,10 @@
 "use strict";
 
 var cli = require('cli');
-var winston  = require('winston');
+var Q = require('q');
 var _        = require('underscore');
 var async    = require('async');
-var sqlCommon = require('./common');
+var transactions = require('./transactions');
 var initialization = require('./initialization');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
@@ -15,34 +15,21 @@ var optionSpec = {
 
 cli.parse(optionSpec, []);
 
-var exitOnErr = sqlCommon.exitOnErr;
-
-cli.main(function(args, options) {
+cli.main(function (args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
   process.env.pgConnectionUrl = options.pgConnectionUrl;
   cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
 
   var scriptDir = __dirname + '/schema';
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, callback) {
-    if(err) {
-      exitOnErr(err);
-    }
-    async.series(
+  transactions.withTransaction( {
+    connString: options.pgConnectionUrl,
+    pooled: false,
+    mode: 'READ_WRITE'
+  }, function (client) {
+    return Q.nfcall(async.series,
       [
         initialization.loadSchemas(client, scriptDir),
-        initialization.disableTriggersAndInitializeTables(client),
-        function(cb) {console.log('Main is done!'); cb(); }
-      ],
-      function(err){
-        if(err) {
-          exitOnErr(err);
-        }
-        callback(null, function(err) {
-          if(err) {
-            exitOnErr(err);
-          }
-        });
-      });
-  });
-
+        initialization.disableTriggersAndInitializeTables(client)
+      ]);
+  }).done();
 });
