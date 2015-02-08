@@ -24,10 +24,22 @@ function makeUnionSql(count, firstAlias) {
   return 'ST_union(ARRAY[' + items.join(',') + '])';
 }
 
-function removeAll(aas, bs, keyProperty) {
+function getKeyValue(tema, temaSpec) {
+  return temaSpec.key.map(function(keySpec) {
+    return tema.fields[keySpec.name];
+  });
+}
+
+function hasSameKey(a, b, keySpecs) {
+  return keySpecs.reduce(function(memo, keySpec) {
+    return memo && (a.fields[keySpec.name] === b.fields[keySpec.name]);
+  }, true);
+}
+
+function removeAll(aas, bs, keySpecs) {
   return _.filter(aas, function (a) {
     return _.every(bs, function (newTema) {
-      return newTema.fields[keyProperty] !== a.fields[keyProperty];
+      return !hasSameKey(a, newTema, keySpecs);
     });
   });
 }
@@ -57,8 +69,11 @@ exports.addTema = function(client, tema, callback) {
 };
 
 exports.deleteTema = function(client, temaDef, tema, callback) {
-  var sql = "DELETE FROM temaer WHERE tema = $1 AND fields->>'" + temaDef.key + "' = $2::text";
-  var params = [tema.tema, tema.fields[temaDef.key]];
+  var sql = "DELETE FROM temaer WHERE tema = $1";
+  temaDef.key.forEach(function(keySpec, index) {
+    sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 1) + "::text";
+  });
+  var params = [tema.tema].concat(getKeyValue(tema, temaDef));
   return Q.ninvoke(client, 'query', sql, params).nodeify(callback);
 };
 
@@ -121,11 +136,17 @@ exports.putTemaer = function(temaDef, temaer, client, initializing, callback) {
 
 exports.updateTema = function(client, temaDef, tema, callback) {
   var fieldsNotChangedClause = jsonFieldMap[temaDef.singular].map(function(field) {
-    return "(fields->>'" + field.name + "') IS DISTINCT FROM ($2::json->>'" + field.name + "')";
+    return "(fields->>'" + field.name + "') IS DISTINCT FROM ($" + (temaDef.key.length + 1)+"::json->>'" + field.name + "')";
   }).join(' OR ');
-  var geoChangedClause = "geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, 3) + ", 25832)))";
-  var changedSql = "SELECT " + geoChangedClause + " AS geo_changed, (" + fieldsNotChangedClause + ") as fields_changed, geo_version FROM temaer WHERE tema = '" + tema.tema + "' and fields->>'" + temaDef.key + "' = $1";
-  var changedParams = [tema.fields[temaDef.key], JSON.stringify(tema.fields)].concat(tema.polygons);
+
+
+  var geoChangedClause = "geom IS NULL OR NOT ST_Equals(geom, ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, (temaDef.key.length + 2)) + ", 25832)))";
+  var changedSql = "SELECT " + geoChangedClause + " AS geo_changed, (" + fieldsNotChangedClause + ") as fields_changed, geo_version FROM temaer" +
+    " WHERE tema = '" + tema.tema + "'";
+  temaDef.key.forEach(function(keySpec, index) {
+    changedSql += " and fields->>'" + keySpec.name+ "' = $" + (index + 1);
+  });
+  var changedParams = getKeyValue(tema, temaDef).concat([JSON.stringify(tema.fields)]).concat(tema.polygons);
   return Q.ninvoke(client, 'query', changedSql, changedParams).then(function(result) {
     if(!result.rows) {
       return Q.reject(new Error('Could not update DAGI tema, it was not found.'));
@@ -155,8 +176,13 @@ exports.updateTema = function(client, temaDef, tema, callback) {
       updates.push("geom = ST_Multi(ST_SetSRID(" + makeUnionSql(tema.polygons.length, updateParams.length + 1) + ", 25832))");
       updateParams = updateParams.concat(tema.polygons);
     }
-    updateParams.push(tema.fields[temaDef.key]);
-    var updateSql = "UPDATE temaer SET " + updates.join(', ') + " WHERE fields->>'" + temaDef.key + "' = $" + updateParams.length + "::text";
+    updateParams = updateParams.concat(temaDef.key.map(function(keySpec) {
+      return tema.fields[keySpec.name];
+    }));
+    var updateSql = "UPDATE temaer SET " + updates.join(', ') + " WHERE " +
+      temaDef.key.map(function(keySpec, index) {
+        return "fields->>'" + keySpec.name + "' = $" + (updateParams.length + index) + "::text";
+      }).join(" AND ");
     return Q.ninvoke(client, 'query', updateSql, updateParams);
   }).nodeify(callback);
 };

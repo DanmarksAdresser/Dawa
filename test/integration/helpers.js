@@ -110,3 +110,12 @@ exports.toSqlModel = function(datamodelName, apiObject) {
   }, {});
 };
 
+exports.itQ = function (description, func) {
+  it(description, function (done) {
+    func().then(done, function (err) {
+      expect(err).toBeUndefined();
+      done();
+    });
+  });
+};
+

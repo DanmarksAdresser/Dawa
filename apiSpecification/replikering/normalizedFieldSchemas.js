@@ -314,7 +314,7 @@ var fields = {
 _.each(tilknytninger, function(tilknytning, temaNavn) {
   var tema = _.findWhere(temaer, { singular: temaNavn});
   var additionalFields = additionalFieldsMap[temaNavn];
-  var temaKeyFieldName = tema.key;
+  var temaKeyFieldName = tema.key[0].name;
   var temaKeyField = _.findWhere(additionalFields, {name: temaKeyFieldName});
 
   var tilknytningKeyFieldName = tilknytning.keyFieldName;

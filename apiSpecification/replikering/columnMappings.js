@@ -147,10 +147,15 @@ exports.keys = {};
   exports.keys[entityName] = datamodels[entityName].key;
 });
 
-temaer.forEach(function(tema) {
- var keyColumn = "(fields->>'" + tema.key + "')::integer"; // note, future keys may not be integer
+// We dont replicate jordstykketilknytninger
+_.keys(tilknytninger).forEach(function(temaNavn) {
+  var tema = _.findWhere(temaer, {singular: temaNavn});
+  // For now, only tilknytninter with non-composite keys are replicated.
+  var keyColumn = tema.key.map(function(keySpec) {
+    return "(fields->>'" + keySpec.name + "')::" + keySpec.type;
+  })[0];
   var tilknytningKey = (tema.prefix + 'tilknytning');
-  var temaKeyField = _.findWhere(additionalFieldsMap[tema.singular], {name: tema.key});
+  var temaKeyField = _.findWhere(additionalFieldsMap[tema.singular], {name: tema.key[0].name});
   exports.columnMappings[tilknytningKey] =
     [{
       name: 'adgangsadresseid',
@@ -162,7 +167,7 @@ temaer.forEach(function(tema) {
       }]);
 
   exports.tables[ tilknytningKey] = 'adgangsadresser_temaer_matview';
-  exports.keys[tilknytningKey] = ['adgangsadresseid', tema.key];
+  exports.keys[tilknytningKey] = ['adgangsadresseid', tema.key[0].name];
 });
 
 // maps column names to field names

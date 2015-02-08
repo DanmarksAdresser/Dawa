@@ -6,15 +6,7 @@ var _ = require('underscore');
 
 var ejerlav = require('../../matrikeldata/ejerlav');
 var transactions = require('../../psql/transactions');
-
-function itQ(description, func) {
-  it(description, function (done) {
-    func().then(done, function (err) {
-      expect(err).toBeUndefined();
-      done();
-    });
-  });
-}
+var itQ = require('./helpers').itQ;
 
 describe('Import af matrikel', function () {
   it('Kan parse en matrikelfil', function (done) {

@@ -1,9 +1,13 @@
 "use strict";
 
-var tema = require('../../temaer/tema');
+var q = require('q');
+var _ = require('underscore');
+
 var dagiTemaer = require('../../apiSpecification/temaer/temaer');
 var dbapi = require('../../dbapi');
-var _ = require('underscore');
+var itQ = require('./helpers').itQ;
+var tema = require('../../temaer/tema');
+var transactions = require('../../psql/transactions');
 
 // der er 390 adgangsadresser inden for denne polygon
 var sampleTema = {
@@ -41,21 +45,21 @@ describe('DAGI updates', function() {
     });
   });
 
-  it('When deleting a DAGI tema, the adgangsadresser_temaer_matview table should be updated', function(done) {
-    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-      if(err) { throw err; }
-      tema.addTema(client, sampleTema, function(err, createdTemaId) {
-        if(err) { throw err; }
-        tema.deleteTema(client, sampleTemaDef, sampleTema, function(err) {
-          if(err) { throw err; }
-          client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
-            if(err) { throw err; }
-            transactionDone();
-            expect(result.rows[0].c).toBe('0');
-            done();
+  itQ('When deleting a DAGI tema, the adgangsadresser_temaer_matview table should be updated', function() {
+    return transactions.withTransaction({
+      connString: process.env.pgConnectionUrl,
+      mode: 'ROLLBACK'
+    }, function (client) {
+      tema.addTema(client, sampleTema)
+        .then(function (createdTemaId) {
+          return tema.deleteTema(client, sampleTemaDef, sampleTema).then(function () {
+            return q.ninvoke(client, 'query',
+              "select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1",
+              [createdTemaId]);
           });
+        }).then(function (result) {
+          expect(result.rows[0].c).toBe('0');
         });
-      });
     });
   });
 
@@ -122,22 +126,19 @@ describe('DAGI updates', function() {
     });
   });
 
-  it('When updating a DAGI tema, the tsv column should be updated', function(done) {
-    dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-      if(err) { throw err; }
-      tema.addTema(client, sampleTema, function(err) {
-        if(err) { throw err; }
+  itQ('When updating a DAGI tema, the tsv column should be updated', function() {
+    return transactions.withTransaction({
+      connString: process.env.pgConnectionUrl,
+      mode: 'ROLLBACK'
+    }, function(client) {
+      return tema.addTema(client, sampleTema).then(function() {
         var updated = _.clone(sampleTema);
         updated.fields.navn = 'Foo';
-        tema.updateTema(client, sampleTemaDef, updated, function(err) {
-          if(err) { throw err; }
-          client.query("select count(*) as c FROM temaer WHERE to_tsquery('adresser', 'Foo') @@ tsv", function(err, result) {
-            if(err) { throw err; }
-            transactionDone();
-            expect(result.rows[0].c).toBe('1');
-            done();
-          });
-        });
+        return tema.updateTema(client, sampleTemaDef, updated);
+      }).then(function() {
+        return q.ninvoke(client, 'query', "select count(*) as c FROM temaer WHERE to_tsquery('adresser', 'Foo') @@ tsv", []);
+      }).then(function(result) {
+        expect(result.rows[0].c).toBe('1');
       });
     });
   });

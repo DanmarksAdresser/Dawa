@@ -1063,8 +1063,11 @@ var eventExamples = {
   ]
 };
 
+var tilknytningTemaer = dagiTemaer.filter(function(tema) {
+  return tilknytninger[tema.singular] !== undefined;
+});
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(dagiTemaer.map(function(tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(tilknytningTemaer.map(function(tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({

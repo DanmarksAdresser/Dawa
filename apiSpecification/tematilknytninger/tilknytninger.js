@@ -27,9 +27,6 @@ module.exports = {
   },
   valglandsdel: {
     keyFieldName: 'valglandsdelsbogstav'
-  },
-  jordstykke: {
-    keyFieldName: 'featureID'
   }
 };
 

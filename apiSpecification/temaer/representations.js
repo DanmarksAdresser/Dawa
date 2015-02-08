@@ -89,7 +89,8 @@ _.filter(dagiTemaer, function(tema) {
 
     return result;
   }
-  function dagiTemaJsonMapper(keyFieldName, additionalFields) {
+  function dagiTemaJsonMapper(keySpec, additionalFields) {
+    var keyNames = _.pluck(keySpec, 'name');
     return function(baseUrl) {
       return function(row) {
         var result = {};
@@ -101,7 +102,7 @@ _.filter(dagiTemaer, function(tema) {
         result.geo_version = row.geo_version;
         result.geo_ændret = row.geo_ændret;
 
-        result.href = makeHrefFromPath(baseUrl, tema.plural, [result[keyFieldName]]);
+        result.href = makeHrefFromPath(baseUrl, tema.plural, _.map(keyNames, function(keyName) { return result[keyName]; }));
 
         return result;
       };

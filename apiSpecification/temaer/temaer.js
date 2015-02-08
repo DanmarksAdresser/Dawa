@@ -6,7 +6,10 @@ module.exports = [
     singularSpecific: 'regionen',
     plural: 'regioner',
     prefix: 'regions',
-    key: 'kode',
+    key: [{
+      name: 'kode',
+      type: 'integer'
+    }],
     published: true
   },
   {
@@ -14,7 +17,10 @@ module.exports = [
     singularSpecific: 'kommunen',
     plural: 'kommuner',
     prefix: 'kommune',
-    key: 'kode',
+    key: [{
+      name: 'kode',
+      type: 'integer'
+    }],
     published: true
   },
   {
@@ -22,7 +28,10 @@ module.exports = [
     singularSpecific: 'sognet',
     plural: 'sogne',
     prefix: 'sogne',
-    key: 'kode',
+    key: [{
+      name: 'kode',
+      type: 'integer'
+    }],
     published: true
   },
   {
@@ -30,7 +39,10 @@ module.exports = [
     singularSpecific: 'politikredsen',
     plural: 'politikredse',
     prefix: 'politikreds',
-    key: 'kode',
+    key: [{
+      name: 'kode',
+      type: 'integer'
+    }],
     published: true
   },
   {
@@ -38,7 +50,10 @@ module.exports = [
     singularSpecific: 'retskredsen',
     plural: 'retskredse',
     prefix: 'retskreds',
-    key: 'kode',
+    key: [{
+      name: 'kode',
+      type: 'integer'
+    }],
     published: true
   },
   {
@@ -46,7 +61,10 @@ module.exports = [
     singularSpecific: 'opstillingskredsen',
     plural: 'opstillingskredse',
     prefix: 'opstillingskreds',
-    key: 'kode',
+    key: [{
+      name: 'kode',
+      type: 'integer'
+    }],
     published: true
   },
   {
@@ -54,7 +72,11 @@ module.exports = [
     singularSpecific: 'postnummeret',
     plural: 'postnumre',
     prefix: 'postnummer',
-    key: 'nr',
+    key: [{
+      name: 'nr',
+      type: 'integer'
+    }],
+
     published: false
   },
   {
@@ -62,7 +84,10 @@ module.exports = [
     singularSpecific: 'zonen',
     plural: 'zoner',
     prefix: 'zone',
-    key: 'zone',
+    key: [{
+      name: 'zone',
+      type: 'integer'
+    }],
     published: false
   },
   {
@@ -70,7 +95,10 @@ module.exports = [
     singularSpecific: 'valglandsdelen',
     plural: 'valglandsdele',
     prefix: 'valglandsdels',
-    key: 'bogstav',
+    key: [{
+      name: 'bogstav',
+      type: 'string'
+    }],
     published: true
   },
   {
@@ -78,7 +106,13 @@ module.exports = [
     singularSpecific: 'jordstykket',
     plural: 'jordstykker',
     prefix: 'jordstykke',
-    key: 'featureID',
+    key: [{
+      name: 'ejerlavkode',
+      type: 'integer'
+    }, {
+      name: 'matrikelnr',
+      type: 'string'
+    }],
     published: false
   }
 ];
