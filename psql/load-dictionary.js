@@ -1,22 +1,23 @@
 "use strict";
 
 var async = require('async');
-
-var sqlCommon = require('./common');
+var q = require('q');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-
+var proddb = require('./proddb');
+var sqlCommon = require('./common');
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   version: [false, 'Version af ordbøger, som skal anvendes', 'string']
 };
 
-var exitOnErr = sqlCommon.exitOnErr;
-
 cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(args, options) {
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
-    exitOnErr(err);
-    async.series([
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
+  });
+  proddb.withTransaction('READ_WRITE', function(client) {
+    return q.nfcall(async.series, [
       function(callback){
         client.query('CREATE EXTENSION IF NOT EXISTS dict_xsyn; CREATE EXTENSION IF NOT EXISTS unaccent;', [], callback);
       },
@@ -45,14 +46,6 @@ cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(arg
       sqlCommon.disableTriggers(client),
       sqlCommon.psqlScript(client, __dirname, 'reindex-search.sql'),
       sqlCommon.enableTriggers(client),
-      function(callback) {
-        commit(null, function(err) {
-          callback(err);
-        });
-      }
-    ], function(err) {
-      exitOnErr(err);
-      console.log('done!');
-    });
-  });
+    ]);
+  }).done();
 });

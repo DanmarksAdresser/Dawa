@@ -19,6 +19,7 @@ var tilknytninger = require('../../apiSpecification/tematilknytninger/tilknytnin
 var schemaValidationUtil = require('./schemaValidationUtil');
 
 var helpers = require('./helpers');
+var itQ = helpers.itQ;
 
 var adgangsadresser = [
   {
@@ -145,9 +146,9 @@ describe('Replikering af tilknytninger', function () {
       type: 'resource',
       qualifier: 'hændelser'
     });
-    it('Skal replikere adgangsadressetilknytninger for ' + temaName, function(done) {
-      tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
-        return Q.nfcall(tema.initAdresserTemaerView, client, temaName);
+    itQ('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
+      return tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
+        return Q.nfcall(tema.initAdresserTemaerView, client, temaName, {});
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {
@@ -169,7 +170,6 @@ describe('Replikering af tilknytninger', function () {
         };
         expectedResult[keyFieldName] = expectedKeys[temaName];
         expect(jsonResult).toEqual([expectedResult]);
-
         return Q.nfcall(helpers.getJson, client, eventResource, {}, {});
       }).then(function (eventResult) {
         expect(eventResult.length).toBe(2);
@@ -190,7 +190,7 @@ describe('Replikering af tilknytninger', function () {
         var eventSchema = eventRepresentation.schema;
         expect(schemaValidationUtil.isSchemaValid(eventResult[0], eventSchema)).toBeTruthy();
         expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).toBeTruthy();
-      }).done(done);
+      });
     });
   });
 

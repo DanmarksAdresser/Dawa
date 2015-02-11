@@ -30,7 +30,7 @@ describe('Import af matrikel', function () {
         connString: process.env.pgEmptyDbUrl,
         mode: 'ROLLBACK'
       }, function (client) {
-        return ejerlav.storeEjerlav(jordstykker, client, {init: true});
+        return ejerlav.storeEjerlav(2005752, jordstykker, client, {init: true});
       });
     });
   });

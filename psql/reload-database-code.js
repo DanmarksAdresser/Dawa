@@ -1,26 +1,22 @@
 "use strict";
 
+var q = require('q');
+
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var winston  = require('winston');
-var sqlCommon = require('./common');
 var initialization = require('./initialization');
+var proddb = require('./proddb');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-var exitOnErr = sqlCommon.exitOnErr;
 
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
-  console.log(options.pgConnectionUrl);
-  console.log(JSON.stringify(options));
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
-    exitOnErr(err);
-    initialization.reloadDatabaseCode(client, 'psql/schema')(function(err) {
-      exitOnErr(err);
-      commit(null, function(err) {
-        exitOnErr(err);
-      });
-    });
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
   });
+  proddb.withTransaction('READ_WRITE', function(client) {
+    return q.nfcall(initialization.reloadDatabaseCode, client, 'psql/schema');
+  }).done();
 });

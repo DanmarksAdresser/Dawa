@@ -1,5 +1,6 @@
 "use strict";
 
+var q = require('q');
 var _ = require('underscore');
 var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
@@ -111,9 +112,13 @@ exports.toSqlModel = function(datamodelName, apiObject) {
 };
 
 exports.itQ = function (description, func) {
+  q.longStackSupport = true;
   it(description, function (done) {
     func().then(done, function (err) {
       expect(err).toBeUndefined();
+      if(err) {
+        console.log(err.stack);
+      }
       done();
     });
   });

@@ -44,10 +44,15 @@ function removeAll(aas, bs, keySpecs) {
   });
 }
 
-function getTemaer(client, temaNavn, callback) {
-  console.log('getTemaer');
+function getTemaer(client, temaNavn, constraints, callback) {
   var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1";
   var params = [temaNavn];
+  if(constraints) {
+    _.forEach(constraints, function(value, key) {
+      sql += " AND temaer.fields->>'" + key + "' = $" + (params.length + 1) + "::text";
+      params.push(value);
+    });
+  }
   return Q.ninvoke(client, 'query', sql, params).then(function(result) {
     console.log('got result');
     if(result.rows) {
@@ -71,18 +76,21 @@ exports.addTema = function(client, tema, callback) {
 exports.deleteTema = function(client, temaDef, tema, callback) {
   var sql = "DELETE FROM temaer WHERE tema = $1";
   temaDef.key.forEach(function(keySpec, index) {
-    sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 1) + "::text";
+    sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 2) + "::text";
   });
   var params = [tema.tema].concat(getKeyValue(tema, temaDef));
   return Q.ninvoke(client, 'query', sql, params).nodeify(callback);
 };
 
-exports.putTemaer = function(temaDef, temaer, client, initializing, callback) {
-  return getTemaer(client, temaDef.singular).then(function(existingTemaer) {
+exports.putTemaer = function(temaDef, temaer, client, initializing, constraints, callback) {
+  return getTemaer(client, temaDef.singular, constraints).then(function(existingTemaer) {
     console.log('got existing');
+    console.log('temaer: ' + temaer.length);
     var temaerToRemove = removeAll(existingTemaer, temaer, temaDef.key);
     var temaerToCreate = removeAll(temaer, existingTemaer, temaDef.key);
     var temaerToUpdate = removeAll(temaer, temaerToCreate, temaDef.key);
+    console.log('temaer to create: ' + temaerToCreate.length);
+    console.log('temaer to update: ' + temaerToUpdate.length);
     return Q.nfcall(function(callback) {
       console.log('async.series');
       async.series([
@@ -90,7 +98,7 @@ exports.putTemaer = function(temaDef, temaer, client, initializing, callback) {
           console.log('removing!');
           async.eachSeries(temaerToRemove, function(tema, callback) {
             logger.info('Removing DAGI tema', {tema: tema.tema, fields: tema.fields});
-            exports.deleteTema(client, tema, callback);
+            exports.deleteTema(client, temaDef, tema, callback);
           }, callback);
         },
         function(callback) {
@@ -121,12 +129,11 @@ exports.putTemaer = function(temaDef, temaer, client, initializing, callback) {
           }, callback);
         },
         function(callback) {
-          console.log('initializing');
           if (initializing) {
-            exports.initAdresserTemaerView(client, temaDef.singular, callback);
+            exports.initAdresserTemaerView(client, temaDef.singular, constraints, callback);
           }
           else {
-            exports.updateAdresserTemaerView(client, temaDef.singular).nodeify(callback);
+            exports.updateAdresserTemaerView(client, temaDef.singular, constraints).nodeify(callback);
           }
         },
       ], callback);
@@ -192,7 +199,6 @@ exports.wfsFeatureToTema = function(feature, mapping) {
   if (!featureCandidates) {
     logger.error("found no features, feature[" + mapping.wfsName + "], feature = ", JSON.stringify(feature));
   } else {
-    logger.debug("found " + featureCandidates.length + " features, feature[" + mapping.wfsName + "], feature = ", JSON.stringify(feature));
   }
   var wfsFeature = featureCandidates[0];
 
@@ -208,22 +214,39 @@ exports.wfsFeatureToTema = function(feature, mapping) {
 };
 
 
-exports.initAdresserTemaerView = function(client, temaName, cb) {
+exports.initAdresserTemaerView = function(client, temaName, constraints, cb) {
   async.series([
     sqlCommon.disableTriggers(client),
     function(cb) {
-      client.query('INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema)'+
+      var sql = 'INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema)'+
         ' (SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
-        'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
-        [temaName],
-        cb);
+        'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1 ' +
+        ' JOIN temaer ON gridded_temaer_matview.id = temaer.id';
+      var params = [temaName];
+      if(!_.isEmpty(constraints)) {
+        sql += ' WHERE ' + _.map(constraints, function(value, key) {
+          params.push(value);
+          return "temaer.fields->>'" + key + "' = $" + (params.length) + "::text";
+        }).join(" AND ");
+      }
+      sql += ')';
+      console.log(sql);
+      client.query(sql, params, cb);
     },
     function (cb) {
-      client.query(
-        'INSERT INTO adgangsadresser_temaer_matview_history(adgangsadresse_id, tema_id, tema) ' +
-        '(SELECT adgangsadresse_id, tema_id, tema FROM adgangsadresser_temaer_matview WHERE tema = $1)',
-        [temaName],
-        cb);
+      var sql = 'INSERT INTO adgangsadresser_temaer_matview_history(adgangsadresse_id, tema_id, tema) ' +
+          '(SELECT adgangsadresse_id, tema_id, adgangsadresser_temaer_matview.tema FROM adgangsadresser_temaer_matview ' +
+        ' JOIN temaer ON (adgangsadresser_temaer_matview.tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = temaer.tema) WHERE adgangsadresser_temaer_matview.tema = $1';
+      var params = [temaName];
+      if(!_.isEmpty(constraints)) {
+        _.forEach(constraints, function(value, key) {
+          sql += " AND temaer.fields->>'" + key + "' = $" + (params.length + 1) + "::text";
+          params.push(value);
+        });
+      }
+      sql += ")";
+      console.log(sql);
+      client.query(sql, params, cb);
     },
     sqlCommon.enableTriggers(client)
   ], cb);
@@ -253,3 +276,8 @@ exports.findTema = function(temaNavn) {
   return _.findWhere(temaerApi, { singular: temaNavn });
 }
 
+exports.stringKey = function (tema, temaDef) {
+  return temaDef.key.reduce(function(memo, keySpec) {
+    return memo + tema.fields[keySpec.name];
+  }, '');
+};

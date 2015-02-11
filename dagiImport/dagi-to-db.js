@@ -7,11 +7,11 @@ var xml2js = require('xml2js');
 var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var logger = require('../logger').forCategory('dagiToDb');
-var transactions = require('../psql/transactions');
 
 var dagiTemaer = require('../temaer/tema');
 var featureMappingsNew = require('./featureMappingsNew');
 var featureMappingsOld = require('./featureMappingsOld');
+var proddb = require('../psql/proddb');
 
 function parseInteger(str) {
   return parseInt(str, 10);
@@ -45,6 +45,10 @@ var optionSpec = {
 };
 
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
+  });
   var tema = require('./../temaer/tema'); // needs to be required after the parameterParsing has setup the pgConnectionUrl
 
   var featureMappings = featureMappingsMap[options.service];
@@ -55,12 +59,8 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
 
   function putDagiTemaer(temaNavn, temaer, callback) {
-    return transactions.withTransaction({
-      connString: options.pgConnectionUrl,
-      pooled: false,
-      mode: 'READ_WRITE'
-    }, function(client) {
-      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init);
+    return proddb.withTransaction('READ_WRITE', function(client) {
+      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init, {});
     }).nodeify(callback);
   }
 
@@ -70,7 +70,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
     if(!mapping) {
       throw new Error('Tema ' + temaNavn + ' ikke specificeret for den angivne service');
     }
-    var key = dagiTemaer.findTema(temaNavn).key;
+    var temaDef = dagiTemaer.findTema(temaNavn);
     var directory = path.resolve(options.dataDir);
     var filename = options.filePrefix + temaNavn;
     /*jslint stupid: true */ // allows the readFileSync call
@@ -91,7 +91,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
         return tema.wfsFeatureToTema(feature, mapping);
       });
       var dagiTemaFragmentMap = _.groupBy(dagiTemaFragments, function(fragment) {
-        return fragment.fields[key];
+        return tema.stringKey(fragment, temaDef);
       });
       dagiTemaFragments = null;
       var dagiTemaer = _.map(dagiTemaFragmentMap, function (fragments) {

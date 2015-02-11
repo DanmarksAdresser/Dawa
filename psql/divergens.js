@@ -5,7 +5,7 @@ var _ = require('underscore');
 var Q = require('q');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var sqlCommon = require('./common');
+var proddb = require('./proddb');
 var divergensImpl = require('./divergensImpl');
 var logger = require('../logger').forCategory('divergens');
 
@@ -34,19 +34,22 @@ function saveReport(options, report) {
   fs.writeFileSync(options.reportFile, JSON.stringify(report, null, 2));
 }
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix', 'sekvensnummer', 'rectify', 'compareWithCurrent', 'forceDawaSequenceNumber', 'batchSize'), function(args, options) {
-
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
+  });
   if(options.format !== 'bbr' && options.sekvensnummer === undefined) {
     throw new Error('Hvis format ikke er bbr skal der angives et sekvensnummer for udtrækket');
   }
 
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, done) {
+  proddb.withTransaction('READ_WRITE', function(client) {
     var loadAdresseDataOptions = {
       dataDir: options.dataDir,
       filePrefix: options.filePrefix,
       format: options.format
     };
 
-    divergensImpl.divergenceReport(client, loadAdresseDataOptions, {
+    return divergensImpl.divergenceReport(client, loadAdresseDataOptions, {
         compareWithCurrent: options.compareWithCurrent,
         batchSize: options.batchSize,
         forceDawaSequenceNumber: options.forceDawaSequenceNumber
@@ -71,8 +74,6 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'filePrefix',
         if (options.reportFile) {
           saveReport(options, report);
         }
-      }).then(function() {
-        return Q.nfcall(done, null);
-      }).done();
-  });
+      });
+  }).done();
 });

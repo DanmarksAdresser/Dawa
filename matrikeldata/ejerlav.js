@@ -16,10 +16,12 @@ function parseInteger(str) {
 }
 
 exports.parseEjerlav = function(body) {
+  console.log("parse START")
   return Q.nfcall(xml2js.parseString, body, {
     tagNameProcessors: [xml2js.processors.stripPrefix],
     trim: true
   }).then(function(result) {
+    console.log("parse END")
     if (!result.FeatureCollection) {
       return Q.reject(new Error('Unexpected contents in ejerlav file: ' + JSON.stringify(result)));
     }
@@ -56,7 +58,7 @@ exports.parseEjerlav = function(body) {
         return tema.wfsFeatureToTema(feature, mapping);
       })
       .groupBy(function (fragment) {
-        return fragment.fields[temaDef.key];
+        return tema.stringKey(fragment, temaDef);
       })
       .map(function (fragments) {
         return {
@@ -69,9 +71,9 @@ exports.parseEjerlav = function(body) {
   });
 }
 
-exports.storeEjerlav = function(jordstykker, client, options) {
+exports.storeEjerlav = function(ejerlavkode, jordstykker, client, options) {
   var temaDef = tema.findTema('jordstykke');
-  return tema.putTemaer(temaDef, jordstykker, client, options.init).then(function() {
+  return tema.putTemaer(temaDef, jordstykker, client, options.init, {ejerlavkode: ejerlavkode}).then(function() {
   });
 };
 

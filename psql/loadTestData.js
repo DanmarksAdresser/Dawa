@@ -1,38 +1,38 @@
 "use strict";
 
-var _ = require('underscore');
 var async = require('async');
-var sqlCommon = require('./common');
+var q = require('q');
+var _ = require('underscore');
+
 var initialization = require('./initialization');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var updatePostnumreImpl = require('./updatePostnumreImpl');
+var logger = require('../logger');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
-var updateEjerlavImpl = require('./updateEjerlavImpl');
 var loadAdresseDataImpl = require('./load-adresse-data-impl');
+var proddb = require('./proddb');
 var runScriptImpl = require('./run-script-impl');
 var temaer = require('../apiSpecification/temaer/temaer');
 var tema = require('../temaer/tema');
-var logger = require('../logger');
+var updateEjerlavImpl = require('./updateEjerlavImpl');
+var updatePostnumreImpl = require('./updatePostnumreImpl');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
 };
 
 
-var exitOnErr = sqlCommon.exitOnErr;
-
 var scriptDir = __dirname + '/schema';
 
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
-
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
+  });
   logger.setThreshold('sql', 'warn');
   logger.setThreshold('stat', 'warn');
 
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commitFn) {
-    if (err) {
-      exitOnErr(err);
-    }
-    async.series([
+  proddb.withTransaction('READ_WRITE', function(client) {
+    return q.nfcall(async.series, [
       // load schemas
       initialization.loadSchemas(client, scriptDir),
       // run init functions
@@ -66,16 +66,10 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       function(callback) {
         var temaNames = _.pluck(temaer, 'singular');
         async.eachSeries(temaNames, function(temaName, callback) {
-          tema.initAdresserTemaerView(client, temaName, callback  );
+          tema.initAdresserTemaerView(client, temaName, {}, callback  );
         }, callback);
       }
-    ], function(err) {
-      exitOnErr(err);
-      commitFn(null, function(err) {
-        exitOnErr(err);
-        console.log('Data indlæst med success');
-      });
-    });
-  });
+    ]);
+  }).done();
 });
 

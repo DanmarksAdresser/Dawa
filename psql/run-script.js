@@ -1,38 +1,32 @@
 "use strict";
 
-var cli = require('cli');
-var sqlCommon = require('./common');
+var q = require('q');
 var _ = require('underscore');
 
-var runScriptImpl = require('./run-script-impl');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+var proddb = require('./proddb');
+var runScriptImpl = require('./run-script-impl');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   disableTriggers: [false, 'Whether triggers should be disabled when running the scripts', 'boolean']
 };
 
-cli.parse(optionSpec, []);
 
-var exitOnErr = sqlCommon.exitOnErr;
 
-cli.main(function(args, options) {
-  cliParameterParsing.addEnvironmentOptions(optionSpec, options);
-  cliParameterParsing.checkRequiredOptions(options, _.without(_.keys(optionSpec), 'disableTriggers'));
+cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
+  });
 
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
-    exitOnErr(err);
-    runScriptImpl(client, args, options.disableTriggers, function(err) {
-      exitOnErr(err);
-      commit(null, function(err) {
-        exitOnErr(err);
-      });
-    });
+  proddb.withTransaction('READ_WRITE', function(client) {
     client.on('error', function(err) {
-      exitOnErr(err);
+      console.log('error: %j, err');
     });
     client.on('notice', function(msg) {
       console.log("notice: %j", msg);
     });
+    return q.nfcall(runScriptImpl,client, args, options.disableTriggers);
   });
 });
