@@ -51,7 +51,10 @@ module.exports.valglandsdel = {
 module.exports.jordstykke = {
   id: normalizeParameters([
     {
-      name: 'featureID'
+      name: 'ejerlavkode'
+    },
+    {
+      name: 'matrikelnr'
     }
   ]),
   propertyFilter: []

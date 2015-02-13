@@ -60,7 +60,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
 
   function putDagiTemaer(temaNavn, temaer, callback) {
     return proddb.withTransaction('READ_WRITE', function(client) {
-      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init, {});
+      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init, {}, true);
     }).nodeify(callback);
   }
 

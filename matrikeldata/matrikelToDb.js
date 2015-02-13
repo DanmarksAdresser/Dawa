@@ -8,12 +8,17 @@ var _ = require('underscore');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var ejerlav = require('./ejerlav');
 var proddb = require('../psql/proddb');
+var tema = require('../temaer/tema.js');
+var temaer = require('../apiSpecification/temaer/temaer');
+
 
 var optionSpec = {
   sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
 };
+
+q.longStackSupport = true;
 
 
 function parseEjerlavkode(file) {
@@ -55,5 +60,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
           console.log('successfully stored ejerlav');
         });
     };
-  }).reduce(q.when, q([])).done();
+  }).reduce(q.when, q([])).then(function() {
+    return proddb.withTransaction('READ_WRITE', function(client) {
+      var temaDef = tema.findTema('jordstykke');
+      return tema.updateAdresserTemaerView(client, temaDef, options.init);
+    });
+  }).done();
 });

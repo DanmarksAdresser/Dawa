@@ -17,6 +17,6 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
     pooled: false
   });
   proddb.withTransaction('READ_WRITE', function(client) {
-    return q.nfcall(initialization.reloadDatabaseCode, client, 'psql/schema');
+    return q.nfcall(initialization.reloadDatabaseCode( client, 'psql/schema'));
   }).done();
 });

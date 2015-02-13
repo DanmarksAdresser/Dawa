@@ -18,7 +18,7 @@ CREATE INDEX ON temaer USING gist(geom);
 -- Support lookup using string
 CREATE INDEX ON temaer((fields->>'kode')) WHERE ((fields->>'kode') is not null);
 CREATE INDEX ON temaer((fields->>'nr')) WHERE ((fields->>'nr') is not null);
-CREATE INDEX ON temaer((fields->>'ejerlavkode'), (fields->>'matrikelnr')) WHERE ((fields->>'ejerlavkode') is not null);
+CREATE INDEX ON temaer(tema, (fields->>'ejerlavkode'), (fields->>'matrikelnr'));
 
 -- Support lookup using integer type
 CREATE INDEX ON temaer(((fields->>'kode')::integer)) WHERE ((fields->>'kode')::integer is not null);

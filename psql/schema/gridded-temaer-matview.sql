@@ -60,7 +60,7 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
 CREATE OR REPLACE FUNCTION update_gridded_temaer_matview()
   RETURNS TRIGGER AS $$
 BEGIN
-  IF TG_OP = 'UPDATE' AND OLD.geom = NEW.geom THEN
+  IF TG_OP = 'UPDATE' AND st_equals(OLD.geom, NEW.geom) THEN
     RETURN NULL;
   END IF;
   IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'

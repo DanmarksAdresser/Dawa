@@ -73,8 +73,7 @@ exports.parseEjerlav = function(body) {
 
 exports.storeEjerlav = function(ejerlavkode, jordstykker, client, options) {
   var temaDef = tema.findTema('jordstykke');
-  return tema.putTemaer(temaDef, jordstykker, client, options.init, {ejerlavkode: ejerlavkode}).then(function() {
-  });
+  return tema.putTemaer(temaDef, jordstykker, client, options.init, {ejerlavkode: ejerlavkode}, false);
 };
 
 exports.processEjerlav = function(link, username, password, options, callback) {

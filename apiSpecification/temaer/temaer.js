@@ -113,6 +113,6 @@ module.exports = [
       name: 'matrikelnr',
       type: 'string'
     }],
-    published: false
+    published: true
   }
 ];
