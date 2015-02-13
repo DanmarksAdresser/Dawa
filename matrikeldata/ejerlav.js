@@ -1,11 +1,11 @@
 "use strict";
 
-var JSFtp = require("jsftp");
 var url = require("url");
+
+var JSFtp = require("jsftp");
 var JSZip = require("jszip");
-var xml2js = require('xml2js');
-var Q = require('q');
 var _ = require('underscore');
+
 var tema = require('../temaer/tema');
 var logger = require('../logger').forCategory('ejerlav');
 var sqlCommon = require('../psql/common');
@@ -16,59 +16,28 @@ function parseInteger(str) {
 }
 
 exports.parseEjerlav = function(body) {
-  console.log("parse START")
-  return Q.nfcall(xml2js.parseString, body, {
-    tagNameProcessors: [xml2js.processors.stripPrefix],
-    trim: true
-  }).then(function(result) {
-    console.log("parse END")
-    if (!result.FeatureCollection) {
-      return Q.reject(new Error('Unexpected contents in ejerlav file: ' + JSON.stringify(result)));
-    }
-    var mapping = {
-      name: 'jordstykke',
-      geometry: 'surfaceProperty',
-      wfsName: 'Jordstykke',
-      fields: {
-        ejerlavkode: {
-          name: 'landsejerlavskode',
-          parseFn: parseInteger
-        },
-        matrikelnr: {
-          name: 'matrikelnummer',
-          parseFn: _.identity
-        },
-        featureID: {
-          name: 'featureID',
-          parseFn: parseInteger
-        }
+  var mapping = {
+    name: 'jordstykke',
+    geometry: 'surfaceProperty',
+    wfsName: 'Jordstykke',
+    fields: {
+      ejerlavkode: {
+        name: 'landsejerlavskode',
+        parseFn: parseInteger
+      },
+      matrikelnr: {
+        name: 'matrikelnummer',
+        parseFn: _.identity
+      },
+      featureID: {
+        name: 'featureID',
+        parseFn: parseInteger
       }
-    };
+    }
+  };
 
-    var temaDef = tema.findTema('jordstykke');
-
-    var features = result.FeatureCollection.featureMember;
-
-    return _.chain(features)
-      .filter(function (feature) {
-        // the ejerlav GML might as well as Jordstykke objects contain Centroide objects which we do not want
-        return feature[mapping.wfsName];
-      })
-      .map(function (feature) {
-        return tema.wfsFeatureToTema(feature, mapping);
-      })
-      .groupBy(function (fragment) {
-        return tema.stringKey(fragment, temaDef);
-      })
-      .map(function (fragments) {
-        return {
-          tema: temaDef.singular,
-          fields: fragments[0].fields,
-          polygons: _.pluck(fragments, 'polygon')
-        };
-      })
-      .value();
-  });
+  var temaDef = tema.findTema('jordstykke');
+  return tema.parseTemaer(body, temaDef, mapping);
 }
 
 exports.storeEjerlav = function(ejerlavkode, jordstykker, client, options) {

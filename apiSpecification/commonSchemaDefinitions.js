@@ -40,6 +40,14 @@ var definitions = {
     type: 'string',
     pattern: '^[0-9a-zæøå]{1,7}$'
   },
+  esrejendomsnr: {
+    type: 'string',
+    pattern: '^[1-9][0-9]{0,6}'
+  },
+  sfeejendomsnr: {
+    type: 'string',
+    pattern: '^[1-9][0-9]{0,6}'
+  },
   'Etage':   {
     description: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
       'tal fra 1 til 99, st, kl, kl2 op til kl9.',

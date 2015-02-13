@@ -10,7 +10,8 @@ module.exports = [
       name: 'kode',
       type: 'integer'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'kommune',
@@ -21,7 +22,8 @@ module.exports = [
       name: 'kode',
       type: 'integer'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'sogn',
@@ -32,7 +34,8 @@ module.exports = [
       name: 'kode',
       type: 'integer'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'politikreds',
@@ -43,7 +46,8 @@ module.exports = [
       name: 'kode',
       type: 'integer'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'retskreds',
@@ -54,7 +58,8 @@ module.exports = [
       name: 'kode',
       type: 'integer'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'opstillingskreds',
@@ -65,7 +70,8 @@ module.exports = [
       name: 'kode',
       type: 'integer'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'postnummer',
@@ -76,7 +82,6 @@ module.exports = [
       name: 'nr',
       type: 'integer'
     }],
-
     published: false
   },
   {
@@ -99,7 +104,8 @@ module.exports = [
       name: 'bogstav',
       type: 'string'
     }],
-    published: true
+    published: true,
+    searchable: true
   },
   {
     singular: 'jordstykke',
@@ -113,6 +119,7 @@ module.exports = [
       name: 'matrikelnr',
       type: 'string'
     }],
-    published: true
+    published: true,
+    searchable: false
   }
 ];

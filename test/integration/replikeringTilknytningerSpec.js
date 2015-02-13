@@ -148,7 +148,7 @@ describe('Replikering af tilknytninger', function () {
     });
     itQ('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
       return tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
-        return Q.nfcall(tema.initAdresserTemaerView, client, temaName, {});
+        return Q.nfcall(tema.updateAdresserTemaerView, client, temaDef, true);
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {
@@ -160,7 +160,7 @@ describe('Replikering af tilknytninger', function () {
         expect(jsonResult).toEqual([expectedResult]);
         return tema.updateTema(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
       }).then(function () {
-        return tema.updateAdresserTemaerView(client, temaName);
+        return tema.updateAdresserTemaerView(client, temaDef, false);
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {

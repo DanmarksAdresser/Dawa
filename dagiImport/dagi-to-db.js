@@ -65,7 +65,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
   }
 
   function indlaesDagiTema(temaNavn, callback) {
-    console.log('temaNavn: ' + temaNavn);
+    logger.info('Indlæser DAGI tema ' + temaNavn);
     var mapping = featureMappings[temaNavn];
     if(!mapping) {
       throw new Error('Tema ' + temaNavn + ' ikke specificeret for den angivne service');
@@ -73,46 +73,10 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
     var temaDef = dagiTemaer.findTema(temaNavn);
     var directory = path.resolve(options.dataDir);
     var filename = options.filePrefix + temaNavn;
-    /*jslint stupid: true */ // allows the readFileSync call
     var body = fs.readFileSync(path.join(directory, filename));
-    /*jslint stupid: false */
-    xml2js.parseString(body, {
-      tagNameProcessors: [xml2js.processors.stripPrefix],
-      trim: true
-    }, function (err, result) {
-      if (err) {
-        return callback(err);
-      }
-      if (!result.FeatureCollection) {
-        return callback(new Error('Unexpected result from DAGI: ' + JSON.stringify(result)));
-      }
-      var features = result.FeatureCollection.featureMember;
-      var dagiTemaFragments = _.map(features, function (feature) {
-        return tema.wfsFeatureToTema(feature, mapping);
-      });
-      var dagiTemaFragmentMap = _.groupBy(dagiTemaFragments, function(fragment) {
-        return tema.stringKey(fragment, temaDef);
-      });
-      dagiTemaFragments = null;
-      var dagiTemaer = _.map(dagiTemaFragmentMap, function (fragments) {
-        var polygons = _.pluck(fragments, 'polygon');
-        return  {
-          tema: temaNavn,
-          fields: fragments[0].fields,
-          polygons: polygons
-        };
-      });
-      dagiTemaFragmentMap = null;
-      putDagiTemaer(temaNavn, dagiTemaer, function (err) {
-        if(err) {
-          logger.error('Indlæsning af DAGI tema fejlet', { temaNavn: temaNavn, error: err});
-        }
-        else {
-          logger.debug('Indlæsning af DAGI temaer afsluttet', {temaNavn: temaNavn });
-        }
-        callback(err);
-      });
-    });
+    return tema.parseTemaer(body, temaDef, mapping).then(function(temaer) {
+      return putDagiTemaer(temaNavn, temaer);
+    }).nodeify(callback);
   }
 
   async.eachSeries(temaer, function (temaNavn, callback) {

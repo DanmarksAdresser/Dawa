@@ -658,6 +658,66 @@ var ejerlavDoc = {
   }
 };
 
+var jordstykkeParameters = [
+    {name: 'ejerlavkode',
+      doc: 'Find jordstykker tilhørende ejerlav med den angivne kode.',
+      examples: ['170354', '80652']},
+    {name: 'matrikelnr',
+      doc: 'Find jordstykker med det angivne matrikelnr',
+      examples: ['7kn', '5bv']}
+];
+
+var jordstykkeIdParameters = [
+  {name: 'ejerlavkode',
+    doc: 'Jordstykkets ejerlavkode.',
+    examples: ['170354', '80652']},
+  {name: 'matrikelnr',
+    doc: 'Jordstykkets matrikelnr.',
+    examples: ['7kn', '5bv']}
+];
+
+var jordstykkeDoc = {
+  docVersion: 2,
+  resources: {
+    '/jordstykker': {
+      subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
+      parameters: jordstykkeParameters.concat(formatAndPagingParams),
+      examples: [{description: 'Hent alle jordstykker', query: []},
+        {description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
+          query: [{ name: 'ejerlavkode', value: "80652"}]},
+        {description: 'Find jordstykket med ejerlavkode <em>100453</em> og matrikelnr <em>8bd</em>',
+          query: [{ name: 'ejerlavkode', value: '100453' }, { name: 'matrikelnr', value: '8bd' }]}]},
+
+    '/jordstykker/{ejerlavkode}/{matrikelnr}': {
+      subtext: 'Modtag jordstykket med den angivne ejerlavkode og matrikelnr',
+      parameters: jordstykkeIdParameters,
+      nomulti: true,
+      examples: [{description: 'Hent jordstykket med ejerlavkode <em>100453</em> og matriklenr <em>8bd</em>',
+        path: ['/jordstykker/100453/8bd']}]},
+    '/jordstykker/reverse':  {
+      subtext: 'Modtage jordstykket for det punkt der angives med x- og y-parametrene',
+      parameters: reverseGeocodingParameters,
+      nomulti: true,
+      examples: [
+        {
+          description: 'Returner jordstykket for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+          query: [
+            {name:'x', value:'12.5851471984198'},
+            {name:'y', value:'55.6832383751223'}
+          ]
+        },
+        {
+          description: 'Returner jordstykket for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+          query: [
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
+            {name: 'srid' , value: '25832'}]}
+      ]
+
+    }
+  }
+};
+
 function firstUpper(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
@@ -1120,7 +1180,7 @@ module.exports['/replikering/senesteSekvensnummer'] = {
 
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
-  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources);
+  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources);
 
 var allResources = registry.where({
   type: 'resource'

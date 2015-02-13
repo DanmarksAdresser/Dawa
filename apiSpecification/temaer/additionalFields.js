@@ -101,6 +101,32 @@ var fieldMap = {
       name: 'matrikelnr',
       description: 'Matrikelnummeret for jordstykket. Udgør sammen med ejerlavkoden en unik nøgle for jordstykket.',
       schema: commonSchemaDefinitions.matrikelnr
+    }, {
+      name: 'kommunekode',
+      description: 'Kommunekoden.',
+      schema: commonSchemaDefinitions.Kode4
+    }, {
+      name: 'sognekode',
+      description: 'Sognekoden',
+      schema: commonSchemaDefinitions.Kode4
+    }, {
+      name: 'regionskode',
+      description: 'Regionskoden',
+      schema: commonSchemaDefinitions.Kode4
+    }, {
+      name: 'retskredskode',
+      description: 'Retskredskoden',
+      schema: commonSchemaDefinitions.Kode4
+    }, {
+      name: 'esrejendomsnr',
+      description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
+      ' ESR, som det jordstykket er en del af.' +
+      ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
+      schema: commonSchemaDefinitions.Nullableesrejendomsnr
+    }, {
+      name: 'sfeejendomsnr',
+      description: 'SFE ejendomsnummer.',
+      schema: commonSchemaDefinitions.Nullablesfeejendomsnr
     }
   ]
 };

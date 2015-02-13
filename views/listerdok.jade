@@ -59,6 +59,12 @@ block content
               li <a href='#ejerlavsoegning'>Ejerlavssøgning</a>
               li <a href='#ejerlavopslag'>Ejerlavsopslag</a>
               li <a href='#ejerlavdata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#jordstykke').nav-header Jordstykke API
+            ul#jordstykke.nav.nav-list
+              li <a href='#jordstykkesoegning'>Jordstykkesøgning</a>
+              li <a href='#jordstykkeopslag'>Jordstykkeopslag</a>
+              li <a href='#jordstykkereverse'>Jordstykke reverse geocoding</a>
+              li <a href='#jordstykkedata'>Databeskrivelse</a>
 
 
         div.span9
@@ -177,14 +183,26 @@ block content
             h3.anchor-header#ejerlavsoegning Ejerlavssøgning
             +documentResource(parameterDoc, '/ejerlav')
             div.page-header
-            h3.anchor-header#valglandsdelopslag Ejerlavsopslag
+              h3.anchor-header#ejerlavopslag Ejerlavsopslag
             +documentResource(parameterDoc, '/ejerlav/{kode}')
             div.page-header
-            h3.anchor-header#valglandsdeldata Beskrivelse af ejerlav
-            p Web API'et udstiller for hver ejerlav følgende informationer:
+              h3.anchor-header#ejerlavdata Beskrivelse af ejerlav
+            p Web API'et udstiller for hvert ejerlav følgende informationer:
             +documentSchema(jsonSchemas.ejerlav)
 
           section
+            h3.anchor-header#jordstykkesoegning Jordstykkesøgning
+            +documentResource(parameterDoc, '/jordstykker')
+            div.page-header
+            h3.anchor-header#jordstykkeopslag Jordstykkeopslag
+            +documentResource(parameterDoc, '/jordstykker/{ejerlavkode}/{matrikelnr}')
+            div.page-header
+              h3.anchor-header#jordstykkereverse Jordstykke reverse geocoding
+            +documentResource(parameterDoc, '/jordstykker/reverse')
+            div.page-header
+            h3.anchor-header#jordstykkedata Beskrivelse af jordstykker
+            p Web API'et udstiller for hvert jordstykker følgende informationer:
+            +documentSchema(jsonSchemas.jordstykke)
 
 block append scripts
   script.

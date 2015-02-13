@@ -57,7 +57,16 @@ module.exports.jordstykke = {
       name: 'matrikelnr'
     }
   ]),
-  propertyFilter: []
+  propertyFilter: [
+    {
+      name: 'ejerlavkode',
+      multi: true
+    },
+    {
+      name: 'matrikelnr',
+      multi: true
+    }
+  ]
 };
 
 _.each(module.exports, function(parameterGroup, temaName) {

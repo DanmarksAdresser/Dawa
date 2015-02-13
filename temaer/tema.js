@@ -1,16 +1,19 @@
 "use strict";
 
-var gml = require('../temaer/gml');
-var sqlCommon = require('../psql/common');
+
 var async = require('async');
+var q = require('q');
+var xml2js = require('xml2js');
 var _ = require('underscore');
-var logger = require('../logger').forCategory('tema');
-var dataUtil = require('../psql/dataUtil');
-var jsonFieldMap = require('../apiSpecification/temaer/additionalFields');
+
 var datamodels = require('../crud/datamodel');
+var dataUtil = require('../psql/dataUtil');
 var dbapi = require('../dbapi');
 var divergensImpl = require('../psql/divergensImpl');
-var q = require('q');
+var gml = require('../temaer/gml');
+var jsonFieldMap = require('../apiSpecification/temaer/additionalFields');
+var logger = require('../logger').forCategory('tema');
+var sqlCommon = require('../psql/common');
 var temaerApi = require('../apiSpecification/temaer/temaer');
 
 
@@ -80,15 +83,6 @@ exports.deleteTema = function(client, temaDef, tema, callback) {
   var params = [tema.tema].concat(getKeyValue(tema, temaDef));
   return q.ninvoke(client, 'query', sql, params).nodeify(callback);
 };
-
-exports.updateAdresserTemaerView = q.denodeify(function(client, temaDef, initializing, callback) {
-  if (initializing) {
-    exports.initAdresserTemaerView(client, temaDef.singular, callback);
-  }
-  else {
-    exports.updateAdresserTemaerViewNonInit(client, temaDef.singular).nodeify(callback);
-  }
-});
 
 exports.putTemaer = function(temaDef, temaer, client, initializing, constraints, updateTilknytninger, callback) {
   return getTemaer(client, temaDef.singular, constraints).then(function(existingTemaer) {
@@ -189,6 +183,39 @@ exports.updateTema = function(client, temaDef, tema, callback) {
   }).nodeify(callback);
 };
 
+exports.parseTemaer = function(gmlText, temaDef, mapping) {
+  return q.nfcall(xml2js.parseString, gmlText, {
+    tagNameProcessors: [xml2js.processors.stripPrefix],
+    trim: true
+  }).then(function(result) {
+    if (!result.FeatureCollection) {
+      return q.reject(new Error('Unexpected contents in tema file file: ' + JSON.stringify(result)));
+    }
+
+    var features = result.FeatureCollection.featureMember;
+
+    return _.chain(features)
+      .filter(function (feature) {
+        // Some files may contain feature types we dont want (e.g. ejerlav).
+        return feature[mapping.wfsName];
+      })
+      .map(function (feature) {
+        return exports.wfsFeatureToTema(feature, mapping);
+      })
+      .groupBy(function (fragment) {
+        return exports.stringKey(fragment, temaDef);
+      })
+      .map(function (fragments) {
+        return {
+          tema: temaDef.singular,
+          fields: fragments[0].fields,
+          polygons: _.pluck(fragments, 'polygon')
+        };
+      })
+      .value();
+  });
+};
+
 exports.wfsFeatureToTema = function(feature, mapping) {
   var featureCandidates = feature[mapping.wfsName];
   if (!featureCandidates) {
@@ -209,8 +236,8 @@ exports.wfsFeatureToTema = function(feature, mapping) {
 };
 
 
-exports.initAdresserTemaerView = function(client, temaName, cb) {
-  async.series([
+var initAdresserTemaerView = function(client, temaName) {
+  return q.nfcall(async.series,[
     sqlCommon.disableTriggers(client),
     function(cb) {
       var sql = 'INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema)'+
@@ -228,10 +255,10 @@ exports.initAdresserTemaerView = function(client, temaName, cb) {
       client.query(sql, params, cb);
     },
     sqlCommon.enableTriggers(client)
-  ], cb);
+  ]);
 };
 
-exports.updateAdresserTemaerViewNonInit = function(client, temaName) {
+ var updateAdresserTemaerViewNonInit = function(client, temaName) {
   var datamodel = datamodels.adgangsadresse_tema;
   return dataUtil.createTempTableQ(client, 'tema_mapping_temp', 'adgangsadresser_temaer_matview').then(function() {
     return dbapi.queryRawQ(client, 'INSERT INTO tema_mapping_temp(adgangsadresse_id, tema_id, tema) ' +
@@ -260,3 +287,13 @@ exports.stringKey = function (tema, temaDef) {
     return memo + tema.fields[keySpec.name];
   }, '');
 };
+
+exports.updateAdresserTemaerView = function(client, temaDef, initializing, callback) {
+  if (initializing) {
+    return initAdresserTemaerView(client, temaDef.singular).nodeify(callback);
+  }
+  else {
+    return updateAdresserTemaerViewNonInit(client, temaDef.singular).nodeify(callback);
+  }
+};
+

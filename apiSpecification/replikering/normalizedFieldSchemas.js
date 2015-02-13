@@ -160,10 +160,7 @@ var fields = {
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som det matrikelnummer som adressen ligger på, er en del af.' +
         ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
-      schema: {
-        type: nullableType('string'),
-        pattern: '^[0-9]{1,6}'
-      }
+      schema: definitions.Nullableesrejendomsnr
     }, {
       name: 'etrs89koordinat_øst',
       description: 'Adgangspunktets østlige koordiat angivet i koordinatsystemet UTM zone 32' +

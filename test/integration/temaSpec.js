@@ -32,7 +32,7 @@ describe('DAGI updates', function() {
       if(err) { throw err; }
       tema.addTema(client, sampleTema, function(err, createdTemaId) {
         if(err) { throw err; }
-        tema.updateAdresserTemaerView(client, 'region').nodeify(function(err) {
+        tema.updateAdresserTemaerView(client, sampleTemaDef, false).nodeify(function(err) {
           if(err) { throw err; }
           client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
             if(err) { throw err; }
@@ -83,7 +83,7 @@ describe('DAGI updates', function() {
             '725025.18 6166264.37))'];
           tema.updateTema(client, sampleTemaDef, updated, function(err) {
             if (err) { throw err; }
-            tema.updateAdresserTemaerView(client, 'region').nodeify( done);
+            tema.updateAdresserTemaerView(client, sampleTemaDef, false).nodeify( done);
           });
         });
       });

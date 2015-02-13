@@ -35,6 +35,8 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adgangsadresse: 1319,
     adresse: 2801
   };
+
+  var temaSpec = tema.findTema('region');
   ['adgangsadresse', 'adresse'].forEach(function(entityName) {
     var resourceSpec = registry.findWhere({
       entityName: entityName,
@@ -46,7 +48,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
         if (err) { throw err; }
         tema.addTema(client, sampleTema, function (err) {
           if(err) { throw err; }
-          tema.updateAdresserTemaerView(client, 'region').nodeify( function(err) {
+          tema.updateAdresserTemaerView(client, temaSpec, false).nodeify( function(err) {
             if(err) { throw err; }
             var params = { regionskode: "10" };
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
