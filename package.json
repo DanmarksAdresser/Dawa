@@ -49,6 +49,7 @@
     "grunt-contrib-watch": "~0.5.3",
     "grunt-express-server": "0.4.11 ",
     "grunt-release": "^0.9.0",
+    "jasmine":"2.2.1",
     "jasmine-node": "1.14.5",
     "jshint": "2.4.4"
   },

@@ -123,6 +123,57 @@ var definitions = {
     },
     docOrder: ['href', 'kode', 'navn']
   }),
+  RegionsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Regionens unikke URL.',
+        type: 'string'
+      },
+      kode: {
+        description: 'Regionskoden. 4 cifre.',
+        '$ref': '#/definitions/Kode4'
+      },
+      navn: {
+        description: 'Regionens navn.',
+        type: nullableType('string')
+      }
+    },
+    docOrder: ['href', 'kode', 'navn']
+  }),
+  SogneRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Sognets unikke URL.',
+        type: 'string'
+      },
+      kode: {
+        description: 'Sognekoden. 4 cifre.',
+        '$ref': '#/definitions/Kode4'
+      },
+      navn: {
+        description: 'Sognets navn.',
+        type: nullableType('string')
+      }
+    },
+    docOrder: ['href', 'kode', 'navn']
+  }),
+  RetskredsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Retskredsens unikke URL.',
+        type: 'string'
+      },
+      kode: {
+        description: 'Retskredskoden. 4 cifre.',
+        '$ref': '#/definitions/Kode4'
+      },
+      navn: {
+        description: 'Retskredsens navn.',
+        type: nullableType('string')
+      }
+    },
+    docOrder: ['href', 'kode', 'navn']
+  }),
   VejnavnRef: schemaObject({
     properties: {
       href: {

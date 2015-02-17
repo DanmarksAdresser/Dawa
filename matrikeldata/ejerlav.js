@@ -32,6 +32,45 @@ exports.parseEjerlav = function(body) {
       featureID: {
         name: 'featureID',
         parseFn: parseInteger
+      },
+      regionskode: {
+        name: 'regionskode',
+        parseFn: parseInteger
+      },
+      sognekode: {
+        name: 'sognekode',
+        parseFn: parseInteger
+      },
+      kommunekode: {
+        name: 'kommunekode',
+        parseFn: parseInteger
+      },
+      retskredskode: {
+        name: 'retskredskode',
+        parseFn: parseInteger
+      },
+      esrejendomsnr: {
+        name: 'esr_Ejendomsnummer',
+        path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
+        parseFn: function(strValue) {
+          // there is (as of 2015-02-16) a bug in the data, such that
+          // esrejendomsnr is prefixed with kommunekode
+          if(strValue.length > 7) {
+            return parseInteger(strValue.substring(4));
+          }
+          else {
+            var integer = parseInteger(strValue);
+            if(integer === 0) {
+              return null;
+            }
+            return integer;
+          }
+        }
+      },
+      sfeejendomsnr: {
+        name: 'sfe_Ejendomsnummer',
+        path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
+        parseFn: parseInteger
       }
     }
   };

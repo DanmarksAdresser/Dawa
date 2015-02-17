@@ -1,10 +1,12 @@
 "use strict";
 
 var q = require('q');
+var ZSchema = require('z-schema');
 var _ = require('underscore');
+
+var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
-var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 
 function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) {
   function withDbClient(callback) {
@@ -124,3 +126,23 @@ exports.itQ = function (description, func) {
   });
 };
 
+exports.customMatchers = {
+  toMatchSchema: function(util, customEqualityTesters) {
+    return {
+      compare: function(object, schema) {
+        var zSchemaValidator = new ZSchema({
+          forceItems: true,
+          forceProperties: true
+        });
+
+        var result = {
+          pass: zSchemaValidator.validate(object, schema)
+        };
+        if(!result.pass) {
+          result.message = JSON.stringify(zSchemaValidator.getLastErrors());
+        }
+        return result;
+      }
+    };
+  }
+}

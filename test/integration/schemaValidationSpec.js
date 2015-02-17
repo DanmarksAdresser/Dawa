@@ -1,9 +1,11 @@
 "use strict";
-var dbapi = require('../../dbapi');
 var _ = require('underscore');
-var schemaValidationUtil = require('./schemaValidationUtil');
 
+var customMatchers = require('./helpers').customMatchers;
+var dbapi = require('../../dbapi');
+var schemaValidationUtil = require('./schemaValidationUtil');
 var registry = require('../../apiSpecification/registry');
+
 require('../../apiSpecification/allSpecs');
 /**
  * This test verifies that all testdata is valid according to JSON schema
@@ -69,6 +71,9 @@ function verifyAllValuesVisited(schema, record, prefix) {
 }
 
 describe('Validering af JSON-formatteret output', function() {
+  beforeEach(function() {
+    jasmine.addMatchers(customMatchers);
+  });
   var allNamesAndKeys = registry.where({
     type: 'nameAndKey'
   });
@@ -100,7 +105,7 @@ describe('Validering af JSON-formatteret output', function() {
         dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
-            expect(schemaValidationUtil.isSchemaValid(json, schema)).toBe(true);
+            expect(json).toMatchSchema(schema);
           });
           transactionDone();
           specDone();

@@ -28,6 +28,26 @@ exports.mapKommuneRef = function(dbJson, baseUrl) {
   return null;
 };
 
+exports.mapKode4NavnTema = function(temaNavn, kode, navn, baseUrl) {
+  if (kode) {
+    return {
+      href: exports.makeHref(baseUrl, temaNavn, [kode]),
+      kode: kode4String(kode),
+      navn: navn
+    };
+  }
+  return null;
+
+}
+
+exports.mapEjerlavRef = function(kode, navn, baseUrl) {
+  return {
+    kode: kode,
+    navn: navn,
+    href: exports.makeHref(baseUrl, 'ejerlav', [kode])
+  };
+};
+
 exports.mapAdgangsadresseRef = function(adgangsadresseid, baseUrl) {
   return {
     href: exports.makeHref(baseUrl, 'adgangsadresse', [adgangsadresseid]),

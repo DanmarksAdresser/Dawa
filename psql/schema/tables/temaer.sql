@@ -17,18 +17,24 @@ CREATE INDEX ON temaer USING gist(geom);
 
 -- Support lookup using string
 CREATE INDEX ON temaer((fields->>'kode')) WHERE ((fields->>'kode') is not null);
-CREATE INDEX ON temaer((fields->>'nr')) WHERE ((fields->>'nr') is not null);
-CREATE INDEX ON temaer(tema, (fields->>'ejerlavkode'), (fields->>'matrikelnr'));
 
 -- Support lookup using integer type
 CREATE INDEX ON temaer(((fields->>'kode')::integer)) WHERE ((fields->>'kode')::integer is not null);
-CREATE INDEX ON temaer(((fields->>'nr')::integer)) WHERE ((fields->>'nr')::integer is not null);
-CREATE INDEX ON temaer(((fields->>'ejerlavkode')::integer), (fields->>'matrikelnr')) WHERE ((fields->>'ejerlavkode') is not null);
 
 -- More efficient if tema is already given
 CREATE INDEX ON temaer(tema,(fields->>'kode')) WHERE ((fields->>'kode') is not null);
-CREATE INDEX ON temaer(tema,(fields->>'nr')) WHERE ((fields->>'nr') is not null);
-CREATE INDEX ON temaer(tema,(fields->>'ejerlavkode'), (fields->>'matrikelnr')) WHERE ((fields->>'ejerlavkode') is not null);
 CREATE INDEX ON temaer(tema,((fields->>'kode')::integer)) WHERE ((fields->>'kode')::integer is not null);
-CREATE INDEX ON temaer(tema,((fields->>'nr')::integer)) WHERE ((fields->>'nr')::integer is not null);
-CREATE INDEX ON temaer(tema,((fields->>'ejerlavkode')::integer), (fields->>'matrikelnr')) WHERE ((fields->>'ejerlavkode') is not null);
+
+
+-- Postnumre
+CREATE INDEX ON temaer((fields->>'nr')) WHERE tema = 'postnummer';
+CREATE INDEX ON temaer(((fields->>'nr')::integer)) WHERE tema = 'postnummer';
+
+-- Jordstykker
+CREATE INDEX ON temaer((fields->>'ejerlavkode'), (fields->>'matrikelnr')) WHERE tema = 'jordstykke';
+CREATE INDEX ON temaer((fields->>'kommunekode')) WHERE tema = 'jordstykke';
+CREATE INDEX ON temaer((fields->>'regionskode')) WHERE tema = 'jordstykke';
+CREATE INDEX ON temaer((fields->>'retskredskode')) WHERE tema = 'jordstykke';
+CREATE INDEX ON temaer((fields->>'sognekode')) WHERE tema = 'jordstykke';
+CREATE INDEX ON temaer((fields->>'esrejendomsnr')) WHERE tema = 'jordstykke';
+CREATE INDEX ON temaer((fields->>'sfeejendomsnr')) WHERE tema = 'jordstykke';

@@ -88,12 +88,6 @@ var fieldMap = {
 	],
   jordstykke: [
     {
-      name: 'featureID',
-      description: 'Jordstykkets identifier, udgør nøglen.',
-      schema: {
-        type: 'string'
-      }
-    }, {
       name: 'ejerlavkode',
       description: 'Landsejerlavkode for det ejerlav, som jordstykket tilhører',
       schema: commonSchemaDefinitions.UpTo7
@@ -104,19 +98,23 @@ var fieldMap = {
     }, {
       name: 'kommunekode',
       description: 'Kommunekoden.',
-      schema: commonSchemaDefinitions.Kode4
+      schema: commonSchemaDefinitions.Kode4,
+      formatter: kode4String
     }, {
       name: 'sognekode',
       description: 'Sognekoden',
-      schema: commonSchemaDefinitions.Kode4
+      schema: commonSchemaDefinitions.Kode4,
+      formatter: kode4String
     }, {
       name: 'regionskode',
       description: 'Regionskoden',
-      schema: commonSchemaDefinitions.Kode4
+      schema: commonSchemaDefinitions.Kode4,
+      formatter: kode4String
     }, {
       name: 'retskredskode',
       description: 'Retskredskoden',
-      schema: commonSchemaDefinitions.Kode4
+      schema: commonSchemaDefinitions.Kode4,
+      formatter: kode4String
     }, {
       name: 'esrejendomsnr',
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +

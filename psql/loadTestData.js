@@ -64,9 +64,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
         }, callback);
       },
       function(callback) {
-        var temaNames = _.pluck(temaer, 'singular');
-        async.eachSeries(temaNames, function(temaName, callback) {
-          tema.initAdresserTemaerView(client, temaName, {}, callback  );
+        async.eachSeries(temaer, function(temaDef, callback) {
+          tema.updateAdresserTemaerView(client, temaDef, true, callback  );
         }, callback);
       }
     ]);

@@ -659,12 +659,40 @@ var ejerlavDoc = {
 };
 
 var jordstykkeParameters = [
-    {name: 'ejerlavkode',
-      doc: 'Find jordstykker tilhørende ejerlav med den angivne kode.',
-      examples: ['170354', '80652']},
-    {name: 'matrikelnr',
-      doc: 'Find jordstykker med det angivne matrikelnr',
-      examples: ['7kn', '5bv']}
+  {
+    name: 'ejerlavkode',
+    doc: 'Find jordstykker tilhørende ejerlav med den angivne kode.',
+    examples: ['170354', '80652']
+  },
+  {
+    name: 'matrikelnr',
+    doc: 'Find jordstykker med det angivne matrikelnr.',
+    examples: ['7kn', '5bv']
+  },
+  {
+    name: 'kommunekode',
+    doc: 'Find de jordstykker som ligger indenfor kommunen angivet ved kommunekoden.'
+  },
+  {
+    name: 'regionskode',
+    doc: 'Find de jordstykker som ligger indenfor regionen angivet ved regionkoden.'
+  },
+  {
+    name: 'sognekode',
+    doc: 'Find de jordstykker som ligger indenfor sognet angivet ved sognkoden.'
+  },
+  {
+    name: 'retskredskode',
+    doc: 'Find de jordstykker som ligger indenfor retskredsen angivet ved retskredskoden.'
+  },
+  {
+    name: 'esrejendomsnr',
+    doc: 'Find de jordstykker som er tilknyttet det angivne ESR ejendomsnummer.'
+  },
+  {
+    name: 'sfeejendomsnr',
+    doc: 'Find de jordstykker som er tilknyttet det angivne SFE ejendomsnummer.'
+  }
 ];
 
 var jordstykkeIdParameters = [

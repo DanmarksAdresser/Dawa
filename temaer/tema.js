@@ -228,7 +228,19 @@ exports.wfsFeatureToTema = function(feature, mapping) {
     polygon: gml.gmlGeometryToWkt(wfsFeature[mapping.geometry][0])
   };
   result.fields = _.reduce(mapping.fields, function(memo, fieldMapping, fieldName) {
-    memo[fieldName] = fieldMapping.parseFn(wfsFeature[fieldMapping.name][0]);
+    var objWithProperty;
+    if(fieldMapping.path) {
+      objWithProperty = _.reduce(fieldMapping.path, function(memo, pathSegment) {
+        if(!memo || !memo[pathSegment]) {
+          return null;
+        }
+        return memo[pathSegment][0];
+      }, wfsFeature);
+    }
+    else {
+      objWithProperty = wfsFeature;
+    }
+    memo[fieldName] = fieldMapping.parseFn(objWithProperty[fieldMapping.name][0]);
     return memo;
   }, {});
 
