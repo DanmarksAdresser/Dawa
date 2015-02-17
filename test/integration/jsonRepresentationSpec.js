@@ -3,10 +3,12 @@
 // In this test, we retrieve objects from the test dataset by ID, and verify that the JSON result is as expected.
 // Thus, this test verifies that the API is stable.
 
+var expect = require('chai').expect;
 var _ = require('underscore');
-var registry = require('../../apiSpecification/registry');
-var helpers = require('./helpers');
+
 var dbapi = require('../../dbapi');
+var helpers = require('./helpers');
+var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
 var BASE_URL = "http://dawa";
@@ -396,7 +398,7 @@ describe('JSON opslag', function() {
             }
             expect(function() {
               verifyResult("ROOT",expected, result );
-            }).not.toThrow();
+            }).to.not.throw;
             done();
           });
         });

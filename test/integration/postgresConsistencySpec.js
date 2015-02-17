@@ -1,5 +1,7 @@
 "use strict";
 
+var expect = require('chai').expect;
+
 var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
@@ -49,9 +51,9 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function()
         throw err;
       }
       client.query('SELECT geom FROM adgangsadresser where id = $1', ["038edf0e-001b-4d9d-a1c7-b71cb354680f"], function(err, result) {
-        expect(result.rows.length).toBe(1);
+        expect(result.rows.length).to.equal(1);
         var geom = result.rows[0].geom;
-        expect(geom).toBe('0101000020E864000014AE4761D68B204133333303127B5741');
+        expect(geom).to.equal('0101000020E864000014AE4761D68B204133333303127B5741');
         done();
       });
     });

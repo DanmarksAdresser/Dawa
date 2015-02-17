@@ -1,5 +1,7 @@
 "use strict";
 
+var expect = require('chai').expect;
+
 var serializers = require('../../apiSpecification/common/serializers');
 var eventStream = require('event-stream');
 var pipeline = require('../../pipeline');
@@ -14,16 +16,16 @@ describe('serializers', function() {
     it('Can serialize a single object to pretty printed JSON', function(done) {
       var serializeFn = serializers.createSingleObjectSerializer('json', null, true, representation);
       serializeFn(sampleObject, function(err, response) {
-        expect(JSON.parse(response.body)).toEqual(sampleObject);
-        expect(response.body.indexOf(' ')).toBeGreaterThan(-1);
+        expect(JSON.parse(response.body)).to.deep.equal(sampleObject);
+        expect(response.body.indexOf(' ')).to.be.at.least(0);
         done();
       });
     });
     it('Can serialize a single object to non-pretty-printed JSON', function(done) {
       var serializeFn = serializers.createSingleObjectSerializer('json', null, false, representation);
       serializeFn(sampleObject, function(err, response) {
-        expect(JSON.parse(response.body)).toEqual(sampleObject);
-        expect(response.body.indexOf(' ')).toBe(-1);
+        expect(JSON.parse(response.body)).to.deep.equal(sampleObject);
+        expect(response.body.indexOf(' ')).to.equal(-1);
         done();
       });
     });
@@ -42,8 +44,8 @@ describe('serializers', function() {
     it('Can serialize a stream of objects to pretty printed JSON', function(done) {
       var sampleData = [sampleObject, sampleObject];
       serializeStream(sampleData, 'json',null, null,true, representation, function(err, stringResult) {
-        expect(JSON.parse(stringResult)).toEqual(sampleData);
-        expect(stringResult.indexOf(' ')).toBeGreaterThan(-1);
+        expect(JSON.parse(stringResult)).to.deep.equal(sampleData);
+        expect(stringResult.indexOf(' ')).to.be.at.least(0);
         done();
       });
     });
@@ -51,8 +53,8 @@ describe('serializers', function() {
     it('Can serialize a stream of objects to non pretty printed JSON', function(done) {
       var sampleData = [sampleObject, sampleObject];
       serializeStream(sampleData, 'json',null, null, false, representation, function(err, stringResult) {
-        expect(JSON.parse(stringResult)).toEqual(sampleData);
-        expect(stringResult.indexOf(' ')).toBe(-1);
+        expect(JSON.parse(stringResult)).to.deep.equal(sampleData);
+        expect(stringResult.indexOf(' ')).to.equal(-1);
         done();
       });
     });

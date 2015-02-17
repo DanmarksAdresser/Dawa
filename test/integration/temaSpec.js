@@ -1,11 +1,11 @@
 "use strict";
 
+var expect = require('chai').expect;
 var q = require('q');
 var _ = require('underscore');
 
 var dagiTemaer = require('../../apiSpecification/temaer/temaer');
 var dbapi = require('../../dbapi');
-var itQ = require('./helpers').itQ;
 var tema = require('../../temaer/tema');
 var transactions = require('../../psql/transactions');
 
@@ -37,7 +37,7 @@ describe('DAGI updates', function() {
           client.query("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId], function(err, result) {
             if(err) { throw err; }
             transactionDone();
-            expect(result.rows[0].c).toBe('277');
+            expect(result.rows[0].c).to.equal('277');
             done();
           });
         });
@@ -45,7 +45,7 @@ describe('DAGI updates', function() {
     });
   });
 
-  itQ('When deleting a DAGI tema, the adgangsadresser_temaer_matview table should be updated', function() {
+  it('When deleting a DAGI tema, the adgangsadresser_temaer_matview table should be updated', function() {
     return transactions.withTransaction({
       connString: process.env.pgConnectionUrl,
       mode: 'ROLLBACK'
@@ -58,7 +58,7 @@ describe('DAGI updates', function() {
               [createdTemaId]);
           });
         }).then(function (result) {
-          expect(result.rows[0].c).toBe('0');
+          expect(result.rows[0].c).to.equal('0');
         });
     });
   });
@@ -96,7 +96,7 @@ describe('DAGI updates', function() {
         function (err, result) {
           if (err) { throw err; }
           transactionDone();
-          expect(result.rows[0].c).toBe('226');
+          expect(result.rows[0].c).to.equal('226');
           done();
         });
     });
@@ -104,7 +104,7 @@ describe('DAGI updates', function() {
     it('When updating a tema, the geo_version should be updated', function(done) {
       client.query("select geo_version from temaer where id = $1", [createdTemaId], function(err, result) {
         if(err) { throw err; }
-        expect(result.rows[0].geo_version).toBe(2);
+        expect(result.rows[0].geo_version).to.equal(2);
         transactionDone();
         done();
       });
@@ -119,14 +119,14 @@ describe('DAGI updates', function() {
         client.query("select count(*) as c FROM temaer WHERE to_tsquery('adresser', 'xxyyzz') @@ tsv", function(err, result) {
           if(err) { throw err; }
           transactionDone();
-          expect(result.rows[0].c).toBe('1');
+          expect(result.rows[0].c).to.equal('1');
           done();
         });
       });
     });
   });
 
-  itQ('When updating a DAGI tema, the tsv column should be updated', function() {
+  it('When updating a DAGI tema, the tsv column should be updated', function() {
     return transactions.withTransaction({
       connString: process.env.pgConnectionUrl,
       mode: 'ROLLBACK'
@@ -138,7 +138,7 @@ describe('DAGI updates', function() {
       }).then(function() {
         return q.ninvoke(client, 'query', "select count(*) as c FROM temaer WHERE to_tsquery('adresser', 'Foo') @@ tsv", []);
       }).then(function(result) {
-        expect(result.rows[0].c).toBe('1');
+        expect(result.rows[0].c).to.equal('1');
       });
     });
   });

@@ -1,10 +1,11 @@
 "use strict";
 
 var async = require('async');
+var expect = require('chai').expect;
+
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 var dbapi = require('../../dbapi');
-
 var setupFixture = require('../util/testUtil').setupFixture;
 
 var testFixture = {
@@ -53,7 +54,7 @@ var vejstykkeTests = [{
       kode: 9999
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'testvej':1");
+      expect(updated.tsv).to.equal("'testvej':1");
     }
   }
   }, {
@@ -73,7 +74,7 @@ var vejstykkeTests = [{
       kode: 9999
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'tastvej':1");
+      expect(updated.tsv).to.equal("'tastvej':1");
     }
   }
 }];
@@ -86,7 +87,7 @@ var postnummerTests = [{
       nr: 9998
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'9998':1 'testpostnummer':2");
+      expect(updated.tsv).to.equal("'9998':1 'testpostnummer':2");
     }
   }
 }, {
@@ -104,7 +105,7 @@ var postnummerTests = [{
       nr: 9998
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'9998':1 'tastpostnummer':2");
+      expect(updated.tsv).to.equal("'9998':1 'tastpostnummer':2");
     }
   }
 }];
@@ -117,7 +118,7 @@ var adgangsadresseTests = [{
       id: '11111111-1111-1111-1111-111111111111'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'32a':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A");
+      expect(updated.tsv).to.equal("'32a':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A");
     }
   }
 }, {
@@ -135,7 +136,7 @@ var adgangsadresseTests = [{
       id: '11111111-1111-1111-1111-111111111111'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'32a':2A '9998':4 'testby':3C 'testpostnummer':5 'vestvejen':1A");
+      expect(updated.tsv).to.equal("'32a':2A '9998':4 'testby':3C 'testpostnummer':5 'vestvejen':1A");
     }
   }
 }, {
@@ -154,7 +155,7 @@ var adgangsadresseTests = [{
       id: '11111111-1111-1111-1111-111111111111'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'32a':2A '9998':4 'tastvej':1A 'testby':3C 'testpostnummer':5");
+      expect(updated.tsv).to.equal("'32a':2A '9998':4 'tastvej':1A 'testby':3C 'testpostnummer':5");
     }
   }
 }, {
@@ -172,7 +173,7 @@ var adgangsadresseTests = [{
       id: '11111111-1111-1111-1111-111111111111'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'32a':2A '9998':4 'tastpostnummer':5 'testby':3C 'testvej':1A");
+      expect(updated.tsv).to.equal("'32a':2A '9998':4 'tastpostnummer':5 'testby':3C 'testvej':1A");
     }
   }
 }];
@@ -185,7 +186,7 @@ var adresseTests = [{
       id: '11111111-1111-1111-1111-111111111112'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'32a':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A 'tv':6B");
+      expect(updated.tsv).to.equal("'32a':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A 'tv':6B");
     }
   }
 }, {
@@ -203,7 +204,7 @@ var adresseTests = [{
       id: '11111111-1111-1111-1111-111111111112'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'3':6B '32a':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A 'tv':7B");
+      expect(updated.tsv).to.equal("'3':6B '32a':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A 'tv':7B");
     }
   }
 }, {
@@ -221,7 +222,7 @@ var adresseTests = [{
       id: '11111111-1111-1111-1111-111111111112'
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'36c':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A 'tv':6B");
+      expect(updated.tsv).to.equal("'36c':2A '9998':4 'testby':3C 'testpostnummer':5 'testvej':1A 'tv':6B");
     }
   }
 }];
@@ -237,7 +238,7 @@ var supplerendebynavneTests = [{
 
     },
     expect: function(updated) {
-      expect(updated.tsv).toBe("'testby':1");
+      expect(updated.tsv).to.equal("'testby':1");
     }
   }
 }];
@@ -263,7 +264,7 @@ function verify(testSpec, client, callback) {
       });
     },
     function(callback) {
-      expect(updated).toBeDefined();
+      expect(updated).to.exist;
       if(updated) {
         testSpec.verify.expect(updated);
       }

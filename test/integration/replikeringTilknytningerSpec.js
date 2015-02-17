@@ -3,6 +3,7 @@
 // dette er en integrationstest af adressetilknytninger. Vi opretter nogle adresser og indlæser nogle temaer,
 // hvorefter vi verificerer at de forventede tilknytninger udstilles korrekt både som udtræk og hændelser.
 
+var expect = require('chai').expect;
 var Q = require('q');
 var _ = require('underscore');
 
@@ -19,7 +20,6 @@ var tilknytninger = require('../../apiSpecification/tematilknytninger/tilknytnin
 var schemaValidationUtil = require('./schemaValidationUtil');
 
 var helpers = require('./helpers');
-var itQ = helpers.itQ;
 
 var adgangsadresser = [
   {
@@ -146,7 +146,7 @@ describe('Replikering af tilknytninger', function () {
       type: 'resource',
       qualifier: 'hændelser'
     });
-    itQ('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
+    it('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
       return tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
         return Q.nfcall(tema.updateAdresserTemaerView, client, temaDef, true);
       }).then(function () {
@@ -157,7 +157,7 @@ describe('Replikering af tilknytninger', function () {
           adgangsadresseid: adgangsadresser[0].id
         };
         expectedResult[keyFieldName] = expectedKeys[temaName];
-        expect(jsonResult).toEqual([expectedResult]);
+        expect(jsonResult).to.deep.equal([expectedResult]);
         return tema.updateTema(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
       }).then(function () {
         return tema.updateAdresserTemaerView(client, temaDef, false);
@@ -169,17 +169,17 @@ describe('Replikering af tilknytninger', function () {
           adgangsadresseid: adgangsadresser[1].id
         };
         expectedResult[keyFieldName] = expectedKeys[temaName];
-        expect(jsonResult).toEqual([expectedResult]);
+        expect(jsonResult).to.deep.equal([expectedResult]);
         return Q.nfcall(helpers.getJson, client, eventResource, {}, {});
       }).then(function (eventResult) {
-        expect(eventResult.length).toBe(2);
-        expect(eventResult[0].operation).toBe('delete');
-        expect(eventResult[1].operation).toBe('insert');
-        expect(eventResult[0].data.adgangsadresseid).toBe(adgangsadresser[0].id);
-        expect(eventResult[1].data.adgangsadresseid).toBe(adgangsadresser[1].id);
+        expect(eventResult.length).to.equal(2);
+        expect(eventResult[0].operation).to.equal('delete');
+        expect(eventResult[1].operation).to.equal('insert');
+        expect(eventResult[0].data.adgangsadresseid).to.equal(adgangsadresser[0].id);
+        expect(eventResult[1].data.adgangsadresseid).to.equal(adgangsadresser[1].id);
         var keyFieldName = tilknytning.keyFieldName;
-        expect(eventResult[0].data[keyFieldName]).toBe(expectedKeys[temaName]);
-        expect(eventResult[1].data[keyFieldName]).toBe(expectedKeys[temaName]);
+        expect(eventResult[0].data[keyFieldName]).to.equal(expectedKeys[temaName]);
+        expect(eventResult[1].data[keyFieldName]).to.equal(expectedKeys[temaName]);
 
         var eventRepresentation = registry.findWhere({
           entityName: datamodelName + '_hændelse',
@@ -188,8 +188,8 @@ describe('Replikering af tilknytninger', function () {
         });
 
         var eventSchema = eventRepresentation.schema;
-        expect(schemaValidationUtil.isSchemaValid(eventResult[0], eventSchema)).toBeTruthy();
-        expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).toBeTruthy();
+        expect(schemaValidationUtil.isSchemaValid(eventResult[0], eventSchema)).to.be.true;
+        expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).to.be.true;
       });
     });
   });

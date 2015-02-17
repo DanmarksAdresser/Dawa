@@ -1,14 +1,15 @@
 "use strict";
 
+var expect = require('chai').expect;
 var request = require("request");
 
 describe("AdresserApi", function() {
   describe("Opslag på ID", function() {
     it("Should be possible to get an address", function(done) {
       request.get('http://localhost:3002/adresser/0a3f50a3-823b-32b8-e044-0003ba298018', function(error, response, body) {
-        expect(response.statusCode).toBe(200);
+        expect(response.statusCode).to.equal(200);
         var adresse = JSON.parse(body);
-        expect(adresse.id).toBe('0a3f50a3-823b-32b8-e044-0003ba298018');
+        expect(adresse.id).to.equal('0a3f50a3-823b-32b8-e044-0003ba298018');
         done();
       });
     });
@@ -25,7 +26,7 @@ describe('When searching for polygons and zipcodes', function () {
                     done(response.statusCode);
                   } else {
                     var adrs = JSON.parse(body);
-                    expect(adrs.length).toBe(106);
+                    expect(adrs.length).to.equal(106);
                     done();
                   }
                 });
@@ -38,8 +39,8 @@ describe('The query-parameter', function () {
     request.get('http://localhost:3002/adresser?vejkode=0689',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
-                  expect(response.statusCode).toBe(200);
-                  expect(adrs.length).toBeGreaterThan(1);
+                  expect(response.statusCode).to.equal(200);
+                  expect(adrs.length).to.be.above(1);
                   done();
                 });
   });
@@ -48,8 +49,8 @@ describe('The query-parameter', function () {
     request.get('http://localhost:3002/adresser?vejkode=689',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
-                  expect(response.statusCode).toBe(200);
-                  expect(adrs.length).toBeGreaterThan(1);
+                  expect(response.statusCode).to.equal(200);
+                  expect(adrs.length).to.be.above(1);
                   done();
                 });
   });
@@ -57,8 +58,8 @@ describe('The query-parameter', function () {
     request.get('http://localhost:3002/adresser?vejkode=A851',
                 function(error, response, body){
                   var adrs = JSON.parse(body);
-                  expect(response.statusCode).toBe(400);
-                  expect(adrs.type).toBe("QueryParameterFormatError");
+                  expect(response.statusCode).to.equal(400);
+                  expect(adrs.type).to.equal("QueryParameterFormatError");
                   done();
                 });
   });
@@ -67,8 +68,8 @@ describe('The query-parameter', function () {
     request.get('http://localhost:3002/adresser?ejerlav=',
       function(error, response, body){
         var adrs = JSON.parse(body);
-        expect(response.statusCode).toBe(200);
-        expect(adrs.length).toBeGreaterThan(1);
+        expect(response.statusCode).to.equal(200);
+        expect(adrs.length).to.be.above(1);
         done();
       });
   });

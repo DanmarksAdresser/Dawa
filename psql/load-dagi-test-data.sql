@@ -122,5 +122,5 @@ VALUES
   ('zone',now(), now(), 1, '{ "zone":1 }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('afstemningsomraade',now(), now(), 1, '{ "kode":99, "navn": "Afstemningsomraade test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
   ('valglandsdel',now(), now(), 1, '{ "bogstav":"A", "navn": "Valglandsdel test" }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832)),
-  ('jordstykke',now(), now(), 1, '{ "ejerlavkode":1, "matrikelnr": "ab1f", "kommunekode": 99, "regionskode": 99, "sognekode": 99, "retskredskode": 99 }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832));
+  ('jordstykke',now(), now(), 1, '{ "ejerlavkode":1, "matrikelnr": "ab1f", "kommunekode": 99, "regionskode": 99, "sognekode": 99, "retskredskode": 99, "esrejendomsnr": 123456, "sfeejendomsnr":12345 }', ST_GeomFromText('MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832));
 

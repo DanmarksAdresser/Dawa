@@ -1,7 +1,5 @@
 "use strict";
 
-var q = require('q');
-var ZSchema = require('z-schema');
 var _ = require('underscore');
 
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
@@ -112,37 +110,3 @@ exports.toSqlModel = function(datamodelName, apiObject) {
     return memo;
   }, {});
 };
-
-exports.itQ = function (description, func) {
-  q.longStackSupport = true;
-  it(description, function (done) {
-    func().then(done, function (err) {
-      expect(err).toBeUndefined();
-      if(err) {
-        console.log(err.stack);
-      }
-      done();
-    });
-  });
-};
-
-exports.customMatchers = {
-  toMatchSchema: function(util, customEqualityTesters) {
-    return {
-      compare: function(object, schema) {
-        var zSchemaValidator = new ZSchema({
-          forceItems: true,
-          forceProperties: true
-        });
-
-        var result = {
-          pass: zSchemaValidator.validate(object, schema)
-        };
-        if(!result.pass) {
-          result.message = JSON.stringify(zSchemaValidator.getLastErrors());
-        }
-        return result;
-      }
-    };
-  }
-}

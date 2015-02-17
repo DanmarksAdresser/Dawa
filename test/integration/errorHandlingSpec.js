@@ -1,14 +1,15 @@
 "use strict";
 
+var expect = require('chai').expect;
 var request = require("request");
 
 describe('Ill-formed query parameters', function () {
   it('should result in QueryParameterFormatError', function (done) {
     request.get('http://localhost:3002/adresser?postnr=12345',
                 function(err, response, body){
-                  expect(response.statusCode).toBe(400);
+                  expect(response.statusCode).to.equal(400);
                   var error = JSON.parse(body);
-                  expect(error).toEqual(
+                  expect(error).to.deep.equal(
                     {
                       "type": "QueryParameterFormatError",
                       "title": "One or more query parameters was ill-formed.",
@@ -23,9 +24,9 @@ describe('Ill-formed UUID', function () {
   it('should result in ResourcePathFormatError', function (done) {
     request.get('http://localhost:3002/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018',
                 function(err, response, body){
-                  expect(response.statusCode).toBe(404);
+                  expect(response.statusCode).to.equal(404);
                   var error = JSON.parse(body);
-                  expect(error).toEqual(
+                  expect(error).to.deep.equal(
                     {
                       "type": "ResourcePathFormatError",
                       "title": "The URI path was ill-formed.",
@@ -41,9 +42,9 @@ describe('When getting single addresses', function () {
     var uuid2 = '0a3f50ae-aaaa-bbbb-cccc-0003ba298019';
     request.get('http://localhost:3002/adresser/'+uuid2,
                 function(err, response, body){
-                  expect(response.statusCode).toBe(404);
+                  expect(response.statusCode).to.equal(404);
                   var error = JSON.parse(body);
-                  expect(error).toEqual(
+                  expect(error).to.deep.equal(
                     {
                       type: "ResourceNotFoundError",
                       title: "The resource was not found",

@@ -1,5 +1,7 @@
 "use strict";
 
+var expect = require('chai').expect;
+
 var bbrEvents = require('../../bbr/eventImporter/bbrEvents');
 
 var adresseWithinInterval = bbrEvents.internal.adresseWithinInterval;
@@ -10,26 +12,26 @@ var createSupplerendebynavnUpdate = bbrEvents.internal.createSupplerendebynavnUp
 function compareHusnr(a, b) {
   var result = bbrEvents.internal.compareHusnr(a, b);
   if(result < 0) {
-    expect(bbrEvents.internal.compareHusnr(b, a)).toBeGreaterThan(0);
+    expect(bbrEvents.internal.compareHusnr(b, a)).to.be.above(0);
   }
   else if(result === 0) {
-    expect(bbrEvents.internal.compareHusnr(b, a)).toBe(0);
+    expect(bbrEvents.internal.compareHusnr(b, a)).to.equal(0);
   }
   return result;
 }
 
 describe('compareHusnr', function() {
   it('28 skal være før 28A', function() {
-    expect(compareHusnr('28', '28A')).toBeLessThan(0);
+    expect(compareHusnr('28', '28A')).to.be.below(0);
   });
   it('28 skal være lig 28', function() {
-    expect(compareHusnr("28", "28")).toBe(0);
+    expect(compareHusnr("28", "28")).to.equal(0);
   });
   it('28A skal være før 28B', function() {
-    expect(compareHusnr('28A', '28B')).toBeLessThan(0);
+    expect(compareHusnr('28A', '28B')).to.be.below(0);
   });
   it('28A skal være lig 28A', function() {
-    expect(compareHusnr('28A', '28A')).toBe(0);
+    expect(compareHusnr('28A', '28A')).to.equal(0);
   });
 });
 
@@ -37,31 +39,31 @@ describe('adresseWithinInterval', function() {
   var ligeInterval = {husnrFra: '6', husnrTil: '28'};
   var uligeInterval = {husnrFra: '3A', husnrTil: '7K'};
   it('husnrFra og husnrTil er med i intervallet', function() {
-    expect(adresseWithinInterval({ husnr: '28'}, ligeInterval)).toBe(true);
-    expect(adresseWithinInterval({ husnr: '6'}, ligeInterval)).toBe(true);
-    expect(adresseWithinInterval({ husnr: '7K'}, uligeInterval)).toBe(true);
+    expect(adresseWithinInterval({ husnr: '28'}, ligeInterval)).to.equal(true);
+    expect(adresseWithinInterval({ husnr: '6'}, ligeInterval)).to.equal(true);
+    expect(adresseWithinInterval({ husnr: '7K'}, uligeInterval)).to.equal(true);
   });
   it('Adresser udenfor intervallet er ikke med i intervallet', function() {
-    expect(adresseWithinInterval({ husnr: '4'}, ligeInterval)).toBe(false);
-    expect(adresseWithinInterval({ husnr: '34'}, ligeInterval)).toBe(false);
-    expect(adresseWithinInterval({ husnr: '1C'}, uligeInterval)).toBe(false);
-    expect(adresseWithinInterval({ husnr: '7L'}, uligeInterval)).toBe(false);
-    expect(adresseWithinInterval({ husnr: '9K'}, uligeInterval)).toBe(false);
+    expect(adresseWithinInterval({ husnr: '4'}, ligeInterval)).to.equal(false);
+    expect(adresseWithinInterval({ husnr: '34'}, ligeInterval)).to.equal(false);
+    expect(adresseWithinInterval({ husnr: '1C'}, uligeInterval)).to.equal(false);
+    expect(adresseWithinInterval({ husnr: '7L'}, uligeInterval)).to.equal(false);
+    expect(adresseWithinInterval({ husnr: '9K'}, uligeInterval)).to.equal(false);
   });
 });
 
 describe('isOnSide', function() {
   it('Ulige adresser er ikke på lige side', function() {
-    expect(isOnSide('lige', {husnr: '7K'})).toBe(false);
+    expect(isOnSide('lige', {husnr: '7K'})).to.equal(false);
   });
   it('Ulige adresser er på ulige side', function() {
-    expect(isOnSide('ulige', {husnr: '7K'})).toBe(true);
+    expect(isOnSide('ulige', {husnr: '7K'})).to.equal(true);
   });
   it('Lige adresser er ikke på ulige side', function() {
-    expect(isOnSide('ulige', {husnr: '6'})).toBe(false);
+    expect(isOnSide('ulige', {husnr: '6'})).to.equal(false);
   });
   it('Lige adresser er  på lige side', function() {
-    expect(isOnSide('lige', {husnr: '6Z'})).toBe(true);
+    expect(isOnSide('lige', {husnr: '6Z'})).to.equal(true);
   });
 });
 
@@ -98,7 +100,7 @@ describe('intervalEventChanges', function () {
       husnr: "2",
       postnr: 1000
     };
-    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).toEqual([{
+    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).to.deep.equal([{
       id: 'id',
       postnr: 2960
     }]);
@@ -110,7 +112,7 @@ describe('intervalEventChanges', function () {
       husnr: "2",
       postnr: 2960
     };
-    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).toEqual([]);
+    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).to.deep.equal([]);
   });
 
   it('Adresser udenfor interval skal have postnummeret sat til null', function() {
@@ -119,7 +121,7 @@ describe('intervalEventChanges', function () {
       husnr: "30",
       postnr: 2960
     };
-    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).toEqual([{
+    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).to.deep.equal([{
       id: 'id',
       postnr: null
     }]);
@@ -130,7 +132,7 @@ describe('intervalEventChanges', function () {
       husnr: "3",
       postnr: 1000
     };
-    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).toEqual([]);
+    expect(intervalEventChanges([adresse], postnrEvent, createPostnrUpdate)).to.deep.equal([]);
   });
 
   it('Supplerende bynavn skal trimmes for whitespace', function() {
@@ -139,7 +141,7 @@ describe('intervalEventChanges', function () {
       husnr: "2",
       supplerendebynavn: "Gammelby"
     };
-    expect(intervalEventChanges([adresse], supplerendebynavnEvent, createSupplerendebynavnUpdate)).toEqual([{
+    expect(intervalEventChanges([adresse], supplerendebynavnEvent, createSupplerendebynavnUpdate)).to.deep.equal([{
       id: 'id',
       supplerendebynavn: "Test Bynavn"
     }]);

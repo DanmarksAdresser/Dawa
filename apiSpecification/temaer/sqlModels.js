@@ -17,11 +17,21 @@ var publishedTemaer = _.filter(temaer, function(tema) {
   return tema.published;
 });
 
+var casts = {
+  jordstykke: {
+    ejerlavkode: 'integer'
+  }
+};
+
 publishedTemaer.forEach(function(tema) {
   var jsonFields = additionalFields[tema.singular];
   var columns = jsonFields.reduce(function(memo, fieldSpec) {
+    var column = "fields->>'" + fieldSpec.name + "'";
+    if (casts[tema.singular] && casts[tema.singular][fieldSpec.name]) {
+      column = '(' + column + ')::' + casts[tema.singular][fieldSpec.name];
+    }
     memo[fieldSpec.name] = {
-      column: "fields->>'" + fieldSpec.name + "'"
+      column: column
     };
     return memo;
   }, {});

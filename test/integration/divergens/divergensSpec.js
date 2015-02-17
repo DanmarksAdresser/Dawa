@@ -1,5 +1,6 @@
 "use strict";
 
+var expect = require('chai').expect;
 var fs = require('fs');
 
 var divergensImpl = require('../../../psql/divergensImpl');
@@ -28,14 +29,14 @@ describe('divergenscheck', function() {
           compareWithCurrent: true
         }).then(function(report) {
           return divergensImpl.rectifyAll(client, report).then(function(report) {
-            expect(report).toEqual(expectedData1Report);
+            expect(report).to.deep.equal(expectedData1Report);
           });
         }).then(function() {
           return divergensImpl.divergenceReport(client, data2Options, {
             compareWithCurrent: true
           }).then(function(report) {
             return divergensImpl.rectifyAll(client, report).then(function(report) {
-              expect(report).toEqual(expectedData2Report);
+              expect(report).to.deep.equal(expectedData2Report);
             });
           });
         }).then(function() {
@@ -43,7 +44,7 @@ describe('divergenscheck', function() {
             compareWithCurrent: true
           }).then(function(report) {
             return divergensImpl.rectifyAll(client, report).then(function(report) {
-              expect(report).toEqual(data2ReportSecondRun);
+              expect(report).to.deep.equal(data2ReportSecondRun);
             });
           });
         }).then(function() {
@@ -93,7 +94,7 @@ describe('divergenscheck', function() {
               forceDawaSequenceNumber: 1
             }).then(function (report) {
               return divergensImpl.rectifyAll(client, report).then(function (report) {
-                expect(report).toEqual(expectedReport);
+                expect(report).to.deep.equal(expectedReport);
               });
             });
           }).then(function () {

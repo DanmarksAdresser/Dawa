@@ -1,10 +1,14 @@
 "use strict";
+
+var chai = require('chai');
+var schemaValid = require('../helpers/schemaValid');
 var _ = require('underscore');
 
-var customMatchers = require('./helpers').customMatchers;
 var dbapi = require('../../dbapi');
-var schemaValidationUtil = require('./schemaValidationUtil');
 var registry = require('../../apiSpecification/registry');
+
+var expect = chai.expect;
+chai.use(schemaValid);
 
 require('../../apiSpecification/allSpecs');
 /**
@@ -71,9 +75,6 @@ function verifyAllValuesVisited(schema, record, prefix) {
 }
 
 describe('Validering af JSON-formatteret output', function() {
-  beforeEach(function() {
-    jasmine.addMatchers(customMatchers);
-  });
   var allNamesAndKeys = registry.where({
     type: 'nameAndKey'
   });
@@ -105,7 +106,7 @@ describe('Validering af JSON-formatteret output', function() {
         dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
-            expect(json).toMatchSchema(schema);
+            expect(json).to.be.schemaValid(schema);
           });
           transactionDone();
           specDone();
@@ -118,14 +119,14 @@ describe('Validering af JSON-formatteret output', function() {
       dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
         var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
         dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
-          expect(err).toBe(null);
+          expect(err).to.equal(null);
 
           rows.forEach(function(row) {
             var json = mapper(row);
             recordVisitedValues(json, schema, valuesSeen);
           });
           transactionDone();
-          expect(verifyAllValuesVisited(schema, valuesSeen)).toBe(true);
+          expect(verifyAllValuesVisited(schema, valuesSeen)).to.equal(true);
           specDone();
         });
       });

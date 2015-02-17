@@ -1,11 +1,13 @@
 "use strict";
 
 var async = require('async');
+var expect = require('chai').expect;
+var _ = require('underscore');
+
 var bbrEvents = require('../../bbr/eventImporter/bbrEvents');
 var dbapi = require('../../dbapi');
 var datamodels = require('../../crud/datamodel');
 var crud = require('../../crud/crud');
-var _ = require('underscore');
 
 var handleBbrEvent = bbrEvents.internal.applyBbrEvent;
 
@@ -84,27 +86,27 @@ describe('Håndtering af BBR events', function() {
       var adresserILigeInterval = _.filter(resultingAdresser, function(adresse) {
         return _.contains(husnumreILigeInterval, adresse.husnr);
       });
-      expect(adresserILigeInterval.length).toBe(husnumreILigeInterval.length);
+      expect(adresserILigeInterval.length).to.equal(husnumreILigeInterval.length);
       adresserILigeInterval.forEach(function(adresse) {
-        expect(adresse.supplerendebynavn).toBe('Østby');
+        expect(adresse.supplerendebynavn).to.equal('Østby');
       });
     });
     it('Skal sætte supplerende bynavn (ulige husnummerinterval)', function() {
       var adresserIUligeInterval = _.filter(resultingAdresser, function(adresse) {
         return _.contains(husnumreIUligeInterval, adresse.husnr);
       });
-      expect(adresserIUligeInterval.length).toBe(husnumreIUligeInterval.length);
+      expect(adresserIUligeInterval.length).to.equal(husnumreIUligeInterval.length);
       adresserIUligeInterval.forEach(function(adresse) {
-        expect(adresse.supplerendebynavn).toBe('Vestby');
+        expect(adresse.supplerendebynavn).to.equal('Vestby');
       });
     });
     it('Skal sætte supplerende bynavn på alle andre adresser til null', function() {
       var adresserUdenforInterval = _.reject(resultingAdresser, function(adresse) {
         return _.contains(husnumreILigeInterval.concat(husnumreIUligeInterval), adresse.husnr);
       });
-      expect(adresserUdenforInterval.length).toBe(35);
+      expect(adresserUdenforInterval.length).to.equal(35);
       adresserUdenforInterval.forEach(function(adresse) {
-        expect(adresse.supplerendebynavn).toBeNull();
+        expect(adresse.supplerendebynavn).to.be.null;
       });
     });
     afterEach(function(done) {
@@ -177,11 +179,11 @@ describe('Håndtering af BBR events', function() {
             if(err) {
               throw err;
             }
-            expect(queryResult.length).toBe(1);
+            expect(queryResult.length).to.equal(1);
             var created = queryResult[0];
-            expect(created.kommunekode).toEqual(999);
-            expect(created.kode).toEqual(9899);
-            expect(created.vejnavn).toEqual('Niels Bohrs Alle');
+            expect(created.kommunekode).to.deep.equal(999);
+            expect(created.kode).to.deep.equal(9899);
+            expect(created.vejnavn).to.deep.equal('Niels Bohrs Alle');
             transactionDone();
             done();
           });
@@ -205,9 +207,9 @@ describe('Håndtering af BBR events', function() {
               if(err) {
                 throw err;
               }
-              expect(queryResult.length).toBe(1);
+              expect(queryResult.length).to.equal(1);
               var updated = queryResult[0];
-              expect(updated.vejnavn).toEqual('Einsteins gade');
+              expect(updated.vejnavn).to.deep.equal('Einsteins gade');
               transactionDone();
               done();
             });
@@ -233,7 +235,7 @@ describe('Håndtering af BBR events', function() {
               if (err) {
                 throw err;
               }
-              expect(queryResult.length).toBe(0);
+              expect(queryResult.length).to.equal(0);
               transactionDone();
               done();
             });
@@ -243,7 +245,6 @@ describe('Håndtering af BBR events', function() {
     });
 
     it('Ved modtagelse af en vejnavn event hvor kode  >= 9900 ignoreres den', function(done) {
-      done();
       dbapi.withRollbackTransaction(function(err, client, transactionDone) {
         handleBbrEvent(client, filteredEvent, function (err) {
           if (err) {
@@ -256,7 +257,7 @@ describe('Håndtering af BBR events', function() {
             if(err) {
               throw err;
             }
-            expect(queryResult.length).toBe(0);
+            expect(queryResult.length).to.equal(0);
             transactionDone();
             done();
           });

@@ -1,10 +1,12 @@
 "use strict";
 
-var tema = require('../../temaer/tema');
+var expect = require('chai').expect;
+var request = require("request");
+
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
-var request = require("request");
+var tema = require('../../temaer/tema');
 require('../../apiSpecification/allSpecs');
 
 describe('Filtrering af adresser ud fra DAGI tema kode', function() {
@@ -55,7 +57,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
             var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
             dbapi.queryRaw(client, query.sql, query.params, function(err, result) {
               if(err) { throw err; }
-              expect(result.length).toBe(expectedResultsRegion[entityName]);
+              expect(result.length).to.equal(expectedResultsRegion[entityName]);
               transactionDone();
               done();
             });
@@ -66,14 +68,14 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
 
     it(' for '  + entityName + 'r uden regionstilknytning', function (done) {
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?regionskode=', json: true}, function(error, response, result) {
-        expect(result.length).toBe(expectedResultWithoutRegion[entityName]);
+        expect(result.length).to.equal(expectedResultWithoutRegion[entityName]);
         done();
       });
     });
 
     it(' for zone på '  + entityName, function (done) {
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=1', json: true}, function(error, response, result) {
-        expect(result.length).toBe(expectedResultsZone1[entityName]);
+        expect(result.length).to.equal(expectedResultsZone1[entityName]);
         done();
       });
     });
@@ -83,7 +85,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
         var totalCount = result.length;
         // we know that only associations to zone 1 exists, so the expected count can be computed from totalCount and the expected number of hits for zone 1
         request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=', json: true}, function(error, response, result) {
-          expect(result.length).toBe(totalCount - expectedResultsZone1[entityName]);
+          expect(result.length).to.equal(totalCount - expectedResultsZone1[entityName]);
           done();
         });
       });

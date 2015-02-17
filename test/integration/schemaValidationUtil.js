@@ -1,4 +1,5 @@
 "use strict";
+
 var ZSchema = require('z-schema');
 
 var zSchemaValidator = new ZSchema({

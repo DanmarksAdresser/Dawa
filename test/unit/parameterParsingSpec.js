@@ -1,5 +1,7 @@
 "use strict";
 
+var expect = require('chai').expect;
+
 var parameterParsing = require("../../parameterParsing");
 
 var schema =  {
@@ -21,13 +23,13 @@ var parameterSpec =  {
 describe("Parsing types with schemas", function () {
   it("should succeed on valid data", function (done) {
     expect(parameterParsing.parseParameters({uuid: '98239823-9823-9823-9823-982398239823'}, parameterSpec))
-      .toEqual({params: {uuid: "98239823-9823-9823-9823-982398239823"}, errors: []});
+      .to.deep.equal({params: {uuid: "98239823-9823-9823-9823-982398239823"}, errors: []});
     done();
   });
 
   it("should fail on invalid data ", function (done) {
     expect(parameterParsing.parseParameters({uuid: '98239823-982-982-982-982398239823'}, parameterSpec))
-      .toEqual({params: {}, errors: [['uuid', 'String does not match pattern ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$: 98239823-982-982-982-982398239823']]});
+      .to.deep.equal({params: {}, errors: [['uuid', 'String does not match pattern ^([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})$: 98239823-982-982-982-982398239823']]});
     done();
   });
 });
@@ -35,11 +37,11 @@ describe("Parsing types with schemas", function () {
 describe("Parsing parameters of type 'string'", function () {
   it("should accept anything", function (done) {
     expect(parameterParsing.parseParameters({aString: 'str'}, parameterSpec))
-      .toEqual({params: {aString: "str"}, errors: []});
+      .to.deep.equal({params: {aString: "str"}, errors: []});
     expect(parameterParsing.parseParameters({aString: '42'}, parameterSpec))
-      .toEqual({params: {aString: '42'}, errors: []});
+      .to.deep.equal({params: {aString: '42'}, errors: []});
     expect(parameterParsing.parseParameters({aString: '[1,2,3]'}, parameterSpec))
-      .toEqual({params: {aString: '[1,2,3]'}, errors: []});
+      .to.deep.equal({params: {aString: '[1,2,3]'}, errors: []});
 
     done();
   });
@@ -48,7 +50,7 @@ describe("Parsing parameters of type 'string'", function () {
 describe("Parsing parameters of different types", function () {
   it("should succeed", function (done) {
     expect(parameterParsing.parseParameters({aString:'str', aInteger:"42", aFloat:"3.14", arrayJson:'[1,2,"3"]', objectJson:'{"foo":42}'}, parameterSpec))
-      .toEqual({params: {aString: "str", aInteger: 42, aFloat: 3.14, arrayJson: [1,2,"3"], objectJson: {foo:42}}, errors: []});
+      .to.deep.equal({params: {aString: "str", aInteger: 42, aFloat: 3.14, arrayJson: [1,2,"3"], objectJson: {foo:42}}, errors: []});
     done();
   });
 });
@@ -56,7 +58,7 @@ describe("Parsing parameters of different types", function () {
 describe("When Parsing parameters", function () {
   it("all errors should be returned", function (done) {
     expect(parameterParsing.parseParameters({aString: "42", aInteger: "ad", aFloat: "[3.14]", arrayJson: "a42", objectJson: "4,2"}, parameterSpec))
-      .toEqual({params: {aString: '42'}, errors: [["aInteger", 'notInteger'],["aFloat", 'notFloat'],
+      .to.deep.equal({params: {aString: '42'}, errors: [["aInteger", 'notInteger'],["aFloat", 'notFloat'],
                                                   ["arrayJson", 'notJson'], ["objectJson", 'notJson']]});
     done();
   });
@@ -65,16 +67,16 @@ describe("When Parsing parameters", function () {
 describe("Parsing parameters of type 'undefined'", function () {
   it("should never fail", function (done) {
     expect(parameterParsing.parseParameters({anyValue: "aString"}, parameterSpec))
-      .toEqual({params: {anyValue: "aString"}, errors: []});
+      .to.deep.equal({params: {anyValue: "aString"}, errors: []});
 
     expect(parameterParsing.parseParameters({anyValue: "42"}, parameterSpec))
-      .toEqual({params: {anyValue: "42"}, errors: []});
+      .to.deep.equal({params: {anyValue: "42"}, errors: []});
 
     expect(parameterParsing.parseParameters({anyValue: "3.14"}, parameterSpec))
-      .toEqual({params: {anyValue: "3.14"}, errors: []});
+      .to.deep.equal({params: {anyValue: "3.14"}, errors: []});
 
     expect(parameterParsing.parseParameters({anyValue: "[[[1,2,3]]]"}, parameterSpec))
-      .toEqual({params: {anyValue: "[[[1,2,3]]]"}, errors: []});
+      .to.deep.equal({params: {anyValue: "[[[1,2,3]]]"}, errors: []});
 
     done();
   });
@@ -83,10 +85,10 @@ describe("Parsing parameters of type 'undefined'", function () {
 describe("When parsing unknown parameters'", function () {
   it("they should just be ignored", function (done) {
     expect(parameterParsing.parseParameters({anyValue: "42", unknownParam: ""}, parameterSpec))
-      .toEqual({params: {anyValue: "42"}, errors: []});
+      .to.deep.equal({params: {anyValue: "42"}, errors: []});
 
     expect(parameterParsing.parseParameters({unknownParam: ""}, parameterSpec))
-      .toEqual({params: {}, errors: []});
+      .to.deep.equal({params: {}, errors: []});
 
     done();
   });

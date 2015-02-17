@@ -4,9 +4,12 @@
  * Tests all HTTP based query parameters
  */
 
-var _ = require('underscore');
+var expect = require('chai').expect;
 var request = require("request");
+var _ = require('underscore');
+
 var registry = require('../../apiSpecification/registry');
+require('../../apiSpecification/allSpecs');
 
 var sampleParameters = {
   adgangsadresse: {
@@ -37,18 +40,16 @@ _.keys(sampleParameters).forEach(function(entityName) {
   _.each(sampleParameters[entityName], function(sample, paramName) {
     var verify = sample.verifier;
     sample.values.forEach(function(sampleValue) {
-      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?' + paramName + "=" + sampleValue, json: true}, function(error, response, result) {
-        if (response.statusCode !== 200) { throw 'Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in response with status ' + response.statusCode; }
-        if (result.length === 0) { throw 'Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in empty query result'; }
-        describe('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue, function() {
-          _.each(result, function(queryMatch) {
-            it("matcher for resultat '" + JSON.stringify(queryMatch), function(done) {
-              expect(verify(queryMatch, sampleValue)).toBe(true);
-              done();
+      it('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue, function(done) {
+          request.get({url: 'http://localhost:3002' + resourceSpec.path + '?' + paramName + "=" + sampleValue, json: true}, function(error, response, result) {
+            if (response.statusCode !== 200) { throw 'Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in response with status ' + response.statusCode; }
+            if (result.length === 0) { throw 'Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in empty query result'; }
+            _.each(result, function(queryMatch) {
+              expect(verify(queryMatch, sampleValue)).to.equal(true);
             });
           });
+        done();
         });
-      });
     });
   });
 });

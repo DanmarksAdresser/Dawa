@@ -4,23 +4,19 @@
 // at udtræk samt hændelser hentet via APIet ser ud som forventet.
 // Ved opdateringen ændres samtlige felter.
 
+var expect = require('chai').expect;
 var Q = require('q');
-var format = require('util').format;
 var _ = require('underscore');
 
-var registry = require('../../apiSpecification/registry');
-require('../../apiSpecification/allSpecs');
-
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
-var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
-
-var schemaValidationUtil = require('./schemaValidationUtil');
-
+var format = require('util').format;
 var helpers = require('./helpers');
-
-
+var registry = require('../../apiSpecification/registry');
+var schemaValidationUtil = require('./schemaValidationUtil');
+var sqlCommon = require('../../psql/common');
+require('../../apiSpecification/allSpecs');
 
 var insert = {
   postnummer: {
@@ -225,25 +221,25 @@ describe('ReplikeringsAPI', function() {
       it('Should include the created object in the full extract', function(done) {
         var sekvensnummer = (index * 3) + 1;
         helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-          expect(objects.length).toBe(1);
+          expect(objects.length).to.equal(1);
           var obj = objects[0];
-          expect(obj).toEqual(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
+          expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
           done();
         });
       });
       it('Should include the updated object in the full extract', function(done) {
         var sekvensnummer = (index * 3) + 2;
         helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-          expect(objects.length).toBe(1);
+          expect(objects.length).to.equal(1);
           var obj = objects[0];
-          expect(obj).toEqual(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
+          expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
           done();
         });
       });
       it('Should not include the deleted object in the full extract', function(done) {
         var sekvensnummer = (index * 3) + 3;
         helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-          expect(objects.length).toBe(0);
+          expect(objects.length).to.equal(0);
           done();
         });
       });
@@ -264,9 +260,9 @@ describe('ReplikeringsAPI', function() {
 
       it('All events should be valid according to schema', function(done) {
         helpers.getJson(client, eventResource, {}, {}, function(err, objects) {
-          expect(objects.length).toBeGreaterThan(0);
+          expect(objects.length).to.be.above(0);
           objects.forEach(function(object) {
-            expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).toBeTruthy();
+            expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).to.be.true;
           });
           done();
         });
@@ -275,21 +271,21 @@ describe('ReplikeringsAPI', function() {
       it('sequence number filtering should work when retrieving events', function(done) {
         var sekvensnummer = (index * 3) + 2;
         helpers.getJson(client, eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
-          expect(objects.length).toBe(1);
-          expect(objects[0].sekvensnummer).toBe(sekvensnummer);
-          expect(objects[0].data).toEqual(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName]));
+          expect(objects.length).to.equal(1);
+          expect(objects[0].sekvensnummer).to.equal(sekvensnummer);
+          expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName]));
           done();
         });
       });
       it('When adding id field(s) when retrieving events, events without the specified id should not be returned', function(done) {
         helpers.getJson(client, eventResource, {}, nonexistingIds[datamodelName], function(err, objects) {
-          expect(objects.length).toBe(0);
+          expect(objects.length).to.equal(0);
           done();
         });
       });
       it('When adding id field(s) when retrieving events, events with the specified id should be returned', function(done) {
         helpers.getJson(client, eventResource, {}, existingIds[datamodelName], function(err, objects) {
-          expect(objects.length).toBe(3);
+          expect(objects.length).to.equal(3);
           done();
         });
       });

@@ -1,5 +1,7 @@
 "use strict";
 
+var expect = require('chai').expect;
+
 var docUtil = require('../../docUtil');
 var ZSchema = require('z-schema');
 
@@ -46,9 +48,9 @@ describe('Documentation generation utilities', function() {
         }
       };
 
-      expect(new ZSchema().validateSchema(sampleSchema)).toBeTruthy();
+      expect(new ZSchema().validateSchema(sampleSchema)).to.be.true;
       var doc = docUtil.extractDocumentationForObject(sampleSchema);
-      expect(doc).toEqual([
+      expect(doc).to.deep.equal([
         { name: 'stormodtageradresse', description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.', type: 'string', required: true },
         { name: 'kommuner', description: 'De kommuner hvis areal overlapper postnumeret areal.', type: 'array', required: true, items: [
           { name: 'href', description: 'Kommunens unikke URL.', type: 'string', required: true },

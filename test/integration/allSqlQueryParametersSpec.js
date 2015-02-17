@@ -4,11 +4,14 @@
  * Tests all SQL based query parameters
  */
 
+var expect = require('chai').expect;
 var _ = require('underscore');
-var parameterParsing = require('../../parameterParsing');
+
 var dbapi = require('../../dbapi');
 var kode4String = require('../../apiSpecification/util').kode4String;
+var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
+require('../../apiSpecification/allSpecs');
 
 function multiVerifier(verifierFn) {
   return function(object, paramString) {
@@ -320,7 +323,7 @@ _.keys(sampleParameters).forEach(function(specName) {
     it('tester alle parametre', function() {
       var specifiedParameterNames = _.pluck(propertyFilterParameters, 'name');
       var testedParameterNames = _.keys(sampleParameters[specName]);
-      expect(_.difference(specifiedParameterNames, testedParameterNames)).toEqual([]);
+      expect(_.difference(specifiedParameterNames, testedParameterNames)).to.deep.equal([]);
     });
     _.each(sampleParameters[specName], function(sample, paramName) {
       var verify = sample.verifier;
@@ -330,24 +333,24 @@ _.keys(sampleParameters).forEach(function(specName) {
             var rawQueryParams = {};
             rawQueryParams[paramName] = sampleValue;
             var parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(propertyFilterParameters, 'name'));
-            expect(parseResult.errors.length).toBe(0);
+            expect(parseResult.errors.length).to.equal(0);
             parseDone();
 
             parseResult.params.per_side = 100;
             var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
             dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-              expect(err).toBeFalsy();
+              expect(err).to.not.exist;
               if (err) throw 'unable to open connection';
               dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
                 transactionDone();
-                expect(err).toBeFalsy();
-                expect(rows.length).toBeGreaterThan(0);
+                expect(err).to.not.exist;
+                expect(rows.length).to.be.above(0);
                 var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
                 describe('Query for ' + specName + ' case ' + paramName + '=' + sampleValue + ', query resultat', function() {
                   mappedRows.forEach(function(json) {
                     it(JSON.stringify(json), function(rowSpecDone) {
                       var verifyResult = verify(json, sampleValue);
-                      expect(verifyResult).toBe(true);
+                      expect(verifyResult).to.equal(true);
                       rowSpecDone();
                     });
                   });
