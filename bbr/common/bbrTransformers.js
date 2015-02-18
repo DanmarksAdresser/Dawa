@@ -72,7 +72,15 @@ module.exports = {
   vejstykke: function(row) {
     var result = transformBbr(datamodels.vejstykke, bbrFieldMappings.vejstykke)(row);
     var kode = parseInt(result.kode, 10);
+    var kommunekode = parseInt(result.kommunekode, 10);
+
+    // kode større end 9900 er ikke rigtige veje
     if(kode >= 9900) {
+      return null;
+    }
+
+    // kommunekode >= 9000 er grønlandske veje, som vi ikke skal have med
+    if(kommunekode >= 9000) {
       return null;
     }
     result.oprettet = transformTimestamp(result.oprettet);
