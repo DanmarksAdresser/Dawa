@@ -19,7 +19,11 @@ var consistencyChecks = [
   {
     key: 'AdresserInkonsistentKommune',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i en anden kommune',
-    query: "SELECT id, vejkode, kommunekode, temaer.kode AS geografisk_kommunekode, oprettet, aendret FROM adgangsadresser JOIN griddeddagitemaer temaer ON (st_contains(temaer.geom, adgangsadresser.geom) AND temaer.tema = 'kommune') WHERE adgangsadresser.kommunekode IS DISTINCT FROM temaer.kode ORDER BY aendret DESC"
+    query: "SELECT a.id, vejkode, kommunekode, temaer.fields->>'kode' AS geografisk_kommunekode, a.oprettet, a.aendret" +
+    " FROM adgangsadresser a" +
+    " LEFT JOIN adgangsadresser_temaer_matview atm ON (a.id = atm.adgangsadresse_id)" +
+    " LEFT JOIN temaer ON atm.tema_id = temaer.id" +
+    " WHERE a.noejagtighed <> 'U' AND a.kommunekode IS DISTINCT FROM (temaer.fields->>'kode')::integer ORDER BY a.aendret DESC"
   },
   {
     key: 'AdresserUdenRegion',
@@ -35,6 +39,16 @@ var consistencyChecks = [
     key: 'AdgangsadresserUdenEnhedsadresser',
     description: 'Find alle adgangsadresser uden mindst en tilknyttet enhedsadresse',
     query: 'SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser where not exists(select adgangsadresseid from enhedsadresser where adgangsadresseid = adgangsadresser.id) ORDER BY aendret DESC'
+  },
+  {
+    key: 'AdgangsadresserMatrikelafgivelser',
+    description: 'Find alle adgangsadresser hvor BBR matrikel og geografisk matrikel afviger',
+    query: "SELECT a.id, ejerlavkode, matrikelnr, t.fields->>'ejerlavkode' as geo_ejerlavkode, t.fields->>'matrikelnr' as geo_matrikelnr" +
+    " FROM adgangsadresser a" +
+    " LEFT JOIN adgangsadresser_temaer_matview atm ON atm.tema = 'jordstykke' AND a.id = atm.adgangsadresse_id" +
+    " LEFT JOIN temaer t ON t.tema = 'jordstykke' and T.id = atm.tema_id" +
+    " WHERE a.noejagtighed <> 'U'" +
+    " AND ((t.fields->>'ejerlavkode')::integer IS DISTINCT FROM a.ejerlavkode or (t.fields->>'matrikelnr') IS DISTINCT FROM a.matrikelnr)"
   }
 ];
 

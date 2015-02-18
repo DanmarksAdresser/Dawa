@@ -30,6 +30,9 @@ exports.kommune = {
       parseFn: parseInteger
     },
     navn: 'navn'
+  },
+  filterFn: function(wfsFeature) {
+    return wfsFeature.Kommuneinddeling[0].udenforKommuneinddeling[0] === '0';
   }
 };
 
@@ -121,7 +124,7 @@ exports.valglandsdel = {
 	}
 };
 
-// normalize, such that every field has a name and a parseFn.
+// normalize, such that every field has a name and a parseFn and a filterFn.
 _.each(exports, function(mapping) {
   mapping.fields = _.reduce(mapping.fields, function(memo, value, key) {
     if(_.isObject(value)) {
@@ -135,4 +138,5 @@ _.each(exports, function(mapping) {
     }
     return memo;
   }, {});
+  mapping.filterFn = mapping.filterFn || function() { return true; };
 });

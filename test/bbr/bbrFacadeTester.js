@@ -1,7 +1,7 @@
 "use strict";
 
 var cliParameterParsing = require('../../bbr/common/cliParameterParsing');
-var request = require('request');
+var request = require('request-promise');
 var winston = require('winston');
 var AWS     = require('aws-sdk');
 var _       = require('underscore');

@@ -199,6 +199,7 @@ exports.parseTemaer = function(gmlText, temaDef, mapping) {
         // Some files may contain feature types we dont want (e.g. ejerlav).
         return feature[mapping.wfsName];
       })
+      .filter(mapping.filterFn)
       .map(function (feature) {
         return exports.wfsFeatureToTema(feature, mapping);
       })

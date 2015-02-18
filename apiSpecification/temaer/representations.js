@@ -86,19 +86,19 @@ var jordstykkeJsonSchema = function() {
   };
   schema.properties.kommune = {
     description: 'Kommunen som jordstykket er beliggende i.',
-      $ref: '#/definitions/NullableKommuneRef'
+      $ref: '#/definitions/NullableKommuneRefNoName'
   };
   schema.properties.region = {
     description: 'Regionen som jordstykket er beliggende i.',
-    $ref: '#/definitions/NullableRegionsRef'
+    $ref: '#/definitions/NullableRegionsRefNoName'
   };
   schema.properties.sogn = {
     description: 'Sognet som jordstykket er beliggende i.',
-    $ref: '#/definitions/NullableSogneRef'
+    $ref: '#/definitions/NullableSogneRefNoName'
   };
   schema.properties.retskreds = {
     description: 'Retskredsen som jordstykket er beliggende i.',
-    $ref: '#/definitions/NullableRetskredsRef'
+    $ref: '#/definitions/NullableRetskredsRefNoName'
   };
 
   schema.docOrder = schema.docOrder.concat(['ejerlav', 'kommune', 'region', 'sogn', 'retskreds']);
@@ -119,10 +119,10 @@ var customRepresentations = {
           result.matrikelnr = value.matrikelnr;
           result.href = makeHref(baseUrl, 'jordstykke', [value.ejerlavkode, value.matrikelnr]);
           result.ejerlav = commonMappers.mapEjerlavRef(value.ejerlavkode, "", baseUrl);
-          result.kommune = commonMappers.mapKode4NavnTema('kommune', value.kommunekode, '', baseUrl);
-          result.region = commonMappers.mapKode4NavnTema('region', value.regionskode, '', baseUrl);
-          result.sogn = commonMappers.mapKode4NavnTema('sogn', value.sognekode, '', baseUrl);
-          result.retskreds = commonMappers.mapKode4NavnTema('retskreds', value.retskredskode, '', baseUrl);
+          result.kommune = commonMappers.mapKode4NavnTemaNoName('kommune', value.kommunekode, baseUrl);
+          result.region = commonMappers.mapKode4NavnTemaNoName('region', value.regionskode, baseUrl);
+          result.sogn = commonMappers.mapKode4NavnTemaNoName('sogn', value.sognekode, baseUrl);
+          result.retskreds = commonMappers.mapKode4NavnTemaNoName('retskreds', value.retskredskode, baseUrl);
           result.esrejendomsnr = value.esrejendomsnr ? ('' + value.esrejendomsnr) : null;
           result.sfeejendomsnr = value.sfeejendomsnr ? ('' + value.sfeejendomsnr) : null;
           return result;

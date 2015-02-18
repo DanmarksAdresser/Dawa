@@ -121,4 +121,5 @@ _.each(exports, function(mapping) {
     }
     return memo;
   }, {});
+  mapping.filterFn = mapping.filterFn || function() { return true; };
 });

@@ -37,8 +37,17 @@ exports.mapKode4NavnTema = function(temaNavn, kode, navn, baseUrl) {
     };
   }
   return null;
+};
 
-}
+exports.mapKode4NavnTemaNoName = function(temaNavn, kode, baseUrl) {
+  if (kode) {
+    return {
+      href: exports.makeHref(baseUrl, temaNavn, [kode]),
+      kode: kode4String(kode)
+    };
+  }
+  return null;
+};
 
 exports.mapEjerlavRef = function(kode, navn, baseUrl) {
   return {

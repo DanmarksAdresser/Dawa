@@ -1,7 +1,7 @@
 "use strict";
 
 var expect = require('chai').expect;
-var request    = require('request');
+var request    = require('request-promise');
 var _            = require('underscore');
 
 var parameterDoc = require('../../parameterDoc');

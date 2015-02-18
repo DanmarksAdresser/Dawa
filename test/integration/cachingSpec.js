@@ -1,7 +1,7 @@
 "use strict";
 
 var expect = require('chai').expect;
-var request = require("request");
+var request = require("request-promise");
 
 describe("Caching", function() {
   it("2xx svar skal caches", function(done) {

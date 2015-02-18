@@ -1,7 +1,7 @@
 "use strict";
 
 var expect = require('chai').expect;
-var request = require("request");
+var request = require("request-promise");
 
 describe('Ill-formed query parameters', function () {
   it('should result in QueryParameterFormatError', function (done) {

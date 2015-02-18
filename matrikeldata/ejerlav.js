@@ -72,7 +72,8 @@ exports.parseEjerlav = function(body) {
         path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
         parseFn: parseInteger
       }
-    }
+    },
+    filterFn: function() { return true; }
   };
 
   var temaDef = tema.findTema('jordstykke');
