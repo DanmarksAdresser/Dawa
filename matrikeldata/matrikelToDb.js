@@ -2,6 +2,8 @@
 
 var child_process = require('child_process');
 var fs = require('fs');
+var moment = require('moment');
+var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
@@ -15,6 +17,7 @@ var temaer = require('../apiSpecification/temaer/temaer');
 var optionSpec = {
   sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
+  lastUpdated: [false, 'Timestamp for seneste opdatering, f.eks. "2015-02-18 12:34:48+02:00', 'string'],
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
 };
 
@@ -27,17 +30,28 @@ function parseEjerlavkode(file) {
   return parseInt(match[1], 10);
 }
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
+cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
+  var lastUpdated = options.lastUpdated ? moment(options.lastUpdated) : null;
+
   var files = fs.readdirSync(options.sourceDir).filter(function(file) {
     return /^.+\.zip$/.test(file);
   });
 
+  var atLeastOneFileProcessed = false;
+
   files.map(function(file) {
     return function() {
+      var stats = fs.statSync(path.join(options.sourceDir, file));
+      var ctime = moment(stats.ctime);
+      if(ctime.isBefore(lastUpdated)) {
+        console.log("Skipping file " + file + ", it has not been modified since last update");
+        return;
+      }
+      atLeastOneFileProcessed = true;
       var ejerlavkode = parseEjerlavkode(file);
       return q.nfcall(child_process.exec, "unzip -p " + file,
         {
@@ -61,9 +75,14 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
         });
     };
   }).reduce(q.when, q([])).then(function() {
-    return proddb.withTransaction('READ_WRITE', function(client) {
-      var temaDef = tema.findTema('jordstykke');
-      return tema.updateAdresserTemaerView(client, temaDef, options.init);
-    });
+    if(atLeastOneFileProcessed) {
+      return proddb.withTransaction('READ_WRITE', function(client) {
+        var temaDef = tema.findTema('jordstykke');
+        return tema.updateAdresserTemaerView(client, temaDef, options.init);
+      });
+    }
+    else {
+      console.log("Ingen opdatering af temamapninger, da ingen ejerlav er opdateret");
+    }
   }).done();
 });

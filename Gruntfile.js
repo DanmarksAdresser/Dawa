@@ -20,22 +20,6 @@ module.exports = function (grunt) {
         src: ['test/integration/**/*Spec.js']
       }
     },
-    jasmine_node: {
-      unit: {
-        specFolders: ['test/unit'],
-        includeStackTrace: true
-      },
-      integration: {
-        specFolders: ['test/integration'],
-        includeStackTrace: true,
-        captureExceptions: true,
-        junitreport: {
-          report: true,
-          savePath: 'build/reports/jasmine',
-          useDotNotation: true
-        }
-      }
-    },
     express: {
       test: {
         options: {
