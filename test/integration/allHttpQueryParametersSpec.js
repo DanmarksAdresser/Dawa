@@ -40,16 +40,19 @@ _.keys(sampleParameters).forEach(function(entityName) {
   _.each(sampleParameters[entityName], function(sample, paramName) {
     var verify = sample.verifier;
     sample.values.forEach(function(sampleValue) {
-      it('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue, function(done) {
-          request.get({url: 'http://localhost:3002' + resourceSpec.path + '?' + paramName + "=" + sampleValue, json: true}, function(error, response, result) {
-            if (response.statusCode !== 200) { throw 'Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in response with status ' + response.statusCode; }
-            if (result.length === 0) { throw 'Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in empty query result'; }
-            _.each(result, function(queryMatch) {
-              expect(verify(queryMatch, sampleValue)).to.equal(true);
-            });
+      it('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue, function () {
+        return request.get({
+          url: 'http://localhost:3002' + resourceSpec.path + '?' + paramName + "=" + sampleValue,
+          json: true
+        }).then(function (result) {
+          if (result.length === 0) {
+            throw new Error('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in empty query result');
+          }
+          _.each(result, function (queryMatch) {
+            expect(verify(queryMatch, sampleValue)).to.equal(true);
           });
-        done();
         });
+      });
     });
   });
 });

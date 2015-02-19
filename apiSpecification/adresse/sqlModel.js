@@ -1,16 +1,17 @@
 "use strict";
 
-var nameAndKey = require('./nameAndKey');
-var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
-var parameters = require('./parameters');
-var sqlUtil = require('../common/sql/sqlUtil');
-var assembleSqlModel = sqlUtil.assembleSqlModel;
-var selectIsoTimestamp = sqlUtil.selectIsoDate;
+var adgangsadresseColumns = require('../adgangsadresse/columns');
 var dbapi = require('../../dbapi');
-
+var nameAndKey = require('./nameAndKey');
+var parameters = require('./parameters');
+var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+var sqlUtil = require('../common/sql/sqlUtil');
 var util = require('../util');
 
+
+var assembleSqlModel = sqlUtil.assembleSqlModel;
 var notNull = util.notNull;
+var selectIsoTimestamp = sqlUtil.selectIsoDate;
 
 var columns = {
   id: {
@@ -43,33 +44,18 @@ var columns = {
   etrs89koordinat_nord: {
     column: 'nord'
   },
-  wgs84koordinat_bredde: {
-    column: 'ST_Y(ST_Transform(geom, 4326))'
-  },
-  wgs84koordinat_længde: {
-    column: 'ST_X(ST_Transform(geom, 4326))'
-  },
+  wgs84koordinat_bredde: adgangsadresseColumns.wgs84koordinat_bredde,
+  wgs84koordinat_længde: adgangsadresseColumns.wgs84koordinat_længde,
   nøjagtighed: {
     column: 'noejagtighed'
   },
-  ddkn_m100: {
-    column: 'kn100mdk'
-  },
-  ddkn_km1: {
-    column: 'kn1kmdk'
-  },
-  ddkn_km10: {
-    column: 'kn10kmdk'
-  },
+  ddkn_m100: adgangsadresseColumns.ddkn_m100,
+  ddkn_km1: adgangsadresseColumns.ddkn_km1,
+  ddkn_km10: adgangsadresseColumns.ddkn_km10,
   adressepunktændringsdato: {
     select: selectIsoTimestamp('adressepunktaendringsdato')
   },
-  geom_json: {
-    select: function (sqlParts, sqlModel, params) {
-      var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
-    }
-  },
+  geom_json: adgangsadresseColumns.geom_json,
   adgangsadresse_status: {
     column: 'a_objekttype'
   },
