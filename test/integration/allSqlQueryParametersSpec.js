@@ -186,6 +186,12 @@ var sampleParameters = {
         return adr.postnummer.nr === nr;
       }
     },
+    nøjagtighed: {
+      values: ['A'],
+      verifier: function(adr, nøjagtighed) {
+        return adr.adgangspunkt.nøjagtighed === nøjagtighed;
+      }
+    },
     kommunekode: {
       values: ['461', '0461'],
       verifier: function(adr, kode) {
@@ -275,6 +281,12 @@ var sampleParameters = {
       values: ['4622'],
       verifier: function(adr, nr) {
         return adr.adgangsadresse.postnummer.nr === nr;
+      }
+    },
+    nøjagtighed: {
+      values: ['A'],
+      verifier: function(adr, nøjagtighed) {
+        return adr.adgangsadresse.adgangspunkt.nøjagtighed === nøjagtighed;
       }
     },
     kommunekode: {

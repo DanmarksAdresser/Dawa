@@ -344,6 +344,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     doc: 'Find de adresser, som ligger indenfor den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.'
   },
   {
+    name: 'nøjagtighed',
+    doc: 'Find adresser hvor adgangspunktet har en den angivne nøjagtighed. Mulige værdiger er "A", "B" og "U"'
+  },
+  {
     name: 'regionskode',
     doc: 'Find de adresser som ligger indenfor regionen angivet ved regionkoden.',
     nullable: true

@@ -39,6 +39,7 @@ CREATE INDEX ON adgangsadresser(husnr, id);
 CREATE INDEX ON adgangsadresser(esrejendomsnr);
 CREATE INDEX ON adgangsadresser(objekttype);
 CREATE INDEX ON adgangsadresser USING gin(tsv);
+CREATE INDEX ON adgangsadresser(noejagtighed, id);
 
 
 DROP TABLE IF EXISTS adgangsadresser_history CASCADE;
