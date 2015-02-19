@@ -14,17 +14,17 @@ module.exports = function (grunt) {
     },
     mochaTest: {
       unit: {
-        src: ['test/unit/**/*Spec.js']
+        src: ['test/setupLogging.js', 'test/unit/**/*Spec.js']
       },
       integration: {
-        src: ['test/integration/**/*Spec.js']
+        src: ['test/setupLogging.js', 'test/integration/**/*Spec.js']
       }
     },
     express: {
       test: {
         options: {
           script: 'server.js',
-          args: ['--listenPort=3002', '--masterListenPort=3003'],
+          args: ['--listenPort=3002', '--masterListenPort=3003', '--logConfiguration=travis-ci-server-logconfig.json'],
           output: 'Express server listening'
         }
       }
@@ -68,38 +68,4 @@ module.exports = function (grunt) {
   grunt.registerTask('integrationtest', ['express:test', 'mochaTest:integration', 'express:test:stop']);
   grunt.registerTask('test', ['unitTest', 'integrationtest']);
   grunt.registerTask('default', ['bower','test']);
-
-  grunt.registerMultiTask('jasmine_node', 'Run jasmine-node', function() {
-    var jasmine = require('jasmine-node');
-    var done = this.async();
-    var options = this.data;
-    var previousListeners = process.listeners('uncaughtException');
-    var globalExceptions = [];
-    options.onComplete = function(runner) {
-      var exitCode;
-      if (!(runner.results().failedCount === 0 && globalExceptions.length === 0)) {
-        exitCode = 1;
-        globalExceptions.forEach(function(exception) {
-          console.log('Global exception: ');
-          console.dir(exception);
-          if(exception.stack) {
-            console.log(exception.stack);
-          }
-        });
-        process.exit(exitCode);
-      }
-      process.removeListener('uncaughtException', jasmineExceptionHandler);
-      previousListeners.forEach(function(listener) {
-        process.addListener('uncaughtException', listener);
-      });
-      done();
-    };
-    var jasmineExceptionHandler = function(e) {
-      console.error(e.stack || e);
-      globalExceptions.push(e);
-    };
-    process.removeAllListeners('uncaughtException');
-    process.addListener('uncaughtException', jasmineExceptionHandler);
-    jasmine.executeSpecsInFolder(options);
-  });
 };

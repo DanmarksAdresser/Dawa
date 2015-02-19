@@ -1,6 +1,6 @@
 {
   "directory": ".",
-  "fileNameSuffix": "travis-ci.log",
+  "fileNameSuffix": "travis-ci-client.log",
   "maxSize": 1000000000,
   "maxFiles": 10,
   "defaultLevel": "debug",

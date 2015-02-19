@@ -337,35 +337,32 @@ _.keys(sampleParameters).forEach(function(specName) {
       var testedParameterNames = _.keys(sampleParameters[specName]);
       expect(_.difference(specifiedParameterNames, testedParameterNames)).to.deep.equal([]);
     });
-    _.each(sampleParameters[specName], function(sample, paramName) {
-      var verify = sample.verifier;
-      sample.values.forEach(function(sampleValue) {
-        describe('case ' + paramName + '=' + sampleValue, function() {
-          it('kan parse parametre', function(parseDone) {
-            var rawQueryParams = {};
-            rawQueryParams[paramName] = sampleValue;
-            var parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(propertyFilterParameters, 'name'));
-            expect(parseResult.errors.length).to.equal(0);
-            parseDone();
-
-            parseResult.params.per_side = 100;
-            var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
-            dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-              expect(err).to.not.exist;
-              if (err) throw 'unable to open connection';
-              dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
-                transactionDone();
+    describe('Parametre for ' + specName, function() {
+      _.each(sampleParameters[specName], function(sample, paramName) {
+        var verify = sample.verifier;
+        sample.values.forEach(function(sampleValue) {
+          describe('case ' + paramName + '=' + sampleValue, function() {
+            it('Query for ' + specName + ' case ' + paramName + '=' + sampleValue + ' skal returnere korrekt resultat', function(done) {
+              var parseResult;
+              var rawQueryParams = {};
+              rawQueryParams[paramName] = sampleValue;
+              parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(propertyFilterParameters, 'name'));
+              expect(parseResult.errors.length).to.equal(0);
+              parseResult.params.per_side = 100;
+              var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
+              dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
                 expect(err).to.not.exist;
-                expect(rows.length).to.be.above(0);
-                var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
-                describe('Query for ' + specName + ' case ' + paramName + '=' + sampleValue + ', query resultat', function() {
+                if (err) throw 'unable to open connection';
+                dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
+                  transactionDone();
+                  expect(err).to.not.exist;
+                  expect(rows.length).to.be.above(0);
+                  var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
                   mappedRows.forEach(function(json) {
-                    it(JSON.stringify(json), function(rowSpecDone) {
-                      var verifyResult = verify(json, sampleValue);
-                      expect(verifyResult).to.equal(true);
-                      rowSpecDone();
-                    });
+                    var verifyResult = verify(json, sampleValue);
+                    expect(verifyResult).to.equal(true);
                   });
+                  done();
                 });
               });
             });
