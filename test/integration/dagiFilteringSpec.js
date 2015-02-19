@@ -46,6 +46,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       qualifier: 'query'
     });
     it(' for region på '  + entityName, function (done) {
+      this.timeout(5000);
       dbapi.withRollbackTransaction(function (err, client, transactionDone) {
         if (err) { throw err; }
         tema.addTema(client, sampleTema, function (err) {
@@ -67,6 +68,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     });
 
     it(' for '  + entityName + 'r uden regionstilknytning', function (done) {
+      this.timeout(5000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?regionskode=', json: true}, function(error, response, result) {
         expect(result.length).to.equal(expectedResultWithoutRegion[entityName]);
         done();
@@ -74,6 +76,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     });
 
     it(' for zone på '  + entityName, function (done) {
+      this.timeout(5000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=1', json: true}, function(error, response, result) {
         expect(result.length).to.equal(expectedResultsZone1[entityName]);
         done();
@@ -81,6 +84,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     });
 
     it(' for '  + entityName + 'r uden zonetilknytning', function (done) {
+      this.timeout(5000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path, json: true}, function(error, response, result) {
         var totalCount = result.length;
         // we know that only associations to zone 1 exists, so the expected count can be computed from totalCount and the expected number of hits for zone 1
