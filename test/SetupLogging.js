@@ -3,6 +3,9 @@
 // this is not actually a test, we simply load this file to setup logging.
 
 var fs = require('fs');
+var q = require('q');
+
+q.longStackSupport = true;
 
 var logger = require('../logger');
 

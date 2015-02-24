@@ -1,8 +1,9 @@
 "use strict";
 
 var async = require('async');
-var path = require('path');
+var fs = require('fs');
 var format = require('util').format;
+var path = require('path');
 var _ = require('underscore');
 
 var datamodels = require('../crud/datamodel');
@@ -36,6 +37,10 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'enhedsadresser'},
   {name: 'ejerlav'},
   {name: 'ejerlav_ts'},
+  {name: 'dar_accesspoint', init: false},
+  {name: 'dar_address', init: false},
+  {name: 'dar_housenumber', init: false},
+  {name: 'dar_streetname', init: false},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql'},
@@ -48,7 +53,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'wms_housenumber_inspire', type: 'view'},
   {name: 'wms_adgangsadresser', type: 'view'},
   {name: 'wfs_adgangsadresser', type: 'view'},
-  {name: 'wfs_adresser', type: 'view'}
+  {name: 'wfs_adresser', type: 'view'},
 ]);
 
 exports.forAllTableSpecs = function(client, func, callback){
@@ -74,7 +79,7 @@ exports.initializeTables = function(client){
   return function(callback) {
     exports.forAllTableSpecs(client,
       function (client, spec, cb){
-        if (spec.type !== 'view'){
+        if (spec.type !== 'view' && spec.init !== false){
           sqlCommon.execSQL("select "+spec.name+"_init()", client, true, cb);
         } else {
           cb();
@@ -184,8 +189,14 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
       function(callback) {
         exports.forAllTableSpecs(client,
           function (client, spec, cb){
-            console.log("loading script " + spec.scriptFile);
-            return (psqlScript(client, scriptDir, spec.scriptFile))(cb);
+            if( fs.existsSync(spec.scriptFile)) {
+              console.log("loading script " + spec.scriptFile);
+              return (psqlScript(client, scriptDir, spec.scriptFile))(cb);
+            }
+            else {
+              console.log('no script file for ' + spec.name);
+              callback();
+            }
           }, callback);
       },
       createHistoryTriggers(client)
