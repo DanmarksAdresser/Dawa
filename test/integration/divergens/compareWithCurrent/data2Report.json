@@ -76,9 +76,6 @@
           "kilde": 5,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
-          "kn100mdk": "100m_60891_5557",
-          "kn1kmdk": "1km_6089_555",
-          "kn10kmdk": "10km_608_55",
           "adressepunktaendringsdato": "2005-10-20T00:00:00.000"
         },
         "rectified": true

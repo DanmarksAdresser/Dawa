@@ -26,15 +26,6 @@ module.exports =  {
   nøjagtighed: {
     column: 'noejagtighed'
   },
-  ddkn_m100: {
-    select: "'100m_' || (floor(nord / 100))::text || '_' || (floor(oest / 100))::text"
-  },
-  ddkn_km1: {
-    select: "'1km_' || (floor(nord / 1000))::text || '_' || (floor(oest / 1000))::text"
-  },
-  ddkn_km10: {
-    select: "'10km_' || (floor(nord / 10000))::text || '_' || (floor(oest / 10000))::text"
-  },
   adressepunktændringsdato: {
     column: selectIsoTimestamp('adressepunktaendringsdato')
   },

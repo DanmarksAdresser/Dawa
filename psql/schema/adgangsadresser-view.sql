@@ -17,9 +17,9 @@ CREATE VIEW AdgangsadresserView AS
     A.kilde::smallint,
     A.tekniskstandard,
     A.tekstretning,
-    A.kn100mdk,
-    A.kn1kmdk,
-    A.kn10kmdk,
+    '100m_' || (floor(A.etrs89nord / 100))::text || '_' || (floor(etrs89oest / 100))::text as ddkn_m100,
+    '1km_' || (floor(A.etrs89nord / 1000))::text || '_' || (floor(etrs89oest / 1000))::text as ddkn_km1,
+    '10km_' || (floor(A.etrs89nord / 10000))::text || '_' || (floor(etrs89oest / 10000))::text as ddkn_km10,
     A.adressepunktaendringsdato,
 
     P.nr   AS postnr,

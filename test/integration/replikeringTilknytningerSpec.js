@@ -43,10 +43,7 @@ var adgangsadresser = [
     "kilde": 4,
     "tekniskstandard": "TD",
     "tekstretning": 100.00,
-    "adressepunktændringsdato": "2015-05-22T23:59:00.000",
-    "ddkn_m100": null,
-    "ddkn_km1": null,
-    "ddkn_km10": null
+    "adressepunktændringsdato": "2015-05-22T23:59:00.000"
   },
   {
     "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
@@ -69,10 +66,7 @@ var adgangsadresser = [
     "kilde": 4,
     "tekniskstandard": "TD",
     "tekstretning": 100.00,
-    "adressepunktændringsdato": "2015-05-22T23:59:00.000",
-    "ddkn_m100": null,
-    "ddkn_km1": null,
-    "ddkn_km10": null
+    "adressepunktændringsdato": "2015-05-22T23:59:00.000"
   }
 ];
 

@@ -41,10 +41,7 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function()
         "kilde": 5,
         "tekniskstandard": "TK",
         "tekstretning": "200.00",
-        "adressepunktaendringsdato": "2014-05-22T23:59:00.000Z",
-        "kn100mdk": "100m_61553_5421",
-        "kn1kmdk": "1km_6155_542",
-        "kn10kmdk": "10km_615_54"
+        "adressepunktaendringsdato": "2014-05-22T23:59:00.000Z"
     };
     crud.create(client, datamodels.adgangsadresse, adgangsadresse, function(err) {
       if(err) {

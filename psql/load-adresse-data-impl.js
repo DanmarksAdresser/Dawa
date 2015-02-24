@@ -178,7 +178,7 @@ exports.loadCsvOnly = function(client, options, callback) {
           'husnr', 'supplerendebynavn',
           'postnr', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'objekttype',
           'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord',
-          'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'kn100mdk', 'kn1kmdk', 'kn10kmdk', 'adressepunktaendringsdato'],
+          'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse
 
       }, callback);

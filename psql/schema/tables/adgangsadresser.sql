@@ -21,9 +21,6 @@ CREATE TABLE  adgangsadresser (
   placering char(1),
   tekniskstandard CHAR(2) NULL,
   tekstretning float4 NULL,
-  kn100mdk VARCHAR(15) NULL,
-  kn1kmdk VARCHAR(15) NULL,
-  kn10kmdk VARCHAR(15) NULL,
   adressepunktaendringsdato timestamp NULL,
   geom  geometry(point, 25832),
   tsv tsvector
@@ -68,9 +65,6 @@ CREATE TABLE adgangsadresser_history(
   placering char(1),
   tekniskstandard CHAR(2) NULL,
   tekstretning float4 NULL,
-  kn100mdk VARCHAR(15) NULL,
-  kn1kmdk VARCHAR(15) NULL,
-  kn10kmdk VARCHAR(15) NULL,
   adressepunktaendringsdato timestamp NULL
 );
 

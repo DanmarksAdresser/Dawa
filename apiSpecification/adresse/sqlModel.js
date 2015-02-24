@@ -49,9 +49,6 @@ var columns = {
   nøjagtighed: {
     column: 'noejagtighed'
   },
-  ddkn_m100: adgangsadresseColumns.ddkn_m100,
-  ddkn_km1: adgangsadresseColumns.ddkn_km1,
-  ddkn_km10: adgangsadresseColumns.ddkn_km10,
   adressepunktændringsdato: {
     select: selectIsoTimestamp('adressepunktaendringsdato')
   },

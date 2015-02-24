@@ -68,9 +68,6 @@
           "kilde": 5,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
-          "kn100mdk": "100m_61030_4783",
-          "kn1kmdk": "1km_6103_478",
-          "kn10kmdk": "10km_610_47",
           "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
         },
         "rectified": true
@@ -100,9 +97,6 @@
           "kilde": 5,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
-          "kn100mdk": "100m_60994_4873",
-          "kn1kmdk": "1km_6099_487",
-          "kn10kmdk": "10km_609_48",
           "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
         },
         "rectified": true

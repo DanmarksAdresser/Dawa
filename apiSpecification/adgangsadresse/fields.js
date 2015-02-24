@@ -1,5 +1,8 @@
 "use strict";
 
+var _ = require('underscore');
+
+var ddknSchemas = require('./ddknSchemas');
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 var nullableType = require('../schemaUtil').nullableType;
@@ -9,6 +12,10 @@ var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 var normalizedField = function(fieldName) {
   return normalizedFieldSchemas.normalizedField('adgangsadresse', fieldName);
 };
+
+var normalizedDdknField = function(fieldName) {
+  return _.findWhere(ddknSchemas, {name: fieldName});
+}
 
 var fields = [
   normalizedField('id'),
@@ -60,9 +67,9 @@ var fields = [
   normalizedField('tekniskstandard'),
   normalizedField('tekstretning'),
   normalizedField('adressepunktændringsdato'),
-  normalizedField('ddkn_m100'),
-  normalizedField('ddkn_km1'),
-  normalizedField('ddkn_km10'),
+  normalizedDdknField('ddkn_m100'),
+  normalizedDdknField('ddkn_km1'),
+  normalizedDdknField('ddkn_km10'),
   {
     name: 'temaer',
     multi: true

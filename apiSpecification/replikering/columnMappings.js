@@ -96,17 +96,7 @@ exports.columnMappings = {
     name: 'adressepunktændringsdato',
     column: 'adressepunktaendringsdato',
     selectTransform: selectIsoTimestamp
-  }, {
-    name: 'ddkn_m100',
-    column: 'kn100mdk'
-  }, {
-    name: 'ddkn_km1',
-    column: 'kn1kmdk'
-  }, {
-    name: 'ddkn_km10',
-    column: 'kn10kmdk'
-  }
-  ],
+  }],
   adresse: [{
     name: 'id'
   }, {
