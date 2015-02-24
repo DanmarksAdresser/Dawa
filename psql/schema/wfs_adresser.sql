@@ -31,9 +31,9 @@ CREATE OR REPLACE VIEW wfs_adresser AS
     kilde,
     tekniskstandard,
     tekstretning,
-    kn100mdk                  AS "ddkn_m100",
-    kn1kmdk                   AS "ddkn_km1",
-    kn10kmdk                  AS "ddkn_km10",
+    ddkn_m100,
+    ddkn_km1,
+    ddkn_km10,
     adressepunktaendringsdato AS "adressepunktændringsdato",
     round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "tekstretninggrader",
     geom

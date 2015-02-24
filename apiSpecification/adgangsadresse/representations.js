@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 
+var ddknSchemas = require('./ddknSchemas');
 var temaNameAndKeys = require('../temaer/namesAndKeys');
 var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
@@ -29,6 +30,13 @@ var nullableType = schemaUtil.nullableType;
 var kode4String = require('../util').kode4String;
 var kvhFormat = require('./kvhTransformer').format;
 var kvhFieldsDts = require('./kvhTransformer').kvhFieldsDts;
+
+var normalizedDdknSchema = function(fieldName) {
+  var field = _.findWhere(ddknSchemas, {name: fieldName});
+  var schema = _.clone(field.schema);
+  schema.description = field.description;
+  return schema;
+}
 
   /*
    * flat format
@@ -106,9 +114,9 @@ exports.json = {
         nullable: true,
         description: 'Adressens placering i Det Danske Kvadratnet (DDKN).',
         properties: {
-          'm100': normalizedFieldSchema('ddkn_m100'),
-          'km1' : normalizedFieldSchema('ddkn_km1'),
-          'km10': normalizedFieldSchema('ddkn_km10')
+          'm100': normalizedDdknSchema('ddkn_m100'),
+          'km1' : normalizedDdknSchema('ddkn_km1'),
+          'km10': normalizedDdknSchema('ddkn_km10')
         },
         docOrder: ['m100', 'km1', 'km10']
       }),

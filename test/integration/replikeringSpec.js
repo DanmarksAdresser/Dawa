@@ -52,10 +52,7 @@ var insert = {
     "kilde": 5,
     "tekniskstandard": "TK",
     "tekstretning": 200.00,
-    "adressepunktændringsdato": "2014-05-22T23:59:00.000",
-    "ddkn_m100": "100m_61553_5421",
-    "ddkn_km1": "1km_6155_542",
-    "ddkn_km10": "10km_615_54"
+    "adressepunktændringsdato": "2014-05-22T23:59:00.000"
   },
   adresse: {
     "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f",
@@ -107,10 +104,7 @@ var update = {
     "kilde": 4,
     "tekniskstandard": "TD",
     "tekstretning": 100.00,
-    "adressepunktændringsdato": "2015-05-22T23:59:00.000",
-    "ddkn_m100": "100m_61553_0000",
-    "ddkn_km1": "1km_6155_000",
-    "ddkn_km10": "10km_615_00"
+    "adressepunktændringsdato": "2015-05-22T23:59:00.000"
   },
   adresse: {
     "id": "df870b7b-e6a3-49c8-98b0-4da64a82ac0f",
