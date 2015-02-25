@@ -292,7 +292,7 @@ exports.json = {
           href: makeHref(baseUrl, 'jordstykke', [ejerlavkode, matrikelnr]),
           matrikelnr: matrikelnr
         };
-        result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, matrikelnr);
+        result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, matrikelnr, baseUrl);
         adr.jordstykke = result;
       }
       else {
