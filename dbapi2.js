@@ -56,6 +56,7 @@ module.exports = function(options) {
       sql,
       params,
       function (err) {
+        logger.error('Failed executing query', {sql: sql, params: params});
         if(err) {
           return cb(err);
         }
