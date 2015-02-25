@@ -345,7 +345,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'nøjagtighed',
-    doc: 'Find adresser hvor adgangspunktet har en den angivne nøjagtighed. Mulige værdiger er "A", "B" og "U"'
+    doc: 'Find adresser hvor adgangspunktet har en den angivne nøjagtighed. Mulige værdier er "A", "B" og "U"'
   },
   {
     name: 'regionskode',
