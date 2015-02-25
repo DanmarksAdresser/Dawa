@@ -174,6 +174,27 @@ exports.json = {
         description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone". Beregnes udfra adgangspunktet og zoneinddelingerne fra <a href="http://naturstyrelsen.dk/planlaegning/plansystemdk/services/wfs/">PlansystemDK</a>',
         enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
       },
+      jordstykke: schemaObject({
+        description: 'Jordstykket, som adressens adgangspunkt ligger på. Dette kan afvige fra det jordstykke der er' +
+        ' registreret i BBR.',
+        nullable: true,
+        properties: {
+          href: {
+            description: 'Jordstykkets unikke URL',
+            type: 'string'
+          },
+          ejerlav: {
+            description: 'Ejerlavet som jordstykket tilhører.',
+            $ref: '#/definitions/EjerlavRef'
+          },
+          matrikelnr: {
+            description: 'Jordstykkets matrikelnummer. Udgør sammen med ejerlavet en unik nøgle for jordstykket.' +
+            ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”',
+            $ref: '#/definitions/matrikelnr'
+          }
+        },
+        docOrder: ['href', 'ejerlav', 'matrikelnr']
+      }),
       kvh: {
         description: 'Sammensat nøgle for adgangsadressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
                      'KVH-nøglen er sammen således:' +
@@ -186,7 +207,7 @@ exports.json = {
     },
     docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone']
+      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -262,6 +283,22 @@ exports.json = {
         var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
         adr.zone = util.zoneKodeFormatter(zoneKode);
       }
+      var jordstykkeTemaer = _.where(temaer, {tema: 'jordstykke'});
+      if(jordstykkeTemaer.length === 1) {
+        var jordstykke = jordstykkeTemaer[0];
+        var ejerlavkode = jordstykke.fields.ejerlavkode;
+        var matrikelnr = jordstykke.fields.matrikelnr;
+        var result = {
+          href: makeHref(baseUrl, 'jordstykke', [ejerlavkode, matrikelnr]),
+          matrikelnr: matrikelnr
+        };
+        result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, matrikelnr);
+        adr.jordstykke = result;
+      }
+      else {
+        adr.jordstykke = null;
+      }
+
       // hvis mere en én zone overlapper, eller ingen, så sætter vi zone til null.
       if(adr.zone === undefined) {
         adr.zone = null;
