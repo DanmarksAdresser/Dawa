@@ -148,17 +148,20 @@ var fields = {
     }, {
       name: 'ejerlavkode',
       description: 'Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i.' +
+        ' Stammer fra BBR.' +
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
       schema: definitions.NullableUpTo7
     }, {
       name: 'matrikelnr',
       description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på.' +
+        ' Stammer fra BBR.' +
         ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
       schema: definitions.Nullablematrikelnr
     }, {
       name: 'esrejendomsnr',
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som det matrikelnummer som adressen ligger på, er en del af.' +
+        ' Stammer fra BBR.' +
         ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
       schema: definitions.Nullableesrejendomsnr
     }, {
