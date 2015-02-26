@@ -141,7 +141,7 @@ _.keys(tilknytninger).forEach(function(temaNavn) {
   var tema = _.findWhere(temaer, {singular: temaNavn});
   // For now, only tilknytninter with non-composite keys are replicated.
   var keyColumns = tema.key.map(function(keySpec) {
-    return "(fields->>'" + keySpec.name + "')::" + keySpec.type;
+    return "(fields->>'" + keySpec.name + "')::" + keySpec.sqlType;
   });
   var tilknytningKey = (tema.prefix + 'tilknytning');
   var temaKeyFields = tema.key.map(function(keyPart) {

@@ -8,7 +8,8 @@ module.exports = [
     prefix: 'regions',
     key: [{
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: true,
     searchable: true
@@ -20,7 +21,8 @@ module.exports = [
     prefix: 'kommune',
     key: [{
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: true,
     searchable: true
@@ -32,7 +34,8 @@ module.exports = [
     prefix: 'sogne',
     key: [{
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: true,
     searchable: true
@@ -44,7 +47,8 @@ module.exports = [
     prefix: 'politikreds',
     key: [{
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: true,
     searchable: true
@@ -56,7 +60,8 @@ module.exports = [
     prefix: 'retskreds',
     key: [{
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: true,
     searchable: true
@@ -68,7 +73,8 @@ module.exports = [
     prefix: 'opstillingskreds',
     key: [{
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: true,
     searchable: true
@@ -80,7 +86,8 @@ module.exports = [
     prefix: 'postnummer',
     key: [{
       name: 'nr',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: false
   },
@@ -91,7 +98,8 @@ module.exports = [
     prefix: 'zone',
     key: [{
       name: 'zone',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }],
     published: false
   },
@@ -102,7 +110,8 @@ module.exports = [
     prefix: 'valglandsdels',
     key: [{
       name: 'bogstav',
-      type: 'text'
+      type: 'string',
+      sqlType: 'text'
     }],
     published: true,
     searchable: true
@@ -114,10 +123,12 @@ module.exports = [
     prefix: 'jordstykke',
     key: [{
       name: 'ejerlavkode',
-      type: 'integer'
+      type: 'integer',
+      sqlType: 'integer'
     }, {
       name: 'matrikelnr',
-      type: 'text'
+      type: 'string',
+      sqlType: 'text'
     }],
     published: true,
     searchable: false

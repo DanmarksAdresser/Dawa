@@ -118,6 +118,19 @@ function parseParameterType(valString, type) {
       throw 'notJson';
     }
   }
+  // This code does not really belong here. Perhaps a type class with parse function would work better.
+  if(type === 'zone') {
+    if(valString.toUpperCase() === 'BYZONE') {
+      return 1;
+    }
+    if(valString.toUpperCase() === 'SOMMERHUSOMRÅDE') {
+      return 2;
+    }
+    if(valString.toUpperCase() === 'LANDZONE') {
+      return 3;
+    }
+    throw 'zone skal være enten Byzone, Sommerhusområde eller Landzone';
+  }
 
   throw 'Internal error: Invalid type ' + type + ' specified for parameter';
 }

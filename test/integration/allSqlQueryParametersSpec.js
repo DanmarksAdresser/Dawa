@@ -11,6 +11,7 @@ var dbapi = require('../../dbapi');
 var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
+var commonParameters = require('../../apiSpecification/common/commonParameters');
 require('../../apiSpecification/allSpecs');
 
 function multiVerifier(verifierFn) {
@@ -198,16 +199,58 @@ var sampleParameters = {
         return adr.kommune.kode === kode4String(kode);
       }
     },
+    regionskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.region.kode === kode4String(kode);
+      }
+    },
+    sognekode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.sogn.kode === kode4String(kode);
+      }
+    },
+    politikredskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.politikreds.kode === kode4String(kode);
+      }
+    },
+    retskredskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.retskreds.kode === kode4String(kode);
+      }
+    },
+    opstillingskredskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.opstillingskreds.kode === kode4String(kode);
+      }
+    },
+    zone: {
+      values: ['Byzone'],
+      verifier: function(adr, zone) {
+        return adr.zone === zone;
+      }
+    },
+    zonekode: {
+      values: ['1'],
+      verifier: function(adr, zone) {
+        return adr.zone === 'Byzone';
+      }
+    },
     ejerlavkode: {
-      values: ['02003851', '2003851'],
+      values: ['1', '01'],
       verifier: function(adr, ejerlavkode) {
-        return adr.ejerlav.kode === parseInt(ejerlavkode, 10);
+        return adr.jordstykke && adr.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
     },
     matrikelnr: {
-      values: ['10ae'],
+      values: ['ab1f'],
       verifier: function(adr, matrikelnr) {
-        return adr.matrikelnr === matrikelnr;
+        return adr.jordstykke && adr.jordstykke.matrikelnr === matrikelnr;
       }
     },
     esrejendomsnr: {
@@ -295,16 +338,59 @@ var sampleParameters = {
         return adr.adgangsadresse.kommune.kode === kode4String(kode);
       }
     },
+    regionskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.adgangsadresse.region.kode === kode4String(kode);
+      }
+    },
+    sognekode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.adgangsadresse.sogn.kode === kode4String(kode);
+      }
+    },
+    politikredskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.adgangsadresse.politikreds.kode === kode4String(kode);
+      }
+    },
+    retskredskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.adgangsadresse.retskreds.kode === kode4String(kode);
+      }
+    },
+    opstillingskredskode: {
+      values: ['099'],
+      verifier: function(adr, kode) {
+        return adr.adgangsadresse.opstillingskreds.kode === kode4String(kode);
+      }
+    },
+    zone: {
+      values: ['Byzone'],
+      verifier: function(adr, zone) {
+        return adr.adgangsadresse.zone === zone;
+      }
+    },
+    zonekode: {
+      values: ['1'],
+      verifier: function(adr, zone) {
+        return adr.adgangsadresse.zone === 'Byzone';
+      }
+    },
     ejerlavkode: {
-      values: ['02003851', '2003851'],
+      values: ['1', '01'],
       verifier: function(adr, ejerlavkode) {
-        return adr.adgangsadresse.ejerlav.kode === parseInt(ejerlavkode, 10);
+        return adr.adgangsadresse.jordstykke &&
+          adr.adgangsadresse.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
     },
     matrikelnr: {
-      values: ['10ae'],
+      values: ['ab1f'],
       verifier: function(adr, matrikelnr) {
-        return adr.adgangsadresse.matrikelnr === matrikelnr;
+        return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
       }
     },
     esrejendomsnr: {
@@ -314,6 +400,11 @@ var sampleParameters = {
       }
     }
   }
+};
+
+var additionalParameters = {
+  adgangsadresse: commonParameters.dagiFilter,
+  adresse: commonParameters.dagiFilter
 };
 
 _.keys(sampleParameters).forEach(function(specName) {
@@ -331,9 +422,10 @@ _.keys(sampleParameters).forEach(function(specName) {
     entityName: specName,
     type: 'sqlModel'
   });
+  var allParameters = propertyFilterParameters.concat(additionalParameters[specName] || []);
   describe('Query for ' + specName, function() {
     it('tester alle parametre', function() {
-      var specifiedParameterNames = _.pluck(propertyFilterParameters, 'name');
+      var specifiedParameterNames = _.pluck(allParameters, 'name');
       var testedParameterNames = _.keys(sampleParameters[specName]);
       expect(_.difference(specifiedParameterNames, testedParameterNames)).to.deep.equal([]);
     });
@@ -346,7 +438,7 @@ _.keys(sampleParameters).forEach(function(specName) {
               var parseResult;
               var rawQueryParams = {};
               rawQueryParams[paramName] = sampleValue;
-              parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(propertyFilterParameters, 'name'));
+              parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(allParameters, 'name'));
               expect(parseResult.errors.length).to.equal(0);
               parseResult.params.per_side = 100;
               var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);

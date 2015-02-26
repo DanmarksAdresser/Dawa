@@ -4,6 +4,7 @@ var _ = require('underscore');
 var schema = require('../parameterSchema');
 
 var dagiTemaer = require('../temaer/temaer');
+var tilknytninger = require('../tematilknytninger/tilknytninger');
 exports.paging = [
   {
     name: 'side',
@@ -119,14 +120,32 @@ exports.reverseGeocoding =
     }
   ];
 
-var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'zone'];
+var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'jordstykke'];
 
-var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
-exports.dagiFilter = _.map(filterableDagiSkemaer, function(skemaNavn) {
-  return {
-    name: dagiTemaMap[skemaNavn].prefix + 'kode',
-    type: 'integer',
-    schema: schema.kode4,
-    multi: true
-  };
+var dagiFilters = _.map(filterableDagiSkemaer, function(skemaNavn) {
+  var names = tilknytninger[skemaNavn].keyFieldNames;
+  var tema = _.findWhere(dagiTemaer, {singular: skemaNavn});
+  var key = tema.key;
+  return names.map(function(name, index) {
+    return {
+      name:name,
+      type: key[index].type,
+      multi: true
+    };
+  });
 });
+
+dagiFilters.push({
+  name: 'zone',
+  type: 'zone',
+  multi: true
+});
+
+dagiFilters.push({
+  name: 'zonekode',
+  type: 'integer',
+  multi: true,
+  renameTo: 'zone'
+});
+
+exports.dagiFilter = _.flatten(dagiFilters);

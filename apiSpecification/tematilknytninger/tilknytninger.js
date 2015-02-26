@@ -2,34 +2,44 @@
 
 module.exports = {
   region: {
-    keyFieldNames: ['regionskode']
+    keyFieldNames: ['regionskode'],
+    filterable: true
   },
   kommune: {
-    keyFieldNames: ['kommunekode']
+    keyFieldNames: ['kommunekode'],
+    filterable: false // filtreres ved simpelt property filter
   },
   sogn: {
-    keyFieldNames: ['sognekode']
+    keyFieldNames: ['sognekode'],
+    filterable: true
   },
   politikreds: {
-    keyFieldNames: ['politikredskode']
+    keyFieldNames: ['politikredskode'],
+    filterable: true
   },
   retskreds: {
-    keyFieldNames: ['retskredskode']
+    keyFieldNames: ['retskredskode'],
+    filterable: true
   },
   opstillingskreds: {
-    keyFieldNames: ['opstillingskredskode']
+    keyFieldNames: ['opstillingskredskode'],
+    filterable: true
   },
   postnummer: {
-    keyFieldNames: ['postnummer']
+    keyFieldNames: ['postnummer'],
+    filterable: true
   },
   zone: {
-    keyFieldNames: ['zone']
+    keyFieldNames: ['zone'],
+    filterable: true
   },
   valglandsdel: {
-    keyFieldNames: ['valglandsdelsbogstav']
+    keyFieldNames: ['valglandsdelsbogstav'],
+    filterable: true
   },
   jordstykke: {
-    keyFieldNames: ['ejerlavkode', 'matrikelnr']
+    keyFieldNames: ['ejerlavkode', 'matrikelnr'],
+    filterable: true
   }
 };
 

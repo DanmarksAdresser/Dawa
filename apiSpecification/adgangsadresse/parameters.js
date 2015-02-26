@@ -54,15 +54,6 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
-    name: 'ejerlavkode',
-    type: 'integer',
-    multi: true
-  },
-  {
-    name: 'matrikelnr',
-    multi: true
-  },
-  {
     name: 'esrejendomsnr',
     type: 'integer',
     schema: {

@@ -12,6 +12,7 @@ var util = require('../../util');
 var notNull = util.notNull;
 
 var dagiTemaer = require('../../temaer/temaer');
+var tilknytninger = require('../../tematilknytninger/tilknytninger');
 
 function removeSpecialSearchChars(q) {
   return q.replace(/[^a-zA-Z0-9ÆæØøÅåéEüUäAöO\*]/g, ' ');
@@ -278,41 +279,82 @@ exports.postnummerStormodtagerFilter = function() {
   };
 };
 
-var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'zone'];
-function dagiSkemaKodeJsonField(skemaNavn) {
-  if (skemaNavn === 'zone') {
-    return "zone";
-  } else {
-    return "kode";
+var tilknytningKeyNames = _.reduce(tilknytninger, function(memo, tilknytning, temaName) {
+  if(tilknytning.filterable) {
+    memo[temaName] = tilknytning.keyFieldNames;
   }
-}
+  return memo;
+}, {});
+var temaKeys = _.reduce(dagiTemaer, function(memo, tema){
+  memo[tema.singular] = tema.key;
+  return memo;
+}, {});
 
-var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
+var tilknytningKeyToTemaKey = _.reduce(tilknytningKeyNames, function(memo, tilknytningNames, temaName) {
+  memo[temaName] = _.reduce(tilknytningNames, function(memo, tilknytningName, index) {
+    memo[tilknytningName] = temaKeys[temaName][index];
+    return memo;
+  }, {});
+  return memo;
+}, {});
 
 exports.dagiFilter = function() {
   return function(sqlParts, params) {
-    filterableDagiSkemaer.forEach(function(skemaNavn) {
-      var param = params[dagiTemaMap[skemaNavn].prefix + 'kode'];
-      if(notNull(param)) {
-        var paramArray = param.values;
-        var temaAlias = dbapi.addSqlParameter(sqlParts, skemaNavn);
-        if (paramArray.length == 1 && paramArray[0] == null) {
-          // case where the param in the query string is <dagiTema>kode=, ie. we need to find entities with /no/ association to the tema
-          dbapi.addWhereClause(sqlParts, "NOT EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
-          "JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias +
-          " AND adgangsadresse_id = a_id)");
-        } else {
-          var kodeAliases = _.map(paramArray, function(param) {
+    _.each(tilknytningKeyNames, function(tilknytningKeyName, temaName) {
+
+      // paramValues maps each key name to a list values supplied
+      var paramValues = _.reduce(tilknytningKeyName, function(memo, keyNamePart) {
+        if(params[keyNamePart]) {
+          memo[keyNamePart] = params[keyNamePart].values;
+        }
+        return memo;
+      }, {});
+
+      if(_.isEmpty(paramValues)) {
+        // no parameters supplied for this tema
+        return;
+      }
+
+      // list of parameters where the query requires the tema to be absent
+      var absentKeys = [];
+      // list of parameters where the query requires at least one of the values in the array
+      var presentKeys = {};
+      _.each(paramValues, function(paramValue, keyNamePart) {
+        if(paramValue) {
+          if(paramValue.length === 1 && paramValue[0] === null) {
+            absentKeys.push(keyNamePart);
+          }
+          else {
+            presentKeys[keyNamePart] = paramValue;
+          }
+        }
+      });
+
+      var temaAlias = dbapi.addSqlParameter(sqlParts, temaName);
+
+      if(absentKeys.length !== 0) {
+        // it does not matter which part of the key that is not present
+        dbapi.addWhereClause(sqlParts, "NOT EXISTS( SELECT * FROM adgangsadresser_temaer_matview" +
+        " WHERE  adgangsadresser_temaer_matview.tema = " + temaAlias +
+        " AND adgangsadresse_id = a_id)");
+      }
+      else {
+        var sql = "EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
+        "JOIN temaer ON tema_id = temaer.id AND temaer.tema = " + temaAlias +
+        " WHERE adgangsadresser_temaer_matview.tema = " + temaAlias +
+          " AND adgangsadresse_id = a_id";
+        _.each(presentKeys, function(keyValues, tilknytningKeyName) {
+          var valueAliases = _.map(keyValues, function(param) {
             return dbapi.addSqlParameter(sqlParts, param);
           });
-          dbapi.addWhereClause(sqlParts, "EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
-          "JOIN temaer ON tema_id = temaer.id AND adgangsadresser_temaer_matview.tema = " + temaAlias +
-          " WHERE temaer.fields->>'" + dagiSkemaKodeJsonField(skemaNavn) + "' IN (" + kodeAliases.map(function(alias) {
-            return alias + '::varchar';
-          }).join(', ') + ')' +
-          " AND adgangsadresse_id = a_id)");
-        }
+          var temaKey = tilknytningKeyToTemaKey[temaName][tilknytningKeyName];
+          var temaKeyName = temaKey.name;
+          var temaKeyType = temaKey.sqlType;
+          sql += " AND (temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + "))";
+        });
+        dbapi.addWhereClause(sqlParts, sql);
       }
+
     });
   };
 };
