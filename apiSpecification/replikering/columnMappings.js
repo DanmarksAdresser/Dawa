@@ -137,27 +137,31 @@ exports.keys = {};
   exports.keys[entityName] = datamodels[entityName].key;
 });
 
-// We dont replicate jordstykketilknytninger
 _.keys(tilknytninger).forEach(function(temaNavn) {
   var tema = _.findWhere(temaer, {singular: temaNavn});
   // For now, only tilknytninter with non-composite keys are replicated.
-  var keyColumn = tema.key.map(function(keySpec) {
+  var keyColumns = tema.key.map(function(keySpec) {
     return "(fields->>'" + keySpec.name + "')::" + keySpec.type;
-  })[0];
+  });
   var tilknytningKey = (tema.prefix + 'tilknytning');
-  var temaKeyField = _.findWhere(additionalFieldsMap[tema.singular], {name: tema.key[0].name});
+  var temaKeyFields = tema.key.map(function(keyPart) {
+    return _.findWhere(additionalFieldsMap[tema.singular], {name: keyPart.name});
+  });
+  var keyMappings = temaKeyFields.map(function(temaKeyField, index) {
+    return {
+      name: tilknytninger[tema.singular].keyFieldNames[index],
+      column: keyColumns[index],
+      formatter: temaKeyField.formatter
+    };
+  });
   exports.columnMappings[tilknytningKey] =
     [{
       name: 'adgangsadresseid',
       column: 'adgangsadresse_id'
-    }].concat([{
-        name: tilknytninger[tema.singular].keyFieldName,
-        column: keyColumn,
-        formatter: temaKeyField.formatter
-      }]);
+    }].concat(keyMappings);
 
   exports.tables[ tilknytningKey] = 'adgangsadresser_temaer_matview';
-  exports.keys[tilknytningKey] = ['adgangsadresseid', tema.key[0].name];
+  exports.keys[tilknytningKey] = _.pluck(exports.columnMappings[tilknytningKey], 'name');
 });
 
 // maps column names to field names

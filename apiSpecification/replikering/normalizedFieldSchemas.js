@@ -287,18 +287,21 @@ var fields = {
 _.each(tilknytninger, function(tilknytning, temaNavn) {
   var tema = _.findWhere(temaer, { singular: temaNavn});
   var additionalFields = additionalFieldsMap[temaNavn];
-  var temaKeyFieldName = tema.key[0].name;
-  var temaKeyField = _.findWhere(additionalFields, {name: temaKeyFieldName});
+  var temaKeyFieldNames = _.pluck(tema.key, 'name');
+  var tilknytningKeyFields = temaKeyFieldNames.map(function(temaKeyFieldName) {
+    return _.clone(_.findWhere(additionalFields, {name: temaKeyFieldName}));
+  });
 
-  var tilknytningKeyFieldName = tilknytning.keyFieldName;
+  var tilknytningKeyFieldNames = tilknytning.keyFieldNames;
   var tilknytningFields = [{
     name: 'adgangsadresseid',
     description: 'Adgangsadressens id.',
     schema: definitions.UUID
   }];
-  var tilknytningKeyField = _.clone(temaKeyField);
-  tilknytningKeyField.name = tilknytningKeyFieldName;
-  tilknytningFields.push(tilknytningKeyField);
+  tilknytningKeyFields.forEach(function(keyField, index) {
+    keyField.name = tilknytningKeyFieldNames[index];
+  });
+  tilknytningFields = tilknytningFields.concat(tilknytningKeyFields);
   fields[tema.prefix + 'tilknytning'] = tilknytningFields;
 });
 

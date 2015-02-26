@@ -2,31 +2,34 @@
 
 module.exports = {
   region: {
-    keyFieldName: 'regionskode'
+    keyFieldNames: ['regionskode']
   },
   kommune: {
-    keyFieldName: 'kommunekode'
+    keyFieldNames: ['kommunekode']
   },
   sogn: {
-    keyFieldName: 'sognekode'
+    keyFieldNames: ['sognekode']
   },
   politikreds: {
-    keyFieldName: 'politikredskode'
+    keyFieldNames: ['politikredskode']
   },
   retskreds: {
-    keyFieldName: 'retskredskode'
+    keyFieldNames: ['retskredskode']
   },
   opstillingskreds: {
-    keyFieldName: 'opstillingskredskode'
+    keyFieldNames: ['opstillingskredskode']
   },
   postnummer: {
-    keyFieldName: 'postnummer'
+    keyFieldNames: ['postnummer']
   },
   zone: {
-    keyFieldName: 'zone'
+    keyFieldNames: ['zone']
   },
   valglandsdel: {
-    keyFieldName: 'valglandsdelsbogstav'
+    keyFieldNames: ['valglandsdelsbogstav']
+  },
+  jordstykke: {
+    keyFieldNames: ['ejerlavkode', 'matrikelnr']
   }
 };
 

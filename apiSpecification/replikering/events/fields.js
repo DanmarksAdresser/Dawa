@@ -5,7 +5,6 @@ var _ = require('underscore');
 var fieldsUtil = require('../../common/fieldsUtil');
 var sqlModels = require('./sqlModels');
 var mappings = require('./../columnMappings');
-var additionalFieldsMap = require('../../temaer/additionalFields');
 
 var d = require('../util').d;
 

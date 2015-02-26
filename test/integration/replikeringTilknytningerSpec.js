@@ -81,19 +81,24 @@ var temaObjects = {
   postnummer: { "nr":99, "navn": "Postdistrikt test" },
   sogn: { "kode":99, "navn": "Sogn test" },
   opstillingskreds: { "kode":99, "navn": "Opstillingskreds test" },
-  retskreds: { "kode":99, "navn": "retskreds test" }
+  retskreds: { "kode":99, "navn": "retskreds test" },
+  jordstykke: {
+    "ejerlavkode": 99,
+    "matrikelnr": '4cv'
+  }
 };
 
 // how we expect the keys to be formatted when returned
 var expectedKeys = {
-  zone: 'Byzone',
-  politikreds: '0099',
-  region: '0099',
-  kommune: '0099',
-  postnummer: '0099',
-  sogn: '0099',
-  opstillingskreds: '0099',
-  retskreds: '0099'
+  zone: ['Byzone'],
+  politikreds: ['0099'],
+  region: ['0099'],
+  kommune: ['0099'],
+  postnummer: ['0099'],
+  sogn: ['0099'],
+  opstillingskreds: ['0099'],
+  retskreds: ['0099'],
+  jordstykke: [99, '4cv']
 };
 
 describe('Replikering af tilknytninger', function () {
@@ -140,17 +145,24 @@ describe('Replikering af tilknytninger', function () {
       type: 'resource',
       qualifier: 'hændelser'
     });
+
+    function expectedResultForKey(expectedTemaKeyParts, adgangsadresseId) {
+      var keyFieldNames = tilknytning.keyFieldNames;
+      var expectedResult = {
+        adgangsadresseid: adgangsadresseId
+      };
+      expectedTemaKeyParts.forEach(function(expectedKey, index) {
+        expectedResult[keyFieldNames[index]] = expectedKey;
+      });
+      return expectedResult;
+    }
     it('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
       return tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
         return Q.nfcall(tema.updateAdresserTemaerView, client, temaDef, true);
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {
-        var keyFieldName = tilknytning.keyFieldName;
-        var expectedResult = {
-          adgangsadresseid: adgangsadresser[0].id
-        };
-        expectedResult[keyFieldName] = expectedKeys[temaName];
+        var expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[0].id);
         expect(jsonResult).to.deep.equal([expectedResult]);
         return tema.updateTema(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
       }).then(function () {
@@ -158,11 +170,7 @@ describe('Replikering af tilknytninger', function () {
       }).then(function () {
         return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
       }).then(function (jsonResult) {
-        var keyFieldName = tilknytning.keyFieldName;
-        var expectedResult = {
-          adgangsadresseid: adgangsadresser[1].id
-        };
-        expectedResult[keyFieldName] = expectedKeys[temaName];
+        var expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[1].id);
         expect(jsonResult).to.deep.equal([expectedResult]);
         return Q.nfcall(helpers.getJson, client, eventResource, {}, {});
       }).then(function (eventResult) {
@@ -171,9 +179,11 @@ describe('Replikering af tilknytninger', function () {
         expect(eventResult[1].operation).to.equal('insert');
         expect(eventResult[0].data.adgangsadresseid).to.equal(adgangsadresser[0].id);
         expect(eventResult[1].data.adgangsadresseid).to.equal(adgangsadresser[1].id);
-        var keyFieldName = tilknytning.keyFieldName;
-        expect(eventResult[0].data[keyFieldName]).to.equal(expectedKeys[temaName]);
-        expect(eventResult[1].data[keyFieldName]).to.equal(expectedKeys[temaName]);
+        var keyFieldNames = tilknytning.keyFieldNames;
+        keyFieldNames.forEach(function(keyFieldName, index) {
+          expect(eventResult[0].data[keyFieldName]).to.equal(expectedKeys[temaName][index]);
+          expect(eventResult[1].data[keyFieldName]).to.equal(expectedKeys[temaName][index]);
+        });
 
         var eventRepresentation = registry.findWhere({
           entityName: datamodelName + '_hændelse',

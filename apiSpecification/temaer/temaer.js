@@ -102,7 +102,7 @@ module.exports = [
     prefix: 'valglandsdels',
     key: [{
       name: 'bogstav',
-      type: 'string'
+      type: 'text'
     }],
     published: true,
     searchable: true
@@ -117,7 +117,7 @@ module.exports = [
       type: 'integer'
     }, {
       name: 'matrikelnr',
-      type: 'string'
+      type: 'text'
     }],
     published: true,
     searchable: false
