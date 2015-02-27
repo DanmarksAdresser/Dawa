@@ -7,6 +7,25 @@ var Q = require('q');
 
 require('../setupDbConnection');
 
+function denodeifyClient(client) {
+  var result = {};
+  result.query = function() {
+    return client.query.apply(client, arguments);
+  };
+  result.queryp = function(query, params) {
+    return Q.ninvoke(client, 'query', query, params);
+  };
+  result.emit = function(type, event) {
+    client.emit(type, event);
+    return this;
+  };
+  result.on = function(type, handler) {
+    client.on(type, handler);
+    return this;
+  };
+  return result;
+}
+
 function acquireNonpooledConnection(connString, callback) {
   var client = new pg.Client(connString);
   client.connect(function (err) {
@@ -40,12 +59,14 @@ function withConnection(connString, pooled, connectedFn) {
       if (err) {
         return reject(err);
       }
-      return connectedFn(client).catch(function (err) {
-        done(err);
-        return Q.reject(err);
-      }).then(function () {
-        done();
-      }).then(resolve, reject);
+      return connectedFn(denodeifyClient(client)).then(
+        function () {
+          done();
+        }, function (err) {
+          done(err);
+          return Q.reject(err);
+        }
+      ).then(resolve, reject);
     });
   });
 }

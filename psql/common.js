@@ -32,7 +32,7 @@ exports.enableTriggers = function(client){
 exports.execSQL = function(sql, client, echo, done){
   function doWork(cb){
     if (echo){ winston.info("Executing sql: %s", sql);}
-    client.query(sql, function(err){
+    client.query(sql, [], function(err){
       exitOnErr(err);
       cb();
     });

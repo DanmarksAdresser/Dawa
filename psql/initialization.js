@@ -35,6 +35,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresser'},
   {name: 'enhedsadresser'},
   {name: 'ejerlav'},
+  {name: 'ejerlav_ts'},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql'},

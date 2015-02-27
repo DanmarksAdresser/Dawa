@@ -43,36 +43,65 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
 
   var atLeastOneFileProcessed = false;
 
+  function getLastUpdated(client, ejerlavkode) {
+    return client.query("select lastupdated FROM ejerlav_ts WHERE ejerlavkode = $1", [ejerlavkode]).then(function(result) {
+      if(!result.rows || result.rows.length === 0) {
+        return null;
+      }
+      return moment(result.rows[0].lastupdated).valueOf();
+    });
+  }
+
+  function setLastUpdated(client, ejerlavkode, millisecondsSinceEpoch) {
+    var secondsSinceEpoch = millisecondsSinceEpoch / 1000;
+    return getLastUpdated(client, ejerlavkode).then(function(lastUpdated) {
+      if(lastUpdated) {
+        return client.queryp('UPDATE ejerlav_ts SET lastupdated = to_timestamp($2) WHERE ejerlavkode = $1', [ejerlavkode, secondsSinceEpoch]);
+      }
+      else {
+        return client.queryp('INSERT INTO ejerlav_ts(ejerlavkode, lastupdated) VALUES ($1, to_timestamp($2))', [ejerlavkode, secondsSinceEpoch]);
+      }
+    });
+  }
+
   files.map(function(file) {
     return function() {
       var stats = fs.statSync(path.join(options.sourceDir, file));
-      var ctime = moment(stats.ctime);
-      if(ctime.isBefore(lastUpdated)) {
-        console.log("Skipping file " + file + ", it has not been modified since last update");
-        return;
-      }
+      var ctimeMillis = stats.mtime.getTime();
+
       atLeastOneFileProcessed = true;
       var ejerlavkode = parseEjerlavkode(file);
-      return q.nfcall(child_process.exec, "unzip -p " + file,
-        {
-          cwd: options.sourceDir,
-          maxBuffer: 1024 * 1024 * 128
-        }
-      ).then(function (stdout) {
-        var gml = stdout.toString('utf-8');
-        return ejerlav.parseEjerlav(gml);
-      }).then(function(jordstykker) {
-          jordstykker.forEach(function(jordstykke) {
-            if(jordstykke.fields.ejerlavkode !== ejerlavkode) {
-              return q.reject(new Error("Ejerlavkode for jordstykket matchede ikke ejerlavkode for filen"));
+      return proddb.withTransaction('READ_WRITE', function (client) {
+        return getLastUpdated(client, ejerlavkode).then(function (lastUpdatedMillis) {
+          if (lastUpdatedMillis && lastUpdatedMillis >= ctimeMillis) {
+            console.log('Skipping ' + ejerlavkode, ' not modified');
+            return;
+          }
+          return q.nfcall(child_process.exec, "unzip -p " + file,
+            {
+              cwd: options.sourceDir,
+              maxBuffer: 1024 * 1024 * 128
             }
-          });
-          return proddb.withTransaction('READ_WRITE', function(client) {
-            return ejerlav.storeEjerlav(ejerlavkode, jordstykker, client, { init: options.init });
-          });
-        }).then(function() {
-          console.log('successfully stored ejerlav');
+          ).then(function (stdout) {
+              var gml = stdout.toString('utf-8');
+              return ejerlav.parseEjerlav(gml);
+            }
+          ).then(function (jordstykker) {
+              jordstykker.forEach(function (jordstykke) {
+                if (jordstykke.fields.ejerlavkode !== ejerlavkode) {
+                  return q.reject(new Error("Ejerlavkode for jordstykket matchede ikke ejerlavkode for filen"));
+                }
+              });
+              return ejerlav.storeEjerlav(ejerlavkode, jordstykker, client, {init: options.init});
+            }
+          ).then(function() {
+              return setLastUpdated(client, ejerlavkode, ctimeMillis);
+            }
+          ).then(function() {
+              console.log('successfully updated ' + ejerlavkode);
+            });
         });
+      });
     };
   }).reduce(q.when, q([])).then(function() {
     if(atLeastOneFileProcessed) {
