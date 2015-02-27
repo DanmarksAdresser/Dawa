@@ -44,7 +44,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
   var atLeastOneFileProcessed = false;
 
   function getLastUpdated(client, ejerlavkode) {
-    return client.query("select lastupdated FROM ejerlav_ts WHERE ejerlavkode = $1", [ejerlavkode]).then(function(result) {
+    return client.queryp("select lastupdated FROM ejerlav_ts WHERE ejerlavkode = $1", [ejerlavkode]).then(function(result) {
       if(!result.rows || result.rows.length === 0) {
         return null;
       }
