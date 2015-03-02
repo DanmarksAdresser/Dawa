@@ -340,7 +340,7 @@ exports.dagiFilter = function() {
       }
       else {
         var sql = "EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
-        "JOIN temaer ON tema_id = temaer.id AND temaer.tema = " + temaAlias +
+        "JOIN temaer ON tema_id = temaer.id" +
         " WHERE adgangsadresser_temaer_matview.tema = " + temaAlias +
           " AND adgangsadresse_id = a_id";
         _.each(presentKeys, function(keyValues, tilknytningKeyName) {
