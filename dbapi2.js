@@ -56,8 +56,8 @@ module.exports = function(options) {
       sql,
       params,
       function (err) {
-        logger.error('Failed executing query', {sql: sql, params: params, error: err});
         if(err) {
+          logger.error('Failed executing query', {sql: sql, params: params, error: err});
           return cb(err);
         }
         return cb(null, new CursorStream(client, 'c1', sql));
