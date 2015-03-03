@@ -121,7 +121,7 @@ module.exports = {
       result.supplerendebynavn = result.supplerendebynavn.trim();
     }
     if(result.noejagtighed === 'U') {
-      result.etrs89oest = result.etrs89nord = result.kn100mdk = result.kn1kmdk = result.kn10kmdk = null;
+      result.etrs89oest = result.etrs89nord = null;
     }
     return result;
   }
