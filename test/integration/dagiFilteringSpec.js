@@ -67,6 +67,12 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       });
     });
 
+    it('Query på både ejerlav og matrikelnr', function() {
+      return request.get({url: 'http://localhost:3002' + resourceSpec.path + '?ejerlavkode=1&matrikelnr=ab1f', json: true}).then(function(result) {
+        expect(result.length).to.equal(1);
+      });
+    });
+
     it(' for '  + entityName + 'r uden regionstilknytning', function (done) {
       this.timeout(5000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?regionskode=', json: true}, function(error, response, result) {

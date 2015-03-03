@@ -350,8 +350,9 @@ exports.dagiFilter = function() {
           var temaKey = tilknytningKeyToTemaKey[temaName][tilknytningKeyName];
           var temaKeyName = temaKey.name;
           var temaKeyType = temaKey.sqlType;
-          sql += " AND (temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + "))";
+          sql += " AND (temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + ")";
         });
+        sql += ')';
         dbapi.addWhereClause(sqlParts, sql);
       }
 
