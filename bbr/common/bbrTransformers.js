@@ -79,8 +79,8 @@ module.exports = {
       return null;
     }
 
-    // kommunekode >= 9000 er grønlandske veje, som vi ikke skal have med
-    if(kommunekode >= 9000) {
+    // kommunekode >= 900 er grønlandske veje, som vi ikke skal have med
+    if(kommunekode >= 900) {
       return null;
     }
     result.oprettet = transformTimestamp(result.oprettet);
