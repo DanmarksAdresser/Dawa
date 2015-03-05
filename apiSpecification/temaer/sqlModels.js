@@ -65,7 +65,7 @@ publishedTemaer.forEach(function(tema) {
     sqlParameterImpl.reverseGeocodingWithin(),
     sqlParameterImpl.search(columns),
     sqlParameterImpl.autocomplete(columns),
-    sqlParameterImpl.paging(columns, namesAndKeys[tema.singular].key)
+    sqlParameterImpl.paging(columns, namesAndKeys[tema.singular].key, true)
   ];
 
   exports[tema.singular] = assembleSqlModel(columns, parameterImpls, baseQuery);

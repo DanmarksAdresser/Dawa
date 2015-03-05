@@ -66,7 +66,8 @@ exports.propertyFilter = normalizeParameters([
     name: 'nøjagtighed',
     schema: {
       enum: ['A', 'B', 'U']
-    }
+    },
+    multi: true
   }
 ]);
 

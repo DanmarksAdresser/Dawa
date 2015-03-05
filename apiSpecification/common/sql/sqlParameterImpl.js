@@ -194,11 +194,11 @@ function applyOrderByKey(sqlParts,keyArray) {
   });
 }
 
-exports.paging = function(columnSpec, key) {
+exports.paging = function(columnSpec, key, alwaysOrderByKey) {
   return function(sqlParts, params) {
     var offsetLimit = toOffsetLimit(params);
     _.extend(sqlParts, offsetLimit);
-    if(params.per_side) {
+    if(params.per_side || alwaysOrderByKey) {
       applyOrderByKey(sqlParts, key );
     }
   };
