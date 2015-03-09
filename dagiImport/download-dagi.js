@@ -1,6 +1,6 @@
 "use strict";
 
-var request = require('request');
+var request = require('request-promise');
 var _ = require('underscore');
 var fs = require('fs');
 var path = require('path');
