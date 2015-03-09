@@ -1,5 +1,6 @@
 "use strict";
 
+var inspect = require('util').inspect;
 var pg = require('pg.js');
 var _ = require('underscore');
 var statistics = require('../statistics');
@@ -13,7 +14,11 @@ function denodeifyClient(client) {
     return client.query.apply(client, arguments);
   };
   result.queryp = function(query, params) {
-    return Q.ninvoke(client, 'query', query, params);
+    console.log('executing query ' + query + ' with parameters ' + JSON.stringify(params));
+    return Q.ninvoke(client, 'query', query, params).catch(function(err) {
+      console.log('Failed to execute query ' + query + ' with parameters ' + JSON.stringify(params));
+      return Q.reject(err);
+    });
   };
   result.emit = function(type, event) {
     client.emit(type, event);
@@ -113,21 +118,22 @@ exports.beginTransaction = function (options) {
   var acquireFn = options.pooled ? acquirePooledConnection : acquireNonpooledConnection;
   return Q.Promise(function (resolve, reject) {
     acquireFn(options.connString, function (err, client, done) {
+
       if (err) {
-        reject(err);
+        return reject(err);
       }
-      else {
-        resolve({
-          client: client,
-          done: done,
-          options: options
-        });
-      }
+      resolve({
+        client: denodeifyClient(client),
+        done: done,
+        options: options
+      });
     });
   }).then(function (tx) {
     return Q.ninvoke(tx.client, 'query', transactionStatements[options.mode][0], []).catch(function (err) {
       tx.done(err);
       return Q.reject(err);
+    }).then(function() {
+      return tx;
     });
   });
 };
