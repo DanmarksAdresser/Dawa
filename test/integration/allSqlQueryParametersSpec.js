@@ -12,6 +12,7 @@ var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
 var commonParameters = require('../../apiSpecification/common/commonParameters');
+var testdb = require('../helpers/testdb');
 require('../../apiSpecification/allSpecs');
 
 function multiVerifier(verifierFn) {
@@ -434,7 +435,7 @@ _.keys(sampleParameters).forEach(function(specName) {
         var verify = sample.verifier;
         sample.values.forEach(function(sampleValue) {
           describe('case ' + paramName + '=' + sampleValue, function() {
-            it('Query for ' + specName + ' case ' + paramName + '=' + sampleValue + ' skal returnere korrekt resultat', function(done) {
+            it('Query for ' + specName + ' case ' + paramName + '=' + sampleValue + ' skal returnere korrekt resultat', function() {
               var parseResult;
               var rawQueryParams = {};
               rawQueryParams[paramName] = sampleValue;
@@ -442,19 +443,14 @@ _.keys(sampleParameters).forEach(function(specName) {
               expect(parseResult.errors.length).to.equal(0);
               parseResult.params.per_side = 100;
               var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
-              dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-                expect(err).to.not.exist;
-                if (err) throw 'unable to open connection';
-                dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
-                  transactionDone();
-                  expect(err).to.not.exist;
+              return testdb.withTransaction('test', 'READ_ONLY', function(client) {
+                return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
                   expect(rows.length).to.be.above(0);
                   var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
                   mappedRows.forEach(function(json) {
                     var verifyResult = verify(json, sampleValue);
                     expect(verifyResult).to.equal(true);
                   });
-                  done();
                 });
               });
             });

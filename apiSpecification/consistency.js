@@ -1,6 +1,7 @@
 "use strict";
 
-var dbapi = require('../dbapi');
+var logger = require('../logger').forCategory('consistency');
+var proddb = require('../psql/proddb');
 var registry = require('./registry');
 
 var resourceImpl = require('./common/resourceImpl');
@@ -56,20 +57,21 @@ module.exports = consistencyChecks.reduce(function(memo, check) {
   var path ='/konsistens/' + check.key;
   memo[path] = {
     path: path,
-      expressHandler: function(req, res){
-        dbapi.withReadonlyTransaction(function(err, client, done){
-          if(err) {
-            return resourceImpl.sendInternalServerError(res, "Kunne ikke forbinde til databasen");
-          }
-          client.query(check.query, [], function(err, result) {
-            done(err);
-            if(err) {
-              return resourceImpl.sendInternalServerError(res, "Fejl under udførelse af database query");
-            }
+    expressHandler: function (req, res) {
+      proddb.withTransaction('READ_ONLY', function (client) {
+        return client.queryp(check.query, [])
+          .then(function (result) {
             res.json(result.rows);
+          })
+          .catch(function (err) {
+            logger.error("Fejl under udførelse af database query", err);
+            resourceImpl.sendInternalServerError(res, "Fejl under udførelse af database query");
           });
+      })
+        .catch(function () {
+          resourceImpl.sendInternalServerError(res, "Kunne ikke forbinde til databasen");
         });
-      }
+    }
   };
   registry.add('konsistens', 'resourceImpl',check.key, memo[path]);
   return memo;

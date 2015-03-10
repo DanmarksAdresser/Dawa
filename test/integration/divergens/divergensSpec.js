@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var fs = require('fs');
 
 var divergensImpl = require('../../../psql/divergensImpl');
-var sqlCommon = require('../../../psql/common');
+var testdb = require('../../helpers/testdb');
 
 describe('divergenscheck', function() {
   describe('compareWithCurrent', function() {
@@ -23,9 +23,9 @@ describe('divergenscheck', function() {
     var expectedData2Report = JSON.parse(fs.readFileSync(__dirname + '/compareWithCurrent/data2Report.json'));
     var data2ReportSecondRun = JSON.parse(fs.readFileSync(__dirname + '/compareWithCurrent/data2ReportSecondRun.json'));
 
-    it('Should correctly detect and rectify differences', function(done) {
-      sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function(err, client, transactionDone) {
-        divergensImpl.divergenceReport(client, data1Options, {
+    it('Should correctly detect and rectify differences', function() {
+      return testdb.withTransaction('empty', 'ROLLBACK', function(client) {
+        return divergensImpl.divergenceReport(client, data1Options, {
           compareWithCurrent: true
         }).then(function(report) {
           return divergensImpl.rectifyAll(client, report).then(function(report) {
@@ -47,14 +47,7 @@ describe('divergenscheck', function() {
               expect(report).to.deep.equal(data2ReportSecondRun);
             });
           });
-        }).then(function() {
-          transactionDone("rollback", function() {
-            if(err) {
-              throw err;
-            }
-            done();
-          });
-        }).done();
+        });
       });
     });
   });
@@ -82,8 +75,8 @@ describe('divergenscheck', function() {
      * Gade2 does not exist, which should not appear in the report, because the record is created with sequence number 1
      * and gade3 is modified, which should not be rectified since gade 3 has sequence number 3.
      */
-    it('If an object has been modified later than the sequence number indicated, it will not be rectified', function (done) {
-      sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function (err, client, transactionDone) {
+    it('If an object has been modified later than the sequence number indicated, it will not be rectified', function () {
+      return testdb.withTransaction('empty', 'ROLLBACK', function(client) {
         return divergensImpl.divergenceReport(client, initialOptions, {
           compareWithCurrent: true
         }).then(function (report) {
@@ -97,14 +90,7 @@ describe('divergenscheck', function() {
                 expect(report).to.deep.equal(expectedReport);
               });
             });
-          }).then(function () {
-            transactionDone("rollback", function () {
-              if (err) {
-                throw err;
-              }
-              done();
-            });
-          }).done();
+          });
       });
     });
   });

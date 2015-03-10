@@ -70,7 +70,7 @@ exports.addTema = function(client, tema, callback) {
   var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
     'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
   var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
-  return q.ninvoke(client, 'query', sql, params).then(function(result) {
+  return client.queryp(sql, params).then(function(result) {
     return result.rows[0].id;
   }).nodeify(callback);
 };

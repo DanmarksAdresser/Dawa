@@ -5,9 +5,9 @@ var sqlUtil = require('./sql/sqlUtil');
 var logger = require('../../logger');
 var _ = require('underscore');
 
-var dbapi = require('../../dbapi');
 var pipeline = require('../../pipeline');
 var parameterParsing = require('../../parameterParsing');
+var transactions = require('../../psql/transactions');
 var serializers = require('./serializers');
 
 function jsonStringifyPretty(object){
@@ -252,7 +252,22 @@ exports.createExpressHandler = function(resourceSpec) {
       return !res.connection.writable;
     }
     function withDbClient(callback) {
-      dbapi.withReadonlyTransaction(callback, shouldAbort);
+      transactions.beginTransaction('prod', {mode: 'READ_ONLY', pooled: true, shouldAbort: shouldAbort}).then(
+        function(tx) {
+          callback(undefined, tx.client, function(err) {
+            transactions.endTransaction(tx, err);
+          });
+        },
+        function(err) {
+          if(shouldAbort()) {
+            // normal cancellation of transaction - callback never called.
+            logger.info("http", "Client closed connection before database transaction was started", err);
+          }
+          else {
+            callback(err);
+          }
+        }
+      );
     }
 
     resourceResponse(withDbClient, resourceSpec, req, shouldAbort, function(err, response) {

@@ -3,8 +3,6 @@ var pg = require('pg.js');
 var fs = require('fs');
 var winston = require('winston');
 
-require('../setupDbConnection');
-
 function exitOnErr(err){
   if (err){
     console.dir(err);

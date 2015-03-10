@@ -4,9 +4,10 @@
 // Thus, this test verifies that the API is stable.
 
 var expect = require('chai').expect;
+var q = require('q');
 var _ = require('underscore');
 
-var dbapi = require('../../dbapi');
+var testdb = require('../helpers/testdb');
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
@@ -388,18 +389,13 @@ describe('JSON opslag', function() {
       throw new Error("Could not find getByKey resource for " + entityName);
     }
     expectedResults.forEach(function(expected) {
-      it('Should return correct response for ' + entityName, function(done) {
+      it('Should return correct response for ' + entityName, function() {
         var key = (keyExtractors[entityName] || defaultKeyExtractor(nameAndKey.key))(expected);
-        dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-          helpers.getJson(client, resource, key, { srid: "25832" }, function(err, result) {
-            transactionDone();
-            if(err) {
-              throw err;
-            }
+        return testdb.withTransaction('test', 'READ_ONLY', function(client) {
+          return q.nfcall(helpers.getJson, client, resource, key, { srid: "25832" }).then(function(result) {
             expect(function() {
               verifyResult("ROOT",expected, result );
             }).to.not.throw;
-            done();
           });
         });
       });

@@ -183,19 +183,20 @@ function createHistoryTriggers(client) {
 
 exports.reloadDatabaseCode = function(client, scriptDir) {
   return function(callback) {
-    console.log('loading database functions');
+    console.log('loading database functions from ' + scriptDir);
     async.series([
       psqlScript(client, scriptDir, 'misc.sql'),
       function(callback) {
         exports.forAllTableSpecs(client,
           function (client, spec, cb){
-            if( fs.existsSync(spec.scriptFile)) {
+            var scriptPath = path.join(scriptDir, spec.scriptFile);
+            if( fs.existsSync(scriptPath)) {
               console.log("loading script " + spec.scriptFile);
               return (psqlScript(client, scriptDir, spec.scriptFile))(cb);
             }
             else {
               console.log('no script file for ' + spec.name);
-              callback();
+              cb();
             }
           }, callback);
       },

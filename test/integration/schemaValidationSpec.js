@@ -1,11 +1,12 @@
 "use strict";
 
 var chai = require('chai');
-var schemaValid = require('../helpers/schemaValid');
 var _ = require('underscore');
 
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
+var schemaValid = require('../helpers/schemaValid');
+var testdb = require('../helpers/testdb');
 
 var expect = chai.expect;
 chai.use(schemaValid);
@@ -100,34 +101,28 @@ describe('Validering af JSON-formatteret output', function() {
     if(!schema) {
       throw new Error('no schema for ' + nameAndKey.singular);
     }
-    it('Alle ' + nameAndKey.plural + ' skal validere', function(specDone) {
-      dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
+    it('Alle ' + nameAndKey.plural + ' skal validere', function() {
+      return testdb.withTransaction('test', 'READ_ONLY', function(client) {
         var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
-        dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
+        return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
             expect(json).to.be.schemaValid(schema);
           });
-          transactionDone();
-          specDone();
         });
       });
     });
-    it('Alle felter i ' + nameAndKey.plural + ' skal ses mindst en gang', function(specDone) {
+    it('Alle felter i ' + nameAndKey.plural + ' skal ses mindst en gang', function() {
       var schema = jsonRepresentation.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
-      dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
+      return testdb.withTransaction('test', 'READ_ONLY', function(client) {
         var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
-        dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
-          expect(err).to.equal(null);
-
+        return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
             recordVisitedValues(json, schema, valuesSeen);
           });
-          transactionDone();
           expect(verifyAllValuesVisited(schema, valuesSeen)).to.equal(true);
-          specDone();
         });
       });
     });

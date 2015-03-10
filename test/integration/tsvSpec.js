@@ -2,10 +2,11 @@
 
 var async = require('async');
 var expect = require('chai').expect;
+var q = require('q');
 
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
-var dbapi = require('../../dbapi');
+var testdb = require('../helpers/testdb');
 var setupFixture = require('../util/testUtil').setupFixture;
 
 var testFixture = {
@@ -282,41 +283,24 @@ function verifyAll(provideClient, testSpecs) {
 }
 
 describe('PostgreSQL tsv columns', function() {
-  var client;
-  var transactionDone;
-  beforeEach(function(callback) {
-    async.series([
-      function(callback) {
-        dbapi.withRollbackTransaction(function(err, _client, _transactionDone) {
-          if(err) {
-            return callback(err);
-          }
-          client = _client;
-          transactionDone = _transactionDone;
-          callback(null);
-        });
-      },
-      function(callback) {
-        setupFixture(client, testFixture, callback);
-      }],
-      callback);
-  });
-  afterEach(function(callback) {
-    transactionDone(callback);
-  });
-  describe('update of tsv column for vejstykker', function() {
-    verifyAll(function() { return client; } , vejstykkeTests);
-  });
-  describe('update of tsv column for postnumre', function() {
-    verifyAll(function() { return client; }, postnummerTests);
-  });
-  describe('update of tsv column for adgangsadresser', function() {
-    verifyAll(function() { return client; }, adgangsadresseTests);
-  });
-  describe('update of tsv column for adresser', function() {
-    verifyAll(function() { return client; } , adresseTests);
-  });
-  describe('update of tsv column for supplerendebynavne', function() {
-    verifyAll(function() { return client; } , supplerendebynavneTests);
+  testdb.withTransactionEach('test', function(clientFn) {
+    beforeEach(function() {
+      return q.nfcall(setupFixture, clientFn(), testFixture);
+    });
+    describe('update of tsv column for vejstykker', function() {
+      verifyAll(clientFn , vejstykkeTests);
+    });
+    describe('update of tsv column for postnumre', function() {
+      verifyAll(clientFn, postnummerTests);
+    });
+    describe('update of tsv column for adgangsadresser', function() {
+      verifyAll(clientFn, adgangsadresseTests);
+    });
+    describe('update of tsv column for adresser', function() {
+      verifyAll(clientFn , adresseTests);
+    });
+    describe('update of tsv column for supplerendebynavne', function() {
+      verifyAll(clientFn , supplerendebynavneTests);
+    });
   });
 });

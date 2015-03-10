@@ -2,12 +2,13 @@
 
 var async = require('async');
 var expect = require('chai').expect;
+var q = require('q');
 var _ = require('underscore');
 
 var bbrEvents = require('../../bbr/eventImporter/bbrEvents');
-var dbapi = require('../../dbapi');
 var datamodels = require('../../crud/datamodel');
 var crud = require('../../crud/crud');
+var testdb = require('../helpers/testdb');
 
 var handleBbrEvent = bbrEvents.internal.applyBbrEvent;
 
@@ -48,7 +49,6 @@ describe('Håndtering af BBR events', function() {
         }]
       }
     }];
-    var transactionDone;
     var resultingAdresser;
 
     function handleBbrEvents(client, events, cb) {
@@ -57,27 +57,18 @@ describe('Håndtering af BBR events', function() {
       }, cb);
     }
 
-    beforeEach(function(done) {
-      dbapi.withWriteTransaction(function(err, client, tDone) {
-        if(err) {
-          throw err;
-        }
-        transactionDone = tDone;
-        handleBbrEvents(client, events, function(err) {
-          if(err) {
-            throw err;
-          }
-          crud.query(client, datamodels.adgangsadresse, {
-            kommunekode: 461,
-            vejkode: 4194
-          }, function(err, adresser) {
-            if(err) {
-              throw err;
-            }
+    before(function () {
+      return testdb.withTransaction('test', 'ROLLBACK', function (client) {
+        return q.nfcall(handleBbrEvents, client, events)
+          .then(function () {
+            return q.nfcall(crud.query, client, datamodels.adgangsadresse, {
+              kommunekode: 461,
+              vejkode: 4194
+            });
+          })
+          .then(function (adresser) {
             resultingAdresser = adresser;
-            done();
           });
-        });
       });
     });
     var husnumreILigeInterval = ['190', '192', '194'];
@@ -108,9 +99,6 @@ describe('Håndtering af BBR events', function() {
       adresserUdenforInterval.forEach(function(adresse) {
         expect(adresse.supplerendebynavn).to.be.null;
       });
-    });
-    afterEach(function(done) {
-      transactionDone(null, done);
     });
   });
   describe('vejnavn events', function() {
@@ -166,102 +154,74 @@ describe('Håndtering af BBR events', function() {
       }
     };
 
-    it('Ved modtagelse af en oprettelse event oprettes vejstykket', function(done) {
-      dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-        handleBbrEvent(client, createEvent, function(err) {
-          if(err) {
-            throw err;
-          }
-          crud.query(client, datamodels.vejstykke, {
-            kommunekode: 99,
-            kode: 9899
-          }, function (err, queryResult) {
-            if(err) {
-              throw err;
-            }
+    it('Ved modtagelse af en oprettelse event oprettes vejstykket', function () {
+      return testdb.withTransaction('test', 'ROLLBACK', function (client) {
+        return q.nfcall(handleBbrEvent, client, createEvent)
+          .then(function () {
+            return q.nfcall(crud.query, client, datamodels.vejstykke, {
+              kommunekode: 99,
+              kode: 9899
+            });
+          })
+          .then(function (queryResult) {
             expect(queryResult.length).to.equal(1);
             var created = queryResult[0];
             expect(created.kommunekode).to.deep.equal(99);
             expect(created.kode).to.deep.equal(9899);
             expect(created.vejnavn).to.deep.equal('Niels Bohrs Alle');
-            transactionDone();
-            done();
           });
-        });
       });
     });
-    it('Ved modtagelse af en aendring event udføres en update', function(done) {
-      dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-        handleBbrEvent(client, createEvent, function(err) {
-          if(err) {
-            throw err;
-          }
-          handleBbrEvent(client, updateEvent, function(err) {
-            if(err) {
-              throw err;
-            }
-            crud.query(client, datamodels.vejstykke, {
+    it('Ved modtagelse af en aendring event udføres en update', function () {
+      return testdb.withTransaction('test', 'ROLLBACK', function (client) {
+        return q.nfcall(handleBbrEvent, client, createEvent)
+          .then(function () {
+            return q.nfcall(handleBbrEvent.client, updateEvent);
+          })
+          .then(function () {
+            return q.nfcall(crud.query, client, datamodels.vejstykke, {
               kommunekode: 99,
               kode: 9899
-            }, function (err, queryResult) {
-              if(err) {
-                throw err;
-              }
-              expect(queryResult.length).to.equal(1);
-              var updated = queryResult[0];
-              expect(updated.vejnavn).to.deep.equal('Einsteins gade');
-              transactionDone();
-              done();
             });
+          })
+          .then(function (queryResult) {
+            expect(queryResult.length).to.equal(1);
+            var updated = queryResult[0];
+            expect(updated.vejnavn).to.deep.equal('Einsteins gade');
           });
-        });
       });
     });
 
-    it('Ved modtagelse af en nedlaeggelse event udføres en delete', function(done) {
-      dbapi.withRollbackTransaction(function (err, client, transactionDone) {
-        handleBbrEvent(client, createEvent, function (err) {
-          if (err) {
-            throw err;
-          }
-          handleBbrEvent(client, deleteEvent, function (err) {
-            if (err) {
-              throw err;
-            }
-            crud.query(client, datamodels.vejstykke, {
+    it('Ved modtagelse af en nedlaeggelse event udføres en delete', function () {
+      return testdb.withTransaction('test', 'ROLLBACK', function (client) {
+        return q.nfcall(handleBbrEvent, client, createEvent)
+          .then(function () {
+            return q.nfcall(handleBbrEvent, client, deleteEvent);
+          })
+          .then(function () {
+            return q.nfcall(crud.query, client, datamodels.vejstykke, {
               kommunekode: 99,
               kode: 9899
-            }, function (err, queryResult) {
-              if (err) {
-                throw err;
-              }
-              expect(queryResult.length).to.equal(0);
-              transactionDone();
-              done();
             });
-          });
-        });
-      });
-    });
-
-    it('Ved modtagelse af en vejnavn event hvor kode  >= 9900 ignoreres den', function(done) {
-      dbapi.withRollbackTransaction(function(err, client, transactionDone) {
-        handleBbrEvent(client, filteredEvent, function (err) {
-          if (err) {
-            throw err;
-          }
-          crud.query(client, datamodels.vejstykke, {
-            kommunekode: 99,
-            kode: filteredEvent.data.vejkode
-          }, function (err, queryResult) {
-            if(err) {
-              throw err;
-            }
+          })
+          .then(function (queryResult) {
             expect(queryResult.length).to.equal(0);
-            transactionDone();
-            done();
           });
-        });
+      });
+    });
+
+    it('Ved modtagelse af en vejnavn event hvor kode  >= 9900 ignoreres den', function () {
+      return testdb.withTransaction('test', 'ROLLBACK', function (client) {
+        return q.nfcall(handleBbrEvent, client, filteredEvent)
+          .then(function () {
+            return q.nfcall(crud.query, client, datamodels.vejstykke, {
+              kommunekode: 99,
+              kode: filteredEvent.data.vejkode
+            });
+          })
+          .then(function (queryResult) {
+            expect(queryResult.length).to.equal(0);
+          });
       });
     });
   });

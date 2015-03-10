@@ -2,10 +2,12 @@
 
 var expect = require('chai').expect;
 var request = require("request-promise");
+var q = require('q');
 
 var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
+var testdb = require('../helpers/testdb');
 var tema = require('../../temaer/tema');
 require('../../apiSpecification/allSpecs');
 
@@ -45,25 +47,22 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       type: 'resource',
       qualifier: 'query'
     });
-    it(' for region på '  + entityName, function (done) {
+    it(' for region på ' + entityName, function () {
       this.timeout(5000);
-      dbapi.withRollbackTransaction(function (err, client, transactionDone) {
-        if (err) { throw err; }
-        tema.addTema(client, sampleTema, function (err) {
-          if(err) { throw err; }
-          tema.updateAdresserTemaerView(client, temaSpec, false).nodeify( function(err) {
-            if(err) { throw err; }
-            var params = { regionskode: "10" };
+      return testdb.withTransaction('test', 'ROLLBACK', function (client) {
+        return q.nfcall(tema.addTema, client, sampleTema)
+          .then(function () {
+            return tema.updateAdresserTemaerView(client, temaSpec, false);
+          })
+          .then(function () {
+            var params = {regionskode: "10"};
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
             var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
-            dbapi.queryRaw(client, query.sql, query.params, function(err, result) {
-              if(err) { throw err; }
-              expect(result.length).to.equal(expectedResultsRegion[entityName]);
-              transactionDone();
-              done();
-            });
+            return dbapi.queryRawQ(client, query.sql, query.params);
+          })
+          .then(function (result) {
+            expect(result.length).to.equal(expectedResultsRegion[entityName]);
           });
-        });
       });
     });
 

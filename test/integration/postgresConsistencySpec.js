@@ -1,28 +1,18 @@
 "use strict";
 
 var expect = require('chai').expect;
+var q = require('q');
 
-var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
+var testdb = require('../helpers/testdb');
 
-describe('Triggers in PostgreSQL should maintain a consistent state', function() {
-  var client;
-  var transactionDone;
-  beforeEach(function(done) {
-    sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function(err, _client, _transactionDone){
-      if(err) {
-        return done(err);
-      }
-      client = _client;
-      transactionDone = _transactionDone;
-      done();
-    });
-  });
-
-  it('The geom column of adgangsadresser should be maintained', function(done) {
-    var adgangsadresse = {
-      "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
+describe('Triggers in PostgreSQL should maintain a consistent state', function () {
+  testdb.withTransactionEach('empty', function (clientFn) {
+    it('The geom column of adgangsadresser should be maintained', function () {
+      var client = clientFn();
+      var adgangsadresse = {
+        "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
         "kommunekode": 607,
         "vejkode": 4899,
         "husnr": "22",
@@ -42,23 +32,17 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function()
         "tekniskstandard": "TK",
         "tekstretning": "200.00",
         "adressepunktaendringsdato": "2014-05-22T23:59:00.000Z"
-    };
-    crud.create(client, datamodels.adgangsadresse, adgangsadresse, function(err) {
-      if(err) {
-        throw err;
-      }
-      client.query('SELECT geom FROM adgangsadresser where id = $1', ["038edf0e-001b-4d9d-a1c7-b71cb354680f"], function(err, result) {
-        expect(result.rows.length).to.equal(1);
-        var geom = result.rows[0].geom;
-        expect(geom).to.equal('0101000020E864000014AE4761D68B204133333303127B5741');
-        done();
-      });
-    });
-  });
+      };
 
-  afterEach(function(done) {
-    transactionDone('rollback', function(err) {
-      done();
+      return q.nfcall(crud.create, client, datamodels.adgangsadresse, adgangsadresse)
+        .then(function () {
+          return client.queryp('SELECT geom FROM adgangsadresser where id = $1', ["038edf0e-001b-4d9d-a1c7-b71cb354680f"]);
+        })
+        .then(function (result) {
+          expect(result.rows.length).to.equal(1);
+          var geom = result.rows[0].geom;
+          expect(geom).to.equal('0101000020E864000014AE4761D68B204133333303127B5741');
+        });
     });
   });
 });

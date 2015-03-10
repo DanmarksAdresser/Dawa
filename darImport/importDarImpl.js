@@ -11,8 +11,6 @@ var nodeUuid =  require('node-uuid');
 var q = require('q');
 var _ = require('underscore');
 
-var proddb = require('../psql/proddb');
-
 var types = {
   uuid: {
     parse: _.identity

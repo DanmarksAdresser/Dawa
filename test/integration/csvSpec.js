@@ -2,12 +2,14 @@
 
 var expect = require('chai').expect;
 var request = require("request-promise");
+var q = require('q');
 var _ = require('underscore');
 
-var dbapi = require('../../dbapi');
 var csv = require('csv');
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
+var testdb = require('../helpers/testdb');
+
 require('../../apiSpecification/allSpecs');
 
 describe('CSV udtræk', function() {
@@ -67,10 +69,9 @@ describe('CSV udtræk', function() {
     _.each(expectedColumns, function(colNames, datamodelName) {
       var seenFields = {};
       var resource = registry.findWhere({entityName: datamodelName, type: 'resource', qualifier: 'query'});
-      it('Alle CSV felter i ' + datamodelName + ' skal ses mindst en gang', function(done) {
-        dbapi.withRollbackTransaction(function(err, client, releaseConnectionFn) {
-          helpers.getCsv(client, resource, [], _.extend({}, additionalParams[datamodelName] || {}, { format: 'csv'}), function(err, result) {
-            releaseConnectionFn();
+      it('Alle CSV felter i ' + datamodelName + ' skal ses mindst en gang', function() {
+        testdb.withTransaction('test', 'ROLLBACK', function(client) {
+          return q.nfcall(helpers.getCsv, client, resource, [], _.extend({}, additionalParams[datamodelName] || {}, { format: 'csv'})).then(function(result) {
             result.forEach(function(csvRow) {
               _.each(csvRow, function(value, key) {
                 if(value !== undefined && value !== null && value.trim() !== '') {
@@ -79,7 +80,6 @@ describe('CSV udtræk', function() {
               });
             });
             expect(Object.keys(seenFields).concat(neverExpectedToBeSeen[datamodelName] || []).sort()).to.deep.equal(colNames.slice().sort());
-            done();
           });
         });
       });

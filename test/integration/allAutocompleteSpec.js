@@ -7,6 +7,7 @@ var dbapi = require('../../dbapi');
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
 var schemaValidationUtil = require('./schemaValidationUtil');
+var testdb = require('../helpers/testdb');
 require('../../apiSpecification/allSpecs');
 
 var sampleParameters = {
@@ -31,7 +32,7 @@ describe('Alle autocomplete ressourcer skal virke', function() {
     }
     describe('Autocomplete på ' + resource.path + ' skal virke', function(){
       sampleParameters[resource.path].forEach(function(sampleQueryParam) {
-        it('Autocomplete på ' + resource.path + ' med parameteren q=' + sampleQueryParam + ' skal virke', function(specDone) {
+        it('Autocomplete på ' + resource.path + ' med parameteren q=' + sampleQueryParam + ' skal virke', function() {
           var autocompleteRepresentation = resource.representations.autocomplete;
           var rawQueryParams = {};
           rawQueryParams.q = sampleQueryParam;
@@ -39,22 +40,17 @@ describe('Alle autocomplete ressourcer skal virke', function() {
           expect(parseResult.errors.length).to.equal(0);
           var query = resource.sqlModel.createQuery(_.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params);
           var mapper = autocompleteRepresentation.mapper("BASE_URL", parseResult.params, false);
-          dbapi.withReadonlyTransaction(function(err, client, transactionDone) {
-            if(err) throw 'unable to open connection';
-            dbapi.queryRaw(client, query.sql, query.params, function(err, rows) {
-              transactionDone();
-              expect(err).to.not.exist;
+          return testdb.withTransaction('test', 'READ_ONLY', function(client) {
+            return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
               expect(rows.length).to.be.above(0);
               rows.forEach(function(row) {
                 var json = mapper(row);
                 expect(schemaValidationUtil.isSchemaValid(json, autocompleteRepresentation.schema)).to.equal(true);
               });
-              specDone();
             });
           });
         });
       });
     });
-
   });
 });

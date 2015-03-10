@@ -4,15 +4,15 @@
 // hvorefter vi verificerer at de forventede tilknytninger udstilles korrekt både som udtræk og hændelser.
 
 var expect = require('chai').expect;
-var Q = require('q');
+var q = require('q');
 var _ = require('underscore');
 
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
-var sqlCommon = require('../../psql/common');
 var crud = require('../../crud/crud');
 var tema = require('../../temaer/tema');
+var testdb = require('../helpers/testdb');
 var datamodels = require('../../crud/datamodel');
 var temaer = require('../../apiSpecification/temaer/temaer');
 var tilknytninger = require('../../apiSpecification/tematilknytninger/tilknytninger');
@@ -102,100 +102,86 @@ var expectedKeys = {
 };
 
 describe('Replikering af tilknytninger', function () {
-  var client;
-  var transactionDone;
+  testdb.withTransactionEach('empty', function(clientFn) {
 
-  beforeEach(function (done) {
-    sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function (err, _client, _transactionDone) {
-      if (err) {
-        throw err;
-      }
-      client = _client;
-      transactionDone = _transactionDone;
-      done();
-    });
-  });
-
-  afterEach(function(done) {
-    transactionDone('rollback', function() {
-      done();
-    });
-  });
-  // insert the two adresses
-  adgangsadresser.forEach(function(adgangsadresse) {
-    beforeEach(function(done) {
-      var datamodel = datamodels.adgangsadresse;
-      var sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
-      crud.create(client, datamodel, sqlObject, done);
-    });
-  });
-
-
-  _.each(temaObjects, function(temaObject, temaName) {
-    var temaDef = _.findWhere(temaer, {singular: temaName});
-    var tilknytning = tilknytninger[temaName];
-    var datamodelName = temaDef.prefix + 'tilknytning';
-    var udtraekResource = registry.findWhere({
-      entityName: datamodelName,
-      type: 'resource',
-      qualifier: 'udtraek'
-    });
-    var eventResource = registry.findWhere({
-      entityName: datamodelName,
-      type: 'resource',
-      qualifier: 'hændelser'
-    });
-
-    function expectedResultForKey(expectedTemaKeyParts, adgangsadresseId) {
-      var keyFieldNames = tilknytning.keyFieldNames;
-      var expectedResult = {
-        adgangsadresseid: adgangsadresseId
-      };
-      expectedTemaKeyParts.forEach(function(expectedKey, index) {
-        expectedResult[keyFieldNames[index]] = expectedKey;
+    // insert the two adresses
+    adgangsadresser.forEach(function(adgangsadresse) {
+      beforeEach(function() {
+        var client = clientFn();
+        var datamodel = datamodels.adgangsadresse;
+        var sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
+        return q.nfcall(crud.create, client, datamodel, sqlObject);
       });
-      return expectedResult;
-    }
-    it('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
-      return tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]}).then(function () {
-        return Q.nfcall(tema.updateAdresserTemaerView, client, temaDef, true);
-      }).then(function () {
-        return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
-      }).then(function (jsonResult) {
-        var expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[0].id);
-        expect(jsonResult).to.deep.equal([expectedResult]);
-        return tema.updateTema(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
-      }).then(function () {
-        return tema.updateAdresserTemaerView(client, temaDef, false);
-      }).then(function () {
-        return Q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
-      }).then(function (jsonResult) {
-        var expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[1].id);
-        expect(jsonResult).to.deep.equal([expectedResult]);
-        return Q.nfcall(helpers.getJson, client, eventResource, {}, {});
-      }).then(function (eventResult) {
-        expect(eventResult.length).to.equal(2);
-        expect(eventResult[0].operation).to.equal('delete');
-        expect(eventResult[1].operation).to.equal('insert');
-        expect(eventResult[0].data.adgangsadresseid).to.equal(adgangsadresser[0].id);
-        expect(eventResult[1].data.adgangsadresseid).to.equal(adgangsadresser[1].id);
+    });
+
+
+    _.each(temaObjects, function(temaObject, temaName) {
+      var temaDef = _.findWhere(temaer, {singular: temaName});
+      var tilknytning = tilknytninger[temaName];
+      var datamodelName = temaDef.prefix + 'tilknytning';
+      var udtraekResource = registry.findWhere({
+        entityName: datamodelName,
+        type: 'resource',
+        qualifier: 'udtraek'
+      });
+      var eventResource = registry.findWhere({
+        entityName: datamodelName,
+        type: 'resource',
+        qualifier: 'hændelser'
+      });
+
+      function expectedResultForKey(expectedTemaKeyParts, adgangsadresseId) {
         var keyFieldNames = tilknytning.keyFieldNames;
-        keyFieldNames.forEach(function(keyFieldName, index) {
-          expect(eventResult[0].data[keyFieldName]).to.equal(expectedKeys[temaName][index]);
-          expect(eventResult[1].data[keyFieldName]).to.equal(expectedKeys[temaName][index]);
+        var expectedResult = {
+          adgangsadresseid: adgangsadresseId
+        };
+        expectedTemaKeyParts.forEach(function(expectedKey, index) {
+          expectedResult[keyFieldNames[index]] = expectedKey;
         });
+        return expectedResult;
+      }
+      it('Skal replikere adgangsadressetilknytninger for ' + temaName, function() {
+        var client = clientFn();
+        return tema.addTema(client, {tema: temaName, fields: temaObject, polygons: [polygonContainingFirstAddress]})
+          .then(function () {
+          return tema.updateAdresserTemaerView(client, temaDef, true);
+        }).then(function () {
+          return q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
+        }).then(function (jsonResult) {
+          var expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[0].id);
+          expect(jsonResult).to.deep.equal([expectedResult]);
+          return tema.updateTema(client, temaDef, {tema: temaName, fields: temaObject, polygons: [polygonContainingSecondAddress]});
+        }).then(function () {
+          return tema.updateAdresserTemaerView(client, temaDef, false);
+        }).then(function () {
+          return q.nfcall(helpers.getJson, client, udtraekResource, {}, {});
+        }).then(function (jsonResult) {
+          var expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[1].id);
+          expect(jsonResult).to.deep.equal([expectedResult]);
+          return q.nfcall(helpers.getJson, client, eventResource, {}, {});
+        }).then(function (eventResult) {
+          expect(eventResult.length).to.equal(2);
+          expect(eventResult[0].operation).to.equal('delete');
+          expect(eventResult[1].operation).to.equal('insert');
+          expect(eventResult[0].data.adgangsadresseid).to.equal(adgangsadresser[0].id);
+          expect(eventResult[1].data.adgangsadresseid).to.equal(adgangsadresser[1].id);
+          var keyFieldNames = tilknytning.keyFieldNames;
+          keyFieldNames.forEach(function(keyFieldName, index) {
+            expect(eventResult[0].data[keyFieldName]).to.equal(expectedKeys[temaName][index]);
+            expect(eventResult[1].data[keyFieldName]).to.equal(expectedKeys[temaName][index]);
+          });
 
-        var eventRepresentation = registry.findWhere({
-          entityName: datamodelName + '_hændelse',
-          type: 'representation',
-          qualifier: 'json'
+          var eventRepresentation = registry.findWhere({
+            entityName: datamodelName + '_hændelse',
+            type: 'representation',
+            qualifier: 'json'
+          });
+
+          var eventSchema = eventRepresentation.schema;
+          expect(schemaValidationUtil.isSchemaValid(eventResult[0], eventSchema)).to.be.true;
+          expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).to.be.true;
         });
-
-        var eventSchema = eventRepresentation.schema;
-        expect(schemaValidationUtil.isSchemaValid(eventResult[0], eventSchema)).to.be.true;
-        expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).to.be.true;
       });
     });
   });
-
 });

@@ -110,7 +110,7 @@ describe('Importing DAR CSV files to database', function () {
     });
     _.forEach(csvSpec, function (spec, entityName) {
       it('Should import ' + entityName + ' correctly', function () {
-        return testdb.withEmptyDbTransaction('ROLLBACK', function (client) {
+        return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
           return importDarImpl.loadCsvFile(client,
             path.join(__dirname,
               'sampleDarFiles', 'synthetic', entityName + '.csv'),
@@ -167,7 +167,7 @@ describe('Importing DAR CSV files to database', function () {
         });
     }
     describe('Compute set of differences betweeen to bitemporal tables', function () {
-      testdb.withEmptyDbTransactionAll(function (clientFn) {
+      testdb.withTransactionAll('empty', function (clientFn) {
         before(function () {
           var client = clientFn();
           return setupTable(client).then(function () {
@@ -234,7 +234,7 @@ describe('Importing DAR CSV files to database', function () {
     });
     describe('Full update of bitemporal table', function () {
       var destinationTable = 'cur_table';
-      testdb.withEmptyDbTransactionAll(function (clientFn) {
+      testdb.withTransactionAll('empty', function (clientFn) {
         before(function() {
           var client = clientFn();
           return setupTable(client);
