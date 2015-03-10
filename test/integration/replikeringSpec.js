@@ -15,7 +15,7 @@ var format = require('util').format;
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
 var schemaValidationUtil = require('./schemaValidationUtil');
-var sqlCommon = require('../../psql/common');
+var testdb = require('../helpers/testdb');
 require('../../apiSpecification/allSpecs');
 
 var insert = {
@@ -173,123 +173,106 @@ function formatJson(columnMapping, obj) {
 }
 
 describe('ReplikeringsAPI', function() {
-  var client;
-  var transactionDone;
-  beforeEach(function(done) {
-    sqlCommon.withWriteTransaction(process.env.pgEmptyDbUrl, function(err, _client, _transactionDone){
-      if(err) {
-        throw err;
-      }
-      client = _client;
-      transactionDone = _transactionDone;
-      done();
+
+  testdb.withTransactionAll('empty', function(clientFn) {
+    // create, update and delete each object
+    ENTITY_NAMES.forEach(function(datamodelName) {
+      before(function(done) {
+        var client = clientFn();
+        var datamodel = datamodels[datamodelName];
+        var objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
+        var objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
+        Q.nfcall(crud.create, client, datamodel, objectToInsert).then(function() {
+          return Q.nfcall(crud.update, client, datamodel, objectToUpdate);
+        }).then(function() {
+          return Q.nfcall(crud.delete, client, datamodel, crud.getKey(datamodel, objectToUpdate));
+        }).then(function() {
+          done();
+        }, function(err) {
+          throw err;
+        });
+      });
     });
 
-  });
-
-  // create, update and delete each object
-  ENTITY_NAMES.forEach(function(datamodelName) {
-    beforeEach(function(done) {
-      var datamodel = datamodels[datamodelName];
-      var objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
-      var objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
-      Q.nfcall(crud.create, client, datamodel, objectToInsert).then(function() {
-        return Q.nfcall(crud.update, client, datamodel, objectToUpdate);
-      }).then(function() {
-        return Q.nfcall(crud.delete, client, datamodel, crud.getKey(datamodel, objectToUpdate));
-      }).then(function() {
-        done();
-      }, function(err) {
-        throw err;
-      });
-    });
-  });
-
-  ENTITY_NAMES.forEach(function(datamodelName, index) {
-    describe(format('Replication of %s', datamodelName), function() {
-      var udtraekResource = registry.findWhere({
-        entityName: datamodelName,
-        type: 'resource',
-        qualifier: 'udtraek'
-      });
-      it('Should include the created object in the full extract', function(done) {
-        var sekvensnummer = (index * 3) + 1;
-        helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-          expect(objects.length).to.equal(1);
-          var obj = objects[0];
-          expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
-          done();
+    ENTITY_NAMES.forEach(function(datamodelName, index) {
+      describe(format('Replication of %s', datamodelName), function() {
+        var udtraekResource = registry.findWhere({
+          entityName: datamodelName,
+          type: 'resource',
+          qualifier: 'udtraek'
         });
-      });
-      it('Should include the updated object in the full extract', function(done) {
-        var sekvensnummer = (index * 3) + 2;
-        helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-          expect(objects.length).to.equal(1);
-          var obj = objects[0];
-          expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
-          done();
-        });
-      });
-      it('Should not include the deleted object in the full extract', function(done) {
-        var sekvensnummer = (index * 3) + 3;
-        helpers.getCsv(client, udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-          expect(objects.length).to.equal(0);
-          done();
-        });
-      });
-
-      var eventResource = registry.findWhere({
-        entityName: datamodelName,
-        type: 'resource',
-        qualifier: 'hændelser'
-      });
-
-      var eventRepresentation = registry.findWhere({
-        entityName: datamodelName + '_hændelse',
-        type: 'representation',
-        qualifier: 'json'
-      });
-
-      var eventSchema = eventRepresentation.schema;
-
-      it('All events should be valid according to schema', function(done) {
-        helpers.getJson(client, eventResource, {}, {}, function(err, objects) {
-          expect(objects.length).to.be.above(0);
-          objects.forEach(function(object) {
-            expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).to.be.true;
+        it('Should include the created object in the full extract', function(done) {
+          var sekvensnummer = (index * 3) + 1;
+          helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
+            expect(objects.length).to.equal(1);
+            var obj = objects[0];
+            expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
+            done();
           });
-          done();
         });
-      });
+        it('Should include the updated object in the full extract', function(done) {
+          var sekvensnummer = (index * 3) + 2;
+          helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
+            expect(objects.length).to.equal(1);
+            var obj = objects[0];
+            expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
+            done();
+          });
+        });
+        it('Should not include the deleted object in the full extract', function(done) {
+          var sekvensnummer = (index * 3) + 3;
+          helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
+            expect(objects.length).to.equal(0);
+            done();
+          });
+        });
 
-      it('sequence number filtering should work when retrieving events', function(done) {
-        var sekvensnummer = (index * 3) + 2;
-        helpers.getJson(client, eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
-          expect(objects.length).to.equal(1);
-          expect(objects[0].sekvensnummer).to.equal(sekvensnummer);
-          expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName]));
-          done();
+        var eventResource = registry.findWhere({
+          entityName: datamodelName,
+          type: 'resource',
+          qualifier: 'hændelser'
         });
-      });
-      it('When adding id field(s) when retrieving events, events without the specified id should not be returned', function(done) {
-        helpers.getJson(client, eventResource, {}, nonexistingIds[datamodelName], function(err, objects) {
-          expect(objects.length).to.equal(0);
-          done();
+
+        var eventRepresentation = registry.findWhere({
+          entityName: datamodelName + '_hændelse',
+          type: 'representation',
+          qualifier: 'json'
         });
-      });
-      it('When adding id field(s) when retrieving events, events with the specified id should be returned', function(done) {
-        helpers.getJson(client, eventResource, {}, existingIds[datamodelName], function(err, objects) {
-          expect(objects.length).to.equal(3);
-          done();
+
+        var eventSchema = eventRepresentation.schema;
+
+        it('All events should be valid according to schema', function(done) {
+          helpers.getJson(clientFn(), eventResource, {}, {}, function(err, objects) {
+            expect(objects.length).to.be.above(0);
+            objects.forEach(function(object) {
+              expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).to.be.true;
+            });
+            done();
+          });
+        });
+
+        it('sequence number filtering should work when retrieving events', function(done) {
+          var sekvensnummer = (index * 3) + 2;
+          helpers.getJson(clientFn(), eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
+            expect(objects.length).to.equal(1);
+            expect(objects[0].sekvensnummer).to.equal(sekvensnummer);
+            expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName]));
+            done();
+          });
+        });
+        it('When adding id field(s) when retrieving events, events without the specified id should not be returned', function(done) {
+          helpers.getJson(clientFn(), eventResource, {}, nonexistingIds[datamodelName], function(err, objects) {
+            expect(objects.length).to.equal(0);
+            done();
+          });
+        });
+        it('When adding id field(s) when retrieving events, events with the specified id should be returned', function(done) {
+          helpers.getJson(clientFn(), eventResource, {}, existingIds[datamodelName], function(err, objects) {
+            expect(objects.length).to.equal(3);
+            done();
+          });
         });
       });
     });
   });
-
-  afterEach(function(done) {
-    transactionDone('rollback', function(err) {
-      done();
-    });
-  });
-
 });

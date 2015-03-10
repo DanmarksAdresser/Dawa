@@ -1,5 +1,5 @@
 "use strict";
-var pg = require('pg.js');
+
 var fs = require('fs');
 var winston = require('winston');
 
@@ -41,40 +41,6 @@ exports.execSQL = function(sql, client, echo, done){
   else {
     return doWork;
   }
-};
-
-exports.withWriteTransaction = function (connString, cb) {
-  var client = new pg.Client(connString);
-  return client.connect(function (err) {
-    if (err) {
-      return cb(err);
-    }
-    // we obtain an exclusive lock to prevent any concurrent write access to the db
-    client.query('BEGIN;SELECT pg_advisory_xact_lock(1);', [], function (err) {
-      if (err) {
-        client.end();
-        return cb(err);
-      }
-      cb(err, client, function (err, committedCallback) {
-        if (err) {
-          winston.error("Error during transaction, discarding postgres connection", err);
-          client.end();
-          committedCallback(err);
-          return;
-        }
-        client.query('COMMIT', function (err) {
-          if (err) {
-            winston.error("Error when committing transaction: %j", err);
-          }
-          else {
-            winston.debug("write transaction commited, err: " + JSON.stringify(err));
-          }
-          client.end();
-          committedCallback(err);
-        });
-      });
-    });
-  });
 };
 
 function psqlScript(client, scriptDir, scriptfile){

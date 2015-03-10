@@ -1,13 +1,13 @@
 "use strict";
 
 var cli = require('cli');
-var winston  = require('winston');
+var q = require('q');
 var _        = require('underscore');
-var async    = require('async');
-var sqlCommon = require('./common');
-var initialization = require('./initialization');
+
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+var initialization = require('./initialization');
+var proddb = require('./proddb');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
@@ -15,27 +15,12 @@ var optionSpec = {
 
 cli.parse(optionSpec, []);
 
-var exitOnErr = sqlCommon.exitOnErr;
-
 cli.main(function(args, options) {
   cliParameterParsing.addEnvironmentOptions(optionSpec, options);
   process.env.pgConnectionUrl = options.pgConnectionUrl;
   cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
-
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
-    if(err) {
-      exitOnErr(err);
-    }
-    initialization.disableTriggersAndInitializeTables(client)(function(err) {
-      if(err) {
-        exitOnErr(err);
-      }
-      commit(null, function(err) {
-        if(err) {
-          exitOnErr(err);
-        }
-        console.log('Recompute denormalized completed');
-      });
-    });
-  });
+  proddb.init({ connString: options.pgConnectionUrl, pooled: false});
+  proddb.withTransaction('READ_WRITE', function(client) {
+    return q.nfcall(initialization.disableTriggersAndInitializeTables(client));
+  }).done();
 });

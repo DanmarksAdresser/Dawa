@@ -1,13 +1,10 @@
 "use strict";
 
-var winston = require('winston');
-
-var sqlCommon = require('./common');
+var q = require('q');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var loadAdresseDataImpl = require('./load-adresse-data-impl');
-
-var exitOnErr = sqlCommon.exitOnErr;
+var proddb = require('./proddb');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -17,13 +14,8 @@ var optionSpec = {
 };
 
 cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'dataDir', 'format'], function(args, options) {
-  sqlCommon.withWriteTransaction(options.pgConnectionUrl, function(err, client, commit) {
-    exitOnErr(err);
-    loadAdresseDataImpl.load(client, options, function(err) {
-      exitOnErr(err);
-      commit(err, function(err) {
-        exitOnErr(err);
-      });
-    });
-  });
+  proddb.init({ connString: options.pgConnectionUrl, pooled: false});
+  proddb.withTransaction('READ_WRITE', function(client) {
+    return q.nfcall(loadAdresseDataImpl.load, client, options);
+  }).done();
 });
