@@ -68,7 +68,7 @@ exports.opstillingskreds = {
   geometry: 'geometri',
   fields: {
     kode: {
-      name: 'Opstillingskredsnummer',
+      name: 'opstillingskredsnummer',
       parseFn: parseInteger
     },
     navn: 'navn'
