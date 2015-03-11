@@ -30,7 +30,8 @@ var featureMappingsMap = {
           name: 'zone',
           parseFn: parseInteger
         }
-      }
+      },
+      filterFn: function() { return true; }
     }
   }
 };
