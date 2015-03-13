@@ -3,6 +3,7 @@
 var genericPool = require('generic-pool');
 var pg = require('pg.js');
 var q = require('q');
+var _ = require('underscore');
 
 var statistics = require('../statistics');
 
@@ -10,12 +11,16 @@ var Client = pg.Client;
 var defaults = pg.defaults;
 
 var databases = {};
+var databaseInitializerDeferreds = {};
 
-exports.create = function (name, options) {
-  if (databases[name]) {
-    throw new Error('Attempted to create a dabase with name ' + name + ' but it already exists');
+function awaitInitialization(dbname) {
+  if(!databaseInitializerDeferreds[dbname]) {
+    databaseInitializerDeferreds[dbname] = q.defer();
   }
+  return databaseInitializerDeferreds[dbname].promise;
+}
 
+exports.create = function(name, options) {
   var pool = genericPool.Pool({
     name: name,
     max: options.poolSize || defaults.poolSize,
@@ -58,10 +63,21 @@ exports.create = function (name, options) {
       client.end();
     }
   });
-  databases[name] = {
+  return {
     options: options,
     pool: pool
   };
+};
+
+exports.register = function (name, options) {
+  if (databases[name]) {
+    throw new Error('Attempted to create a dabase with name ' + name + ' but it already exists');
+  }
+  databases[name] = exports.create(name, options);
+  if(!databaseInitializerDeferreds[name]) {
+    databaseInitializerDeferreds[name] = q.defer();
+  }
+  databaseInitializerDeferreds[name].resolve(databases[name]);
 };
 
 function denodeifyClient(client) {
@@ -121,22 +137,30 @@ function acquirePooledConnection(pool, callback) {
   });
 }
 
-exports.connect = function(dbname, pooled, callback) {
-  var db = databases[dbname];
-  if(!db) {
-    return callback(new Error('Attempted to connect to unregistered database: ' + dbname));
+exports.connect = function(dbOrName, pooled, callback) {
+  function doConnect(db, pooled, callback) {
+    if(pooled) {
+      acquirePooledConnection(db.pool, callback);
+    }
+    else {
+      acquireNonpooledConnection(db.options, callback);
+    }
   }
-  if(pooled) {
-    acquirePooledConnection(db.pool, callback);
+  if(_.isString(dbOrName)) {
+    return awaitInitialization(dbOrName).then(function() {
+      doConnect(databases[dbOrName], pooled, callback);
+    }, function(err) {
+      callback(err);
+    });
   }
   else {
-    acquireNonpooledConnection(db.options, callback);
+    return doConnect(dbOrName, pooled, callback);
   }
 };
 
-exports.withConnection = function(dbname, pooled, connectedFn) {
+exports.withConnection = function(dbOrName, pooled, connectedFn) {
   return q.Promise(function (resolve, reject) {
-    exports.connect(dbname, pooled, function (err, client, done) {
+    exports.connect(dbOrName, pooled, function (err, client, done) {
       if (err) {
         return reject(err);
       }

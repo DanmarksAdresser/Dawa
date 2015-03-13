@@ -41,6 +41,7 @@ exports.withTransaction = function (dbname, options, transactionFn) {
           client.emit('transactionEnd');
         }, function(err) {
           client.emit('transactionEnd', err);
+          return Q.reject(err);
         });
       });
   });

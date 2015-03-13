@@ -4,13 +4,15 @@ var pg = require('pg.js');
 var pgConnectionString = require('pg-connection-string');
 var q = require('q');
 var TypeOverrides = require('pg.js/lib/type-overrides');
+var _ = require('underscore');
 
 var database = require('./database');
+var databaseTypes = require('./databaseTypes');
 var logger = require('../logger').forCategory('sql');
 
 // We want timestamps to be parsed into text (ISO format in UTC).
 
-function setupTypes(types) {
+function setupTypes(types, typeMap) {
   var TSTZRANGE_OID = 3910;
   var TIMESTAMPTZ_OID = 1184;
   var TIMESTAMP_OID = 1114;
@@ -74,6 +76,13 @@ function setupTypes(types) {
   };
   types.setTypeParser(JSONB_OID, parseJsonFn);
   types.setTypeParser(JSON_OID, parseJsonFn);
+
+  var husnrOid = typeMap['husnr'];
+  types.setTypeParser(husnrOid, databaseTypes.Husnr.fromPostgres);
+  var husnrRangeOid = typeMap['husnr_range'];
+  types.setTypeParser(husnrRangeOid, function(val) {
+    return databaseTypes.Range.fromPostgres(val, databaseTypes.Husnr.fromPostgres);
+  });
 }
 
 module.exports = function(dbname, connectionString) {
@@ -81,9 +90,18 @@ module.exports = function(dbname, connectionString) {
     return q();
   }
   var options = pgConnectionString.parse(connectionString);
-  var types = new TypeOverrides(pg.types);
-  setupTypes(types);
-  options.types = types;
-  database.create(dbname, options);
-  return q();
+  var untypedDb = database.create('untyped_' + dbname, options);
+  database.withConnection(untypedDb, false, function(client) {
+    // The OIDs for custom types are not fixed beforehand, so we query them from the database
+    return client.queryp('select typname, oid from pg_type', []).then(function(result) {
+      var typeMap = _.reduce(result.rows, function(memo, row){
+        memo[row.typname] = row.oid;
+        return memo;
+      }, {});
+      var types = new TypeOverrides(pg.types);
+      setupTypes(types, typeMap);
+      options.types = types;
+      database.register(dbname, options);
+    });
+  }).done();
 };

@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS dar_streetname CASCADE;
 CREATE TABLE  dar_streetname (
-  versionid uuid NOT NULL PRIMARY KEY,
+  versionid uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
   vejkode smallint NOT NULL,
   kommunekode smallint NOT NULL,
   registrering tstzrange not null default tstzrange(current_timestamp, 'infinity', '[)'),

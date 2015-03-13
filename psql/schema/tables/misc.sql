@@ -1,3 +1,5 @@
+CREATE EXTENSION IF  NOT EXISTS "uuid-ossp";
+
 DROP TYPE IF EXISTS PostnummerRef CASCADE;
 CREATE TYPE PostnummerRef AS (
   nr integer,
@@ -21,6 +23,16 @@ DROP TYPE IF EXISTS tema_data CASCADE;
 CREATE TYPE tema_data AS (
   tema tema_type,
   fields json
+);
+
+DROP TYPE IF EXISTS husnr CASCADE;
+CREATE TYPE husnr AS (
+  tal smallint,
+  bogstav char(1)
+);
+
+CREATE TYPE husnr_range AS RANGE (
+  subtype = husnr
 );
 
 DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser;

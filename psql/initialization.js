@@ -41,6 +41,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar_address', init: false},
   {name: 'dar_housenumber', init: false},
   {name: 'dar_streetname', init: false},
+  {name: 'dar_postnr', init: false},
+  {name: 'dar_supplerendebynavn', init: false},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql'},

@@ -7,6 +7,7 @@ var transactions = require('./transactions');
 
 var options;
 
+
 exports.init = function(_options) {
   options = _options;
   setupDatabase('prod', options.connString);

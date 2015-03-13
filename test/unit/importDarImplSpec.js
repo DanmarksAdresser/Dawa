@@ -4,25 +4,24 @@ var expect = require('chai').expect;
 
 var importDarImpl = require('../../darImport/importDarImpl');
 
-var postgresTimePeriod = importDarImpl.internal.postgresTimePeriod;
 var transform = importDarImpl.internal.transform;
 var types = importDarImpl.internal.types;
 
 describe('importDarImpl', function () {
   describe('Parsing of dates', function() {
     it('Should parse a date with timezone offset', function() {
-      expect(types.timestampDk.parse('2008-07-05T12:16:15.690+02:00')).to.equal('2008-07-05 10:16:15.690Z');
+      expect(types.timestamp.parse('2008-07-05T12:16:15.690+02:00')).to.equal('2008-07-05T10:16:15.690Z');
     });
     it('Should parse a date in zulu time', function() {
-      expect(types.timestampDk.parse('2008-07-05T10:16:15.690Z')).to.equal('2008-07-05 10:16:15.690Z');
+      expect(types.timestamp.parse('2008-07-05T10:16:15.690Z')).to.equal('2008-07-05T10:16:15.690Z');
     });
     it('Should parse dates without full millisecond precision', function() {
-      expect(types.timestampDk.parse('2008-07-05T10:16:15.69Z')).to.equal('2008-07-05 10:16:15.690Z');
-      expect(types.timestampDk.parse('2008-07-05T10:16:15.6Z')).to.equal('2008-07-05 10:16:15.600Z');
-      expect(types.timestampDk.parse('2008-07-05T10:16:15Z')).to.equal('2008-07-05 10:16:15.000Z');
+      expect(types.timestamp.parse('2008-07-05T10:16:15.69Z')).to.equal('2008-07-05T10:16:15.690Z');
+      expect(types.timestamp.parse('2008-07-05T10:16:15.6Z')).to.equal('2008-07-05T10:16:15.600Z');
+      expect(types.timestamp.parse('2008-07-05T10:16:15Z')).to.equal('2008-07-05T10:16:15.000Z');
     });
     it('Currently, more than millisecond precision is truncated', function() {
-      expect(types.timestampDk.parse('2008-07-05T10:16:15.69012Z')).to.equal('2008-07-05 10:16:15.690Z');
+      expect(types.timestamp.parse('2008-07-05T10:16:15.69012Z')).to.equal('2008-07-05T10:16:15.690Z');
     });
   });
   describe('Transformation of CSV values', function () {
@@ -48,7 +47,7 @@ describe('importDarImpl', function () {
         },
         {
           name: 'revisionsdato',
-          type: types.timestampDk
+          type: types.timestamp
         }]
     };
 
@@ -74,13 +73,13 @@ describe('importDarImpl', function () {
       expect(transform(spec, sampleRow).nord).to.equal(6190946.37);
     });
     it('Should parse a timestamp into the appropriate ISO UTC timestamp', function() {
-      expect(transform(spec, sampleRow).revisionsdato).to.equal('2010-07-05 10:16:15.690Z');
+      expect(transform(spec, sampleRow).revisionsdato).to.equal('2010-07-05T10:16:15.690Z');
     });
     it('Should parse virkningstart og virkningslut into an interval', function() {
-      expect(transform(spec, sampleRow).virkning).to.equal('[2008-07-05 10:16:15.690Z, 2010-07-05 10:16:15.690Z)');
+      expect(transform(spec, sampleRow).virkning).to.deep.equal('["2008-07-05T10:16:15.690Z","2010-07-05T10:16:15.690Z")');
     });
     it('Should parse registreringstart og registreringslut into an interval', function() {
-      expect(transform(spec, sampleRow).registrering).to.equal('[2008-07-05 10:16:15.690Z, infinity)');
+      expect(transform(spec, sampleRow).registrering).to.deep.equal('["2008-07-05T10:16:15.690Z","infinity")');
     });
     it('Should parse null and undefined values', function() {
       var sample = {
@@ -90,9 +89,6 @@ describe('importDarImpl', function () {
       var result = transform(spec, sample);
       expect(result.nord).to.be.null;
       expect(result.statuskode).to.be.null;
-    });
-    it('Infinite time interval should be supported', function() {
-      expect(postgresTimePeriod(undefined, undefined)).to.equal('(infinity, infinity)');
     });
   });
 });

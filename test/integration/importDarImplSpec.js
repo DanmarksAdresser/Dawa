@@ -5,9 +5,12 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
+var databaseTypes = require('../../psql/databaseTypes');
 var importDarImpl = require('../../darImport/importDarImpl');
 var testdb = require('../helpers/testdb');
 
+var Husnr = databaseTypes.Husnr;
+var Range = databaseTypes.Range;
 q.longStackSupport = true;
 
 var syntheticDbContent = {
@@ -99,14 +102,34 @@ var syntheticDbContent = {
     "ophoerttimestamp": null,
     "oprettimestamp": "1900-12-31T23:00:00.000Z",
     "vejkode": 5000
+  },
+  postnr: {
+    "aendringstimestamp": "1900-12-31T23:00:00.000Z",
+    "husnrinterval": new Range(new Husnr(13, 'B'), new Husnr(21, null), '[]'),
+    "kommunekode": 906,
+    "ophoerttimestamp": null,
+    "oprettimestamp": null,
+    "postdistriktnummer": 8000,
+    "side": "U",
+    "vejkode": 5000
+  },
+  supplerendebynavn: {
+    "aendringstimestamp": "1900-12-31T23:00:00.000Z",
+    "husnrinterval": new Range(new Husnr(13, 'B'), new Husnr(21, null), '[]'),
+    "kommunekode": 906,
+    "ophoerttimestamp": null,
+    "oprettimestamp": null,
+    "bynavn": 'Stavtrup',
+    "side": "U",
+    "vejkode": 5000
   }
 };
 
 var csvSpec = importDarImpl.internal.csvSpec;
 describe('Importing DAR CSV files to database', function () {
   describe('Import of sample files', function () {
-    it('Should define 4 CSV specifications', function () {
-      expect(Object.keys(csvSpec)).to.have.length(4); // TODO will be 4
+    it('Should define 6 CSV specifications', function () {
+      expect(Object.keys(csvSpec)).to.have.length(6);
     });
     _.forEach(csvSpec, function (spec, entityName) {
       it('Should import ' + entityName + ' correctly', function () {
@@ -148,7 +171,8 @@ describe('Importing DAR CSV files to database', function () {
         {
           name: 'content',
           type: importDarImpl.internal.types.string
-        }]
+        }],
+      dbColumns: ['id', 'content']
     };
 
     function setupTable(client) {

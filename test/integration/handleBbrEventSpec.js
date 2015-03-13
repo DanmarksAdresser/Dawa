@@ -176,7 +176,7 @@ describe('Håndtering af BBR events', function() {
       return testdb.withTransaction('test', 'ROLLBACK', function (client) {
         return q.nfcall(handleBbrEvent, client, createEvent)
           .then(function () {
-            return q.nfcall(handleBbrEvent.client, updateEvent);
+            return q.nfcall(handleBbrEvent, client, updateEvent);
           })
           .then(function () {
             return q.nfcall(crud.query, client, datamodels.vejstykke, {
