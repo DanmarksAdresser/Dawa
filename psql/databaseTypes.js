@@ -59,31 +59,34 @@ Husnr.prototype.toPostgres = function() {
 };
 
 function Range(lower, upper, bounds) {
-  this.empty = lower === upper;
-  if(lower === 'infinity') {
+  this.empty = bounds === 'empty';
+  if(this.empty) {
+    return;
+  }
+  if(lower === null) {
     this.lowerInfinite = true;
   }
   else {
     this.lowerInfinite = false;
     this.lower = lower;
   }
-  if(upper === 'infinity') {
+  if(upper === null) {
     this.upperInfinite = true;
   }
   else {
     this.upperInfinite = false;
     this.upper = upper;
   }
-  this.lowerOpen = bounds[0] === '(';
-  this.upperOpen = bounds[1] === ')';
+  this.lowerOpen = bounds[0] === '(' || this.lowerInfinite;
+  this.upperOpen = bounds[1] === ')' || this.upperInfinite;
 }
 
 Range.prototype.toPostgres = function() {
   if(this.empty) {
     return 'empty';
   }
-  var lower = this.lowerInfinite ? 'infinity' : this.lower;
-  var upper = this.upperInfinite ? 'infinity' : this.upper;
+  var lower = this.lowerInfinite ? '' : this.lower;
+  var upper = this.upperInfinite ? '' : this.upper;
   if(lower.toPostgres) {
     lower = lower.toPostgres();
   }
@@ -92,7 +95,9 @@ Range.prototype.toPostgres = function() {
   }
   var lowerBound = this.lowerOpen ? '(' : '[';
   var upperBound = + this.upperOpen ? ')' : ']';
-  return lowerBound + escapeCompositePart(lower) + ',' + escapeCompositePart(upper) + upperBound;
+  var escapedLower = lower === '' ? '' : escapeCompositePart(lower);
+  var escapedUpper = upper === '' ? '' : escapeCompositePart(upper);
+  return  lowerBound + escapedLower + ',' + escapedUpper + upperBound;
 };
 
 Range.fromPostgres = function(val, subtypeParser) {
@@ -100,18 +105,18 @@ Range.fromPostgres = function(val, subtypeParser) {
     return null;
   }
   if(val === 'empty') {
-    return { empty: true };
+    return new Range(null, null, 'empty');
   }
   var match = rangeRegex.exec(val);
   var lower, upper;
-  if(match[2] === 'infinity') {
-    lower = match[2];
+  if(match[2] === '') {
+    lower = null;
   }
   else {
     lower = subtypeParser(unescapeCompositePart(match[2]));
   }
-  if(match[3] === 'infinity') {
-    upper = match[3];
+  if(match[3] === '') {
+    upper = null;
   }
   else {
     upper = subtypeParser(unescapeCompositePart(match[3]));

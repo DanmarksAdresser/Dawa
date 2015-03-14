@@ -3,7 +3,7 @@ CREATE TABLE  dar_streetname (
   versionid uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
   vejkode smallint NOT NULL,
   kommunekode smallint NOT NULL,
-  registrering tstzrange not null default tstzrange(current_timestamp, 'infinity', '[)'),
+  registrering tstzrange not null default tstzrange(current_timestamp, null, '[)'),
 --  tx_created integer NOT NULL,
 --  tx_expired integer NOT NULL,
   navn text,

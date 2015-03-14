@@ -8,9 +8,10 @@ var databaseTypes = require('../psql/databaseTypes');
 var es = require('event-stream');
 var format = require('string-format');
 var fs = require('fs');
-var nodeUuid =  require('node-uuid');
 var q = require('q');
 var _ = require('underscore');
+
+var promisingStreamCombiner = require('../promisingStreamCombiner');
 
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
@@ -382,10 +383,10 @@ function transform(spec, csvRow) {
     var from = parseStr(types.timestamp, csvRow[name + 'start']);
     var to = parseStr(types.timestamp, csvRow[name + 'slut']);
     if(!from) {
-      from = 'infinity';
+      from = null;
     }
     if(!to) {
-      to = 'infinity';
+      to = null;
     }
     return new Range(from, to, '[)');
   }
@@ -408,24 +409,6 @@ function transform(spec, csvRow) {
     }
   });
   return result;
-}
-
-/**
- * Create a pipeline of streams. Returns a promise, which
- * is resolved when all data is sent through all the streams.
- * @param streams
- * @returns {*}
- */
-function promisingStreamCombiner(streams) {
-  return q.Promise(function(resolve, reject) {
-    streams.reduce(function(memo, stream) {
-      return memo.pipe(stream);
-    });
-    streams.forEach(function(stream) {
-      stream.on('error', reject);
-    });
-    streams[streams.length-1].on('end', resolve);
-  });
 }
 
 function loadCsvFile(client, filePath, tableName, spec) {
@@ -511,8 +494,116 @@ function computeDifferencesFast(client, table, desiredTable, targetTableSuffix) 
     });
 }
 
+function computeDifferencesSlow(client, table, desiredTable, targetTableSuffix, spec) {
+  function columnsDifferClause(alias1, alias2, columns) {
+    var clauses = columns.map(function(column) {
+      return format('{alias1}.{column} IS DISTINCT FROM {alias2}.{column}',
+        {
+          alias1: alias1,
+          alias2: alias2,
+          column: column
+        });
+    });
+    return '(' + clauses.join(' OR ') + ')';
+  }
+
+  function columnsEqualClause(alias1, alias2, columns) {
+    var clauses = columns.map(function(column) {
+      return format('{alias1}.{column} = {alias2}.{column}',
+        {
+          alias1: alias1,
+          alias2: alias2,
+          column: column
+        });
+    });
+    return '(' + clauses.join(' AND ') + ')';
+  }
+
+  function keyEqualsClause(alias1, alias2, spec) {
+    return columnsEqualClause(alias1, alias2, spec.idColumns);
+  }
+
+  function nonKeyFieldsDifferClause(alias1, alias2, spec) {
+    var columns = _.difference(_.pluck(spec.columns, 'name'),spec.idColumns);
+    return columnsDifferClause(alias1, alias2, columns);
+  }
+
+  if(!spec.bitemporal) {
+    var columns = spec.dbColumns;
+
+    var currentTableName = 'current_' + table;
+
+    var currentQuery = format('SELECT ' + columns.join(', ') + ' FROM {table} WHERE upper_inf(registrering) ',
+      {
+        table: table
+      });
+
+    var rowsToInsert = format(
+      'SELECT {desired}.* from {desired} WHERE NOT EXISTS(SELECT * FROM  {current} WHERE {keyEqualsClause})',
+      {
+        desired: desiredTable,
+        current: currentTableName,
+        keyEqualsClause: keyEqualsClause(desiredTable, currentTableName, spec)
+      }
+    );
+    var idColumnsSelect = spec.idColumns.join(', ');
+    var rowsToDelete = format(
+      'SELECT {idColumns} FROM {current}' +
+      ' WHERE NOT EXISTS(SELECT * FROM {desired} WHERE {keyEqualsClause})',
+      {
+        idColumns: idColumnsSelect,
+        desired: desiredTable,
+        current: currentTableName,
+        keyEqualsClause: keyEqualsClause(desiredTable, currentTableName, spec)
+      });
+    var rowsToUpdate = format('SELECT {desired}.* FROM {current} JOIN {desired} ON {keyEqualsClause}' +
+      'WHERE {nonKeyFieldsDifferClause}',
+      {
+        desired: desiredTable,
+        current: currentTableName,
+        keyEqualsClause: keyEqualsClause(desiredTable, currentTableName, spec),
+        nonKeyFieldsDifferClause: nonKeyFieldsDifferClause(desiredTable, currentTableName, spec)
+      });
+
+    return client.queryp(format('CREATE TEMP TABLE {current} AS ({currentQuery})',
+      {
+        current: currentTableName,
+        currentQuery: currentQuery
+      }), [])
+      .then(function () {
+        return client.queryp(format('CREATE TEMP TABLE {inserts} AS ({rowsToInsert})',
+          {
+            inserts: 'insert_' + targetTableSuffix,
+            rowsToInsert: rowsToInsert
+          }), []);
+      })
+      .then(function () {
+        return client.queryp(format('CREATE TEMP TABLE {updates} AS ({rowsToUpdate})',
+          {
+            updates: 'update_' + targetTableSuffix,
+            rowsToUpdate: rowsToUpdate
+          }, []));
+      })
+      .then(function() {
+        return client.queryp(format('CREATE TEMP TABLE {deletes} AS ({rowsToDelete})',
+          {
+            deletes: 'delete_' + targetTableSuffix,
+            rowsToDelete: rowsToDelete
+          }));
+      });
+  }
+}
+
 function createTableAndLoadData(client, filePath, targetTable, templateTable, spec) {
   return client.queryp('CREATE TEMP TABLE ' + targetTable + ' (LIKE ' + templateTable + ')', [])
+    .then(function() {
+      if(!spec.bitemporal) {
+        return client.queryp(format(' ALTER TABLE {targetTable} DROP registrering;' +
+        ' ALTER TABLE {targetTable} DROP versionid;', {
+          targetTable: targetTable
+        }), []);
+      }
+    })
     .then(function() {
       return loadCsvFile(client, filePath, targetTable, spec);
     });
@@ -624,5 +715,6 @@ exports.internal = {
   computeUpdates: computeUpdates,
   computeDeletes: computeDeletes,
   computeDifferencesFast: computeDifferencesFast,
-  createTableAndLoadData: createTableAndLoadData
+  createTableAndLoadData: createTableAndLoadData,
+  computeDifferencesSlow: computeDifferencesSlow
 };

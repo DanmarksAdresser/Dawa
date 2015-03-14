@@ -1,12 +1,15 @@
 "use strict";
 
+var copyFrom = require('pg-copy-streams').from;
 var expect = require('chai').expect;
+var fs = require('fs');
 var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
 var databaseTypes = require('../../psql/databaseTypes');
 var importDarImpl = require('../../darImport/importDarImpl');
+var promisingStreamCombiner = require('../../promisingStreamCombiner');
 var testdb = require('../helpers/testdb');
 
 var Husnr = databaseTypes.Husnr;
@@ -24,21 +27,13 @@ var syntheticDbContent = {
     "nord": 6190946.37,
     "oest": 692221.47,
     "placering": 5,
-    "registrering": {
-      empty: false,
-      lowerOpen: false,
-      upperOpen: true,
-      lowerInfinite: false,
-      upperInfinite: true,
-      lower: '2014-05-09T10:31:44.290Z',
-      upper: null
-    },
+    "registrering": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
     "retning": 71,
     "revisionsdato": "2014-05-08T22:00:00.000Z",
     "statuskode": 6,
     "tekniskstandard": "TK",
     "versionid": "e132a6f0-d06f-41a3-abd8-00035e7ab4cd",
-    "virkning": {empty: true}
+    "virkning": new Range(null, null, '()')
   },
   housenumber: {
     "adgangspunktid": "febf134f-d61f-48e1-af7c-9e7dbd5cc44a",
@@ -49,20 +44,12 @@ var syntheticDbContent = {
     "kildekode": 1,
     "postdistrikt": "Frederikssund",
     "postnummer": 3600,
-    "registrering": {empty: true},
+    "registrering": new Range(null, null, 'empty'),
     "statuskode": 5,
     "vejkode": 1,
     "vejnavn": "A C Hansensvej",
     "versionid": "1e7a5bb0-0718-45f1-9254-00e72dbbe338",
-    "virkning": {
-      "empty": false,
-      "lower": "2014-04-14T12:26:12.770Z",
-      "lowerInfinite": false,
-      "lowerOpen": false,
-      "upper": "2014-04-14T12:26:13.533Z",
-      "upperInfinite": false,
-      "upperOpen": true
-    }
+    "virkning": new Range("2014-04-14T12:26:12.770Z", "2014-04-14T12:26:13.533Z", '[)')
   },
   address: {
     "doerbetegnelse": "MF",
@@ -73,26 +60,10 @@ var syntheticDbContent = {
     "ikrafttraedelsesdato": null,
     "journalnummer": null,
     "kildekode": 1,
-    "registrering": {
-      "empty": false,
-      "lower": "2014-10-07T12:24:13.907Z",
-      "lowerInfinite": false,
-      "lowerOpen": false,
-      "upper": null,
-      "upperInfinite": true,
-      "upperOpen": true
-    },
+    "registrering": new Range("2014-10-07T12:24:13.907Z", null, '[)'),
     "statuskode": 5,
     "versionid": "9ebb96e8-a5ee-4acb-9cb8-0006c32ebb47",
-    "virkning": {
-      "empty": false,
-      "lower": "2014-10-07T12:24:35.473Z",
-      "lowerInfinite": false,
-      "lowerOpen": false,
-      "upper": null,
-      "upperInfinite": true,
-      "upperOpen": true
-    }
+    "virkning": new Range("2014-10-07T12:24:35.473Z", null, '[)')
   },
   streetname: {
     "adresseringsnavn": "Børges Bryggerivej",
@@ -124,6 +95,13 @@ var syntheticDbContent = {
     "vejkode": 5000
   }
 };
+
+function loadRawCsv(client, filePath, destionationTable) {
+  var sql = "COPY " + destionationTable + " FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
+  var pgStream = client.query(copyFrom(sql));
+  var source = fs.createReadStream(filePath, {encoding: 'utf-8'});
+  return promisingStreamCombiner([source, pgStream]);
+}
 
 var csvSpec = importDarImpl.internal.csvSpec;
 describe('Importing DAR CSV files to database', function () {
@@ -190,7 +168,86 @@ describe('Importing DAR CSV files to database', function () {
             csvSpec);
         });
     }
-    describe('Compute set of differences betweeen to bitemporal tables', function () {
+
+    describe('Compute set of differences between for monotemporal table', function() {
+      var monoCsvSpec = {
+        bitemporal: false,
+        idColumns: ['id'],
+        columns: [
+          {
+            name: 'id',
+            type: importDarImpl.internal.types.uuid
+          },
+          {
+            name: 'content',
+            type: importDarImpl.internal.types.string
+          }],
+        dbColumns: ['id', 'content']
+      };
+
+      function setupTable(client) {
+        return client.queryp(
+          'CREATE TEMP TABLE cur_table(' +
+          ' versionid uuid primary key DEFAULT uuid_generate_v4(),' +
+          ' id uuid not null,' +
+          ' content text,' +
+          " registrering tstzrange not null DEFAULT tstzrange(current_timestamp, null, '[)'))", [])
+          .then(function () {
+            return loadRawCsv(client,
+              path.join(__dirname, 'sampleDarFiles', 'comparison_mono', 'table.csv'),
+              'cur_table');
+          });
+      }
+
+      testdb.withTransactionAll('empty', function (clientFn) {
+        before(function () {
+          var client = clientFn();
+          return setupTable(client)
+            .then(function () {
+              return importDarImpl.internal.createTableAndLoadData(client,
+                path.join(__dirname, 'sampleDarFiles', 'comparison_mono', 'desired_table.csv'),
+                'desired_table',
+                'cur_table',
+                monoCsvSpec);
+            })
+            .then(function () {
+              return importDarImpl.internal.computeDifferencesSlow(client, 'cur_table', 'desired_table', 'table', monoCsvSpec);
+            })
+            .then(function() {
+              return client.queryp('SELECT * FROM cur_table', []);
+            });
+        });
+        it('Should correctly compute the insert', function () {
+          var client = clientFn();
+          return client.queryp('SELECT * FROM insert_table', []).then(function (result) {
+            expect(result.rows).to.have.length(1);
+            var row = result.rows[0];
+            expect(row.id).to.equal('11111111-1111-1111-1111-11111111111c');
+            expect(row.content).to.equal('Created row');
+          });
+        });
+        it('Should correctly compute the update', function () {
+          var client = clientFn();
+          return client.queryp("SELECT * FROM update_table", []).then(function (result) {
+            expect(result.rows).to.have.length(1);
+            var row = result.rows[0];
+            expect(row.id).to.equal("11111111-1111-1111-1111-11111111111d");
+            expect(row.content).to.equal('Modified row (modified)');
+          });
+        });
+        it('Should correctly compute the delete', function() {
+          var client = clientFn();
+          return client.queryp("SELECT * FROM delete_table", []).then(function (result) {
+            expect(result.rows).to.have.length(1);
+            expect(result.rows[0]).to.deep.equal({id: "11111111-1111-1111-1111-11111111111b"});
+          });
+        });
+
+      });
+
+    });
+
+    describe('Compute set of differences betweeen two bitemporal tables', function () {
       testdb.withTransactionAll('empty', function (clientFn) {
         before(function () {
           var client = clientFn();
@@ -213,16 +270,8 @@ describe('Importing DAR CSV files to database', function () {
               versionid: '11111111-1111-1111-1111-111111111113',
               id: '11111111-1111-1111-1111-11111111111c',
               content: 'Created row',
-              registrering: {
-                empty: false,
-                lowerOpen: false,
-                upperOpen: true,
-                lowerInfinite: false,
-                upperInfinite: true,
-                lower: "2014-05-08T22:00:00.000Z",
-                upper: null
-              },
-              virkning: {empty: true}
+              registrering: new Range("2014-05-08T22:00:00.000Z", null, '[)'),
+              virkning: new Range(null, null, '()')
             });
           });
         });
@@ -233,17 +282,9 @@ describe('Importing DAR CSV files to database', function () {
             expect(result.rows[0]).to.deep.equal({
               "content": "Modified row",
               "id": "11111111-1111-1111-1111-11111111111d",
-              "registrering": {
-                "empty": false,
-                "lower": "2014-05-08T22:00:00.000Z",
-                "lowerInfinite": false,
-                "lowerOpen": false,
-                "upper": "2014-05-09T22:00:00.000Z",
-                "upperInfinite": false,
-                "upperOpen": true
-              },
+              "registrering": new Range("2014-05-08T22:00:00.000Z", "2014-05-09T22:00:00.000Z", '[)'),
               "versionid": "11111111-1111-1111-1111-111111111114",
-              "virkning": {empty: true}
+              "virkning": new Range(null, null, '()')
             });
           });
         });

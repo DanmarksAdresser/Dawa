@@ -8,7 +8,6 @@ var _ = require('underscore');
 
 var database = require('./database');
 var databaseTypes = require('./databaseTypes');
-var logger = require('../logger').forCategory('sql');
 
 // We want timestamps to be parsed into text (ISO format in UTC).
 
@@ -25,32 +24,6 @@ function setupTypes(types, typeMap) {
     return date ? date.toISOString() : date;
   }
 
-  var tstzrangeRegex = /([\(\[])(".*"|infinity),(".*"|infinity)([\)\]])/;
-
-  function parseTstzrange(val) {
-    if(!val) {
-      return null;
-    }
-    if(val === 'empty') {
-      return { empty: true };
-    }
-    var match = tstzrangeRegex.exec(val);
-    if(!match) {
-      logger.error('Could not parse timestamp range: ' + val);
-      return null;
-    }
-    var result = { empty: false };
-    result.lowerOpen = match[1] === '(';
-    result.upperOpen = match[4] === ')';
-    result.lowerInfinite = match[2] === 'infinity';
-    result.upperInfinite = match[3] === 'infinity';
-    result.lower = result.lowerInfinite ? null : parseTimestampTz(match[2]);
-    result.upper = result.upperInfinite ? null  : parseTimestampTz(match[3]);
-    return result;
-  }
-
-  types.setTypeParser(TIMESTAMPTZ_OID, parseTimestampTz);
-  types.setTypeParser(TSTZRANGE_OID, parseTstzrange);
 
   types.setTypeParser(TIMESTAMP_OID, function(val) {
     var timestampRegex = /(\d{1,}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2})(\.(\d{1,}))?/;
@@ -74,15 +47,21 @@ function setupTypes(types, typeMap) {
       return null;
     }
   };
+  types.setTypeParser(TIMESTAMPTZ_OID, parseTimestampTz);
   types.setTypeParser(JSONB_OID, parseJsonFn);
   types.setTypeParser(JSON_OID, parseJsonFn);
+  types.setTypeParser(TSTZRANGE_OID, function(val) {
+    return databaseTypes.Range.fromPostgres(val, parseTimestampTz);
+  });
 
-  var husnrOid = typeMap['husnr'];
+  var husnrOid = typeMap.husnr;
   types.setTypeParser(husnrOid, databaseTypes.Husnr.fromPostgres);
-  var husnrRangeOid = typeMap['husnr_range'];
+  var husnrRangeOid = typeMap.husnr_range;
   types.setTypeParser(husnrRangeOid, function(val) {
     return databaseTypes.Range.fromPostgres(val, databaseTypes.Husnr.fromPostgres);
   });
+
+
 }
 
 module.exports = function(dbname, connectionString) {

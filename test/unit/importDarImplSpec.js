@@ -79,7 +79,7 @@ describe('importDarImpl', function () {
       expect(transform(spec, sampleRow).virkning).to.deep.equal('["2008-07-05T10:16:15.690Z","2010-07-05T10:16:15.690Z")');
     });
     it('Should parse registreringstart og registreringslut into an interval', function() {
-      expect(transform(spec, sampleRow).registrering).to.deep.equal('["2008-07-05T10:16:15.690Z","infinity")');
+      expect(transform(spec, sampleRow).registrering).to.deep.equal('["2008-07-05T10:16:15.690Z",)');
     });
     it('Should parse null and undefined values', function() {
       var sample = {

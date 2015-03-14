@@ -23,7 +23,7 @@ describe('Parsing and serialization of composite types', function() {
   });
 
   it('Should correctly parse husnr range with infinity', function() {
-    var literal = '["(12,B)",infinity)';
+    var literal = '["(12,B)",)';
     var parsedValue = databaseTypes.Range.fromPostgres(literal, databaseTypes.Husnr.fromPostgres);
     expect(parsedValue.upperInfinite).to.be.true;
     expect(parsedValue.upper).to.not.be.defined;
@@ -47,6 +47,6 @@ describe('Parsing and serialization of composite types', function() {
   it('Should correctly parse the empty range', function(){
     var literal = 'empty';
     var parsedValue = databaseTypes.Range.fromPostgres(literal, databaseTypes.Husnr.fromPostgres);
-    expect(parsedValue).to.deep.equal({empty: true});
+    expect(parsedValue).to.deep.equal(new Range(null, null, 'empty'));
   });
 });
