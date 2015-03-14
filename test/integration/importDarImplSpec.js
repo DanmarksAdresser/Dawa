@@ -38,7 +38,7 @@ var syntheticDbContent = {
   housenumber: {
     "adgangspunktid": "febf134f-d61f-48e1-af7c-9e7dbd5cc44a",
     "bynavn": null,
-    "husnummer": "5B",
+    "husnummer": new Husnr(5, 'B'),
     "id": "2d324437-ed93-4c75-abac-922d5360c2db",
     "ikrafttraedelsesdato": null,
     "kildekode": 1,

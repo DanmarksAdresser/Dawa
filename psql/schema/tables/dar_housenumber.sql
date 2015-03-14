@@ -10,7 +10,7 @@ CREATE TABLE  dar_housenumber (
 --  tx_created integer NOT NULL,
 --  tx_expired integer NOT NULL,
   vejkode smallint NOT NULL,
-  husnummer varchar(6),
+  husnummer husnr,
   ikrafttraedelsesdato timestamptz,
   vejnavn text,
   postnummer smallint,

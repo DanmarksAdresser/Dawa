@@ -155,7 +155,7 @@ var housenumberCsvColumns = [
   },
   {
     name: 'husnummer',
-    type: types.string
+    type: types.husnr
   },
   {
     name: 'ikrafttraedelsesdato',
@@ -676,6 +676,7 @@ function dropChangeTables(client, tableSuffix) {
       return dropTable(client, 'delete_' + tableSuffix);
     });
 }
+
 
 /**
  * Note: FAST version - does not check contents of table, only row existence + registration interval.
