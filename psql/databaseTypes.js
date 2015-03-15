@@ -125,5 +125,19 @@ Range.fromPostgres = function(val, subtypeParser) {
   return new Range(lower, upper, bounds);
 };
 
+/*
+  Note that we do not add a parser for Geometry.
+ */
+function GeometryPoint2d(x, y, srid) {
+  this.x = x;
+  this.y = y;
+  this.srid = srid;
+}
+
+GeometryPoint2d.prototype.toPostgres = function() {
+  return 'SRID=' + this.srid + ';POINT(' + this.x + ' ' + this.y + ')';
+};
+
 exports.Husnr = Husnr;
 exports.Range = Range;
+exports.GeometryPoint2d = GeometryPoint2d;

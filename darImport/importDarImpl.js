@@ -15,6 +15,7 @@ var promisingStreamCombiner = require('../promisingStreamCombiner');
 
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
+var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
 var csvHusnrRegex = /^(\d+)([A-Z])?/;
 var types = {
@@ -331,7 +332,21 @@ var csvSpec = {
     bitemporal: true,
     idColumns: ['id'],
     columns: accesspointCsvColumns,
-    dbColumns: _.pluck(accesspointCsvColumns, 'name')
+    dbColumns: _.without(_.pluck(accesspointCsvColumns, 'name'), 'oest', 'nord').concat('geom'),
+    transform: function(val) {
+      var oest = val.oest;
+      delete val.oest;
+      var nord = val.nord;
+      delete val.nord;
+      var srid = 25832;
+      if(!oest || !nord) {
+        val.geom = null;
+      }
+      else {
+        val.geom = new GeometryPoint2d(oest, nord, srid);
+      }
+      return val;
+    }
   },
   housenumber: {
     bitemporal: true,

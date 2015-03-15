@@ -24,8 +24,6 @@ var syntheticDbContent = {
     "kildekode": 1,
     "kommunenummer": 881,
     "noejagtighedsklasse": "A",
-    "nord": 6190946.37,
-    "oest": 692221.47,
     "placering": 5,
     "registrering": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
     "retning": 71,
@@ -33,7 +31,8 @@ var syntheticDbContent = {
     "statuskode": 6,
     "tekniskstandard": "TK",
     "versionid": "e132a6f0-d06f-41a3-abd8-00035e7ab4cd",
-    "virkning": new Range(null, null, '()')
+    "virkning": new Range(null, null, '()'),
+    "geom": "0101000020E86400000AD7A3F0FA1F25417B14AE97D89D5741"
   },
   housenumber: {
     "adgangspunktid": "febf134f-d61f-48e1-af7c-9e7dbd5cc44a",

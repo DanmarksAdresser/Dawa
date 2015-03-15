@@ -8,8 +8,6 @@ CREATE TABLE  dar_accesspoint (
   virkning tstzrange,
 --  tx_created integer NOT NULL,
 --  tx_expired integer NOT NULL,
-  nord double precision,
-  oest double precision,
   tekniskstandard varchar(2),
   noejagtighedsklasse varchar(1),
   retning real,
@@ -17,7 +15,8 @@ CREATE TABLE  dar_accesspoint (
   kommunenummer smallint,
   esdhreference text,
   journalnummer text,
-  revisionsdato timestamptz
+  revisionsdato timestamptz,
+  geom  geometry(point, 25832)
 );
 
 CREATE INDEX ON dar_accesspoint(id);
