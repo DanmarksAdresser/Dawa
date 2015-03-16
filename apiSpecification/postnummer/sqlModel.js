@@ -66,7 +66,7 @@ var parameterImpls = [
   sqlParameterImpl.reverseGeocodingWithin(geomQuery),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),
-  sqlParameterImpl.paging(columns, nameAndKey.key)
+  sqlParameterImpl.paging(columns, nameAndKey.key, true)
 ];
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
