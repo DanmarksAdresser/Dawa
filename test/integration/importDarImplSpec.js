@@ -113,7 +113,7 @@ describe('Importing DAR CSV files to database', function () {
         return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
           return importDarImpl.loadCsvFile(client,
             path.join(__dirname,
-              'sampleDarFiles', 'synthetic', entityName + '.csv'),
+              'sampleDarFiles', 'synthetic', csvSpec[entityName].filename),
             'dar_' + entityName, spec).then(function () {
               return q.ninvoke(client, 'query', "SELECT * FROM dar_" + entityName, []);
             }).then(function (result) {

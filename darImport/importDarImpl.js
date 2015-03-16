@@ -329,6 +329,7 @@ var supplerendebynavnColumns = [
 
 var csvSpec = {
   accesspoint: {
+    filename: 'Accesspoint.csv',
     bitemporal: true,
     idColumns: ['id'],
     columns: accesspointCsvColumns,
@@ -349,12 +350,14 @@ var csvSpec = {
     }
   },
   housenumber: {
+    filename: 'Housenumber.csv',
     bitemporal: true,
     idColumns: ['id'],
     columns: housenumberCsvColumns,
     dbColumns: _.pluck(housenumberCsvColumns, 'name')
   },
   address: {
+    filename: 'Address.csv',
     bitemporal: true,
     idColumns: ['id'],
     columns: addressColumns,
@@ -362,12 +365,14 @@ var csvSpec = {
 
   },
   streetname: {
+    filename: 'Streetname.csv',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode'],
     columns: streetnameColumns,
     dbColumns: _.pluck(streetnameColumns, 'name')
   },
   postnr: {
+    filename: 'postnr.csv',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
     columns: postnrColumns,
@@ -375,6 +380,7 @@ var csvSpec = {
     transform: transformPostnr
   },
   supplerendebynavn: {
+    filename: 'supplerendebynavn.csv',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
     columns: supplerendebynavnColumns,
