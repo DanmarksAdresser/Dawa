@@ -4,13 +4,14 @@ var assert = require('chai').assert;
 var copyFrom = require('pg-copy-streams').from;
 var csvParse = require('csv-parse');
 var csvStringify = require('csv-stringify');
-var databaseTypes = require('../psql/databaseTypes');
 var es = require('event-stream');
 var format = require('string-format');
 var fs = require('fs');
 var q = require('q');
 var _ = require('underscore');
 
+var databaseTypes = require('../psql/databaseTypes');
+var datamodels = require('../crud/datamodel');
 var promisingStreamCombiner = require('../promisingStreamCombiner');
 
 var Husnr = databaseTypes.Husnr;
@@ -329,7 +330,8 @@ var supplerendebynavnColumns = [
 
 var csvSpec = {
   accesspoint: {
-    filename: 'Accesspoint.csv',
+    filename: 'Adgangspunkt.csv',
+    table: 'dar_adgangspunkt',
     bitemporal: true,
     idColumns: ['id'],
     columns: accesspointCsvColumns,
@@ -350,14 +352,16 @@ var csvSpec = {
     }
   },
   housenumber: {
-    filename: 'Housenumber.csv',
+    filename: 'Husnummer.csv',
+    table: 'dar_husnummer',
     bitemporal: true,
     idColumns: ['id'],
     columns: housenumberCsvColumns,
     dbColumns: _.pluck(housenumberCsvColumns, 'name')
   },
   address: {
-    filename: 'Address.csv',
+    filename: 'Adresse.csv',
+    table: 'dar_adresse',
     bitemporal: true,
     idColumns: ['id'],
     columns: addressColumns,
@@ -365,14 +369,16 @@ var csvSpec = {
 
   },
   streetname: {
-    filename: 'Streetname.csv',
+    filename: 'Vejnavn.csv',
+    table: 'dar_vejnavn',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode'],
     columns: streetnameColumns,
     dbColumns: _.pluck(streetnameColumns, 'name')
   },
   postnr: {
-    filename: 'postnr.csv',
+    filename: 'Vejstykke.csv',
+    table: 'dar_postnr',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
     columns: postnrColumns,
@@ -380,7 +386,8 @@ var csvSpec = {
     transform: transformPostnr
   },
   supplerendebynavn: {
-    filename: 'supplerendebynavn.csv',
+    filename: 'supplerendeBynavn.csv',
+    table: 'dar_supplerendebynavn',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
     columns: supplerendebynavnColumns,
@@ -465,91 +472,46 @@ function loadCsvFile(client, filePath, tableName, spec) {
   ]);
 }
 
-/**
- * Takes to bitemporal tables as input. Compute sets of records to insert
- * in order for table to have the same content as desiredTable. These are stored in
- * targetTable
- */
-function computeInserts(client, table, desiredTable, targetTable) {
-  return client.queryp(
-    format("CREATE TEMP TABLE {targetTable} AS SELECT {desiredTable}.* FROM {desiredTable} LEFT JOIN {table}" +
-      " ON {desiredTable}.versionid = {table}.versionid" +
-      " WHERE {table}.versionid IS NULL",
-      {table: table, targetTable: targetTable, desiredTable: desiredTable}),
-    []);
+function selectList(columns) {
+  return columns.join(', ');
 }
 
-function computeUpdates(client, table, desiredTable, targetTable) {
-  return client.queryp(
-    format("CREATE TEMP TABLE {targetTable} AS SELECT {desiredTable}.* FROM {desiredTable} LEFT JOIN {table}" +
-      " ON {desiredTable}.versionid = {table}.versionid" +
-      " WHERE {table}.versionid IS NOT NULL AND {desiredTable}.registrering is distinct from {table}.registrering",
-      {table: table, targetTable: targetTable, desiredTable: desiredTable}),
-    []);
+function columnsDifferClause(alias1, alias2, columns) {
+  var clauses = columns.map(function(column) {
+    return format('{alias1}.{column} IS DISTINCT FROM {alias2}.{column}',
+      {
+        alias1: alias1,
+        alias2: alias2,
+        column: column
+      });
+  });
+  return '(' + clauses.join(' OR ') + ')';
 }
 
-function computeDeletes(client, table, desiredTable, targetTable) {
-  return client.queryp(
-    format("CREATE TEMP TABLE {targetTable} AS SELECT {table}.versionid FROM {table} LEFT JOIN {desiredTable}" +
-      " ON {desiredTable}.versionid = {table}.versionid" +
-      " WHERE {desiredTable}.versionid IS NULL",
-      {table: table, targetTable: targetTable, desiredTable: desiredTable}),
-    []);
+function columnsEqualClause(alias1, alias2, columns) {
+  var clauses = columns.map(function(column) {
+    return format('{alias1}.{column} IS NOT DISTINCT FROM {alias2}.{column}',
+      {
+        alias1: alias1,
+        alias2: alias2,
+        column: column
+      });
+  });
+  return '(' + clauses.join(' AND ') + ')';
 }
 
-/**
- * Takes to bitemporal tables as input. Compute sets of records to insert, update or delete
- * in order for table to have the same content as desiredTable. These are inserted into
- * insert_<targetTableSuffix>, update_<targetTableSuffix> and delete_<targetTableSuffix> tables.
- *
- * The method assumes that rows are unmodified except for the registrering time.
- */
-
-function computeDifferencesFast(client, table, desiredTable, targetTableSuffix) {
-  return computeInserts(client, table, desiredTable, 'insert_' + targetTableSuffix)
-    .then(function () {
-      return computeUpdates(client, table, desiredTable, 'update_' + targetTableSuffix);
-    })
-    .then(function () {
-      return computeDeletes(client, table, desiredTable, 'delete_' + targetTableSuffix);
-    });
+function keyEqualsClause(alias1, alias2, spec) {
+  return columnsEqualClause(alias1, alias2, spec.idColumns);
 }
 
-function computeDifferencesSlow(client, table, desiredTable, targetTableSuffix, spec) {
-  function columnsDifferClause(alias1, alias2, columns) {
-    var clauses = columns.map(function(column) {
-      return format('{alias1}.{column} IS DISTINCT FROM {alias2}.{column}',
-        {
-          alias1: alias1,
-          alias2: alias2,
-          column: column
-        });
-    });
-    return '(' + clauses.join(' OR ') + ')';
-  }
+function nonKeyFieldsDifferClause(alias1, alias2, spec) {
+  var columns = _.difference(_.pluck(spec.columns, 'name'),spec.idColumns);
+  return columnsDifferClause(alias1, alias2, columns);
+}
 
-  function columnsEqualClause(alias1, alias2, columns) {
-    var clauses = columns.map(function(column) {
-      return format('{alias1}.{column} = {alias2}.{column}',
-        {
-          alias1: alias1,
-          alias2: alias2,
-          column: column
-        });
-    });
-    return '(' + clauses.join(' AND ') + ')';
-  }
 
-  function keyEqualsClause(alias1, alias2, spec) {
-    return columnsEqualClause(alias1, alias2, spec.idColumns);
-  }
-
-  function nonKeyFieldsDifferClause(alias1, alias2, spec) {
-    var columns = _.difference(_.pluck(spec.columns, 'name'),spec.idColumns);
-    return columnsDifferClause(alias1, alias2, columns);
-  }
-
-  if(!spec.bitemporal) {
+function computeDifferences(client, table, desiredTable, targetTableSuffix, spec, useFastComparison) {
+  function computeDifferencesMonotemporal() {
     var columns = spec.dbColumns;
 
     var currentTableName = 'current_' + table;
@@ -605,13 +567,80 @@ function computeDifferencesSlow(client, table, desiredTable, targetTableSuffix, 
             rowsToUpdate: rowsToUpdate
           }, []));
       })
-      .then(function() {
+      .then(function () {
         return client.queryp(format('CREATE TEMP TABLE {deletes} AS ({rowsToDelete})',
           {
             deletes: 'delete_' + targetTableSuffix,
             rowsToDelete: rowsToDelete
           }));
       });
+  }
+
+  /**
+   * Takes to bitemporal tables as input. Compute sets of records to insert, update or delete
+   * in order for table to have the same content as desiredTable. These are inserted into
+   * insert_<targetTableSuffix>, update_<targetTableSuffix> and delete_<targetTableSuffix> tables.
+   *
+   * The method assumes that rows are unmodified except for the registrering time.
+   */
+  function computeDifferencesBitemporal() {
+    /**
+     * Takes to bitemporal tables as input. Compute sets of records to insert
+     * in order for table to have the same content as desiredTable. These are stored in
+     * targetTable
+     */
+    function computeInserts(client, table, desiredTable, targetTable) {
+      return client.queryp(
+        format("CREATE TEMP TABLE {targetTable} AS SELECT {desiredTable}.* FROM {desiredTable} LEFT JOIN {table}" +
+          " ON {desiredTable}.versionid = {table}.versionid" +
+          " WHERE {table}.versionid IS NULL",
+          {table: table, targetTable: targetTable, desiredTable: desiredTable}),
+        []);
+    }
+
+    function computeUpdates(client, table, desiredTable, targetTable) {
+      var sql = "CREATE TEMP TABLE {targetTable} AS SELECT {desiredTable}.* FROM {desiredTable} LEFT JOIN {table}" +
+        " ON {desiredTable}.versionid = {table}.versionid" +
+        " WHERE {table}.versionid IS NOT NULL AND ({desiredTable}.registrering is distinct from {table}.registrering" +
+        " OR {desiredTable}.virkning IS DISTINCT FROM {table}.virkning";
+      if(!useFastComparison) {
+        sql += ' OR {columnsDifferClause}';
+      }
+      sql += ')';
+      return client.queryp(
+        format(sql,
+          {
+            table: table,
+            targetTable: targetTable,
+            desiredTable: desiredTable,
+            columnsDifferClause: columnsDifferClause(table, desiredTable, spec.dbColumns)
+          }),
+        []);
+    }
+
+    function computeDeletes(client, table, desiredTable, targetTable) {
+      return client.queryp(
+        format("CREATE TEMP TABLE {targetTable} AS SELECT {table}.versionid FROM {table} LEFT JOIN {desiredTable}" +
+          " ON {desiredTable}.versionid = {table}.versionid" +
+          " WHERE {desiredTable}.versionid IS NULL",
+          {table: table, targetTable: targetTable, desiredTable: desiredTable}),
+        []);
+    }
+
+    return computeInserts(client, table, desiredTable, 'insert_' + targetTableSuffix)
+      .then(function () {
+        return computeUpdates(client, table, desiredTable, 'update_' + targetTableSuffix);
+      })
+      .then(function () {
+        return computeDeletes(client, table, desiredTable, 'delete_' + targetTableSuffix);
+      });
+  }
+
+  if(!spec.bitemporal) {
+    return computeDifferencesMonotemporal();
+  }
+  else {
+    return computeDifferencesBitemporal();
   }
 }
 
@@ -630,24 +659,6 @@ function createTableAndLoadData(client, filePath, targetTable, templateTable, sp
     });
 }
 
-function computeChangesFromCsv(client, spec, filePath) {
-  var tablename = 'dar_' + spec.name;
-  var tmpTablename = 'tmp_' + spec.name;
-  var changedTablename = 'changed_' + spec.name;
-  return createTableAndLoadData(client, filePath, tmpTablename, tablename, spec)
-    .then(function () {
-      return client.queryp('CREATE TEMP TABLE (' + changedTablename + ' LIKE ' + tablename + ')', []);
-    })
-    .then(function () {
-      return client.queryp('INSERT INTO ' + changedTablename + '(SELECT tmp.* FROM ' + tmpTablename +
-      ' AS tmp LEFT JOIN ' + tablename + ' tab ON tmp.versionid = tab.versionid' +
-      " tab.versionid IS NULL or tab.registrering <> tmp.registrering)", []);
-    })
-    .then(function () {
-      return client.queryp('DROP TABLE ' + tmpTablename, []);
-    });
-}
-
 function applyInserts(client, destinationTable, sourceTable) {
   var sql = format("INSERT INTO {destinationTable} SELECT * FROM {sourceTable}",
     {destinationTable: destinationTable, sourceTable: sourceTable});
@@ -657,11 +668,22 @@ function applyInserts(client, destinationTable, sourceTable) {
 /**
  * Note: FAST version - does not check contents
  */
-function applyUpdates(client, destinationTable, sourceTable) {
+function applyUpdates(client, destinationTable, sourceTable, spec, updateAllFields) {
+  var fieldUpdates = ', ' + spec.dbColumns.map(function(column) {
+    return format('{column} = {sourceTable}.{column}', {
+      column: column,
+        sourceTable: sourceTable
+    });
+  }).join(', ');
   var sql = format(
-    "UPDATE {destinationTable} SET registrering = {sourceTable}.registrering FROM {sourceTable} WHERE" +
-    " {sourceTable}.versionid = {destinationTable}.versionid",
-    {destinationTable: destinationTable, sourceTable: sourceTable});
+    "UPDATE {destinationTable} SET registrering = {sourceTable}.registrering, virkning={sourceTable}.virkning {fieldUpdates}" +
+    " FROM {sourceTable}" +
+    " WHERE {sourceTable}.versionid = {destinationTable}.versionid",
+    {
+      destinationTable: destinationTable,
+      sourceTable: sourceTable,
+      fieldUpdates: updateAllFields ? fieldUpdates : ''
+    });
   return client.queryp(sql, []);
 }
 
@@ -672,13 +694,10 @@ function applyDeletes(client, destinationTable, sourceTable) {
   return client.queryp(sql, []);
 }
 
-/**
- * Note: FAST version - does not check contents
- */
-function applyChanges(client, targetTable, changeTablesSuffix) {
+function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAllFields) {
   return applyInserts(client, targetTable, 'insert_' + changeTablesSuffix)
     .then(function () {
-      return applyUpdates(client, targetTable, 'update_' + changeTablesSuffix);
+      return applyUpdates(client, targetTable, 'update_' + changeTablesSuffix, csvSpec, updateAllFields);
     }).then(function () {
       return applyDeletes(client, targetTable, 'delete_' + changeTablesSuffix);
     });
@@ -698,26 +717,53 @@ function dropChangeTables(client, tableSuffix) {
     });
 }
 
-
 /**
- * Note: FAST version - does not check contents of table, only row existence + registration interval.
- * The  temp tables containing inserts, updates and deletes is not dropped.
+ * Update a table to have same contents as a CSV file. During this process,
+ * temp tables with inserts, updates and deletes are produced. These are not dropped.
  * @param client postgres client
  * @param csvFilePath path to the CSV file with authoritative content of the table
  * @param destinationTable the table to be updated to contain the same as the CSV file
  * @param csvSpec
+ * @param useFastComparison For bitemporal tables, skip comparison of each field.
  * @returns {*}
  */
-function updateBitemporalTableFromCsv(client, csvFilePath, destinationTable, csvSpec) {
+function updateTableFromCsv(client, csvFilePath, destinationTable, csvSpec, useFastComparison) {
   return createTableAndLoadData(client, csvFilePath, 'desired_' + destinationTable, destinationTable, csvSpec)
-    .then(function () {
-      return computeDifferencesFast(client, destinationTable, 'desired_' + destinationTable, destinationTable);
+    .then(function() {
+      return computeDifferences(client, destinationTable, 'desired_' + destinationTable, destinationTable, csvSpec, useFastComparison);
     })
-    .then(function () {
-      return applyChanges(client, destinationTable, destinationTable);
+    .then(function() {
+      return applyChanges(client, destinationTable, destinationTable, csvSpec, !useFastComparison);
     })
     .then(function() {
       return dropTable(client, 'desired_' + destinationTable);
+    });
+}
+
+function performDawaChangesVejstykker(client) {
+  var datamodel = datamodels.vejstykke;
+  var table = 'datamodel.table';
+  var modifiedTable = 'modified_' + table;
+  var select = "select kommunekode, vejkode FROM insert_streetname" +
+    " UNION select komunekode, vejkode FROM update_streetname" +
+    " UNION SELECT kommunekode,vejkode FROM delete_streetname";
+
+  return client.queryp(format('CREATE TEMP TABLE {modifiedTable} AS ({select})', {
+    modifiedTable: modifiedTable,
+    select: select
+  }), [])
+    .then(function() {
+    client.queryp(format('INSERT INTO {table}' +
+    ' (SELECT * FROM dar_{table}_view dv' +
+    ' WHERE NOT EXISTS(SELECT *  FROM {table} tab WHERE {idColumnsEqualClause} ))',
+      {
+        table: table,
+        idColumnsEqualClause: columnsEqualClause('dv', 'tab', datamodel.key)
+      }), []);
+  })
+    .then(function() {
+      var updateColumnsClause
+      client.queryp('UPDATE vejstykker SET ')
     });
 }
 
@@ -727,16 +773,12 @@ exports.load = function(client, options) {
 };
 
 exports.loadCsvFile = loadCsvFile;
-exports.updateBitemporalTableFromCsv = updateBitemporalTableFromCsv;
+exports.updateTableFromCsv = updateTableFromCsv;
 
 exports.internal = {
   transform: transform,
   types: types,
   csvSpec: csvSpec,
-  computeInserts: computeInserts,
-  computeUpdates: computeUpdates,
-  computeDeletes: computeDeletes,
-  computeDifferencesFast: computeDifferencesFast,
   createTableAndLoadData: createTableAndLoadData,
-  computeDifferencesSlow: computeDifferencesSlow
+  computeDifferences: computeDifferences
 };

@@ -11,7 +11,7 @@ CREATE VIEW dar_adgangsadresser_view AS
     (js.fields->>'esrejendomsnr')::integer as esrejendomsnr,
     hn.statuskode as objekttype,
     (SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
-     FROM dar_housenumber hn2
+     FROM dar_husnummer hn2
      WHERE upper_inf(hn2.registrering)
            AND hn.id = hn2.id
            AND upper_inf(hn2.virkning)) AS oprettet,
@@ -24,8 +24,8 @@ CREATE VIEW dar_adgangsadresser_view AS
     ap.tekniskstandard,
     ap.retning as tekstretning,
     ap.revisionsdato AS adressepunktaendringsdato
-  FROM dar_housenumber hn
-    JOIN dar_accesspoint ap
+  FROM dar_husnummer hn
+    JOIN dar_adgangspunkt ap
       ON hn.adgangspunktid = ap.id
          AND upper_inf(ap.registrering)
          AND upper_inf(ap.virkning)

@@ -2,7 +2,9 @@
 
 var cli = require('cli');
 var fs = require('fs');
+var q = require('q');
 var _ = require('underscore');
+
 var logger = require('../../logger');
 
 exports.checkRequiredOptions = function(options, requiredOptions) {
@@ -73,6 +75,7 @@ exports.addLogOptionsParameter = function(optionSpec) {
 };
 
 exports.main = function(optionSpec, requiredParams, mainFunc) {
+  q.longStackSupport = true;
   optionSpec = _.clone(optionSpec);
   exports.addConfigurationFileParameter(optionSpec);
   exports.addLogOptionsParameter(optionSpec);

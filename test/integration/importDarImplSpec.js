@@ -114,8 +114,8 @@ describe('Importing DAR CSV files to database', function () {
           return importDarImpl.loadCsvFile(client,
             path.join(__dirname,
               'sampleDarFiles', 'synthetic', csvSpec[entityName].filename),
-            'dar_' + entityName, spec).then(function () {
-              return q.ninvoke(client, 'query', "SELECT * FROM dar_" + entityName, []);
+            spec.table, spec).then(function () {
+              return q.ninvoke(client, 'query', "SELECT * FROM " + spec.table, []);
             }).then(function (result) {
               expect(result.rows).to.have.length(1);
               var obj = result.rows[0];
@@ -210,7 +210,7 @@ describe('Importing DAR CSV files to database', function () {
                 monoCsvSpec);
             })
             .then(function () {
-              return importDarImpl.internal.computeDifferencesSlow(client, 'cur_table', 'desired_table', 'table', monoCsvSpec);
+              return importDarImpl.internal.computeDifferences(client, 'cur_table', 'desired_table', 'table', monoCsvSpec, false);
             })
             .then(function() {
               return client.queryp('SELECT * FROM cur_table', []);
@@ -258,7 +258,7 @@ describe('Importing DAR CSV files to database', function () {
               csvSpec);
           })
             .then(function () {
-              return importDarImpl.internal.computeDifferencesFast(client, 'cur_table', 'desired_table', 'table');
+              return importDarImpl.internal.computeDifferences(client, 'cur_table', 'desired_table', 'table', csvSpec, true);
             });
         });
         it('Should correctly compute the insert', function () {
@@ -306,7 +306,7 @@ describe('Importing DAR CSV files to database', function () {
         it('Should update destination table to have same content as CSV file', function() {
           var client = clientFn();
           var desiredCsvPath = path.join(__dirname, 'sampleDarFiles', 'comparison', 'desired_table.csv');
-          return importDarImpl.updateBitemporalTableFromCsv(client, desiredCsvPath, destinationTable, csvSpec)
+          return importDarImpl.updateTableFromCsv(client, desiredCsvPath, destinationTable, csvSpec, false)
             .then(function() {
               return client.queryp("SELECT * FROM " + destinationTable + " order by versionid", []);
             })
