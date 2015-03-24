@@ -32,7 +32,7 @@ exports.kommune = {
     navn: 'navn'
   },
   filterFn: function(wfsFeature) {
-    return wfsFeature.Kommuneinddeling[0].udenforKommuneinddeling[0] === '0';
+    return wfsFeature.Kommuneinddeling[0].udenforKommuneinddeling[0] === 'false';
   }
 };
 
@@ -68,7 +68,7 @@ exports.opstillingskreds = {
   geometry: 'geometri',
   fields: {
     kode: {
-      name: 'Opstillingskredsnummer',
+      name: 'opstillingskredsnummer',
       parseFn: parseInteger
     },
     navn: 'navn'
