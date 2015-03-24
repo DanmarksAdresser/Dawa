@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS dar_postnr CASCADE;
 
 CREATE TABLE dar_postnr(
-  versionid uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  versionid integer NOT NULL PRIMARY KEY DEFAULT nextval('id_sequence'),
   kommunekode smallint NOT NULL,
   vejkode smallint NOT NULL,
   registrering tstzrange not null default tstzrange(current_timestamp, null, '[)'),

@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS dar_vejnavn CASCADE;
 CREATE TABLE  dar_vejnavn (
-  versionid uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+  versionid integer NOT NULL PRIMARY KEY DEFAULT nextval('id_sequence'),
   vejkode smallint NOT NULL,
   kommunekode smallint NOT NULL,
   registrering tstzrange not null default tstzrange(current_timestamp, null, '[)'),

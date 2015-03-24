@@ -1,7 +1,8 @@
 DROP TABLE IF EXISTS dar_adgangspunkt CASCADE;
 CREATE TABLE  dar_adgangspunkt (
-  versionid uuid NOT NULL PRIMARY KEY,
-  id uuid NOT NULL,
+  versionid integer NOT NULL PRIMARY KEY,
+  id integer NOT NULL,
+  bkid uuid NOT NULL,
   statuskode smallint NOT NULL,
   kildekode smallint,
   registrering tstzrange,
@@ -20,3 +21,4 @@ CREATE TABLE  dar_adgangspunkt (
 );
 
 CREATE INDEX ON dar_adgangspunkt(id);
+CREATE INDEX ON dar_adgangspunkt(bkid);

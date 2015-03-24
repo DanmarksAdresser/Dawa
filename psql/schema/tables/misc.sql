@@ -1,5 +1,8 @@
 CREATE EXTENSION IF  NOT EXISTS "uuid-ossp";
 
+DROP SEQUENCE IF EXISTS id_sequence CASCADE;
+CREATE SEQUENCE id_sequence START 1;
+
 DROP TYPE IF EXISTS PostnummerRef CASCADE;
 CREATE TYPE PostnummerRef AS (
   nr integer,
@@ -28,7 +31,7 @@ CREATE TYPE tema_data AS (
 DROP TYPE IF EXISTS husnr CASCADE;
 CREATE TYPE husnr AS (
   tal smallint,
-  bogstav char(1)
+  bogstav varchar(1)
 );
 
 CREATE TYPE husnr_range AS RANGE (

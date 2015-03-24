@@ -44,6 +44,22 @@ function Husnr(tal, bogstav) {
   this.bogstav = bogstav;
 }
 
+Husnr.lessThan = function(a, b) {
+  if(!a || !b) {
+    return undefined;
+  }
+  if(a.tal < b.tal) {
+    return true;
+  }
+  if(a.tal === b.tal) {
+    if(!a.bogstav && b.bogstav) {
+      return true;
+    }
+    return a.bogstav < b.bogstav;
+  }
+  return false;
+};
+
 Husnr.fromPostgres = function(val) {
   if(!val) {
     return null;
@@ -51,12 +67,16 @@ Husnr.fromPostgres = function(val) {
   var match = husnrRegex.exec(val);
   var tal = parseInt(unescapeCompositePart(match[1]), 10);
   var bogstav = unescapeCompositePart(match[2]);
+  if(bogstav === '') {
+    bogstav = null;
+  }
   return new Husnr(tal, bogstav);
 };
 
 Husnr.prototype.toPostgres = function() {
-  return '(' + this.tal + ',' + (this.bogstav ? this.bogstav : '') + ')';
+  return '(' + this.tal + ',' + (this.bogstav ? this.bogstav : escapeCompositePart('')) + ')';
 };
+
 
 function Range(lower, upper, bounds) {
   this.empty = bounds === 'empty';

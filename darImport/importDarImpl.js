@@ -12,13 +12,14 @@ var _ = require('underscore');
 
 var databaseTypes = require('../psql/databaseTypes');
 var datamodels = require('../crud/datamodel');
+var logger = require('../logger').forCategory('darImport');
 var promisingStreamCombiner = require('../promisingStreamCombiner');
 
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
 var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
-var csvHusnrRegex = /^(\d+)([A-Z])?/;
+var csvHusnrRegex = /^(\d*)([A-Z]?)$/;
 var types = {
   uuid: {
     parse: _.identity
@@ -48,8 +49,22 @@ var types = {
       if(!str) {
         return null;
       }
+      str = str.trim();
+      if(str === '') {
+        return null;
+      }
       var match = csvHusnrRegex.exec(str);
-      var tal = parseInt(match[1], 10);
+      if(!match) {
+        logger.error('Unable to parse husnr: ' + str);
+        return null;
+      }
+      var tal;
+      if(match[1] !== '') {
+        tal = parseInt(match[1], 10);
+      }
+      else {
+        tal = 0;
+      }
       var bogstav = match[2] ? match[2] : null;
       return new Husnr(tal, bogstav);
     }
@@ -63,6 +78,10 @@ function transformInterval(val) {
   var upper = val.byhusnummertil;
   delete val.byhusnummertil;
   val.husnrinterval = new Range(lower, upper, '[]');
+  if(Husnr.lessThan(upper, lower)) {
+    logger.error("Invalid husnr interval: " + val.husnrinterval.toPostgres());
+    val.husnrinterval = new Range(undefined, undefined, 'empty');
+  }
   return val;
 }
 
@@ -83,6 +102,10 @@ function transformSupplerendebynavn(val) {
 var accesspointCsvColumns = [
   {
     name: 'id',
+    type: types.integer
+  },
+  {
+    name: 'bkid',
     type: types.uuid
   },
   {
@@ -137,6 +160,10 @@ var accesspointCsvColumns = [
 var housenumberCsvColumns = [
   {
     name: 'id',
+    type: types.integer
+  },
+  {
+    name: 'bkid',
     type: types.uuid
   },
   {
@@ -149,7 +176,7 @@ var housenumberCsvColumns = [
   },
   {
     name: 'adgangspunktid',
-    type: types.uuid
+    type: types.integer
   },
   {
     name: 'vejkode',
@@ -184,6 +211,10 @@ var housenumberCsvColumns = [
 var addressColumns = [
   {
     name: 'id',
+    type: types.integer
+  },
+  {
+    name: 'bkid',
     type: types.uuid
   },
   {
@@ -196,7 +227,7 @@ var addressColumns = [
   },
   {
     name: 'husnummerid',
-    type: types.uuid
+    type: types.integer
   },
   {
     name: 'etagebetegnelse',
@@ -386,7 +417,7 @@ var csvSpec = {
     transform: transformPostnr
   },
   supplerendebynavn: {
-    filename: 'supplerendeBynavn.csv',
+    filename: 'SupplerendeBynavn.csv',
     table: 'dar_supplerendebynavn',
     bitemporal: false,
     idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
@@ -424,7 +455,7 @@ function transform(spec, csvRow) {
     return memo;
   }, {});
   if(spec.bitemporal) {
-    result.versionid = parseStr(types.uuid, csvRow.versionid);
+    result.versionid = parseStr(types.integer, csvRow.versionid);
     result.registrering = parseTimeInterval('registrering');
     result.virkning = parseTimeInterval('virkning');
   }
@@ -449,7 +480,7 @@ function loadCsvFile(client, filePath, tableName, spec) {
   var csvParseOptions = {
     delimiter: ';',
     quote: '"',
-    escape: '\\',
+    escape: '"',
     columns: true
   };
 
@@ -472,8 +503,13 @@ function loadCsvFile(client, filePath, tableName, spec) {
   ]);
 }
 
-function selectList(columns) {
-  return columns.join(', ');
+function selectList(alias, columns) {
+  if(!alias) {
+    return columns.join(', ');
+  }
+  return columns.map(function(column) {
+    return alias + '.' + column;
+  }).join(', ');
 }
 
 function columnsDifferClause(alias1, alias2, columns) {
@@ -504,12 +540,31 @@ function keyEqualsClause(alias1, alias2, spec) {
   return columnsEqualClause(alias1, alias2, spec.idColumns);
 }
 
+
+/**
+ * Create a SQL clause for whether non-key fields differ between two tables.
+ * @param alias1
+ * @param alias2
+ * @param spec
+ * @returns {*}
+ */
 function nonKeyFieldsDifferClause(alias1, alias2, spec) {
-  var columns = _.difference(_.pluck(spec.columns, 'name'),spec.idColumns);
+  var columns = _.difference(spec.dbColumns, spec.idColumns);
   return columnsDifferClause(alias1, alias2, columns);
 }
 
 
+/**
+ * Compute differences between two DAR tables. Will create three temp tables with
+ * inserts, updates, and deletes to be performed.
+ * @param client
+ * @param table
+ * @param desiredTable
+ * @param targetTableSuffix
+ * @param spec
+ * @param useFastComparison
+ * @returns {*}
+ */
 function computeDifferences(client, table, desiredTable, targetTableSuffix, spec, useFastComparison) {
   function computeDifferencesMonotemporal() {
     var columns = spec.dbColumns;
@@ -589,50 +644,28 @@ function computeDifferences(client, table, desiredTable, targetTableSuffix, spec
      * in order for table to have the same content as desiredTable. These are stored in
      * targetTable
      */
-    function computeInserts(client, table, desiredTable, targetTable) {
-      return client.queryp(
-        format("CREATE TEMP TABLE {targetTable} AS SELECT {desiredTable}.* FROM {desiredTable} LEFT JOIN {table}" +
-          " ON {desiredTable}.versionid = {table}.versionid" +
-          " WHERE {table}.versionid IS NULL",
-          {table: table, targetTable: targetTable, desiredTable: desiredTable}),
-        []);
+    function computeInsertsBitemp(client, table, desiredTable, targetTable) {
+      return computeInserts(client, desiredTable, table, targetTable, ['versionid']);
     }
 
-    function computeUpdates(client, table, desiredTable, targetTable) {
-      var sql = "CREATE TEMP TABLE {targetTable} AS SELECT {desiredTable}.* FROM {desiredTable} LEFT JOIN {table}" +
-        " ON {desiredTable}.versionid = {table}.versionid" +
-        " WHERE {table}.versionid IS NOT NULL AND ({desiredTable}.registrering is distinct from {table}.registrering" +
-        " OR {desiredTable}.virkning IS DISTINCT FROM {table}.virkning";
+    function computeUpdatesBitemp(client, table, desiredTable, targetTable) {
+      var columnsToCheck = ['registrering'];
       if(!useFastComparison) {
-        sql += ' OR {columnsDifferClause}';
+        columnsToCheck.concat(['virkning']).concat(spec.dbColumns);
       }
-      sql += ')';
-      return client.queryp(
-        format(sql,
-          {
-            table: table,
-            targetTable: targetTable,
-            desiredTable: desiredTable,
-            columnsDifferClause: columnsDifferClause(table, desiredTable, spec.dbColumns)
-          }),
-        []);
+      return computeUpdates(client, desiredTable, table, targetTable, ['versionid'], columnsToCheck);
     }
 
-    function computeDeletes(client, table, desiredTable, targetTable) {
-      return client.queryp(
-        format("CREATE TEMP TABLE {targetTable} AS SELECT {table}.versionid FROM {table} LEFT JOIN {desiredTable}" +
-          " ON {desiredTable}.versionid = {table}.versionid" +
-          " WHERE {desiredTable}.versionid IS NULL",
-          {table: table, targetTable: targetTable, desiredTable: desiredTable}),
-        []);
+    function computeDeletesBitemp(client, table, desiredTable, targetTable) {
+      return computeDeletes(client, desiredTable, table, targetTable, ['versionid']);
     }
 
-    return computeInserts(client, table, desiredTable, 'insert_' + targetTableSuffix)
+    return computeInsertsBitemp(client, table, desiredTable, 'insert_' + targetTableSuffix)
       .then(function () {
-        return computeUpdates(client, table, desiredTable, 'update_' + targetTableSuffix);
+        return computeUpdatesBitemp(client, table, desiredTable, 'update_' + targetTableSuffix);
       })
       .then(function () {
-        return computeDeletes(client, table, desiredTable, 'delete_' + targetTableSuffix);
+        return computeDeletesBitemp(client, table, desiredTable, 'delete_' + targetTableSuffix);
       });
   }
 
@@ -642,6 +675,95 @@ function computeDifferences(client, table, desiredTable, targetTableSuffix, spec
   else {
     return computeDifferencesBitemporal();
   }
+}
+
+/**
+ * Given srcTable and dstTable, insert into a new, temporary table instTable the set of rows
+ * to be inserted into dstTable in order to make srcTable and dstTable equal.
+ */
+function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
+  return client.queryp(
+    format("CREATE TEMP TABLE {insTable} AS SELECT {srcTable}.*" +
+      " FROM {srcTable}" +
+      " WHERE NOT EXISTS(SELECT * FROM {dstTable} WHERE {idEqualsClause})",
+      {
+        srcTable: srcTable,
+        dstTable: dstTable,
+        insTable: insTable,
+        idEqualsClause: columnsEqualClause(srcTable, dstTable, idColumns)
+      }),
+    []);
+}
+
+/**
+ * Given srcTable and dstTable, insert into a new temporary table upTable the set of rows
+ * to be updated in dstTable in order to make srcTable and dstTable equal.
+ */
+function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck) {
+  return client.queryp(
+    format("CREATE TEMP TABLE {upTable} AS SELECT {srcTable}.*" +
+      " FROM {srcTable}" +
+      " JOIN {dstTable} ON {idEqualsClause}" +
+      " WHERE {nonIdColumnsDifferClause}",
+      {
+        srcTable: srcTable,
+        dstTable: dstTable,
+        upTable: upTable,
+        idEqualsClause: columnsEqualClause(srcTable, dstTable, idColumns),
+        nonIdColumnsDifferClause: columnsDifferClause(srcTable, dstTable, columnsToCheck)
+      }),
+    []);
+}
+
+/**
+ * Given srcTable and dstTable, insert into a new, temporary table delTable, the
+ * set of rows to be deleted in dstTable in order to make srcTable and dstTable equal.
+ * The created table delTable only contains the primary key columns.
+ */
+function computeDeletes(client, srcTable, dstTable, delTable, idColumns) {
+  return client.queryp(
+    format("CREATE TEMP TABLE {delTable} AS SELECT {selectIdColumns} FROM {dstTable}" +
+      " WHERE NOT EXISTS(SELECT * FROM {srcTable} WHERE {idEqualsClause})",
+      {
+        srcTable: srcTable,
+        dstTable: dstTable,
+        delTable: delTable,
+        selectIdColumns: selectList(dstTable, idColumns),
+        idEqualsClause: columnsEqualClause(srcTable, dstTable, idColumns)
+      }),
+    []);
+}
+
+function applyUpdates2(client, upTable, dstTable, idColumns, columnsToUpdate) {
+  var fieldUpdates = columnsToUpdate.map(function(column) {
+      return format('{column} = {srcTable}.{column}', {
+        column: column,
+        srcTable: upTable
+      });
+    }).join(', ');
+  var sql = format(
+    "UPDATE {dstTable} SET" +
+    " {fieldUpdates}" +
+    " FROM {upTable}" +
+    " WHERE {idColumnsEqual}",
+    {
+      dstTable: dstTable,
+      upTable: upTable,
+      fieldUpdates: fieldUpdates,
+      idColumnsEqual: columnsEqualClause(upTable, dstTable, idColumns)
+    });
+  return client.queryp(sql, []);
+}
+
+function applyDeletes2(client, delTable, dstTable, idColumns) {
+  var sql = format("DELETE FROM {dstTable} USING {delTable}" +
+    " WHERE {idColumnsEqual}",
+    {
+      dstTable: dstTable,
+      delTable: delTable,
+      idColumnsEqual: columnsEqualClause(delTable, dstTable, idColumns)
+    });
+  return client.queryp(sql, []);
 }
 
 function createTableAndLoadData(client, filePath, targetTable, templateTable, spec) {
@@ -659,47 +781,84 @@ function createTableAndLoadData(client, filePath, targetTable, templateTable, sp
     });
 }
 
-function applyInserts(client, destinationTable, sourceTable) {
-  var sql = format("INSERT INTO {destinationTable} SELECT * FROM {sourceTable}",
-    {destinationTable: destinationTable, sourceTable: sourceTable});
+function applyInserts(client, destinationTable, sourceTable, spec) {
+  var sql;
+  if(spec.bitemporal) {
+    sql = format("INSERT INTO {destinationTable} SELECT * FROM {sourceTable}",
+      {destinationTable: destinationTable, sourceTable: sourceTable});
+  }
+  else {
+    sql = format("INSERT INTO {destinationTable}({dstColumnList})" +
+    " (SELECT {srcColumnList} FROM {sourceTable})",
+      {
+        destinationTable: destinationTable,
+        sourceTable: sourceTable,
+        dstColumnList: selectList(undefined, spec.dbColumns),
+        srcColumnList: selectList(sourceTable, spec.dbColumns)
+      });
+  }
   return client.queryp(sql, []);
 }
 
-/**
- * Note: FAST version - does not check contents
- */
 function applyUpdates(client, destinationTable, sourceTable, spec, updateAllFields) {
-  var fieldUpdates = ', ' + spec.dbColumns.map(function(column) {
-    return format('{column} = {sourceTable}.{column}', {
-      column: column,
-        sourceTable: sourceTable
-    });
-  }).join(', ');
-  var sql = format(
-    "UPDATE {destinationTable} SET registrering = {sourceTable}.registrering, virkning={sourceTable}.virkning {fieldUpdates}" +
-    " FROM {sourceTable}" +
-    " WHERE {sourceTable}.versionid = {destinationTable}.versionid",
-    {
-      destinationTable: destinationTable,
-      sourceTable: sourceTable,
-      fieldUpdates: updateAllFields ? fieldUpdates : ''
-    });
-  return client.queryp(sql, []);
+  if(spec.bitemporal) {
+    var columnsToUpdate = ['registrering'];
+    if(updateAllFields) {
+      columnsToUpdate = columnsToUpdate.concat(['virkning']).concat(spec.dbColumns);
+    }
+    return applyUpdates2(client, sourceTable, destinationTable,['versionid'], columnsToUpdate);
+  }
+  else {
+    var expireOldRowsSql = format(
+      "UPDATE {destinationTable}" +
+      " SET registrering = tstzrange(lower(registrering), CURRENT_TIMESTAMP, '[)')" +
+      " FROM {sourceTable}" +
+      " WHERE {idColumnsEqual}",
+      {
+        destinationTable: destinationTable,
+        sourceTable: sourceTable,
+        idColumnsEqual: columnsEqualClause(sourceTable, destinationTable, spec.idColumns)
+      });
+    return client.queryp(expireOldRowsSql, [])
+      .then(function() {
+        var insertNewRowsSql = format("INSERT INTO {destinationTable}({dstColumnList})" +
+          " (SELECT {srcColumnList} FROM {sourceTable})",
+          {
+            destinationTable: destinationTable,
+            sourceTable: sourceTable,
+            dstColumnList: selectList(undefined, spec.dbColumns),
+            srcColumnList: selectList(sourceTable, spec.dbColumns)
+          });
+        return client.queryp(insertNewRowsSql, []);
+      });
+
+  }
 }
 
-function applyDeletes(client, destinationTable, sourceTable) {
-  var sql = format("DELETE FROM {destinationTable} USING {sourceTable}" +
-    " WHERE {destinationTable}.versionid = {sourceTable}.versionid",
-    {destinationTable: destinationTable, sourceTable: sourceTable});
-  return client.queryp(sql, []);
+function applyDeletes(client, destinationTable, sourceTable, spec) {
+  if(spec.bitemporal) {
+    return applyDeletes2(client, sourceTable, destinationTable, ['versionid']);
+  }
+  else {
+    var sql = format("UPDATE {destinationTable}" +
+    " SET registrering = tstzrange(lower(registrering), CURRENT_TIMESTAMP, '[)')" +
+    " FROM {sourceTable}" +
+    " WHERE {idColumnsEqual}",
+      {
+        destinationTable: destinationTable,
+        sourceTable: sourceTable,
+        idColumnsEqual: columnsEqualClause(destinationTable, sourceTable, spec.idColumns)
+      });
+    return client.queryp(sql, []);
+  }
 }
 
 function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAllFields) {
-  return applyInserts(client, targetTable, 'insert_' + changeTablesSuffix)
+  return applyInserts(client, targetTable, 'insert_' + changeTablesSuffix, csvSpec)
     .then(function () {
       return applyUpdates(client, targetTable, 'update_' + changeTablesSuffix, csvSpec, updateAllFields);
     }).then(function () {
-      return applyDeletes(client, targetTable, 'delete_' + changeTablesSuffix);
+      return applyDeletes(client, targetTable, 'delete_' + changeTablesSuffix, csvSpec);
     });
 }
 
@@ -762,8 +921,6 @@ function performDawaChangesVejstykker(client) {
       }), []);
   })
     .then(function() {
-      var updateColumnsClause
-      client.queryp('UPDATE vejstykker SET ')
     });
 }
 
@@ -774,11 +931,11 @@ exports.load = function(client, options) {
 
 exports.loadCsvFile = loadCsvFile;
 exports.updateTableFromCsv = updateTableFromCsv;
+exports.csvSpec = csvSpec;
 
 exports.internal = {
   transform: transform,
   types: types,
-  csvSpec: csvSpec,
   createTableAndLoadData: createTableAndLoadData,
   computeDifferences: computeDifferences
 };
