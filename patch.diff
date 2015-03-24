@@ -1,0 +1,222 @@
+diff --git a/psql/dictionaries/adresser_unaccent.rules b/psql/dictionaries/adresser_unaccent.rules
+index 91159c6..08c0ce8 100644
+--- a/psql/dictionaries/adresser_unaccent.rules
++++ b/psql/dictionaries/adresser_unaccent.rules
+@@ -9,11 +9,14 @@
+ Ë E
+ ë e
+ w v
++W V
+ x ks
++X Ks
+ z s
+-Æ Ae
++Z S
+ æ ae
+-Ø Oe
++Æ Ae
+ ø oe
++Ø Oe
++å aa
+ Å Aa
+-å aa
+\ No newline at end of file
+diff --git a/psql/dictionaries/adresser_xsyn.rules b/psql/dictionaries/adresser_xsyn.rules
+index 7257de5..20b6385 100644
+--- a/psql/dictionaries/adresser_xsyn.rules
++++ b/psql/dictionaries/adresser_xsyn.rules
+@@ -1,6 +1,7 @@
+-4 iv ivs
+-2 ii iis
+ 10 x xs
++2 ii iis
++4 iv ivs
++accisevej akkisevej ackisevej akcisevej
+ ager ageren
+ alaharmavej alahaermaevej
+ bakke bakken
+@@ -9,28 +10,37 @@ borgmester borgm
+ boulevard boulevarden boulev
+ brunnichesvej brynnichesvej
+ bulows bylows
+-bulowsvej bylowsvej
+ bulowsgade bylowsgade
++bulowsvej bylowsvej
+ by byen
++castenschioldsgade castensjioldsgade castenskjioldsgade
++castenschioldsvej castensjioldsvej castenskjioldsvej
+ christian chr
+ den d
+ doktor dr dronning
+ dronning dronn
++ecco ekko ecko ekco
+ edvard edv
+ ejner ejnar
+ elm elmene
+ erh erhard
++eschrichtsvej eskrichtsvej
+ fald faldet
++faurschousvej faurskousvej faursjousvej
+ fjerritslev fjerritsl
+ floejlsgraesset floejelsgraesset
+ frederik fr
+ frits fritz
+ gade gaden
++galschiøtsvej galsjiøtsvej galskjiøtsvej
+ gammel gl gamle
+ gluckstadtsvej glyckstadtsvej
+-gyde gyden
++goldschmidtspladsen goldsmidtspladsen
++goldschmidtsvej goldsmidtsvej
++goldschmidtsvænget goldsmidtsvænget
+ goteborg goeteborg
+ gunthers gynthers
++gyde gyden
+ hafnarfjordur hafnarfjoerdur
+ hammarskjolds hammarskjoelds
+ handelsvej haendelsvej
+@@ -38,35 +48,39 @@ harnosandvej haernosandvej harnoesandvej haernoesandvej
+ have haven
+ haveforening hf haveforeninger haveforeningen havef
+ havn havnen
++hoerlucksvej hoerlycksvej
+ hulkesvej hylkesvej
+ huse husene
+-hoerlucksvej hoerlycksvej
+ huttel hyttel
+ johannes johs
+ jonkopingvej joenkoepingvej
+ jurgensens jyrgensens
+ jurgensensgade jyrgensensgade
+ jyvaskylavej jyvaeskylaevej
++kaer kaeret
+ kaptajn kpt
+ kirke kirken
+-kluversvej klyversvej
+ klosteret klostret
++kluversvej klyversvej
+ kluwersgade klywersgade
++kongens kgs
+ konprinsesse kprs
++kresten kr
++kristian kr
++kronborg krbg
+ kruger kryger
+ krugersgade krygersgade
+ krugersvej krygersvej
+-kvarter kvarteret kv
+-kaer kaeret
+-kresten kr
+-kristian kr
+ kuchlersgade kychlersgade
++kvarter kvarteret kv
+ lille ll
++lizzivej lissivej lissievej
+ lutkens lytkens
+-luttichausvej lyttichausvej
+ lutkensvej lytkensvej
++luttichausvej lyttichausvej
+ lutzensvej lytzensvej
+ maes maees
++malaccavej malakkavej malackavej malakcavej
+ mark marken
+ moelle moellen
+ molndalsparken moelndalsparken
+@@ -75,22 +89,77 @@ mullers myllers
+ mullersvej myllersvej
+ munsters mynsters
+ nordre ndr noerre nr
++oehlenschlægersgade oehlenslægersgade oegenslægersgade
++oehlenschlægersvej oehlenslægersvej oegenslægersvej
++oestre oe oester
+ park parken
+ pibe piber
+ plads pladsen
+ prinsesse prs
++quintusvej kvintusvej
++quistgaards kvistgaards
++quistgaardsvej kvistgaardsvej
++quistmindevej kvistmindevej
++quists kvists
++quistsvej kvistsvej
+ rasmus rs
++rosenquists rosenkvists
+ ruttelip ryttelip
+-soendre sdr soender
+ sankt skt sct
++schibstedsvej sjibstedsvej skjibstedsvej
++schierupsvej sjierupsvej skjierupsvej
++schildensejevej sjildensejevej skjildensejevej
++schilgen sjilgen skjilgen
++schimmelmanns sjimmelmanns skjimmelmanns
++schimmelmannsvej sjimmelmannsvej skjimmelmannsvej
++schioldannsvej sjioldannsvej skjioldannsvej
++schiwesvej sjiwesvej skjiwesvej
++schiødtes sjiødtes skjiødtes
++schiødtsgade sjiødtsgade skjiødtsgade
++schiøler sjiøler skjiøler
++schlegels slegels
++schleppegrellsgade sleppegrellsgade
++schmeltz smeltz
++schmidts smidts
++schmidtsvej smidtsvej
++schmidtsvej smidtsvej
++schmidtz smidtz
++schneekloths sneekloths
++schneiders sneiders
++schnohrsvej snohrsvej
++schoubygade skoubygade sjoubygade
++schourups skourups sjourups
++schous skous sjous
++schousbovej skousbovej sjousbovej
++schousgade skousgade sjousgade
++schousvej skousvej sjousvej
++schoutgården skoutgården sjoutgården
++schoutstien skoutstien sjoutstien
++schouwsvej skouwsvej sjouwsvej
++schradersvej skradersvej
++schrumsvej skrumsvej
++schrøders skrøders
++schrødersvej skrødersvej
++schrødervej skrødervej
++schwartz swartz svartz
++schwartzgade swartzgade svartzgade
++schweizerdalstien sweizerdalstien sveizerdalstien
++schweizerdalsvej sweizerdalsvej sveizerdalsvej
++schweizerpladsen sweizerpladsen sveizerpladsen
++schweizervej sweizervej sveizervej
++schwenckestræde swenckestræde svenckestræde
+ skov skoven
+ sodertaljevej soedertaljevej sodertaeljevej soedertaeljevej
+-sti stien
++soendre sdr soender
++sozzivænget sossivænget sossievænget
+ st sten stensen
++stavtrup stautrup
++sti stien
+ store st
+-strand stranden
+ straede straedet str
++strand stranden
+ sturups styrups
++sundquistsgade sundkvistsgade
+ svend sv
+ sverige sverrig
+ sverigesgade sverrigsgade
+@@ -99,13 +168,10 @@ thomas ths
+ toft toften
+ torv torvet
+ travemundegade travemyndegade
++treschowsgade treskowsgade tresjowsgade
++vaenge vaenget
+ valdemar vald
+ vang vangen
+ vestre v vester
+ vilhelm vilh
+-vaenge vaenget
+ wurglersvej wyrglersvej
+-oestre oe oester
+-stavtrup stautrup
+-kongens kgs
+-kronborg krbg
+\ No newline at end of file
