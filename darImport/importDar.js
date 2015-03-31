@@ -36,7 +36,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         };
       });
 
-      return importTasks.reduce(q.when);
+      return importTasks.reduce(q.when, q({})).then(function() {
+
+      });
     }
     else {
       importTasks = _.map(csvSpec, function(spec, entityName) {
@@ -45,10 +47,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
           return importDarImpl.updateTableFromCsv(client, path.join(dataDir, spec.filename), spec.table, spec, false);
         };
       });
-      return importTasks.reduce(q.when);
+      return importTasks.reduce(q.when, q({}));
     }
-  })
-    .then(function () {
-
-    }).done();
+  }).done();
 });

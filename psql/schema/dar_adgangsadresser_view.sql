@@ -2,7 +2,7 @@
 DROP VIEW IF EXISTS dar_adgangsadresser_view CASCADE;
 CREATE VIEW dar_adgangsadresser_view AS
   SELECT
-    hn.id,
+    hn.bkid as id,
     ap.kommunenummer AS kommunekode,
     hn.vejkode,
     (hn.husnummer).tal || COALESCE((hn.husnummer).bogstav, ''),
@@ -17,7 +17,7 @@ CREATE VIEW dar_adgangsadresser_view AS
            AND upper_inf(hn2.virkning)) AS oprettet,
     hn.ikrafttraedelsesdato  at time zone 'Europe/Copenhagen' AS ikraftfra,
     lower(hn.virkning) at time zone 'Europe/Copenhagen' as aendret,
-    ap.id as adgangspunktid,
+    ap.bkid as adgangspunktid,
     ap.noejagtighedsklasse as noejagtighed,
     ap.kildekode as kilde,
     ap.placering,

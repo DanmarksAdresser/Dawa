@@ -1,8 +1,8 @@
   DROP VIEW IF EXISTS dar_enhedsadresser_view CASCADE;
   CREATE VIEW dar_enhedsadresser_view AS
     SELECT
-      adr.id,
-      adr.husnummerid AS adgangsadresseid,
+      adr.bkid as id,
+      (SELECT bkid FROM dar_husnummer WHERE upper_inf(registrering) AND upper_inf(virkning) AND id = adr.husnummerid) AS adgangsadresseid,
       adr.statuskode AS objekttype,
       (SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
        FROM dar_adresse adr2
