@@ -43,6 +43,14 @@ cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(arg
           'ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword ' +
           'WITH adresser_unaccent_' + options.version + ', adresser_xsyn_' + options.version + ', simple;', [], callback);
       },
+      function(callback) {
+        client.query(
+          'DROP TEXT SEARCH CONFIGURATION IF EXISTS adresser_query CASCADE;' +
+          'CREATE TEXT SEARCH CONFIGURATION adresser_query (copy=simple);' +
+          'ALTER TEXT SEARCH CONFIGURATION adresser_query ' +
+          'ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword ' +
+          'WITH adresser_unaccent_' + options.version + ', simple;', [], callback);
+      },
       sqlCommon.disableTriggers(client),
       sqlCommon.psqlScript(client, __dirname, 'reindex-search.sql'),
       sqlCommon.enableTriggers(client),
