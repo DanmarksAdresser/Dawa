@@ -7,17 +7,24 @@ var csvStringify = require('csv-stringify');
 var es = require('event-stream');
 var format = require('string-format');
 var fs = require('fs');
-var q = require('q');
+var path = require('path');
 var _ = require('underscore');
 
 var databaseTypes = require('../psql/databaseTypes');
 var datamodels = require('../crud/datamodel');
+var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
 var logger = require('../logger').forCategory('darImport');
 var promisingStreamCombiner = require('../promisingStreamCombiner');
+var sqlCommon = require('../psql/common');
+var tema = require('../temaer/tema');
+var temaer = require('../apiSpecification/temaer/temaer');
+var qUtil = require('../q-util');
 
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
 var GeometryPoint2d = databaseTypes.GeometryPoint2d;
+
+var DAWA_TABLES = ['enhedsadresser', 'adgangsadresser', 'vejstykker'];
 
 var csvHusnrRegex = /^(\d*)([A-Z]?)$/;
 var types = {
@@ -919,19 +926,114 @@ function performDawaChangesVejstykker(client) {
         table: table,
         idColumnsEqualClause: columnsEqualClause('dv', 'tab', datamodel.key)
       }), []);
-  })
+  });
+}
+
+/**
+ * Remove all data from DAR tables
+ */
+function clearDarTables(client) {
+  return qUtil.mapSerial(csvSpec, function(spec) {
+    return client.queryp('DELETE FROM ' + spec.table, []);
+  });
+}
+
+/**
+ * Initialize DAR tables from CSV, assuming they are empty.
+ * Loads data directly into the tables from CSV.
+ */
+function initDarTables(client, dataDir) {
+  return qUtil.mapSerial(csvSpec, function(spec, entityName) {
+    console.log('Importing ' + entityName);
+    return loadCsvFile(client, path.join(dataDir, spec.filename), spec.table, spec);
+  });
+}
+
+/**
+ * Remove all data from adgangsadresser, enhedsadresser, vejstykker and
+ * adgangsadresser_temaer_matview, including history.
+ */
+function clearDawaTables(client) {
+  console.log('clearing DAWA tables');
+  return sqlCommon.withoutTriggers(client, function() {
+    return qUtil.mapSerial(DAWA_TABLES.concat(['adgangsadresser_temaer_matview']), function(tableName) {
+      return client.queryp('delete from ' + tableName + '_history', []).then(function() {
+        return client.queryp('delete from ' + tableName, []);
+      });
+    });
+  });
+}
+
+/**
+ * Given that DAR tables are populated, initialize DAWA tables, assuming no
+ * existing data is present in the tables.
+ */
+function initDawaFromScratch(client) {
+  console.log('initializing DAWA from scratch');
+  return sqlCommon.withoutTriggers(client, function() {
+    return qUtil.mapSerial(DAWA_TABLES, function (tableName) {
+      console.log('initializing table ' + tableName);
+      var sql = format("INSERT INTO {table} (SELECT * FROM dar_{table}_view)",
+        {
+          table: tableName
+        });
+      return client.queryp(sql, []);
+    })
+      .then(function () {
+        console.log('initializing history');
+        return loadAdresseDataImpl.initializeHistory(client);
+      })
+      .then(function() {
+        console.log('initializing adresserTemaerView');
+        return qUtil.mapSerial(temaer, function(temaSpec) {
+          return tema.updateAdresserTemaerView(client, temaSpec, true);
+        });
+      });
+  });
+}
+
+/**
+ * Delete all data in DAR tables, and repopulate from CSV.
+ * If clearDawa is specified, remove all data from DAWA address tables as well
+ * (adgangsadresser, enhedsadresser, vejstykker, adgangsadresser_temaer_matview).
+ * When DAR tables has been updated, the DAWA tables will be updated as well (
+ * from scratch, if clearDawa is specified, otherwise incrementally).
+ */
+function initFromDar(client, dataDir, clearDawa) {
+  return clearDarTables(client)
     .then(function() {
+      return initDarTables(client, dataDir);
+    })
+    .then(function() {
+      if(clearDawa) {
+        return clearDawaTables(client).then(function() {
+          return initDawaFromScratch(client);
+        });
+      }
     });
 }
 
-exports.load = function(client, options) {
-  var dataDir = options.dataDir;
-  var initial = options.initial;
-};
+/**
+ * Assuming DAR tables are already populated, update DAR tables
+ * from CSV, followed by an update of DAWA tables.
+ */
+function updateFromDar(client, dataDir) {
+  return qUtil.mapSerial(csvSpec, function(spec, entityName) {
+    console.log('Importing ' + entityName);
+    return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec.table, spec, false);
+  })
+    .then(function() {
+      return qUtil.mapSerial(csvSpec, function(spec) {
+        return dropChangeTables(client, spec.table);
+      });
+    });
+}
 
 exports.loadCsvFile = loadCsvFile;
 exports.updateTableFromCsv = updateTableFromCsv;
 exports.csvSpec = csvSpec;
+exports.initFromDar = initFromDar;
+exports.updateFromDar = updateFromDar;
 
 exports.internal = {
   transform: transform,

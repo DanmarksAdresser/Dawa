@@ -32,7 +32,7 @@ var syntheticDbContent = {
     "statuskode": 6,
     "tekniskstandard": "TK",
     "versionid": 1000,
-    "virkning": new Range(null, null, '()'),
+    "virkning": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
     "geom": "0101000020E86400000AD7A3F0FA1F25417B14AE97D89D5741"
   },
   housenumber: {
@@ -98,6 +98,9 @@ var syntheticDbContent = {
   }
 };
 
+var SYNTHETIC_DIR = path.join(__dirname, 'sampleDarFiles', 'synthetic');
+var REAL_DIR = path.join(__dirname, 'sampleDarFiles', 'real');
+
 function loadRawCsv(client, filePath, destionationTable) {
   var sql = "COPY " + destionationTable + " FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
   var pgStream = client.query(copyFrom(sql));
@@ -115,8 +118,7 @@ describe('Importing DAR CSV files to database', function () {
       it('Should import ' + entityName + ' correctly', function () {
         return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
           return importDarImpl.loadCsvFile(client,
-            path.join(__dirname,
-              'sampleDarFiles', 'synthetic', csvSpec[entityName].filename),
+            path.join(SYNTHETIC_DIR, csvSpec[entityName].filename),
             spec.table, spec).then(function () {
               return q.ninvoke(client, 'query', "SELECT * FROM " + spec.table, []);
             }).then(function (result) {
@@ -324,6 +326,17 @@ describe('Importing DAR CSV files to database', function () {
               expect(updated.registrering.upper).to.equal('2014-05-09T22:00:00.000Z');
             });
         });
+      });
+    });
+  });
+
+  describe('Initialize database from scratch', function() {
+    return testdb.withTransactionAll('empty', function(clientFn) {
+      it('Can reinitialize db from real DAR CSV files', function() {
+        this.timeout(240000);
+        var client = clientFn();
+        return importDarImpl.initFromDar(client, REAL_DIR, true);
+
       });
     });
   });

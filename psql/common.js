@@ -20,12 +20,26 @@ exports.disableTriggers = function(client){
   };
 };
 
+exports.disableTriggersQ = function(client) {
+  return client.queryp("SET SESSION_REPLICATION_ROLE ='replica'",[]);
+};
+
 exports.enableTriggers = function(client){
   return function(done) {
     winston.info("Enabling triggers");
     client.query("SET SESSION_REPLICATION_ROLE ='origin'",[], done);
   };
 };
+
+exports.enableTriggersQ = function(client) {
+  return client.queryp("SET SESSION_REPLICATION_ROLE ='origin'",[]);
+};
+
+exports.withoutTriggers = function(client, fn) {
+  return exports.disableTriggersQ(client).then(fn).then(function() {
+    return exports.enableTriggersQ(client);
+  });
+}
 
 exports.execSQL = function(sql, client, echo, done){
   function doWork(cb){

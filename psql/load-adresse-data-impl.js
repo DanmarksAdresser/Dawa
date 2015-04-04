@@ -8,8 +8,10 @@ var es      = require('event-stream');
 var copyFrom = require('pg-copy-streams').from;
 var fs = require('fs');
 var zlib = require('zlib');
+var q = require('q');
 var _ = require('underscore');
 
+var qUtil = require('../q-util');
 var sqlCommon = require('./common');
 var initialization = require('./initialization');
 var bbrTransformers = require('../bbr/common/bbrTransformers');
@@ -195,20 +197,17 @@ exports.loadCsvOnly = function(client, options, callback) {
   ], callback);
 };
 
-var initializeHistoryTable = function (client, entityName, callback) {
+var initializeHistoryTable = function (client, entityName) {
   var datamodel = datamodels[entityName];
   var query = 'INSERT INTO ' + datamodel.table + '_history (' + datamodel.columns.join(', ') + ') (select ' + datamodel.columns.join(', ') + ' from ' + datamodel.table + ')';
-  client.query(query, [], callback);
+  return client.queryp(query, []);
 };
 
 function initializeHistory(client) {
-  return function(callback) {
-    async.eachSeries(['vejstykke', 'adgangsadresse', 'adresse'],
-      function(entityName, callback) {
-        initializeHistoryTable(client, entityName, callback);
-      },
-      callback);
-  };
+
+  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(tableName) {
+    return initializeHistoryTable(client, tableName);
+  });
 }
 
 exports.load = function(client, options, callback) {
@@ -230,7 +229,9 @@ exports.load = function(client, options, callback) {
         callback();
       }
     },
-    initializeHistory(client),
+    function(callback) {
+      initializeHistory(client).nodeify(callback);
+    },
     initialization.initializeTables(client),
     sqlCommon.enableTriggers(client)
   ], callback);
@@ -239,4 +240,4 @@ exports.load = function(client, options, callback) {
 exports.bbrFileStreams = bbrFileStreams;
 exports.loadBbrMeta = loadBbrMeta;
 exports.loadCsv = loadCsv;
-exports.initializeHistoryTable = initializeHistoryTable;
+exports.initializeHistory = initializeHistory;

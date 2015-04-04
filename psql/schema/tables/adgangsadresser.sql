@@ -18,7 +18,7 @@ CREATE TABLE  adgangsadresser (
   etrs89nord double precision NULL,
   noejagtighed CHAR(1) NULL,
   kilde integer NULL,
-  placering char(1),
+  placering smallint,
   tekniskstandard CHAR(2) NULL,
   tekstretning float4 NULL,
   adressepunktaendringsdato timestamp NULL,
@@ -62,7 +62,7 @@ CREATE TABLE adgangsadresser_history(
   etrs89nord double precision NULL,
   noejagtighed CHAR(1) NULL,
   kilde integer NULL,
-  placering char(1),
+  placering smallint,
   tekniskstandard CHAR(2) NULL,
   tekstretning float4 NULL,
   adressepunktaendringsdato timestamp NULL
