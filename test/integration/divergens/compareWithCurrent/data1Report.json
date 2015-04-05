@@ -65,7 +65,7 @@
           "etrs89oest": 478334,
           "etrs89nord": 6103044,
           "noejagtighed": "A",
-          "kilde": 5,
+          "adgangspunktkilde": 5,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
           "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
@@ -94,7 +94,7 @@
           "etrs89oest": 487392,
           "etrs89nord": 6099453,
           "noejagtighed": "A",
-          "kilde": 5,
+          "adgangspunktkilde": 5,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
           "adressepunktaendringsdato": "2005-11-02T00:00:00.000"

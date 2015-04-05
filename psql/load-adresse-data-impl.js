@@ -78,7 +78,7 @@ var legacyTransformers = {
       etrs89oest: row.ETRS89utm32Easting,
       etrs89nord: row.ETRS89utm32Northing,
       noejagtighed: row.AddressCoordinateQualityClassCode,
-      kilde: row.AddressGeometrySourceCode,
+      adgangspunktkilde: row.AddressGeometrySourceCode,
       tekniskstandard: row.AddressCoordinateTechnicalStandardCode,
       tekstretning: row.AddressTextAngleMeasure,
       kn100mdk: row.GeometryDDKNcell100mText,
@@ -180,7 +180,7 @@ exports.loadCsvOnly = function(client, options, callback) {
           'husnr', 'supplerendebynavn',
           'postnr', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'objekttype',
           'oprettet', 'ikraftfra', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord',
-          'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'adressepunktaendringsdato'],
+          'noejagtighed', 'adgangspunktkilde', 'tekniskstandard', 'tekstretning', 'adressepunktaendringsdato'],
         transformer: transformers.adgangsadresse
 
       }, callback);

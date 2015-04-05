@@ -17,11 +17,14 @@ CREATE TABLE  adgangsadresser (
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
   noejagtighed CHAR(1) NULL,
-  kilde integer NULL,
+  adgangspunktkilde smallint NULL,
+  husnummerkilde smallint,
   placering smallint,
   tekniskstandard CHAR(2) NULL,
   tekstretning float4 NULL,
   adressepunktaendringsdato timestamp NULL,
+  esdhReference text,
+  journalnummer text,
   geom  geometry(point, 25832),
   tsv tsvector
 );
@@ -61,11 +64,14 @@ CREATE TABLE adgangsadresser_history(
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
   noejagtighed CHAR(1) NULL,
-  kilde integer NULL,
+  adgangspunktkilde smallint NULL,
+  husnummerkilde smallint,
   placering smallint,
   tekniskstandard CHAR(2) NULL,
   tekstretning float4 NULL,
-  adressepunktaendringsdato timestamp NULL
+  adressepunktaendringsdato timestamp NULL,
+  esdhReference text,
+  journalnummer text
 );
 
 CREATE INDEX ON adgangsadresser_history(valid_to);

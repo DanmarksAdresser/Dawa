@@ -20,7 +20,7 @@ module.exports = {
     postnr: 'postnummer',
     ikraftfra: 'ikrafttraedelsesdato',
     adgangspunktid: 'adgangspunkt_id',
-    kilde: 'adgangspunkt_kilde',
+    adgangspunktkilde: 'adgangspunkt_kilde',
     noejagtighed: 'adgangspunkt_noejagtighedsklasse',
     tekniskstandard: 'adgangspunkt_tekniskstandard',
     tekstretning: 'adgangspunkt_retning',

@@ -21,11 +21,14 @@ CREATE VIEW dar_adgangsadresser_view AS
     ST_X(ap.geom) as etrs89oest,
     ST_Y(ap.geom) as etrs89nord,
     ap.noejagtighedsklasse as noejagtighed,
-    ap.kildekode as kilde,
+    ap.kildekode as adgangspunktkilde,
+    hn.kildekode as husnummerkilde,
     ap.placering,
     ap.tekniskstandard,
     ap.retning as tekstretning,
-    ap.revisionsdato AS adressepunktaendringsdato
+    ap.revisionsdato AS adressepunktaendringsdato,
+    ap.esdhreference AS esdhreference,
+    ap.journalnummer AS journalnummer
   FROM dar_husnummer_current hn
     JOIN dar_adgangspunkt_current ap
       ON hn.adgangspunktid = ap.id

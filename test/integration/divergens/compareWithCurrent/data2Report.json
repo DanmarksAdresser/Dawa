@@ -73,7 +73,7 @@
           "etrs89oest": 555744.64,
           "etrs89nord": 6089186.57,
           "noejagtighed": "A",
-          "kilde": 5,
+          "adgangspunktkilde": 5,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
           "adressepunktaendringsdato": "2005-10-20T00:00:00.000"

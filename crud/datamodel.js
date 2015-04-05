@@ -3,7 +3,7 @@ module.exports = {
     name: 'adgangsadresse',
     table: 'adgangsadresser',
     columns: ['id', 'kommunekode', 'vejkode', 'husnr', 'supplerendebynavn', 'postnr', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'ejerlavkode',
-    'matrikelnr', 'esrejendomsnr', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'noejagtighed', 'kilde', 'tekniskstandard', 'tekstretning',
+    'matrikelnr', 'esrejendomsnr', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'noejagtighed', 'adgangspunktkilde', 'tekniskstandard', 'tekstretning',
     'adressepunktaendringsdato'],
     key: ['id']
   },

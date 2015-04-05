@@ -14,7 +14,7 @@ CREATE VIEW AdgangsadresserView AS
     A.etrs89nord::double precision AS nord,
     A.geom       AS geom,
     A.noejagtighed,
-    A.kilde::smallint,
+    A.adgangspunktkilde AS kilde,
     A.tekniskstandard,
     A.tekstretning,
     '100m_' || (floor(A.etrs89nord / 100))::text || '_' || (floor(etrs89oest / 100))::text as ddkn_m100,

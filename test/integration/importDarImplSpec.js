@@ -330,7 +330,7 @@ describe('Importing DAR CSV files to database', function () {
     });
   });
 
-  describe('Initialize database from scratch', function() {
+  describe.skip('Initialize database from scratch', function() {
     return testdb.withTransactionAll('empty', function(clientFn) {
       it('Can reinitialize db from real DAR CSV files', function() {
         this.timeout(240000);

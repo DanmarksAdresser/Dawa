@@ -10,6 +10,9 @@
       adr.ikrafttraedelsesdato AT TIME ZONE 'Europe/Copenhagen' AS ikraftfra,
       lower(adr.virkning) AT TIME ZONE 'Europe/Copenhagen' AS aendret,
       adr.etagebetegnelse AS etage,
-      adr.doerbetegnelse AS doer
+      adr.doerbetegnelse AS doer,
+      adr.kildekode as kilde,
+      adr.esdhreference,
+      adr.journalnummer
     FROM dar_adresse_current adr;
 

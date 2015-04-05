@@ -87,7 +87,8 @@ exports.columnMappings = {
     name: 'nøjagtighed',
     column: 'noejagtighed'
   }, {
-    name: 'kilde'
+    name: 'kilde',
+    column: 'adgangspunktkilde'
   }, {
     name: 'tekniskstandard'
   }, {

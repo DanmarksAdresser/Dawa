@@ -28,7 +28,7 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function (
         "etrs89oest": 542187.19,
         "etrs89nord": 6155336.05,
         "noejagtighed": "A",
-        "kilde": 5,
+        "adgangspunktkilde": 5,
         "tekniskstandard": "TK",
         "tekstretning": "200.00",
         "adressepunktaendringsdato": "2014-05-22T23:59:00.000Z"
