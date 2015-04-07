@@ -1,5 +1,6 @@
 "use strict";
 
+var logger = require('../logger').forCategory('gml');
 var _ = require('underscore');
 
 function coordinatesAs2DWkt(text) {
@@ -76,6 +77,10 @@ exports.gmlGeometryToWkt = function(json) {
   if(json.Surface) {
     return gmlSurfaceToWkt(json.Surface[0]);
   }
+  if(json.LineString) {
+    logger.error('Found LineString in geometry input, this does not make sense');
+    return null;
+  }
 
-  throw new Error('Unsupported geometry type');
+  throw new Error('Unsupported geometry type: ' + JSON.stringify(json));
 };
