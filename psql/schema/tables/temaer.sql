@@ -13,7 +13,6 @@ CREATE TABLE temaer (
 
 CREATE INDEX ON temaer(tema);
 CREATE INDEX ON temaer USING GIN(tsv);
-CREATE INDEX ON temaer USING gist(geom);
 
 -- Support lookup using string
 CREATE INDEX ON temaer((fields->>'kode')) WHERE ((fields->>'kode') is not null);
