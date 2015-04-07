@@ -79,12 +79,12 @@ function getSearchColumn(columnSpec) {
 
 function searchWhereClause(paramAlias, columnSpec) {
   var columnName = getSearchColumn(columnSpec);
-  return "(" + columnName + " @@ to_tsquery('adresser', " + paramAlias + "))";
+  return "(" + columnName + " @@ to_tsquery('adresser_query', " + paramAlias + "))";
 }
 
 function searchOrderClause(paramAlias) {
   var columnName = 'tsv';
-  return 'ts_rank(' + columnName + ", to_tsquery('adresser'," + paramAlias + '), 16) DESC';
+  return 'ts_rank(' + columnName + ", to_tsquery('adresser_query'," + paramAlias + '), 16) DESC';
 }
 
 

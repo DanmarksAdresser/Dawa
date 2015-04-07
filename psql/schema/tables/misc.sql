@@ -41,3 +41,7 @@ CREATE TYPE husnr_range AS RANGE (
 DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser;
 CREATE TEXT SEARCH CONFIGURATION adresser (copy=simple);
 ALTER  TEXT SEARCH CONFIGURATION adresser ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;
+
+DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser_query;
+CREATE TEXT SEARCH CONFIGURATION adresser_query (copy=simple);
+ALTER  TEXT SEARCH CONFIGURATION adresser_query ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;
