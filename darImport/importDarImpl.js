@@ -551,6 +551,18 @@ function columnsDifferClause(alias1, alias2, columns) {
 
 function columnsEqualClause(alias1, alias2, columns) {
   var clauses = columns.map(function(column) {
+    return format('{alias1}.{column} = {alias2}.{column}',
+      {
+        alias1: alias1,
+        alias2: alias2,
+        column: column
+      });
+  });
+  return '(' + clauses.join(' AND ') + ')';
+}
+
+function columnsNotDistinctClause(alias1, alias2, columns) {
+  var clauses = columns.map(function(column) {
     return format('{alias1}.{column} IS NOT DISTINCT FROM {alias2}.{column}',
       {
         alias1: alias1,
@@ -561,8 +573,18 @@ function columnsEqualClause(alias1, alias2, columns) {
   return '(' + clauses.join(' AND ') + ')';
 }
 
+function columnsNullClause(alias, columns) {
+  var clauses = columns.map(function(column) {
+    return format('{alias}.{column} IS NULL', {
+      alias: alias,
+      column: column
+    });
+  });
+  return '(' + clauses.join(' AND') + ')';
+}
+
 function keyEqualsClause(alias1, alias2, spec) {
-  return columnsEqualClause(alias1, alias2, spec.idColumns);
+  return columnsNotDistinctClause(alias1, alias2, spec.idColumns);
 }
 
 
@@ -710,7 +732,7 @@ function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
   return client.queryp(
     format("CREATE TEMP TABLE {insTable} AS SELECT {srcTable}.*" +
       " FROM {srcTable}" +
-      " WHERE NOT EXISTS(SELECT * FROM {dstTable} WHERE {idEqualsClause})",
+      " WHERE NOT EXISTS(SELECT 1 FROM {dstTable} WHERE {idEqualsClause})",
       {
         srcTable: srcTable,
         dstTable: dstTable,
@@ -775,7 +797,7 @@ function applyUpdates2(client, upTable, dstTable, idColumns, columnsToUpdate) {
       dstTable: dstTable,
       upTable: upTable,
       fieldUpdates: fieldUpdates,
-      idColumnsEqual: columnsEqualClause(upTable, dstTable, idColumns)
+      idColumnsEqual: columnsNotDistinctClause(upTable, dstTable, idColumns)
     });
   return client.queryp(sql, []);
 }
@@ -786,7 +808,7 @@ function applyDeletes2(client, delTable, dstTable, idColumns) {
     {
       dstTable: dstTable,
       delTable: delTable,
-      idColumnsEqual: columnsEqualClause(delTable, dstTable, idColumns)
+      idColumnsEqual: columnsNotDistinctClause(delTable, dstTable, idColumns)
     });
   return client.queryp(sql, []);
 }
@@ -842,7 +864,7 @@ function applyUpdates(client, destinationTable, sourceTable, spec, updateAllFiel
       {
         destinationTable: destinationTable,
         sourceTable: sourceTable,
-        idColumnsEqual: columnsEqualClause(sourceTable, destinationTable, spec.idColumns)
+        idColumnsEqual: columnsNotDistinctClause(sourceTable, destinationTable, spec.idColumns)
       });
     return client.queryp(expireOldRowsSql, [])
       .then(function() {
@@ -872,7 +894,7 @@ function applyDeletes(client, destinationTable, sourceTable, spec) {
       {
         destinationTable: destinationTable,
         sourceTable: sourceTable,
-        idColumnsEqual: columnsEqualClause(destinationTable, sourceTable, spec.idColumns)
+        idColumnsEqual: columnsNotDistinctClause(destinationTable, sourceTable, spec.idColumns)
       });
     return client.queryp(sql, []);
   }
@@ -914,12 +936,15 @@ function dropChangeTables(client, tableSuffix) {
 function updateTableFromCsv(client, csvFilePath, destinationTable, csvSpec, useFastComparison) {
   return createTableAndLoadData(client, csvFilePath, 'desired_' + destinationTable, destinationTable, csvSpec)
     .then(function() {
+      console.log('computing differences');
       return computeDifferences(client, destinationTable, 'desired_' + destinationTable, destinationTable, csvSpec, useFastComparison);
     })
     .then(function() {
+      console.log('applying changes');
       return applyChanges(client, destinationTable, destinationTable, csvSpec, !useFastComparison);
     })
     .then(function() {
+      console.log('dropping temp table');
       return dropTable(client, 'desired_' + destinationTable);
     });
 }
@@ -942,7 +967,7 @@ function performDawaChangesVejstykker(client) {
     ' WHERE NOT EXISTS(SELECT *  FROM {table} tab WHERE {idColumnsEqualClause} ))',
       {
         table: table,
-        idColumnsEqualClause: columnsEqualClause('dv', 'tab', datamodel.key)
+        idColumnsEqualClause: columnsNotDistinctClause('dv', 'tab', datamodel.key)
       }), []);
   });
 }
