@@ -74,9 +74,12 @@
           "etrs89nord": 6089186.57,
           "noejagtighed": "A",
           "adgangspunktkilde": 5,
+          "husnummerkilde": null,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
-          "adressepunktaendringsdato": "2005-10-20T00:00:00.000"
+          "adressepunktaendringsdato": "2005-10-20T00:00:00.000",
+          "esdhreference": null,
+          "journalnummer": null
         },
         "rectified": true
       }

@@ -18,10 +18,8 @@ q.longStackSupport = true;
 
 var syntheticDbContent = {
   accesspoint: {
-    "esdhreference": null,
     "id": 1,
     "bkid": "efaae53e-b419-4f0e-bfa6-9097de8f79e2",
-    "journalnummer": null,
     "kildekode": 1,
     "kommunenummer": 881,
     "noejagtighedsklasse": "A",
@@ -32,6 +30,8 @@ var syntheticDbContent = {
     "statuskode": 6,
     "tekniskstandard": "TK",
     "versionid": 1000,
+    "esdhreference": "esdhref1",
+    "journalnummer": "journalnummer1",
     "virkning": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
     "geom": "0101000020E86400000AD7A3F0FA1F25417B14AE97D89D5741"
   },
@@ -54,20 +54,21 @@ var syntheticDbContent = {
   },
   address: {
     "doerbetegnelse": "MF",
-    "esdhreference": null,
     "etagebetegnelse": "96",
     "husnummerid": 3,
     "id": 2,
     "bkid": "970c79e9-d60b-461e-9b9d-75a1c73b0273",
     "ikrafttraedelsesdato": null,
-    "journalnummer": null,
     "kildekode": 1,
     "registrering": new Range("2014-10-07T12:24:13.907Z", null, '[)'),
     "statuskode": 5,
     "versionid": 1001,
+    "esdhreference": "esdhref2",
+    "journalnummer": "journalnummer2",
     "virkning": new Range("2014-10-07T12:24:35.473Z", null, '[)')
   },
   streetname: {
+    "id": "11111111-1111-1111-1111-111111111112",
     "adresseringsnavn": "Børges Bryggerivej",
     "aendringstimestamp": "2010-07-05T10:16:15.690Z",
     "kommunekode": 906,
@@ -77,6 +78,7 @@ var syntheticDbContent = {
     "vejkode": 5000
   },
   postnr: {
+    "id": "11111111-1111-1111-1111-111111111113",
     "aendringstimestamp": "1900-12-31T23:00:00.000Z",
     "husnrinterval": new Range(new Husnr(13, 'B'), new Husnr(21, null), '[]'),
     "kommunekode": 906,
@@ -87,6 +89,7 @@ var syntheticDbContent = {
     "vejkode": 5000
   },
   supplerendebynavn: {
+    "id": "11111111-1111-1111-1111-111111111111",
     "aendringstimestamp": "1900-12-31T23:00:00.000Z",
     "husnrinterval": new Range(new Husnr(13, 'B'), new Husnr(21, null), '[]'),
     "kommunekode": 906,

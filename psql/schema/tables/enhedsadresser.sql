@@ -30,7 +30,10 @@ CREATE TABLE IF NOT EXISTS enhedsadresser_history (
   ikraftfra timestamp,
   aendret timestamp,
   etage VARCHAR(3),
-  doer VARCHAR(4)
+  doer VARCHAR(4),
+  kilde smallint,
+  esdhreference text,
+  journalnummer text
 );
 
 CREATE INDEX ON enhedsadresser_history(valid_to);

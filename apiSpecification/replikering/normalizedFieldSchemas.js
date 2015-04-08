@@ -202,6 +202,12 @@ var fields = {
         type: nullableType('integer')
       }
     }, {
+      name: 'husnummerkilde',
+      description: 'Kode der angiver kilden til husnummeret. Et tal bestående af et ciffer.',
+      schema: {
+        type: nullableType('integer')
+      }
+    }, {
       name: 'tekniskstandard',
       description: 'Kode der angiver den specifikation adressepunktet skal opfylde. 2 tegn.' +
         ' ”TD” = 3 meter inde i bygningen ved det sted hvor indgangsdør e.l. skønnes placeret;' +
@@ -228,6 +234,14 @@ var fields = {
         ' Eksempel: ”1998-11-17T00:00:00”',
       schema: definitions.NullableDateTime,
       formatter: timestampFormatter
+    }, {
+      name: 'esdhreference',
+      description: 'Nøgle i ESDH system.',
+      schema: definitions.Nullableesdhreference
+    }, {
+      name: 'journalnummer',
+      description: 'Journalnummer.',
+      schema: definitions.Nullablejournalnummer
     }
   ],
   adresse: [
@@ -271,6 +285,21 @@ var fields = {
       description: 'Dørbetegnelse. Hvis værdi angivet kan den antage følgende værdier:' +
         ' tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
       schema: definitions.NullableDør
+    }, {
+      name: 'kilde',
+      description: 'Kode der angiver kilden til adressen. Tal bestående af et ciffer.',
+      schema: {
+        type: nullableType('integer')
+      }
+    },
+    {
+      name: 'esdhreference',
+      description: 'Nøgle i ESDH system.',
+      schema: definitions.Nullableesdhreference
+    }, {
+      name: 'journalnummer',
+      description: 'Journalnummer.',
+      schema: definitions.Nullablejournalnummer
     }
   ],
   ejerlav: [{

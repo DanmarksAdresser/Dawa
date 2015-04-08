@@ -87,7 +87,7 @@ function transformInterval(val) {
   val.husnrinterval = new Range(lower, upper, '[]');
   if(Husnr.lessThan(upper, lower)) {
     logger.error("Invalid husnr interval: " + val.husnrinterval.toPostgres());
-    val.husnrinterval = new Range(undefined, undefined, 'empty');
+    val.husnrinterval = new Range(null, null, 'empty');
   }
   return val;
 }
@@ -101,6 +101,9 @@ function transformPostnr(val) {
 
 function transformSupplerendebynavn(val) {
   val = transformInterval(val);
+  if(!val) {
+    return;
+  }
   val.side = val.byvejside;
   delete val.byvejside;
   return val;
@@ -259,6 +262,10 @@ var addressColumns = [
 
 var streetnameColumns = [
   {
+    name: 'id',
+    type: types.uuid
+  },
+  {
     name: 'kommunekode',
     type: types.integer
   },
@@ -289,6 +296,10 @@ var streetnameColumns = [
 ];
 
 var postnrColumns = [
+  {
+    name: 'id',
+    type: types.uuid
+  },
   {
     name: 'kommunekode',
     type: types.integer
@@ -328,6 +339,10 @@ var postnrColumns = [
 ];
 
 var supplerendebynavnColumns = [
+  {
+    name: 'id',
+    type: types.uuid
+  },
   {
     name: 'kommunekode',
     type: types.integer
@@ -410,7 +425,7 @@ var csvSpec = {
     filename: 'Vejnavn.csv',
     table: 'dar_vejnavn',
     bitemporal: false,
-    idColumns: ['kommunekode', 'vejkode'],
+    idColumns: ['id'],
     columns: streetnameColumns,
     dbColumns: _.pluck(streetnameColumns, 'name')
   },
@@ -418,7 +433,7 @@ var csvSpec = {
     filename: 'Vejstykke.csv',
     table: 'dar_postnr',
     bitemporal: false,
-    idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
+    idColumns: ['id'],
     columns: postnrColumns,
     dbColumns: _.without(_.pluck(postnrColumns, 'name'), 'byhusnummerfra', 'byhusnummertil', 'vejstykkeside').concat(['husnrinterval', 'side']),
     transform: transformPostnr
@@ -427,7 +442,7 @@ var csvSpec = {
     filename: 'SupplerendeBynavn.csv',
     table: 'dar_supplerendebynavn',
     bitemporal: false,
-    idColumns: ['kommunekode', 'vejkode','side', 'husnrinterval'],
+    idColumns: ['id'],
     columns: supplerendebynavnColumns,
     dbColumns: _.without(_.pluck(supplerendebynavnColumns, 'name'), 'byhusnummerfra', 'byhusnummertil', 'byvejside').concat(['husnrinterval', 'side']),
     transform: transformSupplerendebynavn
@@ -468,6 +483,9 @@ function transform(spec, csvRow) {
   }
   if(spec.transform) {
     result = spec.transform(result);
+    if(!result) {
+      return;
+    }
   }
   Object.keys(result).forEach(function(key) {
     if(result[key] && result[key].toPostgres) {

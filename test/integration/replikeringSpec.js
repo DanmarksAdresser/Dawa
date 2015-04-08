@@ -50,6 +50,9 @@ var insert = {
     "etrs89koordinat_nord": 6155336.05,
     "nøjagtighed": "A",
     "kilde": 5,
+    "husnummerkilde": null,
+    "esdhreference": null,
+    "journalnummer": null,
     "tekniskstandard": "TK",
     "tekstretning": 200.00,
     "adressepunktændringsdato": "2014-05-22T23:59:00.000"
@@ -62,6 +65,9 @@ var insert = {
     "ikrafttrædelsesdato": null,
     "etage": "st",
     "dør": "th",
+    "esdhreference": null,
+    "journalnummer": null,
+    "kilde": null,
     "adgangsadresseid": "0dd9a7db-c962-4952-b501-4820dadfc4a1"
   },
   ejerlav: {
@@ -102,6 +108,9 @@ var update = {
     "etrs89koordinat_nord": 6155300.00,
     "nøjagtighed": "B",
     "kilde": 4,
+    "husnummerkilde": null,
+    "esdhreference": null,
+    "journalnummer": null,
     "tekniskstandard": "TD",
     "tekstretning": 100.00,
     "adressepunktændringsdato": "2015-05-22T23:59:00.000"
@@ -114,7 +123,10 @@ var update = {
     "ikrafttrædelsesdato": "2015-05-26T09:55:01.157",
     "etage": "1",
     "dør": "tv",
-    "adgangsadresseid": "11111111-c962-4952-b501-4820dadfc4a1"
+    "adgangsadresseid": "11111111-c962-4952-b501-4820dadfc4a1",
+    "kilde": null,
+    "esdhreference": null,
+    "journalnummer": null
   },
   ejerlav: {
     kode: 20551,

@@ -90,9 +90,15 @@ exports.columnMappings = {
     name: 'kilde',
     column: 'adgangspunktkilde'
   }, {
+    name : 'husnummerkilde'
+  }, {
     name: 'tekniskstandard'
   }, {
     name: 'tekstretning'
+  }, {
+    name: 'esdhreference'
+  }, {
+    name: 'journalnummer'
   }, {
     name: 'adressepunktændringsdato',
     column: 'adressepunktaendringsdato',
@@ -121,6 +127,12 @@ exports.columnMappings = {
     column: 'doer'
   }, {
     name: 'adgangsadresseid'
+  }, {
+    name: 'kilde'
+  }, {
+    name: 'esdhreference'
+  }, {
+    name: 'journalnummer'
   }
   ],
   ejerlav: [{

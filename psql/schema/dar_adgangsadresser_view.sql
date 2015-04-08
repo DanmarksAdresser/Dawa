@@ -1,7 +1,7 @@
 
 DROP VIEW IF EXISTS dar_adgangsadresser_view CASCADE;
 CREATE VIEW dar_adgangsadresser_view AS
-  SELECT distinct on (hn.bkid)
+  SELECT
     hn.bkid as id,
     ap.kommunenummer AS kommunekode,
     hn.vejkode,
@@ -28,7 +28,8 @@ CREATE VIEW dar_adgangsadresser_view AS
     ap.retning as tekstretning,
     ap.revisionsdato AS adressepunktaendringsdato,
     ap.esdhreference AS esdhreference,
-    ap.journalnummer AS journalnummer
+    ap.journalnummer AS journalnummer,
+    ap.geom as geom
   FROM dar_husnummer_current hn
     JOIN dar_adgangspunkt_current ap
       ON hn.adgangspunktid = ap.id

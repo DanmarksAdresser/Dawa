@@ -66,9 +66,12 @@
           "etrs89nord": 6103044,
           "noejagtighed": "A",
           "adgangspunktkilde": 5,
+          "husnummerkilde": null,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
-          "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
+          "adressepunktaendringsdato": "2005-11-02T00:00:00.000",
+          "esdhreference": null,
+          "journalnummer": null
         },
         "rectified": true
       },
@@ -95,9 +98,12 @@
           "etrs89nord": 6099453,
           "noejagtighed": "A",
           "adgangspunktkilde": 5,
+          "husnummerkilde": null,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
-          "adressepunktaendringsdato": "2005-11-02T00:00:00.000"
+          "adressepunktaendringsdato": "2005-11-02T00:00:00.000",
+          "esdhreference": null,
+          "journalnummer": null
         },
         "rectified": true
       }
@@ -119,6 +125,9 @@
           "ikraftfra": "2000-02-05T00:00:00.000",
           "etage": "1",
           "doer": "mf",
+          "esdhreference": null,
+          "journalnummer": null,
+          "kilde": null,
           "adgangsadresseid": "0a3f508b-22f2-32b8-e044-0003ba298018"
         },
         "rectified": true
@@ -135,6 +144,9 @@
           "ikraftfra": "2000-02-05T00:00:00.000",
           "etage": "1",
           "doer": "th",
+          "esdhreference": null,
+          "journalnummer": null,
+          "kilde": null,
           "adgangsadresseid": "0a3f508b-22f2-32b8-e044-0003ba298018"
         },
         "rectified": true
