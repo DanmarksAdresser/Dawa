@@ -1,7 +1,6 @@
 
 notifications:
   email:
-    - jrf@trifork.com
     - fij@mbbl.dk
     - anders@andershessellund.dk
 
