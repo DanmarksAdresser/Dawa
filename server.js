@@ -63,7 +63,6 @@ function setupWorker() {
   });
   pg.defaults.poolSize = asInteger(process.env.pgPoolSize);
   pg.defaults.poolIdleTimeout = asInteger(process.env.pgPoolIdleTimeout);
-  var dbapi = require('./dbapi');
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
   require('./apiSpecification/allSpecs');

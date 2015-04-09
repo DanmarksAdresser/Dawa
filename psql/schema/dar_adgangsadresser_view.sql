@@ -1,7 +1,7 @@
 
 DROP VIEW IF EXISTS dar_adgangsadresser_view CASCADE;
 CREATE VIEW dar_adgangsadresser_view AS
-  SELECT
+  SELECT distinct on(id)
     hn.bkid as id,
     ap.kommunenummer AS kommunekode,
     hn.vejkode,
@@ -39,11 +39,9 @@ CREATE VIEW dar_adgangsadresser_view AS
          AND sb.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
                         ELSE 'U' END)
          AND hn.husnummer <@ sb.husnrinterval
-         AND sb.ophoerttimestamp IS NULL
     LEFT JOIN dar_postnr_current pn
       ON ap.kommunenummer = pn.kommunekode
          AND hn.vejkode = pn.vejkode
          AND pn.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
                         ELSE 'U' END)
-         AND hn.husnummer <@ pn.husnrinterval
-         AND pn.ophoerttimestamp IS NULL;
+         AND hn.husnummer <@ pn.husnrinterval;
