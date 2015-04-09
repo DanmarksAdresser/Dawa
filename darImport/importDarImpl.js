@@ -8,6 +8,7 @@ var es = require('event-stream');
 var format = require('string-format');
 var fs = require('fs');
 var path = require('path');
+var q = require('q');
 var _ = require('underscore');
 
 var databaseTypes = require('../psql/databaseTypes');
@@ -600,6 +601,17 @@ function nonKeyFieldsDifferClause(alias1, alias2, spec) {
   return columnsDifferClause(alias1, alias2, columns);
 }
 
+function computeDifferencesNonTemporal(client, table, desiredTable, targetTableSuffix, idColumns, columnsToCheck) {
+  return computeInserts(client, desiredTable, table, 'insert_' + targetTableSuffix, idColumns)
+    .then(function() {
+      return computeUpdates(client, desiredTable, table, 'update_' + targetTableSuffix, idColumns, columnsToCheck);
+    })
+    .then(function() {
+      return computeDeletes(client, desiredTable, table, 'delete_' + targetTableSuffix, idColumns);
+    });
+}
+
+
 
 /**
  * Compute differences between two DAR tables. Will create three temp tables with
@@ -808,7 +820,7 @@ function applyDeletes2(client, delTable, dstTable, idColumns) {
     {
       dstTable: dstTable,
       delTable: delTable,
-      idColumnsEqual: columnsNotDistinctClause(delTable, dstTable, idColumns)
+      idColumnsEqual: columnsEqualClause(delTable, dstTable, idColumns)
     });
   return client.queryp(sql, []);
 }
@@ -909,6 +921,25 @@ function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAl
     });
 }
 
+function applyChangesNonTemporal(client, targetTable, changeTablesSuffix, idColumns, columnsToUpdate) {
+  function applyInserts() {
+    var sql = format("INSERT INTO {targetTable}" +
+      " (SELECT * FROM {sourceTable})",
+      {
+        targetTable: targetTable,
+        sourceTable: 'insert_' + changeTablesSuffix
+      });
+    return client.queryp(sql, []);
+  }
+  function applyUpdates() {
+    return applyUpdates2(client, 'update_' + changeTablesSuffix, targetTable, idColumns, columnsToUpdate);
+  }
+  function applyDeletes() {
+    return applyDeletes2(client, 'delete_' + changeTablesSuffix, targetTable, idColumns);
+  }
+  return applyInserts().then(applyUpdates).then(applyDeletes);
+}
+
 function dropTable(client, tableName) {
   return client.queryp('DROP TABLE ' + tableName,[]);
 }
@@ -920,6 +951,9 @@ function dropChangeTables(client, tableSuffix) {
     })
     .then(function() {
       return dropTable(client, 'delete_' + tableSuffix);
+    })
+    .then(function() {
+      return dropTable(client, 'desired_' + tableSuffix);
     });
 }
 
@@ -942,33 +976,77 @@ function updateTableFromCsv(client, csvFilePath, destinationTable, csvSpec, useF
     .then(function() {
       console.log('applying changes');
       return applyChanges(client, destinationTable, destinationTable, csvSpec, !useFastComparison);
-    })
-    .then(function() {
-      console.log('dropping temp table');
-      return dropTable(client, 'desired_' + destinationTable);
     });
 }
 
-function performDawaChangesVejstykker(client) {
-  var datamodel = datamodels.vejstykke;
-  var table = 'datamodel.table';
-  var modifiedTable = 'modified_' + table;
-  var select = "select kommunekode, vejkode FROM insert_streetname" +
-    " UNION select komunekode, vejkode FROM update_streetname" +
-    " UNION SELECT kommunekode,vejkode FROM delete_streetname";
+function executeExternalSqlScript(client, scriptFile) {
+  return q.nfcall(fs.readFile, path.join(__dirname, 'scripts', scriptFile), {encoding: 'utf-8'}).then(function(sql) {
+    return client.queryp(sql);
+  });
+}
 
-  return client.queryp(format('CREATE TEMP TABLE {modifiedTable} AS ({select})', {
-    modifiedTable: modifiedTable,
-    select: select
-  }), [])
-    .then(function() {
-    client.queryp(format('INSERT INTO {table}' +
-    ' (SELECT * FROM dar_{table}_view dv' +
-    ' WHERE NOT EXISTS(SELECT *  FROM {table} tab WHERE {idColumnsEqualClause} ))',
+/**
+ * Given
+ */
+function computeDirtyObjects(client) {
+  function computeDirtyVejstykker() {
+    console.log('dirty_vejstykker');
+    return executeExternalSqlScript(client, 'dirty_vejstykker.sql');
+  }
+  function computeDirtyAdgangsadresser() {
+    console.log('dirty_adgangsadresser');
+    return executeExternalSqlScript(client, 'dirty_adgangsadresser.sql');
+  }
+  function computeDirtyAdresser(){
+    console.log('dirty_adresser');
+    return executeExternalSqlScript(client, 'dirty_enhedsadresser.sql');
+  }
+  return computeDirtyVejstykker()
+    .then(computeDirtyAdgangsadresser)
+    .then(computeDirtyAdresser);
+}
+
+function performDawaChanges(client) {
+  var columnsToCheck = {
+    vejstykke: datamodels.vejstykke.columns,
+    adgangsadresse: _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr'),
+    adresse: datamodels.adresse.columns
+  };
+  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+    console.log('Updating DAWA entity ' + entityName);
+    var idColumns = datamodels[entityName].key;
+    var tableName = datamodels[entityName].table;
+    return client.queryp(format('CREATE TEMP VIEW desired_{tableName} AS (' +
+    'SELECT dar_{tableName}_view.* FROM dirty_{tableName}' +
+    ' JOIN dar_{tableName}_view ON {idColumnsEqual})',
       {
-        table: table,
-        idColumnsEqualClause: columnsNotDistinctClause('dv', 'tab', datamodel.key)
-      }), []);
+        tableName: tableName,
+        idColumnsEqual: columnsEqualClause('dar_' + tableName + '_view', 'dirty_' + tableName, idColumns)
+      }), [])
+      .then(function() {
+        return client.queryp(format('CREATE TEMP VIEW actual_{tableName} AS (' +
+          'SELECT {tableName}.* FROM dirty_{tableName}' +
+          ' JOIN {tableName} ON {idColumnsEqual})',
+          {
+            tableName: tableName,
+            idColumnsEqual: columnsEqualClause('dirty_' + tableName, tableName, idColumns)
+          }), []);
+      })
+      .then(function() {
+        return computeDifferencesNonTemporal(
+          client,
+          'actual_' + tableName,
+          'desired_' + tableName,
+          tableName,
+          idColumns,
+          columnsToCheck[entityName]);
+      })
+      .then(function() {
+        return applyChangesNonTemporal(client, tableName, tableName, idColumns, columnsToCheck[entityName]);
+      })
+      .then(function() {
+        return client.queryp('DROP VIEW actual_' + tableName + '; DROP VIEW desired_' + tableName, []);
+      });
   });
 }
 
@@ -1066,9 +1144,16 @@ function updateFromDar(client, dataDir) {
     return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec.table, spec, false);
   })
     .then(function() {
+      console.log('computing dirty objects');
+      return computeDirtyObjects(client);
+    })
+    .then(function() {
       return qUtil.mapSerial(csvSpec, function(spec) {
         return dropChangeTables(client, spec.table);
       });
+    })
+    .then(function () {
+      return performDawaChanges(client);
     });
 }
 
