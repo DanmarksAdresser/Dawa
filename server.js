@@ -10,6 +10,7 @@ var Q = require('q');
 var _ = require('underscore');
 
 var cluster = require('cluster');
+var database = require('./psql/database');
 var count = require('os').cpus().length;
 var uuid = require('node-uuid');
 var pg = require('pg.js');
@@ -75,7 +76,7 @@ function setupWorker() {
           requestId: message.requestId,
           data: {
             status: 'up',
-            postgresPool: dbapi.getPoolStatus(),
+            postgresPool: database.getPoolStatus('prod'),
             statistics: statistics.getStatistics(),
             connections: count
           }
@@ -167,7 +168,7 @@ function setupMaster() {
           var status = statuses[i];
           result.workers.push({
             id: workerId,
-            pid: worker.process.pid,
+            pid: worker ? worker.process.pid : null,
             isalive: status.state === 'fulfilled' ? status.value : {
               status: 'down',
               reason: 'Could not get status from worker process'
