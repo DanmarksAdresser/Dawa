@@ -27,6 +27,12 @@ var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
 var DAWA_TABLES = ['enhedsadresser', 'adgangsadresser', 'vejstykker'];
 
+var DAWA_COLUMNS_TO_CHECK = {
+  vejstykke: datamodels.vejstykke.columns,
+  adgangsadresse: _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr'),
+  adresse: datamodels.adresse.columns
+};
+
 var csvHusnrRegex = /^(\d*)([A-Z]?)$/;
 var types = {
   uuid: {
@@ -944,14 +950,18 @@ function dropTable(client, tableName) {
   return client.queryp('DROP TABLE ' + tableName,[]);
 }
 
-function dropChangeTables(client, tableSuffix) {
+function dropModificationTables(client, tableSuffix) {
   return dropTable(client, 'insert_' + tableSuffix)
     .then(function() {
       return dropTable(client, 'update_' + tableSuffix);
     })
     .then(function() {
       return dropTable(client, 'delete_' + tableSuffix);
-    })
+    });
+}
+
+function dropChangeTables(client, tableSuffix) {
+  return dropModificationTables(client, tableSuffix)
     .then(function() {
       return dropTable(client, 'desired_' + tableSuffix);
     });
@@ -1007,11 +1017,6 @@ function computeDirtyObjects(client) {
 }
 
 function performDawaChanges(client) {
-  var columnsToCheck = {
-    vejstykke: datamodels.vejstykke.columns,
-    adgangsadresse: _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr'),
-    adresse: datamodels.adresse.columns
-  };
   return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
     console.log('Updating DAWA entity ' + entityName);
     var idColumns = datamodels[entityName].key;
@@ -1039,10 +1044,10 @@ function performDawaChanges(client) {
           'desired_' + tableName,
           tableName,
           idColumns,
-          columnsToCheck[entityName]);
+          DAWA_COLUMNS_TO_CHECK[entityName]);
       })
       .then(function() {
-        return applyChangesNonTemporal(client, tableName, tableName, idColumns, columnsToCheck[entityName]);
+        return applyChangesNonTemporal(client, tableName, tableName, idColumns, DAWA_COLUMNS_TO_CHECK[entityName]);
       })
       .then(function() {
         return client.queryp('DROP VIEW actual_' + tableName + '; DROP VIEW desired_' + tableName, []);
@@ -1131,29 +1136,59 @@ function initFromDar(client, dataDir, clearDawa) {
           return initDawaFromScratch(client);
         });
       }
+      else {
+        return fullCompareAndUpdate(client);
+      }
     });
+}
+
+/**
+ * Make a full comparison of DAWA state and DAR state, and perform the necessary updates to
+ * the DAWA model
+ * @param client
+ */
+function fullCompareAndUpdate(client) {
+  console.log('Performing full comparison and update');
+  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+    var datamodel = datamodels[entityName];
+    var dawaTable = datamodel.table;
+    return computeDifferencesNonTemporal(client, dawaTable, 'dar_' + dawaTable + '_view',
+      dawaTable, datamodel.key, DAWA_COLUMNS_TO_CHECK[entityName])
+      .then(function() {
+        return applyChangesNonTemporal(client, dawaTable, dawaTable, datamodel.key, DAWA_COLUMNS_TO_CHECK[entityName]);
+      })
+      .then(function() {
+        return dropModificationTables(client, dawaTable);
+      });
+  });
 }
 
 /**
  * Assuming DAR tables are already populated, update DAR tables
  * from CSV, followed by an update of DAWA tables.
  */
-function updateFromDar(client, dataDir) {
+function updateFromDar(client, dataDir, fullCompare) {
   return qUtil.mapSerial(csvSpec, function(spec, entityName) {
     console.log('Importing ' + entityName);
     return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec.table, spec, false);
   })
     .then(function() {
-      console.log('computing dirty objects');
-      return computeDirtyObjects(client);
+      if(fullCompare) {
+        return fullCompareAndUpdate(client);
+      }
+      else {
+        console.log('computing dirty objects');
+        return computeDirtyObjects(client)
+          .then(function() {
+            return performDawaChanges(client);
+          });
+      }
+
     })
     .then(function() {
       return qUtil.mapSerial(csvSpec, function(spec) {
         return dropChangeTables(client, spec.table);
       });
-    })
-    .then(function () {
-      return performDawaChanges(client);
     });
 }
 
