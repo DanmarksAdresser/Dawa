@@ -14,5 +14,7 @@
       adr.kildekode as kilde,
       adr.esdhreference,
       adr.journalnummer
-    FROM dar_adresse_current adr;
+    FROM dar_adresse_current adr
+    WHERE (SELECT bkid FROM dar_husnummer_current WHERE id = adr.husnummerid) IS NOT NULL
+    AND adr.statuskode <> 2 AND adr.statuskode <> 4;
 

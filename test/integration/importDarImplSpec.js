@@ -7,6 +7,7 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
+var darSpec = require('../../darImport/darSpec');
 var databaseTypes = require('../../psql/databaseTypes');
 var importDarImpl = require('../../darImport/importDarImpl');
 var promisingStreamCombiner = require('../../promisingStreamCombiner');
@@ -17,7 +18,7 @@ var Range = databaseTypes.Range;
 q.longStackSupport = true;
 
 var syntheticDbContent = {
-  accesspoint: {
+  adgangspunkt: {
     "id": 1,
     "bkid": "efaae53e-b419-4f0e-bfa6-9097de8f79e2",
     "kildekode": 1,
@@ -35,7 +36,7 @@ var syntheticDbContent = {
     "virkning": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
     "geom": "0101000020E86400000AD7A3F0FA1F25417B14AE97D89D5741"
   },
-  housenumber: {
+  husnummer: {
     "adgangspunktid": 1,
     "bynavn": null,
     "husnummer": new Husnr(5, 'B'),
@@ -52,7 +53,7 @@ var syntheticDbContent = {
     "versionid": 1002,
     "virkning": new Range("2014-04-14T12:26:12.770Z", "2014-04-14T12:26:13.533Z", '[)')
   },
-  address: {
+  adresse: {
     "doerbetegnelse": "MF",
     "etagebetegnelse": "96",
     "husnummerid": 3,
@@ -111,7 +112,7 @@ function loadRawCsv(client, filePath, destionationTable) {
   return promisingStreamCombiner([source, pgStream]);
 }
 
-var csvSpec = importDarImpl.csvSpec;
+var csvSpec = darSpec.spec;
 describe('Importing DAR CSV files to database', function () {
   describe('Import of sample files', function () {
     it('Should define 6 CSV specifications', function () {
@@ -151,11 +152,11 @@ describe('Importing DAR CSV files to database', function () {
       columns: [
         {
           name: 'id',
-          type: importDarImpl.internal.types.uuid
+          type: darSpec.types.uuid
         },
         {
           name: 'content',
-          type: importDarImpl.internal.types.string
+          type: darSpec.types.string
         }],
       dbColumns: ['id', 'content']
     };
@@ -183,11 +184,11 @@ describe('Importing DAR CSV files to database', function () {
         columns: [
           {
             name: 'id',
-            type: importDarImpl.internal.types.uuid
+            type: darSpec.types.uuid
           },
           {
             name: 'content',
-            type: importDarImpl.internal.types.string
+            type: darSpec.types.string
           }],
         dbColumns: ['id', 'content']
       };
@@ -331,6 +332,10 @@ describe('Importing DAR CSV files to database', function () {
         });
       });
     });
+  });
+
+  describe('Incremental updates to DAR', function() {
+
   });
 
   describe.skip('Initialize database from scratch', function() {

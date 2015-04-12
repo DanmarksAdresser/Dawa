@@ -44,4 +44,5 @@ CREATE VIEW dar_adgangsadresser_view AS
          AND hn.vejkode = pn.vejkode
          AND pn.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
                         ELSE 'U' END)
-         AND hn.husnummer <@ pn.husnrinterval;
+         AND hn.husnummer <@ pn.husnrinterval
+  WHERE hn.statuskode <>2 AND hn.statuskode <> 4;

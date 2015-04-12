@@ -1,6 +1,5 @@
 "use strict";
 
-var assert = require('chai').assert;
 var copyFrom = require('pg-copy-streams').from;
 var csvParse = require('csv-parse');
 var csvStringify = require('csv-stringify');
@@ -11,19 +10,14 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
-var databaseTypes = require('../psql/databaseTypes');
 var datamodels = require('../crud/datamodel');
+var darSpec = require('./darSpec');
 var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
-var logger = require('../logger').forCategory('darImport');
 var promisingStreamCombiner = require('../promisingStreamCombiner');
 var sqlCommon = require('../psql/common');
 var tema = require('../temaer/tema');
 var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
-
-var Husnr = databaseTypes.Husnr;
-var Range = databaseTypes.Range;
-var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
 var DAWA_TABLES = ['enhedsadresser', 'adgangsadresser', 'vejstykker'];
 
@@ -33,482 +27,24 @@ var DAWA_COLUMNS_TO_CHECK = {
   adresse: datamodels.adresse.columns
 };
 
-var csvHusnrRegex = /^(\d*)([A-Z]?)$/;
-var types = {
-  uuid: {
-    parse: _.identity
-  },
-  timestamp: {
-    parse: function(str) {
-      var millis = Date.parse(str);
-      assert.isNumber(millis, "Date " + str + " could be parsed");
-      return new Date(millis).toISOString();
-    }
-  },
-  string: {
-    parse: _.identity
-  },
-  integer: {
-    parse: function(str) {
-      return parseInt(str, 10);
-    }
-  },
-  float: {
-    parse: function(str) {
-      return parseFloat(str);
-    }
-  },
-  husnr: {
-    parse: function(str) {
-      if(!str) {
-        return null;
-      }
-      str = str.trim();
-      if(str === '') {
-        return null;
-      }
-      var match = csvHusnrRegex.exec(str);
-      if(!match) {
-        logger.error('Unable to parse husnr: ' + str);
-        return null;
-      }
-      var tal;
-      if(match[1] !== '') {
-        tal = parseInt(match[1], 10);
-      }
-      else {
-        tal = 0;
-      }
-      var bogstav = match[2] ? match[2] : null;
-      return new Husnr(tal, bogstav);
-    }
-  }
-};
-
-function transformInterval(val) {
-
-  var lower = val.byhusnummerfra;
-  delete val.byhusnummerfra;
-  var upper = val.byhusnummertil;
-  delete val.byhusnummertil;
-  val.husnrinterval = new Range(lower, upper, '[]');
-  if(Husnr.lessThan(upper, lower)) {
-    logger.error("Invalid husnr interval: " + val.husnrinterval.toPostgres());
-    val.husnrinterval = new Range(null, null, 'empty');
-  }
-  return val;
+function createCopyStream(client, table, columnNames) {
+  var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
+  return client.query(copyFrom(sql));
 }
 
-function transformPostnr(val) {
-  val = transformInterval(val);
-  val.side = val.vejstykkeside;
-  delete val.vejstykkeside;
-  return val;
-}
-
-function transformSupplerendebynavn(val) {
-  val = transformInterval(val);
-  if(!val) {
-    return;
-  }
-  val.side = val.byvejside;
-  delete val.byvejside;
-  return val;
-}
-
-var accesspointCsvColumns = [
-  {
-    name: 'id',
-    type: types.integer
-  },
-  {
-    name: 'bkid',
-    type: types.uuid
-  },
-  {
-    name: 'statuskode',
-    type: types.integer
-  },
-  {
-    name: 'kildekode',
-    type: types.integer
-  },
-  {
-    name: 'nord',
-    type: types.float
-  },
-  {
-    name: 'oest',
-    type: types.float
-  },
-  {
-    name: 'tekniskstandard',
-    type: types.string
-  },
-  {
-    name: 'noejagtighedsklasse',
-    type: types.string
-  },
-  {
-    name: 'retning',
-    type: types.float
-  },
-  {
-    name: 'placering',
-    type: types.integer
-  },
-  {
-    name: 'kommunenummer',
-    type: types.integer
-  },
-  {
-    name: 'esdhreference',
-    type: types.string
-  },
-  {
-    name: 'journalnummer',
-    type: types.string
-  },
-  {
-    name: 'revisionsdato',
-    type: types.timestamp
-  }];
-
-var housenumberCsvColumns = [
-  {
-    name: 'id',
-    type: types.integer
-  },
-  {
-    name: 'bkid',
-    type: types.uuid
-  },
-  {
-    name: 'statuskode',
-    type: types.integer
-  },
-  {
-    name: 'kildekode',
-    type: types.integer
-  },
-  {
-    name: 'adgangspunktid',
-    type: types.integer
-  },
-  {
-    name: 'vejkode',
-    type: types.integer
-  },
-  {
-    name: 'husnummer',
-    type: types.husnr
-  },
-  {
-    name: 'ikrafttraedelsesdato',
-    type: types.timestamp
-  },
-  {
-    name: 'vejnavn',
-    type: types.string
-  },
-  {
-    name: 'postnummer',
-    type: types.integer
-  },
-  {
-    name: 'postdistrikt',
-    type: types.string
-  },
-  {
-    name: 'bynavn',
-    type: types.string
-  }
-];
-
-var addressColumns = [
-  {
-    name: 'id',
-    type: types.integer
-  },
-  {
-    name: 'bkid',
-    type: types.uuid
-  },
-  {
-    name: 'statuskode',
-    type: types.integer
-  },
-  {
-    name: 'kildekode',
-    type: types.integer
-  },
-  {
-    name: 'husnummerid',
-    type: types.integer
-  },
-  {
-    name: 'etagebetegnelse',
-    type: types.string
-  },
-  {
-    name: 'doerbetegnelse',
-    type: types.string
-  },
-  {
-    name: 'esdhreference',
-    type: types.string
-  },
-  {
-    name: 'journalnummer',
-    type: types.string
-  },
-  {
-    name: 'ikrafttraedelsesdato',
-    type: types.timestamp
-  }];
-
-var streetnameColumns = [
-  {
-    name: 'id',
-    type: types.uuid
-  },
-  {
-    name: 'kommunekode',
-    type: types.integer
-  },
-  {
-    name: 'vejkode',
-    type: types.integer
-  },
-  {
-    name: 'navn',
-    type: types.string
-  },
-  {
-    name: 'adresseringsnavn',
-    type: types.string
-  },
-  {
-    name: 'aendringstimestamp',
-    type: types.timestamp
-  },
-  {
-    name: 'oprettimestamp',
-    type: types.timestamp
-  },
-  {
-    name: 'ophoerttimestamp',
-    type: types.timestamp
-  }
-];
-
-var postnrColumns = [
-  {
-    name: 'id',
-    type: types.uuid
-  },
-  {
-    name: 'kommunekode',
-    type: types.integer
-  },
-  {
-    name: 'vejkode',
-    type: types.integer
-  },
-  {
-    name: 'byhusnummerfra',
-    type: types.husnr
-  },
-  {
-    name: 'byhusnummertil',
-    type: types.husnr
-  },
-  {
-    name: 'vejstykkeside',
-    type: types.string
-  },
-  {
-    name: 'postdistriktnummer',
-    type: types.integer
-  },
-  {
-    name: 'aendringstimestamp',
-    type: types.timestamp
-  },
-  {
-    name: 'oprettimestamp',
-    type: types.timestamp
-  },
-  {
-    name: 'ophoerttimestamp',
-    type: types.timestamp
-  }
-];
-
-var supplerendebynavnColumns = [
-  {
-    name: 'id',
-    type: types.uuid
-  },
-  {
-    name: 'kommunekode',
-    type: types.integer
-  },
-  {
-    name: 'vejkode',
-    type: types.integer
-  },
-  {
-    name: 'byhusnummerfra',
-    type: types.husnr
-  },
-  {
-    name: 'byhusnummertil',
-    type: types.husnr
-  },
-  {
-    name: 'byvejside',
-    type: types.string
-  },
-  {
-    name: 'bynavn',
-    type: types.string
-  },
-  {
-    name: 'aendringstimestamp',
-    type: types.timestamp
-  },
-  {
-    name: 'oprettimestamp',
-    type: types.timestamp
-  },
-  {
-    name: 'ophoerttimestamp',
-    type: types.timestamp
-  }
-];
-
-var csvSpec = {
-  accesspoint: {
-    filename: 'Adgangspunkt.csv',
-    table: 'dar_adgangspunkt',
-    bitemporal: true,
-    idColumns: ['id'],
-    columns: accesspointCsvColumns,
-    dbColumns: _.without(_.pluck(accesspointCsvColumns, 'name'), 'oest', 'nord').concat('geom'),
-    transform: function(val) {
-      var oest = val.oest;
-      delete val.oest;
-      var nord = val.nord;
-      delete val.nord;
-      var srid = 25832;
-      if(!oest || !nord) {
-        val.geom = null;
-      }
-      else {
-        val.geom = new GeometryPoint2d(oest, nord, srid);
-      }
-      return val;
-    }
-  },
-  housenumber: {
-    filename: 'Husnummer.csv',
-    table: 'dar_husnummer',
-    bitemporal: true,
-    idColumns: ['id'],
-    columns: housenumberCsvColumns,
-    dbColumns: _.pluck(housenumberCsvColumns, 'name')
-  },
-  address: {
-    filename: 'Adresse.csv',
-    table: 'dar_adresse',
-    bitemporal: true,
-    idColumns: ['id'],
-    columns: addressColumns,
-    dbColumns: _.pluck(addressColumns, 'name')
-
-  },
-  streetname: {
-    filename: 'Vejnavn.csv',
-    table: 'dar_vejnavn',
-    bitemporal: false,
-    idColumns: ['id'],
-    columns: streetnameColumns,
-    dbColumns: _.pluck(streetnameColumns, 'name')
-  },
-  postnr: {
-    filename: 'Vejstykke.csv',
-    table: 'dar_postnr',
-    bitemporal: false,
-    idColumns: ['id'],
-    columns: postnrColumns,
-    dbColumns: _.without(_.pluck(postnrColumns, 'name'), 'byhusnummerfra', 'byhusnummertil', 'vejstykkeside').concat(['husnrinterval', 'side']),
-    transform: transformPostnr
-  },
-  supplerendebynavn: {
-    filename: 'SupplerendeBynavn.csv',
-    table: 'dar_supplerendebynavn',
-    bitemporal: false,
-    idColumns: ['id'],
-    columns: supplerendebynavnColumns,
-    dbColumns: _.without(_.pluck(supplerendebynavnColumns, 'name'), 'byhusnummerfra', 'byhusnummertil', 'byvejside').concat(['husnrinterval', 'side']),
-    transform: transformSupplerendebynavn
-  }
-};
-
-function transform(spec, csvRow) {
-  function parseStr(type, str) {
-    if(str === undefined || str === null) {
-      return null;
-    }
-    str = str.trim();
-    if(str === '') {
-      return null;
-    }
-    return type.parse(str);
-  }
-  function parseTimeInterval(name) {
-    var from = parseStr(types.timestamp, csvRow[name + 'start']);
-    var to = parseStr(types.timestamp, csvRow[name + 'slut']);
-    if(!from) {
-      from = null;
-    }
-    if(!to) {
-      to = null;
-    }
-    return new Range(from, to, '[)');
-  }
-  var result = spec.columns.reduce(function(memo, colSpec) {
-    var str = csvRow[colSpec.name];
-    memo[colSpec.name] = parseStr(colSpec.type, str);
-    return memo;
-  }, {});
-  if(spec.bitemporal) {
-    result.versionid = parseStr(types.integer, csvRow.versionid);
-    result.registrering = parseTimeInterval('registrering');
-    result.virkning = parseTimeInterval('virkning');
-  }
-  if(spec.transform) {
-    result = spec.transform(result);
-    if(!result) {
-      return;
-    }
-  }
-  Object.keys(result).forEach(function(key) {
-    if(result[key] && result[key].toPostgres) {
-      result[key] = result[key].toPostgres();
-    }
-  });
-  return result;
-}
-
-function loadCsvFile(client, filePath, tableName, spec) {
+function getAllColumnNames(spec) {
   var columnNames = spec.dbColumns;
   if(spec.bitemporal) {
     columnNames = columnNames.concat(['versionid', 'registrering', 'virkning']);
   }
-  var sql = "COPY " + tableName + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
-  var pgStream = client.query(copyFrom(sql));
+  return columnNames;
+
+}
+
+function loadCsvFile(client, filePath, tableName, spec) {
+  var columnNames = getAllColumnNames(spec);
+  var pgStream = createCopyStream(client, tableName, columnNames);
+
   var csvParseOptions = {
     delimiter: ';',
     quote: '"',
@@ -520,8 +56,11 @@ function loadCsvFile(client, filePath, tableName, spec) {
   return promisingStreamCombiner([
     inputStream,
     csvParse(csvParseOptions),
-    es.mapSync(function (csvRow) {
-      return transform(spec, csvRow);
+    es.mapSync(function(csvRow) {
+      return darSpec.transformCsv(spec, csvRow);
+    }),
+    es.mapSync(function (entity) {
+      return darSpec.transform(spec, entity);
     }),
     csvStringify({
       delimiter: ';',
@@ -1059,7 +598,7 @@ function performDawaChanges(client) {
  * Remove all data from DAR tables
  */
 function clearDarTables(client) {
-  return qUtil.mapSerial(csvSpec, function(spec) {
+  return qUtil.mapSerial(darSpec.spec, function(spec) {
     return client.queryp('DELETE FROM ' + spec.table, []);
   });
 }
@@ -1069,7 +608,7 @@ function clearDarTables(client) {
  * Loads data directly into the tables from CSV.
  */
 function initDarTables(client, dataDir) {
-  return qUtil.mapSerial(csvSpec, function(spec, entityName) {
+  return qUtil.mapSerial(darSpec.spec, function(spec, entityName) {
     console.log('Importing ' + entityName);
     return loadCsvFile(client, path.join(dataDir, spec.filename), spec.table, spec);
   });
@@ -1168,7 +707,7 @@ function fullCompareAndUpdate(client) {
  * from CSV, followed by an update of DAWA tables.
  */
 function updateFromDar(client, dataDir, fullCompare) {
-  return qUtil.mapSerial(csvSpec, function(spec, entityName) {
+  return qUtil.mapSerial(darSpec.spec, function(spec, entityName) {
     console.log('Importing ' + entityName);
     return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec.table, spec, false);
   })
@@ -1186,21 +725,113 @@ function updateFromDar(client, dataDir, fullCompare) {
 
     })
     .then(function() {
-      return qUtil.mapSerial(csvSpec, function(spec) {
+      return qUtil.mapSerial(darSpec.spec, function(spec) {
         return dropChangeTables(client, spec.table);
       });
     });
 }
 
+/**
+ * Store DAR entities fetched from API in temp tables
+ * @param client
+ * @param rowsMap
+ * @returns {*}
+ */
+function storeFetched(client, rowsMap) {
+  return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
+    var spec = darSpec.spec[entityName];
+    var fetchedTable = 'fetched_' + entityName;
+    return client.queryp('CREATE TEMP TABLE ' + fetchedTable + ' LIKE ' + spec.table, [])
+      .then(function() {
+        var columnNames = getAllColumnNames(spec);
+        var pgStream = createCopyStream(client, fetchedTable, columnNames);
+        var inputStream = es.readArray(rowsMap[entityName]);
+        return promisingStreamCombiner([
+          inputStream,
+          es.mapSync(function (csvRow) {
+            return transform(spec, csvRow);
+          }),
+          csvStringify({
+            delimiter: ';',
+            quote: '"',
+            escape: '\\',
+            columns: columnNames,
+            header: true,
+            encoding: 'utf8'
+          }),
+          pgStream
+        ]);
+
+      });
+  });
+}
+
+/**
+ * Given a map entityName -> rows fetched from API,
+ * compute set of changes to be performed to bitemporal tables and store these changes in temp tables.
+ * @param client
+ * @param rowsMap
+ */
+function computeChangeSets (client, rowsMap) {
+  storeFetched(client, rowsMap).then(function() {
+    return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
+      var srcTable = 'fetched_' + entityName;
+      var dstTable = 'dar_' + entityName;
+      var insertsSql = format('CREATE TEMP TABLE insert_{dstTable} AS select * from {srcTable}' +
+      ' WHERE NOT EXISTS(SELECT 1 FROM {table} WHERE {dstTable}.versionid = {srcTable}.versionid)',
+        {
+          srcTable: srcTable,
+          dstTable: dstTable
+        });
+      var updatesSql = format('CREATE TEMP TABLE update_{dstTable} AS SELECT * FROM {srcTable}' +
+      ' LEFT JOIN {dstTable} ON {srcTable}.versionid = {dstTable}.versionid' +
+      ' WHERE NOT upper_inf(registrering) AND' +
+      ' {dstTable}.versionid IS NOT NULL' +
+      ' AND NOT upper_inf({dstTable}.registrering)',
+        {
+          srcTable: srcTable,
+          dstTable: dstTable
+        });
+      return client.queryp(insertsSql, [])
+        .then(function() {
+          return client.queryp(updatesSql, []);
+        })
+        .then(function() {
+          return client.queryp('CREATE TEMP TABLE delete_{dstTable}(versionid integer not null)', []);
+        });
+    });
+  });
+}
+
+/**
+ * Given a number of new records for adgangspunkt, husnummer and adresse,
+ * store/update these in the database and update the DAWA model.
+ * @param client
+ * @param rowsMap
+ * @returns promise
+ */
+exports.applyDarChanges = function (client, rowsMap) {
+  return computeChangeSets(client, rowsMap)
+    .then(function () {
+      return computeDirtyObjects(client);
+    })
+    .then(function () {
+      return performDawaChanges(client);
+    })
+    .then(function() {
+      return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
+        return dropChangeTables(client, 'dar_' + entityName);
+      });
+    });
+
+};
+
 exports.loadCsvFile = loadCsvFile;
 exports.updateTableFromCsv = updateTableFromCsv;
-exports.csvSpec = csvSpec;
 exports.initFromDar = initFromDar;
 exports.updateFromDar = updateFromDar;
 
 exports.internal = {
-  transform: transform,
-  types: types,
   createTableAndLoadData: createTableAndLoadData,
   computeDifferences: computeDifferences
 };
