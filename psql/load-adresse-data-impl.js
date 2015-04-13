@@ -162,7 +162,7 @@ exports.loadCsvOnly = function(client, options, callback) {
 
   var transformers = format === 'legacy' ? legacyTransformers : bbrTransformers;
   var fileStreams = format == 'legacy' ? legacyFileStreams(dataDir) : bbrFileStreams(dataDir, filePrefix);
-  async.series([
+  return q.nfcall(async.series, [
     function(callback) {
       var vejstykkerStream = fileStreams.vejstykke();
       loadCsv(client, vejstykkerStream, {
@@ -194,7 +194,7 @@ exports.loadCsvOnly = function(client, options, callback) {
 
       }, callback);
     }
-  ], callback);
+  ]).nodeify(callback);
 };
 
 var initializeHistoryTable = function (client, entityName) {

@@ -629,6 +629,16 @@ function clearDawaTables(client) {
   });
 }
 
+function materializeDarViews(client) {
+  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+    console.log('materializing ' + entityName);
+    var datamodel = comparisonDatamodels[entityName];
+    var matTable = 'mat_' + datamodel.table;
+    var darView = 'dar_' + datamodel.table + '_view';
+    return client.queryp('CREATE TABLE ' + matTable + ' AS SELECT * FROM ' + darView, []);
+  });
+}
+
 /**
  * Given that DAR tables are populated, initialize DAWA tables, assuming no
  * existing data is present in the tables.
@@ -637,12 +647,21 @@ function initDawaFromScratch(client) {
   console.log('initializing DAWA from scratch');
   return sqlCommon.withoutTriggers(client, function() {
     return qUtil.mapSerial(DAWA_TABLES, function (tableName) {
-      console.log('initializing table ' + tableName);
-      var sql = format("INSERT INTO {table} (SELECT * FROM dar_{table}_view)",
-        {
-          table: tableName
+      var matTable = 'mat_' + tableName;
+      var darView = 'dar_' + tableName + '_view';
+      console.log('materializing ' + tableName);
+      return client.queryp('CREATE TEMP TABLE ' + matTable + ' AS SELECT * FROM ' + darView, [])
+        .then(function() {
+          console.log('initializing table ' + tableName);
+          var sql = format("INSERT INTO {table} (SELECT * FROM mat_{table})",
+            {
+              table: tableName
+            });
+          return client.queryp(sql, []);
+        })
+        .then(function() {
+          return client.queryp('DROP TABLE ' + matTable);
         });
-      return client.queryp(sql, []);
     })
       .then(function () {
         console.log('initializing history');
@@ -830,6 +849,7 @@ exports.loadCsvFile = loadCsvFile;
 exports.updateTableFromCsv = updateTableFromCsv;
 exports.initFromDar = initFromDar;
 exports.updateFromDar = updateFromDar;
+exports.initDarTables = initDarTables;
 
 exports.internal = {
   createTableAndLoadData: createTableAndLoadData,

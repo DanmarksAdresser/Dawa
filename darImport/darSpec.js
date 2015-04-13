@@ -13,6 +13,13 @@ var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
 var csvHusnrRegex = /^(\d*)([A-Z]?)$/;
 
+function removePrefixZeroes(str) {
+  while (str && str.charAt(0) === '0') {
+    str = str.substring(1);
+  }
+  return str;
+}
+
 function parseHusnr(str) {
   if(!str) {
     return null;
@@ -329,7 +336,7 @@ var adresseCsvColumns = [
     type: types.string
   },
   {
-    name: 'ikrafttraedelsesdato',
+    name: 'iKrafttraedelsesdato',
     type: types.timestamp
   }];
 
@@ -492,7 +499,17 @@ var csvSpec = {
     bitemporal: true,
     idColumns: ['id'],
     columns: adresseCsvColumns,
-    dbColumns: _.pluck(adresseCsvColumns, 'name')
+    dbColumns: _.pluck(adresseCsvColumns, 'name'),
+    transform: function(row) {
+      if(!_.isUndefined(row.etagebetegnelse) && !_.isNull(row.etagebetegnelse)) {
+        row.etagebetegnelse = removePrefixZeroes(row.etagebetegnelse);
+        row.etagebetegnelse = row.etagebetegnelse.toLowerCase();
+      }
+      if(!_.isUndefined(row.doerbetegnelse) && !_.isNull(row.doerbetegnelse)) {
+        row.doerbetegnelse = row.doerbetegnelse.toLowerCase();
+      }
+      return row;
+    }
 
   },
   streetname: {
@@ -501,7 +518,16 @@ var csvSpec = {
     bitemporal: false,
     idColumns: ['id'],
     columns: streetnameColumns,
-    dbColumns: _.pluck(streetnameColumns, 'name')
+    dbColumns: _.pluck(streetnameColumns, 'name'),
+    transform: function(row) {
+      if(row.navn) {
+        row.navn = row.navn.trim();
+      }
+      if(row.adresseringsnavn) {
+        row.adresseringsnavn = row.adresseringsnavn.trim();
+      }
+      return row;
+    }
   },
   postnr: {
     filename: 'Vejstykke.csv',

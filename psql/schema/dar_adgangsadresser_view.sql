@@ -12,11 +12,17 @@ CREATE VIEW dar_adgangsadresser_view AS
     null::text as matrikelnr,
     null::integer as esrejendomsnr,
     hn.statuskode as objekttype,
-    (SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
-     FROM dar_husnummer_current hn2
-     WHERE hn.id = hn2.id) AS oprettet,
+    LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
+     FROM dar_husnummer hn2
+     WHERE hn.id = hn2.id),
+     (SELECT oprettet
+      FROM adgangsadresser
+      WHERE hn.bkid = adgangsadresser.id)) AS oprettet,
     hn.ikrafttraedelsesdato  at time zone 'Europe/Copenhagen' AS ikraftfra,
-    lower(hn.virkning) at time zone 'Europe/Copenhagen' as aendret,
+    GREATEST  (lower(hn.virkning) at time zone 'Europe/Copenhagen',
+    (SELECT lower(ap2.virkning) at time zone 'Europe/Copenhagen'
+     FROM dar_adgangspunkt_current ap2
+      WHERE ap2.id = hn.adgangspunktid)) as aendret,
     ap.bkid as adgangspunktid,
     ST_X(ap.geom) as etrs89oest,
     ST_Y(ap.geom) as etrs89nord,
@@ -26,7 +32,7 @@ CREATE VIEW dar_adgangsadresser_view AS
     ap.placering,
     ap.tekniskstandard,
     ap.retning as tekstretning,
-    ap.revisionsdato AS adressepunktaendringsdato,
+    ap.revisionsdato at time zone 'Europe/Copenhagen' AS adressepunktaendringsdato,
     ap.esdhreference AS esdhreference,
     ap.journalnummer AS journalnummer,
     ap.geom as geom
