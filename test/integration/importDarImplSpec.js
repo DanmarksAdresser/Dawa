@@ -54,7 +54,7 @@ var syntheticDbContent = {
     "virkning": new Range("2014-04-14T12:26:12.770Z", "2014-04-14T12:26:13.533Z", '[)')
   },
   adresse: {
-    "doerbetegnelse": "MF",
+    "doerbetegnelse": "mf",
     "etagebetegnelse": "96",
     "husnummerid": 3,
     "id": 2,
