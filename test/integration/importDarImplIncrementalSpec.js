@@ -300,6 +300,5 @@ describe('Inkrementiel opdatering af DAR data', function() {
           });
       });
     });
-
   });
 });
