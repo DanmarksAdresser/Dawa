@@ -21,7 +21,30 @@ var MAX_DAR_TX_DURATION = moment.duration(60, 'seconds');
 var MAX_RETURNED_RECORDS = 10000;
 
 function mergeResults(result, page) {
-  var sorted = _.sort(result.concat(page), 'versionid');
+  var sorted = result.concat(page).sort(function(a, b) {
+    var versionCompare = a.versionid.localeCompare(b.versionid);
+    if(versionCompare !== 0) {
+      return versionCompare;
+    }
+    // if two rows have same versionid, but one have registreringslut,
+    // we want it to be first, such that it is the other which is removed.
+    if(a.registeringslut === b.registeringslut) {
+      return 0;
+    }
+    else if(a.registreringslut) {
+      return -1;
+    }
+    else if(b.registreringslut) {
+      return 1;
+    }
+    else {
+      logger.error('Received two rows with same versionid, but different registreringslut', {
+        a: a,
+        b: b
+      });
+      return 0;
+    }
+  });
   return _.uniq(sorted, true, function(val) {
     return val.versionid;
   });
@@ -65,8 +88,6 @@ function getPage(baseUrl, entityName, tsFrom, tsTo) {
     '&to=' + encodeURIComponent(tsTo.toISOString());
   console.log('Getting page ' + url);
   return request.get({url: url, json: true}).then(function(result) {
-    console.log('Got result: ' + JSON.stringify(result));
-    // Currently, the result is JSON-encoded twice.
     return JSON.parse(result);
   });
 }
@@ -133,7 +154,6 @@ function fetch(baseUrl, tsFrom, tsTo) {
   return qUtil.reduce(['adgangspunkt', 'husnummer', 'adresse'], function(memo, entityName) {
     return getRecordsSince(baseUrl, entityName, tsFrom, tsTo).then(function(result) {
       memo[entityName] = result;
-      console.log('fetch memo: ' + JSON.stringify(memo));
       return memo;
     });
   }, {});
@@ -149,7 +169,7 @@ function fetch(baseUrl, tsFrom, tsTo) {
  * @param tsTo
  * @returns {*}
  */
-function fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo) {
+function fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo, report) {
   function countResults(resultSet) {
     return Object.keys(resultSet).reduce(function(memo, entityName) {
       return memo + resultSet[entityName].length;
@@ -157,7 +177,7 @@ function fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo) {
   }
   if(!resultSet) {
     return fetch(baseUrl, tsFrom, tsTo).then(function(resultSet) {
-      return fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo);
+      return fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo, report);
     });
   }
   if(countResults(resultSet) === 0) {
@@ -169,10 +189,17 @@ function fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo) {
   return fetch(baseUrl, tsFrom, tsTo).then(function(secondResult) {
     if(countResults(resultSet) === countResults(secondResult)) {
       console.log('fetched: ' + JSON.stringify(secondResult));
+      if(report) {
+        report.fetchUntilStable = {
+          adgangspunktCount: secondResult.adgangspunkt.length,
+          husnummerCount: secondResult.husnummer.length,
+          adresseCount: secondResult.adresse.length
+        };
+      }
       return secondResult;
     }
     else {
-      return fetchUntilStable(baseUrl, secondResult, tsFrom, tsTo);
+      return fetchUntilStable(baseUrl, secondResult, tsFrom, tsTo, report);
     }
   });
 }
@@ -202,7 +229,7 @@ function getLastSeenTs(client) {
   });
 }
 
-function importFromApi(client, url) {
+function importFromApi(client, url, report) {
   var tsFrom, tsTo;
   return getLastFetched(client)
     .then(function (lastFetched) {
@@ -221,7 +248,7 @@ function importFromApi(client, url) {
         tsFrom = lastFetchedTs;
       }
       tsTo = moment();
-      return fetchUntilStable(url, null, tsFrom, tsTo);
+      return fetchUntilStable(url, null, tsFrom, tsTo, report);
     })
     .then(function (resultSet) {
       if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
@@ -232,7 +259,7 @@ function importFromApi(client, url) {
         return;
       }
       else {
-        return importDarImpl.applyDarChanges(client, resultSet);
+        return importDarImpl.applyDarChanges(client, resultSet, report);
       }
     }).then(function () {
       return setLastFetched(client, tsTo.subtract(MAX_DAR_TX_DURATION));

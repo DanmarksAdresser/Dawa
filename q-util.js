@@ -29,10 +29,10 @@ exports.reduce = function(arr, fn, initial) {
 };
 
 exports.awhile = function(cond, body) {
-  return q.Promise(function(resolve, reject) {
-    if(!cond()) {
-      return resolve();
-    }
-    q.when(body(), exports.awhile, reject);
+  if(!cond()) {
+    return q();
+  }
+  return body().then(function() {
+    exports.awhile(cond, body);
   });
 };

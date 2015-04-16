@@ -782,7 +782,7 @@ function updateFromDar(client, dataDir, fullCompare) {
  * @param rowsMap
  * @returns {*}
  */
-function storeFetched(client, rowsMap) {
+function storeFetched(client, rowsMap, report) {
   return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
     var spec = darSpec.spec[entityName];
     var fetchedTable = 'fetched_' + entityName;
@@ -806,11 +806,39 @@ function storeFetched(client, rowsMap) {
           }),
           pgStream
         ]);
-
+      })
+      .then(function() {
+        reportTable(client, report, fetchedTable);
       });
   });
 }
 
+function reportTable(client, report, table) {
+  if(report) {
+    return client.queryp('select * from ' + table, []).then(function(result) {
+      report[table] = result.rows || [];
+    });
+  }
+  else {
+    return q();
+  }
+}
+
+function reportChanges(client, report, tableSuffix) {
+  if(report) {
+    return qUtil.reduce(['insert', 'update', 'delete'], function(memo, prefix) {
+      return client.queryp('select * from ' + prefix +'_' + tableSuffix, []).then(function(result) {
+        memo[prefix] = result.rows || [];
+        return memo;
+      });
+    }, {}).then(function(changes) {
+      report[tableSuffix] = changes;
+    });
+  }
+  else {
+    return q();
+  }
+}
 
 /**
  * Given a map entityName -> rows fetched from API,
@@ -818,8 +846,8 @@ function storeFetched(client, rowsMap) {
  * @param client
  * @param rowsMap
  */
-function computeChangeSets (client, rowsMap) {
-  return storeFetched(client, rowsMap).then(function() {
+function computeChangeSets (client, rowsMap, report) {
+  return storeFetched(client, rowsMap, report).then(function() {
     return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
       var srcTable = 'fetched_' + entityName;
       var dstTable = 'dar_' + entityName;
@@ -847,6 +875,8 @@ function computeChangeSets (client, rowsMap) {
           '(versionid integer not null)', {
             dstTable: dstTable
           }), []);
+        }).then(function() {
+          return reportChanges(client, report, dstTable);
         });
     });
   })
@@ -866,8 +896,8 @@ function computeChangeSets (client, rowsMap) {
  * @param rowsMap
  * @returns promise
  */
-exports.applyDarChanges = function (client, rowsMap) {
-  return computeChangeSets(client, rowsMap)
+exports.applyDarChanges = function (client, rowsMap, report) {
+  return computeChangeSets(client, rowsMap, report)
     .then(function() {
       return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'],
         function(specName) {
