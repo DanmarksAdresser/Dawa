@@ -87,9 +87,7 @@ function getPage(baseUrl, entityName, tsFrom, tsTo) {
     '?from=' + encodeURIComponent(tsFrom.toISOString()) +
     '&to=' + encodeURIComponent(tsTo.toISOString());
   console.log('Getting page ' + url);
-  return request.get({url: url, json: true}).then(function(result) {
-    return JSON.parse(result);
-  });
+  return request.get({url: url, json: true});
 }
 
 /**

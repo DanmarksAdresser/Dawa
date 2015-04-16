@@ -336,7 +336,7 @@ var adresseCsvColumns = [
     type: types.string
   },
   {
-    name: 'iKrafttraedelsesdato',
+    name: 'ikrafttraedelsesdato',
     type: types.timestamp
   }];
 
