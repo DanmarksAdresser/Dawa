@@ -20,3 +20,4 @@ CREATE TABLE  dar_adresse (
 CREATE INDEX ON dar_adresse(id);
 CREATE INDEX ON dar_adresse(bkid);
 CREATE INDEX ON dar_adresse(husnummerid);
+CREATE INDEX ON dar_adresse(coalesce(upper(registrering), lower(registrering)));

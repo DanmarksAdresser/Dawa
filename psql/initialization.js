@@ -37,6 +37,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'enhedsadresser'},
   {name: 'ejerlav'},
   {name: 'ejerlav_ts'},
+  {name: 'dar_lastfetched', init: false },
   {name: 'dar_adgangspunkt', init: false},
   {name: 'dar_adgangspunkt_current', type: 'view'},
   {name: 'dar_adresse', init: false},

@@ -5,6 +5,7 @@ var pg = require('pg.js');
 var q = require('q');
 var _ = require('underscore');
 
+var logger = require('../logger').forCategory('sql');
 var statistics = require('../statistics');
 
 var Client = pg.Client;
@@ -87,6 +88,10 @@ function denodeifyClient(client) {
   };
   result.queryp = function(query, params) {
     return q.ninvoke(client, 'query', query, params).catch(function(err) {
+      logger.error("Query failed: ", {
+        query: query,
+        error: err
+      });
       return q.reject(err);
     });
   };

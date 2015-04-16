@@ -22,3 +22,4 @@ CREATE TABLE  dar_adgangspunkt (
 
 CREATE INDEX ON dar_adgangspunkt(id);
 CREATE INDEX ON dar_adgangspunkt(bkid);
+CREATE INDEX ON dar_adgangspunkt(coalesce(upper(registrering), lower(registrering)));

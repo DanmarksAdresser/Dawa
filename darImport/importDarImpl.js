@@ -156,7 +156,30 @@ function computeDifferencesNonTemporal(client, table, desiredTable, targetTableS
     });
 }
 
-
+function createEmptyChangeTables(client, table, targetTableSuffix, spec) {
+  if(spec.bitemporal) {
+    return client.queryp(format(
+      'CREATE TEMP TABLE insert_{suffix} (LIKE {table});' +
+      ' CREATE TEMP TABLE update_{suffix} (LIKE {table};' +
+      ' CREATE TEMP TABLE delete_{suffix}(versionid integer)',
+      {
+        suffix: targetTableSuffix,
+        table: table
+      }), []);
+  }
+  else {
+    return client.queryp(format(
+      'CREATE TEMP TABLE insert_{suffix} AS SELECT {columns} FROM {table} WHERE false;' +
+      ' CREATE TEMP TABLE update_{suffix} AS SELECT {columns} FROM {table} WHERE false;' +
+      ' CREATE TEMP TABLE delete_{suffix} AS SELECT {idColumns} FROM {table} WHERE false;',
+      {
+        table: table,
+        suffix: targetTableSuffix,
+        columns: spec.dbColumns.join(', '),
+        idColumns: spec.idColumns.join(', ')
+      }), []);
+  }
+}
 
 /**
  * Compute differences between two DAR tables. Will create three temp tables with
@@ -538,21 +561,21 @@ function executeExternalSqlScript(client, scriptFile) {
  * Given
  */
 function computeDirtyObjects(client) {
-  function computeDirtyVejstykker() {
-    console.log('dirty_vejstykker');
-    return executeExternalSqlScript(client, 'dirty_vejstykker.sql');
-  }
-  function computeDirtyAdgangsadresser() {
-    console.log('dirty_adgangsadresser');
-    return executeExternalSqlScript(client, 'dirty_adgangsadresser.sql');
-  }
-  function computeDirtyAdresser(){
-    console.log('dirty_adresser');
-    return executeExternalSqlScript(client, 'dirty_enhedsadresser.sql');
-  }
-  return computeDirtyVejstykker()
-    .then(computeDirtyAdgangsadresser)
-    .then(computeDirtyAdresser);
+  var tables = ['vejstykker', 'adgangsadresser', 'enhedsadresser'];
+  var dirtyComputations = {
+    vejstykker: function () {
+      return executeExternalSqlScript(client, 'dirty_vejstykker.sql');
+    },
+    adgangsadresser: function () {
+      return executeExternalSqlScript(client, 'dirty_adgangsadresser.sql');
+    },
+    enhedsadresser: function (){
+      return executeExternalSqlScript(client, 'dirty_enhedsadresser.sql');
+    }
+  };
+  return qUtil.mapSerial(tables, function(tableName) {
+    return dirtyComputations[tableName]();
+  });
 }
 
 function performDawaChanges(client) {
@@ -590,6 +613,9 @@ function performDawaChanges(client) {
       })
       .then(function() {
         return client.queryp('DROP VIEW actual_' + tableName + '; DROP VIEW desired_' + tableName, []);
+      })
+      .then(function() {
+        return dropModificationTables(client, tableName);
       });
   });
 }
@@ -760,7 +786,7 @@ function storeFetched(client, rowsMap) {
   return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
     var spec = darSpec.spec[entityName];
     var fetchedTable = 'fetched_' + entityName;
-    return client.queryp('CREATE TEMP TABLE ' + fetchedTable + ' LIKE ' + spec.table, [])
+    return client.queryp('CREATE TEMP TABLE ' + fetchedTable + ' (LIKE ' + spec.table + ')', [])
       .then(function() {
         var columnNames = getAllColumnNames(spec);
         var pgStream = createCopyStream(client, fetchedTable, columnNames);
@@ -768,7 +794,7 @@ function storeFetched(client, rowsMap) {
         return promisingStreamCombiner([
           inputStream,
           es.mapSync(function (csvRow) {
-            return transform(spec, csvRow);
+            return darSpec.transform(spec, csvRow);
           }),
           csvStringify({
             delimiter: ';',
@@ -785,6 +811,7 @@ function storeFetched(client, rowsMap) {
   });
 }
 
+
 /**
  * Given a map entityName -> rows fetched from API,
  * compute set of changes to be performed to bitemporal tables and store these changes in temp tables.
@@ -792,21 +819,21 @@ function storeFetched(client, rowsMap) {
  * @param rowsMap
  */
 function computeChangeSets (client, rowsMap) {
-  storeFetched(client, rowsMap).then(function() {
+  return storeFetched(client, rowsMap).then(function() {
     return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
       var srcTable = 'fetched_' + entityName;
       var dstTable = 'dar_' + entityName;
       var insertsSql = format('CREATE TEMP TABLE insert_{dstTable} AS select * from {srcTable}' +
-      ' WHERE NOT EXISTS(SELECT 1 FROM {table} WHERE {dstTable}.versionid = {srcTable}.versionid)',
+      ' WHERE NOT EXISTS(SELECT 1 FROM {dstTable} WHERE {dstTable}.versionid = {srcTable}.versionid)',
         {
           srcTable: srcTable,
           dstTable: dstTable
         });
-      var updatesSql = format('CREATE TEMP TABLE update_{dstTable} AS SELECT * FROM {srcTable}' +
+      var updatesSql = format('CREATE TEMP TABLE update_{dstTable} AS SELECT {srcTable}.* FROM {srcTable}' +
       ' LEFT JOIN {dstTable} ON {srcTable}.versionid = {dstTable}.versionid' +
-      ' WHERE NOT upper_inf(registrering) AND' +
+      ' WHERE NOT upper_inf({srcTable}.registrering) AND' +
       ' {dstTable}.versionid IS NOT NULL' +
-      ' AND NOT upper_inf({dstTable}.registrering)',
+      ' AND upper_inf({dstTable}.registrering)',
         {
           srcTable: srcTable,
           dstTable: dstTable
@@ -816,10 +843,20 @@ function computeChangeSets (client, rowsMap) {
           return client.queryp(updatesSql, []);
         })
         .then(function() {
-          return client.queryp('CREATE TEMP TABLE delete_{dstTable}(versionid integer not null)', []);
+          return client.queryp(format('CREATE TEMP TABLE delete_{dstTable}' +
+          '(versionid integer not null)', {
+            dstTable: dstTable
+          }), []);
         });
     });
-  });
+  })
+    .then(function() {
+      return qUtil.mapSerial(
+        [darSpec.spec.streetname, darSpec.spec.postnr, darSpec.spec.supplerendebynavn],
+        function(spec) {
+          return createEmptyChangeTables(client, spec.table, spec.table, spec);
+      });
+    });
 }
 
 /**
@@ -831,6 +868,13 @@ function computeChangeSets (client, rowsMap) {
  */
 exports.applyDarChanges = function (client, rowsMap) {
   return computeChangeSets(client, rowsMap)
+    .then(function() {
+      return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'],
+        function(specName) {
+          var spec = darSpec.spec[specName];
+          return applyChanges(client, spec.table, spec.table, spec, false);
+        });
+    })
     .then(function () {
       return computeDirtyObjects(client);
     })
@@ -838,8 +882,19 @@ exports.applyDarChanges = function (client, rowsMap) {
       return performDawaChanges(client);
     })
     .then(function() {
-      return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
-        return dropChangeTables(client, 'dar_' + entityName);
+      return qUtil.mapSerial(Object.keys(darSpec.spec), function(specName) {
+        var spec = darSpec.spec[specName];
+        return dropModificationTables(client, spec.table);
+      });
+    })
+    .then(function() {
+      return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(specName) {
+        return dropTable(client, 'fetched_' + specName);
+      });
+    })
+    .then(function() {
+      return qUtil.mapSerial(['adgangsadresser', 'enhedsadresser', 'vejstykker'], function(table) {
+        return dropTable(client, 'dirty_' + table);
       });
     });
 
@@ -853,5 +908,8 @@ exports.initDarTables = initDarTables;
 
 exports.internal = {
   createTableAndLoadData: createTableAndLoadData,
-  computeDifferences: computeDifferences
+  computeDifferences: computeDifferences,
+  storeFetched: storeFetched,
+  computeChangeSets: computeChangeSets,
+  computeDirtyObjects: computeDirtyObjects
 };

@@ -20,10 +20,19 @@ exports.mapSerial = function(arr, fn) {
 exports.reduce = function(arr, fn, initial) {
   var tasks = arr.map(function(item) {
     return function(memo) {
-      return memo.then(function(memo) {
+      return q.when(memo).then(function(memo) {
         return fn(memo, item);
       });
     };
   });
   return tasks.reduce(q.when, initial);
+};
+
+exports.awhile = function(cond, body) {
+  return q.Promise(function(resolve, reject) {
+    if(!cond()) {
+      return resolve();
+    }
+    q.when(body(), exports.awhile, reject);
+  });
 };
