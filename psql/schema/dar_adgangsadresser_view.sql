@@ -49,4 +49,4 @@ CREATE VIEW dar_adgangsadresser_view AS
   FROM dar_husnummer_current hn
     JOIN dar_adgangspunkt_current ap
       ON hn.adgangspunktid = ap.id
-  WHERE hn.statuskode <>2 AND hn.statuskode <> 4;
+  WHERE hn.statuskode <>2 AND hn.statuskode <> 4 AND hn.vejkode IS NOT NULL;
