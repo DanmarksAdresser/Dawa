@@ -4,7 +4,7 @@ var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var importFromApiImpl = require('./importFromApiImpl');
-var logger = require('logger').forCategory('darImportApi');
+var logger = require('../logger').forCategory('darImportApi');
 var proddb = require('../psql/proddb');
 var qUtil = require('../q-util');
 
