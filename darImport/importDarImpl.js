@@ -560,7 +560,7 @@ function executeExternalSqlScript(client, scriptFile) {
 /**
  * Given
  */
-function computeDirtyObjects(client) {
+function computeDirtyObjects(client, report) {
   var tables = ['vejstykker', 'adgangsadresser', 'enhedsadresser'];
   var dirtyComputations = {
     vejstykker: function () {
@@ -574,7 +574,10 @@ function computeDirtyObjects(client) {
     }
   };
   return qUtil.mapSerial(tables, function(tableName) {
-    return dirtyComputations[tableName]();
+    return dirtyComputations[tableName]().then(function() {
+      return reportTable(client, report, 'dirty_' + tableName);
+    });
+
   });
 }
 
@@ -906,7 +909,7 @@ exports.applyDarChanges = function (client, rowsMap, report) {
         });
     })
     .then(function () {
-      return computeDirtyObjects(client);
+      return computeDirtyObjects(client, report);
     })
     .then(function () {
       return performDawaChanges(client);

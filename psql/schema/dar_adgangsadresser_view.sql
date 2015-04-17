@@ -1,13 +1,23 @@
 
 DROP VIEW IF EXISTS dar_adgangsadresser_view CASCADE;
 CREATE VIEW dar_adgangsadresser_view AS
-  SELECT distinct on(id)
+  SELECT
     hn.bkid as id,
     ap.kommunenummer AS kommunekode,
     hn.vejkode,
     (hn.husnummer).tal || COALESCE((hn.husnummer).bogstav, '') as husnr,
-    sb.bynavn as supplerendebynavn,
-    pn.postdistriktnummer AS postnr,
+    (SELECT bynavn FROM dar_supplerendebynavn sb WHERE
+      ap.kommunenummer = sb.kommunekode
+         AND hn.vejkode = sb.vejkode
+         AND sb.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
+                        ELSE 'U' END)
+         AND hn.husnummer <@ sb.husnrinterval limit 1) as supplerendebynavn,
+    (SELECT postdistriktnummer FROM dar_postnr_current pn WHERE
+      ap.kommunenummer = pn.kommunekode
+         AND hn.vejkode = pn.vejkode
+         AND pn.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
+                        ELSE 'U' END)
+         AND hn.husnummer <@ pn.husnrinterval limit 1) as postnr,
     null::integer as ejerlavkode,
     null::text as matrikelnr,
     null::integer as esrejendomsnr,
@@ -39,16 +49,4 @@ CREATE VIEW dar_adgangsadresser_view AS
   FROM dar_husnummer_current hn
     JOIN dar_adgangspunkt_current ap
       ON hn.adgangspunktid = ap.id
-    LEFT JOIN dar_supplerendebynavn_current sb
-      ON ap.kommunenummer = sb.kommunekode
-         AND hn.vejkode = sb.vejkode
-         AND sb.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
-                        ELSE 'U' END)
-         AND hn.husnummer <@ sb.husnrinterval
-    LEFT JOIN dar_postnr_current pn
-      ON ap.kommunenummer = pn.kommunekode
-         AND hn.vejkode = pn.vejkode
-         AND pn.side = (CASE WHEN (hn.husnummer).tal % 2 = 0 THEN 'L'
-                        ELSE 'U' END)
-         AND hn.husnummer <@ pn.husnrinterval
   WHERE hn.statuskode <>2 AND hn.statuskode <> 4;
