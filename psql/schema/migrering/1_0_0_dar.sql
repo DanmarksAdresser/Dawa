@@ -42,7 +42,8 @@ CREATE TABLE  dar_adgangspunkt (
   esdhreference text,
   journalnummer text,
   revisionsdato timestamptz,
-  geom  geometry(point, 25832)
+  geom  geometry(point, 25832),
+  exclude using gist(id with =, registrering with &&, virkning with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_adgangspunkt(id);
@@ -66,7 +67,8 @@ CREATE TABLE  dar_husnummer (
   vejnavn text,
   postnummer smallint,
   postdistrikt text,
-  bynavn text
+  bynavn text,
+  exclude using gist(id with =, registrering with &&, virkning with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_husnummer(id);
@@ -89,13 +91,34 @@ CREATE TABLE  dar_adresse (
   doerbetegnelse varchar(4),
   esdhreference text,
   journalnummer text,
-  ikrafttraedelsesdato timestamptz
+  ikrafttraedelsesdato timestamptz,
+  exclude using gist(id with =, registrering with &&, virkning with &&) INITIALLY DEFERRED
+
 );
 
 CREATE INDEX ON dar_adresse(id);
 CREATE INDEX ON dar_adresse(bkid);
 CREATE INDEX ON dar_adresse(husnummerid);
 CREATE INDEX ON dar_adresse(coalesce(upper(registrering), lower(registrering)));
+
+CREATE TABLE  dar_vejnavn (
+  versionid integer NOT NULL PRIMARY KEY DEFAULT nextval('id_sequence'),
+  id uuid not null,
+  vejkode smallint,
+  kommunekode smallint,
+  registrering tstzrange NOT NULL DEFAULT tstzrange(current_timestamp, null, '[)'),
+--  tx_created integer NOT NULL,
+--  tx_expired integer NOT NULL,
+  navn text,
+  adresseringsnavn text,
+  aendringstimestamp timestamptz,
+  oprettimestamp timestamptz,
+  ophoerttimestamp timestamptz,
+  exclude using gist((id::text) with =, registrering with &&) INITIALLY DEFERRED
+);
+
+CREATE INDEX ON dar_vejnavn(id);
+CREATE INDEX ON dar_vejnavn(vejkode, kommunekode);
 
 CREATE TABLE dar_postnr(
   versionid integer NOT NULL PRIMARY KEY DEFAULT nextval('id_sequence'),
@@ -108,7 +131,9 @@ CREATE TABLE dar_postnr(
   postdistriktnummer smallint,
   oprettimestamp timestamptz,
   aendringstimestamp timestamptz,
-  ophoerttimestamp timestamptz
+  ophoerttimestamp timestamptz,
+  exclude using gist((id::text) with =, registrering with &&) INITIALLY DEFERRED
+
 );
 
 CREATE INDEX ON dar_postnr(id);
@@ -125,7 +150,8 @@ CREATE TABLE dar_supplerendebynavn(
   bynavn varchar(50),
   oprettimestamp timestamptz,
   aendringstimestamp timestamptz,
-  ophoerttimestamp timestamptz
+  ophoerttimestamp timestamptz,
+  exclude using gist((id::text) with =, registrering with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_supplerendebynavn(id);

@@ -87,7 +87,9 @@ function getPage(baseUrl, entityName, tsFrom, tsTo) {
     '?from=' + encodeURIComponent(tsFrom.toISOString()) +
     '&to=' + encodeURIComponent(tsTo.toISOString());
   console.log('Getting page ' + url);
-  return request.get({url: url, json: true});
+  return request.get({url: url}).then(function(result) {
+    return JSON.parse(result.trim());
+  });
 }
 
 /**
@@ -186,7 +188,6 @@ function fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo, report) {
   // did not receive a partial transaction
   return fetch(baseUrl, tsFrom, tsTo).then(function(secondResult) {
     if(countResults(resultSet) === countResults(secondResult)) {
-      console.log('fetched: ' + JSON.stringify(secondResult));
       if(report) {
         report.fetchUntilStable = {
           adgangspunktCount: secondResult.adgangspunkt.length,

@@ -17,7 +17,8 @@ CREATE TABLE  dar_adgangspunkt (
   esdhreference text,
   journalnummer text,
   revisionsdato timestamptz,
-  geom  geometry(point, 25832)
+  geom  geometry(point, 25832),
+  exclude using gist(id with =, registrering with &&, virkning with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_adgangspunkt(id);

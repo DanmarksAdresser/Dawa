@@ -11,7 +11,8 @@ CREATE TABLE dar_postnr(
   postdistriktnummer smallint,
   oprettimestamp timestamptz,
   aendringstimestamp timestamptz,
-  ophoerttimestamp timestamptz
+  ophoerttimestamp timestamptz,
+  exclude using gist((id::text) with =, registrering with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_postnr(id);

@@ -11,7 +11,8 @@ CREATE TABLE  dar_vejnavn (
   adresseringsnavn text,
   aendringstimestamp timestamptz,
   oprettimestamp timestamptz,
-  ophoerttimestamp timestamptz
+  ophoerttimestamp timestamptz,
+  exclude using gist((id::text) with =, registrering with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_vejnavn(id);

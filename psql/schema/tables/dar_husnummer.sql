@@ -16,7 +16,8 @@ CREATE TABLE  dar_husnummer (
   vejnavn text,
   postnummer smallint,
   postdistrikt text,
-  bynavn text
+  bynavn text,
+  exclude using gist(id with =, registrering with &&, virkning with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_husnummer(id);

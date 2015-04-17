@@ -14,7 +14,8 @@ CREATE TABLE  dar_adresse (
   doerbetegnelse varchar(4),
   esdhreference text,
   journalnummer text,
-  ikrafttraedelsesdato timestamptz
+  ikrafttraedelsesdato timestamptz,
+  exclude using gist(id with =, registrering with &&, virkning with &&) INITIALLY DEFERRED
 );
 
 CREATE INDEX ON dar_adresse(id);

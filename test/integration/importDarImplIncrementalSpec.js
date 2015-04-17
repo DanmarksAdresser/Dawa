@@ -299,6 +299,44 @@ describe('Inkrementiel opdatering af DAR data', function() {
             expect(e.journalnummer).to.equal(ad.journalnummer);
           });
       });
+      it('Når en adresse opdateres i DAR skal den opdateres i DAWA', function() {
+        var ap = testObjects.generate('bitemporal', sampleData.adgangspunkt, {});
+        var hn = testObjects.generate('bitemporal', sampleData.husnummer, {});
+        var ad = testObjects.generate('bitemporal', sampleData.adresse, {});
+        var t1_changeset = {
+          adgangspunkt: [_.clone(ap)],
+          husnummer: [_.clone(hn)],
+          adresse: [_.clone(ad)]
+        };
+        var adExpired = _.clone(ad);
+        adExpired.registreringslut = TIME_2;
+        var adHistoric = testObjects.generate('bitemporal', sampleData.adresse, {});
+        adHistoric.virkningslut = TIME_2;
+        var adUpdated = testObjects.generate('bitemporal', sampleData.adresse, {
+          registreringstart: TIME_2,
+          virkningstart: TIME_2,
+          esdhreference: 'nyesdhref'
+        });
+        var t2_changeset = {
+          adgangspunkt: [],
+          husnummer: [],
+          adresse: [adExpired, adHistoric, adUpdated]
+        };
+        return importDarImpl.applyDarChanges(clientFn(), t1_changeset)
+          .then(function() {
+            return importDarImpl.applyDarChanges(clientFn(), t2_changeset);
+          })
+          .then(function() {
+            return getDawaContent(clientFn());
+          })
+          .then(function(dawaContent) {
+            expect(dawaContent.adresse).to.have.length(1);
+            var e = dawaContent.adresse[0];
+            expect(e.oprettet).to.equal(TIME_1_LOCAL);
+            expect(e.aendret).to.equal(TIME_2_LOCAL);
+            expect(e.esdhreference).to.equal('nyesdhref');
+          });
+      });
     });
   });
 });
