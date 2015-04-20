@@ -8,14 +8,16 @@ var q = require('q');
 var _ = require('underscore');
 
 var darSpec = require('../../darImport/darSpec');
+var darTransaction = require('../helpers/darTransaction');
 var databaseTypes = require('../../psql/databaseTypes');
 var importDarImpl = require('../../darImport/importDarImpl');
 var promisingStreamCombiner = require('../../promisingStreamCombiner');
 var testdb = require('../helpers/testdb');
-
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
 q.longStackSupport = true;
+
+var withDarTransactionAll = darTransaction.withDarTransactionAll;
 
 var syntheticDbContent = {
   adgangspunkt: {
@@ -34,7 +36,9 @@ var syntheticDbContent = {
     "esdhreference": "esdhref1",
     "journalnummer": "journalnummer1",
     "virkning": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
-    "geom": "0101000020E86400000AD7A3F0FA1F25417B14AE97D89D5741"
+    "geom": "0101000020E86400000AD7A3F0FA1F25417B14AE97D89D5741",
+    "tx_created": 1,
+    "tx_expired": null
   },
   husnummer: {
     "adgangspunktid": 1,
@@ -51,7 +55,9 @@ var syntheticDbContent = {
     "vejkode": 1,
     "vejnavn": "A C Hansensvej",
     "versionid": 1002,
-    "virkning": new Range("2014-04-14T12:26:12.770Z", "2014-04-14T12:26:13.533Z", '[)')
+    "virkning": new Range("2014-04-14T12:26:12.770Z", "2014-04-14T12:26:13.533Z", '[)'),
+    "tx_created": 1,
+    "tx_expired": null
   },
   adresse: {
     "doerbetegnelse": "mf",
@@ -66,7 +72,9 @@ var syntheticDbContent = {
     "versionid": 1001,
     "esdhreference": "esdhref2",
     "journalnummer": "journalnummer2",
-    "virkning": new Range("2014-10-07T12:24:35.473Z", null, '[)')
+    "virkning": new Range("2014-10-07T12:24:35.473Z", null, '[)'),
+    "tx_created": 1,
+    "tx_expired": null
   },
   streetname: {
     "id": "11111111-1111-1111-1111-111111111112",
@@ -121,25 +129,27 @@ describe('Importing DAR CSV files to database', function () {
     _.forEach(csvSpec, function (spec, entityName) {
       it('Should import ' + entityName + ' correctly', function () {
         return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
-          return importDarImpl.loadCsvFile(client,
-            path.join(SYNTHETIC_DIR, csvSpec[entityName].filename),
-            spec.table, spec).then(function () {
-              return q.ninvoke(client, 'query', "SELECT * FROM " + spec.table, []);
-            }).then(function (result) {
-              expect(result.rows).to.have.length(1);
-              var obj = result.rows[0];
-              if (!spec.bitemporal) {
-                var registrering = obj.registrering;
-                delete obj.registrering;
-                var versionid = obj.versionid;
-                delete obj.versionid;
-                expect(registrering.empty).to.be.false;
-                expect(registrering.lower).to.be.a.string;
-                expect(registrering.upperInfinite).to.be.true;
-                expect(versionid).to.be.a.number;
-              }
-              expect(obj).to.deep.equal(syntheticDbContent[entityName]);
-            });
+          return importDarImpl.withDarTransaction(client, function() {
+            return importDarImpl.loadCsvFile(client,
+              path.join(SYNTHETIC_DIR, csvSpec[entityName].filename),
+              spec.table, spec).then(function () {
+                return client.queryp("SELECT * FROM " + spec.table, []);
+              }).then(function (result) {
+                expect(result.rows).to.have.length(1);
+                var obj = result.rows[0];
+                if (!spec.bitemporal) {
+                  var registrering = obj.registrering;
+                  delete obj.registrering;
+                  var versionid = obj.versionid;
+                  delete obj.versionid;
+                  expect(registrering.empty).to.be.false;
+                  expect(registrering.lower).to.be.a.string;
+                  expect(registrering.upperInfinite).to.be.true;
+                  expect(versionid).to.be.a.number;
+                }
+                expect(obj).to.deep.equal(syntheticDbContent[entityName]);
+              });
+          });
         });
       });
     });
@@ -207,7 +217,7 @@ describe('Importing DAR CSV files to database', function () {
           });
       }
 
-      testdb.withTransactionAll('empty', function (clientFn) {
+      withDarTransactionAll('empty', function (clientFn) {
         before(function () {
           var client = clientFn();
           return setupTable(client)
@@ -256,7 +266,7 @@ describe('Importing DAR CSV files to database', function () {
     });
 
     describe('Compute set of differences betweeen two bitemporal tables', function () {
-      testdb.withTransactionAll('empty', function (clientFn) {
+      withDarTransactionAll('empty', function (clientFn) {
         before(function () {
           var client = clientFn();
           return setupTable(client).then(function () {
@@ -307,7 +317,7 @@ describe('Importing DAR CSV files to database', function () {
     });
     describe('Full update of bitemporal table', function () {
       var destinationTable = 'cur_table';
-      testdb.withTransactionAll('empty', function (clientFn) {
+      withDarTransactionAll('empty', function (clientFn) {
         before(function() {
           var client = clientFn();
           return setupTable(client);
@@ -335,7 +345,7 @@ describe('Importing DAR CSV files to database', function () {
   });
 
   describe.skip('Initialize database from scratch', function() {
-    return testdb.withTransactionAll('empty', function(clientFn) {
+    return withDarTransactionAll('empty', function(clientFn) {
       it('Can reinitialize db from real DAR CSV files', function() {
         this.timeout(240000);
         var client = clientFn();

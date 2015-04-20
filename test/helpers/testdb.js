@@ -14,6 +14,26 @@ exports.withTransaction = function(dbname, mode, transactionFn) {
   return transactions.withTransaction(dbname, { pooled: true, mode: mode}, transactionFn);
 };
 
+function withTransactionX(dbname, transactionFn, beforeFn, afterFn) {
+  var tx;
+  beforeFn(function() {
+    return transactions.beginTransaction(dbname, {
+      pooled: true,
+      mode: 'ROLLBACK'
+    }).then(function(_tx) {
+      tx = _tx;
+    });
+  });
+  transactionFn(function() {
+    return tx.client;
+  });
+  afterFn(function() {
+    return transactions.endTransaction(tx);
+  });
+}
+
+exports.withTransactionX = withTransactionX;
+
 /**
  * Open a transaction in beforeEach,
  * rollback the transaction in afterEah,
@@ -22,21 +42,7 @@ exports.withTransaction = function(dbname, mode, transactionFn) {
  * @param transactionFn
  */
 exports.withTransactionEach = function(dbname, transactionFn) {
-  var tx;
-  beforeEach(function() {
-    return transactions.beginTransaction(dbname, {
-      pooled: true,
-      mode: 'ROLLBACK'
-    }).then(function(_tx) {
-      tx = _tx;
-    });
-  });
-  afterEach(function() {
-    return transactions.endTransaction(tx);
-  });
-  return transactionFn(function() {
-    return tx.client;
-  });
+  return withTransactionX(dbname, transactionFn, beforeEach, afterEach);
 };
 
 /**
@@ -47,19 +53,5 @@ exports.withTransactionEach = function(dbname, transactionFn) {
  * @param transactionFn
  */
 exports.withTransactionAll = function(dbname, transactionFn) {
-  var tx;
-  before(function() {
-    return transactions.beginTransaction(dbname, {
-        pooled: true,
-        mode: 'ROLLBACK'
-      }).then(function(_tx) {
-      tx = _tx;
-    });
-  });
-  after(function() {
-    return transactions.endTransaction(tx);
-  });
-  return transactionFn(function() {
-    return tx.client;
-  });
+  return withTransactionX(dbname, transactionFn, before, after);
 };

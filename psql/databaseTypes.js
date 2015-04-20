@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('underscore');
 var tupleValueRegex = '("(?:[^"]|"")*"|[^",]*)';
 
 function repeat(val, count) {
@@ -34,6 +35,9 @@ function unescapeCompositePart(val) {
 }
 
 function escapeCompositePart(val) {
+  if(!_.isString(val)) {
+    val = "" + val;
+  }
   val = val.replace(/"/g, '""');
   val = '"' + val + '"';
   return val;

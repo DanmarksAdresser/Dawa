@@ -7,7 +7,7 @@ var _ = require('underscore');
 var datamodels = require('../../crud/datamodel');
 var importDarImpl = require('../../darImport/importDarImpl');
 var qUtil = require('../../q-util');
-var testdb = require('../helpers/testdb');
+var darTransaction = require('../helpers/darTransaction');
 var testObjects = require('../helpers/testObjects');
 
 
@@ -85,7 +85,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
     husnummer: [hn],
     adresse: [adresse]
   };
-  testdb.withTransactionEach('empty', function(clientFn) {
+  darTransaction.withDarTransactionEach('empty', function(clientFn) {
     it('fetched data are stored in appropriate tables', function() {
       return importDarImpl.internal.storeFetched(clientFn(), changeset).then(function() {
         return qUtil.mapSerial(['fetched_adgangspunkt', 'fetched_husnummer',

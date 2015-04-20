@@ -549,7 +549,42 @@ var csvSpec = {
   }
 };
 
+
+function allColumnNames(spec) {
+  var columnNames = spec.dbColumns.concat(['versionid', 'registrering']);
+  if(spec.bitemporal) {
+    columnNames.push('virkning');
+  }
+
+  return columnNames;
+
+}
+
+/*
+ * For monotemporal tables, we generate the versionid and registrering values,
+ * so they are not part of the change tables
+ */
+function changeTableColumnNames(spec) {
+  var columns = spec.dbColumns;
+  if(spec.bitemporal) {
+    columns = columns.concat(['versionid', 'registrering', 'virkning']);
+  }
+  return columns;
+}
+
+function deleteTableColumnNames(spec) {
+  if(spec.bitemporal) {
+    return ['versionid'];
+  }
+  else {
+    return spec.idColumns;
+  }
+}
+
 exports.types = types;
 exports.spec = csvSpec;
 exports.transformCsv = transformCsv;
 exports.transform = transform;
+exports.allColumnNames = allColumnNames;
+exports.changeTableColumnNames = changeTableColumnNames;
+exports.deleteTableColumnNames = deleteTableColumnNames;

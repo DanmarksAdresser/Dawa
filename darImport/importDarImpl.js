@@ -10,6 +10,7 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
+var databaseTypes = require('../psql/databaseTypes');
 var datamodels = require('../crud/datamodel');
 var darSpec = require('./darSpec');
 var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
@@ -18,6 +19,8 @@ var sqlCommon = require('../psql/common');
 var tema = require('../temaer/tema');
 var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
+
+var Range = databaseTypes.Range;
 
 var DAWA_TABLES = ['enhedsadresser', 'adgangsadresser', 'vejstykker'];
 
@@ -32,17 +35,8 @@ function createCopyStream(client, table, columnNames) {
   return client.query(copyFrom(sql));
 }
 
-function getAllColumnNames(spec) {
-  var columnNames = spec.dbColumns;
-  if(spec.bitemporal) {
-    columnNames = columnNames.concat(['versionid', 'registrering', 'virkning']);
-  }
-  return columnNames;
-
-}
-
 function loadCsvFile(client, filePath, tableName, spec) {
-  var columnNames = getAllColumnNames(spec);
+  var columnNames = darSpec.changeTableColumnNames(spec);
   var pgStream = createCopyStream(client, tableName, columnNames);
 
   var csvParseOptions = {
@@ -119,16 +113,6 @@ function columnsNotDistinctClause(alias1, alias2, columns) {
   return '(' + clauses.join(' AND ') + ')';
 }
 
-function columnsNullClause(alias, columns) {
-  var clauses = columns.map(function(column) {
-    return format('{alias}.{column} IS NULL', {
-      alias: alias,
-      column: column
-    });
-  });
-  return '(' + clauses.join(' AND') + ')';
-}
-
 function keyEqualsClause(alias1, alias2, spec) {
   return columnsNotDistinctClause(alias1, alias2, spec.idColumns);
 }
@@ -157,28 +141,18 @@ function computeDifferencesNonTemporal(client, table, desiredTable, targetTableS
 }
 
 function createEmptyChangeTables(client, table, targetTableSuffix, spec) {
-  if(spec.bitemporal) {
-    return client.queryp(format(
-      'CREATE TEMP TABLE insert_{suffix} (LIKE {table});' +
-      ' CREATE TEMP TABLE update_{suffix} (LIKE {table};' +
-      ' CREATE TEMP TABLE delete_{suffix}(versionid integer)',
-      {
-        suffix: targetTableSuffix,
-        table: table
-      }), []);
-  }
-  else {
-    return client.queryp(format(
-      'CREATE TEMP TABLE insert_{suffix} AS SELECT {columns} FROM {table} WHERE false;' +
-      ' CREATE TEMP TABLE update_{suffix} AS SELECT {columns} FROM {table} WHERE false;' +
-      ' CREATE TEMP TABLE delete_{suffix} AS SELECT {idColumns} FROM {table} WHERE false;',
-      {
-        table: table,
-        suffix: targetTableSuffix,
-        columns: spec.dbColumns.join(', '),
-        idColumns: spec.idColumns.join(', ')
-      }), []);
-  }
+  var changeColumnNames = darSpec.changeTableColumnNames(spec);
+  var deleteColumnNames = darSpec.deleteTableColumnNames(spec);
+  return client.queryp(format(
+    'CREATE TEMP TABLE insert_{suffix} AS SELECT {select} FROM {table} WHERE false;' +
+    ' CREATE TEMP TABLE update_{suffix} AS SELECT {select} FROM {table} WHERE false;' +
+    ' CREATE TEMP TABLE delete_{suffix} AS SELECT {deleteColumns} FROM {table} WHERE false;',
+    {
+      suffix: targetTableSuffix,
+      table: table,
+      select: selectList(undefined, changeColumnNames),
+      deleteColumns: selectList(undefined, deleteColumnNames)
+    }), []);
 }
 
 /**
@@ -409,21 +383,16 @@ function createTableAndLoadData(client, filePath, targetTable, templateTable, sp
 }
 
 function applyInserts(client, destinationTable, sourceTable, spec) {
-  var sql;
-  if(spec.bitemporal) {
-    sql = format("INSERT INTO {destinationTable} SELECT * FROM {sourceTable}",
-      {destinationTable: destinationTable, sourceTable: sourceTable});
-  }
-  else {
-    sql = format("INSERT INTO {destinationTable}({dstColumnList})" +
-    " (SELECT {srcColumnList} FROM {sourceTable})",
-      {
-        destinationTable: destinationTable,
-        sourceTable: sourceTable,
-        dstColumnList: selectList(undefined, spec.dbColumns),
-        srcColumnList: selectList(sourceTable, spec.dbColumns)
-      });
-  }
+  var columnNames = darSpec.changeTableColumnNames(spec);
+  var select = selectList(sourceTable, columnNames);
+  var dstColumnList = selectList(undefined, columnNames);
+  var sql = format("INSERT INTO {destinationTable}({dstColumnList}) SELECT {select} FROM {sourceTable}",
+    {
+      destinationTable: destinationTable,
+      sourceTable: sourceTable,
+      select: select,
+      dstColumnList: dstColumnList
+    });
   return client.queryp(sql, []);
 }
 
@@ -658,16 +627,6 @@ function clearDawaTables(client) {
   });
 }
 
-function materializeDarViews(client) {
-  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-    console.log('materializing ' + entityName);
-    var datamodel = comparisonDatamodels[entityName];
-    var matTable = 'mat_' + datamodel.table;
-    var darView = 'dar_' + datamodel.table + '_view';
-    return client.queryp('CREATE TABLE ' + matTable + ' AS SELECT * FROM ' + darView, []);
-  });
-}
-
 /**
  * Given that DAR tables are populated, initialize DAWA tables, assuming no
  * existing data is present in the tables.
@@ -788,10 +747,10 @@ function updateFromDar(client, dataDir, fullCompare) {
 function storeFetched(client, rowsMap, report) {
   return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
     var spec = darSpec.spec[entityName];
+    var columnNames = darSpec.changeTableColumnNames(spec);
     var fetchedTable = 'fetched_' + entityName;
-    return client.queryp('CREATE TEMP TABLE ' + fetchedTable + ' (LIKE ' + spec.table + ')', [])
+    return client.queryp('CREATE TEMP TABLE ' + fetchedTable + ' AS select ' + columnNames.join(', ') + ' FROM ' + spec.table + ' WHERE false', [])
       .then(function() {
-        var columnNames = getAllColumnNames(spec);
         var pgStream = createCopyStream(client, fetchedTable, columnNames);
         var inputStream = es.readArray(rowsMap[entityName]);
         return promisingStreamCombiner([
@@ -852,22 +811,27 @@ function reportChanges(client, report, tableSuffix) {
 function computeChangeSets (client, rowsMap, report) {
   return storeFetched(client, rowsMap, report).then(function() {
     return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
+      var spec = darSpec.spec[entityName];
+      var changeTableColumnNames = darSpec.changeTableColumnNames(spec);
       var srcTable = 'fetched_' + entityName;
       var dstTable = 'dar_' + entityName;
-      var insertsSql = format('CREATE TEMP TABLE insert_{dstTable} AS select * from {srcTable}' +
+      var select = selectList(srcTable, changeTableColumnNames);
+      var insertsSql = format('CREATE TEMP TABLE insert_{dstTable} AS select {select} from {srcTable}' +
       ' WHERE NOT EXISTS(SELECT 1 FROM {dstTable} WHERE {dstTable}.versionid = {srcTable}.versionid)',
         {
           srcTable: srcTable,
-          dstTable: dstTable
+          dstTable: dstTable,
+          select: select
         });
-      var updatesSql = format('CREATE TEMP TABLE update_{dstTable} AS SELECT {srcTable}.* FROM {srcTable}' +
+      var updatesSql = format('CREATE TEMP TABLE update_{dstTable} AS SELECT {select} FROM {srcTable}' +
       ' LEFT JOIN {dstTable} ON {srcTable}.versionid = {dstTable}.versionid' +
       ' WHERE NOT upper_inf({srcTable}.registrering) AND' +
       ' {dstTable}.versionid IS NOT NULL' +
       ' AND upper_inf({dstTable}.registrering)',
         {
           srcTable: srcTable,
-          dstTable: dstTable
+          dstTable: dstTable,
+          select: select
         });
       return client.queryp(insertsSql, [])
         .then(function() {
@@ -931,6 +895,43 @@ exports.applyDarChanges = function (client, rowsMap, report) {
       });
     });
 
+};
+
+function getDawaSeqNum(client) {
+  return client.queryp('SELECT MAX(sequence_number) as dawaSeqNum FROM transaction_history', [])
+    .then(function (result) {
+      return (result.rows && result.rows[0].dawaSeqNum) || -1;
+    });
+}
+
+exports.beginDarTransaction = function(client) {
+  return getDawaSeqNum(client).then(function(dawaSeqNum) {
+    return client.queryp('UPDATE dar_tx_current SET tx_current = COALESCE((SELECT max(id) FROM dar_transaction), 0) + 1').then(function() {
+      return dawaSeqNum;
+    });
+  });
+};
+
+exports.endDarTransaction = function(client, prevDawaSeqNum)
+{
+  return getDawaSeqNum(client)
+    .then(function (lastDawaSeqNum) {
+      return client.queryp('INSERT INTO dar_transaction(id, dawa_seq_range) VALUES ((SELECT tx_current FROM dar_tx_current), $1)',
+        [new Range(prevDawaSeqNum, lastDawaSeqNum, '(]')]);
+    })
+    .then(function () {
+      return client.queryp('UPDATE dar_tx_current SET tx_current = NULL');
+    });
+};
+
+exports.withDarTransaction = function(client, transactionFn) {
+  var prevDawaSeqNum;
+  return exports.beginDarTransaction(client).then(function(dawaSeqNum) {
+    prevDawaSeqNum = dawaSeqNum;
+    return transactionFn(client);
+  }).then(function() {
+    return exports.endDarTransaction(client, prevDawaSeqNum);
+  });
 };
 
 exports.loadCsvFile = loadCsvFile;
