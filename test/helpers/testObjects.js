@@ -14,6 +14,7 @@ function generateVersionId() {
 exports.defaultRegistrering = new Range('2011-01-01T12:00:00.123Z', null, '[)');
 exports.defaultVirkning = new Range('2011-01-01T12:00:00.123Z', null, '[)');
 
+exports.generateVersionId = generateVersionId;
 exports.generate = function(temporality, sample, restrictions) {
   var obj = _.clone(sample);
   _.forEach(restrictions, function(value, key) {

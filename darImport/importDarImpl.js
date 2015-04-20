@@ -367,14 +367,18 @@ function applyDeletes2(client, delTable, dstTable, idColumns) {
   return client.queryp(sql, []);
 }
 
-function createTableAndLoadData(client, filePath, targetTable, templateTable, spec) {
+function createTempTableForCsvContent(client, tableName, spec) {
   var columnNames = darSpec.changeTableColumnNames(spec);
-  return client.queryp(format('CREATE TEMP TABLE {targetTable} AS SELECT {select} FROM {templateTable} WHERE false',
+  return client.queryp(format('CREATE TEMP TABLE {tableName} AS SELECT {select} FROM {templateTable} WHERE false',
     {
-      targetTable: targetTable,
+      tableName: tableName,
       select: selectList(undefined, columnNames),
-      templateTable: templateTable
-    }), [])
+      templateTable: spec.table
+    }), []);
+}
+
+function createTableAndLoadData(client, filePath, targetTable, spec) {
+  return createTempTableForCsvContent(client, targetTable, spec)
     .then(function() {
       return loadCsvFile(client, filePath, targetTable, spec);
     });
@@ -427,7 +431,7 @@ function applyUpdates(client, destinationTable, sourceTable, spec, updateAllFiel
     }
     return markExpiredRecords(client, destinationTable, sourceTable, spec)
       .then(function() {
-        return applyUpdates2(client, sourceTable, destinationTable,['versionid'], columnsToUpdate)
+        return applyUpdates2(client, sourceTable, destinationTable,['versionid'], columnsToUpdate);
     });
   }
   else {
@@ -475,8 +479,36 @@ function applyDeletes(client, destinationTable, sourceTable, spec) {
   }
 }
 
-function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAllFields) {
-  return applyInserts(client, targetTable, 'insert_' + changeTablesSuffix, csvSpec)
+/*
+ * For a bitemporal table, remove any changes in upTable which is dated later than
+ * the csv file.
+ */
+function removeChangesAfterCsv(client, targetTable, upTable, lastCsvTimestamp) {
+  return client.queryp(format(
+  'DELETE FROM {upTable}' +
+  ' USING {targetTable}' +
+  ' WHERE {upTable}.versionid = {targetTable}.versionid' +
+  ' AND COALESCE(upper({targetTable}.registrering), lower({targetTable}.registrering)) > $1 ',
+    {
+      upTable: upTable,
+      targetTable: targetTable
+    }), [lastCsvTimestamp]);
+}
+
+function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAllFields, lastCsvTimestamp) {
+  return q()
+    .then(function() {
+      if(csvSpec.bitemporal && lastCsvTimestamp) {
+        console.log('filtering changes dated after CSV file');
+        return removeChangesAfterCsv(client, targetTable, 'update_' + changeTablesSuffix, lastCsvTimestamp)
+          .then(function() {
+            return removeChangesAfterCsv(client, targetTable, 'delete_' + changeTablesSuffix, lastCsvTimestamp);
+          });
+      }
+    })
+    .then(function () {
+      return applyInserts(client, targetTable, 'insert_' + changeTablesSuffix, csvSpec);
+    })
     .then(function () {
       return applyUpdates(client, targetTable, 'update_' + changeTablesSuffix, csvSpec, updateAllFields);
     }).then(function () {
@@ -525,6 +557,38 @@ function dropChangeTables(client, tableSuffix) {
 }
 
 /**
+ * Given a table desiredTable initialized from a CSV file, apply all necessary changes to destinationTable.
+ * Any records in destinationTable where registrering is later than the oldest record in CSV file is not modifiedl.
+ * @param client
+ * @param desiredTable
+ * @param destinationTable
+ * @param csvSpec
+ * @param useFastComparison
+ * @returns {*}
+ */
+function computeAndApplyCsvChanges(client, desiredTable, csvSpec, useFastComparison) {
+  var lastCsvTimestamp = null;
+  return q()
+    .then(function() {
+      if(csvSpec.bitemporal) {
+        return client.queryp('SELECT MAX(COALESCE(upper(registrering), lower(registrering))) AS ts FROM ' + desiredTable, [])
+          .then(function(result) {
+            lastCsvTimestamp = result.rows[0].ts;
+            console.log('lastCsvTimestamp: ' + lastCsvTimestamp);
+          });
+      }
+    })
+    .then(function() {
+      console.log('computing differences');
+      return computeDifferences(client, csvSpec.table, desiredTable, csvSpec.table, csvSpec, useFastComparison);
+    })
+    .then(function() {
+      console.log('applying changes');
+      return applyChanges(client, csvSpec.table, csvSpec.table, csvSpec, !useFastComparison, lastCsvTimestamp);
+    });
+
+}
+/**
  * Update a table to have same contents as a CSV file. During this process,
  * temp tables with inserts, updates and deletes are produced. These are not dropped.
  * @param client postgres client
@@ -534,15 +598,11 @@ function dropChangeTables(client, tableSuffix) {
  * @param useFastComparison For bitemporal tables, skip comparison of each field.
  * @returns {*}
  */
-function updateTableFromCsv(client, csvFilePath, destinationTable, csvSpec, useFastComparison) {
-  return createTableAndLoadData(client, csvFilePath, 'desired_' + destinationTable, destinationTable, csvSpec)
+function updateTableFromCsv(client, csvFilePath, csvSpec, useFastComparison) {
+  var desiredTable = 'desired_' + csvSpec.table;
+  return createTableAndLoadData(client, csvFilePath, desiredTable, csvSpec)
     .then(function() {
-      console.log('computing differences');
-      return computeDifferences(client, destinationTable, 'desired_' + destinationTable, destinationTable, csvSpec, useFastComparison);
-    })
-    .then(function() {
-      console.log('applying changes');
-      return applyChanges(client, destinationTable, destinationTable, csvSpec, !useFastComparison);
+      return computeAndApplyCsvChanges(client, desiredTable, csvSpec, useFastComparison);
     });
 }
 
@@ -742,7 +802,7 @@ function fullCompareAndUpdate(client) {
 function updateFromDar(client, dataDir, fullCompare) {
   return qUtil.mapSerial(darSpec.spec, function(spec, entityName) {
     console.log('Importing ' + entityName);
-    return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec.table, spec, false);
+    return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec, false);
   })
     .then(function() {
       if(fullCompare) {
@@ -924,15 +984,15 @@ exports.applyDarChanges = function (client, rowsMap, report) {
 };
 
 function getDawaSeqNum(client) {
-  return client.queryp('SELECT MAX(sequence_number) as dawaSeqNum FROM transaction_history', [])
+  return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history', [])
     .then(function (result) {
-      return (result.rows && result.rows[0].dawaSeqNum) || -1;
+      return (result.rows && result.rows[0].seqnum) || -1;
     });
 }
 
 exports.beginDarTransaction = function(client) {
   return getDawaSeqNum(client).then(function(dawaSeqNum) {
-    return client.queryp('UPDATE dar_tx_current SET tx_current = COALESCE((SELECT max(id) FROM dar_transaction), 0) + 1').then(function() {
+    return client.queryp("SET work_mem='256MB'; UPDATE dar_tx_current SET tx_current = COALESCE((SELECT max(id) FROM dar_transaction), 0) + 1").then(function() {
       return dawaSeqNum;
     });
   });
@@ -965,6 +1025,7 @@ exports.endDarTransaction = function(client, prevDawaSeqNum, source)
   return getDawaSeqNum(client)
     .then(function (dawaSeqNum) {
       currentDawaSeqNum = dawaSeqNum;
+      console.log('prevDawaSeqNum: ' + prevDawaSeqNum + ' currentDawaSeqNum: ' + currentDawaSeqNum);
       return hasModifiedDar(client);
     })
     .then(function(hasModifiedDar) {
@@ -1000,5 +1061,7 @@ exports.internal = {
   computeDifferences: computeDifferences,
   storeFetched: storeFetched,
   computeChangeSets: computeChangeSets,
-  computeDirtyObjects: computeDirtyObjects
+  computeDirtyObjects: computeDirtyObjects,
+  computeAndApplyCsvChanges: computeAndApplyCsvChanges,
+  createTempTableForCsvContent: createTempTableForCsvContent
 };
