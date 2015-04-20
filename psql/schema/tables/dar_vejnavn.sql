@@ -5,8 +5,6 @@ CREATE TABLE  dar_vejnavn (
   vejkode smallint,
   kommunekode smallint,
   registrering tstzrange NOT NULL DEFAULT tstzrange(current_timestamp, null, '[)'),
---  tx_created integer NOT NULL,
---  tx_expired integer NOT NULL,
   navn text,
   adresseringsnavn text,
   aendringstimestamp timestamptz,

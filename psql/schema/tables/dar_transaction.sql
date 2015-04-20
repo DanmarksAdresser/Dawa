@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS dar_transaction;
 CREATE TABLE dar_transaction(
 id integer NOT NULL PRIMARY KEY,
 ts timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+source dar_tx_source NOT NULL,
 dawa_seq_range int4range NOT NULL);
 
 CREATE INDEX ON dar_transaction(ts);

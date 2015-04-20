@@ -25,11 +25,13 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   proddb.withTransaction('READ_WRITE', function (client) {
-    if(initial) {
-      return importDarImpl.initFromDar(client, dataDir, clearDawa);
-    }
-    else {
-      return importDarImpl.updateFromDar(client, dataDir, fullCompare);
-    }
+    return importDarImpl.withDarTransaction(client, 'csv', function() {
+      if(initial) {
+        return importDarImpl.initFromDar(client, dataDir, clearDawa);
+      }
+      else {
+        return importDarImpl.updateFromDar(client, dataDir, fullCompare);
+      }
+    });
   }).done();
 });

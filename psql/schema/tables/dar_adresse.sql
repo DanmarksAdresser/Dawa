@@ -22,3 +22,5 @@ CREATE INDEX ON dar_adresse(id);
 CREATE INDEX ON dar_adresse(bkid);
 CREATE INDEX ON dar_adresse(husnummerid);
 CREATE INDEX ON dar_adresse(coalesce(upper(registrering), lower(registrering)));
+CREATE INDEX ON dar_adresse(tx_created);
+CREATE INDEX ON dar_adresse(tx_expired);

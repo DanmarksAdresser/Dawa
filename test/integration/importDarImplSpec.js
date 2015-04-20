@@ -129,7 +129,7 @@ describe('Importing DAR CSV files to database', function () {
     _.forEach(csvSpec, function (spec, entityName) {
       it('Should import ' + entityName + ' correctly', function () {
         return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
-          return importDarImpl.withDarTransaction(client, function() {
+          return importDarImpl.withDarTransaction(client, 'csv', function() {
             return importDarImpl.loadCsvFile(client,
               path.join(SYNTHETIC_DIR, csvSpec[entityName].filename),
               spec.table, spec).then(function () {
@@ -178,7 +178,9 @@ describe('Importing DAR CSV files to database', function () {
         ' id uuid not null,' +
         ' content text,' +
         ' registrering tstzrange not null,' +
-        ' virkning tstzrange not null)', [])
+        ' virkning tstzrange not null,' +
+        ' tx_created integer not null default current_dar_transaction(),' +
+        ' tx_expired integer)', [])
         .then(function () {
           return importDarImpl.loadCsvFile(client,
             path.join(__dirname, 'sampleDarFiles', 'comparison', 'table.csv'),

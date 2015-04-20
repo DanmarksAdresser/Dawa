@@ -3,6 +3,7 @@
 var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+var importDarImpl = require('./importDarImpl');
 var importFromApiImpl = require('./importFromApiImpl');
 var logger = require('../logger').forCategory('darImportApi');
 var proddb = require('../psql/proddb');
@@ -25,7 +26,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   function doImport() {
     var report = {};
     return proddb.withTransaction('READ_WRITE', function (client) {
-      return importFromApiImpl.importFromApi(client, url, report);
+      return importDarImpl.withDarTransaction(client, 'api', function() {
+        return importFromApiImpl.importFromApi(client, url, report);
+      });
     }).then(function() {
       logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
     });

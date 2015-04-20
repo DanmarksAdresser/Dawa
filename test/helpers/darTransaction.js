@@ -13,7 +13,7 @@ function withDarTransaction(dbname, transactionFn, beforeFn, afterFn) {
     });
     transactionFn(clientFn);
     afterFn(function() {
-      return importDarImpl.endDarTransaction(clientFn(), prevDawaSeqNum);
+      return importDarImpl.endDarTransaction(clientFn(), prevDawaSeqNum, 'csv');
     });
   }, beforeFn, afterFn);
 

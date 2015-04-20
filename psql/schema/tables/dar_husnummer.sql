@@ -24,3 +24,5 @@ CREATE INDEX ON dar_husnummer(id);
 CREATE INDEX ON dar_husnummer(bkid);
 CREATE INDEX ON dar_husnummer(adgangspunktid);
 CREATE INDEX ON dar_husnummer(coalesce(upper(registrering), lower(registrering)));
+CREATE INDEX ON dar_husnummer(tx_created);
+CREATE INDEX ON dar_husnummer(tx_expired);

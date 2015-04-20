@@ -368,15 +368,13 @@ function applyDeletes2(client, delTable, dstTable, idColumns) {
 }
 
 function createTableAndLoadData(client, filePath, targetTable, templateTable, spec) {
-  return client.queryp('CREATE TEMP TABLE ' + targetTable + ' (LIKE ' + templateTable + ')', [])
-    .then(function() {
-      if(!spec.bitemporal) {
-        return client.queryp(format(' ALTER TABLE {targetTable} DROP registrering;' +
-        ' ALTER TABLE {targetTable} DROP versionid;', {
-          targetTable: targetTable
-        }), []);
-      }
-    })
+  var columnNames = darSpec.changeTableColumnNames(spec);
+  return client.queryp(format('CREATE TEMP TABLE {targetTable} AS SELECT {select} FROM {templateTable} WHERE false',
+    {
+      targetTable: targetTable,
+      select: selectList(undefined, columnNames),
+      templateTable: templateTable
+    }), [])
     .then(function() {
       return loadCsvFile(client, filePath, targetTable, spec);
     });
@@ -396,13 +394,41 @@ function applyInserts(client, destinationTable, sourceTable, spec) {
   return client.queryp(sql, []);
 }
 
+/**
+ * This function takes a destination table and a table containing updates to be performed to
+ * the destination table, and set the tx_expired column on all columns, which will have
+ * registering slut set.
+ * @param client
+ * @param destinationTable
+ * @param upTable
+ * @param spec
+ * @returns {*}
+ */
+function markExpiredRecords(client, destinationTable, upTable, spec) {
+  return client.queryp(format('UPDATE' +
+    ' {destinationTable}' +
+    ' SET tx_expired = current_dar_transaction()' +
+    ' FROM {upTable}' +
+    ' WHERE {idColumnsEqual}' +
+    ' AND upper({upTable}.registrering) IS NOT NULL' +
+    ' AND upper({destinationTable}.registrering) IS NULL',
+    {
+      destinationTable: destinationTable,
+      upTable: upTable,
+      idColumnsEqual: columnsNotDistinctClause(upTable, destinationTable, spec.idColumns)
+    }), []);
+}
+
 function applyUpdates(client, destinationTable, sourceTable, spec, updateAllFields) {
   if(spec.bitemporal) {
     var columnsToUpdate = ['registrering'];
     if(updateAllFields) {
       columnsToUpdate = columnsToUpdate.concat(['virkning']).concat(spec.dbColumns);
     }
-    return applyUpdates2(client, sourceTable, destinationTable,['versionid'], columnsToUpdate);
+    return markExpiredRecords(client, destinationTable, sourceTable, spec)
+      .then(function() {
+        return applyUpdates2(client, sourceTable, destinationTable,['versionid'], columnsToUpdate)
+    });
   }
   else {
     var expireOldRowsSql = format(
@@ -912,25 +938,54 @@ exports.beginDarTransaction = function(client) {
   });
 };
 
-exports.endDarTransaction = function(client, prevDawaSeqNum)
+
+function hasModifiedDar(client) {
+  function hasModifiedBitemporal(tableName) {
+    return 'EXISTS(SELECT * FROM ' + tableName + ' WHERE coalesce(tx_expired, tx_created) = (SELECT tx_current FROM dar_tx_current))';
+  }
+  function hasModifiedMonotemporal(tableName) {
+    return 'EXISTS(SELECT * FROM ' + tableName + ' WHERE COALESCE(upper(registrering), lower(registrering)) = CURRENT_TIMESTAMP)';
+  }
+  var hasModifiedSql = _.map(darSpec.spec, function(spec, specName) {
+    if(spec.bitemporal) {
+      return hasModifiedBitemporal(spec.table);
+    }
+    else {
+      return hasModifiedMonotemporal(spec.table);
+    }
+  }).join(' OR ');
+  return client.queryp('SELECT (' + hasModifiedSql + ') AS modified').then(function(result) {
+    return result.rows[0].modified;
+  });
+}
+
+exports.endDarTransaction = function(client, prevDawaSeqNum, source)
 {
+  var currentDawaSeqNum;
   return getDawaSeqNum(client)
-    .then(function (lastDawaSeqNum) {
-      return client.queryp('INSERT INTO dar_transaction(id, dawa_seq_range) VALUES ((SELECT tx_current FROM dar_tx_current), $1)',
-        [new Range(prevDawaSeqNum, lastDawaSeqNum, '(]')]);
+    .then(function (dawaSeqNum) {
+      currentDawaSeqNum = dawaSeqNum;
+      return hasModifiedDar(client);
+    })
+    .then(function(hasModifiedDar) {
+      // We only create a transaction entry if we made any changes.
+      if((currentDawaSeqNum !== prevDawaSeqNum) || hasModifiedDar) {
+        return client.queryp('INSERT INTO dar_transaction(id, source, dawa_seq_range) VALUES ((SELECT tx_current FROM dar_tx_current),$1, $2)',
+          [source, new Range(prevDawaSeqNum, currentDawaSeqNum, '(]')]);
+      }
     })
     .then(function () {
       return client.queryp('UPDATE dar_tx_current SET tx_current = NULL');
     });
 };
 
-exports.withDarTransaction = function(client, transactionFn) {
+exports.withDarTransaction = function(client, source, transactionFn) {
   var prevDawaSeqNum;
   return exports.beginDarTransaction(client).then(function(dawaSeqNum) {
     prevDawaSeqNum = dawaSeqNum;
     return transactionFn(client);
   }).then(function() {
-    return exports.endDarTransaction(client, prevDawaSeqNum);
+    return exports.endDarTransaction(client, prevDawaSeqNum, source);
   });
 };
 
