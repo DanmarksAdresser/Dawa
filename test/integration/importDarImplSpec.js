@@ -9,7 +9,7 @@ var _ = require('underscore');
 
 var darSpec = require('../../darImport/darSpec');
 var darTransaction = require('../helpers/darTransaction');
-var dbInit = require('../helpers/dbInit');
+var dbinit = require('../helpers/dbinit');
 var databaseTypes = require('../../psql/databaseTypes');
 var importDarImpl = require('../../darImport/importDarImpl');
 var promisingStreamCombiner = require('../../promisingStreamCombiner');
@@ -373,9 +373,9 @@ describe('Importing DAR CSV files to database', function () {
           var csvObject = _.clone(testObject);
           csvObject.registreringstart = csvObjectRegistreringStart;
           var desiredTable = 'desired_' + csvSpec.table;
-          return dbInit.initDarTable(clientFn(), csvSpec, csvSpec.table, [testObject])
+          return dbinit.initDarTable(clientFn(), csvSpec, csvSpec.table, [testObject])
             .then(function(){
-              return dbInit.initDarTable(clientFn(), csvSpec, desiredTable, [csvObject]);
+              return dbinit.initDarTable(clientFn(), csvSpec, desiredTable, [csvObject]);
             })
             .then(function() {
               return importDarImpl.internal.computeAndApplyCsvChanges(clientFn(), desiredTable, csvSpec, false);
