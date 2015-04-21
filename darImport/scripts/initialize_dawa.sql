@@ -7,6 +7,7 @@ DELETE FROM enhedsadresser;
 DELETE FROM enhedsadresser_history;
 DELETE FROM adgangsadresser_temaer_matview;
 DELETE FROM adgangsadresser_temaer_matview_history;
+DELETE FROM transaction_history WHERE entity IN ('vejstykke', 'adgangsadresse', 'adresse', 'adgangsadresse_tema');
 
 -- do the insert
 INSERT INTO vejstykker SELECT * FROM full_vejstykker_view;
