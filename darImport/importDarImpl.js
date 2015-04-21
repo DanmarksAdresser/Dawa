@@ -114,7 +114,7 @@ function columnsNotDistinctClause(alias1, alias2, columns) {
 }
 
 function keyEqualsClause(alias1, alias2, spec) {
-  return columnsNotDistinctClause(alias1, alias2, spec.idColumns);
+  return columnsEqualClause(alias1, alias2, spec.idColumns);
 }
 
 
