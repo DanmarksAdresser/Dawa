@@ -516,6 +516,84 @@ function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAl
     });
 }
 
+var dawaChangeOrder = [
+  {
+    type: 'insert',
+    entity: 'vejstykke'
+  },
+  {
+    type: 'update',
+    entity: 'vejstykke'
+  },
+  {
+    type: 'delete',
+    entity: 'vejstykke'
+  },
+  {
+    type: 'delete',
+    entity: 'adresse'
+  },
+  {
+    type: 'insert',
+    entity: 'adgangsadresse'
+  },
+  {
+    type: 'update',
+    entity: 'adresse'
+  },
+  {
+    type: 'update',
+    entity: 'adgangsadresse'
+  },
+  {
+    type: 'delete',
+    entity: 'adgangsadresse'
+  },
+  {
+    type: 'insert',
+    entity: 'adresse'
+  }
+];
+
+/*
+ * Given tables has been created for each DAWA entity containing inserts, updates and deletes respectively,
+ * perform the changes to the DAWA tables in the correct order (that is, e.g. ensuring that adgangsadresse
+ * is not deleted before adresse).
+ */
+function doDawaChanges(client) {
+  function applyInserts(targetTable) {
+    var sql = format("INSERT INTO {targetTable}" +
+      " (SELECT * FROM {sourceTable})",
+      {
+        targetTable: targetTable,
+        sourceTable: 'insert_' + targetTable
+      });
+    return client.queryp(sql, []);
+  }
+  function applyUpdates(targetTable, idColumns, columnsToUpdate) {
+    return applyUpdates2(client, 'update_' + targetTable, targetTable, idColumns, columnsToUpdate);
+  }
+
+  function applyDeletes(targetTable, idColumns) {
+    return applyDeletes2(client, 'delete_' + targetTable, targetTable, idColumns);
+  }
+  return qUtil.mapSerial(dawaChangeOrder, function(change) {
+    var datamodel = datamodels[change.entity];
+    var table = datamodel.table;
+    var idColumns = datamodel.key;
+    var columnsToUpdate = DAWA_COLUMNS_TO_CHECK[change.entity];
+    if(change.type === 'insert') {
+      return applyInserts(table);
+    }
+    else if(change.type === 'update') {
+      return applyUpdates(table, idColumns, columnsToUpdate);
+    }
+    else if(change.type === 'delete') {
+      applyDeletes(table, idColumns);
+    }
+  });
+}
+
 function applyChangesNonTemporal(client, targetTable, changeTablesSuffix, idColumns, columnsToUpdate) {
   function applyInserts() {
     var sql = format("INSERT INTO {targetTable}" +
@@ -667,14 +745,16 @@ function performDawaChanges(client) {
           DAWA_COLUMNS_TO_CHECK[entityName]);
       })
       .then(function() {
-        return applyChangesNonTemporal(client, tableName, tableName, idColumns, DAWA_COLUMNS_TO_CHECK[entityName]);
-      })
-      .then(function() {
         return client.queryp('DROP VIEW actual_' + tableName + '; DROP VIEW desired_' + tableName, []);
-      })
-      .then(function() {
-        return dropModificationTables(client, tableName);
       });
+  }).then(function() {
+    return doDawaChanges(client);
+  }).then(function() {
+    return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+      var tableName = datamodels[entityName].table;
+      return dropModificationTables(client, tableName);
+    });
+
   });
 }
 
@@ -699,44 +779,17 @@ function initDarTables(client, dataDir) {
 }
 
 /**
- * Remove all data from adgangsadresser, enhedsadresser, vejstykker and
- * adgangsadresser_temaer_matview, including history.
- */
-function clearDawaTables(client) {
-  console.log('clearing DAWA tables');
-  return sqlCommon.withoutTriggers(client, function() {
-    return qUtil.mapSerial(DAWA_TABLES.concat(['adgangsadresser_temaer_matview']), function(tableName) {
-      return client.queryp('delete from ' + tableName + '_history', []).then(function() {
-        return client.queryp('delete from ' + tableName, []);
-      });
-    });
-  });
-}
-
-/**
  * Given that DAR tables are populated, initialize DAWA tables, assuming no
  * existing data is present in the tables.
  */
 function initDawaFromScratch(client) {
   console.log('initializing DAWA from scratch');
   return sqlCommon.withoutTriggers(client, function() {
-    return qUtil.mapSerial(DAWA_TABLES, function (tableName) {
-      var matTable = 'mat_' + tableName;
-      var darView = 'dar_' + tableName + '_view';
-      console.log('materializing ' + tableName);
-      return client.queryp('CREATE TEMP TABLE ' + matTable + ' AS SELECT * FROM ' + darView, [])
-        .then(function() {
-          console.log('initializing table ' + tableName);
-          var sql = format("INSERT INTO {table} (SELECT * FROM mat_{table})",
-            {
-              table: tableName
-            });
-          return client.queryp(sql, []);
-        })
-        .then(function() {
-          return client.queryp('DROP TABLE ' + matTable);
-        });
-    })
+    return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
+      .then(function() {
+        console.log('populating DAWA tables');
+        return executeExternalSqlScript(client, 'initialize_dawa.sql');
+      })
       .then(function () {
         console.log('initializing history');
         return loadAdresseDataImpl.initializeHistory(client);
@@ -764,9 +817,7 @@ function initFromDar(client, dataDir, clearDawa) {
     })
     .then(function() {
       if(clearDawa) {
-        return clearDawaTables(client).then(function() {
-          return initDawaFromScratch(client);
-        });
+        return initDawaFromScratch(client);
       }
       else {
         return fullCompareAndUpdate(client);

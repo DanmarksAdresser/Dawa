@@ -285,6 +285,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
             return getDawaContent(clientFn());
           })
           .then(function(dawaContent) {
+            console.log(JSON.stringify(dawaContent, null, 2));
             expect(dawaContent.adresse).to.have.length(1);
             var e = dawaContent.adresse[0];
             expect(e.id).to.equal(ad.bkid);

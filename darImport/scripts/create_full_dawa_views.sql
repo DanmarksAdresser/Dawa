@@ -1,36 +1,13 @@
-DROP VIEW IF EXISTS dar_adgangsadresser_core_view;
-CREATE VIEW dar_adgangsadresser_core_view AS
-  SELECT
-    hn.id as hn_id,
-    hn.bkid as hn_bkid,
-    ap.kommunenummer AS ap_kommunenummer,
-    hn.vejkode AS hn_vejkode,
-    hn.husnummer AS hn_husnummer,
-    hn.statuskode as hn_statuskode,
-    hn.ikrafttraedelsesdato  as hn_ikrafttraedelsesdato,
-    hn.virkning as hn_virkning,
-    ap.id as ap_id,
-    ap.bkid as ap_bkid,
-    ap.geom as ap_geom,
-    ap.noejagtighedsklasse as ap_noejagtighedsklasse,
-    ap.kildekode as ap_kildekode,
-    hn.kildekode as hn_kildekode,
-    ap.placering as ap_placering,
-    ap.tekniskstandard as ap_tekniskstandard,
-    ap.retning as ap_retning,
-    ap.revisionsdato ap_revisionsdato,
-    ap.esdhreference AS ap_esdhreference,
-    ap.journalnummer AS ap_journalnummer
-  FROM dar_husnummer_current hn
-    JOIN dar_adgangspunkt_current ap
-      ON hn.adgangspunktid = ap.id
-  WHERE hn.statuskode <>2 AND hn.statuskode <> 4 AND hn.vejkode IS NOT NULL;
+CREATE TEMP VIEW full_vejstykker_view AS SELECT * FROM dar_vejstykker_view;
 
-CREATE VIEW dar_adgangsadresser_view AS
+-- Create a temp table based on a simple join with the simple adgangsadresse columns
+CREATE TEMP TABLE dar_adgangsadresser_core AS SELECT * FROM dar_adgangsadresser_core_view;
+
+CREATE TEMP VIEW  full_adgangsadresser_view AS
   SELECT
     hn_bkid as id,
     ap_kommunenummer AS kommunekode,
-    hn_vejkode AS vejkode,
+    hn_vejkode,
     (hn_husnummer).tal || COALESCE((hn_husnummer).bogstav, '') as husnr,
     (SELECT bynavn FROM dar_supplerendebynavn sb WHERE
       ap_kommunenummer = sb.kommunekode
@@ -65,11 +42,34 @@ CREATE VIEW dar_adgangsadresser_view AS
     ap_noejagtighedsklasse as noejagtighed,
     ap_kildekode as adgangspunktkilde,
     hn_kildekode as husnummerkilde,
-    ap_placering as placering,
-    ap_tekniskstandard as tekniskstandard,
+    ap_placering,
+    ap_tekniskstandard,
     ap_retning as tekstretning,
     ap_revisionsdato at time zone 'Europe/Copenhagen' AS adressepunktaendringsdato,
     ap_esdhreference AS esdhreference,
     ap_journalnummer AS journalnummer,
     ap_geom as geom
-FROM dar_adgangsadresser_core_view;
+FROM dar_adgangsadresser_core;
+
+CREATE TEMP VIEW full_enhedsadresser_view AS
+    SELECT
+      adr.bkid as id,
+      (SELECT bkid FROM dar_husnummer_current WHERE id = adr.husnummerid) AS adgangsadresseid,
+      adr.statuskode AS objekttype,
+      LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
+       FROM dar_adresse adr2
+       WHERE adr.id = adr2.id), (
+       SELECT oprettet
+        FROM enhedsadresser
+         WHERE enhedsadresser.id = adr.bkid
+       )) AS oprettet,
+      adr.ikrafttraedelsesdato AT TIME ZONE 'Europe/Copenhagen' AS ikraftfra,
+      lower(adr.virkning) AT TIME ZONE 'Europe/Copenhagen' AS aendret,
+      adr.etagebetegnelse AS etage,
+      adr.doerbetegnelse AS doer,
+      adr.kildekode as kilde,
+      adr.esdhreference,
+      adr.journalnummer
+    FROM dar_adresse_current adr
+    WHERE adr.husnummerid IN (SELECT hn_id FROM dar_adgangsadresser_core)
+    AND adr.statuskode <> 2 AND adr.statuskode <> 4;

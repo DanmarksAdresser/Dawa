@@ -19,6 +19,6 @@
       adr.esdhreference,
       adr.journalnummer
     FROM dar_adresse_current adr
-    WHERE (SELECT bkid FROM dar_husnummer_current WHERE id = adr.husnummerid) IS NOT NULL
+    WHERE adr.husnummerid IN (SELECT hn_id FROM dar_adgangsadresser_core_view)
     AND adr.statuskode <> 2 AND adr.statuskode <> 4;
 
