@@ -13,26 +13,24 @@ function exitOnErr(err){
 
 exports.exitOnErr = exitOnErr;
 
-exports.disableTriggers = function(client){
-  return function(done) {
-    winston.info("Disabling triggers");
-    client.query("SET SESSION_REPLICATION_ROLE ='replica'",[], done);
-  };
-};
-
 exports.disableTriggersQ = function(client) {
   return client.queryp("SET SESSION_REPLICATION_ROLE ='replica'",[]);
 };
 
-exports.enableTriggers = function(client){
+exports.disableTriggers = function(client){
   return function(done) {
-    winston.info("Enabling triggers");
-    client.query("SET SESSION_REPLICATION_ROLE ='origin'",[], done);
+    return exports.disableTriggersQ(client).nodeify(done);
   };
 };
 
 exports.enableTriggersQ = function(client) {
   return client.queryp("SET SESSION_REPLICATION_ROLE ='origin'",[]);
+};
+
+exports.enableTriggers = function(client){
+  return function(done) {
+    return exports.enableTriggersQ(client).nodeify(done);
+  };
 };
 
 exports.withoutTriggers = function(client, fn) {
@@ -59,12 +57,27 @@ exports.execSQL = function(sql, client, echo, done){
 
 function psqlScript(client, scriptDir, scriptfile){
   return function(cb){
-    var script = fs.readFileSync(scriptDir + '/' + scriptfile, {
-      encoding: 'utf8'
-    });
-    winston.info('Executing psqlScript %s', scriptDir + '/' + scriptfile);
-    client.query(script, [], cb);
+    return exports.psqlScriptQ(client, scriptDir, scriptfile).nodeify(cb);
   };
+}
+
+exports.psqlScriptQ = function(client, scriptDir, scriptfile) {
+  var script = fs.readFileSync(scriptDir + '/' + scriptfile, {
+    encoding: 'utf8'
+  });
+  winston.info('Executing psqlScript %s', scriptDir + '/' + scriptfile);
+  return client.queryp(script, []);
+};
+
+exports.reindex = function(client) {
+  return exports.disableTriggersQ(client)
+    .then(function() {
+    return exports.psqlScriptQ(client, __dirname, 'reindex-search.sql');
+
+  })
+    .then(function() {
+      exports.enableTriggersQ(client);
+    });
 }
 
 exports.psqlScript = psqlScript;

@@ -761,9 +761,11 @@ function performDawaChanges(client) {
 /**
  * Remove all data from DAR tables
  */
-function clearDarTables(client) {
+exports.clearDarTables = function(client) {
   return qUtil.mapSerial(darSpec.spec, function(spec) {
     return client.queryp('DELETE FROM ' + spec.table, []);
+  }).then(function() {
+    return client.queryp('DELETE FROM dar_transaction; UPDATE dar_tx_current set tx_current = null', []);
   });
 }
 
@@ -777,6 +779,12 @@ function initDarTables(client, dataDir) {
     return loadCsvFile(client, path.join(dataDir, spec.filename), spec.table, spec);
   });
 }
+
+exports.clearDawa = function(client) {
+  return sqlCommon.withoutTriggers(client, function() {
+    return executeExternalSqlScript(client, 'clear_dawa.sql');
+  });
+};
 
 /**
  * Given that DAR tables are populated, initialize DAWA tables, assuming no
@@ -804,19 +812,15 @@ function initDawaFromScratch(client) {
 }
 
 /**
- * Delete all data in DAR tables, and repopulate from CSV.
- * If clearDawa is specified, remove all data from DAWA address tables as well
+ * Assuming no data exists in DAR tables, initialize them from CSV.
  * (adgangsadresser, enhedsadresser, vejstykker, adgangsadresser_temaer_matview).
- * When DAR tables has been updated, the DAWA tables will be updated as well (
+ * When DAR tables has been initialized, the DAWA tables will be updated as well (
  * from scratch, if clearDawa is specified, otherwise incrementally).
  */
 function initFromDar(client, dataDir, clearDawa) {
-  return clearDarTables(client)
-    .then(function() {
-      return initDarTables(client, dataDir);
-    })
-    .then(function() {
-      if(clearDawa) {
+  return initDarTables(client, dataDir)
+    .then(function () {
+      if (clearDawa) {
         return initDawaFromScratch(client);
       }
       else {
@@ -1008,6 +1012,9 @@ exports.applyDarChanges = function (client, rowsMap, report) {
           var spec = darSpec.spec[specName];
           return applyChanges(client, spec.table, spec.table, spec, false);
         });
+    })
+    .then(function() {
+      return client.queryp('SET CONSTRAINTS ALL IMMEDIATE; SET CONSTRAINTS ALL DEFERRED', []);
     })
     .then(function () {
       return computeDirtyObjects(client, report);

@@ -56,7 +56,7 @@ CREATE VIEW dar_adgangsadresser_view AS
            WHERE hn_bkid = adgangsadresser.id)) AS oprettet,
     hn_ikrafttraedelsesdato  at time zone 'Europe/Copenhagen' AS ikraftfra,
     GREATEST  (lower(hn_virkning) at time zone 'Europe/Copenhagen',
-               (SELECT lower(ap2.virkning) at time zone 'Europe/Copenhagen'
+               (SELECT max(lower(ap2.virkning)) at time zone 'Europe/Copenhagen'
                 FROM dar_adgangspunkt_current ap2
                 WHERE ap2.id = ap_id)) as aendret,
     ap_bkid as adgangspunktid,

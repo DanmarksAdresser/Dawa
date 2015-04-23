@@ -26,7 +26,7 @@ function defaultOptions(options) {
 
 var transactionStatements = {
   READ_ONLY: ['BEGIN READ ONLY', 'ROLLBACK'],
-  READ_WRITE: ['BEGIN;SELECT pg_advisory_xact_lock(1);', 'COMMIT'],
+  READ_WRITE: ["BEGIN;SELECT pg_advisory_xact_lock(1);SET work_mem='256MB'", 'COMMIT'],
   ROLLBACK: ['BEGIN', 'ROLLBACK']
 };
 

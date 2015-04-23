@@ -4,7 +4,7 @@ CREATE FUNCTION temaer_init() RETURNS void
 LANGUAGE plpgsql AS
   $$
   BEGIN
-    UPDATE temaer SET tsv = to_tsvector('adresser', coalesce(fields->>'navn', ''));
+    UPDATE temaer SET tsv = to_tsvector('adresser',(fields->>'navn')) WHERE (fields->>'navn') IS NOT NULL;
   END;
 $$;
 

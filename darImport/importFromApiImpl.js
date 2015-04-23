@@ -22,9 +22,11 @@ var MAX_RETURNED_RECORDS = 10000;
 
 function mergeResults(result, page) {
   var sorted = result.concat(page).sort(function(a, b) {
-    var versionCompare = a.versionid.localeCompare(b.versionid);
-    if(versionCompare !== 0) {
-      return versionCompare;
+    if(a.versionid < b.versionid) {
+      return -1;
+    }
+    if(a.versionid > b.versionid) {
+      return 1;
     }
     // if two rows have same versionid, but one have registreringslut,
     // we want it to be first, such that it is the other which is removed.

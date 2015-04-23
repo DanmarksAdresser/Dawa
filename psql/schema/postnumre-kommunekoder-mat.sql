@@ -36,5 +36,6 @@ DROP FUNCTION IF EXISTS postnumre_kommunekoder_mat_init() CASCADE;
 CREATE FUNCTION postnumre_kommunekoder_mat_init() RETURNS void
 LANGUAGE SQL AS
 $$
+DELETE FROM postnumre_kommunekoder_mat;
 INSERT INTO postnumre_kommunekoder_mat SELECT DISTINCT postnr, kommunekode FROM adgangsadresser WHERE postnr IS NOT NULL
 $$;
