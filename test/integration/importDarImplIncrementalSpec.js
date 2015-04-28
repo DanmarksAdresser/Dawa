@@ -211,6 +211,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
         var apExpired = _.clone(ap);
         apExpired.registreringslut = TIME_2;
         var apHistoric = testObjects.generate('bitemporal', sampleData.adgangspunkt, {});
+        apHistoric.registreringstart = TIME_2;
         apHistoric.virkningslut = TIME_2;
         var apUpdated = testObjects.generate('bitemporal', sampleData.adgangspunkt, {
           registreringstart: TIME_2,
@@ -249,6 +250,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
         var hnExpired = _.clone(hn);
         hnExpired.registreringslut = TIME_2;
         var hnHistoric = testObjects.generate('bitemporal', sampleData.husnummer, {});
+        hnHistoric.registreringstart = TIME_2;
         hnHistoric.virkningslut = TIME_2;
         var hnUpdated = testObjects.generate('bitemporal', sampleData.husnummer, {
           registreringstart: TIME_2,
@@ -312,6 +314,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
         var adExpired = _.clone(ad);
         adExpired.registreringslut = TIME_2;
         var adHistoric = testObjects.generate('bitemporal', sampleData.adresse, {});
+        adHistoric.registreringstart = TIME_2;
         adHistoric.virkningslut = TIME_2;
         var adUpdated = testObjects.generate('bitemporal', sampleData.adresse, {
           registreringstart: TIME_2,
