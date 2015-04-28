@@ -28,7 +28,7 @@ describe('API import', function() {
         }
         var data = mockApiData[entityName];
         var matchingRecords = _.filter(data, function(record) {
-          return isBetween(record.registreringstart || isBetween(record.registreringslut));
+          return isBetween(record.registreringstart) || isBetween(record.registreringslut);
         });
         var page = matchingRecords.slice(0, Math.min(3, matchingRecords.length));
         return q(page);
@@ -62,9 +62,21 @@ describe('API import', function() {
     ];
 
     return mockedImporter.internal.fetchUntilStable(baseurl, null, t1, t2, null).then(function(result) {
-      console.log(JSON.stringify(result.adgangspunkt, null, 2));
       expect(result.adgangspunkt).to.have.length(5);
+    });
+  });
 
+  it('If we receive both the creation and the expiration of a record in one run, only the expired record will survice', function() {
+    mockApiData.adgangspunkt = [
+      {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null},
+      {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null},
+      {versionid: 3, registreringstart: reg2.toISOString(), registreringslut: null},
+      {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg3.toISOString()}
+    ];
+    return mockedImporter.internal.fetchUntilStable(baseurl, null, t1, t2, null).then(function(result) {
+      expect(result.adgangspunkt).to.have.length(3);
+      var record = _.findWhere(result.adgangspunkt, { versionid: 1});
+      expect(record.registreringslut).to.equal(reg3.toISOString());
     });
   });
 

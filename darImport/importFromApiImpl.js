@@ -39,7 +39,7 @@ module.exports = function(opt) {
       }
       // if two rows have same versionid, but one have registreringslut,
       // we want it to be first, such that it is the other which is removed.
-      if(a.registeringslut === b.registeringslut) {
+      if(a.registreringslut === b.registreringslut) {
         return 0;
       }
       else if(a.registreringslut) {
