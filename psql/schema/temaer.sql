@@ -1,11 +1,9 @@
 -- Init function
 DROP FUNCTION IF EXISTS temaer_init() CASCADE;
 CREATE FUNCTION temaer_init() RETURNS void
-LANGUAGE plpgsql AS
-  $$
-  BEGIN
-    UPDATE temaer SET tsv = to_tsvector('adresser',(fields->>'navn')) WHERE (fields->>'navn') IS NOT NULL;
-  END;
+LANGUAGE sql AS
+$$
+UPDATE temaer SET tsv = to_tsvector('adresser',(fields->>'navn')) WHERE false;
 $$;
 
 -- Trigger which maintains the tsv column
