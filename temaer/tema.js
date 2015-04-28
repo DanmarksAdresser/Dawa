@@ -56,7 +56,7 @@ function getTemaer(client, temaNavn, constraints, callback) {
       params.push(value);
     });
   }
-  return q.ninvoke(client, 'query', sql, params).then(function(result) {
+  return client.queryp(sql, params).then(function(result) {
     if(result.rows) {
       return result.rows;
     }
@@ -70,7 +70,7 @@ exports.addTema = function(client, tema, callback) {
   var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
     'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
   var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
-  return q.ninvoke(client, 'query', sql, params).then(function(result) {
+  return client.queryp(sql, params).then(function(result) {
     return result.rows[0].id;
   }).nodeify(callback);
 };
@@ -81,7 +81,7 @@ exports.deleteTema = function(client, temaDef, tema, callback) {
     sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 2) + "::text";
   });
   var params = [tema.tema].concat(getKeyValue(tema, temaDef));
-  return q.ninvoke(client, 'query', sql, params).nodeify(callback);
+  return client.queryp(sql, params).nodeify(callback);
 };
 
 exports.putTemaer = function(temaDef, temaer, client, initializing, constraints, updateTilknytninger, callback) {
@@ -143,7 +143,7 @@ exports.updateTema = function(client, temaDef, tema, callback) {
     changedSql += " and fields->>'" + keySpec.name+ "' = $" + (index + 1);
   });
   var changedParams = getKeyValue(tema, temaDef).concat([JSON.stringify(tema.fields)]).concat(tema.polygons);
-  return q.ninvoke(client, 'query', changedSql, changedParams).then(function(result) {
+  return client.queryp(changedSql, changedParams).then(function(result) {
     if(!result.rows) {
       return q.reject(new Error('Could not update DAGI tema, it was not found.'));
     }
@@ -179,7 +179,9 @@ exports.updateTema = function(client, temaDef, tema, callback) {
     updateParams = updateParams.concat(temaDef.key.map(function(keySpec) {
       return tema.fields[keySpec.name];
     }));
-    return q.ninvoke(client, 'query', updateSql, updateParams);
+    updateSql += " AND tema = $" + (updateParams.length + 1);
+    updateParams.push(temaDef.singular);
+    return client.queryp(updateSql, updateParams);
   }).nodeify(callback);
 };
 
