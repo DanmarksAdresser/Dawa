@@ -69,4 +69,4 @@ exports.generateDelete = function(temporality, current, time) {
     virkningslut: time
   });
   return [expired, historic];
-}
+};
