@@ -1,5 +1,6 @@
 "use strict";
 
+var logger = require('../logger').forCategory('darImport');
 var request = require('request-promise');
 
 var apiPaths = {
@@ -19,7 +20,7 @@ exports.getPage = function(baseUrl, entityName, tsFrom, tsTo) {
   var url = baseUrl + apiPaths[entityName] +
     '?from=' + encodeURIComponent(tsFrom.toISOString()) +
     '&to=' + encodeURIComponent(tsTo.toISOString());
-  console.log('Getting page ' + url);
+  logger.debug('Getting page ' + url);
   return request.get({url: url}).then(function(result) {
     return JSON.parse(result.trim());
   });

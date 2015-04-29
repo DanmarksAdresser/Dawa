@@ -6,6 +6,7 @@ var _ = require('underscore');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var importDarImpl = require('./importDarImpl');
 var initialization = require('../psql/initialization');
+var logger = require('../logger').forCategory('darImport');
 var proddb = require('../psql/proddb');
 var sqlCommon = require('../psql/common');
 
@@ -31,7 +32,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     return q()
       .then(function() {
         if(clearDawa) {
-          return importDarImpl.clearDawa(client).then(function() { console.log('DAWA cleared'); });
+          return importDarImpl.clearDawa(client).then(function() {
+            logger.info('DAWA tables cleared');
+          });
         }
       })
       .then(function() {
@@ -40,7 +43,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         }
       })
       .then(function() {
-        console.log('starting DAR transaction');
         return importDarImpl.withDarTransaction(client, 'csv', function() {
           if(initial) {
             return importDarImpl.initFromDar(client, dataDir, clearDawa);
@@ -59,5 +61,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         });
       }
     });
-  }).done();
+  }).catch(function(err) {
+    logger.error('Caught error in importDar', err);
+    return q.reject(err);
+  })
+    .done();
 });

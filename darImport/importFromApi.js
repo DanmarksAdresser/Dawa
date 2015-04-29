@@ -38,11 +38,11 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
   function shutdown() {
     shouldContinue = false;
-    console.log('Shutting down...');
+    logger.info('Shutting down...');
   }
 
   if(options.daemon) {
-    console.log('Running in daemon mode');
+    logger.info('Running in daemon mode');
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
     qUtil.awhile(function() {

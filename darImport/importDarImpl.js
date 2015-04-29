@@ -14,6 +14,7 @@ var databaseTypes = require('../psql/databaseTypes');
 var datamodels = require('../crud/datamodel');
 var darSpec = require('./darSpec');
 var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
+var logger = require('../logger').forCategory('darImport');
 var promisingStreamCombiner = require('../promisingStreamCombiner');
 var sqlCommon = require('../psql/common');
 var tema = require('../temaer/tema');
@@ -499,7 +500,6 @@ function applyChanges(client, targetTable, changeTablesSuffix, csvSpec, updateAl
   return q()
     .then(function() {
       if(csvSpec.bitemporal && lastCsvTimestamp) {
-        console.log('filtering changes dated after CSV file');
         return removeChangesAfterCsv(client, targetTable, 'update_' + changeTablesSuffix, lastCsvTimestamp)
           .then(function() {
             return removeChangesAfterCsv(client, targetTable, 'delete_' + changeTablesSuffix, lastCsvTimestamp);
@@ -652,16 +652,18 @@ function computeAndApplyCsvChanges(client, desiredTable, csvSpec, useFastCompari
         return client.queryp('SELECT MAX(COALESCE(upper(registrering), lower(registrering))) AS ts FROM ' + desiredTable, [])
           .then(function(result) {
             lastCsvTimestamp = result.rows[0].ts;
-            console.log('lastCsvTimestamp: ' + lastCsvTimestamp);
+            logger.info('last CSV timestamp in CSV files', {
+              lastCsvTimestamp: lastCsvTimestamp
+            });
           });
       }
     })
     .then(function() {
-      console.log('computing differences');
+      logger.debug('computing differences');
       return computeDifferences(client, csvSpec.table, desiredTable, csvSpec.table, csvSpec, useFastComparison);
     })
     .then(function() {
-      console.log('applying changes');
+      logger.debug('applying changes');
       return applyChanges(client, csvSpec.table, csvSpec.table, csvSpec, !useFastComparison, lastCsvTimestamp);
     });
 
@@ -716,7 +718,7 @@ function computeDirtyObjects(client, report) {
 
 function performDawaChanges(client) {
   return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-    console.log('Updating DAWA entity ' + entityName);
+    logger.debug('Computing changes for DAWA entity', {entity:  entityName});
     var idColumns = datamodels[entityName].key;
     var tableName = datamodels[entityName].table;
     return client.queryp(format('CREATE TEMP VIEW desired_{tableName} AS (' +
@@ -767,7 +769,7 @@ exports.clearDarTables = function(client) {
   }).then(function() {
     return client.queryp('DELETE FROM dar_transaction; UPDATE dar_tx_current set tx_current = null', []);
   });
-}
+};
 
 /**
  * Initialize DAR tables from CSV, assuming they are empty.
@@ -775,7 +777,7 @@ exports.clearDarTables = function(client) {
  */
 function initDarTables(client, dataDir) {
   return qUtil.mapSerial(darSpec.spec, function(spec, entityName) {
-    console.log('Importing ' + entityName);
+    logger.info('Initializing dar table from CSV', {entity: entityName});
     return loadCsvFile(client, path.join(dataDir, spec.filename), spec.table, spec);
   });
 }
@@ -791,19 +793,19 @@ exports.clearDawa = function(client) {
  * existing data is present in the tables.
  */
 function initDawaFromScratch(client) {
-  console.log('initializing DAWA from scratch');
+  logger.info('initializing DAWA from scratch');
   return sqlCommon.withoutTriggers(client, function() {
     return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
       .then(function() {
-        console.log('populating DAWA tables');
+        logger.info('populating DAWA tables');
         return executeExternalSqlScript(client, 'initialize_dawa.sql');
       })
       .then(function () {
-        console.log('initializing history');
+        logger.info('initializing history');
         return loadAdresseDataImpl.initializeHistory(client);
       })
       .then(function() {
-        console.log('initializing adresserTemaerView');
+        logger.info('initializing adresserTemaerView');
         return qUtil.mapSerial(temaer, function(temaSpec) {
           return tema.updateAdresserTemaerView(client, temaSpec, true);
         });
@@ -835,7 +837,7 @@ function initFromDar(client, dataDir, clearDawa) {
  * @param client
  */
 function fullCompareAndUpdate(client) {
-  console.log('Performing full comparison and update');
+  logger.debug('Performing full comparison and update');
   return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
     var datamodel = datamodels[entityName];
     var dawaTable = datamodel.table;
@@ -856,7 +858,7 @@ function fullCompareAndUpdate(client) {
  */
 function updateFromDar(client, dataDir, fullCompare) {
   return qUtil.mapSerial(darSpec.spec, function(spec, entityName) {
-    console.log('Importing ' + entityName);
+    logger.debug('Importing ' + entityName);
     return updateTableFromCsv(client, path.join(dataDir, spec.filename), spec, false);
   })
     .then(function() {
@@ -864,7 +866,7 @@ function updateFromDar(client, dataDir, fullCompare) {
         return fullCompareAndUpdate(client);
       }
       else {
-        console.log('computing dirty objects');
+        logger.debug('computing dirty objects');
         return computeDirtyObjects(client)
           .then(function() {
             return performDawaChanges(client);
@@ -1083,7 +1085,10 @@ exports.endDarTransaction = function(client, prevDawaSeqNum, source)
   return getDawaSeqNum(client)
     .then(function (dawaSeqNum) {
       currentDawaSeqNum = dawaSeqNum;
-      console.log('prevDawaSeqNum: ' + prevDawaSeqNum + ' currentDawaSeqNum: ' + currentDawaSeqNum);
+      logger.debug('Ending DAR transaction', {
+        prevDawaSeqNum: prevDawaSeqNum,
+        currentDawaSeqNum: currentDawaSeqNum
+      });
       return hasModifiedDar(client);
     })
     .then(function(hasModifiedDar) {
