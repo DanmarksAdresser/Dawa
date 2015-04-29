@@ -41,3 +41,32 @@ exports.generate = function(temporality, sample, restrictions) {
   }
   return obj;
 };
+
+/**
+ * TODO currently only bitemporal test objects are supported.
+ * @param temporality
+ * @param current
+ * @param changes
+ * @param time
+ * @returns {*[]}
+ */
+exports.generateUpdate = function(temporality, current, changes, time) {
+  var updated = exports.generate(temporality, current, _.extend({
+    versionid: undefined,
+    registreringstart: time,
+    virkningstart: time
+  }, changes));
+  return exports.generateDelete(temporality, current, time).concat([updated]);
+};
+
+exports.generateDelete = function(temporality, current, time) {
+  var expired = exports.generate(temporality, current, {
+    registreringslut: time
+  });
+  var historic = exports.generate(temporality, current, {
+    versionid: undefined,
+    registreringstart: time,
+    virkningslut: time
+  });
+  return [expired, historic];
+}

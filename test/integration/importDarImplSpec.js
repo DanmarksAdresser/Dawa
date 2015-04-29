@@ -384,7 +384,6 @@ describe('Importing DAR CSV files to database', function () {
               return clientFn().queryp('SELECT lower(registrering) as registreringstart FROM ' + csvSpec.table);
             })
             .then(function(result) {
-              console.log(JSON.stringify(result.rows, null, 2));
               expect(result.rows[0].registreringstart).to.equal(testObjectRegistreringStart);
             });
         });

@@ -69,7 +69,6 @@ function getDawaContent(client) {
     return client.queryp('SELECT * FROM ' + datamodel.table + ' ORDER BY ' + datamodel.key.join(', '), [])
       .then(function(result) {
         memo[entityName] = result.rows ? result.rows : [];
-        console.log('returning ' + JSON.stringify(memo));
         return memo;
       });
   }, {});
@@ -169,19 +168,11 @@ describe('Inkrementiel opdatering af DAR data', function() {
           husnummer: [_.clone(hn)],
           adresse: []
         };
-        var hnExpired = _.clone(hn);
-        hnExpired.registreringslut = TIME_2;
-        var hnHistoric = testObjects.generate('bitemporal', sampleData.husnummer, {});
-        hnHistoric.registreringstart = TIME_2;
-        hnHistoric.virkningslut = TIME_2;
-        var hnUpdated = testObjects.generate('bitemporal', sampleData.husnummer, {
-          registreringstart: TIME_2,
-          virkningstart: TIME_2,
-          husnummer: '13'
-        });
+        var changeRecords = testObjects.generateUpdate('bitemporal', hn, { husnummer: '13'}, TIME_2);
+        console.log(JSON.stringify(changeRecords, null, 2));
         var t2_changeset = {
           adgangspunkt: [],
-          husnummer: [hnExpired, hnHistoric, hnUpdated],
+          husnummer: changeRecords,
           adresse: []
         };
         return importDarImpl.applyDarChanges(clientFn(), t1_changeset)
@@ -208,18 +199,11 @@ describe('Inkrementiel opdatering af DAR data', function() {
           husnummer: [_.clone(hn)],
           adresse: []
         };
-        var apExpired = _.clone(ap);
-        apExpired.registreringslut = TIME_2;
-        var apHistoric = testObjects.generate('bitemporal', sampleData.adgangspunkt, {});
-        apHistoric.registreringstart = TIME_2;
-        apHistoric.virkningslut = TIME_2;
-        var apUpdated = testObjects.generate('bitemporal', sampleData.adgangspunkt, {
-          registreringstart: TIME_2,
-          virkningstart: TIME_2,
+        var changeRecords = testObjects.generateUpdate('bitemporal', ap, {
           tekniskstandard: 'TN'
-        });
+        }, TIME_2);
         var t2_changeset = {
-          adgangspunkt: [apExpired, apHistoric, apUpdated],
+          adgangspunkt: changeRecords,
           husnummer: [],
           adresse: []
         };
@@ -247,19 +231,38 @@ describe('Inkrementiel opdatering af DAR data', function() {
           husnummer: [_.clone(hn)],
           adresse: []
         };
-        var hnExpired = _.clone(hn);
-        hnExpired.registreringslut = TIME_2;
-        var hnHistoric = testObjects.generate('bitemporal', sampleData.husnummer, {});
-        hnHistoric.registreringstart = TIME_2;
-        hnHistoric.virkningslut = TIME_2;
-        var hnUpdated = testObjects.generate('bitemporal', sampleData.husnummer, {
-          registreringstart: TIME_2,
-          virkningstart: TIME_2,
+        var updateRecords = testObjects.generateUpdate('bitemporal', hn, {
           statuskode: 2
-        });
+        }, TIME_2);
         var t2_changeset = {
           adgangspunkt: [],
-          husnummer: [hnExpired, hnHistoric, hnUpdated],
+          husnummer: updateRecords,
+          adresse: []
+        };
+        return importDarImpl.applyDarChanges(clientFn(), t1_changeset)
+          .then(function() {
+            return importDarImpl.applyDarChanges(clientFn(), t2_changeset);
+          })
+          .then(function() {
+            return getDawaContent(clientFn());
+          })
+          .then(function(dawaContent) {
+            expect(dawaContent.adgangsadresse).to.have.length(0);
+          });
+      });
+      it('Når et husnummer slettes i DAR, skal det slettes i DAWA', function() {
+        var ap = testObjects.generate('bitemporal', sampleData.adgangspunkt, {});
+        var hn = testObjects.generate('bitemporal', sampleData.husnummer, {});
+
+        var t1_changeset = {
+          adgangspunkt: [_.clone(ap)],
+          husnummer: [_.clone(hn)],
+          adresse: []
+        };
+        var deleteRecords = testObjects.generateDelete('bitemporal', hn, TIME_2);
+        var t2_changeset = {
+          adgangspunkt: [],
+          husnummer: deleteRecords,
           adresse: []
         };
         return importDarImpl.applyDarChanges(clientFn(), t1_changeset)
@@ -287,7 +290,6 @@ describe('Inkrementiel opdatering af DAR data', function() {
             return getDawaContent(clientFn());
           })
           .then(function(dawaContent) {
-            console.log(JSON.stringify(dawaContent, null, 2));
             expect(dawaContent.adresse).to.have.length(1);
             var e = dawaContent.adresse[0];
             expect(e.id).to.equal(ad.bkid);
@@ -311,20 +313,13 @@ describe('Inkrementiel opdatering af DAR data', function() {
           husnummer: [_.clone(hn)],
           adresse: [_.clone(ad)]
         };
-        var adExpired = _.clone(ad);
-        adExpired.registreringslut = TIME_2;
-        var adHistoric = testObjects.generate('bitemporal', sampleData.adresse, {});
-        adHistoric.registreringstart = TIME_2;
-        adHistoric.virkningslut = TIME_2;
-        var adUpdated = testObjects.generate('bitemporal', sampleData.adresse, {
-          registreringstart: TIME_2,
-          virkningstart: TIME_2,
+        var changeRecords = testObjects.generateUpdate('bitemporal', ad, {
           esdhreference: 'nyesdhref'
-        });
+        }, TIME_2);
         var t2_changeset = {
           adgangspunkt: [],
           husnummer: [],
-          adresse: [adExpired, adHistoric, adUpdated]
+          adresse: changeRecords
         };
         return importDarImpl.applyDarChanges(clientFn(), t1_changeset)
           .then(function() {
@@ -339,6 +334,34 @@ describe('Inkrementiel opdatering af DAR data', function() {
             expect(e.oprettet).to.equal(TIME_1_LOCAL);
             expect(e.aendret).to.equal(TIME_2_LOCAL);
             expect(e.esdhreference).to.equal('nyesdhref');
+          });
+      });
+      it('Når en adresse nedlægges i DAR (statuskode 2) slettes den i DAWA', function() {
+        var ap = testObjects.generate('bitemporal', sampleData.adgangspunkt, {});
+        var hn = testObjects.generate('bitemporal', sampleData.husnummer, {});
+        var ad = testObjects.generate('bitemporal', sampleData.adresse, {});
+        var t1_changeset = {
+          adgangspunkt: [_.clone(ap)],
+          husnummer: [_.clone(hn)],
+          adresse: [_.clone(ad)]
+        };
+        var changeRecords = testObjects.generateUpdate('bitemporal', ad, {
+          statuskode: 2
+        }, TIME_2);
+        var t2_changeset = {
+          adgangspunkt: [],
+          husnummer: [],
+          adresse: changeRecords
+        };
+        return importDarImpl.applyDarChanges(clientFn(), t1_changeset)
+          .then(function() {
+            return importDarImpl.applyDarChanges(clientFn(), t2_changeset);
+          })
+          .then(function() {
+            return getDawaContent(clientFn());
+          })
+          .then(function(dawaContent) {
+            expect(dawaContent.adresse).to.have.length(0);
           });
       });
     });
