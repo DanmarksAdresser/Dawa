@@ -75,6 +75,7 @@
           "noejagtighed": "A",
           "adgangspunktkilde": 5,
           "husnummerkilde": null,
+          "placering": null,
           "tekniskstandard": "UF",
           "tekstretning": 200.00,
           "adressepunktaendringsdato": "2005-10-20T00:00:00.000",

@@ -129,14 +129,14 @@ describe('Inkrementiel opdatering af DAR data', function() {
           husnummer: [_.clone(hn)],
           adresse: []
         };
-        return importDarImpl.applyDarChanges(clientFn(), changeSet)
+        var report = {};
+        return importDarImpl.applyDarChanges(clientFn(), changeSet, report)
           .then(function() {
             return getDawaContent(clientFn());
           })
           .then(function(content) {
             expect(content.adgangsadresse).to.have.length(1);
             var a = content.adgangsadresse[0];
-            console.log(JSON.stringify(a));
             expect(a.id).to.equal(hn.bkid);
             expect(a.kommunekode).to.equal(ap.kommunenummer);
             expect(a.vejkode).to.equal(hn.vejkode);
@@ -169,7 +169,6 @@ describe('Inkrementiel opdatering af DAR data', function() {
           adresse: []
         };
         var changeRecords = testObjects.generateUpdate('bitemporal', hn, { husnummer: '13'}, TIME_2);
-        console.log(JSON.stringify(changeRecords, null, 2));
         var t2_changeset = {
           adgangspunkt: [],
           husnummer: changeRecords,

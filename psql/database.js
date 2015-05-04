@@ -97,7 +97,7 @@ function denodeifyClient(client) {
   };
   result.querypLogged = function(query, params) {
     return result.queryp('EXPLAIN ' + query, params).then(function(plan) {
-      console.log(JSON.stringify(plan.rows[0]));
+      console.log(JSON.stringify(plan.rows, null, 2));
       return result.queryp(query, params);
       });
   }

@@ -28,6 +28,8 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     pooled: false
   });
 
+  var report = {};
+
   proddb.withTransaction('READ_WRITE', function (client) {
     return q()
       .then(function() {
@@ -48,7 +50,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
             return importDarImpl.initFromDar(client, dataDir, clearDawa);
           }
           else {
-            return importDarImpl.updateFromDar(client, dataDir, fullCompare);
+            return importDarImpl.updateFromDar(client, dataDir, fullCompare, report);
           }
       });
     })

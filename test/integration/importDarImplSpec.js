@@ -7,11 +7,15 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
-var darSpec = require('../../darImport/darSpec');
+var bitemporal = require('../../darImport/bitemporal');
+var csvSpecs = require('../../darImport/csvSpec');
+var csvTypes = require('../../darImport/csvTypes');
 var darTransaction = require('../helpers/darTransaction');
-var dbinit = require('../helpers/dbinit');
 var databaseTypes = require('../../psql/databaseTypes');
+var dbinit = require('../helpers/dbinit');
+var dbSpecUtil = require('../../darImport/dbSpecUtil');
 var importDarImpl = require('../../darImport/importDarImpl');
+var monotemporal = require('../../darImport/monotemporal');
 var promisingStreamCombiner = require('../../promisingStreamCombiner');
 var testdb = require('../helpers/testdb');
 var testObjects = require('../helpers/testObjects');
@@ -122,24 +126,29 @@ function loadRawCsv(client, filePath, destionationTable) {
   return promisingStreamCombiner([source, pgStream]);
 }
 
-var csvSpec = darSpec.spec;
+var darDbSpecImpls = importDarImpl.internal.darDbSpecImpls;
+
 describe('Importing DAR CSV files to database', function () {
   describe('Import of sample files', function () {
     it('Should define 6 CSV specifications', function () {
-      expect(Object.keys(csvSpec)).to.have.length(6);
+      expect(Object.keys(csvSpecs)).to.have.length(6);
     });
-    _.forEach(csvSpec, function (spec, entityName) {
+    it('Should define 6 database specifications', function() {
+      expect(Object.keys(darDbSpecImpls)).to.have.length(6);
+    });
+    _.forEach(csvSpecs, function (csvSpec, entityName) {
+      var dbSpecImpl = darDbSpecImpls[entityName];
       it('Should import ' + entityName + ' correctly', function () {
         return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
           return importDarImpl.withDarTransaction(client, 'csv', function() {
             return importDarImpl.loadCsvFile(client,
-              path.join(SYNTHETIC_DIR, csvSpec[entityName].filename),
-              spec.table, spec).then(function () {
-                return client.queryp("SELECT * FROM " + spec.table, []);
+              path.join(SYNTHETIC_DIR, csvSpec.filename),
+              dbSpecImpl.table,dbSpecImpl, csvSpec).then(function () {
+                return client.queryp("SELECT * FROM " + dbSpecImpl.table, []);
               }).then(function (result) {
                 expect(result.rows).to.have.length(1);
                 var obj = result.rows[0];
-                if (!spec.bitemporal) {
+                if (dbSpecImpl.temporality !== 'bitemporal') {
                   var registrering = obj.registrering;
                   delete obj.registrering;
                   var versionid = obj.versionid;
@@ -160,19 +169,25 @@ describe('Importing DAR CSV files to database', function () {
   describe('Computing changes based on CSV file', function () {
     var csvSpec = {
       bitemporal: true,
-      idColumns: ['id'],
       columns: [
         {
           name: 'id',
-          type: darSpec.types.uuid
+          type: csvTypes.uuid
         },
         {
           name: 'content',
-          type: darSpec.types.string
+          type: csvTypes.string
         }],
-      dbColumns: ['id', 'content'],
+    };
+
+    var dbSpec = {
+      temporality: 'bitemporal',
+      idColumns: ['id'],
+      columns: ['id', 'content'],
       table: 'cur_table'
     };
+
+    var dbSpecImpl = bitemporal(dbSpec);
 
     function createSampleTable(client) {
       return client.queryp(
@@ -196,6 +211,7 @@ describe('Importing DAR CSV files to database', function () {
           return importDarImpl.loadCsvFile(client,
             path.join(__dirname, 'sampleDarFiles', 'comparison', 'table.csv'),
             'cur_table',
+            dbSpecImpl,
             csvSpec);
         });
     }
@@ -203,19 +219,25 @@ describe('Importing DAR CSV files to database', function () {
     describe('Compute set of differences between for monotemporal table', function() {
       var monoCsvSpec = {
         bitemporal: false,
-        idColumns: ['id'],
         columns: [
           {
             name: 'id',
-            type: darSpec.types.uuid
+            type: csvTypes.uuid
           },
           {
             name: 'content',
-            type: darSpec.types.string
-          }],
-        dbColumns: ['id', 'content'],
+            type: csvTypes.string
+          }]
+      };
+
+      var monoDbSpec = {
+        temporality: 'monotemporal',
+        idColumns: ['id'],
+        columns: ['id', 'content'],
         table: 'cur_table'
       };
+
+      var monoDbSpecImpl = monotemporal(monoDbSpec);
 
       function setupTable(client) {
         return client.queryp(
@@ -239,13 +261,11 @@ describe('Importing DAR CSV files to database', function () {
               return importDarImpl.internal.createTableAndLoadData(client,
                 path.join(__dirname, 'sampleDarFiles', 'comparison_mono', 'desired_table.csv'),
                 'desired_table',
+                monoDbSpecImpl,
                 monoCsvSpec);
             })
             .then(function () {
-              return importDarImpl.internal.computeDifferences(client, 'cur_table', 'desired_table', 'table', monoCsvSpec, false);
-            })
-            .then(function() {
-              return client.queryp('SELECT * FROM cur_table', []);
+              return monoDbSpecImpl.computeDifferences(client, 'desired_table', 'table', 'cur_table');
             });
         });
         it('Should correctly compute the insert', function () {
@@ -273,9 +293,7 @@ describe('Importing DAR CSV files to database', function () {
             expect(result.rows[0]).to.deep.equal({id: "11111111-1111-1111-1111-11111111111b"});
           });
         });
-
       });
-
     });
 
     describe('Compute set of differences betweeen two bitemporal tables', function () {
@@ -286,10 +304,11 @@ describe('Importing DAR CSV files to database', function () {
             return importDarImpl.internal.createTableAndLoadData(client,
               path.join(__dirname, 'sampleDarFiles', 'comparison', 'desired_table.csv'),
               'desired_table',
+              dbSpecImpl,
               csvSpec);
           })
             .then(function () {
-              return importDarImpl.internal.computeDifferences(client, 'cur_table', 'desired_table', 'table', csvSpec, true);
+              return dbSpecImpl.computeDifferences(client, 'desired_table', 'table', 'cur_table');
             });
         });
         it('Should correctly compute the insert', function () {
@@ -337,7 +356,7 @@ describe('Importing DAR CSV files to database', function () {
         it('Should update destination table to have same content as CSV file', function() {
           var client = clientFn();
           var desiredCsvPath = path.join(__dirname, 'sampleDarFiles', 'comparison', 'desired_table.csv');
-          return importDarImpl.updateTableFromCsv(client, desiredCsvPath, csvSpec, false)
+          return importDarImpl.updateTableFromCsv(client, desiredCsvPath, csvSpec, dbSpecImpl, false)
             .then(function() {
               return client.queryp("SELECT * FROM " + destinationTable + " order by versionid", []);
             })
@@ -356,12 +375,12 @@ describe('Importing DAR CSV files to database', function () {
     });
 
     describe('When updating bitemporal DAR table from CSV,' +
-    '' +
     ' records dated later than the CSV should not be modified', function() {
       darTransaction.withDarTransactionEach('empty', function(clientFn) {
         beforeEach(function() {
           return createSampleTable(clientFn()).then(function() {
-            return importDarImpl.internal.createTempTableForCsvContent(clientFn(), 'desired_cur_table', csvSpec);
+            return dbSpecUtil.createTempTableForCsvContent(clientFn(), 'desired_cur_table',
+              dbSpecImpl);
           });
         });
         it('If registrering start is greater than CSV timestamp, the record should not be updated', function() {
@@ -372,16 +391,18 @@ describe('Importing DAR CSV files to database', function () {
           });
           var csvObject = _.clone(testObject);
           csvObject.registreringstart = csvObjectRegistreringStart;
-          var desiredTable = 'desired_' + csvSpec.table;
-          return dbinit.initDarTable(clientFn(), csvSpec, csvSpec.table, [testObject])
+          var desiredTable = 'desired_' + dbSpecImpl.table;
+          return dbinit.initDarTable(clientFn(), dbSpecImpl, csvSpec, dbSpecImpl.table, [testObject])
             .then(function(){
-              return dbinit.initDarTable(clientFn(), csvSpec, desiredTable, [csvObject]);
+              return dbinit.initDarTable(clientFn(),dbSpecImpl, csvSpec, desiredTable, [csvObject]);
             })
             .then(function() {
-              return importDarImpl.internal.computeAndApplyCsvChanges(clientFn(), desiredTable, csvSpec, false);
+              return dbSpecImpl.compareAndUpdate(clientFn(), desiredTable, dbSpecImpl.table, {
+                useFastComparison: false
+              });
             })
             .then(function() {
-              return clientFn().queryp('SELECT lower(registrering) as registreringstart FROM ' + csvSpec.table);
+              return clientFn().queryp('SELECT lower(registrering) as registreringstart FROM ' + dbSpecImpl.table);
             })
             .then(function(result) {
               expect(result.rows[0].registreringstart).to.equal(testObjectRegistreringStart);

@@ -6,7 +6,7 @@
       adr.statuskode AS objekttype,
       LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
        FROM dar_adresse adr2
-       WHERE adr.id = adr2.id), (
+       WHERE adr.id = adr2.id and adr.statuskode = adr2.statuskode), (
        SELECT oprettet
         FROM enhedsadresser
          WHERE enhedsadresser.id = adr.bkid

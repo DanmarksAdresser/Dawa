@@ -1,13 +1,13 @@
-CREATE TEMP VIEW full_vejstykker_view AS SELECT * FROM dar_vejstykker_view;
+CREATE TEMP VIEW full_vejstykker AS SELECT * FROM dar_vejstykker_view;
 
 -- Create a temp table based on a simple join with the simple adgangsadresse columns
 CREATE TEMP TABLE dar_adgangsadresser_core AS SELECT * FROM dar_adgangsadresser_core_view;
 
-CREATE TEMP VIEW  full_adgangsadresser_view AS
+CREATE TEMP TABLE  full_adgangsadresser AS
   SELECT
     hn_bkid as id,
     ap_kommunenummer AS kommunekode,
-    hn_vejkode,
+    hn_vejkode as vejkode,
     (hn_husnummer).tal || COALESCE((hn_husnummer).bogstav, '') as husnr,
     (SELECT bynavn FROM dar_supplerendebynavn sb WHERE
       ap_kommunenummer = sb.kommunekode
@@ -27,7 +27,7 @@ CREATE TEMP VIEW  full_adgangsadresser_view AS
     hn_statuskode as objekttype,
     LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
            FROM dar_husnummer hn2
-           WHERE hn_id = hn2.id),
+           WHERE hn_id = hn2.id and hn_statuskode = hn2.statuskode),
           (SELECT oprettet
            FROM adgangsadresser
            WHERE hn_bkid = adgangsadresser.id)) AS oprettet,
@@ -42,8 +42,8 @@ CREATE TEMP VIEW  full_adgangsadresser_view AS
     ap_noejagtighedsklasse as noejagtighed,
     ap_kildekode as adgangspunktkilde,
     hn_kildekode as husnummerkilde,
-    ap_placering,
-    ap_tekniskstandard,
+    ap_placering as placering,
+    ap_tekniskstandard as tekniskstandard,
     ap_retning as tekstretning,
     ap_revisionsdato at time zone 'Europe/Copenhagen' AS adressepunktaendringsdato,
     ap_esdhreference AS esdhreference,
@@ -51,14 +51,14 @@ CREATE TEMP VIEW  full_adgangsadresser_view AS
     ap_geom as geom
 FROM dar_adgangsadresser_core;
 
-CREATE TEMP VIEW full_enhedsadresser_view AS
+CREATE TEMP TABLE full_enhedsadresser AS
     SELECT
       adr.bkid as id,
-      (SELECT bkid FROM dar_husnummer_current WHERE id = adr.husnummerid) AS adgangsadresseid,
+      adg_core.hn_bkid as adgangsadresseid,
       adr.statuskode AS objekttype,
       LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
        FROM dar_adresse adr2
-       WHERE adr.id = adr2.id), (
+       WHERE adr.id = adr2.id and adr.statuskode = adr2.statuskode), (
        SELECT oprettet
         FROM enhedsadresser
          WHERE enhedsadresser.id = adr.bkid
@@ -71,5 +71,5 @@ CREATE TEMP VIEW full_enhedsadresser_view AS
       adr.esdhreference,
       adr.journalnummer
     FROM dar_adresse_current adr
-    WHERE adr.husnummerid IN (SELECT hn_id FROM dar_adgangsadresser_core)
+    JOIN dar_adgangsadresser_core adg_core ON adg_core.hn_id = adr.husnummerid
     AND adr.statuskode <> 2 AND adr.statuskode <> 4;

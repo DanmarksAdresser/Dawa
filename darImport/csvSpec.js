@@ -1,17 +1,17 @@
 "use strict";
 
-var assert = require('chai').assert;
 var _ = require('underscore');
 
 var databaseTypes = require('../psql/databaseTypes');
 var logger = require('../logger').forCategory('darImport');
+var types = require('./csvTypes');
 
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
 var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
 
-var csvHusnrRegex = /^(\d*)([A-Z]?)$/;
+var csvHusnrRegex = /^(\d*)([A-ZÆØÅ]?)$/;
 
 function removePrefixZeroes(str) {
   while (str && str.charAt(0) === '0') {
@@ -44,37 +44,6 @@ function parseHusnr(str) {
   return new Husnr(tal, bogstav);
 
 }
-
-var types = {
-  uuid: {
-    parse: _.identity
-  },
-  timestamp: {
-    parse: function(str) {
-      var millis = Date.parse(str);
-      assert.isNumber(millis, "Date " + str + " could be parsed");
-      return new Date(millis).toISOString();
-    }
-  },
-  string: {
-    parse: function(str) {
-      if(!str) {
-        return null;
-      }
-      return str.trim();
-    }
-  },
-  integer: {
-    parse: function(str) {
-      return parseInt(str, 10);
-    }
-  },
-  float: {
-    parse: function(str) {
-      return parseFloat(str);
-    }
-  }
-};
 
 function transformInterval(val) {
 
@@ -112,82 +81,6 @@ function transformSupplerendebynavn(val) {
   return val;
 }
 
-function transformCsv(spec, csvRow) {
-  function parseStr(type, str) {
-    if(str === undefined || str === null) {
-      return null;
-    }
-    str = str.trim();
-    if(str === '') {
-      return null;
-    }
-    return type.parse(str);
-  }
-  var columns = spec.columns;
-  if(spec.bitemporal) {
-    columns = columns.concat(BITEMPORAL_CSV_COLUMNS);
-  }
-  return columns.reduce(function(memo, colSpec) {
-    var str = csvRow[colSpec.name];
-    memo[colSpec.name] = parseStr(colSpec.type, str);
-    return memo;
-  }, {});
-}
-
-function transform(spec, entity) {
-  function toTimeInterval(name) {
-    var from = entity[name + 'start'];
-    delete entity[name + 'start'];
-    var to = entity[name + 'slut'];
-    delete entity[name + 'slut'];
-    if(!from) {
-      from = null;
-    }
-    if(!to) {
-      to = null;
-    }
-    entity[name] = new Range(from, to, '[)');
-  }
-  if(spec.bitemporal) {
-    toTimeInterval('registrering');
-    toTimeInterval('virkning');
-  }
-  if(spec.transform) {
-    entity = spec.transform(entity);
-    if(!entity) {
-      return;
-    }
-  }
-  Object.keys(entity).forEach(function(key) {
-    if(entity[key] && entity[key].toPostgres) {
-      entity[key] = entity[key].toPostgres();
-    }
-  });
-  return entity;
-}
-
-var BITEMPORAL_CSV_COLUMNS = [
-  {
-    name: 'versionid',
-    type: types.integer
-  },
-  {
-    name: 'registreringstart',
-    type: types.timestamp
-  },
-  {
-    name: 'registreringslut',
-    type: types.timestamp
-  },
-  {
-    name: 'virkningstart',
-    type: types.timestamp
-  },
-  {
-    name: 'virkningslut',
-    type: types.timestamp
-  }
-];
 
 var adgangspunktCsvColumns = [
   {
@@ -463,12 +356,9 @@ var supplerendebynavnColumns = [
 
 var csvSpec = {
   adgangspunkt: {
-    filename: 'Adgangspunkt.csv',
-    table: 'dar_adgangspunkt',
     bitemporal: true,
-    idColumns: ['id'],
+    filename: 'Adgangspunkt.csv',
     columns: adgangspunktCsvColumns,
-    dbColumns: _.without(_.pluck(adgangspunktCsvColumns, 'name'), 'oest', 'nord').concat('geom'),
     transform: function(val) {
       var oest = val.oest;
       delete val.oest;
@@ -485,21 +375,15 @@ var csvSpec = {
     }
   },
   husnummer: {
-    filename: 'Husnummer.csv',
-    table: 'dar_husnummer',
     bitemporal: true,
-    idColumns: ['id'],
+    filename: 'Husnummer.csv',
     columns: husnummerCsvColumns,
-    dbColumns: _.pluck(husnummerCsvColumns, 'name'),
     transform: transformHusnummer
   },
   adresse: {
-    filename: 'Adresse.csv',
-    table: 'dar_adresse',
     bitemporal: true,
-    idColumns: ['id'],
+    filename: 'Adresse.csv',
     columns: adresseCsvColumns,
-    dbColumns: _.pluck(adresseCsvColumns, 'name'),
     transform: function(row) {
       if(!_.isUndefined(row.etagebetegnelse) && !_.isNull(row.etagebetegnelse)) {
         row.etagebetegnelse = removePrefixZeroes(row.etagebetegnelse);
@@ -510,15 +394,11 @@ var csvSpec = {
       }
       return row;
     }
-
   },
   streetname: {
-    filename: 'Vejnavn.csv',
-    table: 'dar_vejnavn',
     bitemporal: false,
-    idColumns: ['id'],
+    filename: 'Vejnavn.csv',
     columns: streetnameColumns,
-    dbColumns: _.pluck(streetnameColumns, 'name'),
     transform: function(row) {
       if(row.navn) {
         row.navn = row.navn.trim();
@@ -530,61 +410,17 @@ var csvSpec = {
     }
   },
   postnr: {
-    filename: 'Vejstykke.csv',
-    table: 'dar_postnr',
     bitemporal: false,
-    idColumns: ['id'],
+    filename: 'Vejstykke.csv',
     columns: postnrColumns,
-    dbColumns: _.without(_.pluck(postnrColumns, 'name'), 'byhusnummerfra', 'byhusnummertil', 'vejstykkeside').concat(['husnrinterval', 'side']),
     transform: transformPostnr
   },
   supplerendebynavn: {
-    filename: 'SupplerendeBynavn.csv',
-    table: 'dar_supplerendebynavn',
     bitemporal: false,
-    idColumns: ['id'],
+    filename: 'SupplerendeBynavn.csv',
     columns: supplerendebynavnColumns,
-    dbColumns: _.without(_.pluck(supplerendebynavnColumns, 'name'), 'byhusnummerfra', 'byhusnummertil', 'byvejside').concat(['husnrinterval', 'side']),
     transform: transformSupplerendebynavn
   }
 };
 
-
-function allColumnNames(spec) {
-  var columnNames = spec.dbColumns.concat(['versionid', 'registrering']);
-  if(spec.bitemporal) {
-    columnNames.push('virkning');
-  }
-
-  return columnNames;
-
-}
-
-/*
- * For monotemporal tables, we generate the versionid and registrering values,
- * so they are not part of the change tables
- */
-function changeTableColumnNames(spec) {
-  var columns = spec.dbColumns;
-  if(spec.bitemporal) {
-    columns = columns.concat(['versionid', 'registrering', 'virkning']);
-  }
-  return columns;
-}
-
-function deleteTableColumnNames(spec) {
-  if(spec.bitemporal) {
-    return ['versionid'];
-  }
-  else {
-    return spec.idColumns;
-  }
-}
-
-exports.types = types;
-exports.spec = csvSpec;
-exports.transformCsv = transformCsv;
-exports.transform = transform;
-exports.allColumnNames = allColumnNames;
-exports.changeTableColumnNames = changeTableColumnNames;
-exports.deleteTableColumnNames = deleteTableColumnNames;
+module.exports = csvSpec;
