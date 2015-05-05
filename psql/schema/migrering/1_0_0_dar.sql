@@ -11,7 +11,30 @@ CREATE TYPE husnr_range AS RANGE (
   subtype = husnr
 );
 
+CREATE TYPE dar_tx_source AS ENUM('csv', 'api');
+
 DROP INDEX temaer_geom_idx;
+
+CREATE TABLE dar_transaction (
+  id             INTEGER       NOT NULL PRIMARY KEY,
+  ts             TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  source         dar_tx_source NOT NULL,
+  dawa_seq_range INT4RANGE     NOT NULL
+);
+
+CREATE INDEX ON dar_transaction (ts);
+
+CREATE TABLE dar_tx_current (
+  tx_current INTEGER
+);
+
+INSERT INTO dar_tx_current VALUES (NULL);
+
+CREATE UNIQUE INDEX
+ON dar_tx_current ((TRUE));
+
+CREATE OR REPLACE FUNCTION current_dar_transaction() RETURNS INTEGER
+AS $$ SELECT tx_current FROM dar_tx_current $$ LANGUAGE SQL;
 
 ALTER TABLE adgangsadresser RENAME COLUMN kilde TO adgangspunktkilde;
 ALTER TABLE adgangsadresser ALTER COLUMN placering TYPE smallint USING placering::smallint;
@@ -32,8 +55,8 @@ CREATE TABLE  dar_adgangspunkt (
   kildekode smallint,
   registrering tstzrange NOT NULL,
   virkning tstzrange NOT NULL,
---  tx_created integer NOT NULL,
---  tx_expired integer NOT NULL,
+  tx_created integer NOT NULL,
+  tx_expired integer,
   tekniskstandard varchar(2),
   noejagtighedsklasse varchar(1),
   retning real,
@@ -49,6 +72,8 @@ CREATE TABLE  dar_adgangspunkt (
 CREATE INDEX ON dar_adgangspunkt(id);
 CREATE INDEX ON dar_adgangspunkt(bkid);
 CREATE INDEX ON dar_adgangspunkt(coalesce(upper(registrering), lower(registrering)));
+CREATE INDEX ON dar_adgangspunkt(tx_created);
+CREATE INDEX ON dar_adgangspunkt(tx_expired);
 
 CREATE TABLE  dar_husnummer (
   versionid integer NOT NULL PRIMARY KEY,
@@ -59,8 +84,8 @@ CREATE TABLE  dar_husnummer (
   kildekode smallint,
   registrering tstzrange NOT NULL,
   virkning tstzrange NOT NULL,
---  tx_created integer NOT NULL,
---  tx_expired integer NOT NULL,
+  tx_created integer NOT NULL,
+  tx_expired integer,
   vejkode smallint,
   husnummer husnr,
   ikrafttraedelsesdato timestamptz,
@@ -75,6 +100,8 @@ CREATE INDEX ON dar_husnummer(id);
 CREATE INDEX ON dar_husnummer(bkid);
 CREATE INDEX ON dar_husnummer(adgangspunktid);
 CREATE INDEX ON dar_husnummer(coalesce(upper(registrering), lower(registrering)));
+CREATE INDEX ON dar_husnummer(tx_created);
+CREATE INDEX ON dar_husnummer(tx_expired);
 
 CREATE TABLE  dar_adresse (
   versionid integer NOT NULL PRIMARY KEY,
@@ -84,8 +111,8 @@ CREATE TABLE  dar_adresse (
   kildekode smallint,
   registrering tstzrange NOT NULL,
   virkning tstzrange NOT NULL,
---  tx_created integer NOT NULL,
---  tx_expired integer NOT NULL,
+  tx_created integer NOT NULL,
+  tx_expired integer NULL,
   husnummerid integer NOT NULL,
   etagebetegnelse varchar(2),
   doerbetegnelse varchar(4),
@@ -100,6 +127,8 @@ CREATE INDEX ON dar_adresse(id);
 CREATE INDEX ON dar_adresse(bkid);
 CREATE INDEX ON dar_adresse(husnummerid);
 CREATE INDEX ON dar_adresse(coalesce(upper(registrering), lower(registrering)));
+CREATE INDEX ON dar_adresse(tx_created);
+CREATE INDEX ON dar_adresse(tx_expired);
 
 CREATE TABLE  dar_vejnavn (
   versionid integer NOT NULL PRIMARY KEY DEFAULT nextval('id_sequence'),
@@ -107,8 +136,6 @@ CREATE TABLE  dar_vejnavn (
   vejkode smallint,
   kommunekode smallint,
   registrering tstzrange NOT NULL DEFAULT tstzrange(current_timestamp, null, '[)'),
---  tx_created integer NOT NULL,
---  tx_expired integer NOT NULL,
   navn text,
   adresseringsnavn text,
   aendringstimestamp timestamptz,
