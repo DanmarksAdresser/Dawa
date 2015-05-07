@@ -51,6 +51,44 @@ describe('API import', function() {
   var reg2 = moment('2015-01-01T02:00:00.000Z');
   var reg3 = moment('2015-01-01T03:00:00.000Z');
 
+  it('Will correctly split changeset into transactions based on timestmap', function() {
+    var sampleChangeset = {
+      adgangspunkt: [
+        {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null},
+        {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null},
+        {versionid: 3, registreringstart: reg2.toISOString(), registreringslut: null},
+        {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg3.toISOString()}
+      ],
+      husnummer: [
+        {versionid: 1, registreringstart: reg2.toISOString(), registreringslut: null}
+      ],
+      adresse: [
+        {versionid: 1, registreringstart: reg3.toISOString(), registreringslut: null}
+      ]
+    } ;
+    var expectedResult = [
+      {
+        adgangspunkt: [{versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null}],
+        husnummer: [],
+        adresse: []
+      },
+      {
+        adgangspunkt: [
+          {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null},
+          {versionid: 3, registreringstart: reg2.toISOString(), registreringslut: null}],
+        husnummer: [
+          {versionid: 1, registreringstart: reg2.toISOString(), registreringslut: null}
+        ],
+        adresse: []
+      },
+      {
+        adgangspunkt: [{versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg3.toISOString()}],
+        husnummer: [],
+        adresse: [{versionid: 1, registreringstart: reg3.toISOString(), registreringslut: null}]
+      }];
+    expect(mockedImporter.internal.splitInTransactions(sampleChangeset)).to.deep.equal(expectedResult);
+  });
+
   it('If there are more records than can be fetched in one batch,' +
   '  we will continue to fetch records until we have them all.', function() {
     mockApiData.adgangspunkt = [

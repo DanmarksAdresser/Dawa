@@ -218,6 +218,24 @@ module.exports = function(opt) {
     });
   }
 
+  function splitInTransactions(changeset) {
+    var groupedChangeset = _.reduce(changeset, function(memo, rows, entityName) {
+      memo[entityName] = _.groupBy(rows, function(row) {
+        return row.registreringslut || row.registreringstart;
+      });
+      return memo;
+    }, {});
+    var transactionTimestamps = _.reduce(groupedChangeset, function(memo, entityTimestampMap) {
+      return _.union(memo, Object.keys(entityTimestampMap));
+    }, []).sort();
+    return transactionTimestamps.map(function(timestamp) {
+      return Object.keys(changeset).reduce(function(memo, entityName) {
+        memo[entityName] = groupedChangeset[entityName][timestamp] || [];
+        return memo;
+      }, {});
+    });
+  }
+
   function importFromApi(client, url, report) {
     var tsFrom, tsTo;
     return getLastFetched(client)
@@ -248,7 +266,14 @@ module.exports = function(opt) {
           return;
         }
         else {
-          return importDarImpl.applyDarChanges(client, resultSet, report);
+          return qUtil.mapSerial(splitInTransactions(resultSet), function(transactionSet) {
+            var someRow =_.find(transactionSet, function(rows) {
+              return rows.length > 0;
+            })[0];
+            var txTimestamp = someRow.registreringslut || someRow.registreringstart;
+            report['tx_' +txTimestamp] = {};
+            return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+          });
         }
       }).then(function () {
         return setLastFetched(client, tsTo.subtract(maxDarTxDuration));
@@ -258,7 +283,8 @@ module.exports = function(opt) {
   return {
     importFromApi: importFromApi,
     internal: {
-      fetchUntilStable: fetchUntilStable
+      fetchUntilStable: fetchUntilStable,
+      splitInTransactions: splitInTransactions
     }
   };
 };

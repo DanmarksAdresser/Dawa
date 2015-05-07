@@ -86,14 +86,20 @@ function denodeifyClient(client) {
   result.query = function() {
     return client.query.apply(client, arguments);
   };
-  result.queryp = function(query, params) {
-    return q.ninvoke(client, 'query', query, params).catch(function(err) {
-      logger.error("Query failed: ", {
-        query: query,
-        error: err
+  result.queryp = function (query, params) {
+    var before = Date.now();
+    return q.ninvoke(result, 'query', query, params)
+      .then(function (result) {
+        statistics.emit('psql_query', Date.now() - before, null, {sql: query});
+        return result;
+      }).catch(function (err) {
+        statistics.emit('psql_query', Date.now() - before, err, {sql: query});
+        logger.error("Query failed: ", {
+          query: query,
+          error: err
+        });
+        return q.reject(err);
       });
-      return q.reject(err);
-    });
   };
   result.querypLogged = function(query, params) {
     return result.queryp('EXPLAIN ' + query, params).then(function(plan) {
