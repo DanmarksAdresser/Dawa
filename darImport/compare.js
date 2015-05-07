@@ -28,7 +28,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     'ejerlavkode', 'matrikelnr', 'esrejendomsnr');
 
   return proddb.withTransaction('READ_WRITE', function (client) {
-    console.log('importing new fields');
     return importDarImpl.createFullViews(client)
       .then(function () {
         return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function (entityName) {

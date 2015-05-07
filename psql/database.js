@@ -87,7 +87,6 @@ function denodeifyClient(client) {
     return client.query.apply(client, arguments);
   };
   result.queryp = function(query, params) {
-    console.log(query);
     return q.ninvoke(client, 'query', query, params).catch(function(err) {
       logger.error("Query failed: ", {
         query: query,

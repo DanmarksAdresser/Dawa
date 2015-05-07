@@ -41,7 +41,7 @@ describe('nontemporal', function() {
     table: spec.table,
     key: spec.idColumns,
     columns: spec.columns
-  }
+  };
 
   var specImpl = nontemporal(spec);
 
@@ -72,7 +72,7 @@ describe('nontemporal', function() {
       function computeAndVerify(client, expectedInserts, expectedUpdates, expectedDeletes) {
         return specImpl.computeDifferences(client, srcTable, spec.table, spec.table)
           .then(function() {
-            return verifyTableContent(client, srcDatamodel, 'insert_' + spec.table, expectedInserts)
+            return verifyTableContent(client, srcDatamodel, 'insert_' + spec.table, expectedInserts);
           })
           .then(function() {
             return verifyTableContent(client, srcDatamodel, 'update_' + spec.table, expectedUpdates);
@@ -95,7 +95,7 @@ describe('nontemporal', function() {
         var newObject = {id1: 1, id2: 2, content: 'foo'};
         return loadContent(client, [newObject], [existingObject])
           .then(function() {
-            computeAndVerify(client, [newObject], [],[])
+            computeAndVerify(client, [newObject], [],[]);
           });
       });
       it('Should compute an update if an existing row has changed', function () {
@@ -115,7 +115,46 @@ describe('nontemporal', function() {
             computeAndVerify(client, [], [],[{id1: 1, id2: 2}]);
           });
       });
+
+    });
+
+    describe('Applying changes to nontemporal tables', function() {
+      it('Should correctly apply an insert', function() {
+        var client = clientFn();
+        var newObject = {id1: 1, id2: 2, content: 'foo'};
+        return loadContent(client, [newObject], [])
+          .then(function() {
+            return specImpl.compareAndUpdate(client, srcTable, spec.table);
+          })
+          .then(function() {
+            return verifyTableContent(client, dstDatamodel, spec.table, [newObject]);
+          });
+      });
+      it('Should correctly apply an update', function() {
+        var client = clientFn();
+        var existing = {id1: 1, id2: 2, content: 'foo'};
+        var unmodified = {id1: 1, id2: 3, content: 'unmodified'};
+        var updated = {id1: 1, id2: 2, content: 'updated'};
+        return loadContent(client, [unmodified, updated], [existing, unmodified])
+          .then(function() {
+            return specImpl.compareAndUpdate(client, srcTable, spec.table);
+          })
+          .then(function() {
+            return verifyTableContent(client, dstDatamodel, spec.table, [updated, unmodified]);
+          });
+      });
+      it('Should correctly apply a delete', function() {
+        var client = clientFn();
+        var existing = {id1: 1, id2: 2, content: 'foo'};
+        var unmodified = {id1: 1, id2: 3, content: 'unmodified'};
+        return loadContent(client, [unmodified], [existing, unmodified])
+          .then(function() {
+            return specImpl.compareAndUpdate(client, srcTable, spec.table);
+          })
+          .then(function() {
+            return verifyTableContent(client, dstDatamodel, spec.table, [unmodified]);
+          });
+      });
     });
   });
-
 });

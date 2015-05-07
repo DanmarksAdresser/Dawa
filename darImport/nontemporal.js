@@ -162,7 +162,7 @@ module.exports = function(spec) {
     if(options.columnsToCheck) {
       options.columnsToUpdate = options.columnsToCheck;
     }
-    return impl.computeDifferences(client, srcTable, table, options).then(function() {
+    return impl.computeDifferences(client, srcTable, table, table, options).then(function() {
       return dbSpecUtil.applyChanges(client, impl, table, options);
     });
   };

@@ -146,7 +146,7 @@ module.exports = function (spec) {
     }
   };
   impl.compareAndUpdate = function(client, srcTable, table) {
-    return impl.computeDifferences(client, srcTable, table).then(function() {
+    return impl.computeDifferences(client, srcTable, table, table).then(function() {
       return dbSpecUtil.applyChanges(client, impl, table);
     });
   };
