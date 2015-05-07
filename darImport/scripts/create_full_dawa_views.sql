@@ -27,7 +27,7 @@ CREATE TEMP TABLE  full_adgangsadresser AS
     hn_statuskode as objekttype,
     LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
            FROM dar_husnummer hn2
-           WHERE hn_id = hn2.id and hn_statuskode = hn2.statuskode),
+           WHERE hn_id = hn2.id),
           (SELECT oprettet
            FROM adgangsadresser
            WHERE hn_bkid = adgangsadresser.id)) AS oprettet,
@@ -58,7 +58,7 @@ CREATE TEMP TABLE full_enhedsadresser AS
       adr.statuskode AS objekttype,
       LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
        FROM dar_adresse adr2
-       WHERE adr.id = adr2.id and adr.statuskode = adr2.statuskode), (
+       WHERE adr.id = adr2.id), (
        SELECT oprettet
         FROM enhedsadresser
          WHERE enhedsadresser.id = adr.bkid

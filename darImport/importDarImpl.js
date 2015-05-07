@@ -311,6 +311,12 @@ exports.clearDawa = function(client) {
   });
 };
 
+exports.createFullViews = function(client) {
+  return sqlCommon.withoutTriggers(client, function() {
+    return executeExternalSqlScript(client, 'create_full_dawa_views.sql');
+  });
+}
+
 exports.importNewFields = function(client) {
   return sqlCommon.withoutTriggers(client, function() {
     return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
@@ -427,6 +433,36 @@ function updateFromDar(client, dataDir, fullCompare, report) {
     });
 }
 
+function storeRowsToTempTable(client, csvSpec, dbSpecImpl, rows, table, report) {
+  var columnNames = dbSpecImpl.changeTableColumnNames;
+  return client.queryp('CREATE TEMP TABLE ' + table +
+  ' AS select ' + columnNames.join(', ') +
+  ' FROM ' + dbSpecImpl.table +
+  ' WHERE false', [])
+    .then(function() {
+      var pgStream = createCopyStream(client, table, columnNames);
+      var inputStream = es.readArray(rows);
+      return promisingStreamCombiner([
+        inputStream,
+        es.mapSync(function (csvRow) {
+          return csvSpecUtil.transform(csvSpec, csvRow);
+        }),
+        csvStringify({
+          delimiter: ';',
+          quote: '"',
+          escape: '\\',
+          columns: columnNames,
+          header: true,
+          encoding: 'utf8'
+        }),
+        pgStream
+      ]);
+    })
+    .then(function() {
+      reportTable(client, report, table);
+    });
+}
+
 /**
  * Store DAR entities fetched from API in temp tables
  * @param client
@@ -437,34 +473,9 @@ function storeFetched(client, rowsMap, report) {
   return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(entityName) {
     var dbSpecImpl = darDbSpecImpls[entityName];
     var csvSpec = csvSpecs[entityName];
-    var columnNames = dbSpecImpl.changeTableColumnNames;
     var fetchedTable = 'fetched_' + entityName;
-    return client.queryp('CREATE TEMP TABLE ' + fetchedTable +
-    ' AS select ' + columnNames.join(', ') +
-    ' FROM ' + dbSpecImpl.table +
-    ' WHERE false', [])
-      .then(function() {
-        var pgStream = createCopyStream(client, fetchedTable, columnNames);
-        var inputStream = es.readArray(rowsMap[entityName]);
-        return promisingStreamCombiner([
-          inputStream,
-          es.mapSync(function (csvRow) {
-            return csvSpecUtil.transform(csvSpec, csvRow);
-          }),
-          csvStringify({
-            delimiter: ';',
-            quote: '"',
-            escape: '\\',
-            columns: columnNames,
-            header: true,
-            encoding: 'utf8'
-          }),
-          pgStream
-        ]);
-      })
-      .then(function() {
-        reportTable(client, report, fetchedTable);
-      });
+    var rows = rowsMap[entityName];
+    return storeRowsToTempTable(client, csvSpec, dbSpecImpl, rows, fetchedTable, report);
   });
 }
 
@@ -676,5 +687,6 @@ exports.internal = {
   computeChangeSets: computeChangeSets,
   computeDirtyObjects: computeDirtyObjects,
   dawaDbSpecImpls: dawaDbSpecImpls,
-  darDbSpecImpls: darDbSpecImpls
+  darDbSpecImpls: darDbSpecImpls,
+  storeRowsToTempTable: storeRowsToTempTable
 };

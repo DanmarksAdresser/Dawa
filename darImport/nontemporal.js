@@ -98,7 +98,7 @@ function applyUpdates(client, upTable, dstTable, idColumns, columnsToUpdate) {
       dstTable: dstTable,
       upTable: upTable,
       fieldUpdates: fieldUpdates,
-      idColumnsEqual: columnsNotDistinctClause(upTable, dstTable, idColumns)
+      idColumnsEqual: columnsEqualClause(upTable, dstTable, idColumns)
     });
   return client.queryp(sql, []);
 }

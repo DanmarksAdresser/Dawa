@@ -12,8 +12,7 @@ SET
   husnummerkilde = src.husnummerkilde,
   esdhreference  = src.esdhreference,
   journalnummer  = src.journalnummer,
-  placering      = src.placering,
-  ikraftfra      = src.ikraftfra
+  placering      = src.placering
 FROM full_adgangsadresser src
 WHERE adgangsadresser_history.id = src.id
       AND adgangsadresser_history.valid_to IS NULL;

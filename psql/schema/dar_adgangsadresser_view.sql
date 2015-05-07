@@ -50,7 +50,7 @@ CREATE VIEW dar_adgangsadresser_view AS
     hn_statuskode as objekttype,
     LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
            FROM dar_husnummer hn2
-           WHERE hn_id = hn2.id and hn_statuskode = hn2.statuskode),
+           WHERE hn_id = hn2.id),
           (SELECT oprettet
            FROM adgangsadresser
            WHERE hn_bkid = adgangsadresser.id)) AS oprettet,
