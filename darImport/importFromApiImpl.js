@@ -215,18 +215,41 @@ module.exports = function(opt) {
     });
   }
 
-  function importFromApi(client, url, report) {
+  function transactionAlreadyPerformed(client, rowMap) {
+    var entityWithRows = _.find(Object.keys(rowMap), function(entityName) {
+      return rowMap[entityName].length > 0;
+    });
+    var row = rowMap[entityWithRows][0];
+    var expired = !!row.registreringslut;
+    var sql = 'SELECT EXISTS(SELECT * FROM dar_' + entityWithRows + ' WHERE versionid=$1';
+    if(expired) {
+      sql += ' AND NOT upper_inf(registrering)';
+    }
+    sql += ') as performed';
+    return client.queryp(sql, [row.versionid]).then(function(result) {
+      return result.rows[0].performed;
+    });
+  }
+
+  function importFromApi(db, url, report) {
     var tsFrom, tsTo;
-    return getLastFetched(client)
-      .then(function (lastFetched) {
-        if (!lastFetched) {
-          return getLastSeenTs(client);
+    var lastFetchedTs;
+    return db.withTransaction('READ_ONLY', function (client) {
+      return getLastFetched(client)
+        .then(function (lastFetched) {
+          if (!lastFetched) {
+            return getLastSeenTs(client);
+          }
+          else {
+            return lastFetched;
+          }
+        })
+        .then(function (_lastFetchedTs) {
+          lastFetchedTs = _lastFetchedTs;
         }
-        else {
-          return lastFetched;
-        }
-      })
-      .then(function (lastFetchedTs) {
+      );
+    })
+      .then(function() {
         if (!lastFetchedTs) {
           tsFrom = moment.unix(0);
         }
@@ -246,18 +269,30 @@ module.exports = function(opt) {
         }
         else {
           return qUtil.mapSerial(splitInTransactions(resultSet), function(transactionSet) {
-            var someRow =_.find(transactionSet, function(rows) {
-              return rows.length > 0;
-            })[0];
-            var txTimestamp = someRow.registreringslut || someRow.registreringstart;
-            report['tx_' +txTimestamp] = {};
-            return importDarImpl.withDarTransaction(client, 'api', function() {
-              return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+            return db.withTransaction('READ_WRITE', function(client) {
+              return transactionAlreadyPerformed(client, transactionSet)
+                .then(function(transactionPerformed) {
+                  if(transactionPerformed) {
+                    return;
+                  }
+                  else {
+                    var someRow =_.find(transactionSet, function(rows) {
+                      return rows.length > 0;
+                    })[0];
+                    var txTimestamp = someRow.registreringslut || someRow.registreringstart;
+                    report['tx_' +txTimestamp] = {};
+                    return importDarImpl.withDarTransaction(client, 'api', function() {
+                      return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+                    });
+                  }
+                });
             });
           });
         }
       }).then(function () {
-        return setLastFetched(client, tsTo.subtract(maxDarTxDuration));
+        return db.withTransaction('READ_WRITE', function(client) {
+          return setLastFetched(client, tsTo.subtract(maxDarTxDuration));
+        });
       });
   }
 

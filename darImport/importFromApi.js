@@ -25,11 +25,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
 
   function doImport() {
     var report = {};
-    return proddb.withTransaction('READ_WRITE', function (client) {
-      return importFromApiImpl.importFromApi(client, url, report);
-    }).then(function() {
-      logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
-    });
+    return importFromApiImpl.importFromApi(proddb, url, report)
+      .then(function () {
+        logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
+      });
   }
 
   var shouldContinue = true;
