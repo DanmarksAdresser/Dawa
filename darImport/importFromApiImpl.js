@@ -29,15 +29,20 @@ module.exports = function(opt) {
   var maxDarTxDuration = options.maxDarTxDuration;
 
   var rowKey = function(row) {
-    return row.versionid + '-' + !row.registreringslut;
-  }
+    // we ensure that rows with registreringslut is first, so
+    // it is the one that remains when we use uniq afterwards.
+    return row.versionid + '-' + (row.registreringslut ? 'A' : 'B');
+  };
 
   function mergeResults(result, page) {
     var unsorted = result.concat(page);
     var sorted = unsorted.sort(function(a, b) {
       return rowKey(a).localeCompare(rowKey(b));
     });
-    var unique = _.uniq(sorted, true, rowKey);
+    var unique = _.uniq(sorted, true, function(row) {
+      return row.versionid;
+    });
+
     return unique;
   }
 
@@ -197,7 +202,23 @@ module.exports = function(opt) {
     });
   }
 
-  function splitInTransactions(changeset) {
+  function splitInTransactions(changeset, tsFrom) {
+    // Look for rows witch has been both created and expired in the same batch, and
+    // create a record for the creation. If we do not do this,
+    // we will never see the address in DAWA.
+    changeset = _.reduce(changeset, function(memo, rows, entityName) {
+      var result = _.clone(rows);
+      rows.forEach(function(row) {
+        if(row.registreringslut &&
+          !tsFrom.isAfter(moment(row.registreringstart))) {
+          var creationRow = _.clone(row);
+          creationRow.registreringslut = null;
+          result.push(creationRow);
+        }
+      });
+      memo[entityName] = result;
+      return memo;
+    }, {});
     var groupedChangeset = _.reduce(changeset, function(memo, rows, entityName) {
       memo[entityName] = _.groupBy(rows, function(row) {
         return row.registreringslut || row.registreringstart;
@@ -268,7 +289,7 @@ module.exports = function(opt) {
           return;
         }
         else {
-          return qUtil.mapSerial(splitInTransactions(resultSet), function(transactionSet) {
+          return qUtil.mapSerial(splitInTransactions(resultSet, tsFrom), function(transactionSet) {
             return db.withTransaction('READ_WRITE', function(client) {
               return transactionAlreadyPerformed(client, transactionSet)
                 .then(function(transactionPerformed) {

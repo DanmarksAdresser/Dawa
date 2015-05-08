@@ -54,7 +54,6 @@ describe('API import', function() {
   it('Will correctly split changeset into transactions based on timestmap', function() {
     var sampleChangeset = {
       adgangspunkt: [
-        {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null},
         {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null},
         {versionid: 3, registreringstart: reg2.toISOString(), registreringslut: null},
         {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg3.toISOString()}
@@ -86,7 +85,7 @@ describe('API import', function() {
         husnummer: [],
         adresse: [{versionid: 1, registreringstart: reg3.toISOString(), registreringslut: null}]
       }];
-    expect(mockedImporter.internal.splitInTransactions(sampleChangeset)).to.deep.equal(expectedResult);
+    expect(mockedImporter.internal.splitInTransactions(sampleChangeset, reg1)).to.deep.equal(expectedResult);
   });
 
   it('If there are more records than can be fetched in one batch,' +
@@ -104,7 +103,8 @@ describe('API import', function() {
     });
   });
 
-  it('If we receive both the creation and the expiration of a record in one run, both records should survive', function() {
+  it('If we receive both the creation and the expiration of a record in one batch, only the expired record should survive',
+    function() {
     mockApiData.adgangspunkt = [
       {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null},
       {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null},
@@ -112,7 +112,7 @@ describe('API import', function() {
       {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg3.toISOString()}
     ];
     return mockedImporter.internal.fetchUntilStable(baseurl, null, t1, t2, null).then(function(result) {
-      expect(result.adgangspunkt).to.have.length(4);
+      expect(result.adgangspunkt).to.have.length(3);
       var record = _.findWhere(result.adgangspunkt, { versionid: 1});
       expect(record.registreringslut).to.equal(reg3.toISOString());
     });
