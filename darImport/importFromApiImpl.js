@@ -28,37 +28,16 @@ module.exports = function(opt) {
   var maxReturnedRecords = options.maxReturnedRecords;
   var maxDarTxDuration = options.maxDarTxDuration;
 
+  var rowKey = function(row) {
+    return row.versionid + '-' + !row.registreringslut;
+  }
+
   function mergeResults(result, page) {
     var unsorted = result.concat(page);
     var sorted = unsorted.sort(function(a, b) {
-      if(a.versionid < b.versionid) {
-        return -1;
-      }
-      if(a.versionid > b.versionid) {
-        return 1;
-      }
-      // if two rows have same versionid, but one have registreringslut,
-      // we want it to be first, such that it is the other which is removed.
-      if(a.registreringslut === b.registreringslut) {
-        return 0;
-      }
-      else if(a.registreringslut) {
-        return -1;
-      }
-      else if(b.registreringslut) {
-        return 1;
-      }
-      else {
-        logger.error('Received two rows with same versionid, but different registreringslut', {
-          a: a,
-          b: b
-        });
-        return 0;
-      }
+      return rowKey(a).localeCompare(rowKey(b));
     });
-    var unique = _.uniq(sorted, true, function(val) {
-      return val.versionid;
-    });
+    var unique = _.uniq(sorted, true, rowKey);
     return unique;
   }
 

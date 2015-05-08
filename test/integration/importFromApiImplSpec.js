@@ -104,7 +104,7 @@ describe('API import', function() {
     });
   });
 
-  it('If we receive both the creation and the expiration of a record in one run, only the expired record will survice', function() {
+  it('If we receive both the creation and the expiration of a record in one run, both records should survive', function() {
     mockApiData.adgangspunkt = [
       {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null},
       {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null},
@@ -112,7 +112,7 @@ describe('API import', function() {
       {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg3.toISOString()}
     ];
     return mockedImporter.internal.fetchUntilStable(baseurl, null, t1, t2, null).then(function(result) {
-      expect(result.adgangspunkt).to.have.length(3);
+      expect(result.adgangspunkt).to.have.length(4);
       var record = _.findWhere(result.adgangspunkt, { versionid: 1});
       expect(record.registreringslut).to.equal(reg3.toISOString());
     });
