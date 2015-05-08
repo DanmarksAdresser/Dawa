@@ -26,9 +26,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   function doImport() {
     var report = {};
     return proddb.withTransaction('READ_WRITE', function (client) {
-      return importDarImpl.withDarTransaction(client, 'api', function() {
-        return importFromApiImpl.importFromApi(client, url, report);
-      });
+      return importFromApiImpl.importFromApi(client, url, report);
     }).then(function() {
       logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
     });

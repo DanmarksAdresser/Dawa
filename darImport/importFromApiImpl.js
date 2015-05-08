@@ -251,7 +251,9 @@ module.exports = function(opt) {
             })[0];
             var txTimestamp = someRow.registreringslut || someRow.registreringstart;
             report['tx_' +txTimestamp] = {};
-            return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+            return importDarImpl.withDarTransaction(client, 'api', function() {
+              return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+            });
           });
         }
       }).then(function () {
