@@ -13,8 +13,6 @@ CREATE TYPE husnr_range AS RANGE (
 
 CREATE TYPE dar_tx_source AS ENUM('csv', 'api');
 
-DROP INDEX temaer_geom_idx;
-
 CREATE TABLE dar_transaction (
   id             INTEGER       NOT NULL PRIMARY KEY,
   ts             TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
