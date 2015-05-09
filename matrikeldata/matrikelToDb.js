@@ -9,6 +9,7 @@ var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var ejerlav = require('./ejerlav');
+var logger = require('../logger').forCategory('matrikelImport');
 var proddb = require('../psql/proddb');
 var tema = require('../temaer/tema.js');
 var temaer = require('../apiSpecification/temaer/temaer');
@@ -35,7 +36,6 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  var lastUpdated = options.lastUpdated ? moment(options.lastUpdated) : null;
 
   var files = fs.readdirSync(options.sourceDir).filter(function(file) {
     return /^.+\.zip$/.test(file);
@@ -74,7 +74,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
       return proddb.withTransaction('READ_WRITE', function (client) {
         return getLastUpdated(client, ejerlavkode).then(function (lastUpdatedMillis) {
           if (lastUpdatedMillis && lastUpdatedMillis >= ctimeMillis) {
-            console.log('Skipping ' + ejerlavkode, ' not modified');
+            logger.debug('Skipping ejerlav, not modified', { ejerlavkode: ejerlavkode });
             return;
           }
           return q.nfcall(child_process.exec, "unzip -p " + file,
@@ -84,22 +84,31 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
             }
           ).then(function (stdout) {
               var gml = stdout.toString('utf-8');
-              return ejerlav.parseEjerlav(gml);
+              // For some crazy reason, we get a single comma "," in stdout, when the
+              // ZIP-file does not contain a gml file. We consider any output less than
+              // 10 chars to be "no data".
+              if(gml.trim().length < 10) {
+                logger.error('Ejerlav fil for ejerlav ' + ejerlavkode + ' indeholdt ingen data');
+              }
+              else {
+                return ejerlav.parseEjerlav(gml)
+                  .then(function (jordstykker) {
+                    jordstykker.forEach(function (jordstykke) {
+                      if (jordstykke.fields.ejerlavkode !== ejerlavkode) {
+                        return q.reject(new Error("Ejerlavkode for jordstykket matchede ikke ejerlavkode for filen"));
+                      }
+                    });
+                    return ejerlav.storeEjerlav(ejerlavkode, jordstykker, client, {init: options.init});
+                  }
+                ).then(function() {
+                    return setLastUpdated(client, ejerlavkode, ctimeMillis);
+                  }
+                ).then(function() {
+                    logger.debug('successfully updated ejerlav', {ejerlavkode: ejerlavkode});
+                  });
+              }
             }
-          ).then(function (jordstykker) {
-              jordstykker.forEach(function (jordstykke) {
-                if (jordstykke.fields.ejerlavkode !== ejerlavkode) {
-                  return q.reject(new Error("Ejerlavkode for jordstykket matchede ikke ejerlavkode for filen"));
-                }
-              });
-              return ejerlav.storeEjerlav(ejerlavkode, jordstykker, client, {init: options.init});
-            }
-          ).then(function() {
-              return setLastUpdated(client, ejerlavkode, ctimeMillis);
-            }
-          ).then(function() {
-              console.log('successfully updated ' + ejerlavkode);
-            });
+          );
         });
       });
     };
