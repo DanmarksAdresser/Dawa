@@ -34,6 +34,7 @@ var syntheticDbContent = {
     "noejagtighedsklasse": "A",
     "placering": 5,
     "registrering": new Range('2014-05-09T10:31:44.290Z', null, '[)'),
+    "dbregistrering": new Range('2014-05-09T10:31:45.000Z', null, '[)'),
     "retning": 71,
     "revisionsdato": "2014-05-08T22:00:00.000Z",
     "statuskode": 6,
@@ -57,6 +58,7 @@ var syntheticDbContent = {
     "postdistrikt": "Frederikssund",
     "postnummer": 3600,
     "registrering": new Range(null, null, 'empty'),
+    "dbregistrering": new Range("2014-04-14T12:26:14.000Z", "2014-04-14T12:26:15.000Z", '[)'),
     "statuskode": 5,
     "vejkode": 1,
     "vejnavn": "A C Hansensvej",
@@ -74,6 +76,7 @@ var syntheticDbContent = {
     "ikrafttraedelsesdato": null,
     "kildekode": 1,
     "registrering": new Range("2014-10-07T12:24:13.907Z", null, '[)'),
+    "dbregistrering": new Range("2014-10-07T12:24:36.000Z", null, '[)'),
     "statuskode": 5,
     "versionid": 1001,
     "esdhreference": "esdhref2",
@@ -197,6 +200,7 @@ describe('Importing DAR CSV files to database', function () {
         ' content text,' +
         ' registrering tstzrange not null,' +
         ' virkning tstzrange not null,' +
+        ' dbregistrering tstzrange,' +
         ' tx_created integer not null default current_dar_transaction(),' +
         ' tx_expired integer)', []);
     }
@@ -320,6 +324,7 @@ describe('Importing DAR CSV files to database', function () {
               id: '11111111-1111-1111-1111-11111111111c',
               content: 'Created row',
               registrering: new Range("2014-05-08T22:00:00.000Z", null, '[)'),
+              dbregistrering: new Range("2014-05-08T22:00:01.000Z", null, '[)'),
               virkning: new Range(null, null, '()')
             });
           });
@@ -332,6 +337,7 @@ describe('Importing DAR CSV files to database', function () {
               "content": "Modified row",
               "id": "11111111-1111-1111-1111-11111111111d",
               "registrering": new Range("2014-05-08T22:00:00.000Z", "2014-05-09T22:00:00.000Z", '[)'),
+              dbregistrering: new Range("2014-05-08T22:00:01.000Z", null, '[)'),
               "versionid": 4,
               "virkning": new Range(null, null, '()')
             });

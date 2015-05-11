@@ -7,6 +7,7 @@ CREATE TABLE  dar_adresse (
   kildekode smallint,
   registrering tstzrange NOT NULL,
   virkning tstzrange NOT NULL,
+  dbregistrering tstzrange,
   tx_created integer NOT NULL DEFAULT current_dar_transaction(),
   tx_expired integer,
   husnummerid integer NOT NULL,
@@ -24,3 +25,4 @@ CREATE INDEX ON dar_adresse(husnummerid);
 CREATE INDEX ON dar_adresse(coalesce(upper(registrering), lower(registrering)));
 CREATE INDEX ON dar_adresse(tx_created);
 CREATE INDEX ON dar_adresse(tx_expired);
+CREATE INDEX ON dar_adresse(coalesce(upper(dbregistrering), lower(dbregistrering)));

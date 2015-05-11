@@ -7,6 +7,7 @@ CREATE TABLE  dar_adgangspunkt (
   kildekode smallint,
   registrering tstzrange NOT NULL,
   virkning tstzrange NOT NULL,
+  dbregistrering tstzrange,
   tx_created integer NOT NULL DEFAULT current_dar_transaction(),
   tx_expired integer,
   tekniskstandard varchar(2),
@@ -26,3 +27,4 @@ CREATE INDEX ON dar_adgangspunkt(bkid);
 CREATE INDEX ON dar_adgangspunkt(coalesce(upper(registrering), lower(registrering)));
 CREATE INDEX ON dar_adgangspunkt(tx_created);
 CREATE INDEX ON dar_adgangspunkt(tx_expired);
+CREATE INDEX ON dar_adgangspunkt(coalesce(upper(dbregistrering), lower(dbregistrering)));

@@ -60,7 +60,7 @@ function removeChangesAfterCsv(client, targetTable, upTable, lastCsvTimestamp) {
 
 
 module.exports = function (spec) {
-  var allColumns = spec.columns.concat(['versionid', 'registrering', 'virkning']);
+  var allColumns = spec.columns.concat(['versionid', 'registrering', 'virkning', 'dbregistrering']);
   var versionIdColumn = ['versionid'];
   var nonTempSpec = {
     table: spec.table,
@@ -75,7 +75,7 @@ module.exports = function (spec) {
     deleteTableColumnNames: versionIdColumn,
     allColumnNames: allColumns,
     computeDifferences: function (client, srcTable, dstTable, actTable, options) {
-      var columnsToCheck = ['registrering'];
+      var columnsToCheck = ['registrering', 'dbregistrering'];
       if (options && options.useFastComparison === false) {
         columnsToCheck.concat(['virkning']).concat(spec.columns);
       }
@@ -87,7 +87,7 @@ module.exports = function (spec) {
       return nonTempImpl.applyInserts(client, table);
     },
     applyUpdates: function (client, table, options) {
-      var columnsToUpdate = ['registrering'];
+      var columnsToUpdate = ['registrering', 'dbregistrering'];
       if (options && options.updateAllFields) {
         columnsToUpdate = columnsToUpdate.concat(['virkning']).concat(spec.dbColumns);
       }

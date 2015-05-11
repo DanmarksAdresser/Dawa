@@ -25,6 +25,14 @@ var BITEMPORAL_CSV_COLUMNS = [
   {
     name: 'virkningslut',
     type: types.timestamp
+  },
+  {
+    name: 'dbregistreringstart',
+    type: types.timestamp
+  },
+  {
+    name: 'dbregistreringslut',
+    type: types.timestamp
   }
 ];
 
@@ -68,6 +76,7 @@ function transform(spec, entity) {
   if(spec.bitemporal) {
     toTimeInterval('registrering');
     toTimeInterval('virkning');
+    toTimeInterval('dbregistrering');
   }
   if(spec.transform) {
     entity = spec.transform(entity);
