@@ -304,6 +304,10 @@ module.exports = function(opt) {
                     report['tx_' +txTimestamp] = {};
                     return importDarImpl.withDarTransaction(client, 'api', function() {
                       return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+                    }).then(function() {
+                      logger.info('DAR import delay', {
+                        delay: moment().diff(moment(txTimestamp))
+                      });
                     });
                   }
                 });
