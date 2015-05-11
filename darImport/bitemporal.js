@@ -7,7 +7,7 @@ var logger = require('../logger').forCategory('darImport');
 var nontemporal = require('./nontemporal');
 var sqlUtil = require('./sqlUtil');
 
-var columnsNotDistinctClause = sqlUtil.columnsNotDistinctClause;
+var columnsEqualClause = sqlUtil.columnsEqualClause;
 
 /**
  * This function takes a destination table and a table containing updates to be performed to
@@ -30,7 +30,7 @@ function markExpiredRecords(client, destinationTable, upTable, spec) {
     {
       destinationTable: destinationTable,
       upTable: upTable,
-      idColumnsEqual: columnsNotDistinctClause(upTable, destinationTable, spec.idColumns)
+      idColumnsEqual: columnsEqualClause(upTable, destinationTable, ['versionid'])
     }), []);
 }
 
