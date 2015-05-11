@@ -23,8 +23,7 @@ var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
  * This does not work on windows.
  */
 if(process.platform !== 'win32') {
-  var memwatch = require('memwatch');
-  require('heapdump');
+  var memwatch = require('memwatch-next');
   memwatch.on('stats', function(stats) {
     var logMeta = {
       pid: process.pid,

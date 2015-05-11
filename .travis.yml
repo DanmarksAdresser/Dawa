@@ -7,7 +7,7 @@ notifications:
 language: node_js
 
 node_js:
-  - "0.10"
+  - "0.12"
 
 addons:
   postgresql: 9.3
