@@ -96,6 +96,7 @@ function denodeifyClient(client) {
         statistics.emit('psql_query', Date.now() - before, err, {sql: query});
         logger.error("Query failed: ", {
           query: query,
+          params: params,
           error: err
         });
         return q.reject(err);
