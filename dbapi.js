@@ -2,7 +2,6 @@
 
 var Q = require('q');
 var logger = require('./logger');
-var statistics = require('./statistics');
 
 var CursorStream = require('./cursor-stream');
 
@@ -47,17 +46,9 @@ function createQuery(parts){
 function streamingQueryUsingCursor(client, sql, params, cb) {
   sql = 'declare c1 NO SCROLL cursor for ' + sql;
   logger.info('sql', 'Creating cursor', {sql: sql, params: params });
-  client.query(
-    sql,
-    params,
-    function (err) {
-      if(err) {
-        logger.error('Failed executing query', {sql: sql, params: params, error: err});
-        return cb(err);
-      }
-      return cb(null, new CursorStream(client, 'c1', sql));
-    }
-  );
+  return client.queryp(sql, params).then(function() {
+    return new CursorStream(client, 'c1', sql);
+  }).nodeify(cb);
 }
 
 var query = function(client, sqlParts, cb) {
@@ -67,17 +58,9 @@ var query = function(client, sqlParts, cb) {
 
 var queryRaw = function(client, sql, params, cb) {
   logger.info('sql', 'executing sql query', {sql: sql, params: params});
-  var before = Date.now();
-  client.query(
-    sql,
-    params,
-    function (err, result) {
-      statistics.emit('psql_query', Date.now() - before, err, { sql: sql, params: params });
-      if(err) {
-        return cb(err);
-      }
-      cb(null, result.rows || []);
-    });
+  return client.queryp(sql, params).then(function(result) {
+    return result.rows || [];
+  }).nodeify(cb);
 };
 
 
