@@ -198,7 +198,7 @@ function dropChangeTables(client, tableSuffix) {
  * @returns {*}
  */
 function updateTableFromCsv(client, csvFilePath, csvSpec, dbSpecImpl, useFastComparison, report) {
-  var desiredTable = 'desired_' + csvSpec.table;
+  var desiredTable = 'desired_' + dbSpecImpl.table;
   return createTableAndLoadData(client, csvFilePath, desiredTable, dbSpecImpl, csvSpec)
     .then(function() {
       return dbSpecImpl.compareAndUpdate(client, desiredTable, dbSpecImpl.table, {
