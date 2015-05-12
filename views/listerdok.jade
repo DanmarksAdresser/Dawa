@@ -54,6 +54,12 @@ block content
               li <a href='#valglandsdelopslag'>Valglandsdelsopslag</a>
               li <a href='#valglandsdelreverse'>Valglandsdel reverse geocoding</a>
               li <a href='#valglandsdeldata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#storkreds').nav-header Storkreds API
+            ul#valglandsdel.nav.nav-list
+              li <a href='#storkredssoegning'>Storkredssøgning</a>
+              li <a href='#storkredsopslag'>Storkredsopslag</a>
+              li <a href='#storkredsreverse'>Storkreds reverse geocoding</a>
+              li <a href='#storkedsdeldata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#ejerlav').nav-header Ejerlav API
             ul#ejerlav.nav.nav-list
               li <a href='#ejerlavsoegning'>Ejerlavssøgning</a>
@@ -166,19 +172,31 @@ block content
             +documentSchema(jsonSchemas.opstillingskreds)
 
           section
-              h3.anchor-header#valglandsdelsoegning Valglandsdelssøgning
-              +documentResource(parameterDoc, '/valglandsdele')
-              div.page-header
-              h3.anchor-header#valglandsdelopslag Valglandsdelsopslag
-              +documentResource(parameterDoc, '/valglandsdele/{bogstav}')
-              div.page-header
-                  h3.anchor-header#valglandsdelreverse Valglandsdel reverse geocoding
-              +documentResource(parameterDoc, '/valglandsdele/reverse')
-              div.page-header
-              h3.anchor-header#valglandsdeldata Beskrivelse af valglandsdelsdata
-              p Web API'et udstiller for hver valglandsdel følgende informationer:
-              +documentSchema(jsonSchemas.valglandsdel)
-
+            h3.anchor-header#valglandsdelsoegning Valglandsdelssøgning
+            +documentResource(parameterDoc, '/valglandsdele')
+            div.page-header
+            h3.anchor-header#valglandsdelopslag Valglandsdelsopslag
+            +documentResource(parameterDoc, '/valglandsdele/{bogstav}')
+            div.page-header
+                h3.anchor-header#valglandsdelreverse Valglandsdel reverse geocoding
+            +documentResource(parameterDoc, '/valglandsdele/reverse')
+            div.page-header
+            h3.anchor-header#valglandsdeldata Beskrivelse af valglandsdelsdata
+            p Web API'et udstiller for hver valglandsdel følgende informationer:
+            +documentSchema(jsonSchemas.valglandsdel)
+          section
+            h3.anchor-header#storkredssoegning Storkredssøgning
+            +documentResource(parameterDoc, '/storkredse')
+            div.page-header
+            h3.anchor-header#storkredsslag Storkredsopslag
+            +documentResource(parameterDoc, '/storkredse/{nummer}')
+            div.page-header
+              h3.anchor-header#storkredsreverse Storkreds reverse geocoding
+            +documentResource(parameterDoc, '/storkreds/reverse')
+            div.page-header
+            h3.anchor-header#storkredsdata Beskrivelse af storkredsdata
+            p Web API'et udstiller for hver storkreds følgende informationer:
+            +documentSchema(jsonSchemas.storkreds)
           section
             h3.anchor-header#ejerlavsoegning Ejerlavssøgning
             +documentResource(parameterDoc, '/ejerlav')

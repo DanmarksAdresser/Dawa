@@ -15,15 +15,18 @@ var makeHrefFromPath = commonMappers.makeHrefFromPath;
 
 var registry = require('../registry');
 
-var autocompleteTekst = {
-  valglandsdel: {
-    description: function(tema) {
-      return 'Bogstav efterfulgt af navnet på ' + tema.singularSpecific;
-    },
-    mapper: function (row) {
-      return "" + row.bogstav + ' ' + row.navn;
-    }
+var nameOnlyAutocomplete =  {
+  description: function(tema) {
+    return 'Navnet på ' + tema.singularSpecific;
+  },
+  mapper: function (row) {
+    return row.navn;
   }
+};
+
+var autocompleteTekst = {
+  valglandsdel: nameOnlyAutocomplete,
+  storkreds: nameOnlyAutocomplete
 };
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {

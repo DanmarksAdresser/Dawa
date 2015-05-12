@@ -50,6 +50,24 @@ module.exports.valglandsdel = {
   ])
 };
 
+module.exports.storkreds = {
+  id: normalizeParameters([
+    {
+      name: 'nummer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'navn',
+      multi: true
+    },
+    {
+      name: 'nummer',
+      multi: true
+    }
+  ])
+};
+
 module.exports.jordstykke = {
   id: normalizeParameters([
     {

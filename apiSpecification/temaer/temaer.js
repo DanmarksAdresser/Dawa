@@ -117,6 +117,19 @@ module.exports = [
     searchable: true
   },
   {
+    singular: 'storkreds',
+    singularSpecific: 'storkredsen',
+    plural: 'storkredse',
+    prefix: 'storkreds',
+    key: [{
+      name: 'nummer',
+      type: 'integer',
+      sqlType: 'integer'
+    }],
+    published: true,
+    searchable: true
+  },
+  {
     singular: 'jordstykke',
     singularSpecific: 'jordstykket',
     plural: 'jordstykker',

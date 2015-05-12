@@ -86,6 +86,16 @@ var fieldMap = {
 	  },
     describe(navn, 'Valglandsdelens navn.')
 	],
+  storkreds: [
+    {
+      name: 'nummer',
+      description: 'Storkredsens nummer. Heltal. Udgør nøglen.',
+      schema: {
+        type: 'integer'
+      }
+    },
+    describe(navn, 'Storkredsens navn.')
+  ],
   jordstykke: [
     {
       name: 'ejerlavkode',

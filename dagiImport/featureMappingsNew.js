@@ -124,6 +124,16 @@ exports.valglandsdel = {
 	}
 };
 
+exports.storkreds = {
+  name: 'storkreds',
+  wfsName: 'Storkreds',
+  geometry: 'geometri',
+  fields: {
+    navn: 'navn',
+    nummer: 'storkredsnummer'
+  }
+};
+
 // normalize, such that every field has a name and a parseFn and a filterFn.
 _.each(exports, function(mapping) {
   mapping.fields = _.reduce(mapping.fields, function(memo, value, key) {
