@@ -46,7 +46,9 @@ function getLastModificationTimestamp(client, table) {
     });
 }
 
-function removeChangesAfterCsv(client, targetTable, upTable, lastCsvTimestamp) {
+function removeChangesAfterCsv(client, targetTable, lastCsvTimestamp) {
+  var upTable = 'update_' + targetTable;
+  var delTable = 'delete_' + targetTable;
   return client.queryp(format(
     'DELETE FROM {upTable}' +
     ' USING {targetTable}' +
@@ -55,7 +57,19 @@ function removeChangesAfterCsv(client, targetTable, upTable, lastCsvTimestamp) {
     {
       upTable: upTable,
       targetTable: targetTable
-    }), [lastCsvTimestamp]);
+    }), [lastCsvTimestamp])
+    .then(function () {
+      return client.queryp(format(
+        'DELETE FROM {delTable}' +
+          ' USING {targetTable}' +
+          ' WHERE {delTable}.versionid = {targetTable}.versionid' +
+          ' AND COALESCE(upper({targetTable}.registrering), lower({targetTable}.registrering)) > $1',
+        {
+          delTable: delTable,
+          targetTable: targetTable
+        }
+      ), [lastCsvTimestamp]);
+    });
 }
 
 
@@ -103,7 +117,7 @@ module.exports = function (spec) {
     }
   };
   impl.compareAndUpdate = function (client, srcTable, table, options) {
-    options = _.defaults(options, {
+    options = _.defaults({}, options, {
       useFastComparison: false,
       ignoreNewerRecords: true
     });
@@ -114,7 +128,7 @@ module.exports = function (spec) {
       .then(function () {
         if (options.ignoreNewerRecords) {
           return getLastModificationTimestamp(client, srcTable).then(function (lastCsvTimestamp) {
-            return removeChangesAfterCsv(client, table, 'update_' + table, lastCsvTimestamp);
+            return removeChangesAfterCsv(client, table, lastCsvTimestamp);
           });
         }
       })

@@ -383,6 +383,30 @@ describe('Importing DAR CSV files to database', function () {
               dbSpecImpl);
           });
         });
+        it('Records added later than the date of the CSV timestamp should not be deleted', function() {
+          var testObjectRegistreringStart = '2014-01-01T00:00:00.000Z';
+          var csvObjectRegistreringStart = '2013-01-01T00:00:00.000Z';
+          var testObject = testObjects.generate('bitemporal', sampleObject, {
+            registreringstart: testObjectRegistreringStart
+          });
+          var csvObject = testObjects.generate('bitemporal', sampleObject, {
+            registreringstart: csvObjectRegistreringStart
+          });
+          var desiredTable = 'desired_' + dbSpecImpl.table;
+          return dbinit.initDarTable(clientFn(), dbSpecImpl, csvSpec, dbSpecImpl.table, [testObject])
+            .then(function () {
+              return dbinit.initDarTable(clientFn(), dbSpecImpl, csvSpec, desiredTable, [csvObject]);
+            })
+            .then(function () {
+              return dbSpecImpl.compareAndUpdate(clientFn(), desiredTable, dbSpecImpl.table);
+            })
+            .then(function() {
+              return clientFn().queryp('SELECT versionid FROM ' + dbSpecImpl.table);
+            })
+            .then(function(result) {
+              expect(result.rows).to.have.length(2); // it should contain bot the row from CSV and the already existing row
+            });
+        });
         it('If registrering start is greater than CSV timestamp, the record should not be updated', function() {
           var testObjectRegistreringStart = '2014-01-01T00:00:00.000Z';
           var csvObjectRegistreringStart = '2013-01-01T00:00:00.000Z';
