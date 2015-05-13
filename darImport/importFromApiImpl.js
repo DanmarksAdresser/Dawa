@@ -192,9 +192,9 @@ module.exports = function(opt) {
 
   function getLastSeenTs(client) {
     return client.queryp('SELECT GREATEST(' +
-    '(SELECT max(coalesce(upper(registrering), lower(registrering))) from dar_adgangspunkt), ' +
-    '(SELECT max(coalesce(upper(registrering), lower(registrering))) from dar_husnummer),' +
-    '(SELECT max(coalesce(upper(registrering), lower(registrering))) from dar_adresse)) as lastseen',[]).then(function(result) {
+    '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_adgangspunkt), ' +
+    '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_husnummer),' +
+    '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_adresse)) as lastseen',[]).then(function(result) {
       if(result.rows && result.rows.length > 0) {
         return moment(result.rows[0].lastseen);
       }

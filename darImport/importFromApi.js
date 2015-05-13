@@ -26,7 +26,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   function doImport() {
     var report = {};
     return importFromApiImpl.importFromApi(proddb, url, report)
-      .then(function () {
+      .fin(function () {
         logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
       });
   }
