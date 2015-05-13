@@ -1,0 +1,1 @@
+ALTER TABLE dar_adgangspunkt ADD PRIMARY KEY(versionid);
