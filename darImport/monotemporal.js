@@ -115,8 +115,8 @@ function expireOldRows(client, srcTable, table, idColumns) {
     " AND upper_inf(registrering)",
     {
       table: table,
-      sourceTable: srcTable,
-      idColumnsEqual: columnsNotDistinctClause(srcTable, table, idColumns)
+      srcTable: srcTable,
+      idColumnsEqual: columnsEqualClause(srcTable, table, idColumns)
     });
   return client.queryp(expireOldRowsSql, []);
 }

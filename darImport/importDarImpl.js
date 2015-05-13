@@ -315,7 +315,7 @@ exports.createFullViews = function(client) {
   return sqlCommon.withoutTriggers(client, function() {
     return executeExternalSqlScript(client, 'create_full_dawa_views.sql');
   });
-}
+};
 
 exports.importNewFields = function(client) {
   return sqlCommon.withoutTriggers(client, function() {
@@ -324,7 +324,7 @@ exports.importNewFields = function(client) {
         return executeExternalSqlScript(client, 'import_new_fields.sql');
       });
   });
-}
+};
 
 /**
  * Given that DAR tables are populated, initialize DAWA tables, assuming no
@@ -621,22 +621,25 @@ exports.beginDarTransaction = function(client) {
 
 
 function hasModifiedDar(client) {
-  function hasModifiedBitemporal(tableName) {
-    return 'EXISTS(SELECT * FROM ' + tableName + ' WHERE coalesce(tx_expired, tx_created) = (SELECT tx_current FROM dar_tx_current))';
-  }
-  function hasModifiedMonotemporal(tableName) {
-    return 'EXISTS(SELECT * FROM ' + tableName + ' WHERE COALESCE(upper(registrering), lower(registrering)) = CURRENT_TIMESTAMP)';
-  }
-  var hasModifiedSql = _.map(darDbSpecImpls, function(specImpl) {
-    if(specImpl.temporality === 'bitemporal') {
-      return hasModifiedBitemporal(specImpl.table);
+  return client.queryp("select tx_current from dar_tx_current", function(result){
+    var tx_current = result.rows[0].tx_current;
+    function hasModifiedBitemporal(tableName) {
+      return 'EXISTS(SELECT * FROM ' + tableName + ' WHERE $1 IN (tx_expired, tx_created))';
     }
-    else {
-      return hasModifiedMonotemporal(specImpl.table);
+    function hasModifiedMonotemporal(tableName) {
+      return 'EXISTS(SELECT * FROM ' + tableName + ' WHERE COALESCE(upper(registrering), lower(registrering)) = CURRENT_TIMESTAMP)';
     }
-  }).join(' OR ');
-  return client.queryp('SELECT (' + hasModifiedSql + ') AS modified').then(function(result) {
-    return result.rows[0].modified;
+    var hasModifiedSql  = _.map(darDbSpecImpls, function(specImpl) {
+      if(specImpl.temporality === 'bitemporal') {
+        return hasModifiedBitemporal(specImpl.table);
+      }
+      else {
+        return hasModifiedMonotemporal(specImpl.table);
+      }
+    }).join(' OR ');
+    return client.queryp('SELECT (' + hasModifiedSql + ') AS modified', [tx_current]).then(function(result) {
+      return result.rows[0].modified;
+    });
   });
 }
 
