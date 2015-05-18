@@ -59,7 +59,7 @@ block content
               li <a href='#storkredssoegning'>Storkredssøgning</a>
               li <a href='#storkredsopslag'>Storkredsopslag</a>
               li <a href='#storkredsreverse'>Storkreds reverse geocoding</a>
-              li <a href='#storkedsdeldata'>Databeskrivelse</a>
+              li <a href='#storkredsdata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#ejerlav').nav-header Ejerlav API
             ul#ejerlav.nav.nav-list
               li <a href='#ejerlavsoegning'>Ejerlavssøgning</a>
@@ -188,11 +188,11 @@ block content
             h3.anchor-header#storkredssoegning Storkredssøgning
             +documentResource(parameterDoc, '/storkredse')
             div.page-header
-            h3.anchor-header#storkredsslag Storkredsopslag
+            h3.anchor-header#storkredsopslag Storkredsopslag
             +documentResource(parameterDoc, '/storkredse/{nummer}')
             div.page-header
               h3.anchor-header#storkredsreverse Storkreds reverse geocoding
-            +documentResource(parameterDoc, '/storkreds/reverse')
+            +documentResource(parameterDoc, '/storkredse/reverse')
             div.page-header
             h3.anchor-header#storkredsdata Beskrivelse af storkredsdata
             p Web API'et udstiller for hver storkreds følgende informationer:

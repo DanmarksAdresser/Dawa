@@ -91,7 +91,7 @@ var fieldMap = {
       name: 'nummer',
       description: 'Storkredsens nummer. Heltal. Udgør nøglen.',
       schema: {
-        type: 'integer'
+        type: 'string'
       }
     },
     describe(navn, 'Storkredsens navn.')

@@ -782,7 +782,7 @@ function dagiKodeNavnParameters(tema) {
   ];
 }
 
-function dagiBogstavNavnParameters(tema) {
+function valglandsdelParameters(tema) {
 	return [
 		{
 			name: 'bogstav',
@@ -793,6 +793,14 @@ function dagiBogstavNavnParameters(tema) {
 	];
 }
 
+var storkredsParameters = [
+  {
+    name: 'nummer',
+    doc: 'Storkredsens nummer.'
+  },
+  dagiNavnParameter(_.findWhere(dagiTemaer, {singular: 'storkreds'})),
+  dagiQParameter()
+];
 
 var dagiExamples = {
   region: {
@@ -949,6 +957,36 @@ var dagiExamples = {
 				value: 'Midt'
 			}]
 		}]
+  },
+  storkreds: {
+    query: [{
+      description: 'Find alle Storkredse som starter med Midt',
+      query: [{
+        name: 'q',
+        value: 'Midt*'
+      }]
+    }, {
+      description: 'Returner alle storkredse',
+      query: {}
+    }],
+    get: [{
+      description: 'Returner oplysninger om storkredsen København',
+      path: ['/storkredse/1']
+    }, {
+      description: 'Returnerer oplysninger om storkredsen København i GeoJSON format',
+      path: ['/storkredse/1'],
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }],
+    autocomplete: [{
+      description: 'Find oplysninger om alle storkredse der starter med Nord',
+      query: [{
+        name: 'q',
+        value: 'Nord'
+      }]
+    }]
   }
 };
 
@@ -1022,12 +1060,12 @@ function dagiValglandsDelsDoc() {
 	};
 	doc.resources['/' + tema.plural] = {
 		subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-		parameters: dagiBogstavNavnParameters(tema).concat(formatAndPagingParams),
+		parameters: valglandsdelParameters(tema).concat(formatAndPagingParams),
 		examples: dagiExamples[tema.singular].query || []
 	};
 	doc.resources['/' + tema.plural + '/{bogstav}'] = {
 		subtext: 'Modtag ' + tema.singular + ' ud fra bogstav.',
-		parameters: [_.find(dagiBogstavNavnParameters(tema), function (p) {
+		parameters: [_.find(valglandsdelParameters(tema), function (p) {
 			return p.name === 'bogstav';
 		})].concat(formatParameters),
 		nomulti: true,
@@ -1035,7 +1073,7 @@ function dagiValglandsDelsDoc() {
 	};
 	doc.resources['/' + tema.plural + '/autocomplete'] = {
 		subtext: autocompleteSubtext(tema.plural),
-		parameters: overwriteWithAutocompleteQParameter(dagiBogstavNavnParameters(tema)).concat(formatAndPagingParams),
+		parameters: overwriteWithAutocompleteQParameter(valglandsdelParameters(tema)).concat(formatAndPagingParams),
 		examples: dagiExamples[tema.singular].autocomplete || []
 	};
 	doc.resources['/' + tema.plural + '/reverse'] = dagiReverseEndpointDoc(tema);
@@ -1043,7 +1081,36 @@ function dagiValglandsDelsDoc() {
 	return doc;
 }
 
+function dagiStorkredsDoc() {
+  var tema = _.findWhere(dagiTemaer, {singular: 'storkreds'});
+  var doc = {
+    docVersion: 2,
+    resources: {}
+  };
+  doc.resources['/' + tema.plural] = {
+    subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
+    parameters: storkredsParameters.concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].query || []
+  };
+  doc.resources['/' + tema.plural + '/{nummer}'] = {
+    subtext: 'Modtag ' + tema.singular + ' ud fra nummer.',
+    parameters: [_.find(storkredsParameters, function (p) {
+      return p.name === 'nummer';
+    })].concat(formatParameters),
+    nomulti: true,
+    examples: dagiExamples[tema.singular].get
+  };
+  doc.resources['/' + tema.plural + '/autocomplete'] = {
+    subtext: autocompleteSubtext(tema.plural),
+    parameters: overwriteWithAutocompleteQParameter(storkredsParameters).concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].autocomplete || []
+  };
+  doc.resources['/' + tema.plural + '/reverse'] = dagiReverseEndpointDoc(tema);
+
+  return doc;
+}
 _.extend(module.exports, dagiValglandsDelsDoc().resources);
+_.extend(module.exports, dagiStorkredsDoc().resources);
 
 
 var keyParams = {
