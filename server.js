@@ -6,7 +6,7 @@ var http = require('http');
 var fs = require('fs');
 var logger = require('./logger');
 var statistics = require('./statistics');
-var Q = require('q');
+var q = require('q');
 var _ = require('underscore');
 
 var cluster = require('cluster');
@@ -75,16 +75,20 @@ function setupWorker() {
 
   process.on('message', function(message) {
     if(message.type === 'getStatus') {
-      server.getConnections(function(err, count) {
-        process.send({
-          type: 'status',
-          requestId: message.requestId,
-          data: {
-            status: 'up',
-            postgresPool: database.getPoolStatus('prod'),
-            statistics: statistics.getStatistics(),
-            connections: count
-          }
+      return q.ninvoke(server, 'getConnections').then(function(count) {
+        return proddb.withTransaction('READ_ONLY', function(client) {
+          return client.queryp('select * from adgangsadresser limit 1').then(function(result) {
+            process.send({
+              type: 'status',
+              requestId: message.requestId,
+              data: {
+                status: result.rows && result.rows.length === 1 ? 'up' : 'down',
+                postgresPool: database.getPoolStatus('prod'),
+                statistics: statistics.getStatistics(),
+                connections: count
+              }
+            });
+          });
         });
       });
     }
@@ -166,7 +170,7 @@ function setupMaster() {
         var worker = cluster.workers[workerId];
         return getStatus(worker);
       });
-      Q.allSettled(statusPromises).then(function(statuses) {
+      q.allSettled(statusPromises).then(function(statuses) {
         for(var i = 0; i < workerIds.length; ++i) {
           var workerId = workerIds[i];
           var worker = cluster.workers[workerId];
@@ -192,7 +196,7 @@ function setupMaster() {
 }
 
 function getStatus(worker) {
-  var deferred = Q.defer();
+  var deferred = q.defer();
   var request = {
     type: 'getStatus',
     requestId: uuid.v4(),
@@ -206,7 +210,7 @@ function getStatus(worker) {
   }
   worker.on('message', listener);
   worker.send(request);
-  return Q.timeout(deferred.promise, 5000);
+  return q.timeout(deferred.promise, 5000);
 }
 
 if (cluster.isMaster) {
