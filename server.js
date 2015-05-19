@@ -57,12 +57,18 @@ function socketTimeoutMiddleware(timeoutMillis) {
 function setupWorker() {
   var pg = require('pg.js');
   var proddb = require('./psql/proddb');
+  pg.defaults.poolSize = asInteger(process.env.pgPoolSize);
+  pg.defaults.poolIdleTimeout = asInteger(process.env.pgPoolIdleTimeout);
+  var poolLogger = logger.forCategory('dbPool');
+  pg.defaults.poolLog = function(msg, level) {
+    if(level === 'info' || level === 'warn' || level === 'error') {
+      poolLogger.log(level, msg);
+    }
+  };
   proddb.init({
     connString: process.env.pgConnectionUrl,
     pooled: true
   });
-  pg.defaults.poolSize = asInteger(process.env.pgPoolSize);
-  pg.defaults.poolIdleTimeout = asInteger(process.env.pgPoolIdleTimeout);
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
   require('./apiSpecification/allSpecs');
