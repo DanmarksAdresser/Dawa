@@ -55,20 +55,21 @@ function socketTimeoutMiddleware(timeoutMillis) {
 }
 
 function setupWorker() {
-  var pg = require('pg.js');
   var proddb = require('./psql/proddb');
-  pg.defaults.poolSize = asInteger(process.env.pgPoolSize);
-  pg.defaults.poolIdleTimeout = asInteger(process.env.pgPoolIdleTimeout);
   var poolLogger = logger.forCategory('dbPool');
-  pg.defaults.poolLog = function(msg, level) {
-    if(level === 'info' || level === 'warn' || level === 'error') {
-      poolLogger.log(level, msg);
+  var dboptions = {
+    poolSize: asInteger(process.env.pgPoolSize),
+    poolIdleTimeout: asInteger(process.env.pgPoolIdleTimeout),
+    maxWaitingClients: process.env.maxWaitingClients,
+    connString: process.env.pgConnectionUrl,
+    pooled: true,
+    poolLog: function (msg, level) {
+      if (level === 'info' || level === 'warn' || level === 'error') {
+        poolLogger.log(level, msg);
+      }
     }
   };
-  proddb.init({
-    connString: process.env.pgConnectionUrl,
-    pooled: true
-  });
+  proddb.init(dboptions);
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
   require('./apiSpecification/allSpecs');
@@ -83,6 +84,18 @@ function setupWorker() {
               requestId: message.requestId,
               data: {
                 status: result.rows && result.rows.length === 1 ? 'up' : 'down',
+                postgresPool: database.getPoolStatus('prod'),
+                statistics: statistics.getStatistics(),
+                connections: count
+              }
+            });
+          }, function(err) {
+            process.send({
+              type: 'status',
+              requestId: message.requestId,
+              data: {
+                status: 'down',
+                postgresError: err,
                 postgresPool: database.getPoolStatus('prod'),
                 statistics: statistics.getStatistics(),
                 connections: count
@@ -128,7 +141,8 @@ function setupMaster() {
     disableClustering: [false, 'Deaktiver nodejs clustering, så der kun kører en proces', 'boolean'],
     pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 25],
     pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
-    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 60000]
+    socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 60000],
+    maxWaitingClients: [false, 'Maximum number of clients to queue when there is no available db connections', 'number', 0]
   };
 
   cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
@@ -144,7 +158,8 @@ function setupMaster() {
       logOptions: JSON.stringify(options.logOptions),
       socketTimeout: options.socketTimeout,
       pgPoolSize: options.pgPoolSize,
-      pgPoolIdleTimeout: options.pgPoolIdleTimeout
+      pgPoolIdleTimeout: options.pgPoolIdleTimeout,
+      maxWaitingClients: options.maxWaitingClients
     };
     for (var i = 0; i < count; i++) {
       spawn(workerOptions);

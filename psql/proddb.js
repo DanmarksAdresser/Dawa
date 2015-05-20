@@ -1,6 +1,7 @@
 "use strict";
 
-var database = require('./database');
+var q = require('q');
+
 var setupDatabase = require('./setupDatabase');
 
 var transactions = require('./transactions');
@@ -10,7 +11,7 @@ var options;
 
 exports.init = function(_options) {
   options = _options;
-  setupDatabase('prod', options.connString);
+  setupDatabase('prod', options);
 };
 
 exports.withTransaction = function(mode, transactionFn) {

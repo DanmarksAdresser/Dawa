@@ -20,7 +20,8 @@ module.exports = function (grunt) {
         src: ['test/setupLogging.js', 'test/integration/**/*Spec.js']
       },
       options: {
-        timeout: 5000
+        timeout: 10000,
+        bail: true
       }
     },
     express: {

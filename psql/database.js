@@ -139,8 +139,27 @@ function acquireNonpooledConnection(options, callback) {
   });
 }
 
-function acquirePooledConnection(pool, callback) {
+function acquirePooledConnection(pool, options, callback) {
   var before = Date.now();
+  var maxWaitingClients = options.maxWaitingClients;
+  if(maxWaitingClients === undefined) {
+    maxWaitingClients = 20;
+  }
+  if(pool.availableObjectsCount() === 0 &&
+    pool.getPoolSize() === pool.getMaxPoolSize() &&
+    pool.waitingClientsCount() >= maxWaitingClients) {
+    logger.error("Could not acquire database connection: Pool is full.", {
+      poolSize: pool.getPoolSize(),
+      maxPoolSize: pool.getMaxPoolSize(),
+      waitingClientsCount: pool.waitingClientsCount()
+    });
+    return callback(new Error("Could not acquire database connection: Pool is full."));
+  }
+  logger.info('Acquiring connection', {
+    poolSize: pool.getPoolSize(),
+    maxPoolSize: pool.getMaxPoolSize(),
+    waitingClientsCount: pool.waitingClientsCount()
+  });
   pool.acquire(function(err, client) {
     statistics.emit('psql_acquire_connection', Date.now() - before, err);
     if(err)  return callback(err);
@@ -158,7 +177,7 @@ function acquirePooledConnection(pool, callback) {
 exports.connect = function(dbOrName, pooled, callback) {
   function doConnect(db, pooled, callback) {
     if(pooled) {
-      acquirePooledConnection(db.pool, callback);
+      acquirePooledConnection(db.pool, db.options, callback);
     }
     else {
       acquireNonpooledConnection(db.options, callback);

@@ -7,8 +7,8 @@ var transactions = require('../../psql/transactions');
 var testConnString = process.env.pgConnectionUrl;
 var emptyConnString = process.env.pgEmptyDbUrl;
 
-setupDatabase('test', testConnString);
-setupDatabase('empty', emptyConnString);
+setupDatabase('test', {connString: testConnString});
+setupDatabase('empty', {connString: emptyConnString});
 
 exports.withTransaction = function(dbname, mode, transactionFn) {
   return transactions.withTransaction(dbname, { pooled: true, mode: mode}, transactionFn);
