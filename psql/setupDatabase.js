@@ -64,11 +64,12 @@ function setupTypes(types, typeMap) {
 
 }
 
-module.exports = function(dbname, connectionString) {
+module.exports = function(dbname, options) {
   if(database.exists(dbname)) {
     return q();
   }
-  var options = pgConnectionString.parse(connectionString);
+  var connectionOptions = pgConnectionString.parse(options.connString);
+  options = _.extend({}, options, connectionOptions);
   var untypedDb = database.create('untyped_' + dbname, options);
   database.withConnection(untypedDb, false, function(client) {
     // The OIDs for custom types are not fixed beforehand, so we query them from the database

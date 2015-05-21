@@ -104,7 +104,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
                     return setLastUpdated(client, ejerlavkode, ctimeMillis);
                   }
                 ).then(function() {
-                    logger.debug('successfully updated ejerlav', {ejerlavkode: ejerlavkode});
+                    logger.info('successfully updated ejerlav', {ejerlavkode: ejerlavkode});
                   });
               }
             }
@@ -122,5 +122,8 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
     else {
       console.log("Ingen opdatering af temamapninger, da ingen ejerlav er opdateret");
     }
-  }).done();
+  })
+    .then(function() {
+      logger.info("Indlæsning af matrikelkort afsluttet");
+    }).done();
 });

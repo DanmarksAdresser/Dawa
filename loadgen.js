@@ -2,7 +2,7 @@
 
 var async = require('async');
 var cliParameterParsing = require('./bbr/common/cliParameterParsing');
-var request = require('request');
+var request = require('request-promise');
 var Writable = require('stream').Writable;
 var util = require('util');
 
@@ -19,7 +19,7 @@ var optionSpec = {
   postnummerStreams: [false, 'Antal samtidige requests til /postnumre', 'number', 2],
   regionerStreams: [false, 'Antal samtidige requests til /regioner?format=geojson', 'number', 2],
   adgangsadresseUdtraekStreams: [false, 'Antal samtidige requests til /replikering/adgangsadresser', 'number', 2],
-  adresseAutocompletePerSecond: [false, 'Antal kald til autocomplete pr. sekund', 'number', 15]
+  adresseAutocompletePerSecond: [false, 'Antal kald til autocomplete pr. sekund', 'number', 5]
 };
 
 util.inherits(DevNull, Writable);
@@ -101,7 +101,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       if(err) {
         throw err;
       }
-      console.log('autocomplete: ' + (Date.now() - before));
+      console.log('autocomplete status: ' + response.statusCode + ' time: ' + (Date.now() - before));
     });
   }, 1000 / options.adresseAutocompletePerSecond);
 });

@@ -214,7 +214,7 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
 
   withDatabaseClient(function(err, dbClient, releaseDbClient) {
     if(err) {
-      return internalServerErrorResponse(err);
+      return callback(null, internalServerErrorResponse(err));
     }
     // we do not want to produce a response if it is no longer needed
     if(shouldAbort()) {
