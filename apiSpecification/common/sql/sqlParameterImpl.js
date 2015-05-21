@@ -21,6 +21,9 @@ function toPgSearchQuery(q) {
   // remove all special chars
   q = removeSpecialSearchChars(q);
 
+  // collapse sequences of * into a single *
+  q = q.replace(/\*+/g, '*');
+
   // replace '*' not at the end of a token with ' '
   q = q.replace(/[\*]([^ ])/g, ' $1');
 

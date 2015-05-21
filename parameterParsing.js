@@ -54,8 +54,11 @@ exports.validateParameters = function(params, parameterSpec) {
       return memo;
     },[]);
   var missingRequiredErrors = _.reduce(parameterSpec, function(memo, spec) {
-    if(spec.required && params[spec.name] === undefined) {
-      memo.push([spec.name, 'Parameteren '+ spec.name + ' skal angives']);
+    if (spec.required && (params[spec.name] === undefined ||
+      params[spec.name] === null ||
+      params[spec.name] === ""))
+    {
+      memo.push([spec.name, 'Parameteren ' + spec.name + ' skal angives']);
     }
     return memo;
   }, []);
