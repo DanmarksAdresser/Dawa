@@ -392,7 +392,7 @@ var adgangsadresseParameters =  [
     examples: ['tværv*']
   },
   {name: 'kvh',
-    doc: 'KVH-nøgle. 12 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode efterfulgt af 4 tegn der repræsenter husnr',
+    doc: 'KVH-nøgle. 12 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode efterfulgt af 4 tegn der repræsenter husnr. Se <a href="#adgangsadresse_kvh">databeskrivelse</a>.',
     examples: ['01016378__33']
   },
   adgangsadresseIdParameter].concat(parametersForBothAdresseAndAdgangsAdresse);
@@ -485,7 +485,7 @@ var adresseParameters = [{name: 'q',
                           doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
                           nullable: true},
                          {name: 'kvhx',
-                          doc: 'KVHX-nøgle. 19 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode, 4 tegn der repræsenter husnr, 3 tegn der repræsenterer etage og 4 tegn der repræsenter dør',
+                          doc: 'KVHX-nøgle. 19 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode, 4 tegn der repræsenter husnr, 3 tegn der repræsenterer etage og 4 tegn der repræsenter dør. Se <a href="#adresse_kvhx">databeskrivelse</a>.',
                           examples: ['04619664__26_st___6']
                          }
 ].concat(parametersForBothAdresseAndAdgangsAdresse);

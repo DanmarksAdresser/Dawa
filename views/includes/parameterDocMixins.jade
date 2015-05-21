@@ -83,22 +83,22 @@ mixin parameterDocGet(apiSpec, docSpec)
           a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
             = docUtil.computeGetUrl(url, apiSpec, example.path)
 
-mixin documentProperties(props, indent)
+mixin documentProperties(props, indent, idPrefix)
   - each property in props
     tr
       - for (var x = 0; x < indent; x++)
         td
-      td(colspan=5-indent)
+      td(colspan=5-indent,id=idPrefix + '_' + property.name)
         = property.name
       td= property.type || 'string'
       td= property.required ? 'nej' : 'ja'
       td!= property.description
     if property.type === 'array'
-      +documentProperties(property.items, indent+1)
+      +documentProperties(property.items, indent+1, idPrefix + '_' + property.name)
     if property.type === 'object'
-      +documentProperties(property.properties, indent+1)
+      +documentProperties(property.properties, indent+1, idPrefix + '_' + property.name)
 
-mixin documentSchema(schema)
+mixin documentSchema(schema, idPrefix)
   table.table.table-hover
     thead
       th(colspan="5") Navn
@@ -106,4 +106,4 @@ mixin documentSchema(schema)
       th Optionelt
       th Beskrivelse
     tbody
-      +documentProperties(docUtil.extractDocumentationForObject(schema), 0)
+      +documentProperties(docUtil.extractDocumentationForObject(schema), 0, idPrefix || '')
