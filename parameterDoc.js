@@ -1264,7 +1264,7 @@ var tilknytningTemaer = dagiTemaer.filter(function(tema) {
     parameters: [{
       name: 'sekvensnummer',
       doc: 'Angiver sekvensnummeret for udtrækket. Alle hændelser til og med det angivne sekvensnummer er med i udtrækket.'
-    }],
+    }].concat(formatParameters),
     examples: []
   };
 

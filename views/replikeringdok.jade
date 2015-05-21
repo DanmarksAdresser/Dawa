@@ -24,7 +24,7 @@ block content
             p I DAWA tilknyttes alle ændringer af adresser et unikt, fortløbende <em>sekvensnummer</em>. Et sekvensnummer svarer dermed til en unik hændelse (oprettelse, ændring eller nedlæggelse) på et objekt.
             p Når et klientsystem skal vedligeholde et kopiregister anvendes sekvensnummeret til at holde styr på hvilke adresseændringer klientsystemet har udført i den lokale kopi og hvilke ændringer klientsystemet mangler at udføre.
             p API'erne til replikering udstiller <em>normaliserede</em> adresser. Hvis kopien gemmes i en SQL database vil det være hensigtsmæssigt at have én tabel til hver type.
-            p Udtræk leveres i det kompakte CSV-format, der er velegnet til direkte indlæsning i en SQL-database. Hændelserne leveres i JSON format.
+            p Udtræk leveres i JSON eller i det kompakte CSV-format (se <a href="http://localhost:3000/generelt#dataformater">dataformater</a>). Hændelserne leveres i JSON format.
             div.page-header
               h3.anchor-header#etablering Etablering af lokalt kopiregister
             p Fremgangsmåden for etablering af lokalt kopiregister er som følgende:
@@ -61,7 +61,7 @@ block content
           section
             div.page-header
               h3.anchor-header#udtraek Udtræk
-            p Udtræk leveres i CSV-format. Feltnavne og indhold er det samme som feltnavne for hændelserne dokumenteret nedenfor.
+            p Udtræk leveres i JSON- eller CSV-format (se <a href="http://localhost:3000/generelt#dataformater">dataformater</a>). Feltnavne og indhold er det samme som feltnavne for hændelserne dokumenteret nedenfor.
           section
             div.page-header
               h3.anchor-header#haendelser Hændelser
