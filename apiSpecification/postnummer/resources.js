@@ -14,6 +14,7 @@ module.exports = [
       propertyFilter: parameters.propertyFilter,
       search: commonParameters.search,
       crs: commonParameters.crs,
+      geomWithin: commonParameters.geomWithin,
       stormodtagerFilter: parameters.stormodtagerFilter
     }, representations,
     sqlModel),

@@ -22,7 +22,8 @@ publishedTemaer.forEach(function(tema) {
   var representations = representationsMap[tema.singular];
   var queryParams = {
     propertyFilter: parameters[tema.singular].propertyFilter,
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    geomWithin: commonParameters.geomWithin,
   };
 
   if(tema.searchable) {

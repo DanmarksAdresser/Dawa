@@ -231,7 +231,7 @@ var kommuneDoc = {
   resources: {
     '/kommuner': {
       subtext: 'Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.',
-      parameters: kommuneParameters.concat(formatAndPagingParams),
+      parameters: kommuneParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('kommuner')),
       examples: [{description: 'Hent alle kommuner',
                   query: []},
                  {description: 'Find de kommuner, som starter med <em>aa</em>',
@@ -571,7 +571,7 @@ var postnummerDoc = {
   resources: {
     '/postnumre': {
       subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
-      parameters: postnummerParameters.concat(formatAndPagingParams),
+      parameters: postnummerParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('postnumre')),
       examples: [{description: 'Hent alle postnumre', query: []},
                  {description: 'Find postnummer <em>8600</em>',
                   query: [{ name: 'nr', value: "8600"}]},
@@ -717,7 +717,7 @@ var jordstykkeDoc = {
   resources: {
     '/jordstykker': {
       subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
-      parameters: jordstykkeParameters.concat(formatAndPagingParams),
+      parameters: jordstykkeParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('jordstykker')),
       examples: [{description: 'Hent alle jordstykker', query: []},
         {description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
           query: [{ name: 'ejerlavkode', value: "80652"}]},
@@ -782,6 +782,27 @@ function dagiKodeNavnParameters(tema) {
   ];
 }
 
+function dagiSridCirkelPolygonParameters(plural) {
+  return [
+    SRIDParameter,
+    {
+      name: 'cirkel',
+      doc: 'Find de ' + plural + ', som overlapper den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes ETRS89/UTM32 eller WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+    },
+    {
+      name: 'polygon',
+      doc: 'Find de ' + plural + ', som overlapper det angivne polygon. ' +
+      'Polygonet specificeres som et array af koordinater på samme måde som' +
+      ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.'+
+      ' Bemærk at polygoner skal' +
+      ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>'+
+      ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+      ' angives vha. srid parameteren, se ovenover.<br> Eksempel: '+
+      ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
+
+    }  ];
+}
+
 function valglandsdelParameters(tema) {
 	return [
 		{
@@ -790,7 +811,7 @@ function valglandsdelParameters(tema) {
 		},
 		dagiNavnParameter(tema),
 		dagiQParameter()
-	];
+  ].concat(dagiSridCirkelPolygonParameters(tema.plural));
 }
 
 var storkredsParameters = [
@@ -800,7 +821,7 @@ var storkredsParameters = [
   },
   dagiNavnParameter(_.findWhere(dagiTemaer, {singular: 'storkreds'})),
   dagiQParameter()
-];
+].concat(dagiSridCirkelPolygonParameters(_.findWhere(dagiTemaer, {singular: 'storkreds'}).plural));
 
 var dagiExamples = {
   region: {
@@ -993,7 +1014,7 @@ var dagiExamples = {
 function dagiListEndpointDoc(tema) {
 	return {
 		subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-		parameters: dagiKodeNavnParameters(tema).concat(formatAndPagingParams),
+		parameters: dagiKodeNavnParameters(tema).concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters(tema.plural)),
 		examples: dagiExamples[tema.singular].query || []
 	};
 }

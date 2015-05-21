@@ -24,7 +24,8 @@ var kodeAndNavn = {
       type: 'integer',
       multi: true
     }
-  ])
+  ]),
+
 };
 
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];

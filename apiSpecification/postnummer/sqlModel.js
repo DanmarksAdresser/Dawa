@@ -63,6 +63,7 @@ var geomQuery = "(select geom from temaer where tema = 'postnummer' and (fields-
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
+  sqlParameterImpl.geomWithin(geomQuery),
   sqlParameterImpl.reverseGeocodingWithin(geomQuery),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),

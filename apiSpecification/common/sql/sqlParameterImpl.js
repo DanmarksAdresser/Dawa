@@ -217,7 +217,8 @@ function polygonTransformer(paramValue){
 
 // Generates WHERE clauses for whether the queried object is inside a given geometric shape
 // Supported shapes are a poloygon or a circle.
-exports.geomWithin = function() {
+exports.geomWithin = function(geom) {
+  geom = geom || 'geom';
   return function(sqlParts, params) {
     var srid = params.srid || 4326;
     var sridAlias;
@@ -226,7 +227,7 @@ exports.geomWithin = function() {
     }
     if(params.polygon) {
       var polygonAlias = dbapi.addSqlParameter(sqlParts, polygonTransformer(params.polygon));
-      dbapi.addWhereClause(sqlParts, "ST_Contains(ST_Transform(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), 25832), geom)");
+      dbapi.addWhereClause(sqlParts, "ST_Intersects(ST_Transform(ST_GeomFromText("+ polygonAlias +", " + sridAlias + "), 25832), " + geom + ")");
     }
     if(params.cirkel) {
       var args = params.cirkel.split(',');
@@ -236,7 +237,7 @@ exports.geomWithin = function() {
       var point = "POINT(" + x + " " + y + ")";
       var pointAlias = dbapi.addSqlParameter(sqlParts, point);
       var radiusAlias = dbapi.addSqlParameter(sqlParts, r);
-      dbapi.addWhereClause(sqlParts, "ST_DWithin(geom, ST_Transform(ST_GeomFromText(" + pointAlias + ","+sridAlias + "), 25832), " + radiusAlias + ")");
+      dbapi.addWhereClause(sqlParts, "ST_DWithin(" + geom + ", ST_Transform(ST_GeomFromText(" + pointAlias + ","+sridAlias + "), 25832), " + radiusAlias + ")");
     }
   };
 };
