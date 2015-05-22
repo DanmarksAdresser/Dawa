@@ -71,6 +71,12 @@ var fields = [
   normalizedDdknField('ddkn_km1'),
   normalizedDdknField('ddkn_km10'),
   {
+    name: 'regionskode'
+  },
+  {
+    name: 'regionsnavn'
+  },
+  {
     name: 'temaer',
     multi: true
   },

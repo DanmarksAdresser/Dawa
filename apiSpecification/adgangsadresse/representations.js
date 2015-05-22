@@ -262,14 +262,13 @@ exports.json = {
         km1:  maybeNull(rs.ddkn_km1),
         km10: maybeNull(rs.ddkn_km10)
       } : null;
-
       // DAGI temaer
       adr.sogn = null;
-      adr.region = null;
+      adr.region = commonMappers.mapKode4NavnTema('region', rs.regionskode, rs.regionsnavn, baseUrl);
       adr.retskreds = null;
       adr.politikreds = null;
       adr.opstillingskreds = null;
-      var includedDagiTemaer = ['sogn', 'region', 'retskreds','politikreds','opstillingskreds'];
+      var includedDagiTemaer = ['sogn', 'retskreds','politikreds','opstillingskreds'];
       var temaer = rs.temaer || [];
       var dagiTemaArray =temaer.filter(function(tema) { return _.contains(includedDagiTemaer, tema.tema); });
       var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');

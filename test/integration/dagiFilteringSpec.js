@@ -14,10 +14,10 @@ require('../../apiSpecification/allSpecs');
 describe('Filtrering af adresser ud fra DAGI tema kode', function() {
   // der er 390 adgangsadresser inden for denne polygon
   var sampleTema = {
-    tema: 'region',
+    tema: 'sogn',
     fields: {
       kode: 10,
-      navn: 'Test Region'
+      navn: 'Test sogn'
     },
     polygons: ['POLYGON((' +
       '725025.18 6166264.37,' +
@@ -27,7 +27,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       '725025.18 6166264.37))']
   };
 
-  var expectedResultsRegion = {
+  var expectedResultsSogn = {
     adgangsadresse: 277,
     adresse: 279
   };
@@ -35,19 +35,19 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adgangsadresse: 1,
     adresse: 1
   };
-  var expectedResultWithoutRegion = {
+  var expectedResultWithoutSogn = {
     adgangsadresse: 1319,
     adresse: 2801
   };
 
-  var temaSpec = tema.findTema('region');
+  var temaSpec = tema.findTema('sogn');
   ['adgangsadresse', 'adresse'].forEach(function(entityName) {
     var resourceSpec = registry.findWhere({
       entityName: entityName,
       type: 'resource',
       qualifier: 'query'
     });
-    it(' for region på ' + entityName, function () {
+    it(' for sogn på ' + entityName, function () {
       this.timeout(5000);
       return testdb.withTransaction('test', 'ROLLBACK', function (client) {
         return q.nfcall(tema.addTema, client, sampleTema)
@@ -55,13 +55,13 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
             return tema.updateAdresserTemaerView(client, temaSpec, false);
           })
           .then(function () {
-            var params = {regionskode: "10"};
+            var params = {sognekode: "10"};
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
             var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
             return dbapi.queryRawQ(client, query.sql, query.params);
           })
           .then(function (result) {
-            expect(result.length).to.equal(expectedResultsRegion[entityName]);
+            expect(result.length).to.equal(expectedResultsSogn[entityName]);
           });
       });
     });
@@ -72,10 +72,10 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       });
     });
 
-    it(' for '  + entityName + 'r uden regionstilknytning', function (done) {
+    it(' for '  + entityName + 'r uden sognetilknytning', function (done) {
       this.timeout(5000);
-      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?regionskode=', json: true}, function(error, response, result) {
-        expect(result.length).to.equal(expectedResultWithoutRegion[entityName]);
+      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?sognekode=', json: true}, function(error, response, result) {
+        expect(result.length).to.equal(expectedResultWithoutSogn[entityName]);
         done();
       });
     });

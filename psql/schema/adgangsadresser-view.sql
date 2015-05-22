@@ -33,6 +33,8 @@ CREATE VIEW AdgangsadresserView AS
 
     cast(K.fields->>'kode' as integer) AS kommunekode,
     K.fields->>'navn' AS kommunenavn,
+    cast(R.fields->>'kode' as integer) AS regionskode,
+    R.fields->>'navn' AS regionsnavn,
     array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
     A.tsv
 
@@ -41,4 +43,5 @@ CREATE VIEW AdgangsadresserView AS
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN temaer AS K ON (K.tema = 'kommune' AND cast(K.fields->>'kode' as integer) = A.kommunekode)
+    LEFT JOIN temaer AS R ON (K.fields->>'regionskode') = (R.fields->>'kode') and R.tema = 'region'
   WHERE postnr IS NOT NULL AND husnr IS NOT NULL;

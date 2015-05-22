@@ -90,7 +90,7 @@ exports.adresseFlatRepresentation = function(fields, additionalFieldsMapper) {
   var requiredFlatFields = defaultFlatFields
     .concat(exports.fieldsWithNames(fields, ['temaer', 'kvh', 'kvhx']));
 
-  var includedDagiTemaer = ['region', 'sogn', 'politikreds', 'retskreds', 'opstillingskreds'];
+  var includedDagiTemaer = ['sogn', 'politikreds', 'retskreds', 'opstillingskreds'];
   var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
   var outputFlatFields = _.reduce(includedDagiTemaer, function (memo, temaNavn) {
     memo.push(dagiTemaMap[temaNavn].prefix + 'kode');

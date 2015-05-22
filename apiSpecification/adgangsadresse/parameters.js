@@ -54,6 +54,12 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
+    name: 'regionskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
     name: 'esrejendomsnr',
     type: 'integer',
     schema: {

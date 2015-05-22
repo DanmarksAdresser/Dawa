@@ -3,7 +3,7 @@
 module.exports = {
   region: {
     keyFieldNames: ['regionskode'],
-    filterable: true
+    filterable: false // filtreres ved property filter
   },
   kommune: {
     keyFieldNames: ['kommunekode'],

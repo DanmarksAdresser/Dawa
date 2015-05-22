@@ -117,6 +117,12 @@ var fields = [
     formatter: d
   },
   {
+    name: 'regionskode'
+  },
+  {
+    name: 'regionsnavn'
+  },
+  {
     name: 'temaer',
     multi: true
   }
