@@ -51,6 +51,32 @@ describe('API import', function() {
   var reg2 = moment('2015-01-01T02:00:00.000Z');
   var reg3 = moment('2015-01-01T03:00:00.000Z');
 
+  it('If a row is created and expired in the same batch, a creation row will be created', function() {
+    var sampleChangeset = {
+      adgangspunkt: [
+        {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg2.toISOString()},
+        {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null}],
+      husnummer: [],
+      adresse: []
+    };
+
+    var expectedResult = [
+      {
+        adgangspunkt: [{versionid: 1, registreringstart: reg1.toISOString(), registreringslut: null}],
+        husnummer: [],
+        adresse: []
+      },
+      {
+        adgangspunkt: [
+          {versionid: 1, registreringstart: reg1.toISOString(), registreringslut: reg2.toISOString()},
+          {versionid: 2, registreringstart: reg2.toISOString(), registreringslut: null}
+        ],
+        husnummer: [],
+        adresse: []
+      }];
+    expect(mockedImporter.internal.splitInTransactions(sampleChangeset, reg1)).to.deep.equal(expectedResult);
+  });
+
   it('Will correctly split changeset into transactions based on timestmap', function() {
     var sampleChangeset = {
       adgangspunkt: [
