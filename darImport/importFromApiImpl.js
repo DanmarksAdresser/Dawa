@@ -278,9 +278,12 @@ module.exports = function(opt) {
           tsFrom = lastFetchedTs;
         }
         tsTo = moment();
+        report.tsFrom = tsFrom.toISOString();
+        report.tsTo = tsTo.toISOString();
         return fetchUntilStable(url, null, tsFrom, tsTo, report);
       })
       .then(function (resultSet) {
+        report.fetchedResult = resultSet;
         if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
           logger.info('No new records on API', {
             tsFrom: tsFrom.toISOString(),
