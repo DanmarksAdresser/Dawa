@@ -98,7 +98,10 @@ exports.adresseFlatRepresentation = function(fields, additionalFieldsMapper) {
     return memo;
   }, _.pluck(defaultFlatFields, 'name'));
 
+
   outputFlatFields.push('zone');
+
+  outputFlatFields = outputFlatFields.concat(['jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr']);
 
   var defaultFlatMapper = exports.defaultFlatMapper(defaultFlatFields);
 
@@ -121,6 +124,12 @@ exports.adresseFlatRepresentation = function(fields, additionalFieldsMapper) {
         var zoneTema = _.findWhere(obj.temaer, {tema: 'zone'});
         var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
         result.zone = zoneFormatter(zoneKode);
+        var jordstykke = _.findWhere(obj.temaer, {tema: 'jordstykke'});
+        if(jordstykke) {
+          result.jordstykke_ejerlavkode = jordstykke.fields.ejerlavkode;
+          result.jordstykke_matrikelnr = jordstykke.fields.matrikelnr;
+          result.jordstykke_esrejendomsnr = jordstykke.fields.esrejendomsnr ? "" + jordstykke.fields.esrejendomsnr : null;
+        }
 
         return result;
       };
