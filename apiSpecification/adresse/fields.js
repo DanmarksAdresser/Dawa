@@ -49,6 +49,12 @@ var fields = [
     name: 'postnrnavn'
   },
   {
+    name: 'stormodtagerpostnr'
+  },
+  {
+    name: 'stormodtagerpostnrnavn'
+  },
+  {
     name: 'kommunekode',
     formatter: kode4String
   },

@@ -69,6 +69,10 @@ exports.json = {
         description: 'Postnummeret som adressen er beliggende i.',
         $ref: '#/definitions/NullablePostnummerRef'
       },
+      stormodtagerpostnummer: {
+        description: 'Evt. stormodtagerpostnummer (firmapostnummer) som er tilknyttet adressen.',
+        $ref: '#/definitions/NullablePostnummerRef'
+      },
       'kommune':{
         description: 'Kommunen som adressen er beliggende i.',
         $ref: '#/definitions/KommuneRef'
@@ -212,7 +216,7 @@ exports.json = {
       }
     },
     docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
-      'postnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
+      'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke']
   }),
   mapper: function (baseUrl){
@@ -240,6 +244,14 @@ exports.json = {
       adr.husnr = rs.husnr;
       adr.supplerendebynavn = maybeNull(rs.supplerendebynavn);
       adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, baseUrl);
+      if(rs.stormodtagerpostnr) {
+        adr.stormodtagerpostnummer = mapPostnummerRef(
+          {nr: rs.stormodtagerpostnr, navn: rs.stormodtagerpostnrnavn},
+          baseUrl);
+      }
+      else {
+        adr.stormodtagerpostnummer = null;
+      }
       adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, baseUrl);
       if(rs.ejerlavkode) {
         adr.ejerlav = {

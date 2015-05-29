@@ -25,6 +25,9 @@ CREATE VIEW AdgangsadresserView AS
     P.nr   AS postnr,
     P.navn AS postnrnavn,
 
+    S.nr AS stormodtagerpostnr,
+    S.navn AS stormodtagerpostnrnavn,
+
     V.kode    AS vejkode,
     V.vejnavn AS vejnavn,
     V.adresseringsnavn AS adresseringsvejnavn,
@@ -45,4 +48,5 @@ CREATE VIEW AdgangsadresserView AS
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN temaer AS K ON (K.tema = 'kommune' AND cast(K.fields->>'kode' as integer) = A.kommunekode)
     LEFT JOIN temaer AS R ON (K.fields->>'regionskode') = (R.fields->>'kode') and R.tema = 'region'
+    LEFT JOIN stormodtagere AS S ON (S.adgangsadresseid = A.id)
   WHERE postnr IS NOT NULL AND husnr IS NOT NULL;

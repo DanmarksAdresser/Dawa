@@ -39,6 +39,12 @@ var fields = [
   {
     name: 'postnrnavn'
   },
+  {
+    name: 'stormodtagerpostnr'
+  },
+  {
+    name: 'stormodtagerpostnrnavn'
+  },
   normalizedField('kommunekode'),
   {
     name: 'kommunenavn'
