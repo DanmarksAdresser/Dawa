@@ -230,7 +230,9 @@ module.exports = function(opt) {
         return memo;
       }, {});
     });
-    report.transactions = transactions;
+    if(report) {
+      report.transactions = transactions;
+    }
     return transactions;
   }
 
@@ -250,7 +252,7 @@ module.exports = function(opt) {
     });
   }
 
-  function importFromApi(db, url, report) {
+  function importFromApi(db, url, skipDawa, report) {
     var tsFrom, tsTo;
     var lastFetchedTs;
     return db.withTransaction('READ_ONLY', function (client) {
@@ -304,7 +306,7 @@ module.exports = function(opt) {
                     var txTimestamp = someRow.registreringslut || someRow.registreringstart;
                     report['tx_' +txTimestamp] = {};
                     return importDarImpl.withDarTransaction(client, 'api', function() {
-                      return importDarImpl.applyDarChanges(client, transactionSet, report['tx_' +txTimestamp]);
+                      return importDarImpl.applyDarChanges(client, transactionSet, skipDawa, report['tx_' +txTimestamp]);
                     }).then(function() {
                       logger.info('DAR import delay', {
                         delay: moment().diff(moment(txTimestamp))

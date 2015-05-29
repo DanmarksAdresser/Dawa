@@ -567,7 +567,7 @@ function computeChangeSets (client, rowsMap, report) {
  * @param rowsMap
  * @returns promise
  */
-exports.applyDarChanges = function (client, rowsMap, report) {
+exports.applyDarChanges = function (client, rowsMap, skipDawa, report) {
   return computeChangeSets(client, rowsMap, report)
     .then(function() {
       return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'],
@@ -580,10 +580,17 @@ exports.applyDarChanges = function (client, rowsMap, report) {
       return client.queryp('SET CONSTRAINTS ALL IMMEDIATE; SET CONSTRAINTS ALL DEFERRED', []);
     })
     .then(function () {
-      return computeDirtyObjects(client, report);
-    })
-    .then(function () {
-      return performDawaChanges(client, report);
+      if(!skipDawa) {
+        return computeDirtyObjects(client, report)
+          .then(function () {
+            return performDawaChanges(client, report);
+          })
+          .then(function() {
+            return qUtil.mapSerial(['adgangsadresser', 'enhedsadresser', 'vejstykker'], function(table) {
+              return dropTable(client, 'dirty_' + table);
+            });
+          });
+      }
     })
     .then(function() {
       return qUtil.mapSerial(Object.keys(darDbSpecImpls), function(specName) {
@@ -595,13 +602,7 @@ exports.applyDarChanges = function (client, rowsMap, report) {
       return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(specName) {
         return dropTable(client, 'fetched_' + specName);
       });
-    })
-    .then(function() {
-      return qUtil.mapSerial(['adgangsadresser', 'enhedsadresser', 'vejstykker'], function(table) {
-        return dropTable(client, 'dirty_' + table);
-      });
     });
-
 };
 
 function getDawaSeqNum(client) {

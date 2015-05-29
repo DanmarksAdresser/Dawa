@@ -130,7 +130,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
           adresse: []
         };
         var report = {};
-        return importDarImpl.applyDarChanges(clientFn(), changeSet, report)
+        return importDarImpl.applyDarChanges(clientFn(), changeSet, false, report)
           .then(function() {
             return getDawaContent(clientFn());
           })

@@ -14,7 +14,8 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   url: [false, 'Base URL hvorfra data hentes', 'string'],
   daemon: [false, 'Daemon mode. Keep running in background and download changes from API.', 'boolean', false],
-  reportDir: [false, 'Directory to store report files', 'string']
+  reportDir: [false, 'Directory to store report files', 'string'],
+  skipDawa: [false, 'Only update DAR tables, not DAWA tables', 'boolean', 'false']
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
@@ -24,10 +25,11 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   var url = options.url;
+  var skipDawa = options.skipDawa;
 
   function doImport() {
     var report = {};
-    return importFromApiImpl.importFromApi(proddb, url, report)
+    return importFromApiImpl.importFromApi(proddb, url, skipDawa, report)
       .fin(function () {
         if(options.reportDir) {
           fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
