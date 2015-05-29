@@ -343,20 +343,21 @@ exports.dagiFilter = function() {
         " AND adgangsadresse_id = a_id)");
       }
       else {
-        var sql = "EXISTS( SELECT * FROM adgangsadresser_temaer_matview " +
-        "JOIN temaer ON tema_id = temaer.id" +
-        " WHERE adgangsadresser_temaer_matview.tema = " + temaAlias +
-          " AND adgangsadresse_id = a_id";
-        _.each(presentKeys, function(keyValues, tilknytningKeyName) {
+        var temaClauses = _.map(presentKeys, function(keyValues, tilknytningKeyName) {
           var valueAliases = _.map(keyValues, function(param) {
             return dbapi.addSqlParameter(sqlParts, param);
           });
           var temaKey = tilknytningKeyToTemaKey[temaName][tilknytningKeyName];
           var temaKeyName = temaKey.name;
           var temaKeyType = temaKey.sqlType;
-          sql += " AND (temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + ")";
-        });
-        sql += ')';
+          return "(temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + ")";
+        }).join(' AND ');
+        var temaQuery = 'SELECT id FROM temaer WHERE tema = ' + temaAlias + ' AND ' + temaClauses;
+        var sql = "EXISTS(WITH T AS (" + temaQuery + ") SELECT * FROM adgangsadresser_temaer_matview " +
+        "JOIN temaer ON (tema_id = temaer.id AND temaer.tema = " + temaAlias + ')' +
+        " WHERE adgangsadresser_temaer_matview.tema = " + temaAlias +
+          " AND adgangsadresse_id = a_id" +
+          " AND adgangsadresser_temaer_matview.tema_id IN (SELECT * FROM T))";
         dbapi.addWhereClause(sqlParts, sql);
       }
 
