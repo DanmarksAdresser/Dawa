@@ -1,9 +1,10 @@
 "use strict";
-
+var fs = require('fs');
+var moment = require('moment');
+var path = require('path');
 var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var importDarImpl = require('./importDarImpl');
 var importFromApiImpl = require('./importFromApiImpl')();
 var logger = require('../logger').forCategory('darImportApi');
 var proddb = require('../psql/proddb');
@@ -12,7 +13,8 @@ var qUtil = require('../q-util');
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   url: [false, 'Base URL hvorfra data hentes', 'string'],
-  daemon: [false, 'Daemon mode. Keep running in background and download changes from API.', 'boolean', false]
+  daemon: [false, 'Daemon mode. Keep running in background and download changes from API.', 'boolean', false],
+  reportDir: [false, 'Directory to store report files', 'string']
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
@@ -27,6 +29,9 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     var report = {};
     return importFromApiImpl.importFromApi(proddb, url, report)
       .fin(function () {
+        if(options.reportDir) {
+          fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
+        }
         logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
       });
   }

@@ -72,7 +72,7 @@ module.exports = function(opt) {
    * @param entityName
    * @param tsFrom
    */
-  function getRecordsSince(baseUrl, entityName, tsFrom, tsTo) {
+  function getRecordsSince(baseUrl, entityName, tsFrom, tsTo, report) {
     return getPage(baseUrl, entityName, tsFrom, tsTo).then(function(page) {
       var result = page;
       return qUtil.awhile(
@@ -104,7 +104,7 @@ module.exports = function(opt) {
           else {
             tsFrom = maxPageTs;
           }
-          return getPage(baseUrl, entityName, tsFrom, tsTo).then(function(_page) {
+          return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function(_page) {
             page = _page;
             result = mergeResults(result, page);
             return result;
@@ -124,9 +124,9 @@ module.exports = function(opt) {
    * @returns A map, where key is the entity type and value is an array of rows fetched from the
    * API
    */
-  function fetch(baseUrl, tsFrom, tsTo) {
+  function fetch(baseUrl, tsFrom, tsTo, report) {
     return qUtil.reduce(['adgangspunkt', 'husnummer', 'adresse'], function(memo, entityName) {
-      return getRecordsSince(baseUrl, entityName, tsFrom, tsTo).then(function(result) {
+      return getRecordsSince(baseUrl, entityName, tsFrom, tsTo, report).then(function(result) {
         memo[entityName] = result;
         return memo;
       });
@@ -150,7 +150,7 @@ module.exports = function(opt) {
       }, 0);
     }
     if(!resultSet) {
-      return fetch(baseUrl, tsFrom, tsTo).then(function(resultSet) {
+      return fetch(baseUrl, tsFrom, tsTo, report).then(function(resultSet) {
         return fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo, report);
       });
     }
@@ -160,14 +160,10 @@ module.exports = function(opt) {
     }
     // If we get some results, we fetch again to ensure that we
     // did not receive a partial transaction
-    return fetch(baseUrl, tsFrom, tsTo).then(function(secondResult) {
+    return fetch(baseUrl, tsFrom, tsTo, report).then(function(secondResult) {
       if(countResults(resultSet) === countResults(secondResult)) {
         if(report) {
-          report.fetchUntilStable = {
-            adgangspunktCount: secondResult.adgangspunkt.length,
-            husnummerCount: secondResult.husnummer.length,
-            adresseCount: secondResult.adresse.length
-          };
+          report.fetchUntilStable = secondResult;
         }
         return secondResult;
       }
@@ -202,7 +198,7 @@ module.exports = function(opt) {
     });
   }
 
-  function splitInTransactions(changeset, tsFrom) {
+  function splitInTransactions(changeset, tsFrom, report) {
     // Look for rows witch has been both created and expired in the same batch, and
     // create a record for the creation. If we do not do this,
     // we will never see the address in DAWA.
@@ -228,12 +224,14 @@ module.exports = function(opt) {
     var transactionTimestamps = _.reduce(groupedChangeset, function(memo, entityTimestampMap) {
       return _.union(memo, Object.keys(entityTimestampMap));
     }, []).sort();
-    return transactionTimestamps.map(function(timestamp) {
+    var transactions = transactionTimestamps.map(function(timestamp) {
       return Object.keys(changeset).reduce(function(memo, entityName) {
         memo[entityName] = groupedChangeset[entityName][timestamp] || [];
         return memo;
       }, {});
     });
+    report.transactions = transactions;
+    return transactions;
   }
 
   function transactionAlreadyPerformed(client, rowMap) {
@@ -292,7 +290,7 @@ module.exports = function(opt) {
           return;
         }
         else {
-          return qUtil.mapSerial(splitInTransactions(resultSet, tsFrom), function(transactionSet) {
+          return qUtil.mapSerial(splitInTransactions(resultSet, tsFrom, report), function(transactionSet) {
             return db.withTransaction('READ_WRITE', function(client) {
               return transactionAlreadyPerformed(client, transactionSet)
                 .then(function(transactionPerformed) {

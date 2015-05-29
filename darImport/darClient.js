@@ -1,7 +1,9 @@
 "use strict";
 
-var logger = require('../logger').forCategory('darImport');
+var moment = require('moment');
 var request = require('request-promise');
+
+var logger = require('../logger').forCategory('darImport');
 
 var apiPaths = {
   adgangspunkt: '/HentAdgangspunkt',
@@ -16,13 +18,19 @@ var apiPaths = {
  * @param tsFrom moment timestamp
  * @param tsTo moment timestamp
  */
-exports.getPage = function(baseUrl, entityName, tsFrom, tsTo) {
+exports.getPage = function(baseUrl, entityName, tsFrom, tsTo, report) {
   var url = baseUrl + apiPaths[entityName] +
     '?from=' + encodeURIComponent(tsFrom.toISOString()) +
     '&to=' + encodeURIComponent(tsTo.toISOString());
   logger.debug('Getting page ' + url);
+  var before = moment();
   return request.get({url: url}).then(function(result) {
-    return JSON.parse(result.trim());
+    var parsedResult = JSON.parse(result.trim());
+    var after = moment();
+    report.fetches = report.fetches || {};
+    report.fetches[entityName] = report.fetches[entityName] || {};
+    report.fetches[entityName][before.toISOString() + ' ' + after.toISOString()] = parsedResult;
+    return parsedResult;
   });
 };
 
