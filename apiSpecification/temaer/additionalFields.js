@@ -128,7 +128,7 @@ var fieldMap = {
     }, {
       name: 'esrejendomsnr',
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
-      ' ESR, som det jordstykket er en del af.' +
+      ' ESR, som jordstykket er en del af.' +
       ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
       schema: commonSchemaDefinitions.Nullableesrejendomsnr
     }, {

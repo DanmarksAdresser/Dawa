@@ -7,6 +7,7 @@ var temaNameAndKeys = require('../temaer/namesAndKeys');
 var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
+var commonSchemaDefinitions = require('../commonSchemaDefinitions');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
@@ -191,9 +192,14 @@ exports.json = {
             description: 'Jordstykkets matrikelnummer. Udgør sammen med ejerlavet en unik nøgle for jordstykket.' +
             ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”',
             $ref: '#/definitions/matrikelnr'
+          },
+          esrejendomsnr: {
+            description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ESR,' +
+            ' som jordstykket er en del af. Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
+            schema: commonSchemaDefinitions.Nullableesrejendomsnr
           }
         },
-        docOrder: ['href', 'ejerlav', 'matrikelnr']
+        docOrder: ['href', 'ejerlav', 'matrikelnr', 'esrejendomsnr']
       }),
       kvh: {
         description: 'Sammensat nøgle for adgangsadressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
@@ -287,9 +293,11 @@ exports.json = {
         var jordstykke = jordstykkeTemaer[0];
         var ejerlavkode = jordstykke.fields.ejerlavkode;
         var matrikelnr = jordstykke.fields.matrikelnr;
+        var esrejendomsnr = jordstykke.fields.esrejendomsnr  ?  "" + jordstykke.fields.esrejendomsnr : null;
         var result = {
           href: makeHref(baseUrl, 'jordstykke', [ejerlavkode, matrikelnr]),
-          matrikelnr: matrikelnr
+          matrikelnr: matrikelnr,
+          esrejendomsnr: esrejendomsnr
         };
         result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, matrikelnr, baseUrl);
         adr.jordstykke = result;
