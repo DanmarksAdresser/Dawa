@@ -27,6 +27,7 @@ CREATE VIEW AdgangsadresserView AS
 
     V.kode    AS vejkode,
     V.vejnavn AS vejnavn,
+    V.adresseringsnavn AS adresseringsvejnavn,
 
     A.ejerlavkode,
     EL.navn AS ejerlavnavn,

@@ -340,9 +340,14 @@ var definitions = {
       navn: {
         description: 'Vejens navn.',
         type: nullableType('string')
+      },
+      adresseringsnavn: {
+        description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn, som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.',
+        type: nullableType('string')
       }
+
     },
-    docOrder: ['href', 'kode', 'navn']
+    docOrder: ['href', 'kode', 'navn', 'adresseringsnavn']
   })
 };
 

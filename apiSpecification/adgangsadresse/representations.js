@@ -234,6 +234,7 @@ exports.json = {
       adr.vejstykke = {
         href: makeHref(baseUrl, 'vejstykke', [rs.kommunekode, rs.vejkode]),
         navn: maybeNull(rs.vejnavn),
+        adresseringsnavn: maybeNull(rs.adresseringsvejnavn),
         kode: kode4String(rs.vejkode)
       };
       adr.husnr = rs.husnr;

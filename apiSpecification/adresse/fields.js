@@ -32,6 +32,9 @@ var fields = [
     name: 'vejnavn'
   },
   {
+    name: 'adresseringsvejnavn'
+  },
+  {
     name: 'husnr'
   },
   normalizedField('etage'),
