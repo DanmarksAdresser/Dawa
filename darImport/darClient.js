@@ -27,9 +27,11 @@ exports.getPage = function(baseUrl, entityName, tsFrom, tsTo, report) {
   return request.get({url: url}).then(function(result) {
     var parsedResult = JSON.parse(result.trim());
     var after = moment();
-    report.fetches = report.fetches || {};
-    report.fetches[entityName] = report.fetches[entityName] || {};
-    report.fetches[entityName][before.toISOString() + ' ' + after.toISOString()] = parsedResult;
+    if(report) {
+      report.fetches = report.fetches || {};
+      report.fetches[entityName] = report.fetches[entityName] || {};
+      report.fetches[entityName][before.toISOString() + ' ' + after.toISOString()] = parsedResult;
+    }
     return parsedResult;
   });
 };

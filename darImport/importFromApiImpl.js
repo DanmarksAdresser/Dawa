@@ -73,7 +73,7 @@ module.exports = function(opt) {
    * @param tsFrom
    */
   function getRecordsSince(baseUrl, entityName, tsFrom, tsTo, report) {
-    return getPage(baseUrl, entityName, tsFrom, tsTo).then(function(page) {
+    return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function(page) {
       var result = page;
       return qUtil.awhile(
         function() { return page.length >= maxReturnedRecords; },
