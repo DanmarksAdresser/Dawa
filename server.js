@@ -3,20 +3,16 @@
 var express        = require("express");
 var compression = require('compression');
 var http = require('http');
-var fs = require('fs');
 var logger = require('./logger');
-var statistics = require('./statistics');
-var q = require('q');
+var util = require('util');
 var _ = require('underscore');
 
 var cluster = require('cluster');
-var database = require('./psql/database');
+var isalive = require('./isalive');
 var count = require('os').cpus().length;
-var uuid = require('node-uuid');
 var pg = require('pg.js');
 require('pg-parse-float')(pg);
 
-var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
 /**
  * We log memory statistics, so we can monitor memory consumption in splunk.
@@ -75,33 +71,11 @@ function setupWorker() {
 
   process.on('message', function(message) {
     if(message.type === 'getStatus') {
-      return q.ninvoke(server, 'getConnections').then(function(count) {
-        return proddb.withTransaction('READ_ONLY', function(client) {
-          return client.queryp('select * from adgangsadresser limit 1').then(function(result) {
-            process.send({
-              type: 'status',
-              requestId: message.requestId,
-              data: {
-                status: result.rows && result.rows.length === 1 ? 'up' : 'down',
-                postgresPool: database.getPoolStatus('prod'),
-                statistics: statistics.getStatistics(),
-                connections: count
-              }
-            });
-          }, function(err) {
-            process.send({
-              type: 'status',
-              requestId: message.requestId,
-              data: {
-                status: 'down',
-                postgresError: err,
-                postgresPool: database.getPoolStatus('prod'),
-                statistics: statistics.getStatistics(),
-                connections: count
-              }
-            });
-          });
-        });
+      isalive.isaliveSlave(server).then(function(result) {
+        result.requestId = message.requestId;
+        process.send(result);
+      }).catch(function(err) {
+        logger.error('isalive', 'Unexpected error during isalive', err);
       });
     }
   });
@@ -171,35 +145,12 @@ function setupMaster() {
 
     var isaliveApp = express();
     isaliveApp.get('/isalive', function(req, res) {
-      var result = {
-        name: packageJson.name,
-        version: packageJson.version,
-        generation_time: new Date().toISOString(),
-        workers: []
-
-      };
-      var workerIds = Object.keys(cluster.workers);
-      var statusPromises =
-      _.map(workerIds, function(workerId) {
-        var worker = cluster.workers[workerId];
-        return getStatus(worker);
+      isalive.isaliveMaster(options).then(function(isalive) {
+        res.json(isalive);
+      }).catch(function(err) {
+        logger.error('isalive', 'Unexpected error during isalive', err);
+        res.status(500).send('Unexpected error during isalive: ' + util.inspect(err));
       });
-      q.allSettled(statusPromises).then(function(statuses) {
-        for(var i = 0; i < workerIds.length; ++i) {
-          var workerId = workerIds[i];
-          var worker = cluster.workers[workerId];
-          var status = statuses[i];
-          result.workers.push({
-            id: workerId,
-            pid: worker ? worker.process.pid : null,
-            isalive: status.state === 'fulfilled' ? status.value : {
-              status: 'down',
-              reason: 'Could not get status from worker process'
-            }
-          });
-        }
-        res.json(result);
-      }).done();
     });
 
     isaliveApp.set('json spaces', 2);
@@ -209,23 +160,6 @@ function setupMaster() {
   });
 }
 
-function getStatus(worker) {
-  var deferred = q.defer();
-  var request = {
-    type: 'getStatus',
-    requestId: uuid.v4(),
-    data: {}
-  };
-  function listener(response) {
-    if (response.type === 'status' && response.requestId === request.requestId) {
-      worker.removeListener('message', listener);
-      deferred.resolve(response.data);
-    }
-  }
-  worker.on('message', listener);
-  worker.send(request);
-  return q.timeout(deferred.promise, 5000);
-}
 
 if (cluster.isMaster) {
   setupMaster();

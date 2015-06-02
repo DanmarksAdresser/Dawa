@@ -6,12 +6,14 @@ var Q = require('q');
 var database = require('./database');
 
 function wrapWithStatements(client, beforeStmt, afterStmt, transactionFn) {
-  return Q.ninvoke(client, 'query', beforeStmt, [])
+  return client.queryp(beforeStmt)
     .then(function () {
       return transactionFn(client);
     })
-    .then(function () {
-      return Q.ninvoke(client, 'query', afterStmt, []);
+    .then(function (result) {
+      return client.queryp(afterStmt).then(function() {
+        return result;
+      });
     });
 }
 
@@ -37,8 +39,9 @@ exports.withTransaction = function (dbname, options, transactionFn) {
       transactionStatements[options.mode][0],
       transactionStatements[options.mode][1],
       function(client) {
-        return transactionFn(client).then(function() {
+        return transactionFn(client).then(function(result) {
           client.emit('transactionEnd');
+          return result;
         }, function(err) {
           client.emit('transactionEnd', err);
           return Q.reject(err);

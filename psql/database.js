@@ -3,6 +3,7 @@
 var genericPool = require('generic-pool');
 var pg = require('pg.js');
 var q = require('q');
+var util = require('util');
 var _ = require('underscore');
 
 var logger = require('../logger').forCategory('sql');
@@ -202,8 +203,9 @@ exports.withConnection = function(dbOrName, pooled, connectedFn) {
         return reject(err);
       }
       return connectedFn(client).then(
-        function () {
+        function (result) {
           done();
+          return result;
         }, function (err) {
           done(err);
           return q.reject(err);
