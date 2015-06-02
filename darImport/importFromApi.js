@@ -18,7 +18,7 @@ var optionSpec = {
   skipDawa: [false, 'Only update DAR tables, not DAWA tables', 'boolean', 'false']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'), function(args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false

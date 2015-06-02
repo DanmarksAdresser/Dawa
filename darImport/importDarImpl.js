@@ -289,7 +289,7 @@ exports.clearDarTables = function(client) {
     logger.info('clearing DAR table', {table: dbSpecImpl.table});
     return client.queryp('DELETE FROM ' + dbSpecImpl.table, []);
   }).then(function() {
-    return client.queryp('DELETE FROM dar_transaction; UPDATE dar_tx_current set tx_current = null', []);
+    return client.queryp('DELETE FROM dar_transaction; UPDATE dar_tx_current set tx_current = null; delete from dar_lastfetched', []);
   });
 };
 
