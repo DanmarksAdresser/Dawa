@@ -22,19 +22,23 @@ var consistencyChecks = [
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i en anden kommune',
     query: "SELECT a.id, vejkode, kommunekode, temaer.fields->>'kode' AS geografisk_kommunekode, a.oprettet, a.aendret" +
     " FROM adgangsadresser a" +
-    " LEFT JOIN adgangsadresser_temaer_matview atm ON (a.id = atm.adgangsadresse_id)" +
+    " LEFT JOIN adgangsadresser_temaer_matview atm ON (a.id = atm.adgangsadresse_id AND tema = 'kommune')" +
     " LEFT JOIN temaer ON atm.tema_id = temaer.id" +
     " WHERE a.noejagtighed <> 'U' AND a.kommunekode IS DISTINCT FROM (temaer.fields->>'kode')::integer ORDER BY a.aendret DESC"
   },
   {
     key: 'AdresserUdenRegion',
-    description: 'Find alle adresser med adgangspunkt der ikke har en tilknyttet region',
+    description: 'Find alle adresser med adgangspunkt der geografisk ikke ligger indenfor en region',
     query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresser_temaer_matview rel  ON (rel.adgangsadresse_id = adgangsadresser.id AND rel.tema = 'region') where rel.adgangsadresse_id is null AND adgangsadresser.noejagtighed <> 'U'"
   },
   {
     key: 'AdresserInkonsistentPostnr',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i et andet postnummer',
-    query: "SELECT adgangsadresser.id, vejkode, kommunekode, postnr, (temaer.fields->>'nr')::integer AS geografisk_postnr, oprettet, adgangsadresser.aendret FROM adgangsadresser JOIN gridded_temaer_matview gridded ON (st_contains(gridded.geom, adgangsadresser.geom) AND gridded.tema = 'postnummer') JOIN temaer ON temaer.id = gridded.id WHERE adgangsadresser.postnr IS DISTINCT FROM (temaer.fields->>'nr')::integer ORDER BY postnr, id DESC"
+    query: "SELECT a.id, vejkode, kommunekode, postnr, (temaer.fields->>'nr')::integer AS geografisk_postnr, oprettet, a.aendret" +
+    " FROM adgangsadresser a" +
+    " LEFT JOIN adgangsadresser_temaer_matview atm ON (a.id = atm.adgangsadresse_id AND tema = 'postnummer')" +
+    " LEFT JOIN temaer ON atm.tema_id = temaer.id" +
+    " WHERE a.noejagtighed <> 'U' AND postnr IS DISTINCT FROM (temaer.fields->>'nr')::integer ORDER BY a.aendret DESC"
   },
   {
     key: 'AdgangsadresserUdenEnhedsadresser',
