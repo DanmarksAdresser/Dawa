@@ -163,6 +163,15 @@ block content
               h5 Hændelsesformat for opstillingskredstilknytninger
               +documentSchema(jsonSchemas.opstillingskredstilknytning_hændelse)
             section
+              h4 Valglandsdelstilknytninger
+              p Her udstilles adgangsadressernes tilknyttede valglandsdele, som den beregnes ud fra adgangspunktet og valglandsdelens geografi.
+              h5 Valglandsdelstilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/valglandsdelstilknytninger')
+              h5 Valglandsdelstilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/valglandsdelstilknytninger/haendelser')
+              h5 Hændelsesformat for valglandsdelstilknytninger
+              +documentSchema(jsonSchemas.valglandsdelstilknytning_hændelse)
+            section
               h4 Zonetilknytninger
               p Her udstilles adgangsadressernes tilknyttede zonestatus, som den beregnes ud fra adgangspunktet og zonekortet.
               h5 Zonetilknytninger - udtræk
@@ -171,8 +180,15 @@ block content
               +documentResource(parameterDoc, '/replikering/zonetilknytninger/haendelser')
               h5 Hændelsesformat for zonetilknytninger
               +documentSchema(jsonSchemas.zonetilknytning_hændelse)
-
             section
+              h4 Jordstykketilknytninger
+              p Her udstilles adgangsadressernes tilknyttede jordstykke, som den beregnes ud fra adgangspunktet og jordstykkets geometri.
+              h5 Jordstykketilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/jordstykketilknytninger')
+              h5 Jordstykketilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/jordstykketilknytninger/haendelser')
+              h5 Hændelsesformat for jordstykketilknytninger
+              +documentSchema(jsonSchemas.jordstykketilknytning_hændelse)
 
   block append scripts
     script.
