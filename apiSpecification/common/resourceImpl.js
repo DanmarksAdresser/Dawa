@@ -1,5 +1,6 @@
 "use strict";
 
+var eventStream = require('event-stream');
 var paths = require('../paths');
 var sqlUtil = require('./sql/sqlUtil');
 var logger = require('../../logger');
@@ -169,12 +170,7 @@ function singleResultResponse(
 }
 
 function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize, callback, releaseDbClient) {
-  resourceSpec.sqlModel.stream(dbClient, fieldNames, params, function(err, stream) {
-    if(err) {
-      releaseDbClient(err);
-      return callback(null, modelErrorResponse(err));
-    }
-
+  function pipeResult(stream) {
     // map the query results to the correct representation and serialize to http response
     var pipe = pipeline(stream);
     pipe.map(mapObject);
@@ -184,8 +180,26 @@ function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObje
       releaseDbClient(err);
     });
     serialize(pipe, callback);
-  });
-
+  }
+  if(resourceSpec.disableStreaming) {
+    resourceSpec.sqlModel.query(dbClient, fieldNames, params, function(err, result) {
+      if(err) {
+        releaseDbClient(err);
+        return callback(null, modelErrorResponse(err));
+      }
+      var stream = eventStream.readArray(result);
+      return pipeResult(stream);
+    });
+  }
+  else {
+    resourceSpec.sqlModel.stream(dbClient, fieldNames, params, function(err, stream) {
+      if(err) {
+        releaseDbClient(err);
+        return callback(null, modelErrorResponse(err));
+      }
+      return pipeResult(stream);
+    });
+  }
 }
 
 function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, callback) {
