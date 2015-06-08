@@ -32,7 +32,7 @@ CREATE VIEW dar_adgangsadresser_view AS
     ap_kommunenummer AS kommunekode,
     hn_vejkode AS vejkode,
     (hn_husnummer).tal || COALESCE((hn_husnummer).bogstav, '') as husnr,
-    (SELECT bynavn FROM dar_supplerendebynavn sb WHERE
+    (SELECT bynavn FROM dar_supplerendebynavn_current sb WHERE
       ap_kommunenummer = sb.kommunekode
       AND hn_vejkode = sb.vejkode
       AND sb.side = (CASE WHEN (hn_husnummer).tal % 2 = 0 THEN 'L'
