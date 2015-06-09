@@ -50,7 +50,7 @@ var caretpositions = {
 var mappers = {
   vejnavn: function(vejnavn, targetType) {
     var tekst = vejnavn.tekst;
-    if(targetType === 'vejnavn') {
+    if(targetType !== 'vejnavn') {
       tekst += ' ';
     }
 
