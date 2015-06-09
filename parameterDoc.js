@@ -1302,6 +1302,32 @@ module.exports['/replikering/senesteSekvensnummer'] = {
   examples: []
 };
 
+module.exports['/autocomplete'] = {
+  subtekst: 'Samlet autocomplete-funktionalitet for vejnavne, adgangsadresser og adresser. ',
+  parameters: [{
+    name: 'type',
+    doc: 'Angiver, om brugeren er ved at indtaste et vejnavn, en adgangsadresse eller en adresse.' +
+    ' Mulige værdier: "vejnavn", "adgangsadresse" eller "adresse". De returnerede værdier er ikke nødvendigvis af' +
+    ' denne type. Hvis brugeren f.eks. er ved at indtaste en adresse, men ikke har indtastet nok til at vejnavnet er entydigt ' +
+    ' bestemt, så vil servicen returnere vejnavne som valgmuligheder for brugeren'
+  }, {
+    name: 'q',
+    doc: 'Søgetekst - den tekst brugeren har indtastet'
+  }, {
+    name: 'caretpos',
+    doc: 'Position af careten (cursoren) i den tekst brugeren har indtastet'
+  }, {
+    name: 'postnr',
+    doc: 'Begræns søgning til det angivne postnummer'
+  }, {
+    name: 'kommunekode',
+    doc: 'Begræns søgning til adresser indenfor den angivne kommune'
+  }, {
+    name: 'adgangsadresseid',
+    doc: 'Begræns søgning til adresser med den angivne adgangsadresseid'
+  }].concat(formatAndPagingParams),
+  examples: []
+};
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
   adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources);

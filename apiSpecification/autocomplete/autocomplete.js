@@ -4,6 +4,7 @@ var q = require('q');
 var _ = require('underscore');
 
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+var commonParameters = require('../common/commonParameters');
 var registry = require('../registry');
 var resourcesUtil = require('../common/resourcesUtil');
 var schema = require('../parameterSchema');
@@ -63,6 +64,7 @@ var mappers = {
   },
   adgangsadresse: function(autocompleteAdgadr, targetType) {
     var adgadr = autocompleteAdgadr.adgangsadresse;
+    console.log(JSON.stringify(adgadr));
     var caretpos, tekst;
     if(targetType !== 'adgangsadresse') {
       var textBeforeCaret =  adgadr.vejnavn + ' ' + adgadr.husnr + ', ';
@@ -75,7 +77,7 @@ var mappers = {
       tekst = textBeforeCaret + textAfterCaret;
     }
     else {
-      tekst = adgadr.tekst;
+      tekst = autocompleteAdgadr.tekst;
       caretpos = tekst.length;
     }
     return {
@@ -97,8 +99,27 @@ var mappers = {
   }
 };
 
+var delegatedParameters = [
+  {
+    name: 'adgangsadresseid',
+    type: 'string',
+    schema: schema.uuid
+  },
+  {
+    name: 'kommunekode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'postnr',
+    type: 'integer',
+    schema: schema.postnr,
+    multi: true
+  }
+].concat(commonParameters.format).concat(commonParameters.paging);
 
-var parameters = [
+var nonDelegatedParameters = [
   {
     name: 'q',
     type: 'string',
@@ -115,13 +136,9 @@ var parameters = [
     schema: {
       enum: ['vejnavn', 'adgangsadresse', 'adresse']
     }
-  },
-  {
-    name: 'adgangsadresseid',
-    type: 'string',
-    schema: schema.uuid
-  }
-];
+  }];
+
+var allParameters = delegatedParameters.concat(nonDelegatedParameters);
 
 var representations = {
   autocomplete: {
@@ -208,10 +225,11 @@ var sqlModel = {
         q = insertString(q, caretpos, '*');
       }
     }
-    var sqlParams = {
-      search: q,
-      adgangsadresseid: params.adgangsadresseid
-    };
+    var sqlParams = _.reduce(delegatedParameters, function(memo, param) {
+      memo[param.name] = params[param.name];
+      return memo;
+    }, {search: q});
+
     if(params.adgangsadresseid) {
       return queryFromAdresse(client, sqlParams).nodeify(callback);
     }
@@ -224,7 +242,7 @@ var sqlModel = {
 module.exports = {
   path: '/autocomplete',
   pathParameters: [],
-  queryParameters: parameters,
+  queryParameters: allParameters,
   representations: representations,
   sqlModel: sqlModel,
   singleResult: false,
