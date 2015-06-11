@@ -8,6 +8,7 @@ CREATE TABLE temaer (
   fields json not null,
   tsv tsvector,
   geom  geometry(MultiPolygon, 25832),
+  slettet timestamptz,
   PRIMARY KEY(id)
 );
 

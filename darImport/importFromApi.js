@@ -15,7 +15,7 @@ var optionSpec = {
   url: [false, 'Base URL hvorfra data hentes', 'string'],
   daemon: [false, 'Daemon mode. Keep running in background and download changes from API.', 'boolean', false],
   reportDir: [false, 'Directory to store report files', 'string'],
-  skipDawa: [false, 'Only update DAR tables, not DAWA tables', 'boolean', 'false']
+  skipDawa: [false, 'Only update DAR tables, not DAWA tables', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'), function(args, options) {

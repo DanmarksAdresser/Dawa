@@ -48,7 +48,7 @@ function removeAll(aas, bs, keySpecs) {
 }
 
 function getTemaer(client, temaNavn, constraints, callback) {
-  var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1";
+  var sql = "SELECT tema, id, aendret, geo_version, geo_aendret, fields FROM temaer WHERE tema = $1 AND slettet IS NULL";
   var params = [temaNavn];
   if(constraints) {
     _.forEach(constraints, function(value, key) {
@@ -66,17 +66,48 @@ function getTemaer(client, temaNavn, constraints, callback) {
   }).nodeify(callback);
 }
 
-exports.addTema = function(client, tema, callback) {
-  var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
-    'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
-  var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
+function rowExists(client, temaDef, tema) {
+  var sql = 'SELECT EXISTS(SELECT * FROM TEMAER WHERE tema = $1';
+  temaDef.key.forEach(function(keySpec, index) {
+    sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 2) + "::text";
+  });
+  sql += ') as exist';
+  var params = [tema.tema].concat(getKeyValue(tema, temaDef));
   return client.queryp(sql, params).then(function(result) {
-    return result.rows[0].id;
+    return result.rows[0].exist;
+  });
+}
+
+function undelete(client, temaDef, tema) {
+  var sql = 'UPDATE temaer SET slettet = NULL WHERE tema = $1';
+  temaDef.key.forEach(function(keySpec, index) {
+    sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 2) + "::text";
+  });
+  var params = [tema.tema].concat(getKeyValue(tema, temaDef));
+  return client.queryp(sql, params);
+}
+
+exports.addTema = function(client, tema, callback) {
+  var temaDef = exports.findTema(tema.tema);
+  return rowExists(client, temaDef, tema).then(function(exists) {
+    if(exists) {
+    return undelete(client, temaDef, tema).then(function() {
+        return exports.updateTema(client, temaDef, tema);
+      });
+    }
+    else {
+      var sql = 'INSERT INTO temaer(tema, aendret, geo_version, geo_aendret, fields, geom) ' +
+        'VALUES ($1, NOW(), $2, NOW(), $3, ST_Multi(ST_SetSRID(' + makeUnionSql(tema.polygons.length, 4) +', 25832))) RETURNING id';
+      var params = [tema.tema, 1, tema.fields].concat(tema.polygons);
+      return client.queryp(sql, params).then(function(result) {
+        return result.rows[0].id;
+      });
+    }
   }).nodeify(callback);
 };
 
 exports.deleteTema = function(client, temaDef, tema, callback) {
-  var sql = "DELETE FROM temaer WHERE tema = $1";
+  var sql = "UPDATE temaer SET slettet = NOW(), geom=NULL WHERE tema = $1";
   temaDef.key.forEach(function(keySpec, index) {
     sql += " AND fields->>'" + keySpec.name + "' = $" + (index + 2) + "::text";
   });

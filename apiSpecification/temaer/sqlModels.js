@@ -54,7 +54,7 @@ publishedTemaer.forEach(function(tema) {
     return {
       select: [],
       from: ['temaer'],
-      whereClauses: ['tema = $1'],
+      whereClauses: ['tema = $1 AND slettet IS NULL'],
       orderClauses: [],
       sqlParams: [tema.singular]
     };
