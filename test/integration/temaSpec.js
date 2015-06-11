@@ -115,5 +115,42 @@ describe('DAGI updates', function() {
         });
       });
     });
+
+    it('When deleting a DAGI tema, the slettet property should be set to true, and the geometry deleted', function() {
+      return testdb.withTransaction('test', 'ROLLBACK', function(client) {
+        return tema.addTema(client, sampleTema).then(function() {
+          return tema.deleteTema(client, sampleTemaDef, sampleTema);
+        }).then(function() {
+          return client.queryp(
+            "select slettet, geom from temaer where tema = $1 and fields->>'kode' = $2",
+            ['region', "10"]);
+        }).then(function(result) {
+          expect(result.rows).to.have.length(1);
+          expect(result.rows[0].slettet).to.not.be.null;
+          expect(result.rows[0].geom).to.be.null;
+        });
+      });
+    });
+    it('When recreating a DAGI tema which has prevously been deleted, the slettet property should be not null and the' +
+    ' geometry should be updated', function() {
+      return testdb.withTransaction('test', 'ROLLBACK', function(client) {
+        return tema.addTema(client, sampleTema)
+          .then(function() {
+          return tema.deleteTema(client, sampleTemaDef, sampleTema);
+        })
+          .then(function() {
+            return tema.addTema(client, sampleTema);
+          })
+          .then(function() {
+          return client.queryp(
+            "select slettet, geom from temaer where tema = $1 and fields->>'kode' = $2",
+            ['region', "10"]);
+        }).then(function(result) {
+          expect(result.rows).to.have.length(1);
+          expect(result.rows[0].slettet).be.null;
+          expect(result.rows[0].geom).to.not.be.null;
+        });
+      });
+    });
   });
 });
