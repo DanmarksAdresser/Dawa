@@ -31,12 +31,12 @@ var fields = {
     formatter: kode4String
   }, {
       name: 'oprettet',
-      description: 'Oprettelsestidspunktet for vejstykket som registreret i BBR',
+      description: 'DEPRECATED. Feltet opdateres ikke længere. Oprettelsestidspunktet for vejstykket som registreret i BBR',
       schema: definitions.NullableDateTime,
       formatter: timestampFormatter
   }, {
     name: 'ændret',
-    description: 'Tidspunkt for seneste ændring af vejstykket, som registreret i BBR',
+    description: 'DEPRECATED. Feltet opdateres ikke længere. Tidspunkt for seneste ændring af vejstykket, som registreret i BBR',
     schema: definitions.NullableDateTime,
     formatter: timestampFormatter
   }, {
@@ -147,14 +147,12 @@ var fields = {
       formatter: kode4String
     }, {
       name: 'ejerlavkode',
-      description: 'Unik identifikation af det matrikulære ”ejerlav”, som adressen ligger i.' +
-        ' Stammer fra BBR.' +
+      description: 'DEPRECATED. Feltet opdateres ikke længere. Benyt "jordstykke" i stedet. Angiver ejerlavkoden registreret i BBR.' +
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
       schema: definitions.NullableUpTo7
     }, {
       name: 'matrikelnr',
-      description: 'Betegnelse for det matrikelnummer, dvs. jordstykke, som adressen er beliggende på.' +
-        ' Stammer fra BBR.' +
+      description: 'DEPRECATED. Feltet opdateres ikke længere. Benyt "jordstykke" i stedet. Angiver matrikelnummeret for jordstykket, som det var registreret i BBR.' +
         ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
       schema: definitions.Nullablematrikelnr
     }, {

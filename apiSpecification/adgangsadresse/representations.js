@@ -78,7 +78,9 @@ exports.json = {
         $ref: '#/definitions/KommuneRef'
       },
       'ejerlav': schemaObject({
-        description: 'Det matrikulære ejerlav som adressen ligger i.',
+        description: 'DEPRECATED. Opdateres ikke længere. Benyt "jordstykke" i stedet. ' +
+        'Feltet indeholder den værdi der i sin tid var registreret i BBR. I dag beregnes det tilhørende' +
+        ' jordstykke ud fra adgangspunktets placering.',
         nullable: true,
         properties: {
           'kode': normalizedFieldSchema('ejerlavkode'),

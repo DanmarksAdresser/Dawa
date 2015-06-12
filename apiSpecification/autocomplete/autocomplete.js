@@ -5,6 +5,7 @@ var _ = require('underscore');
 
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var commonParameters = require('../common/commonParameters');
+var logger = require('../../logger').forCategory('autocomplete');
 var registry = require('../registry');
 var resourcesUtil = require('../common/resourcesUtil');
 var schema = require('../parameterSchema');
@@ -64,7 +65,6 @@ var mappers = {
   },
   adgangsadresse: function(autocompleteAdgadr, targetType) {
     var adgadr = autocompleteAdgadr.adgangsadresse;
-    console.log(JSON.stringify(adgadr));
     var caretpos, tekst;
     if(targetType !== 'adgangsadresse') {
       var textBeforeCaret =  adgadr.vejnavn + ' ' + adgadr.husnr + ', ';
@@ -193,9 +193,9 @@ function queryFromAdresse(client, sqlParams) {
   return queryModel(client, 'adresse', sqlParams);
 }
 
-function queryFromAdgangsadresse(client, sqlParams) {
+function queryFromAdgangsadresse(client, type, sqlParams) {
   return queryModel(client, 'adgangsadresse', sqlParams).then(function (result) {
-    if (result.length > 1 || sqlParams.type === 'adgangsadresse') {
+    if (result.length > 1 || type === 'adgangsadresse') {
       return result;
     }
     else {
@@ -204,13 +204,13 @@ function queryFromAdgangsadresse(client, sqlParams) {
   });
 }
 
-function queryFromVejnavn(client, sqlParams) {
+function queryFromVejnavn(client, type, sqlParams) {
   return queryModel(client, 'vejnavn', sqlParams).then(function (result) {
-    if (result.length > 1 || sqlParams.type === 'vejnavn') {
+    if (result.length > 1 || type === 'vejnavn') {
       return result;
     }
     else {
-      return queryFromAdgangsadresse(client, sqlParams);
+      return queryFromAdgangsadresse(client, type, sqlParams);
     }
   });
 }
@@ -219,23 +219,32 @@ var sqlModel = {
   allSelectableFields: [],
   query: function(client, fieldNames, params, callback) {
     var caretpos = params.caretpos;
-    var q = params.q;
-    if (caretpos > 0 && caretpos <= q.length) {
-      if (caretpos === q.length || _.contains([' ', '.', ','], q.charAt(caretpos))) {
-        q = insertString(q, caretpos, '*');
+    var queryParam = params.q;
+    if (caretpos > 0 && caretpos <= queryParam.length) {
+      if (caretpos === queryParam.length || _.contains([' ', '.', ','], queryParam.charAt(caretpos))) {
+        queryParam = insertString(queryParam, caretpos, '*');
       }
     }
     var sqlParams = _.reduce(delegatedParameters, function(memo, param) {
       memo[param.name] = params[param.name];
       return memo;
-    }, {search: q});
+    }, {search: queryParam});
 
-    if(params.adgangsadresseid) {
-      return queryFromAdresse(client, sqlParams).nodeify(callback);
-    }
-    else {
-      return queryFromVejnavn(client, sqlParams).nodeify(callback);
-    }
+    return q()
+      .then(function () {
+        if (params.adgangsadresseid) {
+          return queryFromAdresse(client, sqlParams);
+        }
+        else {
+          return queryFromVejnavn(client, params.type, sqlParams);
+        }
+      })
+      .then(function (result) {
+        if (result.length === 0) {
+          logger.info('EmptyResult', params);
+        }
+        return result;
+      }).nodeify(callback);
   }
 };
 

@@ -1,5 +1,6 @@
 "use strict";
 
+var q = require('q');
 var _ = require('underscore');
 
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
@@ -48,19 +49,10 @@ exports.getStringResponse = function(dbClient, resourceSpec, pathParams, queryPa
 
 // Get the response of a resource as JSON
 exports.getJson = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, str) {
-    if(err) {
-      return callback(err);
-    }
-    var json;
-    try {
-      json = JSON.parse(str);
-    }
-    catch(parseError) {
-      return callback(parseError);
-    }
-    callback(null, json);
-  });
+  return q.nfcall(exports.getStringResponse, dbClient, resourceSpec, pathParams, queryParams)
+    .then(function(str) {
+      return JSON.parse(str);
+    }).nodeify(callback);
 };
 
 // get the response of a resource and parse as CSV

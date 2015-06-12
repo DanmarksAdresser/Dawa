@@ -4,7 +4,6 @@ var expect = require('chai').expect;
 var request = require("request-promise");
 var q = require('q');
 
-var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
 var testdb = require('../helpers/testdb');
@@ -48,7 +47,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       qualifier: 'query'
     });
     it(' for sogn på ' + entityName, function () {
-      this.timeout(5000);
+      this.timeout(10000);
       return testdb.withTransaction('test', 'ROLLBACK', function (client) {
         return q.nfcall(tema.addTema, client, sampleTema)
           .then(function () {
@@ -58,10 +57,10 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
             var params = {sognekode: "10"};
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
             var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
-            return dbapi.queryRawQ(client, query.sql, query.params);
+            return client.queryp(query.sql, query.params);
           })
           .then(function (result) {
-            expect(result.length).to.equal(expectedResultsSogn[entityName]);
+            expect(result.rows.length).to.equal(expectedResultsSogn[entityName]);
           });
       });
     });
