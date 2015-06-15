@@ -1,0 +1,28 @@
+extends layout
+include includes/parameterDocMixins
+block content
+  header.jumbotron.subhead
+    div.container
+      h1 Autocomplete
+      div.page-header
+        p.lead En kombineret autocomplete funktionalitet.
+    div.container
+      div.row
+        div.span3
+          ul#indhold.nav.nav-list.affix
+            li(data-toggle='collapse', data-target='#adresse').nav-header Adgangsadresse API
+            ul#adresse.nav.nav-list
+              li <a href='#autocomplete'>Autocomplete</a>
+              li <a href='#autocompletedata'>Beskrivelse af autocomplete-svar</a>
+        div.span9
+          section
+            h3.anchor-header#autocomplete Autocomplete
+            +documentResource(parameterDoc, '/autocomplete')
+            div.page-header
+            h3.anchor-header#autocompletedata Beskrivelse af autocomplete-svar
+block append scripts
+  script.
+    var topbar = $('#topbar');
+    topbar.find('li').removeClass('active');
+    var a = topbar.find("li a[href='autocompletedok']")[0];
+    var li = $(a).parent().addClass('active');

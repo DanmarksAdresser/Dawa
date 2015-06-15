@@ -56,6 +56,7 @@ function setupJadePage(path, page){
   });
 }
 
+setupJadePage('/autocompletedok'             , 'autocompletedok.jade');
 setupJadePage('/generelt'             , 'generelt.jade');
 setupJadePage('/adressedok'           , 'adressedok.jade');
 setupJadePage('/adgangsadressedok'    , 'adgangsadressedok.jade');
