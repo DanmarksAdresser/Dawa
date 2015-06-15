@@ -9,6 +9,8 @@ var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
 
+require('./apiSpecification/allSpecs');
+
 /*jslint stupid: true */
 /*stupid:true makes JSLint allow use of .readFileSync */
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));

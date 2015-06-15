@@ -30,24 +30,6 @@ var autocompleteResources = ['vejnavn', 'adgangsadresse', 'adresse'].reduce(func
   return memo;
 }, {});
 
-// this nested map supplies functions for computing caret positions.
-// First level is the target type, second level is the type of a choice in the autocomplete dropdown.
-// No entry indicates caret should be positioned at the end of the text
-var caretpositions = {
-  adgangsadresse: {
-    vejnavn: function(vejnavn) {
-
-    }
-  },
-  adresse: {
-    adgangsadresse: function(adgAdr) {
-      // we position the caret, such that it is ready to enter etage and dør
-      var textBeforeCaret =  adgAdr.vejnavn + ' ' + adgAdr.husnr + ', ';
-      return textBeforeCaret.length;
-    }
-  }
-};
-
 var mappers = {
   vejnavn: function(vejnavn, targetType) {
     var tekst = vejnavn.tekst;
@@ -95,7 +77,7 @@ var mappers = {
       forslagstekst: adr.tekst,
       caretpos: adr.tekst.length,
       data: adr.adresse
-    }
+    };
   }
 };
 
@@ -136,7 +118,8 @@ var nonDelegatedParameters = [
     schema: {
       enum: ['vejnavn', 'adgangsadresse', 'adresse']
     }
-  }];
+  }
+];
 
 var allParameters = delegatedParameters.concat(nonDelegatedParameters);
 
@@ -160,9 +143,13 @@ var representations = {
         forslagstekst: {
           description: 'Den tekst, der skal vises for dette forslag. Kan afvige fra den tekst der skal udfyldes i input-feltet.',
           type: 'integer'
+        },
+        data: {
+          description: 'Udvalgte datafelter for vejnavnet, adgangsadressen eller adressen der returneres.',
+          type: 'object'
         }
       },
-      docOrder: ['type', 'tekst', 'caretpos', 'forslagstekst']
+      docOrder: ['type', 'tekst', 'caretpos', 'forslagstekst', 'data']
     }),
     mapper: function(baseurl, params) {
       return function(row) {
@@ -260,4 +247,5 @@ module.exports = {
   disableStreaming: true
 };
 
+registry.add('autocomplete', 'representation', 'autocomplete', representations.autocomplete);
 registry.add('autocomplete', 'resource', 'autocomplete', module.exports);

@@ -72,7 +72,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     });
 
     it(' for '  + entityName + 'r uden sognetilknytning', function (done) {
-      this.timeout(5000);
+      this.timeout(10000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?sognekode=', json: true}, function(error, response, result) {
         expect(result.length).to.equal(expectedResultWithoutSogn[entityName]);
         done();
@@ -80,7 +80,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     });
 
     it(' for zone på '  + entityName, function (done) {
-      this.timeout(5000);
+      this.timeout(10000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=1', json: true}, function(error, response, result) {
         expect(result.length).to.equal(expectedResultsZone1[entityName]);
         done();

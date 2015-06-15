@@ -23,12 +23,16 @@ exports.computeQueryUrl = function (baseUrl, plural, query) {
 };
 
 exports.extractDocumentationForObject = function (schema) {
-
-  var result = _.map(schema.docOrder, function (propertyName) {
-    var property = schema.properties[propertyName];
-    return exports.extractDocumentationForProperty(property, propertyName);
-  });
-  return  result;
+  if(schema.properties) {
+    var result = _.map(schema.docOrder, function (propertyName) {
+      var property = schema.properties[propertyName];
+      return exports.extractDocumentationForProperty(property, propertyName);
+    });
+    return  result;
+  }
+  else {
+    return [];
+  }
 };
 
 // for now, this one just assumes that the schema is compiled
