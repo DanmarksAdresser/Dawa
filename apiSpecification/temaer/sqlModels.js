@@ -26,9 +26,9 @@ var casts = {
 publishedTemaer.forEach(function(tema) {
   var jsonFields = additionalFields[tema.singular];
   var columns = jsonFields.reduce(function(memo, fieldSpec) {
-    var column = "fields->>'" + fieldSpec.name + "'";
+    var column = "(fields->>'" + fieldSpec.name + "')";
     if (casts[tema.singular] && casts[tema.singular][fieldSpec.name]) {
-      column = '(' + column + ')::' + casts[tema.singular][fieldSpec.name];
+      column = '(' + column + '::' + casts[tema.singular][fieldSpec.name] + ')';
     }
     memo[fieldSpec.name] = {
       column: column
