@@ -156,6 +156,14 @@ exports.putTemaer = function(temaDef, temaer, client, initializing, constraints,
           }
           exports.updateAdresserTemaerView(client, temaDef, initializing, callback);
         },
+        function(callback) {
+          if(temaDef.materialized) {
+            return client.queryp('REFRESH MATERIALIZED VIEW ' + temaDef.plural).nodeify(callback);
+          }
+          else {
+            return callback();
+          }
+        }
       ], callback);
     });
   }).nodeify(callback);

@@ -75,5 +75,14 @@ describe('Autocomplete', function() {
           expect(sugg.caretpos).to.equal('Thomas B. Thriges Gade 30, '.length);
         });
     });
+    it('Ved angivelse af startfrom=adgangsadresse returneres altid adgangsadresser,' +
+    ' selvom mere end et vejnavn matcher søgningen ', function() {
+      return helpers.getJson(clientFn(), autocomplete, {}, {q: "t", caretpos:"1", startfra: "adgangsadresse"})
+        .then(function (result) {
+          expect(result.length).to.be.above(1);
+          var sugg = result[0];
+          expect(sugg.type).to.equal('adgangsadresse');
+        });
+    });
   });
 });

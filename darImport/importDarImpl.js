@@ -289,7 +289,7 @@ exports.clearDarTables = function(client) {
     logger.info('clearing DAR table', {table: dbSpecImpl.table});
     return client.queryp('DELETE FROM ' + dbSpecImpl.table, []);
   }).then(function() {
-    return client.queryp('DELETE FROM dar_transaction; UPDATE dar_tx_current set tx_current = null; delete from dar_lastfetched', []);
+    return client.queryp('DELETE FROM dar_transaction; UPDATE dar_tx_current set tx_current = null; UPDATE dar_lastfetched SET lastfetched = NULL', []);
   });
 };
 
@@ -336,7 +336,17 @@ function initDawaFromScratch(client) {
     return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
       .then(function() {
         logger.info('populating DAWA tables');
-        return executeExternalSqlScript(client, 'initialize_dawa.sql');
+        return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+          var spec = dawaDbSpec[entityName];
+          var table = spec.table;
+          var sql = format("INSERT INTO {dawaTable}({columns}) SELECT {columns} FROM {view}",
+            {
+              dawaTable: table,
+              columns: dawaDbSpec[entityName].columns.join(', '),
+              view: 'full_' + table
+            });
+          return client.queryp(sql);
+        });
       })
       .then(function () {
         logger.info('initializing history');

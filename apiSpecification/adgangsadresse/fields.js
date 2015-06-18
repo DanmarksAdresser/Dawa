@@ -86,6 +86,9 @@ var fields = [
     name: 'regionsnavn'
   },
   {
+    name: 'jordstykke_ejerlavnavn'
+  },
+  {
     name: 'temaer',
     multi: true
   },

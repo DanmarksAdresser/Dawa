@@ -243,7 +243,7 @@ var sampleParameters = {
       }
     },
     ejerlavkode: {
-      values: ['1', '01'],
+      values: ['20551', '020551'],
       verifier: function(adr, ejerlavkode) {
         return adr.jordstykke && adr.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
@@ -382,7 +382,7 @@ var sampleParameters = {
       }
     },
     ejerlavkode: {
-      values: ['1', '01'],
+      values: ['20551', '020551'],
       verifier: function(adr, ejerlavkode) {
         return adr.adgangsadresse.jordstykke &&
           adr.adgangsadresse.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);

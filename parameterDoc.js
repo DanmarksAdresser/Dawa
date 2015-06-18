@@ -1311,6 +1311,15 @@ module.exports['/autocomplete'] = {
     ' denne type. Hvis brugeren f.eks. er ved at indtaste en adresse, men ikke har indtastet nok til at vejnavnet er entydigt ' +
     ' bestemt, så vil servicen returnere vejnavne som valgmuligheder for brugeren'
   }, {
+    name: 'startfra',
+    doc: 'Autocomplete søger igennem vejnavne, adgangsadresser og adresser. Som udgangspunkt returneres' +
+    ' den første type, der giver mere end ét resultat. Med startfra parameteren angives, at søgningen skal' +
+    ' starte senere i rækken. Hvis man f.eks. ikke ønsker, at der kan returneres vejnavne, angives startfra=adgangsadresse, og' +
+    ' man vil få adgangsadresser tilbage, selvom mere end et vejnavn matcher søgningen. Parameteren er tiltænkt' +
+    ' den situation, hvor brugeren vælger et vejnavn blandt de muligheder, som autocomplete-komponenten viser.' +
+    ' I denne situation forventer brugeren, at der autocomplete-komponenten efterfølgende viser adgangsadresser. Ved at angive startfra=adgangsadresse' +
+    ' sikres dette. Mulige værdier for parameteren: "vejnavn" (default), "adgangsadresse", "adresse"'
+  }, {
     name: 'q',
     doc: 'Søgetekst - den tekst brugeren har indtastet'
   }, {

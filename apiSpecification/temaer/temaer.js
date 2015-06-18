@@ -12,7 +12,8 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    materialized: true
   },
   {
     singular: 'kommune',
@@ -25,7 +26,8 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    materialized: true
   },
   {
     singular: 'sogn',

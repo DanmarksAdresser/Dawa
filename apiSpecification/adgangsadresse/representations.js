@@ -314,7 +314,7 @@ exports.json = {
           matrikelnr: matrikelnr,
           esrejendomsnr: esrejendomsnr
         };
-        result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, matrikelnr, baseUrl);
+        result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, rs.jordstykke_ejerlavnavn, baseUrl);
         adr.jordstykke = result;
       }
       else {

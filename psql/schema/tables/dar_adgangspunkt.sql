@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS dar_adgangspunkt CASCADE;
 CREATE TABLE  dar_adgangspunkt (
-  versionid integer NOT NULL,
+  versionid integer NOT NULL PRIMARY KEY,
   id integer NOT NULL,
   bkid uuid NOT NULL,
   statuskode smallint NOT NULL,

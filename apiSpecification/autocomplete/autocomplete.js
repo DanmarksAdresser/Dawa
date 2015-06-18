@@ -118,6 +118,14 @@ var nonDelegatedParameters = [
     schema: {
       enum: ['vejnavn', 'adgangsadresse', 'adresse']
     }
+  },
+  {
+    name: 'startfra',
+    type: 'string',
+    defaultValue: 'vejnavn',
+    schema: {
+      enum: ['vejnavn', 'adgangsadresse', 'adresse']
+    }
   }
 ];
 
@@ -219,8 +227,11 @@ var sqlModel = {
 
     return q()
       .then(function () {
-        if (params.adgangsadresseid) {
+        if (params.adgangsadresseid || params.startfra === 'adresse') {
           return queryFromAdresse(client, sqlParams);
+        }
+        else if (params.startfra === 'adgangsadresse') {
+          return queryFromAdgangsadresse(client, params.type, sqlParams);
         }
         else {
           return queryFromVejnavn(client, params.type, sqlParams);

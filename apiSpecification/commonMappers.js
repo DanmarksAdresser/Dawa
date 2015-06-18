@@ -52,7 +52,7 @@ exports.mapKode4NavnTemaNoName = function(temaNavn, kode, baseUrl) {
 exports.mapEjerlavRef = function(kode, navn, baseUrl) {
   return {
     kode: kode,
-    navn: navn,
+    navn: navn ? navn : null,
     href: exports.makeHref(baseUrl, 'ejerlav', [kode])
   };
 };

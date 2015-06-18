@@ -22,31 +22,34 @@ CREATE VIEW AdgangsadresserView AS
     '10km_' || (floor(A.etrs89nord / 10000))::text || '_' || (floor(etrs89oest / 10000))::text as ddkn_km10,
     A.adressepunktaendringsdato,
 
-    P.nr   AS postnr,
+    A.postnr   AS postnr,
     P.navn AS postnrnavn,
 
     S.nr AS stormodtagerpostnr,
     S.navn AS stormodtagerpostnrnavn,
 
-    V.kode    AS vejkode,
+    A.vejkode    AS vejkode,
     V.vejnavn AS vejnavn,
     V.adresseringsnavn AS adresseringsvejnavn,
 
     A.ejerlavkode,
     EL.navn AS ejerlavnavn,
 
-    cast(K.fields->>'kode' as integer) AS kommunekode,
-    K.fields->>'navn' AS kommunenavn,
-    cast(R.fields->>'kode' as integer) AS regionskode,
-    R.fields->>'navn' AS regionsnavn,
+    A.kommunekode AS kommunekode,
+    K.navn AS kommunenavn,
+    R.kode AS regionskode,
+    R.navn AS regionsnavn,
     array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
+    (SELECT E.navn FROM adgangsadresser_temaer_matview ATM
+      JOIN temaer J ON ATM.tema_id = J.id
+      JOIN ejerlav E ON (J.fields->>'ejerlavkode')::integer = E.kode WHERE ATM.tema = 'jordstykke' AND ATM.adgangsadresse_id = A.id) as jordstykke_ejerlavnavn,
     A.tsv
 
   FROM adgangsadresser A
     LEFT JOIN ejerlav AS EL ON (A.ejerlavkode = EL.kode)
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-    LEFT JOIN temaer AS K ON (K.tema = 'kommune' AND cast(K.fields->>'kode' as integer) = A.kommunekode)
-    LEFT JOIN temaer AS R ON (K.fields->>'regionskode') = (R.fields->>'kode') and R.tema = 'region'
     LEFT JOIN stormodtagere AS S ON (S.adgangsadresseid = A.id)
+    LEFT JOIN kommuner K ON A.kommunekode = k.kode
+    LEFT JOIN regioner R ON R.kode = K.regionskode
   WHERE postnr IS NOT NULL AND husnr IS NOT NULL;
