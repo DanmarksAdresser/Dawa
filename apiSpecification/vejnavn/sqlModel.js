@@ -19,7 +19,7 @@ var columns = {
       where: 'vejstykker.kommunekode'
   },
   kommuner: {
-    select: "json_agg(DISTINCT CAST((k.kode, knavn) AS KommuneRef))"
+    select: "json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef))"
   },
   postnumre: {
     select: 'json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef))'
