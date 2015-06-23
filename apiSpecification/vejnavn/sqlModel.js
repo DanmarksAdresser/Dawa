@@ -19,7 +19,7 @@ var columns = {
       where: 'vejstykker.kommunekode'
   },
   kommuner: {
-    select: "json_agg(DISTINCT CAST((k.fields->>'kode', k.fields->>'navn') AS KommuneRef))"
+    select: "json_agg(DISTINCT CAST((k.kode, knavn) AS KommuneRef))"
   },
   postnumre: {
     select: 'json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef))'
@@ -42,7 +42,7 @@ var baseQuery = function() {
     select: [],
     from: [
       ' vejstykker' +
-        " LEFT JOIN temaer k ON k.tema = 'kommune' AND vejstykker.kommunekode::text = k.fields->>'kode'" +
+        " LEFT JOIN kommuner k ON k.kode = vejstykker.kommunekode" +
         ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
         ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
         ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'
