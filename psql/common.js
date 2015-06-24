@@ -1,7 +1,11 @@
 "use strict";
 
+var copyFrom = require('pg-copy-streams').from;
+var csvStringify = require('csv-stringify');
 var fs = require('fs');
 var winston = require('winston');
+
+var promisingStreamCombiner = require('../promisingStreamCombiner');
 
 function exitOnErr(err){
   if (err){
@@ -81,3 +85,24 @@ exports.reindex = function(client) {
 }
 
 exports.psqlScript = psqlScript;
+
+exports.createCopyStream = function (client, table, columnNames) {
+  var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
+  return client.query(copyFrom(sql));
+};
+
+
+exports.streamToTable = function(client, stream, tableName, columnNames) {
+  var csvStringifier = csvStringify({
+    delimiter: ';',
+    quote: '"',
+    escape: '\\',
+    columns: columnNames,
+    header: true,
+    encoding: 'utf8'
+  });
+
+  var pgStream = exports.createCopyStream(client, tableName, columnNames);
+
+  return promisingStreamCombiner([stream, csvStringifier, pgStream]);
+};

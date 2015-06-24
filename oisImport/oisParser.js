@@ -47,6 +47,15 @@ function rawXmlStream(fileStream, oisTableName) {
       }
     }
   });
+
+  parser.on('end', function() {
+    parseStream.push(null);
+  });
+
+  parser.on('error', function(err) {
+    parseStream.emit('error', err);
+  });
+
   parser.on('text', function(text){
     if(currentField) {
       // for some reason, text content of a node may be split into
@@ -69,7 +78,13 @@ exports.oisStream = function(sourceStream, oisFacts) {
   var transformer = es.mapSync(function(rawObject) {
     return oisFacts.fields.reduce(function(memo, field) {
       var rawValue = rawObject[field.name];
-      var parsedValue = fieldParsers[field.type](rawValue);
+      var parsedValue;
+      try {
+        parsedValue = fieldParsers[field.type](rawValue);
+      }
+      catch(e) {
+        throw new Error('Field ' + field.name + ' contained invalid value ' + rawValue + '. Object: ' + JSON.stringify(rawObject));
+      }
       memo[field.name] = parsedValue;
       return memo;
     }, {});

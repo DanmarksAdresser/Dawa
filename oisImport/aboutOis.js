@@ -62,7 +62,7 @@ module.exports = {
       { name: 'HusLeje', type: 'integer'},
       { name: 'HuslejeOplysDato', type: 'string'},
       { name: 'SagsType', type: 'integer'},
-      { name: 'BygPktNoejagtigKls', type: 'integer'},
+      { name: 'BygPktNoejagtigKls', type: 'string'},
       { name: 'BygPkt_id', type: 'uuid'},
       { name: 'FOT_id', type: 'integer'},
       { name: 'StormRaadPaalaeg', type: 'integer'},
@@ -90,7 +90,7 @@ module.exports = {
       { name: 'MatrNr', type: 'string' },
       { name: 'ESREjdNr', type: 'integer'},
       { name: 'Matr_art_kode', type: 'integer'},
-      { name: 'Delnr', type: 'integer'},
+      { name: 'Delnr', type: 'string'},
       { name: 'Opdelingsnr', type: 'integer'},
       { name: 'BygSkadeOmfatFors', type: 'string'},
       { name: 'Gyldighedsdato', type: 'string'}

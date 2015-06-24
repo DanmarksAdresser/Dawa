@@ -15,10 +15,6 @@ module.exports = function(client, scriptPaths, disableTriggers, callback) {
     }
     async.series([
       function(callback) {
-        console.log("set work_mem='500MB'; set maintenance_work_mem='500MB'");
-        client.query("set work_mem='500MB'; set maintenance_work_mem='500MB'", [], callback);
-      },
-      function(callback) {
         if(disableTriggers) {
           console.log('disabling triggers');
           sqlCommon.disableTriggers(client)(callback);
