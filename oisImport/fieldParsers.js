@@ -2,7 +2,7 @@
 
 var assert = require('chai').assert;
 
-var INTEGER_REGEX = /^[\d]+$/;
+var INTEGER_REGEX = /^[\-]?[\d]+$/;
 
 module.exports = {
   uuid: function(str) {

@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 
-var oisDatamodels = require('../../../oisImport/oisDatamodels');
+var oisDatamodels = require('../../../apiSpecification/ois/oisDatamodels');
 
 describe('OIS datamodels', function() {
   Object.keys(oisDatamodels).forEach(function(entityName) {

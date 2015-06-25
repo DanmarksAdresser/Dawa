@@ -6,8 +6,8 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
-var aboutOis = require('./aboutOis');
-var oisDatamodels = require('./oisDatamodels');
+var oisXmlFacts = require('../apiSpecification/ois/oisXmlFacts');
+var oisDatamodels = require('../apiSpecification/ois/oisDatamodels');
 var oisParser = require('./oisParser');
 var qUtil = require('../q-util');
 var sqlCommon = require('../psql/common');
@@ -19,7 +19,7 @@ function createUnzippedStream(filePath, filePattern) {
 }
 
 function createOisStream(entityName, filePath) {
-  var entityFacts = aboutOis[entityName];
+  var entityFacts = oisXmlFacts[entityName];
   return createUnzippedStream(filePath, '*.XML').then(function(stream) {
     return oisParser.oisStream(stream, entityFacts);
   });
@@ -35,11 +35,11 @@ function oisFileToTable(client, entityName, filePath, tableName) {
 
 function importInitial(client, dataDir) {
   var files = fs.readdirSync(dataDir);
-  var entityNames = Object.keys(aboutOis);
+  var entityNames = Object.keys(oisXmlFacts);
 
   return qUtil.mapSerial(entityNames, function(entityName) {
     console.log('importerer ' + entityName);
-    var oisTable = aboutOis[entityName].oisTable;
+    var oisTable = oisXmlFacts[entityName].oisTable;
     var dawaTable = oisDatamodels[entityName].table;
     var matches = _.filter(files, function(file) {
       return file.toLowerCase().indexOf(oisTable.toLowerCase()) !== -1;

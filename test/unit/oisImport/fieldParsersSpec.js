@@ -28,5 +28,9 @@ describe('XML field parsers', function() {
       var str = '1a';
       expect(function() { return fieldParsers.integer(str); }).to.throw;
     });
+    it('Should successfully parse negative integers', function() {
+      var str = '-8';
+      expect(fieldParsers.integer(str)).to.equal(-8);
+    });
   });
 });

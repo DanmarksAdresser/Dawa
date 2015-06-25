@@ -1,8 +1,8 @@
 "use strict";
 
 var _ = require('underscore');
-var aboutOis = require('./aboutOis');
-var datamodels = require('./oisDatamodels');
+var oisXmlFacts = require('../apiSpecification/ois/oisXmlFacts');
+var datamodels = require('../apiSpecification/ois/oisDatamodels');
 
 var defaultSqlTypes = {
   string: 'text',
@@ -26,8 +26,8 @@ function fieldList(fields, primaryKeyField) {
   }).join(',\n');
 }
 
-Object.keys(aboutOis).forEach(function(entityName) {
-  var entityFacts = aboutOis[entityName];
+Object.keys(oisXmlFacts).forEach(function(entityName) {
+  var entityFacts = oisXmlFacts[entityName];
   var datamodel = datamodels[entityName];
   var sql = 'DROP TABLE IF EXISTS ' + datamodel.table + ';\n';
   sql += "CREATE TABLE " + datamodel.table + ' (\n';

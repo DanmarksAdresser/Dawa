@@ -6,13 +6,13 @@ var fs = require('fs');
 var path = require('path');
 var q = require('q');
 
-var aboutOis = require('../../../oisImport/aboutOis');
+var oisXmlFacts = require('../../../apiSpecification/ois/oisXmlFacts');
 
 var oisParser = require('../../../oisImport/oisParser');
 describe('OIS XML file parser', function() {
   it('Kan parse OIS fil med bygninger', function() {
     var fileStream = fs.createReadStream(path.join(__dirname, 'ois_bygning.xml'));
-    var oisStream = oisParser.oisStream(fileStream, aboutOis.bygning);
+    var oisStream = oisParser.oisStream(fileStream, oisXmlFacts.bygning);
     return q.Promise(function(resolve, reject) {
       var writeStream = es.writeArray(function(err, array) {
         if(err) {

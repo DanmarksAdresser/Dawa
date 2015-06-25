@@ -1,13 +1,9 @@
 "use strict";
 
-var fs = require('fs');
-var path = require('path');
 var _ = require('underscore');
 
-var aboutOis = require('./aboutOis');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var importOisImpl = require('./importOisImpl');
-var oisDatamodels = require('./oisDatamodels');
 var proddb = require('../psql/proddb');
 
 var optionSpec = {

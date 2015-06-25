@@ -12,4 +12,5 @@ require('./replikering/events/resources');
 require('./replikering/sekvensnummer/senesteSekvensnummer');
 require('./replikering/udtraek/resources');
 require('./consistency');
-require('./autocomplete/autocomplete.js');
+require('./autocomplete/autocomplete');
+require('./ois/resources');
