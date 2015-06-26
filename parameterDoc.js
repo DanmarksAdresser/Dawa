@@ -3,6 +3,7 @@
 var _ = require('underscore');
 var dagiTemaer = require('./apiSpecification/temaer/temaer');
 var tilknytninger = require('./apiSpecification/tematilknytninger/tilknytninger');
+var oisApiFacts = require('./apiSpecification/ois/oisApiFacts');
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
 
@@ -1337,6 +1338,15 @@ module.exports['/autocomplete'] = {
   }].concat(formatAndPagingParams),
   examples: []
 };
+
+Object.keys(oisApiFacts).forEach(function(entityName) {
+  var apiFacts = oisApiFacts[entityName];
+  module.exports['/' + apiFacts.plural] = {
+    subtekst: 'Søg i ' + apiFacts.plural,
+    parameters: [].concat(formatAndPagingParams),
+    examples: []
+  };
+});
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
   adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources);

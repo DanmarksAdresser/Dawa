@@ -5,6 +5,7 @@ var _ = require('underscore');
 var oisApiFacts = require('./oisApiFacts');
 var oisXmlFacts = require('./oisXmlFacts');
 var registry = require('../registry');
+var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
 
 var assembleSqlModel = sqlUtil.assembleSqlModel;
@@ -36,7 +37,9 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
     memo[field.name] = column;
     return memo;
   });
-  memo[entityName] = assembleSqlModel(columns, [], baseQuery);
+  var parameterImpls =   [sqlParameterImpl.paging(columns, apiFacts.key)];
+
+  memo[entityName] = assembleSqlModel(columns, parameterImpls, baseQuery);
   return memo;
 }, {});
 

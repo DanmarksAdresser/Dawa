@@ -13,12 +13,11 @@ var defaultSqlTypes = {
 
 function fieldList(fields, primaryKeyField) {
   return fields.map(function(field) {
-    var fieldSql
     var sqlType = defaultSqlTypes[field.type];
     if(!sqlType) {
       throw new Error("Unknown field type " + field.type);
     }
-    fieldSql =  '  ' + field.name + ' ' + sqlType;
+    var fieldSql =  '  ' + field.name + ' ' + sqlType;
     if(primaryKeyField === field.name) {
       fieldSql += ' PRIMARY KEY';
     }
