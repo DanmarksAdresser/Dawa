@@ -1,6 +1,7 @@
 "use strict";
 
 var databaseTypes = require('../psql/databaseTypes');
+var logger = require('../logger').forCategory('darImport');
 var types = require('./csvTypes');
 
 var Range = databaseTypes.Range;
@@ -70,6 +71,14 @@ function transform(spec, entity) {
     }
     if(!to) {
       to = null;
+    }
+    if(from !== null && to !== null && Date.parse(from) > Date.parse(to)) {
+      logger.error('Invalid interval', {
+        field: name,
+        from: from,
+        to: to,
+        entity: entity
+      });
     }
     entity[name] = new Range(from, to, '[)');
   }
