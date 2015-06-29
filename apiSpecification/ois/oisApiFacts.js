@@ -7,6 +7,7 @@ module.exports = {
     plural: 'bygninger',
     prefix: 'bygnings',
     key: ['ois_id'],
-    table: 'ois_bygning'
+    table: 'ois_bygning',
+    filterableFields: ['Bygning_id', 'AdgAdr_id']
   }
 };

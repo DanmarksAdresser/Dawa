@@ -13,6 +13,8 @@ CREATE TABLE ois_bygning (
   MatrNr text
 );
 
+DROP TABLE IF EXISTS ois_bygning_history;
+
 CREATE TABLE ois_bygning_history (
   valid_from integer NOT NULL,
   valid_to integer NOT NULL,

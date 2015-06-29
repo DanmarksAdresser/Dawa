@@ -14,7 +14,10 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
     fields: fields[entityName],
     mapper: function() {
       return function(row) {
-        return row;
+        return xmlFacts.fields.reduce(function(memo, field) {
+          memo[field.name] = row[field.name.toLowerCase()];
+          return memo;
+        }, {});
       };
     }
   };
@@ -25,5 +28,3 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
   };
   return memo;
 }, {});
-
-console.log(JSON.stringify(module.exports, null, 2));

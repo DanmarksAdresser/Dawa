@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 
+var propertyParameters = require('./oisPropertyParameters');
 var oisApiFacts = require('./oisApiFacts');
 var oisXmlFacts = require('./oisXmlFacts');
 var registry = require('../registry');
@@ -37,7 +38,10 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
     memo[field.name] = column;
     return memo;
   });
-  var parameterImpls =   [sqlParameterImpl.paging(columns, apiFacts.key)];
+  var parameterImpls =   [
+    sqlParameterImpl.simplePropertyFilter(propertyParameters[entityName], columns),
+    sqlParameterImpl.paging(columns, apiFacts.key)
+  ];
 
   memo[entityName] = assembleSqlModel(columns, parameterImpls, baseQuery);
   return memo;
