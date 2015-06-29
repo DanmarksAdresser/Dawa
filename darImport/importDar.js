@@ -63,7 +63,11 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         });
       }
     });
-  }).catch(function(err) {
+  })
+    .then(function() {
+    logger.info('Successfully completed importDar script');
+  })
+    .catch(function(err) {
     logger.error('Caught error in importDar', err);
     return q.reject(err);
   })

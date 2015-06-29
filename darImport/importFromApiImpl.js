@@ -72,7 +72,7 @@ module.exports = function(opt) {
    * @param entityName
    * @param tsFrom
    */
-  function getRecordsSince(baseUrl, entityName, tsFrom, tsTo, report) {
+  function getRecordsInInterval(baseUrl, entityName, tsFrom, tsTo, report) {
     return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function(page) {
       var result = page;
       return qUtil.awhile(
@@ -99,7 +99,7 @@ module.exports = function(opt) {
               tsTo: tsTo.toISOString(),
               recordTimestamp: page[0].registreringstart
             });
-            tsFrom = maxPageTs.add(moment.duration(1));
+            tsFrom = maxPageTs.clone().add(moment.duration(1));
           }
           else {
             tsFrom = maxPageTs;
@@ -119,15 +119,25 @@ module.exports = function(opt) {
   /**
    * Fetch each entity type from API.
    * @param baseUrl
-   * @param tsFrom Fetch rows time timestamp >= this value
+   * @param tsFrom Fetch rows with timestamp >= this value
    * @param Fetch rows with timestamp less than or equal this value.
    * @returns A map, where key is the entity type and value is an array of rows fetched from the
    * API
    */
   function fetch(baseUrl, tsFrom, tsTo, report) {
+    // we fetch records up to one minute after tsTo,
+    // in order to ensure that we do not get a partial transaction
+    var fetchedTsTo = tsTo.clone().add(1, 'minute');
     return qUtil.reduce(['adgangspunkt', 'husnummer', 'adresse'], function(memo, entityName) {
-      return getRecordsSince(baseUrl, entityName, tsFrom, tsTo, report).then(function(result) {
-        memo[entityName] = result;
+      return getRecordsInInterval(baseUrl, entityName, tsFrom, fetchedTsTo, report).then(function(result) {
+        // Since we fetched records later than tsTo,
+        // we remove those which has both registreringstart and slut in the future
+        memo[entityName] = _.filter(result, function(record) {
+          var startBetween = moment(record.registreringstart).isBetween(tsFrom, tsTo);
+          var slutBetween = record.registreringslut &&
+            moment(record.registreringslut).isBetween(tsFrom, tsTo);
+          return startBetween || slutBetween;
+        });
         return memo;
       });
     }, {});
@@ -198,7 +208,7 @@ module.exports = function(opt) {
     });
   }
 
-  function splitInTransactions(changeset, tsFrom, report) {
+  function splitInTransactions(changeset, tsFrom, tsTo, report) {
     // Look for rows witch has been both created and expired in the same batch, and
     // create a record for the creation. If we do not do this,
     // we will never see the address in DAWA.
@@ -224,6 +234,10 @@ module.exports = function(opt) {
     var transactionTimestamps = _.reduce(groupedChangeset, function(memo, entityTimestampMap) {
       return _.union(memo, Object.keys(entityTimestampMap));
     }, []).sort();
+    // we do not apply transactions outside tsFrom and tsTo, they may be partial transactions
+    transactionTimestamps = _.filter(transactionTimestamps, function(timestamp) {
+      return moment(timestamp).isBetween(tsFrom, tsTo);
+    });
     var transactions = transactionTimestamps.map(function(timestamp) {
       return Object.keys(changeset).reduce(function(memo, entityName) {
         memo[entityName] = groupedChangeset[entityName][timestamp] || [];
@@ -292,7 +306,7 @@ module.exports = function(opt) {
           return;
         }
         else {
-          return qUtil.mapSerial(splitInTransactions(resultSet, tsFrom, report), function(transactionSet) {
+          return qUtil.mapSerial(splitInTransactions(resultSet, tsFrom, tsTo, report), function(transactionSet) {
             return db.withTransaction('READ_WRITE', function(client) {
               return transactionAlreadyPerformed(client, transactionSet)
                 .then(function(transactionPerformed) {
@@ -319,7 +333,7 @@ module.exports = function(opt) {
         }
       }).then(function () {
         return db.withTransaction('READ_WRITE', function(client) {
-          return setLastFetched(client, tsTo.subtract(maxDarTxDuration));
+          return setLastFetched(client, tsTo.clone().subtract(maxDarTxDuration));
         });
       });
   }
