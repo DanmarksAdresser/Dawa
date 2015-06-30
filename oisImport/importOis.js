@@ -8,7 +8,8 @@ var proddb = require('../psql/proddb');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  dataDir: [false, 'Folder med CSV-filer', 'string']
+  dataDir: [false, 'Folder med CSV-filer', 'string'],
+  initial: [false, 'Angiver, om der er tale om første indlæsning', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
@@ -17,6 +18,11 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     pooled: false
   });
   proddb.withTransaction('READ_WRITE', function (client) {
-    return importOisImpl.importInitial(client, options.dataDir);
+    if(options.initial) {
+      return importOisImpl.importInitial(client, options.dataDir);
+    }
+    else {
+      return importOisImpl.importUpdate(client, options.dataDir);
+    }
   }).done();
 });

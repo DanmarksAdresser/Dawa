@@ -1,6 +1,7 @@
 "use strict";
 
 var _ = require('underscore');
+var oisApiFacts = require('../apiSpecification/ois/oisApiFacts');
 var oisXmlFacts = require('../apiSpecification/ois/oisXmlFacts');
 var datamodels = require('../apiSpecification/ois/oisDatamodels');
 
@@ -25,6 +26,13 @@ function fieldList(fields, primaryKeyField) {
   }).join(',\n');
 }
 
+function createIndices(apiFacts) {
+  var sqlStatements = apiFacts.filterableFields.map(function(field) {
+    return 'CREATE INDEX ON ' + apiFacts.table + '(' + field + ');';
+  });
+  return sqlStatements.join('\n') + '\n';
+}
+
 Object.keys(oisXmlFacts).forEach(function(entityName) {
   var entityFacts = oisXmlFacts[entityName];
   var datamodel = datamodels[entityName];
@@ -34,9 +42,10 @@ Object.keys(oisXmlFacts).forEach(function(entityName) {
   sql += '\n);\n';
   sql += 'DROP TABLE IF EXISTS ' + datamodel.table + '_history;\n';
   sql += 'CREATE TABLE ' + datamodel.table + '_history (\n' +
-      '  valid_from integer not null,\n' +
+      '  valid_from integer,\n' +
       '  valid_to integer,\n' +
       fieldList(entityFacts.fields, null);
   sql += '\n);\n';
+  sql += createIndices(oisApiFacts[entityName]);
   console.log(sql);
 });

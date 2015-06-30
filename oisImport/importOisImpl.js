@@ -6,6 +6,10 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
+var dbSpecUtil = require('../darImport/dbSpecUtil');
+var initialization = require('../psql/initialization');
+var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
+var nontemporal = require('../darImport/nontemporal');
 var oisXmlFacts = require('../apiSpecification/ois/oisXmlFacts');
 var oisDatamodels = require('../apiSpecification/ois/oisDatamodels');
 var oisParser = require('./oisParser');
@@ -37,19 +41,59 @@ function importInitial(client, dataDir) {
   var files = fs.readdirSync(dataDir);
   var entityNames = Object.keys(oisXmlFacts);
 
+  return sqlCommon.withoutTriggers(client, function() {
+    return qUtil.mapSerial(entityNames, function(entityName) {
+      console.log('importerer ' + entityName);
+      var oisTable = oisXmlFacts[entityName].oisTable;
+      var dawaTable = oisDatamodels[entityName].table;
+      var matches = _.filter(files, function(file) {
+        return file.toLowerCase().indexOf(oisTable.toLowerCase()) !== -1;
+      });
+      if(matches.length !== 1) {
+        throw new Error('Found ' + matches.length + ' files for OIS table ' + oisTable);
+      }
+      return oisFileToTable(client, entityName, path.join(dataDir, matches[0]), dawaTable)
+        .then(function () {
+          return loadAdresseDataImpl.initializeHistoryTable(client, oisDatamodels[entityName]);
+        });
+    });
+
+  });
+}
+
+function importUpdate(client, dataDir) {
+  var files = fs.readdirSync(dataDir);
+  var entityNames = Object.keys(oisXmlFacts);
+
   return qUtil.mapSerial(entityNames, function(entityName) {
     console.log('importerer ' + entityName);
     var oisTable = oisXmlFacts[entityName].oisTable;
-    var dawaTable = oisDatamodels[entityName].table;
+    var datamodel = oisDatamodels[entityName];
+    var dawaTable = datamodel.table;
+    var fetchedTable = 'fethed_' + dawaTable;
     var matches = _.filter(files, function(file) {
       return file.toLowerCase().indexOf(oisTable.toLowerCase()) !== -1;
     });
     if(matches.length !== 1) {
       throw new Error('Found ' + matches.length + ' files for OIS table ' + oisTable);
     }
-    return oisFileToTable(client, entityName, path.join(dataDir, matches[0]), dawaTable);
+    var spec = {
+      temporality: 'nontemporal',
+      table: dawaTable,
+      columns: datamodel.columns,
+      idColumns: datamodel.key
+    };
+    var nontemporalImpl = nontemporal(spec);
+    return dbSpecUtil.createTempTableForCsvContent(client, fetchedTable, nontemporalImpl)
+      .then(function() {
+        return oisFileToTable(client, entityName, path.join(dataDir, matches[0]), fetchedTable);
+      })
+      .then(function(){
+        return nontemporalImpl.compareAndUpdate(client, fetchedTable, dawaTable);
+      });
   });
 }
 
 exports.oisFileToTable = oisFileToTable;
 exports.importInitial = importInitial;
+exports.importUpdate = importUpdate;

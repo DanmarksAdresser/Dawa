@@ -197,16 +197,15 @@ exports.loadCsvOnly = function(client, options, callback) {
   ]).nodeify(callback);
 };
 
-var initializeHistoryTable = function (client, entityName) {
-  var datamodel = datamodels[entityName];
+var initializeHistoryTable = function (client, datamodel) {
   var query = 'INSERT INTO ' + datamodel.table + '_history (' + datamodel.columns.join(', ') + ') (select ' + datamodel.columns.join(', ') + ' from ' + datamodel.table + ')';
   return client.queryp(query, []);
 };
 
 function initializeHistory(client) {
 
-  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(tableName) {
-    return initializeHistoryTable(client, tableName);
+  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+    return initializeHistoryTable(client, datamodels[entityName]);
   });
 }
 
@@ -241,3 +240,4 @@ exports.bbrFileStreams = bbrFileStreams;
 exports.loadBbrMeta = loadBbrMeta;
 exports.loadCsv = loadCsv;
 exports.initializeHistory = initializeHistory;
+exports.initializeHistoryTable = initializeHistoryTable;

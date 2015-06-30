@@ -1341,9 +1341,15 @@ module.exports['/autocomplete'] = {
 
 Object.keys(oisApiFacts).forEach(function(entityName) {
   var apiFacts = oisApiFacts[entityName];
+  var parameters = apiFacts.filterableFields.map(function(fieldName) {
+    return {
+      name: fieldName,
+      doc: 'Filtrer resultat på værdien af feltet ' + fieldName
+    };
+  });
   module.exports['/' + apiFacts.plural] = {
     subtekst: 'Søg i ' + apiFacts.plural,
-    parameters: [].concat(formatAndPagingParams),
+    parameters: parameters.concat(formatAndPagingParams),
     examples: []
   };
 });
