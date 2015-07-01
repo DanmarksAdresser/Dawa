@@ -15,7 +15,7 @@ function baseQuery(tableName, columnMappings, keyColumns) {
     select: _.map(columnMappings, function(mapping) {
       var columnName = mapping.column || mapping.name;
       var transformed = (mapping.selectTransform || _.identity)(columnName);
-      return transformed + ' AS ' + mapping.name;
+      return transformed + ' AS "' + mapping.name + '"';
     }),
     from: [tableName + '_history'],
     whereClauses: [],

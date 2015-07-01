@@ -225,7 +225,6 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
 
   // create a mapper function that maps results from the SQL layer to the requested representation
   var mapObject = representation.mapper(paths.baseUrl(req), params, resourceSpec.singleResult);
-
   withDatabaseClient(function(err, dbClient, releaseDbClient) {
     if(err) {
       return callback(null, internalServerErrorResponse(err));
@@ -268,9 +267,15 @@ exports.createExpressHandler = function(resourceSpec) {
     function withDbClient(callback) {
       transactions.beginTransaction('prod', {mode: 'READ_ONLY', pooled: true, shouldAbort: shouldAbort}).then(
         function(tx) {
-          callback(undefined, tx.client, function(err) {
+          try {
+            callback(undefined, tx.client, function(err) {
+              transactions.endTransaction(tx, err);
+            });
+          }
+          catch(err) {
             transactions.endTransaction(tx, err);
-          });
+            callback(err);
+          }
         },
         function(err) {
           if(shouldAbort()) {
@@ -281,7 +286,7 @@ exports.createExpressHandler = function(resourceSpec) {
             callback(err);
           }
         }
-      );
+      )
     }
 
     resourceResponse(withDbClient, resourceSpec, req, shouldAbort, function(err, response) {

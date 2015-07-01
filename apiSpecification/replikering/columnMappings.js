@@ -5,6 +5,7 @@ var _ = require('underscore');
 var temaer = require('../temaer/temaer');
 var tilknytninger = require('../tematilknytninger/tilknytninger');
 var additionalFieldsMap = require('../temaer/additionalFields');
+var oisDatamodels = require('../ois/oisDatamodels');
 
 var datamodels = require('../../crud/datamodel');
 // maps of field names to database column names
@@ -149,6 +150,17 @@ exports.keys = {};
   exports.tables[entityName] = datamodels[entityName].table;
   exports.keys[entityName] = datamodels[entityName].key;
 });
+
+Object.keys(oisDatamodels).forEach(function(entityName){
+  var datamodel = oisDatamodels[entityName];
+  exports.tables[entityName] = datamodel.table;
+  exports.keys[entityName] = datamodel.key;
+  exports.columnMappings[entityName] = datamodel.columns.reduce(function(memo, columnName) {
+    memo.push({ name: columnName});
+    return memo;
+  }, []);
+});
+
 
 _.keys(tilknytninger).forEach(function(temaNavn) {
   var tema = _.findWhere(temaer, {singular: temaNavn});

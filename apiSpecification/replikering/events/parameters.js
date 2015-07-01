@@ -1,6 +1,9 @@
 "use strict";
 
 var _ = require('underscore');
+
+var oisApiFacts = require('../../ois/oisApiFacts');
+var oisPropertyParameters = require('../../ois/oisPropertyParameters');
 var schema = require('../../parameterSchema');
 var temaer = require('../../temaer/temaer');
 var tilknytninger = require('../../tematilknytninger/tilknytninger');
@@ -13,6 +16,14 @@ keyParameters.postnummer = require('../../postnummer/parameters').id;
 keyParameters.adgangsadresse = require('../../adgangsadresse/parameters').id;
 keyParameters.adresse = require('../../adresse/parameters').id;
 keyParameters.ejerlav = require('../../ejerlav/parameters').id;
+
+Object.keys(oisApiFacts).forEach(function(entityName) {
+  var apiFacts = oisApiFacts[entityName];
+  var parameter = _.findWhere(oisPropertyParameters[entityName],{ name: apiFacts.key[0] });
+  if(parameter) {
+    keyParameters[entityName] = [parameter];
+  }
+});
 
 exports.keyParameters = keyParameters;
 

@@ -7,15 +7,17 @@
 
 var _ = require('underscore');
 
+var additionalFieldsMap = require('../temaer/additionalFields');
 var definitions = require('../commonSchemaDefinitions');
 var globalSchemaObject = require('../commonSchemaDefinitionsUtil').globalSchemaObject;
 var nullableType = require('../schemaUtil').nullableType;
-var util = require('../util');
-var kode4String = util.kode4String;
-var timestampFormatter = util.d;
+var oisXmlFacts = require('../ois/oisXmlFacts');
 var temaer = require('../temaer/temaer');
 var tilknytninger = require('../tematilknytninger/tilknytninger');
-var additionalFieldsMap = require('../temaer/additionalFields');
+var util = require('../util');
+
+var kode4String = util.kode4String;
+var timestampFormatter = util.d;
 
 var fields = {
   vejstykke: [{
@@ -350,6 +352,28 @@ exports.schemas = _.reduce(fields, function(memo, fieldList, datamodelName) {
   });
   return memo;
 }, {});
+
+var xmlToJsonTypeMap = {
+  uuid: 'string',
+  timestamp: 'string',
+  integer: 'integer',
+  string: 'string',
+};
+
+Object.keys(oisXmlFacts).forEach(function(oisEntityName) {
+  var xmlFacts = oisXmlFacts[oisEntityName];
+  var schema = {
+    title: oisEntityName,
+    docOrder: _.pluck(xmlFacts.fields, 'name')
+  };
+  schema.properties = xmlFacts.fields.reduce(function(memo, field) {
+    memo[field.name] = {
+      type: nullableType(xmlToJsonTypeMap[field.type])
+    };
+    return memo;
+  }, {});
+  exports.schemas[oisEntityName] = schema;
+});
 
 exports.normalizedField = function(datamodelName, fieldName) {
   return _.findWhere(fields[datamodelName], {name: fieldName});

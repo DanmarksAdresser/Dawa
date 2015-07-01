@@ -1143,6 +1143,14 @@ var keyParams = {
   ejerlav: [ejerlavIdParameter]
 };
 
+Object.keys(oisApiFacts).forEach(function(entityName) {
+  keyParams[entityName] = [{
+    name: oisApiFacts[entityName].key[0],
+    doc: 'Filtrer påværdien af feltet ' + oisApiFacts[entityName].key[0],
+    examples: []
+  }];
+});
+
 _.each(tilknytninger, function (tilknytning, temaNavn) {
   var tema = _.findWhere(dagiTemaer, {singular: temaNavn});
   keyParams[tema.prefix + 'tilknytning'] = [
@@ -1252,7 +1260,7 @@ var tilknytningTemaer = dagiTemaer.filter(function(tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(tilknytningTemaer.map(function(tema) {
+Object.keys(oisApiFacts).concat(['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav']).concat(tilknytningTemaer.map(function(tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function(replicatedModelName) {
   var nameAndKey = registry.findWhere({

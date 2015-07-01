@@ -4,6 +4,7 @@ var _ = require('underscore');
 
 var dbapi = require('../../../dbapi');
 var mappings = require('./../columnMappings');
+var oisApiFacts = require('../../ois/oisApiFacts');
 var sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
 var sqlUtil = require('../../common/sql/sqlUtil');
 var parameters = require('./parameters');
@@ -73,7 +74,7 @@ function baseQuery(datamodelName, tableName, columnMappings) {
 
 }
 
-var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav'], function(memo, datamodelName) {
+var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav'].concat(Object.keys(oisApiFacts)), function(memo, datamodelName) {
   var columnMappings = mappings.columnMappings[datamodelName];
   var baseQueryFn = function() {
     return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);

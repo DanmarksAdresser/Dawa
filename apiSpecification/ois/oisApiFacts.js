@@ -1,5 +1,7 @@
 "use strict";
 
+var registry = require('../registry');
+
 module.exports = {
   bygning: {
     singular: 'bygning',
@@ -8,6 +10,10 @@ module.exports = {
     prefix: 'bygnings',
     key: ['ois_id'],
     table: 'ois_bygning',
-    filterableFields: ['Bygning_id', 'AdgAdr_id']
+    filterableFields: ['ois_id', 'Bygning_id', 'AdgAdr_id']
   }
 };
+
+Object.keys(module.exports).forEach(function(entityName) {
+  registry.add(entityName, 'nameAndKey', null, module.exports[entityName]);
+});
