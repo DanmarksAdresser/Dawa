@@ -60,6 +60,8 @@ function requestLoggingMiddleware(req, res, next) {
     // setImmediate is apparently required, for reasons not understood.
     var closeEmitted = false;
     var finishEmitted = false;
+    var connectionErrorEmitted = false;
+    var connectionCloseEmitted = false;
     res.on('close', function() {
       closeEmitted = true;
       logger.info('requestDebug', 'Close emitted');
@@ -67,6 +69,14 @@ function requestLoggingMiddleware(req, res, next) {
     res.on('finish', function() {
       finishEmitted = true;
       logger.info('requestDebug', 'Finish emitted');
+    });
+    res.connection.on('error', function() {
+      connectionErrorEmitted = true;
+      logger.info('requestDebug', 'Connection error emitted');
+    });
+    res.connection.on('close', function() {
+      connectionCloseEmitted = true;
+      logger.info('requestDebug', 'Connection close emitted');
     });
     setImmediate(function() {
       src.once('data', function() {
@@ -84,7 +94,9 @@ function requestLoggingMiddleware(req, res, next) {
             socketBytesRead: res.socket.bytesRead,
             connectionWritable: res.connection.writable,
             closeEmitted: closeEmitted,
-            finishEmitted: finishEmitted
+            finishEmitted: finishEmitted,
+            connectionErrorEmitted: connectionErrorEmitted,
+            connectionCloseEmitted: connectionCloseEmitted
           });
           loggedDataLength = cumulatedDataLength;
         }
