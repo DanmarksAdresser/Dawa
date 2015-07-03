@@ -62,6 +62,21 @@ function requestLoggingMiddleware(req, res, next) {
       src.once('data', function() {
         streamingStarted = new Date();
       });
+      var cumulatedDataLength = 0;
+      var loggedDataLength = 0;
+      src.on('data', function(data) {
+        cumulatedDataLength += data.length;
+        if(cumulatedDataLength > loggedDataLength + 1000000) {
+          logger.info('requestDebug', {
+            dataLength: data.length,
+            cumulatedDataLength: cumulatedDataLength,
+            socketBytesWritten: res.socket.bytesWritten,
+            socketBytesRead: res.socket.bytesRead,
+            connectionWritable: res.connection.writable
+          });
+          loggedDataLength = cumulatedDataLength;
+        }
+      });
     });
   });
   function logRequest(closedPrematurely) {
