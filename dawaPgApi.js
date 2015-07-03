@@ -58,6 +58,16 @@ function requestLoggingMiddleware(req, res, next) {
   // useful events when data is streamed to the response.
   res.once('pipe', function(src) {
     // setImmediate is apparently required, for reasons not understood.
+    var closeEmitted = false;
+    var finishEmitted = false;
+    res.on('close', function() {
+      closeEmitted = true;
+      logger.info('requestDebug', 'Close emitted');
+    });
+    res.on('finish', function() {
+      finishEmitted = true;
+      logger.info('requestDebug', 'Finish emitted');
+    });
     setImmediate(function() {
       src.once('data', function() {
         streamingStarted = new Date();
@@ -67,12 +77,14 @@ function requestLoggingMiddleware(req, res, next) {
       src.on('data', function(data) {
         cumulatedDataLength += data.length;
         if(cumulatedDataLength > loggedDataLength + 1000000) {
-          logger.info('requestDebug', {
+          logger.info('requestDebug', 'data', {
             dataLength: data.length,
             cumulatedDataLength: cumulatedDataLength,
             socketBytesWritten: res.socket.bytesWritten,
             socketBytesRead: res.socket.bytesRead,
-            connectionWritable: res.connection.writable
+            connectionWritable: res.connection.writable,
+            closeEmitted: closeEmitted,
+            finishEmitted: finishEmitted
           });
           loggedDataLength = cumulatedDataLength;
         }
