@@ -19,6 +19,11 @@ require('./apiSpecification/replikering/events/resources');
 var dayInSeconds = 24 * 60 * 60;
 var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
 
+function disableHttpKeepaliveMiddleware(req, res, next) {
+  res.set('Connection', 'close');
+  next();
+}
+
 function cachingMiddleware(req, res, next) {
   // this looks like a mess, but we cannot set the caching headers before we
   // know the response code
@@ -143,6 +148,7 @@ function requestLoggingMiddleware(req, res, next) {
 exports.setupRoutes = function () {
   var app = express();
   app.set('jsonp callback', true);
+  app.use(disableHttpKeepaliveMiddleware);
   app.use(methodOverride());
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
