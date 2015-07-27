@@ -32,7 +32,9 @@ exports.applyChanges = function(client, impl, table, options) {
       return impl.applyUpdates(client, table, options);
     })
     .then(function () {
-      return impl.applyDeletes(client, table, options);
+      if(!options.skipDeletes) {
+        return impl.applyDeletes(client, table, options);
+      }
     });
 };
 

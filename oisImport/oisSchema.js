@@ -12,12 +12,31 @@ var defaultSqlTypes = {
   uuid: 'uuid'
 };
 
+function postgresType(field) {
+  if(field.type === 'timestamp') {
+    return 'timestamptz';
+  }
+  if(field.oisType === 'tinyint' || field.oisType === 'smallint') {
+    return 'smallint';
+  }
+  if(field.oisType === 'int') {
+    return 'integer';
+  }
+  if(field.oisType === 'uniqueidentifier') {
+    return 'uuid';
+  }
+  if(field.oisType === 'varchar') {
+    return 'text';
+  }
+  if(field.oisType === 'char') {
+    return 'char(' + field.oisLength + ')';
+  }
+  return defaultSqlTypes[field.type];
+}
+
 function fieldList(fields, primaryKeyField) {
   return fields.map(function(field) {
-    var sqlType = defaultSqlTypes[field.type];
-    if(!sqlType) {
-      throw new Error("Unknown field type " + field.type);
-    }
+    var sqlType = postgresType(field);
     var fieldSql =  '  ' + field.name + ' ' + sqlType;
     if(primaryKeyField === field.name) {
       fieldSql += ' PRIMARY KEY';
@@ -26,9 +45,10 @@ function fieldList(fields, primaryKeyField) {
   }).join(',\n');
 }
 
-function createIndices(apiFacts) {
-  var sqlStatements = apiFacts.filterableFields.map(function(field) {
-    return 'CREATE INDEX ON ' + apiFacts.table + '(' + field + ');';
+function createIndices(apiFacts, xmlFacts) {
+  var sqlStatements = apiFacts.filterableFields.map(function(dawaName) {
+    var field = _.findWhere(xmlFacts.fields, {dawaName: dawaName});
+    return 'CREATE INDEX ON ' + apiFacts.table + '(' + field.name + ');';
   });
   return sqlStatements.join('\n') + '\n';
 }
@@ -46,6 +66,6 @@ Object.keys(oisXmlFacts).forEach(function(entityName) {
       '  valid_to integer,\n' +
       fieldList(entityFacts.fields, null);
   sql += '\n);\n';
-  sql += createIndices(oisApiFacts[entityName]);
+  sql += createIndices(oisApiFacts[entityName], entityFacts);
   console.log(sql);
 });

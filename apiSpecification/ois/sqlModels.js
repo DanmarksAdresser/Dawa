@@ -27,6 +27,9 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
   };
 
   var columns = xmlFacts.fields.reduce(function(memo, field) {
+    if(!field.dawaName) {
+      return memo;
+    }
     var column = {
     };
     if(field.type === 'timestamp') {
@@ -35,7 +38,7 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
     else {
       column.column = field.name;
     }
-    memo[field.name] = column;
+    memo[field.dawaName] = column;
     return memo;
   });
   var parameterImpls =   [

@@ -39,7 +39,7 @@
     "underscore": "1.6.0",
     "winston": "~0.7.3",
     "winston-loggly": "~1.0.1",
-    "xml-stream": "^0.4.5",
+    "node-expat": "2.3.8",
     "xml2js": "~0.4.1",
     "z-schema": "~3.0.1"
   },

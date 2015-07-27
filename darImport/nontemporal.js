@@ -137,7 +137,9 @@ module.exports = function(spec) {
           return computeUpdates(client, srcTable, actTable, 'update_' + dstTable, idColumns, columnsToCheck);
         })
         .then(function() {
-          return computeDeletes(client, srcTable, actTable, 'delete_' + dstTable, idColumns);
+          if(!options.skipDeletes) {
+            return computeDeletes(client, srcTable, actTable, 'delete_' + dstTable, idColumns);
+          }
         });
     },
     applyInserts: function (client, table) {

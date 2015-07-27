@@ -6,9 +6,11 @@ var sqlModels = require('./sqlModels');
 
 module.exports = Object.keys(oisXmlFacts).reduce(function(memo, entityName) {
   var xmlFacts = oisXmlFacts[entityName];
-  memo[entityName] = xmlFacts.fields.map(function(field) {
+  memo[entityName] = xmlFacts.fields.filter(function(field) {
+    return field.dawaName !== undefined;
+  }).map(function(field) {
     return {
-      name: field.name
+      name: field.dawaName
     };
   });
   fieldsUtil.applySelectability(memo[entityName], sqlModels[entityName]);

@@ -11,7 +11,7 @@ module.exports = Object.keys(oisApiFacts).reduce(function(memo, entityName) {
   var filterableFields = apiFacts.filterableFields;
   var parameters = filterableFields.reduce(function(memo, fieldName) {
     var xmlField = _.find(xmlFacts.fields, function(xmlField) {
-      return xmlField.name === fieldName;
+      return xmlField.dawaName === fieldName;
     });
 
     var parameter = {

@@ -10,7 +10,7 @@ module.exports = {
     prefix: 'bygnings',
     key: ['ois_id'],
     table: 'ois_bygning',
-    filterableFields: ['ois_id', 'Bygning_id', 'AdgAdr_id']
+    filterableFields: ['id', 'adgangsadresseid']
   }
 };
 

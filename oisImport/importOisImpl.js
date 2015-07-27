@@ -89,7 +89,7 @@ function importUpdate(client, dataDir) {
         return oisFileToTable(client, entityName, path.join(dataDir, matches[0]), fetchedTable);
       })
       .then(function(){
-        return nontemporalImpl.compareAndUpdate(client, fetchedTable, dawaTable);
+        return nontemporalImpl.compareAndUpdate(client, fetchedTable, dawaTable, { skipDeletes: true });
       });
   });
 }
