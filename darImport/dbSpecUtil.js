@@ -27,6 +27,7 @@ exports.createTempTableForCsvContent = function(client, tableName, dbSpecImpl) {
 };
 
 exports.applyChanges = function(client, impl, table, options) {
+  options = options || {};
   return impl.applyInserts(client, table, options)
     .then(function () {
       return impl.applyUpdates(client, table, options);

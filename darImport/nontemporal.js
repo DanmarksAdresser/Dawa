@@ -125,6 +125,7 @@ module.exports = function(spec) {
     deleteTableColumnNames: idColumns,
     allColumnNames:  allColumns,
     computeDifferences: function (client, srcTable, dstTable, actTable, options) {
+      options = options || {};
       return computeInserts(client, srcTable, actTable, 'insert_' + dstTable, idColumns)
         .then(function () {
           var columnsToCheck;

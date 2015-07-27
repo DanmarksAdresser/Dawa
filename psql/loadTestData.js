@@ -9,6 +9,7 @@ var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var logger = require('../logger');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
 var loadAdresseDataImpl = require('./load-adresse-data-impl');
+var importOisImpl = require('../oisImport/importOisImpl');
 var proddb = require('./proddb');
 var runScriptImpl = require('./run-script-impl');
 var temaer = require('../apiSpecification/temaer/temaer');
@@ -67,6 +68,9 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
         async.eachSeries(temaer, function(temaDef, callback) {
           tema.updateAdresserTemaerView(client, temaDef, true, callback  );
         }, callback);
+      },
+      function(callback) {
+        importOisImpl.importInitial(client, 'test/data/ois').nodeify(callback);
       },
       function(callback) {
         client.query('analyze', callback);
