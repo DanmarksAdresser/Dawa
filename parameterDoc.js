@@ -43,9 +43,9 @@ var formatParameters = [
  ];
 
 var pagingParameters = [{name: 'side',
-                        doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt##paginering>Paginering</a>.'},
+                        doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt#paginering>Paginering</a>.'},
                        {name: 'per_side',
-                        doc: 'Antal resultater per side. Se <a href=generelt##paginering>Paginering</a>.'}];
+                        doc: 'Antal resultater per side. Se <a href=generelt#paginering>Paginering</a>.'}];
 
 var formatAndPagingParams = formatParameters.concat(pagingParameters);
 
