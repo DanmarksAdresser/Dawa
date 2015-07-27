@@ -87,7 +87,7 @@ function searchWhereClause(paramAlias, columnSpec) {
 
 function searchOrderClause(paramAlias) {
   var columnName = 'tsv';
-  return 'ts_rank(' + columnName + ", to_tsquery('adresser_query'," + paramAlias + '), 16) DESC';
+  return 'round(1000000 * ts_rank(' + columnName + ", to_tsquery('adresser_query'," + paramAlias + '), 16)) DESC';
 }
 
 
