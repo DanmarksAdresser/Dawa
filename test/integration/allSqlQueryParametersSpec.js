@@ -6,8 +6,8 @@
 
 var expect = require('chai').expect;
 var _ = require('underscore');
+var q = require('q');
 
-var dbapi = require('../../dbapi');
 var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
@@ -442,9 +442,8 @@ _.keys(sampleParameters).forEach(function(specName) {
               parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(allParameters, 'name'));
               expect(parseResult.errors.length).to.equal(0);
               parseResult.params.per_side = 100;
-              var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), parseResult.params);
               return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-                return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
+                return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), parseResult.params).then(function(rows) {
                   expect(rows.length).to.be.above(0);
                   var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
                   mappedRows.forEach(function(json) {

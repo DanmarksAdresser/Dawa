@@ -106,6 +106,24 @@ var autocompleteAdresse = function(columnSpec) {
     }
   };
 };
+
+function fuzzySearchParameterImpl(sqlParts, params) {
+  if(params.fuzzyq) {
+    var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
+    sqlParts.whereClauses.push("adresser.a_id IN " +
+      "(SELECT id" +
+      " FROM adgangsadresser adg" +
+      " JOIN (select kommunekode, vejkode, postnr" +
+      " FROM vejstykkerpostnumremat vp" +
+      " ORDER BY tekst <-> " + fuzzyqAlias + " limit 15) as vp" +
+      " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
+    sqlParts.orderClauses.push("least(levenshtein(lower(adressebetegnelse(vejnavn, husnr, etage, doer, NULL," +
+      " to_char(adresser.postnr, 'FM0000'), postnrnavn)), lower(" + fuzzyqAlias + "), 2, 1, 3)," +
+      " levenshtein(lower(adressebetegnelse(vejnavn, husnr, etage, doer, supplerendebynavn, to_char(adresser.postnr," +
+      " 'FM0000'), postnrnavn)), lower(" + fuzzyqAlias + "), 2, 1, 3))");
+  }
+}
+
 // WARNING: order matters!
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
@@ -113,10 +131,11 @@ var parameterImpls = [
   sqlParameterImpl.dagiFilter(),
   searchAdresse(columns),
   autocompleteAdresse(columns),
+  fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
-module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+module.exports = sqlUtil.applyFallbackToFuzzySearch(assembleSqlModel(columns, parameterImpls, baseQuery));
 
 var registry = require('../registry');
 registry.add('adresse', 'sqlModel', undefined, module.exports);

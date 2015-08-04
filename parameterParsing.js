@@ -84,7 +84,7 @@ function parseParameter(valString, paramSpec) {
 }
 
 function parseParameterType(valString, type) {
-  if(valString === '') {
+  if(valString === '' && type !== 'boolean') {
     return null;
   }
   if (type === undefined || type === 'string') {
@@ -108,6 +108,9 @@ function parseParameterType(valString, type) {
     }
     else if (valString === 'false') {
       return false;
+    }
+    else if (valString === '') {
+      return true;
     }
     else {
       throw 'notBoolean';

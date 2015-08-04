@@ -34,6 +34,7 @@ module.exports = [
       crs: commonParameters.crs,
       geomWithin: commonParameters.geomWithin,
       dagiFilter: commonParameters.dagiFilter,
+      fuzzy: commonParameters.fuzzy,
       kvhx:   {
         name: 'kvhx',
         type: 'string',
@@ -45,7 +46,8 @@ module.exports = [
     propertyFilter: parameters.propertyFilter,
     geomWithin: commonParameters.geomWithin,
     dagiFilter: commonParameters.dagiFilter,
-    autocomplete: commonParameters.autocomplete
+    autocomplete: commonParameters.autocomplete,
+    fuzzy: commonParameters.fuzzy
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,

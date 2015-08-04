@@ -1,9 +1,9 @@
 "use strict";
 
 var expect = require('chai').expect;
+var q = require('q');
 var _ = require('underscore');
 
-var dbapi = require('../../dbapi');
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
 var schemaValidationUtil = require('./schemaValidationUtil');
@@ -38,10 +38,9 @@ describe('Alle autocomplete ressourcer skal virke', function() {
           rawQueryParams.q = sampleQueryParam;
           var parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(resource.queryParameters, 'name'));
           expect(parseResult.errors.length).to.equal(0);
-          var query = resource.sqlModel.createQuery(_.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params);
           var mapper = autocompleteRepresentation.mapper("BASE_URL", parseResult.params, false);
           return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-            return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
+            return q.ninvoke(resource.sqlModel, 'query', client, _.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params).then(function(rows) {
               expect(rows.length).to.be.above(0);
               rows.forEach(function(row) {
                 var json = mapper(row);

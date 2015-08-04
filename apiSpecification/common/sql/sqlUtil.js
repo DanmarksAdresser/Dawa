@@ -4,6 +4,7 @@ var util = require('util');
 var _ = require('underscore');
 
 var dbapi = require('../../../dbapi');
+var fallbackStream = require('../../../fallback-stream');
 
 function existy(obj) {
   return !_.isUndefined(obj) && !_.isNull(obj);
@@ -102,4 +103,62 @@ exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
       dbapi.streamRaw(client, query.sql, query.params, callback);
     }
   };
+};
+
+exports.applyFallback = function(sqlModel, fallbackParamsFn) {
+  var fallbackModel = {
+    allSelectableFieldNames: sqlModel.allSelectableFieldNames
+  };
+  fallbackModel.query = function(client, fieldNames, params, callback) {
+    var paramList = fallbackParamsFn(params);
+    sqlModel.query(client, fieldNames, paramList[0], function(err, result) {
+      if(err) {
+        return callback(err);
+      }
+      if(paramList.length === 1) {
+        return callback(undefined, result);
+      }
+      if(result.length === 0) {
+        sqlModel.query(client, fieldNames, paramList[1], callback);
+      }
+      else {
+        callback(undefined, result);
+      }
+    });
+  };
+  fallbackModel.stream = function(client, fieldNames, params, callback) {
+    var paramList = fallbackParamsFn(params);
+    sqlModel.stream(client, fieldNames, paramList[0], function(err, stream) {
+      if(err) {
+        return callback(err);
+      }
+      if(paramList.length === 1) {
+        return callback(undefined, stream);
+      }
+      return callback(undefined, fallbackStream(stream, function(callback) {
+        sqlModel.stream(client, fieldNames, paramList[1], callback);
+      }));
+    });
+  };
+  return fallbackModel;
+};
+
+exports.applyFallbackToFuzzySearch = function(sqlModel) {
+  return exports.applyFallback(sqlModel, function(params) {
+    var q = params.search || params.autocomplete;
+    if(q && params.fuzzy) {
+      q = q.replace('*', '');
+      var unfuzzyParams = _.clone(params);
+      delete unfuzzyParams.fuzzy;
+
+      var fuzzyParams = _.clone(params);
+      delete fuzzyParams.search;
+      delete fuzzyParams.autocomplete;
+      fuzzyParams.fuzzyq = q;
+      return [unfuzzyParams, fuzzyParams];
+    }
+    else {
+      return [params];
+    }
+  });
 };

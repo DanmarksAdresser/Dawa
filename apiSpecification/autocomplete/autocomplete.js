@@ -108,6 +108,10 @@ var nonDelegatedParameters = [
     required: true
   },
   {
+    name: 'fuzzy',
+    type: 'boolean'
+  },
+  {
     name: 'caretpos',
     type: 'integer'
   },
@@ -175,7 +179,6 @@ function queryModel(client, entityName, params) {
   var sqlModel = resource.sqlModel;
   var autocompleteRepresentation = resource.representations.autocomplete;
   var fieldNames = _.pluck(autocompleteRepresentation.fields, 'name');
-
   return q.ninvoke(sqlModel, 'query', client, fieldNames, params).then(function(result) {
     return result.map(function(row) {
       row.type = entityName;
@@ -184,28 +187,33 @@ function queryModel(client, entityName, params) {
   });
 }
 
-function queryFromAdresse(client, sqlParams) {
+function queryFromAdresse(client, sqlParams, fuzzyEnabled) {
+  var params = _.clone(sqlParams);
+  params.fuzzy = fuzzyEnabled;
   return queryModel(client, 'adresse', sqlParams);
 }
 
-function queryFromAdgangsadresse(client, type, sqlParams) {
+function queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled) {
   return queryModel(client, 'adgangsadresse', sqlParams).then(function (result) {
     if (result.length > 1 || type === 'adgangsadresse') {
       return result;
     }
     else {
-      return queryFromAdresse(client, sqlParams);
+      return queryFromAdresse(client, sqlParams, fuzzyEnabled);
     }
   });
 }
 
-function queryFromVejnavn(client, type, sqlParams) {
-  return queryModel(client, 'vejnavn', sqlParams).then(function (result) {
+function queryFromVejnavn(client, type, sqlParams, fuzzyEnabled) {
+  var shouldDoFuzzySearch = fuzzyEnabled && (type === 'vejnavn' || !/\d/.test(sqlParams.search));
+  var params = _.clone(sqlParams);
+  params.fuzzy = shouldDoFuzzySearch;
+  return queryModel(client, 'vejnavn', params).then(function (result) {
     if (result.length > 1 || type === 'vejnavn') {
       return result;
     }
     else {
-      return queryFromAdgangsadresse(client, type, sqlParams);
+      return queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled);
     }
   });
 }
@@ -213,6 +221,8 @@ function queryFromVejnavn(client, type, sqlParams) {
 var sqlModel = {
   allSelectableFields: [],
   query: function(client, fieldNames, params, callback) {
+    var fuzzyEnabled = params.fuzzy;
+    delete params.fuzzy;
     var caretpos = params.caretpos;
     var queryParam = params.q;
     if (caretpos > 0 && caretpos <= queryParam.length) {
@@ -220,26 +230,40 @@ var sqlModel = {
         queryParam = insertString(queryParam, caretpos, '*');
       }
     }
-    var sqlParams = _.reduce(delegatedParameters, function(memo, param) {
+    var additionalSqlParams = _.reduce(delegatedParameters, function(memo, param) {
       memo[param.name] = params[param.name];
       return memo;
-    }, {search: queryParam});
+    }, {});
 
+    var searchSqlParams = _.clone(additionalSqlParams);
+    searchSqlParams.search =  queryParam;
     return q()
       .then(function () {
         if (params.adgangsadresseid || params.startfra === 'adresse') {
-          return queryFromAdresse(client, sqlParams);
+          return queryFromAdresse(client, searchSqlParams, fuzzyEnabled).then(function(result) {
+            if(result.length === 0) {
+              var fuzzySqlParams = _.clone(additionalSqlParams);
+              fuzzySqlParams.fuzzyq = params.q;
+              return queryFromAdresse(client, fuzzySqlParams, fuzzyEnabled);
+            }
+            else {
+              return result;
+            }
+          });
         }
         else if (params.startfra === 'adgangsadresse') {
-          return queryFromAdgangsadresse(client, params.type, sqlParams);
+          return queryFromAdgangsadresse(client, params.type, searchSqlParams, fuzzyEnabled);
         }
         else {
-          return queryFromVejnavn(client, params.type, sqlParams);
+          return queryFromVejnavn(client, params.type, searchSqlParams, fuzzyEnabled);
         }
       })
       .then(function (result) {
         if (result.length === 0) {
           logger.info('EmptyResult', params);
+          var fuzzySqlParams = _.clone(additionalSqlParams);
+          fuzzySqlParams.fuzzyq = params.q;
+          return queryFromAdresse(client, fuzzySqlParams);
         }
         return result;
       }).nodeify(callback);
