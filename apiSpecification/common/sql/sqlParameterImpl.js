@@ -15,7 +15,7 @@ var dagiTemaer = require('../../temaer/temaer');
 var tilknytninger = require('../../tematilknytninger/tilknytninger');
 
 function removeSpecialSearchChars(q) {
-  return q.replace(/[^a-zA-Z0-9ÆæØøÅåéÉëËüÜäAöÖ\*]/g, ' ');
+  return q.replace(/[^a-zA-Z0-9ÆæØøÅåéÉëËüÜäÄöÖ\*]/g, ' ');
 }
 function toPgSearchQuery(q) {
   // remove all special chars
