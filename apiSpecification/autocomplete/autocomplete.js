@@ -190,12 +190,19 @@ function queryModel(client, entityName, params) {
 function queryFromAdresse(client, sqlParams, fuzzyEnabled) {
   var params = _.clone(sqlParams);
   params.fuzzy = fuzzyEnabled;
-  return queryModel(client, 'adresse', sqlParams);
+  return queryModel(client, 'adresse', params);
 }
 
 function queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled) {
-  return queryModel(client, 'adgangsadresse', sqlParams).then(function (result) {
+  // if type is not 'adgangsadresse', we want to continue to adresser, rather than
+  // using fuzzy search on adgangsadresser. Otherwise, we will never continue to adresser.
+  var useFuzzy = fuzzyEnabled && type === 'adgangsadresse';
+  var params = _.clone(sqlParams);
+  params.fuzzy = useFuzzy;
+  return queryModel(client, 'adgangsadresse', params).then(function (result) {
+    console.log('type: ' + type);
     if (result.length > 1 || type === 'adgangsadresse') {
+      console.log('')
       return result;
     }
     else {
@@ -257,15 +264,6 @@ var sqlModel = {
         else {
           return queryFromVejnavn(client, params.type, searchSqlParams, fuzzyEnabled);
         }
-      })
-      .then(function (result) {
-        if (result.length === 0) {
-          logger.info('EmptyResult', params);
-          var fuzzySqlParams = _.clone(additionalSqlParams);
-          fuzzySqlParams.fuzzyq = params.q;
-          return queryFromAdresse(client, fuzzySqlParams);
-        }
-        return result;
       }).nodeify(callback);
   }
 };

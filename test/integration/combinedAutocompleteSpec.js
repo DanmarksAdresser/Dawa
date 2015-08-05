@@ -101,5 +101,21 @@ describe('Autocomplete', function() {
         expect(result[0].tekst).to.equal('Fjordsgade 5, 5000 Odense C');
       });
     });
+
+    it('Hvis laver en fuzzy autocomplete med type vejnavn, så får jeg vejnavne tilbage', function() {
+      return helpers.getJson(clientFn(), autocomplete, {}, {caretpos: "10", q: "fjors gade", fuzzy: "", type: 'vejnavn'}).then(function(result) {
+        expect(result.length).to.be.above(1);
+        expect(result[0].type).to.equal('vejnavn');
+        expect(result[0].tekst).to.equal('Fjordsgade');
+      });
+    });
+
+    it('Hvis laver en fuzzy autocomplete med type adgangsadresse, så får jeg adgangsadresser tilbage', function() {
+      return helpers.getJson(clientFn(), autocomplete, {}, {q: "fjors gade 5 5", fuzzy: "", type: 'adgangsadresse'}).then(function(result) {
+        expect(result.length).to.be.above(1);
+        expect(result[0].type).to.equal('adgangsadresse');
+        expect(result[0].tekst).to.equal('Fjordsgade 5, 5000 Odense C');
+      });
+    });
   });
 });
