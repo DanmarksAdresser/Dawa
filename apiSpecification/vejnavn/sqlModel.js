@@ -35,7 +35,7 @@ var columns = {
 function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
-    sqlParts.whereClauses.push("vejstykker.vejnavn IN (SELECT vejnavn from vejstykker ORDER BY vejnavn <-> " + fuzzyqAlias + ' LIMIT 100)');
+    sqlParts.whereClauses.push("vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT vejnavn, vejnavn <-> " + fuzzyqAlias + " as dist from vejstykker ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)");
     sqlParts.orderClauses.push("levenshtein(lower(vejstykker.vejnavn), lower(" + fuzzyqAlias + '), 2, 1, 3)');
   }
 }

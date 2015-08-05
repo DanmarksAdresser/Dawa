@@ -7,13 +7,10 @@ var Stream = require('stream');
  * create a fallback stream, which is used instead.
  */
 module.exports = function(stream, createFallbackStreamFn) {
-  console.log('creating pass through stream');
   var out = new Stream.PassThrough({
     objectMode: true
   });
-  console.log('func');
   var switchToFallback = function() {
-    console.log('SWITCHING TO FALLBACK');
     createFallbackStreamFn(function(err, fallbackStream) {
       if(err) {
         return out.emit('error', err);
@@ -24,16 +21,11 @@ module.exports = function(stream, createFallbackStreamFn) {
       });
     });
   };
-  console.log('adding data listener');
   stream.once('data', function(data) {
-    console.log('got a piece of data!');
+    console.log('got data: ' + JSON.stringify(data, null, 2));
     stream.removeListener('end', switchToFallback);
     out.write(data);
-    console.log('piping the data');
     stream.pipe(out);
-    stream.on('end', function() {
-      console.log('stream ended!');
-    });
   });
   stream.on('error', function(err) {
     stream.removeListener('end', switchToFallback);

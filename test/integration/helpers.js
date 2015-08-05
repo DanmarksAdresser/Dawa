@@ -14,24 +14,18 @@ function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) 
   function shouldAbort() {
     return false;
   }
-  resourceImpl.resourceResponse(withDbClient, resourceSpec, {params: pathParams, query: queryParams, headers: {}}, shouldAbort, function(err, response) {
-    if(err) {
-      return callback(err);
-    }
+  return q.ninvoke(resourceImpl, 'resourceResponse', withDbClient, resourceSpec, {params: pathParams, query: queryParams, headers: {}}, shouldAbort).then(function(response) {
     if(response.bodyPipe) {
-      response.bodyPipe.toArray(function(err, result) {
-        if(err) {
-          return callback(err);
-        }
+      return q.ninvoke(response.bodyPipe, 'toArray').then(function(result) {
         delete response.bodyPipe;
         response.body = result.join('');
-        callback(null, response);
+        return response;
       });
     }
     else {
-      callback(null, response);
+      return response;
     }
-  });
+  }).nodeify(callback);
 }
 
 // Get the response of a resource as a string
@@ -102,3 +96,5 @@ exports.toSqlModel = function(datamodelName, apiObject) {
     return memo;
   }, {});
 };
+
+exports.getResponse = getResponse;

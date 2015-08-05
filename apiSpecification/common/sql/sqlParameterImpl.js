@@ -133,7 +133,7 @@ function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   // and the ranks that result, rather than ranking a very large
   // number of results.
   sqlUtil.addSelect(columnSpec, 'tsv', sqlParts, params);
-  sqlParts.limit = Math.max(1000, params.per_side ? params.per_side : 0);
+  sqlParts.limit = 1000;
   var query = dbapi.createQuery(sqlParts);
   var transformedQuery =    {
     select: ['*'],
