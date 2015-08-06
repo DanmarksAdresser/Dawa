@@ -1,3 +1,12 @@
+DROP FUNCTION IF EXISTS postnummer_tsvector(postnumre, stormodtagere) CASCADE;
+CREATE FUNCTION postnummer_tsvector(postnumre, stormodtagere)
+  RETURNS TSVECTOR AS $$
+SELECT CASE WHEN $2.nr IS NOT NULL
+  THEN (to_tsvector(to_char($2.nr, 'FM0000') || ' ' || $2.navn)::text || ' ' || $1.tsv::text)::tsvector
+       ELSE $1.tsv
+       END;
+$$ LANGUAGE SQL;
+
 -- Init function
 DROP FUNCTION IF EXISTS adgangsadresser_init_tsv() CASCADE;
 CREATE FUNCTION adgangsadresser_init_tsv()
@@ -8,8 +17,9 @@ CREATE FUNCTION adgangsadresser_init_tsv()
   FROM
     (select adgangsadresser.id, setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
                                 setweight(to_tsvector('adresser', processforindexing(COALESCE(supplerendebynavn, ''))), 'C') ||
-                                setweight(postnumre.tsv, 'D') AS tsv FROM adgangsadresser left join postnumre on adgangsadresser.postnr = postnumre.nr
-      left join vejstykker ON adgangsadresser.kommunekode = vejstykker.kommunekode and adgangsadresser.vejkode = vejstykker.kode) as newtsvs
+                                setweight(postnummer_tsvector(postnumre, stormodtagere), 'D') AS tsv FROM adgangsadresser left join postnumre on adgangsadresser.postnr = postnumre.nr
+      left join vejstykker ON adgangsadresser.kommunekode = vejstykker.kommunekode and adgangsadresser.vejkode = vejstykker.kode
+    left join stormodtagere on adgangsadresser.id = stormodtagere.adgangsadresseid) as newtsvs
   WHERE
       adgangsadresser.id = newtsvs.id and adgangsadresser.tsv is distinct from newtsvs.tsv;
   $$;
@@ -24,6 +34,8 @@ $$
   END;
 $$;
 
+
+
 DROP FUNCTION IF EXISTS adgangsadresser_refresh_tsv(uuid[]) CASCADE;
 CREATE OR REPLACE FUNCTION adgangsadresser_refresh_tsv(uuids uuid[])
   RETURNS VOID
@@ -33,12 +45,13 @@ LANGUAGE plpgsql AS
     UPDATE adgangsadresser
     SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
               setweight(to_tsvector('adresser', processForIndexing(COALESCE(supplerendebynavn, ''))), 'C') ||
-              setweight(postnumre.tsv, 'D')
+              setweight(postnummer_tsvector(postnumre, stormodtagere), 'D')
     FROM
-      postnumre, vejstykker
+      postnumre, vejstykker,stormodtagere
     WHERE
       postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
-      vejstykker.kode = adgangsadresser.vejkode AND adgangsadresser.id = ANY (uuids);
+      vejstykker.kode = adgangsadresser.vejkode AND adgangsadresser.id = ANY (uuids)
+      AND (stormodtagere.adgangsadresseid IS NULL OR stormodtagere.adgangsadresseid = adgangsadresser.id);
   END;
   $$;
 
@@ -48,13 +61,15 @@ CREATE OR REPLACE FUNCTION adgangsadresser_tsv_update()
   RETURNS TRIGGER AS $$
 BEGIN
   NEW.tsv = (SELECT setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', NEW.husnr), 'A') ||
-            setweight(to_tsvector('adresser', processForIndexing(COALESCE(NEW.supplerendebynavn, ''))), 'C') ||
-            setweight(postnumre.tsv, 'D')
-  FROM
-  postnumre, vejstykker
-  WHERE
-  postnumre.nr = NEW.postnr AND vejstykker.kommunekode = NEW.kommunekode AND
-  vejstykker.kode = NEW.vejkode);
+                    setweight(to_tsvector('adresser', processForIndexing(COALESCE(NEW.supplerendebynavn, ''))), 'C') ||
+                    setweight(postnummer_tsvector(postnumre, stormodtagere), 'D')
+             FROM
+               postnumre, vejstykker, stormodtagere
+             WHERE
+               postnumre.nr = NEW.postnr AND vejstykker.kommunekode = NEW.kommunekode AND
+               vejstykker.kode = NEW.vejkode
+               AND (stormodtagere.adgangsadresseid IS NULL OR stormodtagere.adgangsadresseid = NEW.id)
+  );
   RETURN NEW;
 END;
 $$ LANGUAGE PLPGSQL;

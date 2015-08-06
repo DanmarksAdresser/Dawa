@@ -107,7 +107,7 @@ exports.json = {
   }
 };
 
-var autocompleteFieldNames = ['id', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'etage', 'dør'];
+var autocompleteFieldNames = ['id', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'etage', 'dør', 'stormodtagerpostnr', 'stormodtagerpostnrnavn'];
 
 exports.autocomplete = {
   fields: representationUtil.fieldsWithNames(fields, autocompleteFieldNames),
@@ -153,9 +153,17 @@ exports.autocomplete = {
             description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
               'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
             type: nullableType('string')
+          },
+          stormodtagerpostnr: {
+            description: 'Evt. stormodtagerpostnummer, som er tilknyttet adgangsadressen.',
+            type: nullableType('string')
+          },
+          stormodtagerpostnrnavn: {
+            description: 'Stormodtagerpostnummerets navn.',
+            type: nullableType('string')
           }
         },
-        docOrder: ['id', 'href', 'vejnavn', 'etage', 'dør','husnr', 'supplerendebynavn', 'postnr', 'postnrnavn']
+        docOrder: ['id', 'href', 'vejnavn', 'etage', 'dør','husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn']
 
       }
     },
@@ -177,7 +185,9 @@ exports.autocomplete = {
           dør: maybeNull(row.dør),
           supplerendebynavn: maybeNull(row.supplerendebynavn),
           postnr: kode4String(row.postnr),
-          postnrnavn: maybeNull(row.postnrnavn)
+          postnrnavn: maybeNull(row.postnrnavn),
+          stormodtagerpostnr: kode4String(row.stormodtagerpostnr),
+          stormodtagerpostnrnavn: row.stormodtagerpostnrnavn
         }
       };
     };

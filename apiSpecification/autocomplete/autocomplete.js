@@ -200,9 +200,7 @@ function queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled) {
   var params = _.clone(sqlParams);
   params.fuzzy = useFuzzy;
   return queryModel(client, 'adgangsadresse', params).then(function (result) {
-    console.log('type: ' + type);
     if (result.length > 1 || type === 'adgangsadresse') {
-      console.log('')
       return result;
     }
     else {
