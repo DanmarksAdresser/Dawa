@@ -1,9 +1,12 @@
 "use strict";
 
+var dbapi = require('../../dbapi');
 var nameAndKey = require('./nameAndKey');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
-var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
+var sqlUtil = require('../common/sql/sqlUtil')
+
+var assembleSqlModel = sqlUtil.assembleSqlModel;
 
 var columns = {
   navn: {
@@ -29,11 +32,20 @@ var columns = {
   }
 };
 
+function fuzzySearchParameterImpl(sqlParts, params) {
+  if(params.fuzzyq) {
+    var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
+    sqlParts.whereClauses.push("vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT vejnavn, vejnavn <-> " + fuzzyqAlias + " as dist from vejstykker ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)");
+    sqlParts.orderClauses.push("levenshtein(lower(vejstykker.vejnavn), lower(" + fuzzyqAlias + '), 2, 1, 3)');
+  }
+}
+
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
+  fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
@@ -54,7 +66,11 @@ var baseQuery = function() {
   };
 };
 
-module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+
+
+var sqlModel = assembleSqlModel(columns, parameterImpls, baseQuery);
+
+module.exports = sqlUtil.applyFallbackToFuzzySearch(sqlModel);
 
 var registry = require('../registry');
 registry.add('vejnavn', 'sqlModel', undefined, module.exports);

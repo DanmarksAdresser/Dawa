@@ -8,7 +8,9 @@ var normalizeParameters = require('../common/parametersUtil').normalizeParameter
 module.exports =  {
   id: normalizeParameters([
     {
-      name: 'kode'
+      name: 'kode',
+      type: 'integer',
+      schema: schema.kode4
     },
     {
       name: 'kommunekode',
@@ -19,6 +21,8 @@ module.exports =  {
   propertyFilter: normalizeParameters([
   {
     name: 'kode',
+    type: 'integer',
+    schema: schema.kode4,
     multi: true
   },
   {

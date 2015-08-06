@@ -12,6 +12,14 @@ exports.paging = [
     schema: schema.positiveInteger,
     validateFun: function(sideParam, params) {
       var PAGING_LIMIT = 25000;
+      var SEARCH_PAGING_LIMIT = 1000;
+      var FUZZY_PAGING_LIMIT = 100;
+      if( params.fuzzy && params.per_side * sideParam > FUZZY_PAGING_LIMIT ) {
+        throw "Ved anvendelse af fuzzy søgning kan der højst pagineres i de første 100 elementer";
+      }
+      if(params.q && params.per_side * sideParam > SEARCH_PAGING_LIMIT) {
+        throw "Ved anvelse af q-parameteren kan der højst pagineres i de første 1000 elementer";
+      }
       if(sideParam > 1 && params.per_side * sideParam > PAGING_LIMIT) {
         throw "Der kan højst pagineres i de første " + PAGING_LIMIT +" elementer";
       }
@@ -56,6 +64,13 @@ exports.autocomplete = [
     name: 'q',
     type: 'string',
     renameTo: 'autocomplete'
+  }
+];
+
+exports.fuzzy = [
+  {
+    name: 'fuzzy',
+    type: 'boolean'
   }
 ];
 

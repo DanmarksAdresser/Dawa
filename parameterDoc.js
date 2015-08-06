@@ -50,6 +50,13 @@ var pagingParameters = [{name: 'side',
 
 var formatAndPagingParams = formatParameters.concat(pagingParameters);
 
+var fuzzyParameter = {
+  name: 'fuzzy',
+  doc: 'Aktiver fuzzy søgning'
+};
+
+
+
 /******************************************************************************/
 /*** Vejnavne *****************************************************************/
 /******************************************************************************/
@@ -63,6 +70,7 @@ var vejnavneParameters = [{name: 'q',
                            'Wildcard * er tilladt i slutningen af hvert ord. ' +
                            'Der skelnes ikke mellem store og små bogstaver.',
                            examples: ['tværvej']},
+  fuzzyParameter,
 
                           vejnavneIdParameter,
 
@@ -84,7 +92,6 @@ var reverseGeocodingParameters = [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UT
   {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '+
     'anvendex angives længde-værdien.'},
   SRIDParameter].concat(formatParameters);
-
 
 var vejnavneDoc = {
   docVersion: 2,
@@ -379,7 +386,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   }
 ];
 
-var adgangsadresseIdParameter =   {
+var adgangsadresseIdParameter = {
   name: 'id',
   doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
 };
@@ -392,6 +399,7 @@ var adgangsadresseParameters =  [
       'Der skelnes ikke mellem store og små bogstaver.',
     examples: ['tværv*']
   },
+    fuzzyParameter,
   {name: 'kvh',
     doc: 'KVH-nøgle. 12 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode efterfulgt af 4 tegn der repræsenter husnr. Se <a href="#adgangsadresse_kvh">databeskrivelse</a>.',
     examples: ['01016378__33']
@@ -475,6 +483,7 @@ var adresseParameters = [{name: 'q',
                           'Wildcard * er tilladt i slutningen af hvert ord. ' +
                           'Der skelnes ikke mellem store og små bogstaver.',
                           examples: ['tværv*']},
+  fuzzyParameter,
                          {name: 'id',
                           doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'},
                          {name: 'adgangsadresseid',
@@ -1343,6 +1352,9 @@ module.exports['/autocomplete'] = {
   }, {
     name: 'adgangsadresseid',
     doc: 'Begræns søgning til adresser med den angivne adgangsadresseid'
+  }, {
+    name: 'fuzzy',
+    doc: 'Aktiver fuzzy søgning'
   }].concat(formatAndPagingParams),
   examples: []
 };

@@ -56,11 +56,10 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
           .then(function () {
             var params = {sognekode: "10"};
             var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
-            var query = resourceSpec.sqlModel.createQuery(['id'], processedParams);
-            return client.queryp(query.sql, query.params);
+            return q.ninvoke(resourceSpec.sqlModel, 'query', client, ['id'], processedParams);
           })
           .then(function (result) {
-            expect(result.rows.length).to.equal(expectedResultsSogn[entityName]);
+            expect(result.length).to.equal(expectedResultsSogn[entityName]);
           });
       });
     });

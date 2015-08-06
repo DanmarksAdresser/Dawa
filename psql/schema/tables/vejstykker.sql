@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS vejstykker (
 CREATE INDEX ON vejstykker USING gin(tsv);
 CREATE INDEX ON vejstykker(kode);
 CREATE INDEX ON vejstykker(vejnavn);
+CREATE INDEX ON vejstykker USING GIST(vejnavn gist_trgm_ops);
 
 DROP TABLE IF EXISTS vejstykker_history CASCADE;
 CREATE TABLE IF NOT EXISTS vejstykker_history (

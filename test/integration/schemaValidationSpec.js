@@ -2,8 +2,8 @@
 
 var chai = require('chai');
 var _ = require('underscore');
+var q = require('q');
 
-var dbapi = require('../../dbapi');
 var registry = require('../../apiSpecification/registry');
 var schemaValid = require('../helpers/schemaValid');
 var testdb = require('../helpers/testdb');
@@ -103,8 +103,7 @@ describe('Validering af JSON-formatteret output', function() {
     }
     it('Alle ' + nameAndKey.plural + ' skal validere', function() {
       return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-        var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
-        return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
+        return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), {}).then(function(rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
             expect(json).to.be.schemaValid(schema);
@@ -116,8 +115,7 @@ describe('Validering af JSON-formatteret output', function() {
       var schema = jsonRepresentation.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
       return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-        var query = sqlModel.createQuery(_.pluck(jsonRepresentation.fields, 'name'), {});
-        return dbapi.queryRawQ(client, query.sql, query.params).then(function(rows) {
+        return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), {}).then(function(rows) {
           rows.forEach(function(row) {
             var json = mapper(row);
             recordVisitedValues(json, schema, valuesSeen);
