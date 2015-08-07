@@ -53,7 +53,7 @@ function streamingQueryUsingCursor(client, sql, params, cb) {
 
 var query = function(client, sqlParts, cb) {
   var query = createQuery(sqlParts);
-  queryRaw(client, query.sql, query.params, cb);
+  return queryRaw(client, query.sql, query.params, cb);
 };
 
 var queryRaw = function(client, sql, params, cb) {

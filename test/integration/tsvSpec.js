@@ -1,6 +1,5 @@
 "use strict";
 
-var async = require('async');
 var expect = require('chai').expect;
 var q = require('q');
 
@@ -244,40 +243,27 @@ var supplerendebynavneTests = [{
   }
 }];
 
-function verify(testSpec, client, callback) {
-  var updated;
-  async.series([
-    function(callback) {
-      if(testSpec.update) {
-        crud.update(client, datamodels[testSpec.update.model], testSpec.update.update, callback);
-      }
-      else {
-        callback(null);
-      }
-    },
-    function(callback) {
-      crud.query(client, datamodels[testSpec.verify.model], testSpec.verify.query, function(err, result) {
-        if(err) {
-          return callback(err);
-        }
-        updated = result[0];
-        callback();
-      });
-    },
-    function(callback) {
+function verify(testSpec, client) {
+  return q().then(function() {
+    if(testSpec.update) {
+      return crud.update(client, datamodels[testSpec.update.model], testSpec.update.update);
+    }
+  }).then(function() {
+      return crud.query(client, datamodels[testSpec.verify.model], testSpec.verify.query);
+    })
+    .then(function (result) {
+      var updated = result[0];
       expect(updated).to.exist;
       if(updated) {
         testSpec.verify.expect(updated);
       }
-      callback(null);
-    }
-  ], callback);
+    });
 }
 
 function verifyAll(provideClient, testSpecs) {
   testSpecs.forEach(function(testSpec) {
-    it(testSpec.description, function(done) {
-      verify(testSpec, provideClient(), done);
+    it(testSpec.description, function() {
+      return verify(testSpec, provideClient());
     });
   });
 }

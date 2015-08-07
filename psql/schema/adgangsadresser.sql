@@ -1,7 +1,7 @@
 DROP FUNCTION IF EXISTS postnummer_tsvector(postnumre, stormodtagere) CASCADE;
 CREATE FUNCTION postnummer_tsvector(postnumre, stormodtagere)
   RETURNS TSVECTOR AS $$
-SELECT CASE WHEN $2.nr IS NOT NULL
+SELECT CASE WHEN $2 IS NOT NULL
   THEN (to_tsvector(to_char($2.nr, 'FM0000') || ' ' || $2.navn)::text || ' ' || $1.tsv::text)::tsvector
        ELSE $1.tsv
        END;
@@ -45,13 +45,12 @@ LANGUAGE plpgsql AS
     UPDATE adgangsadresser
     SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
               setweight(to_tsvector('adresser', processForIndexing(COALESCE(supplerendebynavn, ''))), 'C') ||
-              setweight(postnummer_tsvector(postnumre, stormodtagere), 'D')
+              setweight(postnummer_tsvector(postnumre, (select ROW(stormodtagere.*)::stormodtagere from stormodtagere where stormodtagere.adgangsadresseid = adgangsadresser.id)), 'D')
     FROM
-      postnumre, vejstykker,stormodtagere
+      postnumre, vejstykker
     WHERE
       postnumre.nr = adgangsadresser.postnr AND vejstykker.kommunekode = adgangsadresser.kommunekode AND
-      vejstykker.kode = adgangsadresser.vejkode AND adgangsadresser.id = ANY (uuids)
-      AND (stormodtagere.adgangsadresseid IS NULL OR stormodtagere.adgangsadresseid = adgangsadresser.id);
+      vejstykker.kode = adgangsadresser.vejkode AND adgangsadresser.id = ANY (uuids);
   END;
   $$;
 
@@ -64,11 +63,11 @@ BEGIN
                     setweight(to_tsvector('adresser', processForIndexing(COALESCE(NEW.supplerendebynavn, ''))), 'C') ||
                     setweight(postnummer_tsvector(postnumre, stormodtagere), 'D')
              FROM
-               postnumre, vejstykker, stormodtagere
+               postnumre, vejstykker
+                          LEFT JOIN stormodtagere ON stormodtagere.adgangsadresseid = NEW.id
              WHERE
                postnumre.nr = NEW.postnr AND vejstykker.kommunekode = NEW.kommunekode AND
                vejstykker.kode = NEW.vejkode
-               AND (stormodtagere.adgangsadresseid IS NULL OR stormodtagere.adgangsadresseid = NEW.id)
   );
   RETURN NEW;
 END;

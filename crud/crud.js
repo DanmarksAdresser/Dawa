@@ -15,7 +15,7 @@ exports.query = function(client, datamodel, filter, callback) {
     sqlParams: []
   };
   exports.applyFilter(datamodel, sqlParts, filter);
-  dbapi.query(client, sqlParts, callback);
+  return dbapi.query(client, sqlParts).nodeify(callback);
 };
 
 exports.applyFilter = function(datamodel, sqlParts, filter) {
@@ -72,7 +72,7 @@ exports.update = function(client, datamodel, object, callback) {
   });
   var params = updateParams.concat(keyParams);
   winston.info(sql);
-  client.query(sql, params, callback);
+  client.queryp(sql, params).nodeify(callback);
 };
 
 exports.delete = function(client, datamodel, key, callback) {
@@ -83,5 +83,5 @@ exports.delete = function(client, datamodel, key, callback) {
   var params = _.map(datamodel.key, function(column) {
     return key[column];
   });
-  client.query(sql, params, callback);
+  client.queryp(sql, params).nodeify(callback);
 };
