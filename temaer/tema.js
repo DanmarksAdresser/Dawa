@@ -115,7 +115,7 @@ exports.deleteTema = function(client, temaDef, tema, callback) {
   return client.queryp(sql, params).nodeify(callback);
 };
 
-exports.putTemaer = function(temaDef, temaer, client, initializing, constraints, updateTilknytninger, callback) {
+exports.putTemaer = function(temaDef, temaer, client, initializing, constraints, updateTilknytninger, maxChanges, callback) {
   return getTemaer(client, temaDef.singular, constraints).then(function(existingTemaer) {
     var temaerToRemove = removeAll(existingTemaer, temaer, temaDef.key);
     var temaerToCreate = removeAll(temaer, existingTemaer, temaDef.key);
@@ -154,7 +154,7 @@ exports.putTemaer = function(temaDef, temaer, client, initializing, constraints,
           if(!updateTilknytninger) {
             return callback();
           }
-          exports.updateAdresserTemaerView(client, temaDef, initializing, callback);
+          exports.updateAdresserTemaerView(client, temaDef, initializing, maxChanges, callback);
         },
         function(callback) {
           if(temaDef.materialized) {
@@ -312,7 +312,7 @@ var initAdresserTemaerView = function(client, temaName) {
   ]);
 };
 
- var updateAdresserTemaerViewNonInit = function(client, temaName) {
+ var updateAdresserTemaerViewNonInit = function(client, temaName, maxChanges) {
   var datamodel = datamodels.adgangsadresse_tema;
   return dataUtil.createTempTableQ(client, 'tema_mapping_temp', 'adgangsadresser_temaer_matview').then(function() {
     return dbapi.queryRawQ(client, 'INSERT INTO tema_mapping_temp(adgangsadresse_id, tema_id, tema) ' +
@@ -324,6 +324,15 @@ var initAdresserTemaerView = function(client, temaName) {
   }).then(function() {
     return divergensImpl.computeTableDifferences(client, datamodel, 'tema_mapping_view_temp', 'tema_mapping_temp');
   }).then(function(report) {
+    var changes = report.inserts.length + report.updates.length + report.deletes.length;
+    if(changes > maxChanges) {
+      logger.error('Antallet af ændringer til tema overskrider den tilladte grænse', {
+        changes: changes,
+        maxChanges: maxChanges,
+        tema: temaName
+      });
+      throw new Error('Antallet af ændringer til tema overskrider den tilladte grænse');
+    }
     return divergensImpl.rectifyDifferences(client, datamodel, report, MAX_INT);
   }).then(function() {
     return dataUtil.dropTableQ(client, 'tema_mapping_temp');
@@ -342,12 +351,12 @@ exports.stringKey = function (tema, temaDef) {
   }, '');
 };
 
-exports.updateAdresserTemaerView = function(client, temaDef, initializing, callback) {
+exports.updateAdresserTemaerView = function(client, temaDef, initializing, maxChanges, callback) {
   if (initializing) {
     return initAdresserTemaerView(client, temaDef.singular).nodeify(callback);
   }
   else {
-    return updateAdresserTemaerViewNonInit(client, temaDef.singular).nodeify(callback);
+    return updateAdresserTemaerViewNonInit(client, temaDef.singular, maxChanges).nodeify(callback);
   }
 };
 

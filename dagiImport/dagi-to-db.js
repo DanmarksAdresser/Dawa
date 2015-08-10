@@ -42,7 +42,8 @@ var optionSpec = {
   filePrefix: [false, 'Prefix på DAGI tema-filer', 'string', ''],
   service: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
   temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string'],
-  init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
+  init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false],
+  maxChanges: [false, 'Maximalt antal ændringer der udføres på adressetilknytninger (pr. tema)', 'number', 10000]
 };
 
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
@@ -59,13 +60,13 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
 
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
 
-  function putDagiTemaer(temaNavn, temaer, callback) {
+  function putDagiTemaer(temaNavn, temaer, maxChanges, callback) {
     return proddb.withTransaction('READ_WRITE', function(client) {
-      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init, {}, true);
+      return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init, {}, true, maxChanges);
     }).nodeify(callback);
   }
 
-  function indlaesDagiTema(temaNavn, callback) {
+  function indlaesDagiTema(temaNavn, maxChanges, callback) {
     logger.info('Indlæser DAGI tema ' + temaNavn);
     var mapping = featureMappings[temaNavn];
     if(!mapping) {
@@ -76,12 +77,12 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
     var filename = options.filePrefix + temaNavn;
     var body = fs.readFileSync(path.join(directory, filename));
     return tema.parseTemaer(body, temaDef, mapping).then(function(temaer) {
-      return putDagiTemaer(temaNavn, temaer);
+      return putDagiTemaer(temaNavn, temaer, maxChanges);
     }).nodeify(callback);
   }
 
   async.eachSeries(temaer, function (temaNavn, callback) {
-    indlaesDagiTema(temaNavn, callback);
+    indlaesDagiTema(temaNavn, options.maxChanges, callback);
   }, function (err) {
     if(err) {
       logger.error('Indlæsning af DAGI tema fejlet', err);
