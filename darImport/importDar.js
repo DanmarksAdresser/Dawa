@@ -1,5 +1,8 @@
 "use strict";
 
+var fs = require('fs');
+var moment = require('moment');
+var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
@@ -15,10 +18,11 @@ var optionSpec = {
   dataDir: [false, 'Folder med CSV-filer', 'string'],
   initial: [false, 'Whether this is an initial import', 'boolean', false],
   clear: [false, 'Completely remove old DAWA data and history', 'boolean', false],
-  fullCompare: [false, 'Whether to make a full comparison', 'boolean', false]
+  fullCompare: [false, 'Whether to make a full comparison', 'boolean', false],
+  reportDir: [false, 'Directory where report from run will be stored', 'string']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'), function(args, options) {
   var dataDir = options.dataDir;
   var initial = options.initial;
   var clearDawa = options.clear;
@@ -64,6 +68,31 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       }
     });
   })
+    .then(function() {
+      if(options.reportDir) {
+        fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
+      }
+    })
+    .then(function() {
+      ['adgangspunkt', 'husnummer', 'adresse'].forEach(function(entity) {
+        ['insert', 'update', 'delete'].forEach(function(op) {
+          var changes = report['dar_' + entity][op];
+          if(changes.length !== 0) {
+            logger.info('Importer changes', {
+              op: op,
+              entity: entity,
+              changes: changes.length
+            });
+          }
+          else {
+            logger.info('No importer changes', {
+              op: op,
+              entity: entity
+            });
+          }
+        });
+      });
+    })
     .then(function() {
     logger.info('Successfully completed importDar script');
   })

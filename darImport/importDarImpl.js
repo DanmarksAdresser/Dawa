@@ -204,6 +204,11 @@ function updateTableFromCsv(client, csvFilePath, csvSpec, dbSpecImpl, useFastCom
       return dbSpecImpl.compareAndUpdate(client, desiredTable, dbSpecImpl.table, {
         useFastComparison: useFastComparison
       }, report);
+    })
+    .then(function() {
+      if(report) {
+        return reportChanges(client, report, dbSpecImpl.table);
+      }
     });
 }
 
