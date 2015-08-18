@@ -120,7 +120,6 @@ var syntheticDbContent = {
 };
 
 var SYNTHETIC_DIR = path.join(__dirname, 'sampleDarFiles', 'synthetic');
-var REAL_DIR = path.join(__dirname, 'sampleDarFiles', 'real');
 
 function loadRawCsv(client, filePath, destionationTable) {
   var sql = "COPY " + destionationTable + " FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
