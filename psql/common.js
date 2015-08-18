@@ -1,7 +1,10 @@
 "use strict";
 
 var fs = require('fs');
+var q = require('q');
 var winston = require('winston');
+
+var qUtil = require('../q-util');
 
 function exitOnErr(err){
   if (err){
@@ -37,7 +40,7 @@ exports.withoutTriggers = function(client, fn) {
   return exports.disableTriggersQ(client).then(fn).then(function() {
     return exports.enableTriggersQ(client);
   });
-}
+};
 
 exports.execSQL = function(sql, client, echo, done){
   function doWork(cb){
@@ -78,6 +81,28 @@ exports.reindex = function(client) {
     .then(function() {
       exports.enableTriggersQ(client);
     });
-}
+};
+
+exports.disableHistoryTrigger = function(client, tableName) {
+  return client.queryp('ALTER TABLE ' + tableName + ' DISABLE TRIGGER ' + tableName + '_history_update');
+};
+
+exports.enableHistoryTrigger = function(client, tableName) {
+  return client.queryp('ALTER TABLE ' + tableName + ' ENABLE TRIGGER ' + tableName + '_history_update');
+};
+
+exports.withoutHistoryTriggers = function(client, tableNames, fn) {
+  return qUtil.mapSerial(tableNames, function(tableName) {
+    return exports.disableHistoryTrigger(client, tableName);
+  })
+    .then(function() {
+      return fn();
+    })
+    .then(function() {
+      return qUtil.mapSerial(tableNames, function(tableName) {
+        return exports.enableHistoryTrigger(client, tableName);
+      });
+    });
+};
 
 exports.psqlScript = psqlScript;

@@ -1,23 +1,22 @@
 "use strict";
 
+var q = require('q');
+
 var d = require('../../util').d;
 
 module.exports = function querySenesteSekvensnummer(client, callback) {
-  client.query('SELECT MAX(sequence_number) as sekvensnummer, MAX(time) as tidspunkt FROM transaction_history', [], function(err, result) {
-    if(err) {
-      return callback(err);
-    }
+  return client.queryp('SELECT MAX(sequence_number) as sekvensnummer, MAX(time) as tidspunkt FROM transaction_history').then(function(result) {
     if(!result.rows) {
-      callback(null, {
+      return {
         sekvensnummer: 0,
         tidspunkt: null
-      });
+      };
     }
     else {
-      callback(null, {
+      return {
         sekvensnummer: result.rows[0].sekvensnummer,
         tidspunkt: d(result.rows[0].tidspunkt)
-      });
+      };
     }
-  });
+  }).nodeify(callback);
 };

@@ -8,8 +8,10 @@ var importDarImpl = require('./importDarImpl');
 var logger = require('../logger').forCategory('darImport');
 var proddb = require('../psql/proddb');
 
+
 var optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
+  skipEvents: [false, 'Opdater DAWA uden udsendelse af hændelser', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
@@ -20,7 +22,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   proddb.withTransaction('READ_WRITE', function (client) {
     var report = {};
     return importDarImpl.withDarTransaction(client, 'csv', function() {
-      return importDarImpl.fullCompareAndUpdate(client, report);
+      return importDarImpl.fullCompareAndUpdate(client, options.skipEvents, report);
     });
   }).catch(function(err) {
     logger.error('Caught error in importNewFields', err);

@@ -19,7 +19,8 @@ var optionSpec = {
   initial: [false, 'Whether this is an initial import', 'boolean', false],
   clear: [false, 'Completely remove old DAWA data and history', 'boolean', false],
   fullCompare: [false, 'Whether to make a full comparison', 'boolean', false],
-  reportDir: [false, 'Directory where report from run will be stored', 'string']
+  reportDir: [false, 'Directory where report from run will be stored', 'string'],
+  skipDawa: [false, 'Do not update DAWA tables', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'), function(args, options) {
@@ -27,6 +28,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
   var initial = options.initial;
   var clearDawa = options.clear;
   var fullCompare = options.fullCompare;
+  var skipDawa = options.skipDawa;
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
@@ -51,10 +53,10 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
       .then(function() {
         return importDarImpl.withDarTransaction(client, 'csv', function() {
           if(initial) {
-            return importDarImpl.initFromDar(client, dataDir, clearDawa);
+            return importDarImpl.initFromDar(client, dataDir, clearDawa, skipDawa);
           }
           else {
-            return importDarImpl.updateFromDar(client, dataDir, fullCompare, report);
+            return importDarImpl.updateFromDar(client, dataDir, fullCompare, skipDawa, report);
           }
       });
     })
