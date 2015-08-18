@@ -143,27 +143,67 @@ var dawaChangeOrder = [
   }
 ];
 
+/**
+ * After an update to DAWA tables without generating history, we update the *most recent* history record
+ * to the new content. This ensures that recent udtræk is correct.
+ * @param client
+ */
+function updateDawaHistory(client) {
+  return qUtil.mapSerial(Object.keys(dawaDbSpecImpls), function(entityName) {
+    var dbSpecImpl = dawaDbSpecImpls[entityName];
+    var tableName = dbSpecImpl.table;
+    var historyTableName = tableName + '_history';
+    var setClause = dbSpecImpl.changeTableColumnNames.map(function(col) {
+      return format("{col} = {table}.{col}", {
+        col: col,
+        table: tableName
+      });
+    }).join(", ");
+    var keyEqualsClause = columnsEqualClause(tableName, historyTableName, dbSpecImpl.idColumns);
+    var sql = format("UPDATE {historyTable}" +
+      " SET {setClause} FROM {table}" +
+      " WHERE {historyTable}.valid_to IS NULL AND {keyEqualsClause}",
+      {
+        table: tableName,
+        historyTable: historyTableName,
+        setClause: setClause,
+        keyEqualsClause: keyEqualsClause
+      });
+    return client.queryp(sql);
+  });
+}
+
 /*
  * Given tables has been created for each DAWA entity containing inserts, updates and deletes respectively,
  * perform the changes to the DAWA tables in the correct order (that is, e.g. ensuring that adgangsadresse
  * is not deleted before adresse).
  */
-function doDawaChanges(client) {
-  return qUtil.mapSerial(dawaChangeOrder, function(change) {
-    var dbSpec = dawaDbSpecImpls[change.entity];
-    var dbSpecImpl = dawaDbSpecImpls[change.entity];
-    var table = dbSpec.table;
-    logger.info('Applying change to DAWA table', change);
-    if(change.type === 'insert') {
-      return dbSpecImpl.applyInserts(client, table);
-    }
-    else if(change.type === 'update') {
-      return dbSpecImpl.applyUpdates(client, table);
-    }
-    else if(change.type === 'delete') {
-      return dbSpecImpl.applyDeletes(client, table);
-    }
-  });
+function doDawaChanges(client, skipEvents) {
+  function applyChanges() {
+    return qUtil.mapSerial(dawaChangeOrder, function(change) {
+      var dbSpec = dawaDbSpecImpls[change.entity];
+      var dbSpecImpl = dawaDbSpecImpls[change.entity];
+      var table = dbSpec.table;
+      logger.info('Applying change to DAWA table', change);
+      if(change.type === 'insert') {
+        return dbSpecImpl.applyInserts(client, table);
+      }
+      else if(change.type === 'update') {
+        return dbSpecImpl.applyUpdates(client, table);
+      }
+      else if(change.type === 'delete') {
+        return dbSpecImpl.applyDeletes(client, table);
+      }
+    });
+  }
+  if(skipEvents) {
+    return sqlCommon.withoutHistoryTriggers(client, ['adgangsadresser', 'enhedsadresser', 'vejstykker'], applyChanges).then(function() {
+      return updateDawaHistory(client);
+    });
+  }
+  else {
+    return applyChanges();
+  }
 }
 
 function dropTable(client, tableName) {
@@ -367,14 +407,16 @@ function initDawaFromScratch(client) {
  * When DAR tables has been initialized, the DAWA tables will be updated as well (
  * from scratch, if clearDawa is specified, otherwise incrementally).
  */
-function initFromDar(client, dataDir, clearDawa) {
+function initFromDar(client, dataDir, clearDawa, skipDawa) {
   return initDarTables(client, dataDir)
     .then(function () {
-      if (clearDawa) {
-        return initDawaFromScratch(client);
-      }
-      else {
-        return fullCompareAndUpdate(client);
+      if(!skipDawa) {
+        if (clearDawa) {
+          return initDawaFromScratch(client);
+        }
+        else {
+          return fullCompareAndUpdate(client, false);
+        }
       }
     });
 }
@@ -384,7 +426,7 @@ function initFromDar(client, dataDir, clearDawa) {
  * the DAWA model
  * @param client
  */
-function fullCompareAndUpdate(client, report) {
+function fullCompareAndUpdate(client, skipEvents, report) {
   logger.info('Performing full comparison and update');
   return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
     .then(function() {
@@ -397,7 +439,7 @@ function fullCompareAndUpdate(client, report) {
     })
     .then(function() {
       logger.info('Applying changes to DAWA tables');
-      return doDawaChanges(client);
+      return doDawaChanges(client, skipEvents);
     })
     .then(function() {
       return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
@@ -413,7 +455,7 @@ function fullCompareAndUpdate(client, report) {
  * Assuming DAR tables are already populated, update DAR tables
  * from CSV, followed by an update of DAWA tables.
  */
-function updateFromDar(client, dataDir, fullCompare, report) {
+function updateFromDar(client, dataDir, fullCompare, skipDawa, report) {
   return qUtil.mapSerial(csvSpecs, function(csvSpec, entityName) {
     logger.debug('Importing ' + entityName);
     var dbSpecImpl = darDbSpecImpls[entityName];
@@ -424,17 +466,21 @@ function updateFromDar(client, dataDir, fullCompare, report) {
       dbSpecImpl, false, report);
   })
     .then(function() {
-      if(fullCompare) {
-        return fullCompareAndUpdate(client, report);
+      if(!skipDawa) {
+        if(fullCompare) {
+          return fullCompareAndUpdate(client, false, report);
+        }
+        else {
+          logger.debug('computing dirty objects');
+          return computeDirtyObjects(client, report)
+            .then(function() {
+              return performDawaChanges(client, report);
+            });
+        }
       }
       else {
-        logger.debug('computing dirty objects');
-        return computeDirtyObjects(client, report)
-          .then(function() {
-            return performDawaChanges(client, report);
-          });
+        logger.info('Skipping DAWA updates');
       }
-
     })
     .then(function() {
       return qUtil.mapSerial(darDbSpecImpls, function(specImpl) {

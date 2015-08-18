@@ -15,7 +15,8 @@ var optionSpec = {
   dataDir: [false, 'Folder med CSV-filer', 'string'],
   initial: [false, 'Whether this is an initial import', 'boolean', false],
   clear: [false, 'Completely remove old DAWA data and history', 'boolean', false],
-  fullCompare: [false, 'Whether to make a full comparison', 'boolean', false]
+  fullCompare: [false, 'Whether to make a full comparison', 'boolean', false],
+  skipDawa: [false, 'Do not update DAWA tables', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
@@ -23,6 +24,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   var initial = options.initial;
   var clearDawa = options.clear;
   var fullCompare = options.fullCompare;
+  var skipDawa = options.skipDawa;
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
@@ -47,10 +49,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
       .then(function() {
         return importDarImpl.withDarTransaction(client, 'csv', function() {
           if(initial) {
-            return importDarImpl.initFromDar(client, dataDir, clearDawa);
+            return importDarImpl.initFromDar(client, dataDir, clearDawa, skipDawa);
           }
           else {
-            return importDarImpl.updateFromDar(client, dataDir, fullCompare, report);
+            return importDarImpl.updateFromDar(client, dataDir, fullCompare, skipDawa, report);
           }
       });
     })

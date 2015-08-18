@@ -441,15 +441,4 @@ describe('Importing DAR CSV files to database', function () {
       });
     });
   });
-
-  describe.skip('Initialize database from scratch', function() {
-    return withDarTransactionAll('empty', function(clientFn) {
-      it('Can reinitialize db from real DAR CSV files', function() {
-        this.timeout(240000);
-        var client = clientFn();
-        return importDarImpl.initFromDar(client, REAL_DIR, true);
-
-      });
-    });
-  });
 });
