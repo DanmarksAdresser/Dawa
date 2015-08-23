@@ -16,6 +16,7 @@ _.each(datamodelNames, function(datamodelName) {
         type: 'integer'
       },
       tidspunkt: {
+        postgresql: null,
         description: 'Tidspunktet hvor hændelsen blev indlæst af DAWA.',
         $ref: '#/definitions/DateTimeUtc'
       },

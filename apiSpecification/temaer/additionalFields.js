@@ -70,9 +70,7 @@ var fieldMap = {
     {
       name: 'zone',
       description: '"Byzone", "Sommerhusområde" eller "Landzone".',
-      schema: {
-        type: 'string'
-      },
+      schema: commonSchemaDefinitions.Zone,
       formatter: util.zoneKodeFormatter
     }
 	],
@@ -80,9 +78,7 @@ var fieldMap = {
 	  {
       name: 'bogstav',
       description: 'Valgslandsdelens bogstav, udgør nøglen.',
-      schema: {
-        type: 'string'
-      }
+      schema: commonSchemaDefinitions.ValglandsdelBogstav
 	  },
     describe(navn, 'Valglandsdelens navn.')
 	],

@@ -23,38 +23,36 @@ var fields = {
     description: 'Identifikation af vejstykke. Er unikt indenfor den pågældende kommune. ' +
       'Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.',
     schema: definitions.Kode4,
-    formatter: kode4String
+    formatter: kode4String,
+    primary: true
   }, {
     name: 'kommunekode',
     description: 'Kommunekoden. 4 cifre.',
     schema: definitions.Kode4,
-    formatter: kode4String
+    formatter: kode4String,
+    primary: true
   }, {
       name: 'oprettet',
       description: 'DEPRECATED. Feltet opdateres ikke længere. Oprettelsestidspunktet for vejstykket som registreret i BBR',
       schema: definitions.NullableDateTime,
-      formatter: timestampFormatter
+      formatter: timestampFormatter,
+      deprecated: true
   }, {
     name: 'ændret',
     description: 'DEPRECATED. Feltet opdateres ikke længere. Tidspunkt for seneste ændring af vejstykket, som registreret i BBR',
     schema: definitions.NullableDateTime,
-    formatter: timestampFormatter
+    formatter: timestampFormatter,
+    deprecated: true
   }, {
     name: 'navn',
     description: 'Vejens navn som det er fastsat og registreret af kommunen. ' +
       'Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.',
-    schema: {
-      type: nullableType('string'),
-      maxLength: 40
-    }
+    schema: definitions.NullableVejnavn
   }, {
     name: 'adresseringsnavn',
     description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn,' +
       ' som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.',
-    schema: {
-      type: nullableType('string'),
-      maxLength: 20
-    }
+    schema: definitions.NullableVejnavnForkortet
   }
   ],
   postnummer: [
@@ -63,24 +61,20 @@ var fields = {
       description: 'Unik identifikation af det postnummeret. Postnumre fastsættes af Post Danmark.' +
         ' Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.',
       schema: definitions.Postnr,
-      formatter: kode4String
+      formatter: kode4String,
+      primary: true
     },
     {
       name: 'navn',
       description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn.' +
         ' Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
-      schema: {
-        type: 'string',
-        maxLength: 20
-      }
+      schema: definitions.PostnrNavn
     },
     {
       name: 'stormodtager',
       description: 'Hvorvidt postnummeret er en særlig type,' +
         ' der er tilknyttet en organisation der modtager en større mængde post.',
-      schema: {
-        type: 'boolean'
-      }
+      schema: definitions.Boolean
     }
   ],
   adgangsadresse: [
@@ -90,7 +84,8 @@ var fields = {
         'Er stabil over hele adressens levetid (ligesom et CPR-nummer) ' +
         'dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode. ' +
         'Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”.',
-      schema: definitions.UUID
+      schema: definitions.UUID,
+      primary: true
     },
     {
       name: 'status',
@@ -149,12 +144,14 @@ var fields = {
       name: 'ejerlavkode',
       description: 'DEPRECATED. Feltet opdateres ikke længere. Benyt "jordstykke" i stedet. Angiver ejerlavkoden registreret i BBR.' +
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
-      schema: definitions.NullableUpTo7
+      schema: definitions.NullableUpTo7,
+      deprecated: true
     }, {
       name: 'matrikelnr',
       description: 'DEPRECATED. Feltet opdateres ikke længere. Benyt "jordstykke" i stedet. Angiver matrikelnummeret for jordstykket, som det var registreret i BBR.' +
         ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.',
-      schema: definitions.Nullablematrikelnr
+      schema: definitions.Nullablematrikelnr,
+      deprecated: true
     }, {
       name: 'esrejendomsnr',
       description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
@@ -166,16 +163,12 @@ var fields = {
       name: 'etrs89koordinat_øst',
       description: 'Adgangspunktets østlige koordiat angivet i koordinatsystemet UTM zone 32' +
         ' og ved brug af det fælles europæiske terrestriale referencesystem EUREF89/ETRS89.',
-      schema: {
-        type: nullableType('number')
-      }
+      schema: definitions.NullableNumber
     }, {
       name: 'etrs89koordinat_nord',
       description: 'Adgangspunktets nordlige koordiat angivet i koordinatsystemet UTM zone 32' +
         ' og ved brug af det fælles europæiske terrestriale referencesystem EUREF89/ETRS89.',
-      schema: {
-        type: nullableType('number')
-      }
+      schema: definitions.NullableNumber
     }, {
       name: 'nøjagtighed',
       description: 'Kode der angiver nøjagtigheden for adressepunktet. Et tegn.' +
@@ -184,10 +177,7 @@ var fields = {
         ' typisk på basis af matrikelkortet, således at adressen ligger midt på det pågældende matrikelnummer.' +
         ' I så fald kan nøjagtigheden være ringere en end +/- 100 meter afhængig af forholdene.' +
         ' ”U” betyder intet adressepunkt.',
-      schema: {
-        type: 'string',
-        pattern: '^A|B|U$'
-      }
+      schema: definitions['Nøjagtighed']
     }, {
       name: 'kilde',
       description: 'Kode der angiver kilden til adressepunktet. Et tegn.' +
@@ -196,15 +186,11 @@ var fields = {
         ' ”3” = Eksternt indberettet af konsulent på vegne af kommunen;' +
         ' ”4” = Eksternt indberettet af kommunes kortkontor o.l.' +
         ' ”5” = Oprettet af teknisk forvaltning."',
-      schema: {
-        type: nullableType('integer')
-      }
+      schema: definitions.NullableInteger
     }, {
       name: 'husnummerkilde',
       description: 'Kode der angiver kilden til husnummeret. Et tal bestående af et ciffer.',
-      schema: {
-        type: nullableType('integer')
-      }
+      schema: definitions.NullableInteger
     }, {
       name: 'tekniskstandard',
       description: 'Kode der angiver den specifikation adressepunktet skal opfylde. 2 tegn.' +
@@ -212,20 +198,13 @@ var fields = {
         ' ”TK” = Udtrykkelig TK-standard: 3 meter inde i bygning, midt for længste side mod vej;' +
         ' ”TN” Alm. teknisk standard: bygningstyngdepunkt eller blot i bygning;' +
         ' ”UF” = Uspecificeret/foreløbig: ikke nødvendigvis placeret i bygning."',
-      schema: {
-        type: nullableType('string'),
-        pattern: '^TD|TK|TN|UF$'
-      }
+      schema: definitions.NullableTekniskstandard
     }, {
       name: 'tekstretning',
       description: 'Angiver en evt. retningsvinkel for adressen i ”gon”' +
         ' dvs. hvor hele cirklen er 400 gon og 200 er vandret.' +
         ' Værdier 0.00-400.00: Eksempel: ”128.34”.',
-      schema: {
-        type: nullableType('number'),
-        minimum: 0,
-        maximum: 400
-      }
+      schema: definitions.NullableTekstretning
     }, {
       name: 'adressepunktændringsdato',
       description: 'Dato for sidste ændring i adressepunktet, som registreret af BBR.' +
@@ -249,7 +228,8 @@ var fields = {
         ' Er stabil over hele adressens levetid (ligesom et CPR-nummer)' +
         ' dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode.' +
         ' Repræsenteret som 32 hexadecimale tegn. Eksempel: ”0a3f507a-93e7-32b8-e044-0003ba298018”.',
-      schema: definitions.UUID
+      schema: definitions.UUID,
+      primary: true
     }, {
       name: 'status',
       description: 'Adressens status. 1 indikerer en gældende adresse, 3 indikerer en foreløbig adresse.',
@@ -286,9 +266,7 @@ var fields = {
     }, {
       name: 'kilde',
       description: 'Kode der angiver kilden til adressen. Tal bestående af et ciffer.',
-      schema: {
-        type: nullableType('integer')
-      }
+      schema: definitions.NullableInteger
     },
     {
       name: 'esdhreference',
@@ -304,13 +282,12 @@ var fields = {
     name: 'kode',
     description: 'Unik identifikation af det matrikulære ”ejerlav”.' +
       ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
-    schema: definitions.UpTo7
+    schema: definitions.UpTo7,
+    primary: true
   }, {
     name: 'navn',
     description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
-    schema: {
-      type: nullableType('string')
-    }
+    schema: definitions.NullableEjerlavNavn
   }]
 };
 
@@ -326,7 +303,8 @@ _.each(tilknytninger, function(tilknytning, temaNavn) {
   var tilknytningFields = [{
     name: 'adgangsadresseid',
     description: 'Adgangsadressens id.',
-    schema: definitions.UUID
+    schema: definitions.UUID,
+    primary: true
   }];
   tilknytningKeyFields.forEach(function(keyField, index) {
     keyField.name = tilknytningKeyFieldNames[index];
@@ -339,6 +317,8 @@ exports.schemas = _.reduce(fields, function(memo, fieldList, datamodelName) {
   var properties = fieldList.reduce(function(acc, field) {
     var property = _.clone(field.schema);
     property.description = field.description;
+    property.primary = field.primary;
+    property.deprecated = field.deprecated;
     acc[field.name] = property;
     return acc;
   }, {});
