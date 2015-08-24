@@ -44,7 +44,7 @@ function resolveProperty(property) {
     if (property.description) {
       propertyDef.description = property.description;
     }
-    if (property.postgresql) {
+    if (property.hasOwnProperty('postgresql')) {
       propertyDef.postgresql = property.postgresql;
     }
     propertyDef.primary = property.primary;
@@ -80,13 +80,15 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
   var typeDesc = extractTypeDesc(type);
   var result = {
     name: propertyName,
-    postgresql: propertyDef.postgresql,
     description: propertyDef.description || '',
     type: typeDesc,
-    required: !isNullable(type),
-    primary: propertyDef.primary,
-    deprecated: propertyDef.deprecated
+    required: !isNullable(type)
   };
+  if (propertyDef.postgresql) {
+    result.postgresql = propertyDef.postgresql;
+    result.primary = propertyDef.primary || false;
+    result.deprecated = propertyDef.deprecated || false;
+  }
 
   if (isType(propertyDef.type,'array')) {
     var itemDef = resolveProperty(propertyDef.items);

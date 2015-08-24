@@ -14,7 +14,8 @@ describe('Documentation generation utilities', function() {
         'properties': {
           'stormodtageradresse': {
             description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.',
-            type: 'string'
+            type: 'string',
+            postgresql: 'VARCHAR(255)'
           },
           'kommuner': {
             description: 'De kommuner hvis areal overlapper postnumeret areal.',
@@ -28,17 +29,24 @@ describe('Documentation generation utilities', function() {
         'docOrder': ['stormodtageradresse', 'kommuner'],
         'additionalProperties': false,
         'definitions': {
-          'NullableKode4': {type: ['null','integer'], pattern: '^(\\d{4})$'},
+          'NullableKode4': {
+            type: ['null', 'integer'],
+            pattern: '^(\\d{4})$'
+          },
           KommuneRef: {
             type: 'object',
             properties: {
               href: {
                 description: 'Kommunens unikke URL.',
-                type: 'string'
+                type: 'string',
+                postgresql: 'TEXT',
+                deprecated: true
               },
               kode: {
                 description: 'Kommunekoden. 4 cifre.',
-                '$ref': '#/definitions/NullableKode4'
+                '$ref': '#/definitions/NullableKode4',
+                postgresql: 'SMALLINT',
+                primary: true
               }
             },
             required: ['href', 'kode'],
@@ -50,12 +58,43 @@ describe('Documentation generation utilities', function() {
 
       expect(new ZSchema().validateSchema(sampleSchema)).to.be.true;
       var doc = docUtil.extractDocumentationForObject(sampleSchema);
+
       expect(doc).to.deep.equal([
-        { name: 'stormodtageradresse', description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.', type: 'string', required: true },
-        { name: 'kommuner', description: 'De kommuner hvis areal overlapper postnumeret areal.', type: 'array', required: true, items: [
-          { name: 'href', description: 'Kommunens unikke URL.', type: 'string', required: true },
-          { name: 'kode', description: 'Kommunekoden. 4 cifre.', type: 'integer', required: false }
-        ] }
+        {
+          name: 'stormodtageradresse',
+          description: 'Hvis postnummeret er et stormodtagerpostnummer rummer feltet adressen på stormodtageren.',
+          type: 'string',
+          required: true,
+          postgresql: 'VARCHAR(255)',
+          deprecated: false,
+          primary: false
+        },
+        {
+          name: 'kommuner',
+          description: 'De kommuner hvis areal overlapper postnumeret areal.',
+          type: 'array',
+          required: true,
+          items: [
+            {
+              name: 'href',
+              description: 'Kommunens unikke URL.',
+              type: 'string',
+              required: true,
+              postgresql: 'TEXT',
+              deprecated: true,
+              primary: false
+            },
+            {
+              name: 'kode',
+              description: 'Kommunekoden. 4 cifre.',
+              type: 'integer',
+              required: false,
+              postgresql: 'SMALLINT',
+              deprecated: false,
+              primary: true
+            }
+          ]
+        }
       ]);
     });
   });
