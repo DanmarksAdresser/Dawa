@@ -65,7 +65,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       },
       function(callback) {
         async.eachSeries(temaer, function(temaDef, callback) {
-          tema.updateAdresserTemaerView(client, temaDef, true, callback  );
+          tema.updateAdresserTemaerView(client, temaDef, true, 1000000, callback  );
         }, callback);
       },
       function(callback) {
