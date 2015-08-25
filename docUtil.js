@@ -44,6 +44,11 @@ function resolveProperty(property) {
     if (property.description) {
       propertyDef.description = property.description;
     }
+    if (property.hasOwnProperty('postgresql')) {
+      propertyDef.postgresql = property.postgresql;
+    }
+    propertyDef.primary = property.primary;
+    propertyDef.deprecated = property.deprecated;
   }
   else {
     propertyDef = property;
@@ -79,6 +84,11 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
     type: typeDesc,
     required: !isNullable(type)
   };
+  if (propertyDef.postgresql) {
+    result.postgresql = propertyDef.postgresql;
+    result.primary = propertyDef.primary || false;
+    result.deprecated = propertyDef.deprecated || false;
+  }
 
   if (isType(propertyDef.type,'array')) {
     var itemDef = resolveProperty(propertyDef.items);
