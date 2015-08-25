@@ -2,7 +2,6 @@
 
 var expect = require('chai').expect;
 var request = require("request-promise");
-var _ = require('underscore');
 
 var schemas = [
   'postnumre', 'vejstykker', 'adgangsadresser', 'adresser',
@@ -10,7 +9,7 @@ var schemas = [
   'postnummertilknytninger', 'sognetilknytninger', 'politikredstilknytninger',
   'opstillingskredstilknytninger', 'valglandsdelstilknytninger',
   'zonetilknytninger', 'jordstykketilknytninger'
-]
+];
 
 var postnumre = {
   "source": "http://dawa.aws.dk/replikering/postnumre",
@@ -69,7 +68,7 @@ var postnumre = {
       ]
     }
   ]
-}
+};
 
 describe("Replikering schema.json", function() {
   it("Alle skema ekisterer", function(done) {
