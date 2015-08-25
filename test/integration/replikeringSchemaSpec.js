@@ -71,19 +71,15 @@ var postnumre = {
 };
 
 describe("Replikering schema.json", function() {
-  it("Alle skema ekisterer", function(done) {
-    request.get({url: "http://localhost:3002/replikeringdok/schema.json", json: true}, function(error, response, result) {
-      expect(error).to.be.null;
+  it("Alle skema ekisterer", function() {
+    return request.get({url: "http://localhost:3002/replikeringdok/schema.json", json: true}).then(function(result) {
       expect(Object.keys(result)).to.deep.equal(schemas);
-      done();
     });
   });
 
-  it("Postnumre skema er korrekt", function(done) {
-    request.get({url: "http://localhost:3002/replikeringdok/schema.json", json: true}, function(error, response, result) {
-      expect(error).to.be.null;
+  it("Postnumre skema er korrekt", function() {
+    return request.get({url: "http://localhost:3002/replikeringdok/schema.json", json: true}).then(function(result) {
       expect(result.postnumre).to.deep.equal(postnumre);
-      done();
     });
   });
 });
