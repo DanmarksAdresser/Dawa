@@ -20,9 +20,8 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   proddb.withTransaction('READ_WRITE', function (client) {
-    var report = {};
     return importDarImpl.withDarTransaction(client, 'csv', function() {
-      return importDarImpl.fullCompareAndUpdate(client, options.skipEvents, report);
+      return importDarImpl.fullCompareAndUpdate(client, options.skipEvents, null);
     });
   }).catch(function(err) {
     logger.error('Caught error in importNewFields', err);
