@@ -443,6 +443,21 @@ function fullCompareAndUpdate(client, skipEvents, report) {
       });
     })
     .then(function() {
+      return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+        var dbSpecImpl = dawaDbSpecImpls[entityName];
+        var dawaTable = dbSpecImpl.table;
+        return qUtil.mapSerial(['insert', 'update', 'delete'], function(op) {
+          return client.queryp('select count(*) as c from ' + op + '_' + dawaTable).then(function(result) {
+            logger.info('change count', {
+              entityName: entityName,
+              operation: op,
+              changes: result.rows[0].c
+            });
+          });
+        });
+      });
+    })
+    .then(function() {
       logger.info('Applying changes to DAWA tables');
       return doDawaChanges(client, skipEvents);
     })
