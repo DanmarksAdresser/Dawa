@@ -4,13 +4,20 @@ include includes/parameterDocMixins
 block content
   header.jumbotron.subhead
     div.container
-      h1 Regioner, kommuner, sogne, retskredse, politikredse, opstillingskredse, valglandsdele, ejerlav og jordstykker
+      h1 Lister
       div.page-header
-        p.lead Web API'et udstiller lister over Danmarks regioner, kommuner, sogne, retskredse, politikredse, opstillingskredse, valglandsdele, ejerlav og jordstykker.
+        p.lead Web API'et udstiller lister over Danmarks supplerende bynavne, regioner, kommuner, sogne, retskredse, politikredse, opstillingskredse, valglandsdele, ejerlav og jordstykker.
     div.container
       div.row
         div.span3
           ul#indhold.nav.nav-list
+            li(data-toggle='collapse', data-target='#supplerendebynavn').nav-header Supplerende bynavne API
+            ul#supplerendebynavn.nav.nav-list
+              li <a href='#supplerendebynavnsoegning'>Supplerende bynavnesøgning</a>
+              li <a href='#supplerendebynavnopslag'>Supplerende bynavnopslag</a>
+              li <a href='#supplerendebynavnautocomplete'>Supplerende bynavn autocomplete</a>
+              li <a href='#supplerendebynavndata'>Beskrivelse af supplerendebynavnedata</a>
+
             li(data-toggle='collapse', data-target='#region').nav-header Region API
             ul#region.nav.nav-list
               li <a href='#regionsoegning'>Regionsøgning</a>
@@ -72,8 +79,25 @@ block content
               li <a href='#jordstykkereverse'>Jordstykke reverse geocoding</a>
               li <a href='#jordstykkedata'>Databeskrivelse</a>
 
-
         div.span9
+          section
+            h3.anchor-header#supplerendebynavnsoegning Supplerende bynavnesøgning
+            +documentResource(parameterDoc, '/supplerendebynavne')
+
+            div.page-header
+            h3.anchor-header#supplerendebynavnopslag Supplerende bynavnopslag
+            +documentResource(parameterDoc, '/supplerendebynavne/{navn}')
+
+            div.page-header
+            h3.anchor-header#supplerendebynavnautocomplete Supplerende bynavn autocomplete
+            +documentResource(parameterDoc, '/supplerendebynavne/autocomplete')
+
+            div.page-header
+            h3.anchor-header#supplerendebynavndata Beskrivelse af supplerende bynavnedata
+            p Ovenstående Web API udstiller supplerende bynavne. Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.
+            p Web API'et udstiller for hver supplerende bynavn følgende informationer:
+            +documentSchema(jsonSchemas.supplerendebynavn)
+
           section
             h3.anchor-header#regionsoegning Regionsøgning
             +documentResource(parameterDoc, '/regioner')
