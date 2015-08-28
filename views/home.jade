@@ -106,7 +106,7 @@ block content
             div.page-header
               h2 Hvordan bruges DAWA?
             p Dawa bruges af udviklere til at etablere adressefunktionalitet i it-systemer. DAWA kan anvendes fra et meget bredt udsnit af - for ikke at sige alle - platforme og udviklingssprog. DAWA tilgås via et web API, hvor man ved simple HTTP forespørgsler fra sit program kalder DAWA. 
-            p Hvis du f.eks. ønsker at finde alle adresser i Københavns kommune med husnummer 13 anvende du følgende URl fra dit program:
+            p Hvis du f.eks. ønsker at finde alle adresser i Københavns kommune med husnummer 13 anvender du følgende URl fra dit program:
             pre
               a(href='#{url}/adresser?kommunekode=0101&husnr=13') #{url}/adresser?kommunekode=0101&husnr=13
 
@@ -114,18 +114,15 @@ block content
             p Du kan prøve et eksempel på autocompleteindtastningen ovenfor i 
               a(href='#anvendelser') afsnittet om anvendelser.
             p Etablering af autocomplete af adresser baseres på en kæde af forespørgelser med tiltagende specifikhed.
-              | Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'rød' anvendes følgende URL:
+              | Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'lill' anvendes følgende URL:
             pre
-              a(href='#{url}/vejnavne/autocomplete?q=rød') #{url}/vejnavne/autocomplete?q=rød
-            p Når brugeren har valgt det aktuelle vejnavn (eller har tastet nok til at identificere ét unikt vejnavn) overgår forespørgelser fra autocomplete på vejnavne til autocomplete på adresser. Lad os sige at brugeren har valgt Rødkildevej som vejnavn, og forsætter med indtastning af husnummer med 4 som første cifre, så skal følgende URL bruges:
+              a(href='#{url}/vejnavne/autocomplete?q=lill') #{url}/vejnavne/autocomplete?q=lill
+            p Når brugeren har valgt det aktuelle vejnavn (eller har tastet nok til at identificere ét unikt vejnavn) overgår forespørgelser fra autocomplete på vejnavne til autocomplete på adgangsadresser. Lad os sige at brugeren har valgt Lilledal som vejnavn, og forsætter med indtastning af husnummer 23, så skal følgende URL bruges:
             pre
-              a(href='#{url}/adresser/autocomplete?q=Rødkildevej 4') #{url}/adresser/autocomplete?q=Rødkildevej 4
-            p Denne forespørgelse begrænser autocomplete-søgningen til søgning efter adresser der matcher "Rødkildevej 4".
-              | Alternativt kunne autocomplete-komponenten have lavet en søgning, der formaliserede at vejnavnet skal være Rødkildevej, altså
+              a(href='#{url}/adgangsadresser/autocomplete?q=Lilledal 23') #{url}/adgangsadresser/autocomplete?q=Lilledal 23
+            p Denne forespørgelse begrænser autocomplete-søgningen til søgning efter adgangsadresser der matcher "Lilledal 23". Det resultere i adgangsadressen "Lilledal 23, 3450 Allerød", som igen kan anvendes til at søge efter adresser, som denne adgangsadresse:
             pre
-              a(href='#{url}/adresser/autocomplete?q=Rødkildevej 4&vejnavn=Rødkildevej') #{url}/adresser/autocomplete?q=Rødkildevej 4&vejnavn=Rødkildevej
-            p Den returnerede mængde adresser vil i de fleste tilfælde være ens for de to queries, men fordi komponenten er designet til at bruges interaktivt,
-              | er det valgt at udføre den første, simple søgning.
+              a(href='#{url}/adresser/autocomplete?q=Lilledal 23, 3450 Allerød') #{url}/adresser/autocomplete?q=Lilledal 23, 3450 Allerød  
 
             p Hvis din applikation kun er rettet mod adresser i f.eks. Københavns kommune, kan du i dine forespørgelser begrænse udsnittet af adresser og vejnavne, der kan autocompletes på til Københavns kommunes adresser. Det sker på følgende måde:
             pre
@@ -133,7 +130,9 @@ block content
             p og
             pre
               a(href='#{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4') #{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4
-            p Hvis du ikke ønsker selv at designe din autocomplete ud fra DAWA's Web API, har vi lavet en komponent, som gør det nemmere at etablere adresseindtastning med autocomplete i web applikationer. Find mere information på <a href='http://autocomplete.aws.dk/'>AWS Autocomplete komponentens web site</a>.  
+
+            p Det kan kræve lidt at implementere en adresseindtastning med autocomplete i en applikation. Den skal håndtere brugerens indtastninger og basere på disse indtastninger kalde de korrekte API'er.
+             Hvis du ikke ønsker selv at designe og implementere din autocomplete ud fra vejnavne, adgangsadresse og adresse Web API'erne, kan du anvende <a href='http://dawa.aws.dk/autocompletedok'>Autocomplete API'et</a>. Dette API kombinerer brugen af de tre web API'er og gør det derved lettere at implementere indtastning af adresser med autocomplete. Til implementering af adresse autocomplete i web applikationer, har vi gjort det endnu lettere. Til dette har vi lavet en komponent, som let kan integreres i din web applikation og etablere adresseindtastning med autocomplete. Find mere information på <a href='http://autocomplete.aws.dk/'>AWS Autocomplete komponentens web site</a>.  
 
             h4 Feltindtastning af adresser
             p  Du kan se et eksempel på feltindtastning af adresser i 
