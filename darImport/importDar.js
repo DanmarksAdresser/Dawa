@@ -77,22 +77,24 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
     })
     .then(function() {
       ['adgangspunkt', 'husnummer', 'adresse'].forEach(function(entity) {
-        ['insert', 'update', 'delete'].forEach(function(op) {
-          var changes = report['dar_' + entity][op];
-          if(changes.length !== 0) {
-            logger.info('Importer changes', {
-              op: op,
-              entity: entity,
-              changes: changes.length
-            });
-          }
-          else {
-            logger.info('No importer changes', {
-              op: op,
-              entity: entity
-            });
-          }
-        });
+        if(report && report['dar_' + entity]) {
+          ['insert', 'update', 'delete'].forEach(function(op) {
+            var changes = report['dar_' + entity][op];
+            if(changes.length !== 0) {
+              logger.info('Importer changes', {
+                op: op,
+                entity: entity,
+                changes: changes.length
+              });
+            }
+            else {
+              logger.info('No importer changes', {
+                op: op,
+                entity: entity
+              });
+            }
+          });
+        }
       });
     })
     .then(function() {
