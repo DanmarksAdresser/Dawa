@@ -5,3 +5,4 @@ select supplerendebynavne_init_tsv();
 select adgangsadresser_init_tsv();
 select enhedsadresser_init();
 select temaer_init();
+select vejstykkerpostnumremat_init();
