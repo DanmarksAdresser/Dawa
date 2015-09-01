@@ -55,7 +55,7 @@ Herefter initialiseres test-databasen:
 Dette sørger for at indlæse test-datasettet i databasen.
 Herefter initialiseres dawaempty:
 ```
- $> node server.js --pgConnectionUrl==postgres://<user>:<password>@localhost/dawaempty node psql/setup-db.js
+ $> pgConnectionUrl==postgres://<user>:<password>@localhost/dawaempty node psql/setup-db.js
 ```
 
 Nu kan tests afvikles:
