@@ -97,7 +97,6 @@ setupJadePage('/generelt'             , 'generelt.jade');
 setupJadePage('/adressedok'           , 'adressedok.jade');
 setupJadePage('/adgangsadressedok'    , 'adgangsadressedok.jade');
 setupJadePage('/vejedok'              , 'vejedok.jade');
-setupJadePage('/supplerendebynavndok' , 'supplerendebynavndok.jade');
 setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
 setupJadePage('/listerdok'            , 'listerdok.jade');
 setupJadePage('/om'                   , 'om.jade');
