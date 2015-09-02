@@ -39,6 +39,32 @@ DAWA startes op ved at køre
  $> node server.js --pgConnectionUrl==postgres://<user>:<password>@<host>:<port>/<dbname>
 ```
 
+## Kørsel af tests
+Afvikling af tests kræver to databaser: dawatest, som indeholder et mindre sæt testdata, samt dawaempty, som er en tom database. Først oprettes de to databaser:
+```
+ $> bash psql/createdb/createdb.bash localhost dawatest <user>
+ $> bash psql/createdb/createdb.bash localhost dawaempty <user>
+```
+
+Herefter initialiseres test-databasen:
+
+```
+  $> pgConnectionUrl=postgres://<user>@localhost/dawatest node psql/loadTestData.js
+```
+
+Dette sørger for at indlæse test-datasettet i databasen.
+Herefter initialiseres dawaempty:
+```
+ $> pgConnectionUrl==postgres://<user>:<password>@localhost/dawaempty node psql/setup-db.js
+```
+
+Nu kan tests afvikles:
+```
+ $> pgConnectionUrl=postgres://<user>@localhost/dawatest pgEmptyDbUrl=postgres://<user>@localhost/dawaempty \
+ grunt test
+```
+
+
 ##Release
 For at lave et release køres 
 
