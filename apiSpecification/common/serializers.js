@@ -42,8 +42,15 @@ JsonStringifyStream.prototype._transform = function(chunk, encoding, cb) {
   cb();
 };
 
-function jsonSep(prettyPrint) {
-  if(prettyPrint) {
+function jsonSep(prettyPrint, ndjson) {
+  if (ndjson) {
+    return {
+      open: '',
+      separator: '\r\n',
+      close: ''
+    };
+  }
+  else if(prettyPrint) {
     return {
       open: '[\n',
       separator: ', ',
@@ -85,7 +92,7 @@ function geojsonFeatureSep(crsUri, prettyPrint) {
 function jsonpSep(callbackName, sep, prettyPrint) {
   return {
     open: callbackName +'(' + sep.open,
-    separator: jsonSep(prettyPrint).separator,
+    separator: jsonSep(prettyPrint, false).separator,
     close: sep.close + ');'
   };
 }
@@ -94,16 +101,21 @@ function toGeoJsonUrn(srid) {
   return 'EPSG:' + srid;
 }
 
-function computeSeparator(formatParam, callbackParam, sridParam, prettyPrint) {
-  var sep = formatParam === 'geojson' ? geojsonFeatureSep(toGeoJsonUrn(sridParam), prettyPrint) : jsonSep(prettyPrint);
+function computeSeparator(formatParam, callbackParam, sridParam, prettyPrint, ndjson) {
+  var sep;
+  if (formatParam === 'geojson') {
+    sep = geojsonFeatureSep(toGeoJsonUrn(sridParam), prettyPrint);
+  } else {
+    sep = jsonSep(prettyPrint, ndjson);
+  }
   if (callbackParam) {
     sep = jsonpSep(callbackParam, sep, prettyPrint);
   }
   return sep;
 }
 
-function transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrint) {
-  var sep = computeSeparator(formatParam, callbackParam, sridParam, prettyPrint);
+function transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrint, ndjson) {
+  var sep = computeSeparator(formatParam, callbackParam, sridParam, prettyPrint, ndjson);
   pipe.add(new JsonStringifyStream(undefined, prettyPrint ? 2 : 0, sep));
   return pipe;
 }
@@ -111,12 +123,15 @@ function transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrin
 /**
  * Compute the appropriate Content-Type header based on the format and
  */
-function contentHeader(format, jsonpCallbackName) {
+function contentHeader(format, jsonpCallbackName, ndjson) {
   if(format === 'csv') {
     return 'text/csv; charset=UTF-8';
   }
   else if (jsonpCallbackName) {
     return "application/javascript; charset=UTF-8";
+  }
+  else if (ndjson) {
+    return "application/x-ndjson; charset=UTF-8";
   }
   else {
     return 'application/json; charset=UTF-8';
@@ -130,19 +145,19 @@ function streamCsv(pipe, csvFieldNames) {
 }
 
 
-exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, prettyPrint, representation) {
+exports.createStreamSerializer = function(formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam, representation) {
   formatParam = formatParam || 'json';
   sridParam = sridParam || 4326;
   return function(pipe, callback) {
     if(formatParam === 'csv') {
       streamCsv(pipe, representation.outputFields);
     } else {
-      transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrint);
+      transformToText(pipe, formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam);
     }
     var response = {
       status: 200,
       headers: {
-        'Content-Type': contentHeader(formatParam, callbackParam)
+        'Content-Type': contentHeader(formatParam, callbackParam, ndjsonParam)
       },
       bodyPipe: pipe
     };
@@ -150,12 +165,12 @@ exports.createStreamSerializer = function(formatParam, callbackParam, sridParam,
   };
 };
 
-exports.createSingleObjectSerializer = function(formatParam, callbackParam, prettyPrint, representation) {
+exports.createSingleObjectSerializer = function(formatParam, callbackParam, prettyPrint, ndjsonParam, representation) {
   return function(object, callback) {
     var response = {
       status: 200,
       headers: {
-        'Content-Type': contentHeader(formatParam, callbackParam)
+        'Content-Type': contentHeader(formatParam, callbackParam, ndjsonParam)
       }
     };
 

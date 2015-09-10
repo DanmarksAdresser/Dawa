@@ -33,6 +33,16 @@ describe('Format selection', function () {
     });
   });
 
+  it("Returns JSON with new-line delimiter if instructed to by ndjson parameter", function(done) {
+    request.get("http://localhost:3002/adresser?per_side=10&ndjson", function(error, response, body) {
+      expect(response.headers['content-type']).to.equal("application/x-ndjson; charset=UTF-8");
+      var items = body.split('\r\n');
+      expect(JSON.parse(items[0])).to.be.an('object');
+      expect(items.length).to.equal(10);
+      done();
+    });
+  });
+
   it("By default, JSON should be returned (single result mode)", function(done) {
     var id = "0a3f50b4-2737-32b8-e044-0003ba298018";
     request.get("http://localhost:3002/adresser/" + id, function(error, response, body) {

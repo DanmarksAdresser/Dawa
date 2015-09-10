@@ -116,6 +116,8 @@ function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
 
   var params = _.extend({}, parameterParseResult.params, pathParameterParseResult.params);
   params.format = params.format || 'json';
+  if (params.hasOwnProperty('noformat')) params.noformat = true;
+  if (params.hasOwnProperty('ndjson')) params.ndjson = true;
 
   // each actual resource impl may need some additional processing of the parameters
   // before they are passed on to the SQL layer
@@ -239,7 +241,8 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
       // client
       var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam,
         params.callback,
-        params.noformat === undefined,
+        !(params.noformat || params.ndjson),
+        params.ndjson,
         representation);
       return singleResultResponse(resourceSpec, dbClient,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult, callback, releaseDbClient);
     }
@@ -249,7 +252,8 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
       var serializeStream = serializers.createStreamSerializer(formatParam,
         params.callback,
         params.srid,
-        params.noformat === undefined,
+        !(params.noformat || params.ndjson),
+        params.ndjson,
         representation);
       return arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serializeStream, callback, releaseDbClient);
     }
