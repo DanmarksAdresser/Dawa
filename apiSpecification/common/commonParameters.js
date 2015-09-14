@@ -48,6 +48,9 @@ exports.format = [
   },
   {
     name: 'noformat'
+  },
+  {
+    name: 'ndjson'
   }
 ];
 
