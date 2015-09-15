@@ -63,7 +63,7 @@ function createCopyStream(client, table, columnNames) {
   return client.query(copyFrom(sql));
 }
 
-function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec) {
+function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec, rowsToSkip) {
   var dbColumnNames = dbSpecImpl.changeTableColumnNames;
   var pgStream = createCopyStream(client, tableName, dbColumnNames);
 
@@ -75,6 +75,7 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec) {
   };
 
   var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
+  console.log('ROWS TO SKIP: ' + JSON.stringify(rowsToSkip));
   return promisingStreamCombiner([
     inputStream,
     csvParse(csvParseOptions),
@@ -83,6 +84,16 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec) {
     }),
     es.mapSync(function (entity) {
       return csvSpecUtil.transform(csvSpec, entity);
+    }),
+    es.map(function(row, callback) {
+      if(_.contains(rowsToSkip, row.versionid ))  {
+        logger.info('Skipping row', {versionid: row.versionid});
+        callback();
+      }
+      else {
+        logger.info('NOT skipping row', { versionid: row.versionid});
+        callback(null, row);
+      }
     }),
     csvStringify({
       delimiter: ';',
@@ -96,10 +107,10 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec) {
   ]);
 }
 
-function createTableAndLoadData(client, filePath, targetTable, dbSpecImpl, csvSpec) {
+function createTableAndLoadData(client, filePath, targetTable, dbSpecImpl, csvSpec, rowsToSkip) {
   return dbSpecUtil.createTempTableForCsvContent(client, targetTable, dbSpecImpl)
     .then(function() {
-      return loadCsvFile(client, filePath, targetTable, dbSpecImpl, csvSpec);
+      return loadCsvFile(client, filePath, targetTable, dbSpecImpl, csvSpec, rowsToSkip);
     });
 }
 
@@ -237,9 +248,9 @@ function dropChangeTables(client, tableSuffix) {
  * @param useFastComparison For bitemporal tables, skip comparison of each field.
  * @returns {*}
  */
-function updateTableFromCsv(client, csvFilePath, csvSpec, dbSpecImpl, useFastComparison, report) {
+function updateTableFromCsv(client, csvFilePath, csvSpec, dbSpecImpl, useFastComparison, rowsToSkip, report) {
   var desiredTable = 'desired_' + dbSpecImpl.table;
-  return createTableAndLoadData(client, csvFilePath, desiredTable, dbSpecImpl, csvSpec)
+  return createTableAndLoadData(client, csvFilePath, desiredTable, dbSpecImpl, csvSpec, rowsToSkip)
     .then(function() {
       return dbSpecImpl.compareAndUpdate(client, desiredTable, dbSpecImpl.table, {
         useFastComparison: useFastComparison
@@ -342,11 +353,11 @@ exports.clearDarTables = function(client) {
  * Initialize DAR tables from CSV, assuming they are empty.
  * Loads data directly into the tables from CSV.
  */
-function initDarTables(client, dataDir) {
+function initDarTables(client, dataDir, skipRowsConfig) {
   return qUtil.mapSerial(darDbSpecImpls, function(dbSpecImpl, entityName) {
     logger.info('Initializing dar table from CSV', {entity: entityName});
     var csvSpec = csvSpecs[entityName];
-    return loadCsvFile(client, path.join(dataDir, csvSpec.filename), dbSpecImpl.table, dbSpecImpl, csvSpec);
+    return loadCsvFile(client, path.join(dataDir, csvSpec.filename), dbSpecImpl.table, dbSpecImpl, csvSpec, skipRowsConfig[entityName]);
   });
 }
 
@@ -412,8 +423,8 @@ function initDawaFromScratch(client) {
  * When DAR tables has been initialized, the DAWA tables will be updated as well (
  * from scratch, if clearDawa is specified, otherwise incrementally).
  */
-function initFromDar(client, dataDir, clearDawa, skipDawa) {
-  return initDarTables(client, dataDir)
+function initFromDar(client, dataDir, clearDawa, skipDawa, skipRowsConfig) {
+  return initDarTables(client, dataDir, skipRowsConfig)
     .then(function () {
       if(!skipDawa) {
         if (clearDawa) {
@@ -475,7 +486,7 @@ function fullCompareAndUpdate(client, skipEvents, report) {
  * Assuming DAR tables are already populated, update DAR tables
  * from CSV, followed by an update of DAWA tables.
  */
-function updateFromDar(client, dataDir, fullCompare, skipDawa, report) {
+function updateFromDar(client, dataDir, fullCompare, skipDawa, skipRowsConfig, report) {
   return qUtil.mapSerial(csvSpecs, function(csvSpec, entityName) {
     logger.debug('Importing ' + entityName);
     var dbSpecImpl = darDbSpecImpls[entityName];
@@ -483,7 +494,7 @@ function updateFromDar(client, dataDir, fullCompare, skipDawa, report) {
       client,
       path.join(dataDir, csvSpec.filename),
       csvSpec,
-      dbSpecImpl, false, report);
+      dbSpecImpl, false, skipRowsConfig[entityName], report);
   })
     .then(function() {
       if(!skipDawa) {

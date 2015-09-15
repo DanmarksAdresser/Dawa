@@ -20,10 +20,11 @@ var optionSpec = {
   clear: [false, 'Completely remove old DAWA data and history', 'boolean', false],
   fullCompare: [false, 'Whether to make a full comparison', 'boolean', false],
   reportDir: [false, 'Directory where report from run will be stored', 'string'],
-  skipDawa: [false, 'Do not update DAWA tables', 'boolean', false]
+  skipDawa: [false, 'Do not update DAWA tables', 'boolean', false],
+  skipRows: [false, 'Path to file with rows to skip', 'string']
 };
 
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'), function(args, options) {
+cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 'skipRows'), function(args, options) {
   var dataDir = options.dataDir;
   var initial = options.initial;
   var clearDawa = options.clear;
@@ -33,6 +34,14 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
     connString: options.pgConnectionUrl,
     pooled: false
   });
+  var skipRowsConfig = {
+    adgangspunkt: [],
+    husnummer: [],
+    adresse: []
+  };
+  if(options.skipRows) {
+    skipRowsConfig = JSON.parse(fs.readFileSync(options.skipRows));
+  }
 
   var report = {};
 
@@ -53,10 +62,10 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
       .then(function() {
         return importDarImpl.withDarTransaction(client, 'csv', function() {
           if(initial) {
-            return importDarImpl.initFromDar(client, dataDir, clearDawa, skipDawa);
+            return importDarImpl.initFromDar(client, dataDir, clearDawa, skipDawa, skipRowsConfig);
           }
           else {
-            return importDarImpl.updateFromDar(client, dataDir, fullCompare, skipDawa, report);
+            return importDarImpl.updateFromDar(client, dataDir, fullCompare, skipDawa, skipRowsConfig, report);
           }
       });
     })
