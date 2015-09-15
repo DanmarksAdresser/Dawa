@@ -75,7 +75,6 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec, rowsToSki
   };
 
   var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
-  console.log('ROWS TO SKIP: ' + JSON.stringify(rowsToSkip));
   return promisingStreamCombiner([
     inputStream,
     csvParse(csvParseOptions),
@@ -91,7 +90,6 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec, rowsToSki
         callback();
       }
       else {
-        logger.info('NOT skipping row', { versionid: row.versionid});
         callback(null, row);
       }
     }),
