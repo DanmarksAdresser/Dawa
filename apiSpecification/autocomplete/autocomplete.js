@@ -5,7 +5,6 @@ var _ = require('underscore');
 
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var commonParameters = require('../common/commonParameters');
-var logger = require('../../logger').forCategory('autocomplete');
 var registry = require('../registry');
 var resourcesUtil = require('../common/resourcesUtil');
 var schema = require('../parameterSchema');

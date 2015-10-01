@@ -16,6 +16,7 @@ exports.checkRequiredOptions = function(options, requiredOptions) {
   }, []);
   var missingOptions = _.difference(requiredOptions,suppliedOptions);
   if(missingOptions.length > 0) {
+    /*eslint no-console: 0 */
     console.error('Missing required options: ' + JSON.stringify(missingOptions));
     process.exit(1);
   }

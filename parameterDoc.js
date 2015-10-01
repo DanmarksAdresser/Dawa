@@ -796,7 +796,7 @@ function dagiSridCirkelPolygonParameters(plural) {
     SRIDParameter,
     {
       name: 'cirkel',
-      doc: 'Find de ' + plural + ', som overlapper den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes ETRS89/UTM32 eller WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+      doc: 'Find de ' + plural + ', som overlapper den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes ETRS89/UTM32 eller WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.'
     },
     {
       name: 'polygon',

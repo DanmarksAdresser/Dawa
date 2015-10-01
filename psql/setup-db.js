@@ -28,7 +28,7 @@ cli.main(function (args, options) {
     return Q.nfcall(async.series,
       [
         initialization.loadSchemas(client, scriptDir),
-        initialization.disableTriggersAndInitializeTables(client),
+        initialization.disableTriggersAndInitializeTables(client)
       ]);
   }).done();
 });

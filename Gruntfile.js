@@ -1,8 +1,13 @@
 module.exports = function (grunt) {
   "use strict";
 
+  require('load-grunt-tasks')(grunt);
+
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    eslint: {
+      target: '.'
+    },
     jshint: {
       all: [
         "*.js",
@@ -61,14 +66,7 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-release');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-express-server');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-bower-task');
-
-  grunt.registerTask('unitTest', ['jshint', 'mochaTest:unit']);
+  grunt.registerTask('unitTest', ['eslint', 'mochaTest:unit']);
   grunt.registerTask('integrationtest', ['express:test', 'mochaTest:integration', 'express:test:stop']);
   grunt.registerTask('test', ['unitTest', 'integrationtest']);
   grunt.registerTask('default', ['bower','test']);

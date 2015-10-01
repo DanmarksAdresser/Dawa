@@ -262,7 +262,6 @@ exports.wfsFeatureToTema = function(feature, mapping) {
   var featureCandidates = feature[mapping.wfsName];
   if (!featureCandidates) {
     logger.error("found no features, feature[" + mapping.wfsName + "], feature = ", JSON.stringify(feature));
-  } else {
   }
   var wfsFeature = featureCandidates[0];
 

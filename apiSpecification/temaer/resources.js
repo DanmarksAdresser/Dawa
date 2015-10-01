@@ -8,7 +8,6 @@ var sqlModels = require('./sqlModels');
 var resourcesUtil = require('../common/resourcesUtil');
 var commonParameters = require('../common/commonParameters');
 var registry = require('../registry');
-var tema = require('../../temaer/tema');
 var _ = require('underscore');
 
 var publishedTemaer = _.filter(dagiTemaer, function(tema) {
@@ -23,7 +22,7 @@ publishedTemaer.forEach(function(tema) {
   var queryParams = {
     propertyFilter: parameters[tema.singular].propertyFilter,
     crs: commonParameters.crs,
-    geomWithin: commonParameters.geomWithin,
+    geomWithin: commonParameters.geomWithin
   };
 
   if(tema.searchable) {

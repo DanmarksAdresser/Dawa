@@ -179,7 +179,7 @@ describe('Importing DAR CSV files to database', function () {
         {
           name: 'content',
           type: csvTypes.string
-        }],
+        }]
     };
 
     var dbSpec = {

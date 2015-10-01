@@ -75,11 +75,11 @@ var fieldMap = {
     }
 	],
 	valglandsdel: [
-	  {
+    {
       name: 'bogstav',
       description: 'Valgslandsdelens bogstav, udgør nøglen.',
       schema: commonSchemaDefinitions.ValglandsdelBogstav
-	  },
+    },
     describe(navn, 'Valglandsdelens navn.')
 	],
   storkreds: [

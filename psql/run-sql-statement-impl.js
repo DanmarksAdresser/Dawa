@@ -1,3 +1,7 @@
+"use strict";
+
+/*eslint no-console: 0 */
+
 var async = require('async');
 var sqlCommon = require('./common');
 

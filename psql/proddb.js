@@ -1,7 +1,5 @@
 "use strict";
 
-var q = require('q');
-
 var setupDatabase = require('./setupDatabase');
 
 var transactions = require('./transactions');

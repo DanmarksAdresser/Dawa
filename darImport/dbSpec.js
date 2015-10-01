@@ -29,7 +29,7 @@ module.exports = {
     table: 'dar_vejnavn',
     temporality: 'monotemporal',
     idColumns: ['id'],
-    columns: _.pluck(csvSpec.streetname.columns, 'name'),
+    columns: _.pluck(csvSpec.streetname.columns, 'name')
   },
   postnr: {
     table: 'dar_postnr',

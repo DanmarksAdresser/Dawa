@@ -37,7 +37,7 @@ describe('Autocomplete af adresser', function() {
       var id = suggestion.adresse.id;
       var href = suggestion.adresse.href;
       expect(href).to.match(new RegExp(id));
-      request.get(href, function(error, response, body) {
+      request.get(href, function(error, response) {
         expect(response.statusCode).to.equal(200);
         done();
       });

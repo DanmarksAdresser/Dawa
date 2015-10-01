@@ -89,7 +89,7 @@ cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
   var directory = path.resolve(options.targetDir);
 
   function saveDagiTema(temaNavn, callback) {
-    console.log("Downloader DAGI tema " + temaNavn);
+    logger.info("downloadDagi", "Downloader DAGI tema " + temaNavn);
     var queryParams = {
       SERVICE: 'WFS',
       VERSION: '1.0.0',
@@ -106,7 +106,7 @@ cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
       return name + '=' + encodeURIComponent(value);
     }).join('&');
     var url = dagiUrl + '&' + paramString;
-    console.log("URL: " + url);
+    logger.info("downloadDagi", "fetching from WFS", { url: url});
     function getDagiTema( callback) {
       request.get(url, function (err, response, body) {
         if (err) {

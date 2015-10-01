@@ -17,5 +17,6 @@ if (process.env.logConfiguration) {
 else {
   logOptions = {};
 }
+/*eslint no-console:0*/
 console.log("initializing logging with " + JSON.stringify(logOptions));
 logger.initialize(logOptions);

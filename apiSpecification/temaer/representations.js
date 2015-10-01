@@ -5,7 +5,6 @@ var dagiTemaer = require('./temaer');
 var representationUtil = require('../common/representationUtil');
 var fieldMap = require('./fields');
 var commonMappers = require('../commonMappers');
-var commonSchemaDefinitions = require('../commonSchemaDefinitions');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var additionalFields = require('./additionalFields');
 
@@ -188,8 +187,8 @@ _.filter(dagiTemaer, function(tema) {
       var dagiTemaMapper = representations.json.mapper(baseUrl);
       return function(row) {
         var result = {
-			    tekst: autocompleteTekst[tema.singular].mapper(row)
-		    };
+          tekst: autocompleteTekst[tema.singular].mapper(row)
+        };
         result[tema.singular] = dagiTemaMapper(row);
         return result;
       };

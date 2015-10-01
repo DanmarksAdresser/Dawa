@@ -3,7 +3,6 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-var xml2js = require('xml2js');
 var async = require('async');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var logger = require('../logger').forCategory('dagiToDb');

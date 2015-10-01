@@ -3,7 +3,6 @@
 var genericPool = require('generic-pool');
 var pg = require('pg.js');
 var q = require('q');
-var util = require('util');
 var _ = require('underscore');
 
 var logger = require('../logger').forCategory('sql');
@@ -105,10 +104,11 @@ function denodeifyClient(client) {
   };
   result.querypLogged = function(query, params) {
     return result.queryp('EXPLAIN ' + query, params).then(function(plan) {
+      /*eslint no-console: 0 */
       console.log(JSON.stringify(plan.rows, null, 2));
       return result.queryp(query, params);
       });
-  }
+  };
   result.emit = function(type, event) {
     client.emit(type, event);
     return this;

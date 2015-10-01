@@ -18,10 +18,8 @@ var optionSpec = {
 function extractResult(client, path, callback) {
   async.eachSeries(['vejstykke', 'adgangsadresse', 'adresse'], function(dataModelName, callback) {
     var filename = dataModelName + '.csv';
-    console.log('outputting ' + filename);
     var stream = fs.createWriteStream(path + '/' + filename);
     dataUtil.tableToCsv(client, stream, historyDatamodels[dataModelName].table, historyDatamodels[dataModelName], function(err) {
-      console.log('callback invoked');
       callback(err);
     });
   }, callback);

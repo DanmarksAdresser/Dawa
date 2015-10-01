@@ -3,7 +3,6 @@
 // This script loads ejerlav into the database from a CSV-file.
 
 var _         = require('underscore');
-var Q = require('q');
 
 var proddb = require('./proddb');
 var updateEjerlavImpl = require('./updateEjerlavImpl');

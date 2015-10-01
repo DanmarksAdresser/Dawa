@@ -238,7 +238,7 @@ var sampleParameters = {
     },
     zonekode: {
       values: ['1'],
-      verifier: function(adr, zone) {
+      verifier: function(adr) {
         return adr.zone === 'Byzone';
       }
     },
@@ -377,7 +377,7 @@ var sampleParameters = {
     },
     zonekode: {
       values: ['1'],
-      verifier: function(adr, zone) {
+      verifier: function(adr) {
         return adr.adgangsadresse.zone === 'Byzone';
       }
     },

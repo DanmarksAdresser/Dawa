@@ -9,7 +9,6 @@ var _ = require('underscore');
 
 var definitions = require('../commonSchemaDefinitions');
 var globalSchemaObject = require('../commonSchemaDefinitionsUtil').globalSchemaObject;
-var nullableType = require('../schemaUtil').nullableType;
 var util = require('../util');
 var kode4String = util.kode4String;
 var timestampFormatter = util.d;

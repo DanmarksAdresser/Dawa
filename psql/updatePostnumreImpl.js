@@ -13,7 +13,6 @@ var MAX_INT = 2147483647;
 
 function loadPostnummerCsv(client, inputFile, tableName) {
   return function() {
-    console.log('indlæser CSV');
     var stream = fs.createReadStream(inputFile);
     return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
       tableName: tableName,
@@ -33,7 +32,6 @@ function createReport(client, inputFile) {
   var report = Q.nfcall(dataUtil.createTempTable, client, 'updated_postnumre', 'postnumre')
     .then(loadPostnummerCsv(client, inputFile, 'updated_postnumre'))
     .then(function() {
-      console.log('Beregner forskel');
       return divergensImpl.computeTableDifferences(client, datamodels.postnummer, 'postnumre', 'updated_postnumre');
     });
 

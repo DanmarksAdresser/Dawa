@@ -7,11 +7,11 @@ var _       = require('underscore');
 
 var jsonpResults = [];
 
-/* jshint ignore:start */
+/*eslint-disable */
 var jsonpCallback = function(result) {
   jsonpResults.push(result);
 };
-/* jshint ignore:end */
+/*eslint-enable */
 
 describe('Format selection', function () {
   it("By default, JSON should be returned", function(done) {

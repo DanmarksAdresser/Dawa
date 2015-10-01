@@ -1,13 +1,13 @@
 "use strict";
 
 var fs = require('fs');
-var q = require('q');
 var winston = require('winston');
 
 var qUtil = require('../q-util');
 
 function exitOnErr(err){
   if (err){
+    /*eslint no-console: 0 */
     console.dir(err);
     winston.error("Error: %j", err, {});
     process.exit(1);

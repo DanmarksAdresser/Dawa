@@ -14,7 +14,6 @@ var MAX_INT = 2147483647;
 
 function loadEjerlavCsv(client, inputFile, tableName) {
   return function() {
-    console.log('indlæser CSV');
     var stream = fs.createReadStream(inputFile);
     return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
       tableName: tableName,
@@ -28,7 +27,6 @@ function createReport(client, inputFile) {
   var report = Q.nfcall(dataUtil.createTempTable, client, 'updated_ejerlav', 'ejerlav')
     .then(loadEjerlavCsv(client, inputFile, 'updated_ejerlav'))
     .then(function() {
-      console.log('Beregner forskel');
       return divergensImpl.computeTableDifferences(client, datamodels.ejerlav, 'ejerlav', 'updated_ejerlav');
     });
 

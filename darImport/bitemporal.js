@@ -19,7 +19,7 @@ var columnsEqualClause = sqlUtil.columnsEqualClause;
  * @param spec
  * @returns {*}
  */
-function markExpiredRecords(client, destinationTable, upTable, spec) {
+function markExpiredRecords(client, destinationTable, upTable) {
   return client.queryp(format('UPDATE' +
     ' {destinationTable}' +
     ' SET tx_expired = current_dar_transaction()' +

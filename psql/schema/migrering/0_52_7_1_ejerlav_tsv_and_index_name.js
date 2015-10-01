@@ -2,7 +2,6 @@
 
 var cliParameterParsing = require('../../../bbr/common/cliParameterParsing');
 var sqlCommon = require('../../common');
-var _ = require('underscore');
 var async = require('async');
 var winston = require('winston');
 

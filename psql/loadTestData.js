@@ -2,7 +2,6 @@
 
 var async = require('async');
 var q = require('q');
-var _ = require('underscore');
 
 var initialization = require('./initialization');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');

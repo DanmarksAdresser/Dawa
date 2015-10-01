@@ -1,0 +1,16 @@
+{
+  "root": true,
+  "extends": "eslint:recommended",
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "generators": true,
+    "templateStrings": true
+  },
+  "env": {
+    "node": true,
+    "mocha": true
+  },
+  "rules": {
+    "no-unused-vars": [2, {"vars": "all", "args": "none"}]
+  }
+}

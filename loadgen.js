@@ -1,5 +1,6 @@
 "use strict";
 
+/*eslint no-console: 0 */
 var async = require('async');
 var cliParameterParsing = require('./bbr/common/cliParameterParsing');
 var request = require('request-promise');

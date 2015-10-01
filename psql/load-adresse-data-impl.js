@@ -135,7 +135,6 @@ function loadBbrMeta(bbrFileStreams, callback) {
       return callback(err);
     }
     if(data.length > 1) {
-      console.log(JSON.stringify(data));
       return callback(new Error("Unexpected length of SenesteHaendelse.CSV: " + data.length));
     }
     if(data.length === 1) {

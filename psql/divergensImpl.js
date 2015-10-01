@@ -8,6 +8,7 @@ var dataUtil = require('./dataUtil');
 var datamodels = require('../crud/datamodel');
 var dbapi = require('../dbapi');
 var loadAdresseData = require('./load-adresse-data-impl');
+var logger = require('../logger').forCategory('divergensImpl');
 
 var baseDatamodels = {
   adgangsadresse: datamodels.adgangsadresse,
@@ -59,7 +60,7 @@ function getDawaSequenceNumber(client, udtraekOptions, comparisonOptions) {
     return getNextDawaSequenceNumber();
   }
   else if (forceDawaSequenceNumber !== undefined) {
-    console.log("FORCING DAWA SEQUENCE NUMBER " + forceDawaSequenceNumber);
+    logger.info("FORCING DAWA SEQUENCE NUMBER " + forceDawaSequenceNumber);
     return forceDawaSequenceNumber;
   }
   else {
@@ -294,7 +295,6 @@ function dropTempTables(client, tablePrefix) {
 exports.computeTableDifferences = computeTableDifferences;
 
 exports.divergenceReport = function (client, loadAdresseDataOptions, comparisonOptions) {
-  console.log("Comparison options: " + JSON.stringify(comparisonOptions));
   var expectedTablePrefix = 'expected_';
   var dawaSequenceNumber = getDawaSequenceNumber(client, loadAdresseDataOptions, comparisonOptions);
 

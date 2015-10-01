@@ -1,7 +1,5 @@
 "use strict";
 
-var async = require('async');
-var q = require('q');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var proddb = require('./proddb');

@@ -12,8 +12,6 @@ var ejerlav = require('./ejerlav');
 var logger = require('../logger').forCategory('matrikelImport');
 var proddb = require('../psql/proddb');
 var tema = require('../temaer/tema.js');
-var temaer = require('../apiSpecification/temaer/temaer');
-
 
 var optionSpec = {
   sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
@@ -120,7 +118,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
       });
     }
     else {
-      console.log("Ingen opdatering af temamapninger, da ingen ejerlav er opdateret");
+      logger.info("Ingen opdatering af temamapninger, da ingen ejerlav er opdateret");
     }
   })
     .then(function() {

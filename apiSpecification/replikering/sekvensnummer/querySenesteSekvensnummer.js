@@ -1,6 +1,5 @@
 "use strict";
 
-var q = require('q');
 
 var d = require('../../util').d;
 

@@ -2,7 +2,6 @@
 
 var fs = require('fs');
 var _ = require('underscore');
-var Q = require('q');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var proddb = require('./proddb');

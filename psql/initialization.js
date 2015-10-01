@@ -1,5 +1,7 @@
 "use strict";
 
+/*eslint no-console: 0*/
+
 var async = require('async');
 var fs = require('fs');
 var format = require('util').format;
@@ -67,7 +69,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'wms_housenumber_inspire', type: 'view'},
   {name: 'wms_adgangsadresser', type: 'view'},
   {name: 'wfs_adgangsadresser', type: 'view'},
-  {name: 'wfs_adresser', type: 'view'},
+  {name: 'wfs_adresser', type: 'view'}
 ]);
 
 exports.forAllTableSpecs = function(client, func, callback){

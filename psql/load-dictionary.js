@@ -53,7 +53,7 @@ cliParameterParsing.main(optionSpec,['pgConnectionUrl', 'version'], function(arg
       },
       sqlCommon.disableTriggers(client),
       sqlCommon.psqlScript(client, __dirname, 'reindex-search.sql'),
-      sqlCommon.enableTriggers(client),
+      sqlCommon.enableTriggers(client)
     ]);
   }).done();
 });

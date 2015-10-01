@@ -50,7 +50,6 @@ CursorStream.prototype._doFetch = function(count) {
     var meta = self.initialPageFetched ? {} : { query : self.query };
     statistics.emit(statCategory, Date.now() - before, err, meta);
     if(err) {
-      console.log('error fetching ' + err);
       self._close(err);
     }
     if(self.closed) {

@@ -2,7 +2,6 @@
 
 var _ = require('underscore');
 
-var dagiTemaer = require('./temaer');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 var registry = require('../registry');
 var schema = require('../parameterSchema');
@@ -24,8 +23,7 @@ var kodeAndNavn = {
       type: 'integer',
       multi: true
     }
-  ]),
-
+  ])
 };
 
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];

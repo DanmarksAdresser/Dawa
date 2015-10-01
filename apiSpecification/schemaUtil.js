@@ -48,6 +48,7 @@ exports.schemaObject = function(def) {
 exports.compileSchema = function(schema) {
   var validator = new ZSchema();
   if(!validator.validateSchema(schema)) {
+    /*eslint no-console:0 */
     console.log(JSON.stringify(schema, null, 2));
     throw new Error("Invalid schema: " + JSON.stringify(validator.getLastErrors()));
   }

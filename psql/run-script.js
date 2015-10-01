@@ -1,5 +1,7 @@
 "use strict";
 
+/*eslint no-console: 0 */
+
 var q = require('q');
 var _ = require('underscore');
 

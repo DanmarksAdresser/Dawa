@@ -1,5 +1,7 @@
 "use strict";
 
+/*eslint no-console: 0 */
+
 var fs = require('fs');
 var _ = require('underscore');
 var async = require('async');

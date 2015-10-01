@@ -22,7 +22,6 @@ module.exports = function(stream, createFallbackStreamFn) {
     });
   };
   stream.once('data', function(data) {
-    console.log('got data: ' + JSON.stringify(data, null, 2));
     stream.removeListener('end', switchToFallback);
     out.write(data);
     stream.pipe(out);

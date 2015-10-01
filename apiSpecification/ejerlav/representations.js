@@ -6,7 +6,6 @@ var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-var util = require('../util');
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
 var normalizedFieldSchema = function(fieldName) {
@@ -14,7 +13,6 @@ var normalizedFieldSchema = function(fieldName) {
 };
 
 
-var d = util.d;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHref = commonMappers.makeHref;
 

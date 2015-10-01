@@ -1,7 +1,6 @@
 "use strict";
 
 var format = require('string-format');
-var _ = require('underscore');
 
 /**
  * Given a table alias and an array of columns,

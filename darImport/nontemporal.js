@@ -9,7 +9,6 @@ var sqlUtil = require('./sqlUtil');
 
 var columnsDistinctClause = sqlUtil.columnsDistinctClause;
 var columnsEqualClause = sqlUtil.columnsEqualClause;
-var columnsNotDistinctClause = sqlUtil.columnsNotDistinctClause;
 var selectList = sqlUtil.selectList;
 
 /**

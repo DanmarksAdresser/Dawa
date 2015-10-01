@@ -8,9 +8,7 @@ var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var datamodels = require('../crud/datamodel');
 var divergensImpl = require('../psql/divergensImpl');
 var importDarImpl = require('./importDarImpl');
-var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
 var proddb = require('../psql/proddb');
-var sqlCommon = require('../psql/common');
 var qUtil = require('../q-util');
 
 var optionSpec = {
@@ -46,6 +44,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
           return q.nfcall(fs.writeFile, options.output, JSON.stringify(differencesArray, null, 2), {encoding: 'utf-8'});
         }
         else {
+          /*eslint no-console:0 */
           console.log(JSON.stringify(differencesArray, null, 2));
         }
       });

@@ -59,7 +59,6 @@ var baseQuery = function () {
 };
 
 
-var geomQuery = "(select geom from temaer where tema = 'postnummer' and (fields->>'nr')::integer = nr limit 1)";
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
