@@ -42,7 +42,7 @@ CREATE VIEW AdgangsadresserView AS
     array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
     (SELECT E.navn FROM adgangsadresser_temaer_matview ATM
       JOIN temaer J ON ATM.tema_id = J.id
-      JOIN ejerlav E ON (J.fields->>'ejerlavkode')::integer = E.kode WHERE ATM.tema = 'jordstykke' AND ATM.adgangsadresse_id = A.id) as jordstykke_ejerlavnavn,
+      JOIN ejerlav E ON (J.fields->>'ejerlavkode')::integer = E.kode WHERE ATM.tema = 'jordstykke' AND ATM.adgangsadresse_id = A.id LIMIT 1) as jordstykke_ejerlavnavn,
     A.tsv
 
   FROM adgangsadresser A
