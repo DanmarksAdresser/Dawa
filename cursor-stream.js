@@ -6,7 +6,7 @@
 var util = require('util');
 var Readable    = require('stream').Readable;
 var statistics = require('./statistics');
-var winston = require('winston');
+var logger = require('./logger').forCategory('cursorStream');
 
 util.inherits(CursorStream, Readable);
 function CursorStream(client, cursorName, query) {
@@ -77,6 +77,9 @@ CursorStream.prototype._close = function(err) {
   }
   self.client.removeListener('transactionEnd', self.transactionEndListener);
   if(err) {
+    logger.error('Cursor closed due to error', {
+      error: err
+    });
     self.emit('error', err);
     self.push(null);
     self.client = null;
@@ -89,7 +92,7 @@ CursorStream.prototype._close = function(err) {
     var close = "CLOSE " + self.cursorName;
     self.client.query(close, [], function(err) {
       if(err) {
-        winston.error('could not close cursor: ' + JSON.stringify(err));
+        logger.error('could not close cursor', err);
       }
     });
     self.client = null;
@@ -100,7 +103,7 @@ CursorStream.prototype._close = function(err) {
 CursorStream.prototype._read = function(count) {
   var self = this;
   if(self.closed) {
-    winston.info('attempted read from a closed source');
+    logger.info('attempted read from a closed source');
     return;
   }
   if(!self.queryInProgress) {

@@ -102,6 +102,9 @@ function setupWorker() {
   var server = http.createServer(app);
   server.listen(listenPort);
   logger.info("startup", "Express server listening for connections", {listenPort: listenPort, mode: app.settings.env});
+  // has to be printed on console for test to work
+  /*eslint no-console: 0 */
+  console.log('Express server listening for connections');
 }
 
 function setupMaster() {

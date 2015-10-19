@@ -10,7 +10,7 @@ var proddb = require('../psql/proddb');
 
 
 var optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {

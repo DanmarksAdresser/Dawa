@@ -95,7 +95,7 @@ function generateAdgangsadresserHistory(client) {
 `;
     yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
   })();
-};
+}
 
 function generateAdresserHistory(client) {
   return q.async(function*() {
