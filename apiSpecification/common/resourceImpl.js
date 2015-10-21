@@ -1,10 +1,12 @@
 "use strict";
 
 var eventStream = require('event-stream');
+var q = require('q');
+var _ = require('underscore');
+
 var paths = require('../paths');
 var sqlUtil = require('./sql/sqlUtil');
 var logger = require('../../logger');
-var _ = require('underscore');
 
 var pipeline = require('../../pipeline');
 var parameterParsing = require('../../parameterParsing');
@@ -171,37 +173,36 @@ function singleResultResponse(
   });
 }
 
-function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize, callback, releaseDbClient) {
-  function pipeResult(stream) {
-    // map the query results to the correct representation and serialize to http response
-    var pipe = pipeline(stream);
-    pipe.map(mapObject);
-    pipe.completed().then(function() {
-      releaseDbClient();
-    }, function(err) {
+function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize, releaseDbClient) {
+  return q.async(function*() {
+    function pipeResult(stream) {
+      // map the query results to the correct representation and serialize to http response
+      var pipe = pipeline(stream);
+      pipe.map(mapObject);
+      pipe.completed().then(function() {
+        releaseDbClient();
+      }, function(err) {
+        releaseDbClient(err);
+      });
+      return q.nfcall(serialize, pipe);
+    }
+
+    try {
+      if (resourceSpec.disableStreaming) {
+        var result = yield q.ninvoke(resourceSpec.sqlModel, "query", dbClient, fieldNames, params);
+        let stream = eventStream.readArray(result);
+        return yield pipeResult(stream);
+      }
+      else {
+        let stream = yield q.ninvoke(resourceSpec.sqlModel, "stream", dbClient, fieldNames, params);
+        return yield pipeResult(stream);
+      }
+    }
+    catch(err) {
       releaseDbClient(err);
-    });
-    serialize(pipe, callback);
-  }
-  if(resourceSpec.disableStreaming) {
-    resourceSpec.sqlModel.query(dbClient, fieldNames, params, function(err, result) {
-      if(err) {
-        releaseDbClient(err);
-        return callback(null, modelErrorResponse(err));
-      }
-      var stream = eventStream.readArray(result);
-      return pipeResult(stream);
-    });
-  }
-  else {
-    resourceSpec.sqlModel.stream(dbClient, fieldNames, params, function(err, stream) {
-      if(err) {
-        releaseDbClient(err);
-        return callback(null, modelErrorResponse(err));
-      }
-      return pipeResult(stream);
-    });
-  }
+      return modelErrorResponse(err);
+    }
+  })();
 }
 
 function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, callback) {
@@ -255,7 +256,7 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
         !(params.noformat || params.ndjson),
         params.ndjson,
         representation);
-      return arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serializeStream, callback, releaseDbClient);
+      return arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serializeStream, releaseDbClient).nodeify(callback);
     }
   });
 }
