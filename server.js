@@ -13,30 +13,6 @@ var count = require('os').cpus().length;
 var pg = require('pg.js');
 require('pg-parse-float')(pg);
 
-
-/**
- * We log memory statistics, so we can monitor memory consumption in splunk.
- * This does not work on windows.
- */
-if(process.platform !== 'win32') {
-  var memwatch = require('memwatch-next');
-  memwatch.on('stats', function(stats) {
-    var logMeta = {
-      pid: process.pid,
-      current_base: stats.current_base,
-      estimated_base: stats.estimated_base,
-      min: stats.min,
-      max: stats.max,
-      usage_trend: stats.usage_trend
-    };
-    logger.info('memory', 'stats', logMeta);
-    if(stats.current_base > 768 * 1024 * 1024) {
-      logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
-      process.exit(1);
-    }
-  });
-
-}
 function asInteger(stringOrNumber) {
   return _.isNumber(stringOrNumber) ? stringOrNumber : parseInt(stringOrNumber);
 }
