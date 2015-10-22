@@ -35,6 +35,9 @@ var transactionStatements = {
 exports.withTransaction = function (dbname, options, transactionFn) {
   options = defaultOptions(options);
   return database.withConnection(dbname, options.pooled, function (client) {
+    if(options.shouldAbort && options.shouldAbort()) {
+      return;
+    }
     return wrapWithStatements(client,
       transactionStatements[options.mode][0],
       transactionStatements[options.mode][1],

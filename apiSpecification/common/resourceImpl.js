@@ -152,38 +152,32 @@ function singleResultResponse(
   validatedParams,
   fieldNames,
   mapObject,
-  serialize,
-  callback,
-  releaseDbClient) {
+  serialize) {
   // create a function that can write the object to the HTTP response based on the format requrested by the
   // client
-  resourceSpec.sqlModel.query(dbClient, fieldNames, validatedParams, function(err, rows) {
-    releaseDbClient(err);
-    if (err) {
-      return callback(null, modelErrorResponse(err));
-    } else if (rows.length > 1) {
-      return callback(null, internalServerErrorResponse("The request resulted in more than one response"));
+  return q.ninvoke(resourceSpec.sqlModel, "query", dbClient, fieldNames, validatedParams).then(function(rows) {
+    if (rows.length > 1) {
+      logger.error('Query for single object resulted in more than one object', {path: resourceSpec.path, params: validatedParams});
+      return internalServerErrorResponse("The request resulted in more than one response");
     } else if (rows.length === 0) {
-      return callback(null, objectNotFoundResponse(validatedPathParams));
+      return objectNotFoundResponse(validatedPathParams);
     } else {
       // map the object and send it to the client
       var mappedResult = mapObject(rows[0]);
-      return serialize(mappedResult, callback);
+      return q.nfcall(serialize, mappedResult);
     }
+  }, function(err) {
+    logger.error('Internal error querying for single object', {error: err});
+    return modelErrorResponse(err);
   });
 }
 
-function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize, releaseDbClient) {
+function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize) {
   return q.async(function*() {
     function pipeResult(stream) {
       // map the query results to the correct representation and serialize to http response
       var pipe = pipeline(stream);
       pipe.map(mapObject);
-      pipe.completed().then(function() {
-        releaseDbClient();
-      }, function(err) {
-        releaseDbClient(err);
-      });
       return q.nfcall(serialize, pipe);
     }
 
@@ -191,7 +185,8 @@ function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObje
       if (resourceSpec.disableStreaming) {
         var result = yield q.ninvoke(resourceSpec.sqlModel, "query", dbClient, fieldNames, params);
         let stream = eventStream.readArray(result);
-        return yield pipeResult(stream);
+        var serialized = yield pipeResult(stream);
+        return serialized;
       }
       else {
         let stream = yield q.ninvoke(resourceSpec.sqlModel, "stream", dbClient, fieldNames, params);
@@ -199,44 +194,35 @@ function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObje
       }
     }
     catch(err) {
-      releaseDbClient(err);
       return modelErrorResponse(err);
     }
   })();
 }
 
-function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, callback) {
-  var parseResult = parseAndProcessParameters(resourceSpec, req.params, req.query);
-  if(parseResult.pathErrors) {
-    return callback(null, uriPathFormatErrorResponse(parseResult.pathErrors));
-  }
-  else if(parseResult.queryErrors) {
-    return callback(null, queryParameterFormatErrorResponse(parseResult.queryErrors));
-  }
-  var params = parseResult.processedParams;
-
-  var formatParam = params.format;
-
-  // choose the right representation based on the format requested by client
-  var representation = resourceSpec.chooseRepresentation(formatParam, resourceSpec.representations);
-  if(_.isUndefined(representation) || _.isNull(representation)){
-    return callback(null, queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource'));
-  }
-  logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
-  // The list of fields we want to retrieve from database
-  var fieldNames = _.pluck(_.filter(representation.fields, function(field){ return field.selectable; }), 'name');
-
-  // create a mapper function that maps results from the SQL layer to the requested representation
-  var mapObject = representation.mapper(paths.baseUrl(req), params, resourceSpec.singleResult);
-
-  withDatabaseClient(function(err, dbClient, releaseDbClient) {
-    if(err) {
-      return callback(null, internalServerErrorResponse(err));
+function resourceResponse(client, resourceSpec, req) {
+  return q.async(function*() {
+    var parseResult = parseAndProcessParameters(resourceSpec, req.params, req.query);
+    if(parseResult.pathErrors) {
+      return uriPathFormatErrorResponse(parseResult.pathErrors);
     }
-    // we do not want to produce a response if it is no longer needed
-    if(shouldAbort()) {
-      return releaseDbClient();
+    else if(parseResult.queryErrors) {
+      return queryParameterFormatErrorResponse(parseResult.queryErrors);
     }
+    var params = parseResult.processedParams;
+
+    var formatParam = params.format;
+
+    // choose the right representation based on the format requested by client
+    var representation = resourceSpec.chooseRepresentation(formatParam, resourceSpec.representations);
+    if(_.isUndefined(representation) || _.isNull(representation)){
+      return queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
+    }
+    logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
+    // The list of fields we want to retrieve from database
+    var fieldNames = _.pluck(_.filter(representation.fields, function(field){ return field.selectable; }), 'name');
+
+    // create a mapper function that maps results from the SQL layer to the requested representation
+    var mapObject = representation.mapper(paths.baseUrl(req), params, resourceSpec.singleResult);
     if(resourceSpec.singleResult) {
       // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
       // client
@@ -245,7 +231,7 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
         !(params.noformat || params.ndjson),
         params.ndjson,
         representation);
-      return singleResultResponse(resourceSpec, dbClient,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult, callback, releaseDbClient);
+      return yield singleResultResponse(resourceSpec, client,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult);
     }
     else {
       // create a serializer function that can stream the objects to the HTTP response in the format requested by the
@@ -256,9 +242,10 @@ function resourceResponse(withDatabaseClient, resourceSpec, req, shouldAbort, ca
         !(params.noformat || params.ndjson),
         params.ndjson,
         representation);
-      return arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serializeStream, releaseDbClient).nodeify(callback);
+      var response = yield arrayResultResponse(resourceSpec, client, params, fieldNames, mapObject, serializeStream);
+      return response;
     }
-  });
+  })();
 }
 
 exports.resourceResponse = resourceResponse;
@@ -270,45 +257,40 @@ exports.createExpressHandler = function(resourceSpec) {
     function shouldAbort() {
       return !res.connection.writable;
     }
-    function withDbClient(callback) {
-      transactions.beginTransaction('prod', {mode: 'READ_ONLY', pooled: true, shouldAbort: shouldAbort}).then(
-        function(tx) {
-          callback(undefined, tx.client, function(err) {
-            transactions.endTransaction(tx, err);
+    function doResponse(client) {
+      return resourceResponse(client, resourceSpec, req)
+        .catch(function (err) {
+          logger.error('An unexpected error happened during resource handling', {error: err});
+          return internalServerErrorResponse(err);
+        }).then(function (response) {
+          res.statusCode = response.status || 200;
+          _.each(response.headers, function (headerValue, headerName) {
+            res.setHeader(headerName, headerValue);
           });
-        },
-        function(err) {
-          if(shouldAbort()) {
-            // normal cancellation of transaction - callback never called.
-            logger.info("http", "Client closed connection before database transaction was started", err);
+          if (response.body) {
+            res.end(response.body);
+          }
+          else if (response.bodyPipe) {
+            response.bodyPipe.toHttpResponse(res);
+            return response.bodyPipe.completed();
           }
           else {
-            callback(err);
+            res.end();
           }
-        }
-      );
+        });
     }
 
-    resourceResponse(withDbClient, resourceSpec, req, shouldAbort, function(err, response) {
-      if(shouldAbort()) {
-        return;
-      }
-      if(err) {
-        response = internalServerErrorResponse(err);
-      }
-      res.statusCode = response.status || 200;
-      _.each(response.headers, function(headerValue, headerName) {
-        res.setHeader(headerName, headerValue);
-      });
-      if(response.body) {
-        res.end(response.body);
-      }
-      else if(response.bodyPipe) {
-        response.bodyPipe.toHttpResponse(res);
-      }
-      else {
-        res.end();
-      }
+    var promise = transactions.withTransaction('prod', {
+      mode: 'READ_ONLY',
+      pooled: true,
+      shouldAbort: shouldAbort
+    }, doResponse);
+
+    return promise.catch(function(err) {
+      logger.error('Internal error processing request', {error: err});
+      res.connection.disconnect();
     });
+
   };
+
 };

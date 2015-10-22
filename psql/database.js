@@ -167,6 +167,7 @@ function acquirePooledConnection(pool, options, callback) {
     client.poolCount++;
     callback(null, denodeifyClient(client), function(err) {
       if(err) {
+        logger.info('Destroying Postgres client', { error: err });
         pool.destroy(client);
       } else {
         pool.release(client);

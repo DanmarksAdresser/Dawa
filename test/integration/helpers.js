@@ -8,13 +8,7 @@ var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
 
 function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  function withDbClient(callback) {
-    callback(null, dbClient, function() {});
-  }
-  function shouldAbort() {
-    return false;
-  }
-  return q.ninvoke(resourceImpl, 'resourceResponse', withDbClient, resourceSpec, {params: pathParams, query: queryParams, headers: {}}, shouldAbort).then(function(response) {
+  return resourceImpl.resourceResponse( dbClient, resourceSpec, {params: pathParams, query: queryParams, headers: {}}).then(function(response) {
     if(response.bodyPipe) {
       return q.ninvoke(response.bodyPipe, 'toArray').then(function(result) {
         delete response.bodyPipe;
