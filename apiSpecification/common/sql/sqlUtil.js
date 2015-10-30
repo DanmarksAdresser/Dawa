@@ -24,6 +24,8 @@ var allSelectableFieldNames = function(allFieldNames, columns) {
   });
 };
 
+exports.allSelectableFieldNames = allSelectableFieldNames;
+
 exports.getColumnNameForWhere = function (columnSpec, name) {
   var spec = columnSpec[name];
   if (_.isUndefined(spec)) {
@@ -96,11 +98,11 @@ exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
     },
     query: function(client, fieldNames, params, callback) {
       var query = this.createQuery(fieldNames, params);
-      dbapi.queryRaw(client, query.sql, query.params, callback);
+      return dbapi.queryRaw(client, query.sql, query.params).nodeify(callback);
     },
     stream: function(client, fieldNames, params, callback) {
       var query = this.createQuery(fieldNames, params);
-      dbapi.streamRaw(client, query.sql, query.params, callback);
+      return dbapi.streamRaw(client, query.sql, query.params).nodeify(callback);
     }
   };
 };

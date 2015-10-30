@@ -94,6 +94,8 @@ function generateAdgangsadresserHistory(client) {
     JOIN postnumre p ON pn.postdistriktnummer = p.nr
 `;
     yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
+    yield client.queryp(`DROP TABLE ${mergedTable}`);
+    yield client.queryp('SELECT vask_adgangsadresser_update_tsv()');
   })();
 }
 
@@ -117,6 +119,7 @@ FROM ${adresseHistoryTable} a JOIN vask_adgangsadresser aa ON a.husnummerid = hn
     yield client.queryp(`DROP TABLE ${unmerged}`);
     yield client.queryp(`DELETE FROM vask_adresser; INSERT INTO vask_adresser (SELECT * FROM ${merged})`);
     yield client.queryp(`DROP TABLE ${merged}`);
+    yield client.queryp('SELECT vask_adresser_update_tsv()');
   })();
 }
 

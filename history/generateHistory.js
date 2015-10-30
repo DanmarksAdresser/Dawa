@@ -22,6 +22,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     return q.async(function*() {
       try {
         yield generateHistoryImpl.generateAdgangsadresserHistory(client);
+        yield generateHistoryImpl.generateAdresserHistory(client);
       }
       catch(err) {
         logger.error('Caught error in generateHistory', err);

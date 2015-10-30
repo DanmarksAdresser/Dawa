@@ -16,9 +16,11 @@ CREATE TABLE vask_adresser (
   postnr             SMALLINT,
   postnrnavn         TEXT,
   virkning           TSTZRANGE,
+  tsv               TSVECTOR,
   EXCLUDE USING GIST (dar_id WITH =, virkning WITH &&)
 );
 
 CREATE INDEX ON vask_adresser(id);
 CREATE INDEX ON vask_adresser(postnr);
+CREATE INDEX ON vask_adresser USING gin(tsv);
 

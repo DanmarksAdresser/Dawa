@@ -2,8 +2,9 @@
 
 require('./adgangsadresse/resources');
 require('./adresse/resources');
-require('./temaer/resources');
+require('./datavask/resources');
 require('./postnummer/resources');
+require('./temaer/resources');
 require('./supplerendebynavn/resources');
 require('./vejnavn/resources');
 require('./vejstykke/resources');

@@ -157,7 +157,7 @@ function singleResultResponse(
   // client
   return q.ninvoke(resourceSpec.sqlModel, "query", dbClient, fieldNames, validatedParams).then(function(rows) {
     if (rows.length > 1) {
-      logger.error('Query for single object resulted in more than one object', {path: resourceSpec.path, params: validatedParams});
+      logger.error('resourceImpl', 'Query for single object resulted in more than one object', {path: resourceSpec.path, params: validatedParams});
       return internalServerErrorResponse("The request resulted in more than one response");
     } else if (rows.length === 0) {
       return objectNotFoundResponse(validatedPathParams);
@@ -167,7 +167,7 @@ function singleResultResponse(
       return q.nfcall(serialize, mappedResult);
     }
   }, function(err) {
-    logger.error('Internal error querying for single object', {error: err});
+    logger.error('resourceImpl', 'Internal error querying for single object', {error: err});
     return modelErrorResponse(err);
   });
 }
@@ -194,6 +194,7 @@ function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObje
       }
     }
     catch(err) {
+      logger.error('resourceImpl', 'Caught unexpected error', {error: err});
       return modelErrorResponse(err);
     }
   })();
@@ -260,7 +261,7 @@ exports.createExpressHandler = function(resourceSpec) {
     function doResponse(client) {
       return resourceResponse(client, resourceSpec, req)
         .catch(function (err) {
-          logger.error('An unexpected error happened during resource handling', {error: err});
+          logger.error('resourceImpl', 'An unexpected error happened during resource handling', {error: err});
           return internalServerErrorResponse(err);
         }).then(function (response) {
           res.statusCode = response.status || 200;
@@ -287,7 +288,7 @@ exports.createExpressHandler = function(resourceSpec) {
     }, doResponse);
 
     return promise.catch(function(err) {
-      logger.error('Internal error processing request', {error: err});
+      logger.error('resourceImpl', 'Internal error processing request', {error: err});
       res.connection.disconnect();
     });
 

@@ -1350,6 +1350,28 @@ module.exports['/autocomplete'] = {
   examples: []
 };
 
+module.exports['/datavask/adgangsadresser'] = {
+  subtext: 'Datavask af adgangsadresse. Servicen modtager en adressebetegnelse og svarer med 1 eller flere  adgangsadresser, ' +
+  'som bedst matcher svaret. Endvidere er der en angivelse af hvor godt de fundne adgangsadresser matcher adressebetegnelsen.',
+  parameters: [{
+    name: 'betegnelse',
+    doc: 'Adressebetegnelsen for den adresse som ønskes vasket, f.eks. "Rentemestervej 8, 2400 København".' +
+    ' Adressebetegnelsen kan leveres med eller uden supplerende bynavn.'
+  }],
+  examples: []
+};
+
+module.exports['/datavask/adresser'] = {
+  subtext: 'Datavask af adresse. Servicen modtager en adressebetegnelse og svarer med 1 eller flere  adresser, ' +
+  'som bedst matcher svaret. Endvidere er der en angivelse af hvor godt de fundne adresser matcher adressebetegnelsen.',
+  parameters: [{
+    name: 'betegnelse',
+    doc: 'Adressebetegnelsen for den adresse som ønskes vasket, f.eks. "Augustenborggade 5, 5. 3, 8000 Aarhus C".' +
+    ' Adressebetegnelsen kan leveres med eller uden supplerende bynavn.'
+  }],
+  examples: []
+};
+
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
   adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources);
 

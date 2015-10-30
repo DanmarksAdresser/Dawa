@@ -87,10 +87,11 @@ function doLog(winstonLogger, level, category, msg, values) {
     meta = _.clone(values);
 
     // for errors, we always want a stack trace
-    if(levels[level] >= levels.error) {
-      if(meta.error === undefined) {
+    if(levels[level]  >= levels.error && meta.error === undefined) {
         meta.stack = new Error().stack;
-      }
+    }
+    else if(meta.error) {
+      meta.stack = meta.error.stack;
     }
   }
   meta.category = category;
