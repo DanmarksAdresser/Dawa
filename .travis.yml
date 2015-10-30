@@ -15,9 +15,11 @@ addons:
 env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty logConfiguration=travis-ci-client-logconfig.json
 
-before_script:
+before_install:
   - sudo apt-get install g++-4.8
   - sudo locale-gen --no-archive da_DK.UTF-8
+
+before_script:
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
   - bash psql/createdb/createdb.bash localhost dawaempty postgres
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest node psql/loadTestData.js
