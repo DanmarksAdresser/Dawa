@@ -255,7 +255,7 @@ var fields = {
     }, {
       name: 'etage',
       description: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier:' +
-        ' tal fra 1 til 99, st, kl, kl2 op til kl9.',
+        ' tal fra 1 til 99, st, kl, k2 op til k9.',
       schema: definitions.NullableEtage
     }, {
       name: 'dør',
