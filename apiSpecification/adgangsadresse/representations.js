@@ -213,7 +213,7 @@ exports.json = {
                      '<dl>' +
                       kvhFieldsDts +
                      '</dl>' +
-                     'En adresse på vejstykke 1074 (Melvej) nummer 6 i kommune 420 (Assens) vil altså få KVH-nøgle "042010740006"',
+                     'En adresse på vejstykke 1074 (Melvej) nummer 6 i kommune 420 (Assens) vil altså få KVH-nøgle "04201074___6"',
         type: 'string'
       }
     },

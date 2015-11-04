@@ -53,7 +53,7 @@ exports.json = {
         '<dl>' +
         kvhxFieldsDts +
         '</dl>' +
-        'En adresse på vejstykke 1074 (Melvej) 6, st. tv i kommune 420 (Assens) vil altså få KVH-nøgle "042010740006_st__tv"',
+        'En adresse på vejstykke 1074 (Melvej) 6, st. tv i kommune 420 (Assens) vil altså få KVH-nøgle "04201074___6_st__tv"',
         type: 'string'
       },
       status: normalizedFieldSchema('status'),
