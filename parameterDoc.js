@@ -1372,6 +1372,48 @@ module.exports['/datavask/adresser'] = {
   examples: []
 };
 
+module.exports['/historik/adgangsadresser'] = {
+  subtext: 'Hent historik for adgangsadresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
+  ' Bemærk, at udgåede adgangsadresser (statuskode 2 og 4) også medtages i svaret. Historikken returneres som en array af JSON-objekter,' +
+  ' hvor hvert objekt repræsenterer en adgangsadresses tilstand i den periode, der er angivet med virkningstart og virkningslut. Hvis tilstanden' +
+  ' er den aktuelle tilstand har virkningslut værdien null.',
+  parameters: [
+    {
+      name: 'id',
+      doc: 'Adgangsadressen unikke UUID'
+    },
+    {
+      name: 'postnr',
+      doc: 'Returner kun historiske adgangsadresser med det angivne postnummer'
+    },
+    {
+      name: 'kommunekode',
+      doc: 'Returner kun historiske adgangsadresser med den angivne kommunekode'
+    }].concat(formatAndPagingParams),
+  examples: []
+};
+
+module.exports['/historik/adresser'] = {
+  subtext: 'Hent historik for adresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
+  ' Bemærk, at udgåede adresser (statuskode 2 og 4) også medtages i svaret. Historikken returneres som en array af JSON-objekter,' +
+  ' hvor hvert objekt repræsenterer en adgangsadresses tilstand i den periode, der er angivet med virkningstart og virkningslut. Hvis tilstanden' +
+  ' er den aktuelle tilstand har virkningslut værdien null.',
+  parameters: [
+    {
+      name: 'id',
+      doc: 'Adgangsadressen unikke UUID'
+    },
+    {
+      name: 'postnr',
+      doc: 'Returner kun historiske adresser med det angivne postnummer'
+    },
+    {
+      name: 'kommunekode',
+      doc: 'Returner kun historiske adresser med den angivne kommunekode'
+    }].concat(formatAndPagingParams),
+  examples: []
+};
+
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
   adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources);
 

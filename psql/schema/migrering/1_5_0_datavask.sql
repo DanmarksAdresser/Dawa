@@ -18,6 +18,7 @@ CREATE TABLE vask_adgangsadresser (
 CREATE INDEX ON vask_adgangsadresser (id);
 CREATE INDEX ON vask_adgangsadresser (postnr);
 CREATE INDEX ON vask_adgangsadresser USING gin(tsv);
+create index on vask_adgangsadresser(kommunekode, vejkode, postnr);
 
 CREATE TABLE vask_adresser (
   id                 UUID,
@@ -43,3 +44,4 @@ CREATE TABLE vask_adresser (
 CREATE INDEX ON vask_adresser(id);
 CREATE INDEX ON vask_adresser(postnr);
 CREATE INDEX ON vask_adresser USING gin(tsv);
+create index on vask_adresser(kommunekode, vejkode, postnr);

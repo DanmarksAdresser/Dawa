@@ -1,9 +1,6 @@
 "use strict";
 
 var commonMappers = require('../commonMappers');
-var fieldsMap = require('./fields');
-var representationUtil = require('../common/representationUtil');
-
 
 var makeHref = commonMappers.makeHref;
 
@@ -11,11 +8,14 @@ var makeHref = commonMappers.makeHref;
 function createResponseMapper(adgangsadresseOnly) {
   return function (baseUrl) {
     return function(row) {
+      // we just set a href on the current address. The rest happens in sqlModel
       row.resultater.forEach((item) => {
-        item.aktueladresse.href = makeHref(
-          baseUrl,
-          adgangsadresseOnly ? 'adgangsadresse' : 'adresse',
-          [item.aktueladresse.id]);
+        if(item.aktueladresse && (item.aktueladresse.status === 1 || item.aktueladresse.status === 3)) {
+          item.aktueladresse.href = makeHref(
+            baseUrl,
+            adgangsadresseOnly ? 'adgangsadresse' : 'adresse',
+            [item.aktueladresse.id]);
+        }
       });
       return row;
     }
@@ -23,11 +23,9 @@ function createResponseMapper(adgangsadresseOnly) {
 }
 
 ['adgangsadresse', 'adresse'].forEach((entityName) => {
-  let fields = fieldsMap[entityName];
-  let flatFields = representationUtil.flatCandidateFields(fields);
   exports[entityName] = {
     json: {
-      fields: flatFields,
+      fields: [],
       mapper: createResponseMapper(entityName === 'adgangsadresse')
     }
   };

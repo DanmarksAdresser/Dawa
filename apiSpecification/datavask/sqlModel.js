@@ -1,20 +1,21 @@
 "use strict";
 
+var moment = require('moment');
 var q = require('q');
 var _ = require('underscore');
 
 var adresseTextMatch = require('../adresseTextMatch');
-var columnsMap = require('./columns');
+var columnsMap = require('../history/columns');
 var dbapi = require('../../dbapi');
 var levenshtein = require('../levenshtein');
 var parameters = require('./parameters');
 var registry = require('../registry');
+var qUtil = require('../../q-util');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
 var util = require('../util');
 
 
-var assembleSqlModel = sqlUtil.assembleSqlModel;
 var kode4String = util.kode4String;
 
 
@@ -42,6 +43,9 @@ function formatAdresseFields(row, adgangOnly) {
 }
 
 function formatAdresse(row, adgangOnly) {
+  if(!row) {
+    return null;
+  }
   var result = formatAdresseFields(row, adgangOnly);
   result.status = row.status;
   return result;
@@ -73,103 +77,119 @@ function computeDifferences(adr1, adr2, adgangOnly) {
   return differences;
 }
 
-function computeMatchResult(address, unwashedAddressText, adgangsadresseOnly) {
-  var addressWithoutSupBynavn = udenSupplerendeBynavn(address);
-  addressWithoutSupBynavn.supplerendebynavn = null;
-  var distanceWithSupBynavn = levenshtein(util.adressebetegnelse(address).toLowerCase(), unwashedAddressText.toLowerCase(), 1, 1, 1).distance;
-  var distanceWithoutSupBynavn = levenshtein(util.adressebetegnelse(addressWithoutSupBynavn).toLowerCase(), unwashedAddressText.toLowerCase(), 1, 1, 1).distance;
-  var usedAddress = distanceWithSupBynavn < distanceWithoutSupBynavn ? address : addressWithoutSupBynavn;
-  var parsedAddress = adresseTextMatch(unwashedAddressText, usedAddress);
-  var differences = computeDifferences(parsedAddress, usedAddress);
-  var differencesSum = Object.keys(differences).reduce(function(memo, value) {
-    memo += differences[value];
-    return memo;
-  }, 0);
-  var matchCategory;
-  if(differencesSum === 0) {
-    matchCategory = 'A';
-  }
-  else if(differences.husnr === 0 && differences.postnr === 0 &&
-    (adgangsadresseOnly || (differences.etage === 0 && differences.dør === 0)) &&
-  differences.vejnavn <= 3 && differences.vejnavn <= address.vejnavn.length * 2 / 3) {
-    matchCategory = 'B'
-  }
-  else {
-    matchCategory = 'C'
-  }
-  let result = {
-    afstand: Math.min(distanceWithSupBynavn, distanceWithoutSupBynavn),
-    kategori: matchCategory,
-    forskelle: differences,
-    parsetadresse: parsedAddress
+function datavaskFuzzySearch(sqlParts, entityName, params) {
+  var betegnelseAlias = dbapi.addSqlParameter(sqlParts, params.betegnelse);
+  sqlParts.whereClauses.push("id IN " +
+    "(SELECT id" +
+    ` FROM vask_${entityName}r adg` +
+    " JOIN (select kommunekode, vejkode, postnr" +
+    " FROM vejstykkerpostnumremat vp" +
+    ` ORDER BY tekst <-> ${betegnelseAlias} limit 15) as vp` +
+    " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
+  sqlParts.orderClauses.push(`min(least(levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', true)}), lower(${betegnelseAlias}), 1, 2, 3),` +
+    ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 1, 2, 3)))`);
+//  sqlParts.orderClauses.push('lower(virkning) desc');
+}
+
+var adgangsadresseFields = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'postnr', 'postnrnavn', 'virkningstart', 'virkningslut'];
+
+var adresseFields = adgangsadresseFields.concat(['etage', 'dør']);
+
+function makeSelectList(fieldNames, columns) {
+  let buildObjectArgs = fieldNames.map((fieldName) => {
+    let column = columns[fieldName];
+
+    return `'${fieldName}', ${ column ? (column.column || column.select) : fieldName}`;
+  }).join(', ');
+  return ['id', `(json_agg(json_build_object(${buildObjectArgs}))) as versions`];
+}
+
+let selectList = {
+  adgangsadresse: makeSelectList(adgangsadresseFields, columnsMap.adgangsadresse),
+  adresse: makeSelectList(adresseFields, columnsMap.adresse)
+};
+
+var baseQuery = function(entityName) {
+  return {
+    select: selectList[entityName],
+      from: [`vask_${entityName}r`],
+    whereClauses: [],
+    groupBy: 'id',
+    orderClauses: [],
+    sqlParams: []
   };
-  return result;
 }
 
-function transformResult(row, adgangsadresseOnly, betegnelseParam) {
-  var result = {};
-  result.adresse = formatAdresse(row, adgangsadresseOnly);
-  result.adresse.virkningstart = row.virkningstart;
-  result.adresse.virkningslut = row.virkningslut;
-  result.aktueladresse = formatAdresse(row.current, adgangsadresseOnly);
-  var addressFields = formatAdresse(row, adgangsadresseOnly);
-  result.vaskeresultat = computeMatchResult(addressFields, betegnelseParam, adgangsadresseOnly);
-  return result;
+function doSearchQuery(client, entityName, params) {
+  var columns = columnsMap[entityName];
+  var queryParts = baseQuery(entityName);
+  sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns)(queryParts, params);
+
+  var tsQuery = sqlParameterImpl.toPgSearchQuery(params.betegnelse);
+  var tsQueryAlias = dbapi.addSqlParameter(queryParts, tsQuery);
+  var tsQueryRankAlias = dbapi.addSqlParameter(queryParts, sqlParameterImpl.queryForRanking(tsQuery));
+
+
+  var searchSubQuery =
+    `SELECT id FROM vask_${entityName}r WHERE id IN (SELECT id FROM vask_${entityName}r WHERE tsv @@ to_tsquery('adresser_query', ${tsQueryAlias}) LIMIT 500)` +
+    ` GROUP BY id` +
+    ` ORDER BY max(round(1000000 * ts_rank(tsv, to_tsquery('adresser_query', ${tsQueryRankAlias}), 16))) DESC` +
+    ` LIMIT 20`;
+
+  queryParts.whereClauses.push(`id IN (${searchSubQuery})`);
+
+  sqlParameterImpl.paging(columns, [])(queryParts, params);
+  var query = dbapi.createQuery(queryParts);
+  return client.queryp(query.sql, query.params).then((result) => {
+    return result.rows || [];
+  });
+
 }
 
+function doFuzzyQuery(client, entityName, params) {
+  var columns = columnsMap[entityName];
+  var queryParts = baseQuery(entityName);
+
+  sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns)(queryParts, params);
+  datavaskFuzzySearch(queryParts, entityName, params);
+  sqlParameterImpl.paging(columns, [])(queryParts, params);
+  var query = dbapi.createQuery(queryParts);
+  return client.queryp(query.sql, query.params).then((result) => {
+    return result.rows || [];
+  });
+}
+
+function removePrefixZeroes(str) {
+  if(str) {
+    return str.replace(/^0+([^0])+]/, '$1');
+  }
+  return str;
+}
+
+function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText) {
+  return _.mapObject(addressTextToFormattedAddressMap, (address, parsedAddressText) => {
+    let addressWithoutSupBynavn = udenSupplerendeBynavn(address);
+    addressWithoutSupBynavn.supplerendebynavn = null;
+
+    // supplerende bynavn is optional, so we take the variant which matches best
+    let distanceWithSupBynavn = levenshtein(parsedAddressText.toLowerCase(), unparsedAddressText.toLowerCase(), 1, 1, 1).distance;
+    let distanceWithoutSupBynavn = levenshtein(util.adressebetegnelse(addressWithoutSupBynavn).toLowerCase(), unparsedAddressText.toLowerCase(), 1, 1, 1).distance;
+    let usedAddress = distanceWithSupBynavn < distanceWithoutSupBynavn ? address : addressWithoutSupBynavn;
+    let result = adresseTextMatch(unparsedAddressText, usedAddress);
+
+    // We consider leading zeroes in husnr and etage to be insignificant
+    result.address.husnr = removePrefixZeroes(result.address.husnr);
+    if(result.etage) {
+      result.address.etage = removePrefixZeroes(result.address.etage);
+    }
+    return result;
+  });
+
+}
 
 function createSqlModel(entityName) {
+  var adgangsadresseOnly = entityName === 'adgangsadresse';
   var columns = columnsMap[entityName]
-  var baseQuery = function () {
-    return {
-      select: [],
-      from: [`vask_${entityName}r`],
-      whereClauses: [],
-      groupBy: '',
-      orderClauses: [],
-      sqlParams: []
-    };
-  };
-  function datavaskFuzzySearch(sqlParts, params) {
-    var betegnelseAlias = dbapi.addSqlParameter(sqlParts, params.betegnelse);
-    sqlParts.whereClauses.push("id IN " +
-      "(SELECT id" +
-      ` FROM vask_${entityName}r adg` +
-      " JOIN (select kommunekode, vejkode, postnr" +
-      " FROM vejstykkerpostnumremat vp" +
-      ` ORDER BY tekst <-> ${betegnelseAlias} limit 15) as vp` +
-      " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
-    sqlParts.orderClauses.push(`least(levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', true)}), lower(${betegnelseAlias}), 2, 1, 3),` +
-      ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 2, 1, 3))`);
-  }
-
-
-  var commonParameterImpls = [
-    sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns)];
-
-  var searchParameterImpls =
-    commonParameterImpls.concat([
-      sqlParameterImpl.search(columns, ['id', 'virkningstart']),
-      sqlParameterImpl.paging(columns, [])
-    ]);
-
-  var fuzzyParameterImpls = commonParameterImpls.concat([
-    datavaskFuzzySearch,
-    sqlParameterImpl.paging(columns, ['id', 'virkningstart'])
-  ]);
-
-  var searchSqlModel = assembleSqlModel(columns, searchParameterImpls, baseQuery);
-
-  var fuzzySqlModel = assembleSqlModel(columns, fuzzyParameterImpls, baseQuery);
-
-  function toResponse(category, transformedResults) {
-    let results = transformedResults.filter((item) => item.vaskeresultat.kategori === category);
-    results.forEach((item) => delete item.vaskeresultat.kategori);
-    return [{
-      kategori: category,
-      resultater: results
-    }]
-  }
 
   return {
     allSelectableFieldNames: function (allFieldNames) {
@@ -177,46 +197,139 @@ function createSqlModel(entityName) {
     },
     query: function (client, fieldNames, params, callback) {
       return q.async(function*() {
-        // first we make a normal text search
-        var searchParams = _.clone(params);
-        delete searchParams.betegnelse;
-        searchParams.search = params.betegnelse;
-        searchParams.side = 1;
-        searchParams.per_side=30;
-        var searchResult = yield searchSqlModel.query(client, fieldNames, searchParams);
+        params = _.clone(params);
+        params.side = 1;
+        params.per_side=10;
 
-        if (searchResult.length === 0) {
-          // we don't get any hits, use fuzzy search
-          var fuzzyParams = _.clone(params);
-          fuzzyParams.side = 1;
-          fuzzyParams.per_side=30;
-          searchResult = yield fuzzySqlModel.query(client, fieldNames, fuzzyParams);
+        let searchResult = yield doSearchQuery(client, entityName, params);
+
+        if(searchResult.length === 0) {
+          searchResult = yield doFuzzyQuery(client, entityName, params);
         }
 
-        var transformedResult = searchResult.map((row) => {
-          return transformResult(row, entityName === 'adgangsadresse', params.betegnelse);
+        var allVersions = _.flatten(_.pluck(searchResult, 'versions'));
+
+        // maps address text of found adresses to the list of versions with that address text
+        var addressTextToVersionsMap = _.groupBy(allVersions, (version) => util.adressebetegnelse(formatAdresse(version, entityName === 'adgangsadresse')));
+
+        // a list of all the different address texts we found
+        var allAddressTexts = Object.keys(addressTextToVersionsMap);
+
+        // map of address text to the formatted address fields
+        var addressTextToFormattedAddressMap = _.mapObject(addressTextToVersionsMap, (versions) => formatAdresse(versions[0], entityName === 'adgangsadresse'));
+        var addressTextToParseResult = parseAddressTexts(addressTextToFormattedAddressMap, params.betegnelse);
+        var addressTextToDifferences = _.mapObject(addressTextToParseResult, (parseResult, usedAddress) => {
+          let parsedAddress = parseResult.address;
+          return computeDifferences(parsedAddress, addressTextToFormattedAddressMap[usedAddress]);
         });
-        var categoryCounts = _.countBy(transformedResult, (result) => result.vaskeresultat.kategori);
-        if(categoryCounts.A === 1) {
-          return toResponse('A', transformedResult);
-        }
-        if(categoryCounts.B === 1) {
-          var result = _.findWhere(transformedResult, (item) => item.vaskeresultat.kategori === 'B');
-          // Hvis en adresse er skiftet, så den har fået tilknyttet et bogstav,
-          // så kan vi ikke vide om den uvaskede adresse simpelthen mangler et bogstav - dette
-          // er en almindelig fejl. Derfor nedgraderer vi til C.
-          if(result.adresse.husnr != result.aktueladresse.husnr &&
-            result.aktueladresse.husnr.match(`^${result.adresse.husnr}[A-Z]$`)) {
-            result.vaskeresultat.kategori = 'C';
+        var addressTextToDifferenceSum = _.mapObject(addressTextToDifferences, (differences) => {
+          return Object.keys(differences).reduce(function(memo, value) {
+            memo += differences[value];
+            return memo;
+          }, 0);
+        });
+
+        // compute list of all current versions
+        var allCurrentVersions = allVersions.filter((version) => !version.virkningslut);
+
+        // compute map of address id -> current address version
+        var idToCurrentVersion = _.indexBy(allCurrentVersions, (version) => version.id);
+
+        // for each match result, find the most recent, preferably active address version
+        var addressTextToSelectedVersion =
+          _.mapObject(addressTextToParseResult, (parseResult, addressText) => {
+            var versions = addressTextToVersionsMap[addressText];
+            var currentVersions = versions.filter((version) => !version.virkningslut);
+            var currentActiveVersions = currentVersions.filter((version) => {
+              return version.status === 1 || version.status === 3
+            });
+            var candidateVersions = currentActiveVersions.length > 0 ? currentActiveVersions : (currentVersions.length > 0 ? currentVersions : versions);
+            var selectedVersion = candidateVersions.reduce((selected, candidate)  => {
+              if(moment(selected.virkningstart).isBefore(moment(candidate.virkningstart))) {
+                return selected;
+              }
+              else {
+                return candidate;
+              }
+            });
+            return selectedVersion;
+          });
+
+
+        let addressTextToCategory = yield* qUtil.mapObjectAsync(addressTextToParseResult, function*(parseResult, addressText) {
+          let address = addressTextToFormattedAddressMap[addressText];
+          let parsedAddress = parseResult.address;
+          var differences = addressTextToDifferences[addressText];
+          var differenceSum = addressTextToDifferenceSum[addressText];
+          // If the matched address is WITHOUT husbogstav, but the most recent address is WITH husbogstav,
+          // we don't really know if the husbogstav is omitted or not (a common case). Therefore, we degrade
+          // to category C
+          var selectedVersion = addressTextToSelectedVersion[addressText];
+          var matchedVersionHusnr = selectedVersion.husnr;
+          var currentHusnr = idToCurrentVersion[selectedVersion.id];
+          if(currentHusnr && new RegExp(`^${matchedVersionHusnr}[A-Za-z]$`).test(currentHusnr)) {
+            return 'C';
           }
-          else {
-            return toResponse('B', transformedResult);
+
+          if(differenceSum === 0 && parseResult.unknownTokens.length === 0) {
+            return 'A';
           }
+          if(parseResult.unknownTokens.length === 0 &&
+            differences.husnr === 0 &&
+            differences.postnr === 0 &&
+            (adgangsadresseOnly || (differences.etage === 0 && differences.dør === 0))) {
+            var vejnavnMatchesCloseEnough;
+            if(differences.vejnavn === 0) {
+              vejnavnMatchesCloseEnough = true;
+            }
+            else if (differences.vejnavn > 3) {
+              vejnavnMatchesCloseEnough = false;
+            }
+            else {
+              var parsedVejnavn = parsedAddress.vejnavn;
+              var closestVejnavn = (yield client.queryp('select vejnavn FROM vejstykker t ORDER BY levenshtein(lower($1), lower(vejnavn)) limit 1', [parsedVejnavn])).rows[0];
+              vejnavnMatchesCloseEnough = (closestVejnavn === address.vejnavn);
+
+            }
+            if(vejnavnMatchesCloseEnough) {
+              return 'B';
+            }
+          }
+          return 'C';
+        });
+
+        var categoryCounts = _.countBy(_.values(addressTextToCategory), _.identity);
+
+        var chosenCategory = categoryCounts.A === 1 ? 'A' : (categoryCounts.B  === 1 ? 'B' : 'C');
+
+        // the set of results we want to return
+        var filteredAddressTexts =
+          allAddressTexts.filter((addressText) => addressTextToCategory[addressText] === chosenCategory);
+
+        if(categoryCounts.A > 1 || (categoryCounts.A === 0 && categoryCounts.B > 1)) {
+          // degrade to category C because we found more than one
+          _.mapObject(addressTextToCategory, (value) => 'C');
+          chosenCategory = 'C';
         }
-        // if there are more than one B result, we cannot know for sure which one is right, so we
-        // degrade them all to category C.
-        transformedResult.forEach((item) => item.vaskeresultat.kategori = 'C');
-        return toResponse('C', transformedResult);
+
+        var results = _.map(filteredAddressTexts, (addressText) => {
+          return {
+            adresse: addressTextToSelectedVersion[addressText],
+            aktueladresse: idToCurrentVersion[addressTextToSelectedVersion[addressText].id],
+            vaskeresultat: {
+              afstand: addressTextToDifferenceSum[addressText],
+              forskelle: addressTextToDifferences[addressText],
+              parsetadresse: addressTextToParseResult[addressText].address,
+              ukendtetokens: addressTextToParseResult[addressText].unknownTokens
+            }
+          }
+        });
+        return [{
+          kategori: chosenCategory,
+          resultater: results
+        }];
+
+
       })().nodeify(callback);
     }
   };

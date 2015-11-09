@@ -125,6 +125,8 @@ exports.simplePropertyFilter = function(parameterSpec, columnSpec) {
   };
 };
 
+exports.queryForRanking = queryForRanking;
+
 function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
   dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
@@ -364,3 +366,5 @@ exports.dagiFilter = function() {
     });
   };
 };
+
+exports.toPgSearchQuery = toPgSearchQuery;

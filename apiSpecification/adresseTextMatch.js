@@ -3,87 +3,174 @@
 var levenshtein = require('./levenshtein');
 var util = require('./util');
 
-function createCharMap(ops) {
-  var charMap = [];
-  var i = 0;
-  for(let op of ops) {
-    if(op.op === 'K') {
-      charMap.push(i);
-      ++i;
-    }
-    else if(op.op === 'U') {
-      charMap.push(i);
-      ++i;
-    }
-    else if(op.op === 'D') {
-      charMap.push(i);
-    }
-    else { // insert
-      ++i;
-    }
-  }
-  return charMap;
+function isWhitespace(ch) {
+  return '., '.indexOf(ch) !== -1;
 }
 
-module.exports = function(uvasketAdrText, vasketAdr) {
+function consume(charlist, length) {
+  if(charlist.length === 0 && length === 0) {
+    return [[], ''];
+  }
+  if(charlist.length === 0) {
+    throw new Error('attempted to consume from empty charlist');
+  }
+  var entry = charlist[0];
+  if(entry.op === 'I') {
+    if(isWhitespace(entry.uvasket) && length === 0) {
+      return [charlist, ''];
+    }
+    let result = consume(charlist.slice(1), length);
+    return [result[0], entry.uvasket + result[1]];
+  }
+  if(length === 0) {
+    return [charlist, ''];
+  }
+  if(entry.op === 'K' || entry.op === 'U') {
+    let result =  consume(charlist.slice(1), length - 1);
+    return [result[0], entry.uvasket + result[1]];
+  }
+  if(entry.op === 'D') {
+    return consume(charlist.slice(1), length - 1);
+  }
+}
+
+function consumeUnknownToken(charlist) {
+  if(charlist.length === 0) {
+    return [charlist, ''];
+  }
+  var entry = charlist[0];
+  if(isWhitespace(entry.uvasket)) {
+    return [charlist, ''];
+  }
+  if(entry.vasket !== null && !isWhitespace(entry.vasket)) {
+    return [charlist, ''];
+  }
+
+  var result = consumeUnknownToken(charlist.slice(1));
+  return [result[0], entry.uvasket + result[1]];
+}
+
+function consumeBetween(charlist) {
+  if(charlist.length === 0) {
+    return [charlist, []];
+  }
+  var entry = charlist[0];
+  if(entry.vasket !== null && !isWhitespace(entry.vasket)) {
+    return [charlist, []];
+  }
+  if(entry.op === 'K') {
+    return consumeBetween(charlist.slice(1));
+  }
+  if(entry.op === 'U' && isWhitespace(entry.uvasket)) {
+    // update to a different kind of WS
+    return consumeBetween(charlist.slice(1));
+  }
+  if(entry.op === 'U' && !isWhitespace(entry.uvasket)) {
+    // an unknown token
+    let  unknownTokenResult = consumeUnknownToken(charlist);
+    let result = consumeBetween(unknownTokenResult[0]);
+    return [result[0], [unknownTokenResult[1]].concat(result[1])]
+  }
+  if(entry.op === 'D') {
+    return consumeBetween(charlist.slice(1));
+  }
+  if(entry.op === 'I' && isWhitespace(entry.uvasket)) {
+     return consumeBetween(charlist.slice(1));
+  }
+  if(entry.op === 'I' && !isWhitespace(entry.uvasket)) {
+    let  unknownTokenResult = consumeUnknownToken(charlist);
+    let result = consumeBetween(unknownTokenResult[0]);
+    return [result[0], [unknownTokenResult[1]].concat(result[1])]
+  }
+  throw new Error(`unexpected for consumeBetween: ${JSON.stringify(entry)}`);
+}
+
+ function mapOps(uvasketAdrText, vasketAdrText,ops) {
+   var uvasketIdx = 0;
+   var vasketIdx = 0;
+   return ops.map((entry) => {
+     let op = entry.op;
+     if(op === 'K') {
+       return {
+         op: 'K',
+         uvasket: uvasketAdrText.charAt(uvasketIdx++),
+         vasket: vasketAdrText.charAt(vasketIdx++)
+       };
+     }
+     if(op === 'U') {
+       return {
+         op: 'U',
+         uvasket: uvasketAdrText.charAt(uvasketIdx++),
+         vasket: vasketAdrText.charAt(vasketIdx++)
+       };
+     }
+     if(op === 'I') {
+       return {
+         op: 'I',
+         uvasket: uvasketAdrText.charAt(uvasketIdx++),
+         vasket: null
+       };
+     }
+     if(op === 'D') {
+       return {
+         op: 'D',
+         uvasket: null,
+         vasket: vasketAdrText.charAt(vasketIdx++)
+       }
+     }
+     throw new Error(`Unknown op ${op}`);
+   });
+ }
+
+function parseTokens(uvasketText, vasketText, tokens) {
+  var ops = levenshtein(uvasketText.trim().toLowerCase(), vasketText.trim().toLowerCase(), 1, 2, 1).ops;
+  var charlist = mapOps(uvasketText, vasketText, ops);
+  var initial = {
+    parsedTokens: [],
+    unknownTokens: [],
+    charlist: charlist
+  };
+
+  return tokens.reduce((memo, token) => {
+    var parseResult = consume(memo.charlist, token.length);
+
+    var betweenResult = consumeBetween(parseResult[0]);
+    return {
+      parsedTokens: memo.parsedTokens.concat(parseResult[1]),
+      unknownTokens: memo.unknownTokens.concat(betweenResult[1]),
+      charlist: betweenResult[0]
+    };
+  }, initial);
+}
+
+module.exports = function (uvasketAdrText, vasketAdr) {
   var vasketAdrText = util.adressebetegnelse(vasketAdr, false);
-  var levenshteinResult = levenshtein(uvasketAdrText.toLowerCase(), vasketAdrText.toLowerCase(), 1, 3, 2);
-  var charMap = createCharMap(levenshteinResult.ops);
-  var uvasketIdx = 0;
-  var vasketIdx = 0;
+  var fieldNames = ['vejnavn', 'husnr', 'etage', 'dør', 'supplerendebynavn', 'postnr', 'postnrnavn'];
+  var tokens = fieldNames.reduce((memo, fieldName) => {
+    if (vasketAdr[fieldName]) {
+      memo.push(vasketAdr[fieldName]);
+    }
+    return memo;
+  }, []);
 
-  function skipWhitespace() {
-    while(uvasketIdx < uvasketAdrText.length - 1 && ' ,.'.indexOf(uvasketAdrText[uvasketIdx]) !== -1) {
-      ++uvasketIdx;
+  var parseResult = parseTokens(uvasketAdrText, vasketAdrText, tokens);
+  var parsedAddress = fieldNames.reduce((memo, fieldName) => {
+    if(vasketAdr[fieldName]) {
+      memo[fieldName] = parseResult.parsedTokens.shift();
     }
-    while(vasketIdx < vasketAdrText.length - 1 &&' ,.'.indexOf(vasketAdrText[vasketIdx]) !== -1) {
-      ++vasketIdx;
-    }
-  }
+    return memo;
+  }, {});
+  return {
+    address: parsedAddress,
+    unknownTokens: parseResult.unknownTokens
+  };
+};
 
-  function consume(tekst, untilSeparator) {
-    skipWhitespace();
-    if(vasketAdrText.substring(vasketIdx, vasketIdx + tekst.length) !== tekst) {
-      throw new Error(`Unexpected: Tried to consume wrong text! vasketAdrText: ${vasketAdrText}, idx: ${vasketIdx}, tekst: ${tekst}`);
-    }
-    var nextUvasketIdx = charMap[vasketIdx + tekst.length];
-    if(untilSeparator) {
-      while(nextUvasketIdx < uvasketAdrText.length - 1 &&  ' ,.'.indexOf(uvasketAdrText[nextUvasketIdx]) === -1) {
-        nextUvasketIdx++;
-      }
-    }
-    var result;
-    if(uvasketIdx >= nextUvasketIdx) {
-      result = '';
-    }
-    else {
-      result = uvasketAdrText.substring(uvasketIdx, nextUvasketIdx);
-      uvasketIdx = nextUvasketIdx;
-    }
-    vasketIdx += tekst.length;
-    // trim result
-    result = result.replace(/^[\s,\.]+|[\s,\.]+$/g, '')
-    return result;
-  }
-
-  var result = {};
-  result.vejnavn = consume(vasketAdr.vejnavn, true);
-  result.husnr = consume(vasketAdr.husnr, true);
-  if(vasketAdr.etage) {
-    result.etage = consume(vasketAdr.etage, false);
-  }
-  if(vasketAdr.dør) {
-    result.dør = consume(vasketAdr.dør, false);
-  }
-  if(vasketAdr.supplerendebynavn) {
-    result.supplerendebynavn = consume(vasketAdr.supplerendebynavn, true);
-  }
-  result.postnr = consume('' + vasketAdr.postnr, false);
-  if(vasketAdr.postnrnavn) {
-    result.postnrnavn = consume(vasketAdr.postnrnavn, true);
-  }
-  else {
-    result.postnrnavn = '';
-  }
-  return result;
+module.exports.internal = {
+  isWhitespace: isWhitespace,
+  mapOps: mapOps,
+  consume: consume,
+  consumeBetween: consumeBetween,
+  consumeUnknownToken: consumeUnknownToken,
+  parseTokens: parseTokens
 };

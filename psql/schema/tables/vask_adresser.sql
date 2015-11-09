@@ -20,7 +20,7 @@ CREATE TABLE vask_adresser (
   EXCLUDE USING GIST (dar_id WITH =, virkning WITH &&)
 );
 
-CREATE INDEX ON vask_adresser(id);
-CREATE INDEX ON vask_adresser(postnr);
+CREATE INDEX ON vask_adresser(id, lower(virkning));
+CREATE INDEX ON vask_adresser(postnr, id);
 CREATE INDEX ON vask_adresser USING gin(tsv);
-
+create index on vask_adresser(kommunekode, vejkode, postnr);

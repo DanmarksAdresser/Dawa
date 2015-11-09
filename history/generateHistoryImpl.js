@@ -76,8 +76,8 @@ function generateAdgangsadresserHistory(client) {
     p.navn                AS postnrnavn,
     m.virkning
   FROM ${mergedTable} m
-    JOIN dar_vejnavn_current vn ON m.kommunekode = vn.kommunekode AND m.vejkode = vn.vejkode
-    JOIN dar_postnr_current pn
+    LEFT JOIN dar_vejnavn_current vn ON m.kommunekode = vn.kommunekode AND m.vejkode = vn.vejkode
+    LEFT JOIN dar_postnr_current pn
       ON m.kommunekode = pn.kommunekode
          AND m.vejkode = pn.vejkode
          AND pn.side = (CASE WHEN (m.husnr).tal % 2 = 0
@@ -91,7 +91,7 @@ function generateAdgangsadresserHistory(client) {
       THEN 'L'
                         ELSE 'U' END)
          AND m.husnr <@ sb.husnrinterval
-    JOIN postnumre p ON pn.postdistriktnummer = p.nr
+    LEFT JOIN postnumre p ON pn.postdistriktnummer = p.nr
 `;
     yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
     yield client.queryp(`DROP TABLE ${mergedTable}`);
@@ -100,7 +100,7 @@ function generateAdgangsadresserHistory(client) {
 }
 
 function generateAdresserHistory(client) {
-  return q.async(function*() {
+  return q.spawn(function*() {
     var adresseHistoryTable = 'adresse_history';
     var unmerged = 'adresse_unmerged';
     var merged = 'adresse_merged';
@@ -120,7 +120,7 @@ FROM ${adresseHistoryTable} a JOIN vask_adgangsadresser aa ON a.husnummerid = hn
     yield client.queryp(`DELETE FROM vask_adresser; INSERT INTO vask_adresser (SELECT * FROM ${merged})`);
     yield client.queryp(`DROP TABLE ${merged}`);
     yield client.queryp('SELECT vask_adresser_update_tsv()');
-  })();
+  });
 }
 
 module.exports = {

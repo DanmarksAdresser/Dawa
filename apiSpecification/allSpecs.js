@@ -3,6 +3,7 @@
 require('./adgangsadresse/resources');
 require('./adresse/resources');
 require('./datavask/resources');
+require('./history/resources');
 require('./postnummer/resources');
 require('./temaer/resources');
 require('./supplerendebynavn/resources');

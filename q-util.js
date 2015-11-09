@@ -3,6 +3,14 @@
 var q = require('q');
 var _ = require('underscore');
 
+exports.mapObjectAsync = function*(obj, generator) {
+  var result = {};
+  for(let key of Object.keys(obj)) {
+    result[key] = yield* generator(obj[key], key, obj);
+  }
+  return result;
+};
+
 exports.mapSerial = function(arr, fn) {
   var promises = [];
   var tasks = _.map(arr, function(value, key) {
