@@ -75,9 +75,9 @@ exports.zoneKodeFormatter = function(zoneKode) {
     return 'Byzone';
   }
   else if (zoneKode === 2) {
-    return 'Sommerhusområde';
+    return 'Landzone';
   }
   else if (zoneKode === 3) {
-    return 'Landzone';
+    return 'Sommerhusområde';
   }
 };

@@ -300,7 +300,7 @@ exports.json = {
       var zoneTemaer = _.where(temaer, {tema: 'zone'});
       if(zoneTemaer.length <= 1) {
         var zoneTema = zoneTemaer[0];
-        var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
+        var zoneKode = zoneTema ? zoneTema.fields.zone : 2;
         adr.zone = util.zoneKodeFormatter(zoneKode);
       }
       var jordstykkeTemaer = _.where(temaer, {tema: 'jordstykke'});
