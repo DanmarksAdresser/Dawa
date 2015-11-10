@@ -100,7 +100,7 @@ function generateAdgangsadresserHistory(client) {
 }
 
 function generateAdresserHistory(client) {
-  return q.spawn(function*() {
+  return q.async(function*() {
     var adresseHistoryTable = 'adresse_history';
     var unmerged = 'adresse_unmerged';
     var merged = 'adresse_merged';
@@ -120,7 +120,7 @@ FROM ${adresseHistoryTable} a JOIN vask_adgangsadresser aa ON a.husnummerid = hn
     yield client.queryp(`DELETE FROM vask_adresser; INSERT INTO vask_adresser (SELECT * FROM ${merged})`);
     yield client.queryp(`DROP TABLE ${merged}`);
     yield client.queryp('SELECT vask_adresser_update_tsv()');
-  });
+  })();
 }
 
 module.exports = {
