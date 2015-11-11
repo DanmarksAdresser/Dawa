@@ -7,6 +7,18 @@ function isWhitespace(ch) {
   return '., '.indexOf(ch) !== -1;
 }
 
+//function printCharlist(charlist) {
+//  console.log(charlist.reduce((memo, entry) => {
+//    return memo + (entry.uvasket ? entry.uvasket : 'X');
+//  }, ''));
+//  console.log(charlist.reduce((memo, entry) => {
+//    return memo + (entry.vasket ? entry.vasket : 'X');
+//  }, ''));
+//  console.log(charlist.reduce((memo, entry) => {
+//    return memo + entry.op;
+//  }, ''));
+//}
+
 function consume(charlist, length) {
   if(charlist.length === 0 && length === 0) {
     return [[], ''];
@@ -50,6 +62,25 @@ function consumeUnknownToken(charlist) {
   return [result[0], entry.uvasket + result[1]];
 }
 
+function isUnknownToken(charlist) {
+  var firstEntry = charlist[0];
+  if(!firstEntry.op === 'I') {
+    throw new Error('isUnknown token should only be called with inserted text');
+  }
+  if(isWhitespace(firstEntry.uvasket)) {
+    throw new Error('An unknown token cannot start with whitespace');
+  }
+  for (let entry of charlist) {
+    if(entry.uvasket && isWhitespace(entry.uvasket)) {
+      return true;
+    }
+    if(entry.vasket && !isWhitespace(entry.vasket)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function consumeBetween(charlist) {
   if(charlist.length === 0) {
     return [charlist, []];
@@ -78,9 +109,12 @@ function consumeBetween(charlist) {
      return consumeBetween(charlist.slice(1));
   }
   if(entry.op === 'I' && !isWhitespace(entry.uvasket)) {
-    let  unknownTokenResult = consumeUnknownToken(charlist);
-    let result = consumeBetween(unknownTokenResult[0]);
-    return [result[0], [unknownTokenResult[1]].concat(result[1])]
+    if(isUnknownToken(charlist)) {
+      let  unknownTokenResult = consumeUnknownToken(charlist);
+      let result = consumeBetween(unknownTokenResult[0]);
+      return [result[0], [unknownTokenResult[1]].concat(result[1])]
+    }
+    return [charlist, []];
   }
   throw new Error(`unexpected for consumeBetween: ${JSON.stringify(entry)}`);
 }
@@ -132,7 +166,11 @@ function parseTokens(uvasketText, vasketText, tokens) {
   };
 
   return tokens.reduce((memo, token) => {
+    //console.log(`consuming ${token} from `);
+    //printCharlist(memo.charlist);
     var parseResult = consume(memo.charlist, token.length);
+    //console.log('consuming between from');
+    //printCharlist(parseResult[0]);
 
     var betweenResult = consumeBetween(parseResult[0]);
     return {
