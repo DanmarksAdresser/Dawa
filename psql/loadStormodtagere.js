@@ -6,10 +6,7 @@
 // This script will re-load all large-mail-recievers into a given
 // database.
 //
-// Required modules
-var q = require('q');
 var _         = require('underscore');
-
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
