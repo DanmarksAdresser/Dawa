@@ -3,7 +3,6 @@
 var cli = require('cli');
 var Q = require('q');
 var _        = require('underscore');
-var async    = require('async');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var initialization = require('./initialization');
@@ -25,10 +24,9 @@ cli.main(function (args, options) {
   });
   var scriptDir = __dirname + '/schema';
   proddb.withTransaction('READ_WRITE', function (client) {
-    return Q.nfcall(async.series,
-      [
-        initialization.loadSchemas(client, scriptDir),
-        initialization.disableTriggersAndInitializeTables(client)
-      ]);
+    return Q.async(function*() {
+      yield initialization.loadSchemas(client, scriptDir);
+      yield initialization.disableTriggersAndInitializeTables(client);
+    })();
   }).done();
 });

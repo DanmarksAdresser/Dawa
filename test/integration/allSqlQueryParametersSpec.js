@@ -243,21 +243,15 @@ var sampleParameters = {
       }
     },
     ejerlavkode: {
-      values: ['20551', '020551'],
+      values: ['10851', '010851'],
       verifier: function(adr, ejerlavkode) {
         return adr.jordstykke && adr.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
     },
     matrikelnr: {
-      values: ['ab1f'],
+      values: ['99f'],
       verifier: function(adr, matrikelnr) {
         return adr.jordstykke && adr.jordstykke.matrikelnr === matrikelnr;
-      }
-    },
-    esrejendomsnr: {
-      values: ['002626', '2626'],
-      verifier: function(adr, esrejendomsnr) {
-        return parseInt(adr.esrejendomsnr, 10) === parseInt(esrejendomsnr, 10);
       }
     }
   },
@@ -382,22 +376,16 @@ var sampleParameters = {
       }
     },
     ejerlavkode: {
-      values: ['20551', '020551'],
+      values: ['10851', '010851'],
       verifier: function(adr, ejerlavkode) {
         return adr.adgangsadresse.jordstykke &&
           adr.adgangsadresse.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
     },
     matrikelnr: {
-      values: ['ab1f'],
+      values: ['99f'],
       verifier: function(adr, matrikelnr) {
         return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
-      }
-    },
-    esrejendomsnr: {
-      values: ['002626', '2626'],
-      verifier: function(adr, esrejendomsnr) {
-        return parseInt(adr.adgangsadresse.esrejendomsnr, 10) === parseInt(esrejendomsnr, 10);
       }
     }
   }
@@ -423,12 +411,17 @@ _.keys(sampleParameters).forEach(function(specName) {
     entityName: specName,
     type: 'sqlModel'
   });
+
+  var untestedParams = {
+    adgangsadresse: ['esrejendomsnr'],
+    adresse: ['esrejendomsnr']
+  };
   var allParameters = propertyFilterParameters.concat(additionalParameters[specName] || []);
   describe('Query for ' + specName, function() {
     it('tester alle parametre', function() {
       var specifiedParameterNames = _.pluck(allParameters, 'name');
       var testedParameterNames = _.keys(sampleParameters[specName]);
-      expect(_.difference(specifiedParameterNames, testedParameterNames)).to.deep.equal([]);
+      expect(_.difference(specifiedParameterNames, testedParameterNames)).to.deep.equal(untestedParams[specName] || []);
     });
     describe('Parametre for ' + specName, function() {
       _.each(sampleParameters[specName], function(sample, paramName) {

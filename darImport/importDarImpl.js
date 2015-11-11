@@ -18,7 +18,7 @@ var datamodels = require('../crud/datamodel');
 var dawaDbSpec = require('./dawaDbSpec');
 var dbSpec = require('./dbSpec');
 var dbSpecUtil = require('./dbSpecUtil');
-var loadAdresseDataImpl = require('../psql/load-adresse-data-impl');
+var initialization = require('../psql/initialization');
 var logger = require('../logger').forCategory('darImport');
 var monotemporal = require('./monotemporal');
 var nontemporal = require('./nontemporal');
@@ -404,7 +404,7 @@ function initDawaFromScratch(client) {
       })
       .then(function () {
         logger.info('initializing history');
-        return loadAdresseDataImpl.initializeHistory(client);
+        return initialization.initializeHistory(client);
       })
       .then(function() {
         logger.info('initializing adresserTemaerView');

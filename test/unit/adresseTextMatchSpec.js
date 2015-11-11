@@ -235,6 +235,23 @@ describe('adresseTextMatch', () => {
     });
   });
 
+  it('Will correctly parse Højvangsvej 13, 8260 Viby J against "Højvangsvej 3, Stavtrup, 8260 Viby J', () => {
+    var uvasket = 'Højvangsvej 13, 8260 Viby J';
+    var vasket = {
+      vejnavn: 'Højvangsvej',
+      husnr: '3',
+      postnr: '8260',
+      postnrnavn: 'Viby J'
+    };
+    var result = adresseTextMatch(uvasket, vasket);
+    expect(result.address).to.deep.equal({
+      vejnavn: 'Højvangsvej',
+      husnr: '13',
+      postnr: '8260',
+      postnrnavn: 'Viby J'
+    });
+  });
+
   it('Will correctly parse ', () => {
     var uvasket = 'Hammerensgade 1, 2., 1267 København K';
     var vasket = {

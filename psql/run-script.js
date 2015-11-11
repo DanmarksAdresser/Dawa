@@ -2,7 +2,6 @@
 
 /*eslint no-console: 0 */
 
-var q = require('q');
 var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
@@ -29,6 +28,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     client.on('notice', function(msg) {
       console.log("notice: %j", msg);
     });
-    return q.nfcall(runScriptImpl,client, args, options.disableTriggers);
+    return runScriptImpl(client, args, options.disableTriggers);
   });
 });

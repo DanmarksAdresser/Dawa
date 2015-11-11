@@ -28,6 +28,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   proddb.withTransaction('READ_WRITE', function(client){
-    return q.nfcall(loadStormodtagereImpl, client, inputFile);
+    return loadStormodtagereImpl(client, inputFile);
   }).done();
 });

@@ -36,7 +36,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
   };
   var expectedResultWithoutSogn = {
     adgangsadresse: 1319,
-    adresse: 2801
+    adresse: 2805
   };
 
   var temaSpec = tema.findTema('sogn');
@@ -70,19 +70,17 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       });
     });
 
-    it(' for '  + entityName + 'r uden sognetilknytning', function (done) {
+    it(' for '  + entityName + 'r uden sognetilknytning', function () {
       this.timeout(10000);
-      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?sognekode=', json: true}, function(error, response, result) {
+      return request.get({url: 'http://localhost:3002' + resourceSpec.path + '?sognekode=', json: true}).then((result) =>  {
         expect(result.length).to.equal(expectedResultWithoutSogn[entityName]);
-        done();
       });
     });
 
-    it(' for zone på '  + entityName, function (done) {
+    it(' for zone på '  + entityName, function () {
       this.timeout(10000);
-      request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=1', json: true}, function(error, response, result) {
+      return request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=1', json: true}).then((result) =>{
         expect(result.length).to.equal(expectedResultsZone1[entityName]);
-        done();
       });
     });
 

@@ -18,6 +18,8 @@ var sqlModels = require('./sqlModel');
     processParameters: function() {},
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
+
+  exports[entityName] = resource;
   registry.add(`datavask_${entityName}`, 'resource', 'datavask', resource);
 });
 

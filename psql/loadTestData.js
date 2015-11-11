@@ -1,13 +1,13 @@
 "use strict";
 
-var async = require('async');
 var q = require('q');
 
 var initialization = require('./initialization');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+var generateHistoryImpl = require('../history/generateHistoryImpl');
 var logger = require('../logger');
+var loadCsvTestdata = require('./loadCsvTestdata');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
-var loadAdresseDataImpl = require('./load-adresse-data-impl');
 var proddb = require('./proddb');
 var runScriptImpl = require('./run-script-impl');
 var temaer = require('../apiSpecification/temaer/temaer');
@@ -31,46 +31,23 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
   logger.setThreshold('stat', 'warn');
 
   proddb.withTransaction('READ_WRITE', function(client) {
-    return q.nfcall(async.series, [
+    return q.async(function*() {
       // load schemas
-      initialization.loadSchemas(client, scriptDir),
+      yield initialization.loadSchemas(client, scriptDir);
       // run init functions
-      initialization.disableTriggersAndInitializeTables(client),
-      // load postnumre
-      function(callback) {
-        updatePostnumreImpl(client, 'data/postnumre.csv').then(function(result) {
-          callback(null, result);
-        }, function(err) {
-          callback(err);
-        });
-      },
-      function(callback) {
-        loadStormodtagereImpl(client, 'data/stormodtagere.csv', callback);
-      },
-      function(callback) {
-        updateEjerlavImpl(client, 'data/ejerlav.csv', callback).then(function() {
-          callback(null);
-        }, function(err) {
-          callback(err);
-        });
-      },
-      function(callback) {
-        runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false, callback);
-      },
-      function(callback) {
-        loadAdresseDataImpl.load(client, {
-          dataDir: 'test/data'
-        }, callback);
-      },
-      function(callback) {
-        async.eachSeries(temaer, function(temaDef, callback) {
-          tema.updateAdresserTemaerView(client, temaDef, true, 1000000, callback  );
-        }, callback);
-      },
-      function(callback) {
-        client.query('analyze', callback);
+      yield initialization.disableTriggersAndInitializeTables(client);
+      yield updatePostnumreImpl(client, 'data/postnumre.csv');
+      yield loadStormodtagereImpl(client, 'data/stormodtagere.csv');
+      yield(updateEjerlavImpl(client, 'data/ejerlav.csv'));
+      yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);
+      yield loadCsvTestdata(client, 'test/data');
+      yield generateHistoryImpl.generateAdgangsadresserHistory(client);
+      yield generateHistoryImpl.generateAdresserHistory(client);
+      for(let temaDef of temaer) {
+        yield tema.updateAdresserTemaerView(client, temaDef, true, 1000000);
       }
-    ]);
+      yield client.queryp('analyze');
+    })();
   }).done();
 });
 

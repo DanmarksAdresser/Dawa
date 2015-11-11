@@ -1,0 +1,56 @@
+"use strict";
+
+const path = require('path');
+const q = require('q');
+
+const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const proddb = require('./proddb');
+
+const optionSpec = {
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til produktionsdatabase', 'string'],
+  subsetDir: [false, 'Directory hvor CSV-filer med subsets er placeret', 'string'],
+  targetDir: [false, 'Directory hvor CSV-er placeres', 'string']
+};
+
+//const adgangsadresseIds = [
+//  '0a3f5096-91d3-32b8-e044-0003ba298018' // Margrethepladsen 4, 8000 Aarhus C
+//];
+//
+//const adresseIds = [
+//  '91b21c97-fb07-4aac-98c5-61bcb4689f78', // Margrethepladsen 4, 8000 Aarhus C
+//  '0a3f50ab-8c3d-32b8-e044-0003ba298018' // Sjællandsvej 17, 4600 Køge
+//];
+
+cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) => {
+  proddb.init({
+    connString: options.pgConnectionUrl,
+    pooled: false
+  });
+
+  const subsetSpec = {
+    dar_vejnavn: ['kommunekode', 'vejkode'],
+    dar_adgangspunkt: ['bkid'],
+    dar_husnummer: ['bkid'],
+    dar_adresse: ['bkid']
+  };
+
+  proddb.withTransaction('READ_WRITE', (client) => {
+    return q.async(function*() {
+      const targetDir = path.resolve(options.targetDir);
+      const copyOptions = `(format 'csv', header true, delimiter ';', quote '"', encoding 'utf8')`;
+      for(let table of Object.keys(subsetSpec)) {
+        const subsetFilePath = path.resolve(path.join(options.subsetDir, `${table}_subset.csv`));
+        const subsetTable = `${table}_subset`;
+        const targetFile = path.join(targetDir, `${table}.csv`);
+        yield client.queryp(`CREATE TEMP TABLE ${subsetTable} AS (SELECT ${subsetSpec[table].join(', ')} FROM ${table} where false)`);
+        yield client.queryp(`COPY ${subsetTable} FROM '${subsetFilePath}' ${copyOptions}`);
+        yield client.queryp(`COPY (SELECT ${table}.* FROM ${table} NATURAL JOIN ${subsetTable}) TO '${targetFile}' ${copyOptions}`);
+      }
+
+      for(let table of ['dar_postnr', 'dar_supplerendebynavn']) {
+        const targetFile = path.join(targetDir, `${table}.csv`);
+        yield client.queryp(`COPY (SELECT ${table}.* FROM ${table} NATURAL JOIN dar_vejnavn_subset) TO '${targetFile}' ${copyOptions}`);
+      }
+    })();
+  }).done();
+});

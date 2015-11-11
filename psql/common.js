@@ -43,19 +43,10 @@ exports.withoutTriggers = function(client, fn) {
 };
 
 exports.execSQL = function(sql, client, echo, done){
-  function doWork(cb){
-    if (echo){ winston.info("Executing sql: %s", sql);}
-    client.query(sql, [], function(err){
-      exitOnErr(err);
-      cb();
-    });
+  if (echo){
+    winston.info("Executing sql: %s", sql);
   }
-  if (done) {
-    doWork(done);
-  }
-  else {
-    return doWork;
-  }
+  return client.queryp(sql, []).nodeify(done);
 };
 
 function psqlScript(client, scriptDir, scriptfile){

@@ -31,6 +31,32 @@ var valuesNeverExpectedToBeSeen = {
   vejnavne: {
   },
   adgangsadresser: {
+    ejerlav: {
+      kode: true,
+      navn: true
+    },
+    matrikelnr: true,
+    esrejendomsnr: true,
+    historik: {
+      oprettet: true,
+      ændret: true
+    }
+  },
+  adresser: {
+    matrikelnr: true,
+    esrejendomsnr: true,
+    adgangsadresse: {
+      ejerlav: {
+        kode: true,
+        navn: true
+      },
+      matrikelnr: true,
+      esrejendomsnr: true
+    },
+    historik: {
+      oprettet: true,
+      ændret: true
+    }
   }
 };
 
@@ -63,6 +89,8 @@ function verifyAllValuesVisited(schema, record, prefix) {
   return _.reduce(schema.properties, function(memo, typeDef, key) {
     var keyPath = prefix + '.' + key;
     if(record[key] === undefined) {
+      /*eslint no-console: 0 */
+      console.log('KEY NOT SEEN: ' + key);
       return false;
     }
     if(hasType(typeDef, 'object')) {
