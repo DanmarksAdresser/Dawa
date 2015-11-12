@@ -27,8 +27,6 @@ exports.initialize = function(logOptions) {
   var filenamePrefix = cluster.isMaster ? 'master-' : process.pid + '-';
   var directory = logOptions.directory || '.';
   var fileNameSuffix = logOptions.fileNameSuffix;
-  var maxSize = logOptions.maxSize || 100000000;
-  var maxFiles = logOptions.maxFiles || 10;
   if(fileNameSuffix) {
     winstonLogger =  new (winston.Logger)({
       transports: [
