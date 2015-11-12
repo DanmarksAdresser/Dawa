@@ -50,6 +50,7 @@ function socketTimeoutMiddleware(timeoutMillis) {
 }
 
 function setupWorker() {
+  var errorMessages = require('./haproxy/errorMessages');
   var proddb = require('./psql/proddb');
   var poolLogger = logger.forCategory('dbPool');
   var dboptions = {
@@ -98,6 +99,16 @@ function setupWorker() {
   app.use('', dawaPgApi.setupRoutes());
   app.use('', documentation);
 
+  app.get('/error/:error', function(req, res) {
+    var error = req.params.error;
+    if(_.contains(Object.keys(errorMessages), error)) {
+      res.status(errorMessages[error].status);
+      res.send(errorMessages[error].content);
+    }
+    else {
+      res.sendStatus(404);
+    }
+  });
 
   var server = http.createServer(app);
   server.listen(listenPort);
