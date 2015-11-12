@@ -2,6 +2,7 @@
 
 var cluster = require('cluster');
 var winston = require('winston');
+var winstonDailyRotateFile = require('winston-daily-rotate-file');
 
 
 var _ = require('underscore');
@@ -31,10 +32,9 @@ exports.initialize = function(logOptions) {
   if(fileNameSuffix) {
     winstonLogger =  new (winston.Logger)({
       transports: [
-        new (winston.transports.File)({
-          timestamp: true,
-          maxSize: maxSize,
-          maxFiles: maxFiles,
+        new winstonDailyRotateFile({
+          name: 'file',
+          datePattern: '.yyyy-MM-ddTHH.log',
           filename: directory + '/' + filenamePrefix + fileNameSuffix})
       ]
     });
