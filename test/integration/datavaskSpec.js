@@ -36,9 +36,25 @@ var adresseTests = [
   },
   {
     it: 'Hvis der er ukendte tokens, så er resultatet kategori C',
-    betegnelse: 'Margrethepladsen 4, 2., 8000 Aarhus C',
+    betegnelse: 'Margrethepladsen 4, 4. th, 8000 Aarhus C',
     result: {
       kategori: 'C',
+      id: '91b21c97-fb07-4aac-98c5-61bcb4689f78'
+    }
+  },
+  {
+    it: 'Foranstillet 0 i husnr ignoreres',
+    betegnelse: 'Margreteplassen 04, 4. 8000 Aarhus C',
+    result: {
+      kategori: 'B',
+      id: '91b21c97-fb07-4aac-98c5-61bcb4689f78'
+    }
+  },
+  {
+    it: 'Foranstillet 0 i etage ignoreres',
+    betegnelse: 'Margreteplassen 4, 04. 8000 Aarhus C',
+    result: {
+      kategori: 'B',
       id: '91b21c97-fb07-4aac-98c5-61bcb4689f78'
     }
   }

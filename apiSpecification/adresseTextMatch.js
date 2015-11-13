@@ -198,6 +198,12 @@ module.exports = function (uvasketAdrText, vasketAdr) {
     }
     return memo;
   }, {});
+  while(parsedAddress.husnr && parsedAddress.husnr.length > 0 && parsedAddress.husnr.charAt(0) === '0') {
+    parsedAddress.husnr = parsedAddress.husnr.substring(1);
+  }
+  while(parsedAddress.etage && parsedAddress.etage.length > 0 && parsedAddress.etage.charAt(0) === '0') {
+    parsedAddress.etage = parsedAddress.etage.substring(1);
+  }
   return {
     address: parsedAddress,
     unknownTokens: parseResult.unknownTokens
