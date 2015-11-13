@@ -60,12 +60,44 @@ var adresseTests = [
   }
 ];
 
+var adgangsadresseTests = [{
+  it: 'Kan finde en adgangsadresse, som matcher præcist',
+  betegnelse: 'Margrethepladsen 4, 8000 Aarhus C',
+  result: {
+    kategori: 'A',
+    id: '0a3f5096-91d3-32b8-e044-0003ba298018'
+  }
+}, {
+  it: 'Kan finde en adgangsadresse med stavefejl i vejnavn',
+  betegnelse: 'Margretheplassen 4, 8000 Aarhus C',
+  result: {
+    kategori: 'B',
+    id: '0a3f5096-91d3-32b8-e044-0003ba298018'
+  }
+}, {
+  it: 'Kan finde en adgangsadresse med stavefejli postnrnavn',
+  betegnelse: 'Margrethepladsen 4, 8000 Århus C',
+  result: {
+    kategori: 'B',
+    id: '0a3f5096-91d3-32b8-e044-0003ba298018'
+  }
+}];
+
 describe('Adressevask', () => {
   testdb.withTransactionEach('test', function (clientFn) {
     adresseTests.forEach((test) => {
       it(test.it, ()=> {
         return q.async(function*() {
           var result = yield helpers.getJson(clientFn(), datavaskResources.adresse, {}, {betegnelse: test.betegnelse})
+          expect(result.kategori).to.equal(test.result.kategori);
+          expect(result.resultater[0].adresse.id).to.equal(test.result.id);
+        })();
+      });
+    });
+    adgangsadresseTests.forEach((test) => {
+      it(test.it, ()=> {
+        return q.async(function*() {
+          var result = yield helpers.getJson(clientFn(), datavaskResources.adgangsadresse, {}, {betegnelse: test.betegnelse})
           expect(result.kategori).to.equal(test.result.kategori);
           expect(result.resultater[0].adresse.id).to.equal(test.result.id);
         })();
