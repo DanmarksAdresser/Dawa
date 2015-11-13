@@ -1,7 +1,5 @@
 "use strict";
 
-var q = require('q');
-
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var initialization = require('./initialization');
 var proddb = require('./proddb');
@@ -17,6 +15,6 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
     pooled: false
   });
   proddb.withTransaction('READ_WRITE', function(client) {
-    return q.nfcall(initialization.reloadDatabaseCode( client, 'psql/schema'));
+    return initialization.reloadDatabaseCode( client, 'psql/schema');
   }).done();
 });

@@ -188,7 +188,6 @@ function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText
 }
 
 function createSqlModel(entityName) {
-  var adgangsadresseOnly = entityName === 'adgangsadresse';
   var columns = columnsMap[entityName]
 
   return {
@@ -277,7 +276,7 @@ function createSqlModel(entityName) {
           if(parseResult.unknownTokens.length === 0 &&
             differences.husnr === 0 &&
             differences.postnr === 0 &&
-            (adgangsadresseOnly || (differences.etage === 0 && differences.dør === 0))) {
+            (differences.etage || 0) === 0 && (differences.dør || 0) === 0) {
             var vejnavnMatchesCloseEnough;
             if(differences.vejnavn === 0) {
               vejnavnMatchesCloseEnough = true;
@@ -287,7 +286,7 @@ function createSqlModel(entityName) {
             }
             else {
               var parsedVejnavn = parsedAddress.vejnavn;
-              var closestVejnavn = (yield client.queryp('select vejnavn FROM vejstykker t ORDER BY levenshtein(lower($1), lower(vejnavn)) limit 1', [parsedVejnavn])).rows[0];
+              var closestVejnavn = (yield client.queryp('select vejnavn FROM vejstykker v JOIN vejstykkerpostnumremat vs ON v.kommunekode = vs.kommunekode and v.kode = vs.vejkode and postnr = $1 ORDER BY levenshtein(lower($2), lower(vejnavn)) limit 1', [parsedAddress.postnr, parsedVejnavn])).rows[0].vejnavn;
               vejnavnMatchesCloseEnough = (closestVejnavn === address.vejnavn);
 
             }

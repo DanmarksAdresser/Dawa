@@ -54,13 +54,15 @@ LANGUAGE plpgsql AS
 $$
   BEGIN
     DELETE FROM VejstykkerPostnumreMat;
-    INSERT INTO VejstykkerPostnumreMat SELECT DISTINCT kommunekode, vejkode, postnr FROM adgangsadresser;
-    UPDATE VejstykkerPostnumreMat vp
-      SET tekst = COALESCE(v.vejnavn, '') || ' ' || to_char(postnr, 'FM0000') || ' ' || COALESCE(p.navn, '')
-    FROM postnumre p, vejstykker v
-    WHERE vp.kommunekode = v.kommunekode AND
-        vp.vejkode = v.kode AND
-        vp.postnr = p.nr;
-
+    insert into vejstykkerpostnumremat(kommunekode, vejkode, postnr, tekst) (
+    select distinct
+      v.kommunekode,
+      vejkode,
+      postdistriktnummer as postnr,
+      COALESCE(v.vejnavn, '') || ' ' || to_char(p.nr, 'FM0000') || ' ' || COALESCE(p.navn, '') as tekst
+    from vejstykker v
+      join dar_postnr on (v.kommunekode = dar_postnr.kommunekode and v.kode = dar_postnr.vejkode and
+                          dar_postnr.ophoerttimestamp is null and upper(dar_postnr.registrering) is null)
+      join postnumre p on postdistriktnummer = p.nr);
   END;
 $$;

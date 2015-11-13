@@ -29,8 +29,6 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) =>
 
   const subsetSpec = {
     dar_vejnavn: ['kommunekode', 'vejkode'],
-    dar_adgangspunkt: ['bkid'],
-    dar_husnummer: ['bkid'],
     dar_adresse: ['bkid']
   };
 
@@ -44,12 +42,25 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) =>
         const targetFile = path.join(targetDir, `${table}.csv`);
         yield client.queryp(`CREATE TEMP TABLE ${subsetTable} AS (SELECT ${subsetSpec[table].join(', ')} FROM ${table} where false)`);
         yield client.queryp(`COPY ${subsetTable} FROM '${subsetFilePath}' ${copyOptions}`);
-        yield client.queryp(`COPY (SELECT ${table}.* FROM ${table} NATURAL JOIN ${subsetTable}) TO '${targetFile}' ${copyOptions}`);
+        yield client.queryp(`COPY (SELECT ${table}.* FROM ${table} NATURAL JOIN ${subsetTable} order by ${subsetSpec[table].join(', ')}, registrering) TO '${targetFile}' ${copyOptions}`);
       }
+
+      const husnummerTargetFile = path.join(targetDir, `dar_husnummer.csv`);
+      yield client.queryp(`COPY (SELECT distinct dar_husnummer.* FROM dar_husnummer
+       JOIN dar_adresse ON husnummerid = dar_husnummer.id
+        JOIN dar_adresse_subset ON dar_adresse.bkid = dar_adresse_subset.bkid order by dar_husnummer.id, dar_husnummer.virkning, dar_husnummer.registrering)
+         TO '${husnummerTargetFile}' ${copyOptions}`);
+
+      const adgangspunktTargetFile = path.join(targetDir, `dar_adgangspunkt.csv`);
+      yield client.queryp(`COPY (SELECT distinct dar_adgangspunkt.* FROM dar_adgangspunkt
+       JOIN dar_husnummer ON dar_husnummer.adgangspunktid = dar_adgangspunkt.id
+       JOIN dar_adresse ON husnummerid = dar_husnummer.id
+        JOIN dar_adresse_subset ON dar_adresse.bkid = dar_adresse_subset.bkid order by dar_adgangspunkt.id, dar_adgangspunkt.virkning, dar_adgangspunkt.registrering)
+         TO '${adgangspunktTargetFile}' ${copyOptions}`);
 
       for(let table of ['dar_postnr', 'dar_supplerendebynavn']) {
         const targetFile = path.join(targetDir, `${table}.csv`);
-        yield client.queryp(`COPY (SELECT ${table}.* FROM ${table} NATURAL JOIN dar_vejnavn_subset) TO '${targetFile}' ${copyOptions}`);
+        yield client.queryp(`COPY (SELECT distinct ${table}.* FROM ${table} NATURAL JOIN dar_vejnavn_subset order by kommunekode, vejkode, husnrinterval, side, registrering) TO '${targetFile}' ${copyOptions}`);
       }
     })();
   }).done();

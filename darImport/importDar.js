@@ -46,72 +46,65 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
   var report = {};
 
   proddb.withTransaction('READ_WRITE', function (client) {
-    return q()
-      .then(function() {
+    return q.async(function*() {
+      try {
         if(clearDawa) {
-          return importDarImpl.clearDawa(client).then(function() {
-            logger.info('DAWA tables cleared');
-          });
+          yield importDarImpl.clearDawa(client);
+          logger.info('DAWA tables cleared');
         }
-      })
-      .then(function() {
         if(initial) {
-          return importDarImpl.clearDarTables(client);
+          yield importDarImpl.clearDarTables(client);
         }
-      })
-      .then(function() {
-        return importDarImpl.withDarTransaction(client, 'csv', function() {
+        yield  importDarImpl.withDarTransaction(client, 'csv', function() {
           if(initial) {
             return importDarImpl.initFromDar(client, dataDir, clearDawa, skipDawa, skipRowsConfig);
           }
           else {
             return importDarImpl.updateFromDar(client, dataDir, fullCompare, skipDawa, skipRowsConfig, report);
           }
-      });
-    })
-    .then(function() {
-      if(clearDawa) {
-        return sqlCommon.withoutTriggers(client, function() {
-          return client.queryp('analyze;').then(function() {
-            return q.nfcall(initialization.initializeTables(client));
-          });
         });
-      }
-    });
-  })
-    .then(function() {
-      if(options.reportDir) {
-        fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
-      }
-    })
-    .then(function() {
-      ['adgangspunkt', 'husnummer', 'adresse'].forEach(function(entity) {
-        if(report && report['dar_' + entity]) {
-          ['insert', 'update', 'delete'].forEach(function(op) {
-            var changes = report['dar_' + entity][op];
-            if(changes.length !== 0) {
-              logger.info('Importer changes', {
-                op: op,
-                entity: entity,
-                changes: changes.length
-              });
-            }
-            else {
-              logger.info('No importer changes', {
-                op: op,
-                entity: entity
-              });
-            }
+
+        if(clearDawa) {
+          yield sqlCommon.withoutTriggers(client, function() {
+            return q.async(function*() {
+              yield client.queryp('analyze');
+              yield initialization.initializeTables(client);
+            })();
           });
         }
-      });
-    })
-    .then(function() {
-    logger.info('Successfully completed importDar script');
-  })
-    .catch(function(err) {
-    logger.error('Caught error in importDar', err);
-    return q.reject(err);
-  })
-    .done();
+
+        yield client.queryp('select vejstykkerpostnumremat_init()');
+
+        if(options.reportDir) {
+          fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
+        }
+        ['adgangspunkt', 'husnummer', 'adresse'].forEach(function(entity) {
+          if (report && report['dar_' + entity]) {
+            ['insert', 'update', 'delete'].forEach(function (op) {
+              var changes = report['dar_' + entity][op];
+              if (changes.length !== 0) {
+                logger.info('Importer changes', {
+                  op: op,
+                  entity: entity,
+                  changes: changes.length
+                });
+              }
+              else {
+                logger.info('No importer changes', {
+                  op: op,
+                  entity: entity
+                });
+              }
+            });
+          }
+        });
+
+        logger.info('Successfully completed importDar script');
+      }
+      catch(err) {
+        logger.error('Caught error in importDar', err);
+        throw err;
+      }
+    })();
+  }).done();
 });
