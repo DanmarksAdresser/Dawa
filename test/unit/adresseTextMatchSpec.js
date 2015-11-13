@@ -149,7 +149,7 @@ describe('adresseTextMatch', () => {
     expect(result.unknownTokens).to.deep.equal(['tic', 'tac', 'toc']);
   });
 
-  it('Will correctly parse Aggustenborgade 5 C, 5.1 8000 Åhrus C', () => {
+  it('Will ignore a space between husnr tal and husnr bogstav', () => {
     var uvasket = "Aggustenborgade 5 C, 5.1 8000 Åhrus C";
     var vasket = {
       vejnavn: 'Augustenborggade',
@@ -162,7 +162,7 @@ describe('adresseTextMatch', () => {
     var result = adresseTextMatch(uvasket, vasket);
     var expectedResult = {
       vejnavn: 'Aggustenborgade',
-      husnr: '5 C',
+      husnr: '5C',
       etage: '5',
       dør: '1',
       postnr: '8000',

@@ -204,6 +204,9 @@ module.exports = function (uvasketAdrText, vasketAdr) {
   while(parsedAddress.etage && parsedAddress.etage.length > 0 && parsedAddress.etage.charAt(0) === '0') {
     parsedAddress.etage = parsedAddress.etage.substring(1);
   }
+  if(parsedAddress.husnr) {
+    parsedAddress.husnr = parsedAddress.husnr.replace(/^(\d+) ([A-Za-z])$/, '$1$2');
+  }
   return {
     address: parsedAddress,
     unknownTokens: parseResult.unknownTokens
