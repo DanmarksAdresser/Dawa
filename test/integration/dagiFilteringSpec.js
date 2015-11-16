@@ -35,8 +35,8 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adresse: 1
   };
   var expectedResultWithoutSogn = {
-    adgangsadresse: 1322,
-    adresse: 2808
+    adgangsadresse: 1323,
+    adresse: 2810
   };
 
   var temaSpec = tema.findTema('sogn');

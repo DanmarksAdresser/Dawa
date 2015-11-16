@@ -57,6 +57,14 @@ var adresseTests = [
       kategori: 'B',
       id: '91b21c97-fb07-4aac-98c5-61bcb4689f78'
     }
+  },
+  {
+    it: 'Hvis adressen er nedlagt og erstattet af en ny adresse returneres den nye adresse',
+    betegnelse: 'Eliasgade 10, 2300 København S',
+    result: {
+      kategori: 'A',
+      id: 'f481e7d5-989e-4372-86a2-58e72cf64e44'
+    }
   }
 ];
 

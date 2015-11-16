@@ -8,15 +8,6 @@ module.exports = function (grunt) {
     eslint: {
       target: '.'
     },
-    jshint: {
-      all: [
-        "*.js",
-        "test/**/*.js"
-      ],
-      options: {
-        jshintrc: true
-      }
-    },
     mochaTest: {
       unit: {
         src: ['test/setupLogging.js', 'test/unit/**/*Spec.js']
