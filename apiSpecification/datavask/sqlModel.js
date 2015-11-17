@@ -77,6 +77,11 @@ function computeDifferences(adr1, adr2, adgangOnly) {
   return differences;
 }
 
+
+function levenshteinOrderClause(entityName, betegnelseAlias) {
+  return `min(least(levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', true)}), lower(${betegnelseAlias}), 2, 1, 3),` +
+  ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 2, 1, 3)))`;
+}
 function datavaskFuzzySearch(sqlParts, entityName, params) {
   var betegnelseAlias = dbapi.addSqlParameter(sqlParts, params.betegnelse);
   sqlParts.whereClauses.push("id IN " +
@@ -86,8 +91,7 @@ function datavaskFuzzySearch(sqlParts, entityName, params) {
     " FROM vejstykkerpostnumremat vp" +
     ` ORDER BY tekst <-> ${betegnelseAlias} limit 15) as vp` +
     " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
-  sqlParts.orderClauses.push(`min(least(levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', true)}), lower(${betegnelseAlias}), 1, 2, 3),` +
-    ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 1, 2, 3)))`);
+  sqlParts.orderClauses.push(levenshteinOrderClause(entityName, betegnelseAlias));
 //  sqlParts.orderClauses.push('lower(virkning) desc');
 }
 
@@ -126,15 +130,16 @@ function doSearchQuery(client, entityName, params) {
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns)(queryParts, params);
 
   var tsQuery = sqlParameterImpl.toPgSearchQuery(params.betegnelse);
+  var betegnelseAlias = dbapi.addSqlParameter(queryParts, params.betegnelse);
   var tsQueryAlias = dbapi.addSqlParameter(queryParts, tsQuery);
   var tsQueryRankAlias = dbapi.addSqlParameter(queryParts, sqlParameterImpl.queryForRanking(tsQuery));
-
 
   var searchSubQuery =
     `SELECT id FROM vask_${entityName}r WHERE id IN (SELECT id FROM vask_${entityName}r WHERE tsv @@ to_tsquery('adresser_query', ${tsQueryAlias}) LIMIT 500)` +
     ` GROUP BY id` +
-    ` ORDER BY max(round(1000000 * ts_rank(tsv, to_tsquery('adresser_query', ${tsQueryRankAlias}), 16))) DESC` +
-    ` LIMIT 20`;
+    ` ORDER BY max(round(1000000 * ts_rank(tsv, to_tsquery('adresser_query', ${tsQueryRankAlias}), 16))) DESC,` +
+    ` ${levenshteinOrderClause(entityName, betegnelseAlias)}` +
+    ` LIMIT 30`;
 
   queryParts.whereClauses.push(`id IN (${searchSubQuery})`);
 
