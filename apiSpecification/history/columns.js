@@ -10,6 +10,9 @@ exports.adgangsadresse = {
   status: {
     column: 'hn_statuskode'
   },
+  adgangspunktstatus: {
+    column: 'ap_statuskode'
+  },
   husnr: {
     select: '(husnr).tal || (husnr).bogstav'
   },
@@ -25,8 +28,15 @@ exports.adgangsadresse = {
 };
 
 exports.adresse = _.clone(exports.adgangsadresse);
+
 exports.adresse.status = {
   column: 'statuskode'
+};
+exports.adresse.adgangsadressestatus = {
+  column: 'hn_statuskode'
+};
+exports.adresse.adgangspunktstatus = {
+  column: 'ap_statuskode'
 };
 exports.adresse.dør = {
   column: 'doer'
