@@ -16,9 +16,10 @@ block content
             ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adressesøgning</a>
               li <a href='#adresseopslag'>Adresseopslag</a>
+              li <a href='#adressedata'>Beskrivelse af adressedata</a>
               li <a href='#adresseautocomplete'>Adresser autocomplete</a>
               li <a href='#datavask'>Datavask</a>
-              li <a href='#adressedata'>Beskrivelse af adressedata</a>
+              li <a href='#historik'>Historik</a>
         div.span9
           section
 
@@ -30,15 +31,7 @@ block content
             +documentResource(parameterDoc, '/adresser/{id}')
 
             div.page-header
-            h3.anchor-header#adresseautocomplete Adresser autocomplete
-            +documentResource(parameterDoc, '/adresser/autocomplete')
-
-            div.page-header
-              h3.anchor-header#datavask Datavask
-            +documentResource(parameterDoc, '/datavask/adresser')
-
-            div.page-header
-            h3.anchor-header#adressedata Beskrivelse af adressedata
+              h3.anchor-header#adressedata Beskrivelse af adressedata
             p En <em>adresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal, en bygning eller en del af en bygning efter reglerne i adressebekendtgørelsen.
             p En adresse angiver en særskilt adgang til et areal, en bygning eller en del af en bygning, efter reglerne i adressebekendtgørelsen. En adresse fastsættes for at angive en bestemt adgang til
             ul
@@ -48,6 +41,20 @@ block content
             p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
             p Web API'et udstiller for hver adresse følgende informationer:
             +documentSchema(jsonSchemas.adresse, 'adresse')
+
+            div.page-header
+            h3.anchor-header#adresseautocomplete Adresser autocomplete
+            +documentResource(parameterDoc, '/adresser/autocomplete')
+
+            div.page-header
+              h3.anchor-header#datavask Datavask
+            +documentResource(parameterDoc, '/datavask/adresser')
+
+            h4 Beskrivelse af returværdi
+            +documentSchema(jsonSchemas.adresse_datavask, 'adresse_datavask')
+            div.page-header
+              h3.anchor-header#historik Historik
+            +documentResource(parameterDoc, '/historik/adresser')
 
 block append scripts
   script.

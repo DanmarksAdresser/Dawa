@@ -15,10 +15,11 @@ block content
             ul#adresse.nav.nav-list
               li <a href='#adressesoegning'>Adgangsadressesøgning</a>
               li <a href='#adresseopslag'>Adgangsadresseopslag</a>
-              li <a href='#adresseautocomplete'>Adgangsadresser autocomplete</a>
               li <a href='#reversegeokodning'>Reverse geokodning</a>
-              li <a href='#datavask'>Datavask</a>
               li <a href='#adressedata'>Beskrivelse af adgangsadressedata</a>
+              li <a href='#adresseautocomplete'>Adgangsadresser autocomplete</a>
+              li <a href='#datavask'>Datavask</a>
+              li <a href='#adressehistorik'>Historik</a>
 
         div.span9
           section
@@ -31,22 +32,31 @@ block content
             +documentResource(parameterDoc, '/adgangsadresser/{id}')
 
             div.page-header
-            h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
-            +documentResource(parameterDoc, '/adgangsadresser/autocomplete')
-
-            div.page-header
             h3.anchor-header#reversegeokodning Reverse geokodning
             +documentResource(parameterDoc, '/adgangsadresser/reverse')
 
             div.page-header
-              h3.anchor-header#datavask Datavask
-            +documentResource(parameterDoc, '/datavask/adgangsadresser')
-            div.page-header
-            h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
+              h3.anchor-header#adressedata Beskrivelse af adgangsadressedata
             p Ovenstående Web API udstiller adgangsadresser. En <em>adgangsadresse</em> er en struktureret betegnelse som angiver en særskilt adgang til et areal eller en bygning efter reglerne i adressebekendtgørelsen.
             p Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.
             p Web API'et udstiller for hver adgangsadresse følgende informationer:
             +documentSchema(jsonSchemas.adgangsadresse, 'adgangsadresse')
+
+            div.page-header
+              h3.anchor-header#adresseautocomplete Adgangsadresser autocomplete
+            +documentResource(parameterDoc, '/adgangsadresser/autocomplete')
+
+            div.page-header
+              h3.anchor-header#datavask Datavask
+            +documentResource(parameterDoc, '/datavask/adgangsadresser')
+
+            h4 Beskrivelse af returværdi
+            +documentSchema(jsonSchemas.adgangsadresse_datavask, 'adgangsadresse_datavask')
+
+            div.page-header
+              h3.anchor-header#adressehistorik Adgangsadresser historik
+            +documentResource(parameterDoc, '/historik/adgangsadresser')
+
 
 block append scripts
   script.

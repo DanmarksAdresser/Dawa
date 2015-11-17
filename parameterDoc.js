@@ -1373,7 +1373,7 @@ module.exports['/datavask/adresser'] = {
 };
 
 module.exports['/historik/adgangsadresser'] = {
-  subtext: 'Hent historik for adgangsadresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
+  subtext: 'ADVARSEL: Experimentelt API. Der vil ske ændringer i dette API uden varsel, som ikke er bagudkompatible. Hent historik for adgangsadresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
   ' Bemærk, at udgåede adgangsadresser (statuskode 2 og 4) også medtages i svaret. Historikken returneres som en array af JSON-objekter,' +
   ' hvor hvert objekt repræsenterer en adgangsadresses tilstand i den periode, der er angivet med virkningstart og virkningslut. Hvis tilstanden' +
   ' er den aktuelle tilstand har virkningslut værdien null.',
@@ -1394,7 +1394,7 @@ module.exports['/historik/adgangsadresser'] = {
 };
 
 module.exports['/historik/adresser'] = {
-  subtext: 'Hent historik for adresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
+  subtext: 'ADVARSEL: Experimentelt API. Der vil ske ændringer i dette API uden varsel, som ikke er bagudkompatible. Hent historik for adresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
   ' Bemærk, at udgåede adresser (statuskode 2 og 4) også medtages i svaret. Historikken returneres som en array af JSON-objekter,' +
   ' hvor hvert objekt repræsenterer en adgangsadresses tilstand i den periode, der er angivet med virkningstart og virkningslut. Hvis tilstanden' +
   ' er den aktuelle tilstand har virkningslut værdien null.',
