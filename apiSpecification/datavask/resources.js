@@ -20,6 +20,6 @@ var sqlModels = require('./sqlModel');
   };
 
   exports[entityName] = resource;
-  registry.add(`datavask_${entityName}`, 'resource', 'datavask', resource);
+  registry.add(`${entityName}_datavask`, 'resource', 'datavask', resource);
 });
 

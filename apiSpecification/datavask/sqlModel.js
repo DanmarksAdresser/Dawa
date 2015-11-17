@@ -336,7 +336,7 @@ function createSqlModel(entityName) {
 
 ['adgangsadresse', 'adresse'].forEach((entityName) => {
   var sqlModel = createSqlModel(entityName);
-  registry.add(`${entityName}_historik`, 'sqlModel', 'query', module.exports);
+  registry.add(`${entityName}_datavask`, 'sqlModel', 'query', module.exports);
   exports[entityName] = sqlModel;
 });
 

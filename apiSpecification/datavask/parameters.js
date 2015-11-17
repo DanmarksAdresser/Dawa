@@ -1,4 +1,6 @@
-var registry = require('../registry');
+"use strict";
+
+let registry = require('../registry');
 
 module.exports = {
   propertyFilter: [
@@ -14,4 +16,6 @@ module.exports = {
   }]
 };
 
-registry.addMultiple('adgangsadresse_history', 'parameterGroup', module.exports);
+['adresse', 'adgangsadresse'].forEach((entityName) => {
+  registry.addMultiple(`${entityName}_datavask`, 'parameterGroup', module.exports);
+});

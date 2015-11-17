@@ -26,5 +26,5 @@ var assembleSqlModel = sqlUtil.assembleSqlModel;
   };
 
   exports[entityName] = assembleSqlModel(columns, parameterImpls, baseQuery);
-  registry.add(`history_${entityName}`, 'sqlModel', undefined, module.exports);
+  registry.add(`${entityName}_history`, 'sqlModel', undefined, exports[entityName]);
 });

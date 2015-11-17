@@ -1,6 +1,7 @@
 "use strict";
 var schema = require('../parameterSchema');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
+var registry = require('../registry');
 
 module.exports = {
   propertyFilter: normalizeParameters([
@@ -24,3 +25,7 @@ module.exports = {
     }
   ])
 };
+
+['adresse_history', 'adgangsadresse_history'].forEach((entityName) => {
+  registry.addMultiple(entityName, 'parameterGroup', module.exports);
+});

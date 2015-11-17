@@ -388,6 +388,37 @@ var sampleParameters = {
         return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
       }
     }
+  },
+  adresse_history: {
+    id: {
+      values: ['f481e7d5-989e-4372-86a2-58e72cf64e44'],
+      verifier: (adr, id) => adr.id === id
+    },
+    postnr: {
+      values: ['2300'],
+      verifier: (adr, postnr) => adr.postnr === postnr
+    },
+    kommunekode: {
+      values: ['101', '0101'],
+      verifier: (adr, kode) => parseInt(adr.kommunekode) === parseInt(kode)
+    }
+
+  },
+  adgangsadresse_history: {
+    id: {
+      values: ['04b3fd1d-48f0-4f80-89df-88b322a84f23'],
+      verifier: (adr, id) => {
+        return adr.id === id;
+      }
+    },
+    postnr: {
+      values: ['2300'],
+      verifier: (adr, postnr) => adr.postnr === postnr
+    },
+    kommunekode: {
+      values: ['101', '0101'],
+      verifier: (adr, kode) => parseInt(adr.kommunekode) === parseInt(kode)
+    }
   }
 };
 
@@ -402,6 +433,7 @@ _.keys(sampleParameters).forEach(function(specName) {
     type: 'parameterGroup',
     qualifier: 'propertyFilter'
   });
+
   var jsonRepresentation = registry.findWhere({
     entityName: specName,
     type: 'representation',
