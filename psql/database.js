@@ -203,7 +203,7 @@ exports.withConnection = function(dbOrName, pooled, connectedFn) {
       if (err) {
         return reject(err);
       }
-      return connectedFn(client).then(
+      return q.when(connectedFn(client)).then(
         function (result) {
           done();
           return result;
