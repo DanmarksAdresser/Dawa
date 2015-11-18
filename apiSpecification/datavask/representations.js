@@ -35,9 +35,9 @@ function createResponseMapper(adgangsadresseOnly) {
       schema: globalSchemaObject({
         properties: {
           kategori: {
-            description: 'Angiver, hvor godt de(n) returnerede adresse(r) matcher adressebetegnelsen. "A" angiver eksakt match. ' +
+            description: 'Angiver, hvor godt de(n) returnerede adresse(r) matcher adressebetegnelsen. "A" angiver, at den returnerede adresse matcher præcist, bortset fra forskelle på store og små bogstaver samt punktuering. ' +
             '"B" angiver et sikkert match, hvor der dog er mindre variationer (stavefejl eller lignende). C angiver et usikkert match, ' +
-            'der er en stor sansynlighed for at den fundne adresse ikke er korrekt. For kategori A og B gælder, at der kun ' +
+            ' hvor der er en stor sansynlighed for at den fundne adresse ikke er korrekt. For kategori A og B gælder, at der kun ' +
             'returneres én adresse. For kategori C kan der returneres flere adresser.',
             enum: ['A', 'B', 'C']
           },

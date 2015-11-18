@@ -1355,7 +1355,7 @@ module.exports['/datavask/adgangsadresser'] = {
   'som bedst matcher svaret. Endvidere er der en angivelse af hvor godt de fundne adgangsadresser matcher adressebetegnelsen.',
   parameters: [{
     name: 'betegnelse',
-    doc: 'Adressebetegnelsen for den adresse som ønskes vasket, f.eks. "Rentemestervej 8, 2400 København".' +
+    doc: 'Adressebetegnelsen for den adgangsadresse som ønskes vasket, f.eks. "Rentemestervej 8, 2400 København".' +
     ' Adressebetegnelsen kan leveres med eller uden supplerende bynavn.'
   }],
   examples: []
@@ -1380,7 +1380,7 @@ module.exports['/historik/adgangsadresser'] = {
   parameters: [
     {
       name: 'id',
-      doc: 'Adgangsadressen unikke UUID'
+      doc: 'Adgangsadressens unikke UUID'
     },
     {
       name: 'postnr',
@@ -1396,12 +1396,12 @@ module.exports['/historik/adgangsadresser'] = {
 module.exports['/historik/adresser'] = {
   subtext: 'ADVARSEL: Experimentelt API. Der vil ske ændringer i dette API uden varsel, som ikke er bagudkompatible. Hent historik for adresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
   ' Bemærk, at udgåede adresser (statuskode 2 og 4) også medtages i svaret. Historikken returneres som en array af JSON-objekter,' +
-  ' hvor hvert objekt repræsenterer en adgangsadresses tilstand i den periode, der er angivet med virkningstart og virkningslut. Hvis tilstanden' +
+  ' hvor hvert objekt repræsenterer en adresses tilstand i den periode, der er angivet med virkningstart og virkningslut. Hvis tilstanden' +
   ' er den aktuelle tilstand har virkningslut værdien null.',
   parameters: [
     {
       name: 'id',
-      doc: 'Adgangsadressen unikke UUID'
+      doc: 'Adressens unikke UUID'
     },
     {
       name: 'postnr',
