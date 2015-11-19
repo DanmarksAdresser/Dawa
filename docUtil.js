@@ -12,6 +12,16 @@ exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
   return url;
 };
 
+exports.addBaseUrlAndParametersForDisplay = function(baseUrl, path, query) {
+  var url = baseUrl + path;
+  if (!_.isEmpty(query)) {
+    url += '?' + _.map(query,function (param) {
+        return `${param.name}=${param.value}`;
+      }).join('&');
+  }
+  return url;
+};
+
 exports.computeQueryUrl = function (baseUrl, plural, query) {
   var url = baseUrl + '/' + plural;
   if (!_.isEmpty(query)) {
