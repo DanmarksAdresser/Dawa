@@ -57,20 +57,26 @@ function udenSupplerendeBynavn(adresse) {
   return result;
 }
 
-function computeDifferences(adr1, adr2, adgangOnly) {
+function computeDifferences(uvasket, vasket, adgangOnly) {
   var addressFieldNames = ['vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
   if(!adgangOnly) {
     addressFieldNames = addressFieldNames.concat(['etage', 'dør']);
   }
   var differences = addressFieldNames.reduce((memo, field) => {
-    if(typeof adr1[field] === 'string' && typeof adr2[field] === 'string') {
-      memo[field] = levenshtein(('' + adr1[field]).toLowerCase(), adr2[field].toLowerCase(), 1, 1, 1).distance;
+    if(field === 'supplerendebynavn' && !uvasket.supplerendebynavn) {
+      // hvis der ikke er et supplerende bynavn givet i den adresse vi har
+      // modtaget, så skal det ikke tælles som en forskel at der er
+      // et supplerende bynavn i den fundne adresse
+      return memo;
     }
-    else if (typeof adr1[field] === 'string') {
-      memo[field] = adr1[field].length;
+    if(typeof uvasket[field] === 'string' && typeof vasket[field] === 'string') {
+      memo[field] = levenshtein(('' + uvasket[field]).toLowerCase(), vasket[field].toLowerCase(), 1, 1, 1).distance;
     }
-    else if(typeof adr2[field] === 'string') {
-      memo[field] = adr2[field].length;
+    else if (typeof uvasket[field] === 'string') {
+      memo[field] = uvasket[field].length;
+    }
+    else if(typeof vasket[field] === 'string') {
+      memo[field] = vasket[field].length;
     }
     return memo;
   }, {});
@@ -95,7 +101,7 @@ function datavaskFuzzySearch(sqlParts, entityName, params) {
 //  sqlParts.orderClauses.push('lower(virkning) desc');
 }
 
-var adgangsadresseFields = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'postnr', 'postnrnavn', 'virkningstart', 'virkningslut'];
+var adgangsadresseFields = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'virkningstart', 'virkningslut'];
 
 var adresseFields = adgangsadresseFields.concat(['etage', 'dør']);
 
@@ -193,9 +199,23 @@ function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText
 }
 
 function resultRelevanceCompareFn(a, b) {
+  var requiredFields = ['vejnavn', 'husnr', 'postnr', 'postnrnavn'];
   for(let prop of ['postnr', 'vejnavn', 'husnr', 'etage', 'dør', 'ponstnrnavn', 'supplerendebynavn']) {
-    var aVal = a.vaskeresultat.forskelle[prop] || 0;
-    var bVal = b.vaskeresultat.forskelle[prop] || 0;
+    var aVal = a.vaskeresultat.forskelle[prop];
+    var bVal = b.vaskeresultat.forskelle[prop];
+    if(_.contains(requiredFields, prop)) {
+      // adresses missing required fields should be last
+      var aExists = !_.isUndefined(aVal) && aVal !== null;
+      var bExists = !_.isUndefined(bVal) && bVal !== null;
+      if(aExists && !bExists) {
+        return -1;
+      }
+      else if (!aExists && bExists) {
+        return 1;
+      }
+    }
+    aVal = aVal || 0;
+    bVal = bVal || 0;
     if(a.vaskeresultat.forskelle[prop] === b.vaskeresultat.forskelle[prop]) {
       continue;
     }

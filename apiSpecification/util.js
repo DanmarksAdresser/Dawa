@@ -52,7 +52,7 @@ exports.adressebetegnelse = function(adresseRow, adgangOnly) {
   if(adresseRow.supplerendebynavn) {
     adresse += adresseRow.supplerendebynavn + ', ';
   }
-  adresse += adresseRow.postnr + ' ' + adresseRow.postnrnavn;
+  adresse += (adresseRow.postnr || '') + ' ' + (adresseRow.postnrnavn || '');
   return adresse;
 };
 

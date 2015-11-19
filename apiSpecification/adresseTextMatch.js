@@ -18,7 +18,7 @@ function isWhitespace(ch) {
 //    return memo + entry.op;
 //  }, ''));
 //}
-
+//
 function consume(charlist, length) {
   if(charlist.length === 0 && length === 0) {
     return [[], ''];
@@ -198,6 +198,7 @@ module.exports = function (uvasketAdrText, vasketAdr) {
     }
     return memo;
   }, {});
+
   while(parsedAddress.husnr && parsedAddress.husnr.length > 0 && parsedAddress.husnr.charAt(0) === '0') {
     parsedAddress.husnr = parsedAddress.husnr.substring(1);
   }
