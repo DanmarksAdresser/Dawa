@@ -1358,7 +1358,8 @@ module.exports['/datavask/adgangsadresser'] = {
     doc: 'Adressebetegnelsen for den adgangsadresse som ønskes vasket, f.eks. "Rentemestervej 8, 2400 København".' +
     ' Adressebetegnelsen kan leveres med eller uden supplerende bynavn.'
   }],
-  examples: []
+  examples: [{description: 'Vask adressen "Rante mester vej 8, 2400 København NV"',
+    query: [{name:'betegnelse', value:'Rante mester vej 8, 2400 København NV'}]}]
 };
 
 module.exports['/datavask/adresser'] = {
@@ -1369,7 +1370,15 @@ module.exports['/datavask/adresser'] = {
     doc: 'Adressebetegnelsen for den adresse som ønskes vasket, f.eks. "Augustenborggade 5, 5. 3, 8000 Aarhus C".' +
     ' Adressebetegnelsen kan leveres med eller uden supplerende bynavn.'
   }],
-  examples: []
+  examples: [
+    {
+      description: 'Vask adressen "Rante mester vej 8, 4, 2400 København NV"',
+      query: [{name:'betegnelse', value:'Rante mester vej 8, 4, 2400 København NV'}]
+    },
+    {
+      description: 'Vask adressen "Borger gade 4, STTV, 6000 Kolding"',
+      query: [{name:'betegnelse', value:'Borger gade 4, STTV, 6000 Kolding'}]
+    }]
 };
 
 module.exports['/historik/adgangsadresser'] = {
@@ -1390,7 +1399,12 @@ module.exports['/historik/adgangsadresser'] = {
       name: 'kommunekode',
       doc: 'Returner kun historiske adgangsadresser med den angivne kommunekode'
     }].concat(formatAndPagingParams),
-  examples: []
+  examples: [
+    {
+      description: 'Vis historikken for adgangsadressen med id "45380a0c-9ad1-4370-84d2-50fc574b2063"',
+      query: [{name:'id', value:'45380a0c-9ad1-4370-84d2-50fc574b2063'}]
+    }
+  ]
 };
 
 module.exports['/historik/adresser'] = {
@@ -1411,7 +1425,12 @@ module.exports['/historik/adresser'] = {
       name: 'kommunekode',
       doc: 'Returner kun historiske adresser med den angivne kommunekode'
     }].concat(formatAndPagingParams),
-  examples: []
+  examples: [
+    {
+      description: 'Vis historik for adressen med id "4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd"',
+      query: [{name:'id', value:'4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd'}]
+    }
+  ]
 };
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
