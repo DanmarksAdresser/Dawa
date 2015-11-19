@@ -139,7 +139,7 @@ function doSearchQuery(client, entityName, params) {
     ` GROUP BY id` +
     ` ORDER BY max(round(1000000 * ts_rank(tsv, to_tsquery('adresser_query', ${tsQueryRankAlias}), 16))) DESC,` +
     ` ${levenshteinOrderClause(entityName, betegnelseAlias)}` +
-    ` LIMIT 30`;
+    ` LIMIT 100`;
 
   queryParts.whereClauses.push(`id IN (${searchSubQuery})`);
 
@@ -192,6 +192,23 @@ function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText
 
 }
 
+function resultRelevanceCompareFn(a, b) {
+  for(let prop of ['postnr', 'vejnavn', 'husnr', 'etage', 'dør', 'ponstnrnavn', 'supplerendebynavn']) {
+    var aVal = a.vaskeresultat.forskelle[prop] || 0;
+    var bVal = b.vaskeresultat.forskelle[prop] || 0;
+    if(a.vaskeresultat.forskelle[prop] === b.vaskeresultat.forskelle[prop]) {
+      continue;
+    }
+    if(aVal < bVal) {
+      return -1;
+    }
+    else {
+      return 1;
+    }
+  }
+}
+
+
 function createSqlModel(entityName) {
   var columns = columnsMap[entityName]
 
@@ -203,7 +220,7 @@ function createSqlModel(entityName) {
       return q.async(function*() {
         params = _.clone(params);
         params.side = 1;
-        params.per_side=10;
+        params.per_side=100;
 
         let searchResult = yield doSearchQuery(client, entityName, params);
 
@@ -328,6 +345,8 @@ function createSqlModel(entityName) {
             }
           }
         });
+        results.sort(resultRelevanceCompareFn);
+        results.length = Math.min(results.length, 30);
         return [{
           kategori: chosenCategory,
           resultater: results
