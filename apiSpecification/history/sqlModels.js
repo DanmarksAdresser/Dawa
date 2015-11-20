@@ -12,7 +12,7 @@ var assembleSqlModel = sqlUtil.assembleSqlModel;
   var columns = columnsMap[entityName];
   var parameterImpls = [
     sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
-    sqlParameterImpl.paging(columns, ['id', 'lower(virkning)'])];
+    sqlParameterImpl.paging(columns, ['id', 'lower(virkning)'], true)];
 
   var baseQuery = function() {
     return {
