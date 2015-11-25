@@ -129,10 +129,10 @@ function parseParameterType(valString, type) {
     if(valString.toUpperCase() === 'BYZONE') {
       return 1;
     }
-    if(valString.toUpperCase() === 'SOMMERHUSOMRÅDE') {
+    if(valString.toUpperCase() === 'LANDZONE') {
       return 2;
     }
-    if(valString.toUpperCase() === 'LANDZONE') {
+    if(valString.toUpperCase() === 'SOMMERHUSOMRÅDE') {
       return 3;
     }
     throw 'zone skal være enten Byzone, Sommerhusområde eller Landzone';
