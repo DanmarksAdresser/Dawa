@@ -122,7 +122,7 @@ exports.adresseFlatRepresentation = function(fields, additionalFieldsMapper) {
           }
         });
         var zoneTema = _.findWhere(obj.temaer, {tema: 'zone'});
-        var zoneKode = zoneTema ? zoneTema.fields.zone : 3;
+        var zoneKode = zoneTema ? zoneTema.fields.zone : 2;
         result.zone = zoneFormatter(zoneKode);
         var jordstykke = _.findWhere(obj.temaer, {tema: 'jordstykke'});
         if(jordstykke) {
