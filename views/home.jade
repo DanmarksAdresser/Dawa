@@ -15,7 +15,7 @@ block content
           section#anvendelser
             div.page-header
               h2 Hvad kan DAWA bruges til?
-            p DAWA bruges til at etablere adressefunktionalitet i it-systemer. Nedenfor kan du se en række eksempler på hvad DAWA kan bruges til.
+            p DAWA kan bruges til at etablere mange forskellige former for adressefunktionalitet i it-systemer. Det kan f.eks. være adresseindtastning, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. Nedenfor kan du se en række eksempler på de forskellige funktionaliteter.
             h3 Adresseindtastning
             p Indtastning af adresser er et væsentligt element i mange applikationer.Det skal både være let for brugeren at indtaste en gyldig adresse og for udvikleren at implementere denne funktionalitet. DAWA er designet med dette for øje. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan implementeres.
             form
@@ -55,6 +55,10 @@ block content
             p Klik på kortet nedenfor og få nærmeste adresse.
 
             div#map
+
+            h3 Adressevask
+            p Adresser bliver brugt i mange forskellige sammenhænge. Det kommer klart til udtryk i det store antal it-systemer, som rummer adresser. Adresserne er typisk blevet indtastet uden kontrol af adressens gyldighed og kan være ændret eller nedlagt efter indtastningen. Det resulterer i, at it-systemet med stor sandsynlighed rummer ugyldige adresser. Konsekvenserne kan være: Problemer med kundebesøg, postlevering, manuelt arbejde med at vedligeholde adresser og lignende. Det kan også resultere i, at man ikke kan anvende adresserne til at foretage analyser. Grundet de ufuldstændige adresseoplysninger kan man ikke kan slå adressen op i DAWA og derved skaffe yderligere oplysninger om adressen, som f.eks. adressens placering og tilknytningen til administrative inddelinger. Disse oplysninger kan anvendes til analyse af geografisk fordeling af ens kunder, placering i sogn og kommune, fordeling mellem land, by og sommerhuszone og andre anvendelige analyser. Det er kort sagt værdifuldt at have gyldige adresser i sit it-system.
+            p DAWA tilbyder funktionalitet til at vaske adresser, som du kan anvende til at implementere adressevask i dit eget it-system.  Adressevask er en proces, hvor en ustruktureret adresse, som kan være ufuldstændig og indeholde stavefejl, oversættes til den korrekte, strukturerede, autoritative adresse. 
 
             h3 Validering af adresser
             p DAWA kan også anvendes til validering af adresser. Hvis du f.eks. har dit eget adressekartotek, som du gerne vil sikre dig udelukkende indeholder gyldige adresser, kan du bruge DAWA. 
@@ -160,6 +164,17 @@ block content
             p Udpegningen af adressen foretages på kort, som resulterer i et koordinatsæt. Koordinatsæt anvendes til at finde nærmeste adresse på følgende måde:                       
             pre
               a(href='#{url}/adgangsadresser/reverse?x=12.59074&y=55.700677') #{url}/adgangsadresser/reverse?x=12.59074&y=55.700677
+
+            h4 Adressevask
+            p Adressevask i DAWA foregår på følgende måde: Lad os sige, at du har Geodatastyrelsen som kunde og har registreret ”Rante mester vej 8 st, 2400” som styrelsens adresse. For at vaske adressen bruges adressebetegnelsen som input til DAWA’s adressevaskservice:
+            pre
+              <a href='#{url}/datavask/adresser?betegnelse=Rante%20mester%20vej%208%20st,%202400'>#{url}/datavask/adresser?betegnelse=Rante mester vej 8 st, 2400</a>
+            p Som resultat får man en række oplysninger om vasken. Den primære oplysning er, hvorvidt man har fået vasket adressen til en gyldig adresse. Kategorien informerer om vaskeresultatet. Kategori A betyder eksakt match, kategori B sikker match og kategori C usikker match. I vores eksempel drejer det sig om en kategori B, som betyder at vi har fundet adressen og får leveret den vaskede adresses bestanddele, som f.eks. unikt id, vejnavn, husnummer og postnummer. Derudover returneres en reference (en URL) til adressen i DAWA
+            pre
+              <a href='#{url}/adresser/0a3f50a0-4660-32b8-e044-0003ba298018'>#{url}/adresser/0a3f50a0-4660-32b8-e044-0003ba298018</a>
+            p som kan anvendes til at hente en lang række andre data om adressen. Det drejer sig f.eks. om adressens placering, tilknytninger til f.eks. administrative inddelinger som sogn og retskreds, placering på jordstykke og selvfølgelig den korrekte adressebetegnelse, som er "Rentemestervej 8, st., 2400 København NV" - og ikke ”Rante mester vej 8 st, 2400”.
+
+            p Du kan finde dokumentation for adressevask på <a href='#{url}/adressedok#datavask'>#{url}/adressedok#datavask</a> og for adgangsadressevask på <a href='#{url}/adgangsadressedok#datavask'>#{url}/adgangsadressedok#datavask</a>.
 
             h4 Adressevalidering. 
             p Eksisterer adressen: Fægangen 1, 1. 13, 4180 Sorø? Det kan vi afgøre på følgende måde:
