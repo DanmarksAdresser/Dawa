@@ -26,6 +26,7 @@ block content
               li <a href='#formatering'>Formatering</a>
               li <a href='#flervaerdisoegning'>Flerværdisøgning</a>
               li <a href='#nullsoegning'>Søgning på <i>ingen værdi</i></a>
+              li <a href='#maxrequests'>Max antal samtidige requests</a>
               li <a href='#kodeeksempler'>Kodeeksempler</a>
         div.span9
           section
@@ -178,6 +179,12 @@ block content
               p
                 pre
                   a(href='#{url}/adresser?vejnavn=Gammel%20Kongevej&husnr=177&etage=') #{url}/adresser?vejnavn=Gammel%20Kongevej&husnr=177&etage=
+
+            div.page-header
+              h3.anchor-header#maxrequests Maksimalt antal samtidige requests</i>
+
+              p Der er en grænse på hvor mange samtidige requests til DAWA, der må foretages fra en enkel IP adresse. Grænsen er på 10 samtidige requests. Baggrunden for at sætte denne grænse er, at forhindre en enkelt anvenders brug af DAWA påvirker andre anvendere. F.eks. i form af lange svartider eller fejl i kald af servicen. 
+              p Hvis grænsen på 10 samtidige requests overskrides returneres responses med HTTP statuskoden 429 Too Many Requests.
 
             div.page-header
               h3.anchor-header#kodeeksempler Kodeeksempler
