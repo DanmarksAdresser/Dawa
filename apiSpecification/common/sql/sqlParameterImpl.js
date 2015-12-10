@@ -308,7 +308,7 @@ exports.dagiFilter = function() {
   return function(sqlParts, params) {
     _.each(tilknytningKeyNames, function(tilknytningKeyName, temaName) {
 
-      // paramValues maps each key name to a list values supplied
+      // paramValues maps each key name to a list of values supplied
       var paramValues = _.reduce(tilknytningKeyName, function(memo, keyNamePart) {
         if(params[keyNamePart]) {
           memo[keyNamePart] = params[keyNamePart].values;
@@ -327,24 +327,28 @@ exports.dagiFilter = function() {
       var presentKeys = {};
       _.each(paramValues, function(paramValue, keyNamePart) {
         if(paramValue) {
-          if(paramValue.length === 1 && paramValue[0] === null) {
+          if(_.contains(paramValue, null)) {
             absentKeys.push(keyNamePart);
           }
-          else {
-            presentKeys[keyNamePart] = paramValue;
+          else if(keyNamePart === 'zone' && _.contains(paramValue, 2)) {
+            // this is a bit hackish, but for zone, if the key is missing, the zone is landzone (2)
+            absentKeys.push(keyNamePart);
           }
+          presentKeys[keyNamePart] = _.without(paramValue, null);
         }
       });
 
       var temaAlias = dbapi.addSqlParameter(sqlParts, temaName);
 
+      var clauses = [];
+
       if(absentKeys.length !== 0) {
         // it does not matter which part of the key that is not present
-        dbapi.addWhereClause(sqlParts, "NOT EXISTS( SELECT * FROM adgangsadresser_temaer_matview" +
+        clauses.push("NOT EXISTS( SELECT * FROM adgangsadresser_temaer_matview" +
         " WHERE  adgangsadresser_temaer_matview.tema = " + temaAlias +
         " AND adgangsadresse_id = a_id)");
       }
-      else {
+      if(_.some(_.values(presentKeys), (values) => values.length > 0)) {
         var temaClauses = _.map(presentKeys, function(keyValues, tilknytningKeyName) {
           var valueAliases = _.map(keyValues, function(param) {
             return dbapi.addSqlParameter(sqlParts, param);
@@ -360,8 +364,10 @@ exports.dagiFilter = function() {
         " WHERE adgangsadresser_temaer_matview.tema = " + temaAlias +
           " AND adgangsadresse_id = a_id" +
           " AND adgangsadresser_temaer_matview.tema_id IN (SELECT * FROM T))";
-        dbapi.addWhereClause(sqlParts, sql);
+        clauses.push(sql);
       }
+
+      dbapi.addWhereClause(sqlParts, `(${clauses.join(') OR (')})`);
 
     });
   };

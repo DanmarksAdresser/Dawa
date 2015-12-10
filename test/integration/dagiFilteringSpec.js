@@ -31,9 +31,14 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adresse: 279
   };
   var expectedResultsZone1 = {
-    adgangsadresse: 1,
-    adresse: 1
+    adgangsadresse: 0,
+    adresse: 0
   };
+  var expectedResultsZone2 = {
+    adgangsadresse: 1324,
+    adresse: 2811
+  };
+
   var expectedResultWithoutSogn = {
     adgangsadresse: 1323,
     adresse: 2810
@@ -84,13 +89,19 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       });
     });
 
+    it(' for landzone på ' + entityName, function() {
+      return request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=2', json: true}).then((result) =>{
+        expect(result.length).to.equal(expectedResultsZone2[entityName]);
+      });
+    });
+
     it(' for '  + entityName + 'r uden zonetilknytning', function (done) {
       this.timeout(5000);
       request.get({url: 'http://localhost:3002' + resourceSpec.path, json: true}, function(error, response, result) {
         var totalCount = result.length;
         // we know that only associations to zone 1 exists, so the expected count can be computed from totalCount and the expected number of hits for zone 1
         request.get({url: 'http://localhost:3002' + resourceSpec.path + '?zonekode=', json: true}, function(error, response, result) {
-          expect(result.length).to.equal(totalCount - expectedResultsZone1[entityName]);
+          expect(result.length).to.equal(totalCount - 1);
           done();
         });
       });

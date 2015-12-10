@@ -231,15 +231,15 @@ var sampleParameters = {
       }
     },
     zone: {
-      values: ['Byzone'],
+      values: ['Landzone'],
       verifier: function(adr, zone) {
         return adr.zone === zone;
       }
     },
     zonekode: {
-      values: ['1'],
+      values: ['2'],
       verifier: function(adr) {
-        return adr.zone === 'Byzone';
+        return adr.zone === 'Landzone';
       }
     },
     ejerlavkode: {
@@ -364,15 +364,15 @@ var sampleParameters = {
       }
     },
     zone: {
-      values: ['Byzone'],
+      values: ['Landzone'],
       verifier: function(adr, zone) {
         return adr.adgangsadresse.zone === zone;
       }
     },
     zonekode: {
-      values: ['1'],
+      values: ['2'],
       verifier: function(adr) {
-        return adr.adgangsadresse.zone === 'Byzone';
+        return adr.adgangsadresse.zone === 'Landzone';
       }
     },
     ejerlavkode: {
