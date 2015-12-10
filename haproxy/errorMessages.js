@@ -13,6 +13,6 @@ module.exports = {
 };
 
 Object.keys(module.exports).forEach((key) => {
-  var file = path.join(__dirname, `${key}.html`);
+  var file = path.join(__dirname, `${key}.json`);
   module.exports[key].content = fs.readFileSync(file, {encoding: 'utf8'});
 });

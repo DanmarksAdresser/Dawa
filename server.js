@@ -103,6 +103,7 @@ function setupWorker() {
     var error = req.params.error;
     if(_.contains(Object.keys(errorMessages), error)) {
       res.status(errorMessages[error].status);
+      res.set('Content-Type', 'application/json');
       res.send(errorMessages[error].content);
     }
     else {
