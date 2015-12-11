@@ -34,3 +34,11 @@ BEGIN
   RETURN REGEXP_REPLACE($1, '[\\.\\/\\-]', ' ', 'g');
 END;
   $$ language plpgsql;
+
+CREATE OR REPLACE FUNCTION parseHusnr(text) RETURNS husnr AS $$
+SELECT CASE WHEN $1 IS NULL THEN null ELSE (substring($1, '([0-9]{1,3})[A-Z]{0,1}')::smallint, substring($1, '[0-9]{1,3}([A-Z]{0,1})'))::husnr END;
+$$ language sql;
+
+CREATE OR REPLACE FUNCTION formatHusnr(husnr) RETURNS text AS $$
+select $1.tal || $1.bogstav;
+$$ language sql;

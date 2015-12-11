@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var q = require('q');
 
 var crud = require('../../crud/crud');
+var Husnr = require('../../psql/databaseTypes').Husnr;
 var datamodels = require('../../crud/datamodel');
 var testdb = require('../helpers/testdb');
 
@@ -15,7 +16,7 @@ describe('Triggers in PostgreSQL should maintain a consistent state', function (
         "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
         "kommunekode": 607,
         "vejkode": 4899,
-        "husnr": "22",
+        "husnr": new Husnr(22, null),
         "supplerendebynavn": "Brovad",
         "postnr": 7000,
         "oprettet": "2014-05-22T14:56:22.237Z",

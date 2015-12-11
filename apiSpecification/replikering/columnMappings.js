@@ -1,12 +1,14 @@
 "use strict";
 
-var kode4String = require('../util').kode4String;
 var _ = require('underscore');
+
+var additionalFieldsMap = require('../temaer/additionalFields');
+var datamodels = require('../../crud/datamodel');
+var husnrUtil = require('../husnrUtil');
+var kode4String = require('../util').kode4String;
 var temaer = require('../temaer/temaer');
 var tilknytninger = require('../tematilknytninger/tilknytninger');
-var additionalFieldsMap = require('../temaer/additionalFields');
 
-var datamodels = require('../../crud/datamodel');
 // maps of field names to database column names
 
 var selectIsoTimestamp = require('../common/sql/sqlUtil').selectIsoDate;
@@ -51,7 +53,8 @@ exports.columnMappings = {
     name: 'vejkode',
     formatter: kode4String
   }, {
-    name: 'husnr'
+    name: 'husnr',
+    formatter: husnrUtil.formatHusnr
   }, {
     name: 'supplerendebynavn'
   }, {

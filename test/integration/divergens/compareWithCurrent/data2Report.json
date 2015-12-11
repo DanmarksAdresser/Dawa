@@ -60,7 +60,10 @@
           "objekttype": 1,
           "kommunekode": 540,
           "vejkode": 458,
-          "husnr": "39A",
+          "husnr": {
+            "tal": 39,
+            "bogstav": "A"
+          },
           "supplerendebynavn": null,
           "postnr": 6440,
           "oprettet": "2000-02-05T17:55:10.000",

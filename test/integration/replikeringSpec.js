@@ -10,6 +10,7 @@ var _ = require('underscore');
 
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 var crud = require('../../crud/crud');
+var databaseTypes = require('../../psql/databaseTypes');
 var datamodels = require('../../crud/datamodel');
 var format = require('util').format;
 var helpers = require('./helpers');
@@ -17,6 +18,8 @@ var registry = require('../../apiSpecification/registry');
 var schemaValidationUtil = require('./schemaValidationUtil');
 var testdb = require('../helpers/testdb');
 require('../../apiSpecification/allSpecs');
+
+var Husnr = databaseTypes.Husnr;
 
 var insert = {
   postnummer: {
@@ -37,7 +40,7 @@ var insert = {
     "status": 1,
     "kommunekode": 607,
     "vejkode": 4899,
-    "husnr": "22",
+    "husnr":  new Husnr(22, null),
     "supplerendebynavn": "Brovad",
     "postnr": 7000,
     "oprettet": "2014-05-22T14:56:22.237",
@@ -95,7 +98,7 @@ var update = {
     "status": 1,
     "kommunekode": 100,
     "vejkode": 200,
-    "husnr": "22B",
+    "husnr": new Husnr(22, 'B'),
     "supplerendebynavn": "Opdateret Brovad",
     "postnr": 6000,
     "oprettet": "2013-05-22T14:56:22.237",

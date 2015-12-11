@@ -4,11 +4,14 @@ var _ = require('underscore');
 var Q = require('q');
 
 var crud = require('../crud/crud');
+var databaseTypes = require('./databaseTypes');
 var dataUtil = require('./dataUtil');
 var datamodels = require('../crud/datamodel');
 var dbapi = require('../dbapi');
 var loadAdresseData = require('./load-adresse-data-impl');
 var logger = require('../logger').forCategory('divergensImpl');
+
+var Husnr = databaseTypes.Husnr;
 
 var baseDatamodels = {
   adgangsadresse: datamodels.adgangsadresse,
@@ -74,6 +77,10 @@ function getDawaSequenceNumber(client, udtraekOptions, comparisonOptions) {
 function isPostgresValuesEqual(expectedValue, actualValue) {
   if(_.isDate(expectedValue) && _.isDate(actualValue)) {
     return expectedValue.getTime() === actualValue.getTime();
+  }
+  if(expectedValue instanceof Husnr && actualValue instanceof Husnr) {
+    return expectedValue.tal === actualValue.tal && expectedValue.bogstav === actualValue.bogstav;
+
   }
   return expectedValue === actualValue;
 }

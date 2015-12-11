@@ -15,7 +15,7 @@ CREATE FUNCTION adgangsadresser_init_tsv()
   UPDATE adgangsadresser
   SET tsv = newtsvs.tsv
   FROM
-    (select adgangsadresser.id, setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
+    (select adgangsadresser.id, setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', formatHusnr(husnr)), 'A') ||
                                 setweight(to_tsvector('adresser', processforindexing(COALESCE(supplerendebynavn, ''))), 'C') ||
                                 setweight(postnummer_tsvector(postnumre, stormodtagere), 'D') AS tsv FROM adgangsadresser left join postnumre on adgangsadresser.postnr = postnumre.nr
       left join vejstykker ON adgangsadresser.kommunekode = vejstykker.kommunekode and adgangsadresser.vejkode = vejstykker.kode
@@ -43,7 +43,7 @@ LANGUAGE plpgsql AS
   $$
   BEGIN
     UPDATE adgangsadresser
-    SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', husnr), 'A') ||
+    SET tsv = setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', formatHusnr(husnr)), 'A') ||
               setweight(to_tsvector('adresser', processForIndexing(COALESCE(supplerendebynavn, ''))), 'C') ||
               setweight(postnummer_tsvector(postnumre, (select ROW(stormodtagere.*)::stormodtagere from stormodtagere where stormodtagere.adgangsadresseid = adgangsadresser.id)), 'D')
     FROM
@@ -59,7 +59,7 @@ DROP FUNCTION IF EXISTS adgangsadresser_tsv_update() CASCADE;
 CREATE OR REPLACE FUNCTION adgangsadresser_tsv_update()
   RETURNS TRIGGER AS $$
 BEGIN
-  NEW.tsv = (SELECT setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', NEW.husnr), 'A') ||
+  NEW.tsv = (SELECT setweight(vejstykker.tsv, 'A') || setweight(to_tsvector('adresser', formatHusnr(NEW.husnr)), 'A') ||
                     setweight(to_tsvector('adresser', processForIndexing(COALESCE(NEW.supplerendebynavn, ''))), 'C') ||
                     setweight(postnummer_tsvector(postnumre, stormodtagere), 'D')
              FROM

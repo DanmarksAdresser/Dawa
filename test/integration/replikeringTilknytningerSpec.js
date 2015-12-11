@@ -11,6 +11,7 @@ var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
 var crud = require('../../crud/crud');
+var Husnr = require('../../psql/databaseTypes').Husnr;
 var tema = require('../../temaer/tema');
 var testdb = require('../helpers/testdb');
 var datamodels = require('../../crud/datamodel');
@@ -27,7 +28,7 @@ var adgangsadresser = [
     "status": 1,
     "kommunekode": 1,
     "vejkode": 1,
-    "husnr": "1",
+    "husnr": new Husnr(1, null),
     "supplerendebynavn": null,
     "postnr": null,
     "oprettet": "2013-05-22T14:56:22.237",
@@ -50,7 +51,7 @@ var adgangsadresser = [
     "status": 1,
     "kommunekode": 1,
     "vejkode": 1,
-    "husnr": "1",
+    "husnr": new Husnr(1, null),
     "supplerendebynavn": null,
     "postnr": null,
     "oprettet": "2013-05-22T14:56:22.237",

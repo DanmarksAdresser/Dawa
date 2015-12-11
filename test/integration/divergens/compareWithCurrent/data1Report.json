@@ -52,7 +52,10 @@
           "objekttype": 1,
           "kommunekode": 550,
           "vejkode": 408,
-          "husnr": "8",
+          "husnr": {
+            "tal": 8,
+            "bogstav": null
+          },
           "supplerendebynavn": "Ballum",
           "postnr": 6261,
           "oprettet": "2000-02-05T17:56:37.000",
@@ -85,7 +88,10 @@
           "objekttype": 1,
           "kommunekode": 550,
           "vejkode": 157,
-          "husnr": "42",
+          "husnr": {
+            "tal": 42,
+            "bogstav": null
+          },
           "supplerendebynavn": null,
           "postnr": 6261,
           "oprettet": "2000-02-05T17:56:16.000",

@@ -18,7 +18,7 @@ var bbrTransformers = require('../bbr/common/bbrTransformers');
 var datamodels = require('../crud/datamodel');
 
 function loadCsv(client, inputStream, options, callback) {
-  var sql = "COPY " + options.tableName + "(" + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', NULL '')";
+  var sql = "COPY " + options.tableName + "(" + options.columns.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
   var pgStream = client.query(copyFrom(sql));
   var csvOptions = options.csvOptions ? options.csvOptions : {
     delimiter: ';',

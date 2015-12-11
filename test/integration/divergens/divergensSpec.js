@@ -29,14 +29,14 @@ describe('divergenscheck', function() {
           compareWithCurrent: true
         }).then(function(report) {
           return divergensImpl.rectifyAll(client, report).then(function(report) {
-            expect(report).to.deep.equal(expectedData1Report);
+            expect(JSON.parse(JSON.stringify(report))).to.deep.equal(expectedData1Report);
           });
         }).then(function() {
           return divergensImpl.divergenceReport(client, data2Options, {
             compareWithCurrent: true
           }).then(function(report) {
             return divergensImpl.rectifyAll(client, report).then(function(report) {
-              expect(report).to.deep.equal(expectedData2Report);
+              expect(JSON.parse(JSON.stringify(report))).to.deep.equal(expectedData2Report);
             });
           });
         }).then(function() {

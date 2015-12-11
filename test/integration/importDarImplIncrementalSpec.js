@@ -5,6 +5,7 @@ var q = require('q');
 var _ = require('underscore');
 
 var datamodels = require('../../crud/datamodel');
+var husnrUtil = require('../../apiSpecification/husnrUtil');
 var importDarImpl = require('../../darImport/importDarImpl');
 var qUtil = require('../../q-util');
 var darTransaction = require('../helpers/darTransaction');
@@ -140,7 +141,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
             expect(a.id).to.equal(hn.bkid);
             expect(a.kommunekode).to.equal(ap.kommunenummer);
             expect(a.vejkode).to.equal(hn.vejkode);
-            expect(a.husnr).to.deep.equal(hn.husnummer);
+            expect(husnrUtil.formatHusnr(a.husnr)).to.deep.equal(hn.husnummer);
             expect(a.objekttype).to.equal(hn.statuskode);
             expect(a.oprettet).to.equal(TIME_1_LOCAL);
             expect(a.ikraftfra).to.equal('2012-05-09T00:00:00.000');
@@ -184,7 +185,7 @@ describe('Inkrementiel opdatering af DAR data', function() {
           .then(function(dawaContent) {
             expect(dawaContent.adgangsadresse).to.have.length(1);
             var a = dawaContent.adgangsadresse[0];
-            expect(a.husnr).to.equal('13');
+            expect(husnrUtil.formatHusnr(a.husnr)).to.equal('13');
             expect(a.oprettet).to.equal(TIME_1_LOCAL);
             expect(a.aendret).to.equal(TIME_2_LOCAL);
           });

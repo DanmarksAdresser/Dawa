@@ -3,46 +3,21 @@
 var _ = require('underscore');
 
 var databaseTypes = require('../psql/databaseTypes');
+var husnrUtil = require('../apiSpecification/husnrUtil');
 var logger = require('../logger').forCategory('darImport');
 var types = require('./csvTypes');
 
 var Husnr = databaseTypes.Husnr;
+var parseHusnr = husnrUtil.parseHusnr;
 var Range = databaseTypes.Range;
 var GeometryPoint2d = databaseTypes.GeometryPoint2d;
 
-
-var csvHusnrRegex = /^(\d*)([A-ZÆØÅ]?)$/;
 
 function removePrefixZeroes(str) {
   while (str && str.charAt(0) === '0') {
     str = str.substring(1);
   }
   return str;
-}
-
-function parseHusnr(str) {
-  if(!str) {
-    return null;
-  }
-  str = str.trim();
-  if(str === '') {
-    return null;
-  }
-  var match = csvHusnrRegex.exec(str);
-  if(!match) {
-    logger.error('Unable to parse husnr: ' + str);
-    return null;
-  }
-  var tal;
-  if(match[1] !== '') {
-    tal = parseInt(match[1], 10);
-  }
-  else {
-    tal = 0;
-  }
-  var bogstav = match[2] ? match[2] : null;
-  return new Husnr(tal, bogstav);
-
 }
 
 function transformInterval(val) {

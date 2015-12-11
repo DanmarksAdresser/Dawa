@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var q = require('q');
 
 var crud = require('../../crud/crud');
+var Husnr = require('../../psql/databaseTypes').Husnr;
 var datamodels = require('../../crud/datamodel');
 var testdb = require('../helpers/testdb');
 var setupFixture = require('../util/testUtil').setupFixture;
@@ -24,7 +25,7 @@ var testFixture = {
   }],
   adgangsadresse: [{
     id: '11111111-1111-1111-1111-111111111111',
-    husnr: '32A',
+    husnr: new Husnr(32, 'A'),
     supplerendebynavn: 'Testby',
     kommunekode: 999,
     vejkode: 9999,
@@ -213,7 +214,7 @@ var adresseTests = [{
     model: 'adgangsadresse',
     update: {
       id: '11111111-1111-1111-1111-111111111111',
-      husnr: '36C'
+      husnr: new Husnr(36, 'C')
     }
   },
   verify: {
@@ -271,7 +272,7 @@ function verifyAll(provideClient, testSpecs) {
 describe('PostgreSQL tsv columns', function() {
   testdb.withTransactionEach('test', function(clientFn) {
     beforeEach(function() {
-      return q.nfcall(setupFixture, clientFn(), testFixture);
+      return setupFixture(clientFn(), testFixture);
     });
     describe('update of tsv column for vejstykker', function() {
       verifyAll(clientFn , vejstykkeTests);

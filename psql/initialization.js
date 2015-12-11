@@ -217,7 +217,7 @@ function initializeHistory(client) {
     for (let tableName of ['vejstykke', 'adgangsadresse', 'adresse']) {
       yield initializeHistoryTable(client, tableName);
     }
-  });
+  })();
 }
 
 exports.initializeHistoryTable = initializeHistoryTable;

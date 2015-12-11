@@ -1,22 +1,18 @@
 "use strict";
 
-var async = require('async');
-var _ = require('underscore');
+var q = require('q');
+
 var crud = require('../../crud/crud');
 var datamodels = require('../../crud/datamodel');
 
-exports.setupFixture = function setupFixture(client, fixture, callback){
-  async.eachSeries(_.keys(fixture),
-    function(datamodelName, callback) {
-      var objects = fixture[datamodelName];
+exports.setupFixture = function setupFixture(client, fixture){
+  return q.async(function*() {
+    for(let datamodelName of Object.keys(fixture)) {
       var datamodel = datamodels[datamodelName];
-      async.eachSeries(objects, function(object, callback) {
-        crud.create(client, datamodel, object, callback);
-      }, callback);
-    }, function(err) {
-      if(err) {
-        throw err;
+      var objects = fixture[datamodelName];
+      for(let object of objects) {
+        yield crud.create(client, datamodel, object);
       }
-      callback();
-    });
+    }
+  })();
 };

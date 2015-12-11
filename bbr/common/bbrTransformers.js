@@ -3,6 +3,7 @@
 var datamodels = require('../../crud/datamodel');
 var moment = require('moment');
 var bbrFieldMappings = require('./fieldMappings');
+var husnrUtil = require('../../apiSpecification/husnrUtil');
 var _ = require('underscore');
 var logger = require('../../logger').forCategory('bbrTransformer');
 
@@ -17,7 +18,7 @@ function transformBbr(datamodel, fieldMapping) {
         value = null;
       }
       var datamodelKey = mapping[key] || key;
-      
+
       if(!_.contains(datamodel.columns, datamodelKey)) {
         return memo;
       }
@@ -111,8 +112,8 @@ module.exports = {
   adgangsadresse: function(row) {
     var result = transformBbrAdgangsadresse(row);
     // vi skal lige have fjernet de foranstillede 0'er
-    result.husnr = removePrefixZeroes(result.husnr);
-
+    var husnr = removePrefixZeroes(result.husnr);
+    result.husnr = husnrUtil.parseHusnr(husnr).toPostgres();
     result.oprettet = transformTimestamp(result.oprettet);
     result.aendret = transformTimestamp(result.aendret);
     result.ikraftfra = transformTimestamp(result.ikraftfra);

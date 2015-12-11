@@ -1,0 +1,2 @@
+ALTER TABLE adgangsadresser ALTER husnr TYPE husnr USING CASE WHEN husnr IS NULL THEN null ELSE (substring(husnr, '([0-9]{1,3})[A-Z]{0,1}')::smallint, substring(husnr, '[0-9]{1,3}([A-Z]{0,1})'))::husnr END;
+ALTER TABLE adgangsadresser_history ALTER husnr TYPE husnr USING CASE WHEN husnr IS NULL THEN null ELSE (substring(husnr, '([0-9]{1,3})[A-Z]{0,1}')::smallint, substring(husnr, '[0-9]{1,3}([A-Z]{0,1})'))::husnr END;
