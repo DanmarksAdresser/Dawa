@@ -20,7 +20,7 @@ var kode4String = util.kode4String;
 
 
 function adressebetegnelseSql(adgangsadresse, includeSuppBynavn) {
-  return `adressebetegnelse(vejnavn, (husnr).tal || COALESCE((husnr).bogstav, ''), ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;
+  return `adressebetegnelse(vejnavn, husnr, ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;
 }
 
 function formatAdresseFields(row, adgangOnly) {

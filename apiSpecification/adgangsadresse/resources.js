@@ -30,6 +30,7 @@ module.exports = [
   kvhDecorator(
   resourcesUtil.queryResourceSpec(nameAndKey, {
       propertyFilter: parameters.propertyFilter,
+    husnrinterval: parameters.husnrinterval,
       search: commonParameters.search,
       crs: commonParameters.crs,
       geomWithin: commonParameters.geomWithin,
@@ -45,6 +46,7 @@ module.exports = [
     sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
+    husnrinterval: parameters.husnrinterval,
     geomWithin: commonParameters.geomWithin,
     dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,

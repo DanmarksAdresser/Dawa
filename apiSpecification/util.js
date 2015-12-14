@@ -32,27 +32,27 @@ exports.removeLeadingUnderscores = function(val) {
   return cleaned;
 }
 
-exports.adressebetegnelse = function(adresseRow, adgangOnly) {
-  var adresse = adresseRow.vejnavn;
-  if(adresseRow.husnr) {
-    adresse += ' ' + adresseRow.husnr;
+exports.adressebetegnelse = function(adresseFields, adgangOnly) {
+  var adresse = adresseFields.vejnavn;
+  if(adresseFields.husnr) {
+    adresse += ' ' + adresseFields.husnr;
   }
   if(!adgangOnly) {
-    if(exports.notNull(adresseRow.etage) || exports.notNull(adresseRow.dør)) {
+    if(exports.notNull(adresseFields.etage) || exports.notNull(adresseFields.dør)) {
       adresse += ',';
     }
-    if(adresseRow.etage) {
-      adresse += ' ' + adresseRow.etage + '.';
+    if(adresseFields.etage) {
+      adresse += ' ' + adresseFields.etage + '.';
     }
-    if(adresseRow.dør) {
-      adresse += ' ' + adresseRow.dør;
+    if(adresseFields.dør) {
+      adresse += ' ' + adresseFields.dør;
     }
   }
   adresse += ', ';
-  if(adresseRow.supplerendebynavn) {
-    adresse += adresseRow.supplerendebynavn + ', ';
+  if(adresseFields.supplerendebynavn) {
+    adresse += adresseFields.supplerendebynavn + ', ';
   }
-  adresse += (adresseRow.postnr || '') + ' ' + (adresseRow.postnrnavn || '');
+  adresse += (adresseFields.postnr || '') + ' ' + (adresseFields.postnrnavn || '');
   return adresse;
 };
 

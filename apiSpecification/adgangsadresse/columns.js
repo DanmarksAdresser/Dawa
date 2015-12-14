@@ -11,6 +11,7 @@ module.exports =  {
   status: {
     column: 'a_objekttype'
   },
+  husnr: sqlUtil.husnrColumn,
   etrs89koordinat_øst: {
     column: 'oest'
   },

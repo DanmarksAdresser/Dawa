@@ -4,6 +4,8 @@ var ZSchema     = require("z-schema");
 var _           = require('underscore');
 //var winston     = require('winston');
 
+var husnrUtil = require('./apiSpecification/husnrUtil');
+
 /******************************************************************************/
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
@@ -138,6 +140,12 @@ function parseParameterType(valString, type) {
     throw 'zone skal være enten Byzone, Sommerhusområde eller Landzone';
   }
 
+  if(type === 'husnr') {
+    if(!/^\d{1,3}[A-Z]?$/.test(valString)) {
+      throw 'Ugyldigt husnr: ' + valString;
+    }
+    return husnrUtil.parseHusnr(valString);
+  }
   throw 'Internal error: Invalid type ' + type + ' specified for parameter';
 }
 

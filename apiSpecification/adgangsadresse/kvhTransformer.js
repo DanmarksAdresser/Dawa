@@ -3,13 +3,14 @@
 var kode4String = require('../util').kode4String;
 var pad = require('../util.js').padUnderscore;
 var clean = require('../util.js').removeLeadingUnderscores;
+var husnrUtil = require('../husnrUtil');
 
 var regExp = /^(\d{4})(\d{4})(.{4})/;
 
 exports.format = function(rs) {
   return kode4String(rs.kommunekode || 0) +
          kode4String(rs.vejkode || 0) +
-         pad(rs.husnr, 4);
+         pad(husnrUtil.formatHusnr(rs.husnr), 4);
 };
 
 exports.validate = function(kvh) {
@@ -35,6 +36,6 @@ exports.parse = function(kvh) {
   return {
     kommunekode: groups[1],
     vejkode: groups[2],
-    husnr: clean(groups[3])
+    husnr: husnrUtil.parseHusnr(clean(groups[3]))
   };
 };

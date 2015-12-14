@@ -5,9 +5,9 @@
 
 var _ = require('underscore');
 
-var sqlUtil = require('./sqlUtil');
-var dbapi = require('../../../dbapi');
-var util = require('../../util');
+const dbapi = require('../../../dbapi');
+const sqlUtil = require('./sqlUtil');
+const util = require('../../util');
 
 var notNull = util.notNull;
 
@@ -89,6 +89,21 @@ function searchOrderClause(paramAlias) {
   var columnName = 'tsv';
   return 'round(1000000 * ts_rank(' + columnName + ", to_tsquery('adresser_query'," + paramAlias + '), 16)) DESC';
 }
+
+module.exports.husnrInterval = function() {
+  return function(sqlParts, params) {
+    if(params.husnrfra) {
+      let paramAlias = dbapi.addSqlParameter(sqlParts, params.husnrfra);
+      sqlParts.whereClauses.push(`husnr >= ${paramAlias}::husnr`);
+    }
+    if(params.husnrtil) {
+      let paramAlias = dbapi.addSqlParameter(sqlParts, params.husnrtil);
+      sqlParts.whereClauses.push(`husnr <= ${paramAlias}::husnr`);
+    }
+  }
+};
+
+
 
 
 /*

@@ -7,7 +7,7 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser2 AS
     kommunekode,
     vejkode,
     vejnavn,
-    husnr,
+    formatHusnr(husnr) as husnr,
     supplerendebynavn,
     postnr,
     postnrnavn,

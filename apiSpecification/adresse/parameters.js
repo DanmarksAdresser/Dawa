@@ -31,4 +31,6 @@ exports.propertyFilter = normalizeParameters(adgangsadresseParameters.propertyFi
   }
 ]));
 
+exports.husnrinterval = adgangsadresseParameters.husnrinterval;
+
 registry.addMultiple('adresse', 'parameterGroup', module.exports);

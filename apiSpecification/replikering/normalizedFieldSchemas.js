@@ -9,6 +9,7 @@ var _ = require('underscore');
 
 var definitions = require('../commonSchemaDefinitions');
 var globalSchemaObject = require('../commonSchemaDefinitionsUtil').globalSchemaObject;
+var husnrUtil = require('../husnrUtil');
 var util = require('../util');
 var kode4String = util.kode4String;
 var timestampFormatter = util.d;
@@ -127,7 +128,8 @@ var fields = {
       description: 'Husnummer der identificerer den pågældende adresse i forhold til andre adresser med samme vejnavn.' +
         ' Husnummeret består af et tal 1-999 evt. suppleret af et stort bogstav A..Z, og fastsættes i stigende orden,' +
         ' normalt med lige og ulige numre på hver side af vejen. Eksempel: "11", "12A", "187B".',
-      schema: definitions.Nullablehusnr
+      schema: definitions.Nullablehusnr,
+      formatter: husnrUtil.formatHusnr
     }, {
       name: 'supplerendebynavn',
       description: 'Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn,' +

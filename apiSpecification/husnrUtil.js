@@ -31,10 +31,39 @@ function parseHusnr(str) {
 }
 
 function formatHusnr(husnr) {
+  if(!husnr) {
+    return null;
+  }
   return ('' +( husnr.tal ? husnr.tal : '')) + (husnr.bogstav ? husnr.bogstav : '');
+}
+
+function compare(a, b) {
+  if(a.tal < b.tal) {
+    return -1;
+  }
+  if(a.tal > b.tal) {
+    return 1;
+  }
+  if(a.bogstav === b.bogstav) {
+    return 0;
+  }
+  if(!a.bogstav && b.bogstav) {
+    return -1;
+  }
+  if(a.bogstav && !b.bogstav) {
+    return 1;
+  }
+  if(a.bogstav < b.bogstav) {
+    return -1;
+  }
+  if(a.bogstav > b.bogstav) {
+    return 1;
+  }
+  throw new Error('This was not supposed to happen');
 }
 
 module.exports = {
   parseHusnr: parseHusnr,
-  formatHusnr: formatHusnr
+  formatHusnr: formatHusnr,
+  compare: compare
 };

@@ -3,7 +3,7 @@ CREATE VIEW AdgangsadresserView AS
   SELECT
     A.id as a_id,
     A.objekttype as a_objekttype,
-    formatHusnr(A.husnr) as husnr,
+    A.husnr,
     A.supplerendebynavn,
     A.matrikelnr,
     A.esrejendomsnr,

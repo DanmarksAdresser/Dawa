@@ -32,6 +32,7 @@ var columns = {
   adgangsadresseid: {
     column: 'a_id'
   },
+  husnr: sqlUtil.husnrColumn,
   dør: {
     column: 'doer'
   },
@@ -127,6 +128,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 // WARNING: order matters!
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+  sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.dagiFilter(),
   searchAdresse(columns),

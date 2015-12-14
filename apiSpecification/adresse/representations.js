@@ -7,6 +7,7 @@ var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+var husnrUtil = require('../husnrUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
 var adgangsadresseRepresentations = require('../adgangsadresse/representations');
@@ -93,7 +94,9 @@ exports.json = {
       };
       adr.etage = maybeNull(rs.etage);
       adr.dør = maybeNull(rs.dør);
-      adr.adressebetegnelse = adressebetegnelse(rs);
+      var fields = _.clone(rs);
+      fields.husnr = husnrUtil.formatHusnr(rs.husnr);
+      adr.adressebetegnelse = adressebetegnelse(fields);
       var adgangsadresseUnmapped = _.clone(rs);
       _.extend(adgangsadresseUnmapped,{
         id: rs.adgangsadresseid,
@@ -172,7 +175,9 @@ exports.autocomplete = {
   mapper: function(baseUrl) {
     return function (row) {
       function adresseText(row) {
-        return adressebetegnelse(row);
+        var fields = _.clone(row);
+        fields.husnr = husnrUtil.formatHusnr(row.husnr);
+        return adressebetegnelse(fields);
       }
       return {
         tekst: adresseText(row),
@@ -180,7 +185,7 @@ exports.autocomplete = {
           id: row.id,
           href: makeHref(baseUrl, 'adresse', [row.id]),
           vejnavn: maybeNull(row.vejnavn),
-          husnr: row.husnr,
+          husnr: husnrUtil.formatHusnr(row.husnr),
           etage: maybeNull(row.etage),
           dør: maybeNull(row.dør),
           supplerendebynavn: maybeNull(row.supplerendebynavn),

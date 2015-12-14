@@ -2,6 +2,8 @@
 
 var expect = require('chai').expect;
 
+var formatHusnr = require('../../apiSpecification/husnrUtil').formatHusnr;
+var Husnr = require('../../psql/databaseTypes').Husnr;
 var kvhTransformer = require('../../apiSpecification/adgangsadresse/kvhTransformer');
 var kvhxTransformer = require('../../apiSpecification/adresse/kvhxTransformer');
 
@@ -29,11 +31,11 @@ function kvhFormattingSpecs(transformer) {
     });
 
     it('should place husnr in position 8-11', function() {
-      expect(transformer.format({husnr: '134B'}).substring(8, 12)).to.equal('134B');
+      expect(transformer.format({husnr: new Husnr(134, 'B')}).substring(8, 12)).to.equal('134B');
     });
 
     it('should prepend husnr with underscores to fill 4 characters', function() {
-      expect(transformer.format({husnr: '13'}).substring(8, 12)).to.equal('__13');
+      expect(transformer.format({husnr: new Husnr(13, null)}).substring(8, 12)).to.equal('__13');
     });
   };
 }
@@ -47,10 +49,10 @@ function kvhParsingSpecs(transformer, trailingFiller) {
       expect(transformer.parse('00004321____' + trailingFiller).vejkode).to.equal('4321');
     });
     it('should extract husnr', function() {
-      expect(transformer.parse('00000000143B' + trailingFiller).husnr).to.equal('143B');
+      expect(formatHusnr(transformer.parse('00000000143B' + trailingFiller).husnr)).to.equal('143B');
     });
     it('should remove leading underscores from husnr', function() {
-      expect(transformer.parse('00000000__7B' + trailingFiller).husnr).to.equal('7B');
+      expect(formatHusnr(transformer.parse('00000000__7B' + trailingFiller).husnr)).to.equal('7B');
     });
     it('should represent husnr consisting of all underscores as null', function() {
       expect(transformer.parse('00000000____' + trailingFiller).husnr).to.equal(null);

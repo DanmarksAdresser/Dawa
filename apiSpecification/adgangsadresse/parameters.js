@@ -35,6 +35,7 @@ exports.propertyFilter = normalizeParameters([
   },
   {
     name: 'husnr',
+    type: 'husnr',
     multi: true
   },
   {
@@ -74,6 +75,17 @@ exports.propertyFilter = normalizeParameters([
       enum: ['A', 'B', 'U']
     },
     multi: true
+  }
+]);
+
+exports.husnrinterval = normalizeParameters([
+  {
+    name: 'husnrfra',
+    type: 'husnr'
+  },
+  {
+    name: 'husnrtil',
+    type: 'husnr'
   }
 ]);
 

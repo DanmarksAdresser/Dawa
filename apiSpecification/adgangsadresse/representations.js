@@ -9,6 +9,7 @@ var fields = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitions = require('../commonSchemaDefinitions');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+var husnrUtil = require('../husnrUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
 
@@ -243,7 +244,7 @@ exports.json = {
         adresseringsnavn: maybeNull(rs.adresseringsvejnavn),
         kode: kode4String(rs.vejkode)
       };
-      adr.husnr = rs.husnr;
+      adr.husnr = husnrUtil.formatHusnr(rs.husnr);
       adr.supplerendebynavn = maybeNull(rs.supplerendebynavn);
       adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, baseUrl);
       if(rs.stormodtagerpostnr) {
@@ -389,7 +390,9 @@ exports.autocomplete = {
   mapper: function(baseUrl) {
     return function (row) {
       function adresseText(row) {
-        return adressebetegnelse(row, true);
+        var fields = _.clone(row);
+        fields.husnr = husnrUtil.formatHusnr(row.husnr);
+        return adressebetegnelse(fields, true);
       }
 
       return {
@@ -398,7 +401,7 @@ exports.autocomplete = {
           id: row.id,
           href: makeHref(baseUrl, 'adgangsadresse', [row.id]),
           vejnavn: row.vejnavn,
-          husnr: row.husnr,
+          husnr: husnrUtil.formatHusnr(row.husnr),
           supplerendebynavn: row.supplerendebynavn,
           postnr: kode4String(row.postnr),
           postnrnavn: row.postnrnavn,

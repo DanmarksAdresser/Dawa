@@ -13,7 +13,7 @@ CREATE VIEW adresser AS
   FROM enhedsadresser E
     JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
-CREATE OR REPLACE FUNCTION adressebetegnelse(vejnavn VARCHAR, husnr VARCHAR, etage VARCHAR, dør VARCHAR, supplerendebynavn VARCHAR, postnr VARCHAR, postnrnavn VARCHAR)
+CREATE OR REPLACE FUNCTION adressebetegnelse(vejnavn VARCHAR, husnr husnr, etage VARCHAR, dør VARCHAR, supplerendebynavn VARCHAR, postnr VARCHAR, postnrnavn VARCHAR)
   RETURNS varchar AS
   $$
   DECLARE
@@ -21,7 +21,7 @@ CREATE OR REPLACE FUNCTION adressebetegnelse(vejnavn VARCHAR, husnr VARCHAR, eta
   BEGIN
     betegnelse := COALESCE(vejnavn, '');
     IF husnr IS NOT NULL THEN
-      betegnelse := betegnelse || ' ' || husnr;
+      betegnelse := betegnelse || ' ' || formatHusnr(husnr);
     END IF;
     IF etage IS NOT NULL OR dør IS NOT NULL THEN
       betegnelse := betegnelse || ',';

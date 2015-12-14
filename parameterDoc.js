@@ -305,6 +305,14 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     doc: 'Husnummer. Max 4 cifre eventuelt med et efterfølgende bogstav.'
   },
   {
+    name: 'husnrfra',
+    doc: 'Returner kun adresser hvor husnr er større eller lig det angivne.'
+  },
+  {
+    name: 'husnrtil',
+    doc: 'Returner kun adresser hvor husnr er mindre eller lig det angivne.'
+  },
+  {
     name: 'supplerendebynavn',
     doc: 'Det supplerende bynavn.',
     nullable: true

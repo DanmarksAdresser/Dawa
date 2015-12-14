@@ -164,3 +164,15 @@ exports.applyFallbackToFuzzySearch = function(sqlModel) {
     }
   });
 };
+
+exports.husnrColumn = {
+  select: 'husnr',
+    where: function(sqlParts, param, params) {
+    var values = param._multi_ ? param.values : [param];
+    var clauses = values.map((value) => {
+      let paramAlias = dbapi.addSqlParameter(sqlParts, value);
+      return `husnr = ${paramAlias}::husnr`;
+    }).join(' OR ');
+    sqlParts.whereClauses.push(clauses);
+  }
+};

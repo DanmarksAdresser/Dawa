@@ -12,7 +12,9 @@ var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
 var commonParameters = require('../../apiSpecification/common/commonParameters');
+var adgangsadresseParameters = require('../../apiSpecification/adgangsadresse/parameters');
 var testdb = require('../helpers/testdb');
+var husnrUtil = require('../../apiSpecification/husnrUtil');
 require('../../apiSpecification/allSpecs');
 
 function multiVerifier(verifierFn) {
@@ -176,6 +178,26 @@ var sampleParameters = {
         return adr.husnr === husnr;
       }
     },
+    husnrfra: {
+      values: ['10B'],
+      verifier: function(adr, husnrStr) {
+        var adrHusnr = husnrUtil.parseHusnr(adr.husnr);
+        var husnr = husnrUtil.parseHusnr(husnrStr);
+        var result = husnrUtil.compare(adrHusnr, husnr);
+        return result >= 0;
+      }
+    },
+    husnrtil: {
+      values: ['10B'],
+      verifier: function(adr, husnrStr) {
+        var adrHusnr = husnrUtil.parseHusnr(adr.husnr);
+        var husnr = husnrUtil.parseHusnr(husnrStr);
+        var result = husnrUtil.compare(adrHusnr, husnr);
+
+        return result <= 0;
+      }
+
+    },
     supplerendebynavn: {
       values: ['Kerte'],
       verifier: function(adr, supplerendeBynavn) {
@@ -309,6 +331,26 @@ var sampleParameters = {
         return adr.adgangsadresse.husnr === husnr;
       }
     },
+    husnrfra: {
+      values: ['10B'],
+      verifier: function(adr, husnrStr) {
+        var adrHusnr = husnrUtil.parseHusnr(adr.adgangsadresse.husnr);
+        var husnr = husnrUtil.parseHusnr(husnrStr);
+        var result = husnrUtil.compare(adrHusnr, husnr);
+        return result >= 0;
+      }
+    },
+    husnrtil: {
+      values: ['10B'],
+      verifier: function(adr, husnrStr) {
+        var adrHusnr = husnrUtil.parseHusnr(adr.adgangsadresse.husnr);
+        var husnr = husnrUtil.parseHusnr(husnrStr);
+        var result = husnrUtil.compare(adrHusnr, husnr);
+
+        return result <= 0;
+      }
+
+    },
     supplerendebynavn: {
       values: ['Kerte'],
       verifier: function(adr, supplerendeBynavn) {
@@ -423,8 +465,8 @@ var sampleParameters = {
 };
 
 var additionalParameters = {
-  adgangsadresse: commonParameters.dagiFilter,
-  adresse: commonParameters.dagiFilter
+  adgangsadresse: commonParameters.dagiFilter.concat(adgangsadresseParameters.husnrinterval),
+  adresse: commonParameters.dagiFilter.concat(adgangsadresseParameters.husnrinterval)
 };
 
 _.keys(sampleParameters).forEach(function(specName) {
