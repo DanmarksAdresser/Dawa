@@ -27,6 +27,7 @@ exports.propertyFilter = normalizeParameters(adgangsadresseParameters.propertyFi
   },
   {
     name: 'adgangsadresseid',
+    schema: schema.uuid,
     multi: true
   }
 ]));

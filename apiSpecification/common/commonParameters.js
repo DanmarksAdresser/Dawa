@@ -141,8 +141,12 @@ exports.geomWithin = [
       var args = params.cirkel.split(',');
       var x = parseFloat(args[0]);
       var y = parseFloat(args[1]);
+      var diam = parseFloat(args[2]);
       validateXParam(x, params.srid);
       validateYParam(y, params.srid);
+      if(diam <= 0) {
+        throw 'Cirkel radius skal være større end 0';
+      }
     }
   }
 ];
