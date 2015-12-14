@@ -6,6 +6,8 @@ var _           = require('underscore');
 
 var husnrUtil = require('./apiSpecification/husnrUtil');
 
+const DEFAULT_MAX_PARAM_LENGTH = 100;
+
 /******************************************************************************/
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
@@ -38,6 +40,7 @@ exports.parseParameters = function(params, parameterSpec) {
 exports.validateParameters = function(params, parameterSpec) {
     var validationErrors = _.reduce(params, function(memo, paramValue, paramKey) {
       var spec = parameterSpec[paramKey];
+
       if(spec && spec.validateFun) {
         try {
           if(spec.multi) {
@@ -80,6 +83,10 @@ function parseParameterMulti(valString, paramSpec) {
 }
 
 function parseParameter(valString, paramSpec) {
+  var maxLength = paramSpec.maxLength ? paramSpec.maxLength : DEFAULT_MAX_PARAM_LENGTH;
+  if(valString.length > maxLength) {
+    throw `Parameteren må bestå af højst ${maxLength} karakterer`;
+  }
   var val = parseParameterType(valString, paramSpec.type);
   jsonSchemaValidation(val, paramSpec.schema);
   return val;

@@ -12,7 +12,7 @@ var schema =  {
 var parameterSpec =  {
   anyValue:  {name: 'something'},
   aString:   {type: 'string'},
-  aInteger:   {type: 'integer'},
+  aInteger:   {type: 'integer', maxLength: 10},
   aFloat: {type: 'float'},
   objectJson: {type: 'json'},
   arrayJson: {type: 'json'},
@@ -21,10 +21,19 @@ var parameterSpec =  {
 };
 
 describe("Parsing types with schemas", function () {
-  it("should succeed on valid data", function (done) {
+  it('Should reject very long parameters by default', function() {
+    expect(parameterParsing.parseParameters({aString: '01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789'}, parameterSpec))
+      .to.deep.equal( {params: {}, errors: [['aString', "Parameteren må bestå af højst 100 karakterer"]]});
+  });
+
+  it('Should respect maxLength', function() {
+    expect(parameterParsing.parseParameters({aInteger: '012345678901234567890'}, parameterSpec))
+      .to.deep.equal( {params: {}, errors: [['aInteger', "Parameteren må bestå af højst 10 karakterer"]]});
+  });
+
+  it("should succeed on valid data", function () {
     expect(parameterParsing.parseParameters({uuid: '98239823-9823-9823-9823-982398239823'}, parameterSpec))
       .to.deep.equal({params: {uuid: "98239823-9823-9823-9823-982398239823"}, errors: []});
-    done();
   });
 
   it("should fail on invalid data ", function (done) {

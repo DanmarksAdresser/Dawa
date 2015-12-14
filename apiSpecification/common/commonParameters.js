@@ -103,6 +103,7 @@ exports.geomWithin = [
     name: 'polygon',
     type: 'json',
     schema: schema.polygon,
+    maxLength: 2000,
     validateFun: function(polygon, params) {
       if(!_.isArray(polygon) || polygon.length === 0) {
         throw 'Polygon must be an array of arrays of coordinate pairs: '+JSON.stringify(polygon);
