@@ -310,7 +310,8 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'husnrtil',
-    doc: 'Returner kun adresser hvor husnr er mindre eller lig det angivne.'
+    doc: 'Returner kun adresser hvor husnr er mindre eller lig det angivne. Bemærk, at hvis der angives' +
+    ' f.eks. husnrtil=20, så er 20A ikke med i resultatet.'
   },
   {
     name: 'supplerendebynavn',

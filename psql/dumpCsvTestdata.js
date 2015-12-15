@@ -62,6 +62,9 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) =>
         const targetFile = path.join(targetDir, `${table}.csv`);
         yield client.queryp(`COPY (SELECT distinct ${table}.* FROM ${table} NATURAL JOIN dar_vejnavn_subset order by kommunekode, vejkode, husnrinterval, side, registrering) TO '${targetFile}' ${copyOptions}`);
       }
+
+      const cprVejTargetFile = path.join(targetDir, 'cpr_vej.csv');
+      yield client.queryp(`COPY (SELECT cpr_vej.* FROM cpr_vej NATURAL JOIN dar_vejnavn_subset ORDER BY kommunekode, vejkode, registrering) TO '${cprVejTargetFile}' ${copyOptions}`);
     })();
   }).done();
 });

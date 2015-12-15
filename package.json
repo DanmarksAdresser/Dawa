@@ -21,7 +21,7 @@
     "memwatch-next": "0.2.9",
     "method-override": "^2.0.2",
     "moment": "2.10.3",
-    "moment-timezone": "^0.3.0",
+    "moment-timezone": "0.4.1",
     "moving-average": "0.0.4",
     "node-uuid": "^1.4.1",
     "pg-connection-string": "^0.1.3",

@@ -58,10 +58,29 @@ function mergeAdgangspunktHusnummer(client, mergedTable) {
   })();
 }
 
+function mergeVejnavn(client, srcTable, mergedTable) {
+  var unmergedTable = mergedTable + '_unmerged';
+  return q.async(function*() {
+    const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'];
+    const src2Columns = ['navn as vejnavn', 'adresseringsnavn'];
+    const query = `CREATE TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)}, ${src2Columns.join(',')},
+     ${srcTable}.virkning * cpr_vej.registrering as virkning
+    FROM ${srcTable} JOIN cpr_vej ON ${srcTable}.kommunekode = cpr_vej.kommunekode
+    AND ${srcTable}.vejkode = cpr_vej.vejkode
+    AND ${srcTable}.virkning && cpr_vej.registrering)`;
+    yield client.queryp(query);
+    yield mergeValidTime(client, unmergedTable, mergedTable, ['id'], src1Columns.concat(['vejnavn', 'adresseringsnavn']),false);
+    yield client.queryp(`DROP TABLE ${unmergedTable}`);
+  })();
+}
+
 function generateAdgangsadresserHistory(client) {
   return q.async(function*() {
     var mergedTable = 'merged_adgangsadresser_history';
+    const mergedTableWithVejnavn = 'adgangsadresser_vejnavne_history';
     yield mergeAdgangspunktHusnummer(client, mergedTable);
+    yield mergeVejnavn(client, mergedTable, mergedTableWithVejnavn);
+    yield client.queryp(`DROP TABLE ${mergedTable}`);
     var query = `SELECT
     m.bkid               AS id,
     m.id AS hn_id,
@@ -69,14 +88,13 @@ function generateAdgangsadresserHistory(client) {
     hn_statuskode,
     m.kommunekode,
     m.vejkode,
-    vn.navn as vejnavn,
+    vejnavn,
     husnr,
     sb.bynavn             AS supplerendebynavn,
     pn.postdistriktnummer AS postnr,
     p.navn                AS postnrnavn,
     m.virkning
-  FROM ${mergedTable} m
-    LEFT JOIN dar_vejnavn_current vn ON m.kommunekode = vn.kommunekode AND m.vejkode = vn.vejkode
+  FROM ${mergedTableWithVejnavn} m
     LEFT JOIN dar_postnr_current pn
       ON m.kommunekode = pn.kommunekode
          AND m.vejkode = pn.vejkode
@@ -94,7 +112,7 @@ function generateAdgangsadresserHistory(client) {
     LEFT JOIN postnumre p ON pn.postdistriktnummer = p.nr
 `;
     yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
-    yield client.queryp(`DROP TABLE ${mergedTable}`);
+    yield client.queryp(`DROP TABLE ${mergedTableWithVejnavn}`);
     yield client.queryp('SELECT vask_adgangsadresser_update_tsv()');
   })();
 }
