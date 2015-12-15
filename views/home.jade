@@ -15,10 +15,12 @@ block content
           section#anvendelser
             div.page-header
               h2 Hvad kan DAWA bruges til?
-            p DAWA kan bruges til at etablere mange forskellige former for adressefunktionalitet i it-systemer. Det kan f.eks. være adresseindtastning, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. Nedenfor kan du se en række eksempler på de forskellige funktionaliteter.
+            p DAWA kan bruges til at etablere mange forskellige former for adressefunktionalitet i it-systemer. Det kan f.eks. være adresseindtastning, adressesøgning, adresseopslag, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. Nedenfor kan du se en række eksempler på de forskellige funktionaliteter.
+           
+            form
             h3 Adresseindtastning
             p Indtastning af adresser er et væsentligt element i mange applikationer.Det skal både være let for brugeren at indtaste en gyldig adresse og for udvikleren at implementere denne funktionalitet. DAWA er designet med dette for øje. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan implementeres.
-            form
+            p Autocomplete i forbindelse med adresseindtastning er en mekanisme til at forudsige, hvilken adresse brugeren ønsker at indtaste uden at brugeren behøver at taste hele adressen.
               fieldset
                 legend Autocomplete af adresse
                 label(for='q') Adresse
@@ -34,6 +36,8 @@ block content
                 label(for='q') Adresse
                 input.span3(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer', id='autocomplete-adresse-kbh')
                 p Valgt adresse: <span id="autocomplete-adresse-kbh-choice"></span>
+
+
 
             form
               fieldset
