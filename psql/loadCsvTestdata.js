@@ -42,7 +42,7 @@ module.exports = function(client, dataDir) {
     yield loadTemaer(client, dataDir);
 
     yield sqlCommon.disableTriggersQ(client);
-    for(let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej']) {
+    for(let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
       const file = path.resolve(path.join(dataDir, `${table}.csv`));
       const  columns = getColumnsFromCsv(file);
       yield copyCsvToTable(client, table, file, columns);

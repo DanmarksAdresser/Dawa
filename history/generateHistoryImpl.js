@@ -52,7 +52,7 @@ function mergeAdgangspunktHusnummer(client, mergedTable) {
   FROM ${husnummerHistoryTable} hn JOIN ${adgangspunktHistoryTable} ap
    ON hn.adgangspunktid = ap.id AND hn.virkning && ap.virkning`;
     yield client.queryp(`CREATE TEMP TABLE ${joinedTable} AS (${query})`);
-    yield client.queryp(`DROP TABLE ${adgangspunktHistoryTable}; DROP TABLE ${husnummerHistoryTable}`);
+    //yield client.queryp(`DROP TABLE ${adgangspunktHistoryTable}; DROP TABLE ${husnummerHistoryTable}`);
     yield mergeValidTime(client, joinedTable, mergedTable, ['id'], ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'], false);
     yield client.queryp(`DROP TABLE ${joinedTable}`);
   })();
@@ -63,7 +63,7 @@ function mergeVejnavn(client, srcTable, mergedTable) {
   return q.async(function*() {
     const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'];
     const src2Columns = ['navn as vejnavn', 'adresseringsnavn'];
-    const query = `CREATE TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)}, ${src2Columns.join(',')},
+    const query = `CREATE TEMP TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)}, ${src2Columns.join(',')},
      ${srcTable}.virkning * cpr_vej.registrering as virkning
     FROM ${srcTable} JOIN cpr_vej ON ${srcTable}.kommunekode = cpr_vej.kommunekode
     AND ${srcTable}.vejkode = cpr_vej.vejkode
@@ -74,13 +74,49 @@ function mergeVejnavn(client, srcTable, mergedTable) {
   })();
 }
 
+function mergePostnr(client, srcTable, mergedTable) {
+  var unmergedTable = mergedTable + '_unmerged';
+  return q.async(function*() {
+    yield client.queryp(`CREATE TEMP TABLE vask_postnrinterval AS (SELECT kommunekode, vejkode, husnrinterval, side, nr, virkning FROM cpr_postnr)`);
+    yield client.queryp(
+`INSERT INTO vask_postnrinterval (kommunekode, vejkode, husnrinterval, side, nr, virkning) (SELECT
+  kommunekode,
+  vejkode,
+  husnrinterval,
+  side,
+  postdistriktnummer AS nr,
+  TSTZRANGE(greatest(oprettimestamp, '2007-01-01T00:00:00Z' :: TIMESTAMPTZ), ophoerttimestamp,
+             '[)')   AS virkning
+FROM dar_postnr
+WHERE upper(registrering) IS NULL);`);
+    yield client.queryp('CREATE INDEX ON vask_postnrinterval(kommunekode, vejkode)');
+    const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr', 'vejnavn', 'adresseringsnavn'];
+    const subselect = `FROM vask_postnrinterval pi
+     WHERE ${srcTable}.kommunekode = pi.kommunekode
+      AND ${srcTable}.vejkode = pi.vejkode
+      AND pi.side = (CASE WHEN (${srcTable}.husnr).tal % 2 = 0 THEN 'L'
+                     ELSE 'U' END)
+      AND husnr <@ pi.husnrinterval  AND ${srcTable}.virkning && pi.virkning LIMIT 1`;
+    const query = `CREATE TEMP TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)},
+     (SELECT nr ${subselect}) AS postnr,
+     ${srcTable}.virkning * (SELECT pi.virkning ${subselect}) as virkning FROM ${srcTable}
+     WHERE EXISTS (SELECT * ${subselect}))`;
+    yield client.queryp(query);
+    yield mergeValidTime(client, unmergedTable, mergedTable, ['id'], src1Columns.concat(['postnr']),false);
+    yield client.queryp(`DROP TABLE ${unmergedTable}; DROP TABLE vask_postnrinterval`);
+  })();
+}
+
 function generateAdgangsadresserHistory(client) {
   return q.async(function*() {
     var mergedTable = 'merged_adgangsadresser_history';
     const mergedTableWithVejnavn = 'adgangsadresser_vejnavne_history';
+    const mergedTableWithPostnr = 'adgangsadresser_postnumre_history';
     yield mergeAdgangspunktHusnummer(client, mergedTable);
     yield mergeVejnavn(client, mergedTable, mergedTableWithVejnavn);
     yield client.queryp(`DROP TABLE ${mergedTable}`);
+    yield mergePostnr(client, mergedTableWithVejnavn, mergedTableWithPostnr);
+    yield client.queryp(`DROP TABLE ${mergedTableWithVejnavn}`);
     var query = `SELECT
     m.bkid               AS id,
     m.id AS hn_id,
@@ -91,17 +127,10 @@ function generateAdgangsadresserHistory(client) {
     vejnavn,
     husnr,
     sb.bynavn             AS supplerendebynavn,
-    pn.postdistriktnummer AS postnr,
+    m.postnr,
     p.navn                AS postnrnavn,
     m.virkning
-  FROM ${mergedTableWithVejnavn} m
-    LEFT JOIN dar_postnr_current pn
-      ON m.kommunekode = pn.kommunekode
-         AND m.vejkode = pn.vejkode
-         AND pn.side = (CASE WHEN (m.husnr).tal % 2 = 0
-      THEN 'L'
-                        ELSE 'U' END)
-         AND m.husnr <@ pn.husnrinterval
+  FROM ${mergedTableWithPostnr} m
     LEFT JOIN dar_supplerendebynavn_current sb
       ON m.kommunekode = sb.kommunekode
          AND m.vejkode = sb.vejkode
@@ -109,10 +138,10 @@ function generateAdgangsadresserHistory(client) {
       THEN 'L'
                         ELSE 'U' END)
          AND m.husnr <@ sb.husnrinterval
-    LEFT JOIN postnumre p ON pn.postdistriktnummer = p.nr
+    LEFT JOIN postnumre p ON postnr = p.nr
 `;
     yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
-    yield client.queryp(`DROP TABLE ${mergedTableWithVejnavn}`);
+    yield client.queryp(`DROP TABLE ${mergedTableWithPostnr}`);
     yield client.queryp('SELECT vask_adgangsadresser_update_tsv()');
   })();
 }
