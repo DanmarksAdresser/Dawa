@@ -51,22 +51,23 @@ function parseAddresses(args, options, postnumre) {
         var adgangUrl = `${options.dawaUrl}/datavask/adgangsadresser?betegnelse=${encodeURIComponent(adressebetegnelse)}`;
         var adgangResult = yield request.get({url: adgangUrl, json: true});
         diffCount[adgangResult.kategori]++;
-        let adgangMatchBetegnelse = util.adressebetegnelse(adgangResult.resultater[0].aktueladresse);
+        console.log(JSON.stringify(adgangResult.resultater[0]));
+        var aktuelAdresse = adgangResult.resultater[0].aktueladresse;
+        let adgangMatchBetegnelse = aktuelAdresse ? util.adressebetegnelse(aktuelAdresse) : "";
         if(adgangResult.kategori === 'B' || adgangResult.kategori === 'C') {
           console.log(`A: ${adressebetegnelse}`);
           console.log(`B: ${adgangMatchBetegnelse}, kategori: ${adgangResult.kategori}`);
         }
-        var aktueladresse = adgangResult.resultater[0].aktueladresse;
         return {
           Vejnavn: data.Vejnavn,
           Husnummer: data.Husnummer,
           Bogstav: data.Bogstav,
           Postnr: data.Postnummer || data.Postnr,
           tjekditnet_betegnelse: adressebetegnelse,
-          match_id: aktueladresse ? aktueladresse.id : '',
+          match_id: aktuelAdresse ? aktuelAdresse.id : '',
           match_betegnelse: adgangMatchBetegnelse,
           kategori: adgangResult.kategori,
-          nedlagt: !aktueladresse || aktueladresse.status === 2 || aktueladresse.status === 4
+          nedlagt: !aktuelAdresse || aktuelAdresse.status === 2 || aktuelAdresse.status === 4
         };
       })().nodeify(callback);
       return false;

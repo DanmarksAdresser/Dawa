@@ -13,9 +13,6 @@ exports.adgangsadresse = {
   adgangspunktstatus: {
     column: 'ap_statuskode'
   },
-  husnr: {
-    select: '(husnr).tal || (husnr).bogstav'
-  },
   virkningstart: {
     column: selectIsoTimestampUtc('lower(virkning)')
   },

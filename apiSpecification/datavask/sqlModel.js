@@ -5,7 +5,7 @@ var q = require('q');
 var _ = require('underscore');
 
 var adresseTextMatch = require('../adresseTextMatch');
-var columnsMap = require('../history/columns');
+var columnsMap = _.clone(require('../history/columns'));
 var dbapi = require('../../dbapi');
 var levenshtein = require('../levenshtein');
 var parameters = require('./parameters');
@@ -18,6 +18,10 @@ var util = require('../util');
 
 var kode4String = util.kode4String;
 
+// We just let the database format the husnr
+columnsMap.adresse.husnr = columnsMap.adgangsadresse.husnr = {
+  select: '(husnr).tal || (husnr).bogstav'
+};
 
 function adressebetegnelseSql(adgangsadresse, includeSuppBynavn) {
   return `adressebetegnelse(vejnavn, husnr, ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;

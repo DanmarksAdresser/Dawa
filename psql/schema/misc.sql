@@ -42,3 +42,7 @@ $$ language sql;
 CREATE OR REPLACE FUNCTION formatHusnr(husnr) RETURNS text AS $$
 select $1.tal || $1.bogstav;
 $$ language sql;
+
+CREATE OR REPLACE FUNCTION utc_trunc_date(timestamptz) RETURNS timestamptz AS $$
+select date_trunc('day', $1 at time zone 'europe/copenhagen') at time zone 'utc';
+$$ language sql;
