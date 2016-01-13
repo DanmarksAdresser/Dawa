@@ -119,10 +119,9 @@ block content
               a(href='#{url}/adresser?kommunekode=0101&husnr=13') #{url}/adresser?kommunekode=0101&husnr=13
 
             h4 Autocomplete af adresser
-            p Du kan prøve et eksempel på autocompleteindtastningen ovenfor i 
-              a(href='#anvendelser') afsnittet om anvendelser.
-            p Etablering af autocomplete af adresser baseres på en kæde af forespørgelser med tiltagende specifikhed.
-              | Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'lill' anvendes følgende URL:
+            p Hvordan implementerer du adresse autocomplete i din applikation? Hvis det er en web applikation er det enkelt. Til dette har vi lavet en komponent, som let kan integreres i din web applikation og etablere adresseindtastning med autocomplete. Find mere information på <a href="http://autocomplete.aws.dk">AWS Autocomplete komponentens web site</a>.  
+            p Hvis det ikke er en web applikation, som skal forsynes med adresse autocomplete, eller du af anden grund ikke kan anvende autocomplete komponenten, anbefaler vi dig at bruge autocomplete API'et, som skræddersyet til at implementere adresse autocomplete i hvilken som helst applikationstype. Læs mere på <a href='#{url}/autocompletedok'>Autocomplete API'et</a>.
+            p Hvis du har helt specielle krav til hvordan autocomplete mekanismen er sammensat, kan du f.eks. anvende autocomplete på vejnavne, adgangsadresser og adresser til at sammen sætte din helt egen adresse autocomplete. Vi vil ikke anbefale det, men det kan gøre på følgende måde: Etablering af autocomplete af adresser baseres på en kæde af forespørgelser med tiltagende specifikhed. Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'lill' anvendes følgende URL:
             pre
               a(href='#{url}/vejnavne/autocomplete?q=lill') #{url}/vejnavne/autocomplete?q=lill
             p Når brugeren har valgt det aktuelle vejnavn (eller har tastet nok til at identificere ét unikt vejnavn) overgår forespørgelser fra autocomplete på vejnavne til autocomplete på adgangsadresser. Lad os sige at brugeren har valgt Lilledal som vejnavn, og forsætter med indtastning af husnummer 23, så skal følgende URL bruges:
@@ -138,9 +137,6 @@ block content
             p og
             pre
               a(href='#{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4') #{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4
-
-            p Det kan kræve lidt at implementere en adresseindtastning med autocomplete i en applikation. Den skal håndtere brugerens indtastninger og basere på disse indtastninger kalde de korrekte API'er.
-            Hvis du ikke ønsker selv at designe og implementere din autocomplete ud fra vejnavne, adgangsadresse og adresse Web API'erne, kan du anvende <a href='#{url}/autocompletedok'>Autocomplete API'et</a>. Dette API kombinerer brugen af de tre web API'er og gør det derved lettere at implementere indtastning af adresser med autocomplete. Til implementering af adresse autocomplete i web applikationer, har vi gjort det endnu lettere. Til dette har vi lavet en komponent, som let kan integreres i din web applikation og etablere adresseindtastning med autocomplete. Find mere information på <a href="http://autocomplete.aws.dk">AWS Autocomplete komponentens web site</a>.  
 
             h4 Feltindtastning af adresser
             p  Du kan se et eksempel på feltindtastning af adresser i 
