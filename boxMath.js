@@ -1,100 +1,11 @@
 "use strict";
 
-function isEmpty(interval, comparator) {
-  return comparator(interval.min, interval.max) > 0 ||
-    (equals(interval.min, interval.max, comparator) && (!interval.maxInclusive || !interval.minInclusive));
-}
-
-function intervalIntersection(a, b, comparator) {
-  var result = {
-    min: max(a.min, b.min, comparator),
-    max: min(a.max, b.max, comparator)
-  };
-  if(equals(result.min, a.min, comparator) && !a.minInclusive) {
-    result.minInclusive = false;
-  }
-  else if(equals(result.min, b.min, comparator) && !b.minInclusive) {
-    result.minInclusive = false;
-  }
-  else {
-    result.minInclusive = true;
-  }
-
-  if(equals(result.max, a.max, comparator) && !a.maxInclusive) {
-    result.maxInclusive = false;
-  }
-  else if(equals(result.max, b.max, comparator) && !b.maxInclusive) {
-    result.maxInclusive = false;
-  }
-  else {
-    result.maxInclusive = true;
-  }
-  if(isEmpty(result, comparator)) {
-    return null;
-  }
-  return result;
-}
-
-// returns the part of interval a that is to the left of b
-function left(a, b, comparator) {
-  var result = {
-    min: a.min,
-    minInclusive: a.minInclusive,
-    max: min(a.max, b.min, comparator)
-  };
-  if(equals(result.max, a.max, comparator) && !a.maxInclusive) {
-    result.maxInclusive = false;
-  }
-  else if(equals(result.max, b.min, comparator) && b.minInclusive) {
-    result.maxInclusive = false;
-  }
-  else {
-    result.maxInclusive = true;
-  }
-  if(isEmpty(result, comparator)) {
-    return null;
-  }
-  return result;
-}
-
-// return the part of interval a that is to the right of b
-function right(a, b, comparator) {
-  const result = {
-    min: max(a.min, b.max, comparator),
-    max: a.max,
-    maxInclusive: a.maxInclusive
-  };
-  if(equals(result.min, a.min, comparator) && !a.minInclusive) {
-    result.minInclusive = false;
-  }
-  else if(equals(result.min,  b.max, comparator) && b.maxInclusive) {
-    result.minInclusive = false;
-  }
-  else {
-    result.minInclusive = true;
-  }
-  if(isEmpty(result, comparator)) {
-    return null;
-  }
-  return result;
-}
-
-function max(a, b, comparator) {
-  return comparator(a,b) <= 0 ? b : a;
-}
-
-function min(a, b, comparator) {
-  return comparator(a,b) <= 0 ? a : b;
-}
-
-function equals(a, b, comparator) {
-  return comparator(a,b) === 0;
-}
+const intervalMath = require('./intervalMath');
 
 // note: ref is taken from b
 function boxIntersection(a, b, xComparator, yComparator) {
-  const xInterval = intervalIntersection(a.xInterval, b.xInterval, xComparator);
-  const yInterval = intervalIntersection(a.yInterval, b.yInterval, yComparator);
+  const xInterval = intervalMath.intersection(a.xInterval, b.xInterval, xComparator);
+  const yInterval = intervalMath.intersection(a.yInterval, b.yInterval, yComparator);
   if(xInterval && yInterval) {
     return {
       xInterval: xInterval,
@@ -109,63 +20,30 @@ function boxOverlaps(a, b, xComparator, yComparator) {
   return boxIntersection(a, b, xComparator, yComparator) !== null;
 }
 
-function isAdjacent(a, b, comparator) {
-  return (equals(a.min, b.max, comparator) && (a.minInclusive !== b.maxInclusive)) ||
-    (equals(a.max, b.min, comparator) && (a.maxInclusive !== b.minInclusive))
-}
-
-function intervalsEqual(a, b, comparator) {
-  return equals(a.min, b.min, comparator) &&
-    equals(a.max, b.max, comparator) &&
-    a.minInclusive === b.minInclusive &&
-    a.maxInclusive === b.maxInclusive;
-}
-
-function mergeAdjacentIntervals(a, b, comparator) {
-  if(equals(a.min, b.max, comparator)) {
-    return {
-      min: b.min,
-      max: a.max,
-      minInclusive: b.minInclusive,
-      maxInclusive: a.maxInclusive
-    };
-  }
-  else if(equals(a.max, b.min, comparator)) {
-    return {
-      min: a.min,
-      max: b.max,
-      minInclusive: a.minInclusive,
-      maxInclusive: b.maxInclusive
-    };
-  }
-  else {
-    throw new Error('Intervals was not adjacent');
-  }
-}
 
 function isVerticalMergable(a, b, xComparator, yComparator) {
-  return isAdjacent(a.yInterval, b.yInterval, yComparator) &&
-    intervalsEqual(a.xInterval, b.xInterval, xComparator) &&
+  return intervalMath.adjacent(a.yInterval, b.yInterval, yComparator) &&
+    intervalMath.equals(a.xInterval, b.xInterval, xComparator) &&
     a.ref === b.ref;
 }
 
 function isHorizontalMergeable(a, b, xComparator, yComparator) {
-  return isAdjacent(a.xInterval, b.xInterval, xComparator) &&
-      intervalsEqual(a.yInterval, b.yInterval, yComparator) &&
+  return intervalMath.adjacent(a.xInterval, b.xInterval, xComparator) &&
+      intervalMath.equals(a.yInterval, b.yInterval, yComparator) &&
       a.ref === b.ref;
 }
 
 function mergeVerticallyAdjacent(a, b, yComparator) {
   return {
     xInterval: a.xInterval,
-    yInterval: mergeAdjacentIntervals(a.yInterval, b.yInterval, yComparator),
+    yInterval: intervalMath.mergeAdjacent(a.yInterval, b.yInterval, yComparator),
     ref: a.ref
   }
 }
 
 function mergeHorizontallyAdjacent(a, b, xComparator) {
   return {
-    xInterval: mergeAdjacentIntervals(a.xInterval, b.xInterval, xComparator),
+    xInterval: intervalMath.mergeAdjacent(a.xInterval, b.xInterval, xComparator),
     yInterval: a.yInterval,
     ref: a.ref
   };
@@ -183,8 +61,8 @@ function applyBoxes(a,b, xComparator, yComparator) {
   const result = [intersection];
 
   // compute box above intersection
-  const aTop = right(a.yInterval, b.yInterval, yComparator);
-  const bTop = right(b.yInterval, a.yInterval, yComparator);
+  const aTop = intervalMath.right(a.yInterval, b.yInterval, yComparator);
+  const bTop = intervalMath.right(b.yInterval, a.yInterval, yComparator);
   if(aTop) {
     result.push({
       xInterval: intersection.xInterval,
@@ -201,8 +79,8 @@ function applyBoxes(a,b, xComparator, yComparator) {
   }
 
   // compute box below intersection
-  const aBottom = left(a.yInterval, b.yInterval, yComparator);
-  const bBottom = left(b.yInterval, a.yInterval, yComparator);
+  const aBottom = intervalMath.left(a.yInterval, b.yInterval, yComparator);
+  const bBottom = intervalMath.left(b.yInterval, a.yInterval, yComparator);
   if(aBottom) {
     result.push({
       xInterval: intersection.xInterval,
@@ -219,8 +97,8 @@ function applyBoxes(a,b, xComparator, yComparator) {
   }
 
   // compute box to the right of the intersection
-  const aRight = right(a.xInterval, b.xInterval, xComparator);
-  const bRight = right(b.xInterval, a.xInterval, xComparator);
+  const aRight = intervalMath.right(a.xInterval, b.xInterval, xComparator);
+  const bRight = intervalMath.right(b.xInterval, a.xInterval, xComparator);
   if(aRight) {
     result.push({
       xInterval: aRight,
@@ -237,8 +115,8 @@ function applyBoxes(a,b, xComparator, yComparator) {
   }
 
   // compute box to the left of the intersection
-  const aLeft = left(a.xInterval, b.xInterval, xComparator);
-  const bLeft = left(b.xInterval, a.xInterval, xComparator);
+  const aLeft = intervalMath.left(a.xInterval, b.xInterval, xComparator);
+  const bLeft = intervalMath.left(b.xInterval, a.xInterval, xComparator);
   if(aLeft) {
     result.push({
       xInterval: aLeft,

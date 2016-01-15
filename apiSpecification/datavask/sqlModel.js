@@ -18,7 +18,10 @@ var util = require('../util');
 
 var kode4String = util.kode4String;
 
+
 // We just let the database format the husnr
+columnsMap.adresse = _.clone(columnsMap.adresse);
+columnsMap.adgangsadresse = _.clone(columnsMap.adgangsadresse);
 columnsMap.adresse.husnr = columnsMap.adgangsadresse.husnr = {
   select: '(husnr).tal || (husnr).bogstav'
 };
@@ -98,7 +101,7 @@ function datavaskFuzzySearch(sqlParts, entityName, params) {
     "(SELECT id" +
     ` FROM vask_${entityName}r adg` +
     " JOIN (select kommunekode, vejkode, postnr" +
-    " FROM vejstykkerpostnumremat vp" +
+    " FROM vask_vejstykker_postnumre vp" +
     ` ORDER BY tekst <-> ${betegnelseAlias} limit 15) as vp` +
     " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
   sqlParts.orderClauses.push(levenshteinOrderClause(entityName, betegnelseAlias));

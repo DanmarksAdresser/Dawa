@@ -29,6 +29,7 @@ exports.fieldsWithoutNames = function(fields, names) {
 
 exports.defaultFlatMapper = function(flatFields) {
   return function(row) {
+
     return _.reduce(flatFields, function(memo, field) {
       var modelValue = row[field.name];
       var formattedValue;
