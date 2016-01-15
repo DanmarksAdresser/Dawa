@@ -7,6 +7,7 @@ const _ = require('underscore');
 
 const dbapi = require('../dbapi');
 const extendStreetIntervals = require('./extendStreetIntervals');
+const extendVejnavnIntervals = require('./extendVejnavnIntervals');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const sqlUtil = require('../darImport/sqlUtil');
 
@@ -69,6 +70,20 @@ TableInserter.prototype._writev = function(chunks, callback) {
     callback);
 };
 
+util.inherits(ExtendVejnavnTransformer, Transform);
+function ExtendVejnavnTransformer() {
+  Transform.call(this, {objectMode: true});
+}
+
+ExtendVejnavnTransformer.prototype._transform = function(street, encoding, callback) {
+  const result = extendVejnavnIntervals(street);
+  for(let interval of result) {
+    this.push(interval);
+  }
+  callback();
+};
+
+
 function createHeadTailTempTable(client, tableName, htsTableName, idColumns, columns, bitemporal) {
   var selectIds = sqlUtil.selectList(tableName, idColumns.concat('virkning'));
   var selectHead = "(lag(virkning, 1) OVER w) IS NULL OR COALESCE(upper(lag(virkning, 1) OVER w) <> lower(virkning), TRUE) AS head";
@@ -125,8 +140,8 @@ UNION (SELECT
          husnrinterval,
          side,
          postdistriktnummer as nr,
-         tstzrange(utc_trunc_date(oprettimestamp), utc_trunc_date(ophoerttimestamp), '[)') AS virkning
-       FROM dar_postnr WHERE upper(registrering) IS NULL AND side IS NOT NULL)) as p GROUP BY kommunekode, vejkode, side ORDER BY kommunekode, vejkode, side;
+         registrering AS virkning
+       FROM dar_postnr WHERE ophoerttimestamp IS NULL AND side IS NOT NULL)) as p GROUP BY kommunekode, vejkode, side ORDER BY kommunekode, vejkode, side;
 `;
     const intervalStream = yield dbapi.streamRaw(client, intervalSql, []);
     let postnrRefify = (interval) => interval.nr;
@@ -143,6 +158,38 @@ UNION (SELECT
   })();
 }
 
+function createVejnavnHistory(client) {
+  return q.async(function*() {
+    yield client.queryp('delete from vask_vejnavn');
+    const intervalSql = `SELECT kommunekode, vejkode,
+  json_agg(json_build_object('navn', navn,
+                             'adresseringsnavn', adresseringsnavn,
+                             'virkningstart', lower(virkning),
+                             'virkningslut', upper(virkning))) as intervals
+FROM ((SELECT kommunekode, vejkode, navn, adresseringsnavn, registrering as virkning FROM cpr_vej) UNION
+(SELECT kommunekode, vejkode, navn, adresseringsnavn, registrering as virkning FROM dar_vejnavn WHERE ophoerttimestamp IS NULL)) AS t
+WHERE navn IS NOT NULL and navn <> ''
+GROUP BY kommunekode, vejkode;`;
+    const intervalStream = yield dbapi.streamRaw(client, intervalSql, []);
+    const columns = ['kommunekode', 'vejkode', 'navn', 'adresseringsnavn', 'virkning'];
+    yield promisingStreamCombiner([
+      intervalStream,
+      new ExtendVejnavnTransformer(),
+      new TableInserter(client, 'vask_vejnavn', columns)
+    ]);
+  })();
+}
+
+function createVejstykkerPostnumreHistory(client) {
+  return client.queryp(`delete from vask_vejstykker_postnumre;
+  insert into vask_vejstykker_postnumre (select distinct vask_vejnavn.kommunekode, vask_vejnavn.vejkode,
+  vask_vejnavn.navn as vejnavn, vask_postnrinterval.nr as postnr,
+  vask_vejnavn.navn || ' ' || vask_postnrinterval.nr || ' ' || COALESCE(postnumre.navn, '') as tekst
+  from vask_vejnavn join vask_postnrinterval on vask_vejnavn.virkning && vask_postnrinterval.virkning
+  and vask_vejnavn.kommunekode=vask_postnrinterval.kommunekode
+  and vask_vejnavn.vejkode = vask_postnrinterval.vejkode
+  LEFT JOIN postnumre ON vask_postnrinterval.nr = postnumre.nr)`);
+}
 //function createVejnavnHistory(client, vejnavnHistoryTable) {
 //  return q.async(function*() {
 //    yield client.queryp(`CREATE TEMP TABLE ${vejnavnHistoryTable} AS (SELECT * FROM cpr_vej)`);
@@ -215,11 +262,11 @@ function mergeAdgangspunktHusnummer(client, mergedTable) {
       `SELECT hn.id, hn.bkid, hn.statuskode as hn_statuskode,
    ap.statuskode as ap_statuskode, hn.adgangspunktid, ap.kommunenummer as kommunekode,
    hn.vejkode, hn.husnummer as husnr,
-   hn.virkning * ap.virkning as virkning
-  FROM ${husnummerHistoryTable} hn JOIN ${adgangspunktHistoryTable} ap
+   hn.virkning * COALESCE(ap.virkning, hn.virkning) as virkning
+  FROM ${husnummerHistoryTable} hn LEFT JOIN ${adgangspunktHistoryTable} ap
    ON hn.adgangspunktid = ap.id AND hn.virkning && ap.virkning`;
     yield client.queryp(`CREATE TEMP TABLE ${joinedTable} AS (${query})`);
-    //yield client.queryp(`DROP TABLE ${adgangspunktHistoryTable}; DROP TABLE ${husnummerHistoryTable}`);
+    yield client.queryp(`DROP TABLE ${adgangspunktHistoryTable}; DROP TABLE ${husnummerHistoryTable}`);
     yield mergeValidTime(client, joinedTable, mergedTable, ['id'], ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'], false);
     yield client.queryp(`DROP TABLE ${joinedTable}`);
   })();
@@ -231,10 +278,10 @@ function mergeVejnavn(client, srcTable, mergedTable) {
     const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'];
     const src2Columns = ['navn as vejnavn', 'adresseringsnavn'];
     const query = `CREATE TEMP TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)}, ${src2Columns.join(',')},
-     ${srcTable}.virkning * cpr_vej.registrering as virkning
-    FROM ${srcTable} JOIN cpr_vej ON ${srcTable}.kommunekode = cpr_vej.kommunekode
-    AND ${srcTable}.vejkode = cpr_vej.vejkode
-    AND ${srcTable}.virkning && cpr_vej.registrering)`;
+     ${srcTable}.virkning * vask_vejnavn.virkning as virkning
+    FROM ${srcTable} JOIN vask_vejnavn ON ${srcTable}.kommunekode = vask_vejnavn.kommunekode
+    AND ${srcTable}.vejkode = vask_vejnavn.vejkode
+    AND ${srcTable}.virkning && vask_vejnavn.virkning)`;
     yield client.queryp(query);
     yield mergeValidTime(client, unmergedTable, mergedTable, ['id'], src1Columns.concat(['vejnavn', 'adresseringsnavn']), false);
     yield client.queryp(`DROP TABLE ${unmergedTable}`);
@@ -257,13 +304,14 @@ function mergePostnr(client, srcTable, mergedTable) {
      WHERE EXISTS (SELECT * ${subselect}))`;
     yield client.queryp(query);
     yield mergeValidTime(client, unmergedTable, mergedTable, ['id'], src1Columns.concat(['postnr']), false);
-    yield client.queryp(`DROP TABLE ${unmergedTable}; DROP TABLE vask_postnrinterval`);
   })();
 }
 
 function generateAdgangsadresserHistory(client) {
   return q.async(function*() {
+    yield createVejnavnHistory(client);
     yield createPostnummerIntervalHistory(client, 'vask_postnrinterval');
+    yield createVejstykkerPostnumreHistory(client);
     var mergedTable = 'merged_adgangsadresser_history';
     const mergedTableWithVejnavn = 'adgangsadresser_vejnavne_history';
     const mergedTableWithPostnr = 'adgangsadresser_postnumre_history';

@@ -69,6 +69,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
   {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
   {name: 'vask_postnrinterval', init: false},
+  {name: 'vask_vejnavn', init: false},
+  {name: 'vask_vejstykker_postnumre', init: false},
   {name: 'vask_adgangsadresser', init: false},
   {name: 'vask_adresser', init: false},
   {name: 'wms_housenumber_inspire', type: 'view'},

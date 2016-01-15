@@ -19,6 +19,8 @@ function createCopyStream(client, table, columnNames) {
   return client.query(copyFrom(sql));
 }
 
+const YEAR_1900 = moment.tz('1900-01-01T00:00:00', 'Europe/Copenhagen');
+
 function parseDateTime(str) {
   str = str.trim();
   if(str === '' || str === '000000000000') {
@@ -31,11 +33,14 @@ function parseDateTime(str) {
     str = str.substring(0,10) + '00';
   }
   var dateFormat = 'YYYYMMDDHHmm';
-  var result = moment.tz(str, dateFormat, 'Europe/Copenhagen').tz('UTC').format('YYYY-MM-DDTHH:mm:ssZ');
-  if(result.toString() === 'Invalid date'){
+  var result = moment.tz(str, dateFormat, 'Europe/Copenhagen').tz('UTC');
+  if(result.isBefore(YEAR_1900)) {
+    return null;
+  }
+  if(!result.isValid()){
     throw new Error('Invalid date: ' + str);
   }
-  return result;
+  return result.format('YYYY-MM-DDTHH:mm:ssZ');
 }
 
 var historyTransformStream = es.map(function(line, cb) {
