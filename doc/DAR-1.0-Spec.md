@@ -256,7 +256,27 @@ Medtages:
 Medtages ikke:
 
  * (ingen)
+ 
+### NavngivenVejPostnummerRelation
+Medtages:
 
+ * NavngivenVej_id
+ * Postnummer_id
+ 
+Medtages ikke:
+
+ * (ingen)
+ 
+### NavngivenVejSupplerendeBynavnRelation
+Medtages:
+
+ * NavngivenVej_id
+ * SupplerendeBynavn_id
+ 
+Medtages ikke:
+
+ * (ingen)
+ 
 ### Postnummer
 Medtages: 
 
@@ -299,5 +319,3 @@ Medtages ikke:
  * Gadepostnummertilhør
  * HusnummerAnvendelse (?)
  * HusnummerIntervalReservation
- * NavngivenVejPostnummerRelation (?)
- * NavngivenVejSupplerendeBynavnRelation (?)
