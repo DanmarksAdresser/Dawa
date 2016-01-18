@@ -78,7 +78,7 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   file: [false, 'Fil med postnumre som skal importeres', 'string'],
   clear: [false, 'Ryd tabel før indsættelse', 'boolean', false],
-  virkning: [false, 'Tidspunkt hvor postnummerudtrækket blev dannet af CPR', 'string'],
+  virkning: [false, 'Tidspunkt hvor postnummerudtrækket blev dannet af CPR', 'string']
 };
 
 
