@@ -18,7 +18,7 @@ CREATE TABLE cpr_vej(
   navn text,
   adresseringsnavn text,
   virkning tstzrange NOT NULL,
-  exclude using gist(kommunekode with =, vejkode with =, registrering with &&) INITIALLY DEFERRED
+  exclude using gist(kommunekode with =, vejkode with =, virkning with &&)
 );
 
 CREATE INDEX ON cpr_vej(kommunekode, vejkode);
