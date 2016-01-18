@@ -299,6 +299,10 @@ Medtages:
  * ReserveretVejadresseringsNavn
  * Retskrivningskontrol
  
+Medtages ikke:
+
+ * (Ingen)
+ 
 ### SupplerendeBynavn
 Medtages:
 
@@ -317,5 +321,11 @@ Medtages ikke:
  * AdresseopgavegenstandNavngivenVejRelation
  * AdresseopgavegenstandSupplerendeBynavnRelation
  * Gadepostnummertilhør
- * HusnummerAnvendelse (?)
  * HusnummerIntervalReservation
+ 
+### Uafklarede entiteter
+Følgende entiter er det endnu ikke afklaret om medtages, 
+idet det endnu ikke er besluttet hvordan entiteten anvendes.
+
+ * HusnummerAnvendelse
+
