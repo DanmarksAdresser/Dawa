@@ -10,8 +10,6 @@ select $1.tal || $1.bogstav;
 $$ language sql;
 
 --- initialize cpr_vej table
-DROP TABLE IF EXISTS cpr_vej CASCADE;
-
 CREATE TABLE cpr_vej(
   kommunekode smallint NOT NULL,
   vejkode smallint NOT NULL,
@@ -24,7 +22,6 @@ CREATE TABLE cpr_vej(
 CREATE INDEX ON cpr_vej(kommunekode, vejkode);
 
 --- initialize cpr_postnr table
-DROP TABLE IF EXISTS cpr_postnr;
 CREATE TABLE cpr_postnr(
   kommunekode smallint NOT NULL,
   vejkode smallint NOT NULL,
@@ -38,8 +35,6 @@ CREATE TABLE cpr_postnr(
 CREATE INDEX ON cpr_postnr(kommunekode, vejkode);
 
 --- vask_vejnavn table
-DROP TABLE IF EXISTS vask_vejnavn;
-
 CREATE TABLE vask_vejnavn(
   kommunekode smallint NOT NULL,
   vejkode smallint NOT NULL,
@@ -52,8 +47,6 @@ CREATE TABLE vask_vejnavn(
 CREATE INDEX ON vask_vejnavn(kommunekode, vejkode);
 
 --- vask_postnrinterval table
-DROP TABLE IF EXISTS vask_postnrinterval;
-
 CREATE TABLE vask_postnrinterval(
   kommunekode smallint NOT NULL,
   vejkode smallint NOT NULL,
@@ -67,15 +60,12 @@ CREATE TABLE vask_postnrinterval(
 CREATE INDEX ON vask_postnrinterval(kommunekode, vejkode);
 
 --- vask_vejstykker_postnumre
-DROP TABLE IF EXISTS vask_vejstykker_postnumre CASCADE;
-
 CREATE TABLE vask_vejstykker_postnumre(
   kommunekode smallint NOT NULL,
   vejkode smallint NOT NULL,
   vejnavn text NOT NULL,
   postnr smallint NOT NULL,
-  tekst text NOT NULL,
-  PRIMARY KEY(kommunekode, vejkode, postnr)
+  tekst text NOT NULL
 );
 
-CREATE INDEX ON vask_vejstykker_postnumre USING GIST(tekst gist_trgm_ops);
+CREATE INDEX ON vask_vejstykker_postnumre(kommunekode, vejkode, postnr);
