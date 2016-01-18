@@ -55,13 +55,13 @@ var historyTransformStream = es.map(function(line, cb) {
     var nedlagt = parseDateTime(line.substring(35, 47));
     var adresseringsnavn = line.substring(47, 67).trim();
     var navn = line.substring(67, 107).trim();
-    const registrering = toInterval(oprettet, nedlagt);
+    const virkning = toInterval(oprettet, nedlagt);
     cb(null, {
       kommunekode: kommunekode,
       vejkode: vejkode,
       adresseringsnavn: adresseringsnavn,
       navn: navn,
-      registrering: registrering
+      virkning: virkning
     });
   }
   catch(e) {
@@ -88,7 +88,7 @@ var currentTransformStream = es.map(function(line, cb) {
     vejkode: vejkode,
     adresseringsnavn: adresseringsnavn,
     navn: navn,
-    registrering: toInterval(oprettet, null)
+    virkning: toInterval(oprettet, null)
   });
 });
 
@@ -101,7 +101,7 @@ function toInterval(from, to) {
 }
 
 function importFile(client, filePath, transformer) {
-  const dbColumnNames = ['kommunekode', 'vejkode', 'navn', 'adresseringsnavn', 'registrering'];
+  const dbColumnNames = ['kommunekode', 'vejkode', 'navn', 'adresseringsnavn', 'virkning'];
   const pgStream = createCopyStream(client, 'cpr_vej', dbColumnNames);
   const inputStream = fs.createReadStream(filePath);
   return promisingStreamCombiner([

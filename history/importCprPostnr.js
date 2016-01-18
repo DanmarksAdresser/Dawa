@@ -41,7 +41,7 @@ var postnrTransformStream = function(virkningstart, virkningslut) {
         side: ligeUlige,
         nr: postnr,
         navn: postnrnavn,
-        virkning: new databaseTypes.Range(virkningstart || null, virkningslut || null, '[)').toPostgres()
+        virkning: new databaseTypes.Range(virkningstart || null, virkningslut || null, '[]').toPostgres()
       };
     }
     catch(e) {
@@ -78,12 +78,11 @@ var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   file: [false, 'Fil med postnumre som skal importeres', 'string'],
   clear: [false, 'Ryd tabel før indsættelse', 'boolean', false],
-  virkningstart: [false, 'Tidspunkt hvor postnumrene skal være gyldige fra', 'string'],
-  virkningslut: [false, 'Tidspunkt hvor postnumrene skal være gyldige til', 'string']
+  virkning: [false, 'Tidspunkt hvor postnummerudtrækket blev dannet af CPR', 'string'],
 };
 
 
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'virkningstart'), function (args, options) {
+cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl
   });
@@ -94,7 +93,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'virkningstar
         if(options.clear) {
           yield client.queryp('delete from cpr_postnr');
         }
-        yield importFile(client, options.file, postnrTransformStream(options.virkningstart, options.virkningslut));
+        yield importFile(client, options.file, postnrTransformStream(options.virkning, options.virkning));
       }
       catch (err) {
         logger.error('Caught error in importCpr', err);
