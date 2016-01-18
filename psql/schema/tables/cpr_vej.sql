@@ -5,6 +5,8 @@ CREATE TABLE cpr_vej(
   vejkode smallint NOT NULL,
   navn text,
   adresseringsnavn text,
-  registrering tstzrange NOT NULL,
+  virkning tstzrange NOT NULL,
   exclude using gist(kommunekode with =, vejkode with =, registrering with &&) INITIALLY DEFERRED
 );
+
+CREATE INDEX ON cpr_vej(kommunekode, vejkode);

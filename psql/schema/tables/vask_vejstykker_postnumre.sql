@@ -5,7 +5,8 @@ CREATE TABLE vask_vejstykker_postnumre(
   vejkode smallint NOT NULL,
   vejnavn text NOT NULL,
   postnr smallint NOT NULL,
-  tekst text NOT NULL
+  tekst text NOT NULL,
+  PRIMARY KEY(kommunekode, vejkode, postnr)
 );
 
 CREATE INDEX ON vask_vejstykker_postnumre USING GIST(tekst gist_trgm_ops);

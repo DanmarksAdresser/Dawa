@@ -166,7 +166,7 @@ function createVejnavnHistory(client) {
                              'adresseringsnavn', adresseringsnavn,
                              'virkningstart', lower(virkning),
                              'virkningslut', upper(virkning))) as intervals
-FROM ((SELECT kommunekode, vejkode, navn, adresseringsnavn, registrering as virkning FROM cpr_vej) UNION
+FROM ((SELECT kommunekode, vejkode, navn, adresseringsnavn, virkning FROM cpr_vej) UNION
 (SELECT kommunekode, vejkode, navn, adresseringsnavn, registrering as virkning FROM dar_vejnavn WHERE ophoerttimestamp IS NULL)) AS t
 WHERE navn IS NOT NULL and navn <> ''
 GROUP BY kommunekode, vejkode;`;
@@ -190,27 +190,6 @@ function createVejstykkerPostnumreHistory(client) {
   and vask_vejnavn.vejkode = vask_postnrinterval.vejkode
   LEFT JOIN postnumre ON vask_postnrinterval.nr = postnumre.nr)`);
 }
-//function createVejnavnHistory(client, vejnavnHistoryTable) {
-//  return q.async(function*() {
-//    yield client.queryp(`CREATE TEMP TABLE ${vejnavnHistoryTable} AS (SELECT * FROM cpr_vej)`);
-//    const upperValid = (yield client.queryp('SELECT max(upper(virkning)) as max FROM cpr_vej')).rows[0].max;
-//    yield client.queryp(`INSERT INTO ${vejnavnHistoryTable} (SELECT kommunekode, vejkode, navn, adresseringsnavn,
-//  tstzrange(greatest(oprettimestamp, $1), ophoerttimestamp, '[)') as virkning
-//FROM dar_vejnavn WHERE upper(registrering) IS NULL and ophoerttimestamp > $1);
-//`, [upperValid]);
-//  })();
-//}
-//
-//function createVejnavnPostnummerHistory(
-//  client,
-//  postnummerIntervalHistoryTable,
-//  vejnavnHistoryTable,
-//  vejnavnPostnummerHistoryTable) {
-//  client.queryp(`WITH pns AS
-//  (SELECT kommunekode, vejkode, postnr, tstzrange(min(lower(virkning), max(upper(virkning))
-//  GROUP BY kommunekode, vejkode, postnr)
-//  SELECT `)
-//}
 
 function prepareAdgangspunkt(client, adgangspunktHistoryTable) {
   return q.async(function*() {

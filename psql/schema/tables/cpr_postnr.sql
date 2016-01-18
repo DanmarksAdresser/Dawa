@@ -8,3 +8,5 @@ CREATE TABLE cpr_postnr(
   navn text,
   virkning tstzrange NOT NULL
 );
+
+CREATE INDEX ON cpr_postnr(kommunekode, vejkode);
