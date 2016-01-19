@@ -168,7 +168,7 @@ function createVejnavnHistory(client) {
                              'virkningslut', upper(virkning))) as intervals
 FROM ((SELECT kommunekode, vejkode, navn, adresseringsnavn, virkning FROM cpr_vej) UNION
 (SELECT kommunekode, vejkode, navn, adresseringsnavn, registrering as virkning FROM dar_vejnavn WHERE ophoerttimestamp IS NULL)) AS t
-WHERE navn IS NOT NULL and navn <> ''
+WHERE navn IS NOT NULL and navn <> '' and adresseringsnavn IS NOT NULL AND vejkode < 9900
 GROUP BY kommunekode, vejkode;`;
     const intervalStream = yield dbapi.streamRaw(client, intervalSql, []);
     const columns = ['kommunekode', 'vejkode', 'navn', 'adresseringsnavn', 'virkning'];
