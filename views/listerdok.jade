@@ -22,6 +22,7 @@ block content
             ul#region.nav.nav-list
               li <a href='#regionsoegning'>Regionsøgning</a>
               li <a href='#regionopslag'>Regionopslag</a>
+              li <a href='#regionerautocomplete'>Regioner autocomplete</a>
               li <a href='#regionreverse'>Region reverse geocoding</a>
               li <a href='#regiondata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#kommune').nav-header Kommune API
@@ -35,47 +36,55 @@ block content
             ul#sogn.nav.nav-list
               li <a href='#sognsoegning'>Sognsøgning</a>
               li <a href='#sognopslag'>Sognopslag</a>
+              li <a href='#sognautocomplete'>Sogn autocomplete</a>
               li <a href='#sognreverse'>Sogn reverse geocoding</a>
               li <a href='#sogndata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#retskreds').nav-header Retskreds API
             ul#retskreds.nav.nav-list
               li <a href='#retskredssoegning'>Retskredssøgning</a>
               li <a href='#retskredsopslag'>Retskredsopslag</a>
+              li <a href='#retskredsautocomplete'>Retskreds autocomplete</a>
               li <a href='#retskredsreverse'>Retskreds reverse geocoding</a>
               li <a href='#retskredsdata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#politikreds').nav-header Politikreds API
             ul#politikreds.nav.nav-list
               li <a href='#politikredssoegning'>Politikredssøgning</a>
               li <a href='#politikredsopslag'>Politikredsopslag</a>
+              li <a href='#politikredsautocomplete'>Politikreds autocomplete</a>
               li <a href='#politikredsreverse'>Politikreds reverse geocoding</a>
               li <a href='#politikredsdata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#opstillingskreds').nav-header Opstillingskreds API
             ul#opstillingskreds.nav.nav-list
               li <a href='#opstillingskredssoegning'>Opstillingskredssøgning</a>
               li <a href='#opstillingskredsopslag'>Opstillingskredsopslag</a>
+              li <a href='#opstillingskredsautocomplete'>Opstillingskreds autocomplete</a>
               li <a href='#opstillingskredsreverse'>Opstillingskreds reverse geocoding</a>
               li <a href='#opstillingskredsdata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#valglandsdel').nav-header Valglandsdels API
             ul#valglandsdel.nav.nav-list
               li <a href='#valglandsdelsoegning'>Valglandsdelssøgning</a>
               li <a href='#valglandsdelopslag'>Valglandsdelsopslag</a>
+              li <a href='#valglandsdelautocomplete'>Valglandsdel autocomplete</a>
               li <a href='#valglandsdelreverse'>Valglandsdel reverse geocoding</a>
               li <a href='#valglandsdeldata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#storkreds').nav-header Storkreds API
-            ul#valglandsdel.nav.nav-list
+            ul#storkreds.nav.nav-list
               li <a href='#storkredssoegning'>Storkredssøgning</a>
               li <a href='#storkredsopslag'>Storkredsopslag</a>
+              li <a href='#storkredsautocomplete'>Storkreds autocomplete</a>
               li <a href='#storkredsreverse'>Storkreds reverse geocoding</a>
               li <a href='#storkredsdata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#ejerlav').nav-header Ejerlav API
             ul#ejerlav.nav.nav-list
               li <a href='#ejerlavsoegning'>Ejerlavssøgning</a>
               li <a href='#ejerlavopslag'>Ejerlavsopslag</a>
+              li <a href='#ejerlavautocomplete'>Ejerlav autocomplete</a>
               li <a href='#ejerlavdata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#jordstykke').nav-header Jordstykke API
             ul#jordstykke.nav.nav-list
               li <a href='#jordstykkesoegning'>Jordstykkesøgning</a>
               li <a href='#jordstykkeopslag'>Jordstykkeopslag</a>
+              li
               li <a href='#jordstykkereverse'>Jordstykke reverse geocoding</a>
               li <a href='#jordstykkedata'>Databeskrivelse</a>
 
@@ -105,6 +114,10 @@ block content
             div.page-header
             h3.anchor-header#regionopslag Regionopslag
             +documentResource(parameterDoc, '/regioner/{kode}')
+
+            div.page-header
+              h3.anchor-header#regionerautocomplete Regioner autocomplete
+            +documentResource(parameterDoc, '/regioner/autocomplete')
 
             div.page-header
               h3.anchor-header#regionreverse Region reverse geocoding
@@ -139,11 +152,15 @@ block content
 
           section
             div.page-header
-            h3.anchor-header#sognsoegning Sognsøgning
+              h3.anchor-header#sognsoegning Sognsøgning
             +documentResource(parameterDoc, '/sogne')
             div.page-header
-            h3.anchor-header#sognopslag Sogneopslag
+              h3.anchor-header#sognopslag Sogneopslag
             +documentResource(parameterDoc, '/sogne/{kode}')
+            div.page-header
+              h3.anchor-header#sognautocomplete Sogn autocomplete
+            +documentResource(parameterDoc, '/sogne/autocomplete')
+
             div.page-header
               h3.anchor-header#sognreverse Sogn reverse geocoding
             +documentResource(parameterDoc, '/sogne/reverse')
@@ -155,10 +172,14 @@ block content
           section
             div.page-header
             h3.anchor-header#retskredssoegning Retskredssøgning
-            +documentResource(parameterDoc, '/retskredse')
+              +documentResource(parameterDoc, '/retskredse')
             div.page-header
             h3.anchor-header#retskredsopslag Retskredsopslag
-            +documentResource(parameterDoc, '/retskredse/{kode}')
+              +documentResource(parameterDoc, '/retskredse/{kode}')
+            div.page-header
+              h3.anchor-header#retskredsautocomplete Retskreds autocomplete
+            +documentResource(parameterDoc, '/retskredse/autocomplete')
+
             div.page-header
               h3.anchor-header#retskredsreverse Retskreds reverse geocoding
             +documentResource(parameterDoc, '/retskredse/reverse')
@@ -174,6 +195,9 @@ block content
             h3.anchor-header#politikredsopslag Politikredsopslag
             +documentResource(parameterDoc, '/politikredse/{kode}')
             div.page-header
+              h3.anchor-header#politikredsautocomplete Politikreds autocomplete
+            +documentResource(parameterDoc, '/politikredse/autocomplete')
+            div.page-header
               h3.anchor-header#politikredsreverse Politikreds reverse geocoding
             +documentResource(parameterDoc, '/politikredse/reverse')
             div.page-header
@@ -185,22 +209,29 @@ block content
             h3.anchor-header#opstillingskredssoegning Opstillingskredssøgning
             +documentResource(parameterDoc, '/opstillingskredse')
             div.page-header
-            h3.anchor-header#opstillingskredsopslag Opstillingskredsopslag
+              h3.anchor-header#opstillingskredsopslag Opstillingskredsopslag
             +documentResource(parameterDoc, '/opstillingskredse/{kode}')
+            div.page-header
+              h3.anchor-header#opstillingskredsautocomplete Opstillingskreds autocomplete
+            +documentResource(parameterDoc, '/opstillingskredse/autocomplete')
             div.page-header
               h3.anchor-header#opstillingskredsreverse Opstillingskreds reverse geocoding
             +documentResource(parameterDoc, '/opstillingskredse/reverse')
             div.page-header
-            h3.anchor-header#opstillingskredsdata Beskrivelse af opstillingskredsdata
+              h3.anchor-header#opstillingskredsdata Beskrivelse af opstillingskredsdata
             p Web API'et udstiller for hver opstillingskreds følgende informationer:
             +documentSchema(jsonSchemas.opstillingskreds)
 
           section
-            h3.anchor-header#valglandsdelsoegning Valglandsdelssøgning
+            div.page-header
+              h3.anchor-header#valglandsdelsoegning Valglandsdelssøgning
             +documentResource(parameterDoc, '/valglandsdele')
             div.page-header
-            h3.anchor-header#valglandsdelopslag Valglandsdelsopslag
+              h3.anchor-header#valglandsdelopslag Valglandsdelsopslag
             +documentResource(parameterDoc, '/valglandsdele/{bogstav}')
+            div.page-header
+              h3.anchor-header#valglandsdelautocomplete Valglandsdel autocomplete
+            +documentResource(parameterDoc, '/valglandsdele/autocomplete')
             div.page-header
                 h3.anchor-header#valglandsdelreverse Valglandsdel reverse geocoding
             +documentResource(parameterDoc, '/valglandsdele/reverse')
@@ -209,11 +240,15 @@ block content
             p Web API'et udstiller for hver valglandsdel følgende informationer:
             +documentSchema(jsonSchemas.valglandsdel)
           section
-            h3.anchor-header#storkredssoegning Storkredssøgning
+            div.page-header
+              h3.anchor-header#storkredssoegning Storkredssøgning
             +documentResource(parameterDoc, '/storkredse')
             div.page-header
-            h3.anchor-header#storkredsopslag Storkredsopslag
+              h3.anchor-header#storkredsopslag Storkredsopslag
             +documentResource(parameterDoc, '/storkredse/{nummer}')
+            div.page-header
+              h3.anchor-header#storkredsautocomplete Storkreds autocomplete
+            +documentResource(parameterDoc, '/storkredse/autocomplete')
             div.page-header
               h3.anchor-header#storkredsreverse Storkreds reverse geocoding
             +documentResource(parameterDoc, '/storkredse/reverse')
@@ -222,11 +257,15 @@ block content
             p Web API'et udstiller for hver storkreds følgende informationer:
             +documentSchema(jsonSchemas.storkreds)
           section
-            h3.anchor-header#ejerlavsoegning Ejerlavssøgning
+            div.page-header
+              h3.anchor-header#ejerlavsoegning Ejerlavssøgning
             +documentResource(parameterDoc, '/ejerlav')
             div.page-header
               h3.anchor-header#ejerlavopslag Ejerlavsopslag
             +documentResource(parameterDoc, '/ejerlav/{kode}')
+            div.page-header
+              h3.anchor-header#ejerlavautocomplete Ejerlav autocomplete
+            +documentResource(parameterDoc, '/ejerlav/autocomplete')
             div.page-header
               h3.anchor-header#ejerlavdata Beskrivelse af ejerlav
             p Web API'et udstiller for hvert ejerlav følgende informationer:
