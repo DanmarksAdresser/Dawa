@@ -13,6 +13,11 @@ var normalizedField = function(fieldName) {
   return normalizedFieldSchemas.normalizedField('adresse', fieldName);
 };
 
+var normalizedAdgangsadresseField = function(fieldName) {
+  return normalizedFieldSchemas.normalizedField('adgangsadresse', fieldName);
+};
+
+
 var fields = [
   {
     name: 'id'
@@ -34,9 +39,7 @@ var fields = [
   {
     name: 'adresseringsvejnavn'
   },
-  {
-    name: 'husnr'
-  },
+  normalizedAdgangsadresseField('husnr'),
   normalizedField('etage'),
   normalizedField('dør'),
   {
