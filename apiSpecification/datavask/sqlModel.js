@@ -6,9 +6,8 @@ var _ = require('underscore');
 
 var adresseTextMatch = require('../adresseTextMatch');
 var columnsMap = _.clone(require('../history/columns'));
-var dbapi = require('../../dbapi');
 var levenshtein = require('../levenshtein');
-var parameters = require('./parameters');
+//var parameters = require('./parameters');
 var registry = require('../registry');
 var qUtil = require('../../q-util');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
@@ -26,9 +25,9 @@ columnsMap.adresse.husnr = columnsMap.adgangsadresse.husnr = {
   select: '(husnr).tal || (husnr).bogstav'
 };
 
-function adressebetegnelseSql(adgangsadresse, includeSuppBynavn) {
-  return `adressebetegnelse(vejnavn, husnr, ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;
-}
+//function adressebetegnelseSql(adgangsadresse, includeSuppBynavn) {
+//  return `adressebetegnelse(vejnavn, husnr, ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;
+//}
 
 function formatAdresseFields(row, adgangOnly) {
   if(!row) {
@@ -91,22 +90,10 @@ function computeDifferences(uvasket, vasket, adgangOnly) {
 }
 
 
-function levenshteinOrderClause(entityName, betegnelseAlias) {
-  return `min(least(levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', true)}), lower(${betegnelseAlias}), 2, 1, 3),` +
-  ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 2, 1, 3)))`;
-}
-function datavaskFuzzySearch(sqlParts, entityName, params) {
-  var betegnelseAlias = dbapi.addSqlParameter(sqlParts, params.betegnelse);
-  sqlParts.whereClauses.push("id IN " +
-    "(SELECT id" +
-    ` FROM vask_${entityName}r adg` +
-    " JOIN (select kommunekode, vejkode, postnr" +
-    " FROM vask_vejstykker_postnumre vp" +
-    ` ORDER BY tekst <-> ${betegnelseAlias} limit 15) as vp` +
-    " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
-  sqlParts.orderClauses.push(levenshteinOrderClause(entityName, betegnelseAlias));
-//  sqlParts.orderClauses.push('lower(virkning) desc');
-}
+//function levenshteinOrderClause(entityName, betegnelseAlias) {
+//  return `min(least(levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', true)}), lower(${betegnelseAlias}), 2, 1, 3),` +
+//  ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 2, 1, 3)))`;
+//}
 
 var adgangsadresseFields = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'virkningstart', 'virkningslut'];
 
@@ -126,38 +113,77 @@ let selectList = {
   adresse: makeSelectList(adresseFields, columnsMap.adresse)
 };
 
-var baseQuery = function(entityName) {
+function searchQuery(entityName, betegnelse, limit) {
+  const table = `vask_${entityName}r`;
+  const uniqueTable = `${table}_unikke`;
+  const sql = `
+WITH allids AS (SELECT id
+                FROM ${uniqueTable}
+                WHERE tsv @@ to_tsquery('adresser_query', $2)
+                LIMIT 500),
+    ids AS (SELECT u.id
+            FROM ${uniqueTable} u NATURAL JOIN allids
+            GROUP BY u.id
+            ORDER BY
+              max(round(1000000 *
+                        ts_rank(tsv, to_tsquery('adresser_query', $3),
+                                16))) DESC,
+              min(levenshtein(lower(adressebetegnelse(vejnavn, husnr, ${entityName === 'adgangsadresse' ? 'NULL, NULL' : 'etage, doer'},
+                                                      supplerendebynavn,
+                                                      to_char(postnr,
+                                                              'FM0000'), postnrnavn)),
+                              lower($1), 2, 1, 3))
+            LIMIT ${limit})
+SELECT ${selectList[entityName].join(',')}
+FROM ${table}
+WHERE id IN (SELECT id
+             FROM ids)
+GROUP BY id;`
+  var tsQuery = sqlParameterImpl.toPgSearchQuery(betegnelse);
+  const tsQueryForRanking = sqlParameterImpl.queryForRanking(tsQuery);
+
   return {
-    select: selectList[entityName],
-      from: [`vask_${entityName}r`],
-    whereClauses: [],
-    groupBy: 'id',
-    orderClauses: [],
-    sqlParams: []
+    sql: sql,
+    params: [betegnelse, tsQuery, tsQueryForRanking]
+  };
+
+}
+
+function fuzzyQuery(entityName, betegnelse, limit) {
+  const table = `vask_${entityName}r`;
+  const uniqueTable = `${table}_unikke`;
+  const sql = `
+WITH vps AS (SELECT
+               kommunekode,
+               vejkode,
+               postnr
+             FROM vask_vejstykker_postnumre vp
+             ORDER BY tekst <-> $1
+             LIMIT 15),
+    allids AS (SELECT DISTINCT id
+               FROM ${table} adg NATURAL JOIN vps),
+    ids AS (SELECT u.id
+            FROM ${uniqueTable} u NATURAL JOIN allids
+            GROUP BY u.id
+            ORDER BY min(levenshtein(lower(adressebetegnelse(vejnavn, husnr, ${entityName === 'adgangsadresse' ? 'NULL, NULL' : 'etage, doer'},
+                                                             supplerendebynavn,
+                                                             to_char(postnr, 'FM0000'),
+                                                             postnrnavn)),
+                                     lower($1), 2, 1, 3))
+            LIMIT ${limit})
+SELECT ${selectList[entityName].join(',')}
+FROM ${table}
+  WHERE id IN (select id from ids)
+GROUP BY id`;
+
+  return {
+    sql: sql,
+    params: [betegnelse]
   };
 }
 
 function doSearchQuery(client, entityName, params) {
-  var columns = columnsMap[entityName];
-  var queryParts = baseQuery(entityName);
-  sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns)(queryParts, params);
-
-  var tsQuery = sqlParameterImpl.toPgSearchQuery(params.betegnelse);
-  var betegnelseAlias = dbapi.addSqlParameter(queryParts, params.betegnelse);
-  var tsQueryAlias = dbapi.addSqlParameter(queryParts, tsQuery);
-  var tsQueryRankAlias = dbapi.addSqlParameter(queryParts, sqlParameterImpl.queryForRanking(tsQuery));
-
-  var searchSubQuery =
-    `SELECT id FROM vask_${entityName}r WHERE id IN (SELECT id FROM vask_${entityName}r WHERE tsv @@ to_tsquery('adresser_query', ${tsQueryAlias}) LIMIT 500)` +
-    ` GROUP BY id` +
-    ` ORDER BY max(round(1000000 * ts_rank(tsv, to_tsquery('adresser_query', ${tsQueryRankAlias}), 16))) DESC,` +
-    ` ${levenshteinOrderClause(entityName, betegnelseAlias)}` +
-    ` LIMIT 100`;
-
-  queryParts.whereClauses.push(`id IN (${searchSubQuery})`);
-
-  sqlParameterImpl.paging(columns, [])(queryParts, params);
-  var query = dbapi.createQuery(queryParts);
+  const query = searchQuery(entityName, params.betegnelse, 30);
   return client.queryp(query.sql, query.params).then((result) => {
     return result.rows || [];
   });
@@ -165,13 +191,7 @@ function doSearchQuery(client, entityName, params) {
 }
 
 function doFuzzyQuery(client, entityName, params) {
-  var columns = columnsMap[entityName];
-  var queryParts = baseQuery(entityName);
-
-  sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns)(queryParts, params);
-  datavaskFuzzySearch(queryParts, entityName, params);
-  sqlParameterImpl.paging(columns, [])(queryParts, params);
-  var query = dbapi.createQuery(queryParts);
+  const query = fuzzyQuery(entityName, params.betegnelse, 30);
   return client.queryp(query.sql, query.params).then((result) => {
     return result.rows || [];
   });
@@ -390,4 +410,3 @@ function createSqlModel(entityName) {
   registry.add(`${entityName}_datavask`, 'sqlModel', 'query', module.exports);
   exports[entityName] = sqlModel;
 });
-

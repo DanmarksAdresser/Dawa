@@ -255,14 +255,14 @@ function mergeVejnavn(client, srcTable, mergedTable) {
   var unmergedTable = mergedTable + '_unmerged';
   return q.async(function*() {
     const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'];
-    const src2Columns = ['navn as vejnavn', 'adresseringsnavn'];
+    const src2Columns = ['navn as vejnavn', 'adresseringsnavn as adresseringsvejnavn'];
     const query = `CREATE TEMP TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)}, ${src2Columns.join(',')},
      ${srcTable}.virkning * vask_vejnavn.virkning as virkning
     FROM ${srcTable} JOIN vask_vejnavn ON ${srcTable}.kommunekode = vask_vejnavn.kommunekode
     AND ${srcTable}.vejkode = vask_vejnavn.vejkode
     AND ${srcTable}.virkning && vask_vejnavn.virkning)`;
     yield client.queryp(query);
-    yield mergeValidTime(client, unmergedTable, mergedTable, ['id'], src1Columns.concat(['vejnavn', 'adresseringsnavn']), false);
+    yield mergeValidTime(client, unmergedTable, mergedTable, ['id'], src1Columns.concat(['vejnavn', 'adresseringsvejnavn']), false);
     yield client.queryp(`DROP TABLE ${unmergedTable}`);
   })();
 }
@@ -270,7 +270,7 @@ function mergeVejnavn(client, srcTable, mergedTable) {
 function mergePostnr(client, srcTable, mergedTable) {
   var unmergedTable = mergedTable + '_unmerged';
   return q.async(function*() {
-    const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr', 'vejnavn', 'adresseringsnavn'];
+    const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr', 'vejnavn', 'adresseringsvejnavn'];
     const subselect = `FROM vask_postnrinterval pi
      WHERE ${srcTable}.kommunekode = pi.kommunekode
       AND ${srcTable}.vejkode = pi.vejkode
@@ -307,6 +307,7 @@ function generateAdgangsadresserHistory(client) {
     m.kommunekode,
     m.vejkode,
     vejnavn,
+    adresseringsvejnavn,
     husnr,
     sb.bynavn             AS supplerendebynavn,
     m.postnr,
@@ -324,7 +325,63 @@ function generateAdgangsadresserHistory(client) {
 `;
     yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
     yield client.queryp(`DROP TABLE ${mergedTableWithPostnr}`);
-    yield client.queryp('SELECT vask_adgangsadresser_update_tsv()');
+    yield client.queryp('DELETE FROM vask_adgangsadresser_unikke');
+    yield client.queryp(`
+INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     vejnavn,
+     husnr,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adgangsadresser);
+
+INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     vejnavn,
+     husnr,
+     supplerendebynavn,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adgangsadresser
+   WHERE supplerendebynavn IS NOT NULL);
+
+INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     adresseringsvejnavn,
+     husnr,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adgangsadresser
+   WHERE adresseringsvejnavn <> vejnavn);
+
+INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     adresseringsvejnavn,
+     husnr,
+     supplerendebynavn,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adgangsadresser
+   WHERE supplerendebynavn IS NOT NULL AND adresseringsvejnavn <> vejnavn);
+INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn)
+  (SELECT
+     v.id,
+     v.vejnavn,
+     v.husnr,
+     v.supplerendebynavn,
+     s.nr   AS postnr,
+     s.navn AS postnrnavn
+   FROM vask_adgangsadresser_unikke v JOIN stormodtagere s ON v.id = s.adgangsadresseid);
+`);
+    yield client.queryp('SELECT vask_adgangsadresser_unikke_update_tsv()');
   })();
 }
 
@@ -336,7 +393,7 @@ function generateAdresserHistory(client) {
     yield mergeValidTime(client, 'dar_adresse', adresseHistoryTable, ['id'], ['id', 'bkid', 'statuskode', 'husnummerid', 'etagebetegnelse', 'doerbetegnelse'], true);
     var query =
       `SELECT a.bkid as id, a.id as dar_id, aa.id as adgangspunktid,
-ap_statuskode, hn_statuskode, a.statuskode, kommunekode, vejkode, vejnavn, husnr,
+ap_statuskode, hn_statuskode, a.statuskode, kommunekode, vejkode, vejnavn, adresseringsvejnavn, husnr,
 a.etagebetegnelse as etage, a.doerbetegnelse as doer,
 supplerendebynavn, postnr, postnrnavn,
 a.virkning * aa.virkning as virkning
@@ -344,11 +401,78 @@ FROM ${adresseHistoryTable} a JOIN vask_adgangsadresser aa ON a.husnummerid = hn
 `;
     yield client.queryp(`CREATE TEMP TABLE ${unmerged} AS (${query})`);
     yield client.queryp(`DROP TABLE ${adresseHistoryTable}`);
-    yield mergeValidTime(client, unmerged, merged, ['id'], ['id', 'dar_id', 'adgangspunktid', 'ap_statuskode', 'hn_statuskode', 'statuskode', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'etage', 'doer', 'supplerendebynavn', 'postnr', 'postnrnavn'], false);
+    yield mergeValidTime(client, unmerged, merged, ['id'], ['id', 'dar_id', 'adgangspunktid', 'ap_statuskode', 'hn_statuskode', 'statuskode', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'etage', 'doer', 'supplerendebynavn', 'postnr', 'postnrnavn'], false);
     yield client.queryp(`DROP TABLE ${unmerged}`);
     yield client.queryp(`DELETE FROM vask_adresser; INSERT INTO vask_adresser (SELECT * FROM ${merged})`);
     yield client.queryp(`DROP TABLE ${merged}`);
-    yield client.queryp('SELECT vask_adresser_update_tsv()');
+    yield client.queryp('DELETE FROM vask_adresser_unikke');
+    yield client.queryp(`
+INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     vejnavn,
+     husnr,
+     etage,
+     doer,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adresser);
+
+INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     vejnavn,
+     husnr,
+     etage,
+     doer,
+     supplerendebynavn,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adresser
+   WHERE supplerendebynavn IS NOT NULL);
+
+INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     adresseringsvejnavn,
+     husnr,
+     etage,
+     doer,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adresser
+   WHERE adresseringsvejnavn <> vejnavn);
+
+INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn)
+  (SELECT DISTINCT
+     id,
+     adresseringsvejnavn,
+     husnr,
+     etage,
+     doer,
+     supplerendebynavn,
+     postnr,
+     postnrnavn
+   FROM
+     vask_adresser
+   WHERE supplerendebynavn IS NOT NULL AND adresseringsvejnavn <> vejnavn);
+
+INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn)
+  (SELECT
+     v.id,
+     v.vejnavn,
+     v.husnr,
+     v.etage,
+     v.doer,
+     v.supplerendebynavn,
+     s.nr   AS postnr,
+     s.navn AS postnrnavn
+   FROM vask_adresser_unikke v JOIN stormodtagere s ON v.id = s.adgangsadresseid);
+`);
+    yield client.queryp('SELECT vask_adresser_unikke_update_tsv()');
   })();
 }
 
