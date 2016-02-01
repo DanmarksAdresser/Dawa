@@ -29,33 +29,70 @@ columnsMap.adresse.husnr = columnsMap.adgangsadresse.husnr = {
 //  return `adressebetegnelse(vejnavn, husnr, ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;
 //}
 
-function formatAdresseFields(row, adgangOnly) {
-  if(!row) {
+function objectComparator(fields) {
+  return function(a, b) {
+    for(let field of fields) {
+      if(a[field] === null && b[field] !== null) {
+        return -1;
+      }
+      if(a[field] !== null && b[field]  === null ) {
+        return 1;
+      }
+      if(a[field] < b[field]) {
+        return -1;
+      }
+      else if(a[field] > b[field]) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+}
+
+//
+function versionComparator(a, b) {
+  if(a.virkningslut && !b.virkningslut) {
+    return 1;
+  }
+  if(!a.virkningslut && b.virkningslut) {
+    return -1;
+  }
+  if(moment(a.virkningstart).isBefore(moment(b.virkningstart))) {
+    return -1;
+  }
+  else if(a.virkningstart === b.virkningstart) {
+    return 0;
+  }
+  else {
+    return 1;
+  }
+}
+
+function formatVersion(version) {
+  if(!version) {
     return null;
   }
   var result = {
-    id: row.id,
-    vejnavn: row.vejnavn,
-    husnr: row.husnr,
-    supplerendebynavn: row.supplerendebynavn ? row.supplerendebynavn : null,
-    postnr: kode4String(row.postnr),
-    postnrnavn: row.postnrnavn
+    id: version.id,
+    vejnavn: version.vejnavn,
+    adresseringsvejnavn: version.adresseringsvejnavn,
+    husnr: version.husnr,
+    supplerendebynavn: version.supplerendebynavn ? version.supplerendebynavn : null,
+    postnr: kode4String(version.postnr),
+    postnrnavn: version.postnrnavn,
+    status: version.status,
+    virkning: version.virkning
   };
-  if(!adgangOnly) {
-    result.etage = row.etage;
-    result.dør = row.dør;
+
+  if(!_.isUndefined(version.adgangsadresseid)) {
+    result.adgangsadresseid = version.adgangsadresseid;
+    result.etage = version.etage;
+    result.dør = version.dør;
   }
   return result;
+
 }
 
-function formatAdresse(row, adgangOnly) {
-  if(!row) {
-    return null;
-  }
-  var result = formatAdresseFields(row, adgangOnly);
-  result.status = row.status;
-  return result;
-}
 
 function udenSupplerendeBynavn(adresse) {
   var result = _.clone(adresse);
@@ -95,9 +132,9 @@ function computeDifferences(uvasket, vasket, adgangOnly) {
 //  ` levenshtein(lower(${adressebetegnelseSql(entityName === 'adgangsadresse', false)}), lower(${betegnelseAlias}), 2, 1, 3)))`;
 //}
 
-var adgangsadresseFields = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'virkningstart', 'virkningslut'];
+var adgangsadresseFields = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'virkningstart', 'virkningslut'];
 
-var adresseFields = adgangsadresseFields.concat(['etage', 'dør']);
+var adresseFields = adgangsadresseFields.concat(['etage', 'dør', 'adgangsadresseid']);
 
 function makeSelectList(fieldNames, columns) {
   let buildObjectArgs = fieldNames.map((fieldName) => {
@@ -228,8 +265,8 @@ function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText
 function resultRelevanceCompareFn(a, b) {
   var requiredFields = ['vejnavn', 'husnr', 'postnr', 'postnrnavn'];
   for(let prop of ['postnr', 'vejnavn', 'husnr', 'etage', 'dør', 'ponstnrnavn', 'supplerendebynavn']) {
-    var aVal = a.vaskeresultat.forskelle[prop];
-    var bVal = b.vaskeresultat.forskelle[prop];
+    var aVal = a.forskelle[prop];
+    var bVal = b.forskelle[prop];
     if(_.contains(requiredFields, prop)) {
       // adresses missing required fields should be last
       var aExists = !_.isUndefined(aVal) && aVal !== null;
@@ -243,7 +280,7 @@ function resultRelevanceCompareFn(a, b) {
     }
     aVal = aVal || 0;
     bVal = bVal || 0;
-    if(a.vaskeresultat.forskelle[prop] === b.vaskeresultat.forskelle[prop]) {
+    if(a.forskelle[prop] === b.forskelle[prop]) {
       continue;
     }
     if(aVal < bVal) {
@@ -255,6 +292,56 @@ function resultRelevanceCompareFn(a, b) {
   }
 }
 
+function uniquesForVersion(stormodtagere, version) {
+  let uniques = [];
+
+  // autoritativ adresse
+  uniques.push({
+    vejnavn: version.vejnavn,
+    husnr: version.husnr,
+    etage: version.etage,
+    dør: version.dør,
+    supplerendebynavn: version.supplerendebynavn,
+    postnr: version.postnr,
+    postnrnavn: version.postnrnavn
+  });
+
+  // uden supplerende bynavn
+  if(version.supplerendebynavn) {
+    uniques.push({
+      vejnavn: version.adresseringsvejnavn,
+      husnr: version.husnr,
+      etage: version.etage,
+      dør: version.dør,
+      supplerendebynavn: version.supplerendebynavn,
+      postnr: version.postnr,
+      postnrnavn: version.postnrnavn
+    });
+  }
+
+  // adresseringsvejnavn i stedet for vejnavn
+  if(version.vejnavn !== version.adresseringsvejnavn) {
+    uniques = uniques.concat(uniques.map((unique) => {
+      const result = _.clone(unique);
+      result.vejnavn = version.adresseringsvejnavn;
+      return result;
+    }));
+  }
+
+  // evt stormodtagere
+  if (stormodtagere[version.id]) {
+    const stormodtager = stormodtagere[version.id];
+    uniques = uniques.concat(uniques.map((unique) => {
+        const result = _.clone(unique);
+        result.postnr = stormodtager.nr;
+        result.postnrnavn = stormodtager.navn;
+        return result;
+      }
+    ));
+  }
+  return uniques;
+
+}
 
 function createSqlModel(entityName) {
   var columns = columnsMap[entityName]
@@ -275,20 +362,40 @@ function createSqlModel(entityName) {
           searchResult = yield doFuzzyQuery(client, entityName, params);
         }
 
+        searchResult.forEach(result => {
+          result.versions = result.versions.map(version =>formatVersion(version));
+        });
+
+        const stormodtagerRows = (yield client.queryp('SELECT nr, navn, adgangsadresseid FROM stormodtagere')).rows;
+        const stormodtagere = _.indexBy(stormodtagerRows, 'adgangsadresseid');
+
+
         var allVersions = _.flatten(_.pluck(searchResult, 'versions'));
 
-        // maps address text of found adresses to the list of versions with that address text
-        var addressTextToVersionsMap = _.groupBy(allVersions, (version) => util.adressebetegnelse(formatAdresse(version, entityName === 'adgangsadresse')));
+
+
+        // create a list of all unique addresses
+        let uniques = allVersions.map(version => uniquesForVersion(stormodtagere, version)).reduce((memo, uniques) => {
+          return memo.concat(uniques);
+        }, []);
+
+        const uniqueComparator = objectComparator(['vejnavn', 'husnr', 'etage', 'dør', 'supplerendebynavn', 'postnr', 'postnrnavn']);
+        uniques.sort(uniqueComparator);
+        uniques = _.uniq(uniques, true, (a) => util.adressebetegnelse(a, entityName === 'adgangsadresse'));
+
+
+        // maps address text of found adresses to the structured version of the adress
+        var addressTextToUniqueMap = _.indexBy(uniques, (unique) => util.adressebetegnelse(unique, entityName === 'adgangsadresse'));
 
         // a list of all the different address texts we found
-        var allAddressTexts = Object.keys(addressTextToVersionsMap);
+        var allAddressTexts = Object.keys(addressTextToUniqueMap);
 
         // map of address text to the formatted address fields
-        var addressTextToFormattedAddressMap = _.mapObject(addressTextToVersionsMap, (versions) => formatAdresse(versions[0], entityName === 'adgangsadresse'));
-        var addressTextToParseResult = parseAddressTexts(addressTextToFormattedAddressMap, params.betegnelse);
+
+        var addressTextToParseResult = parseAddressTexts(addressTextToUniqueMap, params.betegnelse);
         var addressTextToDifferences = _.mapObject(addressTextToParseResult, (parseResult, usedAddress) => {
           let parsedAddress = parseResult.address;
-          return computeDifferences(parsedAddress, addressTextToFormattedAddressMap[usedAddress]);
+          return computeDifferences(parsedAddress, addressTextToUniqueMap[usedAddress]);
         });
         var addressTextToDifferenceSum = _.mapObject(addressTextToDifferences, (differences) => {
           return Object.keys(differences).reduce(function(memo, value) {
@@ -303,41 +410,11 @@ function createSqlModel(entityName) {
         // compute map of address id -> current address version
         var idToCurrentVersion = _.indexBy(allCurrentVersions, (version) => version.id);
 
-        // for each match result, find the most recent, preferably active address version
-        var addressTextToSelectedVersion =
-          _.mapObject(addressTextToParseResult, (parseResult, addressText) => {
-            var versions = addressTextToVersionsMap[addressText];
-            var currentVersions = versions.filter((version) => !version.virkningslut);
-            var currentActiveVersions = currentVersions.filter((version) => {
-              return version.status === 1 || version.status === 3
-            });
-            var candidateVersions = currentActiveVersions.length > 0 ? currentActiveVersions : (currentVersions.length > 0 ? currentVersions : versions);
-            var selectedVersion = candidateVersions.reduce((selected, candidate)  => {
-              if(moment(selected.virkningstart).isBefore(moment(candidate.virkningstart))) {
-                return selected;
-              }
-              else {
-                return candidate;
-              }
-            });
-            return selectedVersion;
-          });
-
-
         let addressTextToCategory = yield* qUtil.mapObjectAsync(addressTextToParseResult, function*(parseResult, addressText) {
-          let address = addressTextToFormattedAddressMap[addressText];
+          const address = addressTextToUniqueMap[addressText];
           let parsedAddress = parseResult.address;
           var differences = addressTextToDifferences[addressText];
           var differenceSum = addressTextToDifferenceSum[addressText];
-          // If the matched address is WITHOUT husbogstav, but the most recent address is WITH husbogstav,
-          // we don't really know if the husbogstav is omitted or not (a common case). Therefore, we degrade
-          // to category C
-          var selectedVersion = addressTextToSelectedVersion[addressText];
-          var matchedVersionHusnr = selectedVersion.husnr;
-          var currentHusnr = idToCurrentVersion[selectedVersion.id];
-          if(currentHusnr && new RegExp(`^${matchedVersionHusnr}[A-Za-z]$`).test(currentHusnr)) {
-            return 'C';
-          }
 
           if(differenceSum === 0 && parseResult.unknownTokens.length === 0) {
             return 'A';
@@ -380,20 +457,88 @@ function createSqlModel(entityName) {
           chosenCategory = 'C';
         }
 
-        var results = _.map(filteredAddressTexts, (addressText) => {
-          return {
-            adresse: addressTextToSelectedVersion[addressText],
-            aktueladresse: idToCurrentVersion[addressTextToSelectedVersion[addressText].id],
-            vaskeresultat: {
-              afstand: addressTextToDifferenceSum[addressText],
-              forskelle: addressTextToDifferences[addressText],
-              parsetadresse: addressTextToParseResult[addressText].address,
-              ukendtetokens: addressTextToParseResult[addressText].unknownTokens
-            }
-          }
+        const addressTextToVaskeresultat = filteredAddressTexts.reduce((memo, addressText) => {
+          const unique = addressTextToUniqueMap[addressText];
+          memo[addressText] = {
+            variant: unique,
+            afstand: addressTextToDifferenceSum[addressText],
+            forskelle: addressTextToDifferences[addressText],
+            parsetadresse: addressTextToParseResult[addressText].address,
+            ukendtetokens: addressTextToParseResult[addressText].unknownTokens
+          };
+          return memo;
+        }, {});
+
+        const orderedAddressTexts = _.clone(filteredAddressTexts);
+        orderedAddressTexts.sort((a, b) => {
+          return resultRelevanceCompareFn(addressTextToVaskeresultat[a], addressTextToVaskeresultat[b]);
         });
-        results.sort(resultRelevanceCompareFn);
-        results.length = Math.min(results.length, 30);
+
+        const idToVersionsMap = _.groupBy(allVersions, version => version.id);
+        const idToAddressTextsMap = _.mapObject(idToVersionsMap, versions => {
+          let uniques = versions
+            .map(version => uniquesForVersion(stormodtagere, version))
+            .reduce((memo, uniques) => {
+              return memo.concat(uniques);
+            }, []);
+
+          let addressTexts = uniques.map(unique =>
+            util.adressebetegnelse(unique, entityName === 'adgangsadresse')
+          );
+
+          addressTexts.sort();
+          return _.uniq(addressTexts);
+        });
+
+        let idToBestMatchingAddressTextMap = _.mapObject(idToAddressTextsMap, addressTexts => {
+          return _.find(orderedAddressTexts, addressText => _.contains(addressTexts, addressText));
+        });
+
+        idToBestMatchingAddressTextMap = _.reduce(idToBestMatchingAddressTextMap, (memo, value, key) => {
+          if(value) {
+            memo[key] = value;
+          }
+          return memo;
+        }, {});
+
+        const idToRankMap = _.mapObject(idToBestMatchingAddressTextMap, addressText => {
+          return orderedAddressTexts.indexOf(addressText);
+        });
+
+        const orderedIds = Object.keys(idToRankMap).sort((a, b) => {
+          return idToRankMap[a] - idToRankMap[b];
+        });
+
+        var results = _.map(orderedIds, (id) => {
+          const addressText = idToBestMatchingAddressTextMap[id];
+
+          const orderdedVersions = idToVersionsMap[id].sort(versionComparator);
+
+          const matchingVersion = _.find(orderdedVersions, version => {
+            const texts = uniquesForVersion(stormodtagere, version).map(unique =>
+              util.adressebetegnelse(unique, entityName === 'adgangsadresse'));
+            return _.contains(texts, addressText);
+          });
+
+
+          return {
+            adresse: matchingVersion,
+            aktueladresse: idToCurrentVersion[id],
+            vaskeresultat: addressTextToVaskeresultat[addressText]
+          };
+        });
+
+        // If the matched address is WITHOUT husbogstav, but the most recent address is WITH husbogstav,
+        // we don't really know if the husbogstav is omitted or not (a common case). Therefore, we degrade
+        // to category C
+        const bestMatchingResult = results[0];
+        if(bestMatchingResult.aktueladresse) {
+          const matchedVersionHusnr = bestMatchingResult.adresse.husnr;
+          const currentHusnr = bestMatchingResult.aktueladresse.husnr;
+          if(currentHusnr && new RegExp(`^${matchedVersionHusnr}[A-Za-z]$`).test(currentHusnr)) {
+            chosenCategory = 'C';
+          }
+        }
         return [{
           kategori: chosenCategory,
           resultater: results

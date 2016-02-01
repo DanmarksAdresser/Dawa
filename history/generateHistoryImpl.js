@@ -181,7 +181,8 @@ GROUP BY kommunekode, vejkode;`;
 }
 
 function createVejstykkerPostnumreHistory(client) {
-  return client.queryp(`delete from vask_vejstykker_postnumre;
+  return q.async(function*() {
+    client.queryp(`delete from vask_vejstykker_postnumre;
   insert into vask_vejstykker_postnumre (select distinct vask_vejnavn.kommunekode, vask_vejnavn.vejkode,
   vask_vejnavn.navn as vejnavn, vask_postnrinterval.nr as postnr,
   vask_vejnavn.navn || ' ' || vask_postnrinterval.nr || ' ' || COALESCE(postnumre.navn, '') as tekst
@@ -189,6 +190,7 @@ function createVejstykkerPostnumreHistory(client) {
   and vask_vejnavn.kommunekode=vask_postnrinterval.kommunekode
   and vask_vejnavn.vejkode = vask_postnrinterval.vejkode
   LEFT JOIN postnumre ON vask_postnrinterval.nr = postnumre.nr)`);
+  })();
 }
 
 function prepareAdgangspunkt(client, adgangspunktHistoryTable) {
@@ -470,7 +472,7 @@ INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendeby
      v.supplerendebynavn,
      s.nr   AS postnr,
      s.navn AS postnrnavn
-   FROM vask_adresser_unikke v JOIN stormodtagere s ON v.id = s.adgangsadresseid);
+   FROM vask_adresser_unikke v JOIN (SELECT DISTINCT va.id, va.adgangsadresseid FROM vask_adresser va) as va ON v.id = va.id JOIN stormodtagere s ON va.adgangsadresseid = s.adgangsadresseid);
 `);
     yield client.queryp('SELECT vask_adresser_unikke_update_tsv()');
   })();
