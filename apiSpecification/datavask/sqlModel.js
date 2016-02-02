@@ -25,10 +25,6 @@ columnsMap.adresse.husnr = columnsMap.adgangsadresse.husnr = {
   select: '(husnr).tal || (husnr).bogstav'
 };
 
-//function adressebetegnelseSql(adgangsadresse, includeSuppBynavn) {
-//  return `adressebetegnelse(vejnavn, husnr, ${adgangsadresse ? 'NULL' : 'etage'}, ${adgangsadresse ? 'NULL' : 'doer'}, ${includeSuppBynavn ? 'supplerendebynavn' : 'NULL'}, to_char(vask_${adgangsadresse ? 'adgangsadresse' : 'adresse'}r.postnr, 'FM0000'), postnrnavn)`;
-//}
-
 function objectComparator(fields) {
   return function(a, b) {
     for(let field of fields) {
@@ -93,12 +89,6 @@ function formatVersion(version) {
 
 }
 
-
-function udenSupplerendeBynavn(adresse) {
-  var result = _.clone(adresse);
-  result.supplerendebynavn = null;
-  return result;
-}
 
 function computeDifferences(uvasket, vasket, adgangOnly) {
   var addressFieldNames = ['vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
@@ -243,14 +233,8 @@ function removePrefixZeroes(str) {
 
 function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText) {
   return _.mapObject(addressTextToFormattedAddressMap, (address, parsedAddressText) => {
-    let addressWithoutSupBynavn = udenSupplerendeBynavn(address);
-    addressWithoutSupBynavn.supplerendebynavn = null;
 
-    // supplerende bynavn is optional, so we take the variant which matches best
-    let distanceWithSupBynavn = levenshtein(parsedAddressText.toLowerCase(), unparsedAddressText.toLowerCase(), 1, 1, 1).distance;
-    let distanceWithoutSupBynavn = levenshtein(util.adressebetegnelse(addressWithoutSupBynavn).toLowerCase(), unparsedAddressText.toLowerCase(), 1, 1, 1).distance;
-    let usedAddress = distanceWithSupBynavn < distanceWithoutSupBynavn ? address : addressWithoutSupBynavn;
-    let result = adresseTextMatch(unparsedAddressText, usedAddress);
+    let result = adresseTextMatch(unparsedAddressText, address);
 
     // We consider leading zeroes in husnr and etage to be insignificant
     result.address.husnr = removePrefixZeroes(result.address.husnr);
@@ -313,7 +297,7 @@ function uniquesForVersion(stormodtagere, version) {
       husnr: version.husnr,
       etage: version.etage,
       dør: version.dør,
-      supplerendebynavn: version.supplerendebynavn,
+      supplerendebynavn: null,
       postnr: version.postnr,
       postnrnavn: version.postnrnavn
     });
@@ -329,11 +313,12 @@ function uniquesForVersion(stormodtagere, version) {
   }
 
   // evt stormodtagere
-  if (stormodtagere[version.id]) {
-    const stormodtager = stormodtagere[version.id];
+  const adgangsadresseid = version.adgangsadresseid || version.id;
+  if (stormodtagere[adgangsadresseid]) {
+    const stormodtager = stormodtagere[adgangsadresseid];
     uniques = uniques.concat(uniques.map((unique) => {
         const result = _.clone(unique);
-        result.postnr = stormodtager.nr;
+        result.postnr = kode4String(stormodtager.nr);
         result.postnrnavn = stormodtager.navn;
         return result;
       }
@@ -390,13 +375,14 @@ function createSqlModel(entityName) {
         // a list of all the different address texts we found
         var allAddressTexts = Object.keys(addressTextToUniqueMap);
 
-        // map of address text to the formatted address fields
-
         var addressTextToParseResult = parseAddressTexts(addressTextToUniqueMap, params.betegnelse);
+
         var addressTextToDifferences = _.mapObject(addressTextToParseResult, (parseResult, usedAddress) => {
           let parsedAddress = parseResult.address;
           return computeDifferences(parsedAddress, addressTextToUniqueMap[usedAddress]);
         });
+
+
         var addressTextToDifferenceSum = _.mapObject(addressTextToDifferences, (differences) => {
           return Object.keys(differences).reduce(function(memo, value) {
             memo += differences[value];
@@ -445,17 +431,12 @@ function createSqlModel(entityName) {
 
         var categoryCounts = _.countBy(_.values(addressTextToCategory), _.identity);
 
-        var chosenCategory = categoryCounts.A === 1 ? 'A' : (categoryCounts.B  === 1 ? 'B' : 'C');
+        var chosenCategory = categoryCounts.A >= 1 ? 'A' : (categoryCounts.B  >= 1 ? 'B' : 'C');
 
         // the set of results we want to return
         var filteredAddressTexts =
           allAddressTexts.filter((addressText) => addressTextToCategory[addressText] === chosenCategory);
 
-        if(categoryCounts.A > 1 || (categoryCounts.A === 0 && categoryCounts.B > 1)) {
-          // degrade to category C because we found more than one
-          _.mapObject(addressTextToCategory, (value) => 'C');
-          chosenCategory = 'C';
-        }
 
         const addressTextToVaskeresultat = filteredAddressTexts.reduce((memo, addressText) => {
           const unique = addressTextToUniqueMap[addressText];
@@ -527,6 +508,23 @@ function createSqlModel(entityName) {
             vaskeresultat: addressTextToVaskeresultat[addressText]
           };
         });
+
+        if((chosenCategory === 'A' || chosenCategory === 'B') && results.length > 1) {
+          // multiple results for cat A or B is not good. We
+          // If the is only a single current address, we assume the others are in fact the same address
+          // which has been mistakenly deleted and created again.
+          const activeResults = results.filter(result => {
+            return result.aktueladresse && result.aktueladresse.status !== 2 && result.aktueladresse.status !== 4;
+          });
+          if(activeResults.length === 1) {
+            results = activeResults;
+          }
+        }
+
+        // degrade to category C if we found more than one
+        if(results.length > 1) {
+          chosenCategory = 'C';
+        }
 
         // If the matched address is WITHOUT husbogstav, but the most recent address is WITH husbogstav,
         // we don't really know if the husbogstav is omitted or not (a common case). Therefore, we degrade

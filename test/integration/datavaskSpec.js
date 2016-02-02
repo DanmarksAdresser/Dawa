@@ -65,6 +65,14 @@ var adresseTests = [
       kategori: 'A',
       id: 'f481e7d5-989e-4372-86a2-58e72cf64e44'
     }
+  },
+  {
+    it: 'Kan matche på stormodtagerpostnummer',
+    betegnelse: 'Girostrøget 1, 0800 Høje Taastrup',
+    result: {
+      kategori: 'A',
+      id: '633c235a-4cd9-4309-b1ce-24ef3caeec6a'
+    }
   }
 ];
 
@@ -88,6 +96,13 @@ var adgangsadresseTests = [{
   result: {
     kategori: 'B',
     id: '0a3f5096-91d3-32b8-e044-0003ba298018'
+  }
+}, {
+  it: 'Kan matche på stormodtagerpostnummer',
+  betegnelse: 'Girostrøget 1, 0800 Høje Taastrup',
+  result: {
+    kategori: 'A',
+    id: '0a3f507c-f9a0-32b8-e044-0003ba298018'
   }
 }];
 
