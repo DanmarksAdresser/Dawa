@@ -12,15 +12,6 @@ const optionSpec = {
   targetDir: [false, 'Directory hvor CSV-er placeres', 'string']
 };
 
-//const adgangsadresseIds = [
-//  '0a3f5096-91d3-32b8-e044-0003ba298018' // Margrethepladsen 4, 8000 Aarhus C
-//];
-//
-//const adresseIds = [
-//  '91b21c97-fb07-4aac-98c5-61bcb4689f78', // Margrethepladsen 4, 8000 Aarhus C
-//  '0a3f50ab-8c3d-32b8-e044-0003ba298018' // Sjællandsvej 17, 4600 Køge
-//];
-
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) => {
   proddb.init({
     connString: options.pgConnectionUrl,

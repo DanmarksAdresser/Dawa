@@ -73,6 +73,14 @@ var adresseTests = [
       kategori: 'A',
       id: '633c235a-4cd9-4309-b1ce-24ef3caeec6a'
     }
+  },
+  {
+    it: 'Kan matche på adresseringsvejnavn i stedet for vejnavn',
+    betegnelse: 'Borgm Christiansens 45, st. th, 2450 København SV',
+    result: {
+      kategori: 'B',
+      id: '0a3f509d-747c-32b8-e044-0003ba298018'
+    }
   }
 ];
 
@@ -104,8 +112,15 @@ var adgangsadresseTests = [{
     kategori: 'A',
     id: '0a3f507c-f9a0-32b8-e044-0003ba298018'
   }
+}, {
+    it: 'Kan matche på adresseringsvejnavn i stedet for vejnavn',
+    betegnelse: 'Borgm Christiansens 45, 2450 København SV',
+    result: {
+      kategori: 'B',
+      id: '0a3f507a-4bd5-32b8-e044-0003ba298018'
+    }
 }];
-
+0
 describe('Adressevask', () => {
   testdb.withTransactionEach('test', function (clientFn) {
     adresseTests.forEach((test) => {

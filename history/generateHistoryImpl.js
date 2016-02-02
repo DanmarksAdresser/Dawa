@@ -189,7 +189,15 @@ function createVejstykkerPostnumreHistory(client) {
   from vask_vejnavn join vask_postnrinterval on vask_vejnavn.virkning && vask_postnrinterval.virkning
   and vask_vejnavn.kommunekode=vask_postnrinterval.kommunekode
   and vask_vejnavn.vejkode = vask_postnrinterval.vejkode
-  LEFT JOIN postnumre ON vask_postnrinterval.nr = postnumre.nr)`);
+  LEFT JOIN postnumre ON vask_postnrinterval.nr = postnumre.nr);
+  insert into vask_vejstykker_postnumre (select distinct vask_vejnavn.kommunekode, vask_vejnavn.vejkode,
+  vask_vejnavn.adresseringsnavn as vejnavn, vask_postnrinterval.nr as postnr,
+  vask_vejnavn.navn || ' ' || vask_postnrinterval.nr || ' ' || COALESCE(postnumre.navn, '') as tekst
+  from vask_vejnavn join vask_postnrinterval on vask_vejnavn.virkning && vask_postnrinterval.virkning
+  and vask_vejnavn.kommunekode=vask_postnrinterval.kommunekode
+  and vask_vejnavn.vejkode = vask_postnrinterval.vejkode
+  LEFT JOIN postnumre ON vask_postnrinterval.nr = postnumre.nr
+  WHERE vask_vejnavn.adresseringsnavn <> vask_vejnavn.navn)  `);
   })();
 }
 

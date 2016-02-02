@@ -35,13 +35,13 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adresse: 0
   };
   var expectedResultsZone2 = {
-    adgangsadresse: 1324,
-    adresse: 2811
+    adgangsadresse: 1325,
+    adresse: 2812
   };
 
   var expectedResultWithoutSogn = {
-    adgangsadresse: 1323,
-    adresse: 2810
+    adgangsadresse: 1324,
+    adresse: 2811
   };
 
   var temaSpec = tema.findTema('sogn');

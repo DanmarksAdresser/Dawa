@@ -418,9 +418,18 @@ function createSqlModel(entityName) {
             }
             else {
               var parsedVejnavn = parsedAddress.vejnavn;
-              var closestVejnavn = (yield client.queryp('select vejnavn FROM vejstykker v JOIN vejstykkerpostnumremat vs ON v.kommunekode = vs.kommunekode and v.kode = vs.vejkode and postnr = $1 ORDER BY levenshtein(lower($2), lower(vejnavn)) limit 1', [parsedAddress.postnr, parsedVejnavn])).rows[0].vejnavn;
-              vejnavnMatchesCloseEnough = (closestVejnavn === address.vejnavn);
-
+              const closestVejstykkeSql = `
+SELECT vejnavn
+FROM vask_vejstykker_postnumre v
+WHERE postnr = $1
+ORDER BY
+  levenshtein(lower($2), lower(vejnavn))
+LIMIT 1`;
+              const closestVejstykke =
+                (yield client.queryp(
+                  closestVejstykkeSql,
+                  [parsedAddress.postnr, parsedVejnavn])).rows[0];
+              vejnavnMatchesCloseEnough = (closestVejstykke.vejnavn === address.vejnavn);
             }
             if(vejnavnMatchesCloseEnough) {
               return 'B';
@@ -436,7 +445,6 @@ function createSqlModel(entityName) {
         // the set of results we want to return
         var filteredAddressTexts =
           allAddressTexts.filter((addressText) => addressTextToCategory[addressText] === chosenCategory);
-
 
         const addressTextToVaskeresultat = filteredAddressTexts.reduce((memo, addressText) => {
           const unique = addressTextToUniqueMap[addressText];
