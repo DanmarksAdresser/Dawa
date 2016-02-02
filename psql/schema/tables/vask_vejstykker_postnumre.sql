@@ -9,3 +9,4 @@ CREATE TABLE vask_vejstykker_postnumre(
 );
 
 CREATE INDEX ON vask_vejstykker_postnumre(kommunekode, vejkode, postnr);
+CREATE INDEX ON vask_vejstykker_postnumre(postnr);

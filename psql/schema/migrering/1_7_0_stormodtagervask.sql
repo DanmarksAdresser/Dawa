@@ -73,3 +73,8 @@ CREATE TABLE vask_adresser_unikke (
 
 CREATE INDEX ON vask_adresser_unikke(id);
 CREATE INDEX ON vask_adresser_unikke USING GIN(tsv);
+
+
+
+CREATE INDEX ON vask_vejstykker_postnumre(postnr);
+
