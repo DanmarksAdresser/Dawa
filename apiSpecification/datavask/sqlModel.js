@@ -546,6 +546,20 @@ LIMIT 1`;
             chosenCategory = 'C';
           }
         }
+
+        for(let result of results) {
+          const variant = result.vaskeresultat.variant;
+          if(variant.postnr !== result.adresse.postnr) {
+            // stormodtagerpostnummer anvendt
+            result.vaskeresultat.anvendtstormodtagerpostnummer = {
+              nr: variant.postnr,
+              navn: variant.postnrnavn
+            };
+          }
+          else {
+            result.vaskeresultat.anvendtstormodtagerpostnummer = null;
+          }
+        }
         return [{
           kategori: chosenCategory,
           resultater: results
