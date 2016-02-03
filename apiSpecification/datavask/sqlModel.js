@@ -429,7 +429,8 @@ LIMIT 1`;
                 (yield client.queryp(
                   closestVejstykkeSql,
                   [parsedAddress.postnr, parsedVejnavn])).rows[0];
-              vejnavnMatchesCloseEnough = (closestVejstykke.vejnavn === address.vejnavn);
+              // hvis der ikke er et closestVejstykke, så er det fordi et stormodtagerpostnummer er anvendt.
+              vejnavnMatchesCloseEnough = !closestVejstykke || (closestVejstykke.vejnavn === address.vejnavn);
             }
             if(vejnavnMatchesCloseEnough) {
               return 'B';
