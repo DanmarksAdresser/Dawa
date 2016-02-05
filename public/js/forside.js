@@ -142,8 +142,7 @@ function searchDør(pnr,vej,husnr,etage,doer) {
   if (vtext===null || vtext.length === 0) return;
   var htext = $(husnr).val();
   if (htext===null || htext.length === 0) return;
-  var etext = $(etage).val();
-  if (etext===null || etext.length === 0) return;
+  var etext = $(etage).val() || '';
   var parametre= {postnr: match[1], vejnavn: vtext, husnr: htext, etage: etext};
   $.ajax({
     cache: true,
