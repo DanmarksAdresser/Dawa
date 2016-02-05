@@ -19,9 +19,10 @@ exports.makeHref = function(baseUrl, resourceName, idArray) {
 
 exports.mapKommuneRef = function(dbJson, baseUrl) {
   if(dbJson) {
+    const formattedKode = kode4String(dbJson.kode);
     return {
-      href: exports.makeHref(baseUrl, 'kommune', [dbJson.kode]),
-      kode: kode4String(dbJson.kode),
+      href: exports.makeHref(baseUrl, 'kommune', [formattedKode]),
+      kode: formattedKode,
       navn: dbJson.navn
     };
   }

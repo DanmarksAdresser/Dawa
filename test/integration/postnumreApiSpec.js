@@ -4,16 +4,15 @@ var expect = require('chai').expect;
 var request = require("request-promise");
 var _ = require('underscore');
 
-var kommuner = [ { href : 'http://localhost:3002/kommuner/253', kode : "0253", navn : 'Greve' },
-                 { href : 'http://localhost:3002/kommuner/269', kode : "0269", navn : 'Solrød' } ];
+var kommuner = [ { href : 'http://localhost:3002/kommuner/0253', kode : "0253", navn : 'Greve' },
+                 { href : 'http://localhost:3002/kommuner/0269', kode : "0269", navn : 'Solrød' } ];
 
 describe("PostnumreApi", function() {
-  it("It is possible to get a single postnummer", function(done) {
-    request.get({url: "http://localhost:3002/postnumre/2690", json: true}, function(error, response, result) {
+  it("It is possible to get a single postnummer", function() {
+    return request.get({url: "http://localhost:3002/postnumre/2690", json: true}).then(function(result) {
       expect(result.nr).to.equal("2690");
       expect(result.navn).to.equal("Karlslunde");
       expect(result.kommuner).to.deep.equal(kommuner);
-      done();
     });
   });
   it("It is possible to autocomplete a postnummer", function(done) {
