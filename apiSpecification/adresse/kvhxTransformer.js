@@ -4,6 +4,7 @@ var _ = require('underscore');
 var kvhTransformer = require('../adgangsadresse/kvhTransformer');
 var pad = require('../util.js').padUnderscore;
 var clean = require('../util.js').removeLeadingUnderscores;
+var husnrUtil = require('../husnrUtil');
 
 var regExp = /^(\d{4})(\d{4})(.{4})(.{3})(.{4})/;
 
@@ -13,12 +14,18 @@ exports.format = function(rs) {
          pad(rs.dør, 4);
 };
 
-exports.validate = function(kvh) {
-  if (kvh.length !== 19) {
-    throw "KVH key must be a string of length 19, but supplied value was '"+kvh+"' with a length of " + kvh.length;
+exports.validate = function(kvhx) {
+  if (kvhx.length !== 19) {
+    throw "KVH key must be a string of length 19, but supplied value was '"+kvhx+"' with a length of " + kvhx.length;
   }
-  if (!kvh.match(regExp)) {
-    throw "Must consist of 8 digits followed by 11 arbitrary characters, but supplied value was '"+kvh+"'";
+  const groups = regExp.exec(kvhx);
+  if (!groups) {
+    throw "Must consist of 8 digits followed by 4 arbitrary characters, but supplied value was '"+kvhx+"'";
+  }
+  const husnrText = clean(groups[3]);
+  const husnr  = husnrUtil.parseHusnr(husnrText);
+  if(!husnr) {
+    throw "KVHX key must contain a valid husnr, but " + husnrText + " is not.";
   }
 };
 

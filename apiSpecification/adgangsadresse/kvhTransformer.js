@@ -17,8 +17,14 @@ exports.validate = function(kvh) {
   if (kvh.length !== 12) {
     throw "KVH key must be a string of length 12, but supplied value was '"+kvh+"' with a length of " + kvh.length;
   }
-  if (!kvh.match(regExp)) {
+  const groups = regExp.exec(kvh);
+  if (!groups) {
     throw "Must consist of 8 digits followed by 4 arbitrary characters, but supplied value was '"+kvh+"'";
+  }
+  const husnrText = clean(groups[3]);
+  const husnr  = husnrUtil.parseHusnr(husnrText);
+  if(!husnr) {
+    throw "KVH key must contain a valid husnr, but " + husnrText + " is not.";
   }
 };
 
