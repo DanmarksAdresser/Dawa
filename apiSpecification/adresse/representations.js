@@ -25,15 +25,23 @@ var normalizedFieldSchema = function(fieldName) {
 
 var kvhxFieldsDts = require('./kvhxTransformer').kvhxFieldsDts;
 var kvhxFormat = require('./kvhxTransformer').format;
+var kvhFormat = require('../adgangsadresse/kvhTransformer').format;
 
 var nullableType = schemaUtil.nullableType;
 var kode4String = util.kode4String;
 
 exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs) {
   return {
-    kvhx: kvhxFormat(rs)
+    kvhx: kvhxFormat(rs),
+    kvh: kvhFormat(rs)
   };
 });
+
+// this should probably be refactored, so we explicitly control the order of fields, but for now we
+// just move kvh to the end.
+exports.flat.outputFields= _.without(exports.flat.outputFields, 'kvh');
+exports.flat.outputFields.push('kvh');
+
 
 var adresseDefinitions = _.clone(definitions);
 adresseDefinitions.Adgangsadresse = adgangsadresseRepresentations.json.schema;

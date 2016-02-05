@@ -140,6 +140,10 @@ var fields = [
   {
     name: 'temaer',
     multi: true
+  },
+  {
+    name: 'kvh',
+    selectable: false
   }
 ];
 
