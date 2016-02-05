@@ -52,4 +52,4 @@ CREATE VIEW AdgangsadresserView AS
     LEFT JOIN stormodtagere AS S ON (S.adgangsadresseid = A.id)
     LEFT JOIN kommuner K ON A.kommunekode = k.kode
     LEFT JOIN regioner R ON R.kode = K.regionskode
-  WHERE postnr IS NOT NULL AND husnr IS NOT NULL;
+  WHERE postnr IS NOT NULL AND husnr IS NOT NULL AND vejnavn IS NOT NULL and vejnavn <> '';
