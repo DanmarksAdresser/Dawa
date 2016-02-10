@@ -3,12 +3,14 @@
 var registry = require('../registry');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
+var schema = require('../parameterSchema');
 
 module.exports = {
   id: normalizeParameters([
     {
       name: 'nr',
-      type: 'integer'
+      type: 'integer',
+      schema: schema.postnr
     }
   ]),
   propertyFilter: normalizeParameters(
@@ -16,7 +18,8 @@ module.exports = {
       {
         name: 'nr',
         type: 'integer',
-        multi: true
+        multi: true,
+        schema: schema.postnr
       },
       {
         name: 'navn',
