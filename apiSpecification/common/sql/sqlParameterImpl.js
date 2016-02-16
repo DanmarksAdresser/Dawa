@@ -335,7 +335,6 @@ exports.dagiFilter = function() {
         // no parameters supplied for this tema
         return;
       }
-
       // list of parameters where the query requires the tema to be absent
       var absentKeys = [];
       // list of parameters where the query requires at least one of the values in the array
@@ -355,16 +354,21 @@ exports.dagiFilter = function() {
 
       var temaAlias = dbapi.addSqlParameter(sqlParts, temaName);
 
-      var clauses = [];
-
+      const clauses = [];
       if(absentKeys.length !== 0) {
         // it does not matter which part of the key that is not present
-        clauses.push("NOT EXISTS( SELECT * FROM adgangsadresser_temaer_matview" +
-        " WHERE  adgangsadresser_temaer_matview.tema = " + temaAlias +
-        " AND adgangsadresse_id = a_id)");
+        clauses.push(`a_id NOT IN (
+        SELECT adgangsadresse_id
+        FROM adgangsadresser_temaer_matview
+        WHERE tema = ${temaAlias} AND tema_id IN (SELECT id
+        FROM temaer
+        WHERE tema = ${temaAlias}))`);
       }
+
+      // due to zones having a default (2) we may require the key to be either absent OR equal
+      // to one of the values
       if(_.some(_.values(presentKeys), (values) => values.length > 0)) {
-        var temaClauses = _.map(presentKeys, function(keyValues, tilknytningKeyName) {
+        let temaClauses = _.map(presentKeys, function(keyValues, tilknytningKeyName) {
           var valueAliases = _.map(keyValues, function(param) {
             return dbapi.addSqlParameter(sqlParts, param);
           });
@@ -373,17 +377,15 @@ exports.dagiFilter = function() {
           var temaKeyType = temaKey.sqlType;
           return "(temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + ")";
         }).join(' AND ');
-        var temaQuery = 'SELECT id FROM temaer WHERE tema = ' + temaAlias + ' AND ' + temaClauses;
-        var sql = "EXISTS(WITH T AS (" + temaQuery + ") SELECT * FROM adgangsadresser_temaer_matview " +
-        "JOIN temaer ON (tema_id = temaer.id AND temaer.tema = " + temaAlias + ')' +
-        " WHERE adgangsadresser_temaer_matview.tema = " + temaAlias +
-          " AND adgangsadresse_id = a_id" +
-          " AND adgangsadresser_temaer_matview.tema_id IN (SELECT * FROM T))";
-        clauses.push(sql);
+        var temaQuery = `SELECT id FROM temaer WHERE tema = ${temaAlias} AND ${temaClauses}`;
+        clauses.push(`a_id IN (
+        SELECT adgangsadresse_id
+        FROM adgangsadresser_temaer_matview
+        WHERE tema = ${temaAlias} AND tema_id IN (${temaQuery}))`);
       }
-
-      dbapi.addWhereClause(sqlParts, `(${clauses.join(') OR (')})`);
-
+      if(clauses.length > 0) {
+        dbapi.addWhereClause(sqlParts, `(${clauses.join(') OR (')})`);
+      }
     });
   };
 };
