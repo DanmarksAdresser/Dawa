@@ -78,7 +78,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'wms_housenumber_inspire', type: 'view'},
   {name: 'wms_adgangsadresser', type: 'view'},
   {name: 'wfs_adgangsadresser', type: 'view'},
-  {name: 'wfs_adresser', type: 'view'}
+  {name: 'wfs_adresser', type: 'view'},
+  {name: 'jordstykker', init: false }
 ]);
 
 exports.forAllTableSpecs = function(client, func){

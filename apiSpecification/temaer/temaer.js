@@ -146,6 +146,7 @@ module.exports = [
       sqlType: 'text'
     }],
     published: true,
-    searchable: false
+    searchable: false,
+    materialized: true
   }
 ];

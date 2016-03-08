@@ -319,6 +319,54 @@ var tilknytningKeyToTemaKey = _.reduce(tilknytningKeyNames, function(memo, tilkn
   return memo;
 }, {});
 
+exports.jordstykkeFilter = function() {
+  return function(sqlParts, params) {
+    const paramNames = ['ejerlavkode', 'matrikelnr'];
+    const paramValues = paramNames.reduce((memo, paramName) => {
+      if(params[paramName]) {
+        memo[paramName] = params[paramName].values;
+      }
+      return memo;
+    }, {});
+    if(_.isEmpty(paramValues)) {
+      return;
+    }
+
+    const absentKeys = paramNames.filter(paramName => {
+      return paramValues[paramName] && _.contains(paramValues[paramName], null);
+    });
+    const paramValuesWithoutNulls = _.mapObject(paramValues, values => {
+      return _.without(values, null);
+    });
+
+    const presentKeys = paramNames.filter(paramName => {
+      return paramValuesWithoutNulls[paramName] && paramValuesWithoutNulls[paramName].length > 0;
+    });
+
+    if(absentKeys.length !== 0) {
+      // it does not matter which part of the key that is not present
+      dbapi.addWhereClause(sqlParts, `a_id NOT IN (
+        SELECT adgangsadresse_id
+        FROM adgangsadresser_temaer_matview
+        WHERE tema = 'jordstykke'`);
+    }
+    else {
+      const jordstykkeClauses = presentKeys.map(paramName => {
+        const values = paramValues[paramName];
+        const valueAliases = _.map(values, function(value) {
+          return dbapi.addSqlParameter(sqlParts, value);
+        });
+        return `${paramName} IN (${valueAliases.join(', ')})`;
+      });
+      const jordstykkeQuery = `select id from jordstykker where ${jordstykkeClauses.join(' AND ')}`;
+      dbapi.addWhereClause(sqlParts,`a_id IN (SELECT adgangsadresse_id
+      FROM adgangsadresser_temaer_matview
+      WHERE tema = 'jordstykke' AND tema_id IN (${jordstykkeQuery}))`);
+    }
+
+  }
+};
+
 exports.dagiFilter = function() {
   return function(sqlParts, params) {
     _.each(tilknytningKeyNames, function(tilknytningKeyName, temaName) {

@@ -73,6 +73,7 @@ var parameterImpls = [
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.dagiFilter(),
+  sqlParameterImpl.jordstykkeFilter(),
   searchAdgangsadresse(columns),
   autocompleteAdgangsadresse(columns),
   fuzzySearchParameterImpl,

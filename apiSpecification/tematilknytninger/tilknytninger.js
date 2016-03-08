@@ -39,7 +39,7 @@ module.exports = {
   },
   jordstykke: {
     keyFieldNames: ['ejerlavkode', 'matrikelnr'],
-    filterable: true
+    filterable: false
   }
 };
 

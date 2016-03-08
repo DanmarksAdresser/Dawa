@@ -46,6 +46,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       for(let temaDef of temaer) {
         yield tema.updateAdresserTemaerView(client, temaDef, true, 1000000);
       }
+      yield client.queryp('refresh materialized view jordstykker');
       yield client.queryp('analyze');
     })();
   }).done();
