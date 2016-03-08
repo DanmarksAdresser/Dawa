@@ -114,7 +114,9 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
     if(atLeastOneFileProcessed) {
       return proddb.withTransaction('READ_WRITE', function(client) {
         var temaDef = tema.findTema('jordstykke');
-        return tema.updateAdresserTemaerView(client, temaDef, options.init);
+        return tema.updateAdresserTemaerView(client, temaDef, options.init).then(() => {
+          return client.queryp('REFRESH MATERIALIZED VIEW CONCURRENTLY jordstykker');
+        });
       });
     }
     else {

@@ -158,7 +158,7 @@ exports.putTemaer = function(temaDef, temaer, client, initializing, constraints,
         },
         function(callback) {
           if(temaDef.materialized) {
-            return client.queryp('REFRESH MATERIALIZED VIEW ' + temaDef.plural).nodeify(callback);
+            return client.queryp('REFRESH MATERIALIZED VIEW CONCURRENTLY ' + temaDef.plural).nodeify(callback);
           }
           else {
             return callback();
