@@ -1,5 +1,8 @@
 "use strict";
 
+const csvStringify = require('csv-stringify');
+const _ = require('underscore');
+
 var logger = require('../logger').forCategory('consistency');
 var proddb = require('../psql/proddb');
 var registry = require('./registry');
@@ -54,6 +57,21 @@ var consistencyChecks = [
     " LEFT JOIN temaer t ON t.tema = 'jordstykke' and T.id = atm.tema_id" +
     " WHERE a.noejagtighed <> 'U'" +
     " AND ((t.fields->>'ejerlavkode')::integer IS DISTINCT FROM a.ejerlavkode or (t.fields->>'matrikelnr') IS DISTINCT FROM a.matrikelnr)"
+  },
+  {
+    key: 'AdresseStatistik',
+    description: 'Adressebestandens ændring over tid',
+    query: `
+WITH changes as (
+select to_char(date_trunc('day', lower(virkning)), 'YYYY-MM-DD') as day, statuskode, count(*) as change FROM dar_adresse where upper(registrering) is null group by date_trunc('day', lower(virkning)), statuskode
+UNION ALL
+  select to_char(date_trunc('day', upper(virkning)), 'YYYY-MM-DD') as day, statuskode, -count(*) as change FROM dar_adresse where upper(registrering) is null and upper(virkning) is not null group by date_trunc('day', upper(virkning)), statuskode)
+select day,
+  sum(CASE WHEN statuskode = 1 THEN change ELSE 0 END)  OVER w as status1,
+  sum(CASE WHEN statuskode = 2 THEN change ELSE 0 END)  OVER w as status2,
+  sum(CASE WHEN statuskode = 3 THEN change ELSE 0 END)  OVER w as status3,
+  sum(CASE WHEN statuskode = 4 THEN change ELSE 0 END)  OVER w as status4
+from changes WINDOW w as (order by day);`
   }
 ];
 
@@ -65,7 +83,17 @@ module.exports = consistencyChecks.reduce(function(memo, check) {
       proddb.withTransaction('READ_ONLY', function (client) {
         return client.queryp(check.query, [])
           .then(function (result) {
-            res.json(result.rows);
+            const fieldNames = _.pluck(result.fields, 'name');
+            csvStringify(result.rows || [], {header: true, columns: fieldNames, rowDelimiter: '\r\n'}, (err, result) => {
+              if(err) {
+                res.status(500).send(JSON.stringify(err));
+                return;
+              }
+              res.set('Content-Type', 'text/csv');
+              res.end(result);
+            });
+
+
           })
           .catch(function (err) {
             logger.error("Fejl under udførelse af database query", err);
