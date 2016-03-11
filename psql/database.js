@@ -82,52 +82,59 @@ exports.register = function (name, options) {
 };
 
 function denodeifyClient(client) {
-  var result = {};
-  result.query = function() {
+  var proxy = {};
+  proxy.loggingContext = {};
+  proxy.setLoggingContext = function(context) {
+    proxy.loggingContext = context;
+  };
+  proxy.query = function() {
     return client.query.apply(client, arguments);
   };
-  result.queryp = function (query, params) {
+  proxy.querypNolog = function(query, params) {
+    return q.ninvoke(proxy, 'query', query, params);
+  };
+  proxy.queryp = function (query, params) {
     var before = Date.now();
-    return q.ninvoke(result, 'query', query, params)
+    return proxy.querypNolog(query, params)
       .then(function (result) {
-        statistics.emit('psql_query', Date.now() - before, null, {sql: query});
+        statistics.emit('psql_query', Date.now() - before, null, proxy.loggingContext);
         return result;
       }).catch(function (err) {
-        statistics.emit('psql_query', Date.now() - before, err, {sql: query});
-        logger.error("Query failed: ", {
+        statistics.emit('psql_query', Date.now() - before, err, _.extend({sql: query}, proxy.loggingContext));
+        logger.error("Query failed: ", _.extend({
           query: query,
           params: params,
           error: err
-        });
+        }, proxy.loggingContext));
         return q.reject(err);
       });
   };
-  result.querypLogged = function(query, params) {
-    return result.queryp('EXPLAIN ' + query, params).then(function(plan) {
+  proxy.querypLogged = function(query, params) {
+    return proxy.queryp('EXPLAIN ' + query, params).then(function(plan) {
       /*eslint no-console: 0 */
       console.log(JSON.stringify(plan.rows, null, 2));
-      return result.queryp(query, params);
+      return proxy.queryp(query, params);
       });
   };
-  result.emit = function(type, event) {
+  proxy.emit = function(type, event) {
     client.emit(type, event);
     return this;
   };
-  result.on = function(type, handler) {
+  proxy.on = function(type, handler) {
     client.on(type, handler);
     return this;
   };
 
-  result.once = function(type, handler) {
+  proxy.once = function(type, handler) {
     client.once(type, handler);
     return this;
   };
-  result.removeListener = function(event, listener) {
+  proxy.removeListener = function(event, listener) {
     client.removeListener(event, listener);
     return this;
   };
 
-  return result;
+  return proxy;
 }
 
 function acquireNonpooledConnection(options, callback) {

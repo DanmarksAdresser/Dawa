@@ -2,6 +2,7 @@
 
 var eventStream = require('event-stream');
 var q = require('q');
+const url = require('url');
 var _ = require('underscore');
 
 var paths = require('../paths');
@@ -97,6 +98,33 @@ function sendError(res, code, message){
   res.statusCode = code;
   res.setHeader('Content-Type', 'application/json; charset=UTF-8');
   res.end(jsonStringifyPretty(message));
+}
+
+function loggingContext(req) {
+  const xForwardedFor = req.header('x-forwarded-for');
+  let clientIp;
+  if(xForwardedFor) {
+    const firstCommaIndex = xForwardedFor.indexOf(',');
+    clientIp = firstCommaIndex !== -1 ? xForwardedFor.substring(0, firstCommaIndex) : xForwardedFor;
+  }
+  else {
+    clientIp = req.ip;
+  }
+  const referer = req.header('referer');
+  let refererHost = null;
+  if(referer) {
+    const parsedUrl = url.parse(referer);
+    if(parsedUrl && parsedUrl.host) {
+      refererHost = parsedUrl.host;
+    }
+  }
+  const loggingContext = {
+    clientIp: clientIp
+  };
+  if(refererHost) {
+    loggingContext.referer = refererHost;
+  }
+  return loggingContext;
 }
 
 function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
@@ -280,11 +308,11 @@ exports.createExpressHandler = function(resourceSpec) {
           }
         });
     }
-
     var promise = transactions.withTransaction('prod', {
       mode: 'READ_ONLY',
       pooled: true,
-      shouldAbort: shouldAbort
+      shouldAbort: shouldAbort,
+      loggingContext: loggingContext(req)
     }, doResponse);
 
     return promise.catch(function(err) {

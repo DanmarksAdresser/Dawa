@@ -5,7 +5,6 @@
 
 var util = require('util');
 var Readable    = require('stream').Readable;
-var statistics = require('./statistics');
 var logger = require('./logger').forCategory('cursorStream');
 
 util.inherits(CursorStream, Readable);
@@ -25,7 +24,6 @@ function CursorStream(client, cursorName, query) {
   this.closed = false;
   this.moreRowsAvailable = true;
   this.queryInProgress = false;
-  this.initialPageFetched = false;
 
   client.once('transactionEnd', self.transactionEndListener);
 }
@@ -44,18 +42,10 @@ CursorStream.prototype._doFetch = function(count) {
   self.queryInProgress = true;
   var fetchSize = Math.min(self.maxFetchSize,count);
   var fetch = 'FETCH ' + fetchSize +' FROM ' + self.cursorName;
-  var before = Date.now();
-  self.client.query(fetch, [], function(err, result) {
-    var statCategory = self.initialPageFetched ?  'psql_stream_page' : 'psql_stream_initial_page';
-    var meta = self.initialPageFetched ? {} : { query : self.query };
-    statistics.emit(statCategory, Date.now() - before, err, meta);
-    if(err) {
-      self._close(err);
-    }
+  self.client.queryp(fetch).then(result => {
     if(self.closed) {
       return;
     }
-    self.initialPageFetched = true;
     self.queryInProgress = false;
     if(result.rows.length < fetchSize) {
       self.moreRowsAvailable = false;
@@ -67,6 +57,8 @@ CursorStream.prototype._doFetch = function(count) {
     if(!self.moreRowsAvailable) {
       self._close();
     }
+  }, err => {
+    self._close(err);
   });
 };
 

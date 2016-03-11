@@ -1,6 +1,7 @@
 "use strict";
 
 var Q = require('q');
+const _ = require('underscore');
 var logger = require('./logger');
 
 var CursorStream = require('./cursor-stream');
@@ -44,8 +45,8 @@ function createQuery(parts){
 
 
 function streamingQueryUsingCursor(client, sql, params, cb) {
+  logger.info('sql', 'cursor', _.extend({sql: sql, params: params}, client.loggingContext));
   sql = 'declare c1 NO SCROLL cursor for ' + sql;
-  logger.info('sql', 'Creating cursor', {sql: sql, params: params });
   return client.queryp(sql, params).then(function() {
     return new CursorStream(client, 'c1', sql);
   }).nodeify(cb);
@@ -57,7 +58,7 @@ var query = function(client, sqlParts, cb) {
 };
 
 var queryRaw = function(client, sql, params, cb) {
-  logger.info('sql', 'executing sql query', {sql: sql, params: params});
+  logger.info('sql', 'query', _.extend({sql: sql, params: params}, client.loggingContext));
   return client.queryp(sql, params).then(function(result) {
     return result.rows || [];
   }).nodeify(cb);

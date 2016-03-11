@@ -6,12 +6,12 @@ var Q = require('q');
 var database = require('./database');
 
 function wrapWithStatements(client, beforeStmt, afterStmt, transactionFn) {
-  return client.queryp(beforeStmt)
+  return client.querypNolog(beforeStmt)
     .then(function () {
       return transactionFn(client);
     })
     .then(function (result) {
-      return client.queryp(afterStmt).then(function() {
+      return client.querypNolog(afterStmt).then(function() {
         return result;
       });
     });
@@ -38,6 +38,7 @@ exports.withTransaction = function (dbname, options, transactionFn) {
     if(options.shouldAbort && options.shouldAbort()) {
       return;
     }
+    client.setLoggingContext(options.loggingContext || {});
     return wrapWithStatements(client,
       transactionStatements[options.mode][0],
       transactionStatements[options.mode][1],
