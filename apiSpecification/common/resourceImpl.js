@@ -2,7 +2,6 @@
 
 var eventStream = require('event-stream');
 var q = require('q');
-const url = require('url');
 var _ = require('underscore');
 
 var paths = require('../paths');
@@ -110,19 +109,12 @@ function loggingContext(req) {
   else {
     clientIp = req.ip;
   }
-  const referer = req.header('referer');
-  let refererHost = null;
-  if(referer) {
-    const parsedUrl = url.parse(referer);
-    if(parsedUrl && parsedUrl.host) {
-      refererHost = parsedUrl.host;
-    }
-  }
   const loggingContext = {
     clientIp: clientIp
   };
-  if(refererHost) {
-    loggingContext.referer = refererHost;
+  const reqId = req.header('X-Amz-Cf-Id');
+  if(reqId) {
+    loggingContext.reqId = reqId;
   }
   return loggingContext;
 }
