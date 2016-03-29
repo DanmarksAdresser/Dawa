@@ -38,33 +38,9 @@ exports.adgangsadresse = [
 ];
 
 exports.adresse = module.exports.adgangsadresse.concat([
-  normalizedAdresseField('id'),
-  normalizedAdresseField('status'),
-  {
-    name: 'adgangsadressestatus'
-  },
-  {
-    name: 'adgangspunktstatus'
-  },
-  normalizedAdgangsadresseField('kommunekode'),
-  normalizedAdgangsadresseField('vejkode'),
-  {
-    name: 'vejnavn'
-  },
-  normalizedAdgangsadresseField('husnr'),
+  normalizedAdresseField('adgangsadresseid'),
   normalizedAdresseField('etage'),
-  normalizedAdresseField('dør'),
-  normalizedAdgangsadresseField('supplerendebynavn'),
-  normalizedAdgangsadresseField('postnr'),
-  {
-    name: 'postnrnavn'
-  },
-  {
-    name: 'virkningstart'
-  },
-  {
-    name: 'virkningslut'
-  }
+  normalizedAdresseField('dør')
 ]);
 
 fieldsUtil.applySelectability(exports.adgangsadresse, sqlModels.adgangsadresse);
