@@ -1,5 +1,4 @@
 DROP TYPE IF EXISTS dar_tx_source CASCADE;
-
 CREATE TYPE dar_tx_source AS ENUM('csv', 'api');
 
 DROP TABLE IF EXISTS dar_transaction;

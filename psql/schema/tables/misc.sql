@@ -60,6 +60,9 @@ ENUM (
   'Udgået'
 );
 
+DROP TYPE IF EXISTS dar_tx_source CASCADE;
+CREATE TYPE dar_tx_source AS ENUM('csv', 'api');
+
 DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser;
 CREATE TEXT SEARCH CONFIGURATION adresser (copy=simple);
 ALTER  TEXT SEARCH CONFIGURATION adresser ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;
