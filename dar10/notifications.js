@@ -19,8 +19,12 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   app.get('/notifications', function(req, res) {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(notifications, null, 2));
-
   });
+
+  app.get('/health', function(req, res) {
+    res.end("OK");
+  });
+  
   app.post('/notify', function(req, res) {
     if(req.header('Content-Type') !== 'application/json') {
       logger.info("Rejected request with invalid content type", {
