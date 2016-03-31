@@ -97,7 +97,7 @@ function denodeifyClient(client) {
     var before = Date.now();
     return proxy.querypNolog(query, params)
       .then(function (result) {
-        statistics.emit('psql_query', Date.now() - before, null, proxy.loggingContext);
+        statistics.emit('psql_query', Date.now() - before, null, _.extend({sql: query}, proxy.loggingContext));
         return result;
       }).catch(function (err) {
         statistics.emit('psql_query', Date.now() - before, err, _.extend({sql: query}, proxy.loggingContext));

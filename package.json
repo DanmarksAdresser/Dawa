@@ -5,6 +5,7 @@
   "author": "Ministeriet for By, Bolig og Landdistrikter",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
   "dependencies": {
+    "ajv": "^3.8.4",
     "async": "0.9.0",
     "aws-sdk": "~2.0.0",
     "bluebird": "~1.1.1",
@@ -30,8 +31,10 @@
     "pg.js": "4.1.1",
     "q": "1.1.2",
     "request-promise": "0.4.0",
+    "split2": "^2.0.1",
     "stream-combiner": "^0.2.1",
     "string-format": "^0.5.0",
+    "through2": "^2.0.1",
     "underscore": "1.8.3",
     "winston": "2.1.0",
     "winston-daily-rotate-file": "^1.0.1",

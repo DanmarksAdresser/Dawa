@@ -92,3 +92,7 @@ exports.toSqlModel = function(datamodelName, apiObject) {
 };
 
 exports.getResponse = getResponse;
+
+exports.ait = (text, generator) => {
+  it(text, q.async(generator));
+};
