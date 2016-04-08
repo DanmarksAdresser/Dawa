@@ -81,17 +81,28 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec, rowsToSki
     es.mapSync(function(csvRow) {
       return csvSpecUtil.transformCsv(csvSpec, csvRow);
     }),
-    es.mapSync(function (entity) {
-      return csvSpecUtil.transform(csvSpec, entity);
-    }),
     es.map(function(row, callback) {
-      if(_.contains(rowsToSkip, row.versionid ))  {
+      let invalid = false;
+      ['registrering', 'virkning', 'dbregistrering'].forEach((field) => {
+        if(row[`${field}start`] && row[`${field}slut`] &&
+          Date.parse(row[`${field}start`]) > Date.parse(row[`${field}slut`])) {
+          logger.info('Skipping row due to bad range' , {row: row});
+          invalid = true;
+        }
+      });
+      if(invalid) {
+        callback();
+      }
+      else if(_.contains(rowsToSkip, row.versionid ))  {
         logger.info('Skipping row', {versionid: row.versionid});
         callback();
       }
       else {
         callback(null, row);
       }
+    }),
+    es.mapSync(function (entity) {
+      return csvSpecUtil.transform(csvSpec, entity);
     }),
     csvStringify({
       delimiter: ';',
