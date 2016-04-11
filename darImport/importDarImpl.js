@@ -116,11 +116,52 @@ function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec, rowsToSki
   ]);
 }
 
+/**
+ * for bitemporal tables, delete any overlapping rows
+ */
+function deleteOverlappingRows(client, targetTable, dbSpecImpl) {
+  return q.async(function*(){
+    if (dbSpecImpl.temporality === 'bitemporal') {
+      const result = yield client.queryp(
+        `SELECT distinct a.versionid, a.id, a.registrering, a.virkning FROM ${targetTable} a JOIN ${targetTable} b ON a.id = b.id
+         AND a.virkning && b.virkning AND a.registrering && b.registrering AND a.versionid <> b.versionid`);
+      const overlapResult = result.rows || [];
+      const groupedResult = _.groupBy(overlapResult, 'id');
+      const versionIdsToKeep = _.mapObject(groupedResult, rows => {
+        // first, we remove the expired version ids
+        const nonExpiredRows = rows.filter(row => !row.registrering.upper);
+        if (nonExpiredRows.length <= 1) {
+          return nonExpiredRows;
+        }
+        const currentRows = nonExpiredRows.filter(row => !row.virkning.upper);
+        if (currentRows.length <= 1) {
+          return currentRows;
+        }
+        // we return the one with the highest virkningstart
+        return _.sortBy(currentRows, row => row.virkning.lower)[currentRows.length - 1];
+      });
+      const versionIdsToDelete = _.mapObject(groupedResult, (rows, id) => {
+        return _.pluck(rows.filter(row => !_.contains(versionIdsToKeep[id], row.versionid)), 'versionid');
+      });
+      Object.keys(versionIdsToDelete).forEach(id => {
+        logger.info('Deleting overlapping rows', {
+          table: dbSpecImpl.table,
+          id: id,
+          versionIds: versionIdsToDelete[id]
+        });
+        client.queryp(`DELETE FROM ${targetTable} WHERE versionid IN (${versionIdsToDelete[id].join(', ')})`);
+      });
+
+    }
+  })();
+}
+
 function createTableAndLoadData(client, filePath, targetTable, dbSpecImpl, csvSpec, rowsToSkip) {
-  return dbSpecUtil.createTempTableForCsvContent(client, targetTable, dbSpecImpl)
-    .then(function() {
-      return loadCsvFile(client, filePath, targetTable, dbSpecImpl, csvSpec, rowsToSkip);
-    });
+  return q.async(function*() {
+    yield dbSpecUtil.createTempTableForCsvContent(client, targetTable, dbSpecImpl);
+    yield loadCsvFile(client, filePath, targetTable, dbSpecImpl, csvSpec, rowsToSkip);
+
+  })();
 }
 
 
@@ -258,18 +299,18 @@ function dropChangeTables(client, tableSuffix) {
  * @returns {*}
  */
 function updateTableFromCsv(client, csvFilePath, csvSpec, dbSpecImpl, useFastComparison, rowsToSkip, report) {
-  var desiredTable = 'desired_' + dbSpecImpl.table;
-  return createTableAndLoadData(client, csvFilePath, desiredTable, dbSpecImpl, csvSpec, rowsToSkip)
-    .then(function() {
-      return dbSpecImpl.compareAndUpdate(client, desiredTable, dbSpecImpl.table, {
-        useFastComparison: useFastComparison
-      }, report);
-    })
-    .then(function() {
-      if(report) {
-        return reportChanges(client, report, dbSpecImpl.table);
-      }
-    });
+  return q.async(function*() {
+    const desiredTable = 'desired_' + dbSpecImpl.table;
+    yield createTableAndLoadData(client, csvFilePath, desiredTable, dbSpecImpl, csvSpec, rowsToSkip);
+    yield deleteOverlappingRows(client, desiredTable, dbSpecImpl);
+    const options = {
+      useFastComparison: useFastComparison
+    };
+    yield dbSpecImpl.compareAndUpdate(client, desiredTable, dbSpecImpl.table, options, report);
+    if(report) {
+      yield reportChanges(client, report, dbSpecImpl.table);
+    }
+  })();
 }
 
 function executeExternalSqlScript(client, scriptFile) {
