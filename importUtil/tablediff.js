@@ -7,6 +7,7 @@ const sqlUtil = require('../darImport/sqlUtil');
 
 const columnsDistinctClause = sqlUtil.columnsDistinctClause;
 const columnsEqualClause = sqlUtil.columnsEqualClause;
+const importUtil = require('./importUtil');
 const selectList = sqlUtil.selectList;
 
 /**
@@ -119,6 +120,15 @@ function applyChanges(client, table, idColumns, allColumns, columnsToUpdate) {
   })();
 }
 
+function dropChangeTables(client, tableSuffix) {
+  return q.async(function*() {
+    for(let prefix of ['insert_', 'update_', 'delete_']) {
+      yield importUtil.dropTable(client, prefix + tableSuffix);
+    }
+  })();
+}
+
+
 module.exports = {
   computeInserts: computeInserts,
   computeUpdates: computeUpdates,
@@ -126,5 +136,6 @@ module.exports = {
   applyInserts: applyInserts,
   applyUpdates: applyUpdates,
   applyDeletes: applyDeletes,
-  applyChanges: applyChanges
+  applyChanges: applyChanges,
+  dropChangeTables: dropChangeTables
 };

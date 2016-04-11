@@ -83,6 +83,8 @@ exports.register = function (name, options) {
 
 function denodeifyClient(client) {
   var proxy = {};
+  const batchedQueries = [];
+  let batchingEnabled = true;
   proxy.loggingContext = {};
   proxy.setLoggingContext = function(context) {
     proxy.loggingContext = context;
@@ -93,21 +95,51 @@ function denodeifyClient(client) {
   proxy.querypNolog = function(query, params) {
     return q.ninvoke(proxy, 'query', query, params);
   };
+
+  proxy.setBatchingEnabled = function(enabled) {
+    batchingEnabled = enabled;
+    if(!batchingEnabled) {
+      return proxy.flush();
+    }
+    return q.resolve();
+  };
+
+  proxy.queryBatched = function(query) {
+    if(batchingEnabled) {
+      batchedQueries.push(query);
+      return q.resolve();
+    }
+    else {
+      return proxy.queryp(query);
+    }
+  };
+
+  proxy.flush = function() {
+    if(batchedQueries.length > 0) {
+      return client.queryp(batchedQueries.join(';\n'));
+    }
+    return q.resolve();
+  };
+
   proxy.queryp = function (query, params) {
-    var before = Date.now();
-    return proxy.querypNolog(query, params)
-      .then(function (result) {
+    return q.async(function*() {
+      yield proxy.flush();
+      const before = Date.now();
+      try {
+        const result = yield proxy.querypNolog(query, params);
         statistics.emit('psql_query', Date.now() - before, null, _.extend({sql: query}, proxy.loggingContext));
         return result;
-      }).catch(function (err) {
+      }
+      catch(err) {
         statistics.emit('psql_query', Date.now() - before, err, _.extend({sql: query}, proxy.loggingContext));
         logger.error("Query failed: ", _.extend({
           query: query,
           params: params,
           error: err
         }, proxy.loggingContext));
-        return q.reject(err);
-      });
+        throw err;
+      }
+    })();
   };
   proxy.querypLogged = function(query, params) {
     return proxy.queryp('EXPLAIN ' + query, params).then(function(plan) {

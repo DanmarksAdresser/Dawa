@@ -3,7 +3,7 @@
 var dbSpecUtil = require('./dbSpecUtil');
 var _ = require('underscore');
 
-const tablediff = require('../dar10/tablediff');
+const tablediff = require('../importUtil/tablediff');
 
 const computeInserts = tablediff.computeInserts;
 const computeUpdates = tablediff.computeUpdates;
