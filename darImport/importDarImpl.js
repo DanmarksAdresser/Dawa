@@ -126,8 +126,11 @@ function deleteOverlappingRows(client, targetTable, dbSpecImpl) {
         `SELECT distinct a.versionid, a.id, a.registrering, a.virkning FROM ${targetTable} a JOIN ${targetTable} b ON a.id = b.id
          AND a.virkning && b.virkning AND a.registrering && b.registrering AND a.versionid <> b.versionid`);
       const overlapResult = result.rows || [];
+      if(overlapResult.length === 0) {
+        return;
+      }
       const groupedResult = _.groupBy(overlapResult, 'id');
-      const versionIdsToKeep = _.mapObject(groupedResult, rows => {
+      const rowsToKeep = _.mapObject(groupedResult, rows => {
         // first, we remove the expired version ids
         const nonExpiredRows = rows.filter(row => !row.registrering.upper);
         if (nonExpiredRows.length <= 1) {
@@ -137,21 +140,23 @@ function deleteOverlappingRows(client, targetTable, dbSpecImpl) {
         if (currentRows.length <= 1) {
           return currentRows;
         }
-        // we return the one with the highest virkningstart
-        return _.sortBy(currentRows, row => row.virkning.lower)[currentRows.length - 1];
+        // we keep the one with the highest virkningstart
+        return [_.sortBy(currentRows, row => row.virkning.lower)[currentRows.length - 1]];
       });
-      const versionIdsToDelete = _.mapObject(groupedResult, (rows, id) => {
-        return _.pluck(rows.filter(row => !_.contains(versionIdsToKeep[id], row.versionid)), 'versionid');
+      const rowsToDelete = _.mapObject(groupedResult, (rows, id) => {
+        return rows.filter(row => !_.contains(rowsToKeep[id], row));
       });
-      Object.keys(versionIdsToDelete).forEach(id => {
+
+      const versionIdsToDeleteMap = _.mapObject(rowsToDelete, rows => _.pluck(rows, 'versionid'));
+      Object.keys(rowsToDelete).forEach(id => {
         logger.info('Deleting overlapping rows', {
           table: dbSpecImpl.table,
           id: id,
-          versionIds: versionIdsToDelete[id]
+          versionIds: versionIdsToDeleteMap[id]
         });
-        client.queryp(`DELETE FROM ${targetTable} WHERE versionid IN (${versionIdsToDelete[id].join(', ')})`);
       });
-
+      const versionIdsToDelete = Object.keys(versionIdsToDeleteMap).reduce((memo, id) => memo.concat(versionIdsToDeleteMap[id]), []);
+      yield client.queryp(`DELETE FROM ${targetTable} WHERE versionid IN (${versionIdsToDelete.join(', ')})`);
     }
   })();
 }
