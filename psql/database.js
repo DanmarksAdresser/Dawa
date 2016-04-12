@@ -5,6 +5,7 @@ var pg = require('pg.js');
 var q = require('q');
 var _ = require('underscore');
 
+const limiter = require('../limiter');
 var logger = require('../logger').forCategory('sql');
 var statistics = require('../statistics');
 
@@ -57,6 +58,8 @@ exports.create = function(name, options) {
         client.poolCount = 0;
         return cb(null, client);
       });
+      // at most 1 concurrent request per client IP per node process
+      pool.requestLimiter = limiter(1);
     },
     destroy: function (client) {
       client._destroying = true;
@@ -81,7 +84,7 @@ exports.register = function (name, options) {
   databaseInitializerDeferreds[name].resolve(databases[name]);
 };
 
-function denodeifyClient(client) {
+function denodeifyClient(client, requestLimiter) {
   var proxy = {};
   proxy.loggingContext = {};
   proxy.setLoggingContext = function(context) {
@@ -94,20 +97,28 @@ function denodeifyClient(client) {
     return q.ninvoke(proxy, 'query', query, params);
   };
   proxy.queryp = function (query, params) {
-    var before = Date.now();
-    return proxy.querypNolog(query, params)
-      .then(function (result) {
-        statistics.emit('psql_query', Date.now() - before, null, proxy.loggingContext);
-        return result;
-      }).catch(function (err) {
-        statistics.emit('psql_query', Date.now() - before, err, _.extend({sql: query}, proxy.loggingContext));
-        logger.error("Query failed: ", _.extend({
-          query: query,
-          params: params,
-          error: err
-        }, proxy.loggingContext));
-        return q.reject(err);
-      });
+    const fn = () => {
+      var before = Date.now();
+      return proxy.querypNolog(query, params)
+        .then(function (result) {
+          statistics.emit('psql_query', Date.now() - before, null, proxy.loggingContext);
+          return result;
+        }).catch(function (err) {
+          statistics.emit('psql_query', Date.now() - before, err, _.extend({sql: query}, proxy.loggingContext));
+          logger.error("Query failed: ", _.extend({
+            query: query,
+            params: params,
+            error: err
+          }, proxy.loggingContext));
+          return q.reject(err);
+        });
+    }
+    if(requestLimiter && proxy.loggingContext && proxy.loggingContext.clientIp) {
+      return requestLimiter(proxy.loggingContext.clientIp, fn);
+    }
+    else {
+      return fn();
+    }
   };
   proxy.querypLogged = function(query, params) {
     return proxy.queryp('EXPLAIN ' + query, params).then(function(plan) {
@@ -172,7 +183,7 @@ function acquirePooledConnection(pool, options, callback) {
     statistics.emit('psql_acquire_connection', Date.now() - before, err);
     if(err)  return callback(err);
     client.poolCount++;
-    callback(null, denodeifyClient(client), function(err) {
+    callback(null, denodeifyClient(client, pool.requestLimiter), function(err) {
       if(err) {
         logger.info('Destroying Postgres client', { error: err });
         pool.destroy(client);

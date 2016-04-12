@@ -1,13 +1,14 @@
 "use strict";
 
 /*eslint no-console: 0 */
-var async = require('async');
 var cliParameterParsing = require('./bbr/common/cliParameterParsing');
 var request = require('request-promise');
 var Writable = require('stream').Writable;
 var util = require('util');
 
 var http = require('http');
+
+const q = require('q');
 
 http.globalAgent.maxSockets = 5000;
 
@@ -36,9 +37,6 @@ DevNull.prototype._write = function (chunk, encoding, cb) {
   cb();
 };
 
-var alwaysTrue = function() { return true; };
-
-
 var chars = 'abcdefghijklmnopqrstuvwxyzæøåé';
 
 function randomString(length) {
@@ -55,54 +53,63 @@ function randomString(length) {
 }
 
 function getRepeatedly(baseUrl, path, parallelCount) {
-  return function (errorCallback) {
-    function getToDevNull(callback) {
+  function getToDevNull() {
+    return q.Promise((resolve, reject) => {
       var requestStream = request(baseUrl + path);
-      requestStream.pipe(new DevNull());
-      requestStream.on('error', function(err) {
-        callback(err);
+      console.log('started request stream');
+      const devNull = new DevNull();
+      requestStream.pipe(devNull);
+      requestStream.on('error', () => {
+        console.log('stream error');
+        reject();
       });
-      requestStream.on('end', function(err) {
-        callback(err);
+      requestStream.on('end', () =>  {
+        console.log('stream end');
+        resolve();
       });
-    }
-    var count = 0;
-    async.whilst(function() {
-      return count < parallelCount;
-    }, function(callback) {
-      count++;
-      console.log('getting ' + path);
-      async.whilst(alwaysTrue, getToDevNull, errorCallback);
-      setTimeout(callback, 1000);
-    }, function(err) {
-      if(err) {
-        throw err;
-      }
     });
-  };
+  }
+  for(let i = 0; i < parallelCount; ++i) {
+    console.log('launching ' + path)
+    q.async(function*() {
+      /* eslint no-constant-condition: 0 */
+      while(true) {
+        try {
+          yield getToDevNull();
+        }
+        catch(e) {
+          console.log('ERROR', e);
+        }
+      }
+
+    })();
+  }
 }
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, options) {
   var baseUrl = options.baseUrl;
-  async.parallel([
-    getRepeatedly(baseUrl, '/adresser', options.adresseStreams),
-    getRepeatedly(baseUrl, '/adgangsadresser', options.adgangsadresseStreams),
-    getRepeatedly(baseUrl, '/vejstykker', options.vejstykkeStreams),
-    getRepeatedly(baseUrl, '/vejnavne', options.vejnavnStreams),
-    getRepeatedly(baseUrl, '/postnumre', options.postnummerStreams),
-    getRepeatedly(baseUrl, '/regioner?format=geojson', options.regionerStreams),
-    getRepeatedly(baseUrl, '/replikering/adgangsadresser', options.adgangsadresseUdtraekStreams)
-  ], function(err) {
-    if(err) {
-      throw err;
-    }
-  });
-  setInterval(function() {
-    var before = Date.now();
-    request(baseUrl + '/adresser/autocomplete?q=' + randomString(2), function(err, response, body) {
-      if(err) {
-        throw err;
+  getRepeatedly(baseUrl, '/adresser', options.adresseStreams),
+  getRepeatedly(baseUrl, '/adgangsadresser', options.adgangsadresseStreams),
+  getRepeatedly(baseUrl, '/vejstykker', options.vejstykkeStreams),
+  getRepeatedly(baseUrl, '/vejnavne', options.vejnavnStreams),
+  getRepeatedly(baseUrl, '/postnumre', options.postnummerStreams),
+  getRepeatedly(baseUrl, '/regioner?format=geojson', options.regionerStreams),
+  getRepeatedly(baseUrl, '/replikering/adgangsadresser', options.adgangsadresseUdtraekStreams)
+
+  q.async(function*() {
+    /* eslint no-constant-condition: 0 */
+    while(true) {
+      try {
+        var before = Date.now();
+        const response = yield request( {
+          uri: baseUrl + '/adresser/autocomplete?q=' + randomString(2),
+          resolveWithFullResponse: true
+        });
+        console.log('autocomplete status: ' + response.statusCode + ' time: ' + (Date.now() - before));
       }
-      console.log('autocomplete status: ' + response.statusCode + ' time: ' + (Date.now() - before));
-    });
-  }, 1000 / options.adresseAutocompletePerSecond);
+
+      catch(e) {
+        console.log('could not get autocomplete response');
+      }
+    }
+  })();
 });
