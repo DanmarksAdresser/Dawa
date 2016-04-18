@@ -1,5 +1,6 @@
 "use strict";
 
+const logger = require('../logger').forCategory('paths');
 var registry = require('./registry');
 var _ = require('underscore');
 require('./allNamesAndKeys');
@@ -15,8 +16,21 @@ var map = _.indexBy(registry.where({
 // the NodeJS instances. By default, these are prefixed with "origin-". We remove the "origin-" prefix to get the real
 // hostname.
 exports.baseUrl = function (req) {
-  // protocol in paths is always returned as http, even when on https
-  var protocol = 'http';
+  let protocol;
+  if(req.headers['cloudfront-forwarded-proto']) {
+    const cfProto = req.headers['cloudfront-forwarded-proto'];
+    if(cfProto === 'http' || cfProto === 'https') {
+      protocol = cfProto;
+    }
+    else {
+      logger.error('Invalid value of cloudFront-forwarded-proto header', {value:cfProto });
+      protocol = 'http';
+    }
+  }
+  else {
+    protocol = 'http';
+  }
+
   var host = req.headers.host;
   if(!_.isString(host)) {
     host = 'dawa';
