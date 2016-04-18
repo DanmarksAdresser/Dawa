@@ -43,6 +43,20 @@ function cachingMiddleware(req, res, next) {
   next();
 }
 
+/**
+ * We prevent HEAD requests. Expressjs executes the entire request (resultning in heavy load),
+ * which is undesirable. If someone has a great use case for HEAD requests, we can add special
+ * support.
+ */
+function preventHeadMiddleware(req, res, next) {
+  if(req.method === 'HEAD') {
+    res.sendStatus(405);
+  }
+  else {
+    next();
+  }
+}
+
 //noinspection JSUnusedLocalSymbols
 function corsMiddleware(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -108,6 +122,7 @@ exports.setupRoutes = function () {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
   app.use(requestLoggingMiddleware);
+  app.use(preventHeadMiddleware);
   app.use(corsMiddleware);
   app.use(cachingMiddleware);
 
