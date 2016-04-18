@@ -230,7 +230,12 @@ var sqlModel = {
     var caretpos = params.caretpos;
     var queryParam = params.q;
     if (caretpos > 0 && caretpos <= queryParam.length) {
-      if (caretpos === queryParam.length || _.contains([' ', '.', ','], queryParam.charAt(caretpos))) {
+      const textBeforeCaret = queryParam.substring(0, caretpos);
+      if(/^[^\d]*\d+$/.test(textBeforeCaret)) {
+        // were autocompleting first number, which is probably husnr. We do not want
+        // to add a star here.
+      }
+      else if (caretpos === queryParam.length || _.contains([' ', '.', ','], queryParam.charAt(caretpos))) {
         queryParam = insertString(queryParam, caretpos, '*');
       }
     }
