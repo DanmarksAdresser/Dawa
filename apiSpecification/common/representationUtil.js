@@ -67,6 +67,9 @@ exports.geojsonRepresentation = function(geomJsonField, flatRepresentation) {
         if (row.geom_json) {
           result.geometry = JSON.parse(row.geom_json);
         }
+        else {
+          result.geometry = null;
+        }
         if (singleResult) {
           result.crs = {
             type: 'name',
