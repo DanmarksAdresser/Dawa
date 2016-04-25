@@ -27,8 +27,8 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
   };
 
   var expectedResultsSogn = {
-    adgangsadresse: 277,
-    adresse: 279
+    adgangsadresse: 281,
+    adresse: 283
   };
   var expectedResultsZone1 = {
     adgangsadresse: 0,

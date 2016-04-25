@@ -7,7 +7,7 @@ function isWhitespace(ch) {
   return '., '.indexOf(ch) !== -1;
 }
 
-//function printCharlist(charlist) {
+// function printCharlist(charlist) {
 //  console.log(charlist.reduce((memo, entry) => {
 //    return memo + (entry.uvasket ? entry.uvasket : 'X');
 //  }, ''));
@@ -17,10 +17,47 @@ function isWhitespace(ch) {
 //  console.log(charlist.reduce((memo, entry) => {
 //    return memo + entry.op;
 //  }, ''));
-//}
-//
-function consume(charlist, length) {
+// }
+
+
+/**
+ * Consumes uvasket letters until a whitespace char is seen.
+ * Any corresponding vasket letters is changed to deletes. Inserts are removed from list.
+ * @param charlist
+ * @returns {*[]}
+ */
+function consumeUntilWhitespace(charlist) {
+  let result = '';
+  let resultList = [];
+  for(let i = 0; i < charlist.length; ++i) {
+    if(charlist[i].uvasket !== null && isWhitespace(charlist[i].uvasket)) {
+      resultList = resultList.concat(charlist.slice(i));
+      break;
+    }
+    else if(charlist[i].op === 'I') {
+      // drop
+    }
+    else if(charlist[i].op === 'D') {
+      // keep
+      resultList.push(charlist[i]);
+    }
+    else {
+      // keep and update becomes delete, because we remove the char from uvasket
+      resultList.push({
+        op: 'D',
+        vasket: charlist[i].vasket,
+        uvasket: null
+      });
+      result += charlist[i].uvasket;
+
+    }
+  }
+  return [resultList, result];
+}
+
+function consume(charlist, length, mustEndWithWhitespace) {
   if(charlist.length === 0 && length === 0) {
+    // end of string, we're done
     return [[], ''];
   }
   if(charlist.length === 0) {
@@ -29,20 +66,26 @@ function consume(charlist, length) {
   var entry = charlist[0];
   if(entry.op === 'I') {
     if(isWhitespace(entry.uvasket) && length === 0) {
+      // we're done
       return [charlist, ''];
     }
-    let result = consume(charlist.slice(1), length);
+    // consume the rest of the token
+    let result = consume(charlist.slice(1), length, mustEndWithWhitespace);
     return [result[0], entry.uvasket + result[1]];
   }
   if(length === 0) {
+    if(mustEndWithWhitespace) {
+      // We need to check that we do not split a token
+      return consumeUntilWhitespace(charlist);
+    }
     return [charlist, ''];
   }
   if(entry.op === 'K' || entry.op === 'U') {
-    let result =  consume(charlist.slice(1), length - 1);
+    let result =  consume(charlist.slice(1), length - 1, mustEndWithWhitespace);
     return [result[0], entry.uvasket + result[1]];
   }
   if(entry.op === 'D') {
-    return consume(charlist.slice(1), length - 1);
+    return consume(charlist.slice(1), length - 1, mustEndWithWhitespace);
   }
 }
 
@@ -156,42 +199,71 @@ function consumeBetween(charlist) {
    });
  }
 
-function parseTokens(uvasketText, vasketText, tokens) {
+function parseTokens(uvasketText, vasketText, tokens, rules) {
   var ops = levenshtein(uvasketText.trim().toLowerCase(), vasketText.trim().toLowerCase(), 1, 2, 1).ops;
-  var charlist = mapOps(uvasketText, vasketText, ops);
-  var initial = {
+  let charlist = mapOps(uvasketText, vasketText, ops);
+  const result = {
     parsedTokens: [],
-    unknownTokens: [],
-    charlist: charlist
+    unknownTokens: []
   };
 
-  return tokens.reduce((memo, token) => {
-    //console.log(`consuming ${token} from `);
-    //printCharlist(memo.charlist);
-    var parseResult = consume(memo.charlist, token.length);
-    //console.log('consuming between from');
-    //printCharlist(parseResult[0]);
+  tokens.forEach((token, index) => {
+    const mustEndWithWhitespace = rules[index].mustEndAtWhitespace ||
+      index === rules.length - 1 ||
+      rules[index+1].mustBeginAtWhitespace;
+    var parseResult = consume(charlist, token.length, mustEndWithWhitespace);
 
     var betweenResult = consumeBetween(parseResult[0]);
-    return {
-      parsedTokens: memo.parsedTokens.concat(parseResult[1]),
-      unknownTokens: memo.unknownTokens.concat(betweenResult[1]),
-      charlist: betweenResult[0]
-    };
-  }, initial);
+    result.parsedTokens = result.parsedTokens.concat(parseResult[1]);
+    result.unknownTokens = result.unknownTokens.concat(betweenResult[1]);
+    charlist = betweenResult[0];
+  });
+  return result;
 }
 
 module.exports = function (uvasketAdrText, vasketAdr) {
   var vasketAdrText = util.adressebetegnelse(vasketAdr, false);
   var fieldNames = ['vejnavn', 'husnr', 'etage', 'dør', 'supplerendebynavn', 'postnr', 'postnrnavn'];
-  var tokens = fieldNames.reduce((memo, fieldName) => {
-    if (vasketAdr[fieldName]) {
-      memo.push(vasketAdr[fieldName]);
+  const rulesMap = {
+    vejnavn: {
+      mustBeginAtWhitespace: true,
+      mustEndAtWhitespace: true
+    },
+    husnr: {
+      mustBeginAtWhitespace: true,
+      mustEndAtWhitespace: true
+    },
+    etage: {
+      mustBeginAtWhitespace: true,
+      mustEndAtWhitespace: false
+    },
+    dør: {
+      mustBeginAtWhitespace: false,
+      mustEndAtWhitespace: true
+    },
+    supplerendebynavn: {
+      mustBeginAtWhitespace: true,
+      mustEndAtWhitespace: true
+    },
+    postnr: {
+      mustBeginAtWhitespace: true,
+      mustEndAtWhitespace: true
+    },
+    postnrnavn: {
+      mustBeginAtWhitespace: true,
+      mustEndAtWhitespace: true
     }
-    return memo;
-  }, []);
+  };
+  let tokens = [];
+  let rules = [];
+  fieldNames.forEach((fieldName) => {
+    if (vasketAdr[fieldName]) {
+      tokens.push(vasketAdr[fieldName]);
+      rules.push(rulesMap[fieldName]);
+    }
+  });
 
-  var parseResult = parseTokens(uvasketAdrText, vasketAdrText, tokens);
+  var parseResult = parseTokens(uvasketAdrText, vasketAdrText, tokens, rules);
   var parsedAddress = fieldNames.reduce((memo, fieldName) => {
     if(vasketAdr[fieldName]) {
       memo[fieldName] = parseResult.parsedTokens.shift();

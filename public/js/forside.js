@@ -222,14 +222,9 @@ function valider(pnr,vej,husnr,etage,doer) {
   if (htext!==null && htext.length > 0) {
     parametre.husnr= htext;
   }
-  var etext = $(etage).val();
-  if (etext!==null && etext.length > 0) {
-    parametre.etage= etext;
-  }
-  var dtext = $(doer).val();
-  if (dtext!==null && dtext.length > 0) {
-    parametre.dør= dtext;
-  }
+  parametre.etage = $(etage).val() || '';
+  parametre.dør = $(doer).val() || '';
+  
   $.ajax({
     cache: true,
     url:'/adresser',

@@ -10,7 +10,52 @@ var consume = adresseTextMatch.internal.consume;
 var consumeBetween = adresseTextMatch.internal.consumeBetween;
 var parseTokens = adresseTextMatch.internal.parseTokens;
 
+const rules = [{
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}, {
+  mustBeginWithWhitespace: true,
+  mustContainWhitespace: false,
+  mustEndWithWhitespace: true
+}];
+
 describe('adresseTextMatch', () => {
+  it('Will respect whitespace rules', () => {
+    const uvasket = '22, 2000';
+    const vasket = '2, 2, 2000';
+    var ops = mapOps(uvasket, vasket, levenshtein(uvasket, vasket, 1, 1, 1).ops);
+    var result = consume(ops, '2'.length, true);
+    expect(result[1]).to.equal('22');
+  });
   it('Will consume a token which matches exactly', () =>  {
     var uvasket = 'token1, token2';
     var vasket = 'token1, token2';
@@ -130,21 +175,21 @@ describe('adresseTextMatch', () => {
   it('Will parse a sequence of matching tokens', () => {
     var uvasket = 'foo bar,foobar';
     var vasket = 'foo bar,foobar';
-    var result = parseTokens(uvasket, vasket, ['foo', 'bar', 'foobar']);
+    var result = parseTokens(uvasket, vasket, ['foo', 'bar', 'foobar'], rules);
     expect(result.parsedTokens).to.deep.equal(['foo', 'bar', 'foobar']);
   });
 
   it('Will parse a sequence of non-matching tokens', () => {
     var uvasket = 'oofooo.br, fbaaroo';
     var vasket = 'foo,bar foobar';
-    var result = parseTokens(uvasket, vasket, ['foo', 'bar', 'foobar']);
+    var result = parseTokens(uvasket, vasket, ['foo', 'bar', 'foobar'], rules);
     expect(result.parsedTokens).to.deep.equal(['oofooo', 'br', 'fbaaroo']);
   });
 
   it('Will parse a sequence with unknown tokens in it', () => {
     var uvasket = 'foo tic tac bar toc';
     var vasket = 'foo bar';
-    var result = parseTokens(uvasket, vasket, ['foo', 'bar']);
+    var result = parseTokens(uvasket, vasket, ['foo', 'bar'], rules);
     expect(result.parsedTokens).to.deep.equal(['foo', 'bar']);
     expect(result.unknownTokens).to.deep.equal(['tic', 'tac', 'toc']);
   });
@@ -206,15 +251,15 @@ describe('adresseTextMatch', () => {
       postnr: '8000',
       postnrnavn: 'Aarhus C'
     };
-    var result = adresseTextMatch(uvasket, vasket);
+    var result = adresseTextMatch(uvasket, vasket, rules);
     expect(result.address).to.deep.equal({
       dør: '',
       etage: '',
       husnr: '',
       postnr: '',
-      postnrnavn: 'bar',
+      postnrnavn: '',
       supplerendebynavn: '',
-      vejnavn: 'fo'
+      vejnavn: 'foobar'
     });
   });
 
@@ -268,5 +313,24 @@ describe('adresseTextMatch', () => {
       postnrnavn: 'København K'
     });
     expect(result.unknownTokens).to.deep.equal(['2']);
+  });
+
+  it('Will correctly parse C.F. Richs Vej 22, 2000 Frederiksberg', () => {
+    const uvasket = 'C.F. Richs Vej 22, 2000 Frederiksberg';
+    const vasket = {
+      vejnavn: 'C.F. Richs Vej',
+      husnr: "2",
+      etage: '2',
+      postnr: '2000',
+      postnrnavn: 'Frederiksberg'
+    }
+    var result = adresseTextMatch(uvasket, vasket);
+    expect(result.address).to.deep.equal({
+      vejnavn: 'C.F. Richs Vej',
+      husnr: '22',
+      etage: '',
+      postnr: '2000',
+      postnrnavn: 'Frederiksberg'
+    });
   });
 });

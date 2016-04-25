@@ -5,6 +5,7 @@ var pg = require('pg.js');
 var q = require('q');
 var _ = require('underscore');
 
+const limiter = require('../limiter');
 var logger = require('../logger').forCategory('sql');
 var statistics = require('../statistics');
 
@@ -57,6 +58,8 @@ exports.create = function(name, options) {
         client.poolCount = 0;
         return cb(null, client);
       });
+      // at most 1 concurrent request per client IP per node process
+      pool.requestLimiter = limiter(1);
     },
     destroy: function (client) {
       client._destroying = true;
@@ -81,7 +84,7 @@ exports.register = function (name, options) {
   databaseInitializerDeferreds[name].resolve(databases[name]);
 };
 
-function denodeifyClient(client) {
+function denodeifyClient(client, requestLimiter) {
   var proxy = {};
   const batchedQueries = [];
   let batchingEnabled = true;
@@ -122,7 +125,7 @@ function denodeifyClient(client) {
   };
 
   proxy.queryp = function (query, params) {
-    return q.async(function*() {
+    const fn = q.async(function*() {
       yield proxy.flush();
       const before = Date.now();
       try {
@@ -139,8 +142,16 @@ function denodeifyClient(client) {
         }, proxy.loggingContext));
         throw err;
       }
-    })();
+    });
+
+    if(requestLimiter && proxy.loggingContext && proxy.loggingContext.clientIp) {
+      return requestLimiter(proxy.loggingContext.clientIp, fn);
+    }
+    else {
+      return fn();
+    }
   };
+  
   proxy.querypLogged = function(query, params) {
     return proxy.queryp('EXPLAIN ' + query, params).then(function(plan) {
       /*eslint no-console: 0 */
@@ -204,7 +215,7 @@ function acquirePooledConnection(pool, options, callback) {
     statistics.emit('psql_acquire_connection', Date.now() - before, err);
     if(err)  return callback(err);
     client.poolCount++;
-    callback(null, denodeifyClient(client), function(err) {
+    callback(null, denodeifyClient(client, pool.requestLimiter), function(err) {
       if(err) {
         logger.info('Destroying Postgres client', { error: err });
         pool.destroy(client);
