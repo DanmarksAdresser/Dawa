@@ -35,7 +35,7 @@ describe('DAGI updates', function() {
           return client.queryp("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId]);
         })
         .then(function (result) {
-          expect(result.rows[0].c).to.equal('277');
+          expect(result.rows[0].c).to.equal('281');
         });
     });
   });
@@ -80,7 +80,7 @@ describe('DAGI updates', function() {
         return clientFn().queryp(
           "select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1",
           [createdTemaId]).then(function(result) {
-            expect(result.rows[0].c).to.equal('226');
+            expect(result.rows[0].c).to.equal('228');
           });
       });
 
