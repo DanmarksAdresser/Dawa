@@ -24,12 +24,12 @@ BEGIN
          gridded_temaer_matview.tema,
          gridded_temaer_matview.id
        FROM Adgangsadresser, gridded_temaer_matview
-       WHERE Adgangsadresser.id = NEW.id AND ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom));
+       WHERE Adgangsadresser.id = NEW.id AND st_covers(gridded_temaer_matview.geom, Adgangsadresser.geom));
   ELSE
     DELETE FROM adgangsadresser_temaer_matview mv WHERE adgangsadresse_id = NEW.id AND NOT EXISTS(
         SELECT *
          FROM Adgangsadresser a, gridded_temaer_matview t
-         WHERE mv.adgangsadresse_id = a.id  AND mv.tema_id = t.id and mv.tema = t.tema AND ST_Contains(t.geom, a.geom)
+         WHERE mv.adgangsadresse_id = a.id  AND mv.tema_id = t.id and mv.tema = t.tema AND st_covers(t.geom, a.geom)
     );
     INSERT INTO adgangsadresser_temaer_matview
       (SELECT DISTINCT
@@ -38,7 +38,7 @@ BEGIN
          gridded_temaer_matview.id
        FROM Adgangsadresser, gridded_temaer_matview
        WHERE Adgangsadresser.id = NEW.id AND
-             ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND
+             st_covers(gridded_temaer_matview.geom, Adgangsadresser.geom) AND
       NOT EXISTS(
         SELECT * FROM adgangsadresser_temaer_matview atm WHERE
         atm.adgangsadresse_id = Adgangsadresser.id AND atm.tema = gridded_temaer_matview.tema AND

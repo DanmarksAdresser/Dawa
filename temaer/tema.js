@@ -295,7 +295,7 @@ var initAdresserTemaerView = function(client, temaName) {
     function(cb) {
       var sql = 'INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema)'+
         ' (SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
-        'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1 ' +
+        'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Covers(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1 ' +
         ' JOIN temaer ON gridded_temaer_matview.id = temaer.id)';
       var params = [temaName];
       client.query(sql, params, cb);
@@ -316,7 +316,7 @@ var initAdresserTemaerView = function(client, temaName) {
   return dataUtil.createTempTableQ(client, 'tema_mapping_temp', 'adgangsadresser_temaer_matview').then(function() {
     return dbapi.queryRawQ(client, 'INSERT INTO tema_mapping_temp(adgangsadresse_id, tema_id, tema) ' +
       '(SELECT Adgangsadresser.id, gridded_temaer_matview.id, gridded_temaer_matview.tema ' +
-      'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Contains(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
+      'FROM Adgangsadresser JOIN gridded_temaer_matview  ON  ST_Covers(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = $1) ',
       [temaName]);
   }).then(function() {
     return dbapi.queryRawQ(client, "CREATE TEMP VIEW tema_mapping_view_temp AS SELECT * FROM adgangsadresser_temaer_matview WHERE tema = '" + temaName + "'", []);
