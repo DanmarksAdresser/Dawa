@@ -1,7 +1,8 @@
 "use strict";
 
-const q = require('q');
 const path = require('path');
+const q = require('q');
+const _ = require('underscore');
 
 const darTablediff = require('./darTablediff');
 const importUtil = require('../importUtil/importUtil');
@@ -153,5 +154,6 @@ function withDar1Transaction(client, fn) {
 module.exports = {
   importInitial: importInitial,
   importIncremental: importIncremental,
-  withDar1Transaction: withDar1Transaction
+  withDar1Transaction: withDar1Transaction,
+  importChangeset: importChangeset
 };
