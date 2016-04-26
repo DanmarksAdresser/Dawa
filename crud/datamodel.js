@@ -23,7 +23,7 @@ module.exports = {
   vejstykke: {
     name: 'vejstykke',
     table: 'vejstykker',
-    columns: ['kommunekode', 'kode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn'],
+    columns: ['kommunekode', 'kode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn', 'geom'],
     key: ['kommunekode', 'kode']
   },
   supplerendebynavn: {

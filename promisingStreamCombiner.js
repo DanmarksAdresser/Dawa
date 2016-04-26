@@ -16,6 +16,7 @@ module.exports = function promisingStreamCombiner(streams) {
     streams.forEach(function(stream) {
       stream.on('error', reject);
     });
+    streams[streams.length-1].on('end', resolve);
     streams[streams.length-1].on('finish', resolve);
   });
 };

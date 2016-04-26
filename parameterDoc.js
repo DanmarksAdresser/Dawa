@@ -133,19 +133,43 @@ var vejstykkerIdParameters = [
     doc: 'vejkode. 4 cifre.',
     examples: ['0052']}
 ];
-var vejstykkerParameters = [{name: 'q',
-                             doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
-                             'Wildcard * er tilladt i slutningen af hvert ord. ' +
-                             'Der skelnes ikke mellem store og små bogstaver.',
-                             examples: ['tværvej']},
-                            vejstykkerIdParameters[0],
-                            vejstykkerIdParameters[1],
-                            {name: 'navn',
-                             doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
-                             examples: ['Margrethepladsen', 'Viborgvej']},
-                            {name: 'postnr',
-                             doc: 'Postnummer. 4 cifre.',
-                             examples: ['2700']}];
+var vejstykkerParameters = [{
+  name: 'q',
+  doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
+  'Wildcard * er tilladt i slutningen af hvert ord. ' +
+  'Der skelnes ikke mellem store og små bogstaver.',
+  examples: ['tværvej']
+},
+  vejstykkerIdParameters[0],
+  vejstykkerIdParameters[1],
+  {
+    name: 'navn',
+    doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
+    examples: ['Margrethepladsen', 'Viborgvej']
+  },
+  {
+    name: 'postnr',
+    doc: 'Postnummer. 4 cifre.',
+    examples: ['2700']
+  },
+  {
+    name: 'polygon',
+    doc: 'Find de vejstykker, som overlapper med det angivne polygon. ' +
+    'Polygonet specificeres som et array af koordinater på samme måde som' +
+    ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.'+
+    ' Bemærk at polygoner skal' +
+    ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>'+
+    ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+    ' angives vha. srid parameteren, se ovenover.<br> Eksempel: '+
+    ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+    examples: []
+  },
+  {
+    name: 'cirkel',
+    doc: 'Find de vejstykker, som overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+    examples: []
+  }
+];
 
 var vejstykkerDoc = {
   docVersion: 2,
@@ -165,6 +189,24 @@ var vejstykkerDoc = {
                   {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
                    query: [{name: 'kommunekode',value: '0101'}]}]},
 
+    '/vejstykker/reverse': {
+      subtext: 'Find det vejstykke, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes ' +
+      'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller ' +
+      'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
+      parameters: reverseGeocodingParameters,
+      examples: [{
+        description: 'Returner vejstykket nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+        query: [{name: 'x', value: '12.5851471984198'},
+          {name: 'y', value: '55.6832383751223'}]
+      },
+        {
+          description: 'Returner vejstykket nærmest punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+          query: [
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
+            {name: 'srid', value: '25832'}]
+        }]
+    },
     '/vejstykker/autocomplete': {
       subtext: autocompleteSubtext('vejstykker'),
       parameters: overwriteWithAutocompleteQParameter(vejstykkerParameters).concat(formatAndPagingParams),

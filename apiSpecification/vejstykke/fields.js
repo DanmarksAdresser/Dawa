@@ -26,6 +26,10 @@ var fields = [
   {
     name: 'postnumre',
     multi: true
+  },
+  {
+    name: 'geom_json',
+    selectable: true
   }
 ];
 

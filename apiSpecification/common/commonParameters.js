@@ -36,7 +36,7 @@ exports.format = [
   {
     name: 'format',
     schema: {
-      "enum": ['csv', 'json', 'geojson']
+      "enum": ['csv', 'json', 'geojson', 'geojsonz']
     }
   },
   {

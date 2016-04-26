@@ -25,10 +25,18 @@ exports.applyDefaultPagingForAutocomplete = function(params) {
   }
 };
 
+function representationName(formatParam) {
+  switch(formatParam) {
+    case 'csv': return 'flat';
+    case 'geojson':
+    case 'geojsonz': return 'geojson'
+    default: return formatParam
+  }
+}
+
 exports.chooseRepresentationForQuery = function (formatParam, representations) {
-  var representationName = formatParam === 'csv' ? 'flat' : formatParam;
-  var representation = representations[representationName];
-  return representation;
+  const name = representationName(formatParam);
+  return representations[name];
 };
 
 exports.chooseRepresentationForAutocomplete = function(formatParam, representations) {

@@ -23,7 +23,7 @@ var mapKommuneRef = commonMappers.mapKommuneRef;
 var kode4String = require('../util').kode4String;
 var schemaObject = schemaUtil.schemaObject;
 
-exports.flat = representationUtil.defaultFlatRepresentation(fields);
+exports.flat = representationUtil.defaultFlatRepresentation(representationUtil.fieldsWithoutNames(fields, ['geom_json']));
 
 var autocompleteFieldNames = ['navn', 'kommunekode', 'kode'];
 var autocompleteFields = _.filter(fields, function(field) {
@@ -111,6 +111,8 @@ exports.json = {
     };
   }
 };
+
+exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
 
 var registry = require('../registry');
 registry.addMultiple('vejstykke', 'representation', module.exports);
