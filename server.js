@@ -19,23 +19,19 @@ require('pg-parse-float')(pg);
  * This does not work on windows.
  */
 if(process.platform !== 'win32') {
-  var memwatch = require('memwatch-next');
-  memwatch.on('stats', function(stats) {
-    var logMeta = {
+  const gc = require('gc-stats')();
+  gc.on('stats', (stats) => {
+    const logMeta = {
       pid: process.pid,
-      current_base: stats.current_base,
-      estimated_base: stats.estimated_base,
-      min: stats.min,
-      max: stats.max,
-      usage_trend: stats.usage_trend
+      before: stats.before.usedHeapSize,
+      after: stats.after.usedHeapSize
     };
     logger.info('memory', 'stats', logMeta);
-    if(stats.current_base > 768 * 1024 * 1024) {
-      logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
-      process.exit(1);
-    }
+      if(stats.after.usedHeapSize > 768 * 1024 * 1024) {
+        logger.error('memory','Memory limit exceeded. Exiting process.', logMeta);
+        process.exit(1);
+      }
   });
-
 }
 function asInteger(stringOrNumber) {
   return _.isNumber(stringOrNumber) ? stringOrNumber : parseInt(stringOrNumber);
