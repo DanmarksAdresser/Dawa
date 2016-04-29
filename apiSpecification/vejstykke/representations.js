@@ -93,7 +93,7 @@ exports.json = {
     },
     docOrder: ['href', 'kode', 'navn', 'adresseringsnavn', 'kommune', 'postnumre', 'historik']
   }),
-  fields: _.where(fields, {'selectable' : true}),
+  fields: representationUtil.fieldsWithoutNames(_.where(fields, {'selectable' : true}), ['geom_json']),
   mapper: function(baseUrl) {
     return function(row) {
       return {
@@ -111,8 +111,9 @@ exports.json = {
     };
   }
 };
-
-exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
+const geomJsonField = _.findWhere(fields, {name: 'geom_json'});
+exports.geojson = representationUtil.geojsonRepresentation(geomJsonField, exports.flat);
+exports.geojsonNested = representationUtil.geojsonRepresentation(geomJsonField, exports.json);
 
 var registry = require('../registry');
 registry.addMultiple('vejstykke', 'representation', module.exports);

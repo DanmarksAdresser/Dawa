@@ -4,6 +4,8 @@ var expect = require('chai').expect;
 var request = require("request-promise");
 var _       = require("underscore");
 
+/*eslint no-console: 0*/
+
 describe('GeoJSON format', function() {
   it('Kan hente adresser i GeoJSON format', function(done) {
     request.get('http://localhost:3002/adresser?format=geojson&per_side=10', function(error, response, body) {
@@ -91,6 +93,32 @@ describe('GeoJSON format', function() {
         }
       });
       done();
+    });
+  });
+
+  it('Vejstykker kan hentes i nested GeoJSON format', () => {
+    return request.get({url: 'http://localhost:3002/vejstykker?navn=Eliasgade&format=geojson&struktur=nestet', json: true}).then(result => {
+      const feature = result.features[0];
+      expect(Array.isArray(feature.properties.postnumre)).to.be.true;
+      expect(feature.geometry).to.be.an.object;
+    });
+  });
+
+  it('Adresser kan hentes i nested GeoJSON format', () => {
+    return request.get({url: 'http://localhost:3002/adresser?vejnavn=Eliasgade&format=geojson&struktur=nestet', json: true}).then(result => {
+      const feature = result.features[0];
+      console.dir(result);
+      expect(feature.properties.adgangsadresse.kommune.kommunekode).to.be.a.number;
+      expect(feature.geometry).to.be.an.object;
+    });
+  });
+
+  it('Vejstykker kan hentes med z-koordinater GeoJSON format', () => {
+    return request.get({url: 'http://localhost:3002/vejstykker?navn=Eliasgade&format=geojsonz', json: true}).then(result => {
+      console.dir(result);
+      const coords = result.features[0].geometry.coordinates;
+      console.dir(coords);
+      expect(coords[0][0]).to.have.length(3);
     });
   });
 });

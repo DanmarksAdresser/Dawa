@@ -12,7 +12,7 @@ var kvhTransformer = require('./kvhTransformer');
 
 function kvhDecorator(resourceSpec) {
   var decorated = resourceSpec.processParameters;
-  resourceSpec.processParameters = function(params) {
+  resourceSpec.processParameters = function (params) {
     if (decorated) {
       decorated(params);
     }
@@ -28,22 +28,23 @@ function kvhDecorator(resourceSpec) {
 module.exports = [
   // query
   kvhDecorator(
-  resourcesUtil.queryResourceSpec(nameAndKey, {
-      propertyFilter: parameters.propertyFilter,
-    husnrinterval: parameters.husnrinterval,
-      search: commonParameters.search,
-      crs: commonParameters.crs,
-      geomWithin: commonParameters.geomWithin,
-      dagiFilter: commonParameters.dagiFilter,
-      fuzzy: commonParameters.fuzzy,
-      kvh:   {
-        name: 'kvh',
-        type: 'string',
-        validateFun: kvhTransformer.validate
-      }
-    },
-    representations,
-    sqlModel)),
+    resourcesUtil.queryResourceSpec(nameAndKey, {
+        propertyFilter: parameters.propertyFilter,
+        husnrinterval: parameters.husnrinterval,
+        search: commonParameters.search,
+        crs: commonParameters.crs,
+        struktur: commonParameters.struktur,
+        geomWithin: commonParameters.geomWithin,
+        dagiFilter: commonParameters.dagiFilter,
+        fuzzy: commonParameters.fuzzy,
+        kvh: {
+          name: 'kvh',
+          type: 'string',
+          validateFun: kvhTransformer.validate
+        }
+      },
+      representations,
+      sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     husnrinterval: parameters.husnrinterval,
@@ -59,13 +60,16 @@ module.exports = [
   ),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,
-    {crs : commonParameters.crs },
+    {
+      crs: commonParameters.crs,
+      struktur: commonParameters.struktur
+    },
     representations,
     sqlModel)
 ];
 
 var registry = require('../registry');
 var qualifiers = ['query', 'autocomplete', 'reverseGeocoding', 'getByKey'];
-_.zip(qualifiers, module.exports).forEach(function(pair) {
+_.zip(qualifiers, module.exports).forEach(function (pair) {
   registry.add('adgangsadresse', 'resource', pair[0], pair[1]);
 });

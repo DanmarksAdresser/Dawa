@@ -14,7 +14,8 @@ exports.query = resourcesUtil.queryResourceSpec(
     propertyFilter: parameters.propertyFilter,
     search: commonParameters.search,
     geomWithin: commonParameters.geomWithin,
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    struktur: commonParameters.struktur
   },
   representations,
   sqlModel
@@ -40,7 +41,8 @@ exports.reverseGeocoding = resourcesUtil.reverseGeocodingResourceSpec(
 exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id,
   {
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    struktur: commonParameters.struktur
   },
   representations,
   sqlModel

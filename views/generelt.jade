@@ -53,7 +53,9 @@ block content
             p Derudover understøtter <em>adresser</em>, <em>adgangsadresser</em>, <em>postnumre</em>, <em>kommuner</em>, <em>regioner</em>, <em>sogne</em>, <em>politikredse</em>, <em>retskredse</em> og <em>opstillingskredse</em> også GeoJSON:
               PRE <a href="/kommuner/0101?format=geojson">#{url}/kommuner/0101?format=geojson</a>
               PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
-            p Shapefile-formatet er meget populært i GIS-kredse. Vi ville gerne have supporteret det, men DAWA's streaming af nær realtids opdaterede data passer ikke godt sammen med Shapefile-formatet. Du kan selv generer Shapefiler vha. DAWA's GeoJSON data og dit GIS-program eller ogr2ogr programmet. Du kan se eksempler på hvordan i <a href='http://digitaliser.dk/news/2558547'>AWS-gruppen på Digitaliser.dk</a>. 
+            p Vejstykker supporterer endvidere GeoJSON hvor også højdeangivelsen (z-koordinatet) er med. Hvis man ønsker dette anvendes format=geojsonz:
+              PRE <a href="/vejstykker?navn=Borgergade&format=geojsonz">#{url}/vejstykker?navn=Borgergade&format=geojsonz</a>
+            p Shapefile-formatet er meget populært i GIS-kredse. Vi ville gerne have supporteret det, men DAWA's streaming af nær realtids opdaterede data passer ikke godt sammen med Shapefile-formatet. Du kan selv generer Shapefiler vha. DAWA's GeoJSON data og dit GIS-program eller ogr2ogr programmet. Du kan se eksempler på hvordan i <a href='http://digitaliser.dk/news/2558547'>AWS-gruppen på Digitaliser.dk</a>.
 
             div.page-header
               h3.anchor-header#tidsformat Tidsformat
@@ -110,7 +112,7 @@ block content
                 li Det er ikke tilladt at fjerne noget fra API'et.
               p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper etableres en ny version, som i en periode driftes samtidig med den tidligere version. Nedlæggelse af aktuel version med information om skift til ny version varsles 1 år før.
 
-              p Det er vigtigt, at de klientprogrammer, som anvender DAWA, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det, der ofte skaber de største problemer, er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Klientprogrammer skal kunne håndterer nye name/value par i JSON. Nye kolonner i CSV. Hvis Klientprogrammerne er robuste over for det, vil de fejlfrit kunne fungere når DAWA opdateres indenfor en version.   
+              p Det er vigtigt, at de klientprogrammer, som anvender DAWA, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det, der ofte skaber de største problemer, er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Klientprogrammer skal kunne håndterer nye name/value par i JSON. Nye kolonner i CSV. Hvis Klientprogrammerne er robuste over for det, vil de fejlfrit kunne fungere når DAWA opdateres indenfor en version.
 
             div.page-header
               h3.anchor-header#kompression  Kompression
@@ -183,7 +185,7 @@ block content
             div.page-header
               h3.anchor-header#maxrequests Maksimalt antal samtidige requests</i>
 
-              p Der er en grænse på hvor mange samtidige requests til DAWA, der må foretages fra en enkel IP adresse. Grænsen er på 10 samtidige requests. Baggrunden for at sætte denne grænse er, at forhindre en enkelt anvenders brug af DAWA påvirker andre anvendere. F.eks. i form af lange svartider eller fejl i kald af servicen. 
+              p Der er en grænse på hvor mange samtidige requests til DAWA, der må foretages fra en enkel IP adresse. Grænsen er på 10 samtidige requests. Baggrunden for at sætte denne grænse er, at forhindre en enkelt anvenders brug af DAWA påvirker andre anvendere. F.eks. i form af lange svartider eller fejl i kald af servicen.
               p Hvis grænsen på 10 samtidige requests overskrides returneres responses med HTTP statuskoden 429 Too Many Requests.
 
             div.page-header
@@ -191,7 +193,7 @@ block content
               p At se på kodeeksempler er en god måde at finde ud af hvordan DAWA anvendes. Du kan finde en række kodeeksempler på
                 | <a href='https://github.com/DanmarksAdresser'> https://github.com/DanmarksAdresser</a>:
               ul
-                li <em>C# og .NET</em>. Kodeeksemplet viser hvorledes man i C# programmere enkle opslag i DAWA, samt hvordan man vha. af streaming kan modtage en større datamængde uden at modtage det som et samlet hele. Du kan finde <a href='https://github.com/DanmarksAdresser/DawaDotnetClient'>C# kodeeksemplet i vort GitHub repositorie</a>. 
+                li <em>C# og .NET</em>. Kodeeksemplet viser hvorledes man i C# programmere enkle opslag i DAWA, samt hvordan man vha. af streaming kan modtage en større datamængde uden at modtage det som et samlet hele. Du kan finde <a href='https://github.com/DanmarksAdresser/DawaDotnetClient'>C# kodeeksemplet i vort GitHub repositorie</a>.
                 li <em>JavaScript og jQuery</em>. Kodeeksemplet er en lille mobil web applikation, <a href='http://dail.aws.dk'>Danmarks adresser i lommen</a>, som viser hvorledes DAWA kan kaldes fra JavaScript ved brug af jQuery. Du kan finde <a href='https://github.com/DanmarksAdresser/DanmarksAdresserILommen'>JavaScript kodeeksemplet i vort GitHub repositorie</a>.
               p Vi planlægger at tilføje kodeeksempler i andre sprog og platforme. Hvis du vil bidrage med et kodeeksempel i dit favorit programmeringssprog, er du meget velkommen.
 

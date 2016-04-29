@@ -54,6 +54,15 @@ exports.format = [
   }
 ];
 
+exports.struktur= [
+  {
+    name: 'struktur',
+    schema: {
+      enum: ['flad', 'nestet']
+    }
+  }
+];
+
 exports.search = [
   {
     name: 'q',

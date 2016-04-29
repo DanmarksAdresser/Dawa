@@ -14,6 +14,7 @@ module.exports = [
       propertyFilter: parameters.propertyFilter,
       search: commonParameters.search,
       crs: commonParameters.crs,
+      struktur: commonParameters.struktur,
       geomWithin: commonParameters.geomWithin,
       stormodtagerFilter: parameters.stormodtagerFilter
     }, representations,
@@ -24,11 +25,18 @@ module.exports = [
     stormodtagerFilter: parameters.stormodtagerFilter
   }, representations.autocomplete, sqlModel),
   resourcesUtil.reverseGeocodingResourceSpec('/postnumre/reverse', representations, sqlModel),
-  resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {crs : commonParameters.crs }, representations, sqlModel)
+  resourcesUtil.getByKeyResourceSpec(
+    nameAndKey, parameters.id,
+    {
+      crs: commonParameters.crs,
+      struktur: commonParameters.struktur
+    },
+    representations,
+    sqlModel)
 ];
 
 var registry = require('../registry');
 var qualifiers = ['query', 'autocomplete', 'reverseGeocoding', 'getByKey'];
-_.zip(qualifiers, module.exports).forEach(function(pair) {
+_.zip(qualifiers, module.exports).forEach(function (pair) {
   registry.add('postnummer', 'resource', pair[0], pair[1]);
 });

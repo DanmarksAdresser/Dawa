@@ -212,7 +212,11 @@ _.filter(dagiTemaer, function(tema) {
       mapper: dagiTemaAutocompleteMapper()
     };
   }
-  representations.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), representations.flat);
+  const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+  representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
+  if(tema.nested) {
+    representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
+  }
   exports[tema.singular] = representations;
 
   registry.addMultiple(tema.singular, 'representation', module.exports[tema.singular]);

@@ -413,7 +413,9 @@ exports.autocomplete = {
   }
 };
 
-exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
+const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
+exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
 
 var registry = require('../registry');
 registry.addMultiple('adgangsadresse', 'representation', module.exports);

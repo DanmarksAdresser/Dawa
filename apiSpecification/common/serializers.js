@@ -103,7 +103,7 @@ function toGeoJsonUrn(srid) {
 
 function computeSeparator(formatParam, callbackParam, sridParam, prettyPrint, ndjson) {
   var sep;
-  if (formatParam === 'geojson') {
+  if (formatParam === 'geojson' || formatParam === 'geojsonz') {
     sep = geojsonFeatureSep(toGeoJsonUrn(sridParam), prettyPrint);
   } else {
     sep = jsonSep(prettyPrint, ndjson);

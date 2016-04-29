@@ -11,7 +11,7 @@ var kvhxTransformer = require('./kvhxTransformer');
 
 function kvhxDecorator(resourceSpec) {
   var decorated = resourceSpec.processParameters;
-  resourceSpec.processParameters = function(params) {
+  resourceSpec.processParameters = function (params) {
     if (decorated) {
       decorated(params);
     }
@@ -28,21 +28,22 @@ function kvhxDecorator(resourceSpec) {
 module.exports = [
   // query
   kvhxDecorator(
-  resourcesUtil.queryResourceSpec(nameAndKey, {
-      propertyFilter: parameters.propertyFilter,
-      husnrinterval: parameters.husnrinterval,
-      search: commonParameters.search,
-      crs: commonParameters.crs,
-      geomWithin: commonParameters.geomWithin,
-      dagiFilter: commonParameters.dagiFilter,
-      fuzzy: commonParameters.fuzzy,
-      kvhx:   {
-        name: 'kvhx',
-        type: 'string',
-        validateFun: kvhxTransformer.validate
-      }
-    }, representations,
-    sqlModel)),
+    resourcesUtil.queryResourceSpec(nameAndKey, {
+        propertyFilter: parameters.propertyFilter,
+        husnrinterval: parameters.husnrinterval,
+        search: commonParameters.search,
+        crs: commonParameters.crs,
+        struktur: commonParameters.struktur,
+        geomWithin: commonParameters.geomWithin,
+        dagiFilter: commonParameters.dagiFilter,
+        fuzzy: commonParameters.fuzzy,
+        kvhx: {
+          name: 'kvhx',
+          type: 'string',
+          validateFun: kvhxTransformer.validate
+        }
+      }, representations,
+      sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     husnrinterval: parameters.husnrinterval,
@@ -53,13 +54,16 @@ module.exports = [
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,
-    {crs : commonParameters.crs },
+    {
+      crs: commonParameters.crs,
+      struktur: commonParameters.struktur
+    },
     representations,
     sqlModel)
 ];
 
 var registry = require('../registry');
 var qualifiers = ['query', 'autocomplete', 'getByKey'];
-_.zip(qualifiers, module.exports).forEach(function(pair) {
+_.zip(qualifiers, module.exports).forEach(function (pair) {
   registry.add('adresse', 'resource', pair[0], pair[1]);
 });

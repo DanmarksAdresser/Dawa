@@ -73,11 +73,11 @@ function removeZCoordinate(coordinates) {
 
 
 
-exports.geojsonRepresentation = function (geomJsonField, flatRepresentation) {
+exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentation) {
   return {
-    fields: flatRepresentation.fields.concat([geomJsonField]),
+    fields: propertiesRepresentation.fields.concat([geomJsonField]),
     mapper: function (baseUrl, params, singleResult) {
-      var flatMapper = flatRepresentation.mapper(baseUrl, params, singleResult);
+      const propertiesMapper = propertiesRepresentation.mapper(baseUrl, params, singleResult);
       return function (row) {
         var result = {};
         result.type = 'Feature';
@@ -98,7 +98,7 @@ exports.geojsonRepresentation = function (geomJsonField, flatRepresentation) {
             }
           };
         }
-        result.properties = flatMapper(row);
+        result.properties = propertiesMapper(row);
         return result;
       };
     }

@@ -42,6 +42,12 @@ var formatParameters = [
   }
  ];
 
+const strukturParameter = {
+  name: 'struktur',
+  doc: 'Hvis format er geojson eller geojsonz angiver strukturparameteren om der ønskes en flad eller en nestet properties struktur.'
+}
+
+
 var pagingParameters = [{name: 'side',
                         doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt#paginering>Paginering</a>.'},
                        {name: 'per_side',
@@ -176,14 +182,14 @@ var vejstykkerDoc = {
   resources: {
     '/vejstykker/{kommunekode}/{kode}': {
       subtext: 'Opslag på enkelt vejstykke ud fra kommunekode og vejkode.',
-      parameters: vejstykkerIdParameters,
+      parameters: vejstykkerIdParameters.concat([strukturParameter]),
       nomulti: true,
       examples:  [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
                     path: ['/vejstykker/0101/316']}]},
 
     '/vejstykker': {
       subtext: 'Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.',
-      parameters: vejstykkerParameters.concat(formatAndPagingParams),
+      parameters: vejstykkerParameters.concat(formatAndPagingParams).concat([strukturParameter]),
       examples:  [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
                    query: [{name:'postnr', value:'2400'}, {name: 'q',value: 'hvid*'}]},
                   {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
@@ -193,7 +199,7 @@ var vejstykkerDoc = {
       subtext: 'Find det vejstykke, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes ' +
       'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller ' +
       'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
-      parameters: reverseGeocodingParameters,
+      parameters: reverseGeocodingParameters.concat([strukturParameter]),
       examples: [{
         description: 'Returner vejstykket nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
         query: [{name: 'x', value: '12.5851471984198'},
@@ -461,14 +467,14 @@ var adgangsadresseDoc = {
   resources: {
     '/adgangsadresser/{id}': {
       subtext: 'Modtag adresse med id.',
-      parameters: [adgangsadresseIdParameter],
+      parameters: [adgangsadresseIdParameter].concat([strukturParameter]),
       nomulti: true,
       examples:  [{description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
                    path: ['/adgangsadresser/0a3f507a-b2e6-32b8-e044-0003ba298018']}]},
 
     '/adgangsadresser':{
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
-      parameters: adgangsadresseParameters.concat(formatAndPagingParams),
+      parameters: adgangsadresseParameters.concat(formatAndPagingParams).concat([strukturParameter]),
       examples: [{description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
                   query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
                           {name: 'husnr',   value: '46'}]},
@@ -518,7 +524,7 @@ var adgangsadresseDoc = {
       subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes '+
         'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller '+
         'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
-      parameters: reverseGeocodingParameters,
+      parameters: reverseGeocodingParameters.concat([strukturParameter]),
       examples: [{description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
                   query: [{name:'x', value:'12.5851471984198'},
                           {name:'y', value:'55.6832383751223'}]},
@@ -555,7 +561,7 @@ var adresseDoc = {
   resources: {
     '/adresser': {
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
-      parameters: adresseParameters.concat(formatAndPagingParams),
+      parameters: adresseParameters.concat(formatAndPagingParams).concat([strukturParameter]),
       examples: [{description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
                   query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'}, {name: 'husnr',value: '46'}]},
                  {description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. '+
@@ -589,7 +595,7 @@ var adresseDoc = {
       ]},
     '/adresser/{id}': {
       subtext: 'Modtag adresse med id.',
-      parameters: [_.find(adresseParameters, function(p){ return p.name === 'id'; })],
+      parameters: [_.find(adresseParameters, function(p){ return p.name === 'id'; })].concat([strukturParameter]),
       nomulti: true,
       examples: [{description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
                   path: ['/adresser/0255b942-f3ac-4969-a963-d2c4ed9ab943']}]},
@@ -631,7 +637,7 @@ var postnummerDoc = {
   resources: {
     '/postnumre': {
       subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
-      parameters: postnummerParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('postnumre')),
+      parameters: postnummerParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('postnumre')).concat([strukturParameter]),
       examples: [{description: 'Hent alle postnumre', query: []},
                  {description: 'Find postnummer <em>8600</em>',
                   query: [{ name: 'nr', value: "8600"}]},
@@ -646,7 +652,7 @@ var postnummerDoc = {
 
     '/postnumre/{nr}': {
       subtext: 'Modtag postnummer med id.',
-      parameters: [postnummerIdParameter],
+      parameters: [postnummerIdParameter].concat([strukturParameter]),
       nomulti: true,
       examples: [{description: 'Hent postnummer for København NV',
                   path: ['/postnumre/2400']}]},
@@ -658,7 +664,7 @@ var postnummerDoc = {
                   query: [{name:'q', value:'strand'}]}]},
     '/postnumre/reverse': {
       subtext: 'Modtage postnummeret for det punkt der angives med x- og y-parametrene',
-      parameters: reverseGeocodingParameters,
+      parameters: reverseGeocodingParameters.concat([strukturParameter]),
       nomulti: true,
       examples: [
         {
@@ -777,7 +783,7 @@ var jordstykkeDoc = {
   resources: {
     '/jordstykker': {
       subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
-      parameters: jordstykkeParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('jordstykker')),
+      parameters: jordstykkeParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('jordstykker')).concat([strukturParameter]),
       examples: [{description: 'Hent alle jordstykker', query: []},
         {description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
           query: [{ name: 'ejerlavkode', value: "80652"}]},
@@ -786,13 +792,13 @@ var jordstykkeDoc = {
 
     '/jordstykker/{ejerlavkode}/{matrikelnr}': {
       subtext: 'Modtag jordstykket med den angivne ejerlavkode og matrikelnr',
-      parameters: jordstykkeIdParameters,
+      parameters: jordstykkeIdParameters.concat([strukturParameter]),
       nomulti: true,
       examples: [{description: 'Hent jordstykket med ejerlavkode <em>100453</em> og matriklenr <em>8bd</em>',
         path: ['/jordstykker/100453/8bd']}]},
     '/jordstykker/reverse':  {
       subtext: 'Modtage jordstykket for det punkt der angives med x- og y-parametrene',
-      parameters: reverseGeocodingParameters,
+      parameters: reverseGeocodingParameters.concat([strukturParameter]),
       nomulti: true,
       examples: [
         {
