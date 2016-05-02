@@ -26,7 +26,12 @@ CREATE TABLE  adgangsadresser (
   esdhReference text,
   journalnummer text,
   geom  geometry(point, 25832),
-  tsv tsvector
+  tsv tsvector,
+  hoejde double precision NULL,
+  -- the coordinates we used when we looked up the height
+  z_x double precision null,
+  z_y double precision null,
+  disableheightlookup timestamptz
 );
 
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
@@ -40,6 +45,14 @@ CREATE INDEX ON adgangsadresser(esrejendomsnr);
 CREATE INDEX ON adgangsadresser(objekttype);
 CREATE INDEX ON adgangsadresser USING gin(tsv);
 CREATE INDEX ON adgangsadresser(noejagtighed, id);
+
+-- Index for lookup of adgangsadresser where we need to fetch the height
+CREATE INDEX ON adgangsadresser (id)
+  WHERE etrs89oest IS NOT NULL AND
+        etrs89nord IS NOT NULL AND
+        (z_x IS NULL OR z_y IS NULL OR
+         z_x <> etrs89oest OR z_y <> etrs89nord);
+
 
 
 DROP TABLE IF EXISTS adgangsadresser_history CASCADE;
@@ -71,7 +84,8 @@ CREATE TABLE adgangsadresser_history(
   tekstretning float4 NULL,
   adressepunktaendringsdato timestamp NULL,
   esdhReference text,
-  journalnummer text
+  journalnummer text,
+  hoejde double precision NULL
 );
 
 CREATE INDEX ON adgangsadresser_history(valid_to);

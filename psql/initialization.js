@@ -9,8 +9,8 @@ var q = require('q');
 var _ = require('underscore');
 
 var datamodels = require('../crud/datamodel');
-const generateSqlSchemaImpl = require('../dar10/generateSqlSchemaImpl');
-const generateViews = require('../dar10/generateViews');
+//const generateSqlSchemaImpl = require('../dar10/generateSqlSchemaImpl');
+//const generateViews = require('../dar10/generateViews');
 var sqlCommon = require('./common');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
@@ -43,11 +43,11 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'ejerlav_ts'},
   {name: 'cpr_vej', init: false},
   {name: 'cpr_postnr', init: false},
-  {name: 'dar1_transaction', init: false},
-  {name: 'dar1_changelog', init: false},
-  {name: 'dar1_vejstykker_view', type: 'view'},
-  {name: 'dar1_adgangsadresser_view', type: 'view'},
-  {name: 'dar1_enhedsadresser_view', type: 'view'},
+  // {name: 'dar1_transaction', init: false},
+  // {name: 'dar1_changelog', init: false},
+  // {name: 'dar1_vejstykker_view', type: 'view'},
+  // {name: 'dar1_adgangsadresser_view', type: 'view'},
+  // {name: 'dar1_enhedsadresser_view', type: 'view'},
   {name: 'dar_transaction', init: false},
   {name: 'dar_lastfetched', init: false },
   {name: 'dar_adgangspunkt', init: false},
@@ -125,7 +125,7 @@ exports.loadTables = function(client, scriptDir) {
         yield psqlScriptQ(client, path.join(scriptDir, 'tables'), spec.scriptFile);
       }
     }
-    yield client.queryp(generateSqlSchemaImpl());
+    // yield client.queryp(generateSqlSchemaImpl());
   })();
 };
 
@@ -201,7 +201,7 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
   return q.async(function*() {
     console.log('loading database functions from ' + scriptDir);
     yield psqlScriptQ(client, scriptDir, 'misc.sql');
-    yield client.queryp(generateViews());
+//    yield client.queryp(generateViews());
     for(let spec of exports.tableSpecs) {
       var scriptPath = path.join(scriptDir, spec.scriptFile);
       if( fs.existsSync(scriptPath)) {

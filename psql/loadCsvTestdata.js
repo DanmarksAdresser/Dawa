@@ -63,6 +63,12 @@ module.exports = function (client, dataDir) {
       `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
          WHERE v.kommunekode = g.kommunekode AND v.kode = g.kode`);
 
+    yield client.queryp('CREATE TEMP TABLE hoejder AS (select id, z_x, z_y, hoejde FROM adgangsadresser WHERE false)');
+    yield copyCsvToTable(client,
+      'hoejder',
+      path.resolve(path.join(dataDir, 'hoejder.csv')),
+      ['id', 'z_x', 'z_y', 'hoejde']);
+    yield client.queryp('UPDATE adgangsadresser a SET z_x = h.z_x, z_y = h.z_y, hoejde = h.hoejde FROM hoejder h WHERE a.id = h.id');
     yield initialization.initializeHistory(client);
     yield initialization.initializeTables(client);
     yield sqlCommon.enableTriggersQ(client);

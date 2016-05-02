@@ -4,7 +4,7 @@ const q = require('q');
 const _ = require('underscore');
 
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
-const importVejmidterImpl = require('./importVejmidterImpl');
+const importAdresseHeightsImpl = require('./importAdresseHeightsImpl');
 const proddb = require('../psql/proddb');
 
 const optionSpec = {
@@ -22,7 +22,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
 
   proddb.withTransaction('READ_WRITE', client => {
     return q.async(function*() {
-      yield importVejmidterImpl.importVejmidter(client, options.file, 'vejstykker', options.initial);
+      yield importAdresseHeightsImpl.importHeights(client, options.file, options.initial);
     })();
   });
 });

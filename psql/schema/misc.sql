@@ -47,16 +47,16 @@ CREATE OR REPLACE FUNCTION utc_trunc_date(timestamptz) RETURNS timestamptz AS $$
 select date_trunc('day', $1 at time zone 'europe/copenhagen') at time zone 'utc';
 $$ language sql;
 
-CREATE OR REPLACE FUNCTION dar1_status_til_kode(dar1_status)
-  RETURNS SMALLINT AS $$
-SELECT CASE $1
-       WHEN 'Gældende'
-         THEN 1::smallint
-       WHEN 'Nedlagt'
-         THEN 2::smallint
-       WHEN 'Foreløbig'
-         THEN 3::smallint
-       WHEN 'Henlagt'
-         THEN 4::smallint
-       END;
-$$ LANGUAGE SQL;
+-- CREATE OR REPLACE FUNCTION dar1_status_til_kode(dar1_status)
+--   RETURNS SMALLINT AS $$
+-- SELECT CASE $1
+--        WHEN 'Gældende'
+--          THEN 1::smallint
+--        WHEN 'Nedlagt'
+--          THEN 2::smallint
+--        WHEN 'Foreløbig'
+--          THEN 3::smallint
+--        WHEN 'Henlagt'
+--          THEN 4::smallint
+--        END;
+-- $$ LANGUAGE SQL;
