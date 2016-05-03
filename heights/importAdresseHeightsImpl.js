@@ -25,7 +25,7 @@ const CSV_PARSE_OPTIONS = {
 
 function streamToTempTable(client, filePath, tableName) {
   return q.async(function*() {
-    yield client.queryp(`CREATE TABLE ${tableName} (
+    yield client.queryp(`CREATE TEMP TABLE ${tableName} (
     id uuid NOT NULL PRIMARY KEY,
     x double precision NOT NULL,
     y double precision NOT NULL,
@@ -54,12 +54,12 @@ function importHeights(client, filePath, initial) {
       yield sqlCommon.disableTriggersQ(client);
     }
     yield client.queryp(
-      `UPDATE adgangsadresser a SET hoejde = h.z 
+      `UPDATE adgangsadresser a SET hoejde = h.z, z_x = h.x, z_y = h.y
       FROM heights h
       WHERE h.id = a.id AND h.x = a.etrs89oest AND h.y = etrs89nord`);
     if (initial) {
       yield client.queryp(
-        `UPDATE adgangsadresser_history a SET hoejde = h.z 
+        `UPDATE adgangsadresser_history a SET hoejde = h.z
       FROM heights h
       WHERE h.id = a.id AND h.x = a.etrs89oest AND h.y = etrs89nord AND a.valid_to IS NULL`);
       yield sqlCommon.enableTriggersQ(client);
