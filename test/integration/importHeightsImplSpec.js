@@ -11,7 +11,7 @@ var testdb = require('../helpers/testdb');
 const importFromApi = importAdresseHeightsImpl.importFromApi;
 const importHeights = importAdresseHeightsImpl.importHeights;
 
-const successMockClient = () => q.resolve(4.2);
+const successMockClient = () => q.resolve(4.22);
 const failMockClient = () => q.reject('someError');
 
 const FIRST_ADDRESS_WITHOUT_HEIGHT = '0a3f5089-792a-32b8-e044-0003ba298018';
@@ -44,9 +44,9 @@ describe('Import from CSV', () => {
   testdb.withTransactionEach('test', clientFn => {
     it('Can perform initial import of højde', q.async(function*() {
       const CSV_POINTS = {
-        '0a3f5089-792a-32b8-e044-0003ba298018': 2.82648,
-        '0a3f5089-792c-32b8-e044-0003ba298018': 2.8082
-      }
+        '0a3f5089-792a-32b8-e044-0003ba298018': 2.8,
+        '0a3f5089-792c-32b8-e044-0003ba298018': 2.8
+      };
       yield importHeights(clientFn(), path.join(__dirname, 'hoejder.csv'), true);
       const result = (yield clientFn().queryp(`select id, etrs89oest, etrs89nord, z_x, z_y, hoejde from adgangsadresser where id in ('${Object.keys(CSV_POINTS).join("', '")}')`)).rows;
       expect(result).to.have.length(2);

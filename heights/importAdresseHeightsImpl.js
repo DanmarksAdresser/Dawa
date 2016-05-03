@@ -22,6 +22,9 @@ const CSV_PARSE_OPTIONS = {
   columns: true
 };
 
+function roundHeight(height) {
+  return Math.round(height * 10) / 10;
+}
 
 function streamToTempTable(client, filePath, tableName) {
   return q.async(function*() {
@@ -37,7 +40,7 @@ function streamToTempTable(client, filePath, tableName) {
         id: csvRow.id,
         x: parseFloat(csvRow.x),
         y: parseFloat(csvRow.y),
-        z: parseFloat(csvRow.interpolz)
+        z: roundHeight(parseFloat(csvRow.interpolz))
       };
     });
     const stringifier = importUtil.copyStreamStringifier(COLUMNS);
@@ -110,7 +113,7 @@ function importFromApi(client, apiClient) {
       const x = row.x;
       const y = row.y;
       try {
-        const z = yield apiClient(x, y);
+        const z = roundHeight(yield apiClient(x, y));
         yield client.queryp(
           'UPDATE adgangsadresser SET z_x = $1, z_y = $2, hoejde=$3 WHERE id=$4',
           [x, y, z, id]);
