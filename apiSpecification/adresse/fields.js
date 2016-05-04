@@ -144,6 +144,9 @@ var fields = [
   {
     name: 'kvh',
     selectable: false
+  },
+  {
+    name: 'højde'
   }
 ];
 

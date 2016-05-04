@@ -12,6 +12,7 @@ CREATE VIEW AdgangsadresserView AS
     A.aendret  AS a_aendret,
     A.etrs89oest::double precision AS oest,
     A.etrs89nord::double precision AS nord,
+    A.hoejde,
     A.geom       AS geom,
     A.noejagtighed,
     A.adgangspunktkilde AS kilde,

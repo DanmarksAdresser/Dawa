@@ -24,39 +24,30 @@ function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) 
 
 // Get the response of a resource as a string
 exports.getStringResponse = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  getResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, res) {
-    if(err) {
-      return callback(err);
-    }
+  return q.async(function*() {
+    const res = yield getResponse(dbClient, resourceSpec, pathParams, queryParams);
     if(res.status !== 200) {
-      return callback(new Error('Unexpected status code: ' + res.status));
+      throw new Error('Unexpected status code: ' + res.status);
     }
-    callback(null, res.body);
-  });
+    return res.body;
+  })().nodeify(callback);
 };
 
 // Get the response of a resource as JSON
 exports.getJson = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  return q.nfcall(exports.getStringResponse, dbClient, resourceSpec, pathParams, queryParams)
-    .then(function(str) {
-      return JSON.parse(str);
-    }).nodeify(callback);
+  return q.async(function*() {
+    const str = yield exports.getStringResponse( dbClient, resourceSpec, pathParams, queryParams);
+    return JSON.parse(str);
+  })().nodeify(callback);
 };
 
 // get the response of a resource and parse as CSV
 exports.getCsv = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  queryParams.format = 'csv';
-  exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams, function(err, str) {
-    if(err) {
-      return callback(err);
-    }
-    csvParse(str, {columns: true}, function(err, result) {
-      if(err) {
-        return callback(err);
-      }
-      callback(err, result);
-    });
-  });
+  return q.async(function*() {
+    queryParams.format = 'csv';
+    const str = yield exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams);
+    return yield q.nfcall(csvParse, str, {columns: true});
+  })().nodeify(callback);
 };
 
 function jsFieldToCsv(field) {

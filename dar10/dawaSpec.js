@@ -17,7 +17,7 @@ module.exports = {
   },
   vejstykke: {
     table: datamodels.vejstykke.table,
-    columns: _.without(datamodels.vejstykke.columns, 'oprettet', 'aendret'),
+    columns: _.without(datamodels.vejstykke.columns, 'oprettet', 'aendret', 'geom'),
     idColumns: datamodels.vejstykke.key
   }
 };

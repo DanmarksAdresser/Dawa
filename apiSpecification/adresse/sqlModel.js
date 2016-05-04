@@ -45,6 +45,9 @@ var columns = {
   etrs89koordinat_nord: {
     column: 'nord'
   },
+  højde: {
+    column: 'hoejde'
+  },
   wgs84koordinat_bredde: adgangsadresseColumns.wgs84koordinat_bredde,
   wgs84koordinat_længde: adgangsadresseColumns.wgs84koordinat_længde,
   nøjagtighed: {

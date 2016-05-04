@@ -4,10 +4,14 @@ var columnMappings = require('./../columnMappings').columnMappings;
 var _ = require('underscore');
 var globalSchemaObject = require('../../commonSchemaDefinitionsUtil').globalSchemaObject;
 var normalizedFieldSchemas = require('../normalizedFieldSchemas');
+const fieldsMap = require('./fields');
+const representationUtil = require('../../common/representationUtil');
 
 var datamodelNames = Object.keys(columnMappings);
 
 _.each(datamodelNames, function(datamodelName) {
+  const fields = fieldsMap[datamodelName];
+
   var schema = globalSchemaObject({
     title: datamodelName + "hændelse",
     properties: {
@@ -50,7 +54,8 @@ _.each(datamodelNames, function(datamodelName) {
       mapper: function(baseUrl, params) {
         return jsonMapper;
       }
-    }
+    },
+    flat: representationUtil.defaultFlatRepresentation(fields)
   };
 });
 

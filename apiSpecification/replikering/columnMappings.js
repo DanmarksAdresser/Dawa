@@ -87,6 +87,9 @@ exports.columnMappings = {
     name: 'etrs89koordinat_nord',
     column: 'etrs89nord'
   }, {
+    name: 'højde',
+    column: 'hoejde'
+  }, {
     name: 'nøjagtighed',
     column: 'noejagtighed'
   }, {

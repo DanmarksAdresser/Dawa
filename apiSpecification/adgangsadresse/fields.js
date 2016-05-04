@@ -88,6 +88,7 @@ var fields = [
   {
     name: 'jordstykke_ejerlavnavn'
   },
+  normalizedField('højde'),
   {
     name: 'temaer',
     multi: true

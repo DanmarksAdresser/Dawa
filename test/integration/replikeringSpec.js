@@ -5,7 +5,7 @@
 // Ved opdateringen ændres samtlige felter.
 
 var expect = require('chai').expect;
-var Q = require('q');
+const q = require('q');
 var _ = require('underscore');
 
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
@@ -51,6 +51,7 @@ var insert = {
     "esrejendomsnr": 35466,
     "etrs89koordinat_øst": 542187.19,
     "etrs89koordinat_nord": 6155336.05,
+    højde: 4.2,
     "nøjagtighed": "A",
     "kilde": 5,
     "husnummerkilde": null,
@@ -109,6 +110,7 @@ var update = {
     "esrejendomsnr": 12345,
     "etrs89koordinat_øst": 542100.00,
     "etrs89koordinat_nord": 6155300.00,
+    højde: 2.4,
     "nøjagtighed": "B",
     "kilde": 4,
     "husnummerkilde": null,
@@ -180,7 +182,12 @@ var ENTITY_NAMES = ['adresse','adgangsadresse','vejstykke','postnummer','ejerlav
 
 
 function formatJson(columnMapping, obj) {
+  console.log('FORMAT JSON');
+  console.dir(columnMapping);
+  console.dir(obj);
   return _.reduce(obj, function(memo, value, key) {
+    /* eslint no-console: 0 */
+    console.log('key: ' + key);
     var formatFn = _.findWhere(columnMapping, { name: key}).formatter || _.identity;
     memo[key] = formatFn(value);
     return memo;
@@ -197,10 +204,10 @@ describe('ReplikeringsAPI', function() {
         var datamodel = datamodels[datamodelName];
         var objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
         var objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
-        Q.nfcall(crud.create, client, datamodel, objectToInsert).then(function() {
-          return Q.nfcall(crud.update, client, datamodel, objectToUpdate);
+        q.nfcall(crud.create, client, datamodel, objectToInsert).then(function() {
+          return q.nfcall(crud.update, client, datamodel, objectToUpdate);
         }).then(function() {
-          return Q.nfcall(crud.delete, client, datamodel, crud.getKey(datamodel, objectToUpdate));
+          return q.nfcall(crud.delete, client, datamodel, crud.getKey(datamodel, objectToUpdate));
         }).then(function() {
           done();
         }, function(err) {
@@ -225,15 +232,13 @@ describe('ReplikeringsAPI', function() {
             done();
           });
         });
-        it('Should include the updated object in the full extract', function(done) {
+        it('Should include the updated object in the full extract', q.async(function*() {
           var sekvensnummer = (index * 3) + 2;
-          helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-            expect(objects.length).to.equal(1);
-            var obj = objects[0];
-            expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
-            done();
-          });
-        });
+          const objects = yield helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer});
+          expect(objects).to.have.length(1);
+          var obj = objects[0];
+          expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
+        }));
         it('Should not include the deleted object in the full extract', function(done) {
           var sekvensnummer = (index * 3) + 3;
           helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {

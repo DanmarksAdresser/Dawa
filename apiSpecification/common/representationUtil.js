@@ -127,6 +127,8 @@ exports.adresseFlatRepresentation = function (fields, additionalFieldsMapper) {
 
   outputFlatFields = outputFlatFields.concat(['jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr']);
 
+  // vi skal sikre, at nye felter tilføjes til sidst
+
   var defaultFlatMapper = exports.defaultFlatMapper(defaultFlatFields);
 
   return {
