@@ -115,10 +115,20 @@ describe('GeoJSON format', function() {
 
   it('Vejstykker kan hentes med z-koordinater GeoJSON format', () => {
     return request.get({url: 'http://localhost:3002/vejstykker?navn=Eliasgade&format=geojsonz', json: true}).then(result => {
-      console.dir(result);
       const coords = result.features[0].geometry.coordinates;
-      console.dir(coords);
       expect(coords[0][0]).to.have.length(3);
+    });
+  });
+  it('Adgangsadresser kan hentes med z-koordinater GeoJSON format', () => {
+    return request.get({url: 'http://localhost:3002/adgangsadresser?id=0a3f507c-f9a0-32b8-e044-0003ba298018&format=geojsonz', json: true}).then(result => {
+      const coords = result.features[0].geometry.coordinates;
+      expect(coords).to.have.length(3);
+    });
+  });
+  it('Adresser kan hentes med z-koordinater GeoJSON format', () => {
+    return request.get({url: 'http://localhost:3002/adresser?id=0a3f50a3-885d-32b8-e044-0003ba298018&format=geojsonz', json: true}).then(result => {
+      const coords = result.features[0].geometry.coordinates;
+      expect(coords).to.have.length(3);
     });
   });
 });

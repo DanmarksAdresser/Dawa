@@ -61,6 +61,10 @@ function importHeights(client, filePath, initial) {
       FROM heights h
       WHERE h.id = a.id AND h.x = a.etrs89oest AND h.y = etrs89nord`);
     if (initial) {
+      yield client.queryp(
+        `UPDATE adgangsadresser_history a SET hoejde = h.z
+      FROM heights h
+      WHERE h.id = a.id AND h.x = a.etrs89oest AND h.y = etrs89nord AND a.valid_to IS NULL`);
       yield sqlCommon.enableTriggersQ(client);
     }
     yield importUtil.dropTable(client, tempTable);

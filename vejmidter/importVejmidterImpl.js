@@ -90,11 +90,6 @@ function importVejmidter(client, filePath, table, initial) {
        FROM ${desiredTable} 
       WHERE ${sqlUtil.columnsEqualClause(desiredTable, table, ID_COLUMNS)}`);
       // initialize history table
-      yield client.queryp(
-        `UPDATE ${table}_history
-         SET geom = ${table}.geom 
-         FROM ${table} 
-         WHERE valid_to IS NULL AND ${sqlUtil.columnsEqualClause(table, table + "_history", ID_COLUMNS)}`);
       yield sqlCommon.enableTriggersQ(client);
     }
     else {
