@@ -37,6 +37,10 @@ module.exports = {
     keyFieldNames: ['valglandsdelsbogstav'],
     filterable: true
   },
+  storkreds: {
+    keyFieldNames: ['storkredsnummer'],
+    filterable: true
+  },
   jordstykke: {
     keyFieldNames: ['ejerlavkode', 'matrikelnr'],
     filterable: false

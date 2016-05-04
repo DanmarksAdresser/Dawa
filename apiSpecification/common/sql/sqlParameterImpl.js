@@ -232,7 +232,7 @@ function polygonTransformer(paramValue){
   return mapPolygon(paramValue);
 }
 
-// Generates WHERE clauses for whether the queried object is inside a given geometric shape
+// Generates WHERE clauses for whether the queried object intersects a given geometric shape
 // Supported shapes are a poloygon or a circle.
 exports.geomWithin = function(geom) {
   geom = geom || 'geom';

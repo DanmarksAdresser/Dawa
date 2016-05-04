@@ -35,19 +35,40 @@ function loadTemaer(client, dataDir) {
   })();
 }
 
-module.exports = function(client, dataDir) {
+module.exports = function (client, dataDir) {
   return q.async(function*() {
 
     // we need triggers to be enabled when loading temaer
     yield loadTemaer(client, dataDir);
 
     yield sqlCommon.disableTriggersQ(client);
-    for(let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
+    for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
       const file = path.resolve(path.join(dataDir, `${table}.csv`));
-      const  columns = getColumnsFromCsv(file);
+      const columns = getColumnsFromCsv(file);
       yield copyCsvToTable(client, table, file, columns);
     }
+
+    yield client.queryp(`CREATE TEMP TABLE vejstykker_geom (
+  kommunekode integer NOT NULL,
+  kode integer NOT NULL,
+  geom  geometry(MULTILINESTRINGZ, 25832),
+  PRIMARY KEY(kommunekode, kode)
+);`);
+    yield copyCsvToTable(client,
+      'vejstykker_geom',
+      path.resolve(path.join(dataDir, 'vejstykker_geom.csv')),
+      ['kommunekode', 'kode', 'geom']);
     yield importDarImpl.fullCompareAndUpdate(client, true);
+    yield client.queryp(
+      `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
+         WHERE v.kommunekode = g.kommunekode AND v.kode = g.kode`);
+
+    yield client.queryp('CREATE TEMP TABLE hoejder AS (select id, z_x, z_y, hoejde FROM adgangsadresser WHERE false)');
+    yield copyCsvToTable(client,
+      'hoejder',
+      path.resolve(path.join(dataDir, 'hoejder.csv')),
+      ['id', 'z_x', 'z_y', 'hoejde']);
+    yield client.queryp('UPDATE adgangsadresser a SET z_x = h.z_x, z_y = h.z_y, hoejde = h.hoejde FROM hoejder h WHERE a.id = h.id');
     yield initialization.initializeHistory(client);
     yield initialization.initializeTables(client);
     yield sqlCommon.enableTriggersQ(client);

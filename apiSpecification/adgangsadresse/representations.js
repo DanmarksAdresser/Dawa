@@ -49,6 +49,10 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
+const FIELDS_AT_END = ['højde'];
+exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
+
+
 exports.json = {
   fields: _.where(fields, {selectable: true}),
   schema: globalSchemaObject({
@@ -110,13 +114,14 @@ exports.json = {
             description: 'Adgangspunktets koordinater som array [x,y].',
             $ref: '#/definitions/NullableGeoJsonCoordinates'
           },
+          højde: normalizedFieldSchema('højde'),
           nøjagtighed: normalizedFieldSchema('nøjagtighed'),
           kilde: normalizedFieldSchema('kilde'),
           tekniskstandard: normalizedFieldSchema('tekniskstandard'),
           tekstretning: normalizedFieldSchema('tekstretning'),
           ændret: normalizedFieldSchema('adressepunktændringsdato')
         },
-        docOrder: ['koordinater','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
+        docOrder: ['koordinater', 'højde','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
       }),
       'DDKN': schemaObject({
         nullable: true,
@@ -256,6 +261,7 @@ exports.json = {
         adr.stormodtagerpostnummer = null;
       }
       adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, baseUrl);
+      const coordinater = rs.geom_json ? JSON.parse(rs.geom_json).coordinates : null;
       if(rs.ejerlavkode) {
         adr.ejerlav = {
           kode: rs.ejerlavkode,
@@ -272,7 +278,9 @@ exports.json = {
         ændret: d(rs.ændret)
       };
       adr.adgangspunkt = {
-        koordinater: rs.geom_json ? JSON.parse(rs.geom_json).coordinates : null,
+        // af legacy årsager returnerer vi kun x,y koordinater
+        koordinater: coordinater ? [coordinater[0], coordinater[1]] : null,
+        højde: rs.højde,
         nøjagtighed: maybeNull(rs.nøjagtighed),
         kilde: maybeNull(rs.kilde),
         tekniskstandard: maybeNull(rs.tekniskstandard),
@@ -413,7 +421,9 @@ exports.autocomplete = {
   }
 };
 
-exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
+const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
+exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
 
 var registry = require('../registry');
 registry.addMultiple('adgangsadresse', 'representation', module.exports);

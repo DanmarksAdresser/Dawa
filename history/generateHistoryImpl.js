@@ -172,6 +172,7 @@ WHERE navn IS NOT NULL and navn <> '' and adresseringsnavn IS NOT NULL AND vejko
 GROUP BY kommunekode, vejkode;`;
     const intervalStream = yield dbapi.streamRaw(client, intervalSql, []);
     const columns = ['kommunekode', 'vejkode', 'navn', 'adresseringsnavn', 'virkning'];
+
     yield promisingStreamCombiner([
       intervalStream,
       new ExtendVejnavnTransformer(),

@@ -6,5 +6,6 @@ CREATE OR REPLACE VIEW wms_adgangsadresser AS
     id,
     formatHusnr(husnr) as husnr,
     round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "tekstretninggrader",
+    objekttype as status,
     geom
   FROM adgangsadresser;

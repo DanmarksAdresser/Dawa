@@ -220,6 +220,11 @@ var fields = {
       name: 'journalnummer',
       description: 'Journalnummer.',
       schema: definitions.Nullablejournalnummer
+    },
+    {
+      name: 'højde',
+      description: 'Adgangspunktets højde over jorden i angivet i meter (DVR90).',
+      schema: definitions.NullableNumber
     }
   ],
   adresse: [

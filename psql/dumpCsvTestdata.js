@@ -58,6 +58,14 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) =>
       yield client.queryp(`COPY (SELECT cpr_vej.* FROM cpr_vej NATURAL JOIN dar_vejnavn_subset ORDER BY kommunekode, vejkode, virkning) TO '${cprVejTargetFile}' ${copyOptions}`);
       const cprPostnrTargetFile = path.join(targetDir, 'cpr_postnr.csv');
       yield client.queryp(`COPY (SELECT cpr_postnr.* FROM cpr_postnr NATURAL JOIN dar_vejnavn_subset ORDER BY kommunekode, vejkode, virkning) TO '${cprPostnrTargetFile}' ${copyOptions}`);
+
+      const vejstykkerGeomTargetFile = path.join(targetDir, 'vejstykker_geom.csv');
+      yield client.queryp(
+        `COPY (SELECT distinct v.kommunekode, v.kode, v.geom 
+        FROM vejstykker  v
+         JOIN dar_vejnavn_subset s ON v.kommunekode = s.kommunekode AND v.kode = s.vejkode
+        ORDER BY v.kommunekode, v.kode) TO '${vejstykkerGeomTargetFile}' ${copyOptions}`);
+
     })();
   }).done();
 });

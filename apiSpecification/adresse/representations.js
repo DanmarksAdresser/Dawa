@@ -39,8 +39,10 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
 
 // this should probably be refactored, so we explicitly control the order of fields, but for now we
 // just move kvh to the end.
-exports.flat.outputFields= _.without(exports.flat.outputFields, 'kvh');
-exports.flat.outputFields.push('kvh');
+
+const FIELDS_AT_END = ['kvh', 'højde'];
+exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
+
 
 
 var adresseDefinitions = _.clone(definitions);
@@ -207,7 +209,9 @@ exports.autocomplete = {
   }
 };
 
-exports.geojson = representationUtil.geojsonRepresentation(_.findWhere(fields, {name: 'geom_json'}), exports.flat);
+const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
+exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
 
 var registry = require('../registry');
 registry.addMultiple('adresse', 'representation', module.exports);

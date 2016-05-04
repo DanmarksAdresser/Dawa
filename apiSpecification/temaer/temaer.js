@@ -147,6 +147,7 @@ module.exports = [
     }],
     published: true,
     searchable: false,
-    materialized: true
+    materialized: true,
+    nested: true
   }
 ];

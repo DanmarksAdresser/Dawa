@@ -1,5 +1,7 @@
 "use strict";
 
+const q = require('q');
+
 var setupDatabase = require('../../psql/setupDatabase');
 
 var transactions = require('../../psql/transactions');
@@ -24,11 +26,19 @@ function withTransactionX(dbname, transactionFn, beforeFn, afterFn) {
       tx = _tx;
     });
   });
+  let err = null;
   transactionFn(function() {
     return tx.client;
+  }, function abortTransaction(_err) {
+    err = _err;
   });
   afterFn(function() {
-    return transactions.endTransaction(tx);
+    return transactions.endTransaction(tx, err).catch(_err => {
+      if(!err) {
+        // unexpected error when ending transaction
+        return q.reject(_err);
+      }
+    });
   });
 }
 

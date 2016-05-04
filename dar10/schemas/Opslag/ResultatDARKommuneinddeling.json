@@ -1,0 +1,99 @@
+{
+  "description": "Resultat schema",
+  "definitions": {
+    "DARKommuneinddeling": {
+      "description": "DARKommuneinddeling schema",
+      "type": "object",
+      "properties": {
+        "eventid": {
+          "type": "integer"
+        },
+        "rowkey": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+        },
+        "registreringfra": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "registreringtil": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "virkningfra": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "virkningtil": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "status": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kommuneinddeling": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "kommunekode": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "navn": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "eventid",
+        "rowkey",
+        "id",
+        "registreringfra",
+        "registreringtil",
+        "virkningfra",
+        "virkningtil",
+        "status",
+        "kommuneinddeling",
+        "kommunekode",
+        "navn"
+      ]
+    }
+  },
+  "type": "object",
+  "properties": {
+    "records": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/DARKommuneinddeling"
+      }
+    },
+    "restindeks": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "records",
+    "restindeks"
+  ]
+}

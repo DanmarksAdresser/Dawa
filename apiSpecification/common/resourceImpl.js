@@ -233,8 +233,10 @@ function resourceResponse(client, resourceSpec, req) {
 
     var formatParam = params.format;
 
+    const strukturParam = params.struktur;
+
     // choose the right representation based on the format requested by client
-    var representation = resourceSpec.chooseRepresentation(formatParam, resourceSpec.representations);
+    var representation = resourceSpec.chooseRepresentation(formatParam, strukturParam, resourceSpec.representations);
     if(_.isUndefined(representation) || _.isNull(representation)){
       return queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
     }

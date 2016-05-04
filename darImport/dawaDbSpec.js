@@ -15,7 +15,7 @@ module.exports = {
   adgangsadresse: {
     temporality: 'nontemporal',
     table: datamodels.adgangsadresse.table,
-    columns:  _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr'),
+    columns:  _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'hoejde'),
     idColumns: datamodels.adgangsadresse.key
   },
   vejstykke: {

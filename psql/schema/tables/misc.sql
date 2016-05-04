@@ -40,6 +40,29 @@ CREATE TYPE husnr_range AS RANGE (
   subtype = husnr
 );
 
+DROP TYPE IF EXISTS dar1_entity CASCADE;
+CREATE TYPE dar1_entity AS
+ENUM (
+  'Adresse'
+);
+
+DROP TYPE IF EXISTS dar1_status CASCADE;
+CREATE TYPE dar1_status AS
+ENUM (
+  'Intern forberedelse',
+  'Foreløbig',
+  'Gældende',
+  'Nedlagt',
+  'Henlagt',
+  'Slettet',
+  'Ikke i brug',
+  'I brug',
+  'Udgået'
+);
+
+DROP TYPE IF EXISTS dar_tx_source CASCADE;
+CREATE TYPE dar_tx_source AS ENUM('csv', 'api');
+
 DROP   TEXT SEARCH CONFIGURATION IF EXISTS adresser;
 CREATE TEXT SEARCH CONFIGURATION adresser (copy=simple);
 ALTER  TEXT SEARCH CONFIGURATION adresser ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword WITH simple;

@@ -24,6 +24,9 @@ module.exports =  {
   wgs84koordinat_længde: {
     column: 'ST_X(ST_Transform(geom, 4326))'
   },
+  højde: {
+    column: 'hoejde'
+  },
   nøjagtighed: {
     column: 'noejagtighed'
   },
@@ -33,7 +36,10 @@ module.exports =  {
   geom_json: {
     select: function(sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
+      return `CASE WHEN hoejde IS NULL 
+      THEN ST_AsGeoJSON(ST_Transform(geom, ${sridAlias}))
+      ELSE ST_AsGeoJSON(ST_Transform(ST_SetSRID(st_makepoint(st_x(geom), st_y(geom), hoejde), 25832), ${sridAlias}))
+      END`;
     }
   },
   oprettet: {

@@ -25,13 +25,27 @@ exports.applyDefaultPagingForAutocomplete = function(params) {
   }
 };
 
-exports.chooseRepresentationForQuery = function (formatParam, representations) {
-  var representationName = formatParam === 'csv' ? 'flat' : formatParam;
-  var representation = representations[representationName];
-  return representation;
+function representationName(formatParam, strukturParam) {
+  switch(formatParam) {
+    case 'csv': return 'flat';
+    case 'geojson':
+    case 'geojsonz':
+      if(strukturParam === 'nestet') {
+        return 'geojsonNested';
+      }
+      else {
+        return 'geojson';
+      } break;
+    default: return formatParam;
+  }
+}
+
+exports.chooseRepresentationForQuery = function (formatParam, strukturParam, representations) {
+  const name = representationName(formatParam, strukturParam);
+  return representations[name];
 };
 
-exports.chooseRepresentationForAutocomplete = function(formatParam, representations) {
+exports.chooseRepresentationForAutocomplete = function(formatParam, strukturParam, representations) {
   if((formatParam || 'json') === 'json') {
     return representations.autocomplete;
   }
@@ -92,15 +106,18 @@ exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameter
   };
 };
 exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel) {
+  const params = {
+    format: commonParameters.format,
+    crs: commonParameters.crs,
+    reverseGeocoding: commonParameters.reverseGeocoding
+  };
+  if(representations.geojsonNested) {
+    params.struktur = commonParameters.struktur;
+  }
   return {
     path: path,
     pathParameters: [],
-    queryParameters: exports.flattenParameters(
-      {
-        format: commonParameters.format,
-        crs: commonParameters.crs,
-        reverseGeocoding: commonParameters.reverseGeocoding
-      }),
+    queryParameters: exports.flattenParameters(params),
     representations: representations,
     sqlModel: sqlModel,
     singleResult: true,
