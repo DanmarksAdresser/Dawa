@@ -26,8 +26,7 @@ CREATE TABLE IF NOT EXISTS vejstykker_history (
   oprettet timestamp,
   aendret timestamp,
   vejnavn VARCHAR(255) NOT NULL,
-  adresseringsnavn VARCHAR(255),
-  geom  geometry(MULTILINESTRINGZ, 25832)
+  adresseringsnavn VARCHAR(255)
 );
 
 CREATE INDEX ON vejstykker_history(valid_from);

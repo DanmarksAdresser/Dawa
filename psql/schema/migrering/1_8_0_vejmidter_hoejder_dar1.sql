@@ -1,5 +1,4 @@
 ALTER TABLE vejstykker ADD COLUMN geom geometry(MULTILINESTRINGZ, 25832);
-ALTER TABLE vejstykker_history ADD COLUMN geom geometry(MULTILINESTRINGZ, 25832);
 CREATE INDEX ON vejstykker USING GIST(geom);
 
 ALTER TABLE adgangsadresser ADD COLUMN hoejde double precision;

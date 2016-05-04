@@ -223,7 +223,7 @@ var fields = {
     },
     {
       name: 'højde',
-      description: 'Adgangspunktets højde over jorden i meter',
+      description: 'Adgangspunktets højde over jorden i angivet i meter (DVR90).',
       schema: definitions.NullableNumber
     }
   ],
