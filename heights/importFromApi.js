@@ -15,7 +15,8 @@ const optionSpec = {
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
-    connString: options.pgConnectionUrl
+    connString: options.pgConnectionUrl,
+    pooled: false
   });
 
   importAdresseHeightsImpl.importFromApiDaemon(options.url, options.login, options.password);

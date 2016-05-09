@@ -139,7 +139,7 @@ function importFromApiDaemon(apiUrl, login, password) {
         return importFromApi(client, apiClient);
       });
       if (!importedAHeight) {
-        yield q.delay(5000);
+        break;
       }
     }
   })();
