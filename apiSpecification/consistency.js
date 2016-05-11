@@ -35,6 +35,11 @@ var consistencyChecks = [
     query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresser_temaer_matview rel  ON (rel.adgangsadresse_id = adgangsadresser.id AND rel.tema = 'region') where rel.adgangsadresse_id is null AND adgangsadresser.noejagtighed <> 'U'"
   },
   {
+    key: 'AdresserUdenPostnr',
+    description: 'Find alle gældende eller foreløbige adgangsadresser, som ikke har et postnr',
+    query: "SELECT id, objekttype as status, a.vejkode, a.kommunekode, a.oprettet, a.aendret as ændret, vejnavn, formatHusnr(husnr) as husnr, supplerendebynavn, postnr FROM adgangsadresser a JOIN vejstykker v ON a.kommunekode = v.kommunekode and a.vejkode = v.kode WHERE postnr IS NULL AND (objekttype=1 OR objekttype=3)"
+  },
+  {
     key: 'AdresserInkonsistentPostnr',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i et andet postnummer',
     query: "SELECT a.id, vejkode, kommunekode, postnr, (temaer.fields->>'nr')::integer AS geografisk_postnr, oprettet, a.aendret" +
