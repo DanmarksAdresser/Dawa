@@ -37,7 +37,7 @@ var columns = {
       var subquery = {
         select: ["*"],
         from: ['vejstykkerpostnumremat'],
-        whereClauses: ['postnr = nr'],
+        whereClauses: ['vejstykkerpostnumremat.kommunekode = vejstykker.kommunekode', 'vejstykkerpostnumremat.vejkode = vejstykker.kode'],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
@@ -80,10 +80,7 @@ var baseQuery = function() {
   return {
     select: [],
     from: ['vejstykker' +
-      " LEFT JOIN kommuner k ON vejstykker.kommunekode = k.kode" +
-      ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
-      ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
-      ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'],
+      " LEFT JOIN kommuner k ON vejstykker.kommunekode = k.kode"],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
