@@ -5,6 +5,7 @@ const fs = require('fs');
 const JSONStream = require('JSONStream');
 const q = require('q');
 
+const geojsonUtil = require('../geojsonUtil');
 const importUtil = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const sqlCommon = require('../psql/common');
@@ -15,25 +16,6 @@ const ID_COLUMNS = ['kommunekode', 'kode'];
 const NON_ID_COLUMNS = ['geom'];
 const COLUMNS = ID_COLUMNS.concat(NON_ID_COLUMNS);
 
-
-function toPostgresqlGeometry(geojsonFeature) {
-  function stringifyPoint(pointArray) {
-    return pointArray.join(' ');
-  }
-
-  function stringifyLineString(arrayOfPoints) {
-    return '(' + arrayOfPoints.map(stringifyPoint).join(', ') + ')';
-  }
-
-
-  let coordinates = geojsonFeature.geometry.coordinates;
-
-  const type = geojsonFeature.geometry.type;
-  if (type !== 'LineString') {
-    throw new Error('Unexpected vejmidte geometry type: ' + type);
-  }
-  return 'SRID=25832;LINESTRINGZ' + stringifyLineString(coordinates);
-}
 
 function parseInteger(str) {
   if(str !== null && str !== undefined && str != ''){
@@ -55,7 +37,7 @@ function streamToTempTable(client, filePath, tableName) {
       return {
         kommunekode: parseInteger(properties.KOMMUNEKODE),
         kode: parseInteger(properties.VEJKODE),
-        geom: toPostgresqlGeometry(geojsonFeature)
+        geom: geojsonUtil.toPostgresqlGeometry(geojsonFeature.geometry, true)
       }
     });
     const stringifier = importUtil.copyStreamStringifier(COLUMNS);
