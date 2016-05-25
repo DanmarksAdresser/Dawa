@@ -102,7 +102,7 @@ exports.json = {
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
         kommune: mapKommuneRef({ kode: row.kommunekode, navn: row.kommunenavn}, baseUrl),
-        postnumre: mapPostnummerRefArray(row.postnumre, baseUrl),
+        postnumre: mapPostnummerRefArray(row.postnumre || [], baseUrl),
         historik: {
           oprettet: d(row.oprettet),
           ændret: d(row.ændret)
