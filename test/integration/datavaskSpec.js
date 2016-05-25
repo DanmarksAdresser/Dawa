@@ -28,10 +28,11 @@ var adresseTests = [
   },
   {
     it: 'Hvis en anden vej matcher bedre, så er resultatet kategori C',
-    betegnelse: 'Jyllandsvej 17, 4600 Køge',
+    betegnelse: 'Mosede Kægvej 6, 2670 Greve',
+    // korrekt adresse er Mosede Engvej,
+    // men Kærvej er tettere på
     result: {
-      kategori: 'C',
-      id: '0a3f50ab-8c3d-32b8-e044-0003ba298018' // Sjællandsvej 17, 4600 Køge
+      kategori: 'C'
     }
   },
   {
@@ -120,7 +121,7 @@ var adgangsadresseTests = [{
       id: '0a3f507a-4bd5-32b8-e044-0003ba298018'
     }
 }];
-0
+
 describe('Adressevask', () => {
   testdb.withTransactionEach('test', function (clientFn) {
     adresseTests.forEach((test) => {
@@ -128,7 +129,9 @@ describe('Adressevask', () => {
         return q.async(function*() {
           var result = yield helpers.getJson(clientFn(), datavaskResources.adresse, {}, {betegnelse: test.betegnelse})
           expect(result.kategori).to.equal(test.result.kategori);
-          expect(result.resultater[0].adresse.id).to.equal(test.result.id);
+          if(test.result.id) {
+            expect(result.resultater[0].adresse.id).to.equal(test.result.id);
+          }
         })();
       });
     });
@@ -137,7 +140,9 @@ describe('Adressevask', () => {
         return q.async(function*() {
           var result = yield helpers.getJson(clientFn(), datavaskResources.adgangsadresse, {}, {betegnelse: test.betegnelse})
           expect(result.kategori).to.equal(test.result.kategori);
-          expect(result.resultater[0].adresse.id).to.equal(test.result.id);
+          if(test.result.id) {
+            expect(result.resultater[0].adresse.id).to.equal(test.result.id);
+          }
         })();
       });
     });
