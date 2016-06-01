@@ -1,49 +1,23 @@
 "use strict";
 
-var fs = require('fs');
-var Q = require('q');
+var q = require('q');
 
-var datamodels = require('../crud/datamodel');
-var divergensImpl = require('./divergensImpl');
-var dataUtil = require('./dataUtil');
-var loadAdresseImpl = require('./load-adresse-data-impl');
+const importUtil = require('../importUtil/importUtil');
+const tableDiff = require('../importUtil/tablediff');
 
-
-var MAX_INT = 2147483647;
+const POSTNUMMER_COUMNS = ['nr', 'navn', 'stormodtager'];
 
 function loadPostnummerCsv(client, inputFile, tableName) {
-  return function() {
-    var stream = fs.createReadStream(inputFile);
-    return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
-      tableName: tableName,
-      transformer: function(row) {
-        return {
-          nr: row.postnr,
-          navn: row.navn,
-          stormodtager: row.stormodtager
-        };
-      },
-      columns: ['nr', 'navn', 'stormodtager']
-    });
-  };
-}
-
-function createReport(client, inputFile) {
-  var report = Q.nfcall(dataUtil.createTempTable, client, 'updated_postnumre', 'postnumre')
-    .then(loadPostnummerCsv(client, inputFile, 'updated_postnumre'))
-    .then(function() {
-      return divergensImpl.computeTableDifferences(client, datamodels.postnummer, 'postnumre', 'updated_postnumre');
-    });
-
-  return report.then(function() {
-    return Q.nfcall(dataUtil.dropTable,client, 'updated_postnumre');
-  }).then(function() {
-    return report;
-  });
+  return importUtil.streamCsvToTable(client, inputFile, tableName, POSTNUMMER_COUMNS,
+  row => ({ nr: row.postnr, navn: row.navn, stormodtager: row.stormodtager}));
 }
 
 module.exports = function(client, inputFile) {
-  return createReport(client, inputFile).then(function(report) {
-    return divergensImpl.rectifyDifferences(client, datamodels.postnummer, report, MAX_INT);
-  });
+  return q.async(function*() {
+    yield importUtil.createTempTableFromTemplate(client, 'updated_postnumre', 'postnumre', POSTNUMMER_COUMNS);
+    yield loadPostnummerCsv(client, inputFile, 'updated_postnumre');
+    yield tableDiff.computeDifferences(client, 'updated_postnumre', 'postnumre', ['nr'], ['navn', 'stormodtager']);
+    yield tableDiff.applyChanges(client, 'postnumre', ['nr'], POSTNUMMER_COUMNS, ['navn', 'stormodtager']);
+    yield tableDiff.dropChangeTables(client, 'postnumre');
+  })();
 };

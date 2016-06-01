@@ -2,6 +2,7 @@
 
 // Generic utility functions for importing data to PostgreSQL
 const copyFrom = require('pg-copy-streams').from;
+const csvParse = require('csv-parse');
 const csvStringify = require('csv-stringify');
 const es = require('event-stream');
 const fs = require('fs');
@@ -105,11 +106,41 @@ function streamNdjsonToTable(client, filePath, targetTable, columns, mapFn) {
   ]);
 }
 
+const DATA_CSV_OPTIONS = {
+  delimiter: ';',
+  quote: '"',
+  escape: '\\',
+  columns: true
+};
+
+function streamCsvToTable(client, filePath, targetTable, columns, mapFn) {
+  var pgStream = copyStream(client, targetTable, columns);
+  var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
+  mapFn = mapFn || _.identity;
+  return promisingStreamCombiner([
+    inputStream,
+    csvParse(Object.assign({}, DATA_CSV_OPTIONS)),
+    through2.obj(function(obj, enc, callback) {
+      try {
+        const result = mapFn(obj);
+        const csvResult = postgresify(result);
+        callback(null, csvResult);
+      }
+      catch(e) {
+        callback(e);
+      }
+    }),
+    copyStreamStringifier(columns),
+    pgStream
+  ]);
+}
+
 module.exports = {
   copyStream: copyStream,
   copyStreamStringifier: copyStreamStringifier,
   dropTable: dropTable,
   createTempTableFromTemplate: createTempTableFromTemplate,
   streamArrayToTable: streamArrayToTable,
+  streamCsvToTable: streamCsvToTable,
   streamNdjsonToTable: streamNdjsonToTable
 };

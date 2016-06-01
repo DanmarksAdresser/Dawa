@@ -1,44 +1,22 @@
 "use strict";
 
-var _ = require('underscore');
-var fs = require('fs');
-var Q = require('q');
+var q = require('q');
 
-var datamodels = require('../crud/datamodel');
-var divergensImpl = require('./divergensImpl');
-var dataUtil = require('./dataUtil');
-var loadAdresseImpl = require('./load-adresse-data-impl');
+const importUtil = require('../importUtil/importUtil');
+const tableDiff = require('../importUtil/tablediff');
 
-
-var MAX_INT = 2147483647;
+const EJERLAV_COLUMNS = ['kode', 'navn'];
 
 function loadEjerlavCsv(client, inputFile, tableName) {
-  return function() {
-    var stream = fs.createReadStream(inputFile);
-    return Q.nfcall(loadAdresseImpl.loadCsv, client, stream, {
-      tableName: tableName,
-      columns: ['kode', 'navn'],
-      transformer: _.identity
-    });
-  };
-}
-
-function createReport(client, inputFile) {
-  var report = Q.nfcall(dataUtil.createTempTable, client, 'updated_ejerlav', 'ejerlav')
-    .then(loadEjerlavCsv(client, inputFile, 'updated_ejerlav'))
-    .then(function() {
-      return divergensImpl.computeTableDifferences(client, datamodels.ejerlav, 'ejerlav', 'updated_ejerlav');
-    });
-
-  return report.then(function() {
-    return Q.nfcall(dataUtil.dropTable,client, 'updated_ejerlav');
-  }).then(function() {
-    return report;
-  });
+  return importUtil.streamCsvToTable(client, inputFile, tableName, EJERLAV_COLUMNS);
 }
 
 module.exports = function(client, inputFile) {
-  return createReport(client, inputFile).then(function (report) {
-    return divergensImpl.rectifyDifferences(client, datamodels.ejerlav, report, MAX_INT);
-  });
-}
+  return q.async(function*() {
+    yield importUtil.createTempTableFromTemplate(client, 'updated_ejerlav', 'ejerlav', EJERLAV_COLUMNS);
+    yield loadEjerlavCsv(client, inputFile, 'updated_ejerlav');
+    yield tableDiff.computeDifferences(client, 'updated_ejerlav', 'ejerlav', ['kode'], ['navn']);
+    yield tableDiff.applyChanges(client, 'ejerlav', ['kode'], EJERLAV_COLUMNS, ['navn']);
+    yield tableDiff.dropChangeTables(client, 'ejerlav');
+  })();
+};

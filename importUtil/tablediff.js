@@ -120,6 +120,25 @@ function applyChanges(client, table, idColumns, allColumns, columnsToUpdate) {
   })();
 }
 
+function computeDifferences(client, srcTable, dstTable, idColumns, columnsToCheck) {
+  const insTable = `insert_${dstTable}`;
+  const upTable = `update_${dstTable}`;
+  const delTable = `delete_${dstTable}`;
+  return q.async(function*() {
+    yield computeInserts(client, srcTable, dstTable, insTable, idColumns);
+    yield computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck);
+    yield computeDeletes(client, srcTable, dstTable, delTable, idColumns);
+  })();
+}
+
+function countDifferences(client, table) {
+  return client.queryp(`select 
+  (select count(*) from insert_${table}) + 
+  (select count(*) from update_${table}) + 
+  (select count(*) from delete_${table}) as c`)
+    .then(result => result.rows[0].c);
+}
+
 function dropChangeTables(client, tableSuffix) {
   return q.async(function*() {
     for(let prefix of ['insert_', 'update_', 'delete_']) {
@@ -133,6 +152,8 @@ module.exports = {
   computeInserts: computeInserts,
   computeUpdates: computeUpdates,
   computeDeletes: computeDeletes,
+  computeDifferences: computeDifferences,
+  countDifferences: countDifferences,
   applyInserts: applyInserts,
   applyUpdates: applyUpdates,
   applyDeletes: applyDeletes,
