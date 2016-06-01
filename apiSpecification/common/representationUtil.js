@@ -68,6 +68,7 @@ function removeZCoordinate(coordinates) {
   else if(coordinates.length === 3) {
     return coordinates.slice(0, 2);
   }
+  return coordinates;
 }
 
 
