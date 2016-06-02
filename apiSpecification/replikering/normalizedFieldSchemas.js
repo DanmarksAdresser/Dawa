@@ -223,7 +223,7 @@ var fields = {
     },
     {
       name: 'højde',
-      description: 'Adgangspunktets højde over jorden i angivet i meter (DVR90).',
+      description: 'Højden (koten) er beregnet efter Dansk Vertikal Reference 1990 (DVR90) fra middelvandstanden i havene ved Danmarks kyster til terrænniveau.  Angivet i meter.',
       schema: definitions.NullableNumber
     }
   ],
