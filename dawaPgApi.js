@@ -129,13 +129,17 @@ exports.setupRoutes = function () {
   registry.where({
     type: 'resource'
   }).forEach(function (resource) {
+    if (!resource.path.startsWith('/replikering')) {
       app.get(resource.path, resourceImpl.createExpressHandler(resource));
-    });
+    }
+  });
 
   registry.where({
     type: 'resourceImpl'
   }).forEach(function(resourceImpl) {
-    app.get(resourceImpl.path, resourceImpl.expressHandler);
+    if (!resourceImpl.path.startsWith('/replikering')) {
+      app.get(resourceImpl.path, resourceImpl.expressHandler);
+    }
   });
 
   return app;
