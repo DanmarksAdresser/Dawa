@@ -56,6 +56,11 @@ var historyTransformStream = es.map(function(line, cb) {
     var adresseringsnavn = line.substring(47, 67).trim();
     var navn = line.substring(67, 107).trim();
     const virkning = toInterval(oprettet, nedlagt);
+
+    if(oprettet === nedlagt) {
+      cb();
+      return;
+    }
     cb(null, {
       kommunekode: kommunekode,
       vejkode: vejkode,
