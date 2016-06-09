@@ -458,6 +458,34 @@ dagiTemaer.forEach(function(dagiTema) {
   definitions[dagiTema.singular + 'Ref'] = schemaObject(dagiSchema(dagiTema));
 });
 
+definitions.bebyggelse = schemaObject(
+  {
+    properties: {
+      id: {
+        description: 'Bebyggelsens unikke ID',
+        type: 'string'
+      },
+      href: {
+        description: 'Bebyggelsens unikke URL',
+        type: 'string'
+      },
+      kode: {
+        description: 'Bebyggelsens kode. Anvendes bl.a. af Danmarks Statistik',
+        type: 'integer'
+      },
+      type: {
+        description: 'Bebyggelsens type. Kan antage værdierne "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby"',
+        type: 'string'
+      },
+      navn: {
+        description: 'Bebyggelsens navn. Bebyggelsers navne er ikke unikke.',
+        type: 'string'
+      }
+    },
+    docOrder: ['id', 'href', 'kode', 'type', 'navn']
+  }
+);
+
 _.each(definitions, function(value, key) {
   definitions['Nullable' + key] = nullable(value);
 });

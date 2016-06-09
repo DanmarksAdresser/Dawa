@@ -62,5 +62,5 @@ exports.logChanges = function(client, entityName, table) {
 };
 
 exports.applyChanges = function(client, table, allColumnNames) {
-  return tablediff.applyChanges(client, table, idColumns, allColumnNames, _.difference(allColumnNames, idColumns));
+  return tablediff.applyChanges(client, table, table, idColumns, allColumnNames, _.difference(allColumnNames, idColumns));
 };

@@ -9,7 +9,6 @@ var map = _.indexBy(registry.where({
   type: 'nameAndKey'
 }),'singular');
 
-
 // Compute the base URL given a request
 // This functionality is tied to the CloudFront setup.
 // CloudFront does not correctly support the HOST header field, so we get the hostname of the load-balancer fronting

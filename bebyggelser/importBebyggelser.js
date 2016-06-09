@@ -25,5 +25,5 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     return q.async(function*() {
       yield importBebyggelserImpl.importBebyggelser(client, options.file, 'bebyggelser', options.initial);
     })();
-  });
+  }).done();
 });

@@ -2,6 +2,7 @@
 
 const _ = require('underscore');
 
+const dbapi = require('../../dbapi');
 const flats = require('./flats');
 const sqlSpecs = require('./sqlSpecs');
 const sqlUtil = require('../common/sql/sqlUtil');
@@ -11,9 +12,26 @@ const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 module.exports = _.mapObject(flats, (flat, flatName) => {
   const sqlSpec = sqlSpecs[flatName];
   const columnSpec = sqlSpec.columns;
+
+  const columns = flat.fields.reduce((memo, field) => {
+    if(columnSpec[field.name]) {
+      memo[field.name] = columnSpec[field.name];
+    }
+    else {
+      memo[field.name] = {
+        column: field.name
+      }
+    }
+    return memo;
+  }, {});
+  columns.geom_json = {
+    select: function (sqlParts, sqlModel, params) {
+      var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
+    }
+  };
+
   const table = sqlSpec.table;
-  const geometryType = flat.geometryType;
-  const searchable = flat.searchable;
   const baseQuery = function () {
     return {
       select: [],
@@ -24,14 +42,13 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
     };
   };
 
-  const columns = flat.fields.map(field => {
-    return {
-      name: field.name
-    }
-  });
   const parameters = parametersMap[flatName];
-  console.dir(parameters);
-  console.dir(parameters.propertyFilter);
-  const propertyFilterParameterImpl = sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns);
-  return sqlUtil.assembleSqlModel(columns, [propertyFilterParameterImpl], baseQuery);
+  const sqlParameterImpls = [
+    sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+    sqlParameterImpl.reverseGeocodingWithin(),
+    sqlParameterImpl.geomWithin(),
+    sqlParameterImpl.paging(columns, flat.key, true)
+
+  ];
+  return sqlUtil.assembleSqlModel(columns, sqlParameterImpls, baseQuery);
 });

@@ -95,6 +95,10 @@ var fields = [
   },
   {
     name: 'geom_json'
+  },
+  {
+    name: 'bebyggelser',
+    multi: true
   }
 ];
 

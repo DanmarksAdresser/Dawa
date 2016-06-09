@@ -2,6 +2,7 @@
 
 const _ = require('underscore');
 
+const commonParameters = require('../common/commonParameters');
 const flats = require('./flats');
 const parametersMap = require('./parameters');
 const registry = require('../registry');
@@ -14,11 +15,19 @@ module.exports = _.mapObject(flats, (flat => {
   const sqlModel = sqlModels[flat.singular];
   const parameters = parametersMap[flat.singular];
   const queryParams = {
-    propertyFilter: parameters.propertyFilter
+    propertyFilter: parameters.propertyFilter,
+    crs: commonParameters.crs,
+    geomWithin: commonParameters.geomWithin,
+    reverseGeocoding: commonParameters.reverseGeocodingOptional
   };
   const queryResource = resourcesUtil.queryResourceSpec(flat, queryParams, representations, sqlModel);
+  const getByKeyResource = resourcesUtil.getByKeyResourceSpec(flat, parameters.id, {
+    crs: commonParameters.crs
+  }, representations, sqlModel);
+
   return {
-    query: queryResource
+    query: queryResource,
+    getByKey: getByKeyResource
   };
 }));
 

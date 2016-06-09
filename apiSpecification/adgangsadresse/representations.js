@@ -213,6 +213,10 @@ exports.json = {
         },
         docOrder: ['href', 'ejerlav', 'matrikelnr', 'esrejendomsnr']
       }),
+      bebyggelser: {
+        type: 'array',
+        items: commonSchemaDefinitions.bebyggelse
+      },
       kvh: {
         description: 'Sammensat nøgle for adgangsadressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
                      'KVH-nøglen er sammen således:' +
@@ -225,7 +229,7 @@ exports.json = {
     },
     docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke']
+      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke', 'bebyggelser']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -335,6 +339,10 @@ exports.json = {
         adr.zone = null;
       }
 
+      adr.bebyggelser = rs.bebyggelser.map(bebyggelse => {
+        bebyggelse.href = makeHref(baseUrl, 'bebyggelse', [bebyggelse.id]);
+        return bebyggelse;
+      });
       _.extend(adr, mappedDagiTemaer);
       return adr;
     };

@@ -47,6 +47,15 @@ CREATE OR REPLACE FUNCTION utc_trunc_date(timestamptz) RETURNS timestamptz AS $$
 select date_trunc('day', $1 at time zone 'europe/copenhagen') at time zone 'utc';
 $$ language sql;
 
+DROP TYPE IF EXISTS BebyggelseRef CASCADE;
+CREATE TYPE BebyggelseRef AS (
+  id uuid,
+  kode integer,
+  type bebyggelsestype,
+  navn varchar
+);
+
+
 -- CREATE OR REPLACE FUNCTION dar1_status_til_kode(dar1_status)
 --   RETURNS SMALLINT AS $$
 -- SELECT CASE $1

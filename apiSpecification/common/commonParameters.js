@@ -212,6 +212,30 @@ exports.reverseGeocoding =
     }
   ];
 
+exports.reverseGeocodingOptional =
+  [
+    {
+      name: 'x',
+      type: 'float',
+      validateFun: function(x, params) {
+        validateXParam(x, params.srid);
+        if(params.y === undefined || params.y === null) {
+          throw new Error('When supplying an x param for reverse geocoding, a y param is required as well.');
+        }
+      }
+    },
+    {
+      name: 'y',
+      type: 'float',
+      validateFun: function(y, params) {
+        validateYParam(y, params.srid);
+        if(params.x === undefined || params.x === null) {
+          throw new Error('When supplying a y param for reverse geocoding, an x param is required as well.');
+        }
+      }
+    }
+  ];
+
 var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'jordstykke'];
 
 var dagiFilters = _.map(filterableDagiSkemaer, function(skemaNavn) {

@@ -13,7 +13,7 @@ module.exports = _.mapObject(flats, (flat) => {
       schema: field.schema
     };
   }, {});
-  const propertyFilterParameters = key.map(keyFieldName => {
+  const propertyFilterParameters = key.concat(flat.filters).map(keyFieldName => {
     const field = _.findWhere(flat.fields, { name: keyFieldName });
     return {
       name: field.name,

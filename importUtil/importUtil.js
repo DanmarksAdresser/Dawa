@@ -34,7 +34,7 @@ function copyStreamStringifier(columns) {
 }
 
 function dropTable(client, tableName) {
-  return client.queryp('DROP TABLE ' + tableName,[]);
+  return client.queryp('DROP TABLE IF EXISTS ' + tableName,[]);
 }
 
 function createTempTableFromTemplate(client, targetTable, templateTable, columns) {

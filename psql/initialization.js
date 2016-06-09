@@ -86,7 +86,10 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'wms_adgangsadresser', type: 'view'},
   {name: 'wfs_adgangsadresser', type: 'view'},
   {name: 'wfs_adresser', type: 'view'},
-  {name: 'jordstykker', init: false }
+  {name: 'jordstykker', init: false },
+  {name: 'bebyggelser', init: false},
+  {name: 'bebyggelser_adgadr', init: false},
+  {name: 'bebyggelser_divided', init: false}
 ]);
 
 exports.forAllTableSpecs = function(client, func){
@@ -135,7 +138,7 @@ exports.loadTables = function(client, scriptDir) {
  * plv8 would be an option?
  */
 function createHistoryTriggers(client) {
-  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema'], function(sql, datamodelName) {
+  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema', 'bebyggelse_adgangsadresse'], function(sql, datamodelName) {
     var datamodel = datamodels[datamodelName];
     var table = datamodel.table;
     sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);

@@ -2,6 +2,8 @@
 
 var _ = require('underscore');
 var dagiTemaer = require('./apiSpecification/temaer/temaer');
+const flats = require('./apiSpecification/flats/flats');
+const flatParametersMap = require('./apiSpecification/flats/parameters');
 var tilknytninger = require('./apiSpecification/tematilknytninger/tilknytninger');
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
@@ -10,18 +12,21 @@ require('./apiSpecification/allSpecs');
 /*** Utils ********************************************************************/
 /******************************************************************************/
 
-function autocompleteSubtext(name){
-  return 'Autocomplete på '+name+'. Der kan anvendes de samme parametre som ved søgning, men bemærk at'+
+function autocompleteSubtext(name) {
+  return 'Autocomplete på ' + name + '. Der kan anvendes de samme parametre som ved søgning, men bemærk at' +
     ' <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.';
 }
 
-function overwriteWithAutocompleteQParameter(properties){
-  var overwrite = [{name: 'q', doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'}];
+function overwriteWithAutocompleteQParameter(properties) {
+  var overwrite = [{
+    name: 'q',
+    doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'
+  }];
   return _.map(_.pairs(_.extend(_.indexBy(properties, 'name'), _.indexBy(overwrite, 'name'))),
-               function(pair){
-                 pair[1].name = pair[0];
-                 return pair[1];
-               });
+    function (pair) {
+      pair[1].name = pair[0];
+      return pair[1];
+    });
 }
 
 /******************************************************************************/
@@ -35,12 +40,13 @@ var formatParameters = [
   },
   {
     name: 'format',
-    doc: 'Output leveres i andet format end <em>JSON</em>. Se <a href=generelt#dataformater>Dataformater</a>.'},
+    doc: 'Output leveres i andet format end <em>JSON</em>. Se <a href=generelt#dataformater>Dataformater</a>.'
+  },
   {
     name: 'noformat',
     doc: 'Parameteren angiver, at whitespaceformatering skal udelades'
   }
- ];
+];
 
 const strukturParameter = {
   name: 'struktur',
@@ -48,10 +54,14 @@ const strukturParameter = {
 }
 
 
-var pagingParameters = [{name: 'side',
-                        doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt#paginering>Paginering</a>.'},
-                       {name: 'per_side',
-                        doc: 'Antal resultater per side. Se <a href=generelt#paginering>Paginering</a>.'}];
+var pagingParameters = [{
+  name: 'side',
+  doc: 'Angiver hvilken siden som skal leveres. Se <a href=generelt#paginering>Paginering</a>.'
+},
+  {
+    name: 'per_side',
+    doc: 'Antal resultater per side. Se <a href=generelt#paginering>Paginering</a>.'
+  }];
 
 var formatAndPagingParams = formatParameters.concat(pagingParameters);
 
@@ -61,41 +71,55 @@ var fuzzyParameter = {
 };
 
 
-
 /******************************************************************************/
 /*** Vejnavne *****************************************************************/
 /******************************************************************************/
 
-var vejnavneIdParameter = {name: 'navn',
-                           doc: "Vejnavn. Der skelnes mellem store og små bogstaver.",
-                           examples: ['Margrethepladsen', 'Viborgvej']};
-
-var vejnavneParameters = [{name: 'q',
-                           doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejnavnet. ' +
-                           'Wildcard * er tilladt i slutningen af hvert ord. ' +
-                           'Der skelnes ikke mellem store og små bogstaver.',
-                           examples: ['tværvej']},
-  fuzzyParameter,
-
-                          vejnavneIdParameter,
-
-                          {name: 'kommunekode',
-                           doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-                           examples: ['0101']},
-
-                          {name: 'postnr',
-                           doc: 'Postnummer. 4 cifre.',
-                           examples: ['2700']}];
-
-var SRIDParameter = {name: 'srid',
-  doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>'+
-    ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84).'
+var vejnavneIdParameter = {
+  name: 'navn',
+  doc: "Vejnavn. Der skelnes mellem store og små bogstaver.",
+  examples: ['Margrethepladsen', 'Viborgvej']
 };
 
-var reverseGeocodingParameters = [{name: 'x', doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk '+
-  'anvendex angives bredde-værdien.'},
-  {name: 'y', doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk '+
-    'anvendex angives længde-værdien.'},
+var vejnavneParameters = [{
+  name: 'q',
+  doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejnavnet. ' +
+  'Wildcard * er tilladt i slutningen af hvert ord. ' +
+  'Der skelnes ikke mellem store og små bogstaver.',
+  examples: ['tværvej']
+},
+  fuzzyParameter,
+
+  vejnavneIdParameter,
+
+  {
+    name: 'kommunekode',
+    doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+    examples: ['0101']
+  },
+
+  {
+    name: 'postnr',
+    doc: 'Postnummer. 4 cifre.',
+    examples: ['2700']
+  }];
+
+var SRIDParameter = {
+  name: 'srid',
+  doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>' +
+  ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84).'
+};
+
+var reverseGeocodingParameters = [{
+  name: 'x',
+  doc: 'X koordinat. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk ' +
+  'anvendex angives bredde-værdien.'
+},
+  {
+    name: 'y',
+    doc: 'Y koordinat. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk ' +
+    'anvendex angives længde-værdien.'
+  },
   SRIDParameter].concat(formatParameters);
 
 var vejnavneDoc = {
@@ -105,26 +129,41 @@ var vejnavneDoc = {
       subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
       parameters: [vejnavneIdParameter],
       nomulti: true,
-      examples:  [{description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
-                   path: ['/vejnavne/Gammel%20Viborgvej']}]},
+      examples: [{
+        description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
+        path: ['/vejnavne/Gammel%20Viborgvej']
+      }]
+    },
 
     '/vejnavne': {
       subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
       parameters: vejnavneParameters.concat(formatAndPagingParams),
-      examples:   [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og '+
-                    'indeholder et ord der starter med <em>hvid</em>',
-                    query: [{name: 'postnr', value: '2400'},
-                            {name: 'q',value: 'hvid*'}]},
-                   {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
-                   query: [{name: 'kommunekode', value: '0101'}]}]},
+      examples: [{
+        description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og ' +
+        'indeholder et ord der starter med <em>hvid</em>',
+        query: [{name: 'postnr', value: '2400'},
+          {name: 'q', value: 'hvid*'}]
+      },
+        {
+          description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
+          query: [{name: 'kommunekode', value: '0101'}]
+        }]
+    },
 
     '/vejnavne/autocomplete': {
       subtext: autocompleteSubtext('vejnavne'),
       parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatAndPagingParams),
-      examples:    [{description: 'Find alle vejnavne som indeholder <em>jolle</em>',
-                     query: [{name:'q', value:'jolle'}]},
-                    {description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
-                     query: [{name:'q', value:'strand '}]}]}}};
+      examples: [{
+        description: 'Find alle vejnavne som indeholder <em>jolle</em>',
+        query: [{name: 'q', value: 'jolle'}]
+      },
+        {
+          description: 'Find alle vejnavne som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
+          query: [{name: 'q', value: 'strand '}]
+        }]
+    }
+  }
+};
 
 
 /******************************************************************************/
@@ -132,12 +171,16 @@ var vejnavneDoc = {
 /******************************************************************************/
 
 var vejstykkerIdParameters = [
-  {name: 'kommunekode',
+  {
+    name: 'kommunekode',
     doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-    examples: ['0101']},
-  {name: 'kode',
+    examples: ['0101']
+  },
+  {
+    name: 'kode',
     doc: 'vejkode. 4 cifre.',
-    examples: ['0052']}
+    examples: ['0052']
+  }
 ];
 var vejstykkerParameters = [{
   name: 'q',
@@ -162,11 +205,11 @@ var vejstykkerParameters = [{
     name: 'polygon',
     doc: 'Find de vejstykker, som overlapper med det angivne polygon. ' +
     'Polygonet specificeres som et array af koordinater på samme måde som' +
-    ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.'+
+    ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
     ' Bemærk at polygoner skal' +
-    ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>'+
+    ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
     ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
-    ' angives vha. srid parameteren, se ovenover.<br> Eksempel: '+
+    ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
     ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
     examples: []
   },
@@ -184,16 +227,24 @@ var vejstykkerDoc = {
       subtext: 'Opslag på enkelt vejstykke ud fra kommunekode og vejkode.',
       parameters: vejstykkerIdParameters.concat([strukturParameter]),
       nomulti: true,
-      examples:  [{ description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
-                    path: ['/vejstykker/0101/316']}]},
+      examples: [{
+        description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',
+        path: ['/vejstykker/0101/316']
+      }]
+    },
 
     '/vejstykker': {
       subtext: 'Søger efter vejstykker. Returnerer de vejstykker, som opfylder kriteriet.',
       parameters: vejstykkerParameters.concat(formatAndPagingParams).concat([strukturParameter]),
-      examples:  [{description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
-                   query: [{name:'postnr', value:'2400'}, {name: 'q',value: 'hvid*'}]},
-                  {description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
-                   query: [{name: 'kommunekode',value: '0101'}]}]},
+      examples: [{
+        description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og indeholder et ord der starter med <em>hvid</em>',
+        query: [{name: 'postnr', value: '2400'}, {name: 'q', value: 'hvid*'}]
+      },
+        {
+          description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
+          query: [{name: 'kommunekode', value: '0101'}]
+        }]
+    },
 
     '/vejstykker/reverse': {
       subtext: 'Find det vejstykke, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes ' +
@@ -216,30 +267,45 @@ var vejstykkerDoc = {
     '/vejstykker/autocomplete': {
       subtext: autocompleteSubtext('vejstykker'),
       parameters: overwriteWithAutocompleteQParameter(vejstykkerParameters).concat(formatAndPagingParams),
-      examples: [{description: 'Find alle vejstykker som indeholder <em>jolle</em>',
-                  query: [{name:'q', value:'jolle'}]},
-                 {description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
-                  query: [{name:'q', value:'strand '}]}]}}};
+      examples: [{
+        description: 'Find alle vejstykker som indeholder <em>jolle</em>',
+        query: [{name: 'q', value: 'jolle'}]
+      },
+        {
+          description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
+          query: [{name: 'q', value: 'strand '}]
+        }]
+    }
+  }
+};
 
 
 /******************************************************************************/
 /*** Supp. bynavne ************************************************************/
 /******************************************************************************/
 
-var supplerendeBynavneIdParameters = {name: 'navn',
-                                      doc: 'Navnet på det supplerende bynavn, f.eks. <em>Holeby</em>',
-                                      examples: ['Holeby', 'Aabybro']};
+var supplerendeBynavneIdParameters = {
+  name: 'navn',
+  doc: 'Navnet på det supplerende bynavn, f.eks. <em>Holeby</em>',
+  examples: ['Holeby', 'Aabybro']
+};
 
-var supplerendeBynavneParameters = [{name: 'q',
-                                     doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche det supplerende bynavn. ' +
-                                     'Wildcard * er tilladt i slutningen af hvert ord.'},
-                                    supplerendeBynavneIdParameters,
-                                    {name: 'postnr',
-                                     doc: 'Postnummer. 4 cifre.',
-                                     examples: ['2700']},
-                                    {name: 'kommunekode',
-                                     doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-                                     examples: ['0101']}];
+var supplerendeBynavneParameters = [{
+  name: 'q',
+  doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche det supplerende bynavn. ' +
+  'Wildcard * er tilladt i slutningen af hvert ord.'
+},
+  supplerendeBynavneIdParameters,
+  {
+    name: 'postnr',
+    doc: 'Postnummer. 4 cifre.',
+    examples: ['2700']
+  },
+  {
+    name: 'kommunekode',
+    doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+    examples: ['0101']
+  }];
 
 var supplerendeBynavneDoc = {
   docVersion: 2,
@@ -248,38 +314,57 @@ var supplerendeBynavneDoc = {
       subtext: 'Modtag supplerende bynavn.',
       parameters: [supplerendeBynavneIdParameters],
       nomulti: true,
-      examples: [{description: 'Hent det supplerende bynavn med navn <em>Aarsballe</em>',
-                  path: ['/supplerendebynavne/Aarsballe']}]},
+      examples: [{
+        description: 'Hent det supplerende bynavn med navn <em>Aarsballe</em>',
+        path: ['/supplerendebynavne/Aarsballe']
+      }]
+    },
 
     '/supplerendebynavne': {
       subtext: 'Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.',
       parameters: supplerendeBynavneParameters.concat(formatAndPagingParams),
-      examples: [{description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
-                  query: [{name: 'postnr',value: '3700'}]},
-                 {description: 'Find de supplerende bynavne, hvor et ord i det supplerende bynavn starter med <em>aar</em>',
-                  query: [{ name: 'q',value: "aar*"}]}]},
+      examples: [{
+        description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
+        query: [{name: 'postnr', value: '3700'}]
+      },
+        {
+          description: 'Find de supplerende bynavne, hvor et ord i det supplerende bynavn starter med <em>aar</em>',
+          query: [{name: 'q', value: "aar*"}]
+        }]
+    },
 
     '/supplerendebynavne/autocomplete': {
       subtext: autocompleteSubtext('supplerendebynavne'),
       parameters: overwriteWithAutocompleteQParameter(supplerendeBynavneParameters).concat(formatAndPagingParams),
-      examples:[{description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
-                 query: [{name:'q', value:'sejr'}]}]}}};
+      examples: [{
+        description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
+        query: [{name: 'q', value: 'sejr'}]
+      }]
+    }
+  }
+};
 
 
 /******************************************************************************/
 /*** Kommune ******************************************************************/
 /******************************************************************************/
 
-var kommuneIdParameters = {name: 'kode',
-                         doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-                         examples: ['0101']};
-var kommuneParameters = [{name: 'q',
-                          doc: 'Søgetekst. Der søges i kommunenavnet. Alle ord i søgeteksten skal matche kommunenavnet. ' +
-                          'Wildcard * er tilladt i slutningen af hvert ord.'},
-                         {name: 'navn',
-                          doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
-                          examples: ['Aarhus', 'København']},
-                         kommuneIdParameters];
+var kommuneIdParameters = {
+  name: 'kode',
+  doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+  examples: ['0101']
+};
+var kommuneParameters = [{
+  name: 'q',
+  doc: 'Søgetekst. Der søges i kommunenavnet. Alle ord i søgeteksten skal matche kommunenavnet. ' +
+  'Wildcard * er tilladt i slutningen af hvert ord.'
+},
+  {
+    name: 'navn',
+    doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
+    examples: ['Aarhus', 'København']
+  },
+  kommuneIdParameters];
 
 var kommuneDoc = {
   docVersion: 2,
@@ -287,23 +372,34 @@ var kommuneDoc = {
     '/kommuner': {
       subtext: 'Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.',
       parameters: kommuneParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('kommuner')),
-      examples: [{description: 'Hent alle kommuner',
-                  query: []},
-                 {description: 'Find de kommuner, som starter med <em>aa</em>',
-                  query: [{ name: 'q',value: "aa*"}]}]},
+      examples: [{
+        description: 'Hent alle kommuner',
+        query: []
+      },
+        {
+          description: 'Find de kommuner, som starter med <em>aa</em>',
+          query: [{name: 'q', value: "aa*"}]
+        }]
+    },
 
     '/kommuner/{kode}': {
       subtext: 'Modtag kommune.',
       parameters: [kommuneIdParameters],
       nomulti: true,
-      examples: [{description: 'Hent Københavns kommune (kode 101)',
-                  path: ['/kommuner/101']}]},
+      examples: [{
+        description: 'Hent Københavns kommune (kode 101)',
+        path: ['/kommuner/101']
+      }]
+    },
 
     '/kommuner/autocomplete': {
       subtext: autocompleteSubtext('kommuner'),
       parameters: overwriteWithAutocompleteQParameter(kommuneParameters).concat(formatAndPagingParams),
-      examples: [{description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
-                  query: [{name:'q', value:'8'}]}]},
+      examples: [{
+        description: 'Find alle kommuner som indeholder <em>8</em> (i kommunekoden).',
+        query: [{name: 'q', value: '8'}]
+      }]
+    },
     '/kommuner/reverse': {
       subtext: 'Modtage kommunen for det punkt der angives med x- og y-parametrene',
       parameters: reverseGeocodingParameters,
@@ -322,12 +418,14 @@ var kommuneDoc = {
             {name: 'x', value: '725369.59'},
             {name: 'y', value: '6176652.55'},
             {name: 'srid', value: '25832'}
-          ]}
+          ]
+        }
       ]
 
     }
 
-  }};
+  }
+};
 
 /******************************************************************************/
 /*** Adresser og adgangsadresser **********************************************/
@@ -337,7 +435,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'status',
     doc: 'Adressens status, som modtaget fra BBR. "1" angiver en endelig adresse og "3" angiver en foreløbig adresse". ' +
-      'Adresser med status "2" eller "4" er ikke med i DAWA.'
+    'Adresser med status "2" eller "4" er ikke med i DAWA.'
   },
   {
     name: 'vejkode',
@@ -398,13 +496,13 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'polygon',
     doc: 'Find de adresser, som ligger indenfor det angivne polygon. ' +
-      'Polygonet specificeres som et array af koordinater på samme måde som' +
-      ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.'+
-      ' Bemærk at polygoner skal' +
-      ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>'+
-      ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
-      ' angives vha. srid parameteren, se ovenover.<br> Eksempel: '+
-      ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
+    'Polygonet specificeres som et array af koordinater på samme måde som' +
+    ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+    ' Bemærk at polygoner skal' +
+    ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+    ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+    ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+    ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
 
   },
   {
@@ -447,16 +545,17 @@ var adgangsadresseIdParameter = {
   doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
 };
 
-var adgangsadresseParameters =  [
+var adgangsadresseParameters = [
   {
     name: 'q',
     doc: 'Søgetekst. Der søges i vejnavn, husnr, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adgangsadressen. ' +
-      'Wildcard * er tilladt i slutningen af hvert ord. ' +
-      'Der skelnes ikke mellem store og små bogstaver.',
+    'Wildcard * er tilladt i slutningen af hvert ord. ' +
+    'Der skelnes ikke mellem store og små bogstaver.',
     examples: ['tværv*']
   },
-    fuzzyParameter,
-  {name: 'kvh',
+  fuzzyParameter,
+  {
+    name: 'kvh',
     doc: 'KVH-nøgle. 12 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode efterfulgt af 4 tegn der repræsenter husnr. Se <a href="#adgangsadresse_kvh">databeskrivelse</a>.',
     examples: ['01016378__33']
   },
@@ -469,91 +568,135 @@ var adgangsadresseDoc = {
       subtext: 'Modtag adresse med id.',
       parameters: [adgangsadresseIdParameter].concat([strukturParameter]),
       nomulti: true,
-      examples:  [{description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
-                   path: ['/adgangsadresser/0a3f507a-b2e6-32b8-e044-0003ba298018']}]},
+      examples: [{
+        description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
+        path: ['/adgangsadresser/0a3f507a-b2e6-32b8-e044-0003ba298018']
+      }]
+    },
 
-    '/adgangsadresser':{
+    '/adgangsadresser': {
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
       parameters: adgangsadresseParameters.concat(formatAndPagingParams).concat([strukturParameter]),
-      examples: [{description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr',   value: '46'}]},
-                 {description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.'+
-                  ' Resultatet leveres i <em>JSONP</em> format.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr', value: '46'},
-                          {name: 'callback',value: 'cbFun'}]},
-                 {description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.'+
-                  ' Resultatet leveres i <em>geojson</em> format.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr', value: '46'},
-                          {name: 'format',value: 'geojson'}]},
-                 {description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.'+
-                  ' Resultatet leveres i <em>csv</em> format.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr', value: '46'},
-                          {name: 'format',value: 'csv'}]},
-                 {description: 'Find de adgangsadresser som indeholder et ord der starter med hvid og har postnummeret 2400',
-                  query: [{name: 'q',      value: 'hvid*'},
-                          {name: 'postnr', value: '2400'}]},
-                 {description: 'Find de adgangsadresser som er indenfor polygonet <em>(10.3,55.3), (10.4,55.3), '+
-                  '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
-                  query: [{name: 'polygon',
-                           encodeValue: false,
-                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]},
-                 {description: 'Hent alle adgangsadresser i Københavns kommune (kode 0101), i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
-                  query: [{name: 'kommunekode', value: '0101'},
-                          {name: 'format', value: 'geojson'},
-                          {name: 'srid', value: '25832'}]},
-                 {description: 'Find den adresse, som har KVH-nøgle 04615319__93',
-                  query: [{name: 'kvh', value: '04615319__93'}]}
-      ]},
+      examples: [{
+        description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
+        query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+          {name: 'husnr', value: '46'}]
+      },
+        {
+          description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.' +
+          ' Resultatet leveres i <em>JSONP</em> format.',
+          query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+            {name: 'husnr', value: '46'},
+            {name: 'callback', value: 'cbFun'}]
+        },
+        {
+          description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.' +
+          ' Resultatet leveres i <em>geojson</em> format.',
+          query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+            {name: 'husnr', value: '46'},
+            {name: 'format', value: 'geojson'}]
+        },
+        {
+          description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.' +
+          ' Resultatet leveres i <em>csv</em> format.',
+          query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+            {name: 'husnr', value: '46'},
+            {name: 'format', value: 'csv'}]
+        },
+        {
+          description: 'Find de adgangsadresser som indeholder et ord der starter med hvid og har postnummeret 2400',
+          query: [{name: 'q', value: 'hvid*'},
+            {name: 'postnr', value: '2400'}]
+        },
+        {
+          description: 'Find de adgangsadresser som er indenfor polygonet <em>(10.3,55.3), (10.4,55.3), ' +
+          '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
+          query: [{
+            name: 'polygon',
+            encodeValue: false,
+            value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'
+          }]
+        },
+        {
+          description: 'Hent alle adgangsadresser i Københavns kommune (kode 0101), i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+          query: [{name: 'kommunekode', value: '0101'},
+            {name: 'format', value: 'geojson'},
+            {name: 'srid', value: '25832'}]
+        },
+        {
+          description: 'Find den adresse, som har KVH-nøgle 04615319__93',
+          query: [{name: 'kvh', value: '04615319__93'}]
+        }
+      ]
+    },
 
 
-
-    '/adgangsadresser/autocomplete':{
+    '/adgangsadresser/autocomplete': {
       subtext: autocompleteSubtext('adgangsadresser'),
       parameters: overwriteWithAutocompleteQParameter(adgangsadresseParameters).concat(formatAndPagingParams),
-      examples: [{description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
-                  query: [{name:'q', value:'rand'}]},
-                 {description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
-                  query: [{name:'q', value:'randers'},
-                          {name:'postnr', value:'8600'}]}]},
+      examples: [{
+        description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
+        query: [{name: 'q', value: 'rand'}]
+      },
+        {
+          description: 'Find alle adgangsadresser som indeholder <em>randers</em> indenfor postnummer <em>8600</em>',
+          query: [{name: 'q', value: 'randers'},
+            {name: 'postnr', value: '8600'}]
+        }]
+    },
 
-    '/adgangsadresser/reverse':{
-      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes '+
-        'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller '+
-        'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
+    '/adgangsadresser/reverse': {
+      subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes ' +
+      'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller ' +
+      'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
       parameters: reverseGeocodingParameters.concat([strukturParameter]),
-      examples: [{description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
-                  query: [{name:'x', value:'12.5851471984198'},
-                          {name:'y', value:'55.6832383751223'}]},
-                 {description: 'Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
-                  query: [
-                          {name: 'x', value: '725369.59'},
-                          {name: 'y', value: '6176652.55'},
-                          {name: 'srid' , value: '25832'}]}]}}};
+      examples: [{
+        description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+        query: [{name: 'x', value: '12.5851471984198'},
+          {name: 'y', value: '55.6832383751223'}]
+      },
+        {
+          description: 'Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+          query: [
+            {name: 'x', value: '725369.59'},
+            {name: 'y', value: '6176652.55'},
+            {name: 'srid', value: '25832'}]
+        }]
+    }
+  }
+};
 
-var adresseParameters = [{name: 'q',
-                          doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adressebetegnelsen. ' +
-                          'Wildcard * er tilladt i slutningen af hvert ord. ' +
-                          'Der skelnes ikke mellem store og små bogstaver.',
-                          examples: ['tværv*']},
+var adresseParameters = [{
+  name: 'q',
+  doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adressebetegnelsen. ' +
+  'Wildcard * er tilladt i slutningen af hvert ord. ' +
+  'Der skelnes ikke mellem store og små bogstaver.',
+  examples: ['tværv*']
+},
   fuzzyParameter,
-                         {name: 'id',
-                          doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'},
-                         {name: 'adgangsadresseid',
-                          doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'},
-                         {name: 'etage',
-                          doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, k2 op til k9.',
-                          nullable: true},
-                         {name: 'dør',
-                          doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
-                          nullable: true},
-                         {name: 'kvhx',
-                          doc: 'KVHX-nøgle. 19 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode, 4 tegn der repræsenter husnr, 3 tegn der repræsenterer etage og 4 tegn der repræsenter dør. Se <a href="#adresse_kvhx">databeskrivelse</a>.',
-                          examples: ['04619664__26_st___6']
-                         }
+  {
+    name: 'id',
+    doc: 'Adressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
+  },
+  {
+    name: 'adgangsadresseid',
+    doc: 'Id på den til adressen tilknyttede adgangsadresse. UUID.'
+  },
+  {
+    name: 'etage',
+    doc: 'Etagebetegnelse. Hvis værdi angivet kan den antage følgende værdier: tal fra 1 til 99, st, kl, k2 op til k9.',
+    nullable: true
+  },
+  {
+    name: 'dør',
+    doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
+    nullable: true
+  },
+  {
+    name: 'kvhx',
+    doc: 'KVHX-nøgle. 19 tegn bestående af 4 cifre der repræsenterer kommunekode, 4 cifre der repræsenterer vejkode, 4 tegn der repræsenter husnr, 3 tegn der repræsenterer etage og 4 tegn der repræsenter dør. Se <a href="#adresse_kvhx">databeskrivelse</a>.',
+    examples: ['04619664__26_st___6']
+  }
 ].concat(parametersForBothAdresseAndAdgangsAdresse);
 
 var adresseDoc = {
@@ -562,75 +705,119 @@ var adresseDoc = {
     '/adresser': {
       subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
       parameters: adresseParameters.concat(formatAndPagingParams).concat([strukturParameter]),
-      examples: [{description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'}, {name: 'husnr',value: '46'}]},
-                 {description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. '+
-                  'Resultatet leveres i <em>JSONP</em> format.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr',value: '46'},
-                          {name: 'callback', value: 'cbFun'}]},
-                 {description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. '+
-                  'Resultatet leveres i <em>geojson</em> format.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr',value: '46'},
-                          {name: 'format', value: 'geojson'}]},
-                 {description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. '+
-                  'Resultatet leveres i <em>csv</em> format.',
-                  query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-                          {name: 'husnr',value: '46'},
-                          {name: 'format', value: 'csv'}]},
-                 {description: 'Find de adresser som indeholder et ord der starter med hvid og har postnummeret 2400',
-                  query: [{name: 'q',value: 'hvid*'}, {name: 'postnr',value: '2400'}]},
-                 {description: 'Find de adresser som er indenfor polygonet <em>(10.3,55.3), (10.4,55.3), '+
-                  '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
-                  query: [{name: 'polygon',
-                           encodeValue: false,
-                           value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'}]},
-                {description: 'Find den adresse, som har KVHX-nøgle 04615319__93__1____',
-                  query: [{name: 'kvhx', value: '04615319__93__1____'}]},
-                {description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
-                  query: [{name: 'postnr', value: '8471'},
-                          {name: 'format', value: 'geojson'},
-                          {name: 'srid', value: '25832'}]}
-      ]},
+      examples: [{
+        description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
+        query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'}, {
+          name: 'husnr',
+          value: '46'
+        }]
+      },
+        {
+          description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. ' +
+          'Resultatet leveres i <em>JSONP</em> format.',
+          query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+            {name: 'husnr', value: '46'},
+            {name: 'callback', value: 'cbFun'}]
+        },
+        {
+          description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. ' +
+          'Resultatet leveres i <em>geojson</em> format.',
+          query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+            {name: 'husnr', value: '46'},
+            {name: 'format', value: 'geojson'}]
+        },
+        {
+          description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. ' +
+          'Resultatet leveres i <em>csv</em> format.',
+          query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+            {name: 'husnr', value: '46'},
+            {name: 'format', value: 'csv'}]
+        },
+        {
+          description: 'Find de adresser som indeholder et ord der starter med hvid og har postnummeret 2400',
+          query: [{name: 'q', value: 'hvid*'}, {name: 'postnr', value: '2400'}]
+        },
+        {
+          description: 'Find de adresser som er indenfor polygonet <em>(10.3,55.3), (10.4,55.3), ' +
+          '(10.4,55.31), (10.4,55.31), (10.3,55.3)</em>',
+          query: [{
+            name: 'polygon',
+            encodeValue: false,
+            value: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'
+          }]
+        },
+        {
+          description: 'Find den adresse, som har KVHX-nøgle 04615319__93__1____',
+          query: [{name: 'kvhx', value: '04615319__93__1____'}]
+        },
+        {
+          description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+          query: [{name: 'postnr', value: '8471'},
+            {name: 'format', value: 'geojson'},
+            {name: 'srid', value: '25832'}]
+        }
+      ]
+    },
     '/adresser/{id}': {
       subtext: 'Modtag adresse med id.',
-      parameters: [_.find(adresseParameters, function(p){ return p.name === 'id'; })].concat([strukturParameter]),
+      parameters: [_.find(adresseParameters, function (p) {
+        return p.name === 'id';
+      })].concat([strukturParameter]),
       nomulti: true,
-      examples: [{description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
-                  path: ['/adresser/0255b942-f3ac-4969-a963-d2c4ed9ab943']}]},
+      examples: [{
+        description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
+        path: ['/adresser/0255b942-f3ac-4969-a963-d2c4ed9ab943']
+      }]
+    },
 
     '/adresser/autocomplete': {
       subtext: autocompleteSubtext('adresser'),
       parameters: overwriteWithAutocompleteQParameter(adresseParameters).concat(formatAndPagingParams),
-      examples: [{description: 'Find alle adresser som indeholder <em>rand</em>',
-                  query: [{name:'q', value:'rand'}]},
-                 {description: 'Find alle adresser som indeholder <em>randers</em> på postnr <em>8450</em>',
-                  query: [{name:'q', value:'randers'},{name:'postnr', value:'8450'}]}]}}};
+      examples: [{
+        description: 'Find alle adresser som indeholder <em>rand</em>',
+        query: [{name: 'q', value: 'rand'}]
+      },
+        {
+          description: 'Find alle adresser som indeholder <em>randers</em> på postnr <em>8450</em>',
+          query: [{name: 'q', value: 'randers'}, {name: 'postnr', value: '8450'}]
+        }]
+    }
+  }
+};
 
 
 /******************************************************************************/
 /*** Postnumre ****************************************************************/
 /******************************************************************************/
 
-var postnummerParameters = [{name: 'nr',
-                             doc: 'Postnummer. 4 cifre.',
-                             examples: ['2690', '8600']},
-                            {name: 'navn',
-                             doc: 'Postnummernavn',
-                             examples: ['Aarhus', 'København']},
-                            {name: 'kommunekode',
-                             doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
-                             examples: ['0101']},
-                            {name: 'q',
-                             doc: 'Søgetekst. Der søges i postnummernavnet. Alle ord i søgeteksten skal matche postnummernavnet. ' +
-                             'Wildcard * er tilladt i slutningen af hvert ord.'},
-                            {name: 'stormodtagere',
-                             doc: "Hvis denne parameter er sat til 'true', vil stormodtager-postnumre medtages i resultatet. Default er false."}];
+var postnummerParameters = [{
+  name: 'nr',
+  doc: 'Postnummer. 4 cifre.',
+  examples: ['2690', '8600']
+},
+  {
+    name: 'navn',
+    doc: 'Postnummernavn',
+    examples: ['Aarhus', 'København']
+  },
+  {
+    name: 'kommunekode',
+    doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+    examples: ['0101']
+  },
+  {
+    name: 'q',
+    doc: 'Søgetekst. Der søges i postnummernavnet. Alle ord i søgeteksten skal matche postnummernavnet. ' +
+    'Wildcard * er tilladt i slutningen af hvert ord.'
+  },
+  {
+    name: 'stormodtagere',
+    doc: "Hvis denne parameter er sat til 'true', vil stormodtager-postnumre medtages i resultatet. Default er false."
+  }];
 
-var postnummerIdParameter =_.find(postnummerParameters, function (p) {
-    return p.name === 'nr';
-  });
+var postnummerIdParameter = _.find(postnummerParameters, function (p) {
+  return p.name === 'nr';
+});
 
 var postnummerDoc = {
   docVersion: 2,
@@ -639,29 +826,46 @@ var postnummerDoc = {
       subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
       parameters: postnummerParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('postnumre')).concat([strukturParameter]),
       examples: [{description: 'Hent alle postnumre', query: []},
-                 {description: 'Find postnummer <em>8600</em>',
-                  query: [{ name: 'nr', value: "8600"}]},
-                 {description: 'Find alle postnumre som benyttes i kommune <em>751</em> Aarhus',
-                  query: [{ name: 'kommunekode', value: "751"}]},
-                 {description: 'Find postnummer for postnummernavn <em>Silkeborg</em>',
-                  query: [{ name: 'navn', value: "Silkeborg"}]},
-                 {description: 'Find alle postnumre som indeholder ordet <em>strand</em>',
-                  query: [{ name: 'q', value: "strand"}]},
-                 {description: 'Find alle postnumre som indeholder <em>aar*</em>',
-                  query: [{ name: 'q', value: "aar*"}]}]},
+        {
+          description: 'Find postnummer <em>8600</em>',
+          query: [{name: 'nr', value: "8600"}]
+        },
+        {
+          description: 'Find alle postnumre som benyttes i kommune <em>751</em> Aarhus',
+          query: [{name: 'kommunekode', value: "751"}]
+        },
+        {
+          description: 'Find postnummer for postnummernavn <em>Silkeborg</em>',
+          query: [{name: 'navn', value: "Silkeborg"}]
+        },
+        {
+          description: 'Find alle postnumre som indeholder ordet <em>strand</em>',
+          query: [{name: 'q', value: "strand"}]
+        },
+        {
+          description: 'Find alle postnumre som indeholder <em>aar*</em>',
+          query: [{name: 'q', value: "aar*"}]
+        }]
+    },
 
     '/postnumre/{nr}': {
       subtext: 'Modtag postnummer med id.',
       parameters: [postnummerIdParameter].concat([strukturParameter]),
       nomulti: true,
-      examples: [{description: 'Hent postnummer for København NV',
-                  path: ['/postnumre/2400']}]},
+      examples: [{
+        description: 'Hent postnummer for København NV',
+        path: ['/postnumre/2400']
+      }]
+    },
 
     '/postnumre/autocomplete': {
       subtext: autocompleteSubtext('postnumre'),
       parameters: overwriteWithAutocompleteQParameter(postnummerParameters).concat(formatAndPagingParams),
-      examples: [{description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
-                  query: [{name:'q', value:'strand'}]}]},
+      examples: [{
+        description: 'Find alle postnumre som indeholder <em>strand</em> i postnummerbetegnelsen',
+        query: [{name: 'q', value: 'strand'}]
+      }]
+    },
     '/postnumre/reverse': {
       subtext: 'Modtage postnummeret for det punkt der angives med x- og y-parametrene',
       parameters: reverseGeocodingParameters.concat([strukturParameter]),
@@ -670,8 +874,8 @@ var postnummerDoc = {
         {
           description: 'Returner postnummeret for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
           query: [
-            {name:'x', value:'12.5851471984198'},
-            {name:'y', value:'55.6832383751223'}
+            {name: 'x', value: '12.5851471984198'},
+            {name: 'y', value: '55.6832383751223'}
           ]
         },
         {
@@ -679,7 +883,8 @@ var postnummerDoc = {
           query: [
             {name: 'x', value: '725369.59'},
             {name: 'y', value: '6176652.55'},
-            {name: 'srid' , value: '25832'}]}
+            {name: 'srid', value: '25832'}]
+        }
       ]
     }
   }
@@ -691,17 +896,23 @@ var postnummerDoc = {
 /******************************************************************************/
 
 var ejerlavParameters = [
-  {name: 'kode',
+  {
+    name: 'kode',
     doc: 'Ejerlavets unikke kode. Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
-    examples: ['170354', '80652']},
-  {name: 'navn',
+    examples: ['170354', '80652']
+  },
+  {
+    name: 'navn',
     doc: 'Postnummernavn',
-    examples: ['Aarhus', 'København']},
-  {name: 'q',
+    examples: ['Aarhus', 'København']
+  },
+  {
+    name: 'q',
     doc: 'Søgetekst. Der søges i ejerlavsnavnet. Alle ord i søgeteksten skal matche ejerlavsnavnet. ' +
-      'Wildcard * er tilladt i slutningen af hvert ord.'}];
+    'Wildcard * er tilladt i slutningen af hvert ord.'
+  }];
 
-var ejerlavIdParameter =_.find(ejerlavParameters, function (p) {
+var ejerlavIdParameter = _.find(ejerlavParameters, function (p) {
   return p.name === 'kode';
 });
 
@@ -712,23 +923,34 @@ var ejerlavDoc = {
       subtext: 'Søg efter ejerlav. Returnerer de ejerlav som opfylder kriteriet.',
       parameters: ejerlavParameters.concat(formatAndPagingParams),
       examples: [{description: 'Hent alle ejerlav', query: []},
-        {description: 'Find ejerlav <em>80652</em>',
-          query: [{ name: 'kode', value: "80652"}]},
-        {description: 'Find ejerlav med navn <em>Lynge By, Lynge</em>',
-          query: [{ name: 'navn', value: "Lynge By, Lynge"}]}]},
+        {
+          description: 'Find ejerlav <em>80652</em>',
+          query: [{name: 'kode', value: "80652"}]
+        },
+        {
+          description: 'Find ejerlav med navn <em>Lynge By, Lynge</em>',
+          query: [{name: 'navn', value: "Lynge By, Lynge"}]
+        }]
+    },
 
     '/ejerlav/{kode}': {
       subtext: 'Modtag ejerlav med angivet kode.',
       parameters: [ejerlavIdParameter],
       nomulti: true,
-      examples: [{description: 'Hent ejerlav 80652',
-        path: ['/ejerlav/80652']}]},
+      examples: [{
+        description: 'Hent ejerlav 80652',
+        path: ['/ejerlav/80652']
+      }]
+    },
 
     '/ejerlav/autocomplete': {
       subtext: autocompleteSubtext('ejerlav'),
       parameters: overwriteWithAutocompleteQParameter(ejerlavParameters).concat(formatAndPagingParams),
-      examples: [{description: 'Find alle ejerlav som indeholder <em>by</em> i navnet',
-        query: [{name:'q', value:'by'}]}]}
+      examples: [{
+        description: 'Find alle ejerlav som indeholder <em>by</em> i navnet',
+        query: [{name: 'q', value: 'by'}]
+      }]
+    }
   }
 };
 
@@ -770,12 +992,16 @@ var jordstykkeParameters = [
 ];
 
 var jordstykkeIdParameters = [
-  {name: 'ejerlavkode',
+  {
+    name: 'ejerlavkode',
     doc: 'Jordstykkets ejerlavkode.',
-    examples: ['170354', '80652']},
-  {name: 'matrikelnr',
+    examples: ['170354', '80652']
+  },
+  {
+    name: 'matrikelnr',
     doc: 'Jordstykkets matrikelnr.',
-    examples: ['7kn', '5bv']}
+    examples: ['7kn', '5bv']
+  }
 ];
 
 var jordstykkeDoc = {
@@ -785,18 +1011,26 @@ var jordstykkeDoc = {
       subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
       parameters: jordstykkeParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('jordstykker')).concat([strukturParameter]),
       examples: [{description: 'Hent alle jordstykker', query: []},
-        {description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
-          query: [{ name: 'ejerlavkode', value: "80652"}]},
-        {description: 'Find jordstykket med ejerlavkode <em>100453</em> og matrikelnr <em>8bd</em>',
-          query: [{ name: 'ejerlavkode', value: '100453' }, { name: 'matrikelnr', value: '8bd' }]}]},
+        {
+          description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
+          query: [{name: 'ejerlavkode', value: "80652"}]
+        },
+        {
+          description: 'Find jordstykket med ejerlavkode <em>100453</em> og matrikelnr <em>8bd</em>',
+          query: [{name: 'ejerlavkode', value: '100453'}, {name: 'matrikelnr', value: '8bd'}]
+        }]
+    },
 
     '/jordstykker/{ejerlavkode}/{matrikelnr}': {
       subtext: 'Modtag jordstykket med den angivne ejerlavkode og matrikelnr',
       parameters: jordstykkeIdParameters.concat([strukturParameter]),
       nomulti: true,
-      examples: [{description: 'Hent jordstykket med ejerlavkode <em>100453</em> og matriklenr <em>8bd</em>',
-        path: ['/jordstykker/100453/8bd']}]},
-    '/jordstykker/reverse':  {
+      examples: [{
+        description: 'Hent jordstykket med ejerlavkode <em>100453</em> og matriklenr <em>8bd</em>',
+        path: ['/jordstykker/100453/8bd']
+      }]
+    },
+    '/jordstykker/reverse': {
       subtext: 'Modtage jordstykket for det punkt der angives med x- og y-parametrene',
       parameters: reverseGeocodingParameters.concat([strukturParameter]),
       nomulti: true,
@@ -804,8 +1038,8 @@ var jordstykkeDoc = {
         {
           description: 'Returner jordstykket for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
           query: [
-            {name:'x', value:'12.5851471984198'},
-            {name:'y', value:'55.6832383751223'}
+            {name: 'x', value: '12.5851471984198'},
+            {name: 'y', value: '55.6832383751223'}
           ]
         },
         {
@@ -813,7 +1047,8 @@ var jordstykkeDoc = {
           query: [
             {name: 'x', value: '725369.59'},
             {name: 'y', value: '6176652.55'},
-            {name: 'srid' , value: '25832'}]}
+            {name: 'srid', value: '25832'}]
+        }
       ]
 
     }
@@ -825,23 +1060,23 @@ function firstUpper(str) {
 }
 
 function dagiNavnParameter(tema) {
-	return {
-		name: 'navn',
-		doc: firstUpper(tema.singularSpecific) + 's navn. Der er forskel på store og små bogstaver.'
-	};
+  return {
+    name: 'navn',
+    doc: firstUpper(tema.singularSpecific) + 's navn. Der er forskel på store og små bogstaver.'
+  };
 }
 function dagiQParameter() {
-	return {
-		name: 'q',
-		doc: 'Søgetekst. Der søges i kode og navn. Alle ord i søgeteksten skal matche. ' +
-			'Wildcard * er tilladt i slutningen af hvert ord.'
-	};
+  return {
+    name: 'q',
+    doc: 'Søgetekst. Der søges i kode og navn. Alle ord i søgeteksten skal matche. ' +
+    'Wildcard * er tilladt i slutningen af hvert ord.'
+  };
 }
 function dagiKodeNavnParameters(tema) {
   return [
     {
       name: 'kode',
-      doc: firstUpper(tema.singularSpecific)+'s kode. 4 cifre.'
+      doc: firstUpper(tema.singularSpecific) + 's kode. 4 cifre.'
     },
     dagiNavnParameter(tema),
     dagiQParameter()
@@ -859,24 +1094,24 @@ function dagiSridCirkelPolygonParameters(plural) {
       name: 'polygon',
       doc: 'Find de ' + plural + ', som overlapper det angivne polygon. ' +
       'Polygonet specificeres som et array af koordinater på samme måde som' +
-      ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.'+
+      ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
       ' Bemærk at polygoner skal' +
-      ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>'+
+      ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
       ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
-      ' angives vha. srid parameteren, se ovenover.<br> Eksempel: '+
+      ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
       ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
 
-    }  ];
+    }];
 }
 
 function valglandsdelParameters(tema) {
-	return [
-		{
-			name: 'bogstav',
-			doc: firstUpper(tema.singularSpecific)+'s bogstav.'
-		},
-		dagiNavnParameter(tema),
-		dagiQParameter()
+  return [
+    {
+      name: 'bogstav',
+      doc: firstUpper(tema.singularSpecific) + 's bogstav.'
+    },
+    dagiNavnParameter(tema),
+    dagiQParameter()
   ].concat(dagiSridCirkelPolygonParameters(tema.plural));
 }
 
@@ -1016,34 +1251,34 @@ var dagiExamples = {
     }]
   },
   valglandsdel: {
-		query: [{
-			description: 'Find alle valglandsdele som starter med Midt',
-			query: [{
-				name: 'q',
-				value: 'Midt*'
-			}]
-		}, {
-			description: 'Returner alle valglandsdele',
-			query: {}
-		}],
-		get: [{
-			description: 'Returner oplysninger om valglandsdel Hovedstaden',
-			path: ['/valglandsdele/A']
-		}, {
-			description: 'Returnerer oplysninger om valglandsdel Hovedstaden i GeoJSON format',
-			path: ['/valglandsdele/A'],
-			query: [{
-				name: 'format',
-				value: 'geojson'
-			}]
-		}],
-		autocomplete: [{
-			description: 'Find oplysninger om alle valglandsdele der starter med Midt',
-			query: [{
-				name: 'q',
-				value: 'Midt'
-			}]
-		}]
+    query: [{
+      description: 'Find alle valglandsdele som starter med Midt',
+      query: [{
+        name: 'q',
+        value: 'Midt*'
+      }]
+    }, {
+      description: 'Returner alle valglandsdele',
+      query: {}
+    }],
+    get: [{
+      description: 'Returner oplysninger om valglandsdel Hovedstaden',
+      path: ['/valglandsdele/A']
+    }, {
+      description: 'Returnerer oplysninger om valglandsdel Hovedstaden i GeoJSON format',
+      path: ['/valglandsdele/A'],
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }],
+    autocomplete: [{
+      description: 'Find oplysninger om alle valglandsdele der starter med Midt',
+      query: [{
+        name: 'q',
+        value: 'Midt'
+      }]
+    }]
   },
   storkreds: {
     query: [{
@@ -1078,54 +1313,55 @@ var dagiExamples = {
 };
 
 function dagiListEndpointDoc(tema) {
-	return {
-		subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-		parameters: dagiKodeNavnParameters(tema).concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters(tema.plural)),
-		examples: dagiExamples[tema.singular].query || []
-	};
+  return {
+    subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
+    parameters: dagiKodeNavnParameters(tema).concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters(tema.plural)),
+    examples: dagiExamples[tema.singular].query || []
+  };
 }
 function dagiByKodeEndpointDoc(tema) {
-	return {
-		subtext: 'Modtag ' + tema.singular + ' med kode.',
-		parameters: [_.find(dagiKodeNavnParameters(tema), function (p) {
-			return p.name === 'kode';
-		})].concat(formatParameters),
-		nomulti: true,
-		examples: dagiExamples[tema.singular].get || []
-	};
+  return {
+    subtext: 'Modtag ' + tema.singular + ' med kode.',
+    parameters: [_.find(dagiKodeNavnParameters(tema), function (p) {
+      return p.name === 'kode';
+    })].concat(formatParameters),
+    nomulti: true,
+    examples: dagiExamples[tema.singular].get || []
+  };
 }
 function dagiAutocompleteEndpointDoc(tema) {
-	return {
-		subtext: autocompleteSubtext(tema.plural),
-		parameters: overwriteWithAutocompleteQParameter(dagiKodeNavnParameters(tema)).concat(formatAndPagingParams),
-		examples: dagiExamples[tema.singular].autocomplete || []
-	};
+  return {
+    subtext: autocompleteSubtext(tema.plural),
+    parameters: overwriteWithAutocompleteQParameter(dagiKodeNavnParameters(tema)).concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].autocomplete || []
+  };
 }
 function dagiReverseEndpointDoc(tema) {
-	return {
-		subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
-		parameters: reverseGeocodingParameters,
-		nomulti: true,
-		examples: [
-			{
-				description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
-				query: [
-					{name: 'x', value: '12.5851471984198'},
-					{name: 'y', value: '55.6832383751223'}
-				]
-			},
-			{
-				description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
-				query: [
-					{name: 'x', value: '725369.59'},
-					{name: 'y', value: '6176652.55'},
-					{name: 'srid', value: '25832'}
-				]}
-		]
-	};
+  return {
+    subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
+    parameters: reverseGeocodingParameters,
+    nomulti: true,
+    examples: [
+      {
+        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+        query: [
+          {name: 'x', value: '12.5851471984198'},
+          {name: 'y', value: '55.6832383751223'}
+        ]
+      },
+      {
+        description: 'Returner ' + tema.singularSpecific + ' for punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+        query: [
+          {name: 'x', value: '725369.59'},
+          {name: 'y', value: '6176652.55'},
+          {name: 'srid', value: '25832'}
+        ]
+      }
+    ]
+  };
 }
 
-['region', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'].forEach(function(dagiTemaNavn) {
+['region', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'].forEach(function (dagiTemaNavn) {
   var tema = _.findWhere(dagiTemaer, {singular: dagiTemaNavn});
   var doc = {
     docVersion: 2,
@@ -1139,33 +1375,76 @@ function dagiReverseEndpointDoc(tema) {
   _.extend(module.exports, doc.resources);
 });
 
-function dagiValglandsDelsDoc() {
-	var tema = _.findWhere(dagiTemaer, {singular: 'valglandsdel'});
-	var doc = {
-		docVersion: 2,
-		resources: {}
-	};
-	doc.resources['/' + tema.plural] = {
-		subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-		parameters: valglandsdelParameters(tema).concat(formatAndPagingParams),
-		examples: dagiExamples[tema.singular].query || []
-	};
-	doc.resources['/' + tema.plural + '/{bogstav}'] = {
-		subtext: 'Modtag ' + tema.singular + ' ud fra bogstav.',
-		parameters: [_.find(valglandsdelParameters(tema), function (p) {
-			return p.name === 'bogstav';
-		})].concat(formatParameters),
-		nomulti: true,
-		examples: dagiExamples[tema.singular].get
-	};
-	doc.resources['/' + tema.plural + '/autocomplete'] = {
-		subtext: autocompleteSubtext(tema.plural),
-		parameters: overwriteWithAutocompleteQParameter(valglandsdelParameters(tema)).concat(formatAndPagingParams),
-		examples: dagiExamples[tema.singular].autocomplete || []
-	};
-	doc.resources['/' + tema.plural + '/reverse'] = dagiReverseEndpointDoc(tema);
+Object.keys(flats).forEach(flatName => {
+  const flat = flats[flatName];
+  const parameters = flatParametersMap[flatName];
+  {
+    const parametersArray = parameters.id.concat(parameters.propertyFilter);
+    const reverseGeocodingDocs = [
+      {
+        name: 'x',
+        doc: 'Find bebyggelser der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendes angives bredde-værdien.'
+      },
+      {
+        name: 'y',
+        doc: 'Find bebyggelser der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk ' +
+        'anvendes angives længde-værdien.'
+      },
+      SRIDParameter];
+    const additionalParameterDocs = parametersArray.map(parameter => ({
+      name: parameter.name,
+      doc: `Filtrer resultat ud fra ${parameter.name}.`
+    }));
+    const parameterDocs = additionalParameterDocs.concat(reverseGeocodingDocs).concat(dagiSridCirkelPolygonParameters(flat.plural)).concat(formatAndPagingParams);
+    const subtext = `Søg efter ' + ${flat.plural} + '. Returnerer de ${flat.plural} der opfylder kriteriet.`;
+    module.exports['/' + flat.plural] = {
+      subtext: subtext,
+      parameters: parameterDocs,
+      examples: []
+    };
+  }
+  {
+    const subtext = `Modtag enkelt ${flat.singular} ud fra unik nøgle`;
+    const idParameterDocs = parameters.id.map(parameter => ({
+      name: parameter.name,
+      doc: `${flat.singularSpecific}s ${parameter.name}`
+    }));
+    module.exports[`/${flat.plural}/{${flat.key.join('}/{')}}`] = {
+      subtext: subtext,
+      parameters: idParameterDocs.concat([SRIDParameter]),
+      examples: [],
+      nomulti: true
+    };
+  }
+});
 
-	return doc;
+function dagiValglandsDelsDoc() {
+  var tema = _.findWhere(dagiTemaer, {singular: 'valglandsdel'});
+  var doc = {
+    docVersion: 2,
+    resources: {}
+  };
+  doc.resources['/' + tema.plural] = {
+    subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
+    parameters: valglandsdelParameters(tema).concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].query || []
+  };
+  doc.resources['/' + tema.plural + '/{bogstav}'] = {
+    subtext: 'Modtag ' + tema.singular + ' ud fra bogstav.',
+    parameters: [_.find(valglandsdelParameters(tema), function (p) {
+      return p.name === 'bogstav';
+    })].concat(formatParameters),
+    nomulti: true,
+    examples: dagiExamples[tema.singular].get
+  };
+  doc.resources['/' + tema.plural + '/autocomplete'] = {
+    subtext: autocompleteSubtext(tema.plural),
+    parameters: overwriteWithAutocompleteQParameter(valglandsdelParameters(tema)).concat(formatAndPagingParams),
+    examples: dagiExamples[tema.singular].autocomplete || []
+  };
+  doc.resources['/' + tema.plural + '/reverse'] = dagiReverseEndpointDoc(tema);
+
+  return doc;
 }
 
 function dagiStorkredsDoc() {
@@ -1217,7 +1496,6 @@ _.each(tilknytninger, function (tilknytning, temaNavn) {
     }
   ];
 });
-
 
 
 var eventExamples = {
@@ -1313,13 +1591,13 @@ var eventExamples = {
   ]
 };
 
-var tilknytningTemaer = dagiTemaer.filter(function(tema) {
+var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(tilknytningTemaer.map(function(tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
-})).forEach(function(replicatedModelName) {
+})).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({
     entityName: replicatedModelName,
     type: 'nameAndKey'
@@ -1415,8 +1693,10 @@ module.exports['/datavask/adgangsadresser'] = {
     doc: 'Adressebetegnelsen for den adgangsadresse som ønskes vasket, f.eks. "Rentemestervej 8, 2400 København".' +
     ' Adressebetegnelsen kan leveres med eller uden supplerende bynavn.'
   }],
-  examples: [{description: 'Vask adressen "Rante mester vej 8, 2400 København NV"',
-    query: [{name:'betegnelse', value:'Rante mester vej 8, 2400 København NV'}]}]
+  examples: [{
+    description: 'Vask adressen "Rante mester vej 8, 2400 København NV"',
+    query: [{name: 'betegnelse', value: 'Rante mester vej 8, 2400 København NV'}]
+  }]
 };
 
 module.exports['/datavask/adresser'] = {
@@ -1430,11 +1710,11 @@ module.exports['/datavask/adresser'] = {
   examples: [
     {
       description: 'Vask adressen "Rante mester vej 8, 4, 2400 København NV"',
-      query: [{name:'betegnelse', value:'Rante mester vej 8, 4, 2400 København NV'}]
+      query: [{name: 'betegnelse', value: 'Rante mester vej 8, 4, 2400 København NV'}]
     },
     {
       description: 'Vask adressen "Borger gade 4, STTV, 6000 Kolding"',
-      query: [{name:'betegnelse', value:'Borger gade 4, STTV, 6000 Kolding'}]
+      query: [{name: 'betegnelse', value: 'Borger gade 4, STTV, 6000 Kolding'}]
     }]
 };
 
@@ -1459,7 +1739,7 @@ module.exports['/historik/adgangsadresser'] = {
   examples: [
     {
       description: 'Vis historikken for adgangsadressen med id "45380a0c-9ad1-4370-84d2-50fc574b2063"',
-      query: [{name:'id', value:'45380a0c-9ad1-4370-84d2-50fc574b2063'}]
+      query: [{name: 'id', value: '45380a0c-9ad1-4370-84d2-50fc574b2063'}]
     }
   ]
 };
@@ -1485,7 +1765,7 @@ module.exports['/historik/adresser'] = {
   examples: [
     {
       description: 'Vis historik for adressen med id "4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd"',
-      query: [{name:'id', value:'4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd'}]
+      query: [{name: 'id', value: '4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd'}]
     }
   ]
 };
@@ -1503,7 +1783,7 @@ function addMultiParameters() {
     var resource = _.findWhere(allResources, {
       path: resourcePath
     });
-    if(!resource) {
+    if (!resource) {
       throw new Error("Could not find a resource for path " + resourcePath);
     }
     var queryParameters = resource.queryParameters;

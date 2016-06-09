@@ -33,6 +33,9 @@ function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
  * to be updated in dstTable in order to make srcTable and dstTable equal.
  */
 function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck) {
+  if(columnsToCheck.length === 0) {
+    return Promise.resolve(null);
+  }
   return client.queryp(
     format("CREATE TEMP TABLE {upTable} AS SELECT {srcTable}.*" +
       " FROM {srcTable}" +
@@ -81,6 +84,9 @@ function applyInserts(client, insTable, dstTable, columns) {
 }
 
 function applyUpdates(client, upTable, dstTable, idColumns, columnsToUpdate) {
+  if(columnsToUpdate.length === 0) {
+    return Promise.resolve(null);
+  }
   var fieldUpdates = columnsToUpdate.map(function(column) {
     return format('{column} = {srcTable}.{column}', {
       column: column,
@@ -112,11 +118,11 @@ function applyDeletes(client, delTable, dstTable, idColumns) {
   return client.queryp(sql, []);
 }
 
-function applyChanges(client, table, idColumns, allColumns, columnsToUpdate) {
+function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColumns, columnsToUpdate) {
   return q.async(function*() {
-    yield applyInserts(client, `insert_${table}`, table, allColumns);
-    yield applyUpdates(client, `update_${table}`, table, idColumns, columnsToUpdate);
-    yield applyDeletes(client, `delete_${table}`, table, idColumns);
+    yield applyInserts(client, `insert_${changeTableSuffix}`, targetTable, allColumns);
+    yield applyUpdates(client, `update_${changeTableSuffix}`, targetTable, idColumns, columnsToUpdate);
+    yield applyDeletes(client, `delete_${changeTableSuffix}`, targetTable, idColumns);
   })();
 }
 

@@ -147,6 +147,10 @@ var fields = [
   },
   {
     name: 'højde'
+  },
+  {
+    name: 'bebyggelser',
+    multi: true
   }
 ];
 

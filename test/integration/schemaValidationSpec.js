@@ -40,6 +40,13 @@ var valuesNeverExpectedToBeSeen = {
     historik: {
       oprettet: true,
       ændret: true
+    },
+    bebyggelser: {
+      id: true,
+      href: true,
+      kode: true,
+      type: true,
+      navn: true
     }
   },
   adresser: {

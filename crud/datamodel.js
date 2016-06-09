@@ -43,5 +43,11 @@ module.exports = {
     table: 'adgangsadresser_temaer_matview',
     columns: ['adgangsadresse_id', 'tema', 'tema_id'],
     key: ['adgangsadresse_id', 'tema', 'tema_id']
+  },
+  bebyggelse_adgangsadresse: {
+    name: 'bebyggelser_adgangsadresse',
+    table: 'bebyggelser_adgadr',
+    columns: ['bebyggelse_id', 'adgangsadresse_id'],
+    key: ['bebyggelse_id', 'adgangsadresse_id']
   }
 };

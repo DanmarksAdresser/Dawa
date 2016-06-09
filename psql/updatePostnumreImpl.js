@@ -17,7 +17,7 @@ module.exports = function(client, inputFile) {
     yield importUtil.createTempTableFromTemplate(client, 'updated_postnumre', 'postnumre', POSTNUMMER_COUMNS);
     yield loadPostnummerCsv(client, inputFile, 'updated_postnumre');
     yield tableDiff.computeDifferences(client, 'updated_postnumre', 'postnumre', ['nr'], ['navn', 'stormodtager']);
-    yield tableDiff.applyChanges(client, 'postnumre', ['nr'], POSTNUMMER_COUMNS, ['navn', 'stormodtager']);
+    yield tableDiff.applyChanges(client, 'postnumre', 'postnumre', ['nr'], POSTNUMMER_COUMNS, ['navn', 'stormodtager']);
     yield tableDiff.dropChangeTables(client, 'postnumre');
   })();
 };

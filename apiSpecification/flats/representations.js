@@ -2,12 +2,16 @@
 
 const _ = require('underscore');
 
+const commonMappers = require('../commonMappers');
 const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const flats = require('./flats');
+const fieldsMap = require('./fields');
 const representationUtil = require('../common/representationUtil');
 
 const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 
+
+const makeHref = commonMappers.makeHref;
 
 const jsonSchema = (fields) => {
   const schema = fields.reduce((memo, field) => {
@@ -22,13 +26,22 @@ const jsonSchema = (fields) => {
 };
 
 module.exports = _.mapObject(flats, (flat) => {
-  const flatRepresentation = representationUtil.defaultFlatRepresentation(flat.fields);
-  return {
+  const fields = fieldsMap[flat.singular];
+  const flatFields = fields.filter(field => field.name !== 'geom_json');
+  const flatRepresentation = representationUtil.defaultFlatRepresentation(flatFields);
+  const representations = {
     flat: flatRepresentation,
     json: {
-      fields: _.pluck(flat.fields, 'name'),
+      fields: flatFields,
       schema: jsonSchema(flat.fields),
-      mapper: _.identity
+      mapper: (baseUrl, params) => (row => {
+        row.href = makeHref(baseUrl, 'bebyggelse', [row.id]);
+        return row;
+      })
     }
   }
+  const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+  representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
+  representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
+  return representations;
 });

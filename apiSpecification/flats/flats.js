@@ -1,3 +1,7 @@
+"use strict";
+
+const registry = require('../registry');
+
 module.exports = {
   bebyggelse: {
     singular: 'bebyggelse',
@@ -21,8 +25,13 @@ module.exports = {
       type: 'string',
       description: 'Bebyggelsens navn.'
     }],
-    key: ['kode'],
+    filters: ['type', 'navn'],
+    key: ['id'],
     geometryType: 'area',
     searchable: true
   }
 };
+
+Object.keys(module.exports).forEach(flatName => {
+  registry.add(flatName, 'nameAndKey', undefined, module.exports[flatName]);
+});

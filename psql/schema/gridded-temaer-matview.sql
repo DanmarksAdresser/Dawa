@@ -31,7 +31,7 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
 --    RAISE NOTICE 'Points: (%)', points;
 
     IF points <= maxPointCount THEN
-      RETURN QUERY SELECT g;
+      RETURN QUERY SELECT ST_Multi(g);
       RETURN;
     END IF;
     xmin := ST_XMin(g);
@@ -49,8 +49,8 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
       r1 := makeRectangle(xmin, ymin, xmax, ymin + dy/2, srid);
       r2 := makeRectangle(xmin, ymin + dy/2, xmax, ymax, srid);
     END IF;
-    i1 := st_intersection(g, r1);
-    i2 := st_intersection(g, r2);
+    i1 := ST_Multi(ST_CollectionExtract(st_intersection(g, r1), 3));
+    i2 := ST_Multi(ST_CollectionExtract(st_intersection(g, r2), 3));
     RETURN QUERY SELECT splitToGridRecursive(i1, maxPointCount);
     RETURN QUERY SELECT splitToGridRecursive(i2, maxPointCount);
     RETURN;

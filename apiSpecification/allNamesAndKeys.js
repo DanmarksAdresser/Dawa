@@ -7,3 +7,4 @@ require('./vejnavn/nameAndKey');
 require('./vejstykke/nameAndKey');
 require('./ejerlav/nameAndKey');
 require('./tematilknytninger/namesAndKeys');
+require('./flats/flats');

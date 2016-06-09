@@ -16,7 +16,7 @@ module.exports = function(client, inputFile) {
     yield importUtil.createTempTableFromTemplate(client, 'updated_ejerlav', 'ejerlav', EJERLAV_COLUMNS);
     yield loadEjerlavCsv(client, inputFile, 'updated_ejerlav');
     yield tableDiff.computeDifferences(client, 'updated_ejerlav', 'ejerlav', ['kode'], ['navn']);
-    yield tableDiff.applyChanges(client, 'ejerlav', ['kode'], EJERLAV_COLUMNS, ['navn']);
+    yield tableDiff.applyChanges(client, 'ejerlav', 'ejerlav', ['kode'], EJERLAV_COLUMNS, ['navn']);
     yield tableDiff.dropChangeTables(client, 'ejerlav');
   })();
 };
