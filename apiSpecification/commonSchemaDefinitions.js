@@ -471,7 +471,7 @@ definitions.bebyggelse = schemaObject(
       },
       kode: {
         description: 'Bebyggelsens kode. Anvendes bl.a. af Danmarks Statistik',
-        type: 'integer'
+        type: ['null', 'integer']
       },
       type: {
         description: 'Bebyggelsens type. Kan antage værdierne "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby"',
