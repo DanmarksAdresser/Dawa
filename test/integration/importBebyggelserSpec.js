@@ -41,7 +41,11 @@ describe('Import af bebyggelser', () => {
       expect(bebyggelse.type).to.equal('bydel');
       expect(bebyggelse.geom).to.equal('{"type":"MultiPolygon","coordinates":[[[[556779,6134635],[556779,6134636],[556780,6134636],[556780,6134635],[556779,6134635]]]]}');
       expect(bebyggelse.geo_version).to.equal(2);
+    }));
 
+    it('Har udfyldt bebyggelser_divided', q.async(function*() {
+      const rows = (yield clientFn().queryp('select * from bebyggelser_divided')).rows;
+      expect(rows.length).to.equal(1);
     }));
   });
 });
