@@ -6,6 +6,7 @@ const commonMappers = require('../commonMappers');
 const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const flats = require('./flats');
 const fieldsMap = require('./fields');
+const registry = require('../registry');
 const representationUtil = require('../common/representationUtil');
 
 const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
@@ -29,11 +30,15 @@ module.exports = _.mapObject(flats, (flat) => {
   const fields = fieldsMap[flat.singular];
   const flatFields = fields.filter(field => field.name !== 'geom_json');
   const flatRepresentation = representationUtil.defaultFlatRepresentation(flatFields);
+  const schema = jsonSchema(flat.fields);
+  schema.properties.href = {
+    type: 'string'
+  };
   const representations = {
     flat: flatRepresentation,
     json: {
       fields: flatFields,
-      schema: jsonSchema(flat.fields),
+      schema: schema,
       mapper: (baseUrl, params) => (row => {
         row.href = makeHref(baseUrl, 'bebyggelse', [row.id]);
         return row;
@@ -44,4 +49,8 @@ module.exports = _.mapObject(flats, (flat) => {
   representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
   representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
   return representations;
+});
+
+Object.keys(module.exports).forEach(flatName => {
+  registry.addMultiple(flatName, 'representation', module.exports[flatName]);
 });

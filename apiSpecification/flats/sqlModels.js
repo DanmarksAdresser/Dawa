@@ -7,6 +7,7 @@ const flats = require('./flats');
 const sqlSpecs = require('./sqlSpecs');
 const sqlUtil = require('../common/sql/sqlUtil');
 const parametersMap = require('./parameters');
+const registry = require('../registry');
 const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 
 module.exports = _.mapObject(flats, (flat, flatName) => {
@@ -50,5 +51,7 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
     sqlParameterImpl.paging(columns, flat.key, true)
 
   ];
-  return sqlUtil.assembleSqlModel(columns, sqlParameterImpls, baseQuery);
+  const sqlModel =  sqlUtil.assembleSqlModel(columns, sqlParameterImpls, baseQuery);
+  registry.add(flatName, 'sqlModel', undefined, sqlModel);
+  return sqlModel;
 });

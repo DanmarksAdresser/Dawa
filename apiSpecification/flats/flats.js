@@ -14,7 +14,7 @@ module.exports = {
       description: 'Unik identifikator for bebyggelsen.'
     },{
       name: 'kode',
-      type: 'string',
+      type: ['integer', 'null'],
       description: 'Unik kode for bebyggelsen.'
     }, {
       name: 'type',

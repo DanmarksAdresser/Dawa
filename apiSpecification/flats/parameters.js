@@ -1,6 +1,7 @@
 "use strict";
 
 const flats = require('./flats');
+const registry = require('../registry');
 const _ = require('underscore');
 
 module.exports = _.mapObject(flats, (flat) => {
@@ -27,4 +28,8 @@ module.exports = _.mapObject(flats, (flat) => {
     id: idParameters,
     propertyFilter: propertyFilterParameters
   };
+});
+
+_.each(module.exports, function(parameterGroup, flatName) {
+  registry.addMultiple(flatName, 'parameterGroup', parameterGroup);
 });
