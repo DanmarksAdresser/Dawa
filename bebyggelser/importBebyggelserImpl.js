@@ -62,6 +62,7 @@ function applyChanges(client, table) {
   return tablediff.applyChanges(client, table, table, ID_COLUMNS, COLUMNS, NON_ID_COLUMNS);
 }
 
+
 function importBebyggelser(client, filePath, table, initial) {
   return q.async(function*() {
     if (initial) {
@@ -73,9 +74,9 @@ function importBebyggelser(client, filePath, table, initial) {
       yield streamToTable(client, filePath, desiredTable);
       yield computeDifferences(client, desiredTable, table);
       yield importUtil.dropTable(client, desiredTable);
-      yield applyChanges(client, table);
       yield client.queryp('UPDATE bebyggelser b SET ændret = NOW() FROM update_bebyggelser u WHERE b.id = u.id');
       yield client.queryp('UPDATE bebyggelser b SET geo_ændret = NOW(), geo_version=geo_version+1 FROM update_bebyggelser u WHERE b.id = u.id AND b.geom IS DISTINCT FROM u.geom');
+      yield applyChanges(client, table);
     }
     if (initial) {
       yield client.queryp(`INSERT INTO bebyggelser_divided(id, geom) (SELECT id, splitToGridRecursive(geom, 64) AS geom FROM bebyggelser)`);
