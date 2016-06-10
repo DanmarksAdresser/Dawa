@@ -57,7 +57,7 @@ var historyTransformStream = es.map(function(line, cb) {
     var navn = line.substring(67, 107).trim();
     const virkning = toInterval(oprettet, nedlagt);
 
-    if(oprettet === nedlagt) {
+    if(oprettet && (oprettet === nedlagt)) {
       cb();
       return;
     }
