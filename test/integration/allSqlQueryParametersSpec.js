@@ -461,6 +461,20 @@ var sampleParameters = {
       values: ['101', '0101'],
       verifier: (adr, kode) => parseInt(adr.kommunekode) === parseInt(kode)
     }
+  },
+  bebyggelse: {
+    id: {
+      values: ['12337669-af32-6b98-e053-d480220a5a3f'],
+      verifier: (bebyggelse, id) => bebyggelse.id === id
+    },
+    navn: {
+      values: ['Emtekær'],
+      verifier: (bebyggelse, navn) => bebyggelse.navn === navn
+    },
+    type: {
+      values: ['by'],
+      verifier: (bebyggelse, type) => bebyggelse.type === type
+    }
   }
 };
 
