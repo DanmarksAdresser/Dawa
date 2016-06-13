@@ -47,6 +47,7 @@ module.exports = [
       sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
+    crs: commonParameters.crs,
     husnrinterval: parameters.husnrinterval,
     geomWithin: commonParameters.geomWithin,
     dagiFilter: commonParameters.dagiFilter,

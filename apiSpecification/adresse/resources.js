@@ -50,6 +50,7 @@ module.exports = [
     geomWithin: commonParameters.geomWithin,
     dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,
+    crs: commonParameters.crs,
     fuzzy: commonParameters.fuzzy
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
