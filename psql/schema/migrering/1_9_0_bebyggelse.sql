@@ -49,3 +49,9 @@ CREATE TABLE bebyggelser_divided(
 
 CREATE INDEX ON bebyggelser_divided(id);
 CREATE INDEX ON bebyggelser_divided USING GIST(geom);
+
+CREATE TABLE vask_postnumre(
+  nr smallint NOT NULL,
+  navn text NOT NULL,
+  virkning tstzrange NOT NULL
+);
