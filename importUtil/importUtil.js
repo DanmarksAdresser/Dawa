@@ -94,6 +94,9 @@ function streamNdjsonToTable(client, filePath, targetTable, columns, mapFn) {
       const json = JSON.parse(line);
       try {
         const result = mapFn(json);
+        if(!result) {
+          return callback();
+        }
         const csvResult = postgresify(result);
         callback(null, csvResult);
       }

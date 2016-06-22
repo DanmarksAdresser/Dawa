@@ -87,12 +87,6 @@
         "null"
       ]
     },
-    "fk_bbr_opgang_opgang": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "fk_bbr_tekniskanlæg_adgangtiltekniskanlæg": {
       "type": [
         "string",
@@ -176,7 +170,6 @@
     "darmenighedsrådsafstemningsområde_id",
     "darsogneinddeling_id",
     "fk_bbr_bygning_adgangtilbygning",
-    "fk_bbr_opgang_opgang",
     "fk_bbr_tekniskanlæg_adgangtiltekniskanlæg",
     "fk_geodk_bygning_geodanmarkbygning",
     "fk_geodk_vejmidte_vejmidte",

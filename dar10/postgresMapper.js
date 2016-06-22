@@ -8,6 +8,7 @@ const _ = require('underscore');
 
 const databaseTypes = require('../psql/databaseTypes');
 const logger = require('../logger').forCategory('darImport');
+const moment = require('moment');
 const nontemporal = require('../darImport/nontemporal');
 const spec = require('./spec');
 
@@ -36,6 +37,11 @@ function transformTimeInterval(entity, name) {
   entity[name] = new Range(from, to, '[)');
 }
 
+function transformStatus(entity) {
+  entity.status = entity.status ? parseInt(entity.status, 10) : null;
+  return entity;
+}
+
 exports.createMapper = function(entityName, validate) {
   return function(rawObject) {
     if(validate) {
@@ -45,8 +51,20 @@ exports.createMapper = function(entityName, validate) {
         throw new Error("JSON schema validation of DAR 1.0 object failed");
       }
     }
+    let invalid = false;
+    ['registrering', 'virkning', 'dbregistrering'].forEach((field) => {
+      if(rawObject[`${field}fra`] && rawObject[`${field}til`] &&
+        Date.parse(rawObject[`${field}fra`]) > Date.parse(rawObject[`${field}til`])) {
+        logger.info('Skipping row due to bad range' , {row: rawObject});
+        invalid = true;
+      }
+    });
+    if(invalid) {
+      return null;
+    }
     transformTimeInterval(rawObject, 'registrering');
     transformTimeInterval(rawObject, 'virkning');
+    transformStatus(rawObject);
     if(spec.fieldTransforms[entityName]) {
       const fieldTransforms = spec.fieldTransforms[entityName];
       Object.keys(rawObject).forEach(fieldName => {

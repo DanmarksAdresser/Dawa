@@ -6,7 +6,7 @@
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
   "dependencies": {
     "JSONStream": "^1.1.1",
-    "ajv": "^3.8.4",
+    "ajv": "^4.1.0",
     "async": "0.9.0",
     "aws-sdk": "~2.0.0",
     "bluebird": "~1.1.1",

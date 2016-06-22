@@ -3,7 +3,7 @@
 const q = require('q');
 const _ = require('underscore');
 
-const tablediff = require('./tablediff');
+const tablediff = require('../importUtil/tablediff');
 const sqlUtil = require('../darImport/sqlUtil');
 
 

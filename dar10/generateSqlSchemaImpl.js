@@ -44,7 +44,7 @@ const standardColumns = [
   },
   {
     name: 'status',
-    type: 'dar1_status',
+    type: 'smallint',
     nullable: false
   }
 ];
