@@ -8,7 +8,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
     hn.husnummertekst as husnr,
     s.navn AS supplerendebynavn,
     p.postnr,
-    dar1_status_til_kode(hn.status) as objekttype,
+    hn.status as objekttype,
     LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
            FROM dar1_husnummer hn2
            WHERE hn.id = hn2.id),
@@ -42,4 +42,4 @@ CREATE VIEW dar1_adgangsadresser_view AS
     ON hn.postnummer_id = p.id
     JOIN dar1_adressepunkt_current ap
     ON hn.adgangspunkt_id = ap.id
-  WHERE hn.status IN ('Gældende', 'Nedlagt');
+  WHERE hn.status IN (1, 3);

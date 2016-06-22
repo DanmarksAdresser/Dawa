@@ -3,7 +3,7 @@ CREATE VIEW dar1_enhedsadresser_view AS
   SELECT
     adr.id,
     adr.husnummer_id AS adgangsadresseid,
-    dar1_status_til_kode(adr.status) as objekttype,
+    adr.status as objekttype,
 
     LEAST((SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
            FROM dar1_adresse_history adr2
@@ -16,5 +16,6 @@ CREATE VIEW dar1_enhedsadresser_view AS
     adr.etagebetegnelse AS etage,
     adr.dørbetegnelse AS doer
   FROM dar1_adresse_current adr
-  WHERE adr.husnummer_id IN (SELECT id FROM dar1_adgangsadresser_view);
+  WHERE adr.husnummer_id IN (SELECT id FROM dar1_adgangsadresser_view)
+  AND status IN (1,3);
 

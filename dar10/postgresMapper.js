@@ -8,7 +8,6 @@ const _ = require('underscore');
 
 const databaseTypes = require('../psql/databaseTypes');
 const logger = require('../logger').forCategory('darImport');
-const moment = require('moment');
 const nontemporal = require('../darImport/nontemporal');
 const spec = require('./spec');
 
