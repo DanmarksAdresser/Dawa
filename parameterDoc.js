@@ -537,6 +537,14 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     name: 'politikredskode',
     doc: 'Find de adresser som ligger indenfor politikredsen angivet ved politikredskoden.',
     nullable: true
+  },
+  {
+    name: 'bebyggelsesid',
+    doc: 'Find de adresser som ligger indenfor bebyggelsen med den angivne ID'
+  },
+  {
+    name: 'bebyggelsestype',
+    doc: 'Find de adresser som ligger en bebyggelse af den angivne type'
   }
 ];
 
@@ -1389,8 +1397,7 @@ Object.keys(flats).forEach(flatName => {
         name: 'y',
         doc: 'Find bebyggelser der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk ' +
         'anvendes angives længde-værdien.'
-      },
-      SRIDParameter];
+      }];
     const additionalParameterDocs = parametersArray.map(parameter => ({
       name: parameter.name,
       doc: `Filtrer resultat ud fra ${parameter.name}.`

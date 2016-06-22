@@ -1,5 +1,6 @@
 "use strict";
 var dbapi = require('../../dbapi');
+const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
 
 var selectIsoTimestamp = sqlUtil.selectIsoDate;
@@ -32,6 +33,51 @@ module.exports =  {
   },
   adressepunktændringsdato: {
     column: selectIsoTimestamp('adressepunktaendringsdato')
+  },
+  bebyggelsesid: {
+    select: null,
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      var subquery = {
+        select: ["*"],
+        from: ['bebyggelser_adgadr'],
+        whereClauses: ['a_id  = bebyggelser_adgadr.adgangsadresse_id'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'bebyggelse_id',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {bebyggelse_id: parameterArray});
+      var subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+
+  },
+  bebyggelsestype: {
+    select: null,
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      var subquery = {
+        select: ["*"],
+        from: ['bebyggelser_adgadr JOIN bebyggelser ON bebyggelser_adgadr.bebyggelse_id = bebyggelser.id'],
+        whereClauses: ['a_id  = bebyggelser_adgadr.adgangsadresse_id'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'type',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {type: parameterArray});
+      var subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
   },
   geom_json: {
     select: function(sqlParts, sqlModel, params) {

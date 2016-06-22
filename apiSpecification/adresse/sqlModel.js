@@ -68,7 +68,10 @@ var columns = {
   },
   adgangsadresse_ikrafttrædelse: {
     select: selectIsoTimestamp('a_ikraftfra')
-  }
+  },
+  bebyggelsesid: adgangsadresseColumns.bebyggelsesid,
+  bebyggelsestype: adgangsadresseColumns.bebyggelsestype
+
 };
 
 var baseQuery = function () {
