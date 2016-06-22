@@ -87,6 +87,11 @@ block content
               li
               li <a href='#jordstykkereverse'>Jordstykke reverse geocoding</a>
               li <a href='#jordstykkedata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#bebyggelse').nav-header Bebyggelse API
+            ul#bebyggelse.nav.nav-list
+              li <a href='#bebyggelsesoegning'>Bebyggelsesøgning</a>
+              li <a href='#bebyggelseopslag'>Bebyggelseopslag</a>
+              li <a href='#bebyggelsedata'>Databeskrivelse</a>
 
         div.span9
           section
@@ -282,9 +287,18 @@ block content
             +documentResource(parameterDoc, '/jordstykker/reverse')
             div.page-header
             h3.anchor-header#jordstykkedata Beskrivelse af jordstykker
-            p Web API'et udstiller for hvert jordstykker følgende informationer:
+            p Web API'et udstiller for hvert jordstykke følgende informationer:
             +documentSchema(jsonSchemas.jordstykke)
-
+          section
+            h3.anchor-header#bebyggelsesoegning Bebyggelsesøgning
+            +documentResource(parameterDoc, '/bebyggelser')
+            div.page-header
+            h3.anchor-header#bebyggelseopslag Bebyggelseopslag
+            +documentResource(parameterDoc, '/bebyggelser/{id}')
+            div.page-header
+            h3.anchor-header#bebyggelsedata Beskrivelse af bebyggelser
+            p Web API'et udstiller for hver bebyggelse følgende informationer:
+            +documentSchema(jsonSchemas.bebyggelse)
 block append scripts
   script.
     var topbar = $('#topbar');

@@ -75,7 +75,19 @@ exports.propertyFilter = normalizeParameters([
       enum: ['A', 'B', 'U']
     },
     multi: true
+  },
+  {
+    name: 'bebyggelsesid',
+    type: 'string',
+    schema: schema.uuid,
+    multi: true
+  },
+  {
+    name: 'bebyggelsestype',
+    type: 'string',
+    multi: true
   }
+
 ]);
 
 exports.husnrinterval = normalizeParameters([

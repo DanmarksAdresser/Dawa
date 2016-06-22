@@ -275,6 +275,18 @@ var sampleParameters = {
       verifier: function(adr, matrikelnr) {
         return adr.jordstykke && adr.jordstykke.matrikelnr === matrikelnr;
       }
+    },
+    bebyggelsesid: {
+      values: ['12337669-af32-6b98-e053-d480220a5a3f'],
+      verifier: function(adr, bebyggelsesid) {
+        return adr.bebyggelser.filter(bebyggelse => bebyggelse.id === bebyggelsesid).length === 1;
+      }
+    },
+    bebyggelsestype: {
+      values: ['by'],
+      verifier: function(adr, type) {
+        return adr.bebyggelser.filter(bebyggelse => bebyggelse.type === type).length >= 1;
+      }
     }
   },
   adresse: {
@@ -428,6 +440,18 @@ var sampleParameters = {
       values: ['99f'],
       verifier: function(adr, matrikelnr) {
         return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
+      }
+    },
+    bebyggelsesid: {
+      values: ['12337669-af32-6b98-e053-d480220a5a3f'],
+      verifier: function(adr, bebyggelsesid) {
+        return adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === bebyggelsesid).length === 1;
+      }
+    },
+    bebyggelsestype: {
+      values: ['by'],
+      verifier: function(adr, type) {
+        return adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.type === type).length >= 1;
       }
     }
   },
