@@ -118,7 +118,7 @@ var fieldMap = {
       formatter: kode4String
     }, {
       name: 'retskredskode',
-      description: 'Retskredskoden',
+      description: 'Retskredskoden, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
       schema: commonSchemaDefinitions.Kode4,
       formatter: kode4String
     }, {

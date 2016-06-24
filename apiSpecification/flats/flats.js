@@ -19,7 +19,7 @@ module.exports = {
     }, {
       name: 'type',
       type: 'string',
-      description: 'Angiver typen af bebyggelse.'
+      description: 'Angiver typen af bebyggelse. Mulige værdier: "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby".'
     }, {
       name: 'navn',
       type: 'string',
