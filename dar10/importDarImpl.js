@@ -34,10 +34,12 @@ function ndjsonFileName(entityName) {
 
 function importInitial(client, dataDir) {
   return q.async(function*() {
+    yield client.queryp('UPDATE dar1_curtime SET virkning = NOW()');
     for (let entityName of entities) {
       const filePath = path.join(dataDir, ndjsonFileName(entityName));
       const tableName = postgresMapper.tables[entityName];
       yield streamToTable(client, entityName, filePath, tableName, true);
+      yield client.queryp(`INSERT INTO dar1_${entityName}_current (SELECT * FROM ${tableName})`);
     }
   })();
 }

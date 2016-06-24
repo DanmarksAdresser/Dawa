@@ -23,3 +23,14 @@ CREATE OR REPLACE FUNCTION current_dar1_transaction()
   RETURNS INTEGER
 AS $$ SELECT tx_current
       FROM dar1_tx_current $$ LANGUAGE SQL;
+
+DROP TABLE IF EXISTS dar1_curtime;
+
+CREATE TABLE dar1_curtime(
+  virkning timestamptz
+);
+
+INSERT INTO dar1_curtime VALUES (NULL);
+
+CREATE UNIQUE INDEX
+ON dar1_curtime ((TRUE));

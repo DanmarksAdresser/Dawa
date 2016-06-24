@@ -59,9 +59,6 @@
       "type": "string",
       "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
     },
-    "bfenummer": {
-      "type": "integer"
-    },
     "darafstemningsområde_id": {
       "type": "string",
       "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
@@ -164,7 +161,6 @@
     "status",
     "adgangsadressebetegnelse",
     "adgangspunkt_id",
-    "bfenummer",
     "darafstemningsområde_id",
     "darkommune_id",
     "darmenighedsrådsafstemningsområde_id",

@@ -1,3 +1,8 @@
+CREATE OR REPLACE FUNCTION dar1_current_time() RETURNS timestamptz LANGUAGE sql AS
+$$
+SELECT virkning from dar1_curtime;
+$$;
+
 --
 -- From: https://wiki.postgresql.org/wiki/First/last_(aggregate)
 --

@@ -8,8 +8,8 @@ module.exports = function() {
   for(let entityName of Object.keys(postgresMapper.tables)) {
     const tableName = postgresMapper.tables[entityName];
     const columns = postgresMapper.columns[entityName];
-    currentViews.push(`CREATE VIEW ${tableName}_current AS SELECT ${columns.join(', ')} FROM ${tableName} WHERE upper(registrering) IS NULL AND now() <@ virkning;`);
     historyViews.push(`CREATE VIEW ${tableName}_history AS SELECT ${columns.join(', ')} FROM ${tableName} WHERE upper(registrering) IS NULL;`);
+    currentViews.push(`CREATE VIEW ${tableName}_current_view AS SELECT ${columns.join(', ')} FROM ${tableName}_history WHERE dar1_current_time() <@ virkning;`);
   }
-  return currentViews.join('\n') + '\n' + historyViews.join('\n');
+  return historyViews.join('\n') + '\n' + currentViews.join('\n');
 };

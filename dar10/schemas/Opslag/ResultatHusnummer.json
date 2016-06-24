@@ -53,9 +53,6 @@
           "type": "string",
           "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
         },
-        "bfenummer": {
-          "type": "integer"
-        },
         "darafstemningsområde_id": {
           "type": "string",
           "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
@@ -76,12 +73,6 @@
           "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
         },
         "fk_bbr_bygning_adgangtilbygning": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "fk_bbr_opgang_opgang": {
           "type": [
             "string",
             "null"
@@ -163,13 +154,11 @@
         "status",
         "adgangsadressebetegnelse",
         "adgangspunkt_id",
-        "bfenummer",
         "darafstemningsområde_id",
         "darkommune_id",
         "darmenighedsrådsafstemningsområde_id",
         "darsogneinddeling_id",
         "fk_bbr_bygning_adgangtilbygning",
-        "fk_bbr_opgang_opgang",
         "fk_bbr_tekniskanlæg_adgangtiltekniskanlæg",
         "fk_geodk_bygning_geodanmarkbygning",
         "fk_geodk_vejmidte_vejmidte",

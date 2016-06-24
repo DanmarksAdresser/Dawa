@@ -96,7 +96,10 @@ module.exports = () => {
       }
       return sql;
     });
-    return `DROP TABLE IF EXISTS dar1_${entityName} CASCADE;\nCREATE TABLE dar1_${entityName}(\n  ${columnSql.join(',\n  ')}\n);`
+    return `DROP TABLE IF EXISTS dar1_${entityName} CASCADE;\n\
+CREATE TABLE dar1_${entityName}(\n  ${columnSql.join(',\n  ')}\n);\
+DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\
+CREATE TABLE dar1_${entityName}_current(\n  ${columnSql.join(',\n  ')}\n);`
   });
 
   return ddlStatements.join('\n\n');

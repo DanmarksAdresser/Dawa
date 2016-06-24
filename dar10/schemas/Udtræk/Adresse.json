@@ -55,9 +55,6 @@
         "null"
       ]
     },
-    "bfenummer": {
-      "type": "integer"
-    },
     "dørbetegnelse": {
       "type": [
         "string",
@@ -99,7 +96,6 @@
     "virkningtil",
     "status",
     "adressebetegnelse",
-    "bfenummer",
     "dørbetegnelse",
     "dørpunkt_id",
     "etagebetegnelse",
