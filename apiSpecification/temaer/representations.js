@@ -99,7 +99,7 @@ var jordstykkeJsonSchema = function() {
     $ref: '#/definitions/NullableSogneRefNoName'
   };
   schema.properties.retskreds = {
-    description: 'Retskredsen som jordstykket er beliggende i.',
+    description: 'Retskredsen, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
     $ref: '#/definitions/NullableRetskredsRefNoName'
   };
 

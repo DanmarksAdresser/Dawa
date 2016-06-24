@@ -544,7 +544,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'bebyggelsestype',
-    doc: 'Find de adresser som ligger en bebyggelse af den angivne type'
+    doc: 'Find de adresser som ligger en bebyggelse af den angivne type. Mulige værdier: "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby".'
   }
 ];
 
@@ -1383,11 +1383,44 @@ function dagiReverseEndpointDoc(tema) {
   _.extend(module.exports, doc.resources);
 });
 
+const flatExamples = {
+  bebyggelse: {
+    query: [
+      {
+        description: 'Find alle bebyggelser',
+        query: []
+      },
+      {
+        description: 'Find alle bebyggelser af typen "kolonihave".',
+        query: [{
+          name: 'type',
+          value: 'kolonihave'
+        }]
+      },
+      {
+        description: 'Modtag bebyggelser i GeoJSON format',
+        query: [{
+          name: 'format',
+          value: 'geojson'
+        }]
+      }
+    ],
+    get: [{
+      description: 'Modtag bebyggelse med ID "12337669-a084-6b98-e053-d480220a5a3f" (Båring Ege)',
+      path: ['/bebyggelser/{12337669-a084-6b98-e053-d480220a5a3f}']
+    }, {
+      description: 'Hent bebyggelsen med ID "12337669-c79d-6b98-e053-d480220a5a3f" (Stavtrup) i GeoJSON format med ETRS89 Zone 32N som koordinatsystem',
+      path: ['/bebyggelser/12337669-c79d-6b98-e053-d480220a5a3f?format=geojson&srid=25832']
+    }]
+
+  }
+};
+
 Object.keys(flats).forEach(flatName => {
   const flat = flats[flatName];
   const parameters = flatParametersMap[flatName];
   {
-    const parametersArray = parameters.id.concat(parameters.propertyFilter);
+    const parametersArray = parameters.propertyFilter;
     const reverseGeocodingDocs = [
       {
         name: 'x',
@@ -1403,11 +1436,11 @@ Object.keys(flats).forEach(flatName => {
       doc: `Filtrer resultat ud fra ${parameter.name}.`
     }));
     const parameterDocs = additionalParameterDocs.concat(reverseGeocodingDocs).concat(dagiSridCirkelPolygonParameters(flat.plural)).concat(formatAndPagingParams);
-    const subtext = `Søg efter ' + ${flat.plural} + '. Returnerer de ${flat.plural} der opfylder kriteriet.`;
+    const subtext = `Søg efter ${flat.plural}. Returnerer de ${flat.plural} der opfylder kriteriet.`;
     module.exports['/' + flat.plural] = {
       subtext: subtext,
       parameters: parameterDocs,
-      examples: []
+      examples: flatExamples[flat.singular].query
     };
   }
   {
@@ -1419,7 +1452,7 @@ Object.keys(flats).forEach(flatName => {
     module.exports[`/${flat.plural}/{${flat.key.join('}/{')}}`] = {
       subtext: subtext,
       parameters: idParameterDocs.concat([SRIDParameter]),
-      examples: [],
+      examples: flatExamples[flat.singular].get,
       nomulti: true
     };
   }
