@@ -1,5 +1,8 @@
 "use strict";
 
+const _ = require('underscore');
+
+const bebyggelseParameters = require('../flats/parameters').bebyggelse;
 var schema = require('../parameterSchema');
 var registry = require('../registry');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
@@ -85,6 +88,7 @@ exports.propertyFilter = normalizeParameters([
   {
     name: 'bebyggelsestype',
     type: 'string',
+    schema: _.findWhere(bebyggelseParameters.propertyFilter, {name: 'type' }).schema,
     multi: true
   }
 
