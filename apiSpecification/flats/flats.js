@@ -2,6 +2,7 @@
 
 const registry = require('../registry');
 
+const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 module.exports = {
   bebyggelse: {
     singular: 'bebyggelse',
@@ -11,6 +12,7 @@ module.exports = {
     fields: [{
       name: 'id',
       type: 'string',
+      schema: commonSchemaDefinitions.UUID,
       description: 'Unik identifikator for bebyggelsen.'
     },{
       name: 'kode',
