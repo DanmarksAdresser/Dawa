@@ -1407,7 +1407,7 @@ const flatExamples = {
     ],
     get: [{
       description: 'Modtag bebyggelse med ID "12337669-a084-6b98-e053-d480220a5a3f" (Båring Ege)',
-      path: ['/bebyggelser/{12337669-a084-6b98-e053-d480220a5a3f}']
+      path: ['/bebyggelser/12337669-a084-6b98-e053-d480220a5a3f']
     }, {
       description: 'Hent bebyggelsen med ID "12337669-c79d-6b98-e053-d480220a5a3f" (Stavtrup) i GeoJSON format med ETRS89 Zone 32N som koordinatsystem',
       path: ['/bebyggelser/12337669-c79d-6b98-e053-d480220a5a3f?format=geojson&srid=25832']
