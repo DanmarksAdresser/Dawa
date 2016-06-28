@@ -34,7 +34,7 @@ function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
  */
 function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck) {
   if(columnsToCheck.length === 0) {
-    return Promise.resolve(null);
+    return q.resolve(null);
   }
   return client.queryp(
     format("CREATE TEMP TABLE {upTable} AS SELECT {srcTable}.*" +
@@ -85,7 +85,7 @@ function applyInserts(client, insTable, dstTable, columns) {
 
 function applyUpdates(client, upTable, dstTable, idColumns, columnsToUpdate) {
   if(columnsToUpdate.length === 0) {
-    return Promise.resolve(null);
+    return q.resolve(null);
   }
   var fieldUpdates = columnsToUpdate.map(function(column) {
     return format('{column} = {srcTable}.{column}', {

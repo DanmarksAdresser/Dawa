@@ -1,36 +1,27 @@
-DROP TABLE IF EXISTS dar1_transaction;
+DROP TABLE IF EXISTS dar1_transaction CASCADE;
 
 CREATE TABLE dar1_transaction (
   id             INTEGER       NOT NULL PRIMARY KEY,
   ts             TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  source         dar_tx_source NOT NULL--,
-  --dawa_seq_range INT4RANGE     NOT NULL
+  source         text NOT NULL,
+  dawa_seq_range INT4RANGE     NOT NULL
 );
 
 CREATE INDEX ON dar1_transaction (ts);
 
-DROP TABLE IF EXISTS dar1_tx_current;
-CREATE TABLE dar1_tx_current (
-  tx_current INTEGER
+DROP TABLE IF EXISTS dar1_meta;
+
+CREATE TABLE dar1_meta(
+  current_tx INTEGER, -- ID of currently executing transaction
+  last_event_id INTEGER, -- Last event id which has been fetched and stored
+  virkning timestamptz -- Current virkning time for computing actual state for DAWA tables
 );
 
-INSERT INTO dar1_tx_current VALUES (NULL);
+INSERT INTO dar1_meta VALUES(NULL, NULL, NULL);
 
 CREATE UNIQUE INDEX
-ON dar1_tx_current ((TRUE));
+ON dar1_meta ((TRUE));
 
-CREATE OR REPLACE FUNCTION current_dar1_transaction()
-  RETURNS INTEGER
-AS $$ SELECT tx_current
-      FROM dar1_tx_current $$ LANGUAGE SQL;
-
-DROP TABLE IF EXISTS dar1_curtime;
-
-CREATE TABLE dar1_curtime(
-  virkning timestamptz
-);
-
-INSERT INTO dar1_curtime VALUES (NULL);
-
-CREATE UNIQUE INDEX
-ON dar1_curtime ((TRUE));
+DROP TABLE IF EXISTS dar1_tx_current CASCADE;
+DROP TABLE IF EXISTS dar1_curtime CASCADE;
+DROP TABLE IF EXISTS dar1_eventid CASCADE;

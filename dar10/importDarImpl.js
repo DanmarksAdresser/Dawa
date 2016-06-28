@@ -4,13 +4,16 @@ const path = require('path');
 const q = require('q');
 const _ = require('underscore');
 
+const tableDiff = require('../importUtil/tablediff');
 const darTablediff = require('./darTablediff');
+const dawaSpec = require('./dawaSpec');
 const importUtil = require('../importUtil/importUtil');
 const tablediff = require('../importUtil/tablediff');
 const postgresMapper = require('./postgresMapper');
 
 const sqlUtil = require('../darImport/sqlUtil');
 const streamToTable = require('./streamToTable');
+const Range = require('../psql/databaseTypes').Range;
 
 const selectList = sqlUtil.selectList;
 
@@ -28,24 +31,156 @@ const entities = [
   'SupplerendeBynavn'
 ];
 
+const dawaChangeOrder = [
+  {
+    type: 'insert',
+    entity: 'vejstykke'
+  },
+  {
+    type: 'update',
+    entity: 'vejstykke'
+  },
+  {
+    type: 'delete',
+    entity: 'vejstykke'
+  },
+  {
+    type: 'delete',
+    entity: 'adresse'
+  },
+  {
+    type: 'insert',
+    entity: 'adgangsadresse'
+  },
+  {
+    type: 'update',
+    entity: 'adresse'
+  },
+  {
+    type: 'update',
+    entity: 'adgangsadresse'
+  },
+  {
+    type: 'delete',
+    entity: 'adgangsadresse'
+  },
+  {
+    type: 'insert',
+    entity: 'adresse'
+  }
+];
+
+/**
+ * We have a single-row table with some metadata about the dar1 import process.
+ * current_tx is the id of the currently executing transaction
+ * last_event_id is the id of the last processed event from DAR1.
+ * virkning is virkning time for computing DAWA values
+ * @param client
+ * @returns {*}
+ */
+function getMeta(client) {
+  return client.queryp('select * from dar1_meta').then(result => result.rows[0]);
+}
+
+function setMeta(client, meta) {
+  const params = [];
+  const setSql = Object.keys(meta).map(key => {
+    params.push(meta[key]);
+    return `${key} = $${params.length}`;
+  }).join(',');
+  return client.queryp(`UPDATE dar1_meta SET ${setSql}`, params);
+}
+
+function setInitialMeta(client) {
+  return client.queryp('UPDATE dar1_meta SET virkning = NOW()');
+}
+
 function ndjsonFileName(entityName) {
   return entityName.replace(new RegExp('å', 'g'), 'aa') + '.ndjson';
 }
 
-function importInitial(client, dataDir) {
+/**
+ * Get maximum event id across all DAR1 tables
+ * @param client
+ * @returns {*}
+ */
+function getMaxEventId(client, tablePrefix) {
+  const singleTableSql = (tableName) => `SELECT MAX(GREATEST(eventopret, eventopdater)) FROM ${tablePrefix + tableName}`;
+  const list = entities.map(entityName => `(${singleTableSql(`dar1_${entityName}`)})`).join(', ');
+  const sql = `select GREATEST(${list}) as maxeventid`;
+  return client.queryp(sql).then(result => result.rows[0].maxeventid || 0);
+}
+
+function alreadyImported(client) {
+  return client.queryp('select * from dar1_adressepunkt limit 1').then(result => !!result.rows);
+}
+
+function importFromFiles(client, dataDir) {
   return q.async(function*() {
-    yield client.queryp('UPDATE dar1_curtime SET virkning = NOW()');
-    for (let entityName of entities) {
-      const filePath = path.join(dataDir, ndjsonFileName(entityName));
-      const tableName = postgresMapper.tables[entityName];
-      yield streamToTable(client, entityName, filePath, tableName, true);
-      yield client.queryp(`INSERT INTO dar1_${entityName}_current (SELECT * FROM ${tableName})`);
+    const hasAlreadyImported = yield alreadyImported(client);
+    if(hasAlreadyImported) {
+      yield importIncremental(client, dataDir);
+    }
+    else {
+      yield importInitial(client, dataDir);
     }
   })();
 }
 
-function importIncremental(client, dataDir, eventId) {
-  return withDar1Transaction(client, () => {
+function getDawaSeqNum(client) {
+  return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history').then(result => result.rows[0].seqnum);
+}
+
+function importInitial(client, dataDir) {
+  return q.async(function*() {
+    yield setInitialMeta(client);
+    yield withDar1Transaction(client, 'csv', q.async(function*() {
+      for (let entityName of entities) {
+        const filePath = path.join(dataDir, ndjsonFileName(entityName));
+        const tableName = postgresMapper.tables[entityName];
+        yield streamToTable(client, entityName, filePath, tableName, true);
+        const columns = postgresMapper.columns[entityName].join(', ');
+        yield client.queryp(`INSERT INTO dar1_${entityName}_current(${columns}) (SELECT ${columns} FROM ${tableName}_current_view)`);
+      }
+      const maxEventId = yield getMaxEventId(client, '');
+      yield setMeta(client, {last_event_id: maxEventId});
+    }));
+  })();
+}
+
+/**
+ * Perform a "full update" of DAWA tables, based on DAR1 tables
+ * and the virkning time stored in dar1_meta table.
+ * @param client
+ */
+function updateDawa(client) {
+  return q.async(function*() {
+    for(let entity of Object.keys(dawaSpec)) {
+      const spec = dawaSpec[entity];
+      const table = spec.table;
+      yield tableDiff.computeDifferences(client, `dar1_${table}_view`, table, spec.idColumns, spec.columns);
+    }
+    for(let change of dawaChangeOrder) {
+      const spec = dawaSpec[change.entity];
+      const table = spec.table;
+      if(change.type === 'insert') {
+        yield tablediff.applyInserts(client, `insert_${table}`, table, spec.columns);
+      }
+      else if(change.type === 'update') {
+        yield tableDiff.applyUpdates(client, `update_${table}`, table, spec.idColumns, spec.columns);
+      }
+      else if(change.type === 'delete') {
+        yield tableDiff.applyDeletes(client, `delete_${table}`, table, spec.idColumns);
+      }
+      else {
+        throw new Error();
+      }
+    }
+  })();
+}
+
+function importIncremental(client, dataDir) {
+  return withDar1Transaction(client, 'csv', () => {
     return q.async(function*() {
       for (let entityName of entities) {
         const columns = postgresMapper.columns[entityName];
@@ -54,6 +189,7 @@ function importIncremental(client, dataDir, eventId) {
         const desiredTableName = `desired_${tableName}`;
         yield client.queryp(`create temp table ${desiredTableName} (LIKE ${tableName})`);
         yield streamToTable(client, entityName, filePath, desiredTableName, true);
+        const eventId = getMaxEventId(client, 'desired_');
         yield darTablediff.computeDifferences(client, desiredTableName, tableName, columns, eventId);
         yield darTablediff.logChanges(client, entityName, tableName);
         yield darTablediff.applyChanges(client, tableName, columns);
@@ -159,18 +295,29 @@ function importChangeset(client, changeset) {
   })();
 }
 
-function withDar1Transaction(client, fn) {
+function withDar1Transaction(client, source, fn) {
   return q.async(function*() {
-    yield client.queryp("update dar1_tx_current set tx_current= COALESCE( (SELECT max(id)+1 from dar1_transaction), 1)");
+    const dawaSeqBefore = yield getDawaSeqNum(client);
+    yield client.queryp("update dar1_meta set current_tx= COALESCE( (SELECT max(id)+1 from dar1_transaction), 1)");
     yield fn();
-    yield client.queryp("insert into dar1_transaction(id, ts) VALUES ( (SELECT COALESCE(max(id), 0)+1 from dar1_transaction), NOW())");
-    yield client.queryp("update dar1_tx_current set tx_current = NULL");
+    const dawaSeqAfter = yield getDawaSeqNum(client);
+    const dawaSeqRange = new Range(dawaSeqBefore, dawaSeqAfter, '(]');
+    yield client.queryp(`insert into dar1_transaction(id, ts, source, dawa_seq_range) \
+VALUES ((select current_tx from dar1_meta), NOW(), $1, $2)`,
+      [source, dawaSeqRange]);
+    yield client.queryp("update dar1_meta set current_tx = NULL");
   })();
 }
 
 module.exports = {
+  importFromFiles: importFromFiles,
   importInitial: importInitial,
   importIncremental: importIncremental,
   withDar1Transaction: withDar1Transaction,
-  importChangeset: importChangeset
+  importChangeset: importChangeset,
+  updateDawa: updateDawa,
+  internal: {
+    getMaxEventId: getMaxEventId,
+    getMeta: getMeta
+  }
 };

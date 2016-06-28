@@ -50,21 +50,20 @@ const standardColumns = [
 ];
 
 function defaultSqlType(jsonSchemaType) {
-  if(jsonSchemaType.format === 'date-time') {
+  if (jsonSchemaType.format === 'date-time') {
     return 'timestamptz';
   }
-  if(jsonSchemaType.pattern === "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$") {
+  if (jsonSchemaType.pattern === "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$") {
     return 'uuid';
   }
-  if(jsonSchemaType.type === 'integer' || _.isArray(jsonSchemaType.type) && _.contains(jsonSchemaType.type, 'integer')) {
+  if (jsonSchemaType.type === 'integer' || _.isArray(jsonSchemaType.type) && _.contains(jsonSchemaType.type, 'integer')) {
     return 'integer';
   }
-  if(jsonSchemaType.type === 'string' || _.isArray(jsonSchemaType.type) && _.contains(jsonSchemaType.type, 'string')) {
+  if (jsonSchemaType.type === 'string' || _.isArray(jsonSchemaType.type) && _.contains(jsonSchemaType.type, 'string')) {
     return 'text';
   }
   throw new Error('Could not get default sql type for ' + JSON.stringify(jsonSchemaType));
 }
-
 
 
 const entityNames = Object.keys(schemas);
@@ -96,11 +95,14 @@ module.exports = () => {
       }
       return sql;
     });
+
+    const indicesSpec = spec.sqlIndices[entityName] || [];
+    const indicesSql = indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n');
     return `DROP TABLE IF EXISTS dar1_${entityName} CASCADE;\n\
 CREATE TABLE dar1_${entityName}(\n  ${columnSql.join(',\n  ')}\n);\
-DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\
-CREATE TABLE dar1_${entityName}_current(\n  ${columnSql.join(',\n  ')}\n);`
+DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\n\
+CREATE TABLE dar1_${entityName}_current(\n  ${columnSql.join(',\n  ')}\n);\n\
+CREATE INDEX ON dar1_${entityName}_current(id);\n` + indicesSql + '\n';
   });
-
   return ddlStatements.join('\n\n');
 };

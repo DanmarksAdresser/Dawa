@@ -1,7 +1,7 @@
 "use strict";
 
 var genericPool = require('generic-pool');
-var pg = require('pg.js');
+var pg = require('pg');
 var q = require('q');
 var _ = require('underscore');
 
@@ -151,7 +151,7 @@ function denodeifyClient(client, requestLimiter) {
       return fn();
     }
   };
-  
+
   proxy.querypLogged = function(query, params) {
     return proxy.queryp('EXPLAIN ' + query, params).then(function(plan) {
       /*eslint no-console: 0 */

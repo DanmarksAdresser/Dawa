@@ -8,7 +8,9 @@ module.exports = function() {
   for(let entityName of Object.keys(postgresMapper.tables)) {
     const tableName = postgresMapper.tables[entityName];
     const columns = postgresMapper.columns[entityName];
+    historyViews.push(`DROP VIEW IF EXISTS ${tableName}_history CASCADE;`);
     historyViews.push(`CREATE VIEW ${tableName}_history AS SELECT ${columns.join(', ')} FROM ${tableName} WHERE upper(registrering) IS NULL;`);
+    currentViews.push(`DROP VIEW IF EXISTS ${tableName}_current_view CASCADE;`);
     currentViews.push(`CREATE VIEW ${tableName}_current_view AS SELECT ${columns.join(', ')} FROM ${tableName}_history WHERE dar1_current_time() <@ virkning;`);
   }
   return historyViews.join('\n') + '\n' + currentViews.join('\n');

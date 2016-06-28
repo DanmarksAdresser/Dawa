@@ -12,7 +12,7 @@ module.exports = {
   },
   adgangsadresse: {
     table: datamodels.adgangsadresse.table,
-    columns:  _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'husnummerkilde', 'esdhreference', 'journalnummer'),
+    columns:  _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'husnummerkilde', 'esdhreference', 'journalnummer', 'placering', 'hoejde'),
     idColumns: datamodels.adgangsadresse.key
   },
   vejstykke: {

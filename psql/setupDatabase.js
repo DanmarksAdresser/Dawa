@@ -1,9 +1,9 @@
 "use strict";
 
-var pg = require('pg.js');
+var pg = require('pg');
 var pgConnectionString = require('pg-connection-string');
 var q = require('q');
-var TypeOverrides = require('pg.js/lib/type-overrides');
+var TypeOverrides = require('pg/lib/type-overrides');
 var _ = require('underscore');
 
 var database = require('./database');

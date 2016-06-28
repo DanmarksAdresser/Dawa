@@ -84,13 +84,33 @@ const sqlTypes = {
   }
 };
 
-
+const sqlIndices = {
+  Husnummer: [
+    ['adgangspunkt_id'],
+    ['darafstemningsområde_id'],
+    ['darkommune_id'],
+    ['darmenighedsrådsafstemningsområde_id'],
+    ['darsogneinddeling_id'],
+    ['navngivenvej_id'],
+    ['postnummer_id'],
+    ['supplerendebynavn_id'],
+    ['vejpunkt_id']
+  ],
+  NavngivenVejKommunedel: [
+    ['navngivenvej_id'],
+    ['kommune']
+  ],
+  DARKommuneInddeling: [
+    ['kommunekode']
+  ]
+};
 
 module.exports = {
   schemas: schemas,
   validateFns: validateFns,
   fieldTransforms: fieldTransforms,
-  sqlTypes: sqlTypes
+  sqlTypes: sqlTypes,
+  sqlIndices: sqlIndices
 };
 
 

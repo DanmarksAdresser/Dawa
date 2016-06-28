@@ -17,7 +17,8 @@ const optionSpec = {
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
   proddb.init({
-    connString: options.pgConnectionUrl
+    connString: options.pgConnectionUrl,
+    pooled: false
   });
 
   proddb.withTransaction('READ_WRITE', client => {
@@ -29,5 +30,5 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         yield importDarImpl.importIncremental(client, options.dataDir, 0);
       }
     })();
-  });
+  }).done();
 });
