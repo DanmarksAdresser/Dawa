@@ -87,15 +87,15 @@ describe('nontemporal', function() {
         var client = clientFn();
         return loadContent(client, [existingObject], [existingObject])
           .then(function() {
-            computeAndVerify(client, [], [],[]);
+            return computeAndVerify(client, [], [],[]);
           });
       });
       it('Should compute an insert if there is a new row in source table', function () {
         var client = clientFn();
         var newObject = {id1: 1, id2: 2, content: 'foo'};
-        return loadContent(client, [newObject], [existingObject])
+        return loadContent(client, [newObject,existingObject], [existingObject])
           .then(function() {
-            computeAndVerify(client, [newObject], [],[]);
+            return computeAndVerify(client, [newObject], [],[]);
           });
       });
       it('Should compute an update if an existing row has changed', function () {
@@ -104,7 +104,7 @@ describe('nontemporal', function() {
         var updatedObject = {id1: 1, id2: 2, content: 'bar'};
         return loadContent(client, [updatedObject], [existingObject])
           .then(function() {
-            computeAndVerify(client, [], [updatedObject],[]);
+            return computeAndVerify(client, [], [updatedObject],[]);
           });
       });
       it('Should compute a delete if an existing row has been removed', function () {
@@ -112,7 +112,7 @@ describe('nontemporal', function() {
         var existingObject = {id1: 1, id2: 2, content: 'foo'};
         return loadContent(client, [], [existingObject])
           .then(function() {
-            computeAndVerify(client, [], [],[{id1: 1, id2: 2}]);
+            return computeAndVerify(client, [], [],[{id1: 1, id2: 2}]);
           });
       });
 

@@ -55,9 +55,9 @@ exports.computeDifferences = function (client, srcTable, dstTable, allColumnName
 
 exports.logChanges = function(client, entityName, table) {
   return q.async(function*() {
-    yield client.queryp(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) (SELECT (SELECT tx_current FROM dar1_tx_current), '${entityName}', 'insert', rowkey FROM insert_${table})`);
-    yield client.queryp(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) (SELECT (SELECT tx_current FROM dar1_tx_current), '${entityName}', 'update', rowkey FROM update_${table})`);
-    yield client.queryp(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) (SELECT (SELECT tx_current FROM dar1_tx_current), '${entityName}', 'delete', rowkey FROM delete_${table})`);
+    yield client.queryp(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) (SELECT dar1_current_tx(), '${entityName}', 'insert', rowkey FROM insert_${table})`);
+    yield client.queryp(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) (SELECT dar1_current_tx(), '${entityName}', 'update', rowkey FROM update_${table})`);
+    yield client.queryp(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) (SELECT dar1_current_tx(), '${entityName}', 'delete', rowkey FROM delete_${table})`);
   })();
 };
 

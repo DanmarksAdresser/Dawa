@@ -344,7 +344,7 @@ function mergePostnr(client, srcTable, mergedTable) {
     const postnrNavnTable = mergedTable + '_postnrnavn';
     const mergedColumns = src1Columns.concat(['postnr']);
     const resultColumns = mergedColumns.concat(['postnrnavn']);
-    client.queryp(
+    yield client.queryp(
       `CREATE TEMP TABLE ${postnrNavnTable} AS \
 (SELECT ${mergedColumns.join(',')}, vp.navn as postnrnavn, \
 u.virkning * vp.virkning as virkning \

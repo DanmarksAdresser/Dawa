@@ -3,6 +3,11 @@ $$
 SELECT virkning from dar1_meta;
 $$;
 
+CREATE OR REPLACE FUNCTION dar1_current_tx() RETURNS integer LANGUAGE sql AS
+$$
+SELECT current_tx from dar1_meta;
+$$;
+
 --
 -- From: https://wiki.postgresql.org/wiki/First/last_(aggregate)
 --

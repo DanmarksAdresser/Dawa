@@ -119,14 +119,15 @@ function denodeifyClient(client, requestLimiter) {
 
   proxy.flush = function() {
     if(batchedQueries.length > 0) {
-      return client.queryp(batchedQueries.join(';\n'));
+      const query = batchedQueries.join(';\n');
+      batchedQueries.length = 0;
+      return proxy.doQuery(query);
     }
     return q.resolve();
   };
 
-  proxy.queryp = function (query, params) {
+  proxy.doQuery = function(query, params) {
     const fn = q.async(function*() {
-      yield proxy.flush();
       const before = Date.now();
       try {
         const result = yield proxy.querypNolog(query, params);
@@ -150,6 +151,26 @@ function denodeifyClient(client, requestLimiter) {
     else {
       return fn();
     }
+  };
+
+  let queryInProgress = false;
+
+  proxy.queryp = function (query, params) {
+    if(queryInProgress) {
+      throw new Error('Query already in progress');
+    }
+    queryInProgress = true;
+    return q.async(function*() {
+      try {
+        console.log('FLUSHING');
+        yield proxy.flush();
+        console.log('FLUSHED');
+        return yield proxy.doQuery(query, params);
+      }
+      finally {
+        queryInProgress = false;
+      }
+    })();
   };
 
   proxy.querypLogged = function(query, params) {

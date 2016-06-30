@@ -15,7 +15,7 @@ const selectList = sqlUtil.selectList;
  * to be inserted into dstTable in order to make srcTable and dstTable equal.
  */
 function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
-  return client.queryp(
+  return client.queryBatched(
     format("CREATE TEMP TABLE {insTable} AS SELECT {srcTable}.*" +
       " FROM {srcTable}" +
       " WHERE NOT EXISTS(SELECT 1 FROM {dstTable} WHERE {idEqualsClause})",
@@ -24,8 +24,7 @@ function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
         dstTable: dstTable,
         insTable: insTable,
         idEqualsClause: columnsEqualClause(srcTable, dstTable, idColumns)
-      }),
-    []);
+      }));
 }
 
 /**
@@ -36,7 +35,7 @@ function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsT
   if(columnsToCheck.length === 0) {
     return q.resolve(null);
   }
-  return client.queryp(
+  return client.queryBatched(
     format("CREATE TEMP TABLE {upTable} AS SELECT {srcTable}.*" +
       " FROM {srcTable}" +
       " JOIN {dstTable} ON {idEqualsClause}" +
@@ -47,8 +46,7 @@ function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsT
         upTable: upTable,
         idEqualsClause: columnsEqualClause(srcTable, dstTable, idColumns),
         nonIdColumnsDifferClause: columnsDistinctClause(srcTable, dstTable, columnsToCheck)
-      }),
-    []);
+      }));
 }
 
 /**
@@ -57,7 +55,7 @@ function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsT
  * The created table delTable only contains the primary key columns.
  */
 function computeDeletes(client, srcTable, dstTable, delTable, idColumns) {
-  return client.queryp(
+  return client.queryBatched(
     format("CREATE TEMP TABLE {delTable} AS SELECT {selectIdColumns} FROM {dstTable}" +
       " WHERE NOT EXISTS(SELECT * FROM {srcTable} WHERE {idEqualsClause})",
       {
@@ -80,7 +78,7 @@ function applyInserts(client, insTable, dstTable, columns) {
       select: select,
       dstColumnList: dstColumnList
     });
-  return client.queryp(sql, []);
+  return client.queryBatched(sql);
 }
 
 function applyUpdates(client, upTable, dstTable, idColumns, columnsToUpdate) {
@@ -104,7 +102,7 @@ function applyUpdates(client, upTable, dstTable, idColumns, columnsToUpdate) {
       fieldUpdates: fieldUpdates,
       idColumnsEqual: columnsEqualClause(upTable, dstTable, idColumns)
     });
-  return client.queryp(sql, []);
+  return client.queryBatched(sql);
 }
 
 function applyDeletes(client, delTable, dstTable, idColumns) {
@@ -115,7 +113,7 @@ function applyDeletes(client, delTable, dstTable, idColumns) {
       delTable: delTable,
       idColumnsEqual: columnsEqualClause(delTable, dstTable, idColumns)
     });
-  return client.queryp(sql, []);
+  return client.queryBatched(sql);
 }
 
 function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColumns, columnsToUpdate) {
@@ -127,13 +125,28 @@ function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColu
 }
 
 function computeDifferences(client, srcTable, dstTable, idColumns, columnsToCheck) {
-  const insTable = `insert_${dstTable}`;
-  const upTable = `update_${dstTable}`;
-  const delTable = `delete_${dstTable}`;
+  return computeDifferencesTargeted(client, srcTable, dstTable, dstTable, idColumns, columnsToCheck);
+}
+
+function computeDifferencesSubset(client, dirtyTable, desiredView, targetTable, idColumns, columnsToCheck) {
   return q.async(function*() {
-    yield computeInserts(client, srcTable, dstTable, insTable, idColumns);
-    yield computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck);
-    yield computeDeletes(client, srcTable, dstTable, delTable, idColumns);
+    const desiredTable = `desired_${targetTable}`;
+    const actualTable = `actual_${targetTable}`;
+    yield client.queryBatched(`CREATE TEMP TABLE ${desiredTable} AS (SELECT ${desiredView}.* FROM ${desiredView} NATURAL JOIN ${dirtyTable})`);
+    yield client.queryBatched(`CREATE TEMP TABLE ${actualTable} AS (SELECT ${targetTable}.* FROM ${targetTable} NATURAL JOIN ${dirtyTable})`);
+    yield computeDifferencesTargeted(client, desiredTable, actualTable, targetTable, idColumns, columnsToCheck);
+    yield client.queryBatched(`DROP TABLE ${desiredTable}; DROP TABLE ${actualTable}`);
+  })();
+}
+
+function computeDifferencesTargeted(client, desiredTable, actualTable, targetTable, idColumns, columnsToCheck) {
+  const insTable = `insert_${targetTable}`;
+  const upTable = `update_${targetTable}`;
+  const delTable = `delete_${targetTable}`;
+  return q.async(function*() {
+    yield computeInserts(client, desiredTable, actualTable, insTable, idColumns);
+    yield computeUpdates(client, desiredTable, actualTable, upTable, idColumns, columnsToCheck);
+    yield computeDeletes(client, desiredTable, actualTable, delTable, idColumns);
   })();
 }
 
@@ -159,6 +172,8 @@ module.exports = {
   computeUpdates: computeUpdates,
   computeDeletes: computeDeletes,
   computeDifferences: computeDifferences,
+  computeDifferencesTargeted: computeDifferencesTargeted,
+  computeDifferencesSubset: computeDifferencesSubset,
   countDifferences: countDifferences,
   applyInserts: applyInserts,
   applyUpdates: applyUpdates,

@@ -104,5 +104,9 @@ DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\n\
 CREATE TABLE dar1_${entityName}_current(\n  ${columnSql.join(',\n  ')}\n);\n\
 CREATE INDEX ON dar1_${entityName}_current(id);\n` + indicesSql + '\n';
   });
+
+  // These two indices are used to find historic records needed for calculating "oprettet" date
+  ddlStatements.push('CREATE INDEX ON dar1_adresse(id);\n');
+  ddlStatements.push('CREATE INDEX ON dar1_husnummer(id);\n');
   return ddlStatements.join('\n\n');
 };

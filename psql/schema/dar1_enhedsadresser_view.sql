@@ -19,3 +19,11 @@ CREATE VIEW dar1_enhedsadresser_view AS
   WHERE adr.husnummer_id IN (SELECT id FROM dar1_adgangsadresser_view)
   AND status IN (1,3);
 
+DROP VIEW IF EXISTS dar1_enhedsadresser_dirty_view CASCADE;
+CREATE VIEW dar1_enhedsadresser_dirty_view AS
+  SELECT
+    adr.id as id,
+    adr.id as adresse_id
+  FROM dar1_adresse_current adr
+  WHERE  status IN (1,3);
+

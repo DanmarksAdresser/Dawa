@@ -245,6 +245,7 @@ var supplerendebynavneTests = [{
 }];
 
 function verify(testSpec, client) {
+  
   return q().then(function() {
     if(testSpec.update) {
       return crud.update(client, datamodels[testSpec.update.model], testSpec.update.update);

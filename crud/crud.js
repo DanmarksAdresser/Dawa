@@ -72,7 +72,7 @@ exports.update = function(client, datamodel, object, callback) {
   });
   var params = updateParams.concat(keyParams);
   winston.info(sql);
-  client.queryp(sql, params).nodeify(callback);
+  return client.queryp(sql, params).nodeify(callback);
 };
 
 exports.delete = function(client, datamodel, key, callback) {

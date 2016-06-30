@@ -16,8 +16,9 @@ const streamToTable = require('./streamToTable');
 const Range = require('../psql/databaseTypes').Range;
 
 const selectList = sqlUtil.selectList;
+const columnsEqualClause = sqlUtil.columnsEqualClause;
 
-const entities = [
+const ALL_DAR_ENTITIES = [
   'Adressepunkt',
   'Adresse',
   'DARAfstemningsområde',
@@ -106,23 +107,23 @@ function ndjsonFileName(entityName) {
  */
 function getMaxEventId(client, tablePrefix) {
   const singleTableSql = (tableName) => `SELECT MAX(GREATEST(eventopret, eventopdater)) FROM ${tablePrefix + tableName}`;
-  const list = entities.map(entityName => `(${singleTableSql(`dar1_${entityName}`)})`).join(', ');
+  const list = ALL_DAR_ENTITIES.map(entityName => `(${singleTableSql(`dar1_${entityName}`)})`).join(', ');
   const sql = `select GREATEST(${list}) as maxeventid`;
   return client.queryp(sql).then(result => result.rows[0].maxeventid || 0);
 }
 
 function alreadyImported(client) {
-  return client.queryp('select * from dar1_adressepunkt limit 1').then(result => !!result.rows);
+  return client.queryp('select * from dar1_adressepunkt limit 1').then(result => result.rows.length > 0);
 }
 
-function importFromFiles(client, dataDir) {
+function importFromFiles(client, dataDir, skipDawa) {
   return q.async(function*() {
     const hasAlreadyImported = yield alreadyImported(client);
-    if(hasAlreadyImported) {
-      yield importIncremental(client, dataDir);
+    if (hasAlreadyImported) {
+      yield importIncremental(client, dataDir, skipDawa);
     }
     else {
-      yield importInitial(client, dataDir);
+      yield importInitial(client, dataDir, skipDawa);
     }
   })();
 }
@@ -131,11 +132,11 @@ function getDawaSeqNum(client) {
   return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history').then(result => result.rows[0].seqnum);
 }
 
-function importInitial(client, dataDir) {
+function importInitial(client, dataDir, skipDawa) {
   return q.async(function*() {
     yield setInitialMeta(client);
-    yield withDar1Transaction(client, 'csv', q.async(function*() {
-      for (let entityName of entities) {
+    yield withDar1Transaction(client, 'initial', q.async(function*() {
+      for (let entityName of ALL_DAR_ENTITIES) {
         const filePath = path.join(dataDir, ndjsonFileName(entityName));
         const tableName = postgresMapper.tables[entityName];
         yield streamToTable(client, entityName, filePath, tableName, true);
@@ -144,6 +145,9 @@ function importInitial(client, dataDir) {
       }
       const maxEventId = yield getMaxEventId(client, '');
       yield setMeta(client, {last_event_id: maxEventId});
+      if(!skipDawa) {
+        yield updateDawa(client);
+      }
     }));
   })();
 }
@@ -155,21 +159,27 @@ function importInitial(client, dataDir) {
  */
 function updateDawa(client) {
   return q.async(function*() {
-    for(let entity of Object.keys(dawaSpec)) {
+    for (let entity of Object.keys(dawaSpec)) {
       const spec = dawaSpec[entity];
       const table = spec.table;
       yield tableDiff.computeDifferences(client, `dar1_${table}_view`, table, spec.idColumns, spec.columns);
     }
-    for(let change of dawaChangeOrder) {
+    yield applyDawaChanges(client);
+  })();
+}
+
+function applyDawaChanges(client) {
+  return q.async(function*() {
+    for (let change of dawaChangeOrder) {
       const spec = dawaSpec[change.entity];
       const table = spec.table;
-      if(change.type === 'insert') {
+      if (change.type === 'insert') {
         yield tablediff.applyInserts(client, `insert_${table}`, table, spec.columns);
       }
-      else if(change.type === 'update') {
+      else if (change.type === 'update') {
         yield tableDiff.applyUpdates(client, `update_${table}`, table, spec.idColumns, spec.columns);
       }
-      else if(change.type === 'delete') {
+      else if (change.type === 'delete') {
         yield tableDiff.applyDeletes(client, `delete_${table}`, table, spec.idColumns);
       }
       else {
@@ -179,119 +189,302 @@ function updateDawa(client) {
   })();
 }
 
-function importIncremental(client, dataDir) {
+const dirtyDeps = {
+  vejstykke: [
+    'NavngivenVej', 'NavngivenVejKommunedel'
+  ],
+  adgangsadresse: [
+    'Husnummer',
+    'Adressepunkt',
+    'DARKommuneinddeling',
+    'NavngivenVej',
+    'NavngivenVejKommunedel',
+    'Postnummer',
+    'SupplerendeBynavn'
+  ],
+  adresse: [
+    'Adresse'
+  ]
+};
+
+function createFetchTable(client, tableName) {
+  const fetchTable = `fetch_${tableName}`;
+  return  client.queryp(`create temp table ${fetchTable} (LIKE ${tableName})`);
+}
+
+function copyDumpToTables(client, dataDir) {
+  return q.async(function*() {
+    for (let entityName of ALL_DAR_ENTITIES) {
+      const filePath = path.join(dataDir, ndjsonFileName(entityName));
+      const tableName = postgresMapper.tables[entityName];
+      const fetchTable = `fetch_${tableName}`;
+      yield createFetchTable(client, tableName);
+      yield streamToTable(client, entityName, filePath, fetchTable, true);
+    }
+  })()
+}
+
+function copyEventIdsToFetchTable(client, fetchTable, table) {
+  return client.queryp(`UPDATE ${fetchTable} F 
+      SET eventopret = COALESCE(f.eventopret, t.eventopret), 
+      eventopdater = COALESCE(f.eventopdater, t.eventopdater) 
+      FROM ${table} t WHERE f.rowkey = t.rowkey`);
+
+}
+
+function computeDumpDifferences(client) {
+  return q.async(function*() {
+    const eventId = yield getMaxEventId(client, 'fetch_');
+    for (let entityName of ALL_DAR_ENTITIES) {
+      const tableName = postgresMapper.tables[entityName];
+      const fetchTable = `fetch_${tableName}`;
+      yield client.queryp(`CREATE UNIQUE INDEX ON ${fetchTable}(rowkey)`);
+      // add/expire any rows added/expired after the dump was generated
+      yield client.queryp(`INSERT INTO ${fetchTable} (SELECT * FROM ${tableName} 
+      WHERE eventOpret > $1 OR eventopdater > $1) 
+      ON CONFLICT (rowkey) DO UPDATE SET registrering = EXCLUDED.registrering`, [eventId]);
+      // ensure we do not overwite eventopret and eventopdater with NULLs
+      // DAR1 may discard them
+      yield copyEventIdsToFetchTable(client, fetchTable, tableName);
+
+      const columns = postgresMapper.columns[entityName];
+      yield tablediff.computeDifferences(client, `fetch_${tableName}`, tableName, ['rowkey'], columns);
+      yield darTablediff.logChanges(client, entityName, tableName);
+      yield importUtil.dropTable(client, fetchTable);
+    }
+  })();
+}
+
+function applyDarDifferences(client, darEntities) {
+  return q.async(function*() {
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      const columns = postgresMapper.columns[entity];
+      yield tablediff.applyChanges(client, table, table, ['rowkey'], columns, columns);
+    }
+  })();
+
+}
+
+function importIncremental(client, dataDir, skipDawa) {
   return withDar1Transaction(client, 'csv', () => {
     return q.async(function*() {
-      for (let entityName of entities) {
-        const columns = postgresMapper.columns[entityName];
-        const filePath = path.join(dataDir, ndjsonFileName(entityName));
-        const tableName = postgresMapper.tables[entityName];
-        const desiredTableName = `desired_${tableName}`;
-        yield client.queryp(`create temp table ${desiredTableName} (LIKE ${tableName})`);
-        yield streamToTable(client, entityName, filePath, desiredTableName, true);
-        const eventId = getMaxEventId(client, 'desired_');
-        yield darTablediff.computeDifferences(client, desiredTableName, tableName, columns, eventId);
-        yield darTablediff.logChanges(client, entityName, tableName);
-        yield darTablediff.applyChanges(client, tableName, columns);
-        yield tablediff.dropChangeTables(client, tableName);
-        yield importUtil.dropTable(desiredTableName);
-      }
+      yield copyDumpToTables(client, dataDir);
+      yield computeDumpDifferences(client);
+      yield applyIncrementalDifferences(client, skipDawa, ALL_DAR_ENTITIES);
     })();
   });
 }
 
-function fetchTableColumns(entityName) {
-  const columns = postgresMapper.columns[entityName];
-  return _.without(columns, 'eventopret', 'eventopdater').concat('eventid');
-
-}
-
-function createFetchedTable(client, entityName, fetchedTable) {
-  const columns = fetchTableColumns(entityName);
-  const table = postgresMapper.columns[entityName];
-  return client.queryBatched(`CREATE TEMP TABLE  ${fetchedTable} AS
-     select ${_.without(columns, 'eventid').join(', ')}, 1 as eventid FROM ${table} WHERE false`);
-}
-
-function createFetchTables(client, changeset) {
+/**
+ * Given updated DAR tables, but the corresponding insert_, update_ and delete_ tables still present,
+ * incrementially update the _current tables.
+ * @param client
+ * @returns {*}
+ */
+function computeIncrementalChangesToCurrentTables(client, darEntities) {
   return q.async(function*() {
-    for (let entityName of Object.keys(changeset)) {
-      yield createFetchedTable(client, entityName, `fetched_${postgresMapper.tables[entityName]}`);
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      const columns = postgresMapper.columns[entity];
+      const currentTable = `${table}_current`;
+      const currentTableView = `${currentTable}_view`;
+      const dirtyTable = `dirty_${currentTable}`;
+      const dirtySelect = ['insert', 'update', 'delete']
+        .map(prefix => `SELECT rowkey from ${prefix}_${table} `)
+        .join(' UNION ');
+      yield client.queryp(`create temp table ${dirtyTable} as (${dirtySelect})`);
+      yield tablediff.computeDifferencesSubset(
+        client, dirtyTable, currentTableView, currentTable, ['rowkey'], columns);
+      yield client.queryp(`drop table ${dirtyTable}`)
+    }
+  })();
+}
+
+function dropDarChangeTables(client, darEntities) {
+  return q.async(function*() {
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      yield tablediff.dropChangeTables(client, table);
+    }
+  })();
+}
+
+function dropDarCurrentChangeTables(client, darEntities) {
+  return q.async(function*() {
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      yield tablediff.dropChangeTables(client, `${table}_current`);
+    }
+  })();
+}
+
+function computeDirtyDarIds(client, darEntities) {
+  return q.async(function*() {
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      const currentTable = `${table}_current`;
+      const dirtyTable = `dirty_${currentTable}`;
+      yield client.queryBatched(`CREATE TEMP TABLE ${dirtyTable} AS (\
+SELECT ${currentTable}.id FROM delete_${currentTable} NATURAL JOIN ${currentTable} UNION \
+SELECT ${currentTable}.id FROM update_${currentTable} \
+    JOIN ${currentTable} ON ${columnsEqualClause(`update_${currentTable}`, currentTable, ['rowkey'])} UNION \
+SELECT id FROM update_${currentTable} UNION \
+SELECT id FROM insert_${currentTable})`);
+    }
+  })();
+}
+
+function dropDirtyDarIdTables(client, darEntities) {
+  return q.async(function*() {
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      const currentTable = `${table}_current`;
+      const dirtyTable = `dirty_${currentTable}`;
+      yield importUtil.dropTable(client, dirtyTable);
+    }
+  })();
+}
+
+function createDirtyDawaTables(client) {
+  return q.async(function*() {
+    for (let dawaEntity of Object.keys(dawaSpec)) {
+      const dawaTable = dawaSpec[dawaEntity].table;
+      const dawaIdColumns = dawaSpec[dawaEntity].idColumns;
+      yield client.queryBatched(`CREATE TEMP TABLE dirty_${dawaTable} AS SELECT ${dawaIdColumns.join(', ')} FROM ${dawaTable} WHERE false`);
+    }
+  })();
+}
+
+function computeDirtyDawaIds(client, darEntities) {
+  return q.async(function*() {
+    for (let dawaEntity of Object.keys(dawaSpec)) {
+      const dawaTable = dawaSpec[dawaEntity].table;
+      const dawaIdColumns = dawaSpec[dawaEntity].idColumns;
+      const relevantEntities = _.intersection(dirtyDeps[dawaEntity], darEntities);
+
+      const selectDirtys = relevantEntities.map(darEntity => {
+        const darTable = postgresMapper.tables[darEntity];
+        const darTableCurrent = `${darTable}_current`;
+        const dirtyDarTable = `dirty_${darTableCurrent}`;
+
+        const darEntityIdColumn = `${darEntity.toLowerCase()}_id`;
+        return `SELECT ${selectList('v', dawaIdColumns)} FROM dar1_${dawaTable}_dirty_view v JOIN ${dirtyDarTable} d ON v.${darEntityIdColumn} = d.id`;
+      }).join(' UNION ');
+      yield client.queryBatched(`WITH existing AS (SELECT ${dawaIdColumns.join(', ')} FROM dirty_${dawaTable}), \
+dels AS (delete from dirty_${dawaTable})      
+INSERT INTO dirty_${dawaTable}(${dawaIdColumns.join(', ')}) (select * from existing UNION ${selectDirtys})`);
+    }
+  })();
+}
+
+
+function applyChangesToCurrentDar(client, darEntities) {
+  return q.async(function*() {
+    for (let entity of darEntities) {
+      const table = postgresMapper.tables[entity];
+      const currentTable = `${table}_current`;
+      yield tablediff.applyChanges(client, currentTable, currentTable, ['rowkey'],
+        postgresMapper.columns[entity], postgresMapper.columns[entity]);
+    }
+  })();
+}
+
+function updateDawaIncrementally(client) {
+  return q.async(function*() {
+    for (let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse']) {
+      const spec = dawaSpec[dawaEntity];
+      const table = spec.table;
+      const dirtyTable = `dirty_${table}`;
+      const view = `dar1_${table}_view`;
+      yield tablediff.computeDifferencesSubset(client, dirtyTable, view, table, spec.idColumns,
+        spec.columns);
+    }
+    yield applyDawaChanges(client);
+  })();
+}
+
+function dropDawaDirtyTables(client) {
+  return q.async(function*() {
+    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse']) {
+      yield importUtil.dropTable(client, `dirty_${dawaSpec[dawaEntity].table}`);
+    }
+  })();
+}
+
+function dropDawaChangeTables(client) {
+  return q.async(function*() {
+    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse']) {
+      yield tablediff.dropChangeTables(client, dawaSpec[dawaEntity].table);
+    }
+  })();
+}
+
+function applyIncrementalDifferences(client, skipDawaUpdate, darEntities) {
+  return q.async(function*() {
+    yield applyDarDifferences(client, darEntities);
+    yield computeIncrementalChangesToCurrentTables(client, darEntities);
+    yield dropDarChangeTables(client, darEntities);
+    if (!skipDawaUpdate) {
+      yield computeDirtyDarIds(client, darEntities);
+      yield createDirtyDawaTables(client);
+      yield computeDirtyDawaIds(client, darEntities);
+    }
+    yield applyChangesToCurrentDar(client, darEntities);
+    if (!skipDawaUpdate) {
+      // due to the joining, some dirty DAWA ids is computed before changing the current dar tables,
+      // and some are computed after
+      yield computeDirtyDawaIds(client, darEntities);
+    }
+    yield dropDarCurrentChangeTables(client, darEntities);
+    if (!skipDawaUpdate) {
+      yield dropDirtyDarIdTables(client, darEntities);
+      yield updateDawaIncrementally(client);
+      yield dropDawaDirtyTables(client);
+      yield dropDawaChangeTables(client);
     }
   })();
 }
 
 function storeChangesetInFetchTables(client, changeset) {
   return q.async(function*() {
-    yield createFetchTables(client, changeset);
     for (let entityName of Object.keys(changeset)) {
       const rows = changeset[entityName];
       const targetTable = postgresMapper.tables[entityName];
       const mappedRows = rows.map(postgresMapper.createMapper(entityName, true));
-      const fetchedTable = `fetched_${targetTable}`;
-      const fetchColumns = fetchTableColumns(entityName);
-      yield importUtil.streamArrayToTable(client, mappedRows, fetchedTable, fetchColumns);
+      for(let row of mappedRows) {
+        const eventid = row.eventid;
+        delete row.eventid;
+        if(row.registreringtil) {
+          // opdatering
+          row.eventopdater = eventid;
+        }
+        else {
+          row.eventopret = eventid;
+        }
+
+      }
+      const fetchedTable = `fetch_${targetTable}`;
+      const columns = postgresMapper.columns[entityName];
+      yield createFetchTable(client, targetTable);
+      yield importUtil.streamArrayToTable(client, mappedRows, fetchedTable, columns);
+      yield copyEventIdsToFetchTable(client, fetchedTable, targetTable);
     }
   })();
 }
 
-function applyFetchTables(client, entityNames) {
-  return q.async(function*() {
-    for (let entityName of Object.keys(entityNames)) {
-      const table = postgresMapper.tables[entityName];
-      const fetchTable = `fetched_${table}`;
-      const allColumns = postgresMapper.columns[entityName];
-      const regularColumns = _.without(allColumns, 'eventopret', 'eventopdater');
-      // Vi antager at opdateringer overholder de givne invarianter, dvs.:
-      // 1. Rækker uden registreringtil er nye rækker som skal indsættes
-      // 2. Rækker med registreringtil er eksisterende rækker som skal opdateres,
-      //    og det er kun nødvendigt at opdatere eventopdater og registrering kolonnerne
-      yield client.queryBatched(`INSERT INTO ${table}(eventopret, ${regularColumns.join(', ')}) (SELECT eventid, ${selectList(null, regularColumns)} FROM ${fetchTable} WHERE upper(registrering) IS NULL)`);
-      yield client.queryBatched(`UPDATE ${table} SET eventopdater = eventid, registrering = ${fetchTable}.registrering FROM ${fetchTable} WHERE ${fetchTable}.rowkey = ${table}.rowkey`);
-      // TODO log changes
-    }
-  })();
-}
-
-function computeChangedDawaObjects(client, changedDarEntityNames) {
-  return q.async(function*() {
-    yield client.queryBatched(`CREATE TEMP TABLE changed_vejstykker(kommunekode smallint, vejkode smallint, primary key(kommunekode, vejkode))`);
-    yield client.queryBatched('CREATE TEMP TABLE changed_adgangsadresser(id uuid PRIMARY KEY)');
-    yield client.queryBatched('CREATE TEMP TABLE changed_enhedsadresser(id uuid PRIMARY KEY)');
-    if (_.contains(changedDarEntityNames, 'NavngivenVejKommunedel')) {
-      yield client.queryBatched(`INSERT INTO changed_vejstykker(kommunekode, vejkode)
-      (SELECT distinct kommune as kommunekode, vejkode FROM fetched_${postgresMapper.tables.NavngivenVejKommunedel})`);
-    }
-    if (_.contains(changedDarEntityNames, 'Husnummer')) {
-      yield client.queryBatched(`INSERT INTO changed_adgangsadresser (SELECT distinct id FROM fetched_${postgresMapper.tables.Husnummer})`);
-    }
-    if (_.contains(changedDarEntityNames, 'AdressePunkt')) {
-      yield client.queryBatched(`INSERT INTO changed_adgangsadresser (SELECT distinct hn.id FROM fetched_${postgresMapper.tables.AdressePunkt} ap JOIN Husnummer hn ON hn.adgangspunkt_id = ap.id WHERE hn.id NOT IN (SELECT id from changed_adgangsadresser))`);
-    }
-    if (_.contains(changedDarEntityNames, 'Adresse')) {
-      yield client.queryBatched(`INSERT INTO changed_enhedsadresser (SELECT distinct id FROM fetched_${postgresMapper.tables.Adresse})`);
-    }
-    for (let table of ['changed_vejstykker', 'changed_adgangsadresser', 'changed_enhedsadresser']) {
-      yield client.queryBatched(`ANALYZE ${table}`);
-    }
-  })();
-}
-
-function dropFetchTables(client, entityNames) {
-  return q.async(function*() {
-    for (let entityName of entityNames) {
-      yield client.queryBatched(`DROP TABLE fetched_${postgresMapper.tables[entityName]}`);
-    }
-  })();
-}
-
-function importChangeset(client, changeset) {
+function importChangeset(client, changeset, skipDawa) {
+  const entities = Object.keys(changeset);
   return q.async(function*() {
     yield storeChangesetInFetchTables(client, changeset);
-    yield applyFetchTables(client, Object.keys(changeset));
-    yield computeChangedDawaObjects(client, Object.keys(changeset));
-    yield dropFetchTables(client, Object.keys(changeset));
-
+    for(let entity of entities) {
+      const table = postgresMapper.tables[entity];
+      yield client.queryp(`CREATE TEMP TABLE dirty_${table} AS (SELECT rowkey FROM fetch_${table})`);
+      yield tablediff.computeDifferencesSubset(client, `dirty_${table}`, `fetch_${table}`, table, ['rowkey'], postgresMapper.columns[entity]);
+      yield importUtil.dropTable(client, `dirty_${table}`);
+      yield importUtil.dropTable(client, `fetch_${table}`);
+    }
+    yield applyIncrementalDifferences(client, skipDawa, entities);
   })();
 }
 
@@ -317,7 +510,9 @@ module.exports = {
   importChangeset: importChangeset,
   updateDawa: updateDawa,
   internal: {
+    ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,
-    getMeta: getMeta
+    getMeta: getMeta,
+    setInitialMeta: setInitialMeta
   }
 };

@@ -601,7 +601,7 @@ function storeRowsToTempTable(client, csvSpec, dbSpecImpl, rows, table, report) 
       ]);
     })
     .then(function() {
-      reportTable(client, report, table);
+      return reportTable(client, report, table);
     });
 }
 
