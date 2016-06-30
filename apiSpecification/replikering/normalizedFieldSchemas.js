@@ -155,7 +155,7 @@ var fields = {
       deprecated: true
     }, {
       name: 'esrejendomsnr',
-      description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
+      description: 'DEPRECATED. Feltet opdateres ikke længere. Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som det matrikelnummer som adressen ligger på, er en del af.' +
         ' Stammer fra BBR.' +
         ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',

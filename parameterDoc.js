@@ -490,7 +490,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'esrejendomsnr',
-    doc: 'ESR Ejendomsnummer. Indtil 7 cifre.'
+    doc: 'ESR Ejendomsnummer. Indtil 7 cifre. Søger på esrejendomsnummeret fra BBR, som ikke opdateres længere.'
   },
   SRIDParameter,
   {
