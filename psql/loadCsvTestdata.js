@@ -27,7 +27,7 @@ function loadTemaer(client, dataDir) {
     const columnsWithoutId = _.without(columns, 'id');
     const tmpTable = 'tmpTemaer';
     // copy CSV to a temp table
-    client.queryp(`CREATE TEMP TABLE ${tmpTable} AS (select * from temaer where false)`);
+    yield client.queryp(`CREATE TEMP TABLE ${tmpTable} AS (select * from temaer where false)`);
     yield copyCsvToTable(client, tmpTable, file, columns);
     // insert into temaer without the id column
     yield client.queryp(`INSERT INTO temaer(${columnsWithoutId.join(', ')}) (SELECT ${columnsWithoutId.join(', ')} FROM ${tmpTable})`);

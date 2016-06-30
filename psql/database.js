@@ -162,9 +162,7 @@ function denodeifyClient(client, requestLimiter) {
     queryInProgress = true;
     return q.async(function*() {
       try {
-        console.log('FLUSHING');
         yield proxy.flush();
-        console.log('FLUSHED');
         return yield proxy.doQuery(query, params);
       }
       finally {
