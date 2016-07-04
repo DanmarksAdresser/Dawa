@@ -9,6 +9,7 @@ const registry = require('../registry');
 var resourcesUtil = require('../common/resourcesUtil');
 
 
+
 exports.query = resourcesUtil.queryResourceSpec(
   nameAndKey, {
     propertyFilter: parameters.propertyFilter,
@@ -47,6 +48,38 @@ exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   representations,
   sqlModel
 );
+
+exports.neighbors = {
+  path: `/${nameAndKey.plural}/:kommunekode/:kode/naboer`,
+  pathParameters: parameters.id,
+  queryParameters: resourcesUtil.flattenParameters({
+    paging: commonParameters.paging,
+    format: commonParameters.format,
+    crs: commonParameters.crs,
+    struktur: commonParameters.struktur,
+    distance: [{
+      name: 'afstand',
+      type: 'float',
+      defaultValue: 0,
+      schema: {
+        type: 'number',
+        minimum: 0
+      }
+    }]
+  }),
+  representations: representations,
+  sqlModel: sqlModel,
+  singleResult: false,
+  chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
+  processParameters: (params) => {
+    params.neighborkommunekode=params.kommunekode;
+    delete params.kommunekode;
+
+    params.neighborkode=params.kode;
+    delete params.kode;
+    resourcesUtil.applyDefaultPagingForQuery(params)
+  }
+};
 
 Object.keys(exports).forEach(key => {
   registry.add('vejstykke', 'resource', key, exports[key]);

@@ -24,6 +24,7 @@ block content
               li <a href='#vejstykkeopslag'>Vejstykkeopslag</a>
               li <a href='#vejstykkerreversegeokodning'>Vejstykker reverse geokodning</a>
               li <a href='#vejstykkerautocomplete'>Vejstykker autocomplete</a>
+              li <a href='#vejstykkenaboer'>Vejstykkes naboer</a>
               li <a href='#vejstykkedata'>Beskrivelse af vejstykkedata</a>
           //
             li(data-toggle='collapse', data-target='#haendelser').nav-header vejnavn hændelse
@@ -69,8 +70,13 @@ block content
             +documentResource(parameterDoc, '/vejstykker/reverse')
 
             div.page-header
-            h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
+              h3.anchor-header#vejstykkerautocomplete Vejstykker autocomplete
             +documentResource(parameterDoc, '/vejstykker/autocomplete')
+
+            div.page-header
+              h3.anchor-header#vejstykkenaboer Vejstykkes naboer
+            +documentResource(parameterDoc, '/vejstykker/{kommunekode}/{kode}/naboer')
+
 
             div.page-header
             h3.anchor-header#vejstykkedata Beskrivelse af vejstykkedata

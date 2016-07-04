@@ -275,6 +275,20 @@ var vejstykkerDoc = {
           description: 'Find alle vejstykker som indeholder <em>strand </em> (bemærk mellemrum tilsidst).',
           query: [{name: 'q', value: 'strand '}]
         }]
+    },
+    '/vejstykker/{kommunekode}/{kode}/naboer': {
+      subtext: 'Find vejstykker i nærheden af et vejstykke',
+      parameters: vejstykkerIdParameters
+        .concat([{
+          name: 'afstand',
+          doc: 'Angiver maksimal afstand. Default er 0, som finder de vejstykker, som støder helt op til vejstykket.'
+        }])
+        .concat(formatAndPagingParams)
+        .concat([strukturParameter, SRIDParameter]),
+      examples: [{
+        description: 'Find alle vejstykker, som støder op til vejstykket med kommunekode 101 og vejkode 64.',
+        path: ['/vejstykker/101/64/naboer']
+      }]
     }
   }
 };

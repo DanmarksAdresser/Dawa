@@ -28,6 +28,9 @@ var columns = {
   navn: {
     column: 'vejstykker.vejnavn'
   },
+  adresseringsnavn: {
+    column: 'vejstykker.adresseringsnavn'
+  },
   postnr: {
     select: null,
     where: function(sqlParts, parameterArray) {
@@ -67,20 +70,39 @@ var columns = {
   }
 };
 
+const distanceParameterImpl = (sqlParts, params) => {
+  // This is implemented with a JOIN
+  // when using a subquery, PostgreSQL fails to utilize the spatial index
+  // Probably a bug in PostgreSQL
+  if (params.afstand !== undefined) {
+    const kommunekodeAlias = dbapi.addSqlParameter(sqlParts, params.neighborkommunekode);
+    const vejkodeAlias = dbapi.addSqlParameter(sqlParts, params.neighborkode);
+    const afstandAlias = dbapi.addSqlParameter(sqlParts, params.afstand);
+    sqlParts.from.push(`, vejstykker v2`);
+    dbapi.addWhereClause(sqlParts, `\
+v2.kommunekode = ${kommunekodeAlias} \
+AND v2.kode = ${vejkodeAlias} \
+AND ST_DWithin(vejstykker.geom, v2.geom, ${afstandAlias})
+AND NOT (vejstykker.kommunekode = ${kommunekodeAlias} AND vejstykker.kode = ${vejkodeAlias})`);
+
+  }
+};
+
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.geomWithin('geom'),
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.autocomplete(columns, ['navn']),
-  sqlParameterImpl.paging(columns, nameAndKey.key)
+  sqlParameterImpl.paging(columns, nameAndKey.key),
+  distanceParameterImpl
 ];
 
 var baseQuery = function() {
   return {
     select: [],
     from: ['vejstykker' +
-      " LEFT JOIN kommuner k ON vejstykker.kommunekode = k.kode"],
+      " LEFT JOIN kommuner k ON (vejstykker.kommunekode = k.kode)"],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
