@@ -41,6 +41,31 @@ module.exports =  {
     schema: schema.postnr,
     multi: true
   }
-])
+]),
+  regex: normalizeParameters([{
+    name: 'regex',
+    type: 'string',
+    schema: {
+      maxLength: 100,
+      minLength: 1
+    },
+    validateFun: (param) => {
+      try {
+        new RegExp(param);
+      }
+      catch(e) {
+        throw e.message;
+      }
+    }
+  }]),
+  distance: normalizeParameters([{
+    name: 'afstand',
+    type: 'float',
+    defaultValue: 0,
+    schema: {
+      type: 'number',
+      minimum: 0
+    }
+  }])
 };
 registry.addMultiple('vejstykke', 'parameterGroup', module.exports);
