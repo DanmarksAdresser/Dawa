@@ -11,6 +11,11 @@ describe('Vejstykker', () => {
   const queryResource = resources.query;
   const naboResource = resources.neighbors;
   testdb.withTransactionEach('test', (clientFn) => {
+    it('Kan finde vejstykker med fuzzy søgning', q.async(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, [], {q: 'elliasgade', fuzzy: ''});
+      expect(result).to.not.be.empty;
+      expect(result[0].navn).to.equal('Eliasgade');
+    }));
     it('Kan finde vejstykker ud fra regulært udtryk', q.async(function*() {
       const result = yield helpers.getJson(clientFn(), queryResource, [], {regex: 'marken'});
       expect(result).to.have.length(2);
