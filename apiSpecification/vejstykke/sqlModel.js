@@ -95,15 +95,25 @@ const regexParameterImpl = (sqlParts, params) => {
   }
 };
 
+function fuzzySearchParameterImpl(sqlParts, params) {
+  if(params.fuzzyq) {
+    var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
+    sqlParts.whereClauses.push("vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT vejnavn, vejnavn <-> " + fuzzyqAlias + " as dist from vejstykker ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)");
+    sqlParts.orderClauses.push("levenshtein(lower(vejnavn), lower(" + fuzzyqAlias + "), 2, 1, 3)");
+  }
+}
+
+
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.geomWithin('geom'),
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.autocomplete(columns, ['navn']),
-  sqlParameterImpl.paging(columns, nameAndKey.key),
   distanceParameterImpl,
-  regexParameterImpl
+  regexParameterImpl,
+  fuzzySearchParameterImpl,
+  sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
 var baseQuery = function() {
@@ -117,7 +127,7 @@ var baseQuery = function() {
   };
 };
 
-module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+module.exports = sqlUtil.applyFallbackToFuzzySearch(assembleSqlModel(columns, parameterImpls, baseQuery));
 
 var registry = require('../registry');
 registry.add('vejstykke', 'sqlModel', undefined, module.exports);

@@ -189,6 +189,10 @@ var vejstykkerParameters = [{
   'Der skelnes ikke mellem store og små bogstaver.',
   examples: ['tværvej']
 },
+  {
+    name: 'fuzzy',
+    doc: 'Aktiver fuzzy søgning'
+  },
   vejstykkerIdParameters[0],
   vejstykkerIdParameters[1],
   {

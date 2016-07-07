@@ -17,6 +17,7 @@ exports.query = resourcesUtil.queryResourceSpec(
     geomWithin: commonParameters.geomWithin,
     crs: commonParameters.crs,
     struktur: commonParameters.struktur,
+    fuzzy: commonParameters.fuzzy,
     regex: parameters.regex
   },
   representations,
@@ -29,6 +30,7 @@ exports.autocomplete = resourcesUtil.autocompleteResourceSpec(
     autocomplete: commonParameters.autocomplete,
     geomWithin: commonParameters.geomWithin,
     crs: commonParameters.crs,
+    fuzzy: commonParameters.fuzzy,
     regex: parameters.regex
   },
   representations.autocomplete,
