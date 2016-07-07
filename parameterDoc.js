@@ -1556,6 +1556,14 @@ _.each(tilknytninger, function (tilknytning, temaNavn) {
   ];
 });
 
+_.each(flats, function (flat) {
+  keyParams[flat.prefix + 'tilknytning'] = [
+    {
+      name: 'adgangsadresseid',
+      doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
+    }
+  ];
+});
 
 var eventExamples = {
   vejstykke: [{
@@ -1654,7 +1662,7 @@ var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({

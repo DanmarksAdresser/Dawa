@@ -8,3 +8,4 @@ require('./vejstykke/nameAndKey');
 require('./ejerlav/nameAndKey');
 require('./tematilknytninger/namesAndKeys');
 require('./flats/flats');
+require('./flats/tilknytninger/namesAndKeys');

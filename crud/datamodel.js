@@ -44,8 +44,8 @@ module.exports = {
     columns: ['adgangsadresse_id', 'tema', 'tema_id'],
     key: ['adgangsadresse_id', 'tema', 'tema_id']
   },
-  bebyggelse_adgangsadresse: {
-    name: 'bebyggelser_adgangsadresse',
+  bebyggelsestilknytning: {
+    name: 'bebyggelsestilknytning',
     table: 'bebyggelser_adgadr',
     columns: ['bebyggelse_id', 'adgangsadresse_id'],
     key: ['bebyggelse_id', 'adgangsadresse_id']

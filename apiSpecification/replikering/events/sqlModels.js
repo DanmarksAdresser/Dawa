@@ -10,6 +10,7 @@ var parameters = require('./parameters');
 var querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
 var temaer = require('../../temaer/temaer');
 
+
 function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
   return {
     allSelectableFieldNames: function () {
@@ -80,7 +81,7 @@ function baseQuery(datamodelName, tableName, columnMappings) {
 
 }
 
-var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav'], function(memo, datamodelName) {
+var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav', 'bebyggelsestilknytning'], function(memo, datamodelName) {
   var columnMappings = mappings.columnMappings[datamodelName];
   var baseQueryFn = function() {
     return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);
@@ -110,6 +111,7 @@ function createTilknytningModel(tema) {
 temaer.forEach(function(tema) {
   _.extend(sqlModels, createTilknytningModel(tema));
 });
+
 
 module.exports = sqlModels;
 
