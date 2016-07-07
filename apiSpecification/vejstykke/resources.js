@@ -16,7 +16,8 @@ exports.query = resourcesUtil.queryResourceSpec(
     search: commonParameters.search,
     geomWithin: commonParameters.geomWithin,
     crs: commonParameters.crs,
-    struktur: commonParameters.struktur
+    struktur: commonParameters.struktur,
+    regex: parameters.regex
   },
   representations,
   sqlModel
@@ -27,7 +28,8 @@ exports.autocomplete = resourcesUtil.autocompleteResourceSpec(
     propertyFilter: parameters.propertyFilter,
     autocomplete: commonParameters.autocomplete,
     geomWithin: commonParameters.geomWithin,
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    regex: parameters.regex
   },
   representations.autocomplete,
   sqlModel
@@ -57,15 +59,7 @@ exports.neighbors = {
     format: commonParameters.format,
     crs: commonParameters.crs,
     struktur: commonParameters.struktur,
-    distance: [{
-      name: 'afstand',
-      type: 'float',
-      defaultValue: 0,
-      schema: {
-        type: 'number',
-        minimum: 0
-      }
-    }]
+    distance: parameters.distance
   }),
   representations: representations,
   sqlModel: sqlModel,

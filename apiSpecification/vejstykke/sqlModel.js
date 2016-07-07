@@ -88,6 +88,13 @@ AND NOT (vejstykker.kommunekode = ${kommunekodeAlias} AND vejstykker.kode = ${ve
   }
 };
 
+const regexParameterImpl = (sqlParts, params) => {
+  if(params.regex) {
+    const regexAlias = dbapi.addSqlParameter(sqlParts, params.regex);
+    dbapi.addWhereClause(sqlParts, `vejnavn ~ ${regexAlias}`);
+  }
+};
+
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
@@ -95,7 +102,8 @@ var parameterImpls = [
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   sqlParameterImpl.paging(columns, nameAndKey.key),
-  distanceParameterImpl
+  distanceParameterImpl,
+  regexParameterImpl
 ];
 
 var baseQuery = function() {

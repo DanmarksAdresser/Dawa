@@ -139,7 +139,7 @@ exports.loadTables = function(client, scriptDir) {
  * plv8 would be an option?
  */
 function createHistoryTriggers(client) {
-  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema', 'bebyggelse_adgangsadresse'], function(sql, datamodelName) {
+  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema', 'bebyggelsestilknytning'], function(sql, datamodelName) {
     var datamodel = datamodels[datamodelName];
     var table = datamodel.table;
     sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);

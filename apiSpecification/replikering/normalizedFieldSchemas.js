@@ -14,8 +14,10 @@ var util = require('../util');
 var kode4String = util.kode4String;
 var timestampFormatter = util.d;
 var temaer = require('../temaer/temaer');
-var tilknytninger = require('../tematilknytninger/tilknytninger');
+var temaTilknytninger = require('../tematilknytninger/tilknytninger');
 var additionalFieldsMap = require('../temaer/additionalFields');
+const flatTilknytninger = require('../flats/tilknytninger/tilknytninger');
+const flats = require('../flats/flats');
 
 var fields = {
   vejstykke: [{
@@ -297,7 +299,7 @@ var fields = {
   }]
 };
 
-_.each(tilknytninger, function(tilknytning, temaNavn) {
+_.each(temaTilknytninger, function(tilknytning, temaNavn) {
   var tema = _.findWhere(temaer, { singular: temaNavn});
   var additionalFields = additionalFieldsMap[temaNavn];
   var temaKeyFieldNames = _.pluck(tema.key, 'name');
@@ -317,6 +319,23 @@ _.each(tilknytninger, function(tilknytning, temaNavn) {
   });
   tilknytningFields = tilknytningFields.concat(tilknytningKeyFields);
   fields[tema.prefix + 'tilknytning'] = tilknytningFields;
+});
+
+Object.keys(flatTilknytninger).forEach(flatName => {
+  const flat = flats[flatName];
+  const tilknytningName = flat.prefix + 'tilknytning';
+  const tilknytningFlatFields = flat.key.map(flatKeyName => {
+    const tilknytningKeyName = flatTilknytninger[flatName].keyFieldNames[flatKeyName];
+    const flatField = _.findWhere(flat.fields, {name: flatKeyName});
+    return Object.assign({}, flatField, {name: tilknytningKeyName});
+  });
+  const tilknytningFields = [{
+    name: 'adgangsadresseid',
+    description: 'Adgangsadressens id.',
+    schema: definitions.UUID,
+    primary: true
+  }].concat(tilknytningFlatFields);
+  fields[tilknytningName] = tilknytningFields;
 });
 
 exports.schemas = _.reduce(fields, function(memo, fieldList, datamodelName) {

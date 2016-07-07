@@ -34,24 +34,21 @@ function createTempTable(client, tableName) {
     )`);
 }
 
-function streamToTable(client, filePath, tableName) {
-  return q.async(function*() {
-    const src = fs.createReadStream(filePath, {encoding: 'utf8'});
-    const jsonTransformer = JSONStream.parse('features.*');
-    const mapper = es.mapSync(geojsonFeature => {
-      const properties = geojsonFeature.properties;
-      return {
-        id: properties.ID_LOKALID,
-        kode: parseInteger(properties.BEBYGGELSESKODE),
-        type: properties.BEBYGGELSESTYPE,
-        navn: properties.SKRIVEMAADE,
-        geom: geojsonUtil.toPostgresqlGeometry(geojsonFeature.geometry, false, true)
-      };
-    });
-    const stringifier = importUtil.copyStreamStringifier(COLUMNS);
-    const copyStream = importUtil.copyStream(client, tableName, COLUMNS);
-    yield promisingStreamCombiner([src, jsonTransformer, mapper, stringifier, copyStream]);
-  })();
+function streamToTable(client, stream, tableName) {
+  const jsonTransformer = JSONStream.parse('features.*');
+  const mapper = es.mapSync(geojsonFeature => {
+    const properties = geojsonFeature.properties;
+    return {
+      id: properties.ID_LOKALID,
+      kode: parseInteger(properties.BEBYGGELSESKODE),
+      type: properties.BEBYGGELSESTYPE,
+      navn: properties.SKRIVEMAADE,
+      geom: geojsonUtil.toPostgresqlGeometry(geojsonFeature.geometry, false, true)
+    };
+  });
+  const stringifier = importUtil.copyStreamStringifier(COLUMNS);
+  const copyStream = importUtil.copyStream(client, tableName, COLUMNS);
+  return promisingStreamCombiner([stream, jsonTransformer, mapper, stringifier, copyStream]);
 }
 
 function computeDifferences(client, srcTable, dstTable) {
@@ -62,16 +59,15 @@ function applyChanges(client, table) {
   return tablediff.applyChanges(client, table, table, ID_COLUMNS, COLUMNS, NON_ID_COLUMNS);
 }
 
-
-function importBebyggelser(client, filePath, table, initial) {
+function importBebyggelserFromStream(client, stream, table, initial) {
   return q.async(function*() {
     if (initial) {
-      yield streamToTable(client, filePath, table);
+      yield streamToTable(client, stream, table);
     }
     else {
       const desiredTable = 'desired_' + table;
       yield createTempTable(client, desiredTable);
-      yield streamToTable(client, filePath, desiredTable);
+      yield streamToTable(client, stream, desiredTable);
       yield computeDifferences(client, desiredTable, table);
       yield importUtil.dropTable(client, desiredTable);
       yield client.queryp('UPDATE bebyggelser b SET ændret = NOW() FROM update_bebyggelser u WHERE b.id = u.id');
@@ -121,6 +117,12 @@ JOIN changed_ids ON bebyggelser_adgadr.bebyggelse_id = changed_ids.id)`);
   })();
 }
 
+function importBebyggelser(client, filePath, table, initial) {
+  const src = fs.createReadStream(filePath, {encoding: 'utf8'});
+  return importBebyggelserFromStream(client, src, table, initial);
+}
+
 module.exports = {
-  importBebyggelser: importBebyggelser
+  importBebyggelser: importBebyggelser,
+  importBebyggelserFromStream: importBebyggelserFromStream
 };

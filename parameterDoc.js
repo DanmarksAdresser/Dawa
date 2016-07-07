@@ -217,6 +217,11 @@ var vejstykkerParameters = [{
     name: 'cirkel',
     doc: 'Find de vejstykker, som overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
     examples: []
+  },
+  {
+    name: 'regex',
+    doc: 'Find de vejstykker, som matcher det angivne regulære udtryk.',
+    examples: []
   }
 ];
 
@@ -1551,6 +1556,14 @@ _.each(tilknytninger, function (tilknytning, temaNavn) {
   ];
 });
 
+_.each(flats, function (flat) {
+  keyParams[flat.prefix + 'tilknytning'] = [
+    {
+      name: 'adgangsadresseid',
+      doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
+    }
+  ];
+});
 
 var eventExamples = {
   vejstykke: [{
@@ -1649,7 +1662,7 @@ var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({

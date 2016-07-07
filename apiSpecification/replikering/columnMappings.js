@@ -7,7 +7,9 @@ var datamodels = require('../../crud/datamodel');
 var husnrUtil = require('../husnrUtil');
 var kode4String = require('../util').kode4String;
 var temaer = require('../temaer/temaer');
-var tilknytninger = require('../tematilknytninger/tilknytninger');
+var temaTilknytninger = require('../tematilknytninger/tilknytninger');
+const flatTilknytninger = require('../flats/tilknytninger/tilknytninger');
+const flats = require('../flats/flats');
 
 // maps of field names to database column names
 
@@ -156,7 +158,7 @@ exports.keys = {};
   exports.keys[entityName] = datamodels[entityName].key;
 });
 
-_.keys(tilknytninger).forEach(function(temaNavn) {
+_.keys(temaTilknytninger).forEach(function(temaNavn) {
   var tema = _.findWhere(temaer, {singular: temaNavn});
   // For now, only tilknytninter with non-composite keys are replicated.
   var keyColumns = tema.key.map(function(keySpec) {
@@ -168,7 +170,7 @@ _.keys(tilknytninger).forEach(function(temaNavn) {
   });
   var keyMappings = temaKeyFields.map(function(temaKeyField, index) {
     return {
-      name: tilknytninger[tema.singular].keyFieldNames[index],
+      name: temaTilknytninger[tema.singular].keyFieldNames[index],
       column: keyColumns[index],
       formatter: temaKeyField.formatter
     };
@@ -181,6 +183,27 @@ _.keys(tilknytninger).forEach(function(temaNavn) {
 
   exports.tables[ tilknytningKey] = 'adgangsadresser_temaer_matview';
   exports.keys[tilknytningKey] = _.pluck(exports.columnMappings[tilknytningKey], 'name');
+});
+
+Object.keys(flatTilknytninger).forEach(flatName => {
+  const flat = flats[flatName];
+  const tilknytning = flatTilknytninger[flatName];
+  const tilknytningName = flat.prefix + 'tilknytning';
+  const keyColumnMappings = flat.key.map(keyName => {
+    const keyFieldName = tilknytning.keyFieldNames[keyName];
+    const keyFieldColumn = tilknytning.keyFieldColumns[keyName];
+    return {
+      name: keyFieldName,
+      column: keyFieldColumn
+    }
+  });
+  const columnMappings = [{
+    name: 'adgangsadresseid',
+    column: 'adgangsadresse_id'
+  }].concat(keyColumnMappings);
+  exports.columnMappings[tilknytningName] = columnMappings;
+  exports.tables[tilknytningName] = `${flat.plural}_adgadr`;
+  exports.keys[tilknytningName] = _.pluck(exports.columnMappings[tilknytningName], 'name');
 });
 
 // maps column names to field names
