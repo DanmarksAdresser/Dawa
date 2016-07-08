@@ -9,6 +9,7 @@ const _ = require('underscore');
 const bebyggelse = require('../apiSpecification/flats/flats').bebyggelse;
 const geojsonUtil = require('../geojsonUtil');
 const importUtil = require('../importUtil/importUtil');
+const logger = require('../logger').forCategory('importBebyggelser');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const sqlCommon = require('../psql/common');
 const tablediff = require('../importUtil/tablediff');
@@ -59,7 +60,21 @@ function applyChanges(client, table) {
   return tablediff.applyChanges(client, table, table, ID_COLUMNS, COLUMNS, NON_ID_COLUMNS);
 }
 
-function importBebyggelserFromStream(client, stream, table, initial) {
+function verifyBebyggelser(client) {
+  return q.async(function*() {
+    const insertsSql = 'select bebyggelse_id, count(*) as inserts FROM insert_current GROUP BY bebyggelse_id';
+    const deletesSql = 'select bebyggelse_id, count(*) as deletes FROM delete_current GROUP BY bebyggelse_id';
+    const threshold = 100;
+    const suspiciusBebyggelserSql = `select i.bebyggelse_id, inserts, deletes FROM (${insertsSql}) i NATURAL JOIN (${deletesSql}) d WHERE inserts >= $1 and deletes >= $1`;
+    const suspiciousBebyggelser = (yield client.queryp(suspiciusBebyggelserSql, [threshold])).rows;
+    if(suspiciousBebyggelser.length > 0) {
+      logger.error('Mistænkelige bebyggelser. Aborterer.', { bebyggelser: suspiciousBebyggelser});
+      throw new Error("Mistænkelige bebyggelser. Aborterer.");
+    }
+  })();
+}
+
+function importBebyggelserFromStream(client, stream, table, initial, skipSanityCheck) {
   return q.async(function*() {
     if (initial) {
       yield streamToTable(client, stream, table);
@@ -108,6 +123,9 @@ JOIN changed_ids ON b.id = changed_ids.id)`);
 FROM bebyggelser_adgadr \
 JOIN changed_ids ON bebyggelser_adgadr.bebyggelse_id = changed_ids.id)`);
       yield tablediff.computeDifferences(client, 'desired', 'current', relColumns, []);
+      if(!skipSanityCheck) {
+        yield verifyBebyggelser(client);
+      }
       yield tablediff.applyChanges(client, 'current', 'bebyggelser_adgadr', relColumns, relColumns, []);
       yield tablediff.dropChangeTables(client, 'current');
       yield importUtil.dropTable(client, 'desired');
@@ -117,9 +135,9 @@ JOIN changed_ids ON bebyggelser_adgadr.bebyggelse_id = changed_ids.id)`);
   })();
 }
 
-function importBebyggelser(client, filePath, table, initial) {
+function importBebyggelser(client, filePath, table, initial, skipSanityCheck) {
   const src = fs.createReadStream(filePath, {encoding: 'utf8'});
-  return importBebyggelserFromStream(client, src, table, initial);
+  return importBebyggelserFromStream(client, src, table, initial, skipSanityCheck);
 }
 
 module.exports = {
