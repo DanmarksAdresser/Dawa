@@ -65,7 +65,7 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '))';
+      return 'ST_AsGeoJSON(ST_Transform(vejstykker.geom,' + sridAlias + '))';
     }
   }
 };
@@ -107,7 +107,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
-  sqlParameterImpl.geomWithin('geom'),
+  sqlParameterImpl.geomWithin('vejstykker.geom'),
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   distanceParameterImpl,

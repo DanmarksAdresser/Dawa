@@ -290,7 +290,7 @@ var vejstykkerDoc = {
       parameters: vejstykkerIdParameters
         .concat([{
           name: 'afstand',
-          doc: 'Angiver maksimal afstand. Default er 0, som finder de vejstykker, som støder helt op til vejstykket.'
+          doc: 'Angiver maksimal afstand i meter. Default er 0, som finder de vejstykker, som støder helt op til vejstykket.'
         }])
         .concat(formatAndPagingParams)
         .concat([strukturParameter, SRIDParameter]),
