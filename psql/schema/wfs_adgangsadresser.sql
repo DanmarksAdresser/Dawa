@@ -30,4 +30,4 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser AS
     adressepunktaendringsdato AS "adressepunktændringsdato",
     round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "tekstretninggrader",
     geom
-  FROM AdgangsadresserView;
+  FROM adgangsadresser_valid_view;

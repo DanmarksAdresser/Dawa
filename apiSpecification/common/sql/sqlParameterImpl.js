@@ -439,3 +439,9 @@ exports.dagiFilter = function() {
 };
 
 exports.toPgSearchQuery = toPgSearchQuery;
+
+exports.includeInvalidAdgangsadresser = function(sqlParts, params) {
+  if(!params.medtagugyldige) {
+    dbapi.addWhereClause(sqlParts, `postnr IS NOT NULL AND husnr IS NOT NULL AND vejnavn IS NOT NULL and vejnavn <> ''`);
+  }
+};

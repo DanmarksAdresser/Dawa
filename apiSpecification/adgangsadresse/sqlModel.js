@@ -68,6 +68,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 
 
 var parameterImpls = [
+  sqlParameterImpl.includeInvalidAdgangsadresser,
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.geomWithin(),

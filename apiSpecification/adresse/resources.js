@@ -31,6 +31,7 @@ module.exports = [
     resourcesUtil.queryResourceSpec(nameAndKey, {
         propertyFilter: parameters.propertyFilter,
         husnrinterval: parameters.husnrinterval,
+        includeInvalid: parameters.includeInvalid,
         search: commonParameters.search,
         crs: commonParameters.crs,
         struktur: commonParameters.struktur,
@@ -47,6 +48,7 @@ module.exports = [
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     husnrinterval: parameters.husnrinterval,
+    includeInvalid: parameters.includeInvalid,
     geomWithin: commonParameters.geomWithin,
     dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,
@@ -56,6 +58,7 @@ module.exports = [
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,
     {
+      includeInvalid: parameters.includeInvalid,
       crs: commonParameters.crs,
       struktur: commonParameters.struktur
     },

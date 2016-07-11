@@ -105,4 +105,10 @@ exports.husnrinterval = normalizeParameters([
   }
 ]);
 
+exports.includeInvalid = [{
+  name: 'medtagugyldige',
+  type: 'boolean',
+  default: false
+}];
+
 registry.addMultiple('adgangsadresse', 'parameterGroup', module.exports);
