@@ -31,6 +31,9 @@ module.exports = function(street) {
       ref: refify(streetName)
     }
   });
+  // We sort the intervals, such that the most recent intervals are prioritized.
+  // This is to ensure that cpr records does not overwrite DAR records
+  intervalMath.sortByLeft(intervals, intervalMath.valueMath.numberComparator);
   const extendedIntervals = intervalMath.extend(intervals, intervalMath.valueMath.numberComparator);
   const result = extendedIntervals.map((interval) => {
     const virkningstart = interval.min === Number.NEGATIVE_INFINITY ? null : moment.tz(interval.min, 'utc').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
