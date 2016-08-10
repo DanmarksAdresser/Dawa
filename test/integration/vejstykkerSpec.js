@@ -32,6 +32,10 @@ describe('Vejstykker', () => {
         expect(names.has('Langebjergvej')).to.be.true;
         expect(names.has('Skeevej')).to.be.true;
       }));
+      it('Kan finde naboer i GeoJSON format', q.async(function*() {
+        const result = yield helpers.getJson(clientFn(), naboResource, {kommunekode: '329', kode: '4317'}, {format: 'geojson'});
+        expect(result.features).to.have.length(2);
+      }));
     });
   });
 });

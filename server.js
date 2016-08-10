@@ -58,7 +58,7 @@ function setupWorker() {
     connString: process.env.pgConnectionUrl,
     pooled: true,
     poolLog: function (msg, level) {
-      if (level === 'info' || level === 'warn' || level === 'error') {
+      if (level === 'warn' || level === 'error') {
         poolLogger.log(level, msg);
       }
     }

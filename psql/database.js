@@ -131,7 +131,7 @@ function denodeifyClient(client, requestLimiter) {
       const before = Date.now();
       try {
         const result = yield proxy.querypNolog(query, params);
-        statistics.emit('psql_query', Date.now() - before, null, _.extend({sql: query}, proxy.loggingContext));
+        statistics.emit('psql_query', Date.now() - before, null, _.extend(proxy.loggingContext));
         return result;
       }
       catch(err) {
@@ -210,7 +210,6 @@ function acquireNonpooledConnection(options, callback) {
 }
 
 function acquirePooledConnection(pool, options, callback) {
-  var before = Date.now();
   var maxWaitingClients = options.maxWaitingClients;
   if(maxWaitingClients === undefined) {
     maxWaitingClients = 20;
@@ -231,7 +230,6 @@ function acquirePooledConnection(pool, options, callback) {
     waitingClientsCount: pool.waitingClientsCount()
   });
   pool.acquire(function(err, client) {
-    statistics.emit('psql_acquire_connection', Date.now() - before, err);
     if(err)  return callback(err);
     client.poolCount++;
     callback(null, denodeifyClient(client, pool.requestLimiter), function(err) {

@@ -5,11 +5,17 @@ const _ = require('underscore');
 const MINUS_INFINITY = Number.NEGATIVE_INFINITY;
 const INFINITY = Number.POSITIVE_INFINITY;
 
+/**
+ * Check whether an interval is empty. An interval consisting of a single point is not empty.
+ */
 function isEmpty(interval, comparator) {
   return comparator(interval.min, interval.max) > 0 ||
     (equals(interval.min, interval.max, comparator) && (!interval.maxInclusive || !interval.minInclusive));
 }
 
+/**
+ * Compute the intersection of two intervals, using the specified comparator to compare values.
+ */
 function intervalIntersection(a, b, comparator) {
   var result = {
     min: max(a.min, b.min, comparator),
@@ -40,11 +46,16 @@ function intervalIntersection(a, b, comparator) {
   return result;
 }
 
+/** Check if two intervals overlap. Two intervals may overlap by a single point.
+ *
+ */
 function overlaps(a, b, comparator) {
   return intervalIntersection(a, b, comparator) !== null;
 }
 
-// returns the part of interval a that is to the left of b
+/**
+ * returns the part of interval a that is to the left of b
+ */
 function left(a, b, comparator) {
   var result = {
     min: a.min,
@@ -66,7 +77,9 @@ function left(a, b, comparator) {
   return result;
 }
 
-// return the part of interval a that is to the right of b
+/**
+ * return the part of interval a that is to the right of b
+ */
 function right(a, b, comparator) {
   const result = {
     min: max(a.min, b.max, comparator),
@@ -100,11 +113,14 @@ function equals(a, b, comparator) {
   return comparator(a,b) === 0;
 }
 
-
+/**
+ * Check if two intervals are precicely adjacent to each other (and not overlapping)
+ */
 function isAdjacent(a, b, comparator) {
   return (equals(a.min, b.max, comparator) && (a.minInclusive !== b.maxInclusive)) ||
     (equals(a.max, b.min, comparator) && (a.maxInclusive !== b.minInclusive))
 }
+
 
 function intervalsEqual(a, b, comparator) {
   return equals(a.min, b.min, comparator) &&
@@ -113,6 +129,9 @@ function intervalsEqual(a, b, comparator) {
     a.maxInclusive === b.maxInclusive;
 }
 
+/**
+ * Merge two adjacent intervals into one. Assumes the intervals are adjacent.
+ */
 function mergeAdjacentIntervals(a, b, comparator) {
   if(equals(a.min, b.max, comparator)) {
     return {
@@ -135,6 +154,11 @@ function mergeAdjacentIntervals(a, b, comparator) {
   }
 }
 
+/**
+ * Given two intervals a and b:
+ * return an array containing b, and zero, one or two additional intervals
+ * containing the part of a that does not overlap with b.
+ */
 function applyIntervals(a, b, comparator) {
   const result = [b];
   const aLeft = left(a, b, comparator);
@@ -151,7 +175,9 @@ function applyIntervals(a, b, comparator) {
   return result;
 }
 
-
+/**
+ * Sort an array of intervals by the lower bound, descending order.
+ */
 function sortByLeft(arr, comparator) {
   arr.sort((a, b) => {
     const c = comparator(a.min, b.min);
@@ -167,6 +193,10 @@ function sortByLeft(arr, comparator) {
     return c;
   });
 }
+
+/**
+ * Sort an array of intervals by the upper bound, ascending order.
+ */
 function sortByRight(arr, comparator) {
   arr.sort((a, b) => {
     const c = comparator(a.max, b.max);
@@ -183,6 +213,12 @@ function sortByRight(arr, comparator) {
   });
 }
 
+/**
+ * Given a list of intervals, ensure that the intervals do not overlap by shrinking/splitting 
+ * them appropriately.
+ * The intervals should be given in prioritized order. If intervals overlap, the algorithm will
+ * shrink/split the last one.
+ */
 function ensureNotOverlapping(intervals, comparator) {
   if(intervals.length <= 1) {
     return intervals;
