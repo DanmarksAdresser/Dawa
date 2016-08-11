@@ -89,6 +89,8 @@ describe('DAR 1.0 Notifications', () => {
       });
     });
 
+    yield q.delay(50);
+
     // check that we are connected
     {
       const healthPage = yield request.get({uri: 'http://localhost:4001/health', json: true});
@@ -103,6 +105,8 @@ describe('DAR 1.0 Notifications', () => {
     yield receivedNotification;
 
     ws.close();
+
+    yield q.delay(50);
 
     // check that the server registered the connecton has been closed
     {
