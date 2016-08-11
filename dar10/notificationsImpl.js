@@ -2,7 +2,6 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const ws = require('ws');
 const http = require('http');
 var expressWs = require('express-ws');
 const _ = require('underscore');

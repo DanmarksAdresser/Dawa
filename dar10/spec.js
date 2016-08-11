@@ -24,6 +24,10 @@ const validateFns = _.mapObject(schemas, schema => ajv.compile(schema));
 function parseInteger(tekst) {
   return parseInt(tekst, 10);
 }
+
+/**
+ * Some fields needs to be transformed before storing in Postgres.
+ */
 const fieldTransforms = {
   Adressepunkt: {
     position: wktText => {
@@ -64,6 +68,9 @@ const fieldTransforms = {
 
 };
 
+/**
+ * SQL type overrides.
+ */
 const sqlTypes = {
   Adressepunkt: {
     position: 'geometry(Point,25832)'

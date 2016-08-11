@@ -4,6 +4,9 @@ var _ = require('underscore');
 
 var datamodels = require('../crud/datamodel');
 
+/**
+ * Specification of DAWA tables and fields, which are updated based on data from DAR 1.0
+ */
 module.exports = {
   adresse: {
     table: datamodels.adresse.table,

@@ -255,17 +255,34 @@ function computeDumpDifferences(client) {
   })();
 }
 
+function logDarChanges(client, entity) {
+  return q.async(function*() {
+    for(let op of ['insert', 'update', 'delete']) {
+      yield client.queryBatched(`INSERT INTO dar1_changelog(tx_id, entity, operation, rowkey) \
+(SELECT (select current_tx FROM dar1_meta) as tx_id, '${entity}', '${op}', rowkey FROM ${op}_${postgresMapper.tables[entity]})`);
+    }
+  })();
+}
+
 function applyDarDifferences(client, darEntities) {
   return q.async(function*() {
     for (let entity of darEntities) {
       const table = postgresMapper.tables[entity];
       const columns = postgresMapper.columns[entity];
       yield tablediff.applyChanges(client, table, table, ['rowkey'], columns, columns);
+      yield logDarChanges(client, entity);
     }
   })();
 
 }
 
+/**
+ * Start a DAR 1 transaction, and perform an incremental update based on a full dump from DAR 1.
+ * @param client
+ * @param dataDir
+ * @param skipDawa
+ * @returns {*}
+ */
 function importIncremental(client, dataDir, skipDawa) {
   return withDar1Transaction(client, 'csv', () => {
     return q.async(function*() {
@@ -420,6 +437,13 @@ function dropDawaChangeTables(client) {
   })();
 }
 
+/**
+ * Apply a set of changes to DAR. The changes must already be stored in change tables.
+ * @param client
+ * @param skipDawaUpdate don't update DAWA tables
+ * @param darEntities the list of dar entities which has changes
+ * @returns {*}
+ */
 function applyIncrementalDifferences(client, skipDawaUpdate, darEntities) {
   return q.async(function*() {
     yield applyDarDifferences(client, darEntities);
@@ -473,6 +497,14 @@ function storeChangesetInFetchTables(client, changeset) {
   })();
 }
 
+/**
+ * Import a collection of records to the database. Each record either represents
+ * an insert or an update.
+ * @param client
+ * @param changeset
+ * @param skipDawa
+ * @returns {*}
+ */
 function importChangeset(client, changeset, skipDawa) {
   const entities = Object.keys(changeset);
   return q.async(function*() {
@@ -488,6 +520,15 @@ function importChangeset(client, changeset, skipDawa) {
   })();
 }
 
+/**
+ * Set up a DAR transaction by creating a transactionId and logging the DAWA sequence number.
+ * After the transaction, we log some metadata (timestamp, source, and the DAWA modifications
+ * produced by this transaction.
+ * @param client
+ * @param source
+ * @param fn
+ * @returns {*}
+ */
 function withDar1Transaction(client, source, fn) {
   return q.async(function*() {
     const dawaSeqBefore = yield getDawaSeqNum(client);

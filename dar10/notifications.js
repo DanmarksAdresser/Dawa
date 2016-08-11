@@ -11,8 +11,8 @@ const optionSpec = {
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
-  const app = notificationsImpl.createNotificationApp();
-  app.listen(options.listenPort, function () {
+  const server = notificationsImpl.createNotificationApp();
+  server.listen(options.listenPort, function () {
     logger.info(`Notification service listening on port ${options.listenPort}`);
   });
 });

@@ -59,7 +59,7 @@ describe('Import af DAR 1.0 udtræk', function () {
 });
 
 describe('Import af changesets', () => {
-  testdb.withTransactionAll('empty', clientFn => {
+  testdb.withTransactionEach('empty', clientFn => {
     const INITIAL_CHANGESET = {
       Adressepunkt: [{
         "eventopret": null,
@@ -194,7 +194,9 @@ describe('Import af changesets', () => {
     it('Kan importere et changeset', q.async(function*() {
       const client = clientFn();
       yield importDarImpl.internal.setInitialMeta(client);
-      yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
+        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+      }));
 
       // check at vi har importeret et vejstykke, adgangsadresse og adresse
       for (let dawaEntity of Object.keys(dawaSpec)) {
@@ -202,6 +204,15 @@ describe('Import af changesets', () => {
         const count = (yield client.queryp(`SELECT COUNT(*)::integer as c FROM ${table} `)).rows[0].c;
         expect(count).to.equal(1);
       }
+
+      // check, at vi logger noget historik
+      const changelog = (yield client.queryp('select * from dar1_changelog')).rows;
+      expect(changelog).to.have.length(7);
+      const change = changelog[0];
+      expect(change.tx_id).to.equal(1);
+      expect(change.entity).to.not.be.empty;
+      expect(change.operation).to.equal('insert');
+      expect(change.rowkey).to.be.above(0);
     }));
   });
 });
