@@ -388,9 +388,10 @@ function computeDirtyDawaIds(client, darEntities) {
         const darEntityIdColumn = `${darEntity.toLowerCase()}_id`;
         return `SELECT ${selectList('v', dawaIdColumns)} FROM dar1_${dawaTable}_dirty_view v JOIN ${dirtyDarTable} d ON v.${darEntityIdColumn} = d.id`;
       }).join(' UNION ');
+      const unionSelectDirtys = selectDirtys ? `UNION ${selectDirtys}` : '';
       yield client.queryBatched(`WITH existing AS (SELECT ${dawaIdColumns.join(', ')} FROM dirty_${dawaTable}), \
 dels AS (delete from dirty_${dawaTable})      
-INSERT INTO dirty_${dawaTable}(${dawaIdColumns.join(', ')}) (select * from existing UNION ${selectDirtys})`);
+INSERT INTO dirty_${dawaTable}(${dawaIdColumns.join(', ')}) (select * from existing ${unionSelectDirtys})`);
     }
   })();
 }

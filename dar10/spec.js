@@ -113,6 +113,7 @@ const sqlIndices = {
 };
 
 module.exports = {
+  entities: Object.keys(schemas),
   schemas: schemas,
   validateFns: validateFns,
   fieldTransforms: fieldTransforms,
