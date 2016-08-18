@@ -87,10 +87,11 @@ function splitInTransactions(rowMap) {
   }
 
   // TODO: We probably need to parse the timestamps appropriately
-  const uniqueTransactionTimestamps = _.union(_.values(rowMap).map(txTimestamp)).sort();
+  const uniqueTransactionTimestamps = _.uniq(_.flatten(_.values(rowMap)).map(txTimestamp).sort(), true);
+  console.log(uniqueTransactionTimestamps);
 
   return uniqueTransactionTimestamps.map(timestamp => {
-    return rowMap.mapObject(rows => rows.filter(row => txTimestamp(row) === timestamp));
+    return _.mapObject(rowMap, rows => rows.filter(row => txTimestamp(row) === timestamp));
   });
 }
 
@@ -125,6 +126,7 @@ module.exports = {
   internal: {
     getRecords: getRecordsForEntity,
     recordsUrl: recordsUrl,
-    getCurrentEventIds: getCurrentEventIds
+    getCurrentEventIds: getCurrentEventIds,
+    splitInTransactions: splitInTransactions
   }
 };

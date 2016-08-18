@@ -6,6 +6,8 @@ const importDarImpl = require('../../dar10/importDarImpl');
 const importFromApiImpl = require('../../dar10/importFromApiImpl');
 const testdb = require('../helpers/testdb');
 
+const Range = require('../../psql/databaseTypes').Range;
+
 q.longStackSupport = true;
 
 describe('Import from DAR 1.0 API', () => {
@@ -75,5 +77,23 @@ describe('Import from DAR 1.0 API', () => {
 
       expect(eventIds.postnummer).to.equal(3);
     }));
+
+    it('Can split set of records into transactions according to registration time', () => {
+      const changeset = {
+        Postnummer: [{
+          registrering: new Range("2016-04-21T00:00:00Z", null, '[)')
+        }, {
+          registrering: new Range("2016-04-21T00:00:00Z", "2016-04-22T00:00:00Z", '[)')
+        },{
+          registrering: new Range("2016-04-22T00:00:00Z", null, '[)')
+        }]
+      };
+      const transactions = importFromApiImpl.internal.splitInTransactions(changeset);
+      expect(transactions).to.deep.equal([{
+        Postnummer: [changeset.Postnummer[0]]
+      }, {
+        Postnummer: [changeset.Postnummer[1], changeset.Postnummer[2]]
+      }]);
+    });
   });
 });
