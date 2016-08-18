@@ -477,18 +477,6 @@ function storeChangesetInFetchTables(client, changeset) {
       const rows = changeset[entityName];
       const targetTable = postgresMapper.tables[entityName];
       const mappedRows = rows.map(postgresMapper.createMapper(entityName, true));
-      for(let row of mappedRows) {
-        const eventid = row.eventid;
-        delete row.eventid;
-        if(row.registreringtil) {
-          // opdatering
-          row.eventopdater = eventid;
-        }
-        else {
-          row.eventopret = eventid;
-        }
-
-      }
       const fetchedTable = `fetch_${targetTable}`;
       const columns = postgresMapper.columns[entityName];
       yield createFetchTable(client, targetTable);

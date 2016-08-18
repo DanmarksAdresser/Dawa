@@ -1,7 +1,5 @@
 "use strict";
 
-const url = require('url');
-const request = require('request-promise');
 const q = require('q');
 const _ = require('underscore');
 
@@ -12,40 +10,15 @@ const scheduler = require('./scheduler');
 const spec = require('./spec');
 const logger = require('../logger').forCategory('darImport');
 
-function getEventStatus(baseUrl) {
-  return q.async(function*() {
-    const statusUrl = baseUrl + '/Status'
-    return yield request.get({uri: statusUrl, json: true});
-  })();
-}
+const darApiClient = require('./darApiClient')
 
-function recordsUrl(baseUrl, eventStart, eventSlut, entitet, startindeks) {
-  const parsedUrl = url.parse(baseUrl +  '/Records', true);
-  parsedUrl.query.Eventstart = eventStart;
-  parsedUrl.query.Eventslut = eventSlut;
-  parsedUrl.query.Entitet = entitet;
-  if(startindeks) {
-    parsedUrl.query.Startindeks=startindeks;
-  }
-  return url.format(parsedUrl);
-}
-
-function getRecordsPage(baseUrl, eventStart, eventSlut, entitet, startindeks) {
-  const queryUrl = recordsUrl(baseUrl, eventStart, eventSlut, entitet, startindeks);
-  return request.get({
-    uri: queryUrl,
-    json: true
-  });
-}
-
-
-function getRecordsForEntity(baseUrl, eventStart, eventSlut, entitet) {
+function getRecordsForEntity(darClient, eventStart, eventSlut, entitet) {
   return q.async(function*() {
     let rows= [];
     let startindeks = null;
     let result;
     do {
-      result = yield getRecordsPage(baseUrl, eventStart, eventSlut, entitet, startindeks);
+      result = yield darClient.getRecordsPage(eventStart, eventSlut, entitet, startindeks);
       rows = rows.concat(result.records);
       startindeks = result.restindeks;
     }
@@ -54,7 +27,7 @@ function getRecordsForEntity(baseUrl, eventStart, eventSlut, entitet) {
   })();
 }
 
-function getRows(baseUrl, currentEventIds, targetEventIds) {
+function getRows(darClient, currentEventIds, targetEventIds) {
   return q.async(function*() {
     const entities = Object.keys(targetEventIds);
     const result = {};
@@ -66,10 +39,21 @@ function getRows(baseUrl, currentEventIds, targetEventIds) {
         rawResult = [];
       }
       else {
-        rawResult = getRecordsForEntity(baseUrl, eventStart, eventSlut, entity);
+        rawResult = yield getRecordsForEntity(darClient, eventStart, eventSlut, entity);
       }
-      // TODO: We need to validate according to correct schema
-      result[entity] = rawResult.map(postgresMapper.createMapper(entity, false));
+      const normalizedResult = rawResult.map(row => {
+        if(row.registreringtil) {
+          row.eventopret = null;
+          row.eventopdater = row.eventid;
+        }
+        else {
+          row.eventopret = row.eventid;
+          row.eventopdater = null;
+        }
+        delete row.eventid;
+        return row;
+      });
+      result[entity] = normalizedResult;
     }
     return result;
   })();
@@ -78,17 +62,16 @@ function getRows(baseUrl, currentEventIds, targetEventIds) {
 
 function splitInTransactions(rowMap) {
   function txTimestamp(row) {
-    if(row.registrering.upperInfinite) {
-      return row.registrering.lower;
+    if(row.registreringtil) {
+      return row.registreringtil;
     }
     else {
-      return row.registrering.upper;
+      return row.registreringfra;
     }
   }
 
-  // TODO: We probably need to parse the timestamps appropriately
-  const uniqueTransactionTimestamps = _.uniq(_.flatten(_.values(rowMap)).map(txTimestamp).sort(), true);
-  console.log(uniqueTransactionTimestamps);
+  const uniqueTransactionTimestamps = _.uniq(_.flatten(_.values(rowMap)).map(txTimestamp)
+    .sort((a, b) => Date.parse(a) - Date.parse(b)), true);
 
   return uniqueTransactionTimestamps.map(timestamp => {
     return _.mapObject(rowMap, rows => rows.filter(row => txTimestamp(row) === timestamp));
@@ -99,24 +82,36 @@ function getCurrentEventIds(client) {
   return q.async(function*() {
     const selects = spec.entities.map(entity => `(SELECT GREATEST(MAX(eventopret), MAX(eventopdater), 0) FROM ${postgresMapper.tables[entity]}) as ${entity}`);
     const queryResult = yield client.queryp(`SELECT ${selects.join(', ')}`);
-    return queryResult.rows[0];
+    const row = queryResult.rows[0];
+    // fix the casing of result
+    return spec.entities.reduce((memo, entity) => {
+      memo[entity] = row[entity.toLowerCase()];
+      return memo;
+    }, {});
+  })();
+}
+
+function fetchAndImport(client, darClient, remoteEventIds) {
+  return q.async(function*() {
+    const localEventIds = yield getCurrentEventIds(client);
+    const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
+    const transactions = splitInTransactions(rowsMap);
+    for(let transaction of transactions) {
+      yield importDarImpl.withDar1Transaction(client, 'api', () => {
+        return importDarImpl.importChangeset(client, transaction, false);
+      });
+    }
   })();
 }
 
 function importDaemon(baseUrl, pollIntervalMs) {
+  const darClient = darApiClient.createClient(baseUrl);
   scheduler.schedule(pollIntervalMs, () => {
     return q.async(function*() {
-      const remoteEventIds = yield getEventStatus(baseUrl);
-      yield proddb.withTransaction('READ_WRITE', q.async(function*(client) {
-        const localEventIds = yield getCurrentEventIds(client);
-        const rowsMap = yield getRows(baseUrl, localEventIds, remoteEventIds);
-        const transactions = splitInTransactions(rowsMap);
-        for(let transaction of transactions) {
-          yield importDarImpl.withDar1Transaction(client, 'api', () => {
-            return importDarImpl.importChangeset(client, transaction, false);
-          });
-        }
-      }));
+      const remoteEventIds = yield darClient.getEventStatus();
+      yield proddb.withTransaction('READ_WRITE', (client) => {
+        return fetchAndImport(client, darClient, remoteEventIds);
+      });
     })();
   }, error => logger.error('DAR1 API import failed', error));
 }
@@ -125,8 +120,8 @@ module.exports = {
   importDaemon: importDaemon,
   internal: {
     getRecords: getRecordsForEntity,
-    recordsUrl: recordsUrl,
     getCurrentEventIds: getCurrentEventIds,
-    splitInTransactions: splitInTransactions
+    splitInTransactions: splitInTransactions,
+    fetchAndImport: fetchAndImport
   }
 };
