@@ -97,7 +97,8 @@ module.exports = () => {
     });
 
     const indicesSpec = spec.sqlIndices[entityName] || [];
-    const indicesSql = indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n');
+    const eventIndex = `CREATE INDEX ON dar1_${entityName}(GREATEST(eventopret, eventopdater))`;
+    const indicesSql = eventIndex + ';\n' + indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n');
     return `DROP TABLE IF EXISTS dar1_${entityName} CASCADE;\n\
 CREATE TABLE dar1_${entityName}(\n  ${columnSql.join(',\n  ')}\n);\
 DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\n\

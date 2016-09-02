@@ -14,6 +14,13 @@ const spec = require('./spec');
 
 const Range = databaseTypes.Range;
 
+const IMPORT_FILTER = {
+  NavngivenVejKommunedel: [
+    'a3294ab8-f805-11e5-bf82-063320a53a26',
+    'a3245274-f805-11e5-af28-063320a53a26'
+  ]
+};
+
 function transformTimeInterval(entity, name) {
   var from = entity[name + 'fra'];
   delete entity[name + 'fra'];
@@ -55,6 +62,10 @@ exports.createMapper = function(entityName, validate) {
       if(rawObject[`${field}fra`] && rawObject[`${field}til`] &&
         Date.parse(rawObject[`${field}fra`]) > Date.parse(rawObject[`${field}til`])) {
         logger.info('Skipping row due to bad range' , {row: rawObject});
+        invalid = true;
+      }
+      if(IMPORT_FILTER[entityName] && _.contains(IMPORT_FILTER[entityName], rawObject.id)) {
+        logger.info('Skipping row due to filter', {row: rawObject});
         invalid = true;
       }
     });

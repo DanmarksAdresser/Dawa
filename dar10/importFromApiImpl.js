@@ -6,11 +6,11 @@ const _ = require('underscore');
 const importDarImpl = require('./importDarImpl');
 const postgresMapper = require('./postgresMapper');
 const proddb = require('../psql/proddb');
-const scheduler = require('./scheduler');
 const spec = require('./spec');
 const logger = require('../logger').forCategory('darImport');
 
-const darApiClient = require('./darApiClient')
+const darApiClient = require('./darApiClient');
+const notificationClient = require('./notificationClient');
 
 function getRecordsForEntity(darClient, eventStart, eventSlut, entitet) {
   return q.async(function*() {
@@ -80,7 +80,7 @@ function splitInTransactions(rowMap) {
 
 function getCurrentEventIds(client) {
   return q.async(function*() {
-    const selects = spec.entities.map(entity => `(SELECT GREATEST(MAX(eventopret), MAX(eventopdater), 0) FROM ${postgresMapper.tables[entity]}) as ${entity}`);
+    const selects = spec.entities.map(entity => `(SELECT coalesce(MAX(GREATEST(eventopret,eventopdater)), 0) FROM ${postgresMapper.tables[entity]}) as ${entity}`);
     const queryResult = yield client.queryp(`SELECT ${selects.join(', ')}`);
     const row = queryResult.rows[0];
     // fix the casing of result
@@ -104,16 +104,72 @@ function fetchAndImport(client, darClient, remoteEventIds) {
   })();
 }
 
-function importDaemon(baseUrl, pollIntervalMs) {
-  const darClient = darApiClient.createClient(baseUrl);
-  scheduler.schedule(pollIntervalMs, () => {
-    return q.async(function*() {
-      const remoteEventIds = yield darClient.getEventStatus();
-      yield proddb.withTransaction('READ_WRITE', (client) => {
-        return fetchAndImport(client, darClient, remoteEventIds);
-      });
-    })();
-  }, error => logger.error('DAR1 API import failed', error));
+function race(promises) {
+  return q.Promise((resolve, reject) => {
+    let resolved = false;
+
+    for(let promise of promises) {
+      promise.then((value) => {
+        if(!resolved) {
+          resolved = true;
+          resolve({value: value, promise: promise});
+        }
+      }, (error) => {
+        if(!resolved) {
+          resolved = true;
+          reject({error: error, promise: promise});
+        }
+      })
+    }
+  });
+}
+
+/**
+ * Start a persistent import daemon, which polls the DAR Status endpoint as well as
+ * listen to WebSocket notifications. If pollIntervalMs passes or a websocket message is recevied,
+ * we check the current Status using the DAR Status service and initiate an import if neccesary.
+ * The service runs in a loop.
+ * @param baseUrl
+ * @param pollIntervalMs
+ * @param notificationWsUrl
+ * @returns {*}
+ */
+function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
+
+  return q.async(function*() {
+    const darClient = darApiClient.createClient(baseUrl);
+    const wsClient = notificationWsUrl ? notificationClient(notificationWsUrl) : null;
+    if(!wsClient) {
+      logger.info("Running DAR 1.0 import daemon without WebSocket listener");
+    }
+    const aborted = false;
+
+    const doImport = () => {
+      return q.async(function*() {
+        const remoteEventIdList = yield darClient.getEventStatus();
+        const remoteEventsIdMap = remoteEventIdList.reduce((memo, pair) => {
+          memo[pair.entitet] = pair.eventid;
+          return memo;
+        }, {});
+        return yield proddb.withTransaction('READ_WRITE', (client) => {
+          return fetchAndImport(client, darClient, remoteEventsIdMap);
+        });
+      })();
+    };
+
+    while(!aborted) {
+      const pollPromise = q.delay(pollIntervalMs);
+      if(wsClient) {
+        const notificationPromise = wsClient.await();
+        yield race([pollPromise, notificationPromise]);
+        wsClient.unawait();
+      }
+      else {
+        yield pollPromise;
+      }
+      yield doImport();
+    }
+  })();
 }
 
 module.exports = {

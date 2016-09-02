@@ -8,9 +8,11 @@ const tableDiff = require('../importUtil/tablediff');
 const darTablediff = require('./darTablediff');
 const dawaSpec = require('./dawaSpec');
 const importUtil = require('../importUtil/importUtil');
+const initialization = require('../psql/initialization');
 const tablediff = require('../importUtil/tablediff');
 const postgresMapper = require('./postgresMapper');
 
+const sqlCommon = require('../psql/common');
 const sqlUtil = require('../darImport/sqlUtil');
 const streamToTable = require('./streamToTable');
 const Range = require('../psql/databaseTypes').Range;
@@ -150,6 +152,26 @@ function importInitial(client, dataDir, skipDawa) {
       }
     }));
   })();
+}
+
+/**
+ * Initializes the DAWA tables from DAR tables. DAWA tables must be empty. This will never run in production.
+ */
+function initDawa(client) {
+  return q.async(function*() {
+    yield sqlCommon.disableTriggersQ(client);
+
+    for (let entity of Object.keys(dawaSpec)) {
+      const spec = dawaSpec[entity];
+      const table = spec.table;
+      const view = `dar1_${table}_view`;
+      const columns = spec.columns.join(', ');
+      yield client.queryp(`INSERT INTO ${table}(${columns}) (SELECT ${columns} FROM ${view})`);
+    }
+    yield initialization.initializeHistory(client);
+    yield sqlCommon.enableTriggersQ(client);
+  })();
+
 }
 
 /**
@@ -538,6 +560,7 @@ module.exports = {
   importIncremental: importIncremental,
   withDar1Transaction: withDar1Transaction,
   importChangeset: importChangeset,
+  initDawa: initDawa,
   updateDawa: updateDawa,
   internal: {
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,

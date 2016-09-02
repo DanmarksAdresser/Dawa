@@ -63,6 +63,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
       " to_char(adgangsadresserview.postnr, 'FM0000'), postnrnavn)), lower(" + fuzzyqAlias + "), 2, 1, 3)," +
       " levenshtein(lower(adressebetegnelse(vejnavn, husnr, NULL, NULL, supplerendebynavn, to_char(adgangsadresserview.postnr," +
       " 'FM0000'), postnrnavn)), lower(" + fuzzyqAlias + "), 2, 1, 3))");
+    sqlParts.orderClauses.push('husnr');
   }
 }
 
