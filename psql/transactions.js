@@ -43,7 +43,11 @@ exports.withTransaction = function (dbname, options, transactionFn) {
       transactionStatements[options.mode][0],
       transactionStatements[options.mode][1],
       function(client) {
-        return transactionFn(client).then(function(result) {
+        return transactionFn(client)
+          .then((result) => {
+            return client.flush().then(() => result);
+          })
+          .then(function(result) {
           client.emit('transactionEnd');
           return result;
         }, function(err) {
