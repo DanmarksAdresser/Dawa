@@ -8,7 +8,8 @@ CREATE VIEW dar1_adgangsadresser_view AS
     hn.husnummertekst                                           AS husnr,
     s.navn                                                      AS supplerendebynavn,
     p.postnr,
-    hn.status                                                   AS objekttype,
+    dar1_status_til_dawa_status(hn.status)
+                                                                AS objekttype,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_husnummer hn2
      WHERE hn.id = hn2.id)
@@ -51,8 +52,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
-  WHERE hn.status IN (1, 3);
-
+  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3);
 
 -- This view is used for dirty-checking (computing which adgangsadresser has changed
 -- due to changes in DAR 1.0 entities)
@@ -60,7 +60,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
 DROP VIEW IF EXISTS dar1_adgangsadresser_dirty_view CASCADE;
 CREATE VIEW dar1_adgangsadresser_dirty_view AS
   SELECT
-    hn.id AS id,
+    hn.id  AS id,
     hn.id  AS husnummer_id,
     k.id   AS darkommuneinddeling_id,
     nv.id  AS navngivenvej_id,
@@ -82,4 +82,4 @@ CREATE VIEW dar1_adgangsadresser_dirty_view AS
       ON hn.postnummer_id = p.id
     JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
-  WHERE hn.status IN (1,3);
+  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3);

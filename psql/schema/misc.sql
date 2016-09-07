@@ -43,19 +43,19 @@ CREATE OR REPLACE FUNCTION processForIndexing(text) RETURNS text AS $$
 BEGIN
   RETURN REGEXP_REPLACE($1, '[\\.\\/\\-]', ' ', 'g');
 END;
-  $$ language plpgsql;
+  $$ language plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION parseHusnr(text) RETURNS husnr AS $$
 SELECT CASE WHEN $1 IS NULL THEN null ELSE (substring($1, '([0-9]{1,3})[A-Z]{0,1}')::smallint, substring($1, '[0-9]{1,3}([A-Z]{0,1})'))::husnr END;
-$$ language sql;
+$$ language sql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION formatHusnr(husnr) RETURNS text AS $$
 select $1.tal || $1.bogstav;
-$$ language sql;
+$$ language sql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 CREATE OR REPLACE FUNCTION utc_trunc_date(timestamptz) RETURNS timestamptz AS $$
 select date_trunc('day', $1 at time zone 'europe/copenhagen') at time zone 'utc';
-$$ language sql;
+$$ language sql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 DROP TYPE IF EXISTS BebyggelseRef CASCADE;
 CREATE TYPE BebyggelseRef AS (
@@ -65,6 +65,22 @@ CREATE TYPE BebyggelseRef AS (
   navn varchar
 );
 
+CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(integer)
+  RETURNS integer AS
+$$
+SELECT CASE $1
+       WHEN 2
+         THEN 3 -- foreløbig
+       WHEN 3
+         THEN 1 -- gældende
+       WHEN 4
+         THEN 2 -- nedlagt
+       WHEN 5
+         THEN 4 -- henlagt
+       ELSE
+         0
+       END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 -- CREATE OR REPLACE FUNCTION dar1_status_til_kode(dar1_status)
 --   RETURNS SMALLINT AS $$
