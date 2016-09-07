@@ -8,6 +8,8 @@ const _ = require('underscore');
 
 const logger = require('../logger').forCategory("notifications");
 
+const wsHeartbeats = require('ws-heartbeats');
+
 
 const notificationMap = {};
 const wsClientsMap = {};
@@ -73,6 +75,7 @@ exports.createNotificationApp = (options) => {
   app.post('/:env/notify', (req, res) => handleNotification(req.params.env, req, res));
 
   app.ws('/:env/listen', (ws, req) => {
+
     const env = req.params.env;
     if(wsClientsMap[env] === undefined) {
       wsClientsMap[env] = [];
@@ -80,6 +83,10 @@ exports.createNotificationApp = (options) => {
     const wsClients = wsClientsMap[env];
     wsClients.push(ws);
     logger.info('Received ws connection', { env: env, listeners: wsClients.length});
+    wsHeartbeats(ws, {
+      heartbeatTimeout: 30000,
+      heartbeatInterval: 15000
+    });
     ws.on('close', function close() {
       wsClientsMap[env] = wsClientsMap[env].filter(wsClient => wsClient !== ws);
     });

@@ -2,6 +2,7 @@
 
 const q = require('q');
 const WebSocket = require('ws');
+const wsHeartbeats = require('ws-heartbeats');
 
 const logger = require('../logger');
 
@@ -31,6 +32,11 @@ module.exports = (notificationWsUrl) => {
         dead = true;
         reject(err);
       };
+      wsHeartbeats(ws, {
+        heartbeatTimeout: 30000,
+        heartbeatInterval: 15000
+      });
+
       ws.on('message', (data, flags) => {
         if(dead) {
           // ignore, to prevent duplicate responses
@@ -50,7 +56,7 @@ module.exports = (notificationWsUrl) => {
 
       ws.on('close', () => {
         if(!dead) {
-          die();
+          die('WS connection closed');
         }
       });
       ws.on('error', (err) => {
