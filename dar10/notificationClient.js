@@ -42,15 +42,18 @@ module.exports = (notificationWsUrl) => {
           // ignore, to prevent duplicate responses
           return;
         }
-        try{
-          const notification = JSON.parse(data);
-          logger.info('Received DAR notification', {msg: notification});
-          if(deferred.isPending()) {
-            deferred.resolve(notification);
-          }
+        let notification;
+
+        try {
+          notification = JSON.parse(data);
         }
         catch(e) {
           logger.error('Received unparsable DAR notification', {data: data});
+          die('Received unparsable DAR notification');
+        }
+        logger.info('Received DAR notification', {msg: notification});
+        if(deferred.promise.isPending()) {
+          deferred.resolve(notification);
         }
       });
 
