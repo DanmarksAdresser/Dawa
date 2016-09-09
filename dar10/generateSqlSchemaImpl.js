@@ -98,7 +98,14 @@ module.exports = () => {
 
     const indicesSpec = spec.sqlIndices[entityName] || [];
     const eventIndex = `CREATE INDEX ON dar1_${entityName}(GREATEST(eventopret, eventopdater))`;
-    const indicesSql = eventIndex + ';\n' + indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n');
+    let historyIndices = '';
+    if(spec.sqlIndicesHistory[entityName]) {
+      historyIndices = spec.sqlIndicesHistory[entityName].map(index => {
+        return `CREATE INDEX ON dar1_${entityName}(${index.join(', ')})`
+      }).join(';') + ';';
+    }
+    const virkningIndices = `CREATE INDEX ON dar1_${entityName}(lower(virkning)); CREATE INDEX ON dar1_${entityName}(upper(virkning));`;
+    const indicesSql = virkningIndices + '\n' + eventIndex + ';\n' + historyIndices + '\n' + indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n');
     return `DROP TABLE IF EXISTS dar1_${entityName} CASCADE;\n\
 CREATE TABLE dar1_${entityName}(\n  ${columnSql.join(',\n  ')}\n);\
 DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\n\
@@ -106,8 +113,5 @@ CREATE TABLE dar1_${entityName}_current(\n  ${columnSql.join(',\n  ')}\n);\n\
 CREATE INDEX ON dar1_${entityName}_current(id);\n` + indicesSql + '\n';
   });
 
-  // These two indices are used to find historic records needed for calculating "oprettet" date
-  ddlStatements.push('CREATE INDEX ON dar1_adresse(id);\n');
-  ddlStatements.push('CREATE INDEX ON dar1_husnummer(id);\n');
   return ddlStatements.join('\n\n');
 };

@@ -91,6 +91,17 @@ const sqlTypes = {
   }
 };
 
+const sqlIndicesHistory = {
+  Husnummer: [
+    // needed for computing 'oprettet'
+    ['id']
+  ],
+  Adresse: [
+    // needed for computing 'oprettet'
+    ['id']
+  ]
+};
+
 const sqlIndices = {
   Husnummer: [
     ['adgangspunkt_id'],
@@ -105,7 +116,8 @@ const sqlIndices = {
   ],
   NavngivenVejKommunedel: [
     ['navngivenvej_id'],
-    ['kommune']
+    // needed for finding entity from husnummer properties
+    ['kommune', 'navngivenvej_id']
   ],
   DARKommuneInddeling: [
     ['kommunekode']
@@ -118,7 +130,8 @@ module.exports = {
   validateFns: validateFns,
   fieldTransforms: fieldTransforms,
   sqlTypes: sqlTypes,
-  sqlIndices: sqlIndices
+  sqlIndices: sqlIndices,
+  sqlIndicesHistory: sqlIndicesHistory
 };
 
 

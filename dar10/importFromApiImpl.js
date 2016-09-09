@@ -96,10 +96,17 @@ function fetchAndImport(client, darClient, remoteEventIds) {
     const localEventIds = yield getCurrentEventIds(client);
     const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
     const transactions = splitInTransactions(rowsMap);
-    for(let transaction of transactions) {
+    if(transactions.length === 0) {
       yield importDarImpl.withDar1Transaction(client, 'api', () => {
-        return importDarImpl.importChangeset(client, transaction, false);
+        return importDarImpl.applyIncrementalDifferences(client, false, []);
       });
+    }
+    else {
+      for(let transaction of transactions) {
+        yield importDarImpl.withDar1Transaction(client, 'api', () => {
+          return importDarImpl.importChangeset(client, transaction, false);
+        });
+      }
     }
   })();
 }
@@ -158,6 +165,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
     };
 
     while(!aborted) {
+      yield doImport();
       const pollPromise = q.delay(pollIntervalMs);
       if(wsClient) {
         const notificationPromise = wsClient.await();
@@ -167,7 +175,6 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
       else {
         yield pollPromise;
       }
-      yield doImport();
     }
   })();
 }

@@ -9,6 +9,7 @@ const darTablediff = require('./darTablediff');
 const dawaSpec = require('./dawaSpec');
 const importUtil = require('../importUtil/importUtil');
 const initialization = require('../psql/initialization');
+const moment = require('moment');
 const tablediff = require('../importUtil/tablediff');
 const postgresMapper = require('./postgresMapper');
 
@@ -321,18 +322,29 @@ function importIncremental(client, dataDir, skipDawa) {
  * @param client
  * @returns {*}
  */
-function computeIncrementalChangesToCurrentTables(client, darEntities) {
+function computeIncrementalChangesToCurrentTables(client, darEntitiesWithNewRows, entitiesWithChangedVirkning) {
   return q.async(function*() {
-    for (let entity of darEntities) {
+    const allChangedEntities = _.union(darEntitiesWithNewRows, entitiesWithChangedVirkning);
+    for (let entity of allChangedEntities) {
       const table = postgresMapper.tables[entity];
       const columns = postgresMapper.columns[entity];
       const currentTable = `${table}_current`;
       const currentTableView = `${currentTable}_view`;
       const dirtyTable = `dirty_${currentTable}`;
-      const dirtySelect = ['insert', 'update', 'delete']
-        .map(prefix => `SELECT rowkey from ${prefix}_${table} `)
-        .join(' UNION ');
-      yield client.queryp(`create temp table ${dirtyTable} as (${dirtySelect})`);
+      const dirty = [];
+      if(_.contains(darEntitiesWithNewRows, entity)) {
+        dirty.push(['insert', 'update', 'delete']
+          .map(prefix => `SELECT rowkey from ${prefix}_${table} `)
+          .join(' UNION '));
+      }
+      if(_.contains(entitiesWithChangedVirkning, entity)) {
+        dirty.push(`SELECT rowkey FROM ${table}, tstzrange(
+        (select prev_virkning from dar1_meta), (select virkning from dar1_meta), '[)') as
+      virkrange WHERE virkrange @> lower(virkning) or virkrange @> upper(virkning)`);
+      }
+
+      const selectDirty = dirty.join(' UNION ');
+      yield client.queryp(`create temp table ${dirtyTable} as (${selectDirty})`);
       yield tablediff.computeDifferencesSubset(
         client, dirtyTable, currentTableView, currentTable, ['rowkey'], columns);
       yield client.queryp(`drop table ${dirtyTable}`)
@@ -461,31 +473,110 @@ function dropDawaChangeTables(client) {
 }
 
 /**
+ *
+ */
+
+function getChangedEntitiesDueToVirkningTime(client) {
+  const entities = Object.keys(postgresMapper.tables);
+  return q.async(function*() {
+    const sql = 'SELECT ' + entities.map(entity => {
+        const table = postgresMapper.tables[entity];
+        const selectPrevVirkning = '(SELECT prev_virkning FROM dar1_meta)';
+        const selectVirkning = '(SELECT virkning FROM dar1_meta)';
+        return `(SELECT count(*) FROM ${table} 
+        WHERE (lower(virkning) >= ${selectPrevVirkning} AND lower(virkning) < ${selectVirkning}) or 
+              (upper(virkning) >= ${selectPrevVirkning} AND upper(virkning) < ${selectVirkning})
+              ) > 0 as "${entity}"`;
+      }).join(',');
+    const queryResult = (yield client.queryp(sql)).rows[0];
+    return Object.keys(queryResult).reduce((memo, entityName) => {
+      if (queryResult[entityName]) {
+        memo.push(entityName);
+      }
+      return memo;
+    }, []);
+  })();
+}
+
+/**
+ * Compute the virkning time value we want to advance the database to. It is the greatest of
+ * NOW()
+ * registration time of any row
+ * current virkning time
+ * @param client
+ * @param darEntitiesWithNewRows
+ * @returns {*}
+ */
+function getNextVirkningTime(client, darEntitiesWithNewRows) {
+  return q.async(function*() {
+    const virkningTimeDb = (yield client.queryp('SELECT GREATEST((SELECT virkning from dar1_meta), NOW()) as time')).rows[0].time;
+
+    if(darEntitiesWithNewRows.length === 0) {
+      return virkningTimeDb;
+    }
+    const registrationTimeSelects = darEntitiesWithNewRows.map(entity => {
+      const selectMaxRegistration = table => `select max(greatest(lower(registrering), upper(registrering))) FROM ${table}`;
+      return `SELECT GREATEST((${selectMaxRegistration(`insert_dar1_${entity}`)}), (${selectMaxRegistration(`insert_dar1_${entity}`)}))`;
+    });
+    const selectMaxRegistrationQuery = `SELECT GREATEST((${registrationTimeSelects.join('),(')}))`;
+    const virkningTimeChanges = (yield client.queryp(`${selectMaxRegistrationQuery} as v`)).rows[0].v;
+    return  moment.max(moment(virkningTimeDb), moment(virkningTimeChanges)).toISOString();
+  })();
+}
+
+/**
+ * Advance virkning time in database to the time appropriate for the transaction.
+ * It is the greatest value of:
+ * 1) The current virkning time in db
+ * 2) Current db clock time (SELECT NOW())
+ * 3) Registration time of the transaction being processed.
+ * @param client db client
+ * @param darEntities the list of dar entities which has changes
+ */
+function advanceVirkningTime(client, darEntitiesWithNewRows) {
+  return q.async(function*() {
+    const prevVirkning = (yield getMeta(client)).virkning;
+    const virkning = yield getNextVirkningTime(client, darEntitiesWithNewRows);
+    yield setMeta(client, {prev_virkning: prevVirkning, virkning: virkning});
+    return virkning;
+  })();
+}
+
+/**
  * Apply a set of changes to DAR. The changes must already be stored in change tables.
  * @param client
  * @param skipDawaUpdate don't update DAWA tables
  * @param darEntities the list of dar entities which has changes
  * @returns {*}
  */
-function applyIncrementalDifferences(client, skipDawaUpdate, darEntities) {
+function applyIncrementalDifferences(client, skipDawaUpdate, darEntitiesWithNewRows) {
   return q.async(function*() {
-    yield applyDarDifferences(client, darEntities);
-    yield computeIncrementalChangesToCurrentTables(client, darEntities);
-    yield dropDarChangeTables(client, darEntities);
-    if (!skipDawaUpdate) {
-      yield computeDirtyDarIds(client, darEntities);
-      yield createDirtyDawaTables(client);
-      yield computeDirtyDawaIds(client, darEntities);
+    yield advanceVirkningTime(client, darEntitiesWithNewRows);
+    yield applyDarDifferences(client, darEntitiesWithNewRows);
+    const entitiesChangedDueToVirkningTime = yield getChangedEntitiesDueToVirkningTime(client);
+    if(darEntitiesWithNewRows.length === 0 && entitiesChangedDueToVirkningTime.length === 0) {
+      return;
     }
-    yield applyChangesToCurrentDar(client, darEntities);
+    yield computeIncrementalChangesToCurrentTables(
+      client,
+      darEntitiesWithNewRows,
+      entitiesChangedDueToVirkningTime);
+    yield dropDarChangeTables(client, darEntitiesWithNewRows);
+    const allChangedEntities = _.union(darEntitiesWithNewRows, entitiesChangedDueToVirkningTime);
+    if (!skipDawaUpdate) {
+      yield computeDirtyDarIds(client, allChangedEntities);
+      yield createDirtyDawaTables(client);
+      yield computeDirtyDawaIds(client, allChangedEntities);
+    }
+    yield applyChangesToCurrentDar(client, allChangedEntities);
     if (!skipDawaUpdate) {
       // due to the joining, some dirty DAWA ids is computed before changing the current dar tables,
       // and some are computed after
-      yield computeDirtyDawaIds(client, darEntities);
+      yield computeDirtyDawaIds(client, allChangedEntities);
     }
-    yield dropDarCurrentChangeTables(client, darEntities);
+    yield dropDarCurrentChangeTables(client, allChangedEntities);
     if (!skipDawaUpdate) {
-      yield dropDirtyDarIdTables(client, darEntities);
+      yield dropDirtyDarIdTables(client, allChangedEntities);
       yield updateDawaIncrementally(client);
       yield dropDawaDirtyTables(client);
       yield dropDawaChangeTables(client);
@@ -558,6 +649,7 @@ module.exports = {
   importFromFiles: importFromFiles,
   importInitial: importInitial,
   importIncremental: importIncremental,
+  applyIncrementalDifferences: applyIncrementalDifferences,
   withDar1Transaction: withDar1Transaction,
   importChangeset: importChangeset,
   initDawa: initDawa,
