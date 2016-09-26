@@ -31,7 +31,8 @@ CREATE TABLE  adgangsadresser (
   -- the coordinates we used when we looked up the height
   z_x double precision null,
   z_y double precision null,
-  disableheightlookup timestamptz
+  disableheightlookup timestamptz,
+  navngivenvej_id uuid
 );
 
 CREATE INDEX ON Adgangsadresser USING GIST (geom);
@@ -85,7 +86,8 @@ CREATE TABLE adgangsadresser_history(
   adressepunktaendringsdato timestamp NULL,
   esdhReference text,
   journalnummer text,
-  hoejde double precision NULL
+  hoejde double precision NULL,
+  navngivenvej_id uuid
 );
 
 CREATE INDEX ON adgangsadresser_history(valid_to);

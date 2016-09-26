@@ -7,5 +7,9 @@ DELETE FROM enhedsadresser;
 DELETE FROM enhedsadresser_history;
 DELETE FROM adgangsadresser_temaer_matview;
 DELETE FROM adgangsadresser_temaer_matview_history;
-DELETE FROM transaction_history WHERE entity IN ('vejstykke', 'adgangsadresse', 'adresse', 'adgangsadresse_tema');
+DELETE FROM bebyggelser_adgadr;
+DELETE FROM bebyggelser_adgadr_history;
+DELETE FROM transaction_history
+WHERE
+  entity IN ('vejstykke', 'adgangsadresse', 'adresse', 'adgangsadresse_tema', 'bebyggelsestilknytning');
 

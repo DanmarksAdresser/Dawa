@@ -37,6 +37,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
     ap.oprindelse_tekniskstandard                               AS tekniskstandard,
     hn.husnummerretning                                         AS tekstretning,
     ap.oprindelse_registrering AT TIME ZONE 'Europe/Copenhagen' AS adressepunktaendringsdato,
+    nv.id                                                       AS navngivenvej_id,
     ap.position                                                 AS geom
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k

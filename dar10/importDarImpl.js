@@ -31,6 +31,8 @@ const ALL_DAR_ENTITIES = [
   'Husnummer',
   'NavngivenVej',
   'NavngivenVejKommunedel',
+  'NavngivenVejPostnummerRelation',
+  'NavngivenVejSupplerendeBynavnRelation',
   'Postnummer',
   'SupplerendeBynavn'
 ];
@@ -71,6 +73,18 @@ const dawaChangeOrder = [
   {
     type: 'insert',
     entity: 'adresse'
+  },
+  {
+    type: 'delete',
+    entity: 'navngivenvej_postnummer'
+  },
+  {
+    type: 'update',
+    entity: 'navngivenvej_postnummer'
+  },
+  {
+    type: 'insert',
+    entity: 'navngivenvej_postnummer'
   }
 ];
 
@@ -155,6 +169,20 @@ function importInitial(client, dataDir, skipDawa) {
   })();
 }
 
+function clearDar(client) {
+  return q.async(function*() {
+    for(let table of _.values(postgresMapper.tables)) {
+      yield client.queryBatched(`delete from ${table}`);
+      yield client.queryBatched(`delete from ${table}_current`);
+
+    }
+    for(let table of ['dar1_meta', 'dar1_changelog', 'dar1_transaction']) {
+      yield client.queryBatched(`delete from ${table}`);
+    }
+    yield client.flush();
+  })();
+}
+
 /**
  * Initializes the DAWA tables from DAR tables. DAWA tables must be empty. This will never run in production.
  */
@@ -168,6 +196,9 @@ function initDawa(client) {
       const view = `dar1_${table}_view`;
       const columns = spec.columns.join(', ');
       yield client.queryp(`INSERT INTO ${table}(${columns}) (SELECT ${columns} FROM ${view})`);
+    }
+    for(let table of ['vejstykker', 'adgangsadresser', 'enhedsadresser']) {
+      yield client.queryp(`SELECT ${table}_init()`);
     }
     yield initialization.initializeHistory(client);
     yield sqlCommon.enableTriggersQ(client);
@@ -227,6 +258,9 @@ const dirtyDeps = {
   ],
   adresse: [
     'Adresse'
+  ],
+  navngivenvej_postnummer: [
+    'NavngivenVejPostnummerRelation', 'NavngivenVej', 'Postnummer'
   ]
 };
 
@@ -426,6 +460,7 @@ function computeDirtyDawaIds(client, darEntities) {
       yield client.queryBatched(`WITH existing AS (SELECT ${dawaIdColumns.join(', ')} FROM dirty_${dawaTable}), \
 dels AS (delete from dirty_${dawaTable})      
 INSERT INTO dirty_${dawaTable}(${dawaIdColumns.join(', ')}) (select * from existing ${unionSelectDirtys})`);
+      yield client.flush();
     }
   })();
 }
@@ -444,7 +479,7 @@ function applyChangesToCurrentDar(client, darEntities) {
 
 function updateDawaIncrementally(client) {
   return q.async(function*() {
-    for (let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse']) {
+    for (let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer']) {
       const spec = dawaSpec[dawaEntity];
       const table = spec.table;
       const dirtyTable = `dirty_${table}`;
@@ -458,7 +493,7 @@ function updateDawaIncrementally(client) {
 
 function dropDawaDirtyTables(client) {
   return q.async(function*() {
-    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse']) {
+    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer']) {
       yield importUtil.dropTable(client, `dirty_${dawaSpec[dawaEntity].table}`);
     }
   })();
@@ -466,7 +501,7 @@ function dropDawaDirtyTables(client) {
 
 function dropDawaChangeTables(client) {
   return q.async(function*() {
-    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse']) {
+    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer']) {
       yield tablediff.dropChangeTables(client, dawaSpec[dawaEntity].table);
     }
   })();
@@ -654,6 +689,7 @@ module.exports = {
   importChangeset: importChangeset,
   initDawa: initDawa,
   updateDawa: updateDawa,
+  clearDar: clearDar,
   internal: {
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,

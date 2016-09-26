@@ -188,6 +188,19 @@ describe('Import af changesets', () => {
         "navn": "Viby Sjælland",
         "postnr": "4130",
         "postnummerinddeling": "250767"
+      }],
+      NavngivenVejPostnummerRelation: [{
+        "eventopret": null,
+        "eventopdater": null,
+        "rowkey": 69,
+        "id": "873e4c91-c2d3-4674-a491-2f0e30bac7eb",
+        "registreringfra": "2016-04-21T00:00:00Z",
+        "registreringtil": null,
+        "virkningfra": "2016-04-21T00:00:00Z",
+        "virkningtil": null,
+        "status": "3",
+        "navngivenvej_id": "e17d4273-ad3d-496f-85b1-73bba8b1a707",
+        "postnummer_id": "873e4c91-c2d3-4674-a491-2f0e30bac7eb"
       }]
     };
 
@@ -207,7 +220,7 @@ describe('Import af changesets', () => {
 
       // check, at vi logger noget historik
       const changelog = (yield client.queryp('select * from dar1_changelog')).rows;
-      expect(changelog).to.have.length(7);
+      expect(changelog).to.have.length(8);
       const change = changelog[0];
       expect(change.tx_id).to.equal(1);
       expect(change.entity).to.not.be.empty;
