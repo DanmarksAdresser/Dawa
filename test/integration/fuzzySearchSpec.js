@@ -57,16 +57,6 @@ testdb.withTransactionAll('test', function (clientFn) {
         expect(result).to.have.length(20);
       });
     });
-    it('I cannot page beyond 100 results when doing fuzzy search', function() {
-      return helpers.getResponse(clientFn(), vejnavnResource, {}, {
-        q: 'magrete%20ale',
-        fuzzy: '',
-        per_side: '10',
-        side: 11
-      }).then(function (response) {
-        expect(response.status).to.equal(400);
-      });
-    });
   });
   describe('Fuzzy search on adgangsadresser', function () {
     var adgangsadresseResource = registry.findWhere({
