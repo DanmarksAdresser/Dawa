@@ -59,7 +59,8 @@ module.exports = [
   resourcesUtil.reverseGeocodingResourceSpec(
     '/adgangsadresser/reverse',
     representations,
-    sqlModel
+    sqlModel,
+    {includeInvalid: parameters.includeInvalid}
   ),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,

@@ -105,7 +105,7 @@ exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameter
     processParameters:  function(params) { return; }
   };
 };
-exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel) {
+exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel, additionalParams) {
   const params = {
     format: commonParameters.format,
     crs: commonParameters.crs,
@@ -113,6 +113,9 @@ exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel)
   };
   if(representations.geojsonNested) {
     params.struktur = commonParameters.struktur;
+  }
+  if(additionalParams) {
+    Object.assign(params, additionalParams);
   }
   return {
     path: path,
