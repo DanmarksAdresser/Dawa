@@ -12,7 +12,7 @@ var sqlModels = require('./sqlModels');
     path: `/historik/${entityName}r`,
     pathParameters: [],
 
-    queryParameters: resourcesUtil.flattenParameters(parameters).concat(commonParameters.paging)
+    queryParameters: resourcesUtil.flattenParameters(parameters[`${entityName}_history`]).concat(commonParameters.paging)
       .concat(commonParameters.format),
     representations: representationsMap[entityName],
     sqlModel: sqlModels[entityName],
@@ -20,5 +20,5 @@ var sqlModels = require('./sqlModels');
     processParameters: resourcesUtil.applyDefaultPagingForQuery,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
-  registry.add(`history_${entityName}`, 'resource', 'query', resource);
+  registry.add(`${entityName}_history`, 'resource', 'query', resource);
 });

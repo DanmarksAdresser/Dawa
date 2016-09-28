@@ -467,8 +467,11 @@ var sampleParameters = {
     kommunekode: {
       values: ['101', '0101'],
       verifier: (adr, kode) => parseInt(adr.kommunekode) === parseInt(kode)
+    },
+    adgangsadresseid: {
+      values: ['04b3fd1d-48f0-4f80-89df-88b322a84f23'],
+      verifier: (adr, id)=> adr.adgangsadresseid === id
     }
-
   },
   adgangsadresse_history: {
     id: {

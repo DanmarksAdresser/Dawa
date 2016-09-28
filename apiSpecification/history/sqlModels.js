@@ -11,7 +11,7 @@ var assembleSqlModel = sqlUtil.assembleSqlModel;
 ['adgangsadresse', 'adresse'].forEach((entityName) => {
   var columns = columnsMap[entityName];
   var parameterImpls = [
-    sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+    sqlParameterImpl.simplePropertyFilter(parameters[`${entityName}_history`].propertyFilter, columns),
     sqlParameterImpl.paging(columns, ['id', 'lower(virkning)'], true)];
 
   var baseQuery = function() {

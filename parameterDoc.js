@@ -1832,6 +1832,10 @@ module.exports['/historik/adresser'] = {
     {
       name: 'kommunekode',
       doc: 'Returner kun historiske adresser med den angivne kommunekode'
+    },
+    {
+      name: 'adgangsadresseid',
+      doc: 'Returner kun adresser på den angivne adgangsadresse'
     }].concat(formatAndPagingParams),
   examples: [
     {
