@@ -1,7 +1,7 @@
 DROP VIEW IF EXISTS dar1_navngivenvej_postnummer_view CASCADE;
 
 CREATE VIEW dar1_navngivenvej_postnummer_view AS
-  SELECT
+  SELECT distinct on (navngivenvej_id, postnr)
     nv.id                                 AS navngivenvej_id,
     postnr,
     nv.vejnavn || ' ' || postnr || p.navn AS tekst

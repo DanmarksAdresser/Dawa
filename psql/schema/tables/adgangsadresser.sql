@@ -46,6 +46,7 @@ CREATE INDEX ON adgangsadresser(esrejendomsnr);
 CREATE INDEX ON adgangsadresser(objekttype);
 CREATE INDEX ON adgangsadresser USING gin(tsv);
 CREATE INDEX ON adgangsadresser(noejagtighed, id);
+CREATE INDEX ON adgangsadresser(navngivenvej_id, postnr);
 
 -- Index for lookup of adgangsadresser where we need to fetch the height
 CREATE INDEX ON adgangsadresser (id)

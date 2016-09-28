@@ -7,3 +7,5 @@ CREATE TABLE navngivenvej_postnummer(
   tekst text NOT NULL,
   PRIMARY KEY(navngivenvej_id, postnr)
 );
+
+CREATE INDEX ON adgangsadresser(navngivenvej_id, postnr);

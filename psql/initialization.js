@@ -49,6 +49,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar1_adgangsadresser_view', type: 'view'},
   {name: 'dar1_enhedsadresser_view', type: 'view'},
   {name: 'dar1_navngivenvej_postnummer_view', type: 'view'},
+  {name: 'dar1_vejstykkerpostnumremat_view', type: 'view'},
   {name: 'dar_transaction', init: false},
   {name: 'dar_lastfetched', init: false },
   {name: 'dar_adgangspunkt', init: false},

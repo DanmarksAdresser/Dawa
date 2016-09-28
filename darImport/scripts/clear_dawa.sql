@@ -9,6 +9,8 @@ DELETE FROM adgangsadresser_temaer_matview;
 DELETE FROM adgangsadresser_temaer_matview_history;
 DELETE FROM bebyggelser_adgadr;
 DELETE FROM bebyggelser_adgadr_history;
+DELETE FROM vejstykkerpostnumremat;
+DELETE FROM navngivenvej_postnummer;
 DELETE FROM transaction_history
 WHERE
   entity IN ('vejstykke', 'adgangsadresse', 'adresse', 'adgangsadresse_tema', 'bebyggelsestilknytning');

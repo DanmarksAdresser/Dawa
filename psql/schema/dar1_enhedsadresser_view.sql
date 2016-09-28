@@ -16,8 +16,7 @@ CREATE VIEW dar1_enhedsadresser_view AS
     adr.etagebetegnelse AS etage,
     adr.dørbetegnelse AS doer
   FROM dar1_adresse_current adr
-  WHERE adr.husnummer_id IN (SELECT id FROM dar1_adgangsadresser_view)
-  AND dar1_status_til_dawa_status(adr.status) IN (1,3);
+  WHERE dar1_status_til_dawa_status(adr.status) IN (1,3);
 
 DROP VIEW IF EXISTS dar1_enhedsadresser_dirty_view CASCADE;
 CREATE VIEW dar1_enhedsadresser_dirty_view AS

@@ -85,6 +85,18 @@ const dawaChangeOrder = [
   {
     type: 'insert',
     entity: 'navngivenvej_postnummer'
+  },
+  {
+    type: 'delete',
+    entity: 'vejstykke_postnummer'
+  },
+  {
+    type: 'update',
+    entity: 'vejstykke_postnummer'
+  },
+  {
+    type: 'insert',
+    entity: 'vejstykke_postnummer'
   }
 ];
 
@@ -176,9 +188,15 @@ function clearDar(client) {
       yield client.queryBatched(`delete from ${table}_current`);
 
     }
-    for(let table of ['dar1_meta', 'dar1_changelog', 'dar1_transaction']) {
+    for(let table of ['dar1_changelog', 'dar1_transaction']) {
       yield client.queryBatched(`delete from ${table}`);
     }
+    yield setMeta(client, {
+      current_tx: null,
+      last_event_id: null,
+      virkning: null,
+      prev_virkning: null
+    });
     yield client.flush();
   })();
 }
@@ -261,6 +279,9 @@ const dirtyDeps = {
   ],
   navngivenvej_postnummer: [
     'NavngivenVejPostnummerRelation', 'NavngivenVej', 'Postnummer'
+  ],
+  vejstykke_postnummer: [
+    'NavngivenVejKommunedel', 'Husnummer', 'NavngivenVej', 'DARKommuneinddeling', 'Postnummer'
   ]
 };
 
@@ -479,7 +500,8 @@ function applyChangesToCurrentDar(client, darEntities) {
 
 function updateDawaIncrementally(client) {
   return q.async(function*() {
-    for (let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer']) {
+
+    for (let dawaEntity of Object.keys(dawaSpec)) {
       const spec = dawaSpec[dawaEntity];
       const table = spec.table;
       const dirtyTable = `dirty_${table}`;
@@ -493,7 +515,7 @@ function updateDawaIncrementally(client) {
 
 function dropDawaDirtyTables(client) {
   return q.async(function*() {
-    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer']) {
+    for(let dawaEntity of Object.keys(dawaSpec)) {
       yield importUtil.dropTable(client, `dirty_${dawaSpec[dawaEntity].table}`);
     }
   })();
@@ -501,7 +523,7 @@ function dropDawaDirtyTables(client) {
 
 function dropDawaChangeTables(client) {
   return q.async(function*() {
-    for(let dawaEntity of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer']) {
+    for(let dawaEntity of Object.keys(dawaSpec)) {
       yield tablediff.dropChangeTables(client, dawaSpec[dawaEntity].table);
     }
   })();
