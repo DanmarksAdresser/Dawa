@@ -11,6 +11,7 @@ require('./supplerendebynavn/resources');
 require('./vejnavn/resources');
 require('./vejstykke/resources');
 require('./ejerlav/resources');
+require('./navngivenvej/resources');
 require('./replikering/events/resources');
 require('./replikering/sekvensnummer/senesteSekvensnummer');
 require('./replikering/udtraek/resources');

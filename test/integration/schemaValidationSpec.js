@@ -57,6 +57,14 @@ var valuesNeverExpectedToBeSeen = {
       oprettet: true,
       ændret: true
     }
+  },
+  navngivneveje: {
+    beskrivelse: true,
+    vejstykker: {
+      href: true,
+      kommunekode: true,
+      kode: true
+    }
   }
 };
 

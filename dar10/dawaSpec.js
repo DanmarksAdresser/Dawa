@@ -32,5 +32,10 @@ module.exports = {
     table: 'vejstykkerpostnumremat',
     columns: ['kommunekode', 'vejkode', 'postnr', 'tekst'],
     idColumns: ['kommunekode', 'vejkode', 'postnr']
+  },
+  navngivenvej: {
+    table: datamodels.navngivenvej.table,
+    columns: datamodels.navngivenvej.columns,
+    idColumns: ['id']
   }
 };

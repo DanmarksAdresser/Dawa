@@ -23,7 +23,7 @@ module.exports = {
   vejstykke: {
     name: 'vejstykke',
     table: 'vejstykker',
-    columns: ['kommunekode', 'kode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn'],
+    columns: ['kommunekode', 'kode', 'oprettet', 'aendret', 'vejnavn', 'adresseringsnavn', 'navngivenvej_id'],
     key: ['kommunekode', 'kode']
   },
   supplerendebynavn: {
@@ -49,5 +49,13 @@ module.exports = {
     table: 'bebyggelser_adgadr',
     columns: ['bebyggelse_id', 'adgangsadresse_id'],
     key: ['bebyggelse_id', 'adgangsadresse_id']
+  },
+  navngivenvej: {
+    name: 'navngivenvej',
+    table: 'navngivenvej',
+    columns: ['id', 'darstatus', 'oprettet',
+      'ændret', 'navn', 'adresseringsnavn', 'administreresafkommune',
+    'beskrivelse', 'retskrivningskontrol', 'udtaltvejnavn'],
+    key: ['id']
   }
 };

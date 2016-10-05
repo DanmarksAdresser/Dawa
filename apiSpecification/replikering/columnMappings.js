@@ -147,13 +147,34 @@ exports.columnMappings = {
     name: 'kode'
   }, {
     name: 'navn'
+  }],
+  navngivenvej: [{
+    name: 'id'
+  }, {
+    name: 'oprettet',
+    selectTransform: selectIsoTimestamp
+  }, {
+    name: 'ændret',
+    selectTransform: selectIsoTimestamp
+  }, {
+    name: 'navn'
+  }, {
+    name: 'adresseringsnavn'
+  }, {
+    name: 'administreresafkommune'
+  }, {
+    name: 'beskrivelse'
+  }, {
+    name: 'retskrivningskontrol'
+  }, {
+    name: 'udtaltvejnavn'
   }]
 };
 
 exports.tables = {};
 exports.keys = {};
 
-['vejstykke', 'adgangsadresse', 'adresse', 'postnummer', 'ejerlav'].forEach(function(entityName) {
+['vejstykke', 'adgangsadresse', 'adresse', 'postnummer', 'ejerlav', 'navngivenvej'].forEach(function(entityName) {
   exports.tables[entityName] = datamodels[entityName].table;
   exports.keys[entityName] = datamodels[entityName].key;
 });

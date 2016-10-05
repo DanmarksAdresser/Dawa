@@ -1,72 +1,83 @@
-CREATE OR REPLACE FUNCTION dar1_current_time() RETURNS timestamptz LANGUAGE sql AS
+CREATE OR REPLACE FUNCTION dar1_current_time()
+  RETURNS TIMESTAMPTZ LANGUAGE SQL AS
 $$
-SELECT virkning from dar1_meta;
+SELECT virkning
+FROM dar1_meta;
 $$;
 
-CREATE OR REPLACE FUNCTION dar1_current_tx() RETURNS integer LANGUAGE sql AS
+CREATE OR REPLACE FUNCTION dar1_current_tx()
+  RETURNS INTEGER LANGUAGE SQL AS
 $$
-SELECT current_tx from dar1_meta;
+SELECT current_tx
+FROM dar1_meta;
 $$;
 
 --
 -- From: https://wiki.postgresql.org/wiki/First/last_(aggregate)
 --
 -- Create a function that always returns the first non-NULL item
-CREATE OR REPLACE FUNCTION public.first_agg ( anyelement, anyelement )
-RETURNS anyelement LANGUAGE sql IMMUTABLE STRICT AS $$
-        SELECT $1;
+CREATE OR REPLACE FUNCTION public.first_agg(ANYELEMENT, ANYELEMENT)
+  RETURNS ANYELEMENT LANGUAGE SQL IMMUTABLE STRICT AS $$
+SELECT $1;
 $$;
 
 -- And then wrap an aggregate around it
-DROP AGGREGATE IF EXISTS public.first(anyelement) CASCADE;
+DROP AGGREGATE IF EXISTS public.first( ANYELEMENT ) CASCADE;
 CREATE AGGREGATE public.first (
-        sfunc    = public.first_agg,
-        basetype = anyelement,
-        stype    = anyelement
+SFUNC = PUBLIC.first_agg,
+BASETYPE = ANYELEMENT,
+STYPE = ANYELEMENT
 );
 
 -- Create a function that always returns the last non-NULL item
-CREATE OR REPLACE FUNCTION public.last_agg ( anyelement, anyelement )
-RETURNS anyelement LANGUAGE sql IMMUTABLE STRICT AS $$
-        SELECT $2;
+CREATE OR REPLACE FUNCTION public.last_agg(ANYELEMENT, ANYELEMENT)
+  RETURNS ANYELEMENT LANGUAGE SQL IMMUTABLE STRICT AS $$
+SELECT $2;
 $$;
 
 -- And then wrap an aggregate around it
-DROP AGGREGATE IF EXISTS public.last(anyelement) CASCADE;
+DROP AGGREGATE IF EXISTS public.last( ANYELEMENT ) CASCADE;
 CREATE AGGREGATE public.last (
-        sfunc    = public.last_agg,
-        basetype = anyelement,
-        stype    = anyelement
+SFUNC = PUBLIC.last_agg,
+BASETYPE = ANYELEMENT,
+STYPE = ANYELEMENT
 );
 
-CREATE OR REPLACE FUNCTION processForIndexing(text) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION processForIndexing(TEXT)
+  RETURNS TEXT AS $$
 BEGIN
   RETURN REGEXP_REPLACE($1, '[\\.\\/\\-]', ' ', 'g');
 END;
-  $$ language plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
+$$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION parseHusnr(text) RETURNS husnr AS $$
-SELECT CASE WHEN $1 IS NULL THEN null ELSE (substring($1, '([0-9]{1,3})[A-Z]{0,1}')::smallint, substring($1, '[0-9]{1,3}([A-Z]{0,1})'))::husnr END;
-$$ language sql IMMUTABLE RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION parseHusnr(TEXT)
+  RETURNS husnr AS $$
+SELECT CASE WHEN $1 IS NULL
+  THEN NULL
+       ELSE (substring($1, '([0-9]{1,3})[A-Z]{0,1}') :: SMALLINT, substring($1,
+                                                                            '[0-9]{1,3}([A-Z]{0,1})')) :: husnr END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION formatHusnr(husnr) RETURNS text AS $$
-select $1.tal || $1.bogstav;
-$$ language sql IMMUTABLE RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION formatHusnr(husnr)
+  RETURNS TEXT AS $$
+SELECT $1.tal || $1.bogstav;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
-CREATE OR REPLACE FUNCTION utc_trunc_date(timestamptz) RETURNS timestamptz AS $$
-select date_trunc('day', $1 at time zone 'europe/copenhagen') at time zone 'utc';
-$$ language sql IMMUTABLE RETURNS NULL ON NULL INPUT;
+CREATE OR REPLACE FUNCTION utc_trunc_date(TIMESTAMPTZ)
+  RETURNS TIMESTAMPTZ AS $$
+SELECT date_trunc('day', $1 AT TIME ZONE 'europe/copenhagen') AT TIME ZONE 'utc';
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
 DROP TYPE IF EXISTS BebyggelseRef CASCADE;
 CREATE TYPE BebyggelseRef AS (
-  id uuid,
-  kode integer,
+  id   UUID,
+  kode INTEGER,
   type bebyggelsestype,
-  navn varchar
+  navn VARCHAR
 );
 
-CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(integer)
-  RETURNS integer AS
+CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(INTEGER)
+  RETURNS INTEGER AS
 $$
 SELECT CASE $1
        WHEN 2
@@ -82,16 +93,8 @@ SELECT CASE $1
        END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 
--- CREATE OR REPLACE FUNCTION dar1_status_til_kode(dar1_status)
---   RETURNS SMALLINT AS $$
--- SELECT CASE $1
---        WHEN 'Gældende'
---          THEN 1::smallint
---        WHEN 'Nedlagt'
---          THEN 2::smallint
---        WHEN 'Foreløbig'
---          THEN 3::smallint
---        WHEN 'Henlagt'
---          THEN 4::smallint
---        END;
--- $$ LANGUAGE SQL;
+DROP TYPE IF EXISTS VejstykkeRef CASCADE;
+CREATE TYPE VejstykkeRef AS (
+  kommunekode integer,
+  kode integer
+);

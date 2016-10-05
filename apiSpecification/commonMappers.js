@@ -29,6 +29,19 @@ exports.mapKommuneRef = function(dbJson, baseUrl) {
   return null;
 };
 
+exports.mapVejstykkeRef = (dbJson, baseUrl) => {
+  if(dbJson) {
+    const kommunekode = kode4String(dbJson.kommunekode);
+    const kode = kode4String(dbJson.kode);
+    return {
+      href: exports.makeHref(baseUrl, 'vejstykke', [kommunekode, kode]),
+      kommunekode: kommunekode,
+      kode: kode
+    };
+  }
+  return null;
+};
+
 exports.mapKode4NavnTema = function(temaNavn, kode, navn, baseUrl) {
   if (kode) {
     return {

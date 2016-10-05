@@ -302,6 +302,41 @@ var vejstykkerDoc = {
   }
 };
 
+var navngivenVejIdParameter = [
+  {
+    name: 'id',
+    doc: 'Angiver id (UUID) for den navngivne vej',
+    examples: ['11ebfac2-37d2-7205-e044-0003ba298018']
+  }
+];
+
+var navngivneVejeDok = {
+  '/navngivneveje/{id}': {
+    subtext: 'Opslag på enkelt vejstykke ud fra id.',
+    parameters: navngivenVejIdParameter,
+    nomulti: true,
+    examples: []
+  },
+
+  '/navngivneveje': {
+    subtext: 'Søger efter navngivne veje. Returnerer de navngivne veje, som opfylder kriteriet.',
+    parameters: navngivenVejIdParameter.concat([
+      {
+        name: 'navn',
+        doc: 'Find de navngivne veje, som har det angivne navn. Navnet er case-sensitivt.'
+      },
+      {
+        name: 'adresseringsnavn',
+        doc: 'Find de navngivne veje, som har det angivne adresseringsnavn. Navnet er case-sensitivt.'
+      },
+      {
+        name: 'regex',
+        doc: 'Find de navngivne veje, som matcher det angivne regulære udtryk.'
+      }
+    ]).concat(formatAndPagingParams),
+    examples: []
+  }
+};
 
 /******************************************************************************/
 /*** Supp. bynavne ************************************************************/
@@ -1547,7 +1582,8 @@ var keyParams = {
   postnummer: postnummerIdParameter,
   adgangsadresse: [adgangsadresseIdParameter],
   adresse: [adgangsadresseIdParameter],
-  ejerlav: [ejerlavIdParameter]
+  ejerlav: [ejerlavIdParameter],
+  navngivenvej: navngivenVejIdParameter
 };
 
 _.each(tilknytninger, function (tilknytning, temaNavn) {
@@ -1666,7 +1702,7 @@ var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning', 'navngivenvej'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({
@@ -1846,7 +1882,7 @@ module.exports['/historik/adresser'] = {
 };
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
-  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources);
+  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources, navngivneVejeDok);
 
 var allResources = registry.where({
   type: 'resource'

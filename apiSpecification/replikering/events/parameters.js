@@ -14,6 +14,7 @@ keyParameters.postnummer = require('../../postnummer/parameters').id;
 keyParameters.adgangsadresse = require('../../adgangsadresse/parameters').id;
 keyParameters.adresse = require('../../adresse/parameters').id;
 keyParameters.ejerlav = require('../../ejerlav/parameters').id;
+keyParameters.navngivenvej = require('../../navngivenvej/parameters').id;
 
 exports.keyParameters = keyParameters;
 

@@ -76,6 +76,18 @@ const dawaChangeOrder = [
   },
   {
     type: 'delete',
+    entity: 'navngivenvej'
+  },
+  {
+    type: 'update',
+    entity: 'navngivenvej'
+  },
+  {
+    type: 'insert',
+    entity: 'navngivenvej'
+  },
+  {
+    type: 'delete',
     entity: 'navngivenvej_postnummer'
   },
   {
@@ -219,6 +231,7 @@ function initDawa(client) {
       yield client.queryp(`SELECT ${table}_init()`);
     }
     yield initialization.initializeHistory(client);
+    yield
     yield sqlCommon.enableTriggersQ(client);
   })();
 
@@ -282,6 +295,9 @@ const dirtyDeps = {
   ],
   vejstykke_postnummer: [
     'NavngivenVejKommunedel', 'Husnummer', 'NavngivenVej', 'DARKommuneinddeling', 'Postnummer'
+  ],
+  navngivenvej: [
+    'NavngivenVej'
   ]
 };
 
@@ -671,6 +687,7 @@ function importChangeset(client, changeset, skipDawa) {
     for(let entity of entities) {
       const table = postgresMapper.tables[entity];
       yield client.queryp(`CREATE TEMP TABLE dirty_${table} AS (SELECT rowkey FROM fetch_${table})`);
+
       yield tablediff.computeDifferencesSubset(client, `dirty_${table}`, `fetch_${table}`, table, ['rowkey'], postgresMapper.columns[entity]);
       yield importUtil.dropTable(client, `dirty_${table}`);
       yield importUtil.dropTable(client, `fetch_${table}`);

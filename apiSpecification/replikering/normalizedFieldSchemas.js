@@ -296,7 +296,65 @@ var fields = {
     name: 'navn',
     description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.',
     schema: definitions.NullableEjerlavNavn
-  }]
+  }],
+  navngivenvej: [
+    {
+    name: 'id',
+    description: 'Den navngivne vejs unikke ID',
+    schema: definitions.UUID,
+    primary: true
+    },
+    {
+      name: 'darstatus',
+      description: 'Statuskode. Mulige værdier: 2 (Foreløbig), 3 (Gældende).',
+      schema: definitions.Status
+    },
+    {
+      name: 'oprettet',
+      description: 'Dato og tid for vejens oprettelse i DAR. Eksempel: 2001-12-23T00:00:00.',
+      schema: definitions.NullableDateTime,
+      formatter: timestampFormatter
+    },
+    {
+      name: 'ændret',
+      description: 'Dato og tid for seneste ændring af vejen i DAR. Eksempel: 2002-04-08T00:00:00.',
+      schema: definitions.NullableDateTime,
+      formatter: timestampFormatter
+    },
+    {
+    name: 'navn',
+    description: 'Vejens navn. Repræsenteret ved indtil 40 tegn. Eksempel: ”Hvidkildevej”.',
+    schema: definitions.NullableVejnavn
+  }, {
+    name: 'adresseringsnavn',
+    description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn,' +
+    ' som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.',
+      schema: definitions.NullableVejnavnForkortet
+    }, {
+      name: 'administreresafkommune',
+      description: '?',
+      schema: {
+        type: ['string','null']
+      }
+    }, {
+      name: 'beskrivelse',
+      description: 'En beskrivelse af den navngivne vej',
+      schema: {
+        type: ['string','null']
+      }
+    }, {
+      description: '?',
+      name: 'retskrivningskontrol',
+      schema: {
+        type: ['string','null']
+      }
+    }, {
+      name: 'udtaltvejnavn',
+      description: '?',
+      schema: {
+        type: ['string','null']
+      }
+    }]
 };
 
 _.each(temaTilknytninger, function(tilknytning, temaNavn) {

@@ -39,6 +39,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'stormodtagere'},
   {name: 'adgangsadresser'},
   {name: 'enhedsadresser'},
+  {name: 'navngivenvej', init: false},
   {name: 'ejerlav'},
   {name: 'ejerlav_ts'},
   {name: 'cpr_vej', init: false},
@@ -48,6 +49,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar1_vejstykker_view', type: 'view'},
   {name: 'dar1_adgangsadresser_view', type: 'view'},
   {name: 'dar1_enhedsadresser_view', type: 'view'},
+  {name: 'dar1_navngivenvej_view', type: 'view'},
   {name: 'dar1_navngivenvej_postnummer_view', type: 'view'},
   {name: 'dar1_vejstykkerpostnumremat_view', type: 'view'},
   {name: 'dar_transaction', init: false},
@@ -142,7 +144,7 @@ exports.loadTables = function(client, scriptDir) {
  * plv8 would be an option?
  */
 function createHistoryTriggers(client) {
-  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema', 'bebyggelsestilknytning'], function(sql, datamodelName) {
+  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema', 'bebyggelsestilknytning', 'navngivenvej'], function(sql, datamodelName) {
     var datamodel = datamodels[datamodelName];
     var table = datamodel.table;
     sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);
@@ -238,7 +240,7 @@ function initializeHistoryTable(client, entityName) {
 
 function initializeHistory(client) {
   return q.async(function*() {
-    for (let tableName of ['vejstykke', 'adgangsadresse', 'adresse']) {
+    for (let tableName of ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej']) {
       yield initializeHistoryTable(client, tableName);
     }
   })();

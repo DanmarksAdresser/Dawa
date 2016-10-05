@@ -42,7 +42,7 @@ module.exports = function (client, dataDir) {
     yield loadTemaer(client, dataDir);
 
     yield sqlCommon.disableTriggersQ(client);
-    for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
+    for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr', 'navngivenvej']) {
       const file = path.resolve(path.join(dataDir, `${table}.csv`));
       const columns = getColumnsFromCsv(file);
       yield copyCsvToTable(client, table, file, columns);
@@ -69,6 +69,7 @@ module.exports = function (client, dataDir) {
       path.resolve(path.join(dataDir, 'hoejder.csv')),
       ['id', 'z_x', 'z_y', 'hoejde']);
     yield client.queryp('UPDATE adgangsadresser a SET z_x = h.z_x, z_y = h.z_y, hoejde = h.hoejde FROM hoejder h WHERE a.id = h.id');
+
     yield initialization.initializeHistory(client);
     yield initialization.initializeTables(client);
     yield sqlCommon.enableTriggersQ(client);

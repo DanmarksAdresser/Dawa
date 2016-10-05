@@ -21,7 +21,7 @@ module.exports = {
   vejstykke: {
     temporality: 'nontemporal',
     table: datamodels.vejstykke.table,
-    columns: _.without(datamodels.vejstykke.columns, 'oprettet', 'aendret'),
+    columns: _.without(datamodels.vejstykke.columns, 'oprettet', 'aendret', 'navngivenvej_id'),
     idColumns: datamodels.vejstykke.key
   }
 };

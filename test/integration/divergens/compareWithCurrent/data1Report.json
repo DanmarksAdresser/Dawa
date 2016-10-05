@@ -18,7 +18,8 @@
           "oprettet": "2010-01-17T11:17:27.537",
           "aendret": "2010-01-17T11:17:27.537",
           "vejnavn": "Ahlefeldtsgade",
-          "adresseringsnavn": "Ahlefeldtsgade"
+          "adresseringsnavn": "Ahlefeldtsgade",
+          "navngivenvej_id": null
         },
         "rectified": true
       },
@@ -33,7 +34,8 @@
           "oprettet": "2010-01-17T11:17:27.537",
           "aendret": "2010-01-17T11:17:27.537",
           "vejnavn": "Ahlmannsgade",
-          "adresseringsnavn": "Ahlmannsgade"
+          "adresseringsnavn": "Ahlmannsgade",
+          "navngivenvej_id": null
         },
         "rectified": true
       }
