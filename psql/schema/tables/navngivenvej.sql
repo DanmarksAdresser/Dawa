@@ -34,8 +34,3 @@ CREATE TABLE navngivenvej_history(
 CREATE INDEX ON navngivenvej_history(valid_to);
 CREATE INDEX ON navngivenvej_history(valid_from);
 CREATE INDEX ON navngivenvej_history(id);
-
-ALTER TABLE vejstykker ADD COLUMN navngivenvej_id UUID;
-ALTER TABLE vejstykker_history ADD COLUMN navngivenvej_id UUID;
-
-CREATE INDEX ON vejstykker(navngivenvej_id);
