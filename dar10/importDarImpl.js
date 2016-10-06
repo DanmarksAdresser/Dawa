@@ -7,6 +7,7 @@ const _ = require('underscore');
 const tableDiff = require('../importUtil/tablediff');
 const darTablediff = require('./darTablediff');
 const dawaSpec = require('./dawaSpec');
+const importBebyggelserImpl = require('../bebyggelser/importBebyggelserImpl');
 const importUtil = require('../importUtil/importUtil');
 const initialization = require('../psql/initialization');
 const moment = require('moment');
@@ -20,6 +21,9 @@ const Range = require('../psql/databaseTypes').Range;
 
 const selectList = sqlUtil.selectList;
 const columnsEqualClause = sqlUtil.columnsEqualClause;
+
+const tema = require('../temaer/tema');
+const temaer = require('../apiSpecification/temaer/temaer');
 
 const ALL_DAR_ENTITIES = [
   'Adressepunkt',
@@ -231,8 +235,11 @@ function initDawa(client) {
       yield client.queryp(`SELECT ${table}_init()`);
     }
     yield initialization.initializeHistory(client);
-    yield
     yield sqlCommon.enableTriggersQ(client);
+    for(let temaSpec of temaer) {
+      yield tema.updateAdresserTemaerView(client, temaSpec, true);
+    }
+    yield importBebyggelserImpl.initBebyggelserAdgangsadresserRelation(client);
   })();
 
 }

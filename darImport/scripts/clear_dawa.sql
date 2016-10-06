@@ -1,6 +1,8 @@
 -- Clear existing DAWA tables
 DELETE FROM vejstykker;
 DELETE FROM vejstykker_history;
+DELETE FROM navngivenvej;
+DELETE FROM navngivenvej_history;
 DELETE FROM adgangsadresser;
 DELETE FROM adgangsadresser_history;
 DELETE FROM enhedsadresser;

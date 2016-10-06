@@ -99,15 +99,7 @@ function importBebyggelserFromStream(client, stream, table, initial, skipSanityC
       yield client.queryp('INSERT INTO bebyggelser_divided(id, geom) (SELECT id, splitToGridRecursive(geom, 64) AS geom FROM update_bebyggelser)');
     }
     if (initial) {
-      yield sqlCommon.disableTriggersQ(client);
-      yield client.queryp(
-        `INSERT INTO bebyggelser_adgadr(bebyggelse_id, adgangsadresse_id) 
-        (SELECT DISTINCT b.id, a.id FROM adgangsadresser a 
-         JOIN bebyggelser_divided b ON ST_Covers(b.geom, a.geom))`);
-      yield client.queryp(
-        `INSERT INTO bebyggelser_adgadr_history(bebyggelse_id, adgangsadresse_id) 
-        (SELECT bebyggelse_id, adgangsadresse_id from bebyggelser_adgadr)`);
-      yield sqlCommon.enableTriggersQ(client);
+      yield initBebyggelserAdgangsadresserRelation(client);
     }
     else {
       const relColumns = ['bebyggelse_id', 'adgangsadresse_id'];
@@ -135,6 +127,20 @@ JOIN changed_ids ON bebyggelser_adgadr.bebyggelse_id = changed_ids.id)`);
   })();
 }
 
+function initBebyggelserAdgangsadresserRelation(client) {
+  return q.async(function*() {
+    yield sqlCommon.disableTriggersQ(client);
+    yield client.queryp(
+      `INSERT INTO bebyggelser_adgadr(bebyggelse_id, adgangsadresse_id) 
+        (SELECT DISTINCT b.id, a.id FROM adgangsadresser a 
+         JOIN bebyggelser_divided b ON ST_Covers(b.geom, a.geom))`);
+    yield client.queryp(
+      `INSERT INTO bebyggelser_adgadr_history(bebyggelse_id, adgangsadresse_id) 
+        (SELECT bebyggelse_id, adgangsadresse_id from bebyggelser_adgadr)`);
+    yield sqlCommon.enableTriggersQ(client);
+  })();
+}
+
 function importBebyggelser(client, filePath, table, initial, skipSanityCheck) {
   const src = fs.createReadStream(filePath, {encoding: 'utf8'});
   return importBebyggelserFromStream(client, src, table, initial, skipSanityCheck);
@@ -142,5 +148,6 @@ function importBebyggelser(client, filePath, table, initial, skipSanityCheck) {
 
 module.exports = {
   importBebyggelser: importBebyggelser,
-  importBebyggelserFromStream: importBebyggelserFromStream
+  importBebyggelserFromStream: importBebyggelserFromStream,
+  initBebyggelserAdgangsadresserRelation: initBebyggelserAdgangsadresserRelation
 };
