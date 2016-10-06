@@ -99,7 +99,11 @@ const sqlIndicesHistory = {
   Adresse: [
     // needed for computing 'oprettet'
     ['id']
-  ]
+  ],
+  NavngivenVej: [
+  // needed for computing 'oprettet'
+    ['id']
+]
 };
 
 const sqlIndices = {

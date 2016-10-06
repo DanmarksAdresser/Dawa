@@ -18,7 +18,8 @@ exports.createClient = (baseUrl)  => {
 
   return {
     getEventStatus: () => {
-        const statusUrl = baseUrl + '/Status'
+        const statusUrl = baseUrl + '/Status';
+      console.log('getting event status');
         return  request.get({uri: statusUrl, json: true});
       },
     getRecordsPage: (eventStart, eventSlut, entitet, startindeks) => {

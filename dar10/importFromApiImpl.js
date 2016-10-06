@@ -14,7 +14,7 @@ const notificationClient = require('./notificationClient');
 
 function getRecordsForEntity(darClient, eventStart, eventSlut, entitet) {
   return q.async(function*() {
-    let rows= [];
+    let rows = [];
     let startindeks = null;
     let result;
     do {
@@ -22,7 +22,7 @@ function getRecordsForEntity(darClient, eventStart, eventSlut, entitet) {
       rows = rows.concat(result.records);
       startindeks = result.restindeks;
     }
-    while(result.restindeks);
+    while (result.restindeks);
     return rows;
   })();
 }
@@ -31,18 +31,18 @@ function getRows(darClient, currentEventIds, targetEventIds) {
   return q.async(function*() {
     const entities = Object.keys(targetEventIds);
     const result = {};
-    for(let entity of entities) {
+    for (let entity of entities) {
       const eventStart = currentEventIds[entity] + 1;
       const eventSlut = targetEventIds[entity];
       let rawResult;
-      if(eventStart > eventSlut) {
+      if (eventStart > eventSlut) {
         rawResult = [];
       }
       else {
         rawResult = yield getRecordsForEntity(darClient, eventStart, eventSlut, entity);
       }
       const normalizedResult = rawResult.map(row => {
-        if(row.registreringtil) {
+        if (row.registreringtil) {
           row.eventopret = null;
           row.eventopdater = row.eventid;
         }
@@ -62,7 +62,7 @@ function getRows(darClient, currentEventIds, targetEventIds) {
 
 function splitInTransactions(rowMap) {
   function txTimestamp(row) {
-    if(row.registreringtil) {
+    if (row.registreringtil) {
       return row.registreringtil;
     }
     else {
@@ -96,13 +96,13 @@ function fetchAndImport(client, darClient, remoteEventIds) {
     const localEventIds = yield getCurrentEventIds(client);
     const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
     const transactions = splitInTransactions(rowsMap);
-    if(transactions.length === 0) {
+    if (transactions.length === 0) {
       yield importDarImpl.withDar1Transaction(client, 'api', () => {
         return importDarImpl.applyIncrementalDifferences(client, false, []);
       });
     }
     else {
-      for(let transaction of transactions) {
+      for (let transaction of transactions) {
         yield importDarImpl.withDar1Transaction(client, 'api', () => {
           return importDarImpl.importChangeset(client, transaction, false);
         });
@@ -115,14 +115,14 @@ function race(promises) {
   return q.Promise((resolve, reject) => {
     let resolved = false;
 
-    for(let promise of promises) {
+    for (let promise of promises) {
       promise.then((value) => {
-        if(!resolved) {
+        if (!resolved) {
           resolved = true;
           resolve({value: value, promise: promise});
         }
       }, (error) => {
-        if(!resolved) {
+        if (!resolved) {
           resolved = true;
           reject({error: error, promise: promise});
         }
@@ -146,7 +146,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
   return q.async(function*() {
     const darClient = darApiClient.createClient(baseUrl);
     const wsClient = notificationWsUrl ? notificationClient(notificationWsUrl) : null;
-    if(!wsClient) {
+    if (!wsClient) {
       logger.info("Running DAR 1.0 import daemon without WebSocket listener");
     }
     const aborted = false;
@@ -154,6 +154,10 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
     const doImport = () => {
       return q.async(function*() {
         const remoteEventIdList = yield darClient.getEventStatus();
+        if (!Array.isArray(remoteEventIdList)) {
+          logger.error('Got non-array response from DAR 1.0 status');
+          return;
+        }
         const remoteEventsIdMap = remoteEventIdList.reduce((memo, pair) => {
           memo[pair.entitet] = pair.eventid;
           return memo;
@@ -164,16 +168,27 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
       })();
     };
 
-    while(!aborted) {
-      yield doImport();
-      const pollPromise = q.delay(pollIntervalMs);
-      if(wsClient) {
-        const notificationPromise = wsClient.await();
-        yield race([pollPromise, notificationPromise]);
-        wsClient.unawait();
+    while (!aborted) {
+      try {
+        yield doImport();
       }
-      else {
-        yield pollPromise;
+      catch (e) {
+        logger.error('Error importing from DAR1.0', {error: e});
+      }
+      try {
+        const pollPromise = q.delay(pollIntervalMs);
+        if (wsClient) {
+          const notificationPromise = wsClient.await();
+          yield race([pollPromise, notificationPromise]);
+          wsClient.unawait();
+        }
+        else {
+          yield pollPromise;
+        }
+      }
+      catch (e) {
+        logger.error('WebSocket error receiving DAR notifications', {error: e});
+        yield q.delay(5000);
       }
     }
   })();

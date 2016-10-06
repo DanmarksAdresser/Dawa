@@ -12,6 +12,9 @@ CREATE TABLE navngivenvej(
   udtaltvejnavn text
 );
 
+CREATE INDEX ON navngivenvej(navn);
+CREATE INDEX ON navngivenvej(adresseringsnavn);
+
 DROP TABLE IF EXISTS navngivenvej_history CASCADE;
 CREATE TABLE navngivenvej_history(
   valid_from integer,
@@ -31,3 +34,8 @@ CREATE TABLE navngivenvej_history(
 CREATE INDEX ON navngivenvej_history(valid_to);
 CREATE INDEX ON navngivenvej_history(valid_from);
 CREATE INDEX ON navngivenvej_history(id);
+
+ALTER TABLE vejstykker ADD COLUMN navngivenvej_id UUID;
+ALTER TABLE vejstykker_history ADD COLUMN navngivenvej_id UUID;
+
+CREATE INDEX ON vejstykker(navngivenvej_id);

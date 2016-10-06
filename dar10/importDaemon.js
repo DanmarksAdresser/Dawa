@@ -23,7 +23,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'notification
   importFromApiImpl.importDaemon(options.darApiUri, options.pollInterval, options.notificationUrl).catch(err => {
     logger.error('Import daemon error', err);
     throw err;
-  });
+  }).done();
 });
 
 
