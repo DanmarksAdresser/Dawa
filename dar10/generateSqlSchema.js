@@ -1,6 +1,6 @@
 "use strict";
 
-const generateSqlSchemaImpl = require('./generatesqlSchemaImpl');
+const generateSqlSchemaImpl = require('./generateSqlSchemaImpl');
 const _ = require('underscore');
 
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
