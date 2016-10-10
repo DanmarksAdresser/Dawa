@@ -3,6 +3,7 @@
 const expect = require('chai').expect;
 const uuid = require('uuid');
 
+const moment = require('moment');
 const path = require('path');
 const q = require('q');
 
@@ -226,6 +227,90 @@ describe('Import af changesets', () => {
       expect(change.entity).to.not.be.empty;
       expect(change.operation).to.equal('insert');
       expect(change.rowkey).to.be.above(0);
+    }));
+
+    it('Når virkningstid avanceres, håndteres fremtidige ændringer', q.async(function*() {
+      const client = clientFn();
+      yield importDarImpl.internal.setInitialMeta(client);
+      const now = (yield client.queryp('SELECT NOW() AS n')).rows[0].n;
+      const future = moment(now).add(1, 'minutes').toISOString();
+
+      const firstChangeset = {
+        NavngivenVej: [{
+          "eventopret": null,
+          "eventopdater": null,
+          "rowkey": 6259,
+          "id": "e17d4273-ad3d-496f-85b1-73bba8b1a707",
+          "registreringfra": now,
+          "registreringtil": null,
+          "virkningfra": future,
+          "virkningtil": null,
+          "status": "2",
+          "administreresafkommune": "0265",
+          "beskrivelse": null,
+          "retskrivningskontrol": "4",
+          "udtaltvejnavn": "Sø Svenstrup Byvej",
+          "vejadresseringsnavn": "Sø Svenstrup Byvej",
+          "vejnavn": "Sø Svenstrup Byvej",
+          "vejnavnebeliggenhed_oprindelse_kilde": "Ekstern",
+          "vejnavnebeliggenhed_oprindelse_nøjagtighedsklasse": "B",
+          "vejnavnebeliggenhed_oprindelse_registrering": "2016-04-06T13:24:14.91Z",
+          "vejnavnebeliggenhed_oprindelse_tekniskstandard": "NO",
+          "vejnavnebeliggenhed_vejnavnelinje": "GEOMETRYCOLLECTION EMPTY",
+          "vejnavnebeliggenhed_vejnavneområde": "POLYGON ((689614.504882 6159819.35656, 689711.933656 6159597.59578, 688475.328649 6159054.30353, 688377.899875 6159276.0643, 689614.504882 6159819.35656))",
+          "vejnavnebeliggenhed_vejtilslutningspunkter": "GEOMETRYCOLLECTION EMPTY"
+
+        }]
+      };
+
+      // import a changeset with a change occuring in the future
+      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
+        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(firstChangeset)));
+      }));
+
+      // check at vejen ikke eksisterer endnu
+      const entityCount = (yield client.queryp('select count(*)::integer  as c from navngivenvej')).rows[0].c;
+      expect(entityCount).to.equal(0);
+
+      const secondChangeset = {
+        NavngivenVej: [{
+          "eventopret": null,
+          "eventopdater": null,
+          "rowkey": 6260,
+          "id": "e17d4273-ad3d-496f-85b1-73bba8b1ffff",
+          "registreringfra": future,
+          "registreringtil": null,
+          "virkningfra": future,
+          "virkningtil": null,
+          "status": "2",
+          "administreresafkommune": "0265",
+          "beskrivelse": null,
+          "retskrivningskontrol": "4",
+          "udtaltvejnavn": "Different Road",
+          "vejadresseringsnavn": "Different Road",
+          "vejnavn": "Different Road",
+          "vejnavnebeliggenhed_oprindelse_kilde": "Ekstern",
+          "vejnavnebeliggenhed_oprindelse_nøjagtighedsklasse": "B",
+          "vejnavnebeliggenhed_oprindelse_registrering": "2016-04-06T13:24:14.91Z",
+          "vejnavnebeliggenhed_oprindelse_tekniskstandard": "NO",
+          "vejnavnebeliggenhed_vejnavnelinje": "GEOMETRYCOLLECTION EMPTY",
+          "vejnavnebeliggenhed_vejnavneområde": "POLYGON ((689614.504882 6159819.35656, 689711.933656 6159597.59578, 688475.328649 6159054.30353, 688377.899875 6159276.0643, 689614.504882 6159819.35656))",
+          "vejnavnebeliggenhed_vejtilslutningspunkter": "GEOMETRYCOLLECTION EMPTY"
+        }]
+      };
+
+      // import a changeset with a registration time in future will advance virkning time in db
+      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
+        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(secondChangeset)));
+      }));
+
+      // check that virkning time has been incremented
+      const virkningTime = (yield importDarImpl.internal.getMeta(client)).virkning;
+      expect(virkningTime).to.equal(future);
+
+      // check that both roads exist now
+      const entityCount2 = (yield client.queryp('select count(*)::integer as c from navngivenvej')).rows[0].c;
+      expect(entityCount2).to.equal(2);
     }));
   });
 });

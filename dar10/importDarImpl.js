@@ -417,7 +417,7 @@ function computeIncrementalChangesToCurrentTables(client, darEntitiesWithNewRows
       }
       if(_.contains(entitiesWithChangedVirkning, entity)) {
         dirty.push(`SELECT rowkey FROM ${table}, tstzrange(
-        (select prev_virkning from dar1_meta), (select virkning from dar1_meta), '[)') as
+        (select prev_virkning from dar1_meta), (select virkning from dar1_meta), '(]') as
       virkrange WHERE virkrange @> lower(virkning) or virkrange @> upper(virkning)`);
       }
 
@@ -564,8 +564,8 @@ function getChangedEntitiesDueToVirkningTime(client) {
         const selectPrevVirkning = '(SELECT prev_virkning FROM dar1_meta)';
         const selectVirkning = '(SELECT virkning FROM dar1_meta)';
         return `(SELECT count(*) FROM ${table} 
-        WHERE (lower(virkning) >= ${selectPrevVirkning} AND lower(virkning) < ${selectVirkning}) or 
-              (upper(virkning) >= ${selectPrevVirkning} AND upper(virkning) < ${selectVirkning})
+        WHERE (lower(virkning) > ${selectPrevVirkning} AND lower(virkning) <= ${selectVirkning}) or 
+              (upper(virkning) > ${selectPrevVirkning} AND upper(virkning) <= ${selectVirkning})
               ) > 0 as "${entity}"`;
       }).join(',');
     const queryResult = (yield client.queryp(sql)).rows[0];
