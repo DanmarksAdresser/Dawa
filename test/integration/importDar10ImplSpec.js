@@ -312,5 +312,58 @@ describe('Import af changesets', () => {
       const entityCount2 = (yield client.queryp('select count(*)::integer as c from navngivenvej')).rows[0].c;
       expect(entityCount2).to.equal(2);
     }));
+
+    it('Adgangsadresser are updated when any entity that is part of the address changes', q.async(function*() {
+      const client = clientFn();
+
+      const makeUpdate = (currentRecord, time, newProps) => {
+        const result =  Object.assign({}, currentRecord, newProps);
+        return [
+          Object.assign({}, currentRecord, {
+          registreringtil: time
+        }),
+        Object.assign({}, result, {
+          registreringfra: time,
+          virkningtil: time
+        }),
+        Object.assign({}, result, {
+          registreringfra: time,
+          virkningfra: time
+        })]
+      };
+      yield importDarImpl.internal.setInitialMeta(client);
+      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
+        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+      }));
+
+      // check that address is updated when vejkode changes
+      const time2 = '2016-04-22T00:00:00Z';
+      const navngivenVejKommunedelChange = {
+        NavngivenVejKommunedel: makeUpdate(INITIAL_CHANGESET.NavngivenVejKommunedel[0], time2, {
+          vejkode: "0700"
+        })
+      };
+      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
+        yield importDarImpl.importChangeset(client, navngivenVejKommunedelChange);
+      }));
+
+      let updatedAddress = (yield client.queryp('select * from adgangsadresser')).rows[0];
+      expect(updatedAddress.vejkode).to.equal(700);
+
+
+      // check that address postnummer is updated when postnummer changes
+      const time3 = '2016-04-23T00:00:00Z';
+      const postnummerChange = {
+        Postnummer: makeUpdate(INITIAL_CHANGESET.Postnummer[0], time3, {
+          postnr: "5000"
+        })
+      };
+      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
+        yield importDarImpl.importChangeset(client, postnummerChange);
+      }));
+
+      updatedAddress = (yield client.queryp('select * from adgangsadresser')).rows[0];
+      expect(updatedAddress.postnr).to.equal(5000);
+    }));
   });
 });
