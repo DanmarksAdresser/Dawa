@@ -8,7 +8,7 @@ CREATE VIEW dar1_navngivenvej_view AS
      WHERE nh.id = n.id) AS oprettet,
     lower(n.virkning) AT TIME ZONE 'Europe/Copenhagen' AS ændret,
     n.vejnavn as navn,
-    n.vejadresseringsnavn as adresseringsnavn,
+    COALESCE(n.vejadresseringsnavn, '') as adresseringsnavn,
     administreresafkommune,
     beskrivelse,
     retskrivningskontrol,

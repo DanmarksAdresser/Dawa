@@ -4,7 +4,7 @@ CREATE VIEW dar1_vejstykker_view AS
     kommune AS kommunekode,
     vejkode AS kode,
     vejnavn,
-    vejadresseringsnavn as adresseringsnavn,
+    COALESCE(vejadresseringsnavn, '') as adresseringsnavn,
     navngivenvej_id
   FROM dar1_navngivenvejkommunedel_current nvk
     JOIN dar1_navngivenvej_current nv

@@ -10,6 +10,7 @@ create table transaction_history(
 
 create index on transaction_history(entity, time);
 create index on transaction_history(entity, sequence_number);
+create index on transaction_history(time);
 
 DROP TABLE IF EXISTS bbr_sekvensnummer CASCADE;
 
