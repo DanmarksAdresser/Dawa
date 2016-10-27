@@ -1,3 +1,5 @@
+"use strict";
+
 var child_process = require('child_process');
 var fs = require('fs');
 var moment = require('moment');
@@ -108,6 +110,6 @@ function doImport(db, srcDir, initial) {
 }
 
 module.exports = {
-  doImport,
-  importEjerlav
+  doImport: doImport,
+  importEjerlav: importEjerlav
 };

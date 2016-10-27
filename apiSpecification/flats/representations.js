@@ -56,7 +56,7 @@ const jsonSchema = (flat, fields) => {
 
 var jordstykkeJsonSchema = function () {
   var schema = jsonSchema(flats.jordstykke, flats.jordstykke.fields.filter(field =>
-    ['matrikelnr', 'esrejendomsnr','sfeejendomsnr'].includes(field.name)));
+    _.contains(['matrikelnr', 'esrejendomsnr','sfeejendomsnr'], field.name)));
   schema.properties.ejerlav = {
     description: 'Ejerlavet som jordstykket tilhører.',
     $ref: '#/definitions/EjerlavRef'
