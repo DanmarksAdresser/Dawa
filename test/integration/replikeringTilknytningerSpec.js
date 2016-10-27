@@ -22,6 +22,7 @@ var tilknytninger = require('../../apiSpecification/tematilknytninger/tilknytnin
 const flats = require('../../apiSpecification/flats/flats');
 const flatTilknytninger = require('../../apiSpecification/flats/tilknytninger/tilknytninger');
 const importBebyggelserImpl = require('../../bebyggelser/importBebyggelserImpl');
+const importJordstykkerImpl = require('../../matrikeldata/importJordstykkerImpl');
 
 var schemaValidationUtil = require('./schemaValidationUtil');
 
@@ -87,11 +88,7 @@ var temaObjects = {
   postnummer: {"nr": 99, "navn": "Postdistrikt test"},
   sogn: {"kode": 99, "navn": "Sogn test"},
   opstillingskreds: {"kode": 99, "navn": "Opstillingskreds test"},
-  retskreds: {"kode": 99, "navn": "retskreds test"},
-  jordstykke: {
-    "ejerlavkode": 99,
-    "matrikelnr": '4cv'
-  }
+  retskreds: {"kode": 99, "navn": "retskreds test"}
 };
 
 const bebyggelseJsonContainingFirstAddress = {
@@ -131,15 +128,19 @@ const loadFlatFns = {
     load1: (client) =>
       importBebyggelserImpl.importBebyggelserFromStream(
         client,
-        asTextStream(bebyggelseJsonContainingFirstAddress),
-        'bebyggelser', true)
+        asTextStream(bebyggelseJsonContainingFirstAddress), true, false)
     ,
     load2: (client) =>
       importBebyggelserImpl.importBebyggelserFromStream(
         client,
-        asTextStream(bebyggelseJsonContainingSecondAdresses),
-        'bebyggelser', false)
+        asTextStream(bebyggelseJsonContainingSecondAdresses), false, false)
 
+  },
+  jordstykke: {
+    load1: client =>
+      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel1.gml.zip', true),
+    load2: client =>
+      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel2.gml.zip', false)
   }
 };
 
@@ -152,14 +153,18 @@ var expectedKeys = {
   postnummer: ['0099'],
   sogn: ['0099'],
   opstillingskreds: ['0099'],
-  retskreds: ['0099'],
-  jordstykke: [99, '4cv']
+  retskreds: ['0099']
 };
 
 const expectedFlatResults1 = {
   bebyggelse: [{
     adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb3546800',
     bebyggelsesid: '12337669-a241-6b98-e053-d480220a5a3f'
+  }],
+  jordstykke: [{
+    adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb3546800',
+    ejerlavkode: 60851,
+    matrikelnr: '2c'
   }]
 };
 
@@ -167,9 +172,13 @@ const expectedFlatResults2 = {
   bebyggelse: [{
     adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb354680f',
     bebyggelsesid: '12337669-a241-6b98-e053-d480220a5a3f'
+  }],
+  jordstykke: [{
+    adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb354680f',
+    ejerlavkode: 60851,
+    matrikelnr: '2c'
   }]
-
-}
+};
 
 describe('Replikering af tilknytninger', function () {
   testdb.withTransactionEach('empty', function (clientFn) {

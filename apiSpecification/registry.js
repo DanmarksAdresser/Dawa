@@ -23,12 +23,13 @@ exports.add = function(entityName, type, qualifier, object) {
 
 exports.addMultiple = function (entityName, type, objectMap) {
   _.each(objectMap, function (object, qualifier) {
-    if(exports.findWhere({
-        entityName: entityName,
-        type: type,
-        qualifier: qualifier
-      })) {
-      throw new Error("Attempted to overwrite an entry in registry");
+    const key = {
+      entityName: entityName,
+      type: type,
+      qualifier: qualifier
+    };
+    if(exports.findWhere(key)) {
+      throw new Error("Attempted to overwrite an entry in registry: " + JSON.stringify(key));
     }
     exports.add(entityName,
       type,

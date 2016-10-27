@@ -24,7 +24,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
 
   proddb.withTransaction('READ_WRITE', client => {
     return q.async(function*() {
-      yield importBebyggelserImpl.importBebyggelser(client, options.file, 'bebyggelser', options.initial, options.skipsanitycheck);
+      yield importBebyggelserImpl.importBebyggelser(client, options.file, options.initial, options.skipsanitycheck);
     })();
   }).done();
 });

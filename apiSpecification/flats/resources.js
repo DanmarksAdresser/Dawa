@@ -20,15 +20,22 @@ module.exports = _.mapObject(flats, (flat => {
     geomWithin: commonParameters.geomWithin,
     reverseGeocoding: commonParameters.reverseGeocodingOptional
   };
+  if(flat.structuredJsonRepresentation) {
+    queryParams.struktur = commonParameters.struktur
+  }
   const queryResource = resourcesUtil.queryResourceSpec(flat, queryParams, representations, sqlModel);
   const getByKeyResource = resourcesUtil.getByKeyResourceSpec(flat, parameters.id, {
     crs: commonParameters.crs
   }, representations, sqlModel);
 
-  return {
+  const resources= {
     query: queryResource,
     getByKey: getByKeyResource
   };
+  if(flat.legacyReverseResource) {
+    resources.reverseGeocoding = resourcesUtil.reverseGeocodingResourceSpec('/' + flat.plural + '/reverse', representations, sqlModel)
+  }
+  return resources;
 }));
 
 _.mapObject(module.exports, (resources, entityName) => {

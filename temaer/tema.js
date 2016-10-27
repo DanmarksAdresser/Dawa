@@ -224,7 +224,7 @@ exports.updateTema = function(client, temaDef, tema, callback) {
   }).nodeify(callback);
 };
 
-exports.parseTemaer = function(gmlText, temaDef, mapping) {
+exports.parseGml = (gmlText, singular, key, mapping)  => {
   return q.nfcall(xml2js.parseString, gmlText, {
     tagNameProcessors: [xml2js.processors.stripPrefix],
     trim: true
@@ -244,18 +244,26 @@ exports.parseTemaer = function(gmlText, temaDef, mapping) {
       .map(function (feature) {
         return exports.wfsFeatureToTema(feature, mapping);
       })
-      .groupBy(function (fragment) {
-        return exports.stringKey(fragment, temaDef);
+      .groupBy(fragment => {
+        const result = key.map(keyPart => fragment.fields[keyPart]).join(':');
+        return result;
       })
       .map(function (fragments) {
         return {
-          tema: temaDef.singular,
+          tema: singular,
           fields: fragments[0].fields,
           polygons: _.pluck(fragments, 'polygon')
         };
       })
       .value();
   });
+
+}
+
+exports.parseTemaer = function(gmlText, temaDef, mapping) {
+  const singular = temaDef.singular;
+  const key = _.pluck(key, 'name');
+  return exports.parseGml(gmlText, singular, key, mapping);
 };
 
 exports.wfsFeatureToTema = function(feature, mapping) {

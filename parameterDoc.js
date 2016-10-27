@@ -1054,6 +1054,15 @@ var jordstykkeParameters = [
   {
     name: 'sfeejendomsnr',
     doc: 'Find de jordstykker som er tilknyttet det angivne SFE ejendomsnummer.'
+  },
+  {
+    name: 'x',
+    doc: 'Find jordstykket for det angivne punkt. Både x- og y-parameter skal angives. Hvis ETRS89/UTM32 anvendes angives øst-værdien. Hvis WGS84/geografisk anvendes angives bredde-værdien.'
+  },
+  {
+    name: 'y',
+    doc: 'Find jordstykket for det angivne punkt. Både x- og y-parameter skal angives. Hvis ETRS89/UTM32 anvendes angives nord-værdien. Hvis WGS84/geografisk ' +
+    'anvendes angives længde-værdien.'
   }
 ];
 
@@ -1471,6 +1480,10 @@ const flatExamples = {
       path: ['/bebyggelser/12337669-c79d-6b98-e053-d480220a5a3f?format=geojson&srid=25832']
     }]
 
+  },
+  jordstykke: {
+    query: [],
+    get: []
   }
 };
 
@@ -1702,7 +1715,7 @@ var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning', 'navngivenvej'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({
@@ -1882,7 +1895,7 @@ module.exports['/historik/adresser'] = {
 };
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
-  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, jordstykkeDoc.resources, navngivneVejeDok);
+  adgangsadresseDoc.resources, postnummerDoc.resources, adresseDoc.resources, ejerlavDoc.resources, navngivneVejeDok, jordstykkeDoc.resources);
 
 var allResources = registry.where({
   type: 'resource'

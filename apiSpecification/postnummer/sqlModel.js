@@ -34,7 +34,7 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(' + geomQuery + ',' + sridAlias + '))';
+      return 'ST_AsGeoJSON(ST_Transform(' + geomQuery + ',' + sridAlias + '::integer))';
     }
   },
   kommuner: {

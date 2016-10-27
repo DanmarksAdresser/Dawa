@@ -13,8 +13,7 @@ describe('Import af bebyggelser', () => {
       const client = clientFn();
       yield importBebyggelserImpl.importBebyggelser(
         client,
-        path.join(__dirname, 'sampleBebyggelserFiles', 'initial.json'),
-        'bebyggelser', true);
+        path.join(__dirname, 'sampleBebyggelserFiles', 'initial.json'), true, false);
       const bebyggelser = (yield client.queryp('select id, geo_version, kode, navn, type, st_asgeojson(geom) as geom from bebyggelser')).rows;
       expect(bebyggelser).to.have.length(1);
       const bebyggelse = bebyggelser[0];
@@ -30,8 +29,7 @@ describe('Import af bebyggelser', () => {
       const client = clientFn();
       yield importBebyggelserImpl.importBebyggelser(
         client,
-        path.join(__dirname, 'sampleBebyggelserFiles', 'updated.json'),
-        'bebyggelser', false);
+        path.join(__dirname, 'sampleBebyggelserFiles', 'updated.json'), false, false);
       const bebyggelser = (yield client.queryp('select id, geo_version, kode, navn, type, st_asgeojson(geom) as geom from bebyggelser')).rows;
       expect(bebyggelser).to.have.length(1);
       const bebyggelse = bebyggelser[0];

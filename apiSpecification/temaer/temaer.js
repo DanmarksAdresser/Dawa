@@ -130,24 +130,5 @@ module.exports = [
     }],
     published: true,
     searchable: true
-  },
-  {
-    singular: 'jordstykke',
-    singularSpecific: 'jordstykket',
-    plural: 'jordstykker',
-    prefix: 'jordstykke',
-    key: [{
-      name: 'ejerlavkode',
-      type: 'integer',
-      sqlType: 'integer'
-    }, {
-      name: 'matrikelnr',
-      type: 'string',
-      sqlType: 'text'
-    }],
-    published: true,
-    searchable: false,
-    materialized: true,
-    nested: true
   }
 ];

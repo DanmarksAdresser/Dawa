@@ -228,7 +228,7 @@ exports.reverseGeocodingOptional =
     }
   ];
 
-var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds', 'jordstykke'];
+var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
 
 var dagiFilters = _.map(filterableDagiSkemaer, function(skemaNavn) {
   var names = tilknytninger[skemaNavn].keyFieldNames;

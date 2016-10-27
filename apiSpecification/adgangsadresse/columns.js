@@ -83,8 +83,8 @@ module.exports =  {
     select: function(sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return `CASE WHEN hoejde IS NULL 
-      THEN ST_AsGeoJSON(ST_Transform(geom, ${sridAlias}))
-      ELSE ST_AsGeoJSON(ST_Transform(ST_SetSRID(st_makepoint(st_x(geom), st_y(geom), hoejde), 25832), ${sridAlias}))
+      THEN ST_AsGeoJSON(ST_Transform(geom, ${sridAlias}::integer))
+      ELSE ST_AsGeoJSON(ST_Transform(ST_SetSRID(st_makepoint(st_x(geom), st_y(geom), hoejde), 25832), ${sridAlias}::integer))
       END`;
     }
   },

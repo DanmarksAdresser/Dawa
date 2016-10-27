@@ -86,6 +86,15 @@ var fields = [
     name: 'regionsnavn'
   },
   {
+    name: 'jordstykke_ejerlavkode'
+  },
+  {
+    name: 'jordstykke_matrikelnr'
+  },
+  {
+    name: 'jordstykke_esrejendomsnr'
+  },
+  {
     name: 'jordstykke_ejerlavnavn'
   },
   normalizedField('højde'),

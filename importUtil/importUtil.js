@@ -5,6 +5,7 @@ const copyFrom = require('pg-copy-streams').from;
 const csvParse = require('csv-parse');
 const csvStringify = require('csv-stringify');
 const es = require('event-stream');
+const Readable = require('stream').Readable;
 const fs = require('fs');
 const q = require('q');
 const split2 = require('split2');
@@ -138,6 +139,22 @@ function streamCsvToTable(client, filePath, targetTable, columns, mapFn) {
   ]);
 }
 
+class ArrayStream extends Readable {
+  constructor(arr) {
+    super({objectMode: true});
+    if (!Array.isArray(arr))
+      throw new TypeError('First argument must be an Array');
+    this._i = 0;
+    this._arr = arr;
+  }
+
+  _read(size) {
+    this.push(this._i < this._arr.length ? this._arr[this._i++] : null);
+  }
+}
+
+const streamArray = (arr) => new ArrayStream(arr);
+
 module.exports = {
   copyStream: copyStream,
   copyStreamStringifier: copyStreamStringifier,
@@ -145,5 +162,6 @@ module.exports = {
   createTempTableFromTemplate: createTempTableFromTemplate,
   streamArrayToTable: streamArrayToTable,
   streamCsvToTable: streamCsvToTable,
-  streamNdjsonToTable: streamNdjsonToTable
+  streamNdjsonToTable: streamNdjsonToTable,
+  streamArray: streamArray
 };

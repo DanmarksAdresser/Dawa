@@ -265,13 +265,13 @@ var sampleParameters = {
       }
     },
     ejerlavkode: {
-      values: ['10851', '010851'],
+      values: ['60851', '060851'],
       verifier: function(adr, ejerlavkode) {
         return adr.jordstykke && adr.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
     },
     matrikelnr: {
-      values: ['99f'],
+      values: ['1a'],
       verifier: function(adr, matrikelnr) {
         return adr.jordstykke && adr.jordstykke.matrikelnr === matrikelnr;
       }
@@ -430,14 +430,14 @@ var sampleParameters = {
       }
     },
     ejerlavkode: {
-      values: ['10851', '010851'],
+      values: ['60851', '060851'],
       verifier: function(adr, ejerlavkode) {
         return adr.adgangsadresse.jordstykke &&
           adr.adgangsadresse.jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10);
       }
     },
     matrikelnr: {
-      values: ['99f'],
+      values: ['1a'],
       verifier: function(adr, matrikelnr) {
         return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
       }
@@ -502,6 +502,40 @@ var sampleParameters = {
       values: ['by'],
       verifier: (bebyggelse, type) => bebyggelse.type === type
     }
+  },
+  jordstykke: {
+    ejerlavkode: {
+      values: ['60851', '060851'],
+      verifier: (jordstykke, ejerlavkode) => jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10)
+    },
+    matrikelnr: {
+      values: ['1a'],
+      verifier: (jordstykke, matrikelnr) => jordstykke.matrikelnr === matrikelnr
+    },
+    esrejendomsnr: {
+      values: ['8571'],
+      verifier: (jordstykke, esrejendomsnr) => jordstykke.esrejendomsnr === esrejendomsnr
+    },
+    sfeejendomsnr: {
+      values: ['1305735'],
+      verifier: (jordstykke, sfeejendomsnr) => jordstykke.sfeejendomsnr === sfeejendomsnr
+    },
+    kommunekode: {
+      values: ['0350'],
+      verifier: (jordstykke, kommunekode) => jordstykke.kommune.kode === kommunekode
+    },
+    regionskode: {
+      values: ['1085'],
+      verifier: (jordstykke, regionskode) => jordstykke.region.kode === regionskode
+    },
+    sognekode: {
+      values: ['7171'],
+      verifier: (jordstykke, sognekode) => jordstykke.sogn.kode === sognekode
+    },
+    retskredskode: {
+      values: ['1180'],
+      verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
+    }
   }
 };
 
@@ -548,7 +582,7 @@ _.keys(sampleParameters).forEach(function(specName) {
               var rawQueryParams = {};
               rawQueryParams[paramName] = sampleValue;
               parseResult = parameterParsing.parseParameters(rawQueryParams, _.indexBy(allParameters, 'name'));
-              expect(parseResult.errors.length).to.equal(0);
+              expect(parseResult.errors).to.deep.equal([]);
               parseResult.params.per_side = 100;
               return testdb.withTransaction('test', 'READ_ONLY', function(client) {
                 return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), parseResult.params).then(function(rows) {

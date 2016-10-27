@@ -90,6 +90,18 @@ exports.propertyFilter = normalizeParameters([
     type: 'string',
     schema: _.findWhere(bebyggelseParameters.propertyFilter, {name: 'type' }).schema,
     multi: true
+  },
+  {
+    name: 'ejerlavkode',
+    type: 'integer',
+    multi: false,
+    renameTo: 'jordstykke_ejerlavkode'
+  },
+  {
+    name: 'matrikelnr',
+    type: 'string',
+    multi: false,
+    renameTo: 'jordstykke_matrikelnr'
   }
 
 ]);

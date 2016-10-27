@@ -316,19 +316,13 @@ exports.json = {
         var zoneKode = zoneTema ? zoneTema.fields.zone : 2;
         adr.zone = util.zoneKodeFormatter(zoneKode);
       }
-      var jordstykkeTemaer = _.where(temaer, {tema: 'jordstykke'});
-      if(jordstykkeTemaer.length === 1) {
-        var jordstykke = jordstykkeTemaer[0];
-        var ejerlavkode = jordstykke.fields.ejerlavkode;
-        var matrikelnr = jordstykke.fields.matrikelnr;
-        var esrejendomsnr = jordstykke.fields.esrejendomsnr  ?  "" + jordstykke.fields.esrejendomsnr : null;
-        var result = {
-          href: makeHref(baseUrl, 'jordstykke', [ejerlavkode, matrikelnr]),
-          matrikelnr: matrikelnr,
-          esrejendomsnr: esrejendomsnr
-        };
-        result.ejerlav = commonMappers.mapEjerlavRef(ejerlavkode, rs.jordstykke_ejerlavnavn, baseUrl);
-        adr.jordstykke = result;
+      if(rs.jordstykke_matrikelnr) {
+        const jordstykke = {};
+        jordstykke.href = makeHref(baseUrl, 'jordstykke', [rs.jordstykke_ejerlavkode, rs.jordstykke_matrikelnr]),
+        jordstykke.ejerlav = commonMappers.mapEjerlavRef(rs.jordstykke_ejerlavkode, rs.jordstykke_ejerlavnavn, baseUrl);
+        jordstykke.matrikelnr = rs.jordstykke_matrikelnr;
+        jordstykke.esrejendomsnr = rs.jordstykke_esrejendomsnr  ?  "" + rs.jordstykke_esrejendomsnr  : null;
+        adr.jordstykke = jordstykke;
       }
       else {
         adr.jordstykke = null;

@@ -139,7 +139,6 @@ var parameterImpls = [
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.dagiFilter(),
-  sqlParameterImpl.jordstykkeFilter(),
   searchAdresse(columns),
   autocompleteAdresse(columns),
   fuzzySearchParameterImpl,

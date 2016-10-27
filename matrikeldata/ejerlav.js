@@ -70,8 +70,7 @@ exports.parseEjerlav = function(body) {
     filterFn: function() { return true; }
   };
 
-  var temaDef = tema.findTema('jordstykke');
-  return tema.parseTemaer(body, temaDef, mapping);
+  return tema.parseGml(body, 'jordstykke', ['ejerlavkode', 'matrikelnr'], mapping);
 }
 
 exports.storeEjerlav = function(ejerlavkode, jordstykker, client, options) {

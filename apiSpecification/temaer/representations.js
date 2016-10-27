@@ -9,7 +9,6 @@ var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var additionalFields = require('./additionalFields');
 
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHref = commonMappers.makeHref;
 var makeHrefFromPath = commonMappers.makeHrefFromPath;
 
 var registry = require('../registry');
@@ -78,60 +77,8 @@ function schemaForFlatFields(tema, additionalFieldsSpec, excludedFieldNames) {
   return result;
 }
 
-var jordstykkeJsonSchema = function() {
-  var tema = _.findWhere(dagiTemaer, { singular: 'jordstykke'});
-  var schema = schemaForFlatFields(tema, additionalFields.jordstykke, ['ejerlavkode', 'kommunekode', 'regionskode',
-    'retskredskode', 'sognekode']);
-  schema.properties.ejerlav = {
-    description: 'Ejerlavet som jordstykket tilhører.',
-    $ref: '#/definitions/EjerlavRef'
-  };
-  schema.properties.kommune = {
-    description: 'Kommunen som jordstykket er beliggende i.',
-      $ref: '#/definitions/NullableKommuneRefNoName'
-  };
-  schema.properties.region = {
-    description: 'Regionen som jordstykket er beliggende i.',
-    $ref: '#/definitions/NullableRegionsRefNoName'
-  };
-  schema.properties.sogn = {
-    description: 'Sognet som jordstykket er beliggende i.',
-    $ref: '#/definitions/NullableSogneRefNoName'
-  };
-  schema.properties.retskreds = {
-    description: 'Retskredsen, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
-    $ref: '#/definitions/NullableRetskredsRefNoName'
-  };
-
-  schema.docOrder = schema.docOrder.concat(['ejerlav', 'kommune', 'region', 'sogn', 'retskreds']);
-  return globalSchemaObject(schema);
-};
 
 var customRepresentations = {
-  jordstykke: {
-    json: {
-      fields: representationUtil.fieldsWithoutNames(fieldMap.jordstykke, ['geom_json']),
-      schema: jordstykkeJsonSchema(),
-      mapper: function (baseUrl) {
-        return function (value) {
-          var result = {};
-          result.ændret =  value.ændret;
-          result.geo_version = value.geo_version;
-          result.geo_ændret = value.geo_ændret;
-          result.matrikelnr = value.matrikelnr;
-          result.href = makeHref(baseUrl, 'jordstykke', [value.ejerlavkode, value.matrikelnr]);
-          result.ejerlav = commonMappers.mapEjerlavRef(value.ejerlavkode, "", baseUrl);
-          result.kommune = commonMappers.mapKode4NavnTemaNoName('kommune', value.kommunekode, baseUrl);
-          result.region = commonMappers.mapKode4NavnTemaNoName('region', value.regionskode, baseUrl);
-          result.sogn = commonMappers.mapKode4NavnTemaNoName('sogn', value.sognekode, baseUrl);
-          result.retskreds = commonMappers.mapKode4NavnTemaNoName('retskreds', value.retskredskode, baseUrl);
-          result.esrejendomsnr = value.esrejendomsnr ? ('' + value.esrejendomsnr) : null;
-          result.sfeejendomsnr = value.sfeejendomsnr ? ('' + value.sfeejendomsnr) : null;
-          return result;
-        };
-      }
-    }
-  }
 };
 
 // postnumre, zoner eksporteres ikke

@@ -15,6 +15,7 @@ var tema = require('../temaer/tema');
 var updateEjerlavImpl = require('./updateEjerlavImpl');
 var updatePostnumreImpl = require('./updatePostnumreImpl');
 const importBebyggelserImpl = require('../bebyggelser/importBebyggelserImpl');
+const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -47,8 +48,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       for(let temaDef of temaer) {
         yield tema.updateAdresserTemaerView(client, temaDef, true, 1000000);
       }
-      yield importBebyggelserImpl.importBebyggelser(client, 'test/data/Bebyggelse.json', 'bebyggelser', true);
-      yield client.queryp('refresh materialized view jordstykker');
+      yield importBebyggelserImpl.importBebyggelser(client, 'test/data/Bebyggelse.json', true, false);
+      yield importJordstykkerImpl.importEjerlav(client, 'test/data/matrikelkort', '60851_GML_UTM32-EUREF89.zip', true);
       yield client.queryp('analyze');
     })();
   }).done();

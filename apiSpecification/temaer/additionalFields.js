@@ -91,47 +91,6 @@ var fieldMap = {
       }
     },
     describe(navn, 'Storkredsens navn.')
-  ],
-  jordstykke: [
-    {
-      name: 'ejerlavkode',
-      description: 'Landsejerlavkode for det ejerlav, som jordstykket tilhører',
-      schema: commonSchemaDefinitions.UpTo7
-    }, {
-      name: 'matrikelnr',
-      description: 'Matrikelnummeret for jordstykket. Udgør sammen med ejerlavkoden en unik nøgle for jordstykket.',
-      schema: commonSchemaDefinitions.matrikelnr
-    }, {
-      name: 'kommunekode',
-      description: 'Kommunekoden.',
-      schema: commonSchemaDefinitions.Kode4,
-      formatter: kode4String
-    }, {
-      name: 'sognekode',
-      description: 'Sognekoden',
-      schema: commonSchemaDefinitions.Kode4,
-      formatter: kode4String
-    }, {
-      name: 'regionskode',
-      description: 'Regionskoden',
-      schema: commonSchemaDefinitions.Kode4,
-      formatter: kode4String
-    }, {
-      name: 'retskredskode',
-      description: 'Retskredskoden, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
-      schema: commonSchemaDefinitions.Kode4,
-      formatter: kode4String
-    }, {
-      name: 'esrejendomsnr',
-      description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
-      ' ESR, som jordstykket er en del af.' +
-      ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
-      schema: commonSchemaDefinitions.Nullableesrejendomsnr
-    }, {
-      name: 'sfeejendomsnr',
-      description: 'SFE ejendomsnummer.',
-      schema: commonSchemaDefinitions.Nullablesfeejendomsnr
-    }
   ]
 };
 

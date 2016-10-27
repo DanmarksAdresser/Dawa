@@ -4,7 +4,6 @@ var _ = require('underscore');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 var registry = require('../registry');
-var schema = require('../parameterSchema');
 
 var kodeAndNavn = {
   id: normalizeParameters([
@@ -67,60 +66,60 @@ module.exports.storkreds = {
   ])
 };
 
-module.exports.jordstykke = {
-  id: normalizeParameters([
-    {
-      name: 'ejerlavkode'
-    },
-    {
-      name: 'matrikelnr'
-    }
-  ]),
-  propertyFilter: [
-    {
-      name: 'ejerlavkode',
-      multi: true
-    },
-    {
-      name: 'matrikelnr',
-      multi: true
-    },
-    {
-      name: 'kommunekode',
-      type: 'integer',
-      schema: schema.kode4,
-      multi: true
-    },
-    {
-      name: 'regionskode',
-      type: 'integer',
-      schema: schema.kode4,
-      multi: true
-    },
-    {
-      name: 'sognekode',
-      type: 'integer',
-      schema: schema.kode4,
-      multi: true
-    },
-    {
-      name: 'retskredskode',
-      type: 'integer',
-      schema: schema.kode4,
-      multi: true
-    },
-    {
-      name: 'esrejendomsnr',
-      type: 'integer',
-      multi: true
-    },
-    {
-      name: 'sfeejendomsnr',
-      type: 'integer',
-      multi: true
-    }
-  ]
-};
+// module.exports.jordstykke = {
+//   id: normalizeParameters([
+//     {
+//       name: 'ejerlavkode'
+//     },
+//     {
+//       name: 'matrikelnr'
+//     }
+//   ]),
+//   propertyFilter: [
+//     {
+//       name: 'ejerlavkode',
+//       multi: true
+//     },
+//     {
+//       name: 'matrikelnr',
+//       multi: true
+//     },
+//     {
+//       name: 'kommunekode',
+//       type: 'integer',
+//       schema: schema.kode4,
+//       multi: true
+//     },
+//     {
+//       name: 'regionskode',
+//       type: 'integer',
+//       schema: schema.kode4,
+//       multi: true
+//     },
+//     {
+//       name: 'sognekode',
+//       type: 'integer',
+//       schema: schema.kode4,
+//       multi: true
+//     },
+//     {
+//       name: 'retskredskode',
+//       type: 'integer',
+//       schema: schema.kode4,
+//       multi: true
+//     },
+//     {
+//       name: 'esrejendomsnr',
+//       type: 'integer',
+//       multi: true
+//     },
+//     {
+//       name: 'sfeejendomsnr',
+//       type: 'integer',
+//       multi: true
+//     }
+//   ]
+// };
 
 _.each(module.exports, function(parameterGroup, temaName) {
   registry.addMultiple(temaName, 'parameterGroup', parameterGroup);

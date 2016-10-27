@@ -76,6 +76,13 @@ CREATE TYPE BebyggelseRef AS (
   navn VARCHAR
 );
 
+DROP TYPE IF EXISTS JordstykkeRef CASCADE;
+CREATE TYPE JordstykkeRef AS (
+  ejerlavkode integer,
+  matrikelnr text,
+  ejerlavnavn text
+);
+
 CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(INTEGER)
   RETURNS INTEGER AS
 $$

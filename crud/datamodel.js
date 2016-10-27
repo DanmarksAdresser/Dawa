@@ -57,5 +57,11 @@ module.exports = {
       'ændret', 'navn', 'adresseringsnavn', 'administreresafkommune',
     'beskrivelse', 'retskrivningskontrol', 'udtaltvejnavn'],
     key: ['id']
+  },
+  jordstykketilknytning: {
+    name: 'jordstykketilknytning',
+    table: 'jordstykker_adgadr',
+    columns: ['ejerlavkode', 'matrikelnr', 'adgangsadresse_id'],
+    key: ['ejerlavkode', 'matrikelnr', 'adgangsadresse_id']
   }
 };

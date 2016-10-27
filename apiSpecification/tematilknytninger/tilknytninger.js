@@ -40,10 +40,6 @@ module.exports = {
   storkreds: {
     keyFieldNames: ['storkredsnummer'],
     filterable: true
-  },
-  jordstykke: {
-    keyFieldNames: ['ejerlavkode', 'matrikelnr'],
-    filterable: false
   }
 };
 

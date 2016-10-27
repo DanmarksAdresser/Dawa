@@ -123,12 +123,11 @@ exports.adresseFlatRepresentation = function (fields, additionalFieldsMapper) {
     return memo;
   }, _.pluck(defaultFlatFields, 'name'));
 
-
   outputFlatFields.push('zone');
 
-  outputFlatFields = outputFlatFields.concat(['jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr']);
-
   // vi skal sikre, at nye felter tilføjes til sidst
+  const newFields = ['jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr'];
+  outputFlatFields = _.difference(outputFlatFields, newFields).concat(newFields);
 
   var defaultFlatMapper = exports.defaultFlatMapper(defaultFlatFields);
 

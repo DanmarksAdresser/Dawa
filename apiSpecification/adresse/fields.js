@@ -142,6 +142,15 @@ var fields = [
     multi: true
   },
   {
+    name: 'jordstykke_ejerlavkode'
+  },
+  {
+    name: 'jordstykke_matrikelnr'
+  },
+  {
+    name: 'jordstykke_esrejendomsnr'
+  },
+  {
     name: 'kvh',
     selectable: false
   },
