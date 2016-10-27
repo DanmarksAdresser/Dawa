@@ -7,10 +7,10 @@ notifications:
 language: node_js
 
 node_js:
-  - "4.4.7"
+  - "6.9.1"
 
 addons:
-  postgresql: 9.4
+  postgresql: 9.6
 
 env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty logConfiguration=travis-ci-client-logconfig.json
