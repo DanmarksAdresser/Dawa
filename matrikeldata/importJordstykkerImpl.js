@@ -38,16 +38,18 @@ function setLastUpdated(client, ejerlavkode, millisecondsSinceEpoch) {
   });
 }
 
-function importEjerlav(client, srcDir, file, initial) {
+function importEjerlav(client, srcDir, file, initial, skipModificationCheck) {
   return q.async(function*() {
     var stats = fs.statSync(path.join(srcDir, file));
     var ctimeMillis = stats.mtime.getTime();
 
     const ejerlavkode = parseEjerlavkode(file);
     const lastUpdatedMillis = yield getLastUpdated(client, ejerlavkode);
-    if (lastUpdatedMillis && lastUpdatedMillis >= ctimeMillis) {
-      logger.debug('Skipping ejerlav, not modified', { ejerlavkode: ejerlavkode });
-      return;
+    if(skipModificationCheck) {
+      if (lastUpdatedMillis && lastUpdatedMillis >= ctimeMillis) {
+        logger.debug('Skipping ejerlav, not modified', { ejerlavkode: ejerlavkode });
+        return;
+      }
     }
     const unzipBuffer = yield q.nfcall(child_process.exec, "unzip -p " + file,
       {

@@ -140,7 +140,7 @@ const loadFlatFns = {
     load1: client =>
       importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel1.gml.zip', true),
     load2: client =>
-      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel2.gml.zip', false)
+      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel2.gml.zip', false, true)
   }
 };
 
