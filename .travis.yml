@@ -27,6 +27,7 @@ before_install:
 before_script:
   - pwd
   - which node
+  - sudo chown -R a+rx /home/travis
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
   - bash psql/createdb/createdb.bash localhost dawaempty postgres
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest node psql/loadTestData.js
