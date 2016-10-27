@@ -40,26 +40,23 @@ function setLastUpdated(client, ejerlavkode, millisecondsSinceEpoch) {
 
 function importEjerlav(client, srcDir, file, initial, skipModificationCheck) {
   return q.async(function*() {
-    logger.info('importing ejerlav');
     var stats = fs.statSync(path.join(srcDir, file));
     var ctimeMillis = stats.mtime.getTime();
 
     const ejerlavkode = parseEjerlavkode(file);
     const lastUpdatedMillis = yield getLastUpdated(client, ejerlavkode);
-    if(skipModificationCheck) {
+    if(!skipModificationCheck) {
       if (lastUpdatedMillis && lastUpdatedMillis >= ctimeMillis) {
         logger.debug('Skipping ejerlav, not modified', { ejerlavkode: ejerlavkode });
         return;
       }
     }
-    logger.info('passed modification check');
     const unzipBuffer = yield q.nfcall(child_process.exec, "unzip -p " + file,
       {
         cwd: srcDir,
         maxBuffer: 1024 * 1024 * 128
       }
     );
-    logger.info('unzipped');
     const gml = unzipBuffer.toString('utf-8');
     // For some crazy reason, we get a single comma "," in stdout, when the
     // ZIP-file does not contain a gml file. We consider any output less than
@@ -94,8 +91,6 @@ function importEjerlav(client, srcDir, file, initial, skipModificationCheck) {
     };
 
     yield importing.importFlat(client, 'jordstykke', importUtil.streamArray(rows), [], initial, null, createSubsetTableFn);
-
-    logger.info('imported');
 
     yield setLastUpdated(client, ejerlavkode, ctimeMillis);
 
