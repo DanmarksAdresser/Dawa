@@ -25,7 +25,6 @@ before_install:
   - sudo locale-gen --no-archive da_DK.UTF-8
 
 before_script:
-  - sudo chmod a+rx -R .
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
   - bash psql/createdb/createdb.bash localhost dawaempty postgres
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest node psql/loadTestData.js
