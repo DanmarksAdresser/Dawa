@@ -35,7 +35,7 @@ function representationName(formatParam, strukturParam) {
       }
       else {
         return 'geojson';
-      } break;
+      }
     default: return formatParam;
   }
 }
