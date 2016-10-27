@@ -1,4 +1,3 @@
-sudo: required
 dist: trusty
 
 notifications:
@@ -28,5 +27,5 @@ before_install:
 before_script:
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
   - bash psql/createdb/createdb.bash localhost dawaempty postgres
-  - sudo pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest node psql/loadTestData.js
-  - sudo pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaempty node psql/setup-db.js
+  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest node psql/loadTestData.js
+  - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaempty node psql/setup-db.js
