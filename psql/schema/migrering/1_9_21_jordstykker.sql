@@ -33,7 +33,7 @@ CREATE TABLE jordstykker_adgadr(
 );
 
 -- Covering index for better performance
-CREATE INDEX ON jordstykker_adgadr(adgangsadresse_id, ejerlavkode, matrikelnr);
+CREATE UNIQUE INDEX ON jordstykker_adgadr(adgangsadresse_id);
 
 DROP TABLE IF EXISTS jordstykker_adgadr_history CASCADE;
 CREATE TABLE jordstykker_adgadr_history(
@@ -47,7 +47,7 @@ CREATE TABLE jordstykker_adgadr_history(
 CREATE INDEX ON jordstykker_adgadr_history(valid_from);
 CREATE INDEX ON jordstykker_adgadr_history(valid_to);
 CREATE INDEX ON jordstykker_adgadr_history(adgangsadresse_id);
-CREATE INDEX ON jordstykker_adgadr_history(ejerlavkode, matrikelnr, adgangsadresse_id);
+CREATE INDEX ON jordstykker_adgadr_history(ejerlavkode, matrikelnr);
 
 INSERT INTO jordstykker(ejerlavkode, matrikelnr, kommunekode, sognekode, regionskode,
                         retskredskode, esrejendomsnr, sfeejendomsnr,
