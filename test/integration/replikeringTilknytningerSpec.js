@@ -180,6 +180,64 @@ const expectedFlatResults2 = {
   }]
 };
 
+
+function loadAdresse(client, adgangsadresse) {
+  const datamodel = datamodels.adgangsadresse;
+  const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
+  return q.nfcall(crud.create, client, datamodel, sqlObject);
+}
+
+function updateAdresse(client, adgangsadresse) {
+  const datamodel = datamodels.adgangsadresse;
+  const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
+  return q.nfcall(crud.update, client, datamodel, sqlObject);
+}
+
+function deleteAdresse(client, adgangsadresse) {
+  const datamodel = datamodels.adgangsadresse;
+  return q.nfcall(crud.delete, client, datamodel, {id: adgangsadresse.id});
+}
+
+describe('Opdatering af tilknytninger', function() {
+  testdb.withTransactionAll('empty', function (clientFn) {
+    it('Når en adresse oprettes, skal jordstykket tilknyttes adressen', q.async(function*() {
+      const client = clientFn();
+      yield loadFlatFns.jordstykke.load1(client);
+      yield loadAdresse(client, adgangsadresser[0]);
+      const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
+      expect(result).to.have.length(1);
+      expect(result[0].adgangsadresse_id).to.equal(adgangsadresser[0].id);
+      expect(result[0].ejerlavkode).to.equal(60851);
+      expect(result[0].matrikelnr).to.equal('2c');
+    }));
+
+    it('Når adressen flytter udenfor jordstykket slettes tilknytningen', q.async(function*() {
+      const client = clientFn();
+      const adresseUdenfor = Object.assign({}, adgangsadresser[0], {"etrs89koordinat_nord": 6500000.00});
+      yield updateAdresse(client, adresseUdenfor);
+      const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
+      expect(result).to.have.length(0);
+    }));
+
+    it('Når adressen flytter indenfor oprettes tilknytningen igen', q.async(function*() {
+      const client = clientFn();
+      yield updateAdresse(client, adgangsadresser[0]);
+      const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
+      expect(result).to.have.length(1);
+      expect(result[0].adgangsadresse_id).to.equal(adgangsadresser[0].id);
+      expect(result[0].ejerlavkode).to.equal(60851);
+      expect(result[0].matrikelnr).to.equal('2c');
+    }));
+
+    it('Når adressen slettes fjernes tilknytingen', q.async(function*() {
+      const client = clientFn();
+      yield deleteAdresse(client, adgangsadresser[0]);
+      const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
+      expect(result).to.have.length(0);
+    }));
+  });
+});
+
 describe('Replikering af tilknytninger', function () {
   testdb.withTransactionEach('empty', function (clientFn) {
 
@@ -187,9 +245,7 @@ describe('Replikering af tilknytninger', function () {
     adgangsadresser.forEach(function (adgangsadresse) {
       beforeEach(function () {
         var client = clientFn();
-        var datamodel = datamodels.adgangsadresse;
-        var sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
-        return q.nfcall(crud.create, client, datamodel, sqlObject);
+        return loadAdresse(client, adgangsadresse);
       });
     });
 

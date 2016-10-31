@@ -2,6 +2,7 @@
 
 /*eslint no-console: 0*/
 
+
 var fs = require('fs');
 var format = require('util').format;
 var path = require('path');
@@ -12,6 +13,9 @@ var datamodels = require('../crud/datamodel');
 const generateSqlSchemaImpl = require('../dar10/generateSqlSchemaImpl');
 const generateViews = require('../dar10/generateViews');
 var sqlCommon = require('./common');
+const flats = require('../apiSpecification/flats/flats');
+const flatSqlSpecs = require('../apiSpecification/flats/sqlSpecs');
+const flatTilknytninger = require('../apiSpecification/flats/tilknytninger/tilknytninger');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
@@ -138,6 +142,76 @@ exports.loadTables = function(client, scriptDir) {
   })();
 };
 
+
+function createFlatTilknytningTriggers(client) {
+  const deleteSql = flatName => {
+    const sqlSpec = flatSqlSpecs[flatName];
+    const relTable = `${sqlSpec.table}_adgadr`;
+    return `DELETE FROM ${relTable} WHERE adgangsadresse_id = OLD.id;`
+  };
+
+  const insertSql = flatName => {
+    const flat = flats[flatName];
+    const sqlSpec = flatSqlSpecs[flatName];
+    const relTable = `${sqlSpec.table}_adgadr`;
+    const tilknytning = flatTilknytninger[flatName];
+    const flatGeometryTable = sqlSpec.subdividedGeometryIndex ? `${sqlSpec.table}_divided` : sqlSpec.table ;
+    const flatRelationFlatKey = _.values(tilknytning.keyFieldColumns).join(', ');
+    const flatRelationCompleteKey = flatRelationFlatKey + ', adgangsadresse_id';
+    const flatKeySql = flat.key.map(key => `F.${key}`).join(', ');
+    return `INSERT INTO ${relTable}(${flatRelationCompleteKey}) 
+    (SELECT ${sqlSpec.subdividedGeometryIndex ? 'DISTINCT' : ''}
+    ${flatKeySql}, A.id
+    FROM Adgangsadresser A, ${flatGeometryTable} F
+    WHERE A.id = NEW.id AND st_covers(F.geom, A.geom));`
+  };
+
+  const updateSql = flatName => {
+    const flat = flats[flatName];
+    const sqlSpec = flatSqlSpecs[flatName];
+    const relTable = `${sqlSpec.table}_adgadr`;
+    const tilknytning = flatTilknytninger[flatName];
+    const flatRelColumns = _.values(tilknytning.keyFieldColumns);
+    const relTableColumns = ['adgangsadresse_id'].concat(flatRelColumns);
+    const relJoinCond = flat.key.map(keyField => `F.${keyField} = R.${tilknytning.keyFieldColumns[keyField]}`).join(' AND ');
+    const flatGeometryTable = sqlSpec.subdividedGeometryIndex ? `${sqlSpec.table}_divided` : sqlSpec.table;
+    const deleteSql = `
+    DELETE FROM ${relTable} AS R WHERE adgangsadresse_id = NEW.id AND NOT EXISTS(
+    SELECT *
+    FROM Adgangsadresser A, ${flatGeometryTable} F
+  WHERE R.adgangsadresse_id = A.id  AND ${relJoinCond} AND st_covers(F.geom, A.geom)
+);`;
+
+    const insertSql = `
+    INSERT INTO ${relTable} AS R(${relTableColumns.join(',')}) 
+    (SELECT A.id, ${flat.key.map(key => `F.${key}`).join(',')}
+     FROM Adgangsadresser A JOIN ${flatGeometryTable} F ON st_covers(F.geom, A.geom) 
+     WHERE A.id = NEW.id);`;
+    return `${deleteSql}\n${insertSql}`;
+  }
+  const triggerSql =
+    `DROP FUNCTION IF EXISTS adgangsadresser_flats_update_on_adgangsadresse() CASCADE;
+  CREATE FUNCTION adgangsadresser_flats_update_on_adgangsadresse()
+  RETURNS TRIGGER AS $$
+  BEGIN
+  IF (TG_OP = 'UPDATE' AND OLD.geom IS NOT DISTINCT FROM NEW.geom) THEN
+  RETURN NULL;
+  END IF;
+  IF TG_OP = 'DELETE' THEN
+  ${Object.keys(flats).map(flatName => deleteSql(flatName)).join('\n')}
+  ELSIF TG_OP = 'INSERT' THEN
+  ${Object.keys(flats).map(flatName => insertSql(flatName)).join('\n')}
+  ELSE
+  ${Object.keys(flats).map(flatName => updateSql(flatName)).join('\n')}
+  END IF;
+  RETURN NULL;
+  END;
+  $$ LANGUAGE plpgsql;
+  CREATE TRIGGER adgangsadresser_flats_update_on_adgangsadresse_trigger AFTER INSERT OR UPDATE OR DELETE
+  ON adgangsadresser FOR EACH ROW EXECUTE PROCEDURE adgangsadresser_flats_update_on_adgangsadresse()`;
+  return client.queryp(triggerSql);
+}
+
 /*
  * For each table that has a history table, generate a trigger to maintain it.
  * This is horrible, but generic code in plpgsql is even worse. Perhaps
@@ -222,6 +296,7 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
       }
     }
     yield createHistoryTriggers(client);
+    yield createFlatTilknytningTriggers(client);
   })();
 };
 
