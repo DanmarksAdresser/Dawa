@@ -262,7 +262,7 @@ exports.parseGml = (gmlText, singular, key, mapping)  => {
 
 exports.parseTemaer = function(gmlText, temaDef, mapping) {
   const singular = temaDef.singular;
-  const key = _.pluck(key, 'name');
+  const key = _.pluck(temaDef.key, 'name');
   return exports.parseGml(gmlText, singular, key, mapping);
 };
 
