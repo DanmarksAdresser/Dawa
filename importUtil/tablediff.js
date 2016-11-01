@@ -118,9 +118,9 @@ function applyDeletes(client, delTable, dstTable, idColumns) {
 
 function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColumns, columnsToUpdate) {
   return q.async(function*() {
-    yield applyInserts(client, `insert_${changeTableSuffix}`, targetTable, allColumns);
-    yield applyUpdates(client, `update_${changeTableSuffix}`, targetTable, idColumns, columnsToUpdate);
     yield applyDeletes(client, `delete_${changeTableSuffix}`, targetTable, idColumns);
+    yield applyUpdates(client, `update_${changeTableSuffix}`, targetTable, idColumns, columnsToUpdate);
+    yield applyInserts(client, `insert_${changeTableSuffix}`, targetTable, allColumns);
   })();
 }
 

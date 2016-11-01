@@ -56,9 +56,10 @@ function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initi
       yield sqlCommon.enableTriggersQ(client);
     }
     else {
-      yield client.queryp(`CREATE TEMP TABLE changed_ids AS ((SELECT ${flat.key.join(', ')} from insert_${table})
-      UNION (select ${flat.key.join(', ')} from update_${table})
-      UNION (select ${flat.key.join(', ')} from delete_${table}))`);
+      const changedIdsSelectList = Object.keys(tilknytning.keyFieldColumns).map(keyName => `${keyName} as ${tilknytning.keyFieldColumns[keyName]}`).join(', ');
+      yield client.queryp(`CREATE TEMP TABLE changed_ids AS ((SELECT ${changedIdsSelectList} from insert_${table})
+      UNION (select ${changedIdsSelectList} from update_${table})
+      UNION (select ${changedIdsSelectList} from delete_${table}))`);
 
       const selectFlatKeys = Object.keys(tilknytning.keyFieldColumns).map(key => {
         const column = tilknytning.keyFieldColumns[key];
@@ -66,8 +67,7 @@ function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initi
       }).concat(['a.id as adgangsadresse_id']).join(', ');
       yield client.queryp(`CREATE TEMP VIEW desired_view AS \
 (SELECT DISTINCT ${selectFlatKeys} \
-FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom) \
-JOIN changed_ids ON ${columnsEqualClause('f', 'changed_ids', flat.key)})`);
+FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
 
       yield tablediff.computeDifferencesSubset(
         client, 'changed_ids', 'desired_view', relTable, relTableColumns, []);
