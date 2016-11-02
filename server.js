@@ -9,7 +9,7 @@ var _ = require('underscore');
 
 var cluster = require('cluster');
 var isalive = require('./isalive');
-var count = require('os').cpus().length;
+var cpuCount = require('os').cpus().length;
 var pg = require('pg');
 require('pg-parse-float')(pg);
 
@@ -146,7 +146,7 @@ function setupMaster() {
       pgPoolIdleTimeout: options.pgPoolIdleTimeout,
       maxWaitingClients: options.maxWaitingClients
     };
-    for (var i = 0; i < count; i++) {
+    for (var i = 0; i < cpuCount; i++) {
       spawn(workerOptions);
     }
 
