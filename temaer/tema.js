@@ -154,7 +154,7 @@ exports.putTemaer = function (temaDef, temaer, client, initializing, constraints
           if (!updateTilknytninger) {
             return callback();
           }
-          exports.updateAdresserTemaerView(client, temaDef, initializing, maxChanges, callback);
+          exports.updateAdresserTemaerView(client, temaDef, initializing, maxChanges, false, callback);
         },
         function (callback) {
           if (temaDef.materialized) {
@@ -296,36 +296,36 @@ exports.wfsFeatureToTema = function (feature, mapping) {
   return result;
 };
 
-const updateAdresserTemaerView = (client, temaDef, initializing, maxChanges, callback) => {
+const updateAdresserTemaerView = (client, temaDef, initializing, maxChanges, disableNearestNeighbor, callback) => {
   return q.async(function*() {
     const selectCoveredMappings =
       `SELECT DISTINCT Adgangsadresser.id as adgangsadresse_id, gridded_temaer_matview.id as tema_id, '${temaDef.singular}'::tema_type as tema
       FROM Adgangsadresser JOIN gridded_temaer_matview  
       ON  ST_Covers(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = '${temaDef.singular}'::tema_type`;
 
-//     const selectNearestMappings = coveredTable =>
-//       `WITH adrs AS (SELECT
-//     a.id,
-//       geom
-//     FROM adgangsadresser a
-//     WHERE geom IS NOT NULL AND
-//     NOT exists
-//     (SELECT *
-//       FROM ${coveredTable} mv
-//     WHERE a.id = mv.adgangsadresse_id AND tema = '${temaDef.singular}'::tema_type))
-//     SELECT
-//     a.id as adgangsadresse_id,
-//     (SELECT t.id
-//     FROM gridded_temaer_matview t ORDER BY t.geom <-> a.geom LIMIT 1) as tema_id,
-//       '${temaDef.singular}'::tema_type as tema
-// FROM adrs a`
-//     ;
+    const selectNearestMappings = coveredTable =>
+      `WITH adrs AS (SELECT
+    a.id,
+      geom
+    FROM adgangsadresser a
+    WHERE geom IS NOT NULL AND
+    NOT exists
+    (SELECT *
+      FROM ${coveredTable} mv
+    WHERE a.id = mv.adgangsadresse_id AND tema = '${temaDef.singular}'::tema_type))
+    SELECT
+    a.id as adgangsadresse_id,
+    (SELECT t.id
+    FROM gridded_temaer_matview t ORDER BY t.geom <-> a.geom LIMIT 1) as tema_id,
+      '${temaDef.singular}'::tema_type as tema
+FROM adrs a`
+    ;
     if (initializing) {
       yield sqlCommon.disableTriggersQ(client);
       yield client.queryp(`INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema) (${selectCoveredMappings})`);
-      // if (temaDef.useNearestForAdgangsadresseMapping) {
-      //   yield client.queryp(`INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema) (${selectNearestMappings('adgangsadresser_temaer_matview')})`)
-      // }
+      if (!disableNearestNeighbor && temaDef.useNearestForAdgangsadresseMapping) {
+        yield client.queryp(`INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema) (${selectNearestMappings('adgangsadresser_temaer_matview')})`)
+      }
       yield client.queryp(
         `INSERT INTO adgangsadresser_temaer_matview_history(adgangsadresse_id, tema_id, tema)
         (SELECT adgangsadresse_id, tema_id, '${temaDef.singular}'::tema_type FROM adgangsadresser_temaer_matview atm
@@ -335,9 +335,9 @@ const updateAdresserTemaerView = (client, temaDef, initializing, maxChanges, cal
     else {
       yield client.queryp(
         `CREATE TEMP TABLE tema_mapping_temp AS (${selectCoveredMappings})`);
-      // if (temaDef.useNearestForAdgangsadresseMapping) {
-      //   yield client.queryp(`INSERT INTO tema_mapping_temp (adgangsadresse_id, tema, tema_id) (${selectNearestMappings('tema_mapping_temp')})`);
-      // }
+      if (!disableNearestNeighbor && temaDef.useNearestForAdgangsadresseMapping) {
+        yield client.queryp(`INSERT INTO tema_mapping_temp (adgangsadresse_id, tema_id, tema) (${selectNearestMappings('tema_mapping_temp')})`);
+      }
       yield client.queryp(`CREATE TEMP VIEW tema_mapping_view_temp AS SELECT * FROM adgangsadresser_temaer_matview WHERE tema = '${temaDef.singular}'::tema_type`);
       const datamodel = datamodels.adgangsadresse_tema;
       yield tablediff.computeDifferencesTargeted(client, 'tema_mapping_temp', 'tema_mapping_view_temp', 'adgangsadresser_temaer_matview', datamodel.key, []);

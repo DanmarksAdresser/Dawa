@@ -46,7 +46,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield generateHistoryImpl.generateAdgangsadresserHistory(client);
       yield generateHistoryImpl.generateAdresserHistory(client);
       for(let temaDef of temaer) {
-        yield tema.updateAdresserTemaerView(client, temaDef, true, 1000000);
+        yield tema.updateAdresserTemaerView(client, temaDef, true, 1000000, false);
       }
       yield importBebyggelserImpl.importBebyggelser(client, 'test/data/Bebyggelse.json', true, false);
       yield importJordstykkerImpl.importEjerlav(client, 'test/data/matrikelkort', '60851_GML_UTM32-EUREF89.zip', true);

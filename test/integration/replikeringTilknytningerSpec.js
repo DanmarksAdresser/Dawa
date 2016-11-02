@@ -283,7 +283,7 @@ describe('Replikering af tilknytninger', function () {
           fields: temaObject,
           polygons: [polygonContainingFirstAddress]
         });
-        yield tema.updateAdresserTemaerView(client, temaDef, true);
+        yield tema.updateAdresserTemaerView(client, temaDef, true, 100, true);
         let jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});
         let expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[0].id);
         expect(jsonResult).to.deep.equal([expectedResult]);
@@ -293,7 +293,7 @@ describe('Replikering af tilknytninger', function () {
           fields: temaObject,
           polygons: [polygonContainingSecondAddress]
         });
-        yield tema.updateAdresserTemaerView(client, temaDef, false);
+        yield tema.updateAdresserTemaerView(client, temaDef, false, 100, true);
         jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});
         expectedResult = expectedResultForKey(expectedKeys[temaName], adgangsadresser[1].id);
         expect(jsonResult).to.deep.equal([expectedResult]);

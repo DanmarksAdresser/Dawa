@@ -466,7 +466,7 @@ function initDawaFromScratch(client) {
       .then(function() {
         logger.info('initializing adresserTemaerView');
         return qUtil.mapSerial(temaer, function(temaSpec) {
-          return tema.updateAdresserTemaerView(client, temaSpec, true);
+          return tema.updateAdresserTemaerView(client, temaSpec, true, 100000000, false);
         });
       });
   });

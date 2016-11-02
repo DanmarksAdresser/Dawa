@@ -56,7 +56,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
       return testdb.withTransaction('test', 'ROLLBACK', function (client) {
         return q.nfcall(tema.addTema, client, sampleTema)
           .then(function () {
-            return tema.updateAdresserTemaerView(client, temaSpec, false);
+            return tema.updateAdresserTemaerView(client, temaSpec, false, 5000, true);
           })
           .then(function () {
             var params = {sognekode: "10"};

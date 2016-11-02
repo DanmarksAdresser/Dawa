@@ -29,7 +29,7 @@ describe('DAGI updates', function() {
     return testdb.withTransaction('test', 'ROLLBACK', function (client) {
       return tema.addTema(client, sampleTema)
         .tap(function () {
-          return tema.updateAdresserTemaerView(client, sampleTemaDef, false);
+          return tema.updateAdresserTemaerView(client, sampleTemaDef, false, 10000, true);
         })
         .then(function (createdTemaId) {
           return client.queryp("select count(*) as c FROM adgangsadresser_temaer_matview WHERE tema = 'region' AND tema_id = $1", [createdTemaId]);
@@ -72,7 +72,7 @@ describe('DAGI updates', function() {
           '725025.18 6166264.37))'];
           return tema.updateTema(client, sampleTemaDef, updated);
         }).then(function () {
-          return tema.updateAdresserTemaerView(client, sampleTemaDef, false);
+          return tema.updateAdresserTemaerView(client, sampleTemaDef, false, 10000, true);
         });
       });
 

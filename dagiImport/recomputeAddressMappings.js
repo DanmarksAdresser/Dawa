@@ -24,7 +24,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec)), function (ar
 
   proddb.withTransaction('READ_WRITE', q.async(function*(client) {
     for(let temaDef of temaer) {
-      yield tema.updateAdresserTemaerView(client, temaDef, false, options.maxChanges);
+      yield tema.updateAdresserTemaerView(client, temaDef, false, options.maxChanges, false);
     }
     logger.info('Indlæsning af DAGI temaer gennemført', { temaer: temaer});
   }));

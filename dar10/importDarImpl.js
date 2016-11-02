@@ -237,7 +237,7 @@ function initDawa(client) {
     yield initialization.initializeHistory(client);
     yield sqlCommon.enableTriggersQ(client);
     for(let temaSpec of temaer) {
-      yield tema.updateAdresserTemaerView(client, temaSpec, true);
+      yield tema.updateAdresserTemaerView(client, temaSpec, true, 10000, false);
     }
     yield importBebyggelserImpl.initBebyggelserAdgangsadresserRelation(client);
   })();
