@@ -13,7 +13,8 @@ module.exports = [
     }],
     published: true,
     searchable: true,
-    materialized: true
+    materialized: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'kommune',
@@ -27,7 +28,8 @@ module.exports = [
     }],
     published: true,
     searchable: true,
-    materialized: true
+    materialized: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'sogn',
@@ -40,7 +42,8 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'politikreds',
@@ -53,7 +56,8 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'retskreds',
@@ -66,7 +70,8 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'opstillingskreds',
@@ -79,7 +84,8 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'postnummer',
@@ -116,7 +122,8 @@ module.exports = [
       sqlType: 'text'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    useNearestForAdgangsadresseMapping: true
   },
   {
     singular: 'storkreds',
@@ -129,6 +136,7 @@ module.exports = [
       sqlType: 'integer'
     }],
     published: true,
-    searchable: true
+    searchable: true,
+    useNearestForAdgangsadresseMapping: true
   }
 ];
