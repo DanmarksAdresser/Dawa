@@ -186,7 +186,7 @@ function createFlatTilknytningTriggers(client) {
     INSERT INTO ${relTable} AS R(${relTableColumns.join(',')}) 
     (SELECT A.id, ${flat.key.map(key => `F.${key}`).join(',')}
      FROM Adgangsadresser A JOIN ${flatGeometryTable} F ON st_covers(F.geom, A.geom) 
-     WHERE A.id = NEW.id);`;
+     WHERE A.id = NEW.id) ON CONFLICT DO NOTHING;`;
     return `${deleteSql}\n${insertSql}`;
   }
   const triggerSql =
