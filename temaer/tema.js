@@ -316,7 +316,8 @@ const updateAdresserTemaerView = (client, temaDef, initializing, maxChanges, dis
     SELECT
     a.id as adgangsadresse_id,
     (SELECT t.id
-    FROM gridded_temaer_matview t ORDER BY t.geom <-> a.geom LIMIT 1) as tema_id,
+    FROM gridded_temaer_matview t WHERE t.tema = '${temaDef.singular}'::tema_type
+    ORDER BY t.geom <-> a.geom LIMIT 1) as tema_id,
       '${temaDef.singular}'::tema_type as tema
 FROM adrs a`
     ;
