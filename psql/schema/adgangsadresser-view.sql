@@ -46,10 +46,6 @@ CREATE VIEW AdgangsadresserView AS
     J.sfeejendomsnr,
     array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
     COALESCE((select json_agg(CAST((b.id, b.kode, b.type, b.navn) AS BebyggelseRef)) FROM bebyggelser_adgadr ba JOIN bebyggelser b ON ba.bebyggelse_id = b.id WHERE ba.adgangsadresse_id = A.id),'[]'::json)  as bebyggelser,
---     COALESCE((select json_agg(CAST((J.ejerlavkode, J.matrikelnr, E.navn) AS JordstykkeRef))
---               FROM jordstykker_adgadr JA
---                 JOIN jordstykker J ON JA.ejerlavkode = J.ejerlavkode AND JA.matrikelnr = J.matrikelnr
---                 JOIN ejerlav E ON JA.ejerlavkode = E.kode WHERE JA.adgangsadresse_id = A.id),'[]'::json)  as jordstykker,
     A.tsv
 
   FROM adgangsadresser A
