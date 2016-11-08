@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS enhedsadresser (
   kilde smallint,
   esdhreference text,
   journalnummer text,
-  tsv tsvector
+  tsv tsvector,
+  FOREIGN KEY (adgangsadresseid) REFERENCES adgangsadresser(id)
 );
 CREATE INDEX ON enhedsadresser(adgangsadresseid);
 CREATE INDEX ON enhedsadresser USING gin(tsv);

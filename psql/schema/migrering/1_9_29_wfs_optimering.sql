@@ -1,4 +1,24 @@
-DROP VIEW IF EXISTS wfs_adgangsadresser CASCADE;
+ALTER TABLE stormodtagere
+  ADD PRIMARY KEY (adgangsadresseid);
+
+ALTER TABLE enhedsadresser
+  ADD CONSTRAINT adgangsadresse_fk
+FOREIGN KEY (adgangsadresseid)
+REFERENCES adgangsadresser (id);
+
+CREATE OR REPLACE VIEW adresser AS
+  SELECT
+    E.id        AS e_id,
+    E.objekttype AS e_objekttype,
+    E.oprettet  AS e_oprettet,
+    E.ikraftfra AS e_ikraftfra,
+    E.aendret   AS e_aendret,
+    E.tsv       AS e_tsv,
+    E.etage,
+    E.doer,
+    A.*
+  FROM enhedsadresser E
+    LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
 CREATE OR REPLACE VIEW wfs_adgangsadresser AS
   SELECT

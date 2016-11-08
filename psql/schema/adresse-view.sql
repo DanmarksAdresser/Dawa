@@ -1,5 +1,5 @@
 DROP VIEW IF EXISTS Adresser CASCADE;
-CREATE VIEW adresser AS
+CREATE OR REPLACE VIEW adresser AS
   SELECT
     E.id        AS e_id,
     E.objekttype AS e_objekttype,
@@ -11,7 +11,9 @@ CREATE VIEW adresser AS
     E.doer,
     A.*
   FROM enhedsadresser E
-    JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
+    -- LEFT JOIN optimizes COUNT queries. There is no
+    -- difference due to the forein key constraint.
+    LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
 
 CREATE OR REPLACE FUNCTION adressebetegnelse(vejnavn VARCHAR, husnr husnr, etage VARCHAR, dør VARCHAR, supplerendebynavn VARCHAR, postnr VARCHAR, postnrnavn VARCHAR)
   RETURNS varchar AS
