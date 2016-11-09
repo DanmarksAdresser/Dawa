@@ -64,11 +64,11 @@ const dawaChangeOrder = [
   },
   {
     type: 'update',
-    entity: 'adresse'
+    entity: 'adgangsadresse'
   },
   {
     type: 'update',
-    entity: 'adgangsadresse'
+    entity: 'adresse'
   },
   {
     type: 'delete',
@@ -295,7 +295,11 @@ const dirtyDeps = {
     'SupplerendeBynavn'
   ],
   adresse: [
-    'Adresse'
+    'Adresse',
+    'Husnummer',
+    'DARKommuneinddeling',
+    'NavngivenVej',
+    'NavngivenVejKommunedel'
   ],
   navngivenvej_postnummer: [
     'NavngivenVejPostnummerRelation', 'NavngivenVej', 'Postnummer'

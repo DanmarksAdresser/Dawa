@@ -72,7 +72,7 @@ var insert = {
     "esdhreference": null,
     "journalnummer": null,
     "kilde": null,
-    "adgangsadresseid": "0dd9a7db-c962-4952-b501-4820dadfc4a1"
+    "adgangsadresseid": "038edf0e-001b-4d9d-a1c7-b71cb354680f"
   },
   ejerlav: {
     kode: 20551,
@@ -128,7 +128,7 @@ var update = {
     "ikrafttrædelsesdato": "2015-05-26T09:55:01.157",
     "etage": "1",
     "dør": "tv",
-    "adgangsadresseid": "11111111-c962-4952-b501-4820dadfc4a1",
+    "adgangsadresseid": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
     "kilde": null,
     "esdhreference": null,
     "journalnummer": null
@@ -178,8 +178,8 @@ var nonexistingIds = {
 };
 
 
-var ENTITY_NAMES = ['adresse','adgangsadresse','vejstykke','postnummer','ejerlav'];
-
+const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer','ejerlav'];
+const REVERSE_ENTITY_NAMES = ENTITY_NAMES.slice().reverse();
 
 function formatJson(columnMapping, obj) {
   console.log('FORMAT JSON');
@@ -197,24 +197,22 @@ function formatJson(columnMapping, obj) {
 describe('ReplikeringsAPI', function() {
 
   testdb.withTransactionAll('empty', function(clientFn) {
-    // create, update and delete each object
-    ENTITY_NAMES.forEach(function(datamodelName) {
-      before(function(done) {
-        var client = clientFn();
-        var datamodel = datamodels[datamodelName];
-        var objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
-        var objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
-        q.nfcall(crud.create, client, datamodel, objectToInsert).then(function() {
-          return q.nfcall(crud.update, client, datamodel, objectToUpdate);
-        }).then(function() {
-          return q.nfcall(crud.delete, client, datamodel, crud.getKey(datamodel, objectToUpdate));
-        }).then(function() {
-          done();
-        }, function(err) {
-          throw err;
-        });
-      });
-    });
+    before(() => q.async(function*() {
+      const client = clientFn();
+      for(let datamodelName of ENTITY_NAMES) {
+        const datamodel = datamodels[datamodelName];
+        const objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
+        const objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
+        yield crud.create(client, datamodel, objectToInsert);
+        yield crud.update(client, datamodel, objectToUpdate);
+      }
+      // deletions in reverse order so we do not break Foreign Key constraints
+      for(let datamodelName of REVERSE_ENTITY_NAMES) {
+        const datamodel = datamodels[datamodelName];
+        const objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
+        yield crud.delete(client, datamodel, crud.getKey(datamodel, objectToUpdate));
+      }
+    })());
 
     ENTITY_NAMES.forEach(function(datamodelName, index) {
       describe(format('Replication of %s', datamodelName), function() {
@@ -224,7 +222,7 @@ describe('ReplikeringsAPI', function() {
           qualifier: 'udtraek'
         });
         it('Should include the created object in the full extract', function(done) {
-          var sekvensnummer = (index * 3) + 1;
+          var sekvensnummer = (index * 2) + 1;
           helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
             expect(objects.length).to.equal(1);
             var obj = objects[0];
@@ -233,14 +231,14 @@ describe('ReplikeringsAPI', function() {
           });
         });
         it('Should include the updated object in the full extract', q.async(function*() {
-          var sekvensnummer = (index * 3) + 2;
+          var sekvensnummer = (index * 2) + 2;
           const objects = yield helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer});
           expect(objects).to.have.length(1);
           var obj = objects[0];
           expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
         }));
         it('Should not include the deleted object in the full extract', function(done) {
-          var sekvensnummer = (index * 3) + 3;
+          var sekvensnummer = ENTITY_NAMES.length * 3;
           helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
             expect(objects.length).to.equal(0);
             done();
@@ -272,7 +270,7 @@ describe('ReplikeringsAPI', function() {
         });
 
         it('sequence number filtering should work when retrieving events', function(done) {
-          var sekvensnummer = (index * 3) + 2;
+          var sekvensnummer = (index *2) + 2;
           helpers.getJson(clientFn(), eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
             expect(objects.length).to.equal(1);
             expect(objects[0].sekvensnummer).to.equal(sekvensnummer);

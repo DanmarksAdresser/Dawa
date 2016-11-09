@@ -83,5 +83,5 @@ exports.delete = function(client, datamodel, key, callback) {
   var params = _.map(datamodel.key, function(column) {
     return key[column];
   });
-  client.queryp(sql, params).nodeify(callback);
+  return client.queryp(sql, params).nodeify(callback);
 };
