@@ -1,5 +1,5 @@
 DROP VIEW IF EXISTS AdgangsadresserView CASCADE;
-CREATE VIEW AdgangsadresserView AS
+CREATE OR REPLACE VIEW AdgangsadresserView AS
   SELECT
     A.id as a_id,
     A.objekttype as a_objekttype,
@@ -24,8 +24,8 @@ CREATE VIEW AdgangsadresserView AS
     A.postnr   AS postnr,
     P.navn AS postnrnavn,
 
-    SP.nr AS stormodtagerpostnr,
-    SP.navn AS stormodtagerpostnrnavn,
+    S.nr AS stormodtagerpostnr,
+    S.navn AS stormodtagerpostnrnavn,
 
     A.vejkode    AS vejkode,
     V.vejnavn AS vejnavn,
@@ -56,8 +56,8 @@ CREATE VIEW AdgangsadresserView AS
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN stormodtagere AS S ON (S.adgangsadresseid = A.id)
-    LEFT JOIN postnumre AS SP ON S.nr = SP.nr
     LEFT JOIN kommuner K ON A.kommunekode = k.kode
-    LEFT JOIN regioner R ON R.kode = K.regionskode;
+    LEFT JOIN regioner R ON R.kode = K.regionskode
+;
 
 CREATE VIEW adgangsadresser_valid_view AS SELECT * from adgangsadresserview WHERE postnr IS NOT NULL AND husnr IS NOT NULL;
