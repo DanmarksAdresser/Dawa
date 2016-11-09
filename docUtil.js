@@ -80,8 +80,14 @@ function extractTypeDesc(type) {
   return _.without(type, 'null').join(', ');
 }
 
-function isNullable(type) {
-  return _.isArray(type) && type.indexOf('null') !== -1;
+function isNullable(propertyDef) {
+  const type = propertyDef.type;
+  if(type) {
+    return _.isArray(type) && type.indexOf('null') !== -1;
+  }
+  else if(propertyDef.enum) {
+    return _.contains(propertyDef.enum, null);
+  }
 }
 
 exports.extractDocumentationForProperty = function (property, propertyName) {
@@ -92,7 +98,7 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
     name: propertyName,
     description: propertyDef.description || '',
     type: typeDesc,
-    required: !isNullable(type)
+    required: !isNullable(propertyDef)
   };
   if (propertyDef.postgresql) {
     result.postgresql = propertyDef.postgresql;
