@@ -44,8 +44,10 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     JS_E.navn as jordstykke_ejerlavnavn,
     J.esrejendomsnr as jordstykke_esrejendomsnr,
     J.sfeejendomsnr,
-    array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
-    COALESCE((select json_agg(CAST((b.id, b.kode, b.type, b.navn) AS BebyggelseRef)) FROM bebyggelser_adgadr ba JOIN bebyggelser b ON ba.bebyggelse_id = b.id WHERE ba.adgangsadresse_id = A.id),'[]'::json)  as bebyggelser,
+    array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR
+      JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
+    COALESCE((select json_agg(CAST((b.id, b.kode, b.type, b.navn) AS BebyggelseRef)) FROM bebyggelser_adgadr ba
+      JOIN bebyggelser b ON ba.bebyggelse_id = b.id WHERE ba.adgangsadresse_id = A.id),'[]'::json)  as bebyggelser,
     A.tsv
 
   FROM adgangsadresser A
@@ -57,7 +59,6 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
     LEFT JOIN stormodtagere AS S ON (S.adgangsadresseid = A.id)
     LEFT JOIN kommuner K ON A.kommunekode = k.kode
-    LEFT JOIN regioner R ON R.kode = K.regionskode
-;
+    LEFT JOIN regioner R ON R.kode = K.regionskode;
 
 CREATE VIEW adgangsadresser_valid_view AS SELECT * from adgangsadresserview WHERE postnr IS NOT NULL AND husnr IS NOT NULL;

@@ -140,7 +140,11 @@ const loadFlatFns = {
     load1: client =>
       importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel1.gml.zip', true),
     load2: client =>
-      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel2.gml.zip', false, true)
+      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_testmatrikel2.gml.zip', false, true),
+    loadOverlappende: client =>
+      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_overlappende.gml.zip', true),
+    updateOverlappende: client =>
+      importJordstykkerImpl.importEjerlav(client, __dirname, '60851_overlappende.gml.zip', false)
   }
 };
 
@@ -234,6 +238,26 @@ describe('Opdatering af tilknytninger', function() {
       yield deleteAdresse(client, adgangsadresser[0]);
       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
       expect(result).to.have.length(0);
+    }));
+  });
+});
+
+describe('Håndtering af overlappende jordstykker)', () => {
+  testdb.withTransactionEach('empty', clientFn => {
+    it('Hvis en adresse oprettes oven på to overlappende jordstykker skal kun et jordstykke tilknyttes', q.async(function*() {
+      const client = clientFn();
+      yield loadFlatFns.jordstykke.loadOverlappende(client);
+      yield loadAdresse(client, adgangsadresser[0]);
+      const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
+      expect(result).to.have.length(1);
+    }));
+
+    it('Hvis overlappende jordstykker indlæses tilknyttes eksisterende adresse kun til en' , q.async(function*() {
+      const client = clientFn();
+      yield loadAdresse(client, adgangsadresser[0]);
+      yield loadFlatFns.jordstykke.updateOverlappende(client);
+      const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
+      expect(result).to.have.length(1);
     }));
   });
 });

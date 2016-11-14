@@ -64,6 +64,14 @@ var consistencyChecks = [
     " AND ((t.fields->>'ejerlavkode')::integer IS DISTINCT FROM a.ejerlavkode or (t.fields->>'matrikelnr') IS DISTINCT FROM a.matrikelnr)"
   },
   {
+    key: 'AdgangsadresserFlereJordstykker',
+    description: 'Find adgangsadresser, der ligger på mere end ét jordstykke',
+    query: `with adrs AS (SELECT a.id, a.geom FROM adgangsadresser a 
+    JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
+     GROUP BY a.id, a.geom HAVING count(*) > 2)
+SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jordstykker j ON ST_Covers(j.geom, a.geom)`
+  },
+  {
     key: 'AdresseStatistik',
     description: 'Adressebestandens ændring over tid',
     query: `

@@ -33,7 +33,8 @@ function streamToTable(client, flatName, table, srcStream, mappers) {
   })();
 }
 
-function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initial, sanityCheck) {
+function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initial, sanityCheck,
+forceUnique) {
   return q.async(function*() {
     const table = sqlSpec.table;
     const relTable = `${table}_adgadr`;
@@ -46,9 +47,10 @@ function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initi
 
     if(initial) {
       yield sqlCommon.disableTriggersQ(client);
+      const distinctClause = forceUnique ? 'DISTINCT ON (a.id)' : 'DISTINCT';
       yield client.queryp(
         `INSERT INTO ${relTable}(${insertList}) 
-        (SELECT DISTINCT ${selectList} FROM adgangsadresser a 
+        (SELECT ${distinctClause} ${selectList} FROM adgangsadresser a 
          JOIN ${srcTable} f ON ST_Covers(f.geom, a.geom))`);
       yield client.queryp(
         `INSERT INTO ${relHistoryTable}(${insertList}) 
@@ -65,8 +67,9 @@ function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initi
         const column = tilknytning.keyFieldColumns[key];
         return `f.${key} as ${column}`;
       }).concat(['a.id as adgangsadresse_id']).join(', ');
+      const distinctClause = forceUnique ? 'DISTINCT ON (adgangsadresse_id)' : 'DISTINCT';
       yield client.queryp(`CREATE TEMP VIEW desired_view AS \
-(SELECT DISTINCT ${selectFlatKeys} \
+(SELECT ${distinctClause} ${selectFlatKeys} \
 FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
 
       yield tablediff.computeDifferencesSubset(
@@ -74,7 +77,9 @@ FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
       if(sanityCheck) {
         yield sanityCheck(client)
       }
+
       yield client.queryp('DROP VIEW desired_view');
+
       yield importUtil.dropTable(client, 'changed_ids');
       yield tablediff.applyChanges(client, relTable, relTable, relTableColumns, relTableColumns, []);
       yield tablediff.dropChangeTables(client, relTable);
@@ -82,7 +87,7 @@ FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
   })();
 }
 
-function importFlat(client, flatName, srcStream, mappers, initial, sanityCheck, createSubsetTableFn) {
+function importFlat(client, flatName, srcStream, mappers, initial, sanityCheck, createSubsetTableFn, forceUniqueTilknytning) {
   return q.async(function*() {
     const flat = flats[flatName];
     const sqlSpec = sqlSpecs[flatName];
@@ -124,7 +129,7 @@ function importFlat(client, flatName, srcStream, mappers, initial, sanityCheck, 
       }
     }
     const tilknytning = tilknytninger[flatName];
-    yield updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initial, sanityCheck);
+    yield updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initial, sanityCheck, forceUniqueTilknytning);
     yield tablediff.dropChangeTables(client, table);
   })();
 }

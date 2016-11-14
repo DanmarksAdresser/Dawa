@@ -105,7 +105,8 @@ module.exports = {
     key: ['ejerlavkode', 'matrikelnr'],
     geometryType: 'area',
     legacyReverseResource: true,
-    structuredJsonRepresentation: true
+    structuredJsonRepresentation: true,
+    uniqueTilknytning: true
   }
 };
 

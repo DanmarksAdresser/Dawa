@@ -160,10 +160,10 @@ function createFlatTilknytningTriggers(client) {
     const flatRelationCompleteKey = flatRelationFlatKey + ', adgangsadresse_id';
     const flatKeySql = flat.key.map(key => `F.${key}`).join(', ');
     return `INSERT INTO ${relTable}(${flatRelationCompleteKey}) 
-    (SELECT ${sqlSpec.subdividedGeometryIndex ? 'DISTINCT' : ''}
+    (SELECT 
     ${flatKeySql}, A.id
     FROM Adgangsadresser A, ${flatGeometryTable} F
-    WHERE A.id = NEW.id AND st_covers(F.geom, A.geom));`
+    WHERE A.id = NEW.id AND st_covers(F.geom, A.geom)) ON CONFLICT DO NOTHING;`
   };
 
   const updateSql = flatName => {

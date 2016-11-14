@@ -90,7 +90,7 @@ function importEjerlav(client, srcDir, file, initial, skipModificationCheck) {
       })();
     };
 
-    yield importing.importFlat(client, 'jordstykke', importUtil.streamArray(rows), [], initial, null, createSubsetTableFn);
+    yield importing.importFlat(client, 'jordstykke', importUtil.streamArray(rows), [], initial, null, createSubsetTableFn, true);
 
     yield setLastUpdated(client, ejerlavkode, ctimeMillis);
 
