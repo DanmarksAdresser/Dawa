@@ -68,16 +68,13 @@ function computeDeletes(client, srcTable, dstTable, delTable, idColumns) {
     []);
 }
 
-function applyInserts(client, insTable, dstTable, columns) {
+function applyInserts(client, insTable, dstTable, columns, ignoreConflicting) {
   var select = selectList(insTable, columns);
   var dstColumnList = selectList(undefined, columns);
-  var sql = format("INSERT INTO {dstTable}({dstColumnList}) SELECT {select} FROM {insTable}",
-    {
-      dstTable: dstTable,
-      insTable: insTable,
-      select: select,
-      dstColumnList: dstColumnList
-    });
+  let sql = `INSERT INTO ${dstTable}(${dstColumnList}) (SELECT ${select} FROM ${insTable})`;
+  if(ignoreConflicting) {
+    sql += 'ON CONFLICT DO NOTHING';
+  }
   return client.queryBatched(sql);
 }
 
@@ -91,17 +88,8 @@ function applyUpdates(client, upTable, dstTable, idColumns, columnsToUpdate) {
       srcTable: upTable
     });
   }).join(', ');
-  var sql = format(
-    "UPDATE {dstTable} SET" +
-    " {fieldUpdates}" +
-    " FROM {upTable}" +
-    " WHERE {idColumnsEqual}",
-    {
-      dstTable: dstTable,
-      upTable: upTable,
-      fieldUpdates: fieldUpdates,
-      idColumnsEqual: columnsEqualClause(upTable, dstTable, idColumns)
-    });
+  const sql = `UPDATE ${dstTable} SET ${fieldUpdates} FROM ${upTable} 
+  WHERE ${columnsEqualClause(upTable, dstTable, idColumns)}`;
   return client.queryBatched(sql);
 }
 
@@ -116,11 +104,11 @@ function applyDeletes(client, delTable, dstTable, idColumns) {
   return client.queryBatched(sql);
 }
 
-function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColumns, columnsToUpdate) {
+function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColumns, columnsToUpdate, ignoreConflicting) {
   return q.async(function*() {
     yield applyDeletes(client, `delete_${changeTableSuffix}`, targetTable, idColumns);
     yield applyUpdates(client, `update_${changeTableSuffix}`, targetTable, idColumns, columnsToUpdate);
-    yield applyInserts(client, `insert_${changeTableSuffix}`, targetTable, allColumns);
+    yield applyInserts(client, `insert_${changeTableSuffix}`, targetTable, allColumns, ignoreConflicting);
   })();
 }
 

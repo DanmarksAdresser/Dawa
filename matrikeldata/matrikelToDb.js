@@ -6,6 +6,7 @@ var _ = require('underscore');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const proddb = require('../psql/proddb');
 const importJordstykkerImpl = require('./importJordstykkerImpl');
+const logger = require('../logger').forCategory('matrikelImport');
 
 var optionSpec = {
   sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
@@ -22,5 +23,18 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
     pooled: false
   });
 
-  importJordstykkerImpl.doImport(proddb, options.sourceDir, options.init).done();
+  q.async(function*() {
+    yield importJordstykkerImpl.doImport(proddb, options.sourceDir, options.init);
+    yield proddb.withTransaction('READ_ONLY', q.async(function*(client) {
+      const overlapping = (yield client.queryp(`with adrs AS (SELECT a.id, a.geom FROM adgangsadresser a 
+    JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
+     GROUP BY a.id, a.geom HAVING count(*) > 2)
+SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jordstykker j 
+ON ST_Covers(j.geom, a.geom)`)
+      ).rows;
+      if (overlapping.length > 0) {
+        logger.info('Overlappende jordstykker', {rows: overlapping});
+      }
+    }));
+  })().done();
 });

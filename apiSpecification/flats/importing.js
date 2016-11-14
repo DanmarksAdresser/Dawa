@@ -47,10 +47,9 @@ forceUnique) {
 
     if(initial) {
       yield sqlCommon.disableTriggersQ(client);
-      const distinctClause = forceUnique ? 'DISTINCT ON (a.id)' : 'DISTINCT';
       yield client.queryp(
         `INSERT INTO ${relTable}(${insertList}) 
-        (SELECT ${distinctClause} ${selectList} FROM adgangsadresser a 
+        (SELECT ${selectList} FROM adgangsadresser a 
          JOIN ${srcTable} f ON ST_Covers(f.geom, a.geom))`);
       yield client.queryp(
         `INSERT INTO ${relHistoryTable}(${insertList}) 
@@ -67,9 +66,8 @@ forceUnique) {
         const column = tilknytning.keyFieldColumns[key];
         return `f.${key} as ${column}`;
       }).concat(['a.id as adgangsadresse_id']).join(', ');
-      const distinctClause = forceUnique ? 'DISTINCT ON (adgangsadresse_id)' : 'DISTINCT';
       yield client.queryp(`CREATE TEMP VIEW desired_view AS \
-(SELECT ${distinctClause} ${selectFlatKeys} \
+(SELECT ${selectFlatKeys} \
 FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
 
       yield tablediff.computeDifferencesSubset(
@@ -81,7 +79,8 @@ FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
       yield client.queryp('DROP VIEW desired_view');
 
       yield importUtil.dropTable(client, 'changed_ids');
-      yield tablediff.applyChanges(client, relTable, relTable, relTableColumns, relTableColumns, []);
+      yield tablediff.applyChanges(client, relTable, relTable, relTableColumns,
+        relTableColumns, [], true);
       yield tablediff.dropChangeTables(client, relTable);
     }
   })();
