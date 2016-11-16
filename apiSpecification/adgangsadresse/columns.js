@@ -79,6 +79,18 @@ module.exports =  {
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
   },
+  x: {
+    select: (sqlParts, sqlModel, params) => {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return `ST_X(ST_Transform(geom, ${sridAlias}::integer))`;
+    }
+  },
+  y: {
+    select: (sqlParts, sqlModel, params) => {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return `ST_Y(ST_Transform(geom, ${sridAlias}::integer))`;
+    }
+  },
   geom_json: {
     select: function(sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);

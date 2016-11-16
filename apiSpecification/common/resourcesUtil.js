@@ -27,16 +27,31 @@ exports.applyDefaultPagingForAutocomplete = function(params) {
 
 function representationName(formatParam, strukturParam) {
   switch(formatParam) {
-    case 'csv': return 'flat';
+    case 'csv':
+      if(strukturParam === 'mini') {
+        return 'mini';
+      }
+      else {
+        return 'flat';
+      }
     case 'geojson':
     case 'geojsonz':
       if(strukturParam === 'nestet') {
         return 'geojsonNested';
       }
+      else if(strukturParam === 'mini') {
+        return 'geojsonMini';
+      }
       else {
         return 'geojson';
       }
-    default: return formatParam;
+    case 'json':
+      if(strukturParam === 'mini') {
+        return 'mini';
+      }
+      else {
+        return 'json';
+      }
   }
 }
 

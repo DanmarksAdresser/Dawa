@@ -70,7 +70,9 @@ var columns = {
     select: selectIsoTimestamp('a_ikraftfra')
   },
   bebyggelsesid: adgangsadresseColumns.bebyggelsesid,
-  bebyggelsestype: adgangsadresseColumns.bebyggelsestype
+  bebyggelsestype: adgangsadresseColumns.bebyggelsestype,
+  x: adgangsadresseColumns.x,
+  y: adgangsadresseColumns.y
 
 };
 

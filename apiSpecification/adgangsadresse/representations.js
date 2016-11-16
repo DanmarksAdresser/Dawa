@@ -53,6 +53,16 @@ const FIELDS_AT_END = ['højde'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
+const miniFieldNamesWithoutCoords = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
+
+const miniFieldNames = miniFieldNamesWithoutCoords.concat(['x', 'y']);
+
+
+const miniFieldsWithoutCoords = fields.filter(field => _.contains(miniFieldNamesWithoutCoords, field.name));
+const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
+
+exports.mini = representationUtil.defaultFlatRepresentation(miniFields);
+
 exports.json = {
   fields: _.where(fields, {selectable: true}),
   schema: globalSchemaObject({
@@ -426,6 +436,9 @@ exports.autocomplete = {
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
 exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
+
+const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFieldsWithoutCoords);
+exports.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
 
 var registry = require('../registry');
 registry.addMultiple('adgangsadresse', 'representation', module.exports);

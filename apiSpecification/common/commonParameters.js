@@ -50,7 +50,7 @@ exports.struktur= [
   {
     name: 'struktur',
     schema: {
-      enum: ['flad', 'nestet']
+      enum: ['flad', 'nestet', 'mini']
     }
   }
 ];

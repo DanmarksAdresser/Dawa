@@ -99,6 +99,12 @@ var fields = [
   },
   normalizedField('højde'),
   {
+    name: 'x'
+  },
+  {
+    name: 'y'
+  },
+  {
     name: 'temaer',
     multi: true
   },

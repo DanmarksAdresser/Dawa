@@ -54,3 +54,13 @@ exports.findWhere = function(spec) {
   }
   return undefined;
 };
+
+exports.get = function(spec) {
+  var entry = _.findWhere(registry, spec);
+  if(entry) {
+    return entry.object;
+  }
+  else {
+    throw new Error('Registry entry not found: ' + JSON.stringify(spec));
+  }
+};

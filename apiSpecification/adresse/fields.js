@@ -158,6 +158,12 @@ var fields = [
     name: 'højde'
   },
   {
+    name: 'x'
+  },
+  {
+    name: 'y'
+  },
+  {
     name: 'bebyggelser',
     multi: true
   }

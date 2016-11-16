@@ -107,7 +107,7 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
 };
 
 exports.adresseFlatRepresentation = function (fields, additionalFieldsMapper) {
-  var fieldsExcludedFromFlat = ['geom_json'];
+  var fieldsExcludedFromFlat = ['geom_json', 'x', 'y'];
   var defaultFlatFields = exports
     .fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat)
     .concat(exports.fieldsWithNames(fields, ['kvh', 'kvhx']));
