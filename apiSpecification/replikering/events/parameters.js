@@ -7,6 +7,7 @@ var tilknytninger = require('../../tematilknytninger/tilknytninger');
 var keyParameters = {};
 const flatTilknytninger = require('../../flats/tilknytninger/tilknytninger');
 const flats = require('../../flats/flats');
+const normalizeParameters = require('../../common/parametersUtil').normalizeParameters;
 
 // For events we support retrieval of the events by object id
 keyParameters.vejstykke = require('../../vejstykke/parameters').id;
@@ -15,6 +16,23 @@ keyParameters.adgangsadresse = require('../../adgangsadresse/parameters').id;
 keyParameters.adresse = require('../../adresse/parameters').id;
 keyParameters.ejerlav = require('../../ejerlav/parameters').id;
 keyParameters.navngivenvej = require('../../navngivenvej/parameters').id;
+keyParameters.vejstykkepostnummerrelation = normalizeParameters([
+  {
+    name: 'kommunekode',
+    type: 'integer',
+    schema: schema.kode4
+  },
+  {
+    name: 'vejkode',
+    type: 'integer',
+    schema: schema.kode4
+  },
+  {
+    name: 'postnr',
+    type: 'integer',
+    schema: schema.postnr
+  }
+]);
 
 exports.keyParameters = keyParameters;
 

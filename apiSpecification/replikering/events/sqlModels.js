@@ -81,7 +81,7 @@ function baseQuery(datamodelName, tableName, columnMappings) {
 
 }
 
-var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning'], function(memo, datamodelName) {
+var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(memo, datamodelName) {
   var columnMappings = mappings.columnMappings[datamodelName];
   var baseQueryFn = function() {
     return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);

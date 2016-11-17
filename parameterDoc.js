@@ -1596,7 +1596,23 @@ var keyParams = {
   adgangsadresse: [adgangsadresseIdParameter],
   adresse: [adgangsadresseIdParameter],
   ejerlav: [ejerlavIdParameter],
-  navngivenvej: navngivenVejIdParameter
+  navngivenvej: navngivenVejIdParameter,
+  vejstykkepostnummerrelation: [
+    {
+      name: 'kommunekode',
+      doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+      examples: ['0101']
+    },
+    {
+      name: 'vejkode',
+      doc: 'vejkode. 4 cifre.',
+      examples: ['0052']
+    },
+    {
+      name: 'postnr',
+      doc: 'Postnummer. 4 cifre.',
+      examples: ['8000']
+    }]
 };
 
 _.each(tilknytninger, function (tilknytning, temaNavn) {
@@ -1709,13 +1725,14 @@ var eventExamples = {
       }]
     }
   ]
+
 };
 
 var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({

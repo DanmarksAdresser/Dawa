@@ -14,6 +14,7 @@ var temaer = require('../apiSpecification/temaer/temaer');
 var tema = require('../temaer/tema');
 var updateEjerlavImpl = require('./updateEjerlavImpl');
 var updatePostnumreImpl = require('./updatePostnumreImpl');
+const importDarImpl = require('../darImport/importDarImpl');
 const importBebyggelserImpl = require('../bebyggelser/importBebyggelserImpl');
 const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
 
@@ -43,6 +44,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield(updateEjerlavImpl(client, 'data/ejerlav.csv'));
       yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);
       yield loadCsvTestdata(client, 'test/data');
+      yield importDarImpl.updateVejstykkerPostnumreMat(client, true);
       yield generateHistoryImpl.generateAdgangsadresserHistory(client);
       yield generateHistoryImpl.generateAdresserHistory(client);
       for(let temaDef of temaer) {

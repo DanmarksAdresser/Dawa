@@ -168,13 +168,23 @@ exports.columnMappings = {
     name: 'retskrivningskontrol'
   }, {
     name: 'udtaltvejnavn'
+  }],
+  vejstykkepostnummerrelation: [{
+    name: 'kommunekode',
+    formatter: kode4String
+  }, {
+    name: 'vejkode',
+    formatter: kode4String
+  }, {
+    name: 'postnr',
+    formatter: kode4String
   }]
 };
 
 exports.tables = {};
 exports.keys = {};
 
-['vejstykke', 'adgangsadresse', 'adresse', 'postnummer', 'ejerlav', 'navngivenvej'].forEach(function(entityName) {
+['vejstykke', 'adgangsadresse', 'adresse', 'postnummer', 'ejerlav', 'navngivenvej', 'vejstykkepostnummerrelation'].forEach(function(entityName) {
   exports.tables[entityName] = datamodels[entityName].table;
   exports.keys[entityName] = datamodels[entityName].key;
 });

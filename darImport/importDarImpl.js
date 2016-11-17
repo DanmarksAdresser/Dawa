@@ -28,6 +28,7 @@ var sqlUtil = require('./sqlUtil');
 var tema = require('../temaer/tema');
 var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
+const tablediff = require('../importUtil/tablediff');
 
 var selectList = sqlUtil.selectList;
 var columnsEqualClause = sqlUtil.columnsEqualClause;
@@ -537,42 +538,65 @@ function fullCompareAndUpdate(client, skipEvents, report) {
     });
 }
 
+function updateVejstykkerPostnumreMat(client, initial) {
+  return q.async(function*() {
+    const selectVejstykkerPostnumreMat = `SELECT DISTINCT a.kommunekode, a.vejkode, a.postnr,
+     COALESCE(v.vejnavn, '') || ' ' || to_char(p.nr, 'FM0000') || ' ' || COALESCE(p.navn, '') as tekst
+    from adgangsadresser a
+    JOIN vejstykker v ON a.kommunekode = v.kommunekode and a.vejkode = v.kode
+    JOIN postnumre p ON a.postnr = p.nr`;
+    yield client.queryp(`CREATE TEMP VIEW vejstykkerpostnumremat_view AS (${selectVejstykkerPostnumreMat})`);
+    if(initial) {
+      yield sqlCommon.disableHistoryTrigger(client, 'vejstykkerpostnumremat');
+      yield client.queryp('INSERT INTO vejstykkerpostnumremat(kommunekode, vejkode, postnr, tekst) (SELECT * FROM vejstykkerpostnumremat_view)');
+      yield client.queryp('INSERT INTO vejstykkerpostnumremat_history(kommunekode, vejkode, postnr)' +
+        '(select kommunekode, vejkode, postnr FROM vejstykkerpostnumremat)');
+      yield sqlCommon.enableHistoryTrigger(client, 'vejstykkerpostnumremat');
+    }
+    else {
+      const idColumns = ['kommunekode', 'vejkode', 'postnr'];
+      const nonIdColumns = ['tekst'];
+      yield tablediff.computeDifferences(client, 'vejstykkerpostnumremat_view', 'vejstykkerpostnumremat', idColumns, nonIdColumns);
+      yield tablediff.applyChanges(client, 'vejstykkerpostnumremat', 'vejstykkerpostnumremat', idColumns, idColumns.concat(nonIdColumns), nonIdColumns);
+    }
+    yield client.queryp('DROP VIEW vejstykkerpostnumremat_view');
+  })();
+}
+
 /**
  * Assuming DAR tables are already populated, update DAR tables
  * from CSV, followed by an update of DAWA tables.
  */
 function updateFromDar(client, dataDir, fullCompare, skipDawa, skipRowsConfig, report) {
-  return qUtil.mapSerial(csvSpecs, function(csvSpec, entityName) {
-    logger.debug('Importing ' + entityName);
-    var dbSpecImpl = darDbSpecImpls[entityName];
-    return updateTableFromCsv(
-      client,
-      path.join(dataDir, csvSpec.filename),
-      csvSpec,
-      dbSpecImpl, false, skipRowsConfig[entityName], report);
-  })
-    .then(function() {
-      if(!skipDawa) {
-        if(fullCompare) {
-          return fullCompareAndUpdate(client, false, report);
-        }
-        else {
-          logger.debug('computing dirty objects');
-          return computeDirtyObjects(client, report)
-            .then(function() {
-              return performDawaChanges(client, report);
-            });
-        }
+  return q.async(function*() {
+
+    for(let entityName of Object.keys(csvSpecs)) {
+      const csvSpec = csvSpecs[entityName];
+      const dbSpecImpl = darDbSpecImpls[entityName];
+      yield updateTableFromCsv(
+        client,
+        path.join(dataDir, csvSpec.filename),
+        csvSpec,
+        dbSpecImpl, false, skipRowsConfig[entityName], report);
+    }
+    if(!skipDawa) {
+      if(fullCompare) {
+        yield fullCompareAndUpdate(client, false, report);
       }
       else {
-        logger.info('Skipping DAWA updates');
+        logger.debug('computing dirty objects');
+        yield computeDirtyObjects(client, report);
+        yield performDawaChanges(client, report);
       }
-    })
-    .then(function() {
-      return qUtil.mapSerial(darDbSpecImpls, function(specImpl) {
-        return dropChangeTables(client, specImpl.table);
-      });
-    });
+      yield updateVejstykkerPostnumreMat(client, false);
+    }
+    else {
+      logger.info('Skipping DAWA updates');
+    }
+    for(let specImpl of _.values(darDbSpecImpls)) {
+      yield dropChangeTables(client, specImpl.table);
+    }
+  })();
 }
 
 function storeRowsToTempTable(client, csvSpec, dbSpecImpl, rows, table, report) {
@@ -826,6 +850,7 @@ exports.initFromDar = initFromDar;
 exports.updateFromDar = updateFromDar;
 exports.initDarTables = initDarTables;
 exports.fullCompareAndUpdate = fullCompareAndUpdate;
+exports.updateVejstykkerPostnumreMat = updateVejstykkerPostnumreMat;
 
 exports.internal = {
   createTableAndLoadData: createTableAndLoadData,

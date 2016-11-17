@@ -63,5 +63,11 @@ module.exports = {
     table: 'jordstykker_adgadr',
     columns: ['ejerlavkode', 'matrikelnr', 'adgangsadresse_id'],
     key: ['ejerlavkode', 'matrikelnr', 'adgangsadresse_id']
+  },
+  vejstykkepostnummerrelation: {
+    name: 'vejstykkepostnummerrelation',
+    table: 'vejstykkerpostnumremat',
+    columns: ['kommunekode', 'vejkode', 'postnr'],
+    key: ['kommunekode', 'vejkode']
   }
 };

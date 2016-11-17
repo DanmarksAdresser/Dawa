@@ -325,8 +325,7 @@ module.exports = function(opt) {
                       logger.info('DAR import delay', {
                         delay: moment().diff(moment(txTimestamp))
                       });
-                    })
-                      .catch(function(err) {
+                    }).catch(function(err) {
                         // in case of failure to import a transaction, we skip it and continue to the next one.
                         // This is preferable to aborting API importer permanently.
                         logger.error('Import From API transaction failed', {

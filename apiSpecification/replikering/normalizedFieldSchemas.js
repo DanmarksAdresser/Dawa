@@ -354,7 +354,26 @@ var fields = {
       schema: {
         type: ['string','null']
       }
-    }]
+    }],
+  vejstykkepostnummerrelation: [{
+    name: 'kommunekode',
+    description: 'Kommunekoden. 4 cifre.',
+    schema: definitions.Kode4,
+    formatter: kode4String,
+    primary: true
+  }, {
+    name: 'vejkode',
+    description: 'Vejkoden. 4 cifre.',
+    schema: definitions.Kode4,
+    formatter: kode4String,
+    primary: true
+  }, {
+    name: 'postnr',
+    description: 'Postnummeret. 4 cifre.',
+    schema: definitions.Kode4,
+    formatter: kode4String,
+    primary: true
+  }]
 };
 
 _.each(temaTilknytninger, function(tilknytning, temaNavn) {
