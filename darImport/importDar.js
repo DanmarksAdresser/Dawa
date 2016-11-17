@@ -73,8 +73,6 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
           });
         }
 
-        yield client.queryp('select vejstykkerpostnumremat_init()');
-
         if(options.reportDir) {
           fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
         }
