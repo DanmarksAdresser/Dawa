@@ -51,6 +51,14 @@ var formatParameters = [
 const strukturParameter = {
   name: 'struktur',
   doc: 'Hvis format er geojson eller geojsonz angiver strukturparameteren om der ønskes en flad eller en nestet properties struktur.'
+};
+
+const strukturParameterAdresse = {
+  name: 'struktur',
+  doc: 'Angiver om der ønskes en fuld svarstruktur (nestet), en flad svarstruktur (flad) eller en reduceret svarstruktur (mini). ' +
+  ' Mulige værdier: "nestet", "flad" eller "mini".  For JSON er default "nestet", og for CSV og GeoJSON er default "flad".' +
+  ' Det anbefales at benytte mini-formatet hvis der ikke er behov for den fulde struktur, da dette vil' +
+  ' give bedre svartider.'
 }
 
 
@@ -632,7 +640,7 @@ var adgangsadresseDoc = {
   resources: {
     '/adgangsadresser/{id}': {
       subtext: 'Modtag adresse med id.',
-      parameters: [adgangsadresseIdParameter].concat([strukturParameter]),
+      parameters: [adgangsadresseIdParameter].concat([strukturParameterAdresse]),
       nomulti: true,
       examples: [{
         description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
@@ -641,12 +649,15 @@ var adgangsadresseDoc = {
     },
 
     '/adgangsadresser': {
-      subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
-      parameters: adgangsadresseParameters.concat(formatAndPagingParams).concat([strukturParameter]),
+      subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet. Med mindre der er behov' +
+      ' for felter  som kun er med i den fulde adressestruktur anbefaler vi at, man tilføjer parameteren <code>struktur=mini</code>,' +
+      ' da dette vil resultere i bedre performance.',
+      parameters: adgangsadresseParameters.concat(formatAndPagingParams).concat([strukturParameterAdresse]),
       examples: [{
         description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
         query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
-          {name: 'husnr', value: '46'}]
+          {name: 'husnr', value: '46'},
+          {name: 'struktur', value: 'mini'}]
       },
         {
           description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.' +
@@ -659,8 +670,10 @@ var adgangsadresseDoc = {
           description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.' +
           ' Resultatet leveres i <em>geojson</em> format.',
           query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+
             {name: 'husnr', value: '46'},
-            {name: 'format', value: 'geojson'}]
+            {name: 'format', value: 'geojson'},
+            {name: 'struktur', value: 'mini'},]
         },
         {
           description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.' +
@@ -715,11 +728,12 @@ var adgangsadresseDoc = {
       subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes ' +
       'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller ' +
       'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
-      parameters: reverseGeocodingParameters.concat([strukturParameter]),
+      parameters: reverseGeocodingParameters.concat([strukturParameterAdresse]),
       examples: [{
         description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
         query: [{name: 'x', value: '12.5851471984198'},
-          {name: 'y', value: '55.6832383751223'}]
+          {name: 'y', value: '55.6832383751223'},
+          {name: 'struktur', value: 'mini'}]
       },
         {
           description: 'Returner adressen nærmest punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
@@ -769,14 +783,16 @@ var adresseDoc = {
   docVersion: 2,
   resources: {
     '/adresser': {
-      subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet.',
-      parameters: adresseParameters.concat(formatAndPagingParams).concat([strukturParameter]),
+      subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet. Med mindre der er behov' +
+      ' for felter  som kun er med i den fulde adressestruktur anbefaler vi at, man tilføjer parameteren <code>struktur=mini</code>,' +
+      ' da dette vil resultere i bedre performance.',
+      parameters: adresseParameters.concat(formatAndPagingParams).concat([strukturParameterAdresse]),
       examples: [{
         description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
-        query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'}, {
-          name: 'husnr',
-          value: '46'
-        }]
+        query: [
+          {name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
+          {name: 'husnr', value: '46'},
+          {name: 'struktur', value: 'mini'}]
       },
         {
           description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. ' +
@@ -790,7 +806,8 @@ var adresseDoc = {
           'Resultatet leveres i <em>geojson</em> format.',
           query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
             {name: 'husnr', value: '46'},
-            {name: 'format', value: 'geojson'}]
+            {name: 'format', value: 'geojson'},
+            {name: 'struktur', value: 'mini'}]
         },
         {
           description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46. ' +
@@ -828,7 +845,7 @@ var adresseDoc = {
       subtext: 'Modtag adresse med id.',
       parameters: [_.find(adresseParameters, function (p) {
         return p.name === 'id';
-      })].concat([strukturParameter]),
+      })].concat([strukturParameterAdresse]),
       nomulti: true,
       examples: [{
         description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',

@@ -440,3 +440,4 @@ exports.normalizedField = function(datamodelName, fieldName) {
 exports.normalizedSchemaField = function(datamodelName, fieldName) {
   return exports.schemas[datamodelName].properties[fieldName];
 };
+

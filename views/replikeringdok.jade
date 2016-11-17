@@ -97,6 +97,11 @@ block content
               +documentResource(parameterDoc, '/replikering/ejerlav/haendelser')
               h4 Hændelsesformat for ejerlav
               +documentSchema(jsonSchemas.ejerlav_hændelse)
+            section
+              h4 Vejstykkepostnummerrelationer
+              +documentResource(parameterDoc, '/replikering/vejstykkepostnummerrelationer/haendelser')
+              h4 Hændelsesformat for vejstykkepostnummerrelationer
+              +documentSchema(jsonSchemas.vejstykkepostnummerrelation_hændelse)
           section
             h3 Adressetilknytninger
             p Adgangsadresser er tilknyttet administrative inddelinger, så som sogn, region, retskreds, politikreds m.v. På replikerings-API'et er disse tilknytninger ikke en del af adgangsadressen - de udstilles separat. Bemærk, at disse tilknytninger alle er beregnet ud fra adressens og den administrative inddelings <em>geografi</em>. Hvis adressens adgangspunkt eller inddelingens geografi ikke er korrekt vil det resultere i en forkert tilknytning.
