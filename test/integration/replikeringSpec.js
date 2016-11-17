@@ -77,6 +77,11 @@ var insert = {
   ejerlav: {
     kode: 20551,
     navn: "Herstedvester By, Herstedvester"
+  },
+  vejstykkepostnummerrelation: {
+    kommunekode: 607,
+    vejkode: 4899,
+    postnr: 8260
   }
 };
 
@@ -155,6 +160,11 @@ var existingIds = {
   },
   ejerlav: {
     kode: 20551
+  },
+  vejstykkepostnummerrelation: {
+    kommunekode: 607,
+    vejkode: 4899,
+    postnr: 8260
   }
 };
 
@@ -174,11 +184,16 @@ var nonexistingIds = {
   },
   ejerlav: {
     kode: 1234
+  },
+  vejstykkepostnummerrelation: {
+    kommunekode: 1234,
+    vejkode: 1234,
+    postnr: 1234
   }
 };
 
 
-const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer','ejerlav'];
+const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer','ejerlav', 'vejstykkepostnummerrelation'];
 const REVERSE_ENTITY_NAMES = ENTITY_NAMES.slice().reverse();
 
 function formatJson(columnMapping, obj) {
@@ -194,6 +209,26 @@ function formatJson(columnMapping, obj) {
   }, {});
 }
 
+let currentSeqNum = 1;
+const insertSeqNums = {};
+const updateSeqNums = {};
+const deleteSeqnums = {};
+
+const doInsert = (client, datamodel, objectToInsert) => {
+  insertSeqNums[datamodel.name] = currentSeqNum++;
+  return crud.create(client, datamodel, objectToInsert);
+};
+
+const doUpdate = (client, datamodel, objectToUpdate) => {
+  updateSeqNums[datamodel.name] = currentSeqNum++;
+  return crud.update(client, datamodel, objectToUpdate);
+};
+
+const doDelete = (client, datamodel, key) => {
+  deleteSeqnums[datamodel.name] = currentSeqNum++;
+  return crud.delete(client, datamodel, crud.getKey(datamodel, key));
+};
+
 describe('ReplikeringsAPI', function() {
 
   testdb.withTransactionAll('empty', function(clientFn) {
@@ -202,19 +237,21 @@ describe('ReplikeringsAPI', function() {
       for(let datamodelName of ENTITY_NAMES) {
         const datamodel = datamodels[datamodelName];
         const objectToInsert = helpers.toSqlModel(datamodelName, insert[datamodelName]);
-        const objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
-        yield crud.create(client, datamodel, objectToInsert);
-        yield crud.update(client, datamodel, objectToUpdate);
+        yield doInsert(client, datamodel, objectToInsert);
+        if(update[datamodelName]) {
+          const objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
+          yield doUpdate(client, datamodel, objectToUpdate);
+        }
       }
       // deletions in reverse order so we do not break Foreign Key constraints
       for(let datamodelName of REVERSE_ENTITY_NAMES) {
         const datamodel = datamodels[datamodelName];
-        const objectToUpdate = helpers.toSqlModel(datamodelName, update[datamodelName]);
-        yield crud.delete(client, datamodel, crud.getKey(datamodel, objectToUpdate));
+        const objectToDelete = helpers.toSqlModel(datamodelName, insert[datamodelName]);
+        yield doDelete(client, datamodel, crud.getKey(datamodel, objectToDelete));
       }
     })());
 
-    ENTITY_NAMES.forEach(function(datamodelName, index) {
+    ENTITY_NAMES.forEach(function(datamodelName) {
       describe(format('Replication of %s', datamodelName), function() {
         var udtraekResource = registry.findWhere({
           entityName: datamodelName,
@@ -222,7 +259,7 @@ describe('ReplikeringsAPI', function() {
           qualifier: 'udtraek'
         });
         it('Should include the created object in the full extract', function(done) {
-          var sekvensnummer = (index * 2) + 1;
+          var sekvensnummer = insertSeqNums[datamodelName];
           helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
             expect(objects.length).to.equal(1);
             var obj = objects[0];
@@ -231,14 +268,17 @@ describe('ReplikeringsAPI', function() {
           });
         });
         it('Should include the updated object in the full extract', q.async(function*() {
-          var sekvensnummer = (index * 2) + 2;
+          var sekvensnummer = updateSeqNums[datamodelName];
+          if(!sekvensnummer) {
+            return;
+          }
           const objects = yield helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer});
           expect(objects).to.have.length(1);
           var obj = objects[0];
           expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
         }));
         it('Should not include the deleted object in the full extract', function(done) {
-          var sekvensnummer = ENTITY_NAMES.length * 3;
+          var sekvensnummer = deleteSeqnums[datamodelName];
           helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
             expect(objects.length).to.equal(0);
             done();
@@ -270,11 +310,11 @@ describe('ReplikeringsAPI', function() {
         });
 
         it('sequence number filtering should work when retrieving events', function(done) {
-          var sekvensnummer = (index *2) + 2;
+          var sekvensnummer = insertSeqNums[datamodelName]
           helpers.getJson(clientFn(), eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
             expect(objects.length).to.equal(1);
             expect(objects[0].sekvensnummer).to.equal(sekvensnummer);
-            expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName]));
+            expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName]));
             done();
           });
         });
@@ -286,7 +326,8 @@ describe('ReplikeringsAPI', function() {
         });
         it('When adding id field(s) when retrieving events, events with the specified id should be returned', function(done) {
           helpers.getJson(clientFn(), eventResource, {}, existingIds[datamodelName], function(err, objects) {
-            expect(objects.length).to.equal(3);
+            const expectedRows = update[datamodelName] ? 3 : 2;
+            expect(objects.length).to.equal(expectedRows);
             done();
           });
         });
