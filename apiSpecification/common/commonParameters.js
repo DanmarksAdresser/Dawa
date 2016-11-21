@@ -228,6 +228,12 @@ exports.reverseGeocodingOptional =
     }
   ];
 
+exports.reverseGeocodingNearest = [{
+  name: 'nærmeste',
+  type: 'boolean',
+  renameTo: 'reverseGeocodingNearest'
+}];
+
 var filterableDagiSkemaer = ['region', 'opstillingskreds', 'politikreds', 'sogn', 'retskreds'];
 
 var dagiFilters = _.map(filterableDagiSkemaer, function(skemaNavn) {

@@ -261,12 +261,14 @@ exports.geomWithin = function(geom) {
 
 // Adds an ORDER BY clause which returns the object closest to the specified X- and Y parameters.
 // Sets limit to 1.
-exports.reverseGeocoding = function() {
+exports.reverseGeocoding = function(geom) {
+  geom = geom || 'geom';
   return function(sqlParts, params) {
     if(notNull(params.x) && notNull(params.y)) {
       if (!params.srid){ params.srid = 4326;}
+
       var orderby =
-        "geom <-> ST_Transform(ST_SetSRID(ST_Point(" +
+        `${geom} <-> ST_Transform(ST_SetSRID(ST_Point(` +
           dbapi.addSqlParameter(sqlParts, params.x)+", " +
           dbapi.addSqlParameter(sqlParts, params.y)+"), " +
           dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832)::geometry";
@@ -279,19 +281,44 @@ exports.reverseGeocoding = function() {
 // Adds a where clause which requires the queried object to contain the point specified by the x and y parameters
 exports.reverseGeocodingWithin = function(geom) {
   geom = geom || 'geom';
+  const reverseGeocoding = exports.reverseGeocoding(geom);
   return function(sqlParts, params) {
-    if(notNull(params.x) && notNull(params.y)) {
+    if(params.reverseGeocodingNearest) {
+      return reverseGeocoding(sqlParts, params);
+    }
+    else if(notNull(params.x) && notNull(params.y)) {
       if (!params.srid){ params.srid = 4326;}
-      var xAlias = dbapi.addSqlParameter(sqlParts, params.x);
-      var yAlias = dbapi.addSqlParameter(sqlParts, params.y);
-      dbapi.addWhereClause(sqlParts, "ST_Contains(" + geom + ", ST_Transform(ST_SetSRID(ST_Point(" +
-        xAlias+", " +
-        yAlias+"), " +
-        dbapi.addSqlParameter(sqlParts, params.srid)+"), 25832))");
+      const xAlias = dbapi.addSqlParameter(sqlParts, params.x);
+      const yAlias = dbapi.addSqlParameter(sqlParts, params.y);
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid);
+      const pointSql = `ST_Transform(ST_SetSRID(ST_Point(${xAlias}, ${yAlias}), ${sridAlias}), 25832)`;
+      dbapi.addWhereClause(sqlParts, `ST_Contains(${geom}, ${pointSql})`);
     }
   };
 };
 
+// Adds a where clause which requires the queried object to contain the point specified by the x and y parameters
+exports.reverseGeocodingWithinTema = function(temaName) {
+  return function(sqlParts, params) {
+    if(notNull(params.x) && notNull(params.y)) {
+      if (!params.srid){ params.srid = 4326;}
+      const xAlias = dbapi.addSqlParameter(sqlParts, params.x);
+      const yAlias = dbapi.addSqlParameter(sqlParts, params.y);
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid);
+      const pointSql = `ST_Transform(ST_SetSRID(ST_Point(${xAlias}, ${yAlias}), ${sridAlias}), 25832)`;
+      if(params.reverseGeocodingNearest) {
+        dbapi.addWhereClause(sqlParts,
+          `temaer.id = (select id from gridded_temaer_matview g
+           WHERE g.tema = '${temaName}' ORDER BY geom <-> ${pointSql} LIMIT 1)`);
+      }
+      else {
+        dbapi.addWhereClause(sqlParts,
+          `temaer.id = (select id from gridded_temaer_matview g
+           WHERE g.tema = '${temaName}' and ST_Covers(geom, ${pointSql}) LIMIT 1)`);
+      }
+    }
+  };
+};
 exports.postnummerStormodtagerFilter = function() {
   return function(sqlParts, params) {
     if(params.stormodtagere !== undefined && !params.stormodtagere) {

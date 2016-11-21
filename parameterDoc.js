@@ -437,7 +437,7 @@ var kommuneDoc = {
   resources: {
     '/kommuner': {
       subtext: 'Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.',
-      parameters: kommuneParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('kommuner')),
+      parameters: kommuneParameters.concat(dagiReverseParameters(_.findWhere(dagiTemaer, {singular: 'kommune'}))).concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('kommuner')),
       examples: [{
         description: 'Hent alle kommuner',
         query: []
@@ -1404,10 +1404,26 @@ var dagiExamples = {
   }
 };
 
+function dagiReverseParameters(tema) {
+  return [{
+    name: 'x',
+    doc: `Reverse geocoding. Find ${tema.singularSpecific} for det angivne koordinat.
+ Der benyttes det koordinatsystem, som er angivet i srid-parameteren (Default WGS84).`
+  }, {
+    name: 'y',
+    doc: `Reverse geocoding. Find ${tema.singularSpecific} for det angivne koordinat.' +
+  'Der benyttes det koordinatsystem, som er angivet i srid-parameteren (Default WGS84).`
+  }, {
+    name: 'nærmeste',
+    doc: `Hvis denne parameter angives, sammen med x og y parametrene findes ${tema.singularSpecific} der
+ ligger nærmest det angivne punkt.`
+  }];
+}
+
 function dagiListEndpointDoc(tema) {
   return {
     subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-    parameters: dagiKodeNavnParameters(tema).concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters(tema.plural)),
+    parameters: dagiKodeNavnParameters(tema).concat(dagiReverseParameters(tema)).concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters(tema.plural)),
     examples: dagiExamples[tema.singular].query || []
   };
 }
@@ -1554,7 +1570,7 @@ function dagiValglandsDelsDoc() {
   };
   doc.resources['/' + tema.plural] = {
     subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-    parameters: valglandsdelParameters(tema).concat(formatAndPagingParams),
+    parameters: valglandsdelParameters(tema).concat(dagiReverseParameters(tema)).concat(formatAndPagingParams),
     examples: dagiExamples[tema.singular].query || []
   };
   doc.resources['/' + tema.plural + '/{bogstav}'] = {
@@ -1583,7 +1599,7 @@ function dagiStorkredsDoc() {
   };
   doc.resources['/' + tema.plural] = {
     subtext: 'Søg efter ' + tema.plural + '. Returnerer de ' + tema.plural + ' der opfylder kriteriet.',
-    parameters: storkredsParameters.concat(formatAndPagingParams),
+    parameters: storkredsParameters.concat(dagiReverseParameters(tema)).concat(formatAndPagingParams),
     examples: dagiExamples[tema.singular].query || []
   };
   doc.resources['/' + tema.plural + '/{nummer}'] = {

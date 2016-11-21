@@ -1,11 +1,15 @@
 "use strict";
 
 var expect = require('chai').expect;
+const q = require('q');
 var _ = require('underscore');
 
 var dagiTemaer = require('../../apiSpecification/temaer/temaer');
 var tema = require('../../temaer/tema');
 var testdb = require('../helpers/testdb');
+const registry = require('../../apiSpecification/registry');
+const helpers = require('./helpers');
+
 
 // der er 390 adgangsadresser inden for denne polygon
 var sampleTema = {
@@ -23,6 +27,26 @@ var sampleTema = {
 };
 
 var sampleTemaDef = _.findWhere(dagiTemaer, { singular: sampleTema.tema });
+
+describe('DAGI reverse geocoding', () => {
+  return testdb.withTransactionEach('empty', (clientFn) => {
+    it('Should find a DAGI tema by coordinates', q.async(function*() {
+      const client = clientFn();
+      yield tema.addTema(client, sampleTema);
+      const resource = registry.get({
+        entityName: 'region',
+        type: 'resource',
+        qualifier: 'query'
+      });
+      const resultWithin = yield helpers.getJson(client, resource, {}, { x: "726000", y: '6167000.76', srid: '25832'});
+      expect(resultWithin).to.have.length(1);
+      const resultOutside = yield helpers.getJson(client, resource, {}, { x: "723000", y: '6167000.76', srid: '25832'});
+      expect(resultOutside).to.have.length(0);
+      const resultOutsideNearest = yield helpers.getJson(client, resource, {}, { x: "723000", y: '6167000.76', srid: '25832', nærmeste: ''});
+      expect(resultOutsideNearest).to.have.length(1);
+    }));
+  });
+});
 
 describe('DAGI updates', function() {
   it('When adding a new DAGI tema, the adgangsadresser_temaer_matview table should be updated', function () {

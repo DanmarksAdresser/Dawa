@@ -33,6 +33,9 @@ publishedTemaer.forEach(function (tema) {
     queryParams.search = commonParameters.search
   }
 
+  queryParams.reverseGeocoding = commonParameters.reverseGeocodingOptional;
+  queryParams.reverseGeocodingNearest = commonParameters.reverseGeocodingNearest;
+
   var resources = [
     resourcesUtil.queryResourceSpec(nameAndKey,
       queryParams,
