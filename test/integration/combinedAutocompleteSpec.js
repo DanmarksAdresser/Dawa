@@ -116,5 +116,20 @@ describe('Autocomplete', function() {
         expect(result[0].tekst).to.equal('Fjordsgade 5, 5000 Odense C');
       });
     });
+
+    it('Søgning skal ikke gå videre til adgangsadresser med mindre det indtastede matcher vjenavnet eksakt', () => {
+      return helpers.getJson(clientFn(), autocomplete, {}, {q: "mosev", fuzzy: "", type: 'adgangsadresse', caretpos: '5'}).then(function(result) {
+        expect(result).to.have.length(1);
+        expect(result[0].type).to.equal('vejnavn');
+        expect(result[0].tekst).to.equal('Mosevej ');
+      });
+    });
+
+    it('Søgning skal gå videre til adgangsadresser med det indtastede matcher vejnavn eksakt', () => {
+      return helpers.getJson(clientFn(), autocomplete, {}, {q: "mosevej ", fuzzy: "", type: 'adgangsadresse', caretpos: '8'}).then(function(result) {
+        expect(result.length).to.be.above(1);
+        expect(result[0].type).to.equal('adgangsadresse');
+      });
+    });
   });
 });

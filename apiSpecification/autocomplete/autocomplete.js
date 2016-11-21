@@ -208,65 +208,66 @@ function queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled) {
   });
 }
 
-function queryFromVejnavn(client, type, sqlParams, fuzzyEnabled) {
-  var shouldDoFuzzySearch = fuzzyEnabled && (type === 'vejnavn' || !/\d/.test(sqlParams.search));
-  var params = _.clone(sqlParams);
-  params.fuzzy = shouldDoFuzzySearch;
-  return queryModel(client, 'vejnavn', params).then(function (result) {
-    if (result.length > 1 || type === 'vejnavn') {
+function queryFromVejnavn(client, rawQueryParam, type, sqlParams, fuzzyEnabled) {
+  return q.async(function*() {
+    var shouldDoFuzzySearch = fuzzyEnabled && (type === 'vejnavn' || !/\d/.test(sqlParams.search));
+    var params = _.clone(sqlParams);
+    params.fuzzy = shouldDoFuzzySearch;
+    const result = yield queryModel(client, 'vejnavn', params);
+    if (result.length > 1
+      || type === 'vejnavn'
+      || (result.length === 1 && !rawQueryParam.toLowerCase().startsWith(result[0].navn.toLowerCase()))) {
       return result;
     }
     else {
-      return queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled);
+      return yield queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled);
     }
-  });
+  })();
 }
 
 var sqlModel = {
   allSelectableFields: [],
   query: function(client, fieldNames, params, callback) {
-    var fuzzyEnabled = params.fuzzy;
-    delete params.fuzzy;
-    var caretpos = params.caretpos;
-    var queryParam = params.q;
-    if (caretpos > 0 && caretpos <= queryParam.length) {
-      const textBeforeCaret = queryParam.substring(0, caretpos);
-      if(/^[^\d]*\d+$/.test(textBeforeCaret)) {
-        // were autocompleting first number, which is probably husnr. We do not want
-        // to add a star here.
-      }
-      else if (caretpos === queryParam.length || _.contains([' ', '.', ','], queryParam.charAt(caretpos))) {
-        queryParam = insertString(queryParam, caretpos, '*');
-      }
-    }
-    var additionalSqlParams = _.reduce(delegatedParameters, function(memo, param) {
-      memo[param.name] = params[param.name];
-      return memo;
-    }, {});
-
-    var searchSqlParams = _.clone(additionalSqlParams);
-    searchSqlParams.search =  queryParam;
-    return q()
-      .then(function () {
-        if (params.adgangsadresseid || params.startfra === 'adresse') {
-          return queryFromAdresse(client, searchSqlParams, fuzzyEnabled).then(function(result) {
-            if(result.length === 0) {
-              var fuzzySqlParams = _.clone(additionalSqlParams);
-              fuzzySqlParams.fuzzyq = params.q;
-              return queryFromAdresse(client, fuzzySqlParams, fuzzyEnabled);
-            }
-            else {
-              return result;
-            }
-          });
+    return q.async(function*() {
+      var fuzzyEnabled = params.fuzzy;
+      delete params.fuzzy;
+      var caretpos = params.caretpos;
+      var queryParam = params.q;
+      if (caretpos > 0 && caretpos <= queryParam.length) {
+        const textBeforeCaret = queryParam.substring(0, caretpos);
+        if(/^[^\d]*\d+$/.test(textBeforeCaret)) {
+          // were autocompleting first number, which is probably husnr. We do not want
+          // to add a star here.
         }
-        else if (params.startfra === 'adgangsadresse') {
-          return queryFromAdgangsadresse(client, params.type, searchSqlParams, fuzzyEnabled);
+        else if (caretpos === queryParam.length || _.contains([' ', '.', ','], queryParam.charAt(caretpos))) {
+          queryParam = insertString(queryParam, caretpos, '*');
+        }
+      }
+      var additionalSqlParams = _.reduce(delegatedParameters, function(memo, param) {
+        memo[param.name] = params[param.name];
+        return memo;
+      }, {});
+
+      var searchSqlParams = _.clone(additionalSqlParams);
+      searchSqlParams.search =  queryParam;
+      if (params.adgangsadresseid || params.startfra === 'adresse') {
+        const result = yield queryFromAdresse(client, searchSqlParams, fuzzyEnabled);
+        if(result.length === 0) {
+          var fuzzySqlParams = _.clone(additionalSqlParams);
+          fuzzySqlParams.fuzzyq = params.q;
+          return yield queryFromAdresse(client, fuzzySqlParams, fuzzyEnabled);
         }
         else {
-          return queryFromVejnavn(client, params.type, searchSqlParams, fuzzyEnabled);
+          return result;
         }
-      }).nodeify(callback);
+      }
+      else if (params.startfra === 'adgangsadresse') {
+        return yield queryFromAdgangsadresse(client, params.type, searchSqlParams, fuzzyEnabled);
+      }
+      else {
+        return yield queryFromVejnavn(client, params.q, params.type, searchSqlParams, fuzzyEnabled);
+      }
+    })().nodeify(callback);
   }
 };
 
