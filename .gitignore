@@ -229,6 +229,8 @@ pip-log.txt
 .mr.developer.cfg
 .elasticbeanstalk/
 
+/test/deployment-test/node_modules
+
 /psql/setupdb.GENERATED.sql
 /public/lib
 /bower_components
