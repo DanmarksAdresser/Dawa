@@ -35,7 +35,15 @@ module.exports = function (a, b, insertCost, updateCost, deleteCost) {
   var ops = [];
 
   while(i > 0 || j > 0) {
-    if(i > 0 && j > 0 && b[i-1] === a[j-1]) {
+    if (j > 0 && matrix[i][j] - matrix[i][j-1] === insertCost) {
+      ops.push({op: 'I', letter: a[j-1]});
+      j--;
+    }
+    else if (i > 0 && matrix[i][j] - matrix[i-1][j] === deleteCost) {
+      ops.push({op: 'D', letter: b[i-1]});
+      i--;
+    }
+    else if(i > 0 && j > 0 && b[i-1] === a[j-1]) {
       ops.push({op: 'K',letter: a[j-1]});
       i--;
       j--;
@@ -45,13 +53,8 @@ module.exports = function (a, b, insertCost, updateCost, deleteCost) {
       i--;
       j--;
     }
-    else if (j > 0 && matrix[i][j] - matrix[i][j-1] === insertCost) {
-      ops.push({op: 'I', letter: a[j-1]});
-      j--;
-    }
-    else {
-      ops.push({op: 'D', letter: b[i-1]});
-      i--;
+    else{
+      throw new Error('Error in levensthein algorithm');
     }
   }
   return {

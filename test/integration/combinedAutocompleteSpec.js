@@ -5,7 +5,7 @@ var request = require('request-promise');
 
 require('../../apiSpecification/allSpecs');
 
-var autocomplete = require('../../apiSpecification/autocomplete/autocomplete');
+var autocomplete = require('../../apiSpecification/autocomplete/autocomplete').autocompleteResource;
 var helpers = require('./helpers');
 var testdb = require('../helpers/testdb');
 

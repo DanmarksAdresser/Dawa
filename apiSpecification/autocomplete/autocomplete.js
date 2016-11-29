@@ -4,12 +4,20 @@ var q = require('q');
 var _ = require('underscore');
 
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-var commonParameters = require('../common/commonParameters');
+const husnrUtil = require('../husnrUtil');
 var registry = require('../registry');
 var resourcesUtil = require('../common/resourcesUtil');
 var schema = require('../parameterSchema');
+const adresseTextMatch = require('../adresseTextMatch');
+const levenshtein = require('../levenshtein');
+
+require('../vejnavn/resources');
+require('../adgangsadresse/resources');
+require('../adresse/resources');
 
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
+
+const formatHusnr = husnrUtil.formatHusnr;
 
 function insertString(str, index, insertion) {
   if(index >= 0 && index <= str.length) {
@@ -19,6 +27,18 @@ function insertString(str, index, insertion) {
     return str + insertion;
   }
 }
+
+const ADDRESS_ELEMENT_WEIGHTS = {
+  vejnavn: 1,
+  husnr: 3,
+  etage: 3,
+  dør: 3,
+  supplerendebynavn: 1,
+  postnr: 3,
+  postnrnavn: 1
+};
+
+const MAX_WEIGHT = 3;
 
 var autocompleteResources = ['vejnavn', 'adgangsadresse', 'adresse'].reduce(function(memo, entity ) {
   memo[entity] = registry.findWhere({
@@ -98,7 +118,7 @@ var delegatedParameters = [
     schema: schema.postnr,
     multi: true
   }
-].concat(commonParameters.format).concat(commonParameters.paging);
+];
 
 var nonDelegatedParameters = [
   {
@@ -174,104 +194,363 @@ var representations = {
 };
 
 function queryModel(client, entityName, params) {
-  var resource = autocompleteResources[entityName];
-  var sqlModel = resource.sqlModel;
-  var autocompleteRepresentation = resource.representations.autocomplete;
-  var fieldNames = _.pluck(autocompleteRepresentation.fields, 'name');
-  return q.ninvoke(sqlModel, 'query', client, fieldNames, params).then(function(result) {
+  return q.async(function*() {
+    var resource = autocompleteResources[entityName];
+    var sqlModel = resource.sqlModel;
+    var autocompleteRepresentation = resource.representations.autocomplete;
+    var fieldNames = _.pluck(autocompleteRepresentation.fields, 'name');
+    const result = yield  sqlModel.query(client, fieldNames, params);
     return result.map(function(row) {
       row.type = entityName;
       return row;
     });
-  });
-}
-
-function queryFromAdresse(client, sqlParams, fuzzyEnabled) {
-  var params = _.clone(sqlParams);
-  params.fuzzy = fuzzyEnabled;
-  return queryModel(client, 'adresse', params);
-}
-
-function queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled) {
-  // if type is not 'adgangsadresse', we want to continue to adresser, rather than
-  // using fuzzy search on adgangsadresser. Otherwise, we will never continue to adresser.
-  var useFuzzy = fuzzyEnabled && type === 'adgangsadresse';
-  var params = _.clone(sqlParams);
-  params.fuzzy = useFuzzy;
-  return queryModel(client, 'adgangsadresse', params).then(function (result) {
-    if (result.length > 1 || type === 'adgangsadresse') {
-      return result;
-    }
-    else {
-      return queryFromAdresse(client, sqlParams, fuzzyEnabled);
-    }
-  });
-}
-
-function queryFromVejnavn(client, rawQueryParam, type, sqlParams, fuzzyEnabled) {
-  return q.async(function*() {
-    var shouldDoFuzzySearch = fuzzyEnabled && (type === 'vejnavn' || !/\d/.test(sqlParams.search));
-    var params = _.clone(sqlParams);
-    params.fuzzy = shouldDoFuzzySearch;
-    const result = yield queryModel(client, 'vejnavn', params);
-    if (result.length > 1
-      || type === 'vejnavn'
-      || (result.length === 1 && !rawQueryParam.toLowerCase().startsWith(result[0].navn.toLowerCase()))) {
-      return result;
-    }
-    else {
-      return yield queryFromAdgangsadresse(client, type, sqlParams, fuzzyEnabled);
-    }
   })();
 }
+
+function scoreAddressElement(addressText, searchText, weight) {
+  addressText = addressText || '';
+  searchText = searchText || '';
+  if((addressText || '') === (searchText || '')) {
+    return 0;
+  }
+  if(searchText === '') {
+    return 1;
+  }
+  if(addressText.startsWith(searchText)) {
+    return 2;
+  }
+
+  const levenshteinResult = levenshtein(addressText, searchText, 1, 1, 1);
+  const ops = levenshteinResult.ops;
+  const isPrefix = ops[ops.length-1].op === 'I';
+  while(ops.length > 0 && ops[ops.length-1].op === 'I') {
+    ops.length = ops.length-1;
+  }
+  const edits = ops.filter(op => op.op !== 'K').length;
+  return 2 + edits * weight + (isPrefix ? 1 : 0);
+}
+
+const fieldFormatters = {
+  husnr: formatHusnr,
+  postnr: nr => '' + nr
+};
+
+const ADRESSE_FIELD_NAMES = {
+  adgangsadresse: ['vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'],
+  adresse: ['vejnavn', 'husnr', 'etage', 'dør', 'supplerendebynavn', 'postnr', 'postnrnavn']
+};
+
+function computeVariants(autocompleteResult, fields) {
+  const fieldsWithoutChoices = _.intersection(fields, ['husnr', 'etage', 'dør']);
+  const baseChoice = fieldsWithoutChoices.reduce((memo, field) => {
+    memo[field] = autocompleteResult[field];
+    return memo;
+  }, {});
+  const vejnavnChoices = [{
+    vejnavn: autocompleteResult.vejnavn
+  }];
+  if (autocompleteResult.adresseringsvejnavn &&
+    autocompleteResult.adresseringsvejnavn !== autocompleteResult.vejnavn) {
+    vejnavnChoices.push({
+      vejnavn: autocompleteResult.adresseringsvejnavn
+    });
+  }
+
+  const supplerendeBynavnChoices = [{
+    supplerendebynavn: ''
+  }];
+  if(autocompleteResult.supplerendebynavn) {
+    supplerendeBynavnChoices.push({
+      supplerendebynavn: autocompleteResult.supplerendebynavn
+    });
+  }
+  const postnrChoices = [{
+    postnr: autocompleteResult.postnr,
+    postnrnavn: autocompleteResult.postnrnavn
+  }];
+  if(autocompleteResult.stormodtagerpostnr) {
+    postnrChoices.push({
+      postnr: autocompleteResult.stormodtagerpostnr,
+      postnrnavn: autocompleteResult.stormodtagerpostnrnavn
+    });
+  }
+
+  const choicesList = [vejnavnChoices, supplerendeBynavnChoices, postnrChoices];
+  const applyChoices = (variants, choices) => _.flatten(choices.map(choice =>
+    variants.map(variant => Object.assign({}, variant, choice))
+  ), true);
+
+  return choicesList.reduce(
+    (variants, choices) => applyChoices(variants, choices),
+    [baseChoice]);
+}
+
+function formatVariant(variant, fields) {
+  return  fields.reduce((memo, field) => {
+    memo[field] = (fieldFormatters[field] || _.identity)(variant[field]);
+    if(memo[field]) {
+      memo[field] = memo[field].toLowerCase();
+    }
+    else {
+      memo[field] = '';
+    }
+    return memo;
+  }, {});
+}
+
+function computeProcessedResult(variant, searchText, fields) {
+  const matchResult = adresseTextMatch(searchText, variant);
+  const scores = fields.reduce((memo, field) => {
+    memo[field] = scoreAddressElement(
+      variant[field],
+      matchResult.address[field],
+      ADDRESS_ELEMENT_WEIGHTS[field]);
+    return memo;
+  }, {});
+
+  const unknownTokenScore = matchResult.unknownTokens.reduce((memo, token) => {
+    return memo + (2 + token.length * MAX_WEIGHT);
+  }, 0);
+  const totalScore = Object.keys(scores).reduce((memo, key) => memo + scores[key], 0) + unknownTokenScore;
+  const processedResult = {
+    variant: variant,
+    matchResult: matchResult,
+    scores: scores,
+    unknownTokenScore: unknownTokenScore,
+    totalScore: totalScore
+  };
+  return processedResult;
+}
+
+function process(autocompleteResult, searchText, fields) {
+  const unformattedVariants = computeVariants(autocompleteResult, fields);
+
+  const variants = unformattedVariants.map(variant => formatVariant(variant, fields));
+  const processedResults = variants.map(variant => computeProcessedResult(variant, searchText, fields));
+  let bestProcessedResult = processedResults[0];
+  for(let processedResult of processedResults) {
+    if(bestProcessedResult.totalScore > processedResult.totalScore) {
+      bestProcessedResult = processedResult;
+    }
+  }
+  return Object.assign(bestProcessedResult, {
+    autocompleteResult: autocompleteResult
+  });
+}
+
+function unprocess(processedResult) {
+  return processedResult.autocompleteResult;
+}
+
+function compareStringsInsensitive(a, b) {
+  return a < b ? -1 : a === b ? 0 : 1;
+}
+
+
+const nothingFirst = fn =>
+  ((a, b) => {
+    const aIsNothing = typeof(a) === 'undefined' || a === null || a === '';
+    const bIsNothing = typeof(b) === 'undefined' || b === null || b === '';
+    if(aIsNothing && bIsNothing) {
+      return 0;
+    }
+    if(aIsNothing && !bIsNothing) {
+      return -1;
+    }
+    if(!aIsNothing && bIsNothing) {
+      return 1;
+    }
+    return fn(a, b);
+  });
+
+
+const comparators = {
+  vejnavn: nothingFirst(compareStringsInsensitive),
+  husnr: nothingFirst((a, b) => {
+    if(a.tal === b.tal) {
+      if(a.bogstav === b.bogstav) {
+        return 0;
+      }
+      if(!a.bogstav) {
+        return -1;
+      }
+      if(!b.bogstav) {
+        return 1;
+      }
+      return a.bogstav < b.bogstav ? -1 : a.bogstav === b.bogstav ? 0 : 1;
+    }
+    return a.tal - b.tal;
+  }),
+  etage: nothingFirst((a, b) => {
+    if(a === b) {
+      return 0;
+    }
+    if(a.startsWith('kl') && !b.startsWith('kl')) {
+      return -1;
+    }
+    if(!a.startsWith('kl') && b.startsWith('kl')) {
+      return -1;
+    }
+    if(a.startsWith('kl') && b.startsWith('kl')) {
+      return -a.localeCompare(b);
+    }
+    if(a === 'st') {
+      return -1;
+    }
+    if(b === 'st') {
+      return 1;
+    }
+    if(!isNaN(a)  && !isNaN(b)){
+      return parseInt(a, 10) - parseInt(b, 10);
+    }
+    return compareStringsInsensitive(a, b);
+  }),
+  dør: nothingFirst((a, b) => {
+    if(a === b) {
+      return 0;
+    }
+    for (let val of ['tv', 'mf', 'th']) {
+      if(a === val) {
+        return -1;
+      }
+      if(b === val) {
+        return 1;
+      }
+    }
+    if(!isNaN(a) && isNaN(b)){
+      return -1;
+    }
+    if(isNaN(a) && !isNaN(b)) {
+      return 1;
+    }
+    if(!isNaN(a) && !isNaN(b)) {
+      return a - b;
+    }
+    return compareStringsInsensitive(a, b);
+  }),
+  supplerendebynavn: nothingFirst(compareStringsInsensitive),
+  postnr: nothingFirst((a, b) => {
+    if(a === b) {
+      return 0;
+    }
+    if(isNaN(a)) {
+      return -1;
+    }
+    if(isNaN(b)) {
+      return 1;
+    }
+    return a - b;
+  }),
+  postnrnavn: nothingFirst(compareStringsInsensitive)
+};
+
+function compareProcessedResults(a, b) {
+  if(a.totalScore !== b.totalScore) {
+    return a.totalScore - b.totalScore;
+  }
+  for(let field of ['vejnavn', 'husnr', 'etage', 'dør', 'postnr', 'supplerendebynavn']) {
+    const compareResult = comparators[field](a.autocompleteResult[field],
+      b.autocompleteResult[field]);
+    if(compareResult !== 0) {
+      return compareResult;
+    }
+  }
+  return 0;
+}
+
+function prepareQuery(params) {
+  const delegatedParameterNames = _.pluck(delegatedParameters, 'name');
+  const delegatedParameterValues = delegatedParameterNames.reduce(
+    (memo, paramName) => {
+      if(params.hasOwnProperty(paramName)) {
+        memo[paramName] = params[paramName];
+      }
+      return memo;
+    }, {});
+  const q = params.q;
+  const fuzzyEnabled = params.fuzzy;
+  const caretpos = params.caretpos;
+  let regularSearchQuery = q;
+  if (caretpos > 0 && caretpos <= q.length) {
+    if (caretpos === q.length || _.contains([' ', '.', ','], q.charAt(caretpos))) {
+      regularSearchQuery = insertString(q, caretpos, '*');
+    }
+  }
+
+  return Object.assign(
+    {
+      search: regularSearchQuery,
+      fuzzy: fuzzyEnabled,
+      per_side: 200,
+      side: 1
+    },
+    delegatedParameterValues
+  );
+}
+
+const queryVejnavn = (client, params) => {
+  var shouldDoFuzzySearch = params.fuzzy &&  !/\d/.test(params.q);
+  params = Object.assign({}, params, {
+    fuzzy: shouldDoFuzzySearch
+  });
+  const regularSearchParams = prepareQuery(params);
+  const result = queryModel(client, 'vejnavn', regularSearchParams);
+  result.length = Math.min(result.length, params.per_side);
+  return result;
+};
+
+const queryAdresse = (entityName, client, params, lastEntity) => {
+  return q.async(function*() {
+
+    // disable fuzzy in adgangsadresse search unless it is the last searched entity
+    if(!lastEntity) {
+      params = Object.assign({}, params);
+      delete params.fuzzy;
+    }
+
+    const regularSearchParams = prepareQuery(params);
+    const queryResult = yield queryModel(client, entityName, regularSearchParams);
+    const processedResult = queryResult.map(result => process(result, params.q, ADRESSE_FIELD_NAMES[entityName]));
+    processedResult.sort(compareProcessedResults);
+    processedResult.length = Math.min(processedResult.length, params.per_side);
+    return processedResult.map(unprocess);
+  })();
+};
+
+const shouldProceed = {
+  vejnavn: (result, params) =>
+    result.length === 1 && params.q.toLowerCase().startsWith(result[0].navn.toLowerCase()),
+  adgangsadresse: (result, params) => result.length <= 1
+};
+
+const entityTypes = ['vejnavn', 'adgangsadresse', 'adresse'];
+
+const queryFns = {
+  vejnavn: (client, params) => queryVejnavn(client, params),
+  adgangsadresse: (client, params, lastEntity) => queryAdresse('adgangsadresse', client, params, lastEntity),
+  adresse: (client, params, lastEntity) => queryAdresse('adresse', client, params, lastEntity)
+};
 
 var sqlModel = {
   allSelectableFields: [],
   query: function(client, fieldNames, params, callback) {
     return q.async(function*() {
-      var fuzzyEnabled = params.fuzzy;
-      delete params.fuzzy;
-      var caretpos = params.caretpos;
-      var queryParam = params.q;
-      if (caretpos > 0 && caretpos <= queryParam.length) {
-        const textBeforeCaret = queryParam.substring(0, caretpos);
-        if(/^[^\d]*\d+$/.test(textBeforeCaret)) {
-          // were autocompleting first number, which is probably husnr. We do not want
-          // to add a star here.
-        }
-        else if (caretpos === queryParam.length || _.contains([' ', '.', ','], queryParam.charAt(caretpos))) {
-          queryParam = insertString(queryParam, caretpos, '*');
-        }
-      }
-      var additionalSqlParams = _.reduce(delegatedParameters, function(memo, param) {
-        memo[param.name] = params[param.name];
-        return memo;
-      }, {});
-
-      var searchSqlParams = _.clone(additionalSqlParams);
-      searchSqlParams.search =  queryParam;
-      if (params.adgangsadresseid || params.startfra === 'adresse') {
-        const result = yield queryFromAdresse(client, searchSqlParams, fuzzyEnabled);
-        if(result.length === 0) {
-          var fuzzySqlParams = _.clone(additionalSqlParams);
-          fuzzySqlParams.fuzzyq = params.q;
-          return yield queryFromAdresse(client, fuzzySqlParams, fuzzyEnabled);
-        }
-        else {
+      const startfra = params.adgangsadresseid ? 'adresse' : (params.startfra || 'vejnavn');
+      const slutmed = params.type || 'adresse';
+      const searchedEntities = entityTypes.slice(entityTypes.indexOf(startfra), entityTypes.indexOf(slutmed)+1);
+      for(let entityName of searchedEntities) {
+        const lastEntity = entityName === searchedEntities[searchedEntities.length - 1];
+        const result = yield queryFns[entityName](client, params, lastEntity);
+        if( lastEntity ||
+          (result.length > 0 && !shouldProceed[entityName](result, params))) {
           return result;
         }
-      }
-      else if (params.startfra === 'adgangsadresse') {
-        return yield queryFromAdgangsadresse(client, params.type, searchSqlParams, fuzzyEnabled);
-      }
-      else {
-        return yield queryFromVejnavn(client, params.q, params.type, searchSqlParams, fuzzyEnabled);
       }
     })().nodeify(callback);
   }
 };
 
-module.exports = {
+const autocompleteResource = {
   path: '/autocomplete',
   pathParameters: [],
   queryParameters: allParameters,
@@ -283,5 +562,10 @@ module.exports = {
   disableStreaming: true
 };
 
+module.exports = {
+  autocompleteResource: autocompleteResource,
+  scoreAddressElement: scoreAddressElement
+};
+
 registry.add('autocomplete', 'representation', 'autocomplete', representations.autocomplete);
-registry.add('autocomplete', 'resource', 'autocomplete', module.exports);
+registry.add('autocomplete', 'resource', 'autocomplete', autocompleteResource);

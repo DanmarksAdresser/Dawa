@@ -67,9 +67,9 @@ describe('Levenshtein distance', () => {
     expect(levenshtein('aa', 'ab', 2, 3, 2).distance).to.equal(3);
   });
   it('Should correctly compute a delete op in the middle of a string', () => {
-    var vasket = 'gga';
+    var vasket = 'gua';
     var uvasket ='ga';
-    var expectedResult = [{op: 'D', letter: 'g'}, {op: 'K', letter: 'g'}, {op: 'K', letter: 'a'}];
+    var expectedResult = [{op: 'K', letter: 'g'}, {op: 'D', letter: 'u'}, {op: 'K', letter: 'a'}];
     expect(levenshtein(uvasket, vasket, 1, 3, 2).ops).to.deep.equal(expectedResult);
   });
 });

@@ -353,7 +353,7 @@ exports.json = {
   }
 };
 
-var autocompleteFieldNames = ['id', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn'];
+var autocompleteFieldNames = ['id', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn'];
 exports.autocomplete = {
   fields: representationUtil.fieldsWithNames(fields, autocompleteFieldNames),
   schema: globalSchemaObject({

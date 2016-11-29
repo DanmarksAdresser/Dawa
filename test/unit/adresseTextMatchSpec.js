@@ -183,7 +183,8 @@ describe('adresseTextMatch', () => {
     var uvasket = 'oofooo.br, fbaaroo';
     var vasket = 'foo,bar foobar';
     var result = parseTokens(uvasket, vasket, ['foo', 'bar', 'foobar'], rules);
-    expect(result.parsedTokens).to.deep.equal(['oofooo', 'br', 'fbaaroo']);
+    expect(result.parsedTokens).to.deep.equal(['oofoo', 'br', 'fbaaroo']);
+    expect(result.unknownTokens).to.deep.equal(['o']);
   });
 
   it('Will parse a sequence with unknown tokens in it', () => {
@@ -332,5 +333,30 @@ describe('adresseTextMatch', () => {
       postnr: '2000',
       postnrnavn: 'Frederiksberg'
     });
+  });
+
+  it('Will correctly parse "højvangsvej foobar 13, 8260 viby" against "højdevej 11, 1. 8260 viby j"', () => {
+    const uvasket = 'højvangsvej foobar 13, 8260 viby';
+    const vasket = {
+      "vejnavn": "højdevej",
+      "husnr": "11",
+      "etage": "1",
+      "dør": "",
+      "supplerendebynavn": "",
+      "postnr": "8260",
+      "postnrnavn": "viby j"
+    };
+    var result = adresseTextMatch(uvasket, vasket);
+    expect(result).to.deep.equal(
+      {
+        "address": {
+          "etage": "13",
+          "husnr": "foobar",
+          "postnr": "8260",
+          "postnrnavn": "viby",
+          "vejnavn": "højvangsvej"
+        },
+        "unknownTokens": []
+      });
   });
 });

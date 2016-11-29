@@ -36,6 +36,7 @@ function consumeUntilWhitespace(charlist) {
     }
     else if(charlist[i].op === 'I') {
       // drop
+      result += charlist[i].uvasket;
     }
     else if(charlist[i].op === 'D') {
       // keep
@@ -212,8 +213,8 @@ function parseTokens(uvasketText, vasketText, tokens, rules) {
       index === rules.length - 1 ||
       rules[index+1].mustBeginAtWhitespace;
     var parseResult = consume(charlist, token.length, mustEndWithWhitespace);
-
     var betweenResult = consumeBetween(parseResult[0]);
+
     result.parsedTokens = result.parsedTokens.concat(parseResult[1]);
     result.unknownTokens = result.unknownTokens.concat(betweenResult[1]);
     charlist = betweenResult[0];

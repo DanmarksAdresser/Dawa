@@ -1,6 +1,7 @@
 "use strict";
 
 var util = require('util');
+const q = require('q');
 var _ = require('underscore');
 
 var dbapi = require('../../../dbapi');
@@ -113,20 +114,18 @@ exports.applyFallback = function(sqlModel, fallbackParamsFn) {
   };
   fallbackModel.query = function(client, fieldNames, params, callback) {
     var paramList = fallbackParamsFn(params);
-    sqlModel.query(client, fieldNames, paramList[0], function(err, result) {
-      if(err) {
-        return callback(err);
-      }
+    return q.async(function*() {
+      const result = yield sqlModel.query(client, fieldNames, paramList[0]);
       if(paramList.length === 1) {
-        return callback(undefined, result);
+        return result;
       }
       if(result.length === 0) {
-        sqlModel.query(client, fieldNames, paramList[1], callback);
+        return yield sqlModel.query(client, fieldNames, paramList[1]);
       }
       else {
-        callback(undefined, result);
+        return result;
       }
-    });
+    })().nodeify(callback);
   };
   fallbackModel.stream = function(client, fieldNames, params, callback) {
     var paramList = fallbackParamsFn(params);
