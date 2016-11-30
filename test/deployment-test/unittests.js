@@ -9,7 +9,9 @@ var assert = require("assert")
   , http= require('http');
 
 //var host= "http://localhost:3000";
-var host= "http://dawa.aws.dk";
+var host= "http://dawa-p1.aws.dk";
+//var host= "http://origin-dawa-p2.aws.dk";
+//var host= "http://52.212.234.159";
 console.log(host);
 
 describe('Adressevalidering', function(){
@@ -58,19 +60,39 @@ describe('Adressesøgning', function(){
 	  })
 	})
 
-	 it('vejnavn=Rødkildevej', function(done){
-    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {  	
-    	assert.equal(error,null);
-    	assert.equal(response.statusCode,200);
-	    var adresser= JSON.parse(body);
-	    assert(adresser.length>1);
-	    done();
-	  })
-	})
+   it('vejnavn=Rødkildevej', function(done){
+    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {    
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var adresser= JSON.parse(body);
+      assert(adresser.length>1);
+      done();
+    })
+  })
+
+   it('vejnavn=Rødkildevej&struktur=mini', function(done){
+    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&struktur=mini&cache=no-cache'), function (error, response, body) {    
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var adresser= JSON.parse(body);
+      assert(adresser.length>1);
+      done();
+    })
+  })
 
 
   it('regionskode=1083&husnr=77', function(done){
     request(encodeURI(host+'/adgangsadresser?regionskode=1083&husnr=77&cache=no-cache'), function (error, response, body) {    
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var adresser= JSON.parse(body);
+      assert(adresser.length>1);
+      done();
+    })
+  })
+
+  it('regionskode=1083&husnr=77&struktur=mini', function(done){
+    request(encodeURI(host+'/adgangsadresser?regionskode=1083&husnr=77&struktur=mini&cache=no-cache'), function (error, response, body) {    
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -104,12 +126,20 @@ describe('Adressesøgning', function(){
 describe('Adresseopslag', function(){
 
   it('2f725450-a76a-11e2-9692-b7a1608861ab', function(done){
-    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?cache=no-cache'), function (error, response, body) {  	
-    	assert.equal(error,null);
-    	assert.equal(response.statusCode,200);
-	    done();
-	  })
-	})
+    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?cache=no-cache'), function (error, response, body) {   
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      done();
+    })
+  }) 
+
+  it('2f725450-a76a-11e2-9692-b7a1608861ab?struktur=mini', function(done){
+    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?struktur=mini&cache=no-cache'), function (error, response, body) {   
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      done();
+    })
+  })
 
   it("korrekt indhold", function(done){
 
@@ -450,32 +480,40 @@ describe('Adresseopslag', function(){
     var minirequest= rp(optmini);
 
     Promise.all([jsonrequest, minirequest]).then(function (bodies) {
-      var adresserjson= JSON.parse(bodies[0]);
-      var adressejson= adresserjson[0];
-      var adressermini= JSON.parse(bodies[1]);
-      var adressemini= adresserjson[1];
-      assert(adressejson.id===adressemini.id, 'Id i json og mini format forskellig. json: ' + adressejson.id + ', mini: ' + adressemini.id);
-      assert(adressejson.status==adressemini.status, 'Status i json og mini format forskellig. json: |' + adressejson.status + '|, mini: |' + adressemini.status + '|');
-      assert(adressejson.etage?adressejson.etage===adressemini.etage:adressemini.etage.length===0, 'etage i json og mini format forskellig. json: ' + adressejson.etage + ', mini: ' + adressemini.etage);
-      assert(adressejson.dør?adressejson.dør===adressemini.dør:adressemini.dør.length===0, 'dør i json og mini format forskellig. json: ' + adressejson.dør + ', mini: ' + adressemini.dør);
-      assert(adressejson.adgangsadresse.id===adressemini.adgangsadresseid, 'adgangsadresseid i json og mini format forskellig. json: ' + adressejson.adgangsadresse.id + ', mini: ' + adressemini.adgangsadresseid);
-      assert(adressejson.adgangsadresse.vejstykke.navn===adressemini.vejnavn, 'adresse.vejstykke.navn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', mini: ' + adressemini.vejnavn);
-      assert(adressejson.adgangsadresse.vejstykke.navn===optjson.qs.vejnavn, 'adresse.vejstykke.navn i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', søgekriterie: ' + optjson.qs.vejnavn);
-      assert(adressejson.adgangsadresse.vejstykke.kode===adressemini.vejkode, 'adresse.vejstykke.kode i json og mini format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.kode + ', mini: ' + adressemini.vejkode);
-      assert(adressejson.adgangsadresse.husnr===adressemini.husnr, 'adresse.husnr i json og mini format forskellig. json: ' + adressejson.adgangsadresse.husnr + ', mini: ' + adressemini.husnr);
-      assert(adressejson.adgangsadresse.husnr===optjson.qs.husnr, 'adresse.husnr i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.husnr + ', søgekriterie: ' + optjson.qs.husnr);
-      assert(adressejson.adgangsadresse.supplerendebynavn==adressemini.supplerendebynavn||adressejson.adgangsadresse.supplerendebynavn===null&&adressemini.supplerendebynavn=="", 'adresse.supplerendebynavn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.supplerendebynavn + ', mini: ' + adressemini.supplerendebynavn);
-      assert(adressejson.adgangsadresse.postnummer.nr===adressemini.postnr, 'adresse.postnummer.nr i json og mini format forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', mini: ' + adressemini.postnr);
-      assert(adressejson.adgangsadresse.postnummer.nr===optjson.qs.postnr, 'adresse.postnummer.nr i json og søgekriterie er forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', søgekriterie: ' + optjson.qs.postnr);
-      assert(adressejson.adgangsadresse.postnummer.navn===adressemini.postnrnavn, 'adresse.postnummer.navn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.postnummer.navn + ', mini: ' + adressemini.postnrnavn);
-      assert(adressejson.adgangsadresse.kommune.kode===adressemini.kommunekode, 'adresse.kommune.nr i json og mini format forskellig. json: ' + adressejson.adgangsadresse.kommune.kode + ', mini: ' + adressemini.kommunekode);
-      assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]==adressemini.x, 'punkt.koordinater[0] i json og mini format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', mini: ' + adressemini.x);
-      assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]==adressemini.x, 'punkt.koordinater[1] i json og mini format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', mini: ' + adressemini.y);
-      done();
-    }).catch(reason => { 
-      console.log(reason.response.statusCode + " " + reason.response.statusMessage);
-      done(new Error('StatusCode: ' + reason.statusCode + ', body: ' + reason.response.body));
-    });
+      try {
+        var adresserjson= JSON.parse(bodies[0]);
+        var adressejson= adresserjson[0];
+        var adressermini= JSON.parse(bodies[1]);
+        var adressemini= adressermini[0];
+    
+        assert(adressejson.id===adressemini.id, 'Id i json og mini format forskellig. json: ' + adressejson.id + ', mini: ' + adressemini.id);
+        assert(adressejson.status==adressemini.status, 'Status i json og mini format forskellig. json: |' + adressejson.status + '|, mini: |' + adressemini.status + '|');
+        assert(adressejson.etage===adressemini.etage, 'etage i json og mini format forskellig. json: ' + adressejson.etage + ', mini: ' + adressemini.etage);
+        assert(adressejson.dør===adressemini.dør, 'dør i json og mini format forskellig. json: ' + adressejson.dør + ', mini: ' + adressemini.dør);      
+        assert(adressejson.adgangsadresse.id===adressemini.adgangsadresseid, 'adgangsadresseid i json og mini format forskellig. json: ' + adressejson.adgangsadresse.id + ', mini: ' + adressemini.adgangsadresseid);
+        assert(adressejson.adgangsadresse.vejstykke.navn===adressemini.vejnavn, 'adresse.vejstykke.navn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', mini: ' + adressemini.vejnavn);
+        assert(adressejson.adgangsadresse.vejstykke.navn===optjson.qs.vejnavn, 'adresse.vejstykke.navn i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', søgekriterie: ' + optjson.qs.vejnavn);
+        assert(adressejson.adgangsadresse.vejstykke.kode===adressemini.vejkode, 'adresse.vejstykke.kode i json og mini format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.kode + ', mini: ' + adressemini.vejkode);
+        assert(adressejson.adgangsadresse.husnr===adressemini.husnr, 'adresse.husnr i json og mini format forskellig. json: ' + adressejson.adgangsadresse.husnr + ', mini: ' + adressemini.husnr);
+        assert(adressejson.adgangsadresse.husnr===optjson.qs.husnr, 'adresse.husnr i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.husnr + ', søgekriterie: ' + optjson.qs.husnr);
+        assert(adressejson.adgangsadresse.supplerendebynavn==adressemini.supplerendebynavn||adressejson.adgangsadresse.supplerendebynavn===null&&adressemini.supplerendebynavn=="", 'adresse.supplerendebynavn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.supplerendebynavn + ', mini: ' + adressemini.supplerendebynavn);
+        assert(adressejson.adgangsadresse.postnummer.nr===adressemini.postnr, 'adresse.postnummer.nr i json og mini format forskellig. json: |' + adressejson.adgangsadresse.postnummer.nr + '|, mini: |' + adressemini.postnr + '|');
+        assert(adressejson.adgangsadresse.postnummer.nr===optjson.qs.postnr, 'adresse.postnummer.nr i json og søgekriterie er forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', søgekriterie: ' + optjson.qs.postnr);
+        assert(adressejson.adgangsadresse.postnummer.navn===adressemini.postnrnavn, 'adresse.postnummer.navn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.postnummer.navn + ', mini: ' + adressemini.postnrnavn);
+        assert(adressejson.adgangsadresse.kommune.kode===adressemini.kommunekode, 'adresse.kommune.nr i json og mini format forskellig. json: ' + adressejson.adgangsadresse.kommune.kode + ', mini: ' + adressemini.kommunekode);
+        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]===adressemini.x, 'punkt.koordinater[0] i json og mini format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', mini: ' + adressemini.x);
+        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]===adressemini.y, 'punkt.koordinater[1] i json og mini format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', mini: ' + adressemini.y);
+
+        done();
+      }
+      catch (e) {
+        console.log('catch:'+e);
+        done(e);
+      }
+    })
+    .catch((err) => {
+      done(err);
+    });;
 
   })
 
@@ -834,7 +872,7 @@ it("autocomplete nr", function(done){
   it("reverse geokodning med nærmest", function(done){
     var options= {};
     options.baseUrl= host;
-    options.url= 'sogne/reverse';
+    options.url= 'sogne';
     options.qs= {cache: 'no-cache'};
     options.qs.x= 12.054613430562348;
     options.qs.y= 55.709279836294584;
