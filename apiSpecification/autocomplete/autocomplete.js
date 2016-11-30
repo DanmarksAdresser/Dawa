@@ -385,14 +385,28 @@ const comparators = {
     if(a === b) {
       return 0;
     }
+    if(!a) {
+      return -1;
+    }
+    if (!b) {
+      return 1;
+    }
     if(a.startsWith('kl') && !b.startsWith('kl')) {
       return -1;
     }
     if(!a.startsWith('kl') && b.startsWith('kl')) {
-      return -1;
+      return 1;
     }
     if(a.startsWith('kl') && b.startsWith('kl')) {
-      return -a.localeCompare(b);
+      if(a === 'kl') {
+        return 1;
+      }
+      else if(b === 'kl') {
+        return -1;
+      }
+      const aLevel = parseInt(a.charAt(2));
+      const bLevel = parseInt(b.charAt(2));
+      return bLevel - aLevel;
     }
     if(a === 'st') {
       return -1;
@@ -526,6 +540,13 @@ const queryVejnavn = (client, params) => {
   })();
 };
 
+const sortAdresse = (entityName, q, per_side, unsortedResults) => {
+  const processedResult = unsortedResults.map(result => process(result, q, ADRESSE_FIELD_NAMES[entityName]));
+  processedResult.sort(compareProcessedResults);
+  processedResult.length = Math.min(processedResult.length, per_side);
+  return processedResult.map(unprocess);
+};
+
 const queryAdresse = (entityName, client, params, lastEntity) => {
   return q.async(function*() {
 
@@ -537,10 +558,7 @@ const queryAdresse = (entityName, client, params, lastEntity) => {
 
     const regularSearchParams = prepareQuery(params);
     const queryResult = yield queryModel(client, entityName, regularSearchParams);
-    const processedResult = queryResult.map(result => process(result, params.q, ADRESSE_FIELD_NAMES[entityName]));
-    processedResult.sort(compareProcessedResults);
-    processedResult.length = Math.min(processedResult.length, params.per_side);
-    return processedResult.map(unprocess);
+    return sortAdresse(entityName, params.q, params.per_side, queryResult);
   })();
 };
 
@@ -591,7 +609,8 @@ const autocompleteResource = {
 
 module.exports = {
   autocompleteResource: autocompleteResource,
-  scoreAddressElement: scoreAddressElement
+  scoreAddressElement: scoreAddressElement,
+  sortAdresse: sortAdresse
 };
 
 registry.add('autocomplete', 'representation', 'autocomplete', representations.autocomplete);
