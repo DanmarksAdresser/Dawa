@@ -195,7 +195,7 @@ var representations = {
 
 function queryModel(client, entityName, params) {
   return q.async(function*() {
-    var resource = autocompleteResources[entityName];
+    const resource = autocompleteResources[entityName];
     var sqlModel = resource.sqlModel;
     var autocompleteRepresentation = resource.representations.autocomplete;
     var fieldNames = _.pluck(autocompleteRepresentation.fields, 'name');
@@ -488,15 +488,42 @@ function prepareQuery(params) {
   );
 }
 
+function processVejnavn(autocompleteResult, searchText) {
+  const score = scoreAddressElement(autocompleteResult.navn, searchText, 1);
+  return {
+    score: score,
+    autocompleteResult: autocompleteResult
+  };
+}
+
+function unprocessVejnavn(processedVejnavn) {
+  return processedVejnavn.autocompleteResult;
+}
+
 const queryVejnavn = (client, params) => {
-  var shouldDoFuzzySearch = params.fuzzy &&  !/\d/.test(params.q);
-  params = Object.assign({}, params, {
-    fuzzy: shouldDoFuzzySearch
-  });
-  const regularSearchParams = prepareQuery(params);
-  const result = queryModel(client, 'vejnavn', regularSearchParams);
-  result.length = Math.min(result.length, params.per_side);
-  return result;
+  return q.async(function*() {
+    var shouldDoFuzzySearch = params.fuzzy &&  !/\d/.test(params.q);
+    params = Object.assign({}, params, {
+      fuzzy: shouldDoFuzzySearch
+    });
+    const regularSearchParams = prepareQuery(params);
+    const result = yield queryModel(client, 'vejnavn', regularSearchParams);
+    const processedResult = result.map(result => processVejnavn(result, params.q));
+
+    const vejnavnComparator = (a, b) => {
+      if(a.score === b.score) {
+        const whitespaceRegex = /[\. ,]/g;
+        return a.autocompleteResult.navn.replace(whitespaceRegex, '').localeCompare(b.autocompleteResult.navn.replace(whitespaceRegex, ''));
+      }
+      return a.score - b.score;
+    };
+
+    processedResult.sort(vejnavnComparator);
+
+    processedResult.length = Math.min(processedResult.length, params.per_side);
+    return processedResult.map(unprocessVejnavn);
+
+  })();
 };
 
 const queryAdresse = (entityName, client, params, lastEntity) => {
