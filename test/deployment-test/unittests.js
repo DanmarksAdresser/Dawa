@@ -60,7 +60,7 @@ describe('Adressesøgning', function(){
 	  })
 	})
 
-   it('vejnavn=Rødkildevej', function(done){
+  it('vejnavn=Rødkildevej', function(done){
     request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {    
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
@@ -70,7 +70,7 @@ describe('Adressesøgning', function(){
     })
   })
 
-   it('vejnavn=Rødkildevej&struktur=mini', function(done){
+  it('vejnavn=Rødkildevej&struktur=mini', function(done){
     request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&struktur=mini&cache=no-cache'), function (error, response, body) {    
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
@@ -367,7 +367,7 @@ describe('Adresseopslag', function(){
 
   });
 
-   it("Samme indhold json og csv format", function(done){
+  it("Samme indhold json og csv format", function(done){
 
     var optjson= {};
     optjson.baseUrl= host;
@@ -452,6 +452,101 @@ describe('Adresseopslag', function(){
         done();
       });
     });
+  });
+
+  it("Samme indhold json og geojson format", function(done){
+
+    var optjson= {};
+    optjson.baseUrl= host;
+    optjson.url='adresser';
+    optjson.qs= {};
+    optjson.qs.cache= 'no-cache';
+    optjson.qs.vejnavn= 'Rådhuspladsen';
+    optjson.qs.husnr= '1';
+    optjson.qs.postnr= '1550';
+    var jsonrequest= rp(optjson);
+
+    var optgeojson= {};
+    optgeojson.baseUrl= host;
+    optgeojson.url=optjson.url;
+    optgeojson.qs= {};
+    optgeojson.qs.cache= optjson.qs.cache;
+    optgeojson.qs.vejnavn= optjson.qs.vejnavn;
+    optgeojson.qs.husnr= optjson.qs.husnr;
+    optgeojson.qs.postnr= optjson.qs.postnr;
+    optgeojson.qs.format= 'geojson';
+    var geojsonrequest= rp(optgeojson);
+
+    Promise.all([jsonrequest, geojsonrequest]).then(function (bodies) {      
+      try {
+        var adresserjson= JSON.parse(bodies[0]);
+        var adressejson= adresserjson[0];
+        //console.log(adressejson);      
+        var adressergeojson= JSON.parse(bodies[1]);
+        var adressegeojson= adressergeojson.features[0].properties;
+        //console.log(adgangsadressegeojson);
+        assert(adressejson.id===adressegeojson.id, 'Id i json og geojson format forskellig. json: ' + adressejson.id + ', geojson: ' + adressegeojson.id);
+        assert(adressejson.status==adressegeojson.status, 'Status i json og geojson format forskellig. json: |' + adressejson.status + '|, geojson: |' + adressegeojson.status + '|');
+        assert(adressejson.kvhx===adressegeojson.kvhx, 'kvh i json og geojson format forskellig. json: ' + adressejson.kvhx + ', geojson: ' + adressegeojson.kvhx);
+        assert(adressejson.historik.oprettet===adressegeojson.oprettet, 'oprettet i json og geojson format forskellig. json: |' + adressejson.historik.oprettet + '|, geojson: |' + adressegeojson.oprettet + '|');
+        assert(adressejson.historik.ændret===adressegeojson.ændret, 'ændret i json og geojson format forskellig. json: ' + adressejson.historik.ændret + ', geojson: ' + adressegeojson.ændret);
+        assert(adressejson.etage===adressegeojson.etage, 'etage i json og geojson format forskellig. json: ' + adressejson.etage + ', geojson: ' + adressegeojson.etage);
+        assert(adressejson.dør===adressegeojson.dør, 'dør i json og geojson format forskellig. json: ' + adressejson.dør + ', geojson: ' + adressegeojson.dør);
+        assert(adressejson.adgangsadresse.vejstykke.navn===adressegeojson.vejnavn, 'adresse.vejstykke.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', geojson: ' + adressegeojson.vejnavn);
+        assert(adressejson.adgangsadresse.vejstykke.navn===optjson.qs.vejnavn, 'adresse.vejstykke.navn i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', søgekriterie: ' + optjson.qs.vejnavn);
+        assert(adressejson.adgangsadresse.vejstykke.kode===adressegeojson.vejkode, 'adresse.vejstykke.kode i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.kode + ', geojson: ' + adressegeojson.vejkode);
+        assert(adressejson.adgangsadresse.vejstykke.adresseringsnavn===adressegeojson.adresseringsvejnavn, 'adresse.vejstykke.adresseringsnavn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.adresseringsnavn + ', geojson: ' + adressegeojson.adresseringsvejnavn);
+        assert(adressejson.adgangsadresse.husnr===adressegeojson.husnr, 'adresse.husnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.husnr + ', geojson: ' + adressegeojson.husnr);
+        assert(adressejson.adgangsadresse.husnr===optjson.qs.husnr, 'adresse.husnr i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.husnr + ', søgekriterie: ' + optjson.qs.husnr);
+        assert(adressejson.adgangsadresse.supplerendebynavn==adressegeojson.supplerendebynavn||adressejson.adgangsadresse.supplerendebynavn===null&&adressegeojson.supplerendebynavn=="", 'adresse.supplerendebynavn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.supplerendebynavn + ', geojson: ' + adressegeojson.supplerendebynavn);
+        assert(adressejson.adgangsadresse.postnummer.nr===adressegeojson.postnr, 'adresse.postnummer.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', geojson: ' + adressegeojson.postnr);
+        assert(adressejson.adgangsadresse.postnummer.nr===optjson.qs.postnr, 'adresse.postnummer.nr i json og søgekriterie er forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', søgekriterie: ' + optjson.qs.postnr);
+        assert(adressejson.adgangsadresse.postnummer.navn===adressegeojson.postnrnavn, 'adresse.postnummer.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.postnummer.navn + ', geojson: ' + adressegeojson.postnrnavn);
+        if (adressejson.adgangsadresse.stormodtagerpostnr) {
+          assert(adressejson.adgangsadresse.stormodtagerpostnummer.nr===adressegeojson.stormodtagerpostnr, 'adresse.stormodtagerpostnummer.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.stormodtagerpostnummer.nr + ', geojson: ' + adressegeojson.stormodtagerpostnr);
+          assert(adressejson.adgangsadresse.stormodtagerpostnummer.navn===adressegeojson.stormodtagerpostnrnavn, 'adresse.stormodtagerpostnummer.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.stormodtagerpostnummer.navn + ', geojson: ' + adressegeojson.stormodtagerpostnrnavn);
+        }
+        assert(adressejson.adgangsadresse.kommune.kode===adressegeojson.kommunekode, 'adresse.kommune.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.kommune.kode + ', geojson: ' + adressegeojson.kommunekode);
+        assert(adressejson.adgangsadresse.kommune.navn===adressegeojson.kommunenavn, 'adresse.kommune.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.kommune.navn + ', geojson: ' + adressegeojson.kommunenavn);
+        assert(adressejson.adgangsadresse.ejerlav.kode==adressegeojson.ejerlavkode, 'adresse.ejerlav.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.ejerlav.kode + ', geojson: ' + adressegeojson.ejerlavkode);
+        assert(adressejson.adgangsadresse.ejerlav.navn===adressegeojson.ejerlavnavn, 'adresse.ejerlav.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.ejerlav.navn + ', geojson: ' + adressegeojson.ejerlavnavn);
+        assert(adressejson.adgangsadresse.sogn.kode===adressegeojson.sognekode, 'adresse.sogn.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.sogn.kode + ', geojson: ' + adressegeojson.sognekode);
+        assert(adressejson.adgangsadresse.sogn.navn===adressegeojson.sognenavn, 'adresse.sogn.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.sogn.navn + ', geojson: ' + adressegeojson.sognenavn);
+        assert(adressejson.adgangsadresse.region.kode===adressegeojson.regionskode, 'adresse.region.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.region.kode + ', geojson: ' + adressegeojson.regionskode);
+        assert(adressejson.adgangsadresse.region.navn===adressegeojson.regionsnavn, 'adresse.region.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.region.navn + ', geojson: ' + adressegeojson.regionsnavn);
+        assert(adressejson.adgangsadresse.retskreds.kode===adressegeojson.retskredskode, 'adresse.retskreds.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.retskreds.kode + ', geojson: ' + adressegeojson.retskredskode);
+        assert(adressejson.adgangsadresse.retskreds.navn===adressegeojson.retskredsnavn, 'adresse.retskreds.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.retskreds.navn + ', geojson: ' + adressegeojson.retskredsnavn);
+        assert(adressejson.adgangsadresse.politikreds.kode===adressegeojson.politikredskode, 'adresse.politikreds.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.politikreds.kode + ', geojson: ' + adressegeojson.politikredskode);
+        assert(adressejson.adgangsadresse.politikreds.navn===adressegeojson.politikredsnavn, 'adresse.politikreds.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.politikreds.navn + ', geojson: ' + adressegeojson.politikredsnavn);
+        assert(adressejson.adgangsadresse.opstillingskreds.kode===adressegeojson.opstillingskredskode, 'adresse.opstillingskreds.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.opstillingskreds.kode + ', geojson: ' + adressegeojson.opstillingskredskode);
+        assert(adressejson.adgangsadresse.opstillingskreds.navn===adressegeojson.opstillingskredsnavn, 'adresse.opstillingskreds.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.opstillingskreds.navn + ', geojson: ' + adressegeojson.retskredsnavn);
+        assert(adressejson.adgangsadresse.opstillingskreds.kode===adressegeojson.opstillingskredskode, 'adresse.opstillingskreds.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.opstillingskreds.kode + ', geojson: ' + adressegeojson.opstillingskredskode);
+        assert(adressejson.adgangsadresse.opstillingskreds.navn===adressegeojson.opstillingskredsnavn, 'adresse.opstillingskreds.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.opstillingskreds.navn + ', geojson: ' + adressegeojson.retskredsnavn);
+        assert(adressejson.adgangsadresse.esrejendomsnr===adressegeojson.esrejendomsnr, 'adresse.esrejendomsnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.esrejendomsnr + ', geojson: ' + adressegeojson.esrejendomsnr);
+        assert(adressejson.adgangsadresse.matrikelnr===adressegeojson.matrikelnr, 'adresse.matrikelnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.matrikelnr + ', geojson: ' + adressegeojson.matrikelnr);
+        
+        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]==adressegeojson.wgs84koordinat_længde, 'punkt.koordinater[0] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', geojson: ' + adressegeojson.wgs84koordinat_længde);
+        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]==adressegeojson.wgs84koordinat_bredde, 'punkt.koordinater[1] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', geojson: ' + adressegeojson.wgs84koordinat_bredde);
+        assert(adressejson.adgangsadresse.adgangspunkt.nøjagtighed===adressegeojson.nøjagtighed, 'punkt.nøjagtighed i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.nøjagtighed + ', geojson: ' + adressegeojson.nøjagtighed);
+        assert(adressejson.adgangsadresse.adgangspunkt.kilde==adressegeojson.kilde, 'punkt.kilde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.kilde + ', geojson: ' + adressegeojson.kilde);
+        assert(adressejson.adgangsadresse.adgangspunkt.tekniskstandard===adressegeojson.tekniskstandard, 'punkt.tekniskstandard i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekniskstandard + ', geojson: ' + adressegeojson.tekniskstandard);
+        assert(adressejson.adgangsadresse.adgangspunkt.tekstretning==adressegeojson.tekstretning, 'punkt.tekstretning i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekstretning + ', geojson: ' + adressegeojson.tekstretning);
+        assert(adressejson.adgangsadresse.adgangspunkt.ændret===adressegeojson.adressepunktændringsdato, 'punkt.adressepunktændringsdato i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.ændret + ', geojson: ' + adressegeojson.adressepunktændringsdato);
+        assert(adressejson.adgangsadresse.jordstykke.ejerlav.kode==adressegeojson.jordstykke_ejerlavkode, 'jordstykke.ejerlav.kode i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.ejerlav.kode + ', geojson: ' + adressegeojson.jordstykke_ejerlavkode);
+        assert(adressejson.adgangsadresse.jordstykke.matrikelnr===adressegeojson.jordstykke_matrikelnr, 'jordstykke.matrikelnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.matrikelnr + ', geojson: ' + adressegeojson.jordstykke_matrikelnr);
+        assert(adressejson.adgangsadresse.jordstykke.esrejendomsnr===adressegeojson.jordstykke_esrejendomsnr, 'jordstykke.esrejendomsnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.esrejendomsnr + ', geojson: ' + adressegeojson.jordstykke_esrejendomsnr);
+        assert(adressejson.adgangsadresse.zone===adressegeojson.zone, 'Zone i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.zone + ', geojson: ' + adressegeojson.zone);
+        assert(adressejson.adgangsadresse.adgangspunkt.højde==adressegeojson.højde, 'Højde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.højde + ', geojson: ' + adressecsv.højde);
+        done();
+      }
+      catch (e) {
+        console.log('catch:'+e);
+        done(e);
+      }
+    }).catch((err) => {
+      done(err);
+    });
+
   })
 
   it("Samme indhold mini og normal format", function(done){
@@ -510,8 +605,7 @@ describe('Adresseopslag', function(){
         console.log('catch:'+e);
         done(e);
       }
-    })
-    .catch((err) => {
+    }).catch((err) => {
       done(err);
     });;
 
@@ -637,6 +731,20 @@ describe('Supplerendebynavnsøgning', function(){
 });
 
 describe('Postnummersøgning', function(){
+
+  function erIkkeStormodtager(element, index, array) { 
+    return element.stormodtageradresser === null; 
+  } 
+  
+  it("stormodtagerpostnumre skal ikke med som default", function(done){
+    request(encodeURI(host+"/postnumre?cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var postnumre= JSON.parse(body);
+      assert(postnumre.every(erIkkeStormodtager),"Postnumre indeholder stormodtagerpostnumre")
+      done();
+    })
+  })
 
   it("q=Eske*", function(done){
     request(encodeURI(host+"/postnumre?q=eske*&cache=no-cache"), function (error, response, body) {
