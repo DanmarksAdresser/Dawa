@@ -45,14 +45,13 @@ var fields = [
   {
     name: 'supplerendebynavn'
   },
-  {
-    name: 'postnr'
-  },
+  normalizedAdgangsadresseField('postnr'),
   {
     name: 'postnrnavn'
   },
   {
-    name: 'stormodtagerpostnr'
+    name: 'stormodtagerpostnr',
+    formatter: kode4String
   },
   {
     name: 'stormodtagerpostnrnavn'
@@ -129,7 +128,8 @@ var fields = [
     formatter: d
   },
   {
-    name: 'regionskode'
+    name: 'regionskode',
+    formatter: kode4String
   },
   {
     name: 'regionsnavn'

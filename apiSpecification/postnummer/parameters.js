@@ -34,7 +34,8 @@ module.exports = {
   stormodtagerFilter: normalizeParameters([
     {
       name: 'stormodtagere',
-      type: 'boolean'
+      type: 'boolean',
+      defaultValue: 'false'
     }
   ])
 };

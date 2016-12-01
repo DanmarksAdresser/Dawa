@@ -62,10 +62,9 @@ describe("PostnumreApi", function() {
       done();
     });
   });
-  it('Jeg kan hente et enkelt stormodtagerpostnummer', function(done) {
-    request.get({url: "http://localhost:3002/postnumre/1786", json: true}, function(error, response, result) {
+  it('Jeg kan hente et enkelt stormodtagerpostnummer', function() {
+    return request.get({url: "http://localhost:3002/postnumre/1786", json: true}, function(error, response, result) {
       expect(result.nr).to.equal('1786');
-      done();
     });
   });
 

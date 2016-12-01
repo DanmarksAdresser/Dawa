@@ -321,7 +321,7 @@ exports.reverseGeocodingWithinTema = function(temaName) {
 };
 exports.postnummerStormodtagerFilter = function() {
   return function(sqlParts, params) {
-    if(params.stormodtagere !== undefined && !params.stormodtagere) {
+    if(typeof(params.stormodtagere) !== 'undefined' && !params.stormodtagere) {
       dbapi.addWhereClause(sqlParts, 'NOT stormodtager');
     }
   };

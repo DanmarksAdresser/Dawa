@@ -6,8 +6,10 @@ var ddknSchemas = require('./ddknSchemas');
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 var nullableType = require('../schemaUtil').nullableType;
-
+const util = require('../util');
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+const kode4String = util.kode4String;
 
 var normalizedField = function(fieldName) {
   return normalizedFieldSchemas.normalizedField('adgangsadresse', fieldName);
@@ -40,7 +42,8 @@ var fields = [
     name: 'postnrnavn'
   },
   {
-    name: 'stormodtagerpostnr'
+    name: 'stormodtagerpostnr',
+    formatter: kode4String
   },
   {
     name: 'stormodtagerpostnrnavn'
@@ -80,7 +83,8 @@ var fields = [
   normalizedDdknField('ddkn_km1'),
   normalizedDdknField('ddkn_km10'),
   {
-    name: 'regionskode'
+    name: 'regionskode',
+    formatter: kode4String
   },
   {
     name: 'regionsnavn'

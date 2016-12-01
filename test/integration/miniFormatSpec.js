@@ -58,7 +58,7 @@ describe('Mini-format', () => {
         "etage": null,
         "dør": null,
         "supplerendebynavn": "Boruphuse",
-        "postnr": 4320,
+        "postnr": "4320",
         "postnrnavn": "Lejre",
         "kommunekode": "0350",
         "adgangsadresseid": "0a3f5081-c2b5-32b8-e044-0003ba298018",
@@ -171,7 +171,7 @@ describe('Mini-format', () => {
           "etage": null,
           "dør": null,
           "supplerendebynavn": "Boruphuse",
-          "postnr": 4320,
+          "postnr": "4320",
           "postnrnavn": "Lejre",
           "kommunekode": "0350",
           "adgangsadresseid": "0a3f5081-c2b5-32b8-e044-0003ba298018"
