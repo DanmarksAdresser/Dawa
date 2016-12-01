@@ -73,7 +73,8 @@ var fields = [
     name: 'matrikelnr'
   },
   {
-    name: 'esrejendomsnr'
+    name: 'esrejendomsnr',
+    formatter: util.numberToString
   },
   {
     name: 'etrs89koordinat_øst'

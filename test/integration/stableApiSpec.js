@@ -14,7 +14,7 @@ describe('Stable API', () => {
   const expectedResults = {
     adgangsadresse: {
       json: {
-        mini: {
+        mini: [{
           params: {
             id: '0a3f5089-0408-32b8-e044-0003ba298018'
           },
@@ -31,8 +31,8 @@ describe('Stable API', () => {
             "x": 10.3314667967922,
             "y": 55.394897400344
           }
-        },
-        nestet: {
+        }],
+        nestet: [{
           params: {
             id: '0a3f5089-0408-32b8-e044-0003ba298018'
           },
@@ -109,10 +109,10 @@ describe('Stable API', () => {
             "jordstykke": null,
             "bebyggelser": []
           }
-        }
+        }]
       },
       geojsonz: {
-        flad: {
+        flad: [{
           params: {
             id: '0a3f5089-0408-32b8-e044-0003ba298018'
           },
@@ -183,12 +183,83 @@ describe('Stable API', () => {
               "zone": "Landzone"
             }
           }
-        }
+        }, {
+          params: {
+            id: '0a3f5081-c394-32b8-e044-0003ba298018'
+          },
+          value: {
+            "type": "Feature",
+            "crs": {
+              "properties": {
+                "name": "EPSG:4326"
+              },
+              "type": "name"
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                11.9365380642214,
+                55.5391035801617,
+                46.4
+              ]
+            },
+            "properties": {
+              "id": "0a3f5081-c394-32b8-e044-0003ba298018",
+              "status": 1,
+              "oprettet": "2000-02-05T21:40:29.000",
+              "ændret": "2013-11-01T11:23:52.353",
+              "vejkode": "0347",
+              "vejnavn": "Jonstrupvej",
+              "adresseringsvejnavn": "Jonstrupvej",
+              "husnr": "1B",
+              "supplerendebynavn": "Boruphuse",
+              "postnr": "4320",
+              "postnrnavn": "Lejre",
+              "stormodtagerpostnr": null,
+              "stormodtagerpostnrnavn": null,
+              "kommunekode": "0350",
+              "kommunenavn": "Lejre",
+              "ejerlavkode": null,
+              "ejerlavnavn": null,
+              "matrikelnr": null,
+              "esrejendomsnr": null,
+              "etrs89koordinat_øst": 685289.88,
+              "etrs89koordinat_nord": 6158701.41,
+              "wgs84koordinat_bredde": 55.5391035801617,
+              "wgs84koordinat_længde": 11.9365380642214,
+              "nøjagtighed": "A",
+              "kilde": 5,
+              "tekniskstandard": "TK",
+              "tekstretning": 378,
+              "adressepunktændringsdato": "2000-01-01T23:59:00.000",
+              "ddkn_m100": "100m_61587_6852",
+              "ddkn_km1": "1km_6158_685",
+              "ddkn_km10": "10km_615_68",
+              "regionskode": null,
+              "regionsnavn": null,
+              "jordstykke_ejerlavkode": 60851,
+              "jordstykke_matrikelnr": "1a",
+              "jordstykke_esrejendomsnr": "8571",
+              "jordstykke_ejerlavnavn": "Borup, Osted",
+              "højde": 46.4,
+              "kvh": "03500347__1B",
+              "sognekode": "0099",
+              "sognenavn": "Sogn test",
+              "politikredskode": "0099",
+              "politikredsnavn": "Politikreds test",
+              "retskredskode": "0099",
+              "retskredsnavn": "retskreds test",
+              "opstillingskredskode": "0099",
+              "opstillingskredsnavn": "Opstillingskreds test",
+              "zone": "Landzone"
+            }
+          }
+        }]
       }
     },
     adresse: {
       json: {
-        mini: {
+        mini: [{
           params: {
             id: '0a3f50b3-a112-32b8-e044-0003ba298018'
           },
@@ -208,8 +279,8 @@ describe('Stable API', () => {
             "x": 10.3314667967922,
             "y": 55.394897400344
           }
-        },
-        nestet: {
+        }],
+        nestet: [{
           params: {
             id: '0a3f50b3-a112-32b8-e044-0003ba298018'
           },
@@ -299,10 +370,10 @@ describe('Stable API', () => {
               "bebyggelser": []
             }
           }
-        }
+        }]
       },
       geojsonz: {
-        flad: {
+        flad: [{
           params: {
             id: '0a3f50b3-a112-32b8-e044-0003ba298018'
           },
@@ -380,30 +451,32 @@ describe('Stable API', () => {
               "zone": "Landzone"
             }
           }
-        }
+        }]
       }
     }
-  }
+  };
 
 
   testdb.withTransactionEach('test', (clientFn) => {
-    for(let entityName of Object.keys(expectedResults)) {
+    for (let entityName of Object.keys(expectedResults)) {
       const resource = registry.get({
         entityName: entityName,
         type: 'resource',
         qualifier: 'getByKey'
       });
       const formatMap = expectedResults[entityName];
-      for(let format of Object.keys(formatMap)) {
+      for (let format of Object.keys(formatMap)) {
         const strukturMap = formatMap[format];
-        for(let struktur of Object.keys(strukturMap)) {
-          const test = strukturMap[struktur];
+        for (let struktur of Object.keys(strukturMap)) {
+          const tests = strukturMap[struktur];
           it(`Return value for entity=${entityName},format=${format},struktur=${struktur}`, q.async(function*() {
-            let jsonResult = yield helpers.getJson(clientFn(), resource, test.params, {
-              format: format,
-              struktur: struktur
-            });
-            expect(jsonResult).to.deep.equal(test.value);
+            for(let test of tests) {
+              let jsonResult = yield helpers.getJson(clientFn(), resource, test.params, {
+                format: format,
+                struktur: struktur
+              });
+              expect(jsonResult).to.deep.equal(test.value);
+            }
           }))
         }
       }
