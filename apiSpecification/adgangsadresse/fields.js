@@ -96,7 +96,8 @@ var fields = [
     name: 'jordstykke_matrikelnr'
   },
   {
-    name: 'jordstykke_esrejendomsnr'
+    name: 'jordstykke_esrejendomsnr',
+    formatter: util.numberToString
   },
   {
     name: 'jordstykke_ejerlavnavn'

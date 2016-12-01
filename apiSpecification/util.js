@@ -11,6 +11,13 @@ exports.kode4String = function(kodeAsInteger) {
   }
 };
 
+exports.numberToString = (num) => {
+  if(typeof(num) === 'undefined' || num === null) {
+    return null;
+  }
+  return num.toString();
+}
+
 exports.maybeNull = function(val) {
   if(val === undefined) {
     return null;

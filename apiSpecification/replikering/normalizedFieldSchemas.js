@@ -161,7 +161,8 @@ var fields = {
         ' ESR, som det matrikelnummer som adressen ligger på, er en del af.' +
         ' Stammer fra BBR.' +
         ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
-      schema: definitions.Nullableesrejendomsnr
+      schema: definitions.Nullableesrejendomsnr,
+      formatter: util.numberToString
     }, {
       name: 'etrs89koordinat_øst',
       description: 'Adgangspunktets østlige koordiat angivet i koordinatsystemet UTM zone 32' +
