@@ -9,7 +9,7 @@ var assert = require("assert")
   , http= require('http');
 
 //var host= "http://localhost:3000";
-var host= "http://dawa-p1.aws.dk";
+var host= "http://dawa.aws.dk";
 //var host= "http://origin-dawa-p2.aws.dk";
 //var host= "http://52.212.234.159";
 console.log(host);
@@ -525,18 +525,18 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.esrejendomsnr===adressegeojson.esrejendomsnr, 'adresse.esrejendomsnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.esrejendomsnr + ', geojson: ' + adressegeojson.esrejendomsnr);
         assert(adressejson.adgangsadresse.matrikelnr===adressegeojson.matrikelnr, 'adresse.matrikelnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.matrikelnr + ', geojson: ' + adressegeojson.matrikelnr);
         
-        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]==adressegeojson.wgs84koordinat_længde, 'punkt.koordinater[0] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', geojson: ' + adressegeojson.wgs84koordinat_længde);
-        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]==adressegeojson.wgs84koordinat_bredde, 'punkt.koordinater[1] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', geojson: ' + adressegeojson.wgs84koordinat_bredde);
+        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]===adressegeojson.wgs84koordinat_længde, 'punkt.koordinater[0] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', geojson: ' + adressegeojson.wgs84koordinat_længde);
+        assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]===adressegeojson.wgs84koordinat_bredde, 'punkt.koordinater[1] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', geojson: ' + adressegeojson.wgs84koordinat_bredde);
         assert(adressejson.adgangsadresse.adgangspunkt.nøjagtighed===adressegeojson.nøjagtighed, 'punkt.nøjagtighed i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.nøjagtighed + ', geojson: ' + adressegeojson.nøjagtighed);
-        assert(adressejson.adgangsadresse.adgangspunkt.kilde==adressegeojson.kilde, 'punkt.kilde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.kilde + ', geojson: ' + adressegeojson.kilde);
+        assert(adressejson.adgangsadresse.adgangspunkt.kilde===adressegeojson.kilde, 'punkt.kilde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.kilde + ', geojson: ' + adressegeojson.kilde);
         assert(adressejson.adgangsadresse.adgangspunkt.tekniskstandard===adressegeojson.tekniskstandard, 'punkt.tekniskstandard i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekniskstandard + ', geojson: ' + adressegeojson.tekniskstandard);
-        assert(adressejson.adgangsadresse.adgangspunkt.tekstretning==adressegeojson.tekstretning, 'punkt.tekstretning i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekstretning + ', geojson: ' + adressegeojson.tekstretning);
+        assert(adressejson.adgangsadresse.adgangspunkt.tekstretning===adressegeojson.tekstretning, 'punkt.tekstretning i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekstretning + ', geojson: ' + adressegeojson.tekstretning);
         assert(adressejson.adgangsadresse.adgangspunkt.ændret===adressegeojson.adressepunktændringsdato, 'punkt.adressepunktændringsdato i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.ændret + ', geojson: ' + adressegeojson.adressepunktændringsdato);
         assert(adressejson.adgangsadresse.jordstykke.ejerlav.kode==adressegeojson.jordstykke_ejerlavkode, 'jordstykke.ejerlav.kode i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.ejerlav.kode + ', geojson: ' + adressegeojson.jordstykke_ejerlavkode);
         assert(adressejson.adgangsadresse.jordstykke.matrikelnr===adressegeojson.jordstykke_matrikelnr, 'jordstykke.matrikelnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.matrikelnr + ', geojson: ' + adressegeojson.jordstykke_matrikelnr);
         assert(adressejson.adgangsadresse.jordstykke.esrejendomsnr===adressegeojson.jordstykke_esrejendomsnr, 'jordstykke.esrejendomsnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.esrejendomsnr + ', geojson: ' + adressegeojson.jordstykke_esrejendomsnr);
         assert(adressejson.adgangsadresse.zone===adressegeojson.zone, 'Zone i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.zone + ', geojson: ' + adressegeojson.zone);
-        assert(adressejson.adgangsadresse.adgangspunkt.højde==adressegeojson.højde, 'Højde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.højde + ', geojson: ' + adressecsv.højde);
+        assert(adressejson.adgangsadresse.adgangspunkt.højde===adressegeojson.højde, 'Højde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.højde + ', geojson: ' + adressegeojson.højde);
         done();
       }
       catch (e) {
