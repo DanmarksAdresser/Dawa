@@ -10,6 +10,7 @@ var resourcesUtil = require('../common/resourcesUtil');
 var schema = require('../parameterSchema');
 const adresseTextMatch = require('../adresseTextMatch');
 const levenshtein = require('../levenshtein');
+const commonParameters = require('../common/commonParameters');
 
 require('../vejnavn/resources');
 require('../adgangsadresse/resources');
@@ -150,7 +151,7 @@ var nonDelegatedParameters = [
       enum: ['vejnavn', 'adgangsadresse', 'adresse']
     }
   }
-];
+].concat(commonParameters.format).concat(commonParameters.paging);
 
 var allParameters = delegatedParameters.concat(nonDelegatedParameters);
 
