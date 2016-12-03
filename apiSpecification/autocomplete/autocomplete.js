@@ -582,7 +582,9 @@ var sqlModel = {
   query: function(client, fieldNames, params, callback) {
     return q.async(function*() {
       const startfra = params.adgangsadresseid ? 'adresse' : (params.startfra || 'vejnavn');
-      const slutmed = params.type || 'adresse';
+      // If adgangsadresseid parameter is supplied, we ignore type parameter
+      // this is not quite correct, but some client depends on it.
+      const slutmed = params.adgangsadresseid ? 'adresse' : (params.type || 'adresse');
       const searchedEntities = entityTypes.slice(entityTypes.indexOf(startfra), entityTypes.indexOf(slutmed)+1);
       for(let entityName of searchedEntities) {
         const lastEntity = entityName === searchedEntities[searchedEntities.length - 1];
