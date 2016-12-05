@@ -1,6 +1,6 @@
 {
   "name": "DAWA",
-  "version": "1.9.37",
+  "version": "1.9.38",
   "private": true,
   "author": "Ministeriet for By, Bolig og Landdistrikter",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
@@ -28,6 +28,7 @@
     "moment": "2.10.3",
     "moment-timezone": "0.4.1",
     "moving-average": "0.0.4",
+    "node-expat": "^2.3.15",
     "node-uuid": "^1.4.1",
     "npm": "^3.10.3",
     "pg": "6.0.1",
