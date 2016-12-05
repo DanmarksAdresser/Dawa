@@ -22,6 +22,24 @@ const PSQL_CSV_OPTIONS = {
   encoding: 'utf8'
 };
 
+function streamToTablePipeline(client, targetTable, columns, mapFn) {
+  mapFn = mapFn || _.identity;
+  var pgStream = copyStream(client, targetTable, columns);
+  return [through2.obj(function (obj, enc, callback) {
+    try {
+      const result = mapFn(obj);
+      const csvResult = postgresify(result);
+      callback(null, csvResult);
+    }
+    catch (e) {
+      callback(e);
+    }
+  }),
+    copyStreamStringifier(columns),
+    pgStream
+  ];
+}
+
 /**
  * Create a PostgreSQL COPY stream, which accepts CSV streams made by copyStreamStringifier
  */
@@ -64,14 +82,9 @@ function postgresify(obj) {
  */
 function streamArrayToTable(client, array, targetTable, columns) {
   return q.async(function*() {
-    const pgStream = copyStream(client, targetTable, columns);
     const inputStream = es.readArray(array);
     yield promisingStreamCombiner([
-      inputStream,
-      es.mapSync(postgresify),
-      copyStreamStringifier(columns),
-      pgStream
-    ]);
+      inputStream].concat(streamToTablePipeline(client, targetTable, columns)));
   })();
 }
 
@@ -85,29 +98,18 @@ function streamArrayToTable(client, array, targetTable, columns) {
  * @returns {*}
  */
 function streamNdjsonToTable(client, filePath, targetTable, columns, mapFn) {
-  var pgStream = copyStream(client, targetTable, columns);
   var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
   mapFn = mapFn || _.identity;
-  return promisingStreamCombiner([
-    inputStream,
-    split2(),
-    through2.obj(function(line, enc, callback) {
-      const json = JSON.parse(line);
-      try {
-        const result = mapFn(json);
-        if(!result) {
-          return callback();
-        }
-        const csvResult = postgresify(result);
-        callback(null, csvResult);
-      }
-      catch(e) {
-        callback(e);
-      }
-    }),
-    copyStreamStringifier(columns),
-    pgStream
-  ]);
+  const parseAndMapFn = str => {
+    const parsed = JSON.parse(str);
+    return mapFn(parsed);
+  }
+  return promisingStreamCombiner(
+    [
+      inputStream,
+      split2()
+    ]
+      .concat(streamToTablePipeline(client, targetTable, columns, parseAndMapFn)));
 }
 
 const DATA_CSV_OPTIONS = {
@@ -118,25 +120,12 @@ const DATA_CSV_OPTIONS = {
 };
 
 function streamCsvToTable(client, filePath, targetTable, columns, mapFn) {
-  var pgStream = copyStream(client, targetTable, columns);
   var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
-  mapFn = mapFn || _.identity;
-  return promisingStreamCombiner([
+  const streams =  [
     inputStream,
-    csvParse(Object.assign({}, DATA_CSV_OPTIONS)),
-    through2.obj(function(obj, enc, callback) {
-      try {
-        const result = mapFn(obj);
-        const csvResult = postgresify(result);
-        callback(null, csvResult);
-      }
-      catch(e) {
-        callback(e);
-      }
-    }),
-    copyStreamStringifier(columns),
-    pgStream
-  ]);
+    csvParse(Object.assign({}, DATA_CSV_OPTIONS))
+  ].concat(streamToTablePipeline(client, targetTable, columns, mapFn));
+  return promisingStreamCombiner(streams);
 }
 
 class ArrayStream extends Readable {
@@ -163,5 +152,6 @@ module.exports = {
   streamArrayToTable: streamArrayToTable,
   streamCsvToTable: streamCsvToTable,
   streamNdjsonToTable: streamNdjsonToTable,
-  streamArray: streamArray
+  streamArray: streamArray,
+  streamToTablePipeline: streamToTablePipeline
 };
