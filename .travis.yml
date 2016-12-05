@@ -18,11 +18,7 @@ env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty logConfiguration=travis-ci-client-logconfig.json
 
 before_install:
-  - wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-  - sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main" >> /etc/apt/sources.list.d/postgresql.list'
-  - sudo apt-get update
   - sudo locale-gen --no-archive da_DK.UTF-8
-  - psql --version
 
 before_script:
   - bash psql/createdb/createdb.bash localhost dawaintegrationtest postgres
