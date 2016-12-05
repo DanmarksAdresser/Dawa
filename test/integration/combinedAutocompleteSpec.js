@@ -2,6 +2,7 @@
 
 var expect = require('chai').expect;
 var request = require('request-promise');
+const q = require('q');
 
 require('../../apiSpecification/allSpecs');
 
@@ -131,5 +132,27 @@ describe('Autocomplete', function() {
         expect(result[0].type).to.equal('adgangsadresse');
       });
     });
+
+    it('Skal understøtte JSONP', q.async(function*() {
+      const result = yield helpers.getStringResponse(clientFn(), autocomplete, {}, {
+          q: "Mosede",
+          callback: 'cb'
+        }
+      );
+      expect(result.startsWith('cb(')).to.be.true;
+    }));
+
+    // Legacy behavior
+    it('Hvis jeg anvender adgangsadresseid parameteren sammen med type parameteren, så ignoreres type parameteren',
+      q.async(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+        q: "Mosede engvej",
+        fuzzy: "",
+        type: 'adgangsadresse',
+        adgangsadresseid: '0a3f5081-3b23-32b8-e044-0003ba298018'}
+        );
+      expect(result.length).to.be.above(0);
+      expect(result[0].type).to.equal('adresse');
+    }));
   });
 });
