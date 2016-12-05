@@ -22,7 +22,7 @@ before_install:
   - sudo service postgresql stop
   - sudo apt-get install postgresql-9.6 postgresql-contrib-9.6 postgresql-9.6-postgis-2.3
   - sudo service postgresql start
-  psql --version
+  - psql --version
 
 
 before_script:
