@@ -11,17 +11,13 @@ node_js:
   - "4.2.3"
 
 addons:
-  postgresql: 9.5
+  postgresql: 9.6
 
 env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty logConfiguration=travis-ci-client-logconfig.json
 
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update
-  - sudo apt-get install g++-4.8
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 90
-  - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 90
+  - sudo apt-get install -y postgresql-9.6-postgis-2.3
   - sudo locale-gen --no-archive da_DK.UTF-8
 
 before_script:
