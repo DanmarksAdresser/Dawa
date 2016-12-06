@@ -14,6 +14,26 @@ var host= "http://dawa.aws.dk";
 //var host= "http://52.212.234.159";
 console.log(host);
 
+describe('Autocomplete', function(){
+
+  it('Autocomplete med callback', function(done){
+
+    function cb(response) {  
+      console.log(response[0].tekst); 
+      return response.length;
+    }
+
+    request(encodeURI(host+'/autocomplete?q=rødkildev&type=vejnavn&caretpos=9&callback=cb&cache=no-cache'), function (error, response, body) {      
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var len= eval(body);
+      assert(len>1);  
+      done();
+    })
+  });
+
+});
+
 describe('Adressevalidering', function(){
 
   it('Alleshavevej,11,4593 er ok', function(done){
