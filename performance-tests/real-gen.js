@@ -11,6 +11,8 @@ const url = require('url');
 const _ = require('underscore');
 const Writable = require('stream').Writable;
 
+q.longStackSupport = true;
+
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const logger = require('../logger').forCategory('loadtest');
 
@@ -20,7 +22,10 @@ var optionSpec = {
   concurrency: [false, 'Number of concurrent requests', 'number', 1]
 };
 
+const keepAliveAgent = new http.Agent({ keepAlive: true,  });
+
 const performRequest = (options) => {
+  options = Object.assign({}, options, {agent: keepAliveAgent});
   return q.Promise((resolve, reject) => {
     const before = Date.now();
     let byteCount = 0;
@@ -28,16 +33,14 @@ const performRequest = (options) => {
       res.on('data', chunk => {
         byteCount += chunk.byteLength;
       });
-      res.on('error', err => {
-        reject(err);
-      });
+      res.on('error', reject);
       res.on('end', () => {
         resolve({
           duration: Date.now() - before,
           byteCount: byteCount
         });
       });
-    });
+    }).on('error', reject);
   });
 };
 
