@@ -11,8 +11,8 @@ const url = require('url');
 const _ = require('underscore');
 const Writable = require('stream').Writable;
 
-var cliParameterParsing = require('./bbr/common/cliParameterParsing');
-const logger = require('./logger').forCategory('loadtest');
+var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const logger = require('../logger').forCategory('loadtest');
 
 var optionSpec = {
   baseUrl: [false, 'URL på dawa service', 'string', 'http://127.0.0.1:3000'],
