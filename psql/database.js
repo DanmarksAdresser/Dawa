@@ -58,8 +58,6 @@ exports.create = function(name, options) {
         client.poolCount = 0;
         return cb(null, client);
       });
-      // at most 1 concurrent request per client IP per node process
-      pool.requestLimiter = limiter(1);
     },
     destroy: function (client) {
       client._destroying = true;
