@@ -16,6 +16,7 @@ var sqlCommon = require('./common');
 const flats = require('../apiSpecification/flats/flats');
 const flatSqlSpecs = require('../apiSpecification/flats/sqlSpecs');
 const flatTilknytninger = require('../apiSpecification/flats/tilknytninger/tilknytninger');
+const generateOisSchemaImpl = require('../ois/generateSqlSchemaImpl');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
@@ -139,6 +140,7 @@ exports.loadTables = function(client, scriptDir) {
       }
     }
     yield client.queryp(generateSqlSchemaImpl());
+    yield client.queryp(generateOisSchemaImpl());
   })();
 };
 

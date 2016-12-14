@@ -6,7 +6,6 @@ const q = require('q');
 
 const importOisImpl = require('../../ois/importOisImpl');
 const oisModels = require('../../ois/oisModels');
-const helpers = require('./helpers');
 const testdb = require('../helpers/testdb');
 
 const FIELDS_NOT_IN_TEST_DATA = {
