@@ -2,13 +2,10 @@
 
 var cluster = require('cluster');
 var fs = require('fs');
-var pgConnectionString = require('pg-connection-string');
 var q = require('q');
-var util = require('util');
 var uuid = require('node-uuid');
 
 var database = require('./psql/database');
-var checkdns = require('./checkdns');
 var proddb = require('./psql/proddb');
 var statistics = require('./statistics');
 
@@ -60,33 +57,15 @@ exports.getWorkerStatuses = function() {
 
 };
 
-function getDnsStatus(host) {
-  return checkdns(host)
-    .then(function(dnsStatus) {
-      dnsStatus.status = dnsStatus.lookupStale ? 'down' : 'up';
-      return dnsStatus;
-  }, function(error) {
-      return {
-        status: 'down',
-        reason: util.inspect(error)
-      };
-  });
-}
-
 exports.isaliveMaster = function(options) {
-  var pgConnectionUrl = options.pgConnectionUrl;
-  var host = pgConnectionString.parse(pgConnectionUrl).host;
   var result = {
     name: packageJson.name,
     version: packageJson.version,
     generation_time: new Date().toISOString()
   };
   var workerStatusesPromise = exports.getWorkerStatuses();
-  var dnsCheckPromise = getDnsStatus(host);
-  return q.all([workerStatusesPromise, dnsCheckPromise]).spread(function(workerStatuses, dnsStatus) {
+  return q.all([workerStatusesPromise]).spread(function(workerStatuses) {
       result.workers = workerStatuses;
-      result.database_dns = dnsStatus;
-      result.status = result.database_dns.status;
       return result;
     });
 };
