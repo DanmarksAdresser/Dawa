@@ -5,7 +5,7 @@ var pg = require('pg');
 var q = require('q');
 var _ = require('underscore');
 
-const limiter = require('../limiter');
+const fairScheduler = require('./fair-scheduler');
 var logger = require('../logger').forCategory('sql');
 var statistics = require('../statistics');
 
@@ -58,8 +58,6 @@ exports.create = function(name, options) {
         client.poolCount = 0;
         return cb(null, client);
       });
-      // at most 1 concurrent request per client IP per node process
-      pool.requestLimiter = limiter(1);
     },
     destroy: function (client) {
       client._destroying = true;
@@ -67,6 +65,27 @@ exports.create = function(name, options) {
       client.end();
     }
   });
+
+  
+  const scheduler = fairScheduler({
+    concurrency: 2,
+    cleanupInterval: 5000,
+    initialPriorityOffset: -1000,
+    prioritySlots: 1
+  });
+  pool.requestLimiter = (clientIp, fn) => q.async(function*() {
+    const scheduleResult = yield scheduler.schedule(clientIp, q.async(function*() {
+      const before = Date.now();
+      const result = yield fn();
+      const duration = Date.now() - before;
+      return {
+        cost: duration,
+        result: result
+      }
+    }));
+    return scheduleResult.result;
+  })();
+
   return {
     options: options,
     pool: pool
