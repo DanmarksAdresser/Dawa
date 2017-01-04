@@ -2,7 +2,6 @@
 
 var adgangsadresseColumns = require('../adgangsadresse/columns');
 var dbapi = require('../../dbapi');
-var nameAndKey = require('./nameAndKey');
 var parameters = require('./parameters');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
@@ -144,7 +143,14 @@ var parameterImpls = [
   searchAdresse(columns),
   autocompleteAdresse(columns),
   fuzzySearchParameterImpl,
-  sqlParameterImpl.paging(columns, nameAndKey.key)
+  sqlParameterImpl.paging(columns, params => {
+    if(params.postnr || params.kommunekode || params.vejkode || params.vejnavn || params.husnr) {
+      return ['adgangsadresseid', 'id'];
+    }
+    else {
+      return ['id'];
+    }
+  })
 ];
 
 module.exports = sqlUtil.applyFallbackToFuzzySearch(assembleSqlModel(columns, parameterImpls, baseQuery));

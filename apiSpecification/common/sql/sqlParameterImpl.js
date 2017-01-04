@@ -219,7 +219,8 @@ exports.paging = function(columnSpec, key, alwaysOrderByKey) {
     var offsetLimit = toOffsetLimit(params);
     _.extend(sqlParts, offsetLimit);
     if(params.per_side || alwaysOrderByKey) {
-      applyOrderByKey(sqlParts, key );
+      const orderBy = _.isFunction(key) ? key(params) : key;
+      applyOrderByKey(sqlParts, orderBy );
     }
   };
 };
