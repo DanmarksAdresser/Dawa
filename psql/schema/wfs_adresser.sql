@@ -1,3 +1,25 @@
+-- This is a temporary fix for WFS induced COUNT queries.
+-- We use left join b/c this performs better.
+-- However, other DAWA queries perform much worse, so
+-- we use two different backing views.
+DROP VIEW IF EXISTS adresser_wfs_support CASCADE;
+CREATE OR REPLACE VIEW adresser_wfs_support AS
+  SELECT
+    E.id        AS e_id,
+    E.objekttype AS e_objekttype,
+    E.oprettet  AS e_oprettet,
+    E.ikraftfra AS e_ikraftfra,
+    E.aendret   AS e_aendret,
+    E.tsv       AS e_tsv,
+    E.etage,
+    E.doer,
+    A.*
+  FROM enhedsadresser E
+    -- LEFT JOIN optimizes COUNT queries. There is no
+    -- difference due to the forein key constraint.
+    LEFT JOIN adgangsadresserView A  ON (E.adgangsadresseid = A.a_id);
+
+
 DROP VIEW IF EXISTS wfs_adresser CASCADE;
 
 CREATE OR REPLACE VIEW wfs_adresser AS
@@ -37,4 +59,4 @@ CREATE OR REPLACE VIEW wfs_adresser AS
     adressepunktaendringsdato AS "adressepunktændringsdato",
     round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "tekstretninggrader",
     geom
-  FROM Adresser;
+  FROM adresser_wfs_support;

@@ -22,6 +22,7 @@
     "express-ws": "^2.0.0-rc.1",
     "fastpriorityqueue": "^0.1.0",
     "generic-pool": "^2.1.1",
+    "iconv-lite": "^0.4.15",
     "install": "^0.8.1",
     "jade": "1.11.0",
     "js-csp": "^0.6.1",
@@ -38,6 +39,7 @@
     "pg-parse-float": "0.0.1",
     "q": "1.1.2",
     "request-promise": "0.4.0",
+    "sax": "^1.2.1",
     "split2": "^2.0.1",
     "stream-combiner": "^0.2.1",
     "string-format": "^0.5.0",
@@ -49,6 +51,7 @@
     "winston-daily-rotate-file": "^1.0.1",
     "ws": "^1.1.1",
     "ws-heartbeats": "^1.0.0",
+    "xml": "^1.0.1",
     "xml2js": "~0.4.1",
     "z-schema": "~3.0.1"
   },

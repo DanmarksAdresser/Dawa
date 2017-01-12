@@ -1,23 +1,66 @@
 "use strict";
 
-module.exports = {
-  bygning: [
-    ['AdgAdr_id'],
-    ['ESREjdNr'],
-    ['BYG_ANVEND_KODE'],
-    ['KomKode']
-  ],
-  tekniskanlaeg: [
-    ['AdgAdr_id'],
-    ['ESREjdNr'],
-    ['Bygning_id'],
-    ['KomKode']
-  ],
-  enhed: [
-    ['EnhAdr_id'],
-    ['ENH_ANVEND_KODE']
-  ],
-  opgang: [
-    ['Bygning_id']
-  ]
-}
+module.exports = [{
+  entity: 'bygning',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'bygning',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'bygning',
+  columns: ['BYG_ANVEND_KODE']
+}, {
+  entity: 'bygning',
+  columns: ['KomKode']
+}, {
+  entity: 'bygning',
+  columns: ['BygPkt_id']
+}, {
+  entity: 'opgang',
+  columns: ['Bygning_id']
+}, {
+  entity: 'opgang',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'enhed',
+  columns: ['EnhAdr_id']
+}, {
+  entity: 'enhed',
+  columns: ['ENH_ANVEND_KODE']
+}, {
+  entity: 'enhed',
+  columns: ['Opgang_id']
+}, {
+  entity: 'enhed',
+  columns: ['Etage_id']
+}, {
+  entity: 'etage',
+  columns: ['Bygning_id']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['Bygning_id']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['KomKode']
+}, {
+  entity: 'ejerskab',
+  columns: ['bbrid']
+}, {
+  entity: 'ejerskab',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'matrikelreference',
+  columns: ['Grund_id']
+}, {
+  entity: 'matrikelreference',
+  columns: ['Landsejerlavkode', 'MatrNr']
+}, {
+  entity: 'matrikelreference',
+  columns: ['MatrNr']
+}];

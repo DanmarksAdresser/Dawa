@@ -1,91 +1,81 @@
 "use strict";
 
 const expect = require('chai').expect;
-const path = require('path');
 const q = require('q');
 
-const importOisImpl = require('../../ois/importOisImpl');
 const oisModels = require('../../ois/oisModels');
 const testdb = require('../helpers/testdb');
 
 const FIELDS_NOT_IN_TEST_DATA = {
+  grund: [
+    "Byggesag_id",
+    "GrundStam_id",
+    "KomFelt1",
+    "KomFelt2",
+    "KomFelt3",
+    "JourNr",
+    "ESDH_Ref",
+    "Gyldighedsdato",
+    "GruMdlSplvnd",
+    "GruPbFrbRens",
+    "GruPbFrbRensDato",
+    "GruTilUdtr",
+    "GruTilUdtrDato",
+    "GruTilAltAfld",
+    "GruTilAltAfldDato"
+  ],
   bygning: [
     "bygningsnr",
-  "Byggesag_id",
-  "BygStam_id",
-  "UdloebDatoMidl",
-  "BYG_AFLOEB_KODE",
-  "BYG_AFLOEB_TILL",
-  "SuppYderVaegMat",
-  "SuppTagDaekMat",
-  "AsbestMateriale",
-  "Carport_Princip",
-  "FREDNING_KODE",
-  "BevarVaerdig",
-  "UdlejForhold1",
-  "HuslejeOplysDato",
-  "SagsType",
-  "BygPktNoejagtigKls",
-  "BygPkt_id",
-  "StormRaadPaalaegDato",
-  "BygSkadeForsikSelskab",
-  "BygSkadeForsikSelskabDato",
-  "KomFelt1",
-  "KomFelt2",
-  "KomFelt3",
-  "JourNr",
-  "ESDH_Ref",
-  "eRef",
-  "Delnr",
-  "Opdelingsnr",
-  "BygSkadeOmfatFors",
-  "Gyldighedsdato"
-],
-
+    "BevarVaerdig",
+    "UdlejForhold1",
+    "HuslejeOplysDato",
+    "StormRaadPaalaegDato",
+    "KomFelt1",
+    "KomFelt2",
+    "KomFelt3",
+    "eRef",
+    "Opdelingsnr"
+  ],
   opgang: [
-  "ByggeSag_id",
-    "OpgStam_id",
     "DataFelt2",
     "DataFelt3",
-    "SagsType",
     "KomFelt1",
     "KomFelt2",
     "KomFelt3",
     "JourNr",
-    "ESDH_Ref",
-    "Ophoert_ts",
-    "Gyldighedsdato"
+    "ESDH_Ref"
   ],
- enhedopgang: [
-  "Ophoert_ts"
+  enhedopgang: [
+    "ois_id",
+    "ois_ts",
+    "EnhedOpgang_id",
+    "Opgang_id",
+    "Enhed_id",
+    "PrimaerIndg",
+    "OPRET_TS",
+    "AENDR_TS",
+    "Aendr_Funk",
+    "Ophoert_ts"
   ],
   enhed: [
-  "Nybyg",
-    "ByggeSag_id",
-    "EnhedStam_id",
-    "HenvEnh_id",
+    "Nybyg",
     "REF_Enhed_id",
-    "IdentOpretDato",
     "ENH_UDLEJ1_KODE",
     "HuslejeOplysDato",
-    "LOVLIG_ANVEND_KODE",
-    "DispTidsbegraensetDato",
-    "ENH_DEL_IBRUG_DATO",
-    "OFF_STOETTE_KODE",
-    "IndflytDato",
-    "VARMEINSTAL_KODE",
-    "OPVARMNING_KODE",
-    "VARME_SUPPL_KODE",
     "KomFelt1",
     "KomFelt2",
     "KomFelt3",
     "JourNr",
-    "ESDH_Ref",
-    "Gyldighedsdato"
+    "ESDH_Ref"
+  ],
+  etage: [
+    "KomFelt1",
+    "KomFelt2",
+    "KomFelt3",
+    "JourNr",
+    "ESDH_Ref"
   ],
   tekniskanlaeg: [
-  "Bygning_id",
-    "FabrikatType",
     "ExtDB",
     "ExtNoegle",
     "Slojfning",
@@ -97,7 +87,6 @@ const FIELDS_NOT_IN_TEST_DATA = {
     "KomFelt2",
     "KomFelt3",
     "JourNr",
-    "ESDH_Ref",
     "eRef",
     "Delnr",
     "Opdelingsnr",
@@ -109,22 +98,42 @@ const FIELDS_NOT_IN_TEST_DATA = {
     "SloejfningAar"
   ],
   ejerskab: [
-  "eRef",
-    "MereEnd1EjerLej",
-    "EjerlejNr",
-    "Ophoert_ts"
+    "eRef"
   ],
   enhedenhedsadresse: [
-  "Ophoert_ts"
+    "ois_id",
+    "ois_ts",
+    "EnhEnhAdr_id",
+    "EnhAdr_id",
+    "Enhed_id",
+    "PrimaerAdr",
+    "OPRET_TS",
+    "AENDR_TS",
+    "Aendr_Funk",
+    "Ophoert_ts"
   ],
-  bygningspunkt: []
+  entitet: [],
+  felt: [],
+  datatype: [
+    "Ophoert_ts"
+  ],
+  kodetype: [
+    "Ophoert_ts"
+  ],
+  kodefelt: [
+    "Ophoert_ts"
+  ],
+  kode: [
+    "Ophoert_ts"
+  ],
+  bygningspunkt: [],
+  matrikelreference: [
+    "eRef"
+  ]
 };
 
 describe('Import af OIS-filer', () => {
-  testdb.withTransactionAll('empty', clientFn => {
-    it('Kan importere et OIS-udtræk', q.async(function*() {
-      yield importOisImpl.importOis(clientFn(), path.join(__dirname, 'sampleOisFiles/total'), false);
-    }));
+  testdb.withTransactionAll('test', clientFn => {
     for(let oisModelName of Object.keys(oisModels)) {
       it(`Alle felter i ${oisModelName} er blevet importeret`, q.async(function*() {
         const oisModel = oisModels[oisModelName];

@@ -66,7 +66,7 @@ exports.create = function(name, options) {
     }
   });
 
-  
+
   const scheduler = fairScheduler({
     concurrency: 2,
     cleanupInterval: 5000,

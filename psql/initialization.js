@@ -100,7 +100,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'jordstykker', init: false },
   {name: 'bebyggelser', init: false},
   {name: 'bebyggelser_adgadr', init: false},
-  {name: 'bebyggelser_divided', init: false}
+  {name: 'bebyggelser_divided', init: false},
+  {name: 'ois_importlog', init: false}
 ]);
 
 exports.forAllTableSpecs = function(client, func){

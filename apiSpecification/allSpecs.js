@@ -17,3 +17,4 @@ require('./replikering/sekvensnummer/senesteSekvensnummer');
 require('./replikering/udtraek/resources');
 require('./consistency');
 require('./autocomplete/autocomplete.js');
+require('./ois/resources');

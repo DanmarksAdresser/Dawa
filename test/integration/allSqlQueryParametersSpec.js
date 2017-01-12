@@ -536,6 +536,110 @@ var sampleParameters = {
       values: ['1180'],
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
     }
+  },
+  grund: {
+    id: {
+      values: ['003b8b83-a7da-4cd1-9ebf-9d2ed4b2d522'],
+      verifier: (grund, id) => grund.Grund_id === id
+    }
+  },
+  bygning: {
+    id: {
+      values: ['00058c31-60c7-45d5-9b80-a031270c0034'],
+      verifier: (bygning, id) => bygning.Bygning_id === id
+    },
+    adgangsadresseid: {
+      values: ['0a3f507e-0409-32b8-e044-0003ba298018'],
+      verifier: (bygning, id) => bygning.AdgAdr_id === id
+    },
+    esrejendomsnr: {
+      values: ['095967'],
+      verifier: (bygning, nr) =>   bygning.ESREjdNr === nr
+    },
+    anvendelseskode: {
+      values: ['120'],
+      verifier: (bygning, kode) => bygning.BYG_ANVEND_KODE === parseInt(kode, 10)
+    },
+    kommunekode: {
+      values: ['0265'],
+      verifier: (bygning, kode) => bygning.KomKode === kode
+    }
+  },
+  opgang: {
+    id: {
+      values: ['008ff3ab-db75-4755-a71b-470f7eb42483'],
+      verifier: (opgang, id) => opgang.Opgang_id === id
+    },
+    bygningsid: {
+      values: ['affbb717-e4c0-489a-962c-5cc5505248b3'],
+      verifier: (opgang, bygningsid) => opgang.Bygning_id === bygningsid
+    }
+  },
+  enhed: {
+    id: {
+      values: ['00006909-250f-4878-8117-663b759bcac1'],
+      verifier: (enhed, id) => enhed.Enhed_id === id
+    },
+    adresseid: {
+      values: ['0a3f50aa-dfa0-32b8-e044-0003ba298018'],
+      verifier: (enhed, id) => enhed.EnhAdr_id === id
+    },
+    anvendelseskode: {
+      values: ['140'],
+      verifier: (enhed, kode) => enhed.ENH_ANVEND_KODE === parseInt(kode, 10)
+    },
+    bygningsid: {
+      values: ['701c5259-82bc-4f69-8f98-8d319dc0b381'],
+      verifier: (enhed, id) => enhed.bygning.Bygning_id === id
+    },
+    kommunekode: {
+      values: ['0461'],
+      verifier: (enhed, kode) => enhed.bygning.KomKode === kode
+    }
+  },
+  etage: {
+    id: {
+      values: ['0012cdf2-5cd8-4e81-869f-54955973a58d'],
+      verifier: (etage, id) => etage.Etage_id === id
+    },
+    bygningsid: {
+      values: ['6c6ea386-df09-42c4-b610-64e3b311896e'],
+      verifier: (etage, bygningsid) => etage.Bygning_id === bygningsid
+    }
+  },
+  ejerskab: {
+    id: {
+      values: ['00db6657-2d66-4b49-949d-ce9e31d7b823'],
+      verifier: (ejerskab, id) => ejerskab.Ejerskab_id === id
+    },
+    bbrid: {
+      values: ['40e0ec3f-419b-4c92-8f0c-f8b6f5184604'],
+      verifier: (ejerskab, bbrid) => ejerskab.BbrId === bbrid
+    },
+    esrejendomsnr: {
+      values: ['704986'],
+      verifier: (ejerskab, nr) => ejerskab.ESREjdNr === nr
+    }
+  },
+  bygningspunkt: {
+    id: {
+      values: ['001b754d-9fcb-4b65-8e79-d81fe98f0367'],
+      verifier: (bygningspunkt, id) => bygningspunkt.BygPkt_id === id
+    }
+  },
+  matrikelreference: {
+    grundid: {
+      values: ['7992a022-b023-48db-9705-9a90aa1c0108'],
+      verifier: (matref, id) => matref.Grund_id === id
+    },
+    ejerlavkode: {
+      values: ['390954'],
+      verifier: (matref, kode) => matref.LandsejerlavKode === parseInt(kode, 10)
+    },
+    matrikelnr: {
+      values: ['5f'],
+      verifier: (matref, nr) => matref.MatrNr === nr
+    }
   }
 };
 

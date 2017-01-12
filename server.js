@@ -9,7 +9,6 @@ var _ = require('underscore');
 
 var cluster = require('cluster');
 var isalive = require('./isalive');
-var cpuCount = require('os').cpus().length;
 var pg = require('pg');
 require('pg-parse-float')(pg);
 
@@ -127,10 +126,11 @@ function setupMaster() {
     pgPoolSize: [false, 'PostgreSQL connection pool størrelse', 'number', 25],
     pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
     socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 60000],
-    maxWaitingClients: [false, 'Maximum number of clients to queue when there is no available db connections', 'number', 0]
+    maxWaitingClients: [false, 'Maximum number of clients to queue when there is no available db connections', 'number', 0],
+    processes: [false, 'Number of concurrent worker processes', 'number']
   };
 
-  cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering'), function(args, options) {
+  cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'disableClustering', 'processes'), function(args, options) {
     if(options.disableClustering) {
       _.extend(process.env, options);
       setupWorker();
@@ -146,7 +146,9 @@ function setupMaster() {
       pgPoolIdleTimeout: options.pgPoolIdleTimeout,
       maxWaitingClients: options.maxWaitingClients
     };
-    for (var i = 0; i < cpuCount; i++) {
+    const processCount = options.processes || require('os').cpus().length;
+
+    for (var i = 0; i < processCount; i++) {
       spawn(workerOptions);
     }
 

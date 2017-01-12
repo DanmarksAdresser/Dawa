@@ -15,12 +15,12 @@ function CursorStream(client, cursorName, query) {
   };
   Readable.call(this, {
     objectMode: true,
-    highWaterMark: 400
+    highWaterMark: 200
   });
   this.client = client;
   this.cursorName = cursorName;
   this.query = query;
-  this.maxFetchSize = 200;
+  this.maxFetchSize = 100;
   this.closed = false;
   this.moreRowsAvailable = true;
   this.queryInProgress = false;

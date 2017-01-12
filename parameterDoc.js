@@ -7,6 +7,8 @@ const flatParametersMap = require('./apiSpecification/flats/parameters');
 var tilknytninger = require('./apiSpecification/tematilknytninger/tilknytninger');
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
+const oisApiModel = require('./apiSpecification/ois/oisApiModels');
+const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
 
 /******************************************************************************/
 /*** Utils ********************************************************************/
@@ -60,6 +62,7 @@ const strukturParameterAdresse = {
   ' Det anbefales at benytte mini-formatet hvis der ikke er behov for den fulde struktur, da dette vil' +
   ' give bedre svartider.'
 }
+
 
 
 var pagingParameters = [{
@@ -1760,6 +1763,227 @@ var eventExamples = {
   ]
 
 };
+
+const oisFilterParameterDoc = {
+  grund: {
+    subtext: 'Find grunde fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find grund med den angivne id (Grund_id)'
+      }
+    ],
+    examples: []
+  },
+  bygning: {
+    subtext: 'Find bygninger fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find bygning med den angivne id (Bygning_id)'
+      },
+      {
+        name: 'adgangsadresseid',
+        doc: 'Find bygninger med den angivne adgangsadresseid (AdgAdr_id)'
+      },
+      {
+        name: 'esrejendomsnr',
+        doc: 'Find bygninger med det angivne ESR ejendomsnummer (EsrEjdNr)'
+      },
+      {
+        name: 'anvendelseskode',
+        doc: 'Find bygninger med den angivne anvendelseskode (BYG_ANVEND_KODE). For mulige værdier henvises til BBR-dokumentationen.',
+      },
+      {
+        name: 'kommunekode',
+        doc: 'Find bygninger med den angivne kommunekode (KomKode)'
+      },
+      {
+        name: 'polygon',
+        doc: 'Find bygninger, hvor bygningspunktet ligger indenfor det angivne polygon.'+
+        ' Polygonet specificeres som et array af koordinater på samme måde som' +
+        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+        ' Bemærk at polygoner skal' +
+        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+      },
+      {
+        name: 'cirkel',
+        doc: 'Find de bygninger, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+        examples: []
+      },
+    ],
+    examples: []
+  },
+  tekniskanlaeg: {
+    subtext: 'Find tekniske anlæg fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find teknisk anlæg med den angivne id (Tekniskanlaeg_id)'
+      },
+      {
+        name: 'adgangsadresseid',
+        doc: 'Find tekniske anlæg med den angivne adgangsadresse (AdgAdr_id)'
+      },
+      {
+        name: 'esrejendomsnr',
+        doc: 'Find tekniske anlæg med det angivne ESR ejendomsnummer (ESREjdNr)'
+      },
+      {
+        name: 'bygningsid',
+        doc: 'Find tekniske anlæg i bygningen med den angivne bygningsid (Bygning_id)'
+      },
+      {
+        name: 'kommunekode',
+        doc: 'Find tekniske anlæg med den angivne kommunekode (KomKode)'
+      },
+      {
+        name: 'polygon',
+        doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.'+
+        ' Polygonet specificeres som et array af koordinater på samme måde som' +
+        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+        ' Bemærk at polygoner skal' +
+        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+      },
+      {
+        name: 'cirkel',
+        doc: 'Find de tekniske anlæg, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+        examples: []
+      }],
+    examples: []
+
+  },
+  enhed: {
+    subtext: 'Find enheder fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find enheden med den angivne ID (Enhed_id)'
+      },
+      {
+        name: 'adresseid',
+        doc: 'Find enhederne med den angivne adresseid (EnhAdr_id)'
+      },
+      {
+        name: 'anvendelseskode',
+        doc: 'Find enhederne med den angivne anvendelseskode (ENH_ANVEND_KODE)'
+      },
+      {
+        name: 'bygningsid',
+        doc: 'Find enhederne i den angivne bygning.'
+      },
+      {
+        name: 'kommunekode',
+        doc: 'Find enheder, der ligger i en bygning med den angivne kommunekode (KomKode)'
+      }
+    ],
+    examples: []
+
+  },
+  etage: {
+    subtext: 'Find etager fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find etage med den angivne ID (Etage_id)'
+      },
+      {
+        name: 'bygningsid',
+        doc: 'Find etager med den angivne bygningsid (Bygning_id)'
+      }
+    ],
+    examples: []
+
+  },
+  ejerskab: {
+    subtext: 'Find ejerskaber fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find ejerskab med den angivne ID (Ejerskab_id)'
+      },
+      {
+        name: 'bbrid',
+        doc: 'Find ejerskaber med den angivne BBR ID (BbrId)'
+      },
+      {
+        name: 'esrejendomsnr',
+        doc: 'Find ejerskab med det angivne ESR ejendomsnr (ESREjdNr)'
+      }
+    ],
+    examples: []
+
+  },
+  opgang: {
+    subtext: 'Find opgange fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find opgange med den angivne ID (Opgang_id)'
+      },
+      {
+        name: 'bygningsid',
+        doc: 'Find opgange med den angivne bygningsid (Bygning_id)'
+      }
+    ],
+    examples: []
+
+  },
+  bygningspunkt: {
+    subtext: 'Find bygningspunkter fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find bygningspunktet med det angivne ID (BygPkt_id)'
+      }
+    ],
+    examples: []
+  },
+  matrikelreference: {
+    subtext: 'Find matrikelreferencer fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'grundid',
+        doc: 'Find matrikelreferencer med den angivne grund ID (Grund_id)'
+      },
+      {
+        name: 'kommunekode',
+        doc: 'Find matrikelreferencer med den angivne kommunekode (KomKode)'
+      },
+      {
+        name: 'ejerlavkode',
+        doc: 'Find matrikelreferencer med den angivne landsejerlavkode'
+      },
+      {
+        name: 'matrikelnr',
+        doc: 'Find matrikelreferencer med det angivne matrikelnr (MatrNr). Kombineres typisk' +
+        ' med ejerlavkode parameteren.'
+      }
+    ],
+    examples: []
+  }
+};
+
+Object.keys(oisApiModel).forEach(apiModelName => {
+  const strukturParam = {
+    name: 'struktur',
+    doc: 'Angiver hvilken svarstruktur der ønskes. "mini" angiver, OIS-entiten uden relatede entiteter. "nestet" angiver, at evt. relaterede' +
+    'entiter skal medtages. "flad" angiver, at relaterede entiter skal medtages, men i en flad struktur.' +
+    ' "nestet" er default for JSON format, "flad" er default for GeoJSON og CSV.'
+  };
+  const plural = oisNamesAndKeys[apiModelName].plural;
+  const path = `/ois/${plural}`;
+  const parameterDoc = oisFilterParameterDoc[apiModelName];
+  parameterDoc.parameters.push(strukturParam);
+  parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
+  module.exports[path] = parameterDoc;
+});
 
 var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;

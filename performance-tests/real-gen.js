@@ -142,6 +142,7 @@ function fetchLoop(baseUrl, reader) {
         logger.info('Error', err);
       }
       count++;
+      yield q.delay(500);
     }
     console.log(count);
   })().done();

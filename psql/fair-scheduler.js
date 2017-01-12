@@ -122,8 +122,10 @@ module.exports = (options) => {
       });
 
       const nextIsPriorityTask = queue.peek().priority < topPriority;
-      const remainingPrioritySlots = prioritySlots - priorityRunning;
-      if((nextIsPriorityTask && remainingPrioritySlots > 0)|| (activeCount < concurrency - remainingPrioritySlots)) {
+      const remainingPrioritySlots = Math.max(0, prioritySlots - priorityRunning);
+      const mayRunAsNonPriority = activeCount < concurrency - remainingPrioritySlots;
+      const mayRunAsPriority = nextIsPriorityTask && remainingPrioritySlots > 0;
+      if(mayRunAsPriority || mayRunAsNonPriority) {
         q.async(function*() {
           /* eslint no-constant-condition: 0 */
           while(true) {

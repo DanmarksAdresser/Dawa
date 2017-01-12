@@ -10,4 +10,20 @@ exports.dawaTableName = (oisEntityName) => {
 
 exports.oisTableName = oisEntityName => oisModels[oisEntityName].oisTable;
 
-exports.columnNames = oisEntityName => _.pluck(oisModels[oisEntityName].fields, 'name');
+exports.postgresColumnNames = _.mapObject(oisModels, (model) => {
+  return _.pluck(model.fields, 'name').concat(_.pluck(model.derivedFields, 'name'))
+});
+
+exports.oisFieldNames = oisEntityName => _.pluck(oisModels[oisEntityName].fields, 'name');
+
+
+exports.dataModels = Object.keys(oisModels).reduce((memo, modelName) => {
+  const model = oisModels[modelName];
+  memo[modelName] = {
+    name: modelName,
+    table: exports.oisTableName(modelName),
+    key: model.key,
+    columns: exports.postgresColumnNames[modelName]
+  };
+  return memo;
+}, {});

@@ -57,11 +57,11 @@ function addSelect(columnSpec, fieldName, sqlParts, params) {
       else {
         clause = select;
       }
-      if (column.as) {
-        clause += ' as ' + column.as;
-      }
-      else if (clause !== fieldName) {
-        clause += ' as ' + fieldName;
+      const alias = column.as || fieldName;
+      const quoteAlias = alias !== alias.toLowerCase();
+      if(quoteAlias || clause !== fieldName) {
+        const quotedAlias = quoteAlias ? `"${alias}"` : alias;
+        clause +=  ` as ${quotedAlias}`;
       }
     }
     else {

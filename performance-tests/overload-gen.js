@@ -37,7 +37,11 @@ const performRequest = (options) => {
     const before = Date.now();
     let byteCount = 0;
     concurrency++;
-    http.get(options, res => {
+    http.get(Object.assign(options, {
+      headers: {
+        "X-Forwarded-For": "1.2.3.4"
+      }
+    }), res => {
       res.on('data', chunk => {
         byteCount += chunk.byteLength;
       });
@@ -60,6 +64,7 @@ const performRequest = (options) => {
 const launchSingleRequestGenerator = (baseUrl, spec) => {
   const stringUrl = _.isFunction(spec.url) ? spec.url() : spec.url;
   const parsedUrl = url.parse(url.resolve(baseUrl, stringUrl));
+
   return performRequest(parsedUrl);
 };
 
