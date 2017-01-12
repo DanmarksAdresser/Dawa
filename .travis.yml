@@ -17,7 +17,7 @@ env:
   - pgConnectionUrl=postgres://postgres@127.0.0.1:5432/dawaintegrationtest pgEmptyDbUrl=postgres://postgres@127.0.0.1:5432/dawaempty logConfiguration=travis-ci-client-logconfig.json
 
 before_install:
-  - sudo apt-get install -y postgresql-9.6-postgis-2.3
+  - sudo apt-get install -y p7zip-full postgresql-9.6-postgis-2.3
   - sudo locale-gen --no-archive da_DK.UTF-8
 
 before_script:
