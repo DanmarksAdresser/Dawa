@@ -1,5 +1,8 @@
 "use strict";
 
+const oisApiModels = require('./apiSpecification/ois/oisApiModels');
+const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
+const registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 
 exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
@@ -119,6 +122,23 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
     result.properties = exports.extractDocumentationForObject(propertyDef);
   }
   return result;
+};
+
+exports.getOisQueryResourcePath = oisEntityName => {
+  const resource = registry.get({
+    entityName: oisEntityName,
+    type: 'resource',
+    qualifier: 'query'
+  });
+  return resource.path;
+};
+
+exports.getOisEntityNames = () => {
+  return Object.keys(oisApiModels);
+};
+
+exports.getOisPlural = (oisEntityName) => {
+  return oisNamesAndKeys[oisEntityName].plural;
 };
 
 

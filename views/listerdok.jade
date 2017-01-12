@@ -299,6 +299,10 @@ block content
             h3.anchor-header#bebyggelsedata Beskrivelse af bebyggelser
             p Web API'et udstiller for hver bebyggelse følgende informationer:
             +documentSchema(jsonSchemas.bebyggelse)
+          section
+            - each oisEntityName in docUtil.getOisEntityNames()
+              h3 #{docUtil.getOisPlural(oisEntityName)}
+              +documentOisResource(oisEntityName)
 block append scripts
   script.
     var topbar = $('#topbar');

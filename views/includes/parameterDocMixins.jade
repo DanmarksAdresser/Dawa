@@ -107,3 +107,6 @@ mixin documentSchema(schema, idPrefix)
       th Beskrivelse
     tbody
       +documentProperties(docUtil.extractDocumentationForObject(schema), 0, idPrefix || '')
+
+mixin documentOisResource(name)
+  +documentResource(parameterDoc, docUtil.getOisQueryResourcePath(name))
