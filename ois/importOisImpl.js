@@ -1,14 +1,14 @@
 "use strict";
 
-var child_process = require('child_process');
-var fs = require('fs');
-var path = require('path');
-var q = require('q');
-var _ = require('underscore');
+const child_process = require('child_process');
+const fs = require('fs');
+const path = require('path');
+const q = require('q');
+const _ = require('underscore');
 
 const oisCommon = require('./common');
 const oisModels = require('./oisModels');
-var oisParser = require('./oisParser');
+const oisParser = require('./oisParser');
 const importUtil = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tablediff = require('../importUtil/tablediff');
@@ -54,16 +54,10 @@ const fileNameToDescriptor = fileName => {
   };
 };
 
-const getAlreadyImportedSerials = (client, entityName, serials) => {
-  return q.async(function*() {
-    const serialParams = [];
-    for(let i = 2; i <= serials.length + 1; ++i) {
-      serialParams.push(`$${i}`);
-    }
-    const alreadyImportedSerialsSql = `SELECT serial FROM ois_importlog WHERE entity = $1 AND serial IN (${serialParams.join(', ')})`;
-    return (yield client.queryp(alreadyImportedSerialsSql, [entityName].concat(serials))).rows.map(row => row.serial);
-  })();
-};
+const getLastImportedSerial = (client, entityName) => q.async(function*() {
+  const alreadyImportedSerialsSql = `SELECT max(serial) as serial FROM ois_importlog WHERE entity = $1`;
+  return (yield client.queryp(alreadyImportedSerialsSql, [entityName])).rows[0].serial;
+})();
 
 const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
   return q.async(function*() {
@@ -78,13 +72,34 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
     const serialToFileMap = _.groupBy(descriptorsForEntity, 'serial');
     for(let serialStr of Object.keys(serialToFileMap)) {
       if(serialToFileMap[serialStr].length > 1) {
+        logger.error('Duplicate Serial', {
+          serial: serialStr,
+          files: serialToFileMap[serialStr]
+        });
         throw new Error('Duplicate serial');
       }
     }
     const serials = Object.keys(serialToFileMap).map(serial => parseInt(serial, 10));
-    const alreadyImportedSerials = yield getAlreadyImportedSerials(client, oisModelName, serials);
-    const serialsToImport = _.difference(serials, alreadyImportedSerials);
+    const lastImportedSerial = yield getLastImportedSerial(client, oisModelName);
+    const serialsToImport = serials.filter(serial => serial > lastImportedSerial);
     serialsToImport.sort((a, b) => a - b);
+    const firstSerialToImport = serialsToImport[0];
+    if(lastImportedSerial + 1 !== firstSerialToImport) {
+      logger.error('Missing serial', {
+        entity: oisModelName,
+        serial: lastImportedSerial + 1
+      });
+      throw new Error('Missing serial');
+    }
+    for(let i = 0; i < serialsToImport.length - 2; ++i) {
+      if(serialsToImport[i] + 1 !== serialsToImport[i+1]) {
+        logger.error('Missing serial', {
+          entity: oisModelName,
+          serial: serialsToImport[i] + 1
+        });
+        throw new Error('Missing serial');
+      }
+    }
     return serialsToImport.map(serial => serialToFileMap[serial][0]);
   })();
 };
@@ -123,7 +138,6 @@ function importOis(client, dataDir, singleFileNameOnly) {
           continue;
         }
         const existingTableEmpty = yield isTableEmpty(client, oisCommon.dawaTableName(entityName));
-        const filePath = path.join(dataDir, fileName);
         const table = oisCommon.dawaTableName(entityName);
         const delta = !fileDescriptor.total;
         logger.info('Importerer OIS fil', fileDescriptor);
@@ -137,7 +151,7 @@ function importOis(client, dataDir, singleFileNameOnly) {
           const keyColumns = oisModels[entityName].key;
           const fetchTable = fetchTableName(entityName);
           yield createFetchTable(client, entityName);
-          yield oisFileToTable(client, entityName, filePath, fetchTable);
+          yield oisFileToTable(client, entityName, dataDir, fileName, fetchTable);
           const postgresColumns = oisCommon.postgresColumnNames[entityName];
           yield tablediff.computeInserts(client, fetchTable, table, `insert_${table}`, keyColumns);
           yield tablediff.computeUpdates(client, fetchTable, table, `update_${table}`, keyColumns, postgresColumns);
@@ -152,6 +166,9 @@ function importOis(client, dataDir, singleFileNameOnly) {
           }
           for(let prefix of ['insert_', 'update_']) {
             yield importUtil.dropTable(client, prefix + table);
+          }
+          if(!delta) {
+            yield importUtil.dropTable(client, `delete_${table}`);
           }
         }
         yield client.queryp('INSERT INTO ois_importlog(entity, serial, total, ts) VALUES ($1, $2, $3, NOW())',

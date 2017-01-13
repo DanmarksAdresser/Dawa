@@ -5,6 +5,7 @@ const q = require('q');
 
 const oisModels = require('../../ois/oisModels');
 const testdb = require('../helpers/testdb');
+const importOisImpl = require('../../ois/importOisImpl');
 
 const FIELDS_NOT_IN_TEST_DATA = {
   grund: [
@@ -133,6 +134,23 @@ const FIELDS_NOT_IN_TEST_DATA = {
 };
 
 describe('Import af OIS-filer', () => {
+  testdb.withTransactionEach('test', clientFn => {
+    it('Kan importere deltaudtræk', q.async(function*() {
+      yield importOisImpl.importOis(clientFn(), 'test/data/ois/delta');
+      const imported = (yield clientFn().queryp('SELECT COUNT(*)::integer as c FROM ois_importlog where serial = 2')).rows[0].c;
+      expect(imported).to.equal(15);
+    })).timeout(40000);
+    it('Fejler ved manglende serienummer', q.async(function*() {
+      let failed = false;
+      try {
+        yield importOisImpl.importOis(clientFn(), 'test/data/ois/missing-serial');
+      }
+      catch(e) {
+        failed = true;
+      }
+      expect(failed).to.be.true;
+    }));
+  });
   testdb.withTransactionAll('test', clientFn => {
     for(let oisModelName of Object.keys(oisModels)) {
       it(`Alle felter i ${oisModelName} er blevet importeret`, q.async(function*() {
