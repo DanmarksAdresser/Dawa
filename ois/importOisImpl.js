@@ -62,7 +62,14 @@ const getLastImportedSerial = (client, entityName) => q.async(function*() {
 const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
   return q.async(function*() {
     const oisModel = oisModels[oisModelName];
-    const files = yield q.nfcall(fs.readdir, dataDir);
+    const filesAndDirectories = yield q.nfcall(fs.readdir, dataDir);
+    const files = [];
+    for(let fileOrDirectory of filesAndDirectories) {
+      const stat = yield q.nfcall(fs.stat, path.join(dataDir, fileOrDirectory));
+      if(!stat.isDirectory()) {
+        files.push(fileOrDirectory);
+      }
+    }
     const descriptors = files.map(fileNameToDescriptor);
     const oisTable = oisModel.oisTable;
     const descriptorsForEntity = descriptors.filter(descriptor => descriptor.oisTable.toLowerCase() === oisTable.toLowerCase());

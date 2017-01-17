@@ -22,6 +22,7 @@ for(let oisModelName of Object.keys(namesAndKeys)) {
   }, parametersMap[oisModelName]);
   if(apiModel.geojson) {
     queryParameters.geomWithin =commonParameters.geomWithin;
+    queryParameters.reverseGeocoding = commonParameters.reverseGeocodingOptional;
   }
   const queryResource = {
     path: '/ois/' + nameAndKey.plural,

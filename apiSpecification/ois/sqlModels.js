@@ -37,6 +37,11 @@ for(let apiModelName of Object.keys(oisApiModels)) {
     sqlParameterImpl.paging(columns, nameAndKey.key)
   ];
 
+  if(oisApiModels[apiModelName].geojson) {
+    parameterImpls.push(sqlParameterImpl.geomWithin());
+    parameterImpls.push(sqlParameterImpl.reverseGeocoding());
+  }
+
   module.exports[apiModelName] = sqlUtil.assembleSqlModel(
     columns,
     parameterImpls,

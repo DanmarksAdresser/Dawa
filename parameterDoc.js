@@ -1814,6 +1814,16 @@ const oisFilterParameterDoc = {
         doc: 'Find de bygninger, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
         examples: []
       },
+      {
+        name: 'x',
+        doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+        'i det koordinatsystem som er angivet ved srid-parameteren.'
+      },
+      {
+        name: 'y',
+        doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+        'i det koordinatsystem som er angivet ved srid-parameteren.'
+      }
     ],
     examples: []
   },
@@ -1855,7 +1865,18 @@ const oisFilterParameterDoc = {
         name: 'cirkel',
         doc: 'Find de tekniske anlæg, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
         examples: []
-      }],
+      },
+      {
+        name: 'x',
+        doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+        'i det koordinatsystem som er angivet ved srid-parameteren.'
+      },
+      {
+        name: 'y',
+        doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+        'i det koordinatsystem som er angivet ved srid-parameteren.'
+      }
+      ],
     examples: []
 
   },
