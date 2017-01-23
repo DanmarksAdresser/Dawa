@@ -553,8 +553,8 @@ var sampleParameters = {
       verifier: (bygning, id) => bygning.AdgAdr_id === id
     },
     esrejendomsnr: {
-      values: ['095967'],
-      verifier: (bygning, nr) =>   bygning.ESREjdNr === nr
+      values: ['095967', '95967'],
+      verifier: (bygning, nr) =>   parseInt(bygning.ESREjdNr, 10) === parseInt(nr, 10)
     },
     anvendelseskode: {
       values: ['120'],
@@ -618,7 +618,7 @@ var sampleParameters = {
     },
     esrejendomsnr: {
       values: ['704986'],
-      verifier: (ejerskab, nr) => ejerskab.ESREjdNr === nr
+      verifier: (bygning, nr) =>   parseInt(bygning.ESREjdNr, 10) === parseInt(nr, 10)
     }
   },
   bygningspunkt: {

@@ -15,6 +15,8 @@ var defaults = pg.defaults;
 var databases = {};
 var databaseInitializerDeferreds = {};
 
+const FAIR_SCHEDULER_ENABLED = false;
+
 function awaitInitialization(dbname) {
   if(!databaseInitializerDeferreds[dbname]) {
     databaseInitializerDeferreds[dbname] = q.defer();
@@ -66,25 +68,26 @@ exports.create = function(name, options) {
     }
   });
 
-
-  const scheduler = fairScheduler({
-    concurrency: 2,
-    cleanupInterval: 5000,
-    initialPriorityOffset: -1000,
-    prioritySlots: 1
-  });
-  pool.requestLimiter = (clientIp, fn) => q.async(function*() {
-    const scheduleResult = yield scheduler.schedule(clientIp, q.async(function*() {
-      const before = Date.now();
-      const result = yield fn();
-      const duration = Date.now() - before;
-      return {
-        cost: duration,
-        result: result
-      }
-    }));
-    return scheduleResult.result;
-  })();
+  if(FAIR_SCHEDULER_ENABLED) {
+    const scheduler = fairScheduler({
+      concurrency: 2,
+      cleanupInterval: 5000,
+      initialPriorityOffset: -1000,
+      prioritySlots: 1
+    });
+    pool.requestLimiter = (clientIp, fn) => q.async(function*() {
+      const scheduleResult = yield scheduler.schedule(clientIp, q.async(function*() {
+        const before = Date.now();
+        const result = yield fn();
+        const duration = Date.now() - before;
+        return {
+          cost: duration,
+          result: result
+        }
+      }));
+      return scheduleResult.result;
+    })();
+  }
 
   return {
     options: options,

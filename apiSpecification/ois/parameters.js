@@ -1,107 +1,48 @@
 "use strict";
 
-const registry = require('../registry');
+const oisModels= require('../../ois/oisModels');
+const fieldSpec = require('./fieldSpec');
+const schemas = require('./schemas');
 
-const filtersMap = {
-  grund: [{
-    name: 'id',
-    field: 'Grund_id'
-  }],
-  bygning: [{
-    name: 'id',
-    field: 'Bygning_id'
-  }, {
-    name: 'adgangsadresseid',
-    field: 'AdgAdr_id'
-  }, {
-    name: 'esrejendomsnr',
-    field: 'ESREjdNr'
-  }, {
-    name: 'anvendelseskode',
-    field: 'BYG_ANVEND_KODE'
-  }, {
-    name: 'kommunekode',
-    field: 'KomKode'
-  }],
-  opgang: [{
-    name: 'id',
-    field: 'Opgang_id'
-  }, {
-    name: 'bygningsid',
-    field: 'Bygning_id'
-  }],
-  enhed: [{
-    name: 'id',
-    field: 'Enhed_id'
-  }, {
-    name: 'adresseid',
-    field: 'EnhAdr_id'
-  }, {
-    name: 'anvendelseskode',
-    field: 'ENH_ANVEND_KODE'
-  }, {
-    name: 'bygningsid',
-    field: 'bygning_Bygning_id'
-  }, {
-    name: 'kommunekode',
-    field: 'bygning_KomKode'
-  }],
-  etage: [{
-    name: 'id',
-    field: 'Etage_id'
-  }, {
-    name: 'bygningsid',
-    field: 'Bygning_id'
-  }],
-  tekniskanlaeg: [{
-    name: 'id',
-    field: 'Tekniskanlaeg_id'
-  }, {
-    name: 'adgangsadresseid',
-    field: 'AdgAdr_id'
-  }, {
-    name: 'esrejendomsnr',
-    field: 'ESREjdNr'
-  }, {
-    name: 'bygningsid',
-    field: 'Bygning_id'
-  }, {
-    name: 'kommunekode',
-    field: 'KomKode'
-  }],
-  ejerskab: [{
-    name: 'id',
-    field: 'Ejerskab_id'
-  }, {
-    name: 'bbrid',
-    field: 'BbrId'
-  }, {
-    name: 'esrejendomsnr',
-    field: 'ESREjdNr'
-  }],
-  bygningspunkt: [{
-    name: 'id',
-    field: 'BygPkt_id'
-  }],
-  matrikelreference: [{
-    name: 'grundid',
-    field: 'Grund_id'
-  }, {
-    name: 'ejerlavkode',
-    field: 'LandsejerlavKode'
-  }, {
-    name: 'matrikelnr',
-    field: 'MatrNr'
-  }]
-};
+const registry = require('../registry');
+const filtersMap = require('./filterParameterSpec');
+
+const parametertypeFromField = field => {
+  const schema = schemas.schemaFromField(field, false);
+  if(schema.type === 'string') {
+    return 'string';
+  }
+  else if(schema.type === 'number') {
+    return 'float'
+  }
+  else if(schema.type === 'integer') {
+    return 'integer';
+  }
+  else {
+    throw new Error('Could not decide parameter type for ' + JSON.stringify(field));
+  }
+}
 
 const filterParams = oisApiModelName => {
   const filters = filtersMap[oisApiModelName];
   return filters.map(filter => {
-    return {
-      name: filter.name,
-      renameTo: filter.field
+    const field  = fieldSpec[oisApiModelName].find(field => field.name === filter.field);
+    if(!field) {
+      throw new Error(`Could not find field to filter: ${oisApiModelName}, ${filter.field}`);
     }
+    const sourceModel = field.source ? field.source.relation : oisApiModelName;
+    const sourceName = field.source ? field.source.name : field.name;
+    const sourceField = oisModels[sourceModel].fields.find(field  => field.name === sourceName);
+    const result = {
+      name: filter.name,
+      type: parametertypeFromField(sourceField),
+      renameTo: filter.field,
+      schema: filter.schema || schemas.schemaFromField(sourceField, false)
+    };
+    if(filter.process) {
+      result.process = filter.process;
+    }
+    return result;
   });
 };
 

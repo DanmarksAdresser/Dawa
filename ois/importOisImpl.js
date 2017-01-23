@@ -18,8 +18,8 @@ const OIS_FILE_REGEX = /^ois_nybbr_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$
 
 
 function createUnzippedStream(filePath, filePattern) {
-  var args = [ 'e', '-so', path.resolve(filePath) , filePattern];
-  var proc = child_process.spawn( '7za', args);
+  var args = ['e', '-so', path.resolve(filePath), filePattern];
+  var proc = child_process.spawn('7za', args);
   return proc.stdout;
 }
 
@@ -40,7 +40,7 @@ function oisFileToTable(client, entityName, dataDir, fileName, table) {
 
 const fileNameToDescriptor = fileName => {
   const match = OIS_FILE_REGEX.exec(fileName);
-  if(!match) {
+  if (!match) {
     throw new Error(`Filename ${fileName} did not match regex`);
   }
   const oisTable = match[1];
@@ -50,7 +50,9 @@ const fileNameToDescriptor = fileName => {
     oisTable: oisTable,
     total: total,
     serial: serial,
-    fileName: fileName
+    fileName: fileName,
+    fileDate: match[4],
+    fileTime: match[5]
   };
 };
 
@@ -64,21 +66,22 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
     const oisModel = oisModels[oisModelName];
     const filesAndDirectories = yield q.nfcall(fs.readdir, dataDir);
     const files = [];
-    for(let fileOrDirectory of filesAndDirectories) {
+    for (let fileOrDirectory of filesAndDirectories) {
       const stat = yield q.nfcall(fs.stat, path.join(dataDir, fileOrDirectory));
-      if(!stat.isDirectory()) {
+      if (!stat.isDirectory()) {
         files.push(fileOrDirectory);
       }
     }
-    const descriptors = files.map(fileNameToDescriptor);
+    const oisFiles = files.filter(file => OIS_FILE_REGEX.test(file));
+    const descriptors = oisFiles.map(fileNameToDescriptor);
     const oisTable = oisModel.oisTable;
     const descriptorsForEntity = descriptors.filter(descriptor => descriptor.oisTable.toLowerCase() === oisTable.toLowerCase());
-    if(descriptorsForEntity.length  === 0) {
+    if (descriptorsForEntity.length === 0) {
       return [];
     }
     const serialToFileMap = _.groupBy(descriptorsForEntity, 'serial');
-    for(let serialStr of Object.keys(serialToFileMap)) {
-      if(serialToFileMap[serialStr].length > 1) {
+    for (let serialStr of Object.keys(serialToFileMap)) {
+      if (serialToFileMap[serialStr].length > 1) {
         logger.error('Duplicate Serial', {
           serial: serialStr,
           files: serialToFileMap[serialStr]
@@ -91,15 +94,15 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
     const serialsToImport = serials.filter(serial => serial > lastImportedSerial);
     serialsToImport.sort((a, b) => a - b);
     const firstSerialToImport = serialsToImport[0];
-    if(lastImportedSerial + 1 !== firstSerialToImport) {
+    if (lastImportedSerial + 1 !== firstSerialToImport) {
       logger.error('Missing serial', {
         entity: oisModelName,
         serial: lastImportedSerial + 1
       });
       throw new Error('Missing serial');
     }
-    for(let i = 0; i < serialsToImport.length - 2; ++i) {
-      if(serialsToImport[i] + 1 !== serialsToImport[i+1]) {
+    for (let i = 0; i < serialsToImport.length - 2; ++i) {
+      if (serialsToImport[i] + 1 !== serialsToImport[i + 1]) {
         logger.error('Missing serial', {
           entity: oisModelName,
           serial: serialsToImport[i] + 1
@@ -112,11 +115,11 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
 };
 
 const findFileName = (filesIndDirectory, entityName) => {
-  const matches = _.filter(filesIndDirectory, function(file) {
+  const matches = _.filter(filesIndDirectory, function (file) {
     return file.toLowerCase().endsWith('zip') &&
-    file.toLowerCase().indexOf(oisCommon.oisTableName(entityName).toLowerCase()) !== -1;
+      file.toLowerCase().indexOf(oisCommon.oisTableName(entityName).toLowerCase()) !== -1;
   });
-  if(matches.length !== 1) {
+  if (matches.length !== 1) {
     throw new Error('Found ' + matches.length + ' files for OIS table ' + oisCommon.oisTableName(entityName));
   }
   return matches[0];
@@ -137,22 +140,22 @@ const createFetchTable = (client, entityName) => {
 
 function importOis(client, dataDir, singleFileNameOnly) {
   return q.async(function*() {
-    for(const entityName of Object.keys(oisModels)) {
+    for (const entityName of Object.keys(oisModels)) {
       const fileDescriptors = yield findFilesToImportForEntity(client, entityName, dataDir);
-      for(let fileDescriptor of fileDescriptors) {
+      for (let fileDescriptor of fileDescriptors) {
         const fileName = fileDescriptor.fileName;
-        if(singleFileNameOnly && fileName !== singleFileNameOnly) {
+        if (singleFileNameOnly && fileName !== singleFileNameOnly) {
           continue;
         }
         const existingTableEmpty = yield isTableEmpty(client, oisCommon.dawaTableName(entityName));
         const table = oisCommon.dawaTableName(entityName);
         const delta = !fileDescriptor.total;
-        logger.info('Importerer OIS fil', fileDescriptor);
-        if(existingTableEmpty) {
-          if(delta) {
+        if (existingTableEmpty) {
+          if (delta) {
             throw new Error('Kan ikke importere delta-udtræk som initielt udtræk');
           }
           yield oisFileToTable(client, entityName, dataDir, fileName, table);
+          logger.info('Importerede Initiel OIS fil', Object.assign({}, fileDescriptor));
         }
         else {
           const keyColumns = oisModels[entityName].key;
@@ -162,24 +165,30 @@ function importOis(client, dataDir, singleFileNameOnly) {
           const postgresColumns = oisCommon.postgresColumnNames[entityName];
           yield tablediff.computeInserts(client, fetchTable, table, `insert_${table}`, keyColumns);
           yield tablediff.computeUpdates(client, fetchTable, table, `update_${table}`, keyColumns, postgresColumns);
-          if(!delta) {
+          if (!delta) {
             yield tablediff.computeDeletes(client, fetchTable, table, `delete_${table}`, keyColumns);
           }
           yield importUtil.dropTable(client, fetchTable);
           yield tablediff.applyInserts(client, `insert_${table}`, table, postgresColumns, false);
           yield tablediff.applyUpdates(client, `update_${table}`, table, keyColumns, postgresColumns);
-          if(!delta) {
+          if (!delta) {
             yield tablediff.applyDeletes(client, `delete_${table}`, table, keyColumns);
           }
-          for(let prefix of ['insert_', 'update_']) {
+          let changesSql = `SELECT (select count(*) FROM insert_${table}) as inserts, (select count(*) from update_${table}) as updates`;
+          if(!delta) {
+            changesSql += `, (select count(*) from delete_${table}) as deletes`;
+          }
+          const changes = (yield client.queryp(changesSql)).rows[0];
+          for (let prefix of ['insert_', 'update_']) {
             yield importUtil.dropTable(client, prefix + table);
           }
-          if(!delta) {
+          if (!delta) {
             yield importUtil.dropTable(client, `delete_${table}`);
           }
+          logger.info('Importerede OIS fil', Object.assign({}, fileDescriptor, changes));
         }
         yield client.queryp('INSERT INTO ois_importlog(entity, serial, total, ts) VALUES ($1, $2, $3, NOW())',
-        [entityName, fileDescriptor.serial, !delta]);
+          [entityName, fileDescriptor.serial, !delta]);
       }
     }
   })();

@@ -20,7 +20,7 @@ exports.parseParameters = function(params, parameterSpec) {
            }
          });
   var paramNames = _.filter(_.keys(params), function(name) {
-    return parameterSpec[name] ? true : false;
+    return !!parameterSpec[name];
   });
   var parsedParameters = _.reduce(paramNames,
     function(memo, name){
@@ -89,6 +89,9 @@ function parseParameter(valString, paramSpec) {
   }
   var val = parseParameterType(valString, paramSpec.type);
   jsonSchemaValidation(val, paramSpec.schema);
+  if(paramSpec.process) {
+    val = paramSpec.process(val);
+  }
   return val;
 }
 
