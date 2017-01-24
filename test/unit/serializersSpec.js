@@ -3,8 +3,10 @@
 var expect = require('chai').expect;
 
 var serializers = require('../../apiSpecification/common/serializers');
+const { transducingSerializer } = serializers;
 var eventStream = require('event-stream');
 var pipeline = require('../../pipeline');
+const { into }= require('transducers-js');
 
 describe('serializers', function() {
   describe('JSON serialization', function() {
@@ -78,5 +80,20 @@ describe('serializers', function() {
         done();
       });
     });
+  });
+});
+
+describe('Transducing serializer', () => {
+  it('Can serialize JSON values', () => {
+    const serializer = transducingSerializer('json', null, null, false, false, null);
+    expect(serializer.headers['Content-Type']).to.equal('application/json; charset=UTF-8');
+    const serializedResult = into([], serializer.xform, [{id: 'a'}, {id: 'b'}]).join('');
+    expect(serializedResult).to.equal(JSON.stringify([{id: 'a'}, {id: 'b'}]));
+  });
+  it('Can serialize NDJSON values', () => {
+    const serializer = transducingSerializer('json', null, null, false, true, null);
+    expect(serializer.headers['Content-Type']).to.equal('application/x-ndjson; charset=UTF-8');
+    const serializedResult = into([], serializer.xform, [{id: 'a'}, {id: 'b'}]).join('');
+    expect(serializedResult).to.equal(`${JSON.stringify({id: 'a'})}\r\n${JSON.stringify({id: 'b'})}`);
   });
 });

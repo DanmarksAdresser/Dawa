@@ -6,6 +6,7 @@ var _ = require('underscore');
 
 var dbapi = require('../../../dbapi');
 var fallbackStream = require('../../../fallback-stream');
+const cursorChannel = require('../../../cursor-channel');
 
 function existy(obj) {
   return !_.isUndefined(obj) && !_.isNull(obj);
@@ -104,6 +105,10 @@ exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
     stream: function(client, fieldNames, params, callback) {
       var query = this.createQuery(fieldNames, params);
       return dbapi.streamRaw(client, query.sql, query.params).nodeify(callback);
+    },
+    channelStream: function(client, fieldNames, params, abortSignal) {
+      const query = this.createQuery(fieldNames, params);
+      return cursorChannel(client, query.sql, query.params, abortSignal);
     }
   };
 };

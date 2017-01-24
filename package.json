@@ -45,6 +45,7 @@
     "string-format": "^0.5.0",
     "terraformer-wkt-parser": "^1.1.0",
     "through2": "^2.0.1",
+    "transducers-js": "^0.4.174",
     "underscore": "1.8.3",
     "uuid": "^2.0.2",
     "winston": "2.1.0",

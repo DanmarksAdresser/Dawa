@@ -4,7 +4,8 @@ var eventStream = require('event-stream');
 var Transform        = require('stream').Transform;
 var util             = require('util');
 var pipeline = require('../../pipeline');
-
+const {separate} = require('../../transducer-util');
+const { comp, map } = require('transducers-js');
 function jsonStringify(object, prettyPrint){
   return JSON.stringify(object, undefined, prettyPrint ? 2 : 0);
 }
@@ -190,5 +191,27 @@ exports.createSingleObjectSerializer = function(formatParam, callbackParam, pret
       }
     }
     callback(null, response);
+  };
+};
+
+exports.transducingSerializer = (formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam, representation) => {
+  formatParam = formatParam || 'json';
+  sridParam = sridParam || 4326;
+  if(formatParam === 'csv') {
+    throw new Error("CSV not yet implemented");
+  }
+  const sep = computeSeparator(formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam);
+
+  const stringifyFn = prettyPrint ?
+    (obj => JSON.stringify(obj, null, 2)) :
+    (obj => JSON.stringify(obj));
+  const xform = comp(map(stringifyFn), separate(sep));
+
+  return {
+    status: 200,
+    headers: {
+      'Content-Type': contentHeader(formatParam, callbackParam, ndjsonParam)
+    },
+    xform
   };
 };

@@ -12,6 +12,7 @@ var pipeline = require('../../pipeline');
 var parameterParsing = require('../../parameterParsing');
 var transactions = require('../../psql/transactions');
 var serializers = require('./serializers');
+const { Signal, wrapWritableStream, select, TAKE, CLOSED, go } = require('../../csp');
 
 function jsonStringifyPretty(object){
   return JSON.stringify(object, undefined, 2);
@@ -259,19 +260,74 @@ function resourceResponse(client, resourceSpec, req) {
     else {
       // create a serializer function that can stream the objects to the HTTP response in the format requested by the
       // client
-      var serializeStream = serializers.createStreamSerializer(formatParam,
-        params.callback,
-        params.srid,
-        !(params.noformat || params.ndjson),
-        params.ndjson,
-        representation);
-      var response = yield arrayResultResponse(resourceSpec, client, params, fieldNames, mapObject, serializeStream);
-      return response;
+      if(resourceSpec.sqlModel.channelStream) {
+        console.log('USING CHANNEL STREAM');
+        const abortSignal = new Signal();
+        const { channel, endSignal, errorSignal } = resourceSpec.sqlModel.channelStream(client, fieldNames, params, abortSignal);
+        const serializer = serializers.transducingSerializer(formatParam,
+          params.callback,
+          params.srid,
+          !(params.noformat || params.ndjson),
+          params.ndjson,
+          representation);
+        return Object.assign(serializer, { channel, endSignal, abortSignal, errorSignal });
+      }
+      else {
+        var serializeStream = serializers.createStreamSerializer(formatParam,
+          params.callback,
+          params.srid,
+          !(params.noformat || params.ndjson),
+          params.ndjson,
+          representation);
+        var response = yield arrayResultResponse(resourceSpec, client, params, fieldNames, mapObject, serializeStream);
+        return response;
+      }
     }
   })();
 }
 
 exports.resourceResponse = resourceResponse;
+
+const transform = (dst, xform, src, abortSignal) => {
+  return go(function*() {
+    const acc = [];
+    const outputter = {
+      "@@transducer/step": (result, input) => {
+        acc.push(input);
+        return acc;
+      },
+      "@@transducer/result": (result) => {
+      }
+    };
+    xform = xform(outputter);
+
+    /* eslint no-constant-condition: 0 */
+    while(true) {
+      const {ch, value} = yield select([
+        {ch: src, op: TAKE},
+        {ch: abortSignal, op: TAKE}
+      ]);
+      if(ch === abortSignal) {
+        return;
+      }
+      if(value === CLOSED) {
+        xform["@@transducer/result"](acc);
+      }
+      else {
+        xform["@@transducer/step"](acc, value);
+      }
+      for(let val of acc) {
+        yield dst.put(val);
+      }
+      acc.length = 0;
+      if(value === CLOSED) {
+        dst.close();
+        break;
+      }
+
+    }
+  });
+};
 
 exports.createExpressHandler = function(resourceSpec) {
   return function(req, res) {
@@ -281,26 +337,46 @@ exports.createExpressHandler = function(resourceSpec) {
       return !res.connection.writable;
     }
     function doResponse(client) {
-      return resourceResponse(client, resourceSpec, req)
-        .catch(function (err) {
+      return q.async(function*() {
+        let response;
+        try {
+          response = yield resourceResponse(client, resourceSpec, req);
+        }
+        catch(err) {
           logger.error('resourceImpl', 'An unexpected error happened during resource handling', {error: err});
-          return internalServerErrorResponse(err);
-        }).then(function (response) {
-          res.statusCode = response.status || 200;
-          _.each(response.headers, function (headerValue, headerName) {
-            res.setHeader(headerName, headerValue);
-          });
-          if (response.body) {
-            res.end(response.body);
-          }
-          else if (response.bodyPipe) {
-            response.bodyPipe.toHttpResponse(res);
-            return response.bodyPipe.completed();
-          }
-          else {
-            res.end();
-          }
+          response = internalServerErrorResponse(err);
+        }
+        res.statusCode = response.status || 200;
+        _.each(response.headers, function (headerValue, headerName) {
+          res.setHeader(headerName, headerValue);
         });
+        if (response.body) {
+          res.end(response.body);
+        }
+        else if (response.bodyPipe) {
+          response.bodyPipe.toHttpResponse(res);
+          yield response.bodyPipe.completed();
+        }
+        else if(response.channel) {
+          const {
+            channel: inputChannel,
+            abortSignal: abortQuerySignal,
+            endSignal,
+            errorSignal: queryErrorSignal,
+            xform
+          } = response;
+          const { ch: outputChannel, errorSignal: outputErrorSignal } =  wrapWritableStream(res);
+          const abortTransformSignal = new Signal();
+          queryErrorSignal.connect(abortTransformSignal);
+          outputErrorSignal.connect(abortTransformSignal);
+          outputErrorSignal.connect(abortQuerySignal);
+          yield transform(outputChannel, xform, inputChannel, abortTransformSignal).take();
+          yield endSignal.take();
+        }
+        else {
+          res.end();
+        }
+      })();
     }
     var promise = transactions.withTransaction('prod', {
       mode: 'READ_ONLY',
