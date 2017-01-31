@@ -177,7 +177,7 @@ var fields = {
       name: 'nøjagtighed',
       description: 'Kode der angiver nøjagtigheden for adressepunktet. Et tegn.' +
         ' ”A” betyder at adressepunktet er absolut placeret på et detaljeret grundkort,' +
-        ' tyisk med en nøjagtighed bedre end +/- 2 meter. ”B” betyder at adressepunktet er beregnet –' +
+        ' typisk med en nøjagtighed bedre end +/- 2 meter. ”B” betyder at adressepunktet er beregnet –' +
         ' typisk på basis af matrikelkortet, således at adressen ligger midt på det pågældende matrikelnummer.' +
         ' I så fald kan nøjagtigheden være ringere en end +/- 100 meter afhængig af forholdene.' +
         ' ”U” betyder intet adressepunkt.',
