@@ -5,8 +5,9 @@
 // Ved opdateringen ændres samtlige felter.
 
 var expect = require('chai').expect;
-const q = require('q');
 var _ = require('underscore');
+
+const { go } = require('ts-csp');
 
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 var crud = require('../../crud/crud');
@@ -16,7 +17,7 @@ var format = require('util').format;
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
 var schemaValidationUtil = require('./schemaValidationUtil');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 require('../../apiSpecification/allSpecs');
 
 var Husnr = databaseTypes.Husnr;
@@ -197,9 +198,6 @@ const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer','ejer
 const REVERSE_ENTITY_NAMES = ENTITY_NAMES.slice().reverse();
 
 function formatJson(columnMapping, obj) {
-  console.log('FORMAT JSON');
-  console.dir(columnMapping);
-  console.dir(obj);
   return _.reduce(obj, function(memo, value, key) {
     /* eslint no-console: 0 */
     console.log('key: ' + key);
@@ -229,10 +227,37 @@ const doDelete = (client, datamodel, key) => {
   return crud.delete(client, datamodel, crud.getKey(datamodel, key));
 };
 
+describe('ReplikeringsAPI testopslag', function() {
+  const udtraekResource = registry.findWhere({
+    entityName: 'postnummer',
+    type: 'resource',
+    qualifier: 'udtraek'
+  });
+
+  const eventResource = registry.findWhere({
+    entityName: 'postnummer',
+    type: 'resource',
+    qualifier: 'hændelser'
+  });
+
+  testdb.withTransactionEach('empty', clientFn => {
+    it('Skal fejle hvis man henter udtræk med fremtidigt sekvensnummer', () => go(function*() {
+      const sekvensnummer = 1000000;
+      const response = yield helpers.getResponse(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer});
+      expect(response.status).to.equal(400);
+    }));
+    it('Skal fejle hvis man henter hændelser med fremtidigt sekvensnummer', () => go(function*() {
+      const sekvensnummer = 1000000;
+      const response = yield helpers.getResponse(clientFn(), eventResource, {}, {sekvensnummertil: '' + sekvensnummer});
+      expect(response.status).to.equal(400);
+    }));
+  });
+});
+
 describe('ReplikeringsAPI', function() {
 
   testdb.withTransactionAll('empty', function(clientFn) {
-    before(() => q.async(function*() {
+    before(() => go(function*() {
       const client = clientFn();
       for(let datamodelName of ENTITY_NAMES) {
         const datamodel = datamodels[datamodelName];
@@ -249,7 +274,7 @@ describe('ReplikeringsAPI', function() {
         const objectToDelete = helpers.toSqlModel(datamodelName, insert[datamodelName]);
         yield doDelete(client, datamodel, crud.getKey(datamodel, objectToDelete));
       }
-    })());
+    }));
 
     ENTITY_NAMES.forEach(function(datamodelName) {
       describe(format('Replication of %s', datamodelName), function() {
@@ -258,16 +283,15 @@ describe('ReplikeringsAPI', function() {
           type: 'resource',
           qualifier: 'udtraek'
         });
-        it('Should include the created object in the full extract', function(done) {
+        it('Should include the created object in the full extract', () => go(function*() {
           var sekvensnummer = insertSeqNums[datamodelName];
-          helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-            expect(objects.length).to.equal(1);
-            var obj = objects[0];
-            expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
-            done();
-          });
-        });
-        it('Should include the updated object in the full extract', q.async(function*() {
+          const objects = yield helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer});
+          expect(objects.length).to.equal(1);
+          var obj = objects[0];
+          expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName])));
+        }));
+
+        it('Should include the updated object in the full extract', () => go(function*() {
           var sekvensnummer = updateSeqNums[datamodelName];
           if(!sekvensnummer) {
             return;
@@ -277,13 +301,11 @@ describe('ReplikeringsAPI', function() {
           var obj = objects[0];
           expect(obj).to.deep.equal(helpers.jsToCsv(formatJson(columnMappings.columnMappings[datamodelName], update[datamodelName])));
         }));
-        it('Should not include the deleted object in the full extract', function(done) {
+        it('Should not include the deleted object in the full extract', () => go(function*(){
           var sekvensnummer = deleteSeqnums[datamodelName];
-          helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer}, function(err, objects) {
-            expect(objects.length).to.equal(0);
-            done();
-          });
-        });
+          const objects = yield helpers.getCsv(clientFn(), udtraekResource, {}, {sekvensnummer: '' + sekvensnummer});
+          expect(objects.length).to.equal(0);
+        }));
 
         var eventResource = registry.findWhere({
           entityName: datamodelName,
@@ -299,38 +321,33 @@ describe('ReplikeringsAPI', function() {
 
         var eventSchema = eventRepresentation.schema;
 
-        it('All events should be valid according to schema', function(done) {
-          helpers.getJson(clientFn(), eventResource, {}, {}, function(err, objects) {
-            expect(objects.length).to.be.above(0);
-            objects.forEach(function(object) {
-              expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).to.be.true;
-            });
-            done();
+        it('All events should be valid according to schema', () => go(function*() {
+          const objects = yield helpers.getJson(clientFn(), eventResource, {}, {});
+          expect(objects.length).to.be.above(0);
+          objects.forEach(function (object) {
+            expect(schemaValidationUtil.isSchemaValid(object, eventSchema)).to.be.true;
           });
-        });
+        }));
 
-        it('sequence number filtering should work when retrieving events', function(done) {
+        it('sequence number filtering should work when retrieving events', () => go(function*() {
           var sekvensnummer = insertSeqNums[datamodelName]
-          helpers.getJson(clientFn(), eventResource, {}, {sekvensnummerfra: sekvensnummer, sekvensnummertil: sekvensnummer}, function(err, objects) {
-            expect(objects.length).to.equal(1);
-            expect(objects[0].sekvensnummer).to.equal(sekvensnummer);
-            expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName]));
-            done();
+          const objects = yield helpers.getJson(clientFn(), eventResource, {}, {
+            sekvensnummerfra: sekvensnummer,
+            sekvensnummertil: sekvensnummer
           });
-        });
-        it('When adding id field(s) when retrieving events, events without the specified id should not be returned', function(done) {
-          helpers.getJson(clientFn(), eventResource, {}, nonexistingIds[datamodelName], function(err, objects) {
-            expect(objects.length).to.equal(0);
-            done();
-          });
-        });
-        it('When adding id field(s) when retrieving events, events with the specified id should be returned', function(done) {
-          helpers.getJson(clientFn(), eventResource, {}, existingIds[datamodelName], function(err, objects) {
-            const expectedRows = update[datamodelName] ? 3 : 2;
-            expect(objects.length).to.equal(expectedRows);
-            done();
-          });
-        });
+          expect(objects.length).to.equal(1);
+          expect(objects[0].sekvensnummer).to.equal(sekvensnummer);
+          expect(objects[0].data).to.deep.equal(formatJson(columnMappings.columnMappings[datamodelName], insert[datamodelName]));
+        }));
+        it('When adding id field(s) when retrieving events, events without the specified id should not be returned', () => go(function*() {
+          const objects = yield helpers.getJson(clientFn(), eventResource, {}, nonexistingIds[datamodelName]);
+          expect(objects.length).to.equal(0);
+        }));
+        it('When adding id field(s) when retrieving events, events with the specified id should be returned', () => go(function*() {
+          const objects = yield helpers.getJson(clientFn(), eventResource, {}, existingIds[datamodelName]);
+          const expectedRows = update[datamodelName] ? 3 : 2;
+          expect(objects.length).to.equal(expectedRows);
+        }));
       });
     });
   });

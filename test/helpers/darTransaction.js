@@ -1,7 +1,7 @@
 "use strict";
 
 var importDarImpl = require('../../darImport/importDarImpl');
-var testdb = require('./testdb');
+var testdb = require('./testdb2');
 
 function withDarTransaction(dbname, transactionFn, beforeFn, afterFn) {
   var prevDawaSeqNum;

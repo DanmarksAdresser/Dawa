@@ -7,7 +7,7 @@ const _ = require('underscore');
 const darApiClient = require('../../dar10/darApiClient');
 const importDarImpl = require('../../dar10/importDarImpl');
 const importFromApiImpl = require('../../dar10/importFromApiImpl');
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 
 
 q.longStackSupport = true;

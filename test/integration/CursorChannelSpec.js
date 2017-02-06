@@ -1,19 +1,20 @@
 "use strict";
 
 const expect = require('chai').expect;
-const q = require('q');
 
-const testdb = require('../helpers/testdb');
-const cursorChannel = require('../../cursor-channel');
-const { Signal, CLOSED } = require('../../csp');
+const testdb = require('../helpers/testdb2');
+const cursorChannel = require('../../util/cursor-channel');
+const { go, CLOSED, Channel } = require('ts-csp');
 
 describe('Cursor Channel', () => {
   testdb.withTransactionEach('test', clientFn => {
-    it('Can successfully fetch a stream of rows from the database', q.async(function*() {
-      const abortSignal = new Signal();
-      const {channel, endSignal } = cursorChannel(clientFn(), 'SELECT id FROM adgangsadresser LIMIT 10', [], abortSignal, {
-        fetchSize: 2, bufferSize: 4
-      });
+    it('Can successfully fetch a stream of rows from the database', () =>
+      go(function*() {
+      const channel = new Channel();
+      const cursorChannelProcess = cursorChannel(
+        clientFn(), 'SELECT id FROM adgangsadresser LIMIT 10', [], channel, {
+          fetchSize: 2
+        });
       let count = 0;
       /* eslint no-constant-condition: 0 */
       while(true) {
@@ -25,8 +26,7 @@ describe('Cursor Channel', () => {
         ++count;
       }
       expect(count).to.equal(10);
-      const result = yield endSignal.take();
-      expect(result).to.be.null;
-    }));
+      yield cursorChannelProcess;
+    }).asPromise());
   });
 });

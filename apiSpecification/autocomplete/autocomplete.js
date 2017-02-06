@@ -1,6 +1,5 @@
 "use strict";
 
-var q = require('q');
 var _ = require('underscore');
 
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
@@ -11,6 +10,8 @@ var schema = require('../parameterSchema');
 const adresseTextMatch = require('../adresseTextMatch');
 const levenshtein = require('../levenshtein');
 const commonParameters = require('../common/commonParameters');
+
+const { go } = require('ts-csp');
 
 require('../vejnavn/resources');
 require('../adgangsadresse/resources');
@@ -195,17 +196,18 @@ var representations = {
 };
 
 function queryModel(client, entityName, params) {
-  return q.async(function*() {
+  return go(function*() {
     const resource = autocompleteResources[entityName];
     var sqlModel = resource.sqlModel;
     var autocompleteRepresentation = resource.representations.autocomplete;
     var fieldNames = _.pluck(autocompleteRepresentation.fields, 'name');
-    const result = yield  sqlModel.query(client, fieldNames, params);
+    const result = yield this.delegateAbort(
+      sqlModel.processQuery(client, fieldNames, params));
     return result.map(function(row) {
       row.type = entityName;
       return row;
     });
-  })();
+  });
 }
 
 function scoreAddressElement(addressText, searchText, weight) {
@@ -516,13 +518,16 @@ function unprocessVejnavn(processedVejnavn) {
 }
 
 const queryVejnavn = (client, params) => {
-  return q.async(function*() {
+  return go(function*() {
     var shouldDoFuzzySearch = params.fuzzy &&  !/\d/.test(params.q);
     params = Object.assign({}, params, {
       fuzzy: shouldDoFuzzySearch
     });
     const regularSearchParams = prepareQuery(params);
-    const result = yield queryModel(client, 'vejnavn', regularSearchParams);
+
+    const result = yield this.delegateAbort(
+      queryModel(client, 'vejnavn', regularSearchParams)
+    );
     const processedResult = result.map(result => processVejnavn(result, params.q));
 
     const vejnavnComparator = (a, b) => {
@@ -537,8 +542,7 @@ const queryVejnavn = (client, params) => {
 
     processedResult.length = Math.min(processedResult.length, params.per_side);
     return processedResult.map(unprocessVejnavn);
-
-  })();
+  });
 };
 
 const sortAdresse = (entityName, q, per_side, unsortedResults) => {
@@ -549,7 +553,7 @@ const sortAdresse = (entityName, q, per_side, unsortedResults) => {
 };
 
 const queryAdresse = (entityName, client, params, lastEntity) => {
-  return q.async(function*() {
+  return go(function*() {
 
     // disable fuzzy in adgangsadresse search unless it is the last searched entity
     if(!lastEntity) {
@@ -558,9 +562,9 @@ const queryAdresse = (entityName, client, params, lastEntity) => {
     }
 
     const regularSearchParams = prepareQuery(params);
-    const queryResult = yield queryModel(client, entityName, regularSearchParams);
+    const queryResult = yield this.delegateAbort(queryModel(client, entityName, regularSearchParams));
     return sortAdresse(entityName, params.q, params.per_side, queryResult);
-  })();
+  });
 };
 
 const shouldProceed = {
@@ -577,10 +581,10 @@ const queryFns = {
   adresse: (client, params, lastEntity) => queryAdresse('adresse', client, params, lastEntity)
 };
 
-var sqlModel = {
+const sqlModel = {
   allSelectableFields: [],
-  query: function(client, fieldNames, params, callback) {
-    return q.async(function*() {
+  processQuery: function(client, fieldNames, params) {
+    return go(function*() {
       const startfra = params.adgangsadresseid ? 'adresse' : (params.startfra || 'vejnavn');
       // If adgangsadresseid parameter is supplied, we ignore type parameter
       // this is not quite correct, but some client depends on it.
@@ -588,13 +592,13 @@ var sqlModel = {
       const searchedEntities = entityTypes.slice(entityTypes.indexOf(startfra), entityTypes.indexOf(slutmed)+1);
       for(let entityName of searchedEntities) {
         const lastEntity = entityName === searchedEntities[searchedEntities.length - 1];
-        const result = yield queryFns[entityName](client, params, lastEntity);
+        const result = yield this.delegateAbort(queryFns[entityName](client, params, lastEntity));
         if( lastEntity ||
           (result.length > 0 && !shouldProceed[entityName](result, params))) {
           return result;
         }
       }
-    })().nodeify(callback);
+    });
   }
 };
 

@@ -4,7 +4,7 @@ const expect = require('chai').expect;
 const q = require('q');
 
 const oisModels = require('../../ois/oisModels');
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 const importOisImpl = require('../../ois/importOisImpl');
 
 const FIELDS_NOT_IN_TEST_DATA = {

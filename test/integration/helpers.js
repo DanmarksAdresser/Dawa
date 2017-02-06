@@ -1,54 +1,38 @@
 "use strict";
 
 var q = require('q');
+const { go } = require('ts-csp');
 var _ = require('underscore');
 
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
 
-function getResponse(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  return resourceImpl.resourceResponse( dbClient, resourceSpec, {params: pathParams, query: queryParams, headers: {}}).then(function(response) {
-    if(response.bodyPipe) {
-      return q.ninvoke(response.bodyPipe, 'toArray').then(function(result) {
-        delete response.bodyPipe;
-        response.body = result.join('');
-        return response;
-      });
-    }
-    else {
-      return response;
-    }
-  }).nodeify(callback);
+function getResponse(dbClient, resourceSpec, pathParams, queryParams) {
+  return resourceImpl.materializeResponse(dbClient, resourceSpec, 'http://dawa', pathParams, queryParams);
 }
 
 // Get the response of a resource as a string
-exports.getStringResponse = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  return q.async(function*() {
-    const res = yield getResponse(dbClient, resourceSpec, pathParams, queryParams);
-    if(res.status !== 200) {
-      throw new Error('Unexpected status code: ' + res.status);
-    }
-    return res.body;
-  })().nodeify(callback);
-};
+exports.getStringResponse = (dbClient, resourceSpec, pathParams, queryParams) => go(function*() {
+  const res = yield getResponse(dbClient, resourceSpec, pathParams, queryParams);
+  if(res.status !== 200) {
+    throw new Error('Unexpected status code: ' + res.status);
+  }
+  return res.body;
+});
 
 // Get the response of a resource as JSON
-exports.getJson = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  return q.async(function*() {
-    const str = yield exports.getStringResponse( dbClient, resourceSpec, pathParams, queryParams);
-    return JSON.parse(str);
-  })().nodeify(callback);
-};
+exports.getJson = (dbClient, resourceSpec, pathParams, queryParams) => go(function*() {
+  const str = yield exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams);
+  return JSON.parse(str);
+});
 
 // get the response of a resource and parse as CSV
-exports.getCsv = function(dbClient, resourceSpec, pathParams, queryParams, callback) {
-  return q.async(function*() {
-    queryParams.format = 'csv';
-    const str = yield exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams);
-    return yield q.nfcall(csvParse, str, {columns: true});
-  })().nodeify(callback);
-};
+exports.getCsv = (dbClient, resourceSpec, pathParams, queryParams) => go(function*() {
+  queryParams.format = 'csv';
+  const str = yield exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams);
+  return yield q.nfcall(csvParse, str, {columns: true});
+});
 
 function jsFieldToCsv(field) {
   if (typeof field === 'string') {

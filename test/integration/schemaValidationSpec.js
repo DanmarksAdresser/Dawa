@@ -2,11 +2,11 @@
 
 var chai = require('chai');
 var _ = require('underscore');
-var q = require('q');
+const { go } = require('ts-csp');
 
 var registry = require('../../apiSpecification/registry');
 var schemaValid = require('../helpers/schemaValid');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 var expect = chai.expect;
 chai.use(schemaValid);
@@ -138,27 +138,25 @@ describe('Validering af JSON-formatteret output', function() {
       throw new Error('no schema for ' + nameAndKey.singular);
     }
     it('Alle ' + nameAndKey.plural + ' skal validere', function() {
-      return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-        return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), {}).then(function(rows) {
-          rows.forEach(function(row) {
-            var json = mapper(row);
-            expect(json).to.be.schemaValid(schema);
-          });
+      return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
+        const rows = yield sqlModel.processQuery(client, _.pluck(jsonRepresentation.fields, 'name'), {});
+        rows.forEach(function(row) {
+          const json = mapper(row);
+          expect(json).to.be.schemaValid(schema);
         });
-      });
+      }));
     });
     it('Alle felter i ' + nameAndKey.plural + ' skal ses mindst en gang', function() {
       var schema = jsonRepresentation.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
-      return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-        return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), {}).then(function(rows) {
-          rows.forEach(function(row) {
-            var json = mapper(row);
-            recordVisitedValues(json, schema, valuesSeen);
-          });
-          expect(verifyAllValuesVisited(schema, valuesSeen)).to.equal(true);
+      return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
+        const rows = yield sqlModel.processQuery(client, _.pluck(jsonRepresentation.fields, 'name'), {});
+        rows.forEach(function (row) {
+          var json = mapper(row);
+          recordVisitedValues(json, schema, valuesSeen);
         });
-      });
+        expect(verifyAllValuesVisited(schema, valuesSeen)).to.equal(true);
+      }));
     });
   });
 });

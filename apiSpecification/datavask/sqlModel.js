@@ -1,7 +1,6 @@
 "use strict";
 
 var moment = require('moment');
-var q = require('q');
 var _ = require('underscore');
 
 var adresseTextMatch = require('../adresseTextMatch');
@@ -9,11 +8,12 @@ var columnsMap = _.clone(require('../history/columns'));
 var levenshtein = require('../levenshtein');
 //var parameters = require('./parameters');
 var registry = require('../registry');
-var qUtil = require('../../q-util');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
 var util = require('../util');
 
+const { go } = require('ts-csp');
+const { mapObjectAsync } = require('../../util/cspUtil');
 
 var kode4String = util.kode4String;
 
@@ -210,17 +210,16 @@ GROUP BY id`;
 }
 
 function doSearchQuery(client, entityName, params) {
-  const query = searchQuery(entityName, params.betegnelse, 30);
-  return client.queryp(query.sql, query.params).then((result) => {
-    return result.rows || [];
+  return go(function*() {
+    const query = searchQuery(entityName, params.betegnelse, 30);
+    return yield this.delegateAbort(client.queryRows(query.sql, query.params));
   });
-
 }
 
 function doFuzzyQuery(client, entityName, params) {
-  const query = fuzzyQuery(entityName, params.betegnelse, 30);
-  return client.queryp(query.sql, query.params).then((result) => {
-    return result.rows || [];
+  return go(function*() {
+    const query = fuzzyQuery(entityName, params.betegnelse, 30);
+    return yield this.delegateAbort(client.queryRows(query.sql, query.params));
   });
 }
 
@@ -335,23 +334,24 @@ function createSqlModel(entityName) {
     allSelectableFieldNames: function (allFieldNames) {
       return sqlUtil.allSelectableFieldNames(allFieldNames, columns);
     },
-    query: function (client, fieldNames, params, callback) {
-      return q.async(function*() {
+    processQuery: function (client, fieldNames, params) {
+      return go(function*() {
+
         params = _.clone(params);
         params.side = 1;
         params.per_side=100;
 
-        let searchResult = yield doSearchQuery(client, entityName, params);
+        let searchResult = yield this.delegateAbort(doSearchQuery(client, entityName, params));
 
         if(searchResult.length === 0) {
-          searchResult = yield doFuzzyQuery(client, entityName, params);
+          searchResult = yield this.delegateAbort(doFuzzyQuery(client, entityName, params));
         }
 
         searchResult.forEach(result => {
           result.versions = result.versions.map(version =>formatVersion(version));
         });
 
-        const stormodtagerRows = (yield client.queryp('SELECT nr, navn, adgangsadresseid FROM stormodtagere')).rows;
+        const stormodtagerRows = yield this.delegateAbort(client.queryRows('SELECT nr, navn, adgangsadresseid FROM stormodtagere'));
         const stormodtagere = _.indexBy(stormodtagerRows, 'adgangsadresseid');
 
 
@@ -396,48 +396,52 @@ function createSqlModel(entityName) {
         // compute map of address id -> current address version
         var idToCurrentVersion = _.indexBy(allCurrentVersions, (version) => version.id);
 
-        let addressTextToCategory = yield* qUtil.mapObjectAsync(addressTextToParseResult, function*(parseResult, addressText) {
-          const address = addressTextToUniqueMap[addressText];
-          let parsedAddress = parseResult.address;
-          var differences = addressTextToDifferences[addressText];
-          var differenceSum = addressTextToDifferenceSum[addressText];
 
-          if(differenceSum === 0 && parseResult.unknownTokens.length === 0) {
-            return 'A';
-          }
-          if(parseResult.unknownTokens.length === 0 &&
-            differences.husnr === 0 &&
-            differences.postnr === 0 &&
-            (differences.etage || 0) === 0 && (differences.dør || 0) === 0) {
-            var vejnavnMatchesCloseEnough;
-            if(differences.vejnavn === 0) {
-              vejnavnMatchesCloseEnough = true;
-            }
-            else if (differences.vejnavn > 3) {
-              vejnavnMatchesCloseEnough = false;
-            }
-            else {
-              var parsedVejnavn = parsedAddress.vejnavn;
-              const closestVejstykkeSql = `
+        let addressTextToCategory = yield this.delegateAbort(
+          mapObjectAsync(addressTextToParseResult,
+            (parseResult, addressText) => go(function*() {
+              const address = addressTextToUniqueMap[addressText];
+              let parsedAddress = parseResult.address;
+              var differences = addressTextToDifferences[addressText];
+              var differenceSum = addressTextToDifferenceSum[addressText];
+
+              if (differenceSum === 0 && parseResult.unknownTokens.length === 0) {
+                return 'A';
+              }
+              if (parseResult.unknownTokens.length === 0 &&
+                differences.husnr === 0 &&
+                differences.postnr === 0 &&
+                (differences.etage || 0) === 0 && (differences.dør || 0) === 0) {
+                var vejnavnMatchesCloseEnough;
+                if (differences.vejnavn === 0) {
+                  vejnavnMatchesCloseEnough = true;
+                }
+                else if (differences.vejnavn > 3) {
+                  vejnavnMatchesCloseEnough = false;
+                }
+                else {
+                  var parsedVejnavn = parsedAddress.vejnavn;
+                  const closestVejstykkeSql = `
 SELECT vejnavn
 FROM vask_vejstykker_postnumre v
 WHERE postnr = $1
 ORDER BY
   levenshtein(lower($2), lower(vejnavn))
 LIMIT 1`;
-              const closestVejstykke =
-                (yield client.queryp(
-                  closestVejstykkeSql,
-                  [parsedAddress.postnr, parsedVejnavn])).rows[0];
-              // hvis der ikke er et closestVejstykke, så er det fordi et stormodtagerpostnummer er anvendt.
-              vejnavnMatchesCloseEnough = !closestVejstykke || (closestVejstykke.vejnavn === address.vejnavn);
-            }
-            if(vejnavnMatchesCloseEnough) {
-              return 'B';
-            }
-          }
-          return 'C';
-        });
+                  const closestVejstykke =
+                    (yield this.delegateAbort(client.queryRows(closestVejstykkeSql,
+                      [parsedAddress.postnr, parsedVejnavn])))[0];
+                  // hvis der ikke er et closestVejstykke, så er det fordi et stormodtagerpostnummer er anvendt.
+                  vejnavnMatchesCloseEnough = !closestVejstykke || (closestVejstykke.vejnavn === address.vejnavn);
+                }
+                if (vejnavnMatchesCloseEnough) {
+                  return 'B';
+                }
+              }
+              return 'C';
+            })
+          )
+        );
 
         var categoryCounts = _.countBy(_.values(addressTextToCategory), _.identity);
 
@@ -566,7 +570,7 @@ LIMIT 1`;
         }];
 
 
-      })().nodeify(callback);
+      });
     }
   };
 }

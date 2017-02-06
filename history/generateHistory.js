@@ -19,6 +19,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   proddb.withTransaction('READ_WRITE', function (client) {
+     client.allowParallelQueries = true;
     return q.async(function*() {
       try {
         yield generateHistoryImpl.generateAdgangsadresserHistory(client);

@@ -1,13 +1,13 @@
 "use strict";
 
 var expect = require('chai').expect;
-var q = require('q');
+const { go } = require('ts-csp');
 
 require('../../apiSpecification/allSpecs');
 
 var datavaskResources = require('../../apiSpecification/datavask/resources');
 var helpers = require('./helpers');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 var adresseTests = [
   {
@@ -126,24 +126,24 @@ describe('Adressevask', () => {
   testdb.withTransactionEach('test', function (clientFn) {
     adresseTests.forEach((test) => {
       it(test.it, ()=> {
-        return q.async(function*() {
-          var result = yield helpers.getJson(clientFn(), datavaskResources.adresse, {}, {betegnelse: test.betegnelse})
+        return go(function*() {
+          var result = yield helpers.getJson(clientFn(), datavaskResources.adresse, {}, {betegnelse: test.betegnelse});
           expect(result.kategori).to.equal(test.result.kategori);
           if(test.result.id) {
             expect(result.resultater[0].adresse.id).to.equal(test.result.id);
           }
-        })();
+        }).asPromise();
       });
     });
     adgangsadresseTests.forEach((test) => {
       it(test.it, ()=> {
-        return q.async(function*() {
+        return go(function*() {
           var result = yield helpers.getJson(clientFn(), datavaskResources.adgangsadresse, {}, {betegnelse: test.betegnelse})
           expect(result.kategori).to.equal(test.result.kategori);
           if(test.result.id) {
             expect(result.resultater[0].adresse.id).to.equal(test.result.id);
           }
-        })();
+        }).asPromise();
       });
     });
   });

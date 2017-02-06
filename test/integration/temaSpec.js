@@ -6,7 +6,7 @@ var _ = require('underscore');
 
 var dagiTemaer = require('../../apiSpecification/temaer/temaer');
 var tema = require('../../temaer/tema');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 const registry = require('../../apiSpecification/registry');
 const helpers = require('./helpers');
 

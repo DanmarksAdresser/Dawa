@@ -1,8 +1,8 @@
 "use strict";
 
 const expect = require('chai').expect;
-const { into, cat } = require('transducers-js');
-const { separate } = require('../../transducer-util');
+const { into } = require('transducers-js');
+const { separate } = require('../../util/transducer-util');
 
 describe('separate', () => {
   it('Can Separate with a begin, separator and end', () => {

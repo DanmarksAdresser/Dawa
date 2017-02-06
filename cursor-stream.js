@@ -9,10 +9,6 @@ var logger = require('./logger').forCategory('cursorStream');
 
 util.inherits(CursorStream, Readable);
 function CursorStream(client, cursorName, query) {
-  var self = this;
-  self.transactionEndListener = function (err) {
-    self._close(new Error('Transaction ended unexpectedly', err));
-  };
   Readable.call(this, {
     objectMode: true,
     highWaterMark: 200
@@ -25,7 +21,6 @@ function CursorStream(client, cursorName, query) {
   this.moreRowsAvailable = true;
   this.queryInProgress = false;
 
-  client.once('transactionEnd', self.transactionEndListener);
 }
 
 CursorStream.prototype._doFetch = function(count) {
@@ -67,7 +62,6 @@ CursorStream.prototype._close = function(err) {
   if(self.closed) {
     return;
   }
-  self.client.removeListener('transactionEnd', self.transactionEndListener);
   if(err) {
     logger.error('Cursor closed due to error', {
       error: err

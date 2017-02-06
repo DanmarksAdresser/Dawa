@@ -10,7 +10,10 @@ var _ = require('underscore');
 var cluster = require('cluster');
 var isalive = require('./isalive');
 var pg = require('pg');
+const databasePools = require('./psql/databasePools');
 require('pg-parse-float')(pg);
+
+const { requestLimiter } = require('./psql/requestLimiter');
 
 
 /**
@@ -60,9 +63,11 @@ function setupWorker() {
       if (level === 'warn' || level === 'error') {
         poolLogger.log(level, msg);
       }
-    }
+    },
+    requestLimiter
   };
   proddb.init(dboptions);
+  databasePools.create('prod', dboptions);
   var dawaPgApi      = require('./dawaPgApi');
   var documentation = require('./documentation');
   require('./apiSpecification/allSpecs');

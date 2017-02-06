@@ -5,17 +5,18 @@
  */
 
 var expect = require('chai').expect;
+const { go } = require('ts-csp');
 var _ = require('underscore');
-var q = require('q');
 
 var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
 var commonParameters = require('../../apiSpecification/common/commonParameters');
 var adgangsadresseParameters = require('../../apiSpecification/adgangsadresse/parameters');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 var husnrUtil = require('../../apiSpecification/husnrUtil');
 require('../../apiSpecification/allSpecs');
+
 
 function multiVerifier(verifierFn) {
   return function(object, paramString) {
@@ -689,14 +690,18 @@ _.keys(sampleParameters).forEach(function(specName) {
               expect(parseResult.errors).to.deep.equal([]);
               parseResult.params.per_side = 100;
               return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-                return q.ninvoke(sqlModel, 'query', client, _.pluck(jsonRepresentation.fields, 'name'), parseResult.params).then(function(rows) {
+                return go(function*() {
+                  const rows = yield sqlModel.processQuery(
+                    client,
+                    _.pluck(jsonRepresentation.fields, 'name'),
+                    parseResult.params);
                   expect(rows.length).to.be.above(0);
                   var mappedRows = _.map(rows, jsonRepresentation.mapper("BASE_URL", parseResult.params));
                   mappedRows.forEach(function(json) {
                     var verifyResult = verify(json, sampleValue);
                     expect(verifyResult).to.equal(true);
                   });
-                });
+                }).asPromise();
               });
             });
           });

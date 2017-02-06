@@ -1,13 +1,13 @@
 "use strict";
 
 var expect = require('chai').expect;
-var q = require('q');
 var _ = require('underscore');
 
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
 var schemaValidationUtil = require('./schemaValidationUtil');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
+const { go } = require('ts-csp');
 require('../../apiSpecification/allSpecs');
 
 var sampleParameters = {
@@ -39,14 +39,18 @@ describe('Alle autocomplete ressourcer skal virke', function() {
           expect(parseResult.errors.length).to.equal(0);
           var mapper = autocompleteRepresentation.mapper("BASE_URL", parseResult.params, false);
           return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-            return q.ninvoke(resource.sqlModel, 'query', client, _.pluck(autocompleteRepresentation.fields, 'name'), parseResult.params).then(function(rows) {
+            return go(function*() {
+              const rows = yield resource.sqlModel.processQuery(
+                client,
+                _.pluck(autocompleteRepresentation.fields, 'name'),
+                parseResult.params);
               expect(rows.length).to.be.above(0);
               rows.forEach(function(row) {
                 var json = mapper(row);
                 expect(schemaValidationUtil.isSchemaValid(json, autocompleteRepresentation.schema)).to.equal(true);
               });
             });
-          });
+          }).asPromise();
         });
       });
     });

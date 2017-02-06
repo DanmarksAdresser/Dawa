@@ -3,11 +3,12 @@
 const csvStringify = require('csv-stringify');
 const _ = require('underscore');
 
-var logger = require('../logger').forCategory('consistency');
-var proddb = require('../psql/proddb');
+const { go } = require('ts-csp');
+const databasePools = require('../psql/databasePools');
 var registry = require('./registry');
 
 var resourceImpl = require('./common/resourceImpl');
+const logger = require('../logger').forCategory('consistency');
 
 var consistencyChecks = [
   {
@@ -112,37 +113,33 @@ FROM byDay
   }
 ];
 
-module.exports = consistencyChecks.reduce(function(memo, check) {
-  var path ='/konsistens/' + check.key;
+module.exports = consistencyChecks.reduce(function (memo, check) {
+  var path = '/konsistens/' + check.key;
   memo[path] = {
     path: path,
     expressHandler: function (req, res) {
-      proddb.withTransaction('READ_ONLY', function (client) {
-        return client.queryp(check.query, [])
-          .then(function (result) {
-            const fieldNames = _.pluck(result.fields, 'name');
-            csvStringify(result.rows || [], {header: true, columns: fieldNames, rowDelimiter: '\r\n'}, (err, result) => {
-              if(err) {
-                res.status(500).send(JSON.stringify(err));
-                return;
-              }
-              res.set('Content-Type', 'text/csv');
-              res.end(result);
-            });
-
-
-          })
-          .catch(function (err) {
-            logger.error("Fejl under udførelse af database query", err);
-            resourceImpl.sendInternalServerError(res, "Fejl under udførelse af database query");
-          });
-      })
-        .catch(function () {
-          resourceImpl.sendInternalServerError(res, "Kunne ikke forbinde til databasen");
+      databasePools.get('prod').withConnection({}, (client) => go(function*() {
+        const result = yield client.query(check.query);
+        const fieldNames = _.pluck(result.fields, 'name');
+        csvStringify(result.rows || [], {
+          header: true,
+          columns: fieldNames,
+          rowDelimiter: '\r\n'
+        }, (err, result) => {
+          if (err) {
+            res.status(500).send(JSON.stringify(err));
+            return;
+          }
+          res.set('Content-Type', 'text/csv');
+          res.end(result);
         });
+      })).asPromise().catch(function (err) {
+        logger.error('Fejl under consistency check', err);
+        resourceImpl.sendInternalServerError(res, { message: "Kunne ikke forbinde til databasen"});
+      });
     }
   };
-  registry.add('konsistens', 'resourceImpl',check.key, memo[path]);
+  registry.add('konsistens', 'resourceImpl', check.key, memo[path]);
   return memo;
 }, {});
 

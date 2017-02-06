@@ -46,8 +46,10 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);
       yield loadCsvTestdata(client, 'test/data');
       yield importDarImpl.updateVejstykkerPostnumreMat(client, true);
+      client.allowParallelQueries = true;
       yield generateHistoryImpl.generateAdgangsadresserHistory(client);
       yield generateHistoryImpl.generateAdresserHistory(client);
+      client.allowParallelQueries = false;
       for(let temaDef of temaer) {
         yield tema.updateAdresserTemaerView(client, temaDef, true, 1000000, false);
       }

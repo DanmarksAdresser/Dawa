@@ -6,7 +6,7 @@ var q = require('q');
 var crud = require('../../crud/crud');
 var Husnr = require('../../psql/databaseTypes').Husnr;
 var datamodels = require('../../crud/datamodel');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 var setupFixture = require('../util/testUtil').setupFixture;
 
 var testFixture = {
@@ -40,7 +40,7 @@ var testFixture = {
 };
 
 
-// all the tests in this file follows the following format:
+// all the tests in this file follorews the following format:
 // first, an updated is performed (or the test is verifying something
 // in the initial fixture).
 // Second, an object that is supposed to be modified is retrieved from the DB
@@ -245,7 +245,7 @@ var supplerendebynavneTests = [{
 }];
 
 function verify(testSpec, client) {
-  
+
   return q().then(function() {
     if(testSpec.update) {
       return crud.update(client, datamodels[testSpec.update.model], testSpec.update.update);

@@ -1,12 +1,11 @@
 "use strict";
 
 var util = require('util');
-const q = require('q');
 var _ = require('underscore');
 
 var dbapi = require('../../../dbapi');
-var fallbackStream = require('../../../fallback-stream');
-const cursorChannel = require('../../../cursor-channel');
+const cursorChannel = require('../../../util/cursor-channel');
+const { go } = require('ts-csp');
 
 function existy(obj) {
   return !_.isUndefined(obj) && !_.isNull(obj);
@@ -86,66 +85,67 @@ exports.InvalidParametersError = function(message) {
 util.inherits(exports.InvalidParametersError, Error);
 
 exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
-  return {
-    allSelectableFieldNames: function(allFieldNames) {
-      return allSelectableFieldNames(allFieldNames, columnSpec);
-    },
-    createQuery: function(fieldNames, params) {
-      var sqlParts = baseQuery();
+  const createQuery = (fieldNames, params) => {
+      const sqlParts = baseQuery();
       applySelect(sqlParts,columnSpec, fieldNames,params);
       parameterImpls.forEach(function(parameterImpl) {
         parameterImpl(sqlParts, params);
       });
       return dbapi.createQuery(sqlParts);
+  };
+  return {
+    allSelectableFieldNames: function(allFieldNames) {
+      return allSelectableFieldNames(allFieldNames, columnSpec);
     },
-    query: function(client, fieldNames, params, callback) {
-      var query = this.createQuery(fieldNames, params);
-      return dbapi.queryRaw(client, query.sql, query.params).nodeify(callback);
+    processQuery: function(client, fieldNames, params) {
+      return go(function*() {
+        const query = createQuery(fieldNames, params);
+        return (yield this.delegateAbort(client.query(query.sql, query.params))).rows || [];
+      });
     },
-    stream: function(client, fieldNames, params, callback) {
-      var query = this.createQuery(fieldNames, params);
-      return dbapi.streamRaw(client, query.sql, query.params).nodeify(callback);
-    },
-    channelStream: function(client, fieldNames, params, abortSignal) {
-      const query = this.createQuery(fieldNames, params);
-      return cursorChannel(client, query.sql, query.params, abortSignal);
+    processStream: function(client, fieldNames, params, channel, options) {
+      const query = createQuery(fieldNames, params);
+      return cursorChannel(client, query.sql, query.params, channel, options);
     }
   };
 };
 
 exports.applyFallback = function(sqlModel, fallbackParamsFn) {
-  var fallbackModel = {
+  const fallbackModel = {
     allSelectableFieldNames: sqlModel.allSelectableFieldNames
   };
-  fallbackModel.query = function(client, fieldNames, params, callback) {
-    var paramList = fallbackParamsFn(params);
-    return q.async(function*() {
-      const result = yield sqlModel.query(client, fieldNames, paramList[0]);
-      if(paramList.length === 1) {
-        return result;
+  fallbackModel.processQuery = function(client, fieldNames, params) {
+    return go(function*() {
+      const paramList = fallbackParamsFn(params);
+      let result;
+      for(let params of paramList) {
+        result = (yield this.delegateAbort(sqlModel.processQuery(client, fieldNames, params))) || [];
+        if(result.length > 0) {
+          return result;
+        }
       }
-      if(result.length === 0) {
-        return yield sqlModel.query(client, fieldNames, paramList[1]);
-      }
-      else {
-        return result;
-      }
-    })().nodeify(callback);
-  };
-  fallbackModel.stream = function(client, fieldNames, params, callback) {
-    var paramList = fallbackParamsFn(params);
-    sqlModel.stream(client, fieldNames, paramList[0], function(err, stream) {
-      if(err) {
-        return callback(err);
-      }
-      if(paramList.length === 1) {
-        return callback(undefined, stream);
-      }
-      return callback(undefined, fallbackStream(stream, function(callback) {
-        sqlModel.stream(client, fieldNames, paramList[1], callback);
-      }));
+      return result;
     });
   };
+  fallbackModel.processStream = function (client, fieldNames, params, channel, options) {
+    options = options || {};
+    const keepOpen = options.keepOpen ? true : false;
+    return go(function*() {
+      const paramList = fallbackParamsFn(params);
+      for (let params of paramList) {
+
+        yield this.delegateAbort(sqlModel.processStream(client, fieldNames, params, channel, {keepOpen: true}));
+
+        if (channel.putCount() > 0) {
+          break;
+        }
+      }
+      if(!keepOpen) {
+        channel.close();
+      }
+
+    });
+  }
   return fallbackModel;
 };
 

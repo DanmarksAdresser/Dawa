@@ -5,7 +5,7 @@ const path = require('path');
 const q = require('q');
 
 const importBebyggelserImpl = require('../../bebyggelser/importBebyggelserImpl');
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 
 describe('Import af bebyggelser', () => {
   testdb.withTransactionAll('empty', clientFn => {

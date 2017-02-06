@@ -4,8 +4,10 @@ var eventStream = require('event-stream');
 var Transform        = require('stream').Transform;
 var util             = require('util');
 var pipeline = require('../../pipeline');
-const {separate} = require('../../transducer-util');
+const { separate } = require('../../util/transducer-util');
 const { comp, map } = require('transducers-js');
+const { csvStringify: transducingCsvStringify } = require('../../util/csvStringify');
+
 function jsonStringify(object, prettyPrint){
   return JSON.stringify(object, undefined, prettyPrint ? 2 : 0);
 }
@@ -194,18 +196,38 @@ exports.createSingleObjectSerializer = function(formatParam, callbackParam, pret
   };
 };
 
-exports.transducingSerializer = (formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam, representation) => {
+exports.transducingSerializer = (singleObject, formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam, representation) => {
   formatParam = formatParam || 'json';
   sridParam = sridParam || 4326;
+  let xform;
   if(formatParam === 'csv') {
-    throw new Error("CSV not yet implemented");
+    const columns = representation.outputFields;
+    const options = {
+      header: true, columns, rowDelimiter: '\r\n'
+    }
+    xform = transducingCsvStringify(options);
   }
-  const sep = computeSeparator(formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam);
+  else if(singleObject) {
+    const mapper = object => {
+      const textObject = jsonStringify(object, prettyPrint);
+      if(callbackParam) {
+        const sep = jsonpSep(callbackParam, {open: '', separator: '', close: ''});
+        return sep.open + textObject + sep.close;
+      }
+      else {
+        return textObject;
+      }
+    };
+    xform = map(mapper);
+  }
+  else {
+    const sep = computeSeparator(formatParam, callbackParam, sridParam, prettyPrint, ndjsonParam);
 
-  const stringifyFn = prettyPrint ?
-    (obj => JSON.stringify(obj, null, 2)) :
-    (obj => JSON.stringify(obj));
-  const xform = comp(map(stringifyFn), separate(sep));
+    const stringifyFn = prettyPrint ?
+      (obj => JSON.stringify(obj, null, 2)) :
+      (obj => JSON.stringify(obj));
+    xform = comp(map(stringifyFn), separate(sep));
+  }
 
   return {
     status: 200,

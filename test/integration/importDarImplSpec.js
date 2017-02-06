@@ -1,6 +1,5 @@
 "use strict";
 
-var copyFrom = require('pg-copy-streams').from;
 var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');
@@ -17,7 +16,7 @@ var dbSpecUtil = require('../../darImport/dbSpecUtil');
 var importDarImpl = require('../../darImport/importDarImpl');
 var monotemporal = require('../../darImport/monotemporal');
 var promisingStreamCombiner = require('../../promisingStreamCombiner');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 var testObjects = require('../helpers/testObjects');
 var Husnr = databaseTypes.Husnr;
 var Range = databaseTypes.Range;
@@ -123,7 +122,7 @@ var SYNTHETIC_DIR = path.join(__dirname, 'sampleDarFiles', 'synthetic');
 
 function loadRawCsv(client, filePath, destionationTable) {
   var sql = "COPY " + destionationTable + " FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
-  var pgStream = client.query(copyFrom(sql));
+  var pgStream = client.copyFrom(sql);
   var source = fs.createReadStream(filePath, {encoding: 'utf-8'});
   return promisingStreamCombiner([source, pgStream]);
 }

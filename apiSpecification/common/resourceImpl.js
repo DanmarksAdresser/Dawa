@@ -1,18 +1,21 @@
 "use strict";
 
-var eventStream = require('event-stream');
-var q = require('q');
 var _ = require('underscore');
 
-var paths = require('../paths');
-var sqlUtil = require('./sql/sqlUtil');
 var logger = require('../../logger');
+const paths = require('../paths');
 
-var pipeline = require('../../pipeline');
 var parameterParsing = require('../../parameterParsing');
-var transactions = require('../../psql/transactions');
+const databasePools = require('../../psql/databasePools');
 var serializers = require('./serializers');
-const { Signal, wrapWritableStream, select, TAKE, CLOSED, go } = require('../../csp');
+const { comp, map } = require('transducers-js');
+const { Channel, Signal, Abort, OperationType, CLOSED, go, parallel } = require('ts-csp');
+const dbLogger = require('../../logger').forCategory('Database');
+const requestLogger = require('../../logger').forCategory('RequestLog');
+const statistics = require('../../statistics');
+const sqlUtil = require('./sql/sqlUtil');
+
+const { pipeToStream, pipe } = require('../../util/cspUtil');
 
 function jsonStringifyPretty(object){
   return JSON.stringify(object, undefined, 2);
@@ -71,6 +74,7 @@ function postgresQueryErrorResponse(details) {
   return jsonResponse(500, msg);
 }
 
+
 function modelErrorResponse(err) {
   if(err instanceof sqlUtil.InvalidParametersError) {
     return queryParameterFormatErrorResponse(err.message);
@@ -100,25 +104,20 @@ function sendError(res, code, message){
   res.end(jsonStringifyPretty(message));
 }
 
-function loggingContext(req) {
+const getClientIp = req => {
   const xForwardedFor = req.header('x-forwarded-for');
-  let clientIp;
   if(xForwardedFor) {
     const firstCommaIndex = xForwardedFor.indexOf(',');
-    clientIp = firstCommaIndex !== -1 ? xForwardedFor.substring(0, firstCommaIndex) : xForwardedFor;
+    return firstCommaIndex !== -1 ? xForwardedFor.substring(0, firstCommaIndex) : xForwardedFor;
   }
   else {
-    clientIp = req.ip;
+    return req.ip;
   }
-  const loggingContext = {
-    clientIp: clientIp
-  };
-  const reqId = req.header('X-Amz-Cf-Id');
-  if(reqId) {
-    loggingContext.reqId = reqId;
-  }
-  return loggingContext;
-}
+};
+
+const getRequestId = req => {
+  return req.header('X-Amz-Cf-Id');
+};
 
 function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
   /*
@@ -166,230 +165,241 @@ exports.internal = {
 
 exports.sendInternalServerError = sendInternalServerError;
 
-function singleResultResponse(
-  resourceSpec,
-  dbClient,
-  validatedPathParams,
-  validatedParams,
-  fieldNames,
-  mapObject,
-  serialize) {
-  // create a function that can write the object to the HTTP response based on the format requrested by the
-  // client
-  return q.ninvoke(resourceSpec.sqlModel, "query", dbClient, fieldNames, validatedParams).then(function(rows) {
-    if (rows.length > 1) {
-      logger.error('resourceImpl', 'Query for single object resulted in more than one object', {path: resourceSpec.path, params: validatedParams});
-      return internalServerErrorResponse("The request resulted in more than one response");
-    } else if (rows.length === 0) {
-      return objectNotFoundResponse(validatedPathParams);
-    } else {
-      // map the object and send it to the client
-      var mappedResult = mapObject(rows[0]);
-      return q.nfcall(serialize, mappedResult);
-    }
-  }, function(err) {
-    logger.error('resourceImpl', 'Internal error querying for single object', {error: err});
-    return modelErrorResponse(err);
-  });
-}
-
-function arrayResultResponse(resourceSpec, dbClient, params, fieldNames, mapObject, serialize) {
-  return q.async(function*() {
-    function pipeResult(stream) {
-      // map the query results to the correct representation and serialize to http response
-      var pipe = pipeline(stream);
-      pipe.map(mapObject);
-      return q.nfcall(serialize, pipe);
-    }
-
-    try {
-      if (resourceSpec.disableStreaming) {
-        var result = yield q.ninvoke(resourceSpec.sqlModel, "query", dbClient, fieldNames, params);
-        let stream = eventStream.readArray(result);
-        var serialized = yield pipeResult(stream);
-        return serialized;
-      }
-      else {
-        let stream = yield q.ninvoke(resourceSpec.sqlModel, "stream", dbClient, fieldNames, params);
-        return yield pipeResult(stream);
-      }
-    }
-    catch(err) {
-      logger.error('resourceImpl', 'Caught unexpected error', {error: err});
-      return modelErrorResponse(err);
-    }
-  })();
-}
-
-function resourceResponse(client, resourceSpec, req) {
-  return q.async(function*() {
-    var parseResult = parseAndProcessParameters(resourceSpec, req.params, req.query);
+const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams) => {
+  return go(function*() {
+    const parseResult = parseAndProcessParameters(resourceSpec, pathParams, queryParams);
     if(parseResult.pathErrors) {
       return uriPathFormatErrorResponse(parseResult.pathErrors);
     }
     else if(parseResult.queryErrors) {
       return queryParameterFormatErrorResponse(parseResult.queryErrors);
     }
-    var params = parseResult.processedParams;
+    const params = parseResult.processedParams;
 
-    var formatParam = params.format;
+    const formatParam = params.format;
 
     const strukturParam = params.struktur;
 
     // choose the right representation based on the format requested by client
-    var representation = resourceSpec.chooseRepresentation(formatParam, strukturParam, resourceSpec.representations);
+    const representation = resourceSpec.chooseRepresentation(formatParam, strukturParam, resourceSpec.representations);
     if(_.isUndefined(representation) || _.isNull(representation)){
       return queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
     }
     logger.debug('ParameterParsing', 'Successfully parsed parameters', {parseResult: params});
     // The list of fields we want to retrieve from database
-    var fieldNames = _.pluck(_.filter(representation.fields, function(field){ return field.selectable; }), 'name');
+    const fieldNames = _.pluck(_.filter(representation.fields, function(field){ return field.selectable; }), 'name');
+
+    if(resourceSpec.sqlModel.validateParams) {
+      try {
+        yield resourceSpec.sqlModel.validateParams(client, params);
+      }
+      catch(err) {
+        return modelErrorResponse(err);
+      }
+    }
 
     // create a mapper function that maps results from the SQL layer to the requested representation
-    var mapObject = representation.mapper(paths.baseUrl(req), params, resourceSpec.singleResult);
+    const mapObject = representation.mapper(baseUrl, params, resourceSpec.singleResult);
+    const transducingSerializer = serializers.transducingSerializer(
+      resourceSpec.singleResult,
+      formatParam,
+      params.callback,
+      params.srid,
+      !(params.noformat || params.ndjson),
+      params.ndjson,
+      representation);
+
+    const xform = comp(map(mapObject), transducingSerializer.xform);
+    let execute;
     if(resourceSpec.singleResult) {
-      // create a serializer function that can stream the objects to the HTTP response in the format requrested by the
-      // client
-      var serializeSingleResult = serializers.createSingleObjectSerializer(formatParam,
-        params.callback,
-        !(params.noformat || params.ndjson),
-        params.ndjson,
-        representation);
-      return yield singleResultResponse(resourceSpec, client,parseResult.pathParams, params, fieldNames, mapObject, serializeSingleResult);
+      const rows = yield this.delegateAbort(resourceSpec.sqlModel.processQuery(client, fieldNames, params));
+      if(rows.length === 0) {
+        return objectNotFoundResponse(pathParams);
+      }
+      else if (rows.length > 1) {
+        return internalServerErrorResponse("Unexpected number of results from query");
+      }
+      const value = rows[0];
+      execute = (client, channel) => go(function*() {
+        yield channel.put(value);
+        channel.close();
+      });
+    }
+    else if (resourceSpec.disableStreaming) {
+      execute = (client, channel) => go(function*() {
+        this.abortSignal.take().then(() => 'EXECUTE ABORTED');
+        const result = yield this.delegateAbort(resourceSpec.sqlModel.processQuery(client, fieldNames, params));
+        yield channel.putMany(result);
+        channel.close();
+      });
     }
     else {
-      // create a serializer function that can stream the objects to the HTTP response in the format requested by the
-      // client
-      if(resourceSpec.sqlModel.channelStream) {
-        console.log('USING CHANNEL STREAM');
-        const abortSignal = new Signal();
-        const { channel, endSignal, errorSignal } = resourceSpec.sqlModel.channelStream(client, fieldNames, params, abortSignal);
-        const serializer = serializers.transducingSerializer(formatParam,
-          params.callback,
-          params.srid,
-          !(params.noformat || params.ndjson),
-          params.ndjson,
-          representation);
-        return Object.assign(serializer, { channel, endSignal, abortSignal, errorSignal });
-      }
-      else {
-        var serializeStream = serializers.createStreamSerializer(formatParam,
-          params.callback,
-          params.srid,
-          !(params.noformat || params.ndjson),
-          params.ndjson,
-          representation);
-        var response = yield arrayResultResponse(resourceSpec, client, params, fieldNames, mapObject, serializeStream);
-        return response;
-      }
+      execute = (client, channel) =>
+        client.withTransaction(
+          'READ_ONLY',
+          () => resourceSpec.sqlModel.processStream(client, fieldNames, params, channel));
     }
-  })();
-}
 
-exports.resourceResponse = resourceResponse;
-
-const transform = (dst, xform, src, abortSignal) => {
-  return go(function*() {
-    const acc = [];
-    const outputter = {
-      "@@transducer/step": (result, input) => {
-        acc.push(input);
-        return acc;
-      },
-      "@@transducer/result": (result) => {
-      }
+    return {
+      status: transducingSerializer.status,
+      headers: transducingSerializer.headers,
+      execute,
+      xform
     };
-    xform = xform(outputter);
-
-    /* eslint no-constant-condition: 0 */
-    while(true) {
-      const {ch, value} = yield select([
-        {ch: src, op: TAKE},
-        {ch: abortSignal, op: TAKE}
-      ]);
-      if(ch === abortSignal) {
-        return;
-      }
-      if(value === CLOSED) {
-        xform["@@transducer/result"](acc);
-      }
-      else {
-        xform["@@transducer/step"](acc, value);
-      }
-      for(let val of acc) {
-        yield dst.put(val);
-      }
-      acc.length = 0;
-      if(value === CLOSED) {
-        dst.close();
-        break;
-      }
-
-    }
   });
 };
 
-exports.createExpressHandler = function(resourceSpec) {
-  return function(req, res) {
-    // In case the HTTP connection has been reset before we get a psql connection,
-    // we do not want to actually acquire it.
-    function shouldAbort() {
-      return !res.connection.writable;
-    }
-    function doResponse(client) {
-      return q.async(function*() {
-        let response;
-        try {
-          response = yield resourceResponse(client, resourceSpec, req);
-        }
-        catch(err) {
-          logger.error('resourceImpl', 'An unexpected error happened during resource handling', {error: err});
-          response = internalServerErrorResponse(err);
-        }
-        res.statusCode = response.status || 200;
-        _.each(response.headers, function (headerValue, headerName) {
-          res.setHeader(headerName, headerValue);
-        });
-        if (response.body) {
-          res.end(response.body);
-        }
-        else if (response.bodyPipe) {
-          response.bodyPipe.toHttpResponse(res);
-          yield response.bodyPipe.completed();
-        }
-        else if(response.channel) {
-          const {
-            channel: inputChannel,
-            abortSignal: abortQuerySignal,
-            endSignal,
-            errorSignal: queryErrorSignal,
-            xform
-          } = response;
-          const { ch: outputChannel, errorSignal: outputErrorSignal } =  wrapWritableStream(res);
-          const abortTransformSignal = new Signal();
-          queryErrorSignal.connect(abortTransformSignal);
-          outputErrorSignal.connect(abortTransformSignal);
-          outputErrorSignal.connect(abortQuerySignal);
-          yield transform(outputChannel, xform, inputChannel, abortTransformSignal).take();
-          yield endSignal.take();
-        }
-        else {
-          res.end();
-        }
-      })();
-    }
-    var promise = transactions.withTransaction('prod', {
-      mode: 'READ_ONLY',
-      pooled: true,
-      shouldAbort: shouldAbort,
-      loggingContext: loggingContext(req)
-    }, doResponse);
+exports.prepareResponse = prepareResponse;
 
-    return promise.catch(function(err) {
-      logger.error('resourceImpl', 'Internal error processing request', {error: err});
-      res.connection.disconnect();
+function serveResponse(client, req, res, response, initialDataSignal) {
+  return go(function*() {
+    res.statusCode = response.status || 200;
+    _.each(response.headers, function (headerValue, headerName) {
+      res.setHeader(headerName, headerValue);
     });
 
-  };
+    if(response.body) {
+      res.end(response.body);
+      return;
+    }
 
+
+    // Channel for data written to HTTP response
+    const httpResponseChannel = new Channel(0, response.xform);
+
+    // channel used for buffering query responses
+    const bufferChannel = new Channel(400);
+
+    // process which pipes response data to the NodeJS response stream
+    const httpWriterProcess  =  pipeToStream(httpResponseChannel, res, 200, initialDataSignal);
+
+    // process responsible for querying the database and puting the rows to bufferChannel
+    const queryProcess = response.execute(client, bufferChannel);
+
+    // Process which pipes rows from the bufferChannel to the httpResponseChannel
+    const pipeProcess = pipe(bufferChannel, httpResponseChannel, 200);
+
+    // Compose the three child processes into one
+    const responseProcess = parallel(httpWriterProcess, queryProcess, pipeProcess);
+
+    // wait for the responseProcess to complete (or abort)
+    return yield this.delegateAbort(responseProcess);
+  });
+}
+
+
+const pipeToArray = (src, batchSize) => go(function*() {
+  const result = [];
+  /* eslint no-constant-condition: 0 */
+  while (true) {
+    const {values} = yield this.selectOrAbort(
+      [{ch: src, op: OperationType.TAKE_MANY, count: batchSize}]);
+    const closed = values[values.length - 1] === CLOSED;
+    if (closed) {
+      values.pop();
+    }
+    for(let value of values) {
+      result.push(value);
+    }
+    if (closed) {
+      return result;
+    }
+  }
+});
+
+const materializeBody = (client, preparedResponse) => go(function*() {
+  if(typeof preparedResponse.body !== 'undefined') {
+    return preparedResponse.body;
+  }
+  const ch = new Channel(0, preparedResponse.xform);
+
+  const queryProcess = preparedResponse.execute(client, ch);
+  const arrayWriterProcess = pipeToArray(ch, 200);
+  const [result] = yield this.delegateAbort(parallel(arrayWriterProcess, queryProcess));
+  return result.join('');
+});
+
+exports.materializeResponse = (client, resourceSpec, baseUrl, pathParams, queryParams) => go(function*() {
+  const preparedResponse = yield this.delegateAbort(prepareResponse(client, resourceSpec, baseUrl, pathParams, queryParams));
+  const body = yield materializeBody(client, preparedResponse);
+
+  return {
+    status: preparedResponse.status,
+    headers: preparedResponse.headers,
+    body
+  }
+});
+
+exports.createExpressHandler = function(resourceSpec) {
+  return function(req, res) {
+    go(function*() {
+      const requestContext = {
+        requestReceived: Date.now(),
+        waitTime: 0,
+        queryTime: 0,
+        clientIp: getClientIp(req),
+        path: req.path,
+      };
+      const requestId = getRequestId(req);
+      if(requestId) {
+        requestContext.requestId = requestId;
+      }
+      // Create a signal which is raised when the client aborts the HTTP connection
+      const clientDisconnectedSignal = new Signal();
+      req.once('aborted', err => clientDisconnectedSignal.raise("Client closed connection"));
+
+      const baseUrl = paths.baseUrl(req);
+
+      const dbStatContext = { clientIp: requestContext.clientIp};
+      if(requestContext.requestId) {
+        dbStatContext.requestId = requestContext.requestId;
+      }
+      const dbLogListener = logMessage => {
+        if(logMessage.error) {
+          dbLogger.error('Query Failed', logMessage);
+        }
+        requestContext.waitTime += logMessage.waitTime;
+        requestContext.queryTime += logMessage.queryTime;
+        statistics.emit('psql_query', logMessage.queryTime, null, dbStatContext);
+      };
+
+      const initialDataSignal = new Signal();
+      initialDataSignal.take().then(value => requestContext.responseBegin = Date.now());
+      const clientOptions = {
+        clientId: requestContext.clientIp,
+        logger: dbLogListener
+      };
+      const process = databasePools.get('prod').withConnection(clientOptions, (client) => {
+        return go(function*() {
+          const preparedResponse = yield this.delegateAbort(prepareResponse(client, resourceSpec, baseUrl, req.params, req.query));
+          return yield this.delegateAbort(serveResponse(client, req, res, preparedResponse, initialDataSignal));
+        });
+      });
+      clientDisconnectedSignal.connect(process.abort);
+      try {
+        yield process;
+      }
+      catch (err) {
+        requestContext.error = err;
+        req.destroy();
+      }
+      requestContext.responseEnd = Date.now();
+      const requestOutcome = requestContext.err ?
+        (requestContext.err instanceof Abort ? 'ABORTED' : 'FAILED') :
+        'COMPLETED';
+      requestContext.outcome = requestOutcome;
+      const logLevels = {
+        ABORTED: 'warn',
+        FAILED: 'error',
+        COMPLETED: 'info'
+      };
+      if(requestContext.responseBegin) {
+        requestContext.initialDelay = requestContext.responseBegin - requestContext.requestReceived;
+      }
+      requestLogger[logLevels[requestOutcome]]("Request Completed", requestContext);
+    }).asPromise().catch((err) => {
+      requestLogger.error('Unexpected internal coding error', err);
+      req.destroy();
+    });
+  };
 };

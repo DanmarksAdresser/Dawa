@@ -5,7 +5,7 @@ const q = require('q');
 
 const helpers = require('./helpers');
 const resources = require('../../apiSpecification/vejstykke/resources');
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 
 describe('Vejstykker', () => {
   const queryResource = resources.query;

@@ -2,7 +2,9 @@
 
 var _ = require('underscore');
 
-var async = require('async');
+const { go } = require('ts-csp');
+const cursorChannel = require('../../../util/cursor-channel');
+
 var querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
 var dbapi = require('../../../dbapi');
 var mappings = require('./../columnMappings');
@@ -26,33 +28,27 @@ function baseQuery(tableName, columnMappings, keyColumns) {
 
 function createSqlModel(columnMappings, baseQueryFn) {
   return {
-    allSelectableFields: function () {
+    allSelectableFieldNames: function () {
       return _.pluck(columnMappings, 'name');
     },
-    stream: function (client, fieldNames, params, callback) {
-      async.waterfall([
-        function (callback) {
-          querySenesteSekvensnummer(client, callback);
-        },
-        function (senesteHaendelse, callback) {
-          if (params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
-            callback(new sqlUtil.InvalidParametersError("hændelse med sekvensnummer " + params.sekvensnummer + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer));
-          }
-          else {
-            var sqlParts = baseQueryFn();
-            if (params.sekvensnummer) {
-              var sekvensnummerAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummer);
-              dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR valid_from IS NULL)');
-              dbapi.addWhereClause(sqlParts, '(valid_to > ' + sekvensnummerAlias + ' OR valid_to IS NULL)');
-            }
-            else {
-              dbapi.addWhereClause(sqlParts, 'valid_to IS NULL');
-            }
-            var query = dbapi.createQuery(sqlParts);
-            dbapi.streamRaw(client, query.sql, query.params, callback);
-          }
-        }
-      ], callback);
+    validateParams: (client, params) => go(function*() {
+      const senesteHaendelse = yield querySenesteSekvensnummer(client);
+      if (params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
+        throw new sqlUtil.InvalidParametersError("hændelse med sekvensnummer " + params.sekvensnummer + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer);
+      }
+    }),
+    processStream: (client, fieldNames, params, channel, options) => {
+      const sqlParts = baseQueryFn();
+      if (params.sekvensnummer) {
+        const sekvensnummerAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummer);
+        dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR valid_from IS NULL)');
+        dbapi.addWhereClause(sqlParts, '(valid_to > ' + sekvensnummerAlias + ' OR valid_to IS NULL)');
+      }
+      else {
+        dbapi.addWhereClause(sqlParts, 'valid_to IS NULL');
+      }
+      var query = dbapi.createQuery(sqlParts);
+      return cursorChannel(client, query.sql, query.params, channel, options);
     }
   };
 }

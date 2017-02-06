@@ -1,20 +1,16 @@
 "use strict";
 
-var setupDatabase = require('./setupDatabase');
+const databasePools = require('./databasePools');
+const scriptDbLogger = require('./scriptDbLogger');
 
-var transactions = require('./transactions');
-
-var options;
+let options;
 
 
 exports.init = function(_options) {
-  options = _options;
-  setupDatabase('prod', options);
+  options = Object.assign({}, { logger: scriptDbLogger }, _options);
+  databasePools.create('prod', options);
 };
 
 exports.withTransaction = function(mode, transactionFn) {
-  return transactions.withTransaction('prod', {
-    pooled: options.pooled,
-    mode: mode
-  }, transactionFn);
+  return databasePools.get('prod').withTransaction(options, mode, transactionFn).asPromise();
 };

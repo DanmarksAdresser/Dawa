@@ -6,7 +6,7 @@ var q = require('q');
 var crud = require('../../crud/crud');
 var Husnr = require('../../psql/databaseTypes').Husnr;
 var datamodels = require('../../crud/datamodel');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 describe('Triggers in PostgreSQL should maintain a consistent state', function () {
   testdb.withTransactionEach('empty', function (clientFn) {

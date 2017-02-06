@@ -15,7 +15,7 @@ require('../../apiSpecification/allSpecs');
 var crud = require('../../crud/crud');
 var Husnr = require('../../psql/databaseTypes').Husnr;
 var tema = require('../../temaer/tema');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 var datamodels = require('../../crud/datamodel');
 var temaer = require('../../apiSpecification/temaer/temaer');
 var tilknytninger = require('../../apiSpecification/tematilknytninger/tilknytninger');

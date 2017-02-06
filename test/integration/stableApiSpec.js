@@ -5,7 +5,7 @@ const q = require('q');
 
 const helpers = require('./helpers');
 const registry = require('../../apiSpecification/registry');
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 
 require('../../apiSpecification/allSpecs');
 

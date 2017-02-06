@@ -6,7 +6,7 @@ var q = require('q');
 var crud = require('../../crud/crud');
 var nontemporal = require('../../darImport/nontemporal');
 var qUtil = require('../../q-util');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 q.longStackSupport = true;
 

@@ -8,7 +8,7 @@ var _ = require('underscore');
 var csv = require('csv');
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 require('../../apiSpecification/allSpecs');
 

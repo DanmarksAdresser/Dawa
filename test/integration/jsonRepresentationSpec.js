@@ -4,10 +4,10 @@
 // Thus, this test verifies that the API is stable.
 
 var expect = require('chai').expect;
-var q = require('q');
 var _ = require('underscore');
+const { go } = require('ts-csp');
 
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
@@ -390,14 +390,13 @@ describe('JSON opslag', function() {
     }
     expectedResults.forEach(function(expected) {
       it('Should return correct response for ' + entityName, function() {
-        var key = (keyExtractors[entityName] || defaultKeyExtractor(nameAndKey.key))(expected);
-        return testdb.withTransaction('test', 'READ_ONLY', function(client) {
-          return q.nfcall(helpers.getJson, client, resource, key, { srid: "25832" }).then(function(result) {
-            expect(function() {
-              verifyResult("ROOT",expected, result );
-            }).to.not.throw;
-          });
-        });
+        const key = (keyExtractors[entityName] || defaultKeyExtractor(nameAndKey.key))(expected);
+        return testdb.withTransaction('test', 'READ_ONLY', client  => go(function*() {
+          const result = yield helpers.getJson(client, resource, key, { srid: "25832" });
+          expect(function() {
+            verifyResult("ROOT",expected, result );
+          }).to.not.throw;
+        }));
       });
     });
   });

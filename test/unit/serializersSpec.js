@@ -85,13 +85,13 @@ describe('serializers', function() {
 
 describe('Transducing serializer', () => {
   it('Can serialize JSON values', () => {
-    const serializer = transducingSerializer('json', null, null, false, false, null);
+    const serializer = transducingSerializer(false, 'json', null, null, false, false, null);
     expect(serializer.headers['Content-Type']).to.equal('application/json; charset=UTF-8');
     const serializedResult = into([], serializer.xform, [{id: 'a'}, {id: 'b'}]).join('');
     expect(serializedResult).to.equal(JSON.stringify([{id: 'a'}, {id: 'b'}]));
   });
   it('Can serialize NDJSON values', () => {
-    const serializer = transducingSerializer('json', null, null, false, true, null);
+    const serializer = transducingSerializer(false, 'json', null, null, false, true, null);
     expect(serializer.headers['Content-Type']).to.equal('application/x-ndjson; charset=UTF-8');
     const serializedResult = into([], serializer.xform, [{id: 'a'}, {id: 'b'}]).join('');
     expect(serializedResult).to.equal(`${JSON.stringify({id: 'a'})}\r\n${JSON.stringify({id: 'b'})}`);

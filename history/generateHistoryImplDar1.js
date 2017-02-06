@@ -66,7 +66,8 @@ TableInserter.prototype._writev = function(chunks, callback) {
   });
   this.client.query(
     `INSERT INTO ${this.table} (${this.columns.join(',')}) VALUES ${valueRows.join(',')}`,
-    parameters).asPromise().nodeify(callback);
+    parameters,
+    callback);
 };
 
 util.inherits(ExtendVejnavnTransformer, Transform);
@@ -160,14 +161,43 @@ UNION (SELECT
 function createVejnavnHistory(client) {
   return q.async(function*() {
     yield client.queryp('delete from vask_vejnavn');
-    const intervalSql = `SELECT kommunekode, vejkode,
+    const intervalSql = `
+SELECT
+  kommunekode,
+  vejkode,
   json_agg(json_build_object('navn', navn,
                              'adresseringsnavn', adresseringsnavn,
                              'virkningstart', lower(virkning),
-                             'virkningslut', upper(virkning))) as intervals
-FROM ((SELECT kommunekode, vejkode, navn, adresseringsnavn, virkning FROM cpr_vej) UNION
-(SELECT kommunekode, vejkode, navn, adresseringsnavn, registrering as virkning FROM dar_vejnavn WHERE ophoerttimestamp IS NULL)) AS t
-WHERE navn IS NOT NULL and navn <> '' and adresseringsnavn IS NOT NULL AND vejkode < 9900
+                             'virkningslut', upper(virkning))) AS intervals
+FROM ((SELECT
+         kommunekode,
+         vejkode,
+         navn,
+         adresseringsnavn,
+         virkning
+       FROM cpr_vej)
+      UNION
+      (SELECT
+         kommunekode,
+         vejkode,
+         navn,
+         adresseringsnavn,
+         registrering AS virkning
+       FROM dar_vejnavn
+       WHERE ophoerttimestamp IS NULL)
+      UNION
+      (SELECT
+         kommune AS kommunekode,
+         vejkode,
+        vejnavn as navn,
+        vejadresseringsnavn as adresseringsnavn,
+        nv.virkning * nvk.virkning as virkning
+        FROM dar1_navngivenvejkommunedel_history nv
+        JOIN dar1_navngivenvej_history nvk on nvk.id = nv.navngivenvej_id
+        AND nvk.virkning && nv.virkning
+      )
+     ) AS t
+WHERE navn IS NOT NULL AND navn <> '' AND adresseringsnavn IS NOT NULL AND vejkode < 9900
 GROUP BY kommunekode, vejkode;`;
     const intervalStream = yield dbapi.streamRaw(client, intervalSql, []);
     const columns = ['kommunekode', 'vejkode', 'navn', 'adresseringsnavn', 'virkning'];

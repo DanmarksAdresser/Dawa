@@ -5,7 +5,7 @@ const path = require('path');
 const q = require('q');
 
 const importAdresseHeightsImpl = require('../../heights/importAdresseHeightsImpl');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 
 const importFromApi = importAdresseHeightsImpl.importFromApi;

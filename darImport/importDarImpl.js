@@ -1,6 +1,5 @@
 "use strict";
 
-var copyFrom = require('pg-copy-streams').from;
 var csvParse = require('csv-parse');
 var csvStringify = require('csv-stringify');
 var es = require('event-stream');
@@ -29,6 +28,7 @@ var tema = require('../temaer/tema');
 var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
 const tablediff = require('../importUtil/tablediff');
+const importUtil = require('../importUtil/importUtil');
 
 var selectList = sqlUtil.selectList;
 var columnsEqualClause = sqlUtil.columnsEqualClause;
@@ -59,14 +59,9 @@ var dawaDbSpecImpls = _.reduce(dawaDbSpec, function(memo, spec, name) {
 }, {});
 
 
-function createCopyStream(client, table, columnNames) {
-  var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
-  return client.query(copyFrom(sql));
-}
-
 function loadCsvFile(client, filePath, tableName, dbSpecImpl, csvSpec, rowsToSkip) {
   var dbColumnNames = dbSpecImpl.changeTableColumnNames;
-  var pgStream = createCopyStream(client, tableName, dbColumnNames);
+  var pgStream = importUtil.copyStream(client, tableName, dbColumnNames);
 
   var csvParseOptions = {
     delimiter: ';',
@@ -606,7 +601,7 @@ function storeRowsToTempTable(client, csvSpec, dbSpecImpl, rows, table, report) 
   ' FROM ' + dbSpecImpl.table +
   ' WHERE false', [])
     .then(function() {
-      var pgStream = createCopyStream(client, table, columnNames);
+      var pgStream = importUtil.copyStream(client, table, columnNames);
       var inputStream = es.readArray(rows);
       return promisingStreamCombiner([
         inputStream,

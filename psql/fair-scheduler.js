@@ -72,6 +72,7 @@ module.exports = (options) => {
       if(runPrioritized) {
         priorityRunning++;
       }
+
       const promise = task.asyncTaskFn();
       const taskResult = yield promise;
       if(runPrioritized) {
@@ -93,6 +94,26 @@ module.exports = (options) => {
   }
 
   return {
+    status: () => {
+      const clients = Object.keys(sourceDescriptorMap);
+      clients.sort();
+      const clientDescs = clients.map(client => {
+        const descriptor = sourceDescriptorMap[client];
+        return {
+          client,
+          tasks: descriptor.tasks.length,
+          priority: descriptor.priority,
+          running: descriptor.running
+        };
+      });
+      return {
+        activeCount,
+        topPriority,
+        priorityRunning,
+        lastCleanup: new Date(lastCleanup).toISOString(),
+        clients: clientDescs
+      };
+    },
     schedule: (source, asyncTaskFn) => {
       if(!sourceDescriptorMap[source]) {
         const sourceDescriptor = {

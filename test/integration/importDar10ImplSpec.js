@@ -10,7 +10,7 @@ const q = require('q');
 const databaseTypes = require('../../psql/databaseTypes');
 const dawaSpec = require('../../dar10/dawaSpec');
 const importDarImpl = require('../../dar10/importDarImpl');
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 
 const Range = databaseTypes.Range;
 

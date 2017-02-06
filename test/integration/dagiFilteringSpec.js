@@ -1,12 +1,13 @@
 "use strict";
 
 var expect = require('chai').expect;
+
+const { go } = require('ts-csp');
 var request = require("request-promise");
-var q = require('q');
 
 var registry = require('../../apiSpecification/registry');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 var tema = require('../../temaer/tema');
 require('../../apiSpecification/allSpecs');
 
@@ -54,19 +55,15 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     it(' for sogn på ' + entityName, function () {
       this.timeout(10000);
       return testdb.withTransaction('test', 'ROLLBACK', function (client) {
-        return q.nfcall(tema.addTema, client, sampleTema)
-          .then(function () {
-            return tema.updateAdresserTemaerView(client, temaSpec, false, 5000, true);
-          })
-          .then(function () {
-            var params = {sognekode: "10"};
-            var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
-            return q.ninvoke(resourceSpec.sqlModel, 'query', client, ['id'], processedParams);
-          })
-          .then(function (result) {
-            expect(result.length).to.equal(expectedResultsSogn[entityName]);
-          });
-      });
+        return go(function*() {
+          yield tema.addTema(client, sampleTema);
+          yield tema.updateAdresserTemaerView(client, temaSpec, false, 5000, true);
+          var params = {sognekode: "10"};
+          var processedParams = resourceImpl.internal.parseAndProcessParameters(resourceSpec, [], params).processedParams;
+          const result = yield  resourceSpec.sqlModel.processQuery(client, ['id'], processedParams);
+          expect(result.length).to.equal(expectedResultsSogn[entityName]);
+        })
+      }).asPromise();
     });
 
     it(' for '  + entityName + 'r uden sognetilknytning', function () {

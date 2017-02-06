@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var q = require('q');
 
 var generateHistory = require('../../history/generateHistoryImpl');
-var testdb = require('../helpers/testdb');
+var testdb = require('../helpers/testdb2');
 
 q.longStackSupport = true;
 
@@ -13,6 +13,7 @@ describe('History generation', () => {
     testdb.withTransactionEach('empty', (clientFn) => {
       beforeEach(q.async(function*() {
         var client = clientFn();
+        client.allowParallelQueries = true;
         yield client.queryp('CREATE TEMP TABLE foo(id1 integer, id2 integer, a text, b text, virkning tstzrange)');
         yield client.queryp("INSERT INTO foo(id1, id2, a, b, virkning) VALUES (1, 1, 'a1', 'b1', '[\"2000-01-01Z\", \"2001-01-01Z\")')");
         yield client.queryp("INSERT INTO foo(id1, id2, a, b, virkning) VALUES (1, 1, 'a1', 'b2', '[\"2001-01-01Z\", \"2002-01-01Z\")')");
@@ -49,6 +50,7 @@ describe('History generation', () => {
     testdb.withTransactionEach('empty', (clientFn) => {
       it('Can generate a completely empty history', q.async(function*() {
         var client = clientFn();
+        client.allowParallelQueries = true;
         yield generateHistory.generateAdgangsadresserHistory(client);
       }));
     });
@@ -58,6 +60,7 @@ describe('History generation', () => {
     testdb.withTransactionEach('empty', (clientFn) => {
       it('Can generate a completely empty history', q.async(function*() {
         var client = clientFn();
+        client.allowParallelQueries = true;
         yield generateHistory.generateAdresserHistory(client);
       }));
     });

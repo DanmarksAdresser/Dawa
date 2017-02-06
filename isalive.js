@@ -5,9 +5,11 @@ var fs = require('fs');
 var q = require('q');
 var uuid = require('node-uuid');
 
-var database = require('./psql/database');
+const { go } = require('ts-csp');
+
+const databasePools = require('./psql/databasePools');
 var proddb = require('./psql/proddb');
-var statistics = require('./statistics');
+const logger = require('./logger').forCategory('isalive');
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
@@ -71,30 +73,32 @@ exports.isaliveMaster = function(options) {
 };
 
 exports.isaliveSlave = function(server) {
-  return q.ninvoke(server, 'getConnections').then(function(count) {
-    return proddb.withTransaction('READ_ONLY', function(client) {
-      return client.queryp('select * from adgangsadresser limit 1').then(function(result) {
-        return {
-          type: 'status',
-          data: {
-            status: result.rows && result.rows.length === 1 ? 'up' : 'down',
-            postgresPool: database.getPoolStatus('prod'),
-            statistics: statistics.getStatistics(),
-            connections: count
+  return go(function*() {
+    const connectionCount = yield q.ninvoke(server, 'getConnections');
+    let couldPerformQuery = false;
+    try {
+      yield proddb.withTransaction('READ_ONLY', function (client) {
+        return go(function*() {
+          const result = yield client.queryp('select * from adgangsadresser limit 1');
+          if(result.rows.length !== 1) {
+            throw new Error('No rows from adgangsadresser');
           }
-        };
-      }, function(err) {
-        return {
-          type: 'status',
-          data: {
-            status: 'down',
-            postgresError: err,
-            postgresPool: database.getPoolStatus('prod'),
-            statistics: statistics.getStatistics(),
-            connections: count
-          }
-        };
+          couldPerformQuery = true;
+        });
       });
-    });
+    }
+    catch(err) {
+      logger.error('Isalive query failed', err);
+    }
+    const poolStatus = databasePools.get('prod').getPoolStatus();
+    const status = couldPerformQuery ? 'up' : 'down';
+    return {
+      type: 'status',
+      data: {
+        status,
+        postgresPool: poolStatus,
+        connections: connectionCount
+      }
+    }
   });
 };

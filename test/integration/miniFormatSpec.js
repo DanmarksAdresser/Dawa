@@ -2,9 +2,9 @@
 
 const expect = require('chai').expect;
 
-const q = require('q');
+const { go } = require('ts-csp');
 
-const testdb = require('../helpers/testdb');
+const testdb = require('../helpers/testdb2');
 const helpers = require('./helpers');
 const registry = require('../../apiSpecification/registry');
 
@@ -23,7 +23,7 @@ describe('Mini-format', () => {
       type: 'resource',
       qualifier: 'query'
     });
-    it('Skal kunne returnere en adgangsadresse i mini-format', q.async(function*() {
+    it('Skal kunne returnere en adgangsadresse i mini-format', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), adgangsadresseQueryResource, {}, {
         id: '0a3f5081-c2b5-32b8-e044-0003ba298018',
         struktur: 'mini'
@@ -43,7 +43,7 @@ describe('Mini-format', () => {
         "y": 55.5382729699298
       });
     }));
-    it('Skal kunne returnere en adresse i mini-format', q.async(function*() {
+    it('Skal kunne returnere en adresse i mini-format',() => go(function*() {
       const result = yield helpers.getJson(clientFn(), adresseQueryResource, {}, {
         id: '0a3f50ab-a7fe-32b8-e044-0003ba298018',
         struktur: 'mini'
@@ -67,7 +67,7 @@ describe('Mini-format', () => {
       });
     }));
 
-    it('Skal kunne returnere adgangsadresse i CSV + Mini format', q.async(function*() {
+    it('Skal kunne returnere adgangsadresse i CSV + Mini format', () => go(function*() {
       const result = yield helpers.getCsv(clientFn(), adgangsadresseQueryResource, {}, {
         id: '0a3f5081-c2b5-32b8-e044-0003ba298018',
         struktur: 'mini',
@@ -89,7 +89,7 @@ describe('Mini-format', () => {
       });
     }));
 
-    it('Skal kunne returnere en adresse i CSV + mini format', q.async(function*() {
+    it('Skal kunne returnere en adresse i CSV + mini format', () => go(function*() {
       const result = yield helpers.getCsv(clientFn(), adresseQueryResource, {}, {
         id: '0a3f50ab-a7fe-32b8-e044-0003ba298018',
         struktur: 'mini',
@@ -114,7 +114,7 @@ describe('Mini-format', () => {
       });
     }));
 
-    it('Skal kunne returnere adgangsadresse i GeoJSON+mini format', q.async(function*() {
+    it('Skal kunne returnere adgangsadresse i GeoJSON+mini format', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), adgangsadresseQueryResource, {}, {
         id: '0a3f5081-c2b5-32b8-e044-0003ba298018',
         struktur: 'mini',
@@ -145,7 +145,7 @@ describe('Mini-format', () => {
       });
     }));
 
-    it('Skal kunne returnere adresse i GeoJSON+mini format', q.async(function*() {
+    it('Skal kunne returnere adresse i GeoJSON+mini format', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), adresseQueryResource, {}, {
         id: '0a3f50ab-a7fe-32b8-e044-0003ba298018',
         struktur: 'mini',

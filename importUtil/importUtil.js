@@ -1,7 +1,6 @@
 "use strict";
 
 // Generic utility functions for importing data to PostgreSQL
-const copyFrom = require('pg-copy-streams').from;
 const csvParse = require('csv-parse');
 const csvStringify = require('csv-stringify');
 const es = require('event-stream');
@@ -45,7 +44,7 @@ function streamToTablePipeline(client, targetTable, columns, mapFn) {
  */
 function copyStream(client, table, columnNames) {
   var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
-  return client.query(copyFrom(sql));
+  return client.copyFrom(sql);
 }
 
 function copyStreamStringifier(columns) {

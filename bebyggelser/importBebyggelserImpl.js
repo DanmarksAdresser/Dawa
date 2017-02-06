@@ -3,7 +3,7 @@
 const es = require('event-stream');
 const fs = require('fs');
 const JSONStream = require('JSONStream');
-const q = require('q');
+const { go } = require('ts-csp');
 
 const geojsonUtil = require('../geojsonUtil');
 const importing = require('../apiSpecification/flats/importing');
@@ -16,19 +16,17 @@ function parseInteger(str) {
   return null;
 }
 
-function verifyBebyggelser(client) {
-  return q.async(function*() {
+const verifyBebyggelser = client => go(function*() {
     const insertsSql = 'select bebyggelse_id, count(*) as inserts FROM insert_bebyggelser_adgadr GROUP BY bebyggelse_id';
     const deletesSql = 'select bebyggelse_id, count(*) as deletes FROM delete_bebyggelser_adgadr GROUP BY bebyggelse_id';
     const threshold = 100;
     const suspiciusBebyggelserSql = `select i.bebyggelse_id, inserts, deletes FROM (${insertsSql}) i NATURAL JOIN (${deletesSql}) d WHERE inserts >= $1 and deletes >= $1`;
     const suspiciousBebyggelser = (yield client.queryp(suspiciusBebyggelserSql, [threshold])).rows;
-    if(suspiciousBebyggelser.length > 0) {
-      logger.error('Mistænkelige bebyggelser. Aborterer.', { bebyggelser: suspiciousBebyggelser});
+    if (suspiciousBebyggelser.length > 0) {
+      logger.error('Mistænkelige bebyggelser. Aborterer.', {bebyggelser: suspiciousBebyggelser});
       throw new Error("Mistænkelige bebyggelser. Aborterer.");
     }
-  })();
-}
+  });
 
 function importBebyggelserFromStream(client, stream, initial, skipSanityCheck) {
   const jsonTransformer = JSONStream.parse('features.*');
