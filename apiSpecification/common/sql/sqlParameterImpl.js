@@ -267,6 +267,9 @@ exports.reverseGeocoding = function(geom) {
   return function(sqlParts, params) {
     if(notNull(params.x) && notNull(params.y)) {
       if (!params.srid){ params.srid = 4326;}
+      // This WHERE clause does not affect the result of the query,
+      // but apparently helps the query planner.
+      dbapi.addWhereClause(sqlParts, `${geom} IS NOT NULL`);
 
       var orderby =
         `${geom} <-> ST_Transform(ST_SetSRID(ST_Point(` +
