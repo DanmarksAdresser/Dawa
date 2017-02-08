@@ -16,12 +16,16 @@ module.exports = _.mapObject(flats, (flat) => {
   }, {});
   const propertyFilterParameters = key.concat(flat.filters).map(keyFieldName => {
     const field = _.findWhere(flat.fields, { name: keyFieldName });
-    return {
+    const result = {
       name: field.name,
       type: field.type,
-      schema: field.schema,
+      schema: field.parameterSchema || field.schema,
       multi: true
     };
+    if(field.processParameter) {
+      result.process = field.processParameter;
+    }
+    return result;
   }, {});
 
   return {

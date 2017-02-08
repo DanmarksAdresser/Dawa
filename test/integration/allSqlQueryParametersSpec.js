@@ -514,16 +514,16 @@ var sampleParameters = {
       verifier: (jordstykke, matrikelnr) => jordstykke.matrikelnr === matrikelnr
     },
     esrejendomsnr: {
-      values: ['8571'],
-      verifier: (jordstykke, esrejendomsnr) => jordstykke.esrejendomsnr === esrejendomsnr
+      values: ['8571' ,'08571'],
+      verifier: (jordstykke, esrejendomsnr) => jordstykke.esrejendomsnr === parseInt(esrejendomsnr, 10).toString()
     },
     sfeejendomsnr: {
       values: ['1305735'],
       verifier: (jordstykke, sfeejendomsnr) => jordstykke.sfeejendomsnr === sfeejendomsnr
     },
     kommunekode: {
-      values: ['0350'],
-      verifier: (jordstykke, kommunekode) => jordstykke.kommune.kode === kommunekode
+      values: ['0350', '350'],
+      verifier: (jordstykke, kommunekode) => parseInt(jordstykke.kommune.kode, 10) === parseInt(kommunekode, 10)
     },
     regionskode: {
       values: ['1085'],

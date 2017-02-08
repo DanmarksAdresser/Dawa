@@ -59,7 +59,27 @@ module.exports = {
   ejerskab:{
     primaryRelation: 'ejerskab',
     alias: 'es',
-    secondaryRelations: []
+    secondaryRelations: [{
+      relationName: 'bygning',
+      alias: 'b',
+      method: 'LEFT JOIN',
+      clauses: [['es.BbrId', 'b.Bygning_id']]
+    }, {
+      relationName: 'tekniskanlaeg',
+      alias: 't',
+      method: 'LEFT JOIN',
+      clauses: [['es.BbrId', 't.Tekniskanlaeg_id']]
+    }, {
+      relationName: 'grund',
+      alias: 'g',
+      method: 'LEFT JOIN',
+      clauses: [['es.BbrId', 'g.Grund_id']]
+    }, {
+      relationName: 'enhed',
+      alias: 'e',
+      method: 'LEFT JOIN',
+      clauses: [['es.BbrId', 'e.Enhed_id']]
+    }]
   },
   opgang: {
     primaryRelation: 'opgang',

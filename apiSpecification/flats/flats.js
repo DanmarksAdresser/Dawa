@@ -1,9 +1,26 @@
 "use strict";
 
 const registry = require('../registry');
-
 const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 const kode4String = require('../util').kode4String;
+
+// ESR ejendomsnummer er en streng i databasen,
+// men parameteren skal fortolkes som et tal og tillade
+// foranstillede nuller.
+const processIntegerAsString = str => {
+  while(str.length > 0 && str[0] === '0') {
+    str = str.substring(1);
+  }
+  if(str === '') {
+    str = '0';
+  }
+  return str;
+};
+
+const kode4ParameterSchema = {
+    type: 'string',
+    pattern: '^\\d{1,4}$'
+  };
 
 
 module.exports = {
@@ -68,24 +85,32 @@ module.exports = {
         description: 'Kommunekoden.',
         type: 'string',
         schema: commonSchemaDefinitions.Kode4,
+        parameterSchema: kode4ParameterSchema,
+        processParameter: processIntegerAsString,
         formatter: kode4String
       }, {
         name: 'sognekode',
         description: 'Sognekoden',
         type: 'string',
         schema: commonSchemaDefinitions.Kode4,
+        parameterSchema: kode4ParameterSchema,
+        processParameter: processIntegerAsString,
         formatter: kode4String
       }, {
         name: 'regionskode',
         description: 'Regionskoden',
         type: 'string',
         schema: commonSchemaDefinitions.Kode4,
+        parameterSchema: kode4ParameterSchema,
+        processParameter: processIntegerAsString,
         formatter: kode4String
       }, {
         name: 'retskredskode',
         description: 'Retskredskoden, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
         type: 'string',
         schema: commonSchemaDefinitions.Kode4,
+        parameterSchema: kode4ParameterSchema,
+        processParameter: processIntegerAsString,
         formatter: kode4String
       }, {
         name: 'esrejendomsnr',
@@ -93,7 +118,13 @@ module.exports = {
         description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som jordstykket er en del af.' +
         ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
-        schema: commonSchemaDefinitions.Nullableesrejendomsnr
+
+        schema: commonSchemaDefinitions.Nullableesrejendomsnr,
+        parameterSchema: {
+          type: 'string',
+          pattern: '^\\d{1,7}$'
+        },
+        processParameter: processIntegerAsString
       }, {
         name: 'sfeejendomsnr',
         type: 'string',
