@@ -37,7 +37,8 @@ const filterParams = oisApiModelName => {
       name: filter.name,
       type: parametertypeFromField(sourceField),
       renameTo: filter.field,
-      schema: filter.schema || schemas.schemaFromField(sourceField, false)
+      schema: filter.schema || schemas.schemaFromField(sourceField, false),
+      multi: true
     };
     if(filter.process) {
       result.process = filter.process;
