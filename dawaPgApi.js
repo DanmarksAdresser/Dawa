@@ -94,6 +94,7 @@ function requestLoggingMiddleware(req, res, next) {
     meta.httpVersion = req.httpVersion;
     meta.statusCode = res.statusCode;
     meta.Host = req.headers.host;
+    meta.reqId = req.header('X-Amz-Cf-Id');
     meta.protocol = req.connection.encrypted ? 'https' : 'http';
     if(req.headers.via) {
       meta.Via = req.headers.via;
