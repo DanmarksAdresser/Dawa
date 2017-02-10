@@ -51,5 +51,5 @@ for(let oisApiModelName of Object.keys(filtersMap)) {
   exports[oisApiModelName] = {
     propertyFilter: filterParams(oisApiModelName)
   };
-  registry.addMultiple(oisApiModelName, 'parameterGroup', module.exports[oisApiModelName]);
+  registry.addMultiple(`ois_${oisApiModelName}`, 'parameterGroup', module.exports[oisApiModelName]);
 }

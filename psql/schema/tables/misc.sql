@@ -58,6 +58,10 @@ ENUM (
   'SupplerendeBynavn'
 );
 
+DROP TYPE IF EXISTS operation_type CASCADE;
+DROP TABLE IF EXISTS transaction_history CASCADE;
+create type operation_type as enum('insert', 'update', 'delete');
+
 DROP TYPE IF EXISTS dar1_status CASCADE;
 
 DROP TYPE IF EXISTS dar_tx_source CASCADE;

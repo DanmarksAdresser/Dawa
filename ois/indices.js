@@ -50,10 +50,16 @@ module.exports = [{
   columns: ['KomKode']
 }, {
   entity: 'ejerskab',
-  columns: ['bbrid']
+  columns: ['BbrId']
+},{
+  entity: 'ejerskab',
+  columns: ['Kommune_Id']
 }, {
   entity: 'ejerskab',
   columns: ['ESREjdNr']
+}, {
+  entity: 'kommune',
+  columns: ['KomKode', 'Kommune_id']
 }, {
   entity: 'matrikelreference',
   columns: ['Grund_id']

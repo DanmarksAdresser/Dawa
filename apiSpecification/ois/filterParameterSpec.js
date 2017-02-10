@@ -7,6 +7,7 @@ const leftPad = (str, char, len) => {
 }
 
 const processEsr = esr => leftPad(esr, '0', 6);
+const processKommunekode = kode => leftPad(kode, '0', 4);
 
 module.exports = {
   grund: [{
@@ -90,6 +91,14 @@ module.exports = {
     name: 'bbrid',
     field: 'BbrId'
   }, {
+    name: 'kommunekode',
+    field: 'kommune_KomKode',
+    schema: {
+      type: 'string',
+      pattern: '^\\d{1,4}$'
+    },
+    process: processKommunekode
+  }, {
     name: 'esrejendomsnr',
     field: 'ESREjdNr',
     schema: {
@@ -97,6 +106,21 @@ module.exports = {
     },
     process: processEsr
   }],
+  kommune: [
+    {
+      name: 'id',
+      field: 'Kommune_id'
+    },
+    {
+      name: 'kommunekode',
+      field: 'KomKode',
+      schema: {
+        type: 'string',
+        pattern: '^\\d{1,4}$'
+      },
+      process: processKommunekode
+    }
+  ],
   bygningspunkt: [{
     name: 'id',
     field: 'BygPkt_id'

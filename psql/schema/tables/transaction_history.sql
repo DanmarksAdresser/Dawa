@@ -1,6 +1,4 @@
-DROP TYPE IF EXISTS operation_type CASCADE;
 DROP TABLE IF EXISTS transaction_history CASCADE;
-create type operation_type as enum('insert', 'update', 'delete');
 create table transaction_history(
   sequence_number integer not null primary key,
   time timestamptz not null DEFAULT CURRENT_TIMESTAMP(3),

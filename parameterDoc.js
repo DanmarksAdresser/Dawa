@@ -1934,12 +1934,30 @@ const oisFilterParameterDoc = {
         doc: 'Find ejerskaber med den angivne BBR ID (BbrId)'
       },
       {
+        name: 'kommunekode',
+        doc: 'Find ejerskaber ud fra kommunekode'
+      },
+      {
         name: 'esrejendomsnr',
         doc: 'Find ejerskab med det angivne ESR ejendomsnr (ESREjdNr)'
       }
     ],
     examples: []
 
+  },
+  kommune: {
+    subtext: 'Find kommuner fra OIS (BBR). For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Find kommunen med den angivne UUID (Kommune_id)'
+      },
+      {
+        name: 'kommunekode',
+        doc: 'Find kommunen ud fra kommunekode'
+      }
+    ],
+    examples: []
   },
   opgang: {
     subtext: 'Find opgange fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',

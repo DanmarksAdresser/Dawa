@@ -35,5 +35,5 @@ for(let oisModelName of Object.keys(namesAndKeys)) {
     processParameters: resourcesUtil.applyDefaultPagingForQuery
   };
 
-  registry.add(oisModelName, 'resource', 'query', queryResource);
+  registry.add(`ois_${oisModelName}`, 'resource', 'query', queryResource);
 }

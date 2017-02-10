@@ -403,6 +403,28 @@ module.exports = {
     ],
     derivedFields: []
   },
+  kommune: {
+    oisTable: 'CO41100T',
+    key: ['Kommune_id'],
+    fields: [
+      { name: 'ois_id', oisType: 'int' },
+      { name: 'ois_ts', oisType: 'varchar', oisLength: 26 },
+      { name: 'Kommune_id', oisType: 'uniqueidentifier' },
+      { name: 'KomKode', oisType: 'char', oisLength: 4 },
+      { name: 'KomNavn', oisType: 'varchar', oisLength: 40 },
+      { name: 'BbrNavn', oisType: 'varchar', oisLength: 40 },
+      { name: 'BbrKontor', oisType: 'varchar', oisLength: 40 },
+      { name: 'BbrAdr', oisType: 'varchar', oisLength: 40 },
+      { name: 'BbrPost', oisType: 'varchar', oisLength: 40 },
+      { name: 'BbrTlfNr', oisType: 'varchar', oisLength: 20 },
+      { name: 'BbrEmail', oisType: 'varchar', oisLength: 60 },
+      {name: 'OPRET_TS', oisType: 'varchar', oisLength: 26},
+      {name: 'AENDR_TS', oisType: 'varchar', oisLength: 26},
+      {name: 'Aendr_Funk', oisType: 'varchar', oisLength: 40},
+      {name: 'Ophoert_ts', oisType: 'varchar', oisLength: 26}
+    ],
+    derivedFields: []
+  },
   enhedenhedsadresse: {
     oisTable: 'CO42200T',
     key: ['EnhEnhAdr_id'],

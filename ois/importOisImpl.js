@@ -93,6 +93,9 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
     const lastImportedSerial = yield getLastImportedSerial(client, oisModelName);
     const serialsToImport = serials.filter(serial => serial > lastImportedSerial);
     serialsToImport.sort((a, b) => a - b);
+    if(serialsToImport.length === 0) {
+      return [];
+    }
     const firstSerialToImport = serialsToImport[0];
     if (lastImportedSerial + 1 !== firstSerialToImport) {
       logger.error('Missing serial', {

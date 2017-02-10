@@ -126,7 +126,7 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
 
 exports.getOisQueryResourcePath = oisEntityName => {
   const resource = registry.get({
-    entityName: oisEntityName,
+    entityName: `ois_${oisEntityName}`,
     type: 'resource',
     qualifier: 'query'
   });

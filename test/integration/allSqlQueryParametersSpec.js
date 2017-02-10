@@ -538,13 +538,13 @@ var sampleParameters = {
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
     }
   },
-  grund: {
+  ois_grund: {
     id: {
       values: ['003b8b83-a7da-4cd1-9ebf-9d2ed4b2d522'],
       verifier: (grund, id) => grund.Grund_id === id
     }
   },
-  bygning: {
+  ois_bygning: {
     id: {
       values: ['00058c31-60c7-45d5-9b80-a031270c0034'],
       verifier: (bygning, id) => bygning.Bygning_id === id
@@ -566,7 +566,7 @@ var sampleParameters = {
       verifier: (bygning, kode) => bygning.KomKode === kode
     }
   },
-  opgang: {
+  ois_opgang: {
     id: {
       values: ['008ff3ab-db75-4755-a71b-470f7eb42483'],
       verifier: (opgang, id) => opgang.Opgang_id === id
@@ -576,7 +576,7 @@ var sampleParameters = {
       verifier: (opgang, bygningsid) => opgang.Bygning_id === bygningsid
     }
   },
-  enhed: {
+  ois_enhed: {
     id: {
       values: ['00006909-250f-4878-8117-663b759bcac1'],
       verifier: (enhed, id) => enhed.Enhed_id === id
@@ -598,7 +598,7 @@ var sampleParameters = {
       verifier: (enhed, kode) => enhed.bygning.KomKode === kode
     }
   },
-  etage: {
+  ois_etage: {
     id: {
       values: ['0012cdf2-5cd8-4e81-869f-54955973a58d'],
       verifier: (etage, id) => etage.Etage_id === id
@@ -608,7 +608,7 @@ var sampleParameters = {
       verifier: (etage, bygningsid) => etage.Bygning_id === bygningsid
     }
   },
-  ejerskab: {
+  ois_ejerskab: {
     id: {
       values: ['00db6657-2d66-4b49-949d-ce9e31d7b823'],
       verifier: (ejerskab, id) => ejerskab.Ejerskab_id === id
@@ -617,18 +617,32 @@ var sampleParameters = {
       values: ['40e0ec3f-419b-4c92-8f0c-f8b6f5184604'],
       verifier: (ejerskab, bbrid) => ejerskab.BbrId === bbrid
     },
+    kommunekode: {
+      values: ['0461', '461'],
+      verifier: (ejerskab, kode) => parseInt(ejerskab.kommune.KomKode, 10) === parseInt(kode, 10)
+    },
     esrejendomsnr: {
       values: ['704986'],
       verifier: (bygning, nr) =>   parseInt(bygning.ESREjdNr, 10) === parseInt(nr, 10)
     }
   },
-  bygningspunkt: {
+  ois_kommune: {
+    id: {
+      values: ['09c46ce8-36ea-498d-aa36-cd3d06f1aac3'],
+      verifier: (kommune, id)=> kommune.Kommune_id === id
+    },
+    kommunekode: {
+      values: ['0671', '671'],
+      verifier: (kommune, kode) => parseInt(kommune.KomKode, 10) === parseInt(kode, 10)
+    }
+  },
+  ois_bygningspunkt: {
     id: {
       values: ['001b754d-9fcb-4b65-8e79-d81fe98f0367'],
       verifier: (bygningspunkt, id) => bygningspunkt.BygPkt_id === id
     }
   },
-  matrikelreference: {
+  ois_matrikelreference: {
     grundid: {
       values: ['7992a022-b023-48db-9705-9a90aa1c0108'],
       verifier: (matref, id) => matref.Grund_id === id

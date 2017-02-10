@@ -101,6 +101,9 @@ const FIELDS_NOT_IN_TEST_DATA = {
   ejerskab: [
     "eRef"
   ],
+  kommune: [
+    "Ophoert_ts"
+  ],
   enhedenhedsadresse: [
     "ois_id",
     "ois_ts",

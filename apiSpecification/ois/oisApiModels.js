@@ -79,7 +79,17 @@ module.exports = {
       alias: 'e',
       method: 'LEFT JOIN',
       clauses: [['es.BbrId', 'e.Enhed_id']]
+    }, {
+      relationName: 'kommune',
+      alias: 'k',
+      method: 'LEFT JOIN',
+      clauses: [['es.Kommune_id', 'k.Kommune_id']]
     }]
+  },
+  kommune: {
+    primaryRelation: 'kommune',
+    alias: 'k',
+    secondaryRelations: []
   },
   opgang: {
     primaryRelation: 'opgang',

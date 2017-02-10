@@ -31,6 +31,11 @@ module.exports = {
     plural: 'ejerskaber',
     key: ['Ejerskab_id']
   },
+  kommune: {
+    singular: 'kommune',
+    plural: 'kommuner',
+    key: ['Kommune_id']
+  },
   opgang: {
     singular: 'opgang',
     plural: 'opgange',

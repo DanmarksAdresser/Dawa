@@ -93,5 +93,5 @@ for(let apiModelName of Object.keys(oisApiModels)) {
     representations.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniRepresentation);
   }
   exports[apiModelName] = representations;
-  registry.addMultiple(apiModelName, 'representation', representations);
+  registry.addMultiple(`ois_${apiModelName}`, 'representation', representations);
 }

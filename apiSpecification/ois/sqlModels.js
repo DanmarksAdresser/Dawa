@@ -47,6 +47,6 @@ for(let apiModelName of Object.keys(oisApiModels)) {
     parameterImpls,
     () => baseQuery(apiModelName));
 
-  registry.add(apiModelName, 'sqlModel', undefined, module.exports[apiModelName]);
+  registry.add(`ois_${apiModelName}`, 'sqlModel', undefined, module.exports[apiModelName]);
 }
 
