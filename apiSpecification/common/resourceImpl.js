@@ -307,7 +307,10 @@ exports.createExpressHandler = function(resourceSpec) {
       pooled: true,
       shouldAbort: shouldAbort,
       loggingContext: loggingContext(req)
-    }, doResponse);
+    }, client => q.async(function*() {
+      yield client.queryp('SET statement_timeout TO 10000');
+      return yield doResponse(client);
+    })());
 
     return promise.catch(function(err) {
       logger.error('resourceImpl', 'Internal error processing request', {error: err});
