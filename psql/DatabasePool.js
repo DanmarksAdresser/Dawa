@@ -6,7 +6,7 @@ const genericPool = require('generic-pool');
 const pgConnectionString = require('pg-connection-string');
 const TypeOverrides = require('pg/lib/type-overrides');
 const setupDatabaseTypes = require('./setupDatabaseTypes');
-const { withDawaClient } = require('./Dawaclient');
+const { withDawaClient } = require('./DawaClient');
 
 const {go} = require('ts-csp');
 
