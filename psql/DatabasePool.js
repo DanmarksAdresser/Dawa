@@ -2,218 +2,96 @@
 
 const Promise = require('bluebird');
 const pg = require('pg');
+const genericPool = require('generic-pool');
 const pgConnectionString = require('pg-connection-string');
 const TypeOverrides = require('pg/lib/type-overrides');
 const setupDatabaseTypes = require('./setupDatabaseTypes');
+const { withDawaClient } = require('./Dawaclient');
 
-const {go, Abort} = require('ts-csp');
-
-const { processify } = require('../util/cspUtil');
-
-const copyFrom = require('pg-copy-streams').from;
+const {go} = require('ts-csp');
 
 const logger = require('../logger').forCategory('DatabasePool');
 
-const transactionStatements = {
-  READ_ONLY: ['BEGIN READ ONLY', 'ROLLBACK'],
-  READ_WRITE: ["BEGIN;SELECT pg_advisory_xact_lock(1);SET work_mem='256MB'", 'COMMIT'],
-  ROLLBACK: ['BEGIN', 'ROLLBACK']
+const DEFAULT_RAW_POOL_OPTIONS = {
+  testOnBorrow: true,
+  max: 50,
+  min: 1,
+  maxWaitingClients: 50,
+  acquireTimeoutMillis: 10000,
+  evictionRunIntervalMillis: 10000,
+  idleTimeoutMillis: 3000,
+  Promise,
+  statementTimeout: 10000,
+  autoStart: false
 };
 
-
-/* eslint no-console: 0 */
-const withConnection = (connectFn, createProcessFn) => go(function*() {
-  const {client, done} = yield connectFn();
-  if (this.abortSignal.isRaised()) {
-    done();
-    throw new Abort(this.abortSignal.value());
-  }
+const withUnpooledRawConnection = (options, connectionFn) => go(function*() {
+  const client = new pg.Client(options);
+  yield Promise.promisify(client.connect, { context: client})();
   try {
-    yield this.delegateAbort(createProcessFn(client));
-    done();
+    const result = yield this.delegateAbort(connectionFn(client));
+    return result;
   }
-  catch (err) {
-    if (err instanceof Abort) {
-      done();
-    }
-    else {
-      // something unexpected happened, discard connection
-      done(err);
-    }
-    throw err;
+  finally {
+    yield Promise.promisify(client.end, { context: client})();
   }
 });
 
-class DawaClient {
-
-
-  constructor(client, options) {
-    this.client = client;
-    options = options || {};
-    this.clientId = options.clientId;
-    this.requestLimiter = options.requestLimiter || ((clientId, fn) => fn());
-    this.logger = options.logger || (() => null);
-    this.released = false;
-    this.batchedQueries = [];
-    this.inTransaction = false;
-    this.queryInProgress = false;
-    this.allowParallelQueries = false;
-  }
-
-  queryRows(sql, params) {
-    const thisClient = this;
-    return go(function*() {
-      const result = yield this.delegateAbort(thisClient.query(sql, params));
-      return result.rows || [];
-    });
-  }
-
-  queryBatched(sql) {
-    this.batchedQueries.push(sql);
-    return Promise.resolve();
-  }
-
-  flush() {
-    const  { batchedQueries, client } = this;
-    return go(function*() {
-      if(batchedQueries.length > 0) {
-        yield Promise.promisify(client.query, {context: client})(batchedQueries.join(';\n'));
-        batchedQueries.length = 0;
-      }
-    });
-  }
-
-  query(sql, params) {
-    if (this.released) {
-      throw new Error('Attempted to query using released client!');
-    }
-    if (this.queryInProgress && !this.allowParallelQueries) {
-      throw new Error('Query already in progress');
-    }
-    this.queryInProgress = true;
-    const { clientId, requestLimiter, logger, client } = this;
-    const thisClient = this;
-    return go(function*() {
-      yield thisClient.flush();
-      const beforeTs = Date.now();
-      const abortSignal = this.abortSignal;
-      const fn = Promise.coroutine(function*() {
-        const logMessage = {
-          sql,
-          params
-        };
-
-        try {
-          const afterQueueTs = Date.now();
-          const waitTime = afterQueueTs - beforeTs;
-          logMessage.waitTime = waitTime;
-          if (abortSignal.isRaised()) {
-            throw new Abort(abortSignal.value());
-          }
-          let result;
-          try {
-            result = yield Promise.promisify(client.query, {context: client})(sql, params);
-          }
-          catch (err) {
-            if (err) {
-              logMessage.error = err;
-            }
-            throw err;
-          }
-          finally {
-            const afterQueryTs = Date.now();
-            logMessage.queryTime = afterQueryTs - afterQueueTs;
-          }
-          result.rows = result.rows || [];
-          return result;
-        }
-        catch (err) {
-          if (err instanceof Abort) {
-            logMessage.aborted = true;
-            logMessage.abortReason = err.reason;
-          }
-          throw err;
-        }
-        finally {
-          thisClient.queryInProgress = false;
-          logger(logMessage);
-        }
-      });
-
-      if (requestLimiter && clientId) {
-        return yield requestLimiter(clientId, fn);
-      }
-      else {
-        return yield fn();
-      }
-    });
-
-  }
-
-  copyFrom(sql) {
-    return this.client.query(copyFrom(sql));
-  }
-
-  withTransaction(mode, transactionFn) {
-    if(this.inTransaction) {
-      return transactionFn();
-    }
-    this.inTransaction = true;
-    const client = this;
-    return go(function*() {
-      yield this.delegateAbort(client.query(transactionStatements[mode][0]));
+const rawConnectionPool = (options) => {
+  options = Object.assign({}, DEFAULT_RAW_POOL_OPTIONS, options);
+  const factory = {
+    create: () => go(function*() {
+      const client = new pg.Client(options);
+      yield Promise.promisify(client.connect, { context: client})();
+      yield client.query(`SET statement_timeout TO ${options.statementTimeout}`);
+      return client;
+    }),
+    destroy: (client) => {
+      return Promise.promisify(client.end, { context: client})();
+    },
+    validate: client => Promise.coroutine(function*(){
       try {
-        const result = yield this.delegateAbort(processify(transactionFn()));
-        client.inTransaction = false;
-        // note that we do *not* abort transaction commit/rollback
-        yield client.query(transactionStatements[mode][1]);
-        return result;
+        yield client.query('select 1');
+        return true;
       }
-      catch(err) {
-        if(err instanceof Abort) {
-          // regular abort, rollback transaction
-          yield client.query('ROLLBACK');
-        }
-        throw err;
+      catch(e) {
+        return false;
       }
-    });
 
-  }
-
-  queryp(sql, params) {
-    return this.query(sql, params).asPromise();
-  }
-}
-
-const connectUnpooled = (options) => {
-  const client = new pg.Client(options);
-  return Promise.promisify(client.connect, {context: client})().then(() => {
-    const dawaClient = new DawaClient(client);
-    return {
-      client: dawaClient,
-      done: () => {
-        dawaClient.released = true;
-        client.end();
-      }
-    };
-  });
+    })()
+  };
+  return genericPool.createPool(factory, options);
 };
 
-
-class DatabasePool {
-  constructor(options) {
-    const connectionOptions = pgConnectionString.parse(options.connString);
-    this.options = Object.assign({}, options, connectionOptions);
+const withRawPooledConnection = (pool, connectionFn) => go(function*() {
+  const client = yield pool.acquire();
+  try {
+    return yield this.delegateAbort(connectionFn(client));
   }
+  finally {
+    yield pool.release(client);
+  }
+});
 
-  setup() {
-    const options = this.options;
-    const thisPool = this;
-    this.requestLimiter = options.requestLimiter || ((clientId, fn) => fn());
-    this.setupProcess =  go(function*() {
-      yield withConnection(
-        () => connectUnpooled(options),
-        (client) => go(function*() {
+const withUnpooledDawaClient = (options, clientFn) =>
+  withUnpooledRawConnection(options, (rawClient) =>
+    withDawaClient(rawClient, options, clientFn));
+
+const withPooledDawaClient = (pool, options, clientFn) =>
+  withRawPooledConnection(pool, (rawClient) =>
+    withDawaClient(rawClient, options, clientFn));
+
+
+const createDatabasePool = _options => {
+  const connectionOptions = pgConnectionString.parse(_options.connString);
+  const options =  Object.assign({}, _options, connectionOptions);
+  const requestLimiter = options.requestLimiter || ((clientId, fn) => fn());
+  let pool = null;
+  const setupProcess =  go(function*() {
+    /* eslint no-constant-condition: 0 */
+    while(true) {
+      try {
+        yield withUnpooledDawaClient(options, client => go(function*() {
           // The OIDs for custom types are not fixed beforehand, so we query them from the database
           const result = yield client.query('select typname, oid from pg_type', []);
           const typeMap = result.rows.reduce((memo, row) => {
@@ -223,64 +101,68 @@ class DatabasePool {
           const types = new TypeOverrides(pg.types);
           setupDatabaseTypes(types, typeMap);
           options.types = types;
-        }));
-      thisPool.pool = new pg.Pool(options);
-      thisPool.pool.on('error', (err) => {
-        logger.error('Database Pool Error', err);
-      });
-    });
-    return this.setupProcess;
-  }
+          if(options.pooled !== false) {
+            pool = rawConnectionPool(options);
+            pool.on('factoryCreateError', function(err){
+              logger.error('GenericPool failed to create client', err);
+            });
 
-  withConnection(options, fn) {
-    let connect;
-    options = Object.assign({}, options, { requestLimiter: this.requestLimiter});
-    if(options.pooled === false) {
-      connect = () => connectUnpooled(Object.assign({}, this.options, options));
-    }
-    else {
-      connect = Promise.promisify(callback => {
-        this.pool.connect((err, client, done) => {
-          if (err) {
-            callback(err);
-          }
-          else {
-            const dawaClient = new DawaClient(client, options);
-            callback(null, {
-              client: dawaClient,
-              done: (err) => {
-                client.released = true;
-                done(err);
-              }
+            pool.on('factoryDestroyError', function(err){
+              logger.error('GenericPool failed to destroy client', err);
             });
           }
-        });
-      });
+        }) );
+        break;
+      }
+      catch(e) {
+        logger.error('failed to initialize pool, retrying in 5s', e);
+        yield Promise.delay(5000);
+      }
+      if(options.pooled) {
+        pool.start();
+      }
     }
-    const thisPool = this;
-    return go(function*() {
-      yield thisPool.setupProcess;
-      yield this.delegateAbort(withConnection(connect, fn));
     });
 
-  }
+  const withConnection = (connectionOptions, fn) => {
+    const combinedOptions = Object.assign({}, { requestLimiter: this.requestLimiter},
+      options, connectionOptions);
+    if(options.pooled === false || combinedOptions.pooled === false) {
+      return withUnpooledDawaClient(combinedOptions, fn);
+    }
+    else {
+      return go(function*() {
+        yield setupProcess;
+        return yield this.delegateAbort(withPooledDawaClient(pool, combinedOptions, fn));
+      });
+    }
+  };
 
-  withTransaction(connectionOptions, mode, fn) {
-    return this.withConnection(connectionOptions, client => client.withTransaction(mode, () => fn(client)));
-  }
+  const withTransaction = (connectionOptions, mode, fn) => {
+    return withConnection(connectionOptions,
+      client => client.withTransaction(mode, () => fn(client)));
+  };
 
-  getPoolStatus() {
-    const requestLimiterStatus = this.requestLimiter.status ? this.requestLimiter.status() : 'Request limiting disabled';
+  const getPoolStatus = () => {
+    const requestLimiterStatus = requestLimiter.status ? requestLimiter.status() : 'Request limiting disabled';
+    const poolStatus = pool === null ? 'Pooling disabled' : {
+        size: pool.getPoolSize(),
+        availableObjectsCount: pool.availableObjectsCount(),
+        waitingClientsCount: pool.waitingClientsCount(),
+      };
     return {
-      size: this.pool.pool.getPoolSize(),
-      availableObjectsCount: this.pool.pool.availableObjectsCount(),
-      waitingClientsCount: this.pool.pool.waitingClientsCount(),
+      pool: poolStatus,
       requestLimiter: requestLimiterStatus
     };
+  };
+  return {
+    withConnection,
+    withTransaction,
+    getPoolStatus,
+    setupProcess
   }
-
-}
+};
 
 module.exports = {
-  DatabasePool
+  createDatabasePool
 };

@@ -52,18 +52,13 @@ function socketTimeoutMiddleware(timeoutMillis) {
 function setupWorker() {
   var errorMessages = require('./haproxy/errorMessages');
   var proddb = require('./psql/proddb');
-  var poolLogger = logger.forCategory('dbPool');
   var dboptions = {
     poolSize: asInteger(process.env.pgPoolSize),
     poolIdleTimeout: asInteger(process.env.pgPoolIdleTimeout),
-    maxWaitingClients: process.env.maxWaitingClients,
+    maxWaitingClients: asInteger(process.env.maxWaitingClients),
+    statementTimeout: asInteger(process.env.statementTimeout),
     connString: process.env.pgConnectionUrl,
     pooled: true,
-    poolLog: function (msg, level) {
-      if (level === 'warn' || level === 'error') {
-        poolLogger.log(level, msg);
-      }
-    },
     requestLimiter
   };
   proddb.init(dboptions);
@@ -132,6 +127,7 @@ function setupMaster() {
     pgPoolIdleTimeout: [false, 'Tidsrum en connection skal være idle før den lukkes (ms)', 'number', 10000],
     socketTimeout: [false, 'Socket timeout for TCP-forbindelser til APIet', 'number', 60000],
     maxWaitingClients: [false, 'Maximum number of clients to queue when there is no available db connections', 'number', 0],
+    statementTimeout: [false, 'Maximum time before a database query is cancelled in milliseconds', 'number',10000 ],
     processes: [false, 'Number of concurrent worker processes', 'number']
   };
 
@@ -149,7 +145,8 @@ function setupMaster() {
       socketTimeout: options.socketTimeout,
       pgPoolSize: options.pgPoolSize,
       pgPoolIdleTimeout: options.pgPoolIdleTimeout,
-      maxWaitingClients: options.maxWaitingClients
+      maxWaitingClients: options.maxWaitingClients,
+      statementTimeout: options.statementTimeout
     };
     const processCount = options.processes || require('os').cpus().length;
 

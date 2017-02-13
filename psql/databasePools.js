@@ -1,12 +1,12 @@
 "use strict";
 
-const { DatabasePool } = require('./DatabasePool');
+const { createDatabasePool } = require('./DatabasePool');
 
 const pools = {};
 exports.create = (name, options) => {
-  const pool = new DatabasePool(options);
+  const pool = createDatabasePool(options);
   pools[name] = pool;
-  return pool.setup();
+  return pool.setupProcess;
 };
 
 exports.get = name => {
