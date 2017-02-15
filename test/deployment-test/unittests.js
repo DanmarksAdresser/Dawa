@@ -2418,6 +2418,28 @@ describe('OIS', function(){
     });
   });
 
+ it("reverse geokodning af bygning", function(done) {
+    var reverseopt= {};
+    reverseopt.baseUrl= host;
+    reverseopt.url='ois/bygninger';
+    reverseopt.qs= {};
+    reverseopt.qs.cache= 'no-cache';
+    reverseopt.qs.x= 12.5108572474172;
+    reverseopt.qs.y= 55.6983973831476; 
+    reverseopt.resolveWithFullResponse= true;
+    var reverserp= rp(reverseopt);       
+    reverserp.then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
+      assert(bygninger[0].BYG_ANVEND_KODE===930, "Det er ikke et udhus (930), men " + bygninger[0].BYG_ANVEND_KODE);
+      assert(bygninger[0].OPFOERELSE_AAR===1921, "Det er ikke opført i 1921, men " + bygninger[0].OPFOERELSE_AAR);
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
 
 });
 // describe('HAProxy', function(){
