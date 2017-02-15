@@ -379,13 +379,13 @@ exports.createExpressHandler = function(resourceSpec) {
       try {
         yield process;
       }
-      catch (err) {
-        requestContext.error = err;
+      catch (error) {
+        requestContext.error = error;
         req.destroy();
       }
       requestContext.responseEnd = Date.now();
-      const requestOutcome = requestContext.err ?
-        (requestContext.err instanceof Abort ? 'ABORTED' : 'FAILED') :
+      const requestOutcome = requestContext.error ?
+        (requestContext.error instanceof Abort ? 'ABORTED' : 'FAILED') :
         'COMPLETED';
       requestContext.outcome = requestOutcome;
       const logLevels = {
