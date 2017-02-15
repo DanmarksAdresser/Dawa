@@ -8,7 +8,8 @@ var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var importFromApiImpl = require('./importFromApiImpl')();
 var logger = require('../logger').forCategory('darImportApi');
 var proddb = require('../psql/proddb');
-var qUtil = require('../q-util');
+
+const { go } = require('ts-csp');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -28,17 +29,15 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
   var skipDawa = options.skipDawa;
 
   function doImport() {
-    var report = {};
-    return importFromApiImpl.importFromApi(proddb, url, skipDawa, report)
-      .then(function () {
-        logger.info('Successfully ran importFromApi');
-      })
-      .fin(function () {
-        if(options.reportDir) {
-          fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
-        }
-        logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
-      });
+    return go(function*() {
+      const report = {};
+      yield importFromApiImpl.importFromApi(proddb, url, skipDawa, report);
+      logger.info('Successfully ran importFromApi');
+      if(options.reportDir) {
+        fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
+      }
+      logger.debug('REPORT\n' + JSON.stringify(report, null, 2));
+    });
   }
 
   var shouldContinue = true;
@@ -48,15 +47,17 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
     logger.info('Shutting down...');
   }
 
-  if(options.daemon) {
-    logger.info('Running in daemon mode');
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
-    qUtil.awhile(function() {
-      return shouldContinue;
-    }, doImport).done();
-  }
-  else {
-    doImport().done();
-  }
+  go(function*() {
+    if(options.daemon) {
+      process.on('SIGTERM', shutdown);
+      process.on('SIGINT', shutdown);
+      logger.info('Running in daemon mode');
+      while (shouldContinue) {
+        yield doImport();
+      }
+    }
+    else {
+      yield doImport();
+    }
+  }).asPromise().done();
 });

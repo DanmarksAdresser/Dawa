@@ -1,7 +1,7 @@
 "use strict";
 
 var cli = require('cli');
-var Q = require('q');
+const { go } = require('ts-csp');
 var _        = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
@@ -24,9 +24,9 @@ cli.main(function (args, options) {
   });
   var scriptDir = __dirname + '/schema';
   proddb.withTransaction('READ_WRITE', function (client) {
-    return Q.async(function*() {
+    return go(function*() {
       yield initialization.loadSchemas(client, scriptDir);
       yield initialization.disableTriggersAndInitializeTables(client);
-    })();
+    });
   }).done();
 });

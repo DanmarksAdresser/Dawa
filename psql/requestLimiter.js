@@ -9,7 +9,7 @@ if(FAIR_SCHEDULER_ENABLED) {
   const scheduler = fairScheduler({
     concurrency: 2,
     cleanupInterval: 5000,
-    initialPriorityOffset: -1000,
+    initialPriorityOffset: -2000,
     prioritySlots: 1
   });
   requestLimiter = (clientIp, fn) => Promise.coroutine(function*() {
@@ -30,7 +30,7 @@ if(FAIR_SCHEDULER_ENABLED) {
       }
     }));
     const result = scheduleResult.result;
-    if(typeof result.succeeded !== undefined) {
+    if(typeof result.succeeded !== 'undefined') {
       return result.succeeded;
     }
     else {
