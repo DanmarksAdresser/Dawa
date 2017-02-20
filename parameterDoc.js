@@ -1980,7 +1980,34 @@ const oisFilterParameterDoc = {
       {
         name: 'id',
         doc: 'Find bygningspunktet med det angivne ID (BygPkt_id)'
+      },
+      {
+        name: 'polygon',
+        doc: 'Find bygningspunkter der ligger indenfor det angivne polygon.'+
+        ' Polygonet specificeres som et array af koordinater på samme måde som' +
+        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+        ' Bemærk at polygoner skal' +
+        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+      },
+      {
+        name: 'cirkel',
+        doc: 'Find bygningspunkter der overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+        examples: []
+      },
+      {
+        name: 'x',
+        doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+        'i det koordinatsystem som er angivet ved srid-parameteren.'
+      },
+      {
+        name: 'y',
+        doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+        'i det koordinatsystem som er angivet ved srid-parameteren.'
       }
+
     ],
     examples: []
   },

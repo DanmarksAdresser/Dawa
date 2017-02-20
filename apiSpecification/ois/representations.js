@@ -11,18 +11,33 @@ const registry = require('../registry');
 
 const extractNonprefixedEntity = (entity, row) => {
   const fields = oisModels[entity].fields;
-  return fields.reduce((memo, field) => {
+  const obj = fields.reduce((memo, field) => {
     memo[field.name] = row[field.name];
     return memo;
-  }, {})
+  }, {});
+  const geomField = _.findWhere(oisModels[entity].derivedFields, { name: 'geom'});
+  if(geomField) {
+    obj.koordinater =  row.koordinater_x ?
+      [row.koordinater_x, row.koordinater_y]
+      : null;
+  }
+  return obj;
 };
 const extractPrefixedEntity = (entity, row) => {
   const oisModel = oisModels[entity];
   if(row[`${entity}_${oisModel.key[0]}`]) {
-    return includedFieldsMap[entity].reduce((memo, field) => {
+    const fields = oisModels[entity].fields;
+    const obj = fields.reduce((memo, field) => {
       memo[field.name] = row[`${entity}_${field.name}`];
       return memo;
-    }, {})
+    }, {});
+    const geomField = _.findWhere(oisModels[entity].derivedFields, { name: 'geom'});
+    if(geomField) {
+      obj.koordinater =  row[`${entity}_koordinater_x`] ?
+        [row[`${entity}_koordinater_x`], row[`${entity}_koordinater_y`]] :
+        null;
+    }
+    return obj;
   }
   else {
     return null;
@@ -44,7 +59,7 @@ const extractAggregateEntity = (entity, row) => {
   return result;
 }
 
-const includedFieldsMap = Object.keys(oisApiModels).reduce((memo, apiModelName) => {
+const fieldsIncludedInFlatMap = Object.keys(oisApiModels).reduce((memo, apiModelName) => {
   const excludedFields = ['geom_json'];
 
   const allFields = fieldsMap[apiModelName];
@@ -54,11 +69,10 @@ const includedFieldsMap = Object.keys(oisApiModels).reduce((memo, apiModelName) 
 
 for(let apiModelName of Object.keys(oisApiModels)) {
   const apiModel = oisApiModels[apiModelName];
-  const includedFields = includedFieldsMap[apiModelName];
-  const flatRepresentation = representationUtil.defaultFlatRepresentation(includedFields);
-
+  const flatFields = fieldsIncludedInFlatMap[apiModelName];
+  const flatRepresentation = representationUtil.defaultFlatRepresentation(flatFields);
   const miniFieldNames = _.pluck(oisModels[apiModelName].fields, 'name');
-  const miniFields = _.filter(includedFields, field => _.contains(miniFieldNames, field.name));
+  const miniFields = _.filter(flatFields, field => _.contains(miniFieldNames, field.name));
 
   const miniRepresentation = representationUtil.defaultFlatRepresentation(miniFields);
 
@@ -80,7 +94,7 @@ for(let apiModelName of Object.keys(oisApiModels)) {
   const representations = {
     flat: flatRepresentation,
     json: {
-      fields: includedFieldsMap[apiModelName],
+      fields: fieldsIncludedInFlatMap[apiModelName],
       mapper: jsonMapper
     },
     mini: miniRepresentation
