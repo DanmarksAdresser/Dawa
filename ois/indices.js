@@ -1,0 +1,72 @@
+"use strict";
+
+module.exports = [{
+  entity: 'bygning',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'bygning',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'bygning',
+  columns: ['BYG_ANVEND_KODE']
+}, {
+  entity: 'bygning',
+  columns: ['KomKode']
+}, {
+  entity: 'bygning',
+  columns: ['BygPkt_id']
+}, {
+  entity: 'opgang',
+  columns: ['Bygning_id']
+}, {
+  entity: 'opgang',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'enhed',
+  columns: ['EnhAdr_id']
+}, {
+  entity: 'enhed',
+  columns: ['ENH_ANVEND_KODE']
+}, {
+  entity: 'enhed',
+  columns: ['Opgang_id']
+}, {
+  entity: 'enhed',
+  columns: ['Etage_id']
+}, {
+  entity: 'etage',
+  columns: ['Bygning_id']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['Bygning_id']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['KomKode']
+}, {
+  entity: 'ejerskab',
+  columns: ['BbrId']
+},{
+  entity: 'ejerskab',
+  columns: ['Kommune_Id']
+}, {
+  entity: 'ejerskab',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'kommune',
+  columns: ['KomKode', 'Kommune_id']
+}, {
+  entity: 'matrikelreference',
+  columns: ['Grund_id']
+}, {
+  entity: 'matrikelreference',
+  columns: ['Landsejerlavkode', 'MatrNr']
+}, {
+  entity: 'matrikelreference',
+  columns: ['MatrNr']
+}];
