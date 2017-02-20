@@ -40,6 +40,9 @@ module.exports = {
   }, {
     name: 'bygningsid',
     field: 'Bygning_id'
+  }, {
+    name: 'adgangsadresseid',
+    field: 'AdgAdr_id'
   }],
   enhed: [{
     name: 'id',

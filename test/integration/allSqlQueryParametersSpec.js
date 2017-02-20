@@ -574,6 +574,10 @@ var sampleParameters = {
     bygningsid: {
       values: ['affbb717-e4c0-489a-962c-5cc5505248b3'],
       verifier: (opgang, bygningsid) => opgang.Bygning_id === bygningsid
+    },
+    adgangsadresseid: {
+      values: ['0a3f507e-0409-32b8-e044-0003ba298018'],
+      verifier: (opgang, adgangsadresseid) => opgang.AdgAdr_id === adgangsadresseid
     }
   },
   ois_enhed: {

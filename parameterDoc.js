@@ -1969,6 +1969,10 @@ const oisFilterParameterDoc = {
       {
         name: 'bygningsid',
         doc: 'Find opgange med den angivne bygningsid (Bygning_id)'
+      },
+      {
+        name: 'adgangsadresseid',
+        doc: 'Find opgange med den angivne adgangsadresseid (AdgAdr_id)'
       }
     ],
     examples: []
