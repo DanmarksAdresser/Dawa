@@ -108,5 +108,9 @@ mixin documentSchema(schema, idPrefix)
     tbody
       +documentProperties(docUtil.extractDocumentationForObject(schema), 0, idPrefix || '')
 
-mixin documentOisResource(name)
+mixin documentOisQueryResource(name)
   +documentResource(parameterDoc, docUtil.getOisQueryResourcePath(name))
+mixin documentOisGetByKeyResource(name)
+  if docUtil.getOisGetByKeyResourcePath(name)
+    h3 OIS #{oisEntityName} enkeltopslag
+    +documentResource(parameterDoc, docUtil.getOisGetByKeyResourcePath(name))

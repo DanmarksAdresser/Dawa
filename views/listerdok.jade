@@ -87,11 +87,15 @@ block content
               li
               li <a href='#jordstykkereverse'>Jordstykke reverse geocoding</a>
               li <a href='#jordstykkedata'>Databeskrivelse</a>
-            li(data-toggle='collapse', data-target='#bebyggelse').nav-header Bebyggelse API
             ul#bebyggelse.nav.nav-list
               li <a href='#bebyggelsesoegning'>Bebyggelsesøgning</a>
               li <a href='#bebyggelseopslag'>Bebyggelseopslag</a>
               li <a href='#bebyggelsedata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#ois').nav-header OIS API
+            ul#ois.nav.nav-list
+              - each oisEntityName in docUtil.getOisEntityNames()
+                li
+                  a(href='#ois_' + oisEntityName) #{docUtil.getOisPlural(oisEntityName)}
 
         div.span9
           section
@@ -299,10 +303,11 @@ block content
             h3.anchor-header#bebyggelsedata Beskrivelse af bebyggelser
             p Web API'et udstiller for hver bebyggelse følgende informationer:
             +documentSchema(jsonSchemas.bebyggelse)
-          section
+          section#ois
             - each oisEntityName in docUtil.getOisEntityNames()
-              h3 #{docUtil.getOisPlural(oisEntityName)}
-              +documentOisResource(oisEntityName)
+              h3.anchor-header(id='ois_' + oisEntityName) OIS #{docUtil.getOisPlural(oisEntityName)} søgning
+              +documentOisQueryResource(oisEntityName)
+              +documentOisGetByKeyResource(oisEntityName)
 block append scripts
   script.
     var topbar = $('#topbar');

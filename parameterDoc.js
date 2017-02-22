@@ -1765,9 +1765,11 @@ var eventExamples = {
 
 };
 
+const oisReferenceText = `For dokumentation af begreber, felter, kodelister m.v. henvises til <a href="http://w2l.dk/file/632761/bbr_logisk_datamodel_v_12.2.pdf">BBR datamodellen</a>, <a href="http://bbr.dk/registreringsindhold/0/30">BBR's registreringsindhold</a> og <a href="https://www.ois.dk/Documents/PDFPrint/ois_datamodel.doc">OIS-dokumentationen</a>.`;
+
 const oisFilterParameterDoc = {
   grund: {
-    subtext: 'Find grunde fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find grunde fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1777,7 +1779,7 @@ const oisFilterParameterDoc = {
     examples: []
   },
   bygning: {
-    subtext: 'Find bygninger fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find bygninger fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1829,7 +1831,7 @@ const oisFilterParameterDoc = {
     examples: []
   },
   tekniskanlaeg: {
-    subtext: 'Find tekniske anlæg fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find tekniske anlæg fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1882,7 +1884,7 @@ const oisFilterParameterDoc = {
 
   },
   enhed: {
-    subtext: 'Find enheder fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find enheder fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1909,7 +1911,7 @@ const oisFilterParameterDoc = {
 
   },
   etage: {
-    subtext: 'Find etager fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find etager fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1924,7 +1926,7 @@ const oisFilterParameterDoc = {
 
   },
   ejerskab: {
-    subtext: 'Find ejerskaber fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find ejerskaber fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1947,7 +1949,7 @@ const oisFilterParameterDoc = {
 
   },
   kommune: {
-    subtext: 'Find kommuner fra OIS (BBR). For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find kommuner fra OIS (BBR). ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1961,7 +1963,7 @@ const oisFilterParameterDoc = {
     examples: []
   },
   opgang: {
-    subtext: 'Find opgange fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find opgange fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -1980,7 +1982,7 @@ const oisFilterParameterDoc = {
 
   },
   bygningspunkt: {
-    subtext: 'Find bygningspunkter fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find bygningspunkter fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -2017,7 +2019,7 @@ const oisFilterParameterDoc = {
     examples: []
   },
   matrikelreference: {
-    subtext: 'Find matrikelreferencer fra OIS. For dokumentation af begreber, felter, kodelister m.v. henvises til BBR- og OIS-dokumentationen',
+    subtext: `Find matrikelreferencer fra OIS. ${oisReferenceText}`,
     parameters: [
       {
         name: 'grundid',

@@ -133,6 +133,18 @@ exports.getOisQueryResourcePath = oisEntityName => {
   return resource.path;
 };
 
+exports.getOisGetByKeyResourcePath = oisEntityName => {
+  const resource = registry.findWhere({
+    entityName: `ois_${oisEntityName}`,
+    type: 'resource',
+    qualifier: 'getByKey'
+  });
+  if(!resource) {
+    return null;
+  }
+  return resource.path.replace(':id', '{id}');
+};
+
 exports.getOisEntityNames = () => {
   return Object.keys(oisApiModels);
 };
