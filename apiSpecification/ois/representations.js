@@ -67,6 +67,8 @@ const fieldsIncludedInFlatMap = Object.keys(oisApiModels).reduce((memo, apiModel
   return memo;
 }, {});
 
+const makeOisHref = (baseUrl, apiModelName, id) => `${baseUrl}/ois/${namesAndKeys[apiModelName].plural}/${id}`;
+
 for(let apiModelName of Object.keys(oisApiModels)) {
   const apiModel = oisApiModels[apiModelName];
   const flatFields = fieldsIncludedInFlatMap[apiModelName];
@@ -79,6 +81,9 @@ for(let apiModelName of Object.keys(oisApiModels)) {
 
   const jsonMapper = baseUrl => row => {
     let result = extractNonprefixedEntity(apiModel.primaryRelation, row);
+    if(apiModelName !== 'matrikelreference') {
+      result.href = makeOisHref(baseUrl, apiModelName, row[oisModels[apiModel.primaryRelation].key[0]]);
+    }
     for(let secondaryRelation of apiModel.secondaryRelations) {
       if(!secondaryRelation.aggregate) {
         result[secondaryRelation.relationName] =

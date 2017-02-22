@@ -8,6 +8,7 @@ var tilknytninger = require('./apiSpecification/tematilknytninger/tilknytninger'
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
 const oisApiModel = require('./apiSpecification/ois/oisApiModels');
+const oisModels = require('./ois/oisModels');
 const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
 
 /******************************************************************************/
@@ -2053,6 +2054,20 @@ Object.keys(oisApiModel).forEach(apiModelName => {
   parameterDoc.parameters.push(strukturParam);
   parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
   module.exports[path] = parameterDoc;
+  if(apiModelName !== 'matrikelreference') {
+    const getByKeyPath = `/ois/${plural}/{id}`;
+    const pathParameter = {
+      name: 'id',
+      doc: `ID (${oisModels[apiModelName].key[0]})`
+    };
+    const parameters = [pathParameter].concat(formatParameters).concat(strukturParam);
+    const subtext = `Enkeltopslag af ${apiModelName}`;
+    module.exports[getByKeyPath] = {
+      subtext,
+      parameters,
+      examples: []
+    };
+  }
 });
 
 var tilknytningTemaer = dagiTemaer.filter(function (tema) {

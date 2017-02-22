@@ -9,9 +9,7 @@ var _ = require('underscore');
 
 var cluster = require('cluster');
 var isalive = require('./isalive');
-var pg = require('pg');
 const databasePools = require('./psql/databasePools');
-require('pg-parse-float')(pg);
 
 const { requestLimiter } = require('./psql/requestLimiter');
 
