@@ -112,5 +112,5 @@ mixin documentOisQueryResource(name)
   +documentResource(parameterDoc, docUtil.getOisQueryResourcePath(name))
 mixin documentOisGetByKeyResource(name)
   if docUtil.getOisGetByKeyResourcePath(name)
-    h3 OIS #{oisEntityName} enkeltopslag
+    h3 OIS #{name} enkeltopslag
     +documentResource(parameterDoc, docUtil.getOisGetByKeyResourcePath(name))
