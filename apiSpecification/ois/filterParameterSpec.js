@@ -32,7 +32,12 @@ module.exports = {
     field: 'BYG_ANVEND_KODE'
   }, {
     name: 'kommunekode',
-    field: 'KomKode'
+    field: 'KomKode',
+    schema: {
+      type: 'string',
+      pattern: '^\\d{1,4}$'
+    },
+    process: processKommunekode
   }],
   opgang: [{
     name: 'id',
@@ -58,7 +63,13 @@ module.exports = {
     field: 'bygning_Bygning_id'
   }, {
     name: 'kommunekode',
-    field: 'bygning_KomKode'
+    field: 'bygning_KomKode',
+    schema: {
+      type: 'string',
+      pattern: '^\\d{1,4}$'
+    },
+    process: processKommunekode
+
   }],
   etage: [{
     name: 'id',
@@ -85,7 +96,12 @@ module.exports = {
     field: 'Bygning_id'
   }, {
     name: 'kommunekode',
-    field: 'KomKode'
+    field: 'KomKode',
+    schema: {
+      type: 'string',
+      pattern: '^\\d{1,4}$'
+    },
+    process: processKommunekode
   }],
   ejerskab: [{
     name: 'id',
