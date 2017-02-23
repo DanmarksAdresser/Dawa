@@ -2214,7 +2214,7 @@ describe('OIS', function(){
 
       var bejerskaber= JSON.parse(responses[1].body);      
       console.log(util.inspect(bejerskaber));                  
-      assert(bejerskaber.length>=1, "Der er ikke fundet ejerskab, antal: " + bejerskaber.length);
+      assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
 
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
