@@ -73,8 +73,9 @@ module.exports = (options) => {
         priorityRunning++;
       }
 
-      const promise = task.asyncTaskFn();
+      const promise = Promise.resolve(task.asyncTaskFn());
       const taskResult = yield promise;
+      console.log('QUEUE REGISTERED TASK COMPLETION');
       if(runPrioritized) {
         priorityRunning--;
       }
@@ -83,6 +84,7 @@ module.exports = (options) => {
       const cost = taskResult.cost;
       const result = taskResult.result;
       sourceDescriptor.priority += cost;
+      console.log('ADDING TO QUEUE');
       queue.add(sourceDescriptor);
 
       task.deferred.resolve({
@@ -124,9 +126,11 @@ module.exports = (options) => {
         };
         sourceDescriptorMap[source] = sourceDescriptor;
 
+        console.log('adding to queue');
         queue.add(sourceDescriptor);
       }
       else {
+        console.dir(sourceDescriptorMap[source]);
         if(inactive.has(sourceDescriptorMap[source])) {
           const sourceDescriptor = sourceDescriptorMap[source];
           inactive.delete(sourceDescriptor);
@@ -150,12 +154,16 @@ module.exports = (options) => {
         q.async(function*() {
           /* eslint no-constant-condition: 0 */
           while(true) {
+            console.log('QUEUE LOOP');
             removeTasklessSources();
             if(queue.isEmpty()) {
+              console.log('queue was empty');
               break;
             }
             const nextIsPriorityTask = queue.peek().priority < topPriority;
+            console.log('checking top task condition');
             if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < concurrency - prioritySlots + priorityRunning)) {
+              console.log('RUN TOP TASK');
               yield runTopTask();
             }
             else {

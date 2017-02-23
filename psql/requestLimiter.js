@@ -1,5 +1,7 @@
 const Promise = require('bluebird');
-const fairScheduler = require('./fair-scheduler');
+const fairScheduler = require('../dist-scheduler/fair-scheduler');
+const { schedule } = require('../dist-scheduler/client');
+const { go } = require('ts-csp');
 
 const FAIR_SCHEDULER_ENABLED = true;
 
@@ -12,8 +14,9 @@ if(FAIR_SCHEDULER_ENABLED) {
     initialPriorityOffset: -2000,
     prioritySlots: 1
   });
-  requestLimiter = (clientIp, fn) => Promise.coroutine(function*() {
-    const scheduleResult = yield scheduler.schedule(clientIp, Promise.coroutine(function*() {
+
+  requestLimiter = (clientIp, fn) => go(function*() {
+    const scheduleResult = yield schedule(clientIp, () => go(function*() {
       const before = Date.now();
 
       let result;
@@ -36,7 +39,7 @@ if(FAIR_SCHEDULER_ENABLED) {
     else {
       throw result.failed;
     }
-  })();
+  });
   requestLimiter.status = () => scheduler.status();
 }
 

@@ -13,6 +13,15 @@ const databasePools = require('./psql/databasePools');
 
 const { requestLimiter } = require('./psql/requestLimiter');
 
+const { createScheduler } = require('./dist-scheduler/dist-scheduler');
+
+const SCHEDULER_OPTS = {
+  concurrency: 6,
+  cleanupInterval: 5000,
+  initialPriorityOffset: -5000,
+  prioritySlots: 3
+};
+
 
 /**
  * We log memory statistics, so we can monitor memory consumption in splunk.
@@ -136,6 +145,7 @@ function setupMaster() {
       return;
     }
 
+
     var workerOptions = {
       pgConnectionUrl: options.pgConnectionUrl,
       listenPort: options.listenPort,
@@ -151,6 +161,8 @@ function setupMaster() {
     for (var i = 0; i < processCount; i++) {
       spawn(workerOptions);
     }
+
+    const scheduler = createScheduler(SCHEDULER_OPTS);
 
     cluster.on('exit', function (worker, code, signal) {
       logger.error('master', 'Worker died. Restarting worker.', { pid: worker.process.pid, signal: signal, code: code});

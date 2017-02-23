@@ -46,6 +46,7 @@ const pipe = (src, dst, batchSize) => {
     while(true) {
       const { values } = yield this.selectOrAbort(
         [{ch: src, op: OperationType.TAKE_MANY, count: batchSize}]);
+      console.log('TOOK ' + JSON.stringify(values));
       const closed = values[values.length -1] === CLOSED;
       if(closed) {
         values.pop();
@@ -166,6 +167,28 @@ const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
   });
 };
 
+const sleep = ms => go(function*() {
+  const signal = new Signal();
+  const timeoutId = setTimeout(() => signal.raise(), ms);
+  try {
+    yield this.takeOrAbort(signal);
+  }
+  finally {
+    clearTimeout(timeoutId);
+  }
+});
+
+const channelEvents = (eventEmitter, eventName, channel) => go(function*() {
+  console.log('setting up event channelling for ' + eventName);
+    const handler = event => {
+      console.log('channeling event ' + JSON.stringify(event));
+      channel.putSync(event);
+    };
+    eventEmitter.on(eventName, handler);
+    yield this.abortSignal.take();
+    eventEmitter.removeListener(eventName, handler);
+  }
+);
 
 module.exports = {
   mapAsync,
@@ -174,5 +197,7 @@ module.exports = {
   processify,
   pipe,
   pipeToStream,
-  pipeFromStream
+  pipeFromStream,
+  sleep,
+  channelEvents
 };
