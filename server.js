@@ -13,6 +13,7 @@ const databasePools = require('./psql/databasePools');
 
 const SCHEDULER_OPTS = {
   concurrency: 6,
+  concurrencyPerSource: 3,
   cleanupInterval: 5000,
   initialPriorityOffset: -5000,
   prioritySlots: 3,

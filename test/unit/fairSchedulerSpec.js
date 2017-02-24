@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect;
 const q = require('q');
+const { go } = require('ts-csp');
 
 const fairScheduler = require('../../dist-scheduler/fair-scheduler');
 describe("Fair scheduler", () => {
@@ -108,5 +109,23 @@ describe("Fair scheduler", () => {
     yield q.delay(0);
     expect(scheduler.internal.descriptor('source1')).to.be.undefined;
     expect(scheduler.internal.descriptor('source2')).to.not.be.undefined;
+  }));
+
+  it('A source can run two concurrent tasks, if concurrencyPerSource is 2', () => go(function*() {
+    scheduler = fairScheduler({
+      concurrency:3,
+      concurrencyPerSource: 2
+    });
+
+    let tasks = [scheduleTask('source1'), scheduleTask('source1'), scheduleTask('source1')];
+    yield q.delay(0);
+    expect(tasks[0].running).to.be.true;
+    expect(tasks[1].running).to.be.true;
+    expect(tasks[2].running).to.be.false;
+    completeTask(tasks[0], null, 100);
+    yield q.delay(0);
+    expect(tasks[2].running).to.be.true;
+    completeTask(tasks[1], null, 100);
+    completeTask(tasks[2], null, 100);
   }));
 });
