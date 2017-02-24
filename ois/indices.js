@@ -41,6 +41,9 @@ module.exports = [{
   columns: ['AdgAdr_id']
 }, {
   entity: 'tekniskanlaeg',
+  columns: ['BygPkt_id']
+}, {
+  entity: 'tekniskanlaeg',
   columns: ['ESREjdNr']
 }, {
   entity: 'tekniskanlaeg',
