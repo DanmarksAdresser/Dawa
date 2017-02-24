@@ -146,9 +146,12 @@ const createDatabasePool = _options => {
   const getPoolStatus = () => {
     const requestLimiterStatus = requestLimiter.status ? requestLimiter.status() : 'Request limiting disabled';
     const poolStatus = pool === null ? 'Pooling disabled' : {
-        size: pool.getPoolSize(),
-        availableObjectsCount: pool.availableObjectsCount(),
-        waitingClientsCount: pool.waitingClientsCount(),
+        size: pool.size,
+        available: pool.available,
+        borrowed: pool.borrowed,
+        pending: pool.pending,
+        max: pool.max,
+        min: pool.min
       };
     return {
       pool: poolStatus,

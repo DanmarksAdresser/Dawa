@@ -11,15 +11,12 @@ var cluster = require('cluster');
 var isalive = require('./isalive');
 const databasePools = require('./psql/databasePools');
 
-const { requestLimiter } = require('./psql/requestLimiter');
-
-const { createScheduler } = require('./dist-scheduler/dist-scheduler');
-
 const SCHEDULER_OPTS = {
   concurrency: 6,
   cleanupInterval: 5000,
   initialPriorityOffset: -5000,
-  prioritySlots: 3
+  prioritySlots: 3,
+  timeout: 15000
 };
 
 
@@ -57,8 +54,10 @@ function socketTimeoutMiddleware(timeoutMillis) {
 }
 
 function setupWorker() {
-  var errorMessages = require('./haproxy/errorMessages');
-  var proddb = require('./psql/proddb');
+  const errorMessages = require('./haproxy/errorMessages');
+  const proddb = require('./psql/proddb');
+  const { requestLimiter } = require('./psql/requestLimiter');
+
   var dboptions = {
     poolSize: asInteger(process.env.pgPoolSize),
     poolIdleTimeout: asInteger(process.env.pgPoolIdleTimeout),
@@ -161,8 +160,9 @@ function setupMaster() {
     for (var i = 0; i < processCount; i++) {
       spawn(workerOptions);
     }
+    const messagingInstance = require('./messaging/messaging-master-instance').instance;
 
-    const scheduler = createScheduler(SCHEDULER_OPTS);
+    require('./dist-scheduler/dist-scheduler-master').create(messagingInstance, SCHEDULER_OPTS);
 
     cluster.on('exit', function (worker, code, signal) {
       logger.error('master', 'Worker died. Restarting worker.', { pid: worker.process.pid, signal: signal, code: code});

@@ -3,7 +3,7 @@
 const expect = require('chai').expect;
 const q = require('q');
 
-const fairScheduler = require('../../psql/fair-scheduler');
+const fairScheduler = require('../../dist-scheduler/fair-scheduler');
 describe("Fair scheduler", () => {
   let scheduler;
   const scheduleTask = (source) => {

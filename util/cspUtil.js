@@ -46,7 +46,6 @@ const pipe = (src, dst, batchSize) => {
     while(true) {
       const { values } = yield this.selectOrAbort(
         [{ch: src, op: OperationType.TAKE_MANY, count: batchSize}]);
-      console.log('TOOK ' + JSON.stringify(values));
       const closed = values[values.length -1] === CLOSED;
       if(closed) {
         values.pop();
@@ -178,10 +177,28 @@ const sleep = ms => go(function*() {
   }
 });
 
+const takeWithTimeout = (ms, src, errFactory) => go(function*() {
+  errFactory = errFactory || (() => new Error('Timeout'));
+  const sleeperProcess = sleep(ms);
+  try {
+    const selectResult = yield this.selectOrAbort([
+      {ch: sleeperProcess.succeeded, op: OperationType.TAKE },
+      {ch: src, op: OperationType.TAKE }
+    ]);
+    if(selectResult.ch === sleeperProcess.succeeded) {
+      throw errFactory();
+    }
+    else {
+      return selectResult.value;
+    }
+  }
+  finally {
+    sleeperProcess.abort.raise();
+  }
+});
+
 const channelEvents = (eventEmitter, eventName, channel) => go(function*() {
-  console.log('setting up event channelling for ' + eventName);
     const handler = event => {
-      console.log('channeling event ' + JSON.stringify(event));
       channel.putSync(event);
     };
     eventEmitter.on(eventName, handler);
@@ -199,5 +216,6 @@ module.exports = {
   pipeToStream,
   pipeFromStream,
   sleep,
-  channelEvents
+  channelEvents,
+  takeWithTimeout
 };
