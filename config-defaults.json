@@ -1,0 +1,97 @@
+[
+  {
+    "name": "pgConnectionUrl",
+    "description": "URL for databaseforbindelse",
+    "type": "string"
+  },
+  {
+    "name": "listenPort",
+    "description": "Socket port der lyttes på",
+    "type": "number",
+    "default": 3000
+  },
+  {
+    "name": "masterListenPort",
+    "description": "Socket port masteren lytter på (isalive)",
+    "type": "number",
+    "default": 3001
+  },
+  {
+    "name": "pg.pool.max",
+    "description": "Max antal samtidige PostgreSQL queries",
+    "type": "number",
+    "default": 150
+  },
+  {
+    "name": "pg.pool.idleTimeoutMillis",
+    "description": "Hvor lang tid der går før idle Postgres connections kan lukkes ned",
+    "type": "number",
+    "default": 10000
+  },
+  {
+    "name": "pg.pool.maxWaitingClients",
+    "description": "Hvor mange klienter, der maksimalt kan vente på at fåen Postgres connection",
+    "type": "number",
+    "default": 0
+  },
+  {
+    "name": "pg.statementTimeoutMillis",
+    "description": "Maksimal query-tid for et PostgreSQL statement, for query afbrydes",
+    "type": "number",
+    "default": 10000
+  },
+  {
+    "name": "processes",
+    "description": "Antal NodeJS worker processer der startes",
+    "type": "number",
+    "default": 4
+  },
+  {
+    "name": "scheduler.timeoutMillis",
+    "description": "Hvor lang tid scheduleren venter på beskeder",
+    "type": "number",
+    "default": 15000
+  },
+  {
+    "name": "scheduler.slots",
+    "description": "Antal samtidige PostgreSQL queries",
+    "type": "number",
+    "default": 6
+  },
+  {
+    "name": "scheduler.prioritySlots",
+    "description": "Antal query slots, der er reserveret til klienter med høj prioritet",
+    "type": "number",
+    "default": 3
+  },
+  {
+    "name": "scheduler.slotsPerSource",
+    "description": "Maximum slots consumed by a single source",
+    "type": "number",
+    "default": 3
+  },
+  {
+    "name": "scheduler.initialPriorityOffsetMillis",
+    "description": "Querytid der tildeles nye klienter",
+    "type": "number",
+    "default": 10000
+  },
+  {
+    "name": "scheduler.requiredPriorityOffsetMillis",
+    "description": "Krævet queryitd for at klient kan udføre queries med høj prioritet",
+    "type": "number",
+    "default": 1000
+  },
+  {
+    "name": "scheduler.cleanupIntervalMillis",
+    "description": "Oprydningsinterval for klientliste",
+    "type": "number",
+    "default": 5000
+  },
+  {
+    "name": "socketTimeoutMillis",
+    "description": "Socket timeout",
+    "type": "number",
+    "default": 30000
+  }
+]
