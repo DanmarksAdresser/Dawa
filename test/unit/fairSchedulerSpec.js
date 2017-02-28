@@ -31,7 +31,7 @@ describe("Fair scheduler", () => {
   };
 
   beforeEach(() => {
-    scheduler = fairScheduler({concurrency: 2});
+    scheduler = fairScheduler({slots: 2});
   });
 
   it('Should run task immediately if queue is empty', q.async(function*() {
@@ -43,7 +43,7 @@ describe("Fair scheduler", () => {
     expect(taskDescriptor.running).to.be.false;
   }));
 
-  it('Exactly <concurrency> tasks should be executing', q.async(function*() {
+  it('Exactly <slots> tasks should be executing', q.async(function*() {
     const tasks = [scheduleTask('source1'), scheduleTask('source2'), scheduleTask('source3')];
     yield q.delay(0);
     let runningTasks = tasks.reduce((memo, task) => memo + (task.running ? 1 : 0), 0);
@@ -73,7 +73,7 @@ describe("Fair scheduler", () => {
   it('New sources may receive a head start specified by initialPriorityOffset', q.async(function*() {
     scheduler = fairScheduler({
       concurrency:1,
-      initialPriorityOffset: -100
+      initialPriorityOffset: 100
     });
     let tasksSource1 = [scheduleTask('source1')];
     yield q.delay(0);
@@ -91,7 +91,7 @@ describe("Fair scheduler", () => {
   it('Should cleanup sources with priority lower than top + offest', q.async(function*() {
     scheduler = fairScheduler({
       concurrency:1,
-      initialPriorityOffset: -100,
+      initialPriorityOffset: 100,
       cleanupInterval: 0
     });
     let taskSource1 = scheduleTask('source1');
@@ -113,8 +113,8 @@ describe("Fair scheduler", () => {
 
   it('A source can run two concurrent tasks, if concurrencyPerSource is 2', () => go(function*() {
     scheduler = fairScheduler({
-      concurrency:3,
-      concurrencyPerSource: 2
+      slots:3,
+      slotsPerSource: 2
     });
 
     let tasks = [scheduleTask('source1'), scheduleTask('source1'), scheduleTask('source1')];

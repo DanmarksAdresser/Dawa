@@ -13,6 +13,8 @@ const create = (messagingInstance, options) => {
   const readyChannel = new Channel();
   messagingInstance.subscribe('DIST_SCHEDULER_READY', readyChannel);
 
+  const status = () => 'not implemented yet';
+
   const process = go(function*() {
     /* eslint no-constant-condition: 0 */
     while (true) {
@@ -72,7 +74,8 @@ const create = (messagingInstance, options) => {
 
   return {
     schedule,
-    process
+    process,
+    status
   };
 
 };

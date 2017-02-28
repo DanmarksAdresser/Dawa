@@ -15,9 +15,9 @@ describe('Distributed scheduler', () => {
   /* eslint no-unused-vars: 0 */
   let master, client1, client2;
   const OPTIONS = {
-    concurrency: 2,
+    slots: 2,
     cleanupInterval: 5000,
-    initialPriorityOffset: -2000,
+    initialPriorityOffset: 2000,
     prioritySlots: 1,
     timeout: 120
   };

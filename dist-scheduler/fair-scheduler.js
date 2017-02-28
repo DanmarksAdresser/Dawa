@@ -13,11 +13,12 @@ const q = require('q');
 
 module.exports = (options) => {
 
-  const concurrency = options.concurrency || 1;
-  const concurrencyPerSource = options.concurrencyPerSource || 1;
+  const slots = options.slots || 1;
+  const concurrencyPerSource = options.slotsPerSource || 1;
   const prioritySlots = options.prioritySlots || 0;
   const initialPriorityOffset = options.initialPriorityOffset || 0;
   const cleanupInterval = options.cleanupInterval || 0;
+  const requiredPriorityOffset = options.requiredPriorityOffset || 0;
   const sourceDescriptorMap = {};
   let activeCount = 0;
   let topPriority = 0;
@@ -66,7 +67,7 @@ module.exports = (options) => {
     if(inactive.size > 0 && lastCleanup + cleanupInterval < Date.now()) {
       lastCleanup = Date.now();
       for(let sourceDescriptor of inactive.values()) {
-        if(sourceDescriptor.priority <= topPriority + initialPriorityOffset) {
+        if(sourceDescriptor.priority <= topPriority - initialPriorityOffset) {
           inactive.delete(sourceDescriptor);
           delete sourceDescriptorMap[sourceDescriptor.source];
         }
@@ -135,6 +136,14 @@ module.exports = (options) => {
         topPriority,
         priorityRunning,
         lastCleanup: new Date(lastCleanup).toISOString(),
+        options: {
+          slots,
+          concurrencyPerSource,
+          prioritySlots,
+          initialPriorityOffset,
+          cleanupInterval,
+          requiredPriorityOffset
+        },
         clients: clientDescs
       };
     },
@@ -143,7 +152,7 @@ module.exports = (options) => {
         const sourceDescriptor = {
           source: source,
           tasks: [],
-          priority: topPriority + initialPriorityOffset,
+          priority: topPriority - initialPriorityOffset,
           running: 0
         };
         sourceDescriptorMap[source] = sourceDescriptor;
@@ -153,7 +162,7 @@ module.exports = (options) => {
         if(inactive.has(sourceDescriptorMap[source])) {
           const sourceDescriptor = sourceDescriptorMap[source];
           inactive.delete(sourceDescriptor);
-          sourceDescriptor.priority = Math.max(topPriority + initialPriorityOffset, sourceDescriptor.priority);
+          sourceDescriptor.priority = Math.max(topPriority - initialPriorityOffset, sourceDescriptor.priority);
           queueAdd(sourceDescriptor);
         }
       }
@@ -165,9 +174,9 @@ module.exports = (options) => {
         deferred: deferred
       });
 
-      const nextIsPriorityTask = queuePeek().priority < topPriority;
+      const nextIsPriorityTask = queuePeek().priority < topPriority - requiredPriorityOffset;
       const remainingPrioritySlots = Math.max(0, prioritySlots - priorityRunning);
-      const mayRunAsNonPriority = activeCount < concurrency - remainingPrioritySlots;
+      const mayRunAsNonPriority = activeCount < slots - remainingPrioritySlots;
       const mayRunAsPriority = nextIsPriorityTask && remainingPrioritySlots > 0;
       if(mayRunAsPriority || mayRunAsNonPriority) {
         q.async(function*() {
@@ -178,7 +187,7 @@ module.exports = (options) => {
               break;
             }
             const nextIsPriorityTask = queuePeek().priority < topPriority;
-            if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < concurrency - prioritySlots + priorityRunning)) {
+            if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < slots - prioritySlots + priorityRunning)) {
               yield runTopTask();
             }
             else {
