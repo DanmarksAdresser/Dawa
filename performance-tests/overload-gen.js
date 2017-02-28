@@ -54,7 +54,10 @@ const performRequest = (options) => {
         });
       });
     });
-    request.on('error', err => reject(err));
+    request.on('error', err =>  {
+      concurrency--;
+      reject(err);
+    });
   });
 };
 
