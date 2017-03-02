@@ -37,11 +37,8 @@ const performRequest = (options) => {
     const before = Date.now();
     let byteCount = 0;
     concurrency++;
-    http.get(Object.assign(options, {
-      headers: {
-        "X-Forwarded-For": "1.2.3.4"
-      }
-    }), res => {
+
+    const request = http.get(options, res => {
       res.on('data', chunk => {
         byteCount += chunk.byteLength;
       });
@@ -57,6 +54,10 @@ const performRequest = (options) => {
         });
       });
     });
+    request.on('error', err =>  {
+      concurrency--;
+      reject(err);
+    });
   });
 };
 
@@ -65,22 +66,36 @@ const launchSingleRequestGenerator = (baseUrl, spec) => {
   const stringUrl = _.isFunction(spec.url) ? spec.url() : spec.url;
   const parsedUrl = url.parse(url.resolve(baseUrl, stringUrl));
 
-  return performRequest(parsedUrl);
+  return performRequest(Object.assign({}, parsedUrl, { headers: spec.headers}));
 };
 
 const launchGetRepeatedlyGenerator = (baseUrl, spec) => {
   return q.async(function*() {
     while(true) {
-      yield launchSingleRequestGenerator(baseUrl, spec);
+      try {
+        yield launchSingleRequestGenerator(baseUrl, spec);
+      }
+      catch(e) {
+        console.error(e);
+      }
     }
   })();
 };
 
 const lauchfixedConcurrencyGenerator = (baseUrl, spec)  => {
   return q.async(function*() {
-    for(let i = 0; i < spec.concurrency; ++i) {
-      launchGetRepeatedlyGenerator(baseUrl, spec);
-      yield q.delay(spec.rampUpDelay);
+    for(let clientId = 0; clientId < (spec.clientCount || 1); clientId++) {
+      const ip = `1.1.1.${clientId%(spec.clientCount || 1)}`;
+      for(let i = 0; i < spec.concurrency; ++i) {
+        launchGetRepeatedlyGenerator(baseUrl, {
+          url: spec.url,
+          headers: {
+            "X-Forwarded-For": ip,
+            "Accept-Encoding": "gzip"
+          }
+        });
+      }
+        yield q.delay(spec.rampUpDelay);
     }
   })();
 };

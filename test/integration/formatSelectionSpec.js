@@ -1,9 +1,11 @@
 "use strict";
 
 var csv     = require('csv');
-var expect = require('chai').expect;
+const { expect, assert } = require('chai');
 var request = require("request-promise");
 var _       = require('underscore');
+
+const { go } = require('ts-csp');
 
 var jsonpResults = [];
 
@@ -74,6 +76,16 @@ describe('Format selection', function () {
           expect(data[0].id).to.deep.equal(id);
           done();
         });
+    });
+  });
+
+  it('Hvis struktur=flad er angivet, modtages en flad struktur i JSON-format', () => {
+    return go(function*() {
+      const response = yield request.get({
+        json: true,
+        url: "http://localhost:3002/adresser?per_side=11&struktur=flad"
+      });
+      assert.notTypeOf(response[0].postnr, 'undefined');
     });
   });
 

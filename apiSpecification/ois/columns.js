@@ -6,22 +6,36 @@ const dbapi = require('../../dbapi');
 const oisCommon = require('../../ois/common');
 const oisApiModels = require('./oisApiModels');
 const namesAndKeys = require('./namesAndKeys');
+const computedColumns = require('./computedColumns');
 
 module.exports = _.mapObject(oisApiModels, (apiModel, modelName) => {
-  const primaryColumns = oisCommon.postgresColumnNames[modelName].reduce((memo, columnName) => {
+  let primaryColumns = oisCommon.postgresColumnNames[modelName].reduce((memo, columnName) => {
     memo[columnName] = {
       column: `${apiModel.alias}.${columnName.toLowerCase()}`
     };
     return memo;
   }, {});
+  if(computedColumns[modelName]) {
+    Object.assign(primaryColumns, computedColumns[apiModel.primaryRelation](apiModel.alias));
+  }
   const secondaryColumnMaps = apiModel.secondaryRelations.filter(relation => !relation.aggregate).map(secondaryRelation => {
     const secondaryTableColumnNames = oisCommon.postgresColumnNames[secondaryRelation.relationName];
-    return secondaryTableColumnNames.reduce((memo, columnName) => {
+    let columns =  secondaryTableColumnNames.reduce((memo, columnName) => {
       memo[`${secondaryRelation.relationName}_${columnName}`] = {
         column: `${secondaryRelation.alias}.${columnName.toLowerCase()}`
       };
       return memo;
     }, {});
+    if(computedColumns[secondaryRelation.relationName]) {
+      const unprefixedComputedCols = computedColumns[secondaryRelation.relationName](secondaryRelation.alias);
+      const prefixedComputedCols = Object.keys(unprefixedComputedCols).reduce((memo, unprefixed) => {
+        const value = unprefixedComputedCols[unprefixed];
+        memo[`${secondaryRelation.relationName}_${unprefixed}`] = value;
+        return memo;
+      }, {});
+      Object.assign(columns, prefixedComputedCols);
+    }
+    return columns;
   });
 
   const aggregateColumnMap = apiModel.secondaryRelations.filter(relation => relation.aggregate)

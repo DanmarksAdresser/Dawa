@@ -19,7 +19,9 @@ for(let oisModelName of Object.keys(namesAndKeys)) {
     struktur: commonParameters.struktur,
     format: commonParameters.format,
     paging: commonParameters.paging
-  }, parametersMap[oisModelName]);
+  }, {
+    propertyFilter: parametersMap[oisModelName].propertyFilter
+  });
   if(apiModel.geojson) {
     queryParameters.geomWithin =commonParameters.geomWithin;
     queryParameters.reverseGeocoding = commonParameters.reverseGeocodingOptional;
@@ -36,4 +38,26 @@ for(let oisModelName of Object.keys(namesAndKeys)) {
   };
 
   registry.add(`ois_${oisModelName}`, 'resource', 'query', queryResource);
+  const idParams = parametersMap[oisModelName].id;
+  if(idParams.length === 1) {
+    const getByKeyPath = `/ois/${nameAndKey.plural}/:id`;
+    const getByKeyResource = {
+      path: getByKeyPath,
+      pathParameters: idParams,
+      queryParameters: resourcesUtil.flattenParameters(
+        Object.assign({},
+          {format: commonParameters.format},
+          {
+            crs: commonParameters.crs,
+            struktur: commonParameters.struktur
+          })),
+      representations: representations,
+      sqlModel: sqlModel,
+      singleResult: true,
+      processParameters: () => null,
+      chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
+    };
+
+    registry.add(`ois_${oisModelName}`, 'resource', 'getByKey', getByKeyResource);
+  }
 }

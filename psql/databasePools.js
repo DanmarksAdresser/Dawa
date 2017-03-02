@@ -1,5 +1,6 @@
 "use strict";
-
+const pg = require('pg');
+require('pg-parse-float')(pg);
 const { createDatabasePool } = require('./DatabasePool');
 
 const pools = {};

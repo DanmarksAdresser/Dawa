@@ -166,6 +166,46 @@ const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
   });
 };
 
+const sleep = ms => go(function*() {
+  const signal = new Signal();
+  const timeoutId = setTimeout(() => signal.raise(), ms);
+  try {
+    yield this.takeOrAbort(signal);
+  }
+  finally {
+    clearTimeout(timeoutId);
+  }
+});
+
+const takeWithTimeout = (ms, src, errFactory) => go(function*() {
+  errFactory = errFactory || (() => new Error('Timeout'));
+  const sleeperProcess = sleep(ms);
+  try {
+    const selectResult = yield this.selectOrAbort([
+      {ch: sleeperProcess.succeeded, op: OperationType.TAKE },
+      {ch: src, op: OperationType.TAKE }
+    ]);
+    if(selectResult.ch === sleeperProcess.succeeded) {
+      throw errFactory();
+    }
+    else {
+      return selectResult.value;
+    }
+  }
+  finally {
+    sleeperProcess.abort.raise();
+  }
+});
+
+const channelEvents = (eventEmitter, eventName, channel) => go(function*() {
+    const handler = event => {
+      channel.putSync(event);
+    };
+    eventEmitter.on(eventName, handler);
+    yield this.abortSignal.take();
+    eventEmitter.removeListener(eventName, handler);
+  }
+);
 
 module.exports = {
   mapAsync,
@@ -174,5 +214,8 @@ module.exports = {
   processify,
   pipe,
   pipeToStream,
-  pipeFromStream
+  pipeFromStream,
+  sleep,
+  channelEvents,
+  takeWithTimeout
 };

@@ -36,4 +36,7 @@ var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
 
 module.exports = fields;
 
-_.each(fields, fieldSpec => fieldsUtil.normalize(fieldSpec));
+_.each(fields, (fieldSpec, key) => {
+  fieldsUtil.applySelectability(fieldSpec, sqlModels[key]);
+  fieldsUtil.normalize(fieldSpec)
+});

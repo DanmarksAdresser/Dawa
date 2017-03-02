@@ -21,7 +21,27 @@ const parametertypeFromField = field => {
   else {
     throw new Error('Could not decide parameter type for ' + JSON.stringify(field));
   }
-}
+};
+
+const keyParams = oisApiModelName => {
+  const oisModel = oisModels[oisApiModelName];
+  const filters = filtersMap[oisApiModelName];
+  const field  = fieldSpec[oisApiModelName].find(field => field.name === oisModel.key[0]);
+  const filter = filters.find(filter => filter.field === field.name);
+  if(!filter) {
+    return [];
+  }
+  const result = {
+    name: filter.name,
+    type: parametertypeFromField(field),
+    renameTo: filter.field,
+    schema: filter.schema || schemas.schemaFromField(field, false),
+  };
+  if(filter.process) {
+    result.process = filter.process;
+  }
+  return [result];
+};
 
 const filterParams = oisApiModelName => {
   const filters = filtersMap[oisApiModelName];
@@ -49,7 +69,8 @@ const filterParams = oisApiModelName => {
 
 for(let oisApiModelName of Object.keys(filtersMap)) {
   exports[oisApiModelName] = {
-    propertyFilter: filterParams(oisApiModelName)
+    propertyFilter: filterParams(oisApiModelName),
+    id: keyParams(oisApiModelName)
   };
   registry.addMultiple(`ois_${oisApiModelName}`, 'parameterGroup', module.exports[oisApiModelName]);
 }

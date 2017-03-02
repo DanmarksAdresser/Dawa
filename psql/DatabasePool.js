@@ -66,10 +66,12 @@ const rawConnectionPool = (options) => {
 const withRawPooledConnection = (pool, connectionFn) => go(function*() {
   const client = yield pool.acquire();
   try {
-    return yield this.delegateAbort(connectionFn(client));
-  }
-  finally {
+    const result = yield this.delegateAbort(connectionFn(client));
     yield pool.release(client);
+    return result;
+  }
+  catch(e) {
+    pool.destroy(client);
   }
 });
 
@@ -89,7 +91,7 @@ const createDatabasePool = _options => {
   let pool = null;
   const setupProcess =  go(function*() {
     /* eslint no-constant-condition: 0 */
-    while(true) {
+    while (true) {
       try {
         yield withUnpooledDawaClient(options, client => go(function*() {
           // The OIDs for custom types are not fixed beforehand, so we query them from the database
@@ -101,28 +103,28 @@ const createDatabasePool = _options => {
           const types = new TypeOverrides(pg.types);
           setupDatabaseTypes(types, typeMap);
           options.types = types;
-          if(options.pooled !== false) {
+          if (options.pooled !== false) {
             pool = rawConnectionPool(options);
-            pool.on('factoryCreateError', function(err){
+            pool.on('factoryCreateError', function (err) {
               logger.error('GenericPool failed to create client', err);
             });
 
-            pool.on('factoryDestroyError', function(err){
+            pool.on('factoryDestroyError', function (err) {
               logger.error('GenericPool failed to destroy client', err);
             });
           }
-        }) );
+        }));
         break;
       }
-      catch(e) {
+      catch (e) {
         logger.error('failed to initialize pool, retrying in 5s', e);
         yield Promise.delay(5000);
       }
-      if(options.pooled) {
-        pool.start();
-      }
     }
-    });
+    if (options.pooled) {
+      pool.start();
+    }
+  });
 
   const withConnection = (connectionOptions, fn) => {
     const combinedOptions = Object.assign({}, { requestLimiter: this.requestLimiter},
@@ -146,9 +148,12 @@ const createDatabasePool = _options => {
   const getPoolStatus = () => {
     const requestLimiterStatus = requestLimiter.status ? requestLimiter.status() : 'Request limiting disabled';
     const poolStatus = pool === null ? 'Pooling disabled' : {
-        size: pool.getPoolSize(),
-        availableObjectsCount: pool.availableObjectsCount(),
-        waitingClientsCount: pool.waitingClientsCount(),
+        size: pool.size,
+        available: pool.available,
+        borrowed: pool.borrowed,
+        pending: pool.pending,
+        max: pool.max,
+        min: pool.min
       };
     return {
       pool: poolStatus,

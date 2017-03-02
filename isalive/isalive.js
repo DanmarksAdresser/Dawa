@@ -5,13 +5,9 @@ var fs = require('fs');
 var q = require('q');
 var uuid = require('node-uuid');
 
-const { go } = require('ts-csp');
+const { instance: distSchedulerInstance } = require('../dist-scheduler/dist-scheduler-master-instance');
 
-const databasePools = require('./psql/databasePools');
-var proddb = require('./psql/proddb');
-const logger = require('./logger').forCategory('isalive');
-
-var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
+var packageJson = JSON.parse(fs.readFileSync(__dirname + '/../package.json'));
 
 // get status from a single worker
 function getStatus(worker) {
@@ -29,7 +25,7 @@ function getStatus(worker) {
   }
   worker.on('message', listener);
   worker.send(request);
-  return q.timeout(deferred.promise, 5000);
+  return q.timeout(deferred.promise, 15000);
 }
 
 exports.getWorkerStatuses = function() {
@@ -59,7 +55,7 @@ exports.getWorkerStatuses = function() {
 
 };
 
-exports.isaliveMaster = function(options) {
+exports.isaliveMaster = function() {
   var result = {
     name: packageJson.name,
     version: packageJson.version,
@@ -68,37 +64,8 @@ exports.isaliveMaster = function(options) {
   var workerStatusesPromise = exports.getWorkerStatuses();
   return q.all([workerStatusesPromise]).spread(function(workerStatuses) {
       result.workers = workerStatuses;
+      result.distScheduler = distSchedulerInstance.status();
       return result;
     });
-};
 
-exports.isaliveSlave = function(server) {
-  return go(function*() {
-    const connectionCount = yield q.ninvoke(server, 'getConnections');
-    let couldPerformQuery = false;
-    try {
-      yield proddb.withTransaction('READ_ONLY', function (client) {
-        return go(function*() {
-          const result = yield client.queryp('select * from adgangsadresser limit 1');
-          if(result.rows.length !== 1) {
-            throw new Error('No rows from adgangsadresser');
-          }
-          couldPerformQuery = true;
-        });
-      });
-    }
-    catch(err) {
-      logger.error('Isalive query failed', err);
-    }
-    const poolStatus = databasePools.get('prod').getPoolStatus();
-    const status = couldPerformQuery ? 'up' : 'down';
-    return {
-      type: 'status',
-      data: {
-        status,
-        postgresPool: poolStatus,
-        connections: connectionCount
-      }
-    }
-  });
 };

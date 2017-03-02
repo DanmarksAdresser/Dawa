@@ -49,6 +49,9 @@ function representationName(formatParam, strukturParam) {
       if(strukturParam === 'mini') {
         return 'mini';
       }
+      else if(strukturParam === 'flad') {
+        return 'flat';
+      }
       else {
         return 'json';
       }

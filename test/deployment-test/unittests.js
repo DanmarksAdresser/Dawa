@@ -1960,7 +1960,6 @@ describe('OIS', function(){
       var adresser= JSON.parse(response.body);
       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/enheder';
@@ -1969,6 +1968,16 @@ describe('OIS', function(){
       enhedopt.qs.adresseid= adresser[0].id;
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
+
+      // var opgangopt= {};
+      // opgangopt.baseUrl= host;
+      // opgangopt.url='ois/opgange';
+      // opgangopt.qs= {};
+      // opgangopt.qs.cache= enhedopt.qs.cache;
+      // //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
+      // opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
+      // opgangopt.resolveWithFullResponse= true;
+      // var opgangsrp= rp(opgangopt);
 
       var bygningopt= {};
       bygningopt.baseUrl= host;
@@ -1990,39 +1999,42 @@ describe('OIS', function(){
       tekniskanlægopt.resolveWithFullResponse= true;
       var tekniskanlægrp= rp(tekniskanlægopt);
 
+      return Promise.all([enhedrp, bygningrp, tekniskanlægrp /*, opgangsrp */]);
+    })
+    .then(function (responses) {
+      function callok(element, index, array) {          
+        return element.statusCode===200; 
+      } 
+      assert(responses.every(callok), "Http status code != 200");
+
+      // enhed        
+      var enheder= JSON.parse(responses[0].body);        
+      assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+
+      // bygninger        
+      var bygninger= JSON.parse(responses[1].body);        
+      assert(bygninger.length===0, "Der er fundet en bygning, men " + bygninger.length);
+
+      // tekniske anlæg        
+      var tekniskanlæg= JSON.parse(responses[2].body);        
+      assert(tekniskanlæg.length===0, "Der er fundet et teknisk anlæg, men " + tekniskanlæg.length);
+
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
       ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= enhedopt.qs.cache;
-      ejerskabopt.qs.esrejendomsnr= /* '0'+ */ adresser[0].adgangsadresse.jordstykke.esrejendomsnr; // fjern '0' +
+      ejerskabopt.qs.cache= 'no-cache';
+      ejerskabopt.qs.bbrid= /* '0'+ */ enheder[0].Enhed_id; // fjern '0' +
       ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-
-      Promise.all([enhedrp, bygningrp, tekniskanlægrp, ejerskabrp]).then(function (responses) {
-        function callok(element, index, array) {          
-          return response.statusCode===200; 
-        } 
-        assert(responses.every(callok), "Http status code != 200");
-
-        // enhed        
-        var enheder= JSON.parse(responses[0].body);        
-        assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-
-        // bygninger        
-        var bygninger= JSON.parse(responses[1].body);        
-        assert(bygninger.length<=1, "Der er ikke fundet én bygning, men " + bygninger.length);
-
-        // tekniske anlæg        
-        var tekniskanlæg= JSON.parse(responses[2].body);        
-        assert(tekniskanlæg.length<=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskanlæg.length);
-
-        // ejerskab        
-        var ejerskab= JSON.parse(responses[3].body);        
-        assert(ejerskab.length>1, "Der er ikke fundet ét ejerskab, men " + ejerskab.length);
-
-        done();
-      });
+      //console.log(ejerskabopt);
+      //console.log(util.inspect(enheder));
+      return rp(ejerskabopt);
+    })
+    .then(function (response) {
+      // ejerskab        
+      var ejerskab= JSON.parse(response.body);        
+      assert(ejerskab.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskab.length);
+      done();
     })
     .catch((err) => {
       done(err);
@@ -2065,15 +2077,16 @@ describe('OIS', function(){
       ejerskabopt.url='ois/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+      ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
+      // ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
+      // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
       ejerskabopt.resolveWithFullResponse= true;
       var ejerskabrp= rp(ejerskabopt);
       return ejerskabrp;
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===7, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
+      assert(ejerskaber.length===0, "Der er ikke fundet nul ejerskab, men " + ejerskaber.length);
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 
@@ -2121,19 +2134,18 @@ describe('OIS', function(){
       ejerskabopt.url='ois/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+      ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
       ejerskabopt.resolveWithFullResponse= true;
       var ejerskabrp= rp(ejerskabopt);
       return ejerskabrp;
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===13, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1||element.EntitetsType===2; 
+      assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
+      function enhed(element, index, array) {          
+        return element.EntitetsType===3; 
       } 
-      //assert(ejerskaber.every(grund), "Ejerskab er ikke en grund eller bygning");
+      assert(ejerskaber.every(enhed), "Ejerskab er ikke en grund eller bygning");
       done();
     }).catch((err) => {
       done(err);
@@ -2170,24 +2182,45 @@ describe('OIS', function(){
       assert(enheder[0].ENH_ANVEND_KODE===120, "Enhed er ikke et parcelhus");
       assert(enheder[0].bygning.BYG_ANVEND_KODE===120, "Bygning er ikke et parcelhus");
      
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
-      ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-      return ejerskabrp;
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
-      //assert(ejerskaber.length===13, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
+      var eejerskabopt= {};
+      eejerskabopt.baseUrl= host;
+      eejerskabopt.url='ois/ejerskaber';
+      eejerskabopt.qs= {};
+      eejerskabopt.qs.cache= 'no-cache';
+      eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
+      eejerskabopt.resolveWithFullResponse= true;
+      var eejerskabrp= rp(eejerskabopt);
+
+      var bejerskabopt= {};
+      bejerskabopt.baseUrl= host;
+      bejerskabopt.url='ois/ejerskaber';
+      bejerskabopt.qs= {};
+      bejerskabopt.qs.cache= 'no-cache';
+      bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
+      bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+      bejerskabopt.resolveWithFullResponse= true;
+      var bejerskabrp= rp(bejerskabopt);
+
+      return Promise.all([eejerskabrp, bejerskabrp]);
+    }).then((responses) => {    
+      function callok(element, index, array) {          
+        return element.statusCode===200; 
+      } 
+      assert(responses.every(callok), "Http status code != 200");
+
+      var eejerskaber= JSON.parse(responses[0].body);      
+      console.log(util.inspect(eejerskaber));           
+      assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
+
+      var bejerskaber= JSON.parse(responses[1].body);      
+      console.log(util.inspect(bejerskaber));                  
+      assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
+
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 
-      //assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+      assert(bejerskaber.every(grund), "Ejerskab er ikke en grund");
+
       done();
     }).catch((err) => {
       done(err);
@@ -2220,7 +2253,7 @@ describe('OIS', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var tekniskeanlæg= JSON.parse(response.body);          
       assert(tekniskeanlæg.length>=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskeanlæg.length);
-      assert(tekniskeanlæg[0].ejerskaber.length===0, "Der er fundet ejerskab i et parcelhus");
+      assert(tekniskeanlæg[0].ejerskaber.length===0, "Der er fundet ejerskab i det tekniske anlæg");
      
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
@@ -2235,16 +2268,178 @@ describe('OIS', function(){
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      //assert(ejerskaber.length===13, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
+      assert(ejerskaber.length===5, "Der er ikke fundet fem ejerskab, men " + ejerskaber.length);
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 
-      //assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
       done();
     }).catch((err) => {
       done(err);
     });
   });
+
+ it("teknisk anlæg på lejet grund", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='adgangsadresser';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.q= "Tom Kristensens Vej 1, 9500 Hobro";
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adresser= JSON.parse(response.body);
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+
+      var enhedopt= {};
+      enhedopt.baseUrl= host;
+      enhedopt.url='ois/tekniskeanlaeg';
+      enhedopt.qs= {};
+      enhedopt.qs.cache= 'no-cache';
+      enhedopt.qs.adgangsadresseid= adresser[0].id;
+      enhedopt.resolveWithFullResponse= true;
+      var enhedrp= rp(enhedopt);
+      return enhedrp;
+    }).then((response) => {      
+      assert(response.statusCode===200, "Http status code != 200");
+      var tekniskeanlæg= JSON.parse(response.body);          
+      assert(tekniskeanlæg.length>=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskeanlæg.length);
+      assert(tekniskeanlæg[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i det tekniske anlæg");
+     
+      var ejerskabopt= {};
+      ejerskabopt.baseUrl= host;
+      ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.qs= {};
+      ejerskabopt.qs.cache= 'no-cache';
+      ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
+      ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr; 
+      ejerskabopt.resolveWithFullResponse= true;
+      var ejerskabrp= rp(ejerskabopt);
+      return ejerskabrp;
+    }).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var ejerskaber= JSON.parse(response.body);          
+      assert(ejerskaber.length===2, "Der er ikke fundet to ejerskab, men " + ejerskaber.length);
+      function grund(element, index, array) {          
+        return element.EntitetsType===1; 
+      } 
+      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
+
+ it("bygning på lejet grund", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='adgangsadresser';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.q= "Østergade 24A, 9370 Hals";
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adresser= JSON.parse(response.body);
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+
+      var enhedopt= {};
+      enhedopt.baseUrl= host;
+      enhedopt.url='ois/bygninger';
+      enhedopt.qs= {};
+      enhedopt.qs.cache= 'no-cache';
+      enhedopt.qs.adgangsadresseid= adresser[0].id;
+      enhedopt.resolveWithFullResponse= true;
+      var enhedrp= rp(enhedopt);
+      return enhedrp;
+    }).then((response) => {      
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);          
+      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
+      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
+     
+      var ejerskabopt= {};
+      ejerskabopt.baseUrl= host;
+      ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.qs= {};
+      ejerskabopt.qs.cache= 'no-cache';
+      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
+      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+      ejerskabopt.resolveWithFullResponse= true;
+      var ejerskabrp= rp(ejerskabopt);
+      return ejerskabrp;
+    }).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var ejerskaber= JSON.parse(response.body);          
+      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
+      function grund(element, index, array) {          
+        return element.EntitetsType===1; 
+      } 
+      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
+
+ it("fra ejerskab til adresse", function(done) {
+    var ejerskabopt= {};
+    ejerskabopt.baseUrl= host;
+    ejerskabopt.url='ois/ejerskaber';
+    ejerskabopt.qs= {};
+    ejerskabopt.qs.cache= 'no-cache';
+    ejerskabopt.qs.kommunekode= "0201";
+    ejerskabopt.qs.esrejendomsnr= "094995"; 
+    ejerskabopt.resolveWithFullResponse= true;
+    var ejerskabrp= rp(ejerskabopt);
+    ejerskabrp.then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var ejerskaber= JSON.parse(response.body);  
+      assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);                
+      var options= {};
+      options.baseUrl= host;
+      options.url='adresser';
+      options.qs= {};
+      options.qs.cache= 'no-cache';
+      options.qs.id= ejerskaber[0].enhed.EnhAdr_id;
+      options.resolveWithFullResponse= true;
+      return rp(options);
+    }).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adresser= JSON.parse(response.body);          
+      assert(adresser.length===1, "Der er ikke fundet en adresse, men " + adresser.length);
+      assert(adresser[0].adressebetegnelse.localeCompare("Lilledal 23, 1. tv, 3450 Allerød")===0, "Adressen er ikke Lilledal 23, 1. tv, 3450 Allerød");
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
+ it("reverse geokodning af bygning", function(done) {
+    var reverseopt= {};
+    reverseopt.baseUrl= host;
+    reverseopt.url='ois/bygninger';
+    reverseopt.qs= {};
+    reverseopt.qs.cache= 'no-cache';
+    reverseopt.qs.x= 12.5108572474172;
+    reverseopt.qs.y= 55.6983973831476; 
+    reverseopt.resolveWithFullResponse= true;
+    var reverserp= rp(reverseopt);       
+    reverserp.then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
+      assert(bygninger[0].BYG_ANVEND_KODE===930, "Det er ikke et udhus (930), men " + bygninger[0].BYG_ANVEND_KODE);
+      assert(bygninger[0].OPFOERELSE_AAR===1921, "Det er ikke opført i 1921, men " + bygninger[0].OPFOERELSE_AAR);
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
 
 });
 // describe('HAProxy', function(){

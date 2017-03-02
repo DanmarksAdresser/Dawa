@@ -13,10 +13,12 @@ const q = require('q');
 
 module.exports = (options) => {
 
-  const concurrency = options.concurrency || 1;
+  const slots = options.slots || 1;
+  const concurrencyPerSource = options.slotsPerSource || 1;
   const prioritySlots = options.prioritySlots || 0;
   const initialPriorityOffset = options.initialPriorityOffset || 0;
   const cleanupInterval = options.cleanupInterval || 0;
+  const requiredPriorityOffset = options.requiredPriorityOffset || 0;
   const sourceDescriptorMap = {};
   let activeCount = 0;
   let topPriority = 0;
@@ -24,8 +26,26 @@ module.exports = (options) => {
   let lastCleanup = Date.now();
 
   const queue = new FastPriorityQueue((a, b) => {
-    return a.priority < b.priority;
+    return a.queueKey < b.queueKey;
   });
+
+  const queueAdd = (descriptor) => {
+    descriptor.queueKey = descriptor.priority;
+    queue.add(descriptor);
+  };
+
+  const queuePeek = () => {
+    while(true) {
+      const descriptor = queue.peek();
+      if(descriptor.queueKey !== descriptor.priority) {
+        queue.poll();
+        queueAdd(descriptor);
+      }
+      else {
+        return descriptor;
+      }
+    }
+  };
 
   const inactive = new Set();
   /**
@@ -34,7 +54,7 @@ module.exports = (options) => {
    */
   function removeTasklessSources() {
     while(!queue.isEmpty()) {
-      const sourceDescriptor = queue.peek();
+      const sourceDescriptor = queuePeek();
       const tasks = sourceDescriptor.tasks;
       if(tasks.length === 0) {
         queue.poll();
@@ -47,7 +67,7 @@ module.exports = (options) => {
     if(inactive.size > 0 && lastCleanup + cleanupInterval < Date.now()) {
       lastCleanup = Date.now();
       for(let sourceDescriptor of inactive.values()) {
-        if(sourceDescriptor.priority <= topPriority + initialPriorityOffset) {
+        if(sourceDescriptor.priority <= topPriority - initialPriorityOffset) {
           inactive.delete(sourceDescriptor);
           delete sourceDescriptorMap[sourceDescriptor.source];
         }
@@ -67,23 +87,28 @@ module.exports = (options) => {
     topPriority = Math.max(topPriority, sourceDescriptor.priority);
     ++activeCount;
     return q.async(function*() {
-      sourceDescriptor.running = true;
+      sourceDescriptor.running += 1;
       const runPrioritized = sourceDescriptor.priority < topPriority;
       if(runPrioritized) {
         priorityRunning++;
       }
+      if(sourceDescriptor.running < concurrencyPerSource) {
+        queueAdd(sourceDescriptor);
+      }
 
-      const promise = task.asyncTaskFn();
+      const promise = Promise.resolve(task.asyncTaskFn());
       const taskResult = yield promise;
       if(runPrioritized) {
         priorityRunning--;
       }
-      sourceDescriptor.running = false;
+      if(sourceDescriptor.running ===  concurrencyPerSource) {
+        queueAdd(sourceDescriptor);
+      }
+      sourceDescriptor.running -= 1;
       --activeCount;
       const cost = taskResult.cost;
       const result = taskResult.result;
       sourceDescriptor.priority += cost;
-      queue.add(sourceDescriptor);
 
       task.deferred.resolve({
         result: result,
@@ -111,6 +136,14 @@ module.exports = (options) => {
         topPriority,
         priorityRunning,
         lastCleanup: new Date(lastCleanup).toISOString(),
+        options: {
+          slots,
+          concurrencyPerSource,
+          prioritySlots,
+          initialPriorityOffset,
+          cleanupInterval,
+          requiredPriorityOffset
+        },
         clients: clientDescs
       };
     },
@@ -119,19 +152,18 @@ module.exports = (options) => {
         const sourceDescriptor = {
           source: source,
           tasks: [],
-          priority: topPriority + initialPriorityOffset,
-          running: false
+          priority: topPriority - initialPriorityOffset,
+          running: 0
         };
         sourceDescriptorMap[source] = sourceDescriptor;
-
-        queue.add(sourceDescriptor);
+        queueAdd(sourceDescriptor);
       }
       else {
         if(inactive.has(sourceDescriptorMap[source])) {
           const sourceDescriptor = sourceDescriptorMap[source];
           inactive.delete(sourceDescriptor);
-          sourceDescriptor.priority = Math.max(topPriority + initialPriorityOffset, sourceDescriptor.priority);
-          queue.add(sourceDescriptor);
+          sourceDescriptor.priority = Math.max(topPriority - initialPriorityOffset, sourceDescriptor.priority);
+          queueAdd(sourceDescriptor);
         }
       }
       const sourceDescriptor = sourceDescriptorMap[source];
@@ -142,9 +174,9 @@ module.exports = (options) => {
         deferred: deferred
       });
 
-      const nextIsPriorityTask = queue.peek().priority < topPriority;
+      const nextIsPriorityTask = queuePeek().priority < topPriority - requiredPriorityOffset;
       const remainingPrioritySlots = Math.max(0, prioritySlots - priorityRunning);
-      const mayRunAsNonPriority = activeCount < concurrency - remainingPrioritySlots;
+      const mayRunAsNonPriority = activeCount < slots - remainingPrioritySlots;
       const mayRunAsPriority = nextIsPriorityTask && remainingPrioritySlots > 0;
       if(mayRunAsPriority || mayRunAsNonPriority) {
         q.async(function*() {
@@ -154,8 +186,8 @@ module.exports = (options) => {
             if(queue.isEmpty()) {
               break;
             }
-            const nextIsPriorityTask = queue.peek().priority < topPriority;
-            if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < concurrency - prioritySlots + priorityRunning)) {
+            const nextIsPriorityTask = queuePeek().priority < topPriority;
+            if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < slots - prioritySlots + priorityRunning)) {
               yield runTopTask();
             }
             else {

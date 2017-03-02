@@ -99,7 +99,12 @@ module.exports = {
   bygningspunkt: {
     primaryRelation: 'bygningspunkt',
     alias: 'bp',
-    secondaryRelations: []
+    secondaryRelations: [],
+    geojson: {
+      relation: 'bygningspunkt',
+      field: 'geom'
+    }
+
   },
   enhed: {
     primaryRelation: 'enhed',

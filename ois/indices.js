@@ -41,6 +41,9 @@ module.exports = [{
   columns: ['AdgAdr_id']
 }, {
   entity: 'tekniskanlaeg',
+  columns: ['BygPkt_id']
+}, {
+  entity: 'tekniskanlaeg',
   columns: ['ESREjdNr']
 }, {
   entity: 'tekniskanlaeg',
@@ -48,6 +51,9 @@ module.exports = [{
 }, {
   entity: 'tekniskanlaeg',
   columns: ['KomKode']
+}, {
+  entity: 'tekniskanlaeg',
+  columns: ['Klassifikation']
 }, {
   entity: 'ejerskab',
   columns: ['BbrId']
