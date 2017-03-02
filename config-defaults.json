@@ -93,5 +93,29 @@
     "description": "Socket timeout",
     "type": "number",
     "default": 30000
+  },
+  {
+    "name": "ois.enabled",
+    "description": "whether OIS API is enabled (0=disabled, 1=enabled)",
+    "type": "number",
+    "default": 0
+  },
+  {
+    "name": "ois.unprotected",
+    "description": "Whether the OIS API is password protected",
+    "type": "number",
+    "default": 0
+  },
+  {
+    "name": "ois.login",
+    "description": "OIS login (username)",
+    "type": "string",
+    "default": "ois"
+  },
+  {
+    "name": "ois.password",
+    "description": "OIS password",
+    "type": "string",
+    "default": "ois"
   }
 ]

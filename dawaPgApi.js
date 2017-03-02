@@ -7,6 +7,8 @@
 var express          = require('express');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
+const basicAuth = require('express-basic-auth');
+const config = require('./server/config');
 
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
 
@@ -61,6 +63,7 @@ function corsMiddleware(req, res, next) {
   next();
 }
 
+
 /******************************************************************************/
 /*** Routes *******************************************************************/
 /******************************************************************************/
@@ -74,6 +77,29 @@ exports.setupRoutes = function () {
   app.use(preventHeadMiddleware);
   app.use(corsMiddleware);
   app.use(cachingMiddleware);
+  const oisEnabled = config.getOption('ois.enabled');
+  const oisProtected = !config.getOption('ois.unprotected');
+  const oisUsers = {};
+  oisUsers[config.getOption('ois.login')] = config.getOption('ois.password');
+
+  const oisBasicAuthMiddleware = basicAuth({
+    users: oisUsers,
+    challenge: true,
+    realm: 'OIS login'
+  });
+  if(!oisEnabled || oisProtected) {
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/ois')) {
+        if(!oisEnabled) {
+          return res.status(403).send('OIS currently disabled for all users');
+        }
+        if(oisProtected) {
+          return oisBasicAuthMiddleware(req, res, next);
+        }
+      }
+      next();
+    });
+  }
 
   registry.where({
     type: 'resource'

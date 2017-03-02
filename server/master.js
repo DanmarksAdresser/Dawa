@@ -9,6 +9,7 @@ const util = require('util');
 const logger = require('../logger');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const config = require('./config');
+const _ = require('underscore');
 
 function spawn(options){
   var worker = cluster.fork(options);
@@ -17,13 +18,21 @@ function spawn(options){
 
 const options = JSON.parse(fs.readFileSync(path.join(__dirname, '../config-defaults.json'), {encoding: 'utf-8'}));
 const cliSpec = options.reduce((memo, option) => {
+  const defaultValue = option.default === 'undefined' ?
+    [] :
+    option.type === 'boolean' && option.default === false ?
+      [] :
+      [option.default];
   memo[option.name] = [false, option.description, option.type,
-    ... typeof option.default !== 'undefined' ? [option.default] : []];
+    ... defaultValue];
   return memo;
 }, {});
 
-  cliParameterParsing.main(cliSpec, Object.keys(cliSpec), function(args, options) {
+  cliParameterParsing.main(cliSpec, _.without(Object.keys(cliSpec), 'ois.enabled'), function(args, options) {
     config.setOptions(options);
+    if(config.getOption('ois.enabled') && !config.getOption('ois.unprotected') && config.getOption('ois.password') === 'ois') {
+      throw new Error('OIS enabled but with default password. That is not OK.');
+    }
 
     const isalive = require('../isalive/isalive');
 
