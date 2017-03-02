@@ -52,6 +52,9 @@ module.exports = [{
   entity: 'tekniskanlaeg',
   columns: ['KomKode']
 }, {
+  entity: 'tekniskanlaeg',
+  columns: ['Klassifikation']
+}, {
   entity: 'ejerskab',
   columns: ['BbrId']
 },{

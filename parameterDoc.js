@@ -1854,6 +1854,10 @@ const oisFilterParameterDoc = {
         doc: 'Find tekniske anlæg med den angivne kommunekode (KomKode)'
       },
       {
+        name: 'klassifikation',
+        doc: 'Find tekniske anlæg med den angivne klassifikation'
+      },
+      {
         name: 'polygon',
         doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.'+
         ' Polygonet specificeres som et array af koordinater på samme måde som' +

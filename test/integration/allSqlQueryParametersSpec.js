@@ -566,6 +566,32 @@ var sampleParameters = {
       verifier: (bygning, kode) => bygning.KomKode === kode
     }
   },
+  ois_tekniskanlaeg: {
+    id: {
+      values: ['94314c40-1335-49be-b589-0b5fd0bb37d7'],
+      verifier: (anlaeg, id) => anlaeg.TekniskAnlaeg_id === id
+    },
+    adgangsadresseid: {
+      values: ['0a3f5081-39a3-32b8-e044-0003ba298018'],
+      verifier: (anlaeg, adgangsadresseid) => anlaeg.AdgAdr_id === adgangsadresseid
+    },
+    esrejendomsnr: {
+      values: ['068590', '68590'],
+      verifier: (anlaeg, nr) => parseInt(anlaeg.EsrEjdNr, 10) === parseInt(nr, 10)
+    },
+    bygningsid: {
+      values: ['77ab6532-7d12-4816-85e4-a128dfe998c4'],
+      verifier: (anlaeg, id) => anlaeg.Bygning_id === id
+    },
+    kommunekode: {
+      values: ['0253', '253'],
+      verifier: (anlaeg, kode) => parseInt(anlaeg.KomKode, 10) === parseInt(kode, 10)
+    },
+    klassifikation: {
+      values: ['1920'],
+      verifier: (anlaeg, klassifikation) => anlaeg.Klassifikation === parseInt(klassifikation, 10)
+    }
+  },
   ois_opgang: {
     id: {
       values: ['008ff3ab-db75-4755-a71b-470f7eb42483'],
