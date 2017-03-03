@@ -9,8 +9,8 @@ var assert = require("assert")
   , http= require('http');
 
 //var host= "http://localhost:3000";
-var host= "http://dawa-p2.aws.dk";
-//var host= "http://origin-dawa-p2.aws.dk";
+//var host= "http://dawa-p2.aws.dk";
+var host= "http://origin-dawa-p2.aws.dk";
 //var host= "http://52.212.234.159";
 console.log(host);
 
@@ -1947,6 +1947,12 @@ describe('Korttjenester', function(){
 
 describe('OIS', function(){
 
+  var auth= {
+    'user': '',
+    'pass': '',
+    'sendImmediately': true
+  };
+
   it("relation til adresse", function(done){
     var options= {};
     options.baseUrl= host;
@@ -1963,25 +1969,28 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/enheder';
+      enhedopt.auth= auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
 
-      // var opgangopt= {};
-      // opgangopt.baseUrl= host;
-      // opgangopt.url='ois/opgange';
-      // opgangopt.qs= {};
-      // opgangopt.qs.cache= enhedopt.qs.cache;
-      // //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
-      // opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
-      // opgangopt.resolveWithFullResponse= true;
-      // var opgangsrp= rp(opgangopt);
+      var opgangopt= {};
+      opgangopt.baseUrl= host;
+      opgangopt.url='ois/opgange';
+      opgangopt.auth=auth;
+      opgangopt.qs= {};
+      opgangopt.qs.cache= enhedopt.qs.cache;
+      //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
+      opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
+      opgangopt.resolveWithFullResponse= true;
+      var opgangsrp= rp(opgangopt);
 
       var bygningopt= {};
       bygningopt.baseUrl= host;
       bygningopt.url='ois/bygninger';
+      bygningopt.auth=auth;
       bygningopt.qs= {};
       bygningopt.qs.cache= enhedopt.qs.cache;
       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
@@ -1992,6 +2001,7 @@ describe('OIS', function(){
       var tekniskanlægopt= {};
       tekniskanlægopt.baseUrl= host;
       tekniskanlægopt.url='ois/tekniskeanlaeg';
+      tekniskanlægopt.auth=auth;
       tekniskanlægopt.qs= {};
       tekniskanlægopt.qs.cache= enhedopt.qs.cache;
       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
@@ -1999,7 +2009,7 @@ describe('OIS', function(){
       tekniskanlægopt.resolveWithFullResponse= true;
       var tekniskanlægrp= rp(tekniskanlægopt);
 
-      return Promise.all([enhedrp, bygningrp, tekniskanlægrp /*, opgangsrp */]);
+      return Promise.all([enhedrp, bygningrp, tekniskanlægrp, opgangsrp]);
     })
     .then(function (responses) {
       function callok(element, index, array) {          
@@ -2013,15 +2023,20 @@ describe('OIS', function(){
 
       // bygninger        
       var bygninger= JSON.parse(responses[1].body);        
-      assert(bygninger.length===0, "Der er fundet en bygning, men " + bygninger.length);
+      assert(bygninger.length===0, "Der er fundet bygninger: " + bygninger.length);
 
       // tekniske anlæg        
       var tekniskanlæg= JSON.parse(responses[2].body);        
-      assert(tekniskanlæg.length===0, "Der er fundet et teknisk anlæg, men " + tekniskanlæg.length);
+      assert(tekniskanlæg.length===0, "Der er fundet tekniske anlæg: " + tekniskanlæg.length);
+
+      // opgange        
+      var opgange= JSON.parse(responses[3].body);        
+      assert(opgange.length===1, "Der er ikke fundet en opgang, men: " + tekniskanlæg.length);
 
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.auth=auth;
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= /* '0'+ */ enheder[0].Enhed_id; // fjern '0' +
@@ -2058,6 +2073,7 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/enheder';
+      enhedopt.auth=auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -2075,6 +2091,7 @@ describe('OIS', function(){
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.auth=auth;
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
@@ -2113,6 +2130,7 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/enheder';
+      enhedopt.auth=auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -2132,6 +2150,7 @@ describe('OIS', function(){
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.auth=auth;
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
@@ -2168,6 +2187,7 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/enheder';
+      enhedopt.auth=auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -2185,6 +2205,7 @@ describe('OIS', function(){
       var eejerskabopt= {};
       eejerskabopt.baseUrl= host;
       eejerskabopt.url='ois/ejerskaber';
+      eejerskabopt.auth=auth;
       eejerskabopt.qs= {};
       eejerskabopt.qs.cache= 'no-cache';
       eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
@@ -2194,6 +2215,7 @@ describe('OIS', function(){
       var bejerskabopt= {};
       bejerskabopt.baseUrl= host;
       bejerskabopt.url='ois/ejerskaber';
+      bejerskabopt.auth=auth;
       bejerskabopt.qs= {};
       bejerskabopt.qs.cache= 'no-cache';
       bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
@@ -2243,6 +2265,7 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/tekniskeanlaeg';
+      enhedopt.auth=auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adgangsadresseid= adresser[0].id;
@@ -2258,6 +2281,7 @@ describe('OIS', function(){
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.auth=auth;
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
@@ -2295,6 +2319,7 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/tekniskeanlaeg';
+      enhedopt.auth=auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adgangsadresseid= adresser[0].id;
@@ -2310,6 +2335,7 @@ describe('OIS', function(){
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.auth=auth;
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
@@ -2348,6 +2374,7 @@ describe('OIS', function(){
       var enhedopt= {};
       enhedopt.baseUrl= host;
       enhedopt.url='ois/bygninger';
+      enhedopt.auth=auth;
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adgangsadresseid= adresser[0].id;
@@ -2363,6 +2390,7 @@ describe('OIS', function(){
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='ois/ejerskaber';
+      ejerskabopt.auth=auth;
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
@@ -2389,6 +2417,7 @@ describe('OIS', function(){
     var ejerskabopt= {};
     ejerskabopt.baseUrl= host;
     ejerskabopt.url='ois/ejerskaber';
+    ejerskabopt.auth=auth;
     ejerskabopt.qs= {};
     ejerskabopt.qs.cache= 'no-cache';
     ejerskabopt.qs.kommunekode= "0201";
@@ -2422,6 +2451,7 @@ describe('OIS', function(){
     var reverseopt= {};
     reverseopt.baseUrl= host;
     reverseopt.url='ois/bygninger';
+    reverseopt.auth=auth;
     reverseopt.qs= {};
     reverseopt.qs.cache= 'no-cache';
     reverseopt.qs.x= 12.5108572474172;
