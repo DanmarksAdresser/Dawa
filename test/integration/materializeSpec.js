@@ -6,7 +6,16 @@ const path = require('path');
 
 const testdb = require('../helpers/testdb2');
 
-const {computeDirty, createChangeTable, applyInserts, applyDeletes, applyUpdates} = require('../../importUtil/materialize');
+const {
+  computeDirty,
+  createChangeTable,
+  applyInserts,
+  applyDeletes,
+  applyUpdates,
+  computeInserts,
+  computeDeletes,
+  computeUpdates
+} = require('../../importUtil/materialize');
 const {insert, update, del} = require('../../importUtil/tableModelUtil');
 const {go} = require('ts-csp');
 
@@ -39,17 +48,38 @@ const tableModel = {
   },
   tertiary: {
     table: 'tertiary',
-    primaryKey: [{
-      name: 'id_part1'
-    }, {
-      name: 'id_part2'
-    }],
+    primaryKey: ['id_part1', 'id_part2'],
     columns: [{
       name: 'id_part1'
     }, {
       name: 'id_part2'
     }, {
       name: 'name'
+    }]
+  },
+  primary_mat: {
+    table: 'primary_mat',
+    primaryKey: ['id'],
+    columns: [{
+      name: 'id'
+    }, {
+      name: 'prim_name'
+    }, {
+      name: 'sec_id1'
+    }, {
+      name: 'sec_id2'
+    }, {
+      name: 'sec_name1',
+    }, {
+      name: 'sec_name2'
+    }, {
+      name: 'tert_id_part1'
+    }, {
+      name: 'tert_id_part2'
+    }, {
+      name: 'tert_name'
+    }, {
+      name: 'derived'
     }]
   }
 };
@@ -74,7 +104,6 @@ describe('View materialization', () => {
   const setupSql = fs.readFileSync(path.join(__dirname, 'testMaterializeTables.sql'), {encoding: 'utf8'});
   testdb.withTransactionEach('empty', clientFn => {
     beforeEach(() => go(function*() {
-      console.log('SETTING UP TEST TABLES');
       yield clientFn().query(setupSql);
       for (let table of Object.keys(tableModel)) {
         yield createChangeTable(clientFn(), table);
@@ -193,19 +222,57 @@ describe('View materialization', () => {
       };
       beforeEach(() => go(function*() {
         const client = clientFn();
-        yield insert(client, tableModel.tertiary, {id_part1: 1, id_part2: 2});
+        yield insert(client, tableModel.tertiary, {id_part1: 1, id_part2: 2, name: 'tert_name'});
         yield insert(client, tableModel.prim, Object.assign({id: unchangedId}, tert_ref_cols));
         yield insert(client, tableModel.prim, Object.assign({id: deletedId}, tert_ref_cols));
         yield insert(client, tableModel.prim, Object.assign({id: updatedId}, tert_ref_cols));
+        yield client.query('INSERT INTO primary_mat (select * from primary_mat_view)');
       }));
 
       it('Will compute an insert', () => go(function*() {
         const client = clientFn();
-        const inserted = Object.assign({id: insertedId}, tert_ref_cols);
-        yield insert(client, tableModel.prim, inserted);
         yield client.query(
-          `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2)' 
-           VALUES(${txid}, 'insert', true, ${insertedId}, 1, 2)`);
+          `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2) 
+           VALUES(${txid}, 'insert', true, '${insertedId}', 1, 2)`);
+        yield applyInserts(client, txid, 'prim', tableModel.prim);
+        yield computeDirty(client, txid, tableModel, testMaterialization);
+        yield computeInserts(client, txid, tableModel, testMaterialization);
+        const result = yield client.queryRows('select * from primary_mat_changes');
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].txid, txid);
+        assert.strictEqual(result[0].operation, 'insert');
+        assert.strictEqual(result[0].id, insertedId);
+      }));
+
+      it('Will compute a delete', () => go(function*() {
+        const client = clientFn();
+        yield client.query(
+          `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2) 
+           VALUES(${txid}, 'delete', true, '${deletedId}', 1, 2)`);
+        yield applyDeletes(client, txid, 'prim', tableModel.prim);
+        yield computeDirty(client, txid, tableModel, testMaterialization);
+        yield computeDeletes(client, txid, tableModel, testMaterialization);
+        const result = yield client.queryRows('select * from primary_mat_changes');
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].txid, txid);
+        assert.strictEqual(result[0].operation, 'delete');
+        assert.strictEqual(result[0].id, deletedId);
+      }));
+
+      it('Will compute an update', () => go(function*() {
+        const client = clientFn();
+        yield client.query(
+          `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2, name) 
+           VALUES(${txid}, 'update', true, '${updatedId}', 1, 2, 'foo')`);
+        yield applyUpdates(client, txid, 'prim', tableModel.prim);
+        yield computeDirty(client, txid, tableModel, testMaterialization);
+        yield computeUpdates(client, txid, tableModel, testMaterialization);
+        const result = yield client.queryRows('select * from primary_mat_changes');
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].txid, txid);
+        assert.strictEqual(result[0].operation, 'update');
+        assert.strictEqual(result[0].id, updatedId);
+        assert.strictEqual(result[0].prim_name, 'foo');
       }));
     });
   });

@@ -1,17 +1,16 @@
 "use strict";
 
-const { assert } = require('chai');
-const { go } = require('ts-csp');
+const {assert} = require('chai');
+const {go} = require('ts-csp');
 
-const { selectList, columnsEqualClause } = require('../darImport/sqlUtil');
-const { allColumnNames, nonPrimaryColumnNames } = require('./tableModelUtil');
+const {selectList, columnsEqualClause, columnsDistinctClause} = require('../darImport/sqlUtil');
+const {allColumnNames, nonPrimaryColumnNames} = require('./tableModelUtil');
 
 const createTempDirtyTable = (client, materialization) => {
   const selectClause = selectList(null, materialization.primaryKey);
   return client.query(
     `CREATE TEMP TABLE ${materialization.table}_dirty AS 
      (SELECT ${selectClause} FROM ${materialization.table} WHERE false)`);
-  console.log('SUCCEEDED');
 };
 
 
@@ -79,14 +78,56 @@ const createChangeTable = (client, srcTableName) => go(function*() {
      CREATE INDEX ON ${changeTableName}(changeid, public)`);
 });
 
-const computeInserts = (client, txid, tableModels, materialization, dirtyTable) => {
+const computeInserts = (client, txid, tableModels, materialization) => {
+  const dirtyTable = `${materialization.table}_dirty`;
   const idSelect = selectList(null, materialization.primaryKey);
   const beforeSql = `SELECT ${idSelect} FROM ${materialization.table} NATURAL JOIN ${dirtyTable}`;
   const afterSql = `SELECT ${idSelect} FROM ${materialization.view} NATURAL JOIN ${dirtyTable}`;
   const insertIdsSql = `WITH before as (${beforeSql}), after AS (${afterSql}) SELECT ${idSelect} from after EXCEPT SELECT ${idSelect} FROM before`;
 
-  const sql = `WITH inserts AS (${insertIdsSql}) INSERT INTO ${materialization.table}_changes c (SELECT $1, NULL, 'insert', true, v.* FROM ${materialization.view} v NATURAL JOIN inserts`;
+  const sql = `WITH inserts AS (${insertIdsSql}) INSERT INTO ${materialization.table}_changes (SELECT $1, NULL, 'insert', true, v.* FROM ${materialization.view} v NATURAL JOIN inserts)`;
   return client.query(sql, [txid]);
 };
 
-module.exports = { computeDirty, createChangeTable, applyInserts, applyDeletes, applyUpdates, computeInserts, createTempDirtyTable };
+const computeDeletes = (client, txid, tableModels, materialization) => {
+  const dirtyTable = `${materialization.table}_dirty`;
+  const idSelect = selectList(null, materialization.primaryKey);
+  const beforeSql = `SELECT ${idSelect} FROM ${materialization.table} NATURAL JOIN ${dirtyTable}`;
+  const afterSql = `SELECT ${idSelect} FROM ${materialization.view} NATURAL JOIN ${dirtyTable}`;
+  const deleteIdsSql = `WITH before as (${beforeSql}), after AS (${afterSql}) SELECT ${idSelect} from before EXCEPT SELECT ${idSelect} FROM after`;
+
+  const sql = `WITH deletes AS (${deleteIdsSql}) INSERT INTO ${materialization.table}_changes (SELECT $1, NULL, 'delete', true, t.* FROM ${materialization.table} t NATURAL JOIN deletes)`;
+  return client.query(sql, [txid]);
+};
+
+const computeUpdates = (client, txid, tableModels, materialization) => {
+  const dirtyTable = `${materialization.table}_dirty`;
+  const idSelect = selectList(null, materialization.primaryKey);
+  const presentBeforeSql = `SELECT ${idSelect} FROM ${materialization.table} NATURAL JOIN ${dirtyTable}`;
+  const presentAfterSql = `SELECT ${idSelect} FROM ${materialization.view} NATURAL JOIN ${dirtyTable}`;
+  const possiblyChangedIds = `${presentBeforeSql} INTERSECT ${presentAfterSql}`;
+  const changeColumns = nonPrimaryColumnNames(tableModels[materialization.table]);
+  const changedColumnClause = columnsDistinctClause('before', 'after', changeColumns);
+  const sql =
+    `WITH possiblyChanged AS (${possiblyChangedIds}),
+     before AS (select ${materialization.table}.* FROM ${materialization.table} NATURAL JOIN possiblyChanged),
+     after AS (select ${materialization.view}.* FROM ${materialization.view} NATURAL JOIN possiblyChanged),
+     changedIds AS (SELECT ${selectList('before', materialization.primaryKey)} 
+  FROM before JOIN after ON ${columnsEqualClause('before', 'after', materialization.primaryKey)}
+  WHERE ${changedColumnClause})
+   INSERT INTO ${materialization.table}_changes (SELECT $1, NULL, 'update', true, v.* FROM ${materialization.view} v NATURAL JOIN changedIds)
+`;
+  return client.query(sql, [txid]);
+};
+
+module.exports = {
+  computeDirty,
+  createChangeTable,
+  applyInserts,
+  applyDeletes,
+  applyUpdates,
+  computeInserts,
+  computeDeletes,
+  computeUpdates,
+  createTempDirtyTable
+};

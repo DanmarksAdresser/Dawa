@@ -1,7 +1,5 @@
 "use strict";
 
-const { selectList } = require('../darImport/sqlUtil');
-
 const allColumnNames = tableModel => tableModel.columns.map(col => col.name);
 
 const nonPrimaryColumnNames = tableModel =>

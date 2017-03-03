@@ -22,7 +22,7 @@ CREATE TABLE tertiary (
 CREATE TABLE primary_mat(
   id UUID primary key,
   prim_name text,
-  sec_id1 integer not null,
+  sec_id1 integer,
   sec_id2 integer,
   sec_name1 text,
   sec_name2 text,
@@ -36,8 +36,8 @@ CREATE VIEW primary_mat_view AS (
   SELECT p.id,
     p.name as prim_name,
     sec_id1,
-    s1.name as sec_name1,
     sec_id2,
+    s1.name as sec_name1,
     s2.name as sec_name2,
     tert_id_part1,
     tert_id_part2,
