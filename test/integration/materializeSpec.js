@@ -9,13 +9,17 @@ const testdb = require('../helpers/testdb2');
 const {
   computeDirty,
   createChangeTable,
-  applyInserts,
-  applyDeletes,
-  applyUpdates,
   computeInserts,
   computeDeletes,
   computeUpdates
 } = require('../../importUtil/materialize');
+
+const {
+  applyInserts,
+  applyDeletes,
+  applyUpdates
+} = require('../../importUtil/tableDiffNg');
+
 const {insert, update, del} = require('../../importUtil/tableModelUtil');
 const {go} = require('ts-csp');
 
@@ -99,6 +103,8 @@ const testMaterialization = {
     columns: ['sec_id2']
   }]
 };
+
+
 
 describe('View materialization', () => {
   const setupSql = fs.readFileSync(path.join(__dirname, 'testMaterializeTables.sql'), {encoding: 'utf8'});

@@ -52,21 +52,6 @@ const computeDirty = (client, txid, tablemodels, materialization) => go(function
 });
 
 
-const applyInserts = (client, txid, tableName, tableModel) => go(function*() {
-  const columnList = selectList(null, allColumnNames(tableModel));
-  yield client.queryp(`INSERT INTO ${tableName}(${columnList}) (SELECT ${columnList} FROM ${tableName}_changes WHERE txid = $1 and operation = 'insert')`, [txid]);
-});
-
-const applyDeletes = (client, txid, tableName, tableModel) => go(function*() {
-  yield client.queryp(`DELETE FROM ${tableName} t USING ${tableName}_changes c WHERE c.txid = $1 AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`, [txid]);
-});
-
-const applyUpdates = (client, txid, tableName, tableModel) => go(function*() {
-  const columnsToUpdate = nonPrimaryColumnNames(tableModel);
-  const updateClause = columnsToUpdate.map(column => `${column} = c.${column}`).join(', ');
-  yield client.queryp(`UPDATE ${tableName} t SET ${updateClause} FROM ${tableName}_changes c WHERE ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
-});
-
 const createChangeTable = (client, srcTableName) => go(function*() {
   const changeTableName = `${srcTableName}_changes`;
   yield client.query(
@@ -123,9 +108,6 @@ const computeUpdates = (client, txid, tableModels, materialization) => {
 module.exports = {
   computeDirty,
   createChangeTable,
-  applyInserts,
-  applyDeletes,
-  applyUpdates,
   computeInserts,
   computeDeletes,
   computeUpdates,

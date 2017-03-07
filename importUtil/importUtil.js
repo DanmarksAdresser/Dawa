@@ -1,5 +1,7 @@
 "use strict";
 
+const { go } = require('ts-csp');
+
 // Generic utility functions for importing data to PostgreSQL
 const csvParse = require('csv-parse');
 const csvStringify = require('csv-stringify');
@@ -143,6 +145,21 @@ class ArrayStream extends Readable {
 
 const streamArray = (arr) => new ArrayStream(arr);
 
+const withImportTransaction = (client, description, fn) =>
+  client.withTransaction('READ_WRITE', () => go(function*() {
+    const txid = (yield client.query(
+      `WITH id AS (SELECT COALESCE(MAX(txid), 0)+1 as txid FROM transactions),
+       d AS (UPDATE current_tx SET txid = (SELECT txid FROM id))
+       INSERT INTO transactions(txid, description) (select txid, $1 FROM id) RETURNING txid`, [description])).rows[0].txid;
+    try {
+      return yield fn(txid);
+
+    }
+    finally {
+      yield client.query(`UPDATE current_tx SET txid=null`);
+    }
+  }));
+
 module.exports = {
   copyStream: copyStream,
   copyStreamStringifier: copyStreamStringifier,
@@ -152,5 +169,6 @@ module.exports = {
   streamCsvToTable: streamCsvToTable,
   streamNdjsonToTable: streamNdjsonToTable,
   streamArray: streamArray,
-  streamToTablePipeline: streamToTablePipeline
+  streamToTablePipeline: streamToTablePipeline,
+  withImportTransaction
 };

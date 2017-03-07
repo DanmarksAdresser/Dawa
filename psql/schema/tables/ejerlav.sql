@@ -11,13 +11,17 @@ CREATE INDEX ejerlav_tsv ON ejerlav USING gin(tsv);
 CREATE INDEX ejerlav_navn ON ejerlav(navn);
 
 DROP TABLE IF EXISTS ejerlav_history CASCADE;
-CREATE TABLE IF NOT EXISTS ejerlav_history (
-  valid_from integer,
-  valid_to integer,
+
+DROP TABLE IF EXISTS ejerlav_changes CASCADE;
+CREATE TABLE ejerlav_changes (
+  txid INTEGER NOT NULL,
+  changeid INTEGER,
+  operation operation_type NOT NULL,
+  public boolean NOT NULL,
   kode INTEGER,
-  navn VARCHAR(255) NOT NULL
+  navn VARCHAR(255) NOT NULL,
+  tsv TSVECTOR
 );
 
-CREATE INDEX ON ejerlav_history(kode);
-CREATE INDEX ON ejerlav_history(valid_from);
-CREATE INDEX ON ejerlav_history(valid_to);
+CREATE INDEX ON ejerlav_changes(txid);
+CREATE INDEX ON ejerlav_changes(changeid);

@@ -4,6 +4,8 @@
 
 var _         = require('underscore');
 
+const databasePools = require('./databasePools');
+const { withImportTransaction } = require('../importUtil/importUtil');
 var proddb = require('./proddb');
 var updateEjerlavImpl = require('./updateEjerlavImpl');
 var logger = require('../logger');
@@ -22,7 +24,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   logger.setThreshold('stat', 'warn');
 
   var inputFile = args[0];
-  proddb.withTransaction('READ_WRITE', function(client) {
-    return updateEjerlavImpl(client, inputFile);
-  }).done();
+  databasePools.get('prod').withConnection({pooled: false}, (client) => {
+      return withImportTransaction(client, 'updateEjerlav', (txid) => {
+        return updateEjerlavImpl(client, txid, inputFile);
+      })
+  }
+  ).asPromise().done();
 });

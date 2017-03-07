@@ -36,6 +36,7 @@ function normaliseTableSpec(specs){
 
 // Note, the sequence of the tables matter!
 exports.tableSpecs = normaliseTableSpec([
+  {name: 'transactions', init: false},
   {name: 'transaction_history'},
   {name: 'bbr_events'},
   {name: 'temaer'},
@@ -45,7 +46,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'adgangsadresser'},
   {name: 'enhedsadresser'},
   {name: 'navngivenvej', init: false},
-  {name: 'ejerlav'},
+  {name: 'ejerlav', init: false},
   {name: 'ejerlav_ts'},
   {name: 'cpr_vej', init: false},
   {name: 'cpr_postnr', init: false},
@@ -221,7 +222,7 @@ function createFlatTilknytningTriggers(client) {
  * plv8 would be an option?
  */
 function createHistoryTriggers(client) {
-  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'ejerlav', 'adgangsadresse_tema', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(sql, datamodelName) {
+  var sql = _.reduce(['postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'adgangsadresse_tema', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(sql, datamodelName) {
     var datamodel = datamodels[datamodelName];
     var table = datamodel.table;
     sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);
