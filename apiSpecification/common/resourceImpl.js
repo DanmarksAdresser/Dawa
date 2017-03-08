@@ -339,6 +339,7 @@ exports.createExpressHandler = function(resourceSpec) {
         queryTime: 0,
         clientIp: getClientIp(req),
         path: req.path,
+        url: req.originalUrl
       };
       const requestId = getRequestId(req);
       if(requestId) {
