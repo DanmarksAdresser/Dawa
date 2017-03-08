@@ -584,7 +584,7 @@ const queryFns = {
 const sqlModel = {
   allSelectableFields: [],
   processQuery: function(client, fieldNames, params) {
-    return go(function*() {
+    return client.withReservedSlot(() => go(function*() {
       const startfra = params.adgangsadresseid ? 'adresse' : (params.startfra || 'vejnavn');
       // If adgangsadresseid parameter is supplied, we ignore type parameter
       // this is not quite correct, but some client depends on it.
@@ -598,7 +598,7 @@ const sqlModel = {
           return result;
         }
       }
-    });
+    }));
   }
 };
 

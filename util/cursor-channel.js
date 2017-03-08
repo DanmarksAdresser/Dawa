@@ -31,7 +31,7 @@ module.exports = (client, sql, params, channel, options) => {
           if(!keepOpen) {
             channel.close();
           }
-          yield client.query(`CLOSE c1`);
+          yield client.query(`CLOSE c1`, [], { skipQueue: true });
           break;
         }
       }
@@ -39,7 +39,7 @@ module.exports = (client, sql, params, channel, options) => {
     catch(err) {
       if(err instanceof Abort) {
         // regular abort. Just close the cursor and abort.
-        yield client.query(`CLOSE c1`);
+        yield client.query(`CLOSE c1`, [], { skipQueue: true });
       }
       throw err;
     }

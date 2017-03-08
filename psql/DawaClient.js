@@ -22,6 +22,7 @@ class DawaClient {
     this.inTransaction = false;
     this.queryInProgress = false;
     this.allowParallelQueries = false;
+    this.inReservedSlot = false;
   }
 
   queryRows(sql, params) {
@@ -47,7 +48,9 @@ class DawaClient {
     });
   }
 
-  query(sql, params) {
+  query(sql, params, options) {
+    options = options || {};
+    const skipQueue = options.skipQueue || false;
     if (this.released) {
       throw new Error('Attempted to query using released client!');
     }
@@ -55,7 +58,7 @@ class DawaClient {
       throw new Error('Query already in progress');
     }
     this.queryInProgress = true;
-    const { clientId, requestLimiter, logger, client } = this;
+    const { logger, client } = this;
     const thisClient = this;
     return go(function*() {
 
@@ -105,14 +108,34 @@ class DawaClient {
         }
       });
 
-      if (requestLimiter && clientId) {
-        return yield requestLimiter(clientId, fn);
+      if (skipQueue) {
+        return yield fn();
       }
       else {
-        return yield fn();
+        return yield thisClient.withReservedSlot(fn);
       }
     });
 
+  }
+
+  withReservedSlot(fn) {
+    const { clientId, requestLimiter } = this;
+    if(this.inReservedSlot) {
+      return fn();
+    }
+    if(!requestLimiter || !clientId) {
+      return fn();
+    }
+    const that = this;
+    return go(function*() {
+      that.inReservedSlot = true;
+      try {
+        return yield requestLimiter(clientId, fn);
+      }
+      finally {
+        that.inReservedSlot = false;
+      }
+    });
   }
 
   copyFrom(sql) {
@@ -126,20 +149,16 @@ class DawaClient {
     this.inTransaction = true;
     const client = this;
     return go(function*() {
-      yield this.delegateAbort(client.query(transactionStatements[mode][0]));
+      yield this.delegateAbort(client.query(transactionStatements[mode][0], [], { skipQueue: true }));
       try {
         const result = yield this.delegateAbort(processify(transactionFn()));
         client.inTransaction = false;
         // note that we do *not* abort transaction commit/rollback
-        yield client.query(transactionStatements[mode][1]);
+        yield client.query(transactionStatements[mode][1], [], { skipQueue: true });
         return result;
       }
-      catch(err) {
-        if(err instanceof Abort) {
-          // regular abort, rollback transaction
-          yield client.query('ROLLBACK');
-        }
-        throw err;
+      finally {
+        yield client.query('ROLLBACK', [], { skipQueue: true });
       }
     });
 
