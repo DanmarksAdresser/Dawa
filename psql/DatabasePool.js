@@ -72,6 +72,7 @@ const withRawPooledConnection = (pool, connectionFn) => go(function*() {
   }
   catch(e) {
     pool.destroy(client);
+    throw e;
   }
 });
 

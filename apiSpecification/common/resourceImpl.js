@@ -227,7 +227,6 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
     }
     else if (resourceSpec.disableStreaming) {
       execute = (client, channel) => go(function*() {
-        this.abortSignal.take().then(() => 'EXECUTE ABORTED');
         const result = yield this.delegateAbort(resourceSpec.sqlModel.processQuery(client, fieldNames, params));
         yield channel.putMany(result);
         channel.close();
