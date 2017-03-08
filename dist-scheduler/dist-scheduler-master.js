@@ -24,6 +24,13 @@ const create = (messagingInstance, options) => {
       const {payload: {clientId, taskId}, workerId} = yield this.takeOrAbort(enqueueChannel);
       const taskFn = () => go(function*() {
         const before = Date.now();
+        if(!messagingInstance.workerExists(workerId)) {
+          logger.error('Could not schedule task: Worker is gone');
+          return {
+            cost: 0,
+            result: null
+          };
+        }
         messagingInstance.send('DIST_SCHEDULER_READY', workerId, {taskId, clientId});
         try {
           yield messagingInstance.receiveOnce(
