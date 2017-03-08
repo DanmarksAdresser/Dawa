@@ -568,19 +568,19 @@ var sampleParameters = {
   },
   ois_tekniskanlaeg: {
     id: {
-      values: ['94314c40-1335-49be-b589-0b5fd0bb37d7'],
-      verifier: (anlaeg, id) => anlaeg.TekniskAnlaeg_id === id
+      values: ['ff1b4aef-ef89-4822-bbf0-1fadeec2d38c'],
+      verifier: (anlaeg, id) => anlaeg.Tekniskanlaeg_id === id
     },
     adgangsadresseid: {
-      values: ['0a3f5081-39a3-32b8-e044-0003ba298018'],
+      values: ['0a3f507b-c8ff-32b8-e044-0003ba298018'],
       verifier: (anlaeg, adgangsadresseid) => anlaeg.AdgAdr_id === adgangsadresseid
     },
     esrejendomsnr: {
-      values: ['068590', '68590'],
-      verifier: (anlaeg, nr) => parseInt(anlaeg.EsrEjdNr, 10) === parseInt(nr, 10)
+      values: ['061537', '61537'],
+      verifier: (anlaeg, nr) => parseInt(anlaeg.ESREjdNr, 10) === parseInt(nr, 10)
     },
     bygningsid: {
-      values: ['77ab6532-7d12-4816-85e4-a128dfe998c4'],
+      values: ['d284b19e-b68a-4d1b-ac17-5576c3750231'],
       verifier: (anlaeg, id) => anlaeg.Bygning_id === id
     },
     kommunekode: {
@@ -745,7 +745,7 @@ _.keys(sampleParameters).forEach(function(specName) {
                     var verifyResult = verify(json, sampleValue);
                     expect(verifyResult).to.equal(true);
                   });
-                }).asPromise();
+                });
               });
             });
           });
