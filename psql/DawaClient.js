@@ -57,7 +57,6 @@ class DawaClient {
     if (this.queryInProgress && !this.allowParallelQueries) {
       throw new Error('Query already in progress');
     }
-    this.queryInProgress = true;
     const { logger, client } = this;
     const thisClient = this;
     return go(function*() {
@@ -65,7 +64,8 @@ class DawaClient {
       yield thisClient.flush();
       const beforeTs = Date.now();
       const abortSignal = this.abortSignal;
-      const fn = Promise.coroutine(function*() {
+      const task = () => go(function*() {
+        this.queryInProgress = true;
         const logMessage = {
           sql,
           params
@@ -75,6 +75,7 @@ class DawaClient {
           const afterQueueTs = Date.now();
           const waitTime = afterQueueTs - beforeTs;
           logMessage.waitTime = waitTime;
+          logMessage.queryTime = 0;
           if (abortSignal.isRaised()) {
             throw new Abort(abortSignal.value());
           }
@@ -109,10 +110,10 @@ class DawaClient {
       });
 
       if (skipQueue) {
-        return yield fn();
+        return yield task();
       }
       else {
-        return yield thisClient.withReservedSlot(fn);
+        return yield thisClient.withReservedSlot(task);
       }
     });
 
@@ -129,11 +130,28 @@ class DawaClient {
     const that = this;
     return go(function*() {
       that.inReservedSlot = true;
+      const before = Date.now();
+      let waitTimeLogged = false;
       try {
-        return yield requestLimiter(clientId, fn);
+        return yield this.delegateAbort(requestLimiter(clientId, () => {
+          const waitTime = Date.now() - before;
+          waitTimeLogged = true;
+          that.logger({
+            queryTime: 0,
+            waitTime
+          });
+          return fn();
+        }));
       }
       finally {
         that.inReservedSlot = false;
+        if(!waitTimeLogged) {
+          const waitTime = Date.now() - before;
+          that.logger({
+            queryTime: 0,
+            waitTime
+          });
+        }
       }
     });
   }
@@ -152,13 +170,16 @@ class DawaClient {
       yield this.delegateAbort(client.query(transactionStatements[mode][0], [], { skipQueue: true }));
       try {
         const result = yield this.delegateAbort(processify(transactionFn()));
-        client.inTransaction = false;
         // note that we do *not* abort transaction commit/rollback
         yield client.query(transactionStatements[mode][1], [], { skipQueue: true });
         return result;
       }
+      catch(e) {
+        yield Promise.promisify(client.query, {context: client})('ROLLBACK');
+        throw e;
+      }
       finally {
-        yield client.query('ROLLBACK', [], { skipQueue: true });
+        client.inTransaction = false;
       }
     });
 

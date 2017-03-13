@@ -35,6 +35,7 @@ const dboptions = {
   max: options['pg.pool.max'],
   idleTimeoutMillis: config.getOption('pg.pool.idleTimeoutMillis'),
   maxWaitingClients: config.getOption('pg.pool.maxWaitingClients'),
+  acquireTimeoutMillis: config.getOption('pg.pool.acquireTimeoutMillis'),
   statementTimeoutMillis: config.getOption('pg.statementTimeoutMillis'),
   connString: config.getOption('pgConnectionUrl'),
   pooled: true,

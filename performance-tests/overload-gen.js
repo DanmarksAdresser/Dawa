@@ -101,14 +101,26 @@ const lauchfixedConcurrencyGenerator = (baseUrl, spec)  => {
 };
 
 const launchFixedRpsGenerator = (baseUrl, spec, log) => {
+  const clientCount = spec.clientCount || 1;
+  let clientCounter = 0;
   setInterval(() => {
-    launchSingleRequestGenerator(baseUrl, spec).then(result => {
+    const ip = `1.1.1.${clientCounter + 1}`;
+    clientCounter = (clientCounter + 1) % clientCount;
+    launchSingleRequestGenerator(baseUrl, {
+      url: spec.url,
+      headers: {
+        "X-Forwarded-For": ip,
+        "Accept-Encoding": "gzip"
+      }
+    }).then(result => {
       log({
         ts: Date.now(),
         name: 'FixedRps',
         key: 'duration',
         value: result.duration
       });
+    }, error => {
+      console.error(error);
     });
   }, 1000 / spec.max);
 };
