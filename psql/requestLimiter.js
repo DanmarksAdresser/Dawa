@@ -11,7 +11,7 @@ requestLimiter.status = () => "Request limiting disabled";
 if(FAIR_SCHEDULER_ENABLED) {
   const scheduler = distSchedulerClientCreate(messagingInstance, SCHEDULER_OPTIONS);
 
-  requestLimiter = (clientIp, fn) => scheduler.schedule(clientIp, fn);
+  requestLimiter = (clientIp, fn, timeout) => scheduler.schedule(clientIp, fn, timeout);
   requestLimiter.status = () => scheduler.status();
 }
 

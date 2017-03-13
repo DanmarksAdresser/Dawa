@@ -46,7 +46,8 @@ const create = (messagingInstance, options) => {
       });
     }
   });
-  const schedule = (clientId, taskFn) =>  {
+  const schedule = (clientId, taskFn, overriddenTimeout) =>  {
+    let chosenTimeout = overriddenTimeout || timeout;
     const taskId = uuid.v4();
     const readySignal = new Signal();
 
@@ -57,7 +58,7 @@ const create = (messagingInstance, options) => {
 
     const process = go(function*() {
       yield takeWithTimeout(
-        timeout,
+        chosenTimeout,
         readySignal,
         () => new Error('Timeout waiting for query slot'));
       return yield this.delegateAbort(taskFn());

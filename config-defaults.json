@@ -123,5 +123,11 @@
     "description": "OIS password",
     "type": "string",
     "default": "ois"
+  },
+  {
+    "name": "autocomplete.querySlotTimeout",
+    "description": "Autocomplete query slot timeout",
+    "type": "number",
+    "default": 1000
   }
 ]

@@ -119,7 +119,7 @@ class DawaClient {
 
   }
 
-  withReservedSlot(fn) {
+  withReservedSlot(fn, timeout) {
     const { clientId, requestLimiter } = this;
     if(this.inReservedSlot) {
       return fn();
@@ -141,7 +141,7 @@ class DawaClient {
             waitTime
           });
           return fn();
-        }));
+        }, timeout));
       }
       finally {
         that.inReservedSlot = false;
