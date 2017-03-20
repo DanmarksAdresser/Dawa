@@ -18,6 +18,7 @@ const importDarImpl = require('../darImport/importDarImpl');
 const importBebyggelserImpl = require('../bebyggelser/importBebyggelserImpl');
 const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
 const importOisImpl = require('../ois/importOisImpl');
+const { withImportTransaction } = require('../importUtil/importUtil');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -42,7 +43,9 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield initialization.disableTriggersAndInitializeTables(client);
       yield updatePostnumreImpl(client, 'data/postnumre.csv');
       yield loadStormodtagereImpl(client, 'data/stormodtagere.csv');
-      yield(updateEjerlavImpl(client, 'data/ejerlav.csv'));
+      yield withImportTransaction(client, 'updateEjerlav', (txid) =>
+        updateEjerlavImpl(client, txid, 'data/ejerlav.csv')
+      );
       yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);
       yield loadCsvTestdata(client, 'test/data');
       yield importDarImpl.updateVejstykkerPostnumreMat(client, true);
