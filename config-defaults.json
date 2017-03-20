@@ -32,13 +32,13 @@
     "name": "pg.pool.maxWaitingClients",
     "description": "Hvor mange klienter, der maksimalt kan vente på at fåen Postgres connection",
     "type": "number",
-    "default": 10
+    "default": 150
   },
   {
     "name": "pg.pool.acquireTimeoutMillis",
     "description": "Hvor lang tid en klient venter i kø på at fåen DB connection",
     "type": "number",
-    "default": 300
+    "default": 500
   },
   {
     "name": "pg.statementTimeoutMillis",
