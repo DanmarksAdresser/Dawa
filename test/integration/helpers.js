@@ -7,6 +7,7 @@ var _ = require('underscore');
 var columnMappings = require('../../apiSpecification/replikering/columnMappings');
 var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
+require('./setup-options');
 
 function getResponse(dbClient, resourceSpec, pathParams, queryParams) {
   return resourceImpl.materializeResponse(dbClient, resourceSpec, 'http://dawa', pathParams, queryParams);
