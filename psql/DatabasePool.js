@@ -66,12 +66,10 @@ const rawConnectionPool = (options) => {
 const withRawPooledConnection = (pool, connectionFn) => go(function*() {
   const client = yield pool.acquire();
   try {
-    const result = yield this.delegateAbort(connectionFn(client));
-    yield pool.release(client);
-    return result;
+    return yield this.delegateAbort(connectionFn(client));
   }
-  catch(e) {
-    pool.destroy(client);
+  finally {
+    yield pool.release(client);
   }
 });
 

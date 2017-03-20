@@ -1,5 +1,11 @@
 "use strict";
 
+const Promise = require('bluebird');
+
+Promise.config({
+  longStackTraces: false
+});
+
 const cluster = require('cluster');
 const logger = require('./logger');
 

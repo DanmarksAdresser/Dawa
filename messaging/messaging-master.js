@@ -41,6 +41,8 @@ const setup = (cluster) => {
     });
   };
 
+  const workerExists = (workerId) =>  !!cluster.workers[workerId];
+
   const send = (type, workerId, payload) => {
     const message = {
       '@@MESSAGE_TYPE': type,
@@ -118,7 +120,8 @@ const setup = (cluster) => {
     process,
     subscribe,
     receiveOnce,
-    send
+    send,
+    workerExists
   }
 };
 

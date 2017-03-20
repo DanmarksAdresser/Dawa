@@ -12,7 +12,6 @@ const { comp, map } = require('transducers-js');
 const { Channel, Signal, Abort, OperationType, CLOSED, go, parallel } = require('ts-csp');
 const dbLogger = require('../../logger').forCategory('Database');
 const requestLogger = require('../../logger').forCategory('RequestLog');
-const statistics = require('../../statistics');
 const sqlUtil = require('./sql/sqlUtil');
 
 const { pipeToStream, pipe } = require('../../util/cspUtil');
@@ -227,7 +226,6 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
     }
     else if (resourceSpec.disableStreaming) {
       execute = (client, channel) => go(function*() {
-        this.abortSignal.take().then(() => 'EXECUTE ABORTED');
         const result = yield this.delegateAbort(resourceSpec.sqlModel.processQuery(client, fieldNames, params));
         yield channel.putMany(result);
         channel.close();
@@ -339,6 +337,7 @@ exports.createExpressHandler = function(resourceSpec) {
         queryTime: 0,
         clientIp: getClientIp(req),
         path: req.path,
+        url: req.originalUrl
       };
       const requestId = getRequestId(req);
       if(requestId) {
@@ -360,7 +359,10 @@ exports.createExpressHandler = function(resourceSpec) {
         }
         requestContext.waitTime += logMessage.waitTime;
         requestContext.queryTime += logMessage.queryTime;
-        statistics.emit('psql_query', logMessage.queryTime, null, dbStatContext);
+        dbLogger.info('stat', Object.assign({}, dbStatContext, {
+          query: logMessage.queryTime,
+          wait: logMessage.waitTime
+        }));
       };
 
       const initialDataSignal = new Signal();
@@ -372,6 +374,7 @@ exports.createExpressHandler = function(resourceSpec) {
       const process = databasePools.get('prod').withConnection(clientOptions, (client) => {
         return go(function*() {
           const preparedResponse = yield this.delegateAbort(prepareResponse(client, resourceSpec, baseUrl, req.params, req.query));
+          requestContext.status = preparedResponse.status;
           return yield this.delegateAbort(serveResponse(client, req, res, preparedResponse, initialDataSignal));
         });
       });

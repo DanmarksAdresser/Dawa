@@ -1,5 +1,7 @@
 "use strict";
 
+const { go } = require('ts-csp');
+
 var querySenesteSekvensnummer = require('./querySenesteSekvensnummer');
 var _ = require('underscore');
 var commonParameters = require('../../common/commonParameters');
@@ -12,14 +14,10 @@ var representation = {
 };
 
 var sqlModel = {
-  query: function(client, fieldNames, params, callback) {
-    querySenesteSekvensnummer(client, function(err, result) {
-      if(err) {
-        return callback(err);
-      }
-      callback(null, [result]);
-    });
-  }
+  processQuery: (client, fieldNames, params) => go(function*() {
+    const result = yield querySenesteSekvensnummer(client);
+    return [result];
+  })
 };
 
 var resource = {
