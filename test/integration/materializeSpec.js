@@ -193,7 +193,7 @@ describe('View materialization', () => {
         yield client.query(`INSERT INTO prim_changes(txid, operation, public, id, sec_id1, name) VALUES (${txid}, 'update', true, '${updatedId}', 12, null)`);
       }));
       it('Correctly applies insert', () => go(function*() {
-        yield applyInserts(clientFn(), txid, 'prim', tableModel.prim);
+        yield applyInserts(clientFn(), txid, tableModel.prim);
         const result = yield clientFn().queryRows('select id, sec_id1 from prim order by id');
         assert.strictEqual(result.length, 3);
         const insertedRow = result[0];
@@ -202,14 +202,14 @@ describe('View materialization', () => {
       }));
 
       it('Correctly applies delete', () => go(function*() {
-        yield applyDeletes(clientFn(), txid, 'prim', tableModel.prim);
+        yield applyDeletes(clientFn(), txid, tableModel.prim);
         const result = yield clientFn().queryRows('select id, sec_id1 from prim order by id');
         assert.strictEqual(result.length, 1);
         assert.notEqual(result[0].id, deletedId);
       }));
 
       it('Correctly applies update', () => go(function*() {
-        yield applyUpdates(clientFn(), txid, 'prim', tableModel.prim);
+        yield applyUpdates(clientFn(), txid, tableModel.prim);
         const result = yield clientFn().queryRows('select id, sec_id1,name from prim order by id');
         assert.strictEqual(result.length, 2);
         assert.strictEqual(result[0].sec_id1, 9);
@@ -240,7 +240,7 @@ describe('View materialization', () => {
         yield client.query(
           `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2) 
            VALUES(${txid}, 'insert', true, '${insertedId}', 1, 2)`);
-        yield applyInserts(client, txid, 'prim', tableModel.prim);
+        yield applyInserts(client, txid, tableModel.prim);
         yield computeDirty(client, txid, tableModel, testMaterialization);
         yield computeInserts(client, txid, tableModel, testMaterialization);
         const result = yield client.queryRows('select * from primary_mat_changes');
@@ -255,7 +255,7 @@ describe('View materialization', () => {
         yield client.query(
           `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2) 
            VALUES(${txid}, 'delete', true, '${deletedId}', 1, 2)`);
-        yield applyDeletes(client, txid, 'prim', tableModel.prim);
+        yield applyDeletes(client, txid, tableModel.prim);
         yield computeDirty(client, txid, tableModel, testMaterialization);
         yield computeDeletes(client, txid, tableModel, testMaterialization);
         const result = yield client.queryRows('select * from primary_mat_changes');
@@ -270,7 +270,7 @@ describe('View materialization', () => {
         yield client.query(
           `INSERT INTO prim_changes(txid, operation, public, id, tert_id_part1, tert_id_part2, name) 
            VALUES(${txid}, 'update', true, '${updatedId}', 1, 2, 'foo')`);
-        yield applyUpdates(client, txid, 'prim', tableModel.prim);
+        yield applyUpdates(client, txid, tableModel.prim);
         yield computeDirty(client, txid, tableModel, testMaterialization);
         yield computeUpdates(client, txid, tableModel, testMaterialization);
         const result = yield client.queryRows('select * from primary_mat_changes');

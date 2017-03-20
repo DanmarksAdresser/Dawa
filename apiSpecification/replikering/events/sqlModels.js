@@ -12,6 +12,13 @@ var parameters = require('./parameters');
 var querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
 var temaer = require('../../temaer/temaer');
 
+const selectClause = columnMappings =>
+  columnMappings.map(function(columnMapping) {
+    var selectTransform = columnMapping.selectTransform;
+    var columnName = columnMapping.column || columnMapping.name;
+    var transformedColumn = selectTransform ? selectTransform(columnName) : columnName;
+    return transformedColumn + ' AS ' + columnMapping.name;
+  });
 
 function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
   return {
@@ -60,17 +67,9 @@ function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
 }
 
 function baseQuery(datamodelName, tableName, columnMappings) {
-  function selectFields() {
-    return columnMappings.map(function(columnMapping) {
-      var selectTransform = columnMapping.selectTransform;
-      var columnName = columnMapping.column || columnMapping.name;
-      var transformedColumn = selectTransform ? selectTransform(columnName) : columnName;
-      return transformedColumn + ' AS ' + columnMapping.name;
-    });
-  }
 
   var query = {
-    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectFields()),
+    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectClause(columnMappings)),
     from: [" transaction_history h" +
       " LEFT JOIN " + tableName + "_history i ON ((h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from) OR (h.operation = 'delete' AND h.sequence_number = i.valid_to))"],
     whereClauses: [],
@@ -80,13 +79,37 @@ function baseQuery(datamodelName, tableName, columnMappings) {
   var datamodelAlias = dbapi.addSqlParameter(query, datamodelName);
   dbapi.addWhereClause(query, "h.entity = " + datamodelAlias);
   return query;
-
 }
 
-var sqlModels = _.reduce(['vejstykke', 'adgangsadresse', 'adresse','postnummer','ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(memo, datamodelName) {
+const baseQuery2 = (tableName, columnMappings) => {
+  var query = {
+    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectClause(columnMappings)),
+    from: [" transaction_history h" +
+    " JOIN " + tableName + "_changes i ON h.sequence_number = i.changeid"],
+    whereClauses: ['public'],
+    orderClauses: ['changeid'],
+    sqlParams: []
+  };
+  return query;
+};
+
+const oldSqlModelNames = ['vejstykke', 'adgangsadresse', 'adresse','postnummer', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'];
+const newSqlModelNames = ['ejerlav'];
+
+var oldSqlModels = oldSqlModelNames.reduce(function(memo, datamodelName) {
   var columnMappings = mappings.columnMappings[datamodelName];
   var baseQueryFn = function() {
     return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);
+  };
+
+  memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName], baseQueryFn);
+  return memo;
+}, {});
+
+const newSqlModels = newSqlModelNames.reduce((memo, datamodelName) => {
+  var columnMappings = mappings.columnMappings[datamodelName];
+  var baseQueryFn = function() {
+    return baseQuery2(mappings.tables[datamodelName], columnMappings);
   };
 
   memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName], baseQueryFn);
@@ -109,6 +132,7 @@ function createTilknytningModel(tema) {
   result[tema.prefix + 'tilknytning'] = createSqlModel(columnMappings, parameters.keyParameters[sqlModelName], baseQueryFn);
   return result;
 }
+const sqlModels = Object.assign({}, oldSqlModels, newSqlModels);
 
 temaer.forEach(function(tema) {
   _.extend(sqlModels, createTilknytningModel(tema));

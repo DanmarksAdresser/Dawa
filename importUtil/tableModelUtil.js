@@ -72,30 +72,44 @@ const deriveColumnsForChange = (client, txid, tableModel) => go(function*() {
   yield deriveColumns(client, `${tableModel.table}_changes`, tableModel, additionalWhereClauses);
 });
 
-const assignSequenceNumbers = (client, txid, tableModel, operations) => go(function*() {
-
+const setPublic = (client, txid, tableModel) => go(function*() {
+  const table = tableModel.table;
+  const changeTable = `${table}_changes`;
   const hasNonpublicFields = _.some(tableModel.columns, c => c.public === false);
+  if(!hasNonpublicFields) {
+    yield client.queryBatched(`UPDATE ${changeTable} SET public = true WHERE txid = ${txid}`);
+    return;
+  }
   const publicColumnNames = tableModel.columns
     .filter(c => c.public !== false)
     .map(c => c.name);
+  yield client.query(
+`
+UPDATE ${changeTable} c 
+SET public = ${columnsDistinctClause('c', 't', publicColumnNames)} FROM ${table} t 
+WHERE txid = ${txid} 
+  AND ${columnsEqualClause('c', 't', tableModel.primaryKey)}`
+  );
+
+});
+
+const assignSequenceNumbers = (client, txid, tableModel, operations) => go(function*() {
   const table = tableModel.table;
   const changeTable = `${table}_changes`;
   for(let op of operations) {
     const seqSelectId = selectList('c', tableModel.primaryKey);
     let  seqFromClause = `${changeTable} c`;
-    let seqWhereClause =  `txid = ${txid} AND operation='${op}'`;
-    if(hasNonpublicFields) {
-      seqFromClause += ` LEFT JOIN ${table} t ON ${columnsEqualClause('c', 't', tableModel.primaryKey)}`
-      seqWhereClause += ` AND ${columnsDistinctClause('t', 'c', publicColumnNames)}`;
-    }
+    let seqWhereClause =  `txid = ${txid} AND operation='${op}' AND public`;
     const selectSeq =
       `SELECT ${seqSelectId}, row_number() over () as s FROM ${seqFromClause} WHERE ${seqWhereClause}`;
     const sql = `WITH seq AS (${selectSeq}),
-                      last_seq AS (select coalesce(max(sequence_number), 0) FROM transaction_history)
-                 UPDATE ${changeTable} 
-                 SET changeid = s + (select * from last_seq) 
-                 FROM seq 
-                 WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)}`;
+                      last_seq AS (select coalesce(max(sequence_number), 0) FROM transaction_history),
+                      t as (UPDATE ${changeTable} 
+                            SET changeid = s + (select * from last_seq) 
+                            FROM seq 
+                            WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)})
+                 INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
+                   (SELECT s + (select * from last_seq), '${tableModel.entity}', '${op}', ${txid} FROM seq)`;
     yield client.queryBatched(sql);
   }
 });
@@ -108,5 +122,6 @@ module.exports = {
   del,
   deriveColumns,
   deriveColumnsForChange,
+  setPublic,
   assignSequenceNumbers
 };

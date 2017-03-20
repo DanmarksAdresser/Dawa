@@ -75,10 +75,6 @@ var insert = {
     "kilde": null,
     "adgangsadresseid": "038edf0e-001b-4d9d-a1c7-b71cb354680f"
   },
-  ejerlav: {
-    kode: 20551,
-    navn: "Herstedvester By, Herstedvester"
-  },
   vejstykkepostnummerrelation: {
     kommunekode: 607,
     vejkode: 4899,
@@ -138,10 +134,6 @@ var update = {
     "kilde": null,
     "esdhreference": null,
     "journalnummer": null
-  },
-  ejerlav: {
-    kode: 20551,
-    navn: "Herstedvester By, Herstedvester (opdateret)"
   }
 };
 
@@ -158,9 +150,6 @@ var existingIds = {
   },
   postnummer: {
     "nr": 8260
-  },
-  ejerlav: {
-    kode: 20551
   },
   vejstykkepostnummerrelation: {
     kommunekode: 607,
@@ -183,9 +172,6 @@ var nonexistingIds = {
   postnummer: {
     "nr": 1234
   },
-  ejerlav: {
-    kode: 1234
-  },
   vejstykkepostnummerrelation: {
     kommunekode: 1234,
     vejkode: 1234,
@@ -194,7 +180,7 @@ var nonexistingIds = {
 };
 
 
-const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer','ejerlav', 'vejstykkepostnummerrelation'];
+const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer', 'vejstykkepostnummerrelation'];
 const REVERSE_ENTITY_NAMES = ENTITY_NAMES.slice().reverse();
 
 function formatJson(columnMapping, obj) {

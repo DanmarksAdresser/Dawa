@@ -6,7 +6,6 @@ const testdb = require('../helpers/testdb2');
 
 const tableModel = require('../../psql/tableModel');
 
-const { createChangeTable } = require('../../importUtil/materialize');
 const { computeInserts, computeUpdates, computeDeletes, computeDifferences }  = require('../../importUtil/tableDiffNg');
 
 const ejerlavTableModel = tableModel.tables.ejerlav;

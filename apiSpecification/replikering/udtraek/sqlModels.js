@@ -12,13 +12,16 @@ var registry = require('../../registry');
 var sqlUtil = require('../../common/sql/sqlUtil');
 var temaer = require('../../temaer/temaer');
 
+const selectClause = columnMappings =>
+  _.map(columnMappings, function (mapping) {
+    var columnName = mapping.column || mapping.name;
+    var transformed = (mapping.selectTransform || _.identity)(columnName);
+    return transformed + ' AS ' + mapping.name;
+  });
+
 function baseQuery(tableName, columnMappings, keyColumns) {
   return {
-    select: _.map(columnMappings, function(mapping) {
-      var columnName = mapping.column || mapping.name;
-      var transformed = (mapping.selectTransform || _.identity)(columnName);
-      return transformed + ' AS ' + mapping.name;
-    }),
+    select: selectClause(columnMappings),
     from: [tableName + '_history'],
     whereClauses: [],
     orderClauses: keyColumns,
@@ -26,17 +29,56 @@ function baseQuery(tableName, columnMappings, keyColumns) {
   };
 }
 
+const validateParams = (client, params) => go(function*() {
+  const senesteHaendelse = yield querySenesteSekvensnummer(client);
+  if (params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
+    throw new sqlUtil.InvalidParametersError("hændelse med sekvensnummer " + params.sekvensnummer + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer);
+  }
+});
+
+const baseQuery2 = (tableName, keyColumns, columnMappings, sequenceNumber) => {
+  let subselect =
+    `SELECT *, row_number()
+  OVER (PARTITION BY ${keyColumns.join(', ')}
+    ORDER BY changeid desc NULLS LAST) as row_num
+FROM ${tableName}_changes WHERE public`;
+  if(sequenceNumber) {
+    subselect += ` AND (changeid IS NULL OR changeid <= $1)`
+  }
+  const baseQuery = {
+    select: selectClause(columnMappings),
+    from: [`(${subselect}) t`],
+    whereClauses: ['row_num = 1'],
+    groupBy: '',
+    orderClauses: [],
+    sqlParams: []
+  };
+  if(sequenceNumber) {
+    baseQuery.sqlParams.push(sequenceNumber);
+  }
+  return baseQuery;
+};
+
+const createSqlModel2 = (columnMappings, baseQueryFn) => {
+  return {
+    allSelectableFieldNames: function () {
+      return _.pluck(columnMappings, 'name');
+    },
+    validateParams: validateParams,
+    processStream: (client, fieldNames, params, channel, options) => {
+      const sqlParts = baseQueryFn(params.sekvensnummer);
+      const query = dbapi.createQuery(sqlParts);
+      return cursorChannel(client, query.sql, query.params, channel, options);
+    }
+  };
+};
+
 function createSqlModel(columnMappings, baseQueryFn) {
   return {
     allSelectableFieldNames: function () {
       return _.pluck(columnMappings, 'name');
     },
-    validateParams: (client, params) => go(function*() {
-      const senesteHaendelse = yield querySenesteSekvensnummer(client);
-      if (params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
-        throw new sqlUtil.InvalidParametersError("hændelse med sekvensnummer " + params.sekvensnummer + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer);
-      }
-    }),
+    validateParams: validateParams,
     processStream: (client, fieldNames, params, channel, options) => {
       const sqlParts = baseQueryFn();
       if (params.sekvensnummer) {
@@ -52,11 +94,28 @@ function createSqlModel(columnMappings, baseQueryFn) {
     }
   };
 }
-var sqlModels = _.reduce(mappings.columnMappings, function(memo, columnMappings, datamodelName) {
+
+const newModelNames = ['ejerlav'];
+const oldModelNames = _.difference(Object.keys(mappings.columnMappings), newModelNames);
+
+var oldSqlModels = oldModelNames.reduce(function(memo, datamodelName) {
+  const columnMappings = mappings.columnMappings[datamodelName];
   var baseQueryFn = function() {
     return baseQuery(mappings.tables[datamodelName], columnMappings, mappings.keys[datamodelName]);
   };
   memo[datamodelName] = createSqlModel(columnMappings, baseQueryFn);
+  return memo;
+}, {});
+
+const newSqlModels = newModelNames.reduce((memo, datamodelName) => {
+  const columnMappings = mappings.columnMappings[datamodelName];
+  const baseQueryFn = (sequenceNumber) => baseQuery2(
+    mappings.tables[datamodelName],
+    mappings.keys[datamodelName],
+    columnMappings,
+    sequenceNumber
+  );
+  memo[datamodelName] = createSqlModel2(columnMappings, baseQueryFn);
   return memo;
 }, {});
 
@@ -78,9 +137,9 @@ var tilknytningModels = _.reduce(temaer, function(memo, tema) {
   return memo;
 }, {});
 
-_.extend(sqlModels, tilknytningModels);
-module.exports = sqlModels;
+const allSqlModels = Object.assign({}, oldSqlModels, tilknytningModels, newSqlModels);
+module.exports = allSqlModels;
 
-_.each(sqlModels, function(sqlModel, key) {
+_.each(allSqlModels, function(sqlModel, key) {
   registry.add(key + 'udtraek', 'sqlModel', undefined, sqlModel);
 });

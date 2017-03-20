@@ -4,7 +4,7 @@ const {assert} = require('chai');
 const {go} = require('ts-csp');
 
 const {selectList, columnsEqualClause, columnsDistinctClause} = require('../darImport/sqlUtil');
-const {allColumnNames, nonPrimaryColumnNames} = require('./tableModelUtil');
+const {nonPrimaryColumnNames} = require('./tableModelUtil');
 
 const createTempDirtyTable = (client, materialization) => {
   const selectClause = selectList(null, materialization.primaryKey);
