@@ -29,7 +29,8 @@ CREATE TABLE primary_mat(
   tert_id_part1 integer,
   tert_id_part2 integer,
   tert_name text,
-  derived text
+  derived text,
+  nonpublic text
 );
 
 CREATE VIEW primary_mat_view AS (

@@ -75,7 +75,8 @@ const tableModel = {
     }, {
       name: 'sec_name1',
     }, {
-      name: 'sec_name2'
+      name: 'sec_name2',
+      public: false
     }, {
       name: 'tert_id_part1'
     }, {
@@ -229,9 +230,12 @@ describe('View materialization', () => {
       beforeEach(() => go(function*() {
         const client = clientFn();
         yield insert(client, tableModel.tertiary, {id_part1: 1, id_part2: 2, name: 'tert_name'});
+        yield insert(client, tableModel.secondary, {id: 10, name: 'second_name'});
         yield insert(client, tableModel.prim, Object.assign({id: unchangedId}, tert_ref_cols));
         yield insert(client, tableModel.prim, Object.assign({id: deletedId}, tert_ref_cols));
-        yield insert(client, tableModel.prim, Object.assign({id: updatedId}, tert_ref_cols));
+        yield insert(client, tableModel.prim, Object.assign({id: updatedId}, tert_ref_cols, {
+          sec_id2: 10
+        }));
         yield client.query('INSERT INTO primary_mat (select * from primary_mat_view)');
       }));
 
@@ -279,6 +283,20 @@ describe('View materialization', () => {
         assert.strictEqual(result[0].operation, 'update');
         assert.strictEqual(result[0].id, updatedId);
         assert.strictEqual(result[0].prim_name, 'foo');
+        assert.strictEqual(result[0].public, true);
+      }));
+
+      it('If an update only changes nonpublic fields, the change is marked as nonpublic', () => go(function*() {
+        const client = clientFn();
+        yield client.query(
+          `INSERT INTO secondary_changes(txid, operation, public, id, name) 
+           VALUES(${txid}, 'update', true, 10, 'sec_name_updated')`);
+        yield applyUpdates(client, txid, tableModel.secondary);
+        yield computeDirty(client, txid, tableModel, testMaterialization);
+        yield computeUpdates(client, txid, tableModel, testMaterialization);
+        const result = yield client.queryRows('select * from primary_mat_changes');
+        assert.strictEqual(result[0].public, false);
+        assert.strictEqual(result[0].sec_name2, 'sec_name_updated');
       }));
     });
   });

@@ -1,13 +1,20 @@
 "use strict";
 
 const { go } = require('ts-csp');
-const _ = require('underscore');
 
-const { columnsDistinctClause, selectList, columnsEqualClause } = require('../darImport/sqlUtil');
+const { selectList, columnsEqualClause } = require('../darImport/sqlUtil');
 const allColumnNames = tableModel => tableModel.columns.map(col => col.name);
 
+const isPrimaryColumn = (colName, tableModel) =>  tableModel.primaryKey.includes(colName);
+
 const nonPrimaryColumnNames = tableModel =>
-  allColumnNames(tableModel).filter(column => !tableModel.primaryKey.includes(column));
+  allColumnNames(tableModel).filter(column => !isPrimaryColumn(column, tableModel));
+
+const publicColumnNames = tableModel =>
+tableModel.columns
+  .filter(col => col.public !== false)
+  .map(col => col.name)
+  .filter(colName => !isPrimaryColumn(colName, tableModel));
 
 const insert = (client, tableModel, object) => {
   const columns = [];
@@ -72,27 +79,6 @@ const deriveColumnsForChange = (client, txid, tableModel) => go(function*() {
   yield deriveColumns(client, `${tableModel.table}_changes`, tableModel, additionalWhereClauses);
 });
 
-const setPublic = (client, txid, tableModel) => go(function*() {
-  const table = tableModel.table;
-  const changeTable = `${table}_changes`;
-  const hasNonpublicFields = _.some(tableModel.columns, c => c.public === false);
-  if(!hasNonpublicFields) {
-    yield client.queryBatched(`UPDATE ${changeTable} SET public = true WHERE txid = ${txid}`);
-    return;
-  }
-  const publicColumnNames = tableModel.columns
-    .filter(c => c.public !== false)
-    .map(c => c.name);
-  yield client.query(
-`
-UPDATE ${changeTable} c 
-SET public = ${columnsDistinctClause('c', 't', publicColumnNames)} FROM ${table} t 
-WHERE txid = ${txid} 
-  AND ${columnsEqualClause('c', 't', tableModel.primaryKey)}`
-  );
-
-});
-
 const assignSequenceNumbers = (client, txid, tableModel, operations) => go(function*() {
   const table = tableModel.table;
   const changeTable = `${table}_changes`;
@@ -122,6 +108,6 @@ module.exports = {
   del,
   deriveColumns,
   deriveColumnsForChange,
-  setPublic,
-  assignSequenceNumbers
+  assignSequenceNumbers,
+  publicColumnNames
 };

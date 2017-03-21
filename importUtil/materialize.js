@@ -2,9 +2,10 @@
 
 const {assert} = require('chai');
 const {go} = require('ts-csp');
+const _ = require('underscore');
 
 const {selectList, columnsEqualClause, columnsDistinctClause} = require('../darImport/sqlUtil');
-const {nonPrimaryColumnNames} = require('./tableModelUtil');
+const {nonPrimaryColumnNames, publicColumnNames} = require('./tableModelUtil');
 
 const createTempDirtyTable = (client, materialization) => {
   const selectClause = selectList(null, materialization.primaryKey);
@@ -69,7 +70,6 @@ const computeInserts = (client, txid, tableModels, materialization) => {
   const beforeSql = `SELECT ${idSelect} FROM ${materialization.table} NATURAL JOIN ${dirtyTable}`;
   const afterSql = `SELECT ${idSelect} FROM ${materialization.view} NATURAL JOIN ${dirtyTable}`;
   const insertIdsSql = `WITH before as (${beforeSql}), after AS (${afterSql}) SELECT ${idSelect} from after EXCEPT SELECT ${idSelect} FROM before`;
-
   const sql = `WITH inserts AS (${insertIdsSql}) INSERT INTO ${materialization.table}_changes (SELECT $1, NULL, 'insert', true, v.* FROM ${materialization.view} v NATURAL JOIN inserts)`;
   return client.query(sql, [txid]);
 };
@@ -85,22 +85,33 @@ const computeDeletes = (client, txid, tableModels, materialization) => {
   return client.query(sql, [txid]);
 };
 
+const makePublicClause = (client, tableModel) =>  {
+  const hasNonpublicFields = _.some(tableModel.columns, c => c.public === false);
+  if(!hasNonpublicFields) {
+    return 'true'
+  }
+  return columnsDistinctClause('before', 'after', publicColumnNames(tableModel));
+};
+
+
 const computeUpdates = (client, txid, tableModels, materialization) => {
+  const tableModel = tableModels[materialization.table];
   const dirtyTable = `${materialization.table}_dirty`;
   const idSelect = selectList(null, materialization.primaryKey);
   const presentBeforeSql = `SELECT ${idSelect} FROM ${materialization.table} NATURAL JOIN ${dirtyTable}`;
   const presentAfterSql = `SELECT ${idSelect} FROM ${materialization.view} NATURAL JOIN ${dirtyTable}`;
   const possiblyChangedIds = `${presentBeforeSql} INTERSECT ${presentAfterSql}`;
-  const changeColumns = nonPrimaryColumnNames(tableModels[materialization.table]);
+  const changeColumns = nonPrimaryColumnNames(tableModel);
   const changedColumnClause = columnsDistinctClause('before', 'after', changeColumns);
+  const publicClause = makePublicClause(client, tableModel);
   const sql =
     `WITH possiblyChanged AS (${possiblyChangedIds}),
      before AS (select ${materialization.table}.* FROM ${materialization.table} NATURAL JOIN possiblyChanged),
      after AS (select ${materialization.view}.* FROM ${materialization.view} NATURAL JOIN possiblyChanged),
-     changedIds AS (SELECT ${selectList('before', materialization.primaryKey)} 
+     changedIds AS (SELECT ${selectList('before', materialization.primaryKey)}, ${publicClause} as is_public 
   FROM before JOIN after ON ${columnsEqualClause('before', 'after', materialization.primaryKey)}
   WHERE ${changedColumnClause})
-   INSERT INTO ${materialization.table}_changes (SELECT $1, NULL, 'update', true, v.* FROM ${materialization.view} v NATURAL JOIN changedIds)
+   INSERT INTO ${materialization.table}_changes (SELECT $1, NULL, 'update', is_public, v.* FROM ${materialization.view} v NATURAL JOIN changedIds)
 `;
   return client.query(sql, [txid]);
 };
