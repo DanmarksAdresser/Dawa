@@ -23,11 +23,6 @@ require('../../apiSpecification/allSpecs');
 var Husnr = databaseTypes.Husnr;
 
 var insert = {
-  postnummer: {
-    "nr": 8260,
-    "navn": "Viby J",
-    "stormodtager": false
-  },
   vejstykke: {
     "kode": 2640,
     "kommunekode": 846,
@@ -83,11 +78,6 @@ var insert = {
 };
 
 var update = {
-  postnummer: {
-    "nr": 8260,
-    "navn": "Opdateret Viby J",
-    "stormodtager": true
-  },
   vejstykke: {
     "kode": 2640,
     "kommunekode": 846,
@@ -148,9 +138,6 @@ var existingIds = {
     "kode": 2640,
     "kommunekode": 846
   },
-  postnummer: {
-    "nr": 8260
-  },
   vejstykkepostnummerrelation: {
     kommunekode: 607,
     vejkode: 4899,
@@ -169,9 +156,6 @@ var nonexistingIds = {
     "kode": 1234,
     "kommunekode": 1234
   },
-  postnummer: {
-    "nr": 1234
-  },
   vejstykkepostnummerrelation: {
     kommunekode: 1234,
     vejkode: 1234,
@@ -180,7 +164,7 @@ var nonexistingIds = {
 };
 
 
-const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke','postnummer', 'vejstykkepostnummerrelation'];
+const ENTITY_NAMES = ['adgangsadresse','adresse', 'vejstykke', 'vejstykkepostnummerrelation'];
 const REVERSE_ENTITY_NAMES = ENTITY_NAMES.slice().reverse();
 
 function formatJson(columnMapping, obj) {

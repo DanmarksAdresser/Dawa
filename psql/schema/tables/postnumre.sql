@@ -10,14 +10,19 @@ CREATE INDEX ON postnumre USING gin(tsv);
 CREATE INDEX ON postnumre(navn);
 
 DROP TABLE IF EXISTS postnumre_history CASCADE;
-CREATE TABLE IF NOT EXISTS postnumre_history (
-  valid_from integer,
-  valid_to integer,
-  nr integer,
+
+DROP TABLE IF EXISTS postnumre_changes CASCADE;
+CREATE TABLE postnumre_changes(
+  txid INTEGER NOT NULL,
+  changeid INTEGER,
+  operation operation_type NOT NULL,
+  public boolean NOT NULL,
+  nr integer NOT NULL PRIMARY KEY,
   navn VARCHAR(20) NOT NULL,
-  stormodtager boolean NOT NULL DEFAULT false
+  tsv tsvector,
+  stormodtager boolean NOT NULL
 );
 
-CREATE INDEX ON postnumre_history(nr);
-CREATE INDEX ON postnumre_history(valid_from);
-CREATE INDEX ON postnumre_history(valid_to);
+CREATE INDEX ON postnumre_changes(txid);
+CREATE INDEX ON postnumre_changes(changeid);
+CREATE INDEX ON postnumre_changes(nr);

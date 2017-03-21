@@ -1,7 +1,7 @@
 "use strict";
 
 var q = require('q');
-
+const  {go} = require('ts-csp');
 var initialization = require('./initialization');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var generateHistoryImpl = require('../history/generateHistoryImpl');
@@ -41,11 +41,11 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield initialization.loadSchemas(client, scriptDir);
       // run init functions
       yield initialization.disableTriggersAndInitializeTables(client);
-      yield updatePostnumreImpl(client, 'data/postnumre.csv');
-      yield loadStormodtagereImpl(client, 'data/stormodtagere.csv');
-      yield withImportTransaction(client, 'updateEjerlav', (txid) =>
-        updateEjerlavImpl(client, txid, 'data/ejerlav.csv')
-      );
+      yield withImportTransaction(client, 'updateEjerlav', (txid) => go(function*() {
+        yield updatePostnumreImpl(client, txid, 'data/postnumre.csv');
+        yield loadStormodtagereImpl(client, 'data/stormodtagere.csv');
+        yield updateEjerlavImpl(client, txid, 'data/ejerlav.csv')
+      }));
       yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);
       yield loadCsvTestdata(client, 'test/data');
       yield importDarImpl.updateVejstykkerPostnumreMat(client, true);

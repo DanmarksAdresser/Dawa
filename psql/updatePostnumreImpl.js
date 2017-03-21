@@ -1,23 +1,26 @@
 "use strict";
 
-var q = require('q');
+const {go} = require('ts-csp');
 
 const importUtil = require('../importUtil/importUtil');
-const tableDiff = require('../importUtil/tablediff');
+const tableDiffNg = require('../importUtil/tableDiffNg');
+const tableModel = require('../psql/tableModel');
+const {deriveColumns, assignSequenceNumbers} = require('../importUtil/tableModelUtil');
 
-const POSTNUMMER_COUMNS = ['nr', 'navn', 'stormodtager'];
+const POSTNUMMER_COUMNS = ['nr', 'navn', 'stormodtager', 'tsv'];
 
 function loadPostnummerCsv(client, inputFile, tableName) {
   return importUtil.streamCsvToTable(client, inputFile, tableName, POSTNUMMER_COUMNS,
   row => ({ nr: row.postnr, navn: row.navn, stormodtager: row.stormodtager}));
 }
 
-module.exports = function(client, inputFile) {
-  return q.async(function*() {
-    yield importUtil.createTempTableFromTemplate(client, 'updated_postnumre', 'postnumre', POSTNUMMER_COUMNS);
-    yield loadPostnummerCsv(client, inputFile, 'updated_postnumre');
-    yield tableDiff.computeDifferences(client, 'updated_postnumre', 'postnumre', ['nr'], ['navn', 'stormodtager']);
-    yield tableDiff.applyChanges(client, 'postnumre', 'postnumre', ['nr'], POSTNUMMER_COUMNS, ['navn', 'stormodtager']);
-    yield tableDiff.dropChangeTables(client, 'postnumre');
-  })();
-};
+const postnumreTableModel = tableModel.tables.postnumre;
+
+module.exports = (client, txid, inputFile) => go(function*() {
+  yield importUtil.createTempTableFromTemplate(client, 'updated_postnumre', 'postnumre', POSTNUMMER_COUMNS);
+  yield loadPostnummerCsv(client, inputFile, 'updated_postnumre');
+  yield deriveColumns(client, 'updated_postnumre', postnumreTableModel);
+  yield tableDiffNg.computeDifferences(client, txid, 'updated_postnumre', postnumreTableModel);
+  yield assignSequenceNumbers(client, txid, postnumreTableModel, ['delete', 'update', 'insert']);
+  yield tableDiffNg.applyChanges(client, txid, postnumreTableModel);
+});

@@ -25,3 +25,4 @@ CREATE TABLE ejerlav_changes (
 
 CREATE INDEX ON ejerlav_changes(txid);
 CREATE INDEX ON ejerlav_changes(changeid);
+CREATE INDEX ON ejerlav_changes(kode);

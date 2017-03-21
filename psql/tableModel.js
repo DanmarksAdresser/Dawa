@@ -47,9 +47,11 @@ const adgangsadresser = {
   }, {
     name: 'adressepunktaendringsdato'
   }, {
-    name: 'geom'
+    name: 'geom',
+    public: false
   }, {
-    name: 'tsv'
+    name: 'tsv',
+    public: false
   }, {
     name: 'objekttype'
   }, {
@@ -88,6 +90,31 @@ const ejerlav = {
   }]
 };
 
+const postnumre = {
+  entity: 'postnummer',
+  table: 'postnumre',
+  primaryKey: ['nr'],
+  columns: [{
+    name: 'nr'
+  }, {
+    name: 'navn'
+  }, {
+    name: 'tsv',
+    public: false,
+    derive: (client, table, additionalWhereClauses) => {
+
+      let sql = `UPDATE ${table} t 
+      SET tsv = to_tsvector('adresser', coalesce(to_char(nr, '0000'), '') || ' ' || coalesce(navn, ''))`;
+      if(additionalWhereClauses) {
+        sql += ` WHERE ${additionalWhereClauses('t')}`;
+      }
+      return client.queryBatched(sql);
+    }
+  }, {
+    name: 'stormodtager'
+  }]
+}
+
 const adgangsadresser_mat = {
   table: 'adgangsadresser_mat',
   primaryKey: ['id'],
@@ -99,8 +126,9 @@ const adgangsadresser_mat = {
 
 exports.tables = {
   adgangsadresser,
+  adgangsadresser_mat,
   ejerlav,
-  adgangsadresser_mat
+  postnumre
 };
 
 exports.materializations = {

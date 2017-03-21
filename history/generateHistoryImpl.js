@@ -9,7 +9,9 @@ const dbapi = require('../dbapi');
 const extendStreetIntervals = require('./extendStreetIntervals');
 const extendVejnavnIntervals = require('./extendVejnavnIntervals');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
+const {allColumnNames, } = require('../importUtil/tableModelUtil');
 const sqlUtil = require('../darImport/sqlUtil');
+const tableModels = require('../psql/tableModel');
 
 const Transform = stream.Transform;
 const Writable = stream.Writable;
@@ -67,6 +69,16 @@ TableInserter.prototype._writev = function(chunks, callback) {
   this.client.query(
     `INSERT INTO ${this.table} (${this.columns.join(',')}) VALUES ${valueRows.join(',')}`,
     parameters).asPromise().nodeify(callback);
+};
+
+const createTempHistoryTable = (client, tableModel) => {
+  const partitionClause = sqlUtil.selectList(null, tableModel.primaryKey);
+  const subselect = `select *, last_value(changeid) OVER (PARTITION BY ${partitionClause} ORDER BY changeid ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) as next_valid from ${tableModel.table}_changes`;
+  const selectClause = sqlUtil.selectList(null, allColumnNames(tableModel));
+  const select =
+    `select changeid as valid_from, CASE WHEN next_valid = changeid THEN NULL ELSE next_valid END as valid_to, ${selectClause}
+     FROM (${subselect}) t WHERE operation <> 'delete'`;
+  return client.query(`CREATE TEMP TABLE ${tableModel.table}_history AS (${select})`);
 };
 
 util.inherits(ExtendVejnavnTransformer, Transform);
@@ -182,6 +194,7 @@ GROUP BY kommunekode, vejkode;`;
 
 function createPostnumreHistory(client) {
   return q.async(function*() {
+    yield createTempHistoryTable(client, tableModels.tables.postnumre);
     yield client.queryp('DELETE FROM vask_postnumre');
     yield client.queryp(`INSERT INTO vask_postnumre(nr, navn, virkning) (SELECT nr, navn, \
 tstzrange((CASE WHEN tf.time < '2016-01-01' THEN NULL ELSE tf.time END),tt.time, '[)') as virkning\    
