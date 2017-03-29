@@ -3,7 +3,6 @@
 const es = require('event-stream');
 const fs = require('fs');
 const JSONStream = require('JSONStream');
-const q = require('q');
 const { go } = require('ts-csp');
 
 const geojsonUtil = require('../geojsonUtil');
@@ -11,7 +10,6 @@ const importUtil = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const sqlCommon = require('../psql/common');
 const sqlUtil = require('../darImport/sqlUtil');
-const tablediff = require('../importUtil/tablediff');
 
 const ID_COLUMNS = ['kommunekode', 'kode'];
 const NON_ID_COLUMNS = ['geom'];
@@ -44,14 +42,6 @@ const streamToTempTable = (client, filePath, tableName) => go(function*() {
   const copyStream = importUtil.copyStream(client, tableName, COLUMNS);
   yield promisingStreamCombiner([src, jsonTransformer, mapper, stringifier, copyStream]);
 });
-
-function computeUpdates(client, srcTable, dstTable, upTable) {
-  return tablediff.computeUpdates(client, srcTable, dstTable, upTable, ID_COLUMNS, NON_ID_COLUMNS)
-}
-
-function applyUpdates(client, upTable, dstTable) {
-  return tablediff.applyUpdates(client, upTable, dstTable, ID_COLUMNS, NON_ID_COLUMNS);
-}
 
 const importVejmidter = (client, filePath, table, initial) => go(function*() {
   const linestringsTable = 'vejstykker_linestrings';

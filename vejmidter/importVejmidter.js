@@ -1,6 +1,5 @@
 "use strict";
 
-const q = require('q');
 const _ = require('underscore');
 
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
