@@ -1,5 +1,64 @@
 "use strict";
 
+const vejstykker = {
+  entity: 'vejstykke',
+  table: 'vejstykker',
+  primaryKey: ['kommunekode', 'kode'],
+  columns: [{
+    name: 'kommunekode'
+  }, {
+    name: 'kode'
+  }, {
+    name: 'oprettet'
+  }, {
+    name: 'aendret'
+  }, {
+    name: 'vejnavn'
+  }, {
+    name: 'adresseringsnavn'
+  }, {
+    name: 'tsv',
+    public: false,
+    derive: (table) => {
+      return `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`;
+    }
+  }, {
+    name: 'geom',
+    public: false
+  }, {
+    name: 'navngivenvej_id'
+  }]
+};
+
+const enhedsadresser = {
+  entity: 'adresse',
+  table: 'enhedsadresser',
+  primaryKey: ['id'],
+  columns: [{
+    name: 'id'
+  }, {
+    name: 'adgangsadresseid'
+  }, {
+    name: 'oprettet'
+  }, {
+    name: 'ikraftfra'
+  }, {
+    name: 'aendret'
+  }, {
+    name: 'etage'
+  }, {
+    name: 'doer'
+  }, {
+    name: 'objekttype'
+  }, {
+    name: 'kilde'
+  }, {
+    name: 'esdhreference'
+  }, {
+    name: 'journalnummer'
+  }]
+};
+
 const adgangsadresser = {
   entity: 'adgangsadresse',
   table: 'adgangsadresser',
@@ -33,7 +92,7 @@ const adgangsadresser = {
   }, {
     name: 'etrs89oest'
   }, {
-    name: 'etrs90nord'
+    name: 'etrs89nord'
   }, {
     name: 'noejagtighed'
   }, {
@@ -46,12 +105,6 @@ const adgangsadresser = {
     name: 'tekstretning'
   }, {
     name: 'adressepunktaendringsdato'
-  }, {
-    name: 'geom',
-    public: false
-  }, {
-    name: 'tsv',
-    public: false
   }, {
     name: 'objekttype'
   }, {
@@ -78,15 +131,8 @@ const ejerlav = {
   }, {
     name: 'tsv',
     public: false,
-    derive: (client, table, additionalWhereClauses) => {
-
-      let sql = `UPDATE ${table} t 
-      SET tsv = to_tsvector('adresser', processForIndexing(coalesce(t.navn, '')))`;
-      if(additionalWhereClauses) {
-        sql += ` WHERE ${additionalWhereClauses('t')}`;
-      }
-      return client.queryBatched(sql);
-    }
+    derive: (table) =>
+      `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
   }]
 };
 
@@ -101,34 +147,89 @@ const postnumre = {
   }, {
     name: 'tsv',
     public: false,
-    derive: (client, table, additionalWhereClauses) => {
-
-      let sql = `UPDATE ${table} t 
-      SET tsv = to_tsvector('adresser', coalesce(to_char(nr, '0000'), '') || ' ' || coalesce(navn, ''))`;
-      if(additionalWhereClauses) {
-        sql += ` WHERE ${additionalWhereClauses('t')}`;
-      }
-      return client.queryBatched(sql);
-    }
+    derive: (table) =>
+      `to_tsvector('adresser', coalesce(to_char(${table}.nr, '0000'), '') || ' ' || coalesce(${table}.navn, ''))`
   }, {
     name: 'stormodtager'
   }]
-}
+};
 
+const stormodtagere = {
+  entity: 'stormodtager',
+  table: 'stormodtagere',
+  primaryKey: ['adgangsadresseid'],
+  columns: [{
+    name: 'nr'
+  }, {
+    name: 'navn'
+  }, {
+    name: 'adgangsadresseid'
+  }]
+};
+
+const postnrTsVector = (nr, navn) => `to_tsvector('adresser', coalesce(to_char(${nr}, '0000'), '') || ' ' || coalesce(${navn}, ''))`;
+
+const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
+  `(${postnrTsVector(nr, navn)}::text || ' ' || ${postnrTsVector(stormodtagernr, stormodtagernavn)}::text)::tsvector`
 const adgangsadresser_mat = {
   table: 'adgangsadresser_mat',
   primaryKey: ['id'],
   columns: [...adgangsadresser.columns,
+    {name: 'ejerlavnavn'},
     {
-      name: 'ejerlavnavn'
+      name: 'tsv',
+      public: false,
+      derive: table =>
+        `setweight(to_tsvector('adresser', processforindexing(${table}.vejnavn || ' ' || formatHusnr(${table}.husnr))), 'A') ||
+         setweight(to_tsvector('adresser', processforindexing(COALESCE(${table}.supplerendebynavn, ''))), 'C') || 
+         setweight(${postnrOrStormodtagerTsVector(`${table}.postnr`, `${table}.postnrnavn`, `${table}.stormodtagerpostnr`, `${table}.stormodtagerpostnrnavn`)}, 'D')`
+    },
+    {
+      name: 'geom',
+      public: false,
+      derive: table =>
+        `ST_SetSRID(ST_MakePoint(${table}.etrs89oest, ${table}.etrs89nord), 25832)`
+    },
+    {name: 'vejnavn'},
+    {name: 'adresseringsvejnavn'},
+    {name: 'postnrnavn'},
+    {name: 'stormodtagerpostnr'},
+    {name: 'stormodtagerpostnrnavn'}]
+};
+
+const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'esdhreference', 'journalnummer'];
+
+const adresser_mat = {
+  table: 'adresser_mat',
+  primaryKey: ['id'],
+  columns: [
+    ...enhedsadresser.columns,
+    ...adgangsadresser_mat.columns.filter( col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(col.name)),
+    {name: 'a_objekttype'},
+    {name: 'a_oprettet'},
+    {name: 'a_aendret'},
+    {name: 'a_ikraftfra'},
+    {name: 'geom', public: false},
+    {
+      name: 'tsv',
+    public: false,
+      derive: table =>
+        `setweight(to_tsvector('adresser', processforindexing(${table}.vejnavn || ' ' || formatHusnr(${table}.husnr))), 'A') ||
+         setweight(to_tsvector('adresser', processforindexing(COALESCE(etage, '') ||' ' || COALESCE(doer, ''))), 'B') || 
+         setweight(to_tsvector('adresser', processforindexing(COALESCE(${table}.supplerendebynavn, ''))), 'C') || 
+         setweight(${postnrOrStormodtagerTsVector(`${table}.postnr`, `${table}.postnrnavn`, `${table}.stormodtagerpostnr`, `${table}.stormodtagerpostnrnavn`)}, 'D')`
     }]
 };
 
 exports.tables = {
+  vejstykker,
   adgangsadresser,
+  enhedsadresser,
   adgangsadresser_mat,
   ejerlav,
-  postnumre
+  postnumre,
+  stormodtagere,
+  adresser_mat
 };
 
 exports.materializations = {
@@ -142,6 +243,27 @@ exports.materializations = {
     }, {
       table: 'ejerlav',
       columns: ['ejerlavkode']
+    }, {
+      table: 'postnumre',
+      columns: ['postnr']
+    }, {
+      table: 'vejstykker',
+      columns: ['kommunekode', 'vejkode']
+    }, {
+      table: 'stormodtagere',
+      columns: ['id']
+    }]
+  },
+  adresser_mat: {
+    table: 'adresser_mat',
+    view: 'adresser_mat_view',
+    primaryKey: ['id'],
+    dependents: [{
+      table: 'enhedsadresser',
+      columns: ['id']
+    }, {
+      table: 'adgangsadresser_mat',
+      columns: ['adgangsadresseid']
     }]
   }
 };

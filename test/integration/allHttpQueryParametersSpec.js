@@ -48,6 +48,8 @@ _.keys(sampleParameters).forEach(function(entityName) {
           if (result.length === 0) {
             throw new Error('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue + ' resulted in empty query result');
           }
+          /*eslint no-console: 0 */
+          console.dir(result);
           _.each(result, function (queryMatch) {
             expect(verify(queryMatch, sampleValue)).to.equal(true);
           });

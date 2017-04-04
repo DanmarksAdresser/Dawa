@@ -23,12 +23,12 @@ BEGIN
          Adgangsadresser.id,
          gridded_temaer_matview.tema,
          gridded_temaer_matview.id
-       FROM Adgangsadresser, gridded_temaer_matview
+       FROM Adgangsadresser_mat adgangsadresser, gridded_temaer_matview
        WHERE Adgangsadresser.id = NEW.id AND st_covers(gridded_temaer_matview.geom, Adgangsadresser.geom));
   ELSE
     DELETE FROM adgangsadresser_temaer_matview mv WHERE adgangsadresse_id = NEW.id AND NOT EXISTS(
         SELECT *
-         FROM Adgangsadresser a, gridded_temaer_matview t
+         FROM Adgangsadresser_mat a, gridded_temaer_matview t
          WHERE mv.adgangsadresse_id = a.id  AND mv.tema_id = t.id and mv.tema = t.tema AND st_covers(t.geom, a.geom)
     );
     INSERT INTO adgangsadresser_temaer_matview
@@ -36,7 +36,7 @@ BEGIN
          Adgangsadresser.id,
          gridded_temaer_matview.tema,
          gridded_temaer_matview.id
-       FROM Adgangsadresser, gridded_temaer_matview
+       FROM Adgangsadresser_mat adgangsadresser, gridded_temaer_matview
        WHERE Adgangsadresser.id = NEW.id AND
              st_covers(gridded_temaer_matview.geom, Adgangsadresser.geom) AND
       NOT EXISTS(
@@ -49,6 +49,5 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-DROP TRIGGER IF EXISTS adgangsadresser_temaer_matview_update_on_adgangsadresse ON adgangsadresser;
-CREATE TRIGGER adgangsadresser_temaer_matview_update_on_adgangsadresse AFTER INSERT OR UPDATE OR DELETE ON adgangsadresser
+CREATE TRIGGER adgangsadresser_temaer_matview_update_on_adgangsadresse AFTER INSERT OR UPDATE OR DELETE ON adgangsadresser_mat
 FOR EACH ROW EXECUTE PROCEDURE adgangsadresser_temaer_matview_update_on_adgangsadresse();

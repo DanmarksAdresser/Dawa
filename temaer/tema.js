@@ -300,14 +300,14 @@ const updateAdresserTemaerView = (client, temaDef, initializing, maxChanges, dis
   return q.async(function*() {
     const selectCoveredMappings =
       `SELECT DISTINCT Adgangsadresser.id as adgangsadresse_id, gridded_temaer_matview.id as tema_id, '${temaDef.singular}'::tema_type as tema
-      FROM Adgangsadresser JOIN gridded_temaer_matview  
+      FROM Adgangsadresser_mat adgangsadresser JOIN gridded_temaer_matview  
       ON  ST_Covers(gridded_temaer_matview.geom, Adgangsadresser.geom) AND tema = '${temaDef.singular}'::tema_type`;
 
     const selectNearestMappings = coveredTable =>
       `WITH adrs AS (SELECT
     a.id,
       geom
-    FROM adgangsadresser a
+    FROM adgangsadresser_mat a
     WHERE geom IS NOT NULL AND
     NOT exists
     (SELECT *

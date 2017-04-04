@@ -49,7 +49,7 @@ forceUnique) {
       yield sqlCommon.disableTriggersQ(client);
       yield client.queryp(
         `INSERT INTO ${relTable}(${insertList}) 
-        (SELECT ${selectList} FROM adgangsadresser a 
+        (SELECT DISTINCT ${selectList} FROM adgangsadresser_mat a 
          JOIN ${srcTable} f ON ST_Covers(f.geom, a.geom))`);
       yield client.queryp(
         `INSERT INTO ${relHistoryTable}(${insertList}) 
@@ -67,8 +67,8 @@ forceUnique) {
         return `f.${key} as ${column}`;
       }).concat(['a.id as adgangsadresse_id']).join(', ');
       yield client.queryp(`CREATE TEMP VIEW desired_view AS \
-(SELECT ${selectFlatKeys} \
-FROM ${srcTable} f JOIN adgangsadresser a ON ST_Covers(f.geom, a.geom))`);
+(SELECT DISTINCT ${selectFlatKeys} \
+FROM ${srcTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
 
       yield tablediff.computeDifferencesSubset(
         client, 'changed_ids', 'desired_view', relTable, relTableColumns, []);

@@ -23,10 +23,8 @@ cli.main(function (args, options) {
     pooled: false
   });
   var scriptDir = __dirname + '/schema';
-  proddb.withTransaction('READ_WRITE', function (client) {
-    return go(function*() {
-      yield initialization.loadSchemas(client, scriptDir);
-      yield initialization.disableTriggersAndInitializeTables(client);
-    });
-  }).done();
+  proddb.withTransaction('READ_WRITE',  client => go(function*() {
+    yield initialization.loadSchemas(client, scriptDir);
+    yield initialization.disableTriggersAndInitializeTables(client);
+  })).done();
 });

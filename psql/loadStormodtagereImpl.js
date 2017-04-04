@@ -1,42 +1,30 @@
 "use strict";
 
-var csv       = require('csv');
-var util      = require('util');
-var q = require('q');
-var _ = require('underscore');
+const {go} = require('ts-csp');
 
-function createInsertStormodtagereSQL(stormodtagere){
-  return "INSERT INTO stormodtagere VALUES\n" +
-    _.map(stormodtagere, function(sm){
-      return util.format("  ('%s', '%s', '%s')",
-        sm.Firmapostnr, sm.Bynavn, sm.Adgangsadresseid);
-    }).join(",\n");
+const importUtil = require('../importUtil/importUtil');
+const tableDiffNg = require('../importUtil/tableDiffNg');
+const tableModel = require('../psql/tableModel');
+const {assignSequenceNumbers} = require('../importUtil/tableModelUtil');
+const {materializeDawa} = require('../importUtil/materialize');
+
+const STORMODTAGER_COLUMNS = ['nr', 'navn', 'adgangsadresseid'];
+
+function loadStormodtagerCsv(client, inputFile, tableName) {
+  return importUtil.streamCsvToTable(client, inputFile, tableName, STORMODTAGER_COLUMNS, row => ({
+    adgangsadresseid: row.Adgangsadresseid,
+    nr: row.Firmapostnr,
+    navn: row.Bynavn
+  }));
 }
 
-// When updating, first remove the old stormodtager data, then load
-// the new data.  This way the CSV file completely controls which
-// stormodtagere that exists. Note that the text-search-vector gets
-// re-updated for every zip (the amount of zips is small, so this will
-// be fast).
-function updateStormodtagere(client, stormodtagere){
-  return q.async(function*() {
-    yield client.queryp('DELETE FROM stormodtagere');
-    yield client.queryp(createInsertStormodtagereSQL(stormodtagere));
-  })();
-}
+const stormodtagerTableModel = tableModel.tables.stormodtagere;
 
-module.exports = function (client, inputFile) {
-  // Read stormodtager data (this is a small CSV file, under 40 lines)
-// and call the DB update function.
-  return q.Promise((resolve, reject) =>
-  {
-    csv().from
-      .path(inputFile, {delimiter: ';', columns: true})
-      .to.array(function (data, count) {
-
-        updateStormodtagere(client, _.filter(data, function (d) {
-          return d.Adgangsadresseid !== "";
-        })).then(resolve);
-      });
-  });
-};
+module.exports = (client, txid, inputFile) => go(function*() {
+  yield importUtil.createTempTableFromTemplate(client, 'updated_stormodtagere', 'stormodtagere', STORMODTAGER_COLUMNS);
+  yield loadStormodtagerCsv(client, inputFile, 'updated_stormodtagere');
+  yield tableDiffNg.computeDifferences(client, txid, 'updated_stormodtagere', stormodtagerTableModel);
+  yield assignSequenceNumbers(client, txid, stormodtagerTableModel, ['delete', 'update', 'insert']);
+  yield tableDiffNg.applyChanges(client, txid, stormodtagerTableModel);
+  yield materializeDawa(client, txid);
+});

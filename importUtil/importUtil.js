@@ -45,7 +45,7 @@ function streamToTablePipeline(client, targetTable, columns, mapFn) {
  * Create a PostgreSQL COPY stream, which accepts CSV streams made by copyStreamStringifier
  */
 function copyStream(client, table, columnNames) {
-  var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
+  var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
   return client.copyFrom(sql);
 }
 
@@ -151,24 +151,20 @@ const withImportTransaction = (client, description, fn) =>
       `WITH id AS (SELECT COALESCE(MAX(txid), 0)+1 as txid FROM transactions),
        d AS (UPDATE current_tx SET txid = (SELECT txid FROM id))
        INSERT INTO transactions(txid, description) (select txid, $1 FROM id) RETURNING txid`, [description])).rows[0].txid;
-    try {
-      return yield fn(txid);
-
-    }
-    finally {
-      yield client.query(`UPDATE current_tx SET txid=null`);
-    }
+    const result = yield fn(txid);
+    yield client.query(`UPDATE current_tx SET txid=null`);
+    return result;
   }));
 
 module.exports = {
-  copyStream: copyStream,
-  copyStreamStringifier: copyStreamStringifier,
-  dropTable: dropTable,
-  createTempTableFromTemplate: createTempTableFromTemplate,
-  streamArrayToTable: streamArrayToTable,
-  streamCsvToTable: streamCsvToTable,
-  streamNdjsonToTable: streamNdjsonToTable,
-  streamArray: streamArray,
-  streamToTablePipeline: streamToTablePipeline,
+  copyStream,
+  copyStreamStringifier,
+  dropTable,
+  createTempTableFromTemplate,
+  streamArrayToTable,
+  streamCsvToTable,
+  streamNdjsonToTable,
+  streamArray,
+  streamToTablePipeline,
   withImportTransaction
 };

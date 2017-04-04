@@ -49,6 +49,8 @@ class DawaClient {
   }
 
   query(sql, params, options) {
+    // console.log(sql);
+    // console.log(JSON.stringify(params))
     options = options || {};
     const skipQueue = options.skipQueue || false;
     if (this.released) {
@@ -175,7 +177,12 @@ class DawaClient {
         return result;
       }
       catch(e) {
-        yield Promise.promisify(client.query, {context: client})('ROLLBACK');
+        try {
+          yield client.query('ROLLBACK', [], { skipQueue: true });
+        }
+        catch(e) {
+          // ignore
+        }
         throw e;
       }
       finally {

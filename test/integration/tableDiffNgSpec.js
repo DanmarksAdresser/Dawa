@@ -6,7 +6,8 @@ const testdb = require('../helpers/testdb2');
 
 const tableModel = require('../../psql/tableModel');
 
-const { computeInserts, computeUpdates, computeDeletes, computeDifferences }  = require('../../importUtil/tableDiffNg');
+const { computeInserts, computeUpdates, computeDeletes, computeDifferences, applyChanges }  = require('../../importUtil/tableDiffNg');
+const { withImportTransaction } = require('../../importUtil/importUtil');
 
 const ejerlavTableModel = tableModel.tables.ejerlav;
 describe('tableDiffNg', () => {
@@ -28,18 +29,25 @@ describe('tableDiffNg', () => {
 
     it('Can compute updates by diffing two tables', () => go(function*() {
       const client = clientFn();
-      yield client.query(`INSERT INTO ejerlav(kode, navn) values (1, 'foo')`);
-      yield client.query(`INSERT INTO ejerlav(kode, navn) VALUES (2, 'bar')`);
       yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
+
+      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
+      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn) VALUES (2, 'bar')`);
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        yield applyChanges(client, txid, ejerlavTableModel);
+      }));
       yield client.query(`UPDATE fetch_ejerlav set navn = 'foobar' WHERE kode = 1`);
-      const txid = 1;
-      yield computeUpdates(client, txid, 'fetch_ejerlav', ejerlavTableModel);
-      const result = yield client.queryRows('select * from ejerlav_changes');
-      assert.strictEqual(result.length, 1);
-      assert.strictEqual(result[0].txid, 1);
-      assert.strictEqual(result[0].kode, 1);
-      assert.strictEqual(result[0].operation, 'update');
-      assert.strictEqual(result[0].navn, 'foobar');
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeUpdates(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        const result = yield client.queryRows('select * from ejerlav_changes where txid = $1', [txid]);
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].txid, 2);
+        assert.strictEqual(result[0].kode, 1);
+        assert.strictEqual(result[0].operation, 'update');
+        assert.strictEqual(result[0].navn, 'foobar');
+        assert.strictEqual(result[0].tsv, "'foobar':1");
+      }));
     }));
 
     it('Can compute deletes by diffing two tables', () => go(function*() {
@@ -59,29 +67,35 @@ describe('tableDiffNg', () => {
 
     it('Can compute all differences by diffing two tables', () => go(function*() {
       const client = clientFn();
-      // unmodified
-      yield client.queryBatched(`INSERT INTO ejerlav(kode, navn) values (1, 'foo')`);
-      // updated
-      yield client.queryBatched(`INSERT INTO ejerlav(kode, navn) values (2, 'bar')`);
       yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
-
-      yield client.queryBatched(`UPDATE fetch_ejerlav SET navn = 'baz' WHERE kode = 2`);
+      // unmodified
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
+      // updated
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (2, 'bar')`);
       // deleted
-      yield client.queryBatched(`INSERT INTO ejerlav(kode, navn) values (3, 'foobar')`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (3, 'foobar')`);
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        yield applyChanges(client, txid, ejerlavTableModel);
+      }));
+
+      yield client.queryBatched(`DELETE FROM fetch_ejerlav WHERE kode = 3`);
+      yield client.queryBatched(`UPDATE fetch_ejerlav SET navn = 'baz' WHERE kode = 2`);
       // inserted
       yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) VALUES (4, 'foobaz')`);
-      const txid = 1;
-      yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
-      const result = yield client.queryRows('select * from ejerlav_changes order by kode');
-      assert.strictEqual(result.length, 3);
-      assert.strictEqual(result[0].kode, 2);
-      assert.strictEqual(result[0].navn, 'baz');
-      assert.strictEqual(result[0].operation, 'update');
-      assert.strictEqual(result[1].kode, 3);
-      assert.strictEqual(result[1].operation, 'delete');
-      assert.strictEqual(result[2].kode, 4);
-      assert.strictEqual(result[2].navn, 'foobaz');
-      assert.strictEqual(result[2].operation, 'insert');
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        const result = yield client.queryRows(`select * from ejerlav_changes  where txid = ${txid} order by kode`);
+        assert.strictEqual(result.length, 3);
+        assert.strictEqual(result[0].kode, 2);
+        assert.strictEqual(result[0].navn, 'baz');
+        assert.strictEqual(result[0].operation, 'update');
+        assert.strictEqual(result[1].kode, 3);
+        assert.strictEqual(result[1].operation, 'delete');
+        assert.strictEqual(result[2].kode, 4);
+        assert.strictEqual(result[2].navn, 'foobaz');
+        assert.strictEqual(result[2].operation, 'insert');
+      }));
     }));
   });
 });

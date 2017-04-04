@@ -3,15 +3,15 @@
 var fs = require('fs');
 var moment = require('moment');
 var path = require('path');
-var q = require('q');
 var _ = require('underscore');
+const { go } = require('ts-csp');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var importDarImpl = require('./importDarImpl');
-var initialization = require('../psql/initialization');
 var logger = require('../logger').forCategory('darImport');
 var proddb = require('../psql/proddb');
-var sqlCommon = require('../psql/common');
+const { withImportTransaction } = require('../importUtil/importUtil');
+
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -45,8 +45,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
 
   var report = {};
 
-  proddb.withTransaction('READ_WRITE', function (client) {
-    return q.async(function*() {
+  proddb.withTransaction('READ_WRITE',  (client) => go(function*() {
       try {
         if(clearDawa) {
           yield importDarImpl.clearDawa(client);
@@ -55,23 +54,16 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
         if(initial) {
           yield importDarImpl.clearDarTables(client);
         }
-        yield  importDarImpl.withDarTransaction(client, 'csv', function() {
-          if(initial) {
-            return importDarImpl.initFromDar(client, dataDir, clearDawa, skipDawa, skipRowsConfig);
-          }
-          else {
-            return importDarImpl.updateFromDar(client, dataDir, fullCompare, skipDawa, skipRowsConfig, report);
-          }
-        });
-
-        if(clearDawa) {
-          yield sqlCommon.withoutTriggers(client, function() {
-            return q.async(function*() {
-              yield client.queryp('analyze');
-              yield initialization.initializeTables(client);
-            })();
-          });
-        }
+        yield  importDarImpl.withDarTransaction(client, 'csv', () => go(function*() {
+          yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+            if (initial) {
+              yield importDarImpl.initFromDar(client, txid, dataDir, clearDawa, skipDawa, skipRowsConfig);
+            }
+            else {
+              yield importDarImpl.updateFromDar(client, txid, dataDir, fullCompare, skipDawa, skipRowsConfig, report);
+            }
+          }));
+        }));
 
         if(options.reportDir) {
           fs.writeFileSync(path.join(options.reportDir, 'report-'+ moment().toISOString() + '.json'), JSON.stringify(report, null, undefined));
@@ -103,6 +95,5 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
         logger.error('Caught error in importDar', err);
         throw err;
       }
-    })();
-  }).done();
+    })).done();
 });

@@ -29,8 +29,7 @@ const withUnpooledRawConnection = (options, connectionFn) => go(function*() {
   const client = new pg.Client(options);
   yield Promise.promisify(client.connect, { context: client})();
   try {
-    const result = yield this.delegateAbort(connectionFn(client));
-    return result;
+    return yield this.delegateAbort(connectionFn(client));
   }
   finally {
     yield Promise.promisify(client.end, { context: client})();

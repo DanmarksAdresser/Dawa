@@ -1,5 +1,6 @@
 "use strict";
 
+const { go } = require('ts-csp');
 var csvParse = require('csv-parse');
 var csvStringify = require('csv-stringify');
 var es = require('event-stream');
@@ -9,15 +10,14 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
+const { materializeDawa } = require('../importUtil/materialize');
 var bitemporal = require('./bitemporal');
 var csvSpecs = require('./csvSpec');
 var csvSpecUtil = require('./csvSpecUtil');
 var databaseTypes = require('../psql/databaseTypes');
-var datamodels = require('../crud/datamodel');
 var dawaDbSpec = require('./dawaDbSpec');
 var dbSpec = require('./dbSpec');
 var dbSpecUtil = require('./dbSpecUtil');
-var initialization = require('../psql/initialization');
 var logger = require('../logger').forCategory('darImport');
 var monotemporal = require('./monotemporal');
 var nontemporal = require('./nontemporal');
@@ -27,11 +27,13 @@ var sqlUtil = require('./sqlUtil');
 var tema = require('../temaer/tema');
 var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
+const schemaModel = require('../psql/tableModel');
+
 const tablediff = require('../importUtil/tablediff');
+const tableDiffNg = require('../importUtil/tableDiffNg');
 const importUtil = require('../importUtil/importUtil');
 
 var selectList = sqlUtil.selectList;
-var columnsEqualClause = sqlUtil.columnsEqualClause;
 var Range = databaseTypes.Range;
 
 
@@ -205,68 +207,28 @@ var dawaChangeOrder = [
   }
 ];
 
-/**
- * After an update to DAWA tables without generating history, we update the *most recent* history record
- * to the new content. This ensures that recent udtræk is correct.
- * @param client
- */
-function updateDawaHistory(client) {
-  return qUtil.mapSerial(Object.keys(dawaDbSpecImpls), function(entityName) {
-    var dbSpecImpl = dawaDbSpecImpls[entityName];
-    var tableName = dbSpecImpl.table;
-    var historyTableName = tableName + '_history';
-    var setClause = dbSpecImpl.changeTableColumnNames.map(function(col) {
-      return format("{col} = {table}.{col}", {
-        col: col,
-        table: tableName
-      });
-    }).join(", ");
-    var keyEqualsClause = columnsEqualClause(tableName, historyTableName, dbSpecImpl.idColumns);
-    var sql = format("UPDATE {historyTable}" +
-      " SET {setClause} FROM {table}" +
-      " WHERE {historyTable}.valid_to IS NULL AND {keyEqualsClause}",
-      {
-        table: tableName,
-        historyTable: historyTableName,
-        setClause: setClause,
-        keyEqualsClause: keyEqualsClause
-      });
-    return client.queryp(sql);
-  });
-}
-
 /*
  * Given tables has been created for each DAWA entity containing inserts, updates and deletes respectively,
  * perform the changes to the DAWA tables in the correct order (that is, e.g. ensuring that adgangsadresse
  * is not deleted before adresse).
  */
-function doDawaChanges(client, skipEvents) {
-  function applyChanges() {
-    return qUtil.mapSerial(dawaChangeOrder, function(change) {
-      var dbSpec = dawaDbSpecImpls[change.entity];
-      var dbSpecImpl = dawaDbSpecImpls[change.entity];
-      var table = dbSpec.table;
-      logger.info('Applying change to DAWA table', change);
-      if(change.type === 'insert') {
-        return dbSpecImpl.applyInserts(client, table);
-      }
-      else if(change.type === 'update') {
-        return dbSpecImpl.applyUpdates(client, table);
-      }
-      else if(change.type === 'delete') {
-        return dbSpecImpl.applyDeletes(client, table);
-      }
-    });
+const  doDawaChanges = (client, txid) => go(function*() {
+  for(let change of dawaChangeOrder) {
+    var dbSpec = dawaDbSpecImpls[change.entity];
+    var table = dbSpec.table;
+    const tableModel = schemaModel.tables[table];
+    logger.info('Applying change to DAWA table', change);
+    if(change.type === 'insert') {
+      yield tableDiffNg.applyInserts(client, txid, tableModel);
+    }
+    else if(change.type === 'update') {
+      yield tableDiffNg.applyUpdates(client, txid, tableModel);
+    }
+    else if(change.type === 'delete') {
+      yield tableDiffNg.applyDeletes(client, txid, tableModel);
+    }
   }
-  if(skipEvents) {
-    return sqlCommon.withoutHistoryTriggers(client, ['adgangsadresser', 'enhedsadresser', 'vejstykker'], applyChanges).then(function() {
-      return updateDawaHistory(client);
-    });
-  }
-  else {
-    return applyChanges();
-  }
-}
+});
 
 function dropTable(client, tableName) {
   return client.queryp('DROP TABLE ' + tableName,[]);
@@ -347,46 +309,18 @@ function computeDirtyObjects(client, report) {
   });
 }
 
-function performDawaChanges(client, report) {
-  return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
+const  performDawaChanges = (client, txid, report) => go(function*() {
+  for(let entityName of ['vejstykke', 'adgangsadresse', 'adresse']) {
     logger.debug('Computing changes for DAWA entity', {entity:  entityName});
-    var dbSpecImpl = dawaDbSpecImpls[entityName];
-    var tableName = dbSpecImpl.table;
-    var idColumns = dbSpecImpl.idColumns;
-    return client.queryp(format('CREATE TEMP VIEW desired_{tableName} AS (' +
-    'SELECT dar_{tableName}_view.* FROM dirty_{tableName}' +
-    ' JOIN dar_{tableName}_view ON {idColumnsEqual})',
-      {
-        tableName: tableName,
-        idColumnsEqual: columnsEqualClause('dar_' + tableName + '_view', 'dirty_' + tableName, idColumns)
-      }), [])
-      .then(function() {
-        return client.queryp(format('CREATE TEMP VIEW actual_{tableName} AS (' +
-          'SELECT {tableName}.* FROM dirty_{tableName}' +
-          ' JOIN {tableName} ON {idColumnsEqual})',
-          {
-            tableName: tableName,
-            idColumnsEqual: columnsEqualClause('dirty_' + tableName, tableName, idColumns)
-          }), []);
-      })
-      .then(function() {
-        return dbSpecImpl.computeDifferences(client, 'desired_' + tableName, tableName, 'actual_' + tableName);
-      })
-      .then(function() {
-        return client.queryp('DROP VIEW actual_' + tableName + '; DROP VIEW desired_' + tableName, []);
-      });
-  }).then(function() {
-    return doDawaChanges(client);
-  }).then(function() {
-    return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-      var tableName = datamodels[entityName].table;
-      return reportChanges(client, report, tableName).then(function() {
-        return dropModificationTables(client, tableName);
-      });
-    });
-
-  });
-}
+    const dawaSpec = dawaDbSpec[entityName];
+    const columns = dawaSpec.columns;
+    const tableName = dawaSpec.table;
+    const tableModel = schemaModel.tables[tableName];
+    yield tableDiffNg.computeDifferencesSubset(client, txid, `dar_${tableName}_view`, `dirty_${tableName}`, tableModel, columns);
+    yield tableDiffNg.applyChanges(client, txid, tableModel);
+  }
+  yield materializeDawa(client, txid);
+});
 
 /**
  * Remove all data from DAR tables
@@ -404,13 +338,14 @@ exports.clearDarTables = function(client) {
  * Initialize DAR tables from CSV, assuming they are empty.
  * Loads data directly into the tables from CSV.
  */
-function initDarTables(client, dataDir, skipRowsConfig) {
-  return qUtil.mapSerial(darDbSpecImpls, function(dbSpecImpl, entityName) {
+const initDarTables = (client, dataDir, skipRowsConfig) => go(function*() {
+  for(let entityName of Object.keys(darDbSpecImpls)) {
     logger.info('Initializing dar table from CSV', {entity: entityName});
-    var csvSpec = csvSpecs[entityName];
-    return loadCsvFile(client, path.join(dataDir, csvSpec.filename), dbSpecImpl.table, dbSpecImpl, csvSpec, skipRowsConfig[entityName]);
-  });
-}
+    const dbSpecImpl = darDbSpecImpls[entityName];
+    const csvSpec = csvSpecs[entityName];
+    yield loadCsvFile(client, path.join(dataDir, csvSpec.filename), dbSpecImpl.table, dbSpecImpl, csvSpec, skipRowsConfig[entityName]);
+  }
+});
 
 exports.clearDawa = function(client) {
   return sqlCommon.withoutTriggers(client, function() {
@@ -437,36 +372,23 @@ exports.importNewFields = function(client) {
  * Given that DAR tables are populated, initialize DAWA tables, assuming no
  * existing data is present in the tables.
  */
-function initDawaFromScratch(client) {
+const initDawaFromScratch = (client, txid) => go(function*() {
   logger.info('initializing DAWA from scratch');
-  return sqlCommon.withoutTriggers(client, function() {
-    return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
-      .then(function() {
-        logger.info('populating DAWA tables');
-        return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-          var spec = dawaDbSpec[entityName];
-          var table = spec.table;
-          var sql = format("INSERT INTO {dawaTable}({columns}) SELECT {columns} FROM {view}",
-            {
-              dawaTable: table,
-              columns: dawaDbSpec[entityName].columns.join(', '),
-              view: 'full_' + table
-            });
-          return client.queryp(sql);
-        });
-      })
-      .then(function () {
-        logger.info('initializing history');
-        return initialization.initializeHistory(client);
-      })
-      .then(function() {
-        logger.info('initializing adresserTemaerView');
-        return qUtil.mapSerial(temaer, function(temaSpec) {
-          return tema.updateAdresserTemaerView(client, temaSpec, true, 100000000, false);
-        });
-      });
-  });
-}
+  yield executeExternalSqlScript(client, 'create_full_dawa_views.sql');
+  yield sqlCommon.withoutTriggers(client, () => go(function*() {
+    for(let entityName of ['vejstykke', 'adgangsadresse', 'adresse']) {
+      const spec = dawaDbSpec[entityName];
+      const table = spec.table;
+      const tableModel = schemaModel.tables[table];
+      yield tableDiffNg.initializeFromScratch(client, txid, `full_${table}`, tableModel, spec.columns);
+    }
+  }));
+  yield materializeDawa(client, txid);
+  logger.info('initializing adresserTemaerView');
+  for(let temaSpec of temaer) {
+    yield tema.updateAdresserTemaerView(client, temaSpec, true, 100000000, false);
+  }
+});
 
 /**
  * Assuming no data exists in DAR tables, initialize them from CSV.
@@ -474,64 +396,38 @@ function initDawaFromScratch(client) {
  * When DAR tables has been initialized, the DAWA tables will be updated as well (
  * from scratch, if clearDawa is specified, otherwise incrementally).
  */
-function initFromDar(client, dataDir, clearDawa, skipDawa, skipRowsConfig) {
-  return initDarTables(client, dataDir, skipRowsConfig)
-    .then(function () {
-      if(!skipDawa) {
-        if (clearDawa) {
-          return initDawaFromScratch(client);
-        }
-        else {
-          return fullCompareAndUpdate(client, false);
-        }
-      }
-    });
-}
+const initFromDar = (client, txid, dataDir, clearDawa, skipDawa, skipRowsConfig) => go(function*() {
+  yield initDarTables(client, dataDir, skipRowsConfig);
+  yield client.query('analyze');
+  if (!skipDawa) {
+    if (clearDawa) {
+      yield initDawaFromScratch(client, txid);
+    }
+    else {
+      yield fullCompareAndUpdate(client, txid, false);
+    }
+  }
+});
 
 /**
  * Make a full comparison of DAWA state and DAR state, and perform the necessary updates to
  * the DAWA model
  * @param client
  */
-function fullCompareAndUpdate(client, skipEvents, report) {
+const fullCompareAndUpdate = (client, txid) => go(function*() {
   logger.info('Performing full comparison and update');
-  return executeExternalSqlScript(client, 'create_full_dawa_views.sql')
-    .then(function() {
-      return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-        logger.info('Computing differences for entity', {entityName: entityName});
-        var dbSpecImpl = dawaDbSpecImpls[entityName];
-        var dawaTable = dbSpecImpl.table;
-        return dbSpecImpl.computeDifferences(client, 'full_' + dawaTable, dawaTable, dawaTable);
-      });
-    })
-    .then(function() {
-      return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-        var dbSpecImpl = dawaDbSpecImpls[entityName];
-        var dawaTable = dbSpecImpl.table;
-        return qUtil.mapSerial(['insert', 'update', 'delete'], function(op) {
-          return client.queryp('select count(*) as c from ' + op + '_' + dawaTable).then(function(result) {
-            logger.info('change count', {
-              entityName: entityName,
-              operation: op,
-              changes: result.rows[0].c
-            });
-          });
-        });
-      });
-    })
-    .then(function() {
-      logger.info('Applying changes to DAWA tables');
-      return doDawaChanges(client, skipEvents);
-    })
-    .then(function() {
-      return qUtil.mapSerial(['vejstykke', 'adgangsadresse', 'adresse'], function(entityName) {
-        var tableName = datamodels[entityName].table;
-        return reportChanges(client, report, tableName).then(function() {
-          return dropModificationTables(client, tableName);
-        });
-      });
-    });
-}
+  yield executeExternalSqlScript(client, 'create_full_dawa_views.sql');
+  for(let entityName of ['vejstykke', 'adgangsadresse', 'adresse']) {
+    logger.info('Computing differences for entity', {entityName: entityName});
+    const dawaSpec = dawaDbSpec[entityName];
+    const columns = dawaSpec.columns;
+    const dawaTable = dawaSpec.table;
+    const tableModel = schemaModel.tables[dawaTable];
+    yield tableDiffNg.computeDifferences(client, txid, 'full_' + dawaTable, tableModel, columns);
+  }
+  yield doDawaChanges(client, txid);
+  yield materializeDawa(client, txid);
+});
 
 function updateVejstykkerPostnumreMat(client, initial) {
   return q.async(function*() {
@@ -562,37 +458,35 @@ function updateVejstykkerPostnumreMat(client, initial) {
  * Assuming DAR tables are already populated, update DAR tables
  * from CSV, followed by an update of DAWA tables.
  */
-function updateFromDar(client, dataDir, fullCompare, skipDawa, skipRowsConfig, report) {
-  return q.async(function*() {
+const updateFromDar = (client, txid, dataDir, fullCompare, skipDawa, skipRowsConfig, report) => go(function*() {
 
-    for(let entityName of Object.keys(csvSpecs)) {
-      const csvSpec = csvSpecs[entityName];
-      const dbSpecImpl = darDbSpecImpls[entityName];
-      yield updateTableFromCsv(
-        client,
-        path.join(dataDir, csvSpec.filename),
-        csvSpec,
-        dbSpecImpl, false, skipRowsConfig[entityName], report);
-    }
-    if(!skipDawa) {
-      if(fullCompare) {
-        yield fullCompareAndUpdate(client, false, report);
-      }
-      else {
-        logger.debug('computing dirty objects');
-        yield computeDirtyObjects(client, report);
-        yield performDawaChanges(client, report);
-      }
-      yield updateVejstykkerPostnumreMat(client, false);
+  for (let entityName of Object.keys(csvSpecs)) {
+    const csvSpec = csvSpecs[entityName];
+    const dbSpecImpl = darDbSpecImpls[entityName];
+    yield updateTableFromCsv(
+      client,
+      path.join(dataDir, csvSpec.filename),
+      csvSpec,
+      dbSpecImpl, false, skipRowsConfig[entityName], report);
+  }
+  if (!skipDawa) {
+    if (fullCompare) {
+      yield fullCompareAndUpdate(client, txid, false, report);
     }
     else {
-      logger.info('Skipping DAWA updates');
+      logger.debug('computing dirty objects');
+      yield computeDirtyObjects(client, report);
+      yield performDawaChanges(client, txid, report);
     }
-    for(let specImpl of _.values(darDbSpecImpls)) {
-      yield dropChangeTables(client, specImpl.table);
-    }
-  })();
-}
+    yield updateVejstykkerPostnumreMat(client, false);
+  }
+  else {
+    logger.info('Skipping DAWA updates');
+  }
+  for (let specImpl of _.values(darDbSpecImpls)) {
+    yield dropChangeTables(client, specImpl.table);
+  }
+});
 
 function storeRowsToTempTable(client, csvSpec, dbSpecImpl, rows, table, report) {
   var columnNames = dbSpecImpl.changeTableColumnNames;
@@ -728,43 +622,29 @@ function computeChangeSets (client, rowsMap, report) {
  * @param rowsMap
  * @returns promise
  */
-exports.applyDarChanges = function (client, rowsMap, skipDawa, report) {
-  return computeChangeSets(client, rowsMap, report)
-    .then(function() {
-      return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'],
-        function(specName) {
-          var dbSpecImpl = darDbSpecImpls[specName];
-          return dbSpecUtil.applyChanges(client, dbSpecImpl, dbSpecImpl.table);
-        });
-    })
-    .then(function() {
-      return client.queryp('SET CONSTRAINTS ALL IMMEDIATE; SET CONSTRAINTS ALL DEFERRED', []);
-    })
-    .then(function () {
-      if(!skipDawa) {
-        return computeDirtyObjects(client, report)
-          .then(function () {
-            return performDawaChanges(client, report);
-          })
-          .then(function() {
-            return qUtil.mapSerial(['adgangsadresser', 'enhedsadresser', 'vejstykker'], function(table) {
-              return dropTable(client, 'dirty_' + table);
-            });
-          });
-      }
-    })
-    .then(function() {
-      return qUtil.mapSerial(Object.keys(darDbSpecImpls), function(specName) {
-        var spec = darDbSpecImpls[specName];
-        return dropModificationTables(client, spec.table);
-      });
-    })
-    .then(function() {
-      return qUtil.mapSerial(['adgangspunkt', 'husnummer', 'adresse'], function(specName) {
-        return dropTable(client, 'fetched_' + specName);
-      });
-    });
-};
+exports.applyDarChanges = (client, txid, rowsMap, skipDawa, report) => go(function*() {
+  yield computeChangeSets(client, rowsMap, report);
+  for (let specName of ['adgangspunkt', 'husnummer', 'adresse']) {
+    const dbSpecImpl = darDbSpecImpls[specName];
+    yield dbSpecUtil.applyChanges(client, dbSpecImpl, dbSpecImpl.table);
+
+  }
+  yield client.query('SET CONSTRAINTS ALL IMMEDIATE; SET CONSTRAINTS ALL DEFERRED');
+  if (!skipDawa) {
+    yield  computeDirtyObjects(client, report)
+    yield performDawaChanges(client, txid, report);
+    for (let table of ['adgangsadresser', 'enhedsadresser', 'vejstykker']) {
+      yield dropTable(client, 'dirty_' + table);
+    }
+  }
+  for (let specName of ['adgangspunkt', 'vejnavn', 'postnr', 'supplerendebynavn', 'husnummer', 'adresse']) {
+    yield dropModificationTables(client, `dar_${specName}`);
+  }
+
+  for (let specName of ['adgangspunkt', 'husnummer', 'adresse']) {
+    yield dropTable(client, 'fetched_' + specName);
+  }
+});
 
 function getDawaSeqNum(client) {
   return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history', [])
@@ -829,15 +709,11 @@ exports.endDarTransaction = function(client, prevDawaSeqNum, source)
     });
 };
 
-exports.withDarTransaction = function(client, source, transactionFn) {
-  var prevDawaSeqNum;
-  return exports.beginDarTransaction(client).then(function(dawaSeqNum) {
-    prevDawaSeqNum = dawaSeqNum;
-    return transactionFn(client);
-  }).then(function() {
-    return exports.endDarTransaction(client, prevDawaSeqNum, source);
-  });
-};
+exports.withDarTransaction = (client, source, transactionFn) => go(function*() {
+  const dawaSeqNum = yield exports.beginDarTransaction(client);
+  yield transactionFn(client);
+  yield exports.endDarTransaction(client, dawaSeqNum, source);
+});
 
 exports.loadCsvFile = loadCsvFile;
 exports.updateTableFromCsv = updateTableFromCsv;

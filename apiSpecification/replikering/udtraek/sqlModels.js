@@ -41,7 +41,7 @@ const baseQuery2 = (tableName, keyColumns, columnMappings, sequenceNumber) => {
     `SELECT *, row_number()
   OVER (PARTITION BY ${keyColumns.join(', ')}
     ORDER BY changeid desc NULLS LAST) as row_num
-FROM ${tableName}_changes WHERE public`;
+FROM ${tableName}_changes`;
   if(sequenceNumber) {
     subselect += ` AND (changeid IS NULL OR changeid <= $1)`
   }
@@ -95,7 +95,7 @@ function createSqlModel(columnMappings, baseQueryFn) {
   };
 }
 
-const newModelNames = ['ejerlav'];
+const newModelNames = ['ejerlav', 'postnummer', 'adgangsadresse'];
 const oldModelNames = _.difference(Object.keys(mappings.columnMappings), newModelNames);
 
 var oldSqlModels = oldModelNames.reduce(function(memo, datamodelName) {

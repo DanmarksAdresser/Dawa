@@ -183,20 +183,21 @@ describe('View materialization', () => {
     describe('applying changes', () => {
       const txid = 1;
       const insertedId = '00000000-733c-433a-a5da-a7d428a980cf';
-      const deletedId = '00000000-0000-433a-a5da-a7d428a980cf';
+      const deletedId = '00000000-7777-433a-a5da-a7d428a980cf';
       const updatedId = '10000000-0000-0000-a5da-a7d428a980cf';
       beforeEach(() => go(function*() {
         const client = clientFn();
         yield client.query(`INSERT INTO prim(id, sec_id1) VALUES ('00002732-733c-433a-a5da-a7d428a980cf', 9)`);
         yield client.query(`INSERT INTO prim(id, sec_id1, name) VALUES ('${updatedId}', 8, 'name')`);
+        yield client.query(`INSERT INTO prim(id, sec_id1, name) VALUES ('${deletedId}', 8, 'toBeDeleted')`);
         yield client.query(`INSERT INTO prim_changes(txid, operation, public, id, sec_id1) VALUES (${txid}, 'insert', true, '${insertedId}', 10)`);
         yield client.query(`INSERT INTO prim_changes(txid, operation, public, id, sec_id1) VALUES (${txid}, 'delete', true, '${deletedId}', 11)`);
         yield client.query(`INSERT INTO prim_changes(txid, operation, public, id, sec_id1, name) VALUES (${txid}, 'update', true, '${updatedId}', 12, null)`);
       }));
       it('Correctly applies insert', () => go(function*() {
         yield applyInserts(clientFn(), txid, tableModel.prim);
-        const result = yield clientFn().queryRows('select id, sec_id1 from prim order by id');
-        assert.strictEqual(result.length, 3);
+        const result = yield clientFn().queryRows('select id, sec_id1 from prim where id = $1', [insertedId]);
+        assert.strictEqual(result.length, 1);
         const insertedRow = result[0];
         assert.strictEqual(insertedRow.id, insertedId);
         assert.strictEqual(insertedRow.sec_id1, 10);
@@ -204,18 +205,16 @@ describe('View materialization', () => {
 
       it('Correctly applies delete', () => go(function*() {
         yield applyDeletes(clientFn(), txid, tableModel.prim);
-        const result = yield clientFn().queryRows('select id, sec_id1 from prim order by id');
-        assert.strictEqual(result.length, 1);
-        assert.notEqual(result[0].id, deletedId);
+        const result = yield clientFn().queryRows('select id, sec_id1 from prim where id = $1',[deletedId]);
+        assert.strictEqual(result.length, 0);
       }));
 
       it('Correctly applies update', () => go(function*() {
         yield applyUpdates(clientFn(), txid, tableModel.prim);
-        const result = yield clientFn().queryRows('select id, sec_id1,name from prim order by id');
-        assert.strictEqual(result.length, 2);
-        assert.strictEqual(result[0].sec_id1, 9);
-        assert.strictEqual(result[1].sec_id1, 12);
-        assert.isNull(result[1].name, 12);
+        const result = yield clientFn().queryRows('select id, sec_id1,name from prim where id = $1', [updatedId]);
+        assert.strictEqual(result.length, 1);
+        assert.strictEqual(result[0].sec_id1, 12);
+        assert.isNull(result[0].name, 12);
       }));
     });
     describe('Computing changes', () => {

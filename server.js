@@ -19,7 +19,6 @@ else {
 }
 
 
-
 process.on('uncaughtException', function(err) {
   /* eslint no-console: 0 */
   console.log('UNCAUGHT EXCEPTION!');

@@ -4,12 +4,10 @@ const expect = require('chai').expect;
 const path = require('path');
 const q = require('q');
 
-const importAdresseHeightsImpl = require('../../heights/importAdresseHeightsImpl');
 var testdb = require('../helpers/testdb2');
 
-
-const importFromApi = importAdresseHeightsImpl.importFromApi;
-const importHeights = importAdresseHeightsImpl.importHeights;
+const {importFromApi, importHeights } = require('../../heights/importAdresseHeightsImpl');
+const {withImportTransaction} = require('../../importUtil/importUtil');
 
 const successMockClient = () => q.resolve(4.22);
 const failMockClient = () => q.reject('someError');
@@ -22,17 +20,19 @@ describe('importFromApi', () => {
     it('Can import a height from API', q.async(function*() {
       const previousHeight = (yield clientFn().queryp('select hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0].hoejde;
       expect(previousHeight).to.be.null;
-      yield importFromApi(clientFn(), successMockClient);
-      const after = (yield clientFn().queryp('select z_x, z_y, hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0];
+      yield withImportTransaction(clientFn(), "test", txid => importFromApi(clientFn(), txid, successMockClient));
+      const after = (yield clientFn().queryRows('select z_x, z_y, hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
       expect(after.hoejde).to.equal(4.2);
       expect(after.z_x).to.equal(590795.02);
       expect(after.z_y).to.equal(6140774.41);
+      const after_mat = (yield clientFn().queryRows('select hoejde from adgangsadresser_mat where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
+      expect(after_mat.hoejde).to.equal(4.2);
     }));
 
     it('If importing height fails, we will mark the point to not be queried again for 1 day', q.async(function*() {
       const previousHeight = (yield clientFn().queryp('select hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0].hoejde;
       expect(previousHeight).to.be.null;
-      yield importFromApi(clientFn(), failMockClient);
+      yield withImportTransaction(clientFn(), "test", txid => importFromApi(clientFn(), txid, failMockClient));
       const after = (yield clientFn().queryp('select hoejde, disableheightlookup from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0];
       expect(after.hoejde).to.be.null;
       expect(after.disableheightlookup).to.be.a('string');
@@ -47,8 +47,9 @@ describe('Import from CSV', () => {
         '0a3f5089-792a-32b8-e044-0003ba298018': 2.8,
         '0a3f5089-792c-32b8-e044-0003ba298018': 2.8
       };
-      yield importHeights(clientFn(), path.join(__dirname, 'hoejder.csv'), true);
-      const result = (yield clientFn().queryp(`select id, etrs89oest, etrs89nord, z_x, z_y, hoejde from adgangsadresser where id in ('${Object.keys(CSV_POINTS).join("', '")}')`)).rows;
+      yield withImportTransaction(clientFn(), "test", txid =>
+        importHeights(clientFn(), txid, path.join(__dirname, 'hoejder.csv'), true));
+      const result = (yield clientFn().queryRows(`select id, etrs89oest, etrs89nord, z_x, z_y, hoejde from adgangsadresser where id in ('${Object.keys(CSV_POINTS).join("', '")}')`));
       expect(result).to.have.length(2);
       expect(result[0].hoejde).to.equal(CSV_POINTS[result[0].id]);
       expect(result[1].hoejde).to.equal(CSV_POINTS[result[1].id]);

@@ -2,11 +2,13 @@
 
 var moment = require('moment');
 var _ = require('underscore');
+const { go } = require('ts-csp');
 
 var importDarImpl = require('./importDarImpl');
 var logger = require('../logger').forCategory('darImport');
 var qUtil = require('../q-util');
 var defaultDarClient = require('./darClient');
+const {withImportTransaction} = require('../importUtil/importUtil');
 
 var defaultOptions = {
   /**
@@ -266,84 +268,64 @@ module.exports = function(opt) {
     });
   }
 
-  function importFromApi(db, url, skipDawa, report) {
-    var tsFrom, tsTo;
-    var lastFetchedTs;
-    return db.withTransaction('READ_ONLY', function (client) {
-      return getLastFetched(client)
-        .then(function (lastFetched) {
-          if (!lastFetched) {
-            return getLastSeenTs(client);
-          }
-          else {
-            return lastFetched;
-          }
-        })
-        .then(function (_lastFetchedTs) {
-          lastFetchedTs = _lastFetchedTs;
-        }
-      );
-    })
-      .then(function() {
-        if (!lastFetchedTs) {
-          tsFrom = moment.unix(0);
-        }
-        else {
-          tsFrom = lastFetchedTs;
-        }
-        tsTo = moment();
-        report.tsFrom = tsFrom.toISOString();
-        report.tsTo = tsTo.toISOString();
-        return fetchUntilStable(url, null, tsFrom, tsTo, report);
-      })
-      .then(function (resultSet) {
-        report.fetchedResult = resultSet;
-        if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
-          logger.info('No new records on API', {
-            tsFrom: tsFrom.toISOString(),
-            tsTo: tsTo.toISOString()
-          });
-          return;
-        }
-        else {
-          return qUtil.mapSerial(splitInTransactions(resultSet, tsFrom, tsTo, report), function(transactionSet) {
-            return db.withTransaction('READ_WRITE', function(client) {
-              return transactionAlreadyPerformed(client, transactionSet)
-                .then(function(transactionPerformed) {
-                  if(transactionPerformed) {
-                    return;
-                  }
-                  else {
-                    var someRow =_.find(transactionSet, function(rows) {
-                      return rows.length > 0;
-                    })[0];
-                    var txTimestamp = someRow.registreringslut || someRow.registreringstart;
-                    report['tx_' +txTimestamp] = {};
-                    return importDarImpl.withDarTransaction(client, 'api', function() {
-                      return importDarImpl.applyDarChanges(client, transactionSet, skipDawa, report['tx_' +txTimestamp]);
-                    }).then(function() {
-                      logger.info('DAR import delay', {
-                        delay: moment().diff(moment(txTimestamp))
-                      });
-                    }).catch(function(err) {
-                        // in case of failure to import a transaction, we skip it and continue to the next one.
-                        // This is preferable to aborting API importer permanently.
-                        logger.error('Import From API transaction failed', {
-                          transaction: transactionSet,
-                          error: err
-                        });
-                      });
-                  }
-                });
-            });
-          });
-        }
-      }).then(function () {
-        return db.withTransaction('READ_WRITE', function(client) {
-          return setLastFetched(client, tsTo.clone().subtract(maxDarTxDuration));
+  const importFromApi = (db, url, skipDawa, report) => go(function*() {
+
+    const lastFetchedTs = yield  db.withTransaction('READ_ONLY', client => go(function*() {
+      let lastFetchedTs = yield getLastFetched(client);
+      if (!lastFetchedTs) {
+        lastFetchedTs = yield getLastSeenTs(client);
+      }
+      return lastFetchedTs;
+    }));
+
+      const tsFrom = lastFetchedTs ? lastFetchedTs : moment.unix(0);
+      const tsTo = moment();
+      report.tsFrom = tsFrom.toISOString();
+      report.tsTo = tsTo.toISOString();
+      const resultSet = fetchUntilStable(url, null, tsFrom, tsTo, report);
+      report.fetchedResult = resultSet;
+
+      if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
+        logger.info('No new records on API', {
+          tsFrom: tsFrom.toISOString(),
+          tsTo: tsTo.toISOString()
         });
+        return;
+      }
+      const transactions = splitInTransactions(resultSet, tsFrom, tsTo, report);
+    for (let transactionSet of transactions) {
+      yield db.withTransaction('READ_WRITE', client =>
+        withImportTransaction(client, "darImportFromApi", txid => go(function*() {
+          try {
+            const alreadyPerformed = yield transactionAlreadyPerformed(client, transactionSet);
+            if (alreadyPerformed) {
+              return;
+            }
+            const someRow = _.find(transactionSet, function (rows) {
+              return rows.length > 0;
+            })[0];
+            const txTimestamp = someRow.registreringslut || someRow.registreringstart;
+            report['tx_' + txTimestamp] = {};
+            yield importDarImpl.withDarTransaction(client, 'api', () => go(function*() {
+              yield importDarImpl.applyDarChanges(client, txid, transactionSet, skipDawa, report['tx_' +txTimestamp]);
+            }));
+            logger.info('DAR import delay', {
+              delay: moment().diff(moment(txTimestamp))
+            });
+          }
+          catch(err) {
+            logger.error('Import From API transaction failed', {
+              transaction: transactionSet,
+              error: err
+            });
+          }
+        })));
+      }
+
+      yield db.withTransaction('READ_WRITE', function(client) {
+        return setLastFetched(client, tsTo.clone().subtract(maxDarTxDuration));
       });
-  }
+  });
 
   return {
     importFromApi: importFromApi,

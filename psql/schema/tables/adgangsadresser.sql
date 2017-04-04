@@ -25,8 +25,6 @@ CREATE TABLE  adgangsadresser (
   adressepunktaendringsdato timestamp NULL,
   esdhReference text,
   journalnummer text,
-  geom  geometry(point, 25832),
-  tsv tsvector,
   hoejde double precision NULL,
   -- the coordinates we used when we looked up the height
   z_x double precision null,
@@ -35,18 +33,9 @@ CREATE TABLE  adgangsadresser (
   navngivenvej_id uuid
 );
 
-CREATE INDEX ON Adgangsadresser USING GIST (geom);
 CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
 CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
 CREATE INDEX ON adgangsadresser(postnr, kommunekode);
-CREATE INDEX ON adgangsadresser(supplerendebynavn, kommunekode, postnr);
-CREATE INDEX ON adgangsadresser(matrikelnr);
-CREATE INDEX ON adgangsadresser(husnr, id);
-CREATE INDEX ON adgangsadresser(esrejendomsnr);
-CREATE INDEX ON adgangsadresser(objekttype);
-CREATE INDEX ON adgangsadresser USING gin(tsv);
-CREATE INDEX ON adgangsadresser(noejagtighed, id);
-CREATE INDEX ON adgangsadresser(navngivenvej_id, postnr);
 
 -- Index for lookup of adgangsadresser where we need to fetch the height
 CREATE INDEX ON adgangsadresser (id)

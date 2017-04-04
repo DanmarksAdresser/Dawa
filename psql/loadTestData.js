@@ -41,9 +41,9 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield initialization.loadSchemas(client, scriptDir);
       // run init functions
       yield initialization.disableTriggersAndInitializeTables(client);
-      yield withImportTransaction(client, 'updateEjerlav', (txid) => go(function*() {
+      yield withImportTransaction(client, 'loadtestData', (txid) => go(function*() {
         yield updatePostnumreImpl(client, txid, 'data/postnumre.csv');
-        yield loadStormodtagereImpl(client, 'data/stormodtagere.csv');
+        yield loadStormodtagereImpl(client, txid, 'data/stormodtagere.csv');
         yield updateEjerlavImpl(client, txid, 'data/ejerlav.csv')
       }));
       yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);

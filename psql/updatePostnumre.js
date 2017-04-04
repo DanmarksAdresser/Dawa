@@ -2,10 +2,13 @@
 
 // This script loads postnumre into the database from a CSV-file.
 
+const { go } = require('ts-csp');
 var _         = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var proddb = require('./proddb');
+const databasePools = require('./databasePools');
+const { withImportTransaction } = require('../importUtil/importUtil');
 var updatePostnumreImpl = require('./updatePostnumreImpl');
 
 var optionSpec = {
@@ -18,7 +21,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  proddb.withTransaction('READ_WRITE', function(client) {
-    return updatePostnumreImpl(client, inputFile);
-  }).done();
+  databasePools.get('prod').withConnection({pooled: false}, (client) => {
+      return withImportTransaction(client, 'updatePostnumre', (txid) => go(function*() {
+        yield updatePostnumreImpl(client, txid, inputFile);
+      }));
+    }
+  ).asPromise().done();
 });

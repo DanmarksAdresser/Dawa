@@ -1,9 +1,12 @@
 "use strict";
 
 const { go } = require('ts-csp');
+const _ = require('underscore');
 
 const { selectList, columnsEqualClause } = require('../darImport/sqlUtil');
 const allColumnNames = tableModel => tableModel.columns.map(col => col.name);
+
+const derivedColumnNames = tableModel => tableModel.columns.filter(col => !!col.derive).map(col => col.name);
 
 const isPrimaryColumn = (colName, tableModel) =>  tableModel.primaryKey.includes(colName);
 
@@ -11,10 +14,13 @@ const nonPrimaryColumnNames = tableModel =>
   allColumnNames(tableModel).filter(column => !isPrimaryColumn(column, tableModel));
 
 const publicColumnNames = tableModel =>
-tableModel.columns
-  .filter(col => col.public !== false)
-  .map(col => col.name)
-  .filter(colName => !isPrimaryColumn(colName, tableModel));
+  tableModel.columns
+    .filter(col => col.public !== false)
+    .map(col => col.name);
+
+const publicNonKeyColumnNames = tableModel =>
+  publicColumnNames(tableModel)
+    .filter(colName => !isPrimaryColumn(colName, tableModel));
 
 const insert = (client, tableModel, object) => {
   const columns = [];
@@ -69,7 +75,11 @@ const del = (client, tableModel, key) => {
 const deriveColumns = (client, table, tableModel, additionalWhereClauses) => go(function*() {
   for(let column of tableModel.columns) {
     if(column.derive) {
-      yield column.derive(client, table, additionalWhereClauses);
+      let sql =  `UPDATE ${table} SET ${column.name} = ${column.derive(table)}`;
+      if(additionalWhereClauses) {
+        sql += ` WHERE ${additionalWhereClauses(table)}`;
+      }
+      yield client.query(sql);
     }
   }
 });
@@ -78,6 +88,18 @@ const deriveColumnsForChange = (client, txid, tableModel) => go(function*() {
   const additionalWhereClauses = alias => `${alias}.txid = ${txid} AND (${alias}.operation = 'insert' or ${alias}.operation = 'update')`;
   yield deriveColumns(client, `${tableModel.table}_changes`, tableModel, additionalWhereClauses);
 });
+
+const makeSelectClause = (table, tableModel, columnNames) => {
+  return columnNames.map(columnName => {
+    const columnSpec = _.findWhere(tableModel.columns, {name: columnName});
+    if(columnSpec.derive) {
+      return `${columnSpec.derive(table)} as ${columnName}`
+    }
+    else {
+      return columnName;
+    }
+  }).join(', ');
+};
 
 const assignSequenceNumbers = (client, txid, tableModel, operations) => go(function*() {
   const table = tableModel.table;
@@ -100,8 +122,12 @@ const assignSequenceNumbers = (client, txid, tableModel, operations) => go(funct
   }
 });
 
+const nonDerivedColumnNames = tableModel => _.difference(allColumnNames(tableModel), derivedColumnNames(tableModel));
+
 module.exports = {
   allColumnNames,
+  derivedColumnNames,
+  nonDerivedColumnNames,
   nonPrimaryColumnNames,
   insert,
   update,
@@ -109,5 +135,7 @@ module.exports = {
   deriveColumns,
   deriveColumnsForChange,
   assignSequenceNumbers,
-  publicColumnNames
+  publicColumnNames,
+  publicNonKeyColumnNames,
+  makeSelectClause
 };

@@ -2,7 +2,7 @@
 
 /*eslint no-console: 0*/
 
-
+const { go } = require('ts-csp');
 var fs = require('fs');
 var format = require('util').format;
 var path = require('path');
@@ -17,8 +17,17 @@ const flats = require('../apiSpecification/flats/flats');
 const flatSqlSpecs = require('../apiSpecification/flats/sqlSpecs');
 const flatTilknytninger = require('../apiSpecification/flats/tilknytninger/tilknytninger');
 const generateOisSchemaImpl = require('../ois/generateSqlSchemaImpl');
+const tableModel = require('./tableModel');
+const { createChangeTable } = require('../importUtil/tableDiffNg');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
+
+const createChangeTables = (client)=> go(function*() {
+  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat'];
+  for(let table of tableNames) {
+    yield createChangeTable(client, tableModel.tables[table]);
+  }
+});
 
 function normaliseTableSpec(specs){
   return _.map(
@@ -40,14 +49,16 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'transaction_history'},
   {name: 'bbr_events'},
   {name: 'temaer'},
-  {name: 'vejstykker'},
+  {name: 'vejstykker', init: false},
   {name: 'postnumre'},
   {name: 'stormodtagere'},
-  {name: 'adgangsadresser'},
-  {name: 'enhedsadresser'},
+  {name: 'adgangsadresser', init: false },
+  {name: 'enhedsadresser', init: false },
   {name: 'navngivenvej', init: false},
   {name: 'ejerlav', init: false},
   {name: 'ejerlav_ts'},
+  {name: 'adgangsadresser_mat', init: false },
+  {name: 'adresser_mat', init: false },
   {name: 'cpr_vej', init: false},
   {name: 'cpr_postnr', init: false},
   {name: 'dar1_transaction', init: false},
@@ -143,6 +154,7 @@ exports.loadTables = function(client, scriptDir) {
     }
     yield client.queryp(generateSqlSchemaImpl());
     yield client.queryp(generateOisSchemaImpl());
+    yield createChangeTables(client);
   })();
 };
 
@@ -166,7 +178,7 @@ function createFlatTilknytningTriggers(client) {
     return `INSERT INTO ${relTable}(${flatRelationCompleteKey}) 
     (SELECT 
     ${flatKeySql}, A.id
-    FROM Adgangsadresser A, ${flatGeometryTable} F
+    FROM Adgangsadresser_mat A, ${flatGeometryTable} F
     WHERE A.id = NEW.id AND st_covers(F.geom, A.geom)) ON CONFLICT DO NOTHING;`
   };
 
@@ -182,14 +194,14 @@ function createFlatTilknytningTriggers(client) {
     const deleteSql = `
     DELETE FROM ${relTable} AS R WHERE adgangsadresse_id = NEW.id AND NOT EXISTS(
     SELECT *
-    FROM Adgangsadresser A, ${flatGeometryTable} F
+    FROM Adgangsadresser_mat A, ${flatGeometryTable} F
   WHERE R.adgangsadresse_id = A.id  AND ${relJoinCond} AND st_covers(F.geom, A.geom)
 );`;
 
     const insertSql = `
     INSERT INTO ${relTable} AS R(${relTableColumns.join(',')}) 
     (SELECT A.id, ${flat.key.map(key => `F.${key}`).join(',')}
-     FROM Adgangsadresser A JOIN ${flatGeometryTable} F ON st_covers(F.geom, A.geom) 
+     FROM Adgangsadresser_mat A JOIN ${flatGeometryTable} F ON st_covers(F.geom, A.geom) 
      WHERE A.id = NEW.id) ON CONFLICT DO NOTHING;`;
     return `${deleteSql}\n${insertSql}`;
   }
@@ -212,7 +224,7 @@ function createFlatTilknytningTriggers(client) {
   END;
   $$ LANGUAGE plpgsql;
   CREATE TRIGGER adgangsadresser_flats_update_on_adgangsadresse_trigger AFTER INSERT OR UPDATE OR DELETE
-  ON adgangsadresser FOR EACH ROW EXECUTE PROCEDURE adgangsadresser_flats_update_on_adgangsadresse()`;
+  ON adgangsadresser_mat FOR EACH ROW EXECUTE PROCEDURE adgangsadresser_flats_update_on_adgangsadresse()`;
   return client.queryp(triggerSql);
 }
 

@@ -5,7 +5,8 @@ const {go} = require('ts-csp');
 const importUtil = require('../importUtil/importUtil');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
-const {deriveColumns, assignSequenceNumbers} = require('../importUtil/tableModelUtil');
+const {assignSequenceNumbers} = require('../importUtil/tableModelUtil');
+const {materializeDawa} = require('../importUtil/materialize');
 
 const POSTNUMMER_COUMNS = ['nr', 'navn', 'stormodtager', 'tsv'];
 
@@ -19,8 +20,9 @@ const postnumreTableModel = tableModel.tables.postnumre;
 module.exports = (client, txid, inputFile) => go(function*() {
   yield importUtil.createTempTableFromTemplate(client, 'updated_postnumre', 'postnumre', POSTNUMMER_COUMNS);
   yield loadPostnummerCsv(client, inputFile, 'updated_postnumre');
-  yield deriveColumns(client, 'updated_postnumre', postnumreTableModel);
   yield tableDiffNg.computeDifferences(client, txid, 'updated_postnumre', postnumreTableModel);
   yield assignSequenceNumbers(client, txid, postnumreTableModel, ['delete', 'update', 'insert']);
   yield tableDiffNg.applyChanges(client, txid, postnumreTableModel);
+  yield materializeDawa(client, txid);
+
 });

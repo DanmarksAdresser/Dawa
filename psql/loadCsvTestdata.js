@@ -5,10 +5,15 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
+const { go } = require('ts-csp');
+
 
 var importDarImpl = require('../darImport/importDarImpl');
 var initialization = require('./initialization');
 var sqlCommon = require('./common');
+const { withImportTransaction } = require('../importUtil/importUtil');
+const { createHeightTable, importHeightsFromTable } = require('../heights/importAdresseHeightsImpl');
+
 
 function getColumnsFromCsv(file) {
   const csvContent = fs.readFileSync(file, {encoding: 'utf8'});
@@ -54,21 +59,24 @@ module.exports = function (client, dataDir) {
   geom  geometry(MULTILINESTRINGZ, 25832),
   PRIMARY KEY(kommunekode, kode)
 );`);
+    yield createHeightTable(client, 'hoejder');
+    yield copyCsvToTable(client,
+      'hoejder',
+      path.resolve(path.join(dataDir, 'hoejder.csv')),
+      ['id', 'x', 'y', 'z']);
+    yield withImportTransaction(client, 'loadTestData-adresser', txid => go(function*() {
+      yield importDarImpl.fullCompareAndUpdate(client, txid);
+    }));
+    yield withImportTransaction(client, 'loadTestData-højder', txid => go(function*() {
+      yield importHeightsFromTable(client, txid, 'hoejder');
+    }));
     yield copyCsvToTable(client,
       'vejstykker_geom',
       path.resolve(path.join(dataDir, 'vejstykker_geom.csv')),
       ['kommunekode', 'kode', 'geom']);
-    yield importDarImpl.fullCompareAndUpdate(client, true);
     yield client.queryp(
       `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
          WHERE v.kommunekode = g.kommunekode AND v.kode = g.kode`);
-
-    yield client.queryp('CREATE TEMP TABLE hoejder AS (select id, z_x, z_y, hoejde FROM adgangsadresser WHERE false)');
-    yield copyCsvToTable(client,
-      'hoejder',
-      path.resolve(path.join(dataDir, 'hoejder.csv')),
-      ['id', 'z_x', 'z_y', 'hoejde']);
-    yield client.queryp('UPDATE adgangsadresser a SET z_x = h.z_x, z_y = h.z_y, hoejde = h.hoejde FROM hoejder h WHERE a.id = h.id');
 
     yield initialization.initializeHistory(client);
     yield initialization.initializeTables(client);

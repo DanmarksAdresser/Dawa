@@ -21,22 +21,22 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     '10km_' || (floor(A.etrs89nord / 10000))::text || '_' || (floor(etrs89oest / 10000))::text as ddkn_km10,
     A.adressepunktaendringsdato,
 
-    A.postnr   AS postnr,
-    P.navn AS postnrnavn,
+    A.postnr,
+    A.postnrnavn,
 
-    S.nr AS stormodtagerpostnr,
-    S.navn AS stormodtagerpostnrnavn,
+    A.stormodtagerpostnr,
+    A.stormodtagerpostnrnavn,
 
-    A.vejkode    AS vejkode,
-    V.vejnavn AS vejnavn,
-    V.adresseringsnavn AS adresseringsvejnavn,
+    A.vejkode,
+    A.vejnavn,
+    A.adresseringsvejnavn,
 
     A.kommunekode AS kommunekode,
     K.navn AS kommunenavn,
     R.kode AS regionskode,
     R.navn AS regionsnavn,
     A.ejerlavkode,
-    E.navn as ejerlavnavn,
+    A.ejerlavnavn,
     A.matrikelnr,
     A.esrejendomsnr,
     JA.ejerlavkode as jordstykke_ejerlavkode,
@@ -50,14 +50,10 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
       JOIN bebyggelser b ON ba.bebyggelse_id = b.id WHERE ba.adgangsadresse_id = A.id),'[]'::json)  as bebyggelser,
     A.tsv
 
-  FROM adgangsadresser A
-    LEFT JOIN Ejerlav E ON A.ejerlavkode = E.kode
+  FROM adgangsadresser_mat A
     LEFT JOIN jordstykker_adgadr JA ON JA.adgangsadresse_id = A.id
     LEFT JOIN jordstykker J ON JA.ejerlavkode = J.ejerlavkode AND JA.matrikelnr = J.matrikelnr
     LEFT JOIN Ejerlav JS_E ON JA.ejerlavkode = JS_E.kode
-    LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
-    LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-    LEFT JOIN stormodtagere AS S ON (S.adgangsadresseid = A.id)
     LEFT JOIN kommuner K ON A.kommunekode = k.kode
     LEFT JOIN regioner R ON R.kode = K.regionskode;
 

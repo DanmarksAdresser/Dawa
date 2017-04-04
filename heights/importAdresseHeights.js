@@ -1,11 +1,11 @@
 "use strict";
 
-const q = require('q');
 const _ = require('underscore');
 
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const importAdresseHeightsImpl = require('./importAdresseHeightsImpl');
 const proddb = require('../psql/proddb');
+const { withImportTransaction} = require('../importUtil/importUtil');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -21,9 +21,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE', client => {
-    return q.async(function*() {
-      yield importAdresseHeightsImpl.importHeights(client, options.file, options.initial);
-    })();
-  });
+  proddb.withTransaction('READ_WRITE', client =>
+    withImportTransaction(client, "importHeights", (txid) =>
+      importAdresseHeightsImpl.importHeights(client,txid, options.file, options.initial))).done();
 });

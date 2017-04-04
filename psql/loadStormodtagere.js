@@ -6,18 +6,19 @@
 // This script will re-load all large-mail-recievers into a given
 // database.
 //
-var _         = require('underscore');
+const _         = require('underscore');
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var loadStormodtagereImpl = require('./loadStormodtagereImpl');
-var proddb = require('./proddb');
+const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const loadStormodtagereImpl = require('./loadStormodtagereImpl');
+const proddb = require('./proddb');
+const { withImportTransaction } = require('../importUtil/importUtil');
 
-var optionSpec = {
+const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
-  var inputFile = args[0];
+  const inputFile = args[0];
 
   proddb.init({
     connString: options.pgConnectionUrl,
@@ -25,6 +26,8 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   proddb.withTransaction('READ_WRITE', function(client){
-    return loadStormodtagereImpl(client, inputFile);
+    return withImportTransaction(client, 'updateStormodtagere', (txid) => {
+      return loadStormodtagereImpl(client, txid, inputFile);
+    })
   }).done();
 });
