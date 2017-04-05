@@ -1,4 +1,9 @@
 BEGIN;
+DROP FUNCTION IF EXISTS enhedsadresser_history_update() CASCADE;
+DROP FUNCTION IF EXISTS adgangsadresser_history_update() CASCADE;
+DROP FUNCTION IF EXISTS postnumre_history_update() CASCADE;
+DROP FUNCTION IF EXISTS ejerlav_history_update() CASCADE;
+
 CREATE TABLE transactions(
   txid INTEGER PRIMARY KEY,
   ts TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -51,6 +56,57 @@ CREATE TABLE adgangsadresser_mat(
   stormodtagerpostnrnavn text
 );
 
+ALTER TABLE adgangsadresser DROP COLUMN geom CASCADE;
+ALTER TABLE adgangsadresser DROP COLUMN tsv CASCADE;
+
+CREATE TABLE adresser_mat(
+  id UUID PRIMARY KEY,
+  adgangsadresseid UUID NOT NULL,
+  objekttype smallint,
+  oprettet timestamp,
+  ikraftfra timestamp,
+  aendret timestamp,
+  etage VARCHAR(3),
+  doer VARCHAR(4),
+  kilde smallint,
+  esdhReference text,
+  journalnummer text,
+  a_objekttype smallint,
+  a_oprettet timestamp,
+  a_aendret timestamp,
+  a_ikraftfra timestamp,
+  kommunekode INTEGER NOT NULL,
+  vejkode INTEGER NOT NULL,
+  husnr husnr,
+  supplerendebynavn text NULL,
+  postnr INTEGER NULL,
+  ejerlavkode INTEGER,
+  matrikelnr text NULL,
+  esrejendomsnr integer NULL,
+  adgangspunktid uuid,
+  etrs89oest double precision NULL,
+  etrs89nord double precision NULL,
+  noejagtighed CHAR(1) NULL,
+  adgangspunktkilde smallint NULL,
+  husnummerkilde smallint,
+  placering smallint,
+  tekniskstandard CHAR(2) NULL,
+  tekstretning float4 NULL,
+  adressepunktaendringsdato timestamp NULL,
+  geom  geometry(point, 25832),
+  tsv tsvector,
+  hoejde double precision NULL,
+  navngivenvej_id uuid,
+  postnrnavn text,
+  vejnavn text,
+  adresseringsvejnavn text,
+  ejerlavnavn text,
+  stormodtagerpostnr smallint,
+  stormodtagerpostnrnavn text
+);
+
+ALTER TABLE enhedsadresser DROP COLUMN tsv CASCADE;
+
 CREATE TABLE ejerlav_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, kode, navn, tsv FROM ejerlav WHERE false);
 CREATE INDEX ON ejerlav_changes(kode, changeid desc NULLS LAST);
 CREATE INDEX ON ejerlav_changes(changeid desc NULLS LAST);
@@ -72,6 +128,9 @@ CREATE INDEX ON adgangsadresser_mat_changes(changeid desc NULLS LAST);
 CREATE TABLE stormodtagere_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, nr, navn, adgangsadresseid FROM stormodtagere WHERE false);
 CREATE INDEX ON stormodtagere_changes(adgangsadresseid, changeid desc NULLS LAST);
 CREATE INDEX ON stormodtagere_changes(changeid desc NULLS LAST);
+CREATE TABLE adresser_mat_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, id, adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer, objekttype, kilde, esdhreference, journalnummer, kommunekode, vejkode, husnr, supplerendebynavn, postnr, ejerlavkode, matrikelnr, esrejendomsnr, adgangspunktid, etrs89oest, etrs89nord, noejagtighed, adgangspunktkilde, placering, tekniskstandard, tekstretning, adressepunktaendringsdato, husnummerkilde, hoejde, navngivenvej_id, ejerlavnavn, vejnavn, adresseringsvejnavn, postnrnavn, stormodtagerpostnr, stormodtagerpostnrnavn, a_objekttype, a_oprettet, a_aendret, a_ikraftfra, geom, tsv FROM adresser_mat WHERE false);
+CREATE INDEX ON adresser_mat_changes(id, changeid desc NULLS LAST);
+CREATE INDEX ON adresser_mat_changes(changeid desc NULLS LAST);
 
 CREATE INDEX ON adgangsadresser_mat USING GIST (geom);
 CREATE INDEX ON adgangsadresser_mat(ejerlavkode, id);
@@ -88,7 +147,6 @@ CREATE INDEX ON adgangsadresser_mat(navngivenvej_id, postnr);
 
 DROP INDEX adgangsadresser_ejerlavkode_id_idx;
 DROP INDEX adgangsadresser_esrejendomsnr_idx;
-DROP INDEX adgangsadresser_geom_idx;
 DROP INDEX adgangsadresser_husnr_id_idx;
 DROP INDEX adgangsadresser_kommunekode_vejkode_postnr_idx;
 DROP INDEX adgangsadresser_matrikelnr_idx;
@@ -96,12 +154,28 @@ DROP INDEX adgangsadresser_navngivenvej_id_postnr_idx;
 DROP INDEX adgangsadresser_objekttype_idx;
 DROP INDEX adgangsadresser_postnr_kommunekode_idx;
 DROP INDEX adgangsadresser_supplerendebynavn_kommunekode_postnr_idx;
-DROP INDEX adgangsadresser_tsv_idx;
 
 CREATE INDEX ON adgangsadresser(kommunekode, vejkode);
 CREATE INDEX ON adgangsadresser(postnr);
 CREATE INDEX ON adgangsadresser(ejerlavkode);
 
-ALTER TABLE adgangsadresser DROP COLUMN geom CASCADE;
-ALTER TABLE adgangsadresser DROP COLUMN tsv CASCADE;
+DROP INDEX enhedsadresser_doer_id_idx;
+DROP INDEX enhedsadresser_etage_id_idx;
+DROP INDEX enhedsadresser_objekttype_idx;
+
+CREATE INDEX ON adresser_mat USING GIST (geom);
+CREATE INDEX ON adresser_mat(ejerlavkode, id);
+CREATE INDEX ON adresser_mat(kommunekode, vejkode, postnr);
+CREATE INDEX ON adresser_mat(postnr, kommunekode);
+CREATE INDEX ON adresser_mat(supplerendebynavn, kommunekode, postnr);
+CREATE INDEX ON adresser_mat(matrikelnr);
+CREATE INDEX ON adresser_mat(husnr, id);
+CREATE INDEX ON adresser_mat(esrejendomsnr);
+CREATE INDEX ON adresser_mat(objekttype);
+CREATE INDEX ON adresser_mat USING gin(tsv);
+CREATE INDEX ON adresser_mat(noejagtighed, id);
+CREATE INDEX ON adresser_mat(navngivenvej_id, postnr);
+CREATE INDEX ON adresser_mat(adgangsadresseid);
+CREATE INDEX ON adresser_mat(etage, id);
+CREATE INDEX ON adresser_mat(doer, id);
 COMMIT;

@@ -47,39 +47,3 @@ CREATE INDEX ON adgangsadresser (id)
 
 
 DROP TABLE IF EXISTS adgangsadresser_history CASCADE;
-CREATE TABLE adgangsadresser_history(
-  valid_from integer,
-  valid_to integer,
-  id uuid NOT NULL,
-  kommunekode INTEGER NOT NULL,
-  vejkode INTEGER NOT NULL,
-  husnr husnr,
-  supplerendebynavn VARCHAR(34) NULL,
-  postnr INTEGER NULL,
-  ejerlavkode INTEGER,
-  ejerlavnavn VARCHAR(255) NULL,
-  matrikelnr VARCHAR(7) NULL,
-  esrejendomsnr integer NULL,
-  objekttype smallint,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
-  adgangspunktid uuid,
-  etrs89oest double precision NULL,
-  etrs89nord double precision NULL,
-  noejagtighed CHAR(1) NULL,
-  adgangspunktkilde smallint NULL,
-  husnummerkilde smallint,
-  placering smallint,
-  tekniskstandard CHAR(2) NULL,
-  tekstretning float4 NULL,
-  adressepunktaendringsdato timestamp NULL,
-  esdhReference text,
-  journalnummer text,
-  hoejde double precision NULL,
-  navngivenvej_id uuid
-);
-
-CREATE INDEX ON adgangsadresser_history(valid_to);
-CREATE INDEX ON adgangsadresser_history(valid_from);
-CREATE INDEX ON adgangsadresser_history(id);
