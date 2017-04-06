@@ -16,7 +16,11 @@ var addWhereClause = function(sqlParts, clause) {
 };
 
 function createQuery(parts){
-  var sql =  'SELECT ' + parts.select.join(', ');
+  let sql = '';
+  if(parts.with && parts.with.length > 0) {
+    sql +=  'WITH\n' + parts.with.join(',\n') + '\n';
+  }
+  sql +=  'SELECT ' + parts.select.join(', ');
   if(parts.from && parts.from.length !== 0) {
     sql += ' FROM ' + parts.from.join(' ');
   }

@@ -13,6 +13,7 @@ var notNull = util.notNull;
 
 var baseQuery = function () {
   return {
+    with: [],
     select: [],
     from: ['AdgangsadresserView'],
     whereClauses: [],
@@ -52,13 +53,13 @@ var autocompleteAdgangsadresse = function(columnSpec) {
 function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
-    sqlParts.whereClauses.push("a_id IN " +
-      "(SELECT id" +
-      " FROM adgangsadresser adg" +
-      " JOIN (select kommunekode, vejkode, postnr" +
-      " FROM vejstykkerpostnumremat vp" +
-      " ORDER BY tekst <-> " + fuzzyqAlias + " limit 15) as vp" +
-      " ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)");
+    sqlParts.with.push(`adgadr_ids AS (SELECT id
+       FROM adgangsadresser adg
+       JOIN (select kommunekode, vejkode, postnr
+       FROM vejstykkerpostnumremat vp
+       ORDER BY tekst <-> ${fuzzyqAlias} limit 15) as vp
+       ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)`);
+    sqlParts.whereClauses.push("a_id IN (select * from adgadr_ids)");
     sqlParts.orderClauses.push("least(levenshtein(lower(adressebetegnelse(vejnavn, husnr, NULL, NULL, NULL," +
       " to_char(adgangsadresserview.postnr, 'FM0000'), postnrnavn)), lower(" + fuzzyqAlias + "), 2, 1, 3)," +
       " levenshtein(lower(adressebetegnelse(vejnavn, husnr, NULL, NULL, supplerendebynavn, to_char(adgangsadresserview.postnr," +
