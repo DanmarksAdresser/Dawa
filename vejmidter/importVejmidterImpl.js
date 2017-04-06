@@ -51,6 +51,8 @@ const importVejmidter = (client, filePath, table, initial) => go(function*() {
     select kommunekode, kode, st_collect(geom) AS geom 
     FROM ${linestringsTable} 
     GROUP BY kommunekode, kode)`);
+  yield client.queryp(`INSERT INTO ${desiredTable}(kommunekode, kode) (SELECT kommunekode, kode FROM vejstykker WHERE NOT EXISTS
+  (SELECT kommunekode, kode FROM ${desiredTable} WHERE ${sqlUtil.columnsEqualClause(desiredTable, 'vejstykker', ['kommunekode', 'kode'])}))`);
   yield importUtil.dropTable(client, linestringsTable);
   // we disable triggers because we do not want to generate history entries
   yield sqlCommon.disableTriggersQ(client);
