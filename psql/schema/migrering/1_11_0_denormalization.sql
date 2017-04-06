@@ -144,7 +144,7 @@ CREATE INDEX ON adgangsadresser_mat(objekttype);
 CREATE INDEX ON adgangsadresser_mat USING gin(tsv);
 CREATE INDEX ON adgangsadresser_mat(noejagtighed, id);
 CREATE INDEX ON adgangsadresser_mat(navngivenvej_id, postnr);
-CREATE INDEX ON adgangsadresser_mat(vejnavn, id);
+CREATE INDEX ON adgangsadresser_mat(vejnavn, postnr);
 
 DROP INDEX adgangsadresser_ejerlavkode_id_idx;
 DROP INDEX adgangsadresser_esrejendomsnr_idx;
@@ -179,5 +179,5 @@ CREATE INDEX ON adresser_mat(navngivenvej_id, postnr);
 CREATE INDEX ON adresser_mat(adgangsadresseid);
 CREATE INDEX ON adresser_mat(etage, id);
 CREATE INDEX ON adresser_mat(doer, id);
-CREATE INDEX ON adresser_mat(vejnavn, id);
+CREATE INDEX ON adresser_mat(vejnavn, postnr);
 COMMIT;

@@ -61,3 +61,4 @@ CREATE INDEX ON adresser_mat(adgangsadresseid);
 CREATE INDEX ON adresser_mat(etage, id);
 CREATE INDEX ON adresser_mat(doer, id);
 CREATE INDEX ON adresser_mat(objekttype);
+CREATE INDEX ON adresser_mat(vejnavn, postnr);

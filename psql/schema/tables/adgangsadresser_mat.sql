@@ -49,3 +49,4 @@ CREATE INDEX ON adgangsadresser_mat(objekttype);
 CREATE INDEX ON adgangsadresser_mat USING gin(tsv);
 CREATE INDEX ON adgangsadresser_mat(noejagtighed, id);
 CREATE INDEX ON adgangsadresser_mat(navngivenvej_id, postnr);
+CREATE INDEX ON adgangsadresser_mat(vejnavn, postnr);
