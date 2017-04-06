@@ -224,7 +224,7 @@ function scoreAddressElement(addressText, searchText, weight) {
     return 2;
   }
 
-  const levenshteinResult = levenshtein(addressText, searchText, 1, 1, 1);
+  const levenshteinResult = levenshtein(addressText.toLowerCase(), searchText.toLowerCase(), 1, 1, 1);
   const ops = levenshteinResult.ops;
   const isPrefix = ops[ops.length-1].op === 'I';
   while(ops.length > 0 && ops[ops.length-1].op === 'I') {
