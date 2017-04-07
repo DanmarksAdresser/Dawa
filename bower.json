@@ -11,10 +11,10 @@
   "private": true,
   "dependencies": {
     "underscore": "1.7.0",
-    "jquery": "2.2.4",
+    "jquery": ">2.0.0",
     "bootstrap": "2.3.2",
     "leaflet": "1.0.3",
-    "jquery-ui": "1.12.1",
+    "jquery-ui": ">1.11.0",
     "dawa-autocomplete": "2.0.1"
   },
   "exportsOverride": {
