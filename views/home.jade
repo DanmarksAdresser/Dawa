@@ -11,12 +11,12 @@ block content
             div.page-header
               h2 Hvad er DAWA?
             p Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks adresser, adgangsadresser, vejnavne samt postnumre. DAWA anvendes til at etablere adressefunktionalitet i it-systemer. Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressefunktionalitet i deres it-systemer. DAWA er en del af <a href='http://aws.dk'>AWS Suiten</a>.
-            
+
           section#anvendelser
             div.page-header
               h2 Hvad kan DAWA bruges til?
             p DAWA kan bruges til at etablere mange forskellige former for adressefunktionalitet i it-systemer. Det kan f.eks. være adresseindtastning, adressesøgning, adresseopslag, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. Nedenfor kan du se en række eksempler på de forskellige funktionaliteter.
-           
+
             form
             h3 Adresseindtastning
             p Indtastning af adresser er et væsentligt element i mange applikationer.Det skal både være let for brugeren at indtaste en gyldig adresse og for udvikleren at implementere denne funktionalitet. DAWA er designet med dette for øje. Nedenfor vises en række eksempler til hvordan indtastning af adresser kan implementeres.
@@ -62,10 +62,10 @@ block content
 
             h3 Adressevask
             p Adresser bliver brugt i mange forskellige sammenhænge. Det kommer klart til udtryk i det store antal it-systemer, som rummer adresser. Adresserne er typisk blevet indtastet uden kontrol af adressens gyldighed og kan være ændret eller nedlagt efter indtastningen. Det resulterer i, at it-systemet med stor sandsynlighed rummer ugyldige adresser. Konsekvenserne kan være: Problemer med kundebesøg, postlevering, manuelt arbejde med at vedligeholde adresser og lignende. Det kan også resultere i, at man ikke kan anvende adresserne til at foretage analyser. Grundet de ufuldstændige adresseoplysninger kan man ikke kan slå adressen op i DAWA og derved skaffe yderligere oplysninger om adressen, som f.eks. adressens placering og tilknytningen til administrative inddelinger. Disse oplysninger kan anvendes til analyse af geografisk fordeling af ens kunder, placering i sogn og kommune, fordeling mellem land, by og sommerhuszone og andre anvendelige analyser. Det er kort sagt værdifuldt at have gyldige adresser i sit it-system.
-            p DAWA tilbyder funktionalitet til at vaske adresser, som du kan anvende til at implementere adressevask i dit eget it-system.  Adressevask er en proces, hvor en ustruktureret adresse, som kan være ufuldstændig og indeholde stavefejl, oversættes til den korrekte, strukturerede, autoritative adresse. 
+            p DAWA tilbyder funktionalitet til at vaske adresser, som du kan anvende til at implementere adressevask i dit eget it-system.  Adressevask er en proces, hvor en ustruktureret adresse, som kan være ufuldstændig og indeholde stavefejl, oversættes til den korrekte, strukturerede, autoritative adresse.
 
             h3 Validering af adresser
-            p DAWA kan også anvendes til validering af adresser. Hvis du f.eks. har dit eget adressekartotek, som du gerne vil sikre dig udelukkende indeholder gyldige adresser, kan du bruge DAWA. 
+            p DAWA kan også anvendes til validering af adresser. Hvis du f.eks. har dit eget adressekartotek, som du gerne vil sikre dig udelukkende indeholder gyldige adresser, kan du bruge DAWA.
             p Nedenfor kan du prøve, om du kan indtaste en gyldig adresse uden autocompletehjælp. Husk at der skelnes mellem små og store bogstaver.
 
               fieldset
@@ -113,13 +113,13 @@ block content
           section#eksempler
             div.page-header
               h2 Hvordan bruges DAWA?
-            p Dawa bruges af udviklere til at etablere adressefunktionalitet i it-systemer. DAWA kan anvendes fra et meget bredt udsnit af - for ikke at sige alle - platforme og udviklingssprog. DAWA tilgås via et web API, hvor man ved simple HTTP forespørgsler fra sit program kalder DAWA. 
+            p Dawa bruges af udviklere til at etablere adressefunktionalitet i it-systemer. DAWA kan anvendes fra et meget bredt udsnit af - for ikke at sige alle - platforme og udviklingssprog. DAWA tilgås via et web API, hvor man ved simple HTTP forespørgsler fra sit program kalder DAWA.
             p Hvis du f.eks. ønsker at finde alle adresser i Københavns kommune med husnummer 13 anvender du følgende URl fra dit program:
             pre
               a(href='#{url}/adresser?kommunekode=0101&husnr=13') #{url}/adresser?kommunekode=0101&husnr=13
 
             h4 Autocomplete af adresser
-            p Hvordan implementerer du adresse autocomplete i din applikation? Hvis det er en web applikation er det enkelt. Til dette har vi lavet en komponent, som let kan integreres i din web applikation og etablere adresseindtastning med autocomplete. Find mere information på <a href="http://autocomplete.aws.dk">AWS Autocomplete komponentens web site</a>.  
+            p Hvordan implementerer du adresse autocomplete i din applikation? Hvis det er en web applikation er det enkelt. Til dette har vi lavet en komponent, som let kan integreres i din web applikation og etablere adresseindtastning med autocomplete. Find mere information på <a href="http://autocomplete.aws.dk">AWS Autocomplete komponentens web site</a>.
             p Hvis det ikke er en web applikation, som skal forsynes med adresse autocomplete, eller du af anden grund ikke kan anvende autocomplete komponenten, anbefaler vi dig at bruge autocomplete API'et, som skræddersyet til at implementere adresse autocomplete i hvilken som helst applikationstype. Læs mere på <a href='#{url}/autocompletedok'>Autocomplete API'et</a>.
             p Hvis du har helt specielle krav til hvordan autocomplete mekanismen er sammensat, kan du f.eks. anvende autocomplete på vejnavne, adgangsadresser og adresser til at sammen sætte din helt egen adresse autocomplete. Vi vil ikke anbefale det, men det kan gøre på følgende måde: Etablering af autocomplete af adresser baseres på en kæde af forespørgelser med tiltagende specifikhed. Først autocompletes på vejnavnet. Hvis brugeren for eks. har indtastet 'lill' anvendes følgende URL:
             pre
@@ -129,7 +129,7 @@ block content
               a(href='#{url}/adgangsadresser/autocomplete?q=Lilledal 23') #{url}/adgangsadresser/autocomplete?q=Lilledal 23
             p Denne forespørgelse begrænser autocomplete-søgningen til søgning efter adgangsadresser der matcher "Lilledal 23". Det resultere i adgangsadressen "Lilledal 23, 3450 Allerød", som igen kan anvendes til at søge efter adresser, som denne adgangsadresse:
             pre
-              a(href='#{url}/adresser/autocomplete?q=Lilledal 23, 3450 Allerød') #{url}/adresser/autocomplete?q=Lilledal 23, 3450 Allerød  
+              a(href='#{url}/adresser/autocomplete?q=Lilledal 23, 3450 Allerød') #{url}/adresser/autocomplete?q=Lilledal 23, 3450 Allerød
 
             p Hvis din applikation kun er rettet mod adresser i f.eks. Københavns kommune, kan du i dine forespørgelser begrænse udsnittet af adresser og vejnavne, der kan autocompletes på til Københavns kommunes adresser. Det sker på følgende måde:
             pre
@@ -139,29 +139,29 @@ block content
               a(href='#{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4') #{url}/adresser/autocomplete?kommunekode=0101&vejnavn=Rødkildevej&q=Rødkildevej 4
 
             h4 Feltindtastning af adresser
-            p  Du kan se et eksempel på feltindtastning af adresser i 
+            p  Du kan se et eksempel på feltindtastning af adresser i
               a(href='#anvendelser') afsnittet om anvendelser.
             Feltindtastningen af adresser starter med autocomplete af adressens postnummer. Hvis f.eks. brugeren har indtastet 'aller' med henblik på at vælge postnummeret 3450 Allerød anvendes følgende forespørgelse:
             pre
               a(href='#{url}/postnumre/autocomplete?q=aller') #{url}/postnumre/autocomplete?q=aller
-            p Når postnummeret er valgt går brugeren til indtastning af vejnavn, som er begrænset til de vejnavne, som er i postnummer 3450. Brugeren taster lilled for at vælge vejen Lilledal:            
+            p Når postnummeret er valgt går brugeren til indtastning af vejnavn, som er begrænset til de vejnavne, som er i postnummer 3450. Brugeren taster lilled for at vælge vejen Lilledal:
             pre
               a(href='#{url}/vejnavne/autocomplete?q=lilled&postnr=3450') #{url}/vejnavne/autocomplete?q=lilled&postnr=3450
-            p Mulige husnumre for Lilledal i 3450 Allerød findes vha:            
+            p Mulige husnumre for Lilledal i 3450 Allerød findes vha:
             pre
               a(href='#{url}/adgangsadresser?vejnavn=Lilledal&postnr=3450') #{url}/adgangsadresser?vejnavn=Lilledal&postnr=3450
             p Som anvendes til autocomplete af husnummeret.
             p Mulige etage angivelser findes på lignende vis:
             pre
               a(href='#{url}/adresser?vejnavn=Lilledal&husnr=23&postnr=3450') #{url}/adresser?vejnavn=Lilledal&husnr=23&postnr=3450
-            p Det samme gælder for dørangivelsen:            
+            p Det samme gælder for dørangivelsen:
             pre
               a(href='#{url}/adresser?vejnavn=Lilledal&husnr=23&etage=1&postnr=3450') #{url}/adresser?vejnavn=Lilledal&husnr=23&etage=1&postnr=3450
             p På denne måde styres brugeren til at angive en gyldig adresse.
             h4 Adressevalg baseret på reverse geokodning
-            p Et eksempel på udpegning af en adresse baseret på reverse geokodning  kan prøves i 
+            p Et eksempel på udpegning af en adresse baseret på reverse geokodning  kan prøves i
               a(href='#anvendelser') afsnittet om anvendelser.
-            p Udpegningen af adressen foretages på kort, som resulterer i et koordinatsæt. Koordinatsæt anvendes til at finde nærmeste adresse på følgende måde:                       
+            p Udpegningen af adressen foretages på kort, som resulterer i et koordinatsæt. Koordinatsæt anvendes til at finde nærmeste adresse på følgende måde:
             pre
               a(href='#{url}/adgangsadresser/reverse?x=12.59074&y=55.700677') #{url}/adgangsadresser/reverse?x=12.59074&y=55.700677
 
@@ -176,7 +176,7 @@ block content
 
             p Du kan finde dokumentation for adressevask på <a href='#{url}/adressedok#datavask'>#{url}/adressedok#datavask</a> og for adgangsadressevask på <a href='#{url}/adgangsadressedok#datavask'>#{url}/adgangsadressedok#datavask</a>.
 
-            h4 Adressevalidering. 
+            h4 Adressevalidering.
             p Eksisterer adressen: Fægangen 1, 1. 13, 4180 Sorø? Det kan vi afgøre på følgende måde:
             pre
               a(href='#{url}/adresser?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180') #{url}/adresser?vejnavn=Fægangen&husnr=1&etage=1&dør=13&postnr=4180
@@ -189,24 +189,24 @@ block content
             pre
               a(href='#{url}/adresser?regionskode=1083&format=csv') #{url}/adresser?regionskode=1083&format=csv
 
-            p Adresser i Grøndal sogn:          
+            p Adresser i Grøndal sogn:
             pre
-              a(href='#{url}/adresser?sognekode=7060&format=geojson') #{url}/adresser?sognekode=7060&format=geojson 
+              a(href='#{url}/adresser?sognekode=7060&format=geojson') #{url}/adresser?sognekode=7060&format=geojson
             <br>
 
           section#kodeeksempler
             div.page-header
               h2 Hvordan programmeres op mod DAWA?
-            p Kommunikationen mellem klientprogrammet og DAWA foregår via HTTP protokollen. Klientapplitionen sender et GET request, hvor URL'en specificerer de ønskede data, og modtager efterfølgende et response med de ønskede data. 
+            p Kommunikationen mellem klientprogrammet og DAWA foregår via HTTP protokollen. Klientapplitionen sender et GET request, hvor URL'en specificerer de ønskede data, og modtager efterfølgende et response med de ønskede data.
             p Hvordan dette gøres programmatisk afhænger af platform og programmeringssprog. Vi har for at gøre det lettere at komme i at programmere op mod DAWA lavet nogle programmeringseksempler baseret på forskellige platforme og programmeringssprog:
             ul
-              li <em>C# og .NET</em>. Kodeeksemplet viser hvorledes man i C# programmere enkle opslag i DAWA, samt hvordan man vha. af streaming kan modtage en større datamængde uden at modtage det som et samlet hele. Du kan finde <a href='https://github.com/DanmarksAdresser/DawaDotnetClient'>C# kodeeksemplet i vort GitHub repositorie</a>. 
+              li <em>C# og .NET</em>. Kodeeksemplet viser hvorledes man i C# programmere enkle opslag i DAWA, samt hvordan man vha. af streaming kan modtage en større datamængde uden at modtage det som et samlet hele. Du kan finde <a href='https://github.com/DanmarksAdresser/DawaDotnetClient'>C# kodeeksemplet i vort GitHub repositorie</a>.
               li <em>JavaScript og jQuery</em>. Kodeeksemplet er en lille mobil web applikation, <a href='http://dail.aws.dk'>Danmarks adresser i lommen</a>, som viser hvorledes DAWA kan kaldes fra JavaScript ved brug af jQuery. Du kan finde <a href='https://github.com/DanmarksAdresser/DanmarksAdresserILommen'>JavaScript kodeeksemplet i vort GitHub repositorie</a>.
             p Vi planlægger at tilføje kodeeksempler i andre sprog og platforme. Hvis du vil bidrage med et kodeeksempel i dit favorit programmeringssprog, er du meget velkommen.
 
 block append scripts
   script(src="lib/dawa-autocomplete/dawa-autocomplete.js")
-  script(src="lib/underscore/js/underscore-min.js")
+  script(src="lib/underscore/underscore-min.js")
 
   script(src="js/forside.js")
 
