@@ -282,7 +282,7 @@ module.exports = function(opt) {
       const tsTo = moment();
       report.tsFrom = tsFrom.toISOString();
       report.tsTo = tsTo.toISOString();
-      const resultSet = fetchUntilStable(url, null, tsFrom, tsTo, report);
+      const resultSet = yield fetchUntilStable(url, null, tsFrom, tsTo, report);
       report.fetchedResult = resultSet;
 
       if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
