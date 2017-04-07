@@ -112,6 +112,6 @@ function doImport(db, srcDir, initial) {
 }
 
 module.exports = {
-  doImport: doImport,
-  importEjerlav: importEjerlav
+  doImport,
+  importEjerlav
 };

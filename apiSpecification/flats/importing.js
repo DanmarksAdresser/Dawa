@@ -134,7 +134,7 @@ function importFlat(client, flatName, srcStream, mappers, initial, sanityCheck, 
 }
 
 module.exports = {
-  createFetchTable: createFetchTable,
-  streamToTable: streamToTable,
-  importFlat: importFlat
+  createFetchTable,
+  streamToTable,
+  importFlat
 };

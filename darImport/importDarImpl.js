@@ -317,8 +317,8 @@ const  performDawaChanges = (client, txid, report) => go(function*() {
     const tableName = dawaSpec.table;
     const tableModel = schemaModel.tables[tableName];
     yield tableDiffNg.computeDifferencesSubset(client, txid, `dar_${tableName}_view`, `dirty_${tableName}`, tableModel, columns);
-    yield tableDiffNg.applyChanges(client, txid, tableModel);
   }
+  yield doDawaChanges(client, txid);
   yield materializeDawa(client, txid);
 });
 
