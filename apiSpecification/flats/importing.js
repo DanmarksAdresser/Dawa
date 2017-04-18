@@ -61,22 +61,20 @@ forceUnique) {
       yield client.queryp(`CREATE TEMP TABLE changed_ids AS ((SELECT ${changedIdsSelectList} from insert_${table})
       UNION (select ${changedIdsSelectList} from update_${table})
       UNION (select ${changedIdsSelectList} from delete_${table}))`);
-
       const selectFlatKeys = Object.keys(tilknytning.keyFieldColumns).map(key => {
         const column = tilknytning.keyFieldColumns[key];
         return `f.${key} as ${column}`;
       }).concat(['a.id as adgangsadresse_id']).join(', ');
-      yield client.queryp(`CREATE TEMP VIEW desired_view AS \
-(SELECT DISTINCT ${selectFlatKeys} \
-FROM ${srcTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
-
+      yield client.queryp(`CREATE TEMP table desired_view AS \
+(WITH f AS (select ${srcTable}.* FROM ${srcTable} NATURAL JOIN changed_ids) SELECT DISTINCT ${selectFlatKeys} \
+FROM f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
       yield tablediff.computeDifferencesSubset(
         client, 'changed_ids', 'desired_view', relTable, relTableColumns, []);
       if(sanityCheck) {
         yield sanityCheck(client)
       }
 
-      yield client.queryp('DROP VIEW desired_view');
+      yield client.queryp('DROP table desired_view');
 
       yield importUtil.dropTable(client, 'changed_ids');
       yield tablediff.applyChanges(client, relTable, relTable, relTableColumns,

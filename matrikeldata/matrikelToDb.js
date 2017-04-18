@@ -26,12 +26,11 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
   q.async(function*() {
     yield importJordstykkerImpl.doImport(proddb, options.sourceDir, options.init);
     yield proddb.withTransaction('READ_ONLY', q.async(function*(client) {
-      const overlapping = (yield client.queryp(`with adrs AS (SELECT a.id, a.geom FROM adgangsadresser_mat a 
+      const overlapping = yield client.queryRows(`with adrs AS (SELECT a.id, a.geom FROM adgangsadresser_mat a 
     JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
-     GROUP BY a.id, a.geom HAVING count(*) > 2)
+     GROUP BY a.id, a.geom HAVING count(*) > 1)
 SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jordstykker j 
-ON ST_Covers(j.geom, a.geom)`)
-      ).rows;
+ON ST_Covers(j.geom, a.geom)`);
       if (overlapping.length > 0) {
         logger.info('Overlappende jordstykker', {rows: overlapping});
       }
