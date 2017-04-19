@@ -62,7 +62,7 @@ const importHeightsFromTable = (client, txid, table) => go(function*() {
     `(SELECT a.id FROM adgangsadresser a 
       JOIN ${table} h 
       ON a.id = h.id AND a.etrs89oest = h.x AND a.etrs89nord = h.y
-      AND (a.hoejde is null or a.hoejde <> h.z))`);
+      AND (a.hoejde is null or a.hoejde <> h.z or (a.z_x <> a.etrs89oest or a.z_y <> a.etrs89nord)))`);
   yield client.query(`CREATE TEMP VIEW adgangsadresser_hoejder AS(select id, z as hoejde FROM ${table})`);
   yield tableDiffNg.computeDifferencesSubset(client, txid, 'adgangsadresser_hoejder', 'adgangsadresser_dirty', schemaModel.tables.adgangsadresser, ["id", "hoejde"]);
   yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser);
@@ -129,12 +129,14 @@ const importFromApi = (client, txid, apiClient) => go(function*() {
       yield importUtil.dropTable(client, 'heights');
     }
     catch (e) {
+      logger.error('Failed to import height from API', e);
       yield client.queryp(`UPDATE adgangsadresser
           SET disableheightlookup = NOW() + INTERVAL '1 day' WHERE id = $1`, [id]);
     }
     return true;
   }
   else {
+
     return false;
   }
 
