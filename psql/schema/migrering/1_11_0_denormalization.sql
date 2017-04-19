@@ -131,6 +131,14 @@ CREATE INDEX ON stormodtagere_changes(changeid desc NULLS LAST);
 CREATE TABLE adresser_mat_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, id, adgangsadresseid, oprettet, ikraftfra, aendret, etage, doer, objekttype, kilde, esdhreference, journalnummer, kommunekode, vejkode, husnr, supplerendebynavn, postnr, ejerlavkode, matrikelnr, esrejendomsnr, adgangspunktid, etrs89oest, etrs89nord, noejagtighed, adgangspunktkilde, placering, tekniskstandard, tekstretning, adressepunktaendringsdato, husnummerkilde, hoejde, navngivenvej_id, ejerlavnavn, vejnavn, adresseringsvejnavn, postnrnavn, stormodtagerpostnr, stormodtagerpostnrnavn, a_objekttype, a_oprettet, a_aendret, a_ikraftfra, geom, tsv FROM adresser_mat WHERE false);
 CREATE INDEX ON adresser_mat_changes(id, changeid desc NULLS LAST);
 CREATE INDEX ON adresser_mat_changes(changeid desc NULLS LAST);
+CREATE INDEX ON ejerlav_changes(txid);
+CREATE INDEX ON postnumre_changes(txid);
+CREATE INDEX ON vejstykker_changes(txid);
+CREATE INDEX ON adgangsadresser_changes(txid);
+CREATE INDEX ON enhedsadresser_changes(txid);
+CREATE INDEX ON adgangsadresser_mat_changes(txid);
+CREATE INDEX ON stormodtagere_changes(txid);
+CREATE INDEX ON adresser_mat_changes(txid);
 
 CREATE INDEX ON adgangsadresser_mat USING GIST (geom);
 CREATE INDEX ON adgangsadresser_mat(ejerlavkode, id);
