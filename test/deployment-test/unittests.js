@@ -10,7 +10,7 @@ var assert = require("assert")
 
 //var host= "http://localhost:3000";
 //var host= "http://dawa-p2.aws.dk";
-var host= "http://dawa-p2.aws.dk";
+var host= "http://dawa.aws.dk";
 //var host= "http://52.212.234.159";
 console.log(host);
 
@@ -126,7 +126,7 @@ describe('Adressesøgning', function(){
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
-      assert(adresser.length>1);
+      assert(adresser.length===0);
       done();
     })
   })
