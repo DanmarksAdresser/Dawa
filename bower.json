@@ -1,6 +1,6 @@
 {
   "name": "Dawa",
-  "version": "1.11.1",
+  "version": "1.11.8",
   "homepage": "https://github.com/DanmarksAdresser/Dawa",
   "authors": [
     "Anders Hessellund Jensen <ahj@trifork.com>",
@@ -11,36 +11,13 @@
   "private": true,
   "dependencies": {
     "underscore": "1.7.0",
-    "jquery": "2.1.4",
+    "jquery": ">2.0.0",
     "bootstrap": "2.3.2",
-    "leaflet": "0.7.3",
-    "jquery-ui": "1.11.4",
+    "leaflet": "1.0.3",
+    "jquery-ui": ">1.11.0",
     "dawa-autocomplete": "2.0.1"
   },
-  "exportsOverride": {
-    "bootstrap": {
-      "js": [
-        "js/*.js",
-        "docs/assets/js/*.js"
-      ],
-      "css": "docs/assets/css/bootstrap*.css",
-      "img": "img/*.png"
-    },
-    "jquery": {
-      "js": "dist/*.js"
-    },
-    "jquery-ui": {
-      "js": "*.js",
-      "themes": "themes"
-    },
-    "underscore": {
-      "js": [
-        "*.js",
-        "*.map"
-      ]
-    }
-  },
   "resolutions": {
-    "jquery": ">2.1.0"
+    "jquery": "~3.1.1"
   }
 }

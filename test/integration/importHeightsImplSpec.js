@@ -10,7 +10,7 @@ const {importFromApi, importHeights } = require('../../heights/importAdresseHeig
 const {withImportTransaction} = require('../../importUtil/importUtil');
 
 const successMockClient = () => q.resolve(4.22);
-const failMockClient = () => q.reject('someError');
+const failMockClient = () => q.reject(new Error('someError'));
 
 const FIRST_ADDRESS_WITHOUT_HEIGHT = '0a3f5089-792a-32b8-e044-0003ba298018';
 

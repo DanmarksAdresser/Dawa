@@ -10,7 +10,8 @@ var assert = require("assert")
 
 //var host= "http://localhost:3000";
 //var host= "http://dawa-p2.aws.dk";
-var host= "http://origin-dawa-p1.aws.dk";
+
+var host= "http://dawa.aws.dk";
 //var host= "http://52.212.234.159";
 console.log(host);
 

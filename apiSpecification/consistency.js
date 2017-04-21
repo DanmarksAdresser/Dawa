@@ -118,7 +118,7 @@ module.exports = consistencyChecks.reduce(function (memo, check) {
   memo[path] = {
     path: path,
     expressHandler: function (req, res) {
-      databasePools.get('prod').withConnection({}, (client) => go(function*() {
+      databasePools.get('prod').withConnection({pooled: false, statementTimeout: 120000}, (client) => go(function*() {
         const result = yield client.query(check.query);
         const fieldNames = _.pluck(result.fields, 'name');
         csvStringify(result.rows || [], {
