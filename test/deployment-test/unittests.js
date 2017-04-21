@@ -13,7 +13,10 @@ var assert = require("assert")
 
 var host= "http://dawa.aws.dk";
 //var host= "http://52.212.234.159";
+
+if (process.env.URL) host= process.env.URL; // windows: set URL=http://dawa-p1.aws.dk
 console.log(host);
+
 
 describe('Autocomplete', function(){
 
@@ -2337,57 +2340,57 @@ describe('OIS', function(){
   });
 
 
- it("bygning på lejet grund", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adgangsadresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Østergade 24A, 9370 Hals";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+ // it("bygning på lejet grund", function(done){
+ //    var options= {};
+ //    options.baseUrl= host;
+ //    options.url='adgangsadresser';
+ //    options.qs= {};
+ //    options.qs.cache= 'no-cache';
+ //    options.qs.q= "Østergade 24A, 9370 Hals";
+ //    options.resolveWithFullResponse= true;
+ //    var jsonrequest= rp(options).then((response) => {
+ //      assert(response.statusCode===200, "Http status code != 200");
+ //      var adresser= JSON.parse(response.body);
+ //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/bygninger';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adgangsadresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var bygninger= JSON.parse(response.body);          
-      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
-      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
+ //      var enhedopt= {};
+ //      enhedopt.baseUrl= host;
+ //      enhedopt.url='ois/bygninger';
+ //      enhedopt.qs= {};
+ //      enhedopt.qs.cache= 'no-cache';
+ //      enhedopt.qs.adgangsadresseid= adresser[0].id;
+ //      enhedopt.resolveWithFullResponse= true;
+ //      var enhedrp= rp(enhedopt);
+ //      return enhedrp;
+ //    }).then((response) => {      
+ //      assert(response.statusCode===200, "Http status code != 200");
+ //      var bygninger= JSON.parse(response.body);          
+ //      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
+ //      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
      
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
-      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
-      ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-      return ejerskabrp;
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
-      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+ //      var ejerskabopt= {};
+ //      ejerskabopt.baseUrl= host;
+ //      ejerskabopt.url='ois/ejerskaber';
+ //      ejerskabopt.qs= {};
+ //      ejerskabopt.qs.cache= 'no-cache';
+ //      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
+ //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+ //      ejerskabopt.resolveWithFullResponse= true;
+ //      var ejerskabrp= rp(ejerskabopt);
+ //      return ejerskabrp;
+ //    }).then((response) => {
+ //      assert(response.statusCode===200, "Http status code != 200");
+ //      var ejerskaber= JSON.parse(response.body);          
+ //      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
+ //      function grund(element, index, array) {          
+ //        return element.EntitetsType===1; 
+ //      } 
+ //      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+ //      done();
+ //    }).catch((err) => {
+ //      done(err);
+ //    });
+ //  });
 
 
  it("fra ejerskab til adresse", function(done) {
