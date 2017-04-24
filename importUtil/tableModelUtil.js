@@ -72,14 +72,19 @@ const del = (client, tableModel, key) => {
   return client.query(`DELETE FROM ${tableModel.table} WHERE ${whereClauses.join(' AND ')}`, values);
 };
 
+const deriveColumn = (client, table, tableModel, columnName, additionalWhereClauses) => {
+  const column = _.findWhere(tableModel.columns, {name: columnName});
+  let sql = `UPDATE ${table} SET ${column.name} = ${column.derive(table)}`;
+  if (additionalWhereClauses) {
+    sql += ` WHERE ${additionalWhereClauses(table)}`;
+  }
+  return client.query(sql);
+};
+
 const deriveColumns = (client, table, tableModel, additionalWhereClauses) => go(function*() {
   for(let column of tableModel.columns) {
-    if(column.derive) {
-      let sql =  `UPDATE ${table} SET ${column.name} = ${column.derive(table)}`;
-      if(additionalWhereClauses) {
-        sql += ` WHERE ${additionalWhereClauses(table)}`;
-      }
-      yield client.query(sql);
+    if (column.derive) {
+      yield deriveColumn(client, table, tableModel, column.name, additionalWhereClauses);
     }
   }
 });
@@ -132,6 +137,7 @@ module.exports = {
   insert,
   update,
   del,
+  deriveColumn,
   deriveColumns,
   deriveColumnsForChange,
   assignSequenceNumbers,

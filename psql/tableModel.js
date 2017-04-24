@@ -167,6 +167,33 @@ const stormodtagere = {
   }]
 };
 
+// incomplete, just for deriving TSV column when reindexing
+const temaer = {
+  table: 'temaer',
+  primaryKey: ['id'],
+  columns: [
+    {name: 'id'},
+    {
+      name: 'tsv',
+      derive: table => `to_tsvector('adresser', coalesce(${table}.fields->>'kode', '') || ' ' || coalesce(${table}.fields->>'navn', ''))`
+    }
+  ]
+};
+
+const supplerendebynavne = {
+  table: 'supplerendebynavne',
+  primaryKey: ['supplerendebynavn', 'kommunekode', 'postnr'],
+  columns: [
+    {name: 'supplerendebynavn'},
+    {name: 'kommunekode'},
+    {name: 'postnr'},
+    {
+      name: 'tsv',
+      derive: table => ` to_tsvector('adresser', ${table}.supplerendebynavn)`
+    }
+  ]
+};
+
 const postnrTsVector = (nr, navn) => `to_tsvector('adresser', coalesce(to_char(${nr}, '0000'), '') || ' ' || coalesce(${navn}, ''))`;
 
 const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
@@ -229,7 +256,9 @@ exports.tables = {
   ejerlav,
   postnumre,
   stormodtagere,
-  adresser_mat
+  adresser_mat,
+  temaer,
+  supplerendebynavne
 };
 
 exports.materializations = {

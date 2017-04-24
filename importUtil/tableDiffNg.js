@@ -255,7 +255,6 @@ const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, colu
   yield applyChanges(client, txid, tableModel);
 });
 
-
 module.exports = {
   computeInserts,
   computeInsertsSubset,
