@@ -110,6 +110,12 @@ FROM changes group by day)
 SELECT day, sum(status1) over w as status1, sum(status2) over w as status2, sum(status3) over w as status3, sum(status4) over w as status4
 FROM byDay
   WINDOW w AS (order by day)`
+  },
+  {
+    key: 'AdresseAntal',
+    description: 'Antallet af adresser, adgangsadresser og vejstykker',
+    query: `SELECT (SELECT COUNT(*) FROM adresser_mat where vejnavn is not null and vejnavn <> '' and postnr is not null) as adresser,
+    (select count(*) from adgangsadresser_mat where vejnavn is not null and vejnavn <> '' and postnr is not null) as adgangsadresser`
   }
 ];
 
