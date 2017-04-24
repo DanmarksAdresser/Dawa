@@ -410,9 +410,10 @@ exports.dagiFilter = function() {
         }).join(' AND ');
         var temaQuery = `SELECT id FROM temaer WHERE tema = ${temaAlias} AND ${temaClauses}`;
         clauses.push(`a_id IN (
+        WITH tema_ids AS (${temaQuery})
         SELECT adgangsadresse_id
         FROM adgangsadresser_temaer_matview
-        WHERE tema = ${temaAlias} AND tema_id IN (${temaQuery}))`);
+        WHERE tema = ${temaAlias} AND tema_id IN (select id from tema_ids))`);
       }
       if(clauses.length > 0) {
         dbapi.addWhereClause(sqlParts, `(${clauses.join(') OR (')})`);
