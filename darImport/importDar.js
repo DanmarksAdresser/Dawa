@@ -89,10 +89,10 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
           }
         });
 
-        logger.info('Successfully completed importDar script');
+        logger.info('DAR CSV importer succeeded');
       }
       catch(err) {
-        logger.error('Caught error in importDar', err);
+        logger.error('Caught error in DAR CSV importer', err);
         throw err;
       }
     })).done();
