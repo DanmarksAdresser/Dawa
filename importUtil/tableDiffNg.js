@@ -3,7 +3,7 @@
 const { go } = require('ts-csp');
 const _ = require('underscore');
 
-const {allColumnNames, nonPrimaryColumnNames, publicColumnNames, publicNonKeyColumnNames, deriveColumnsForChange, makeSelectClause, derivedColumnNames, nonDerivedColumnNames} = require('./tableModelUtil');
+const {allColumnNames, nonPrimaryColumnNames, publicColumnNames, publicNonKeyColumnNames, deriveColumnsForChange, makeSelectClause, derivedColumnNames, nonDerivedColumnNames, assignSequenceNumbers} = require('./tableModelUtil');
 const {selectList, columnsEqualClause, columnsDistinctClause} = require('../darImport/sqlUtil');
 
 /**
@@ -140,16 +140,19 @@ const computeDifferencesSubset = (client, txid, srcTableOrView, dirtyTable, tabl
 
 const applyInserts = (client, txid, tableModel) => go(function*() {
   const columnList = selectList(null, allColumnNames(tableModel));
+  yield assignSequenceNumbers(client, txid, tableModel, 'insert');
   yield client.query(`INSERT INTO ${tableModel.table}(${columnList}) (SELECT ${columnList} FROM ${tableModel.table}_changes WHERE txid = ${txid} and operation = 'insert')`);
 });
 
 const applyDeletes = (client, txid, tableModel) => go(function*() {
+  yield assignSequenceNumbers(client, txid, tableModel, 'delete');
   yield client.query(`DELETE FROM ${tableModel.table} t USING ${tableModel.table}_changes c WHERE c.txid = ${txid} AND operation='delete' AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
 });
 
 const applyUpdates = (client, txid, tableModel) => go(function*() {
   const columnsToUpdate = nonPrimaryColumnNames(tableModel);
   const updateClause = columnsToUpdate.map(column => `${column} = c.${column}`).join(', ');
+  yield assignSequenceNumbers(client, txid, tableModel, 'update');
   yield client.query(`UPDATE ${tableModel.table} t SET ${updateClause} FROM ${tableModel.table}_changes c WHERE c.txid = ${txid} AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
 });
 

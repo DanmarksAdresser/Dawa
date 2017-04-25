@@ -18,6 +18,10 @@ INSERT INTO current_tx VALUES (null);
 CREATE UNIQUE INDEX
   ON current_tx((true));
 
+ALTER TABLE transaction_history ADD COLUMN txid integer;
+CREATE INDEX ON transaction_history(txid, sequence_number);
+
+
 CREATE TABLE adgangsadresser_mat(
   id uuid NOT NULL PRIMARY KEY,
   kommunekode INTEGER NOT NULL,

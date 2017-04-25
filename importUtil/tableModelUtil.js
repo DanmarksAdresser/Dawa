@@ -1,14 +1,14 @@
 "use strict";
 
-const { go } = require('ts-csp');
+const {go} = require('ts-csp');
 const _ = require('underscore');
 
-const { selectList, columnsEqualClause } = require('../darImport/sqlUtil');
+const {selectList, columnsEqualClause} = require('../darImport/sqlUtil');
 const allColumnNames = tableModel => tableModel.columns.map(col => col.name);
 
 const derivedColumnNames = tableModel => tableModel.columns.filter(col => !!col.derive).map(col => col.name);
 
-const isPrimaryColumn = (colName, tableModel) =>  tableModel.primaryKey.includes(colName);
+const isPrimaryColumn = (colName, tableModel) => tableModel.primaryKey.includes(colName);
 
 const nonPrimaryColumnNames = tableModel =>
   allColumnNames(tableModel).filter(column => !isPrimaryColumn(column, tableModel));
@@ -22,12 +22,31 @@ const publicNonKeyColumnNames = tableModel =>
   publicColumnNames(tableModel)
     .filter(colName => !isPrimaryColumn(colName, tableModel));
 
+const assignSequenceNumbers = (client, txid, tableModel, op) => go(function*() {
+  const table = tableModel.table;
+  const changeTable = `${table}_changes`;
+  const seqSelectId = selectList('c', tableModel.primaryKey);
+  let seqFromClause = `${changeTable} c`;
+  let seqWhereClause = `txid = ${txid} AND operation='${op}' AND public`;
+  const selectSeq =
+    `SELECT ${seqSelectId}, row_number() over () as s FROM ${seqFromClause} WHERE ${seqWhereClause}`;
+  const sql = `WITH seq AS (${selectSeq}),
+                      last_seq AS (select coalesce(max(sequence_number), 0) FROM transaction_history),
+                      t as (UPDATE ${changeTable} 
+                            SET changeid = s + (select * from last_seq) 
+                            FROM seq 
+                            WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)})
+                 INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
+                   (SELECT s + (select * from last_seq), '${tableModel.entity}', '${op}', ${txid} FROM seq)`;
+  yield client.queryBatched(sql);
+});
+
 const insert = (client, tableModel, object) => {
   const columns = [];
   const values = [];
   const valueClauses = [];
-  for(let column of allColumnNames(tableModel)) {
-    if(typeof object[column] !== 'undefined') {
+  for (let column of allColumnNames(tableModel)) {
+    if (typeof object[column] !== 'undefined') {
       columns.push(column);
       values.push(object[column]);
       valueClauses.push(`$${values.length}`);
@@ -42,16 +61,16 @@ const update = (client, tableModel, object) => {
   const values = [];
   const updateClauses = [];
   const whereClauses = [];
-  for(let column of nonPrimaryColumnNames(tableModel)) {
+  for (let column of nonPrimaryColumnNames(tableModel)) {
     const value = object[column];
-    if(typeof value === 'undefined') {
+    if (typeof value === 'undefined') {
       continue;
     }
     values.push(value);
     const parameter = `$${values.length}`;
     updateClauses.push(`${column} = ${parameter}`);
   }
-  for(let column of tableModel.primaryKey) {
+  for (let column of tableModel.primaryKey) {
     const value = object[column];
     values.push(value);
     const parameter = `$${values.length}`;
@@ -65,7 +84,7 @@ const update = (client, tableModel, object) => {
 const del = (client, tableModel, key) => {
   const values = [];
   const whereClauses = [];
-  for(let column of tableModel.primaryKey) {
+  for (let column of tableModel.primaryKey) {
     values.push(key[column]);
     whereClauses.push(`${column} = $${values.length}`);
   }
@@ -82,7 +101,7 @@ const deriveColumn = (client, table, tableModel, columnName, additionalWhereClau
 };
 
 const deriveColumns = (client, table, tableModel, additionalWhereClauses) => go(function*() {
-  for(let column of tableModel.columns) {
+  for (let column of tableModel.columns) {
     if (column.derive) {
       yield deriveColumn(client, table, tableModel, column.name, additionalWhereClauses);
     }
@@ -97,7 +116,7 @@ const deriveColumnsForChange = (client, txid, tableModel) => go(function*() {
 const makeSelectClause = (table, tableModel, columnNames) => {
   return columnNames.map(columnName => {
     const columnSpec = _.findWhere(tableModel.columns, {name: columnName});
-    if(columnSpec.derive) {
+    if (columnSpec.derive) {
       return `${columnSpec.derive(table)} as ${columnName}`
     }
     else {
@@ -106,26 +125,6 @@ const makeSelectClause = (table, tableModel, columnNames) => {
   }).join(', ');
 };
 
-const assignSequenceNumbers = (client, txid, tableModel, operations) => go(function*() {
-  const table = tableModel.table;
-  const changeTable = `${table}_changes`;
-  for(let op of operations) {
-    const seqSelectId = selectList('c', tableModel.primaryKey);
-    let  seqFromClause = `${changeTable} c`;
-    let seqWhereClause =  `txid = ${txid} AND operation='${op}' AND public`;
-    const selectSeq =
-      `SELECT ${seqSelectId}, row_number() over () as s FROM ${seqFromClause} WHERE ${seqWhereClause}`;
-    const sql = `WITH seq AS (${selectSeq}),
-                      last_seq AS (select coalesce(max(sequence_number), 0) FROM transaction_history),
-                      t as (UPDATE ${changeTable} 
-                            SET changeid = s + (select * from last_seq) 
-                            FROM seq 
-                            WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)})
-                 INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
-                   (SELECT s + (select * from last_seq), '${tableModel.entity}', '${op}', ${txid} FROM seq)`;
-    yield client.queryBatched(sql);
-  }
-});
 
 const nonDerivedColumnNames = tableModel => _.difference(allColumnNames(tableModel), derivedColumnNames(tableModel));
 
