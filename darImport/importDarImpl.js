@@ -730,5 +730,7 @@ exports.internal = {
   computeDirtyObjects: computeDirtyObjects,
   dawaDbSpecImpls: dawaDbSpecImpls,
   darDbSpecImpls: darDbSpecImpls,
-  storeRowsToTempTable: storeRowsToTempTable
+  storeRowsToTempTable: storeRowsToTempTable,
+  doDawaChanges,
+  materializeDawa
 };

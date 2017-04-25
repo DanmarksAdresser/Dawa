@@ -255,6 +255,47 @@ const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, colu
   yield applyChanges(client, txid, tableModel);
 });
 
+/**
+ * Insert a single row into the change table. NOTE: does *not* derive columns
+ * @param client
+ * @param txid
+ * @param tableModel
+ * @param row
+ */
+const insert = (client, txid, tableModel, row) => go(function*() {
+  const changeTableName = `${tableModel.table}_changes`;
+  const nonDerivedColumns = nonDerivedColumnNames(tableModel);
+  const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
+  const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index+2}`).join(',');
+  yield client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${nonDerivedColumns.join(', ')}) 
+  (SELECT $1, null, 'insert', false, ${nonDerivedParamExpr})`, params);
+});
+
+/**
+ * Insert a single update row into the change table. NOTE: does *not* derive columns
+ * @param client
+ * @param txid
+ * @param tableModel
+ * @param row
+ */
+const update = (client, txid, tableModel, row) => go(function*() {
+  const changeTableName = `${tableModel.table}_changes`;
+  const nonDerivedColumns = nonDerivedColumnNames(tableModel);
+  const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
+  const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index+2}`).join(',');
+  yield client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${nonDerivedColumns.join(', ')}) 
+  (SELECT $1, null, 'update', false, ${nonDerivedParamExpr})`, params);
+});
+
+const del = (client, txid, tableModel, row) => go(function*() {
+  const changeTableName = `${tableModel.table}_changes`;
+  const nonDerivedColumns = nonDerivedColumnNames(tableModel);
+  const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
+  const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index+2}`).join(',');
+  yield client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${nonDerivedColumns.join(', ')}) 
+  (SELECT $1, null, 'delete', false, ${nonDerivedParamExpr})`, params);
+});
+
 module.exports = {
   computeInserts,
   computeInsertsSubset,
@@ -270,5 +311,8 @@ module.exports = {
   applyChanges,
   migrateHistoryToChangeTable,
   createChangeTable,
-  initializeFromScratch
+  initializeFromScratch,
+  insert,
+  update,
+  del
 };
