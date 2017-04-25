@@ -112,6 +112,45 @@ FROM byDay
   WINDOW w AS (order by day)`
   },
   {
+    key: 'AdgangsadresseStatistik',
+    description: 'Adgangsadressebestandens ændring over tid',
+    query: `
+WITH changes AS (
+  SELECT
+    to_char(date_trunc('day', lower(virkning)), 'YYYY-MM-DD') AS day,
+    statuskode,
+    count(*)                                                  AS change
+  FROM dar_husnummer
+  WHERE upper(registrering) IS NULL
+  GROUP BY date_trunc('day', lower(virkning)), statuskode
+  UNION ALL
+  SELECT
+    to_char(date_trunc('day', upper(virkning)), 'YYYY-MM-DD') AS day,
+    statuskode,
+    -count(*)                                                 AS change
+  FROM dar_husnummer
+  WHERE upper(registrering) IS NULL AND upper(virkning) IS NOT NULL
+  GROUP BY date_trunc('day', upper(virkning)), statuskode),
+  byDay AS (SELECT
+  day,
+  sum(CASE WHEN statuskode = 1
+    THEN change
+      ELSE 0 END) AS status1,
+  sum(CASE WHEN statuskode = 2
+    THEN change
+      ELSE 0 END) AS status2,
+  sum(CASE WHEN statuskode = 3
+    THEN change
+      ELSE 0 END) AS status3,
+  sum(CASE WHEN statuskode = 4
+    THEN change
+      ELSE 0 END) AS status4
+FROM changes group by day)
+SELECT day, sum(status1) over w as status1, sum(status2) over w as status2, sum(status3) over w as status3, sum(status4) over w as status4
+FROM byDay
+  WINDOW w AS (order by day)`
+  },
+  {
     key: 'AdresseAntal',
     description: 'Antallet af adresser, adgangsadresser og vejstykker',
     query: `SELECT (SELECT COUNT(*) FROM adresser_mat where vejnavn is not null and vejnavn <> '' and postnr is not null) as adresser,
