@@ -1,6 +1,5 @@
 "use strict";
 
-const q = require('q');
 const _ = require('underscore');
 
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
@@ -21,9 +20,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE', client => {
-    return q.async(function*() {
-      yield importVejmidterImpl.importVejmidter(client, options.file, 'vejstykker', options.initial);
-    })();
-  });
+  proddb.withTransaction('READ_WRITE', client =>
+    importVejmidterImpl.importVejmidter(client, options.file, 'vejstykker', options.initial)
+  ).done();
 });

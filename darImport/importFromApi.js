@@ -48,16 +48,22 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir'),
   }
 
   go(function*() {
-    if(options.daemon) {
-      process.on('SIGTERM', shutdown);
-      process.on('SIGINT', shutdown);
-      logger.info('Running in daemon mode');
-      while (shouldContinue) {
+    try {
+      if(options.daemon) {
+        process.on('SIGTERM', shutdown);
+        process.on('SIGINT', shutdown);
+        logger.info('Running in daemon mode');
+        while (shouldContinue) {
+          yield doImport();
+        }
+      }
+      else {
         yield doImport();
       }
     }
-    else {
-      yield doImport();
+    catch(err) {
+      logger.error('Failure during import from API', err);
+      throw err;
     }
   }).asPromise().done();
 });

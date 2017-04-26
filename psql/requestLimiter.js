@@ -1,42 +1,17 @@
-const Promise = require('bluebird');
-const fairScheduler = require('./fair-scheduler');
+const distSchedulerClientCreate = require('../dist-scheduler/dist-scheduler-client').create;
+const messagingInstance = require('../messaging/messaging-worker-instance').instance;
 
 const FAIR_SCHEDULER_ENABLED = true;
+const SCHEDULER_OPTIONS = {
+  timeout: 12000
+};
 
 let requestLimiter = (clientId, fn) => fn();
 requestLimiter.status = () => "Request limiting disabled";
 if(FAIR_SCHEDULER_ENABLED) {
-  const scheduler = fairScheduler({
-    concurrency: 2,
-    cleanupInterval: 5000,
-    initialPriorityOffset: -2000,
-    prioritySlots: 1
-  });
-  requestLimiter = (clientIp, fn) => Promise.coroutine(function*() {
-    const scheduleResult = yield scheduler.schedule(clientIp, Promise.coroutine(function*() {
-      const before = Date.now();
+  const scheduler = distSchedulerClientCreate(messagingInstance, SCHEDULER_OPTIONS);
 
-      let result;
-      try {
-        result = {succeeded: yield fn() }
-      }
-      catch(err) {
-        result = { failed: err}
-      }
-      const duration = Date.now() - before;
-      return {
-        cost: duration,
-        result: result
-      }
-    }));
-    const result = scheduleResult.result;
-    if(typeof result.succeeded !== 'undefined') {
-      return result.succeeded;
-    }
-    else {
-      throw result.failed;
-    }
-  })();
+  requestLimiter = (clientIp, fn, timeout) => scheduler.schedule(clientIp, fn, timeout);
   requestLimiter.status = () => scheduler.status();
 }
 

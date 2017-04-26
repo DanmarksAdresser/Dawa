@@ -1,3 +1,4 @@
+const querystring = require('querystring');
 const chars = 'abcdefghijklmnopqrstuvwxyzæøåé';
 
 function randomString(length) {
@@ -13,19 +14,29 @@ function randomString(length) {
   return string;
 }
 
-module.exports = [{
-  name: 'adresseudtræk',
-  type: 'fixedConcurrency',
-  url: '/adresser',
-  concurrency: 4,
-  rampUpDelay: 5000,
-}, {
+module.exports = [
+//   {
+//   name: 'adresseudtræk',
+//   type: 'fixedConcurrency',
+//   url: '/adresser',
+//   concurrency: 1,
+//   clientCount: 4,
+//   rampUpDelay: 100,
+// },
+  {
   name: 'autocomplete',
   type: 'fixedRps',
-  url: () => '/autocomplete?q=' + randomString(3),
+  url: () => {
+    const params = {q: randomString(8) + ' ' + Math.floor(Math.random() * 100)};
+    if(Math.random() * 10 < 1) {
+      params.fuzzy = '';
+    }
+    return '/autocomplete?' + querystring.stringify(params);
+  },
   initial: 1,
   increase: 1,
-  max: 10,
+  max: 80,
+  clientCount: 250,
   increasePeriod: 1000,
   increaseDelay: 10000
 }];

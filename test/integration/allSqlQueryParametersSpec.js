@@ -566,6 +566,32 @@ var sampleParameters = {
       verifier: (bygning, kode) => bygning.KomKode === kode
     }
   },
+  ois_tekniskanlaeg: {
+    id: {
+      values: ['ff1b4aef-ef89-4822-bbf0-1fadeec2d38c'],
+      verifier: (anlaeg, id) => anlaeg.Tekniskanlaeg_id === id
+    },
+    adgangsadresseid: {
+      values: ['0a3f507b-c8ff-32b8-e044-0003ba298018'],
+      verifier: (anlaeg, adgangsadresseid) => anlaeg.AdgAdr_id === adgangsadresseid
+    },
+    esrejendomsnr: {
+      values: ['061537', '61537'],
+      verifier: (anlaeg, nr) => parseInt(anlaeg.ESREjdNr, 10) === parseInt(nr, 10)
+    },
+    bygningsid: {
+      values: ['d284b19e-b68a-4d1b-ac17-5576c3750231'],
+      verifier: (anlaeg, id) => anlaeg.Bygning_id === id
+    },
+    kommunekode: {
+      values: ['0253', '253'],
+      verifier: (anlaeg, kode) => parseInt(anlaeg.KomKode, 10) === parseInt(kode, 10)
+    },
+    klassifikation: {
+      values: ['1920'],
+      verifier: (anlaeg, klassifikation) => anlaeg.Klassifikation === parseInt(klassifikation, 10)
+    }
+  },
   ois_opgang: {
     id: {
       values: ['008ff3ab-db75-4755-a71b-470f7eb42483'],
@@ -719,7 +745,7 @@ _.keys(sampleParameters).forEach(function(specName) {
                     var verifyResult = verify(json, sampleValue);
                     expect(verifyResult).to.equal(true);
                   });
-                }).asPromise();
+                });
               });
             });
           });

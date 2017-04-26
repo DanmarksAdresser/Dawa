@@ -9,8 +9,8 @@ var assert = require("assert")
   , http= require('http');
 
 //var host= "http://localhost:3000";
+//var host= "http://dawa-p2.aws.dk";
 var host= "http://dawa-p2.aws.dk";
-//var host= "http://origin-dawa-p2.aws.dk";
 //var host= "http://52.212.234.159";
 console.log(host);
 
@@ -1969,15 +1969,15 @@ describe('OIS', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
 
-      // var opgangopt= {};
-      // opgangopt.baseUrl= host;
-      // opgangopt.url='ois/opgange';
-      // opgangopt.qs= {};
-      // opgangopt.qs.cache= enhedopt.qs.cache;
-      // //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
-      // opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
-      // opgangopt.resolveWithFullResponse= true;
-      // var opgangsrp= rp(opgangopt);
+      var opgangopt= {};
+      opgangopt.baseUrl= host;
+      opgangopt.url='ois/opgange';
+      opgangopt.qs= {};
+      opgangopt.qs.cache= enhedopt.qs.cache;
+      //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
+      opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
+      opgangopt.resolveWithFullResponse= true;
+      var opgangsrp= rp(opgangopt);
 
       var bygningopt= {};
       bygningopt.baseUrl= host;
@@ -1999,7 +1999,7 @@ describe('OIS', function(){
       tekniskanlægopt.resolveWithFullResponse= true;
       var tekniskanlægrp= rp(tekniskanlægopt);
 
-      return Promise.all([enhedrp, bygningrp, tekniskanlægrp /*, opgangsrp */]);
+      return Promise.all([enhedrp, bygningrp, tekniskanlægrp, opgangsrp]);
     })
     .then(function (responses) {
       function callok(element, index, array) {          
@@ -2013,11 +2013,15 @@ describe('OIS', function(){
 
       // bygninger        
       var bygninger= JSON.parse(responses[1].body);        
-      assert(bygninger.length===0, "Der er fundet en bygning, men " + bygninger.length);
+      assert(bygninger.length===0, "Der er fundet bygninger: " + bygninger.length);
 
       // tekniske anlæg        
       var tekniskanlæg= JSON.parse(responses[2].body);        
-      assert(tekniskanlæg.length===0, "Der er fundet et teknisk anlæg, men " + tekniskanlæg.length);
+      assert(tekniskanlæg.length===0, "Der er fundet tekniske anlæg: " + tekniskanlæg.length);
+
+      // opgange        
+      var opgange= JSON.parse(responses[3].body);        
+      assert(opgange.length===1, "Der er ikke fundet en opgang, men: " + tekniskanlæg.length);
 
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
@@ -2268,7 +2272,7 @@ describe('OIS', function(){
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
+      assert(ejerskaber.length===5, "Der er ikke fundet fem ejerskab, men " + ejerskaber.length);
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 
@@ -2320,7 +2324,7 @@ describe('OIS', function(){
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
+      assert(ejerskaber.length===2, "Der er ikke fundet to ejerskab, men " + ejerskaber.length);
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 

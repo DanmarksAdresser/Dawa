@@ -24,7 +24,7 @@ module.exports = function (grunt) {
       test: {
         options: {
           script: 'server.js',
-          args: ['--listenPort=3002', '--masterListenPort=3003', '--logConfiguration=travis-ci-server-logconfig.json'],
+          args: ['--listenPort=3002', '--masterListenPort=3003', '--ois.enabled=1', '--ois.unprotected=1', '--logConfiguration=travis-ci-server-logconfig.json'],
           output: 'Express server listening'
         }
       }

@@ -99,6 +99,7 @@ setupJadePage('/adgangsadressedok'    , 'adgangsadressedok.jade');
 setupJadePage('/vejedok'              , 'vejedok.jade');
 setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
 setupJadePage('/listerdok'            , 'listerdok.jade');
+setupJadePage('/oisdok'            , 'oisdok.jade');
 setupJadePage('/om'                   , 'om.jade');
 setupJadePage('/replikeringdok', 'replikeringdok.jade');
 setupSchemaPage('/replikeringdok/schema.json');

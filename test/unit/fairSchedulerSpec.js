@@ -2,8 +2,9 @@
 
 const expect = require('chai').expect;
 const q = require('q');
+const { go } = require('ts-csp');
 
-const fairScheduler = require('../../psql/fair-scheduler');
+const fairScheduler = require('../../dist-scheduler/fair-scheduler');
 describe("Fair scheduler", () => {
   let scheduler;
   const scheduleTask = (source) => {
@@ -30,7 +31,7 @@ describe("Fair scheduler", () => {
   };
 
   beforeEach(() => {
-    scheduler = fairScheduler({concurrency: 2});
+    scheduler = fairScheduler({slots: 2});
   });
 
   it('Should run task immediately if queue is empty', q.async(function*() {
@@ -42,7 +43,7 @@ describe("Fair scheduler", () => {
     expect(taskDescriptor.running).to.be.false;
   }));
 
-  it('Exactly <concurrency> tasks should be executing', q.async(function*() {
+  it('Exactly <slots> tasks should be executing', q.async(function*() {
     const tasks = [scheduleTask('source1'), scheduleTask('source2'), scheduleTask('source3')];
     yield q.delay(0);
     let runningTasks = tasks.reduce((memo, task) => memo + (task.running ? 1 : 0), 0);
@@ -72,7 +73,7 @@ describe("Fair scheduler", () => {
   it('New sources may receive a head start specified by initialPriorityOffset', q.async(function*() {
     scheduler = fairScheduler({
       concurrency:1,
-      initialPriorityOffset: -100
+      initialPriorityOffset: 100
     });
     let tasksSource1 = [scheduleTask('source1')];
     yield q.delay(0);
@@ -90,7 +91,7 @@ describe("Fair scheduler", () => {
   it('Should cleanup sources with priority lower than top + offest', q.async(function*() {
     scheduler = fairScheduler({
       concurrency:1,
-      initialPriorityOffset: -100,
+      initialPriorityOffset: 100,
       cleanupInterval: 0
     });
     let taskSource1 = scheduleTask('source1');
@@ -108,5 +109,23 @@ describe("Fair scheduler", () => {
     yield q.delay(0);
     expect(scheduler.internal.descriptor('source1')).to.be.undefined;
     expect(scheduler.internal.descriptor('source2')).to.not.be.undefined;
+  }));
+
+  it('A source can run two concurrent tasks, if concurrencyPerSource is 2', () => go(function*() {
+    scheduler = fairScheduler({
+      slots:3,
+      slotsPerSource: 2
+    });
+
+    let tasks = [scheduleTask('source1'), scheduleTask('source1'), scheduleTask('source1')];
+    yield q.delay(0);
+    expect(tasks[0].running).to.be.true;
+    expect(tasks[1].running).to.be.true;
+    expect(tasks[2].running).to.be.false;
+    completeTask(tasks[0], null, 100);
+    yield q.delay(0);
+    expect(tasks[2].running).to.be.true;
+    completeTask(tasks[1], null, 100);
+    completeTask(tasks[2], null, 100);
   }));
 });

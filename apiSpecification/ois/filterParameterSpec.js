@@ -95,6 +95,9 @@ module.exports = {
     name: 'bygningsid',
     field: 'Bygning_id'
   }, {
+    name: 'klassifikation',
+    field: 'Klassifikation'
+  }, {
     name: 'kommunekode',
     field: 'KomKode',
     schema: {
