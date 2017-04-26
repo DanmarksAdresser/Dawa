@@ -175,7 +175,7 @@ class DawaClient {
         return result;
       }
       catch(e) {
-        yield Promise.promisify(client.query, {context: client})('ROLLBACK');
+        yield Promise.promisify(client.client.query, {context: client.client})('ROLLBACK');
         throw e;
       }
       finally {
