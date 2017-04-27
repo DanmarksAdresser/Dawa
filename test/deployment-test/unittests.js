@@ -1448,90 +1448,42 @@ describe('Jordstykker', function(){
 
 describe('Historik', function(){
   
-  // it("Samme zone i json og csv format", function(done){
+  it("Historik på nedlagte adresser", function(done){
 
-  //   var optjson= {};
-  //   optjson.baseUrl= host;
-  //   optjson.url='adgangsadresser';
-  //   optjson.qs= {};
-  //   optjson.qs.cache= 'no-cache';
-  //   optjson.qs.vejnavn= 'Kalvebodvej';
-  //   optjson.qs.husnr= '166';
-  //   optjson.qs.postnr= '2791';
-  //   var jsonrequest= rp(optjson);
+    var optadr= {};
+    optadr.baseUrl= host;
+    optadr.url='/adresser/0a3f509d-66fe-32b8-e044-0003ba298018';
+    optadr.qs= {};
+    optadr.qs.cache= 'no-cache';
+    optadr.resolveWithFullResponse= true;
+    optadr.simple= false;
+    var adrrequest= rp(optadr);
 
-  //   var optcsv= {};
-  //   optcsv.baseUrl= host;
-  //   optcsv.url=optjson.url;
-  //   optcsv.qs= {};
-  //   optcsv.qs.cache= optjson.qs.cache;
-  //   optcsv.qs.vejnavn= optjson.qs.vejnavn;
-  //   optcsv.qs.husnr= optjson.qs.husnr;
-  //   optcsv.qs.postnr= optjson.qs.postnr;
-  //   optcsv.qs.format= 'csv';
-  //   var csvrequest= rp(optcsv);
+    var opthist= {};
+    opthist.baseUrl= host;
+    opthist.url= '/historik/adresser';
+    opthist.qs= {};
+    opthist.qs.cache= optadr.qs.cache;
+    opthist.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
+    opthist.resolveWithFullResponse= true;
+    opthist.simple= false;
+    var histrequest= rp(opthist);
 
-  //   Promise.all([jsonrequest, csvrequest]).then(function (bodies) {
-  //     var adgangsadresserjson= JSON.parse(bodies[0]);
-  //     var adgangsadressejson= adgangsadresserjson[0];
-  //     //console.log(adgangsadresse);      
-  //     csv.parse(bodies[1], {columns: true}, function (err, adgangsadressercsv) {
-  //       var adgangsadressecsv= adgangsadressercsv[0];
-  //       //console.log(adgangsadressecsv);
-  //       assert(adgangsadressejson.zone===adgangsadressecsv.zone, 'Zone i json og csv format forskellig. json: ' + adgangsadressejson.zone + ', csv: ' + adgangsadressecsv.zone);
-  //       assert(adgangsadressejson.id===adgangsadressecsv.id, 'Id i json og csv format forskellig. json: ' + adgangsadressejson.id + ', csv: ' + adgangsadressecsv.id);
-  //       assert(adgangsadressejson.status==adgangsadressecsv.status, 'Status i json og csv format forskellig. json: |' + adgangsadressejson.status + '|, csv: |' + adgangsadressecsv.status + '|');
-  //       assert(adgangsadressejson.kvh===adgangsadressecsv.kvh, 'kvh i json og csv format forskellig. json: ' + adgangsadressejson.kvh + ', csv: ' + adgangsadressecsv.kvh);
-  //       assert(adgangsadressejson.historik.oprettet===adgangsadressecsv.oprettet, 'oprettet i json og csv format forskellig. json: |' + adgangsadressejson.historik.oprettet + '|, csv: |' + adgangsadressecsv.oprettet + '|');
-  //       assert(adgangsadressejson.historik.ændret===adgangsadressecsv.ændret, 'ændret i json og csv format forskellig. json: ' + adgangsadressejson.historik.ændret + ', csv: ' + adgangsadressecsv.ændret);
-  //       //assert(adgangsadressejson.etage===adgangsadressecsv.etage, 'etage i json og csv format forskellig. json: ' + adgangsadressejson.etage + ', csv: ' + adgangsadressecsv.etage);
-  //       //assert(adgangsadressejson.dør===adgangsadressecsv.dør, 'dør i json og csv format forskellig. json: ' + adgangsadressejson.dør + ', csv: ' + adgangsadressecsv.dør);
-  //        assert(adgangsadressejson.vejstykke.navn===adgangsadressecsv.vejnavn, 'adgangsadresse.vejstykke.navn i json og csv format forskellig. json: ' + adgangsadressejson.vejstykke.navn + ', csv: ' + adgangsadressecsv.vejnavn);
-  //       assert(adgangsadressejson.vejstykke.kode===adgangsadressecsv.vejkode, 'adgangsadresse.vejstykke.kode i json og csv format forskellig. json: ' + adgangsadressejson.vejstykke.kode + ', csv: ' + adgangsadressecsv.vejkode);
-  //       assert(adgangsadressejson.vejstykke.adresseringsnavn===adgangsadressecsv.adresseringsvejnavn, 'adgangsadresse.vejstykke.adresseringsnavn i json og csv format forskellig. json: ' + adgangsadressejson.vejstykke.adresseringsnavn + ', csv: ' + adgangsadressecsv.adresseringsvejnavn);
-  //       assert(adgangsadressejson.husnr===adgangsadressecsv.husnr, 'adgangsadresse.husnr i json og csv format forskellig. json: ' + adgangsadressejson.husnr + ', csv: ' + adgangsadressecsv.husnr);
-  //       assert(adgangsadressejson.supplerendebynavn==adgangsadressecsv.supplerendebynavn||adgangsadressejson.supplerendebynavn===null&&adgangsadressecsv.supplerendebynavn=="", 'adgangsadresse.supplerendebynavn i json og csv format forskellig. json: ' + adgangsadressejson.supplerendebynavn + ', csv: ' + adgangsadressecsv.supplerendebynavn);
-  //       assert(adgangsadressejson.postnummer.nr===adgangsadressecsv.postnr, 'adgangsadresse.postnummer.nr i json og csv format forskellig. json: ' + adgangsadressejson.postnummer.nr + ', csv: ' + adgangsadressecsv.postnr);
-  //       assert(adgangsadressejson.postnummer.navn===adgangsadressecsv.postnrnavn, 'adgangsadresse.postnummer.navn i json og csv format forskellig. json: ' + adgangsadressejson.postnummer.navn + ', csv: ' + adgangsadressecsv.postnrnavn);
-  //       if (adgangsadressejson.stormodtagerpostnr) {
-  //         assert(adgangsadressejson.stormodtagerpostnummer.nr===adgangsadressecsv.stormodtagerpostnr, 'adgangsadresse.stormodtagerpostnummer.nr i json og csv format forskellig. json: ' + adgangsadressejson.stormodtagerpostnummer.nr + ', csv: ' + adgangsadressecsv.stormodtagerpostnr);
-  //         assert(adgangsadressejson.stormodtagerpostnummer.navn===adgangsadressecsv.stormodtagerpostnrnavn, 'adgangsadresse.stormodtagerpostnummer.navn i json og csv format forskellig. json: ' + adgangsadressejson.stormodtagerpostnummer.navn + ', csv: ' + adgangsadressecsv.stormodtagerpostnrnavn);
-      
-  //       }
-  //       assert(adgangsadressejson.kommune.kode===adgangsadressecsv.kommunekode, 'adgangsadresse.kommune.nr i json og csv format forskellig. json: ' + adgangsadressejson.kommune.kode + ', csv: ' + adgangsadressecsv.kommunekode);
-  //       assert(adgangsadressejson.kommune.navn===adgangsadressecsv.kommunenavn, 'adgangsadresse.kommune.navn i json og csv format forskellig. json: ' + adgangsadressejson.kommune.navn + ', csv: ' + adgangsadressecsv.kommunenavn);
-  //       assert(adgangsadressejson.ejerlav.kode==adgangsadressecsv.ejerlavkode, 'adgangsadresse.ejerlav.nr i json og csv format forskellig. json: ' + adgangsadressejson.ejerlav.kode + ', csv: ' + adgangsadressecsv.ejerlavkode);
-  //       assert(adgangsadressejson.ejerlav.navn===adgangsadressecsv.ejerlavnavn, 'adgangsadresse.ejerlav.navn i json og csv format forskellig. json: ' + adgangsadressejson.ejerlav.navn + ', csv: ' + adgangsadressecsv.ejerlavnavn);
-  //       assert(adgangsadressejson.sogn.kode===adgangsadressecsv.sognekode, 'adgangsadresse.sogn.nr i json og csv format forskellig. json: ' + adgangsadressejson.sogn.kode + ', csv: ' + adgangsadressecsv.sognekode);
-  //       assert(adgangsadressejson.sogn.navn===adgangsadressecsv.sognenavn, 'adgangsadresse.sogn.navn i json og csv format forskellig. json: ' + adgangsadressejson.sogn.navn + ', csv: ' + adgangsadressecsv.sognenavn);
-  //       assert(adgangsadressejson.region.kode===adgangsadressecsv.regionskode, 'adgangsadresse.region.nr i json og csv format forskellig. json: ' + adgangsadressejson.region.kode + ', csv: ' + adgangsadressecsv.regionskode);
-  //       assert(adgangsadressejson.region.navn===adgangsadressecsv.regionsnavn, 'adgangsadresse.region.navn i json og csv format forskellig. json: ' + adgangsadressejson.region.navn + ', csv: ' + adgangsadressecsv.regionsnavn);
-  //       assert(adgangsadressejson.retskreds.kode===adgangsadressecsv.retskredskode, 'adgangsadresse.retskreds.nr i json og csv format forskellig. json: ' + adgangsadressejson.retskreds.kode + ', csv: ' + adgangsadressecsv.retskredskode);
-  //       assert(adgangsadressejson.retskreds.navn===adgangsadressecsv.retskredsnavn, 'adgangsadresse.retskreds.navn i json og csv format forskellig. json: ' + adgangsadressejson.retskreds.navn + ', csv: ' + adgangsadressecsv.retskredsnavn);
-  //       assert(adgangsadressejson.politikreds.kode===adgangsadressecsv.politikredskode, 'adgangsadresse.politikreds.nr i json og csv format forskellig. json: ' + adgangsadressejson.politikreds.kode + ', csv: ' + adgangsadressecsv.politikredskode);
-  //       assert(adgangsadressejson.politikreds.navn===adgangsadressecsv.politikredsnavn, 'adgangsadresse.politikreds.navn i json og csv format forskellig. json: ' + adgangsadressejson.politikreds.navn + ', csv: ' + adgangsadressecsv.politikredsnavn);
-  //       assert(adgangsadressejson.opstillingskreds.kode===adgangsadressecsv.opstillingskredskode, 'adgangsadresse.opstillingskreds.nr i json og csv format forskellig. json: ' + adgangsadressejson.opstillingskreds.kode + ', csv: ' + adgangsadressecsv.opstillingskredskode);
-  //       assert(adgangsadressejson.opstillingskreds.navn===adgangsadressecsv.opstillingskredsnavn, 'adgangsadresse.opstillingskreds.navn i json og csv format forskellig. json: ' + adgangsadressejson.opstillingskreds.navn + ', csv: ' + adgangsadressecsv.retskredsnavn);
-  //       assert(adgangsadressejson.opstillingskreds.kode===adgangsadressecsv.opstillingskredskode, 'adgangsadresse.opstillingskreds.nr i json og csv format forskellig. json: ' + adgangsadressejson.opstillingskreds.kode + ', csv: ' + adgangsadressecsv.opstillingskredskode);
-  //       assert(adgangsadressejson.opstillingskreds.navn===adgangsadressecsv.opstillingskredsnavn, 'adgangsadresse.opstillingskreds.navn i json og csv format forskellig. json: ' + adgangsadressejson.opstillingskreds.navn + ', csv: ' + adgangsadressecsv.retskredsnavn);
-  //       assert(adgangsadressejson.esrejendomsnr===adgangsadressecsv.esrejendomsnr, 'adgangsadresse.esrejendomsnr i json og csv format forskellig. json: ' + adgangsadressejson.esrejendomsnr + ', csv: ' + adgangsadressecsv.esrejendomsnr);
-  //       assert(adgangsadressejson.matrikelnr===adgangsadressecsv.matrikelnr, 'adgangsadresse.matrikelnr i json og csv format forskellig. json: ' + adgangsadressejson.matrikelnr + ', csv: ' + adgangsadressecsv.matrikelnr);
-        
-  //       assert(adgangsadressejson.adgangspunkt.koordinater[0]==adgangsadressecsv.wgs84koordinat_længde, 'adgangspunkt.koordinater[0] i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.koordinater[0] + ', csv: ' + adgangsadressecsv.wgs84koordinat_længde);
-  //       assert(adgangsadressejson.adgangspunkt.koordinater[1]==adgangsadressecsv.wgs84koordinat_bredde, 'adgangspunkt.koordinater[1] i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.koordinater[1] + ', csv: ' + adgangsadressecsv.wgs84koordinat_bredde);
-  //       assert(adgangsadressejson.adgangspunkt.nøjagtighed===adgangsadressecsv.nøjagtighed, 'adgangspunkt.nøjagtighed i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.nøjagtighed + ', csv: ' + adgangsadressecsv.nøjagtighed);
-  //       assert(adgangsadressejson.adgangspunkt.kilde==adgangsadressecsv.kilde, 'adgangspunkt.kilde i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.kilde + ', csv: ' + adgangsadressecsv.kilde);
-  //       assert(adgangsadressejson.adgangspunkt.tekniskstandard===adgangsadressecsv.tekniskstandard, 'adgangspunkt.tekniskstandard i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.tekniskstandard + ', csv: ' + adgangsadressecsv.tekniskstandard);
-  //       assert(adgangsadressejson.adgangspunkt.tekstretning==adgangsadressecsv.tekstretning, 'adgangspunkt.tekstretning i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.tekstretning + ', csv: ' + adgangsadressecsv.tekstretning);
-  //       assert(adgangsadressejson.adgangspunkt.ændret===adgangsadressecsv.adressepunktændringsdato, 'adgangspunkt.adressepunktændringsdato i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.ændret + ', csv: ' + adgangsadressecsv.adressepunktændringsdato);
-  //       assert(adgangsadressejson.jordstykke.ejerlav.kode==adgangsadressecsv.jordstykke_ejerlavkode, 'jordstykke.ejerlav.kode i json og csv format forskellig. json: ' + adgangsadressejson.jordstykke.ejerlav.kode + ', csv: ' + adgangsadressecsv.jordstykke_ejerlavkode);
-  //       assert(adgangsadressejson.jordstykke.matrikelnr===adgangsadressecsv.jordstykke_matrikelnr, 'jordstykke.matrikelnr i json og csv format forskellig. json: ' + adgangsadressejson.jordstykke.matrikelnr + ', csv: ' + adgangsadressecsv.jordstykke_matrikelnr);
-  //       assert(adgangsadressejson.jordstykke.esrejendomsnr===adgangsadressecsv.jordstykke_esrejendomsnr, 'jordstykke.esrejendomsnr i json og csv format forskellig. json: ' + adgangsadressejson.jordstykke.esrejendomsnr + ', csv: ' + adgangsadressecsv.jordstykke_esrejendomsnr);
-  //       done();
-  //     });
-  //   });
+    Promise.all([adrrequest, histrequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,404);
+      assert.equal(responses[1].statusCode,200);
+      var adresse= JSON.parse(responses[0].body);
+      var historik= JSON.parse(responses[1].body);
+      function nedlagt(element, index, array) {
+        return element.status === 2 || element.status === 4;
+      }
+      assert(historik.some(nedlagt), 'Ingen nedlagte eller henlagte'); 
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
 
-  // })
+  })
 });
 
 describe('Adressevask', function(){
