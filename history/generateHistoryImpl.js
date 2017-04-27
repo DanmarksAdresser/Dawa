@@ -298,8 +298,6 @@ function prepareAdgangspunkt(client, adgangspunktHistoryTable) {
    WHERE hn.virkningstart < (ap.virkningstart))
 INSERT INTO ${adgangspunktHistoryUnmerged} (SELECT * FROM missing);`);
     yield mergeValidTime(client, adgangspunktHistoryUnmerged, adgangspunktHistoryTable, ['id'], ['id', 'statuskode', 'kommunenummer'], false);
-    console.log('prepared adgangspunkt');
-    console.log(JSON.stringify(yield client.queryRows(`select * from ${adgangspunktHistoryTable} where id = 2326476`, null, 2)))
   })();
 }
 
@@ -310,8 +308,6 @@ function mergeAdgangspunktHusnummer(client, mergedTable) {
     var joinedTable = 'joined_adgangsadresser_history';
     yield prepareAdgangspunkt(client, adgangspunktHistoryTable);
     yield mergeValidTime(client, 'dar_husnummer', husnummerHistoryTable, ['id'], ['id', 'bkid', 'statuskode', 'adgangspunktid', 'vejkode', 'husnummer'], true);
-    console.log('merged husnummer');
-    console.log(JSON.stringify(yield client.queryRows(`select * from ${husnummerHistoryTable} where bkid = '0A3F509B-72CA-32B8-E044-0003BA298018'`, null, 2)))
     var query =
       `SELECT hn.id, hn.bkid, hn.statuskode as hn_statuskode,
    ap.statuskode as ap_statuskode, hn.adgangspunktid, ap.kommunenummer as kommunekode,
@@ -321,11 +317,7 @@ function mergeAdgangspunktHusnummer(client, mergedTable) {
    ON hn.adgangspunktid = ap.id AND hn.virkning && ap.virkning`;
     yield client.queryp(`CREATE TEMP TABLE ${joinedTable} AS (${query})`);
     yield client.queryp(`DROP TABLE ${adgangspunktHistoryTable}; DROP TABLE ${husnummerHistoryTable}`);
-    console.log('joined');
-    console.log(JSON.stringify(yield client.queryRows(`select * from ${joinedTable} where bkid = '0A3F509B-72CA-32B8-E044-0003BA298018'`, null, 2)))
     yield mergeValidTime(client, joinedTable, mergedTable, ['id'], ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr'], false);
-    console.log('joined & merged');
-    console.log(JSON.stringify(yield client.queryRows(`select * from ${mergedTable} where bkid = '0A3F509B-72CA-32B8-E044-0003BA298018'`, null, 2)))
     yield client.queryp(`DROP TABLE ${joinedTable}`);
   })();
 }

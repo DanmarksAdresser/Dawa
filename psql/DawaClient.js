@@ -178,7 +178,7 @@ class DawaClient {
       }
       catch(e) {
         try {
-          yield client.query('ROLLBACK', [], { skipQueue: true });
+          yield Promise.promisify(client.client.query, {context: client.client})('ROLLBACK');
         }
         catch(e) {
           // ignore
