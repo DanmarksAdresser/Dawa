@@ -1,6 +1,5 @@
 "use strict";
 
-var q = require('q');
 var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
