@@ -49,7 +49,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -124,6 +124,7 @@ exports.json = {
             description: 'Adgangspunktets koordinater som array [x,y].',
             $ref: '#/definitions/NullableGeoJsonCoordinates'
           },
+          id: normalizedFieldSchema('adgangspunktid'),
           højde: normalizedFieldSchema('højde'),
           nøjagtighed: normalizedFieldSchema('nøjagtighed'),
           kilde: normalizedFieldSchema('kilde'),
@@ -131,7 +132,7 @@ exports.json = {
           tekstretning: normalizedFieldSchema('tekstretning'),
           ændret: normalizedFieldSchema('adressepunktændringsdato')
         },
-        docOrder: ['koordinater', 'højde','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
+        docOrder: ['id', 'koordinater', 'højde','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
       }),
       'DDKN': schemaObject({
         nullable: true,
@@ -293,6 +294,7 @@ exports.json = {
       };
       adr.adgangspunkt = {
         // af legacy årsager returnerer vi kun x,y koordinater
+        id: rs.adgangspunktid,
         koordinater: coordinater ? [coordinater[0], coordinater[1]] : null,
         højde: rs.højde,
         nøjagtighed: maybeNull(rs.nøjagtighed),

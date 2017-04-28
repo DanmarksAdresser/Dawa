@@ -160,6 +160,9 @@ var fields = [
     name: 'højde'
   },
   {
+    name: 'adgangspunktid'
+  },
+  {
     name: 'x'
   },
   {

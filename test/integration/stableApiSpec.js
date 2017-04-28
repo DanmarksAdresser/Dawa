@@ -68,6 +68,7 @@ describe('Stable API', () => {
               "ændret": "2012-01-17T21:00:12.943"
             },
             "adgangspunkt": {
+              "id": "0a3f5089-0408-32b8-e044-0003ba298018",
               "koordinater": [
                 10.3314667967929,
                 55.3948974003657
@@ -152,6 +153,7 @@ describe('Stable API', () => {
               "ejerlavnavn": null,
               "matrikelnr": null,
               "esrejendomsnr": null,
+              "adgangspunktid": "0a3f5089-0408-32b8-e044-0003ba298018",
               "etrs89koordinat_øst": 584330.74,
               "etrs89koordinat_nord": 6139543.21,
               "wgs84koordinat_bredde": 55.3948974003657,
@@ -223,6 +225,7 @@ describe('Stable API', () => {
               "ejerlavnavn": null,
               "matrikelnr": null,
               "esrejendomsnr": null,
+              "adgangspunktid": "0a3f5081-c394-32b8-e044-0003ba298018",
               "etrs89koordinat_øst": 685289.88,
               "etrs89koordinat_nord": 6158701.41,
               "wgs84koordinat_bredde": 55.5391035802434,
@@ -328,6 +331,7 @@ describe('Stable API', () => {
                 "ændret": "2012-01-17T21:00:12.943"
               },
               "adgangspunkt": {
+                "id": "0a3f5089-0408-32b8-e044-0003ba298018",
                 "koordinater": [
                   10.3314667967929,
                   55.3948974003657
@@ -426,6 +430,7 @@ describe('Stable API', () => {
               "ddkn_m100": "100m_61395_5843",
               "ddkn_km1": "1km_6139_584",
               "ddkn_km10": "10km_613_58",
+              "adgangspunktid": "0a3f5089-0408-32b8-e044-0003ba298018",
               "adressepunktændringsdato": "2009-02-11T23:59:00.000",
               "adgangsadresseid": "0a3f5089-0408-32b8-e044-0003ba298018",
               "adgangsadresse_status": 1,

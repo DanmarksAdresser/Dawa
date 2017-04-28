@@ -228,6 +228,11 @@ var fields = {
       name: 'højde',
       description: 'Højden (koten) er beregnet efter Dansk Vertikal Reference 1990 (DVR90) fra middelvandstanden i havene ved Danmarks kyster til terrænniveau.  Angivet i meter.',
       schema: definitions.NullableNumber
+    },
+    {
+      name: 'adgangspunktid',
+      description: 'Adgangspunktets unikke ID',
+      schema: definitions.NullableUUID
     }
   ],
   adresse: [

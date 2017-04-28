@@ -44,6 +44,7 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     JS_E.navn as jordstykke_ejerlavnavn,
     J.esrejendomsnr as jordstykke_esrejendomsnr,
     J.sfeejendomsnr,
+    A.adgangspunktid,
     array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR
       JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
     COALESCE((select json_agg(CAST((b.id, b.kode, b.type, b.navn) AS BebyggelseRef)) FROM bebyggelser_adgadr ba

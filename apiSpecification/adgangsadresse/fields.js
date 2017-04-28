@@ -103,6 +103,7 @@ var fields = [
     name: 'jordstykke_ejerlavnavn'
   },
   normalizedField('højde'),
+  normalizedField('adgangspunktid'),
   {
     name: 'x'
   },

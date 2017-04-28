@@ -49,7 +49,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
 // this should probably be refactored, so we explicitly control the order of fields, but for now we
 // just move kvh to the end.
 
-const FIELDS_AT_END = ['kvh', 'højde'];
+const FIELDS_AT_END = ['kvh', 'højde', 'adgangspunktid'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 

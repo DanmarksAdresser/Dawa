@@ -19,6 +19,7 @@ CREATE OR REPLACE VIEW adresser AS
     A.etrs89oest::double precision AS oest,
     A.etrs89nord::double precision AS nord,
     A.hoejde,
+    A.adgangspunktid,
     A.geom       AS geom,
     A.noejagtighed,
     A.tekniskstandard,
