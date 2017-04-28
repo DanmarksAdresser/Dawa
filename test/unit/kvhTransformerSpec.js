@@ -43,19 +43,16 @@ function kvhFormattingSpecs(transformer) {
 function kvhParsingSpecs(transformer, trailingFiller) {
   return function() {
     it('should extract kommunekode', function() {
-      expect(transformer.parse('12340000____' + trailingFiller).kommunekode).to.equal('1234');
+      expect(transformer.parse('12340000___1' + trailingFiller).kommunekode).to.equal('1234');
     });
     it('should extract vejkode', function() {
-      expect(transformer.parse('00004321____' + trailingFiller).vejkode).to.equal('4321');
+      expect(transformer.parse('00004321___1' + trailingFiller).vejkode).to.equal('4321');
     });
     it('should extract husnr', function() {
       expect(formatHusnr(transformer.parse('00000000143B' + trailingFiller).husnr)).to.equal('143B');
     });
     it('should remove leading underscores from husnr', function() {
       expect(formatHusnr(transformer.parse('00000000__7B' + trailingFiller).husnr)).to.equal('7B');
-    });
-    it('should represent husnr consisting of all underscores as null', function() {
-      expect(transformer.parse('00000000____' + trailingFiller).husnr).to.equal(null);
     });
     it('should not throw exceptions because of a malformed parameter value', function() {
       transformer.parse('4201074006'); // this is one character short of being a proper kvh value
@@ -110,4 +107,3 @@ describe('Formatting kvh from an adgangsadresse recordset', kvhFormattingSpecs(k
 describe('Formatting kvh part of kvhx from an adresse recordset', kvhFormattingSpecs(kvhxTransformer));
 
 describe('Parsing kvh for an adgangsadresse query', kvhParsingSpecs(kvhTransformer, ''));
-describe('Parsing kvh part of kvhx for an adresse query', kvhParsingSpecs(kvhxTransformer, '???????'));

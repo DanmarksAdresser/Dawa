@@ -7,6 +7,7 @@ var husnrUtil = require('../husnrUtil');
 
 var regExp = /^(\d{4})(\d{4})(.{4})/;
 
+
 exports.format = function(rs) {
   return kode4String(rs.kommunekode || 0) +
          kode4String(rs.vejkode || 0) +
@@ -22,8 +23,7 @@ exports.validate = function(kvh) {
     throw "Must consist of 8 digits followed by 4 arbitrary characters, but supplied value was '"+kvh+"'";
   }
   const husnrText = clean(groups[3]);
-  const husnr  = husnrUtil.parseHusnr(husnrText);
-  if(!husnr) {
+  if(!husnrUtil.husnrRegex.test(husnrText)) {
     throw "KVH key must contain a valid husnr, but " + husnrText + " is not.";
   }
 };
@@ -33,11 +33,14 @@ exports.kvhFieldsDts = '<dt>Index 0-3: Kommunekode</dt><dd>Kommunekode for adres
                        '<dt>Index 8-11: Husnr</dt><dd>Adressens husnr (inklusive evt. bogstav). Hvis husnummeret har mindre end 4 cifre, foranstilles med underscores, 1C repræsenteres altså fx som ‘__1C’. Husnumre uden bogstav repræsenteres blot med foranstillede underscores, så fx 17 repræsenteres som "__17".</dd>';
 
 exports.parse = function(kvh) {
-  var groups = regExp.exec(kvh);
-
-  if (!groups) {
+  try {
+    exports.validate(kvh);
+  }
+  catch(e){
     return; // the validate function will be called by the resourceImpl and give the user a error message, so we just bail out to allow the parsing code to expect well formed kvh values
   }
+
+  const groups = regExp.exec(kvh);
 
   return {
     kommunekode: groups[1],

@@ -23,8 +23,7 @@ exports.validate = function(kvhx) {
     throw "Must consist of 8 digits followed by 4 arbitrary characters, but supplied value was '"+kvhx+"'";
   }
   const husnrText = clean(groups[3]);
-  const husnr  = husnrUtil.parseHusnr(husnrText);
-  if(!husnr) {
+  if(!husnrUtil.husnrRegex.test(husnrText)) {
     throw "KVHX key must contain a valid husnr, but " + husnrText + " is not.";
   }
 };
@@ -34,14 +33,16 @@ exports.kvhxFieldsDts = kvhTransformer.kvhFieldsDts +
 '<dt>Index 15-18: Dør</dt><dd>Angivelse af dør. Hvis dørbetegnelsen fylder mindre end 4 tegn, foranstilles med underscore, 2 repræsenteres altså som "___2"';
 
 exports.parse = function(kvhx) {
-  var groups = regExp.exec(kvhx);
-
-  if (!groups) {
+  try {
+    exports.validate(kvhx)
+  }
+  catch(e) {
     return; // the validate function will be called by the resourceImpl and give the user a error message, so we just bail out to allow the parsing code to expect well formed kvhx values
   }
+  var groups = regExp.exec(kvhx);
 
   return _.extend(
-    kvhTransformer.parse(kvhx),
+    kvhTransformer.parse(kvhx.substring(0,12)),
     {
       etage: clean(groups[4]),
       dør: clean(groups[5])

@@ -63,6 +63,7 @@ function compare(a, b) {
 }
 
 module.exports = {
+  husnrRegex,
   parseHusnr: parseHusnr,
   formatHusnr: formatHusnr,
   compare: compare
