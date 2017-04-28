@@ -28,8 +28,8 @@ describe('Stable API', () => {
             "postnr": "5200",
             "postnrnavn": "Odense V",
             "kommunekode": "0461",
-            "x": 10.3314667967922,
-            "y": 55.394897400344
+            "x": 10.3314667967929,
+            "y": 55.3948974003657
           }
         }],
         nestet: [{
@@ -69,8 +69,8 @@ describe('Stable API', () => {
             },
             "adgangspunkt": {
               "koordinater": [
-                10.3314667967922,
-                55.394897400344
+                10.3314667967929,
+                55.3948974003657
               ],
               "højde": 31.3,
               "nøjagtighed": "A",
@@ -121,8 +121,8 @@ describe('Stable API', () => {
             "geometry": {
               "type": "Point",
               "coordinates": [
-                10.3314667967922,
-                55.394897400344,
+                10.3314667967929,
+                55.3948974003657,
                 31.3
               ]
             },
@@ -154,8 +154,8 @@ describe('Stable API', () => {
               "esrejendomsnr": null,
               "etrs89koordinat_øst": 584330.74,
               "etrs89koordinat_nord": 6139543.21,
-              "wgs84koordinat_bredde": 55.394897400344,
-              "wgs84koordinat_længde": 10.3314667967922,
+              "wgs84koordinat_bredde": 55.3948974003657,
+              "wgs84koordinat_længde": 10.3314667967929,
               "nøjagtighed": "A",
               "kilde": 5,
               "tekniskstandard": "TN",
@@ -198,8 +198,8 @@ describe('Stable API', () => {
             "geometry": {
               "type": "Point",
               "coordinates": [
-                11.9365380642214,
-                55.5391035801617,
+                11.9365380642305,
+                55.5391035802434,
                 46.4
               ]
             },
@@ -225,8 +225,8 @@ describe('Stable API', () => {
               "esrejendomsnr": null,
               "etrs89koordinat_øst": 685289.88,
               "etrs89koordinat_nord": 6158701.41,
-              "wgs84koordinat_bredde": 55.5391035801617,
-              "wgs84koordinat_længde": 11.9365380642214,
+              "wgs84koordinat_bredde": 55.5391035802434,
+              "wgs84koordinat_længde": 11.9365380642305,
               "nøjagtighed": "A",
               "kilde": 5,
               "tekniskstandard": "TK",
@@ -276,8 +276,8 @@ describe('Stable API', () => {
             "postnrnavn": "Odense V",
             "kommunekode": "0461",
             "adgangsadresseid": "0a3f5089-0408-32b8-e044-0003ba298018",
-            "x": 10.3314667967922,
-            "y": 55.394897400344
+            "x": 10.3314667967929,
+            "y": 55.3948974003657
           }
         }],
         nestet: [{
@@ -329,8 +329,8 @@ describe('Stable API', () => {
               },
               "adgangspunkt": {
                 "koordinater": [
-                  10.3314667967922,
-                  55.394897400344
+                  10.3314667967929,
+                  55.3948974003657
                 ],
                 "højde": 31.3,
                 "nøjagtighed": "A",
@@ -382,8 +382,8 @@ describe('Stable API', () => {
             "geometry": {
               "type": "Point",
               "coordinates": [
-                10.3314667967922,
-                55.394897400344,
+                10.3314667967929,
+                55.3948974003657,
                 31.3
               ]
             },
@@ -417,8 +417,8 @@ describe('Stable API', () => {
               "esrejendomsnr": null,
               "etrs89koordinat_øst": 584330.74,
               "etrs89koordinat_nord": 6139543.21,
-              "wgs84koordinat_bredde": 55.394897400344,
-              "wgs84koordinat_længde": 10.3314667967922,
+              "wgs84koordinat_bredde": 55.3948974003657,
+              "wgs84koordinat_længde": 10.3314667967929,
               "nøjagtighed": "A",
               "kilde": 5,
               "tekniskstandard": "TN",

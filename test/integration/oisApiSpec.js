@@ -250,8 +250,8 @@ const expectedResults = {
           "Ophoert_ts": null,
           "BygPktKilde": 0,
           "koordinater": [
-            12.5870872424516,
-            55.5920826890527
+            12.5870872425019,
+            55.592082689274
           ]
         }
       },
@@ -363,8 +363,8 @@ const expectedResults = {
         "bygningspunkt_Aendr_Funk": "BygningOpret",
         "bygningspunkt_Ophoert_ts": null,
         "bygningspunkt_BygPktKilde": 0,
-        "bygningspunkt_koordinater_x": 12.5870872424516,
-        "bygningspunkt_koordinater_y": 55.5920826890527
+        "bygningspunkt_koordinater_x": 12.5870872425019,
+        "bygningspunkt_koordinater_y": 55.592082689274
       },
       mini: {
         "ois_id": 5344873,
