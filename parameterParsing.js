@@ -100,6 +100,9 @@ function parseParameterType(valString, type) {
     return null;
   }
   if (type === undefined || type === 'string') {
+    if(valString.indexOf('\x00') !== -1) {
+      throw 'Parameter må ikke indeholde 0-karakteren (%00)'
+    }
     return valString;
   }
   if(type === 'integer') {
