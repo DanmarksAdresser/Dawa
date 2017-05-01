@@ -10,6 +10,8 @@ var registry = require('./registry');
 var resourceImpl = require('./common/resourceImpl');
 const logger = require('../logger').forCategory('consistency');
 
+const CONSISTENCY_TIMEOUT = 180000;
+
 var consistencyChecks = [
   {
     key: 'AdresserUdenAdgangspunkt',
@@ -155,6 +157,22 @@ FROM byDay
     description: 'Antallet af adresser, adgangsadresser og vejstykker',
     query: `SELECT (SELECT COUNT(*) FROM adresser_mat where vejnavn is not null and vejnavn <> '' and postnr is not null) as adresser,
     (select count(*) from adgangsadresser_mat where vejnavn is not null and vejnavn <> '' and postnr is not null) as adgangsadresser`
+  },
+  {
+    key: 'AdresseInkonsistentJordstykkeKommune',
+    description: 'Adreser hvor jordstykkets kommunekode ikke stemmer overens med DAGI-temaet, som adressen er placeret på',
+    query: `SELECT
+  j.kommunekode                     AS jordstykke_kommunekode,
+  j.ejerlavkode,
+  j.matrikelnr,
+  ja.adgangsadresse_id              AS adgangsadresseid,
+  (t.fields ->> 'kode') :: SMALLINT AS adgangsadresse_kommunekode
+FROM jordstykker j
+  JOIN jordstykker_adgadr ja ON j.ejerlavkode = ja.ejerlavkode AND j.matrikelnr = ja.matrikelnr
+  JOIN adgangsadresser_temaer_matview atm
+    ON atm.adgangsadresse_id = ja.adgangsadresse_id AND atm.tema = 'kommune'
+  JOIN temaer t ON atm.tema_id = t.id
+WHERE j.kommunekode <> (t.fields ->> 'kode') :: SMALLINT`
   }
 ];
 
@@ -163,7 +181,8 @@ module.exports = consistencyChecks.reduce(function (memo, check) {
   memo[path] = {
     path: path,
     expressHandler: function (req, res) {
-      databasePools.get('prod').withConnection({pooled: false, statementTimeout: 120000}, (client) => go(function*() {
+      databasePools.get('prod').withConnection({pooled: false, statementTimeout: CONSISTENCY_TIMEOUT}, (client) => go(function*() {
+        res.connection.setTimeout(CONSISTENCY_TIMEOUT);
         const result = yield client.query(check.query);
         const fieldNames = _.pluck(result.fields, 'name');
         csvStringify(result.rows || [], {
