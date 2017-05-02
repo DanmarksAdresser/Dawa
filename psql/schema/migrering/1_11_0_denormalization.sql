@@ -1,4 +1,3 @@
-BEGIN;
 DROP FUNCTION IF EXISTS enhedsadresser_history_update() CASCADE;
 DROP FUNCTION IF EXISTS adgangsadresser_history_update() CASCADE;
 DROP FUNCTION IF EXISTS postnumre_history_update() CASCADE;
@@ -192,4 +191,3 @@ CREATE INDEX ON adresser_mat(adgangsadresseid);
 CREATE INDEX ON adresser_mat(etage, id);
 CREATE INDEX ON adresser_mat(doer, id);
 CREATE INDEX ON adresser_mat(vejnavn, postnr);
-COMMIT;
