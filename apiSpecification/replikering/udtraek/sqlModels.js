@@ -43,12 +43,12 @@ const baseQuery2 = (tableName, keyColumns, columnMappings, sequenceNumber) => {
     ORDER BY changeid desc NULLS LAST) as row_num
 FROM ${tableName}_changes`;
   if(sequenceNumber) {
-    subselect += ` AND (changeid IS NULL OR changeid <= $1)`
+    subselect += ` WHERE (changeid IS NULL OR changeid <= $1)`
   }
   const baseQuery = {
     select: selectClause(columnMappings),
     from: [`(${subselect}) t`],
-    whereClauses: ['row_num = 1'],
+    whereClauses: ['row_num = 1 ', `operation <> 'delete'`],
     groupBy: '',
     orderClauses: [],
     sqlParams: []
