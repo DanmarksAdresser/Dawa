@@ -97,5 +97,31 @@ describe('tableDiffNg', () => {
         assert.strictEqual(result[2].operation, 'insert');
       }));
     }));
+
+    it('Will correctly generate changeids for multiple transactions', () => go(function*() {
+      const client = clientFn();
+      yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        yield applyChanges(client, txid, ejerlavTableModel);
+      }));
+      yield client.queryBatched(`UPDATE fetch_ejerlav SET navn='bar'`);
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        yield applyChanges(client, txid, ejerlavTableModel);
+      }));
+      yield client.queryBatched(`DELETE FROM fetch_ejerlav`);
+      yield withImportTransaction(client, 'test', txid => go(function*() {
+        yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
+        yield applyChanges(client, txid, ejerlavTableModel);
+      }));
+      const result = yield client.queryRows('select c.txid, c.changeid, c.operation from ejerlav_changes c JOIN transaction_history h ON c.changeid = h.sequence_number ORDER BY txid');
+      assert.deepEqual(result, [
+        {txid: 1, changeid: 1, operation: 'insert'},
+        {txid: 2, changeid: 2, operation: 'update'},
+        {txid: 3, changeid: 3, operation: 'delete'},
+      ])
+    }));
   });
 });
