@@ -8,3 +8,4 @@ $$;
 
 -- Trigger which maintains the tsv column
 DROP FUNCTION IF EXISTS vejstykker_tsv_update() CASCADE;
+DROP FUNCTION IF EXISTS vejstykker_history_update() CASCADE;
