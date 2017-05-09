@@ -9,8 +9,7 @@ var proddb = require('./proddb');
 var runScriptImpl = require('./run-script-impl');
 
 var optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  disableTriggers: [false, 'Whether triggers should be disabled when running the scripts', 'boolean']
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
 
@@ -28,6 +27,6 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     client.on('notice', function(msg) {
       console.log("notice: %j", msg);
     });
-    return runScriptImpl(client, args, options.disableTriggers);
-  });
+    return runScriptImpl(client, args);
+  }).done();
 });

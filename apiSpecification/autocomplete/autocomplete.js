@@ -590,6 +590,9 @@ const sqlModel = {
       // If adgangsadresseid parameter is supplied, we ignore type parameter
       // this is not quite correct, but some client depends on it.
       const slutmed = params.adgangsadresseid ? 'adresse' : (params.type || 'adresse');
+      if(entityTypes.indexOf(startfra) > entityTypes.indexOf(slutmed)) {
+        return [];
+      }
       const searchedEntities = entityTypes.slice(entityTypes.indexOf(startfra), entityTypes.indexOf(slutmed)+1);
       for(let entityName of searchedEntities) {
         const lastEntity = entityName === searchedEntities[searchedEntities.length - 1];

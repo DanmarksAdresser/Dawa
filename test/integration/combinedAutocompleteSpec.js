@@ -219,5 +219,16 @@ describe('Combined Autocomplete', function () {
         expect(result.length).to.be.above(0);
         expect(result[0].type).to.equal('adresse');
       }));
+
+    it('Søgning med startfra senere end type skal give tomt resultat', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "Mosede ",
+          fuzzy: "",
+          type: 'vejnavn',
+          startfra: 'adgangsadresse'
+        }
+      );
+      expect(result.length).to.equal(0);
+    }));
   });
 });

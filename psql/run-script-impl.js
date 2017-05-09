@@ -5,9 +5,8 @@
 var fs = require('fs');
 var q = require('q');
 var _ = require('underscore');
-var sqlCommon = require('./common');
 
-module.exports = function(client, scriptPaths, disableTriggers) {
+module.exports = function(client, scriptPaths) {
   return q.async(function*() {
     var scripts = _.map(scriptPaths, function(path) {
       return fs.readFileSync(path, {encoding: 'utf8'});
@@ -16,13 +15,6 @@ module.exports = function(client, scriptPaths, disableTriggers) {
 
     console.log("set work_mem='500MB'; set maintenance_work_mem='500MB'");
     yield client.queryp("set work_mem='500MB'; set maintenance_work_mem='500MB'");
-    if(disableTriggers) {
-      console.log('disabling triggers');
-      yield sqlCommon.disableTriggersQ(client);
-    }
-    else {
-      console.log('running script with triggers enabled');
-    }
     for(let script of scripts) {
       var commands = script.split(';');
       for(let command of commands) {
@@ -30,11 +22,6 @@ module.exports = function(client, scriptPaths, disableTriggers) {
         console.log('executing command %s', command);
         yield client.queryp(command);
       }
-    }
-    if(disableTriggers) {
-      console.log('enabling triggers');
-      yield sqlCommon.enableTriggersQ(client);
-
     }
   })();
 };
