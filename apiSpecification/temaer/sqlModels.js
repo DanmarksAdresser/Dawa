@@ -12,6 +12,7 @@ var selectIsoTimestampUtc = sqlUtil.selectIsoDateUtc;
 var dbapi = require('../../dbapi');
 var registry = require('../registry');
 var additionalFields = require('./additionalFields');
+const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
 var publishedTemaer = _.filter(temaer, function(tema) {
   return tema.published;
@@ -38,7 +39,7 @@ publishedTemaer.forEach(function(tema) {
   columns.geom_json = {
     select: function(sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '::integer))';
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias);
     }
   };
 

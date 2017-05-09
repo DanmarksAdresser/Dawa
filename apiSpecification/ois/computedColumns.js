@@ -1,19 +1,20 @@
 "use strict";
 
 const dbapi = require('../../dbapi');
+const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 module.exports = {
   bygningspunkt: (alias) => ({
     koordinater_x: {
       select: (sqlParts, sqlModel, params) => {
         const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-        return `ST_X(ST_Transform(${alias}.geom,${sridAlias}::integer))`;
+        return postgisSqlUtil.selectX(params.srid || 4326, sridAlias, 'geom');
 
       }
     },
     koordinater_y: {
       select: (sqlParts, sqlModel, params) => {
         const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-        return `ST_Y(ST_Transform(${alias}.geom,${sridAlias}::integer))`;
+        return postgisSqlUtil.selectY(params.srid || 4326, sridAlias, 'geom');
       }
     }
   })

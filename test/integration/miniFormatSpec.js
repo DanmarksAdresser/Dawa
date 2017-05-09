@@ -39,8 +39,8 @@ describe('Mini-format', () => {
         "postnr": "4320",
         "postnrnavn": "Lejre",
         "kommunekode": "0350",
-        "x": 11.9260182210665,
-        "y": 55.5382729700102
+        "x": 11.92601822,
+        "y": 55.53827297
       });
     }));
     it('Skal kunne returnere en adresse i mini-format',() => go(function*() {
@@ -62,8 +62,8 @@ describe('Mini-format', () => {
         "postnrnavn": "Lejre",
         "kommunekode": "0350",
         "adgangsadresseid": "0a3f5081-c2b5-32b8-e044-0003ba298018",
-        "x": 11.9260182210665,
-        "y": 55.5382729700102
+        "x": 11.92601822,
+        "y": 55.53827297
       });
     }));
 
@@ -84,8 +84,8 @@ describe('Mini-format', () => {
         "postnr": "4320",
         "postnrnavn": "Lejre",
         "kommunekode": "0350",
-        "x": "11.9260182210665",
-        "y": "55.5382729700102"
+        "x": "11.92601822",
+        "y": "55.53827297"
       });
     }));
 
@@ -109,8 +109,8 @@ describe('Mini-format', () => {
         "postnrnavn": "Lejre",
         "kommunekode": "0350",
         "adgangsadresseid": "0a3f5081-c2b5-32b8-e044-0003ba298018",
-        "x": "11.9260182210665",
-        "y": "55.5382729700102"
+        "x": "11.92601822",
+        "y": "55.53827297"
       });
     }));
 
@@ -127,8 +127,8 @@ describe('Mini-format', () => {
         "geometry": {
           "type": "Point",
           "coordinates": [
-            11.9260182210665,
-            55.5382729700102
+            11.92601822,
+            55.53827297
           ]
         },
         "properties": {
@@ -158,8 +158,8 @@ describe('Mini-format', () => {
         "geometry": {
           "type": "Point",
           "coordinates": [
-            11.9260182210665,
-            55.5382729700102
+            11.92601822,
+            55.53827297
           ]
         },
         "properties": {

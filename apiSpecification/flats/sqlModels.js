@@ -9,6 +9,7 @@ const sqlUtil = require('../common/sql/sqlUtil');
 const parametersMap = require('./parameters');
 const registry = require('../registry');
 const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
 module.exports = _.mapObject(flats, (flat, flatName) => {
   const sqlSpec = sqlSpecs[flatName];
@@ -28,7 +29,7 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
   columns.geom_json = {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(geom,' + sridAlias + '::integer))';
+      return postgisSqlUtil(params.srid || 4326, sridAlias);
     }
   };
 

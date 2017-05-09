@@ -5,6 +5,7 @@ var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 var dbapi = require('../../dbapi');
+const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
 var geomQuery = "(select geom from temaer where tema = 'postnummer' and (fields->>'nr')::integer = nr limit 1)";
 
@@ -34,7 +35,7 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(' + geomQuery + ',' + sridAlias + '::integer))';
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias,geomQuery);
     }
   },
   kommuner: {

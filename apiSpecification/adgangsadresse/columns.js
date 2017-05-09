@@ -4,6 +4,7 @@ const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
 
 var selectIsoTimestamp = sqlUtil.selectIsoDate;
+const postgisUtil = require('../common/sql/postgisSqlUtil');
 
 module.exports =  {
   id: {
@@ -20,10 +21,10 @@ module.exports =  {
     column: 'nord'
   },
   wgs84koordinat_bredde: {
-    column: 'ST_Y(ST_Transform(geom, 4326))'
+    column: postgisUtil.selectYWgs84('geom')
   },
   wgs84koordinat_længde: {
-    column: 'ST_X(ST_Transform(geom, 4326))'
+    column: postgisUtil.selectXWgs84('geom')
   },
   højde: {
     column: 'hoejde'
@@ -82,22 +83,20 @@ module.exports =  {
   x: {
     select: (sqlParts, sqlModel, params) => {
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return `ST_X(ST_Transform(geom, ${sridAlias}::integer))`;
+      return postgisUtil.selectX(params.srid || 4326, sridAlias, 'geom');
     }
   },
   y: {
     select: (sqlParts, sqlModel, params) => {
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return `ST_Y(ST_Transform(geom, ${sridAlias}::integer))`;
+      return postgisUtil.selectY(params.srid || 4326, sridAlias, 'geom');
     }
   },
   geom_json: {
     select: function(sqlParts, sqlModel, params) {
-      var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return `CASE WHEN hoejde IS NULL 
-      THEN ST_AsGeoJSON(ST_Transform(geom, ${sridAlias}::integer))
-      ELSE ST_AsGeoJSON(ST_Transform(ST_SetSRID(st_makepoint(st_x(geom), st_y(geom), hoejde), 25832), ${sridAlias}::integer))
-      END`;
+      const srid = params.srid || 4326;
+      const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+      return postgisUtil.adgangsadresseGeojsonColumn(srid, sridAlias);
     }
   },
   oprettet: {

@@ -5,8 +5,10 @@ var nameAndKey = require('./nameAndKey');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 var sqlUtil = require('../common/sql/sqlUtil');
+const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 var assembleSqlModel = sqlUtil.assembleSqlModel;
 var selectIsoTimestamp = sqlUtil.selectIsoDate;
+
 
 var columns = {
   kode: {
@@ -65,7 +67,7 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return 'ST_AsGeoJSON(ST_Transform(vejstykker.geom,' + sridAlias + '::integer))';
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'vejstykker.geom');
     }
   }
 };
