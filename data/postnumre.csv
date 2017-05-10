@@ -761,6 +761,7 @@ postnr;navn;stormodtager
 5591;Gelsted;false
 5592;Ejby;false
 5600;Faaborg;false
+5602;Avernakø;false
 5603;Bjørnø;false
 5610;Assens;false
 5620;Glamsbjerg;false
@@ -1018,6 +1019,8 @@ postnr;navn;stormodtager
 8766;Nørre Snede;false
 8781;Stenderup;false
 8783;Hornsyld;false
+8789;Endelave;false
+8799;Tunø;false
 8800;Viborg;false
 8830;Tjele;false
 8831;Løgstrup;false
