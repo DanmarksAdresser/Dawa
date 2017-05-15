@@ -43,6 +43,12 @@ CREATE VIEW adresser_mat_view AS
     a.adresseringsvejnavn,
     a.ejerlavnavn,
     a.stormodtagerpostnr,
-    a.stormodtagerpostnrnavn
+    a.stormodtagerpostnrnavn,
+    a.vejpunkt_id,
+    a.vejpunkt_kilde,
+    a.vejpunkt_tekniskstandard,
+    a.vejpunkt_noejagtighedsklasse,
+    a.vejpunkt_geom
+
   FROM enhedsadresser e
     JOIN adgangsadresser_mat a ON e.adgangsadresseid = a.id;

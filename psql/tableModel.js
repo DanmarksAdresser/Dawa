@@ -221,7 +221,12 @@ const adgangsadresser_mat = {
     {name: 'adresseringsvejnavn'},
     {name: 'postnrnavn'},
     {name: 'stormodtagerpostnr'},
-    {name: 'stormodtagerpostnrnavn'}]
+    {name: 'stormodtagerpostnrnavn'},
+    {name: 'vejpunkt_id'},
+    {name: 'vejpunkt_kilde'},
+    {name: 'vejpunkt_noejagtighedsklasse'},
+    {name: 'vejpunkt_tekniskstandard'},
+    {name: 'vejpunkt_geom'}]
 };
 
 const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'esdhreference', 'journalnummer'];
@@ -248,6 +253,19 @@ const adresser_mat = {
     }]
 };
 
+const vejpunkter = {
+  table: 'vejpunkter',
+  primaryKey: ['id'],
+  columns: [
+    { name: 'id '},
+    { name: 'husnummerid' },
+    { name: 'kilde' },
+    { name: 'noejagtighedsklasse' },
+    { name: 'tekniskstandard' },
+    { name: 'geom' }
+  ]
+};
+
 exports.tables = {
   vejstykker,
   adgangsadresser,
@@ -258,7 +276,8 @@ exports.tables = {
   stormodtagere,
   adresser_mat,
   temaer,
-  supplerendebynavne
+  supplerendebynavne,
+  vejpunkter
 };
 
 exports.materializations = {
@@ -281,6 +300,9 @@ exports.materializations = {
     }, {
       table: 'stormodtagere',
       columns: ['id']
+    }, {
+      table: 'vejpunkter',
+      columns: ['vejpunkt_id']
     }]
   },
   adresser_mat: {

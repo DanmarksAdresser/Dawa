@@ -33,9 +33,15 @@ CREATE VIEW adgangsadresser_mat_view AS
     V.adresseringsnavn as adresseringsvejnavn ,
     E.navn as ejerlavnavn,
     S.nr AS stormodtagerpostnr,
-    S.navn AS stormodtagerpostnrnavn
+    S.navn AS stormodtagerpostnrnavn,
+    vp.id AS vejpunkt_id,
+    vp.kilde AS vejpunkt_kilde,
+    vp.tekniskstandard AS vejpunkt_tekniskstandard,
+    vp.noejagtighedsklasse AS vejpunkt_noejagtighedsklasse,
+    vp.geom AS vejpunkt_geom
   FROM adgangsadresser A
     LEFT JOIN Ejerlav E ON A.ejerlavkode = E.kode
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-  LEFT JOIN stormodtagere AS S ON A.id = S.adgangsadresseid;
+  LEFT JOIN stormodtagere AS S ON A.id = S.adgangsadresseid
+LEFT JOIN vejpunkter vp ON A.id = vp.husnummerid;
