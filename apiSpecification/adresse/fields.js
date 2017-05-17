@@ -171,6 +171,21 @@ var fields = [
   {
     name: 'bebyggelser',
     multi: true
+  },
+  {
+    name: 'vejpunkt_id'
+  },
+  {
+    name: 'vejpunkt_kilde'
+  },
+  {
+    name: 'vejpunkt_nøjagtighed'
+  },
+  {
+    name: 'vejpunkt_tekniskstandard'
+  },
+  {
+    name: 'vejpunkt_geom_json'
   }
 ];
 

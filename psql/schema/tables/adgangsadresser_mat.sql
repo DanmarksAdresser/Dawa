@@ -34,7 +34,12 @@ CREATE TABLE adgangsadresser_mat(
   adresseringsvejnavn text,
   ejerlavnavn text,
   stormodtagerpostnr smallint,
-  stormodtagerpostnrnavn text
+  stormodtagerpostnrnavn text,
+  vejpunkt_id uuid,
+  vejpunkt_kilde text,
+  vejpunkt_noejagtighedsklasse text,
+  vejpunkt_tekniskstandard text,
+  vejpunkt_geom geometry(Point,25832)
 );
 
 CREATE INDEX ON adgangsadresser_mat USING GIST (geom);
@@ -51,3 +56,5 @@ CREATE INDEX ON adgangsadresser_mat(noejagtighed, id);
 CREATE INDEX ON adgangsadresser_mat(navngivenvej_id, postnr);
 CREATE INDEX ON adgangsadresser_mat(vejnavn, postnr);
 CREATE INDEX ON adgangsadresser_mat(vejkode,postnr);
+CREATE INDEX ON adgangsadresser_mat(vejpunkt_id);
+CREATE INDEX ON adgangsadresser_mat USING GIST (vejpunkt_geom);

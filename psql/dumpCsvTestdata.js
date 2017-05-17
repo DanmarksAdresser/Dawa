@@ -66,6 +66,12 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), (args, options) =>
          JOIN dar_vejnavn_subset s ON v.kommunekode = s.kommunekode AND v.kode = s.vejkode
         ORDER BY v.kommunekode, v.kode) TO '${vejstykkerGeomTargetFile}' ${copyOptions}`);
 
+      const vejpunkterTargetFile = path.join(targetDir, 'vejpunkter.csv');
+      yield client.queryp(
+        `COPY (SELECT DISTINCT v.* from vejpunkter v
+        JOIN dar_husnummer ON dar_husnummer.bkid = v.husnummerid
+       JOIN dar_adresse ON dar_adresse.husnummerid = dar_husnummer.id
+       JOIN dar_adresse_subset ON dar_adresse.bkid = dar_adresse_subset.bkid ORDER BY v.id) TO '${vejpunkterTargetFile}' ${copyOptions}`);
     })();
   }).done();
 });

@@ -66,7 +66,7 @@ const computeUpdatesSubset = (client, txid, sourceTableOrView, dirtyTable, table
      changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}, ${publicClause} as is_public 
   FROM before JOIN after ON ${columnsEqualClause('before', 'after', tableModel.primaryKey)}
   WHERE ${changedColumnClause})
-   INSERT INTO ${tableModel.table}_changes (SELECT ${txid}, NULL, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
+   INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, allColumnNames(tableModel))}) (SELECT ${txid}, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
 `;
   yield client.query(sql);
 });
@@ -94,7 +94,7 @@ const computeUpdates = (client, txid, sourceTableOrView, tableModel, nonPreserve
      changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}, ${publicClause} as is_public 
   FROM ${tableModel.table} before JOIN after ON ${columnsEqualClause('before', 'after', tableModel.primaryKey)}
   WHERE ${changedColumnClause})
-   INSERT INTO ${tableModel.table}_changes (SELECT ${txid}, NULL, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
+   INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, allColumnNames(tableModel))}) (SELECT ${txid}, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
 `;
   yield client.query(sql);
 });

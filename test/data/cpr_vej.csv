@@ -25,7 +25,6 @@ kommunekode;vejkode;navn;adresseringsnavn;virkning
 185;1615;Helmond Alle;Helmond Alle;"[""1900-01-01 12:00:00+01"",)"
 185;1635;Hillegom Alle;Hillegom Alle;"[""1900-01-01 12:00:00+01"",)"
 185;1640;Hilversumvej;Hilversumvej;"[""1900-01-01 12:00:00+01"",)"
-185;1895;Kongelundsvej;Kongelundsvej;empty
 185;1895;Kongelundsvej;Kongelundsvej;"[""1900-01-01 11:23:00+01"",)"
 185;1980;Limburg Alle;Limburg Alle;"[""1900-01-01 12:00:00+01"",)"
 185;2165;Nøragersmindevej;Nøragersmindevej;"[""1900-01-01 12:00:00+01"",)"
@@ -191,7 +190,6 @@ kommunekode;vejkode;navn;adresseringsnavn;virkning
 461;6620;Risingsvej;Risingsvej;"[""1900-01-01 12:00:00+01"",)"
 461;6623;Rismarksvej;Rismarksvej;"[""1900-01-01 12:00:00+01"",)"
 461;6673;Rolf Krakes Vej;Rolf Krakes Vej;"[""1900-01-01 12:00:00+01"",)"
-461;6814;Rugårdsvej;Rugårdsvej;empty
 461;6814;Rugårdsvej;Rugårdsvej;"[""1900-01-01 10:16:00+01"",)"
 461;6885;Rytterkasernen;Rytterkasernen;"[""1996-02-13 12:34:00+01"",)"
 461;6925;Rømersvej;Rømersvej;"[""1900-01-01 12:00:00+01"",)"
