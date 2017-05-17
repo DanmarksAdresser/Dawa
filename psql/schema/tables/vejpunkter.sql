@@ -9,3 +9,4 @@ CREATE TABLE vejpunkter(
   geom geometry(Point,25832)
 );
 
+CREATE INDEX ON vejpunkter(husnummerid);

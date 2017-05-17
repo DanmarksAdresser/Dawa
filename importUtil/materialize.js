@@ -4,7 +4,8 @@ const {assert} = require('chai');
 const {go} = require('ts-csp');
 
 const {selectList} = require('../darImport/sqlUtil');
-const {computeInsertsSubset, computeUpdatesSubset, computeDeletesSubset, applyChanges} = require('./tableDiffNg');
+const {computeInsertsSubset, computeUpdatesSubset, computeDeletesSubset, applyChanges, initializeFromScratch} = require('./tableDiffNg');
+const {enableTriggersQ, disableTriggersQ} = require('../psql/common');
 const schemaModel = require('../psql/tableModel');
 
 const createTempDirtyTable = (client, materialization) => {
@@ -99,7 +100,19 @@ const materialize = (client, txid, tableModels, materialization) => go(function*
 const materializeDawa = (client, txid) => go(function*() {
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adgangsadresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adresser_mat);
+});
 
+const recomputeMaterializedDawa = (client, txid) => go(function*() {
+  for(let table of ['adgangsadresser_mat', 'adresser_mat']) {
+    const model = schemaModel.materializations[table];
+    if(!model) {
+      throw new Error('No table model for ' + schemaModel);
+    }
+    yield disableTriggersQ(client);
+    yield client.query(`delete from ${table}; delete from ${table}_changes`);
+    yield initializeFromScratch(client, txid, model.view, schemaModel.tables[table]);
+    yield enableTriggersQ(client);
+  }
 });
 
 module.exports = {
@@ -110,5 +123,6 @@ module.exports = {
   computeUpdates,
   createTempDirtyTable,
   materialize,
-  materializeDawa
+  materializeDawa,
+  recomputeMaterializedDawa
 };

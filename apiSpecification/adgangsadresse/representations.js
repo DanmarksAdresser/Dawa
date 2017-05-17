@@ -49,7 +49,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -133,6 +133,96 @@ exports.json = {
           ændret: normalizedFieldSchema('adressepunktændringsdato')
         },
         docOrder: ['id', 'koordinater', 'højde','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
+      }),
+      vejpunkt: schemaObject({
+        description:
+`
+<p>Et geografisk punkt på færdselsnettet som repræsenterer startpunktet \
+af den rute, der fører til et bestemt adgangspunkt.</p>
+<p>Beskrivelse:</p>\
+<p>Et "vejpunkt" repræsenterer det sted på vej- eller stinettet e.l., hvorfra \
+adgangsvejen hen imod et adgangspunkt til et areal eller en bygning \
+starter.</p>
+<p>Ofte vil vejpunktet således angive det sted hvor man forlader vejnettet, \
+for at begive sig det sidste stykke hen imod adgangspunktet (fx \
+indgangen til bygningen) og dermed den adresse, som er turens mål.</p>
+<p>Vejpunktet repræsenterer således det sted, som et nutidigt bilnavigationssystem \
+typisk vil regne som turens destination eller ankomstpunkt. \
+For et bilnavigatonssystem vil vejruten mellem to adresser \
+blive beregnet mellem de to adressers respektive vejpunkter.</p>
+<p>Vejpunktet vil som hovedregel være beliggende et sted på den navngivne \
+vej, som adgangspunktets adresser refererer til.</p>`,
+        nullable: true,
+        properties: {
+          koordinater: {
+            description: 'Vejpunktets koordinater som array [x,y].',
+            $ref: '#/definitions/NullableGeoJsonCoordinates'
+          },
+          id: {
+            description: 'Vejpunktets unikke ID',
+            $ref: '#/definitions/UUID'
+          },
+          kilde: {
+            description: `\
+<p>Kilden til vejpunktets position.</p>
+<dl>
+<dt>Grundkort:</dt>
+<dd>Grundkort</dd>
+<dt>Matrikelkort:</dt>
+<dd>Matrikelkort</dd>
+<dt>Ekstern:</dt>
+<dd>Ekstern tredjepart</dd>
+<dt>Ejer:</dt>
+<dd>Ejer eller administrator</dd>
+<dt>Landinsp:</dt>
+<dd>Landinspektør</dd>
+<dt>Adressemyn:</dt>
+<dd>Adressemyndigheden</dd>
+</dl>`,
+            type: 'string'
+          },
+          tekniskstandard: {
+            description: `\
+<p>Vejpunktets tekniske standard.</p>
+<dl>
+<dt>VU:</dt>
+<dd>Vejpunkt er uspecificeret eller ukendt</dd>
+<dt>VN:</dt>
+<dd>Vejpunkt i vejtilslutningspunkt</dd>
+<dt>V0:</dt>
+<dd>Vejpunkt på vej med korrekt vejkode. Stor sikkerhed for korrekt vejpunkt</dd>
+<dt>V1:</dt>
+<dd>Vejpunkt på vej med korrekt vejkode. Adgang til adgangspunkt via indkørselsvej eller sti</dd>
+<dt>V2:</dt>
+<dd>Vejpunkt på vej med korrekt vejkode. Risiko for at skulle krydse stier</dd>
+<dt>V3:</dt>
+<dd>Vejpunkt på vej med korrekt vejkode. Risiko for at skulle krydse andre veje</dd>
+<dt>V4:</dt>
+<dd>Vejpunkt på vej med korrekt vejkode. Risiko for at skulle krydse et enkelt teknisk anlæg eller trafikhegn</dd>
+<dt>V5:</dt>
+<dd>Vejpunkt på vej med korrekt vejkode. Risiko for at skulle krydse et større antal bygninger eller jordstykker</dd>
+<dt>V6:</dt>
+<dd>Vejpunkt på mindre indkørselsvej med korrekt vejkode. Risiko for at skulle krydse fysiske forhindringer</dd>
+<dt>V7:</dt>
+<dd>Vejpunkt på vej med forkert vejkode, men på samme matrikelnummer. Risiko for at skulle krydse fysiske forhindringer</dd>
+<dt>V8:</dt>
+<dd>Vejpunkt på sti med korrekt vejkode. Risiko for at skulle krydse fysiske forhindringer</dd>
+<dt>V9:</dt>
+<dd>Vejpunkt på vej eller indkørselsvej med forkert kommunekode eller vejkode. Risiko for at skulle krydse fysiske forhindringer</dd>
+<dt>VX:</dt>
+<dd>Vejpunkt på vej. Stor usikkerhed om korrekthed</dd>
+</dl>`,
+            type: 'string'
+          },
+          nøjagtighed: {
+            description: `\
+<p>Vejpunktets nøjagtighedsklasse.</p>
+<p>A : Absolut placeret</p>
+<p>B : Beregnet placering</p>`,
+            type: 'string'
+          }
+        },
+        docOrder: ['id', 'koordinater', 'kilde', 'tekniskstandard', 'nøjagtighed']
       }),
       'DDKN': schemaObject({
         nullable: true,
@@ -240,7 +330,7 @@ exports.json = {
     },
     docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke', 'bebyggelser']
+      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke', 'bebyggelser']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -303,6 +393,19 @@ exports.json = {
         tekstretning:    maybeNull(rs.tekstretning),
         'ændret':        d(rs.adressepunktændringsdato)
       };
+      if(rs.vejpunkt_id) {
+        const vejpunkt_coordinater = rs.vejpunkt_geom_json ? JSON.parse(rs.vejpunkt_geom_json).coordinates : null;
+        adr.vejpunkt = {
+          id: rs.vejpunkt_id,
+          kilde: maybeNull(rs.vejpunkt_kilde),
+          nøjagtighed: maybeNull(rs.vejpunkt_nøjagtighed),
+          tekniskstandard: maybeNull(rs.vejpunkt_tekniskstandard),
+          koordinater: vejpunkt_coordinater
+        }
+      }
+      else {
+        adr.vejpunkt = null;
+      }
       adr.DDKN = rs.ddkn_m100 || rs.ddkn_km1 || rs.ddkn_km10 ? {
         m100: maybeNull(rs.ddkn_m100),
         km1:  maybeNull(rs.ddkn_km1),

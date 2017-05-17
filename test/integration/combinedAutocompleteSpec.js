@@ -94,12 +94,12 @@ describe('Combined Autocomplete', function () {
     it('Hvis der søges efter adresser, men returneres adgangsadresser,' +
       ' så skal careten placeres såd den er klar til indtastning af etage og dør', function () {
       return go(function*() {
-        const result = yield helpers.getJson(clientFn(), autocomplete, {}, {q: "Thomas B. Thriges Gade"});
+        const result = yield helpers.getJson(clientFn(), autocomplete, {}, {q: "Østre Stationsvej"});
         expect(result.length).to.be.above(1);
         const sugg = result[0];
         expect(sugg.type).to.equal('adgangsadresse');
-        expect(sugg.tekst).to.equal('Thomas B. Thriges Gade 30, , 5000 Odense C');
-        expect(sugg.caretpos).to.equal('Thomas B. Thriges Gade 30, '.length);
+        expect(sugg.tekst).to.equal('Østre Stationsvej 4B, , 5000 Odense C');
+        expect(sugg.caretpos).to.equal('Østre Stationsvej 4B, '.length);
       }).asPromise();
     });
     it('Ved angivelse af startfrom=adgangsadresse returneres altid adgangsadresser,' +

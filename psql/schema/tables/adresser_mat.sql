@@ -68,4 +68,5 @@ CREATE INDEX ON adresser_mat(doer, id);
 CREATE INDEX ON adresser_mat(objekttype);
 CREATE INDEX ON adresser_mat(vejnavn, postnr);
 CREATE INDEX ON adresser_mat(vejkode,postnr);
+CREATE INDEX ON adresser_mat(vejpunkt_id);
 CREATE INDEX ON adresser_mat USING GIST (vejpunkt_geom);

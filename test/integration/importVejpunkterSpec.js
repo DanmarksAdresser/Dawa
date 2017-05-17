@@ -14,17 +14,26 @@ describe('Vejpunkter import', () => {
       yield withImportTransaction(clientFn(), 'test import vejpunkter', (txid) => go(function*() {
         yield importVejpunkterImpl(clientFn(), txid, path.join(__dirname, 'vejpunkter.txt'));
       }));
-      const changes = yield clientFn().queryRows('select * from vejpunkter_changes');
-      assert.strictEqual(changes.length, 10);
-      assert.isTrue(changes[0].public);
-      assert.strictEqual(changes[0].tekniskstandard, 'V0');
-      assert.isOk(changes[0].geom);
-      assert.isOk(changes[0].id);
-      assert.isOk(changes[0].noejagtighedsklasse);
-      assert.isOk(changes[0].husnummerid);
-      assert.isOk(changes[0].kilde);
+      const changes1 = yield clientFn().queryRows('select * from vejpunkter_changes');
+      assert.strictEqual(changes1.length, 0);
       const result = yield clientFn().queryRows('select * from vejpunkter');
-      assert.strictEqual(result.length, 10);
+      assert.strictEqual(result.length, 9);
+      assert.strictEqual(result[0].tekniskstandard, 'V0');
+      assert.isOk(result[0].geom);
+      assert.isOk(result[0].id);
+      assert.isOk(result[0].noejagtighedsklasse);
+      assert.isOk(result[0].husnummerid);
+      assert.isOk(result[0].kilde);
+      yield withImportTransaction(clientFn(), 'test import vejpunkter2', (txid) => go(function*() {
+        yield importVejpunkterImpl(clientFn(), txid, path.join(__dirname, 'vejpunkter2.txt'));
+      }));
+      const changes2 = yield clientFn().queryRows('select * from vejpunkter_changes order by id');
+      assert.strictEqual(changes2.length, 3);
+      assert.isTrue(changes2[0].public);
+      const ops = changes2.map(row => row.operation);
+      assert(ops.includes('insert'));
+      assert(ops.includes('update'));
+      assert(ops.includes('delete'));
     }));
   });
 });

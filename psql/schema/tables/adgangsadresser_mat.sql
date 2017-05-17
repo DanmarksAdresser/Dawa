@@ -56,4 +56,5 @@ CREATE INDEX ON adgangsadresser_mat(noejagtighed, id);
 CREATE INDEX ON adgangsadresser_mat(navngivenvej_id, postnr);
 CREATE INDEX ON adgangsadresser_mat(vejnavn, postnr);
 CREATE INDEX ON adgangsadresser_mat(vejkode,postnr);
+CREATE INDEX ON adgangsadresser_mat(vejpunkt_id);
 CREATE INDEX ON adgangsadresser_mat USING GIST (vejpunkt_geom);

@@ -71,8 +71,9 @@ var columns = {
   bebyggelsesid: adgangsadresseColumns.bebyggelsesid,
   bebyggelsestype: adgangsadresseColumns.bebyggelsestype,
   x: adgangsadresseColumns.x,
-  y: adgangsadresseColumns.y
-
+  y: adgangsadresseColumns.y,
+  vejpunkt_nøjagtighed: adgangsadresseColumns.vejpunkt_nøjagtighed,
+  vejpunkt_geom_json: adgangsadresseColumns.vejpunkt_geom_json
 };
 
 var baseQuery = function () {

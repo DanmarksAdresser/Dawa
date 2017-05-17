@@ -5,7 +5,8 @@ const {go} = require('ts-csp');
 const importUtil = require('../importUtil/importUtil');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
-const {materializeDawa} = require('../importUtil/materialize');
+const {materializeDawa, recomputeMaterializedDawa} = require('../importUtil/materialize');
+const logger = require('../logger').forCategory('vejpunkter');
 
 const VEJPUNKTER_COLUMNS = ['id', 'husnummerid', 'kilde', 'noejagtighedsklasse', 'tekniskstandard', 'geom'];
 
@@ -43,10 +44,18 @@ function loadVejpunktCsv(client, inputFile, tableName) {
 const vejpunkterTableModel = tableModel.tables.vejpunkter;
 
 module.exports = (client, txid, inputFile) => go(function*() {
-  yield importUtil.createTempTableFromTemplate(client, 'updated_vejpunkter', 'vejpunkter', VEJPUNKTER_COLUMNS);
-  yield loadVejpunktCsv(client, inputFile, 'updated_vejpunkter');
-  yield tableDiffNg.computeDifferences(client, txid, 'updated_vejpunkter', vejpunkterTableModel);
-  yield tableDiffNg.applyChanges(client, txid, vejpunkterTableModel);
-  yield materializeDawa(client, txid);
-
+  const existingCount = (yield client.queryRows('select coalesce((select count(*) from vejpunkter), 0) as c'))[0].c;
+  if(existingCount > 0) {
+    yield importUtil.createTempTableFromTemplate(client, 'updated_vejpunkter', 'vejpunkter', VEJPUNKTER_COLUMNS);
+    yield loadVejpunktCsv(client, inputFile, 'updated_vejpunkter');
+    yield tableDiffNg.computeDifferences(client, txid, 'updated_vejpunkter', vejpunkterTableModel);
+    yield importUtil.dropTable(client, 'updated_vejpunkter');
+    yield tableDiffNg.applyChanges(client, txid, vejpunkterTableModel);
+    yield materializeDawa(client, txid);
+  }
+  else {
+    logger.info("Initialiserer vejpunkter");
+    yield loadVejpunktCsv(client, inputFile, 'vejpunkter');
+    yield recomputeMaterializedDawa(client, txid);
+  }
 });

@@ -108,6 +108,16 @@ module.exports =  {
   ikrafttrædelse: {
     select: selectIsoTimestamp('a_ikraftfra')
   },
+  vejpunkt_nøjagtighed: {
+    column: 'vejpunkt_noejagtighedsklasse'
+  },
+  vejpunkt_geom_json: {
+    select: function(sqlParts, sqlModel, params) {
+      const srid = params.srid || 4326;
+      const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+      return postgisUtil.geojsonColumn(srid, sridAlias, 'vejpunkt_geom');
+    }
+  },
   tsv: {
     column: 'tsv'
   }

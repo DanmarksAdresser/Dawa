@@ -6,10 +6,10 @@ const { go } = require('ts-csp');
 var _         = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var proddb = require('./proddb');
-const databasePools = require('./databasePools');
+var proddb = require('../psql/proddb');
+const databasePools = require('../psql/databasePools');
 const { withImportTransaction } = require('../importUtil/importUtil');
-var updateVejpunkterImpl = require('./updateVejpunkterImpl');
+var updateVejpunkterImpl = require('./importVejpunkterImpl');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']

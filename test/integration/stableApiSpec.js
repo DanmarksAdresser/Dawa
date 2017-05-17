@@ -80,6 +80,16 @@ describe('Stable API', () => {
               "tekstretning": 196,
               "ændret": "2009-02-11T23:59:00.000"
             },
+            vejpunkt: {
+              "id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+              "kilde": "Ekstern",
+              "koordinater": [
+                10.33144075,
+                55.39500953
+              ],
+              "nøjagtighed": "B",
+              "tekniskstandard": "V0"
+            },
             "DDKN": {
               "m100": "100m_61395_5843",
               "km1": "1km_6139_584",
@@ -140,6 +150,10 @@ describe('Stable API', () => {
               "ændret": "2012-01-17T21:00:12.943",
               "vejkode": "0855",
               "vejnavn": "Brammingevej",
+              "vejpunkt_id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+              "vejpunkt_kilde": "Ekstern",
+              "vejpunkt_nøjagtighed": "B",
+              "vejpunkt_tekniskstandard": "V0",
               "adresseringsvejnavn": "Brammingevej",
               "husnr": "18",
               "supplerendebynavn": "Bolbro",
@@ -213,6 +227,10 @@ describe('Stable API', () => {
               "vejkode": "0347",
               "vejnavn": "Jonstrupvej",
               "adresseringsvejnavn": "Jonstrupvej",
+              "vejpunkt_id": "360943f8-2efe-11e7-bb3a-063320a53a26",
+              "vejpunkt_kilde": "Ekstern",
+              "vejpunkt_nøjagtighed": "B",
+              "vejpunkt_tekniskstandard": "V0",
               "husnr": "1B",
               "supplerendebynavn": "Boruphuse",
               "postnr": "4320",
@@ -343,6 +361,16 @@ describe('Stable API', () => {
                 "tekstretning": 196,
                 "ændret": "2009-02-11T23:59:00.000"
               },
+              "vejpunkt": {
+                "id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+                "kilde": "Ekstern",
+                "koordinater": [
+                  10.33144075,
+                  55.39500953
+                ],
+                "nøjagtighed": "B",
+                "tekniskstandard": "V0"
+              },
               "DDKN": {
                 "m100": "100m_61395_5843",
                 "km1": "1km_6139_584",
@@ -404,6 +432,10 @@ describe('Stable API', () => {
               "ændret": "2000-02-05T06:08:50.000",
               "vejkode": "0855",
               "vejnavn": "Brammingevej",
+              "vejpunkt_id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+              "vejpunkt_kilde": "Ekstern",
+              "vejpunkt_nøjagtighed": "B",
+              "vejpunkt_tekniskstandard": "V0",
               "adresseringsvejnavn": "Brammingevej",
               "husnr": "18",
               "etage": "1",

@@ -36,8 +36,8 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function() {
     adresse: 0
   };
   var expectedResultsZone2 = {
-    adgangsadresse: 1325,
-    adresse: 2812
+    adgangsadresse: 1322,
+    adresse: 2800
   };
 
   var expectedResultWithoutSogn = {
