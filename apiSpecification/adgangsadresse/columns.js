@@ -92,11 +92,37 @@ module.exports =  {
       return postgisUtil.selectY(params.srid || 4326, sridAlias, 'geom');
     }
   },
+  vejpunkt_x: {
+    select: (sqlParts, sqlModel, params) => {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return postgisUtil.selectX(params.srid || 4326, sridAlias, 'vejpunkt_geom');
+    }
+  },
+  vejpunkt_y: {
+    select: (sqlParts, sqlModel, params) => {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return postgisUtil.selectY(params.srid || 4326, sridAlias, 'vejpunkt_geom');
+    }
+  },
+  vejpunkt_geom_json: {
+    select: function(sqlParts, sqlModel, params) {
+      const srid = params.srid || 4326;
+      const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+      return postgisUtil.geojsonColumn(srid, sridAlias, "vejpunkt_geom");
+    }
+  },
+  adgangspunkt_geom_json: {
+    select: function(sqlParts, sqlModel, params) {
+      const srid = params.srid || 4326;
+      const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+      return postgisUtil.geojsonColumn(srid, sridAlias, "geom");
+    }
+  },
   geom_json: {
     select: function(sqlParts, sqlModel, params) {
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
-      return postgisUtil.adgangsadresseGeojsonColumn(srid, sridAlias);
+      return postgisUtil.adgangsadresseGeojsonColumn(srid, sridAlias, params);
     }
   },
   oprettet: {
@@ -110,13 +136,6 @@ module.exports =  {
   },
   vejpunkt_nøjagtighed: {
     column: 'vejpunkt_noejagtighedsklasse'
-  },
-  vejpunkt_geom_json: {
-    select: function(sqlParts, sqlModel, params) {
-      const srid = params.srid || 4326;
-      const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
-      return postgisUtil.geojsonColumn(srid, sridAlias, 'vejpunkt_geom');
-    }
   },
   tsv: {
     column: 'tsv'

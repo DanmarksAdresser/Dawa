@@ -154,6 +154,8 @@ describe('Stable API', () => {
               "vejpunkt_kilde": "Ekstern",
               "vejpunkt_nøjagtighed": "B",
               "vejpunkt_tekniskstandard": "V0",
+              "vejpunkt_x": 10.33144075,
+              "vejpunkt_y": 55.39500953,
               "adresseringsvejnavn": "Brammingevej",
               "husnr": "18",
               "supplerendebynavn": "Bolbro",
@@ -231,6 +233,8 @@ describe('Stable API', () => {
               "vejpunkt_kilde": "Ekstern",
               "vejpunkt_nøjagtighed": "B",
               "vejpunkt_tekniskstandard": "V0",
+              "vejpunkt_x": 11.93571617,
+              "vejpunkt_y": 55.53903448,
               "husnr": "1B",
               "supplerendebynavn": "Boruphuse",
               "postnr": "4320",
@@ -436,6 +440,8 @@ describe('Stable API', () => {
               "vejpunkt_kilde": "Ekstern",
               "vejpunkt_nøjagtighed": "B",
               "vejpunkt_tekniskstandard": "V0",
+              "vejpunkt_x": 10.33144075,
+              "vejpunkt_y": 55.39500953,
               "adresseringsvejnavn": "Brammingevej",
               "husnr": "18",
               "etage": "1",
@@ -507,7 +513,7 @@ describe('Stable API', () => {
         for (let struktur of Object.keys(strukturMap)) {
           const tests = strukturMap[struktur];
           it(`Return value for entity=${entityName},format=${format},struktur=${struktur}`, q.async(function*() {
-            for(let test of tests) {
+            for (let test of tests) {
               let jsonResult = yield helpers.getJson(clientFn(), resource, test.params, {
                 format: format,
                 struktur: struktur

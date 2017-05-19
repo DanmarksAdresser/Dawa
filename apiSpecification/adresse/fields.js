@@ -9,11 +9,11 @@ var d = util.d;
 
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
-var normalizedField = function(fieldName) {
+var normalizedField = function (fieldName) {
   return normalizedFieldSchemas.normalizedField('adresse', fieldName);
 };
 
-var normalizedAdgangsadresseField = function(fieldName) {
+var normalizedAdgangsadresseField = function (fieldName) {
   return normalizedFieldSchemas.normalizedField('adgangsadresse', fieldName);
 };
 
@@ -118,9 +118,6 @@ var fields = [
     name: 'adgangsadresse_status'
   },
   {
-    name: 'geom_json'
-  },
-  {
     name: 'adgangsadresse_oprettet',
     formatter: d
   },
@@ -169,6 +166,12 @@ var fields = [
     name: 'y'
   },
   {
+    name: 'vejpunkt_x'
+  },
+  {
+    name: 'vejpunkt_y'
+  },
+  {
     name: 'bebyggelser',
     multi: true
   },
@@ -185,10 +188,17 @@ var fields = [
     name: 'vejpunkt_tekniskstandard'
   },
   {
+    name: 'adgangspunkt_geom_json'
+  },
+  {
     name: 'vejpunkt_geom_json'
-  }
+  },
+  {
+    name: 'geom_json'
+  },
+
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);
 fieldsUtil.normalize(fields);
-module.exports =  fields;
+module.exports = fields;

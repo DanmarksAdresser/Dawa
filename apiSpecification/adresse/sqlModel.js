@@ -55,10 +55,6 @@ var columns = {
   adressepunktændringsdato: {
     select: selectIsoTimestamp('adressepunktaendringsdato')
   },
-  geom_json: adgangsadresseColumns.geom_json,
-  adgangsadresse_status: {
-    column: 'a_objekttype'
-  },
   adgangsadresse_oprettet: {
     select: selectIsoTimestamp('a_oprettet')
   },
@@ -72,8 +68,15 @@ var columns = {
   bebyggelsestype: adgangsadresseColumns.bebyggelsestype,
   x: adgangsadresseColumns.x,
   y: adgangsadresseColumns.y,
+  vejpunkt_x: adgangsadresseColumns.vejpunkt_x,
+  vejpunkt_y: adgangsadresseColumns.vejpunkt_y,
   vejpunkt_nøjagtighed: adgangsadresseColumns.vejpunkt_nøjagtighed,
-  vejpunkt_geom_json: adgangsadresseColumns.vejpunkt_geom_json
+  adgangspunkt_geom_json: adgangsadresseColumns.adgangspunkt_geom_json,
+  vejpunkt_geom_json: adgangsadresseColumns.vejpunkt_geom_json,
+  geom_json: adgangsadresseColumns.geom_json,
+  adgangsadresse_status: {
+    column: 'a_objekttype'
+  }
 };
 
 var baseQuery = function () {

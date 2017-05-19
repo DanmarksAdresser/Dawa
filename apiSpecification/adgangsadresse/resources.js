@@ -42,7 +42,8 @@ module.exports = [
           name: 'kvh',
           type: 'string',
           validateFun: kvhTransformer.validate
-        }
+        },
+        geometri: parameters.geometri
       },
       representations,
       sqlModel)),
@@ -60,14 +61,18 @@ module.exports = [
     '/adgangsadresser/reverse',
     representations,
     sqlModel,
-    {includeInvalid: parameters.includeInvalid}
+    {
+      includeInvalid: parameters.includeInvalid,
+      geometri: parameters.geometri
+    }
   ),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,
     {
       includeInvalid: parameters.includeInvalid,
       crs: commonParameters.crs,
-      struktur: commonParameters.struktur
+      struktur: commonParameters.struktur,
+      geometri: parameters.geometri
     },
     representations,
     sqlModel)

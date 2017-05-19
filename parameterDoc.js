@@ -501,6 +501,11 @@ var kommuneDoc = {
 /*** Adresser og adgangsadresser **********************************************/
 /******************************************************************************/
 
+const geometriParam = {
+  name: 'geometri',
+    doc: 'Hvis GeoJSON formatet anvendes, angiver parameteren om det er adgangspunktet eller vejpunktet der anvendes. Mulige værdier: "adgangspunkt" eller "vejpunkt"'
+};
+
 var parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'status',
@@ -615,7 +620,8 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'bebyggelsestype',
     doc: 'Find de adresser som ligger en bebyggelse af den angivne type. Mulige værdier: "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby".'
-  }
+  },
+  geometriParam
 ];
 
 var adgangsadresseIdParameter = {
@@ -644,7 +650,7 @@ var adgangsadresseDoc = {
   resources: {
     '/adgangsadresser/{id}': {
       subtext: 'Modtag adresse med id.',
-      parameters: [adgangsadresseIdParameter].concat([strukturParameterAdresse]),
+      parameters: [adgangsadresseIdParameter, strukturParameterAdresse, geometriParam],
       nomulti: true,
       examples: [{
         description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
@@ -732,7 +738,7 @@ var adgangsadresseDoc = {
       subtext: 'Find den adresse, som ligger nærmest det angivne koordinat. Som koordinatsystem kan anvendes ' +
       'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller ' +
       'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
-      parameters: reverseGeocodingParameters.concat([strukturParameterAdresse]),
+      parameters: [...reverseGeocodingParameters, strukturParameterAdresse, geometriParam],
       examples: [{
         description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
         query: [{name: 'x', value: '12.5851471984198'},
@@ -849,7 +855,7 @@ var adresseDoc = {
       subtext: 'Modtag adresse med id.',
       parameters: [_.find(adresseParameters, function (p) {
         return p.name === 'id';
-      })].concat([strukturParameterAdresse]),
+      }), strukturParameterAdresse, geometriParam],
       nomulti: true,
       examples: [{
         description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',

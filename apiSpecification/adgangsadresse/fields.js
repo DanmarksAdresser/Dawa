@@ -115,7 +115,7 @@ var fields = [
     multi: true
   },
   {
-    name: 'geom_json'
+    name: 'adgangspunkt_geom_json'
   },
   {
     name: 'bebyggelser',
@@ -135,6 +135,15 @@ var fields = [
   },
   {
     name: 'vejpunkt_geom_json'
+  },
+  {
+    name: 'geom_json'
+  },
+  {
+    name: 'vejpunkt_x'
+  },
+  {
+    name: 'vejpunkt_y'
   }
 ];
 

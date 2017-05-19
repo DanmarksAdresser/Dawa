@@ -42,7 +42,8 @@ module.exports = [
           name: 'kvhx',
           type: 'string',
           validateFun: kvhxTransformer.validate
-        }
+        },
+        geometri: parameters.geometri
       }, representations,
       sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
@@ -60,7 +61,8 @@ module.exports = [
     {
       includeInvalid: parameters.includeInvalid,
       crs: commonParameters.crs,
-      struktur: commonParameters.struktur
+      struktur: commonParameters.struktur,
+      geometri: parameters.geometri
     },
     representations,
     sqlModel)

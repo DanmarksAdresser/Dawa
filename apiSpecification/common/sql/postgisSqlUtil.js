@@ -15,12 +15,18 @@ exports.geojsonColumn = (srid, sridAlias, geomColumn) => {
 
 }
 
-exports.adgangsadresseGeojsonColumn = (srid, sridAlias) => {
+exports.adgangsadresseGeojsonColumn = (srid, sridAlias, params) => {
+  const geomColumn = params.geometri === 'vejpunkt' ? 'vejpunkt_geom' : 'geom';
   const decimals = sridToDecimals[srid];
-  return `CASE WHEN hoejde IS NULL 
-      THEN ST_AsGeoJSON(ST_Transform(geom, ${sridAlias}::integer), ${decimals})
-      ELSE ST_AsGeoJSON(ST_Transform(ST_SetSRID(st_makepoint(st_x(geom), st_y(geom), hoejde), 25832), ${sridAlias}::integer), ${decimals})
+  if(geomColumn === 'geom') {
+    return `CASE WHEN hoejde IS NULL 
+      THEN ST_AsGeoJSON(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${decimals})
+      ELSE ST_AsGeoJSON(ST_Transform(ST_SetSRID(st_makepoint(st_x(${geomColumn}), st_y(${geomColumn}), hoejde), 25832), ${sridAlias}::integer), ${decimals})
       END`;
+  }
+  else {
+    return `ST_AsGeoJSON(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${decimals})`;
+  }
 };
 
 exports.selectXWgs84 = geomColumn => {

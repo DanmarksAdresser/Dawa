@@ -49,7 +49,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -366,7 +366,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         adr.stormodtagerpostnummer = null;
       }
       adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, baseUrl);
-      const coordinater = rs.geom_json ? JSON.parse(rs.geom_json).coordinates : null;
+      const adgangspunkt_koordinater = rs.adgangspunkt_geom_json ? JSON.parse(rs.adgangspunkt_geom_json).coordinates : null;
       if(rs.ejerlavkode) {
         adr.ejerlav = {
           kode: rs.ejerlavkode,
@@ -385,7 +385,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       adr.adgangspunkt = {
         // af legacy årsager returnerer vi kun x,y koordinater
         id: rs.adgangspunktid,
-        koordinater: coordinater ? [coordinater[0], coordinater[1]] : null,
+        koordinater: adgangspunkt_koordinater ? [adgangspunkt_koordinater[0], adgangspunkt_koordinater[1]] : null,
         højde: rs.højde,
         nøjagtighed: maybeNull(rs.nøjagtighed),
         kilde: maybeNull(rs.kilde),

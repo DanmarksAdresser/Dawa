@@ -123,4 +123,14 @@ exports.includeInvalid = [{
   default: false
 }];
 
+exports.geometri = [
+  {
+    name: 'geometri',
+    type: 'string',
+    default: 'adgangspunkt',
+    schema: {
+      enum: ['adgangspunkt', 'vejpunkt']
+    }
+  }]
+
 registry.addMultiple('adgangsadresse', 'parameterGroup', module.exports);
