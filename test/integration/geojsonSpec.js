@@ -131,4 +131,45 @@ describe('GeoJSON format', function() {
       expect(coords).to.have.length(3);
     });
   });
+  it('Adgangsdresse-enkeltopslag respekterer geometri-parameteren', () => {
+    return request.get({url: 'http://localhost:3002/adgangsadresser/0a3f507d-f25f-32b8-e044-0003ba298018?geometri=vejpunkt&format=geojsonz', json: true}).then(result => {
+      const coords = result.geometry.coordinates;
+      expect(coords).to.have.length(2);
+      expect(coords[0]).to.equal(result.properties.vejpunkt_x);
+      expect(coords[1]).to.equal(result.properties.vejpunkt_y);
+    });
+  });
+  it('Adgangsadresse-opslag respekterer geometri-parameteren', () => {
+    return request.get({url: 'http://localhost:3002/adgangsadresser?id=0a3f507d-f25f-32b8-e044-0003ba298018&geometri=vejpunkt&format=geojsonz', json: true}).then(result => {
+      const coords = result.features[0].geometry.coordinates;
+      expect(coords).to.have.length(2);
+      expect(coords[0]).to.equal(result.features[0].properties.vejpunkt_x);
+      expect(coords[1]).to.equal(result.features[0].properties.vejpunkt_y);
+    });
+  });
+
+  it('Adresse-enkeltopslag respekterer geometri-parameteren', () => {
+    return request.get({url: 'http://localhost:3002/adresser/0a3f50a3-885d-32b8-e044-0003ba298018?geometri=vejpunkt&format=geojsonz', json: true}).then(result => {
+      const coords = result.geometry.coordinates;
+      expect(coords).to.have.length(2);
+      expect(coords[0]).to.equal(result.properties.vejpunkt_x);
+      expect(coords[1]).to.equal(result.properties.vejpunkt_y);
+    });
+  });
+  it('Adresse-opslag respekterer geometri-parameteren', () => {
+    return request.get({url: 'http://localhost:3002/adresser?id=0a3f50a3-885d-32b8-e044-0003ba298018&geometri=vejpunkt&format=geojsonz', json: true}).then(result => {
+      const coords = result.features[0].geometry.coordinates;
+      expect(coords).to.have.length(2);
+      expect(coords[0]).to.equal(result.features[0].properties.vejpunkt_x);
+      expect(coords[1]).to.equal(result.features[0].properties.vejpunkt_y);
+    });
+  });
+  it('Adgangsadresse-reverse respekterer geometri-parameteren', () => {
+    return request.get({url: 'http://localhost:3002/adgangsadresser/reverse?x=750000&y=6100000&srid=25832&geometri=vejpunkt&format=geojson', json: true}).then(result => {
+      const coords = result.geometry.coordinates;
+      expect(coords).to.have.length(2);
+      expect(coords[0]).to.equal(result.properties.vejpunkt_x);
+      expect(coords[1]).to.equal(result.properties.vejpunkt_y);
+    });
+  });
 });
