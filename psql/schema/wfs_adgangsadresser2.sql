@@ -29,5 +29,10 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser2 AS
     ddkn_km10,
     adressepunktaendringsdato AS "adressepunktaendringsdato",
     round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90))::INTEGER % 180 - 90 AS "tekstretninggrader",
+    vejpunkt_id,
+    vejpunkt_kilde,
+    vejpunkt_noejagtighedsklasse as "vejpunkt_nøjagtighed",
+    vejpunkt_tekniskstandard,
+    vejpunkt_geom,
     geom
   FROM Adgangsadresser_valid_view;
