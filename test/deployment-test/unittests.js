@@ -1334,7 +1334,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};
-    optvej.qs.cirkel= '11.25186711,55.72926984,10';
+    optvej.qs.cirkel= '11.25186711,55.72926984,10'; // Alleshavevej 48, 4593
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -1374,7 +1374,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};
-    optvej.qs.cirkel= '11.2543533,55.72774095,10';
+    optvej.qs.cirkel= '11.2543533,55.72774095,10'; // Alleshavevej 48, 4593
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -1413,7 +1413,7 @@ describe('Adgangsadressesøgning', function(){
     var optvej= {};
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
-    optvej.qs= {};
+    optvej.qs= {};      // Alleshavevej 48, 4593
     optvej.qs.polygon= '[[[11.253927730614917, 55.728246510030615],[11.255578599937305, 55.727267076544436],[11.253441999510827, 55.72733506505552],[11.253927730614917, 55.728246510030615]]]';
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
@@ -1454,7 +1454,7 @@ describe('Adgangsadressesøgning', function(){
     var optvej= {};
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
-    optvej.qs= {};
+    optvej.qs= {}; // Alleshavevej 48, 4593
     optvej.qs.polygon= '[[[11.251517395720864, 55.729757549168234],[11.253021444039282, 55.728881507651074],[11.250538933028965, 55.728696939800585],[11.251517395720864, 55.729757549168234]]]';
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
@@ -1511,7 +1511,7 @@ describe('Adgangsadresseopslag', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser/reverse';
     optvej.qs= {};
-    optvej.qs.x= 11.254677072750962;
+    optvej.qs.x= 11.254677072750962; // Alleshavevej 48, 4593
     optvej.qs.y= 55.72665088543518;
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
