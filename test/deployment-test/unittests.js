@@ -211,13 +211,18 @@ describe('Adresseopslag', function(){
       assert(adresse.adgangsadresse.esrejendomsnr==="242358", 'adresse.esrejendomsnr forskellig: ' + adresse.adgangsadresse.esrejendomsnr);
       assert(adresse.adgangsadresse.matrikelnr==="663", 'adresse.matrikelnr forskellig: ' + adresse.adgangsadresse.matrikelnr);
       
-      assert(adresse.adgangsadresse.adgangspunkt.koordinater[0]==12.5108572474172, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[0]);
-      assert(adresse.adgangsadresse.adgangspunkt.koordinater[1]==55.6983973831476, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[1]);
+      assert(adresse.adgangsadresse.adgangspunkt.koordinater[0]==12.51085725, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[0]);
+      assert(adresse.adgangsadresse.adgangspunkt.koordinater[1]==55.69839738, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[1]);
       assert(adresse.adgangsadresse.adgangspunkt.nøjagtighed==="A", 'punkt.nøjagtighed forskellig: ' + adresse.adgangsadresse.adgangspunkt.nøjagtighed);
       assert(adresse.adgangsadresse.adgangspunkt.kilde==5, 'punkt.kilde forskellig: ' + adresse.adgangsadresse.adgangspunkt.kilde);
       assert(adresse.adgangsadresse.adgangspunkt.tekniskstandard==="TD", 'punkt.tekniskstandard forskellig: ' + adresse.adgangsadresse.adgangspunkt.tekniskstandard);
       assert(adresse.adgangsadresse.adgangspunkt.tekstretning==200, 'punkt.tekstretning forskellig: ' + adresse.adgangsadresse.adgangspunkt.tekstretning);
       assert(adresse.adgangsadresse.adgangspunkt.ændret==="2002-04-05T00:00:00.000", 'punkt.adressepunktændringsdato forskellig: ' + adresse.adgangsadresse.adgangspunkt.ændret);
+      assert(adresse.adgangsadresse.vejpunkt.koordinater[0]==12.51066198, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.vejpunkt.koordinater[0]);
+      assert(adresse.adgangsadresse.vejpunkt.koordinater[1]==55.69846171, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.vejpunkt.koordinater[1]);
+      assert(adresse.adgangsadresse.vejpunkt.nøjagtighed==="B", 'punkt.nøjagtighed forskellig: ' + adresse.adgangsadresse.vejpunkt.nøjagtighed);
+      assert(adresse.adgangsadresse.vejpunkt.kilde=='Ekstern', 'punkt.kilde forskellig: ' + adresse.adgangsadresse.vejpunkt.kilde);
+      assert(adresse.adgangsadresse.vejpunkt.tekniskstandard==="V0", 'punkt.tekniskstandard forskellig: ' + adresse.adgangsadresse.vejpunkt.tekniskstandard);
       assert(adresse.adgangsadresse.jordstykke.ejerlav.kode==2000175, 'jordstykke.ejerlav.kode forskellig: ' + adresse.adgangsadresse.jordstykke.ejerlav.kode);
       assert(adresse.adgangsadresse.jordstykke.matrikelnr==="663", 'jordstykke.matrikelnr forskellig: ' + adresse.adgangsadresse.jordstykke.matrikelnr);
       assert(adresse.adgangsadresse.jordstykke.esrejendomsnr==="242358", 'jordstykke.esrejendomsnr forskellig: ' + adresse.adgangsadresse.jordstykke.esrejendomsnr);
@@ -468,6 +473,12 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.adgangspunkt.tekniskstandard===adressecsv.tekniskstandard, 'punkt.tekniskstandard i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekniskstandard + ', csv: ' + adressecsv.tekniskstandard);
         assert(adressejson.adgangsadresse.adgangspunkt.tekstretning==adressecsv.tekstretning, 'punkt.tekstretning i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekstretning + ', csv: ' + adressecsv.tekstretning);
         assert(adressejson.adgangsadresse.adgangspunkt.ændret===adressecsv.adressepunktændringsdato, 'punkt.adressepunktændringsdato i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.ændret + ', csv: ' + adressecsv.adressepunktændringsdato);
+        assert(adressejson.adgangsadresse.vejpunkt.koordinater[0]==adressecsv.vejpunkt_x, 'punkt.koordinater[0] i json og csv format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.koordinater[0] + ', csv: ' + adressecsv.vejpunkt_x);
+        assert(adressejson.adgangsadresse.vejpunkt.koordinater[1]==adressecsv.vejpunkt_y, 'punkt.koordinater[1] i json og csv format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.koordinater[1] + ', csv: ' + adressecsv.vejpunkt_y);
+        assert(adressejson.adgangsadresse.vejpunkt.nøjagtighed===adressecsv.vejpunkt_nøjagtighed, 'punkt.nøjagtighed i json og csv format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.nøjagtighed + ', csv: ' + adressecsv.vejpunkt_nøjagtighed);
+        assert(adressejson.adgangsadresse.vejpunkt.kilde==adressecsv.vejpunkt_kilde, 'punkt.kilde i json og csv format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.kilde + ', csv: ' + adressecsv.vejpunkt_kilde);
+        assert(adressejson.adgangsadresse.vejpunkt.tekniskstandard===adressecsv.vejpunkt_tekniskstandard, 'punkt.tekniskstandard i json og csv format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.tekniskstandard + ', csv: ' + adressecsv.vejpunkt_tekniskstandard);
+        assert(adressejson.adgangsadresse.adgangspunkt.tekstretning==adressecsv.tekstretning, 'punkt.tekstretning i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekstretning + ', csv: ' + adressecsv.tekstretning);
         assert(adressejson.adgangsadresse.jordstykke.ejerlav.kode==adressecsv.jordstykke_ejerlavkode, 'jordstykke.ejerlav.kode i json og csv format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.ejerlav.kode + ', csv: ' + adressecsv.jordstykke_ejerlavkode);
         assert(adressejson.adgangsadresse.jordstykke.matrikelnr===adressecsv.jordstykke_matrikelnr, 'jordstykke.matrikelnr i json og csv format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.matrikelnr + ', csv: ' + adressecsv.jordstykke_matrikelnr);
         assert(adressejson.adgangsadresse.jordstykke.esrejendomsnr===adressecsv.jordstykke_esrejendomsnr, 'jordstykke.esrejendomsnr i json og csv format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.esrejendomsnr + ', csv: ' + adressecsv.jordstykke_esrejendomsnr);
@@ -556,6 +567,11 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.adgangspunkt.tekniskstandard===adressegeojson.tekniskstandard, 'punkt.tekniskstandard i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekniskstandard + ', geojson: ' + adressegeojson.tekniskstandard);
         assert(adressejson.adgangsadresse.adgangspunkt.tekstretning===adressegeojson.tekstretning, 'punkt.tekstretning i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.tekstretning + ', geojson: ' + adressegeojson.tekstretning);
         assert(adressejson.adgangsadresse.adgangspunkt.ændret===adressegeojson.adressepunktændringsdato, 'punkt.adressepunktændringsdato i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.ændret + ', geojson: ' + adressegeojson.adressepunktændringsdato);
+        assert(adressejson.adgangsadresse.vejpunkt.koordinater[0]===adressegeojson.vejpunkt_x, 'punkt.koordinater[0] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.koordinater[0] + ', geojson: ' + adressegeojson.vejpunkt_x);
+        assert(adressejson.adgangsadresse.vejpunkt.koordinater[1]===adressegeojson.vejpunkt_y, 'punkt.koordinater[1] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.koordinater[1] + ', geojson: ' + adressegeojson.vejpunkt_y);
+        assert(adressejson.adgangsadresse.vejpunkt.nøjagtighed===adressegeojson.vejpunkt_nøjagtighed, 'punkt.nøjagtighed i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.nøjagtighed + ', geojson: ' + adressegeojson.vejpunkt_nøjagtighed);
+        assert(adressejson.adgangsadresse.vejpunkt.kilde===adressegeojson.vejpunkt_kilde, 'punkt.kilde i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.kilde + ', geojson: ' + adressegeojson.vejpunkt_kilde);
+        assert(adressejson.adgangsadresse.vejpunkt.tekniskstandard===adressegeojson.vejpunkt_tekniskstandard, 'punkt.tekniskstandard i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.vejpunkt.tekniskstandard + ', geojson: ' + adressegeojson.vejpunkt_tekniskstandard);
         assert(adressejson.adgangsadresse.jordstykke.ejerlav.kode==adressegeojson.jordstykke_ejerlavkode, 'jordstykke.ejerlav.kode i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.ejerlav.kode + ', geojson: ' + adressegeojson.jordstykke_ejerlavkode);
         assert(adressejson.adgangsadresse.jordstykke.matrikelnr===adressegeojson.jordstykke_matrikelnr, 'jordstykke.matrikelnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.matrikelnr + ', geojson: ' + adressegeojson.jordstykke_matrikelnr);
         assert(adressejson.adgangsadresse.jordstykke.esrejendomsnr===adressegeojson.jordstykke_esrejendomsnr, 'jordstykke.esrejendomsnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.jordstykke.esrejendomsnr + ', geojson: ' + adressegeojson.jordstykke_esrejendomsnr);
@@ -1311,6 +1327,167 @@ describe('Adgangsadressesøgning', function(){
     })
   })
 
+
+  it("cirkel og adgangspunkt", function(done){
+
+    var optvej= {};
+    optvej.baseUrl= host;
+    optvej.url='/adgangsadresser';
+    optvej.qs= {};
+    optvej.qs.cirkel= '11.25186711,55.72926984,10';
+    optvej.qs.geometri= 'vejpunkt';
+    optvej.qs.cache= 'no-cache';
+    optvej.resolveWithFullResponse= true;
+    optvej.simple= false;
+    var vejrequest= rp(optvej);
+
+    var optadgang= {};
+    optadgang.baseUrl= host;
+    optadgang.url='/adgangsadresser';
+    optadgang.qs= {};
+    optadgang.qs.cirkel= '11.25186711,55.72926984,10';
+    optadgang.qs.geometri= 'adgangspunkt';
+    optadgang.qs.cache= 'no-cache';
+    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
+    optadgang.resolveWithFullResponse= true;
+    optadgang.simple= false;
+    var adgangrequest= rp(optadgang);
+
+    Promise.all([vejrequest, adgangrequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,200);
+      assert.equal(responses[1].statusCode,200);
+      var vej= JSON.parse(responses[0].body);
+      var adgang= JSON.parse(responses[1].body);
+      assert(vej.length===0, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
+      assert(adgang.length===1, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
+      assert(adgang.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
+
+  });
+
+  it("cirkel og vejpunkt", function(done){
+
+    var optvej= {};
+    optvej.baseUrl= host;
+    optvej.url='/adgangsadresser';
+    optvej.qs= {};
+    optvej.qs.cirkel= '11.2543533,55.72774095,10';
+    optvej.qs.geometri= 'vejpunkt';
+    optvej.qs.cache= 'no-cache';
+    optvej.resolveWithFullResponse= true;
+    optvej.simple= false;
+    var vejrequest= rp(optvej);
+
+    var optadgang= {};
+    optadgang.baseUrl= host;
+    optadgang.url='/adgangsadresser';
+    optadgang.qs= {};
+    optadgang.qs.cirkel= optvej.qs.cirkel;
+    optadgang.qs.geometri= 'adgangspunkt';
+    optadgang.qs.cache= 'no-cache';
+    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
+    optadgang.resolveWithFullResponse= true;
+    optadgang.simple= false;
+    var adgangrequest= rp(optadgang);
+
+    Promise.all([vejrequest, adgangrequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,200);
+      assert.equal(responses[1].statusCode,200);
+      var vej= JSON.parse(responses[0].body);
+      var adgang= JSON.parse(responses[1].body);
+      assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
+      assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
+      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
+
+  });
+
+  it("polygon og vejpunkt", function(done){
+
+    var optvej= {};
+    optvej.baseUrl= host;
+    optvej.url='/adgangsadresser';
+    optvej.qs= {};
+    optvej.qs.polygon= '[[[11.253927730614917, 55.728246510030615],[11.255578599937305, 55.727267076544436],[11.253441999510827, 55.72733506505552],[11.253927730614917, 55.728246510030615]]]';
+    optvej.qs.geometri= 'vejpunkt';
+    optvej.qs.cache= 'no-cache';
+    optvej.resolveWithFullResponse= true;
+    optvej.simple= false;
+    var vejrequest= rp(optvej);
+
+    var optadgang= {};
+    optadgang.baseUrl= host;
+    optadgang.url='/adgangsadresser';
+    optadgang.qs= {};
+    optadgang.qs.polygon= optvej.qs.polygon;
+    optadgang.qs.geometri= 'adgangspunkt';
+    optadgang.qs.cache= 'no-cache';
+    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
+    optadgang.resolveWithFullResponse= true;
+    optadgang.simple= false;
+    var adgangrequest= rp(optadgang);
+
+    Promise.all([vejrequest, adgangrequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,200);
+      assert.equal(responses[1].statusCode,200);
+      var vej= JSON.parse(responses[0].body);
+      var adgang= JSON.parse(responses[1].body);
+      assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
+      assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
+      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
+
+  });
+
+
+  it("polygon og adgangspunkt", function(done){
+
+    var optvej= {};
+    optvej.baseUrl= host;
+    optvej.url='/adgangsadresser';
+    optvej.qs= {};
+    optvej.qs.polygon= '[[[11.251517395720864, 55.729757549168234],[11.253021444039282, 55.728881507651074],[11.250538933028965, 55.728696939800585],[11.251517395720864, 55.729757549168234]]]';
+    optvej.qs.geometri= 'vejpunkt';
+    optvej.qs.cache= 'no-cache';
+    optvej.resolveWithFullResponse= true;
+    optvej.simple= false;
+    var vejrequest= rp(optvej);
+
+    var optadgang= {};
+    optadgang.baseUrl= host;
+    optadgang.url='/adgangsadresser';
+    optadgang.qs= {};
+    optadgang.qs.polygon= optvej.qs.polygon;
+    optadgang.qs.geometri= 'adgangspunkt';
+    optadgang.qs.cache= 'no-cache';
+    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
+    optadgang.resolveWithFullResponse= true;
+    optadgang.simple= false;
+    var adgangrequest= rp(optadgang);
+
+    Promise.all([vejrequest, adgangrequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,200);
+      assert.equal(responses[1].statusCode,200);
+      var vej= JSON.parse(responses[0].body);
+      var adgang= JSON.parse(responses[1].body);
+      assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
+      assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
+      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
+
+  });
 });
 
 
@@ -1325,6 +1502,49 @@ describe('Adgangsadresseopslag', function(){
       done();
     })
   })
+
+  http://dawa-p2.aws.dk/adgangsadresser/reverse?x=11.254677072750962&y=55.72665088543518&format=geojson&geometri=vejpunkt
+
+  it("reverse og vejpunkt", function(done){
+
+    var optvej= {};
+    optvej.baseUrl= host;
+    optvej.url='/adgangsadresser/reverse';
+    optvej.qs= {};
+    optvej.qs.x= 11.254677072750962;
+    optvej.qs.y= 55.72665088543518;
+    optvej.qs.geometri= 'vejpunkt';
+    optvej.qs.cache= 'no-cache';
+    optvej.resolveWithFullResponse= true;
+    optvej.simple= false;
+    var vejrequest= rp(optvej);
+
+    var optadgang= {};
+    optadgang.baseUrl= host;
+    optadgang.url='/adgangsadresser/reverse';
+    optadgang.qs= {};
+    optadgang.qs.x= 11.254677072750962;
+    optadgang.qs.y= 55.72665088543518;
+    optadgang.qs.geometri= 'adgangspunkt';
+    optadgang.qs.cache= 'no-cache';
+    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
+    optadgang.resolveWithFullResponse= true;
+    optadgang.simple= false;
+    var adgangrequest= rp(optadgang);
+
+    Promise.all([vejrequest, adgangrequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,200);
+      assert.equal(responses[1].statusCode,200);
+      var vej= JSON.parse(responses[0].body);
+      var adgang= JSON.parse(responses[1].body);
+      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(adgang.husnr==='46', 'reverse på adgangspunkt burde være 46'); 
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
+
+  });
 
 });
 
