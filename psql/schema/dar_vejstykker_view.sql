@@ -6,3 +6,4 @@ CREATE VIEW dar_vejstykker_view AS select kommunekode, vejkode as kode, navn as 
    AND  vejkode < 9900
    -- kommunekode >= 900 er grønlandske
    AND kommunekode < 900
+  AND kommunekode >= 100
