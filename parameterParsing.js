@@ -71,6 +71,9 @@ exports.validateParameters = function(params, parameterSpec) {
 };
 
 function parseParameterMulti(valString, paramSpec) {
+  if(Array.isArray(valString)) {
+    throw `Parameter må højst angives én gang.`
+  }
   if (paramSpec.multi === true)
   {
     return {_multi_: true,
