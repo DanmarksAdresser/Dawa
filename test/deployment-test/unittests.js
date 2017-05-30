@@ -1694,6 +1694,7 @@ describe('Historik', function(){
       assert.equal(responses[1].statusCode,200);
       var adresse= JSON.parse(responses[0].body);
       var historik= JSON.parse(responses[1].body);
+      assert(historik.length>0,'Ingen historikposter');
       function nedlagt(element, index, array) {
         return element.status === 2 || element.status === 4;
       }
