@@ -287,6 +287,12 @@ exports.reverseGeocoding = function (geom) {
   };
 };
 
+exports.adgangsadresseGeoFilter = function(sqlParts, params) {
+  const geomColumn = params.geometri !== 'adgangspunkt' ? 'vejpunkt_geom' : 'geom';
+  exports.reverseGeocoding(geomColumn)(sqlParts, params);
+  exports.geomWithin(geomColumn)(sqlParts, params);
+};
+
 // Adds a where clause which requires the queried object to contain the point specified by the x and y parameters
 exports.reverseGeocodingWithin = function (geom) {
   geom = geom || 'geom';

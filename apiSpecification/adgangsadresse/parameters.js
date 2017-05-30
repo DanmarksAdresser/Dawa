@@ -119,15 +119,14 @@ exports.husnrinterval = normalizeParameters([
 
 exports.includeInvalid = [{
   name: 'medtagugyldige',
-  type: 'boolean',
-  default: false
+  type: 'boolean'
 }];
 
 exports.geometri = [
   {
     name: 'geometri',
     type: 'string',
-    default: 'adgangspunkt',
+    defaultValue: 'adgangspunkt',
     schema: {
       enum: ['adgangspunkt', 'vejpunkt']
     }

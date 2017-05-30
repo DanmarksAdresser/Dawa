@@ -143,7 +143,7 @@ var parameterImpls = [
   sqlParameterImpl.includeInvalidAdgangsadresser,
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.husnrInterval(),
-  sqlParameterImpl.geomWithin(),
+  sqlParameterImpl.adgangsadresseGeoFilter,
   sqlParameterImpl.dagiFilter(),
   searchAdresse(columns),
   autocompleteAdresse(columns),
