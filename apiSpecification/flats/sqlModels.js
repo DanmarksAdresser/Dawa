@@ -29,7 +29,7 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
   columns.geom_json = {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil(params.srid || 4326, sridAlias);
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias);
     }
   };
 
