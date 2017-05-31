@@ -99,6 +99,7 @@ function searchHusnr(pnr,vej,husnr) {
 
 
 function searchEtage(pnr,vej,husnr,etage) {
+
   var ptext = $(pnr).val();
   var reg = /(\d{4})/g;
   var match = reg.exec(ptext);
@@ -120,7 +121,8 @@ function searchEtage(pnr,vej,husnr,etage) {
     success: function (adresser) {
       var etager= [];
       $.each(adresser, function (i, adresse) {
-        if (etager.indexOf(adresse.etage) === -1) { etager.push(adresse.etage); }
+        var etage = adresse.etage || "";
+        if (etage !== null && etager.indexOf(etage) === -1) { etager.push(etage); }
       });
       $(etage).autocomplete({
         source: etager,
@@ -156,7 +158,8 @@ function searchDør(pnr,vej,husnr,etage,doer) {
     success: function (adresser) {
       var dører= [];
       $.each(adresser, function (i, adresse) {
-        if (dører.indexOf(adresse.dør) === -1) dører.push(adresse.dør);
+        var dør = adresse.dør === null ? "" : adresse.dør;
+        if (dører.indexOf(dør) === -1) dører.push(dør);
       });
       $(doer).autocomplete({
         source: dører,
@@ -224,7 +227,7 @@ function valider(pnr,vej,husnr,etage,doer) {
   }
   parametre.etage = $(etage).val() || '';
   parametre.dør = $(doer).val() || '';
-  
+
   $.ajax({
     cache: true,
     url:'/adresser',
