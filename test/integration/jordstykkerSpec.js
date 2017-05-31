@@ -1,5 +1,6 @@
 "use strict";
 
+const { go } = require('ts-csp');
 const expect = require('chai').expect;
 const request = require("request-promise");
 const q = require('q');
@@ -8,5 +9,13 @@ describe('Jordstykke API', () => {
   it('Query på både ejerlav og matrikelnr', q.async(function*() {
     const result = yield request.get({url: 'http://localhost:3002/jordstykker?ejerlavkode=60851&matrikelnr=1a', json: true});
     expect(result.length).to.equal(1);
+  }));
+
+  it('Kan hente jordstykke i GeoJSON-format', () => go(function*() {
+    const result = yield request.get({url: 'http://localhost:3002/jordstykker?ejerlavkode=60851&matrikelnr=1a&format=geojson', json: true});
+    expect(result.features.length).to.equal(1);
+    const properties = result.features[0].properties;
+    expect(properties.ejerlavkode).to.equal(60851);
+    expect(properties.matrikelnr).to.equal("1a");
   }));
 });
