@@ -234,6 +234,7 @@ const expectedResults = {
           "ois_id": 6093147,
           "ois_ts": "2016-12-12 19:26:53.370",
           "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
+          "href": "http://dawa/ois/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
           "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
           "PktRevDato": "2016-12-12T09:29:07.017",
           "KoorOest": 726016.09,

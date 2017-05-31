@@ -9,6 +9,8 @@ const fieldsMap = require('./fields');
 const representationUtil = require('../common/representationUtil');
 const registry = require('../registry');
 
+const makeOisHref = (baseUrl, apiModelName, id) => `${baseUrl}/ois/${namesAndKeys[apiModelName].plural}/${id}`;
+
 const extractNonprefixedEntity = (entity, row) => {
   const fields = oisModels[entity].fields;
   const obj = fields.reduce((memo, field) => {
@@ -23,7 +25,7 @@ const extractNonprefixedEntity = (entity, row) => {
   }
   return obj;
 };
-const extractPrefixedEntity = (entity, row) => {
+const extractPrefixedEntity = (baseUrl, entity, row) => {
   const oisModel = oisModels[entity];
   if(row[`${entity}_${oisModel.key[0]}`]) {
     const fields = oisModels[entity].fields;
@@ -37,6 +39,7 @@ const extractPrefixedEntity = (entity, row) => {
         [row[`${entity}_koordinater_x`], row[`${entity}_koordinater_y`]] :
         null;
     }
+    obj.href = makeOisHref(baseUrl, entity, row[`${entity}_${oisModel.key[0]}`]);
     return obj;
   }
   else {
@@ -67,8 +70,6 @@ const fieldsIncludedInFlatMap = Object.keys(oisApiModels).reduce((memo, apiModel
   return memo;
 }, {});
 
-const makeOisHref = (baseUrl, apiModelName, id) => `${baseUrl}/ois/${namesAndKeys[apiModelName].plural}/${id}`;
-
 for(let apiModelName of Object.keys(oisApiModels)) {
   const apiModel = oisApiModels[apiModelName];
   const flatFields = fieldsIncludedInFlatMap[apiModelName];
@@ -87,7 +88,7 @@ for(let apiModelName of Object.keys(oisApiModels)) {
     for(let secondaryRelation of apiModel.secondaryRelations) {
       if(!secondaryRelation.aggregate) {
         result[secondaryRelation.relationName] =
-          extractPrefixedEntity(secondaryRelation.relationName, row);
+          extractPrefixedEntity(baseUrl, secondaryRelation.relationName, row);
       }
       else {
         result = Object.assign(result, extractAggregateEntity(secondaryRelation.relationName, row));
