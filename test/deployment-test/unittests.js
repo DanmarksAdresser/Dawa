@@ -1334,7 +1334,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};
-    optvej.qs.cirkel= '11.25186711,55.72926984,10'; // Alleshavevej 48, 4593
+    optvej.qs.cirkel= '11.25186711,55.72926984,5'; // Alleshavevej 48, 4593
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -1345,10 +1345,9 @@ describe('Adgangsadressesøgning', function(){
     optadgang.baseUrl= host;
     optadgang.url='/adgangsadresser';
     optadgang.qs= {};
-    optadgang.qs.cirkel= '11.25186711,55.72926984,10';
+    optadgang.qs.cirkel= '11.25186711,55.72926984,5';
     optadgang.qs.geometri= 'adgangspunkt';
     optadgang.qs.cache= 'no-cache';
-    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
     optadgang.resolveWithFullResponse= true;
     optadgang.simple= false;
     var adgangrequest= rp(optadgang);
@@ -1358,9 +1357,10 @@ describe('Adgangsadressesøgning', function(){
       assert.equal(responses[1].statusCode,200);
       var vej= JSON.parse(responses[0].body);
       var adgang= JSON.parse(responses[1].body);
-      assert(vej.length===0, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
-      assert(adgang.length===1, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(adgang.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      console.log('vej.length: %d, adgang.length: %d',vej.length,adgang.length);
+      assert(vej.length===0, 'adgangsadresse fundet ud fra vejpunkt og cirkel')
+      assert(adgang.length===1, 'adgangsadresse ikke fundet ud fra adgangspunkt og cirkel')
+      assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
       done();
     }).catch(reason => { 
       done(reason);
@@ -1388,7 +1388,6 @@ describe('Adgangsadressesøgning', function(){
     optadgang.qs.cirkel= optvej.qs.cirkel;
     optadgang.qs.geometri= 'adgangspunkt';
     optadgang.qs.cache= 'no-cache';
-    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
     optadgang.resolveWithFullResponse= true;
     optadgang.simple= false;
     var adgangrequest= rp(optadgang);
@@ -1400,7 +1399,7 @@ describe('Adgangsadressesøgning', function(){
       var adgang= JSON.parse(responses[1].body);
       assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(vej[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
       done();
     }).catch(reason => { 
       done(reason);
@@ -1428,7 +1427,6 @@ describe('Adgangsadressesøgning', function(){
     optadgang.qs.polygon= optvej.qs.polygon;
     optadgang.qs.geometri= 'adgangspunkt';
     optadgang.qs.cache= 'no-cache';
-    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
     optadgang.resolveWithFullResponse= true;
     optadgang.simple= false;
     var adgangrequest= rp(optadgang);
@@ -1440,7 +1438,7 @@ describe('Adgangsadressesøgning', function(){
       var adgang= JSON.parse(responses[1].body);
       assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(vej[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
       done();
     }).catch(reason => { 
       done(reason);
@@ -1469,7 +1467,6 @@ describe('Adgangsadressesøgning', function(){
     optadgang.qs.polygon= optvej.qs.polygon;
     optadgang.qs.geometri= 'adgangspunkt';
     optadgang.qs.cache= 'no-cache';
-    optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
     optadgang.resolveWithFullResponse= true;
     optadgang.simple= false;
     var adgangrequest= rp(optadgang);
@@ -1479,9 +1476,9 @@ describe('Adgangsadressesøgning', function(){
       assert.equal(responses[1].statusCode,200);
       var vej= JSON.parse(responses[0].body);
       var adgang= JSON.parse(responses[1].body);
-      assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
-      assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(vej.length===0, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
+      assert(adgang.length===1, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
+      assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
       done();
     }).catch(reason => { 
       done(reason);
