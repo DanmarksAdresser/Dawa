@@ -8,7 +8,9 @@ const sqlModels = require('./sqlModels');
 
 module.exports = _.mapObject(flats, (flat, flatName) => {
   const sqlModel = sqlModels[flatName];
-  const fields = flat.fields.concat([
+  const fields = [
+    ...flat.fields,
+    ...flat.secondaryFields,
     {
       name: 'ændret',
       selectable: true
@@ -23,9 +25,8 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
     },
     {
       name: 'geom_json'
-    }]);
+    }];
   fieldsUtil.applySelectability(fields, sqlModel);
   fieldsUtil.normalize(fields);
   return fields;
 });
-

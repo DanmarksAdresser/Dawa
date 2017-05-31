@@ -60,6 +60,7 @@ module.exports = {
       type: 'string',
       description: 'Bebyggelsens navn.'
     }],
+    secondaryFields: [],
     filters: ['type', 'navn'],
     key: ['id'],
     geometryType: 'area'
@@ -132,6 +133,7 @@ module.exports = {
         schema: commonSchemaDefinitions.Nullablesfeejendomsnr
       }
     ],
+    secondaryFields: [{name: 'ejerlavnavn'}],
     filters: ['ejerlavkode', 'matrikelnr', 'kommunekode', 'regionskode', 'sognekode', 'retskredskode', 'esrejendomsnr', 'sfeejendomsnr'],
     key: ['ejerlavkode', 'matrikelnr'],
     geometryType: 'area',

@@ -15,7 +15,7 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
   const sqlSpec = sqlSpecs[flatName];
   const columnSpec = sqlSpec.columns;
 
-  const columns = flat.fields.reduce((memo, field) => {
+  const columns = [...flat.fields, ...flat.secondaryFields].reduce((memo, field) => {
     if(columnSpec[field.name]) {
       memo[field.name] = columnSpec[field.name];
     }
@@ -34,15 +34,15 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
   };
 
   const table = sqlSpec.table;
-  const baseQuery = function () {
-    return {
-      select: [],
-      from: [table],
-      whereClauses: [],
-      orderClauses: [],
-      sqlParams: []
-    };
-  };
+  const defaultBaseQuery = () => ({
+    select: [],
+    from: [table],
+    whereClauses: [],
+    orderClauses: [],
+    sqlParams: []
+  });
+
+  const baseQuery = sqlSpec.baseQuery || defaultBaseQuery;
 
   const parameters = parametersMap[flatName];
   const sqlParameterImpls = [

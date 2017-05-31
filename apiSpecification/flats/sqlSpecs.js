@@ -8,8 +8,19 @@ module.exports = {
   },
   jordstykke: {
     table: 'jordstykker',
-    columns: {},
+    columns: {
+      ejerlavnavn: {
+        column: "ejerlav.navn"
+      }
+    },
     subdividedGeometryIndex: false,
-    geometryType: 'Polygon'
+    geometryType: 'Polygon',
+    baseQuery: () => ({
+      select: [],
+      from: [`jordstykker LEFT JOIN ejerlav ON jordstykker.ejerlavkode = ejerlav.kode`],
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    }),
   }
 };
