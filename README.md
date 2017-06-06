@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/DanmarksAdresser/Dawa.png?label=ready&title=Ready)](https://waffle.io/DanmarksAdresser/Dawa)
 # Danmarks Adressers Web API - DAWA [![Build Status](https://travis-ci.org/DanmarksAdresser/Dawa.png?branch=master)](https://travis-ci.org/DanmarksAdresser/Dawa)
 
 Et web API der udstiller danmarks adresser.
