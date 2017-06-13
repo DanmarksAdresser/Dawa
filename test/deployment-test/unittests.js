@@ -1649,6 +1649,17 @@ describe('Jordstykker', function(){
     })
   })
 
+  it("opslag - geojson", function(done){
+    request(encodeURI(host+"/jordstykker/100453/8bd?format=geojson&cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var jordstykke= JSON.parse(body);    
+      assert(jordstykke.properties.ejerlavkode===100453,"Forkert jordstykke");
+      done();
+    })
+  })
+  http://dawa-p2.aws.dk/jordstykker?ejerlavkode=100453&matrikelnr=8bd&&format=geojson
+
   it('reverse geokodning', function(done){
     request(encodeURI(host+'/jordstykker/reverse?y=55.737308&x=12.513428&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
