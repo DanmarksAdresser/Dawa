@@ -14,7 +14,7 @@ const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tablediff = require('../importUtil/tablediff');
 const logger = require('../logger').forCategory('oisImport');
 
-const OIS_FILE_REGEX = /^ois_nybbr_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$/;
+const OIS_FILE_REGEX = /^ois_bbrt_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$/;
 
 
 function createUnzippedStream(filePath, filePattern) {
