@@ -8,19 +8,8 @@ html(lang='da')
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     meta(name="description", content="Danmarks adresse web API")
     meta(name="author", content="Finn Jordal")
-
-    //if lt IE 9
-      script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
-
-    link(href="lib/jquery-ui/themes/start/jquery-ui.css", rel="stylesheet")
-    link(href="lib/jquery-ui/themes/start/theme.css", rel="stylesheet")
-    link(href="lib/bootstrap/docs/assets/css/bootstrap.css", rel="stylesheet")
-    link(href="lib/bootstrap/docs/assets/css/bootstrap-responsive.css", rel="stylesheet")
-    link(href="css/style.css", rel="stylesheet")
-    link(href="lib/leaflet/dist/leaflet.css", rel="stylesheet")
-
+    link(href="css/dawa.css", rel="stylesheet")
     link(rel="shortcut icon", href="img/favicon.ico")
-
   body
     div.navbar.navbar-inverse.navbar-fixed-top
       div.navbar-inner
@@ -57,10 +46,7 @@ html(lang='da')
     block content
 
     block scripts
-      script(src="lib/jquery/dist/jquery.min.js")
-      script(src="lib/jquery-ui/jquery-ui.min.js")
-      script(src="lib/bootstrap/docs/assets/js/bootstrap.min.js")
-      script(src="lib/leaflet/dist/leaflet.js")
+      script(src="js/dawa.js")
 
     script(type='text/javascript').
       var _gaq = _gaq || [];

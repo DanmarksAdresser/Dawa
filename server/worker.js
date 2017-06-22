@@ -63,7 +63,7 @@ app.use(socketTimeoutMiddleware(config.getOption('socketTimeoutMillis')));
 app.use(compression( {
   memLevel: 3
 }));
-app.use(express.static(path.join(__dirname, '../public'), {maxAge: 10000}));
+app.use(express.static(path.join(__dirname, '../dist'), {maxAge: 10000}));
 
 
 const listenPort = config.getOption('listenPort');

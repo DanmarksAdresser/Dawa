@@ -46,19 +46,11 @@ module.exports = function (grunt) {
         tagMessage: 'Release af version <%= version %>', //default: 'Version <%= version %>',
         additionalFiles: ['bower.json']
       }
-    },
-    bower: {
-      install: {
-        options: {
-          targetDir: 'public/lib',
-          layout: 'byComponent'
-        }
-      }
     }
   });
 
   grunt.registerTask('unitTest', ['eslint', 'mochaTest:unit']);
   grunt.registerTask('integrationtest', ['express:test', 'mochaTest:integration', 'express:test:stop']);
   grunt.registerTask('test', ['unitTest', 'integrationtest']);
-  grunt.registerTask('default', ['bower','test']);
+  grunt.registerTask('default', ['test']);
 };

@@ -1,5 +1,16 @@
 "use strict";
-/*global L:false */
+
+import 'bootstrap-2.3.2/css/bootstrap.css';
+import 'bootstrap-2.3.2/css/bootstrap-responsive.css';
+import 'leaflet/dist/leaflet.css';
+import '../css/style.css';
+import '../css/autocomplete.css';
+import 'jquery-ui-dist/jquery-ui.min.css';
+import L from 'leaflet';
+import $ from 'jquery';
+window.jQuery = $;
+import 'jquery-ui-dist/jquery-ui.min';
+import {dawaAutocomplete} from 'dawa-autocomplete2';
 
 var apiBase = '';
 
@@ -250,53 +261,58 @@ function valider(pnr,vej,husnr,etage,doer) {
   });
 }
 
-$(function () {
-  function errorHandler(query) {
-    return function(xhr, status, error) {
-      $(query).text('(Fejl - ' + xhr.status + " " + xhr.statusText + " " + status + " " + error + ")");
-    };
-  }
+export function activateTab(tab) {
+  var topbar = $('#topbar');
+  topbar.find('li').removeClass('active');
+  var a = topbar.find(`li a[href='${tab}']`)[0];
+  var li = $(a).parent().addClass('active');
+}
 
-  $('#autocomplete-adresse').dawaautocomplete({
-    baseUrl: '',
-    select: function(event, data) {
-      $('#autocomplete-adresse-choice').text(data.tekst);
-    },
-    error: errorHandler('#autocomplete-adresse-choice')
+export function initForside() {
+  $(function () {
+    function errorHandler(query) {
+      return function(xhr, status, error) {
+        $(query).text('(Fejl - ' + xhr.status + " " + xhr.statusText + " " + status + " " + error + ")");
+      };
+    }
+    dawaAutocomplete(document.getElementById("autocomplete-adresse"), {
+      baseUrl: '',
+      select: (data) => {
+        $('#autocomplete-adresse-choice').text(data.tekst);
+      }
+    });
+    dawaAutocomplete(document.getElementById('autocomplete-adgangsadresse'), {
+      adgangsadresserOnly: true,
+      baseUrl: '',
+      select: function(data) {
+        $('#autocomplete-adgangsadresse-choice').text(data.tekst);
+      }
+    });
+    dawaAutocomplete(document.getElementById('autocomplete-adresse-kbh'), {
+      params: {
+        kommunekode: "101"
+      },
+      baseUrl: '',
+      select: function(data) {
+        $('#autocomplete-adresse-kbh-choice').text(data.tekst);
+      }
+    });
+    searchPostnr('#postnummer');
+    $('#vej').focus(function () {
+      searchVejnavn('#postnummer','#vej');
+    });
+    $('#husnummer').focus(function () {
+      searchHusnr('#postnummer','#vej','#husnummer');
+    });
+    $('#etage').focus(function () {
+      searchEtage('#postnummer','#vej','#husnummer', '#etage');
+    });
+    $('#doer').focus(function () {
+      searchDør('#postnummer','#vej','#husnummer', '#etage', '#doer');
+    });
+    $('#valider').click(function () {
+      valider('#vpostnummer','#vvej','#vhusnummer', '#vetage', '#vdoer');
+    });
+    inverseGeocoding();
   });
-  $('#autocomplete-adgangsadresse').dawaautocomplete({
-    adgangsadresserOnly: true,
-    baseUrl: '',
-    select: function(event, data) {
-      $('#autocomplete-adgangsadresse-choice').text(data.tekst);
-    },
-    error: errorHandler('#autocomplete-adgangsadresse-choice')
-  });
-  $('#autocomplete-adresse-kbh').dawaautocomplete({
-    baseUrl: '',
-    params: {
-      kommunekode: "101"
-    },
-    select: function(event, data) {
-      $('#autocomplete-adresse-kbh-choice').text(data.tekst);
-    },
-    error: errorHandler('#autocomplete-adresse-kbh-choice')
-  });
-  searchPostnr('#postnummer');
-  $('#vej').focus(function () {
-    searchVejnavn('#postnummer','#vej');
-  });
-  $('#husnummer').focus(function () {
-    searchHusnr('#postnummer','#vej','#husnummer');
-  });
-  $('#etage').focus(function () {
-    searchEtage('#postnummer','#vej','#husnummer', '#etage');
-  });
-  $('#doer').focus(function () {
-    searchDør('#postnummer','#vej','#husnummer', '#etage', '#doer');
-  });
-  $('#valider').click(function () {
-    valider('#vpostnummer','#vvej','#vhusnummer', '#vetage', '#vdoer');
-  });
-	inverseGeocoding();
-});
+}

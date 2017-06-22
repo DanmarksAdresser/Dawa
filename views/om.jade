@@ -106,8 +106,5 @@ block content
               | .
 
 block append scripts
-  script(type='text/javascript').
-    var topbar = $('#topbar');
-    topbar.find('li').removeClass('active');
-    var a = topbar.find("li a[href='om']")[0];
-    var li = $(a).parent().addClass('active');
+  script.
+    dawa.activateTab('om');

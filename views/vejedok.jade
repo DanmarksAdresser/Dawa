@@ -85,8 +85,5 @@ block content
             +documentSchema(jsonSchemas.vejstykke)
 
 block append scripts
-  script(type='text/javascript').
-    var topbar = $('#topbar');
-    topbar.find('li').removeClass('active');
-    var a = topbar.find("li a[href='vejedok']")[0];
-    var li = $(a).parent().addClass('active');
+  script.
+    dawa.activateTab('vejedok');

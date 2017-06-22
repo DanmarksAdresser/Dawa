@@ -60,7 +60,4 @@ block content
 
 block append scripts
   script.
-    var topbar = $('#topbar');
-    topbar.find('li').removeClass('active');
-    var a = topbar.find("li a[href='adgangsadressedok']")[0];
-    var li = $(a).parent().addClass('active');
+    dawa.activateTab('adgangsadressedok');

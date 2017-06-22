@@ -301,7 +301,4 @@ block content
             +documentSchema(jsonSchemas.bebyggelse)
 block append scripts
   script.
-    var topbar = $('#topbar');
-    topbar.find('li').removeClass('active');
-    var a = topbar.find("li a[href='listerdok']")[0];
-    var li = $(a).parent().addClass('active');
+    dawa.activateTab('listerdok');
