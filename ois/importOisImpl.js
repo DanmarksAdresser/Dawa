@@ -6,6 +6,7 @@ const path = require('path');
 const q = require('q');
 const _ = require('underscore');
 
+const { go } = require('ts-csp');
 const oisCommon = require('./common');
 const oisModels = require('./oisModels');
 const oisParser = require('./oisParser');
@@ -141,8 +142,19 @@ const createFetchTable = (client, entityName) => {
   return importUtil.createTempTableFromTemplate(client, fetchTable, template, columns);
 };
 
-function importOis(client, dataDir, singleFileNameOnly) {
+const clean = client => go(function*() {
+  for (const entityName of Object.keys(oisModels)) {
+    const table = oisCommon.dawaTableName(entityName);
+    yield client.query(`delete from ${table}`);
+  }
+  yield client.query('delete from ois_importlog');
+});
+
+function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst) {
   return q.async(function*() {
+    if(shouldCleanFirst) {
+      yield clean(client);
+    }
     for (const entityName of Object.keys(oisModels)) {
       const fileDescriptors = yield findFilesToImportForEntity(client, entityName, dataDir);
       for (let fileDescriptor of fileDescriptors) {
