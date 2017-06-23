@@ -31,7 +31,7 @@ function computeInserts(client, srcTable, dstTable, insTable, idColumns) {
  * Given srcTable and dstTable, insert into a new temporary table upTable the set of rows
  * to be updated in dstTable in order to make srcTable and dstTable equal.
  */
-function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck) {
+function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsToCheck, columnsDistinctClauses) {
   if(columnsToCheck.length === 0) {
     return q.resolve(null);
   }
@@ -45,7 +45,7 @@ function computeUpdates(client, srcTable, dstTable, upTable, idColumns, columnsT
         dstTable: dstTable,
         upTable: upTable,
         idEqualsClause: columnsEqualClause(srcTable, dstTable, idColumns),
-        nonIdColumnsDifferClause: columnsDistinctClause(srcTable, dstTable, columnsToCheck)
+        nonIdColumnsDifferClause: columnsDistinctClause(srcTable, dstTable, columnsToCheck, columnsDistinctClauses)
       }));
 }
 
@@ -112,28 +112,28 @@ function applyChanges(client, changeTableSuffix, targetTable, idColumns, allColu
   })();
 }
 
-function computeDifferences(client, srcTable, dstTable, idColumns, columnsToCheck) {
-  return computeDifferencesTargeted(client, srcTable, dstTable, dstTable, idColumns, columnsToCheck);
+function computeDifferences(client, srcTable, dstTable, idColumns, columnsToCheck, columnsDistinctClauses) {
+  return computeDifferencesTargeted(client, srcTable, dstTable, dstTable, idColumns, columnsToCheck, columnsDistinctClauses);
 }
 
-function computeDifferencesSubset(client, dirtyTable, desiredView, targetTable, idColumns, columnsToCheck) {
+function computeDifferencesSubset(client, dirtyTable, desiredView, targetTable, idColumns, columnsToCheck, columnsDistinctClauses) {
   return q.async(function*() {
     const desiredTable = `desired_${targetTable}`;
     const actualTable = `actual_${targetTable}`;
     yield client.queryBatched(`CREATE TEMP TABLE ${desiredTable} AS (SELECT ${desiredView}.* FROM ${desiredView} NATURAL JOIN ${dirtyTable})`);
     yield client.queryBatched(`CREATE TEMP TABLE ${actualTable} AS (SELECT ${targetTable}.* FROM ${targetTable} NATURAL JOIN ${dirtyTable})`);
-    yield computeDifferencesTargeted(client, desiredTable, actualTable, targetTable, idColumns, columnsToCheck);
+    yield computeDifferencesTargeted(client, desiredTable, actualTable, targetTable, idColumns, columnsToCheck, columnsDistinctClauses);
     yield client.queryBatched(`DROP TABLE ${desiredTable}; DROP TABLE ${actualTable}`);
   })();
 }
 
-function computeDifferencesTargeted(client, desiredTable, actualTable, targetTable, idColumns, columnsToCheck) {
+function computeDifferencesTargeted(client, desiredTable, actualTable, targetTable, idColumns, columnsToCheck, columnsDistinctClauses) {
   const insTable = `insert_${targetTable}`;
   const upTable = `update_${targetTable}`;
   const delTable = `delete_${targetTable}`;
   return q.async(function*() {
     yield computeInserts(client, desiredTable, actualTable, insTable, idColumns);
-    yield computeUpdates(client, desiredTable, actualTable, upTable, idColumns, columnsToCheck);
+    yield computeUpdates(client, desiredTable, actualTable, upTable, idColumns, columnsToCheck, columnsDistinctClauses);
     yield computeDeletes(client, desiredTable, actualTable, delTable, idColumns);
   })();
 }

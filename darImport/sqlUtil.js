@@ -16,15 +16,12 @@ function selectList(alias, columns) {
 }
 
 
-function columnsDistinctClause(alias1, alias2, columns) {
-  var clauses = columns.map(function(column) {
-    return format('{alias1}.{column} IS DISTINCT FROM {alias2}.{column}',
-      {
-        alias1: alias1,
-        alias2: alias2,
-        column: column
-      });
-  });
+function columnsDistinctClause(alias1, alias2, columns, distinctClauses) {
+  distinctClauses = distinctClauses || {};
+  const clauses = columns.map(column =>
+    distinctClauses[column] ?
+      distinctClauses[column](`${alias1}.${column}`, `${alias2}.${column}`) :
+      `${alias1}.${column} IS DISTINCT FROM ${alias2}.${column}`);
   return '(' + clauses.join(' OR ') + ')';
 }
 

@@ -99,9 +99,14 @@ function importFlat(client, flatName, srcStream, mappers, initial, sanityCheck, 
       const fetchTable = fetchTableName(sqlSpec);
       yield createFetchTable(client, flat, sqlSpec);
       yield streamToTable(client, flatName, fetchTable, srcStream, mappers);
+      const columnDistinctOps = {
+        geom: (a, b) => `((${a} IS NULL AND ${b} IS NOT NULL) OR 
+        (${a} IS NOT NULL AND ${b} IS NULL) OR 
+        (${a} IS NOT NULL AND ${b} IS NOT NULL AND NOT ST_Equals(${a}, ${b})))`
+      }
       if(createSubsetTableFn) {
         const subsetTable = yield createSubsetTableFn(fetchTable);
-        yield tablediff.computeDifferencesSubset(client, subsetTable, fetchTable, table, flat.key, nonIdColumns);
+        yield tablediff.computeDifferencesSubset(client, subsetTable, fetchTable, table, flat.key, nonIdColumns, columnDistinctOps);
       }
       else {
         yield tablediff.computeDifferences(client, fetchTable, table, flat.key, nonIdColumns);
