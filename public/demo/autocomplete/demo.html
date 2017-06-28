@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+    <title>DAWA autocomplete - demo</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="/css/autocomplete.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
+    <script src="/js/autocomplete/dawa-autocomplete2.min.js"></script>
+</head>
+<body>
+<h3>Autocomplete adresser</h3>
+<div class="autocomplete-container">
+    <input id="autocomplete-default">
+</div>
+
+<h3>Autocomplete adgangsadresser</h3>
+<div class="autocomplete-container">
+    <input id="autocomplete-adgangsadresser-only">
+</div>
+<h3>Adresser i København</h3>
+<div class="autocomplete-container">
+    <input id="autocomplete-kommunekode-101">
+</div>
+</body>
+<script>
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-default"), {
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-adgangsadresser-only"), {
+    adgangsadresserOnly: true,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-kommunekode-101"), {
+    params: {
+      kommunekode: 101
+    },
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+</script>
+</html>

@@ -18,7 +18,7 @@
     "csv": "~0.3.7",
     "csv-parse": "0.0.6",
     "csv-stringify": "0.0.6",
-    "dawa-autocomplete2": "^0.5.0",
+    "dawa-autocomplete2": "^0.7.0",
     "event-stream": "~3.1.7",
     "express": "4.13.3",
     "express-basic-auth": "^1.0.0",
@@ -81,20 +81,29 @@
     "load-grunt-tasks": "^3.5.2",
     "mocha": "^3.1.2",
     "ncp": "^2.0.0",
+    "npm-run-all": "^4.0.2",
     "rimraf": "^2.6.1",
     "rollup": "^0.43.0",
     "rollup-plugin-babel": "^2.7.1",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-css-only": "^0.2.0",
     "rollup-plugin-inject": "^2.0.0",
-    "rollup-plugin-node-resolve": "^3.0.0"
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "xp": "^1.0.1"
   },
   "subdomain": "dawa",
   "domains": [
     "dawa.aws.dk"
   ],
   "scripts": {
-    "prepare": "rimraf dist && mkdir -p dist/css && rollup -c && ncp public/img dist/img",
+    "clean": "rimraf dist",
+    "prepare-dist": "mkdir -p dist/css dist/demo",
+    "rollup": "rollup -c",
+    "copy-images": "ncp public/img dist/img",
+    "copy-autocomplete-js": "ncp node_modules/dawa-autocomplete2/dist dist/js/autocomplete",
+    "copy-autocomplete-css": "ncp public/css/autocomplete.css dist/css/autocomplete.css",
+    "copy-autocomplete-demo": "ncp public/demo/autocomplete dist/demo/autocomplete",
+    "prepare": "run-s clean prepare-dist rollup copy-images copy-autocomplete-js copy-autocomplete-css copy-autocomplete-demo",
     "start": " node server.js",
     "test": "grunt test"
   },

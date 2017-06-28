@@ -98,14 +98,14 @@ function importEjerlav(client, srcDir, file, initial, skipModificationCheck) {
   })();
 }
 
-function doImport(db, srcDir, initial) {
+function doImport(db, srcDir, initial, refresh) {
   return q.async(function*() {
     const files = fs.readdirSync(srcDir).filter(function(file) {
       return /^.+\.zip$/.test(file);
     });
     for(let file of files) {
       yield db.withTransaction('READ_WRITE', function(client) {
-        return importEjerlav(client, srcDir, file, initial);
+        return importEjerlav(client, srcDir, file, initial, refresh);
       });
     }
   })();

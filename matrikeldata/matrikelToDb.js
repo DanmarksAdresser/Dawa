@@ -11,8 +11,8 @@ const logger = require('../logger').forCategory('matrikelImport');
 var optionSpec = {
   sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  lastUpdated: [false, 'Timestamp for seneste opdatering, f.eks. "2015-02-18 12:34:48+02:00', 'string'],
-  init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false]
+  init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false],
+  refresh: [false, 'Genindlæs alle jordstykker', 'boolean', false]
 };
 
 q.longStackSupport = true;
@@ -24,7 +24,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'
   });
 
   q.async(function*() {
-    yield importJordstykkerImpl.doImport(proddb, options.sourceDir, options.init);
+    yield importJordstykkerImpl.doImport(proddb, options.sourceDir, options.init, options.refresh);
     yield proddb.withTransaction('READ_ONLY', q.async(function*(client) {
       const overlapping = yield client.queryRows(`with adrs AS (SELECT a.id, a.geom FROM adgangsadresser_mat a 
     JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
