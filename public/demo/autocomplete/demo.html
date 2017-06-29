@@ -23,6 +23,10 @@
 <div class="autocomplete-container">
     <input id="autocomplete-kommunekode-101">
 </div>
+<h3>Multiline</h3>
+<div class="autocomplete-container">
+    <input id="autocomplete-multiline">
+</div>
 </body>
 <script>
   dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-default"), {
@@ -46,6 +50,13 @@
       console.log('Selected address:');
       console.dir(selected);
     }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-multiline"), {
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    },
+    multiline: true
   });
 </script>
 </html>
