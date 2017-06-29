@@ -2,6 +2,7 @@
 
 const q = require('q');
 const _ = require('underscore');
+const { go } = require('ts-csp');
 
 const flats = require('./flats');
 const sqlCommon =  require('../../psql/common');
@@ -32,6 +33,31 @@ function streamToTable(client, flatName, table, srcStream, mappers) {
     yield promisingStreamCombiner([srcStream].concat(mappers).concat([stringifier, copyStream]));
   })();
 }
+
+const refreshAdgangsadresserRelation = (client, flatName) => go(function*() {
+  const flat = flats[flatName];
+  const sqlSpec = sqlSpecs[flatName];
+  const tilknytning = tilknytninger[flatName];
+  const table = sqlSpec.table;
+  const relTable = `${table}_adgadr`;
+  const srcTable = sqlSpec.subdividedGeometryIndex ? `${table}_divided` : table;
+  const keyFieldColumns = flat.key.map(key => tilknytning.keyFieldColumns[key]);
+  const relTableColumns = keyFieldColumns.concat(['adgangsadresse_id']);
+  const selectFlatKeys = Object.keys(tilknytning.keyFieldColumns).map(key => {
+    const column = tilknytning.keyFieldColumns[key];
+    return `f.${key} as ${column}`;
+  }).concat(['a.id as adgangsadresse_id']).join(', ');
+  yield client.queryp(`CREATE TEMP table desired_view AS \
+(SELECT DISTINCT ${selectFlatKeys} \
+FROM ${srcTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
+  yield tablediff.computeDifferences(
+    client, 'desired_view', relTable, relTableColumns, []);
+  yield client.queryp('DROP table desired_view');
+  yield tablediff.applyChanges(client, relTable, relTable, relTableColumns,
+    relTableColumns, [], true);
+  yield tablediff.dropChangeTables(client, relTable);
+});
+
 
 function updateAdgangsadresserRelation(client, flat, sqlSpec, tilknytning, initial, sanityCheck,
 forceUnique) {
@@ -139,5 +165,6 @@ function importFlat(client, flatName, srcStream, mappers, initial, sanityCheck, 
 module.exports = {
   createFetchTable,
   streamToTable,
-  importFlat
+  importFlat,
+  refreshAdgangsadresserRelation
 };

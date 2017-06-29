@@ -108,6 +108,10 @@ function doImport(db, srcDir, initial, refresh) {
         return importEjerlav(client, srcDir, file, initial, refresh);
       });
     }
+    if(refresh) {
+      yield db.withTransaction('READ_WRITE',
+        client => importing.refreshAdgangsadresserRelation(client, 'jordstykke'));
+    }
   })();
 }
 
