@@ -13,9 +13,7 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
     Readable.call(this, { objectMode : true });
   }
 
-  let objectsToRead = 0;
   ParseStream.prototype._read = function() {
-    ++objectsToRead;
     fileStream.resume();
   };
 
@@ -37,10 +35,9 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
       currentField = null;
     }
     else if (name === oisTableName) {
-      parseStream.push(currentObj);
+      const result = parseStream.push(currentObj);
       currentObj = null;
-      --objectsToRead;
-      if(objectsToRead <= 0) {
+      if(!result) {
         fileStream.pause();
       }
     }
