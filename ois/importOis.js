@@ -7,6 +7,8 @@ var importOisImpl = require('./importOisImpl');
 var proddb = require('../psql/proddb');
 const { go } = require('ts-csp');
 
+require('sax').MAX_BUFFER_LENGTH = 512 * 1024;
+
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med CSV-filer', 'string'],
