@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const q = require('q');
 const _ = require('underscore');
+const Promise = require('bluebird');
 
 const { go } = require('ts-csp');
 const oisCommon = require('./common');
@@ -14,6 +15,7 @@ const importUtil = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tablediff = require('../importUtil/tablediff');
 const logger = require('../logger').forCategory('oisImport');
+const tmp = require('tmp');
 
 const OIS_FILE_REGEX = /^ois_bbrt_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$/;
 
@@ -24,6 +26,21 @@ function createUnzippedStream(filePath, filePattern) {
   return proc.stdout;
 }
 
+function unzipToTempFile(filePath, filePattern) {
+  const tmpFile = tmp.fileSync();
+  const out = fs.createWriteStream(null, {
+    fd: tmpFile.fd
+  });
+  var args = ['e', '-so', path.resolve(filePath), filePattern];
+  var proc = child_process.spawn('7za', args);
+  proc.stdout.pipe(out);
+  return new Promise(resolve => {
+    out.on('finish', () => resolve(tmpFile));
+  })
+}
+
+
+
 function createOisStream(entityName, dataDir, fileName) {
   const model = oisModels[entityName];
   const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
@@ -31,10 +48,19 @@ function createOisStream(entityName, dataDir, fileName) {
   return oisParser.oisStream(stream, model);
 }
 
+const createOisStreamTmp = (entityName, dataDir, fileName) => go(function*() {
+  const model = oisModels[entityName];
+  const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
+  const tmpFile = yield unzipToTempFile(path.join(dataDir, fileName), xmlFileName);
+  const stream = fs.createReadStream(tmpFile.name);
+  stream.on('end', () => tmpFile.removeCallback());
+  return oisParser.oisStream(stream, model);
+});
+
 function oisFileToTable(client, entityName, dataDir, fileName, table) {
   return q.async(function*() {
     const columns = oisCommon.postgresColumnNames[entityName];
-    const oisStream = yield createOisStream(entityName, dataDir, fileName);
+    const oisStream = yield createOisStreamTmp(entityName, dataDir, fileName);
     yield promisingStreamCombiner([oisStream].concat(importUtil.streamToTablePipeline(client, table, columns)));
   })();
 }

@@ -1,7 +1,7 @@
 "use strict";
 
 const through2 = require('through2');
-const rawXmlStream = require('./rawXmlStreamSaxJs');
+const rawXmlStream = require('./rawXmlStreamExpat');
 var fieldParsers = require('./fieldParsers');
 
 
