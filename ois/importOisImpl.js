@@ -28,9 +28,7 @@ function createUnzippedStream(filePath, filePattern) {
 
 function unzipToTempFile(filePath, filePattern) {
   const tmpFile = tmp.fileSync();
-  const out = fs.createWriteStream(null, {
-    fd: tmpFile.fd
-  });
+  const out = fs.createWriteStream(tmpFile.name);
   var args = ['e', '-so', path.resolve(filePath), filePattern];
   var proc = child_process.spawn('7za', args);
   proc.stdout.pipe(out);
