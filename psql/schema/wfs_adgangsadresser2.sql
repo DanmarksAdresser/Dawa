@@ -33,6 +33,5 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser2 AS
     vejpunkt_kilde,
     vejpunkt_noejagtighedsklasse as "vejpunkt_nøjagtighed",
     vejpunkt_tekniskstandard,
-    vejpunkt_geom,
     geom
   FROM Adgangsadresser_valid_view;

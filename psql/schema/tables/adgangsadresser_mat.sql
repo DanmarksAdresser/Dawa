@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS adgangsadresser_mat;
+DROP TABLE IF EXISTS adgangsadresser_mat CASCADE;
 CREATE TABLE adgangsadresser_mat(
   id uuid NOT NULL PRIMARY KEY,
   kommunekode INTEGER NOT NULL,

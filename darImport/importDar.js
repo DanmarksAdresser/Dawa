@@ -90,6 +90,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'reportDir', 
         });
 
         logger.info('DAR CSV importer succeeded');
+        yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
       }
       catch(err) {
         logger.error('Caught error in DAR CSV importer', err);
