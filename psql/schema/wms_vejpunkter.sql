@@ -5,5 +5,5 @@ CREATE OR REPLACE VIEW wms_vejpunkter AS
     id,
     formatHusnr(husnr) as husnr,
     objekttype as status,
-    geom
+    vejpunkt_geom as geom
   FROM adgangsadresser_mat;
