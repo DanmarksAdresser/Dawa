@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS gt_pk_metadata;
 CREATE TABLE public.gt_pk_metadata (
   table_schema VARCHAR(32) NOT NULL,
   table_name VARCHAR(32) NOT NULL,
@@ -15,7 +16,6 @@ insert into gt_pk_metadata values('public', 'wms_vejpunktlinjer', 'id', 0, 'assi
 insert into gt_pk_metadata values('public', 'wms_vejpunkter', 'id', 0, 'assigned', null);
 
 DROP MATERIALIZED VIEW IF EXISTS wms_vejpunktlinjer;
-
 CREATE MATERIALIZED VIEW wms_vejpunktlinjer AS (
   SELECT
     adgangsadresser_mat.id :: TEXT                                           AS id,

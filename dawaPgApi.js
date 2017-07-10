@@ -29,7 +29,7 @@ function cachingMiddleware(req, res, next) {
       header = 'no-cache';
     }
     else {
-      header = 's-maxage=' + cacheMaxAge;
+      header = 'maxage=' + cacheMaxAge;
     }
     res.setHeader('Cache-Control', header);
     if(headers) {
