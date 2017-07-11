@@ -7,7 +7,7 @@ describe("Caching", function() {
   it("2xx svar skal caches", function(done) {
     request.get('http://localhost:3002/adresser?per_side=1', function(error, response, body) {
       expect(response.statusCode).to.equal(200);
-      expect(response.headers['cache-control']).to.match(/maxage=[\d]+/g);
+      expect(response.headers['cache-control']).to.match(/max-age=[\d]+/g);
       done();
     });
   });
