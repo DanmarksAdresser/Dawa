@@ -342,16 +342,19 @@ function mergePostnr(client, srcTable, mergedTable) {
   var unmergedTable = mergedTable + '_unmerged';
   return q.async(function*() {
     const src1Columns = ['id', 'bkid', 'hn_statuskode', 'ap_statuskode', 'adgangspunktid', 'kommunekode', 'vejkode', 'husnr', 'vejnavn', 'adresseringsvejnavn'];
-    const subselect = `FROM vask_postnrinterval pi
-     WHERE ${srcTable}.kommunekode = pi.kommunekode
-      AND ${srcTable}.vejkode = pi.vejkode
-      AND pi.side = (CASE WHEN (${srcTable}.husnr).tal % 2 = 0 THEN 'L'
+    const query = `CREATE TEMP TABLE ${unmergedTable} AS(
+    SELECT ${sqlUtil.selectList(srcTable, src1Columns)},
+    pi.nr as postnr,
+    ${srcTable}.virkning * pi.virkning as virkning
+    FROM ${srcTable}
+    JOIN vask_postnrinterval pi
+    ON ${srcTable}.vejkode = pi.vejkode
+    AND ${srcTable}.kommunekode = pi.kommunekode
+    AND husnr <@ pi.husnrinterval
+    AND ${srcTable}.virkning && pi.virkning
+    AND pi.side = (CASE WHEN (${srcTable}.husnr).tal % 2 = 0 THEN 'L'
                      ELSE 'U' END)
-      AND husnr <@ pi.husnrinterval  AND ${srcTable}.virkning && pi.virkning LIMIT 1`;
-    const query = `CREATE TEMP TABLE ${unmergedTable} AS(select ${sqlUtil.selectList(srcTable, src1Columns)},
-     (SELECT nr ${subselect}) AS postnr,
-     ${srcTable}.virkning * (SELECT pi.virkning ${subselect}) as virkning FROM ${srcTable}
-     WHERE EXISTS (SELECT * ${subselect}))`;
+    )`;
     yield client.queryp(query);
     const postnrNavnTable = mergedTable + '_postnrnavn';
     const mergedColumns = src1Columns.concat(['postnr']);
