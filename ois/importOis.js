@@ -22,7 +22,7 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'fileName'),
       connString: options.pgConnectionUrl,
       pooled: false
     });
-    proddb.withTransaction('READ_WRITE',  (client) => go(function*() {
+    proddb.withTransaction('READ_WRITE_CONCURRENT',  (client) => go(function*() {
       yield importOisImpl.importOis(client, options.dataDir, options.fileName, options.clean);
     })).done();
   });

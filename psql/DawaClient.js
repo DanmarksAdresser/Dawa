@@ -6,6 +6,7 @@ const { processify } = require('../util/cspUtil');
 const transactionStatements = {
   READ_ONLY: ['BEGIN READ ONLY', 'ROLLBACK'],
   READ_WRITE: ["BEGIN;SELECT pg_advisory_xact_lock(1);SET work_mem='256MB'", 'COMMIT'],
+  READ_WRITE_CONCURRENT: ["BEGIN;SET work_mem='256MB'", 'COMMIT'],
   ROLLBACK: ['BEGIN', 'ROLLBACK']
 };
 
