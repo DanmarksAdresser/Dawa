@@ -26,3 +26,5 @@ CREATE MATERIALIZED VIEW wms_vejpunktlinjer AS (
 
 CREATE UNIQUE INDEX ON wms_vejpunktlinjer(id);
 CREATE  INDEX ON wms_vejpunktlinjer USING GIST(vejpunktlinje);
+CREATE INDEX ON adgangsadresser_mat(postnr, id);
+CREATE INDEX ON adresser_mat(postnr, id);
