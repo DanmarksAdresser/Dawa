@@ -54,6 +54,7 @@ CREATE INDEX ON adresser_mat USING GIST (geom);
 CREATE INDEX ON adresser_mat(ejerlavkode, id);
 CREATE INDEX ON adresser_mat(kommunekode, vejkode, postnr);
 CREATE INDEX ON adresser_mat(postnr, kommunekode);
+CREATE INDEX ON adresser_mat(postnr, id);
 CREATE INDEX ON adresser_mat(supplerendebynavn, kommunekode, postnr);
 CREATE INDEX ON adresser_mat(matrikelnr);
 CREATE INDEX ON adresser_mat(husnr, id);
