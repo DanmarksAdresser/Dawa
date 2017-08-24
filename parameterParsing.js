@@ -15,7 +15,7 @@ const DEFAULT_MAX_PARAM_LENGTH = 100;
 exports.parseParameters = function(params, parameterSpec) {
   _.each(_.keys(parameterSpec),
          function(name){
-           if (!params[name] && parameterSpec[name].defaultValue !== undefined){
+           if (params[name] === undefined && parameterSpec[name].defaultValue !== undefined){
              params[name] = parameterSpec[name].defaultValue;
            }
          });

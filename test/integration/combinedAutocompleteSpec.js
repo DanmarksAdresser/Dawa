@@ -230,5 +230,85 @@ describe('Combined Autocomplete', function () {
       );
       expect(result.length).to.equal(0);
     }));
+
+    it('Supplerende bynavn kan fjernes fra adgangsadressetekster', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "stadionvej",
+          fuzzy: "",
+          type: 'adresse',
+          startfra: 'adgangsadresse',
+          supplerendebynavn: 'false'
+        }
+      );
+      expect(result[0].tekst).to.equal("Stadionvej 38, , 5200 Odense V");
+      expect(result[0].forslagstekst).to.equal("Stadionvej 38, 5200 Odense V");
+    }));
+    it('Supplerende bynavn kan fjernes fra adressetekster', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "stadionvej 38",
+          fuzzy: "",
+          type: 'adresse',
+          startfra: 'adgangsadresse',
+          supplerendebynavn: 'false'
+        }
+      );
+      expect(result[0].tekst).to.equal("Stadionvej 38, st. tv, 5200 Odense V");
+      expect(result[0].forslagstekst).to.equal("Stadionvej 38, st. tv, 5200 Odense V");
+    }));
+    it('multilinje kan aktiveres for adgangsadresseforslag', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "stadionvej",
+          fuzzy: "",
+          type: 'adresse',
+          startfra: 'adgangsadresse',
+          multilinje: 'true'
+        }
+      );
+      expect(result[0].tekst).to.equal("Stadionvej 38, , Bolbro, 5200 Odense V");
+      expect(result[0].forslagstekst).to.equal("Stadionvej 38\nBolbro\n5200 Odense V");
+
+    }));
+
+    it('multilinje kan aktiveres for adresseforslag', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "stadionvej 38",
+          fuzzy: "",
+          type: 'adresse',
+          startfra: 'adgangsadresse',
+          multilinje: 'true'
+        }
+      );
+      expect(result[0].tekst).to.equal("Stadionvej 38, st. tv, Bolbro, 5200 Odense V");
+      expect(result[0].forslagstekst).to.equal("Stadionvej 38, st. tv\nBolbro\n5200 Odense V");
+
+    }));
+
+    it('stormodtagerpostnumre kan aktiveres for adgangsadresser', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "girostrøget 1, 0800",
+          type: 'adgangsadresse',
+          startfra: 'adgangsadresse',
+          stormodtagerpostnumre: 'true'
+        }
+      );
+      expect(result[0].tekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
+      expect(result[0].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
+      expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
+      expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
+
+    }));
+    it('stormodtagerpostnumre kan aktiveres for adresser', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          q: "girostrøget 1",
+          type: 'adresse',
+          startfra: 'adresse',
+          stormodtagerpostnumre: 'true'
+        }
+      );
+      expect(result[0].tekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
+      expect(result[0].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
+      expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
+      expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
+    }));
   });
 });

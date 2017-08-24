@@ -2170,6 +2170,17 @@ module.exports['/autocomplete'] = {
     name: 'adgangsadresseid',
     doc: 'Begræns søgning til adresser med den angivne adgangsadresseid'
   }, {
+    name: 'multilinje',
+    doc: 'Angiver, om forslag formateres med linjeskift. Mulige værdier: true eller false. Default false.'
+  }, {
+    name: 'supplerendebynavn',
+    doc: 'Angiver, om adresser formateres med supplerende bynavn. Mulige værdier: true eller false. Default true.'
+  }, {
+    name: 'stormodtagerpostnumre',
+    doc: 'Angiver, om der returneres forslag med stormodtagerpostnumre. Mulige værdier: true eller false. ' +
+    'Default false. Bemærk, at hvis stormodtagerpostnumre aktiveres, ' +
+    'så kan samme adresse optræde to gange i listen af forslag.'
+  }, {
     name: 'fuzzy',
     doc: 'Aktiver fuzzy søgning'
   }].concat(formatAndPagingParams),

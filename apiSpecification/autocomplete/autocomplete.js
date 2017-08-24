@@ -43,6 +43,95 @@ const ADDRESS_ELEMENT_WEIGHTS = {
 
 const MAX_WEIGHT = 3;
 
+const formatAdresseMultiline = (data, medsupplerendebynavn) => {
+  let adresse = data.vejnavn;
+  if (data.husnr) {
+    adresse += ' ' + data.husnr;
+  }
+  if (data.etage || data['dør']) {
+    adresse += ',';
+  }
+  if (data.etage) {
+    adresse += ' ' + data.etage + '.';
+  }
+  if (data['dør']) {
+    adresse += ' ' + data['dør'];
+  }
+  if (medsupplerendebynavn && data.supplerendebynavn) {
+    adresse += '\n' + data.supplerendebynavn;
+  }
+  adresse += '\n' + data.postnr + ' ' + data.postnrnavn;
+  return adresse;
+}
+
+const formatAdresse = (data, stormodtager, multiline, medsupplerendebynavn) => {
+  if(stormodtager) {
+    data = Object.assign({}, data, {postnr: data.stormodtagerpostnr, postnrnavn: data.stormodtagerpostnrnavn});
+  }
+  const multilineAdr = formatAdresseMultiline(data, medsupplerendebynavn);
+  if(!multiline) {
+    return multilineAdr.replace(/\n/g, ', ');
+  }
+  else {
+    return multilineAdr;
+  }
+};
+
+
+const processResultsStormodtagere = (result, params) => {
+  const q = params.q;
+  const medsupplerendebynavn = params.supplerendebynavn;
+  return result.reduce(function (memo, wrapped) {
+    if(params.stormodtagerpostnumre && wrapped.data.stormodtagerpostnr) {
+      // Vi har modtaget et stormodtagerpostnr. Her vil vi gerne vise stormodtagerpostnummeret
+      const stormodtagerEntry = Object.assign({}, wrapped, {stormodtagerpostnr: true});
+      const stormodtagerTekst = formatAdresse(wrapped.data, true, false, medsupplerendebynavn);
+      const nonStormodtagerTekst = formatAdresse(wrapped.data, false, false, medsupplerendebynavn);
+      let rows = [];
+      // Hvis brugeren har indtastet den almindelige adresse eksakt, så er der ingen
+      // grund til at vise stormodtagerudgaven
+      if (q !== stormodtagerTekst) {
+        rows.push(wrapped);
+      }
+
+      // Hvis brugeren har indtastet stormodtagerudgaven af adressen eksakt, så viser vi
+      // ikke den almindelige udgave
+      if (q !== nonStormodtagerTekst) {
+        rows.push(stormodtagerEntry);
+      }
+
+      // brugeren har indtastet stormodtagerpostnummeret, såvi viser stormodtager udgaven først.
+      if (rows.length > 1 && q.indexOf(wrapped.data.stormodtagerpostnr) !== -1) {
+        rows = [rows[1], rows[0]];
+      }
+      memo = memo.concat(rows);
+
+      return memo;
+    }
+    else {
+      memo.push(wrapped);
+      return memo;
+    }
+  }, []);
+};
+
+/*
+ * Format text for displaying in input field. Caret position should be ready for entering etage/dør.
+ */
+const formatIncompleteAdr = (adgadr, medsupplerendebynavn) => {
+  const textBeforeCaret = adgadr.vejnavn + ' ' + adgadr.husnr + ', ';
+  let textAfterCaret = '';
+  if (medsupplerendebynavn && adgadr.supplerendebynavn) {
+    textAfterCaret += ', ' + adgadr.supplerendebynavn;
+  }
+  textAfterCaret += ', ' + adgadr.postnr + ' ' + adgadr.postnrnavn;
+  const caretpos = textBeforeCaret.length;
+  const tekst = textBeforeCaret + textAfterCaret;
+  return {
+    caretpos, tekst
+  }
+};
+
 var autocompleteResources = ['vejnavn', 'adgangsadresse', 'adresse'].reduce(function(memo, entity ) {
   memo[entity] = registry.findWhere({
     entityName: entity,
@@ -52,58 +141,88 @@ var autocompleteResources = ['vejnavn', 'adgangsadresse', 'adresse'].reduce(func
   return memo;
 }, {});
 
-var mappers = {
-  vejnavn: function(vejnavn, targetType) {
-    var tekst = vejnavn.tekst;
-    if(targetType !== 'vejnavn') {
-      tekst += ' ';
-    }
+var postProcessFns = {
+  vejnavn: (vejnavne, params) =>
+    vejnavne.map(vejnavn => {
 
-    return {
-      type: 'vejnavn',
-      tekst: tekst,
-      forslagstekst: vejnavn.tekst,
-      caretpos: tekst.length,
-      data: vejnavn.vejnavn
-    };
-  },
-  adgangsadresse: function(autocompleteAdgadr, targetType) {
-    var adgadr = autocompleteAdgadr.adgangsadresse;
-    var caretpos, tekst;
-    if(targetType !== 'adgangsadresse') {
-      var textBeforeCaret =  adgadr.vejnavn + ' ' + adgadr.husnr + ', ';
-      var textAfterCaret = '';
-      if(adgadr.supplerendebynavn) {
-        textAfterCaret += ', ' + adgadr.supplerendebynavn;
+      let tekst = vejnavn.tekst;
+      if (params.type !== 'vejnavn') {
+        tekst += ' ';
       }
-      textAfterCaret += ', ' + adgadr.postnr + ' ' + adgadr.postnrnavn;
-      caretpos = textBeforeCaret.length;
-      tekst = textBeforeCaret + textAfterCaret;
-    }
-    else {
-      tekst = autocompleteAdgadr.tekst;
-      caretpos = tekst.length;
-    }
-    return {
-      type: 'adgangsadresse',
-      tekst: tekst,
-      forslagstekst: autocompleteAdgadr.tekst,
-      caretpos: caretpos,
-      data: adgadr
-    };
+
+      return {
+        type: 'vejnavn',
+        tekst: tekst,
+        forslagstekst: vejnavn.tekst,
+        caretpos: tekst.length,
+        data: vejnavn.vejnavn
+      }
+    }),
+  adgangsadresse: (autocompleteAdgadrs, params) => {
+    const medsupplerendebynavn = params.supplerendebynavn;
+    const wrapped = autocompleteAdgadrs.map(adgadr => (
+      {
+        data: adgadr.adgangsadresse,
+        stormodtagerpostnr: false,
+        type: 'adgangsadresse'
+      }));
+    const withStormodtagere = params.stormodtagerpostnumre ?
+      processResultsStormodtagere( wrapped, params) :
+      wrapped;
+    return withStormodtagere.map(wrapped => {
+      const forslagstekst = formatAdresse(
+        wrapped.data,
+        wrapped.stormodtagerpostnr,
+        params.multilinje,
+        medsupplerendebynavn);
+      const completeTekst = formatAdresse(
+        wrapped.data,
+        wrapped.stormodtagerpostnr,
+        false,
+        medsupplerendebynavn);
+      let { caretpos, tekst} = params.type !== 'adgangsadresse' ?
+        formatIncompleteAdr(wrapped.data, medsupplerendebynavn) :
+        { caretpos: completeTekst.length, tekst: completeTekst};
+      return Object.assign({}, wrapped, {
+        tekst,
+        forslagstekst,
+        caretpos
+      });
+    })
   },
-  adresse: function(adr) {
-    return {
-      type: 'adresse',
-      tekst: adr.tekst,
-      forslagstekst: adr.tekst,
-      caretpos: adr.tekst.length,
-      data: adr.adresse
-    };
+  adresse: (adrs, params) => {
+    const medsupplerendebynavn = params.supplerendebynavn;
+    const wrapped = adrs.map(adr => (
+      {
+        data: adr.adresse,
+        stormodtagerpostnr: false,
+        type: 'adresse'
+      }));
+    const withStormodtagere = params.stormodtagerpostnumre ?
+      processResultsStormodtagere(wrapped,params) :
+      wrapped;
+    return withStormodtagere.map(wrapped => {
+      const forslagstekst = formatAdresse(
+        wrapped.data,
+        wrapped.stormodtagerpostnr,
+        params.multilinje,
+        medsupplerendebynavn);
+      const completeTekst = formatAdresse(
+        wrapped.data,
+        wrapped.stormodtagerpostnr,
+        false,
+        medsupplerendebynavn);
+      return Object.assign({}, wrapped, {
+        tekst: completeTekst,
+        forslagstekst,
+        caretpos: completeTekst.length
+      });
+    });
+
   }
 };
 
-var delegatedParameters = [
+const delegatedParameters = [
   {
     name: 'adgangsadresseid',
     type: 'string',
@@ -152,6 +271,21 @@ var nonDelegatedParameters = [
     schema: {
       enum: ['vejnavn', 'adgangsadresse', 'adresse']
     }
+  },
+  {
+    name: 'supplerendebynavn',
+    type: 'boolean',
+    defaultValue: "true"
+  },
+  {
+    name: 'stormodtagerpostnumre',
+    type: 'boolean',
+    defaultValue: "false"
+  },
+  {
+    name: 'multilinje',
+    type: 'boolean',
+    defaultValue: "false"
   }
 ].concat(commonParameters.format).concat(commonParameters.paging);
 
@@ -185,13 +319,17 @@ var representations = {
       },
       docOrder: ['type', 'tekst', 'caretpos', 'forslagstekst', 'data']
     }),
-    mapper: function(baseurl, params) {
-      return function(row) {
-        var entityName = row.type;
-        var autocompleteMapper = autocompleteResources[entityName].representations.autocomplete.mapper(baseurl, params);
-        var mapped = autocompleteMapper(row);
-        return mappers[row.type](mapped,params.type);
-      };
+    mapper: (baseurl, params) => result => {
+      if(result.length === 0) {
+        return [];
+      }
+      // We assume all responses are of same type
+      const entityName = result[0].type;
+      const autocompleteMapper = autocompleteResources[entityName].representations.autocomplete.mapper(baseurl, params);
+      const mappedResult = result.map(row => {
+        return autocompleteMapper(row);
+      });
+      return postProcessFns[entityName](mappedResult, params);
     }
   }
 };
@@ -591,7 +729,7 @@ const sqlModel = {
       // this is not quite correct, but some client depends on it.
       const slutmed = params.adgangsadresseid ? 'adresse' : (params.type || 'adresse');
       if(entityTypes.indexOf(startfra) > entityTypes.indexOf(slutmed)) {
-        return [];
+        return [[]];
       }
       const searchedEntities = entityTypes.slice(entityTypes.indexOf(startfra), entityTypes.indexOf(slutmed)+1);
       for(let entityName of searchedEntities) {
@@ -599,7 +737,7 @@ const sqlModel = {
         const result = yield this.delegateAbort(queryFns[entityName](client, params, lastEntity));
         if( lastEntity ||
           (result.length > 0 && !shouldProceed[entityName](result, params))) {
-          return result;
+          return [result];
         }
       }
     }), config.getOption('autocomplete.querySlotTimeout'));
@@ -612,7 +750,7 @@ const autocompleteResource = {
   queryParameters: allParameters,
   representations: representations,
   sqlModel: sqlModel,
-  singleResult: false,
+  singleResult: true,
   chooseRepresentation: resourcesUtil.chooseRepresentationForAutocomplete,
   processParameters: resourcesUtil.applyDefaultPagingForAutocomplete,
   disableStreaming: true
