@@ -224,6 +224,11 @@ var postProcessFns = {
 
 const delegatedParameters = [
   {
+    name: 'id',
+    type: 'string',
+    schema: schema.uuid
+  },
+  {
     name: 'adgangsadresseid',
     type: 'string',
     schema: schema.uuid
@@ -245,8 +250,7 @@ const delegatedParameters = [
 var nonDelegatedParameters = [
   {
     name: 'q',
-    type: 'string',
-    required: true
+    type: 'string'
   },
   {
     name: 'fuzzy',
@@ -658,6 +662,9 @@ function unprocessVejnavn(processedVejnavn) {
 
 const queryVejnavn = (client, params) => {
   return go(function*() {
+    if(!params.q) {
+      return [];
+    }
     var shouldDoFuzzySearch = params.fuzzy &&  !/\d/.test(params.q);
     params = Object.assign({}, params, {
       fuzzy: shouldDoFuzzySearch
@@ -693,6 +700,9 @@ const sortAdresse = (entityName, q, per_side, unsortedResults) => {
 
 const queryAdresse = (entityName, client, params, lastEntity) => {
   return go(function*() {
+    if(!params.q && !params.id) {
+      return [];
+    }
 
     // disable fuzzy in adgangsadresse search unless it is the last searched entity
     if(!lastEntity) {
@@ -702,7 +712,12 @@ const queryAdresse = (entityName, client, params, lastEntity) => {
 
     const regularSearchParams = prepareQuery(params);
     const queryResult = yield this.delegateAbort(queryModel(client, entityName, regularSearchParams));
-    return sortAdresse(entityName, params.q, params.per_side, queryResult);
+    if(params.q) {
+      return sortAdresse(entityName, params.q, params.per_side, queryResult);
+    }
+    else {
+      return queryResult;
+    }
   });
 };
 
@@ -724,7 +739,8 @@ const sqlModel = {
   allSelectableFields: [],
   processQuery: function(client, fieldNames, params) {
     return client.withReservedSlot(() => go(function*() {
-      const startfra = params.adgangsadresseid ? 'adresse' : (params.startfra || 'vejnavn');
+      const startfra = params.id ? params.type : params.adgangsadresseid ? 'adresse' : (params.startfra || 'vejnavn');
+
       // If adgangsadresseid parameter is supplied, we ignore type parameter
       // this is not quite correct, but some client depends on it.
       const slutmed = params.adgangsadresseid ? 'adresse' : (params.type || 'adresse');

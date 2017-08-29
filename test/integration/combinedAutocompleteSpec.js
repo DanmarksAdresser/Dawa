@@ -310,5 +310,24 @@ describe('Combined Autocomplete', function () {
       expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
       expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
     }));
+
+    it('Kan hente en adresse ud fra id', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          id: '01ffcb65-c425-4cee-9145-bef6570f34bb',
+          type: 'adresse'
+        }
+      );
+      expect(result).to.have.length(1);
+      expect(result[0].data.id).to.equal('01ffcb65-c425-4cee-9145-bef6570f34bb');
+    }));
+    it('Kan hente en adgangsadresse ud fra id', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          id: '17c718a1-5510-40cd-8380-735dca3f0afd',
+          type: 'adgangsadresse'
+        }
+      );
+      expect(result).to.have.length(1);
+      expect(result[0].data.id).to.equal('17c718a1-5510-40cd-8380-735dca3f0afd');
+    }));
   });
 });
