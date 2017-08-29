@@ -51,8 +51,8 @@
 
 </body>
 <script>
-  //  const BASE_URL = 'http://localhost:3000';
-  const BASE_URL = 'https://dawa.aws.dk';
+//  const BASE_URL = 'https://dawa.aws.dk';
+  const BASE_URL = '';
   dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-default"), {
     baseUrl:BASE_URL,
     select: function(selected) {
@@ -108,7 +108,7 @@
       console.log('Selected address:');
       console.dir(selected);
     },
-    addressId: 'f5a68d45-935b-48d6-8d11-6363327ca1ae'
+    id: 'f5a68d45-935b-48d6-8d11-6363327ca1ae'
   });
   dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-stormodtagerpostnumre-false"), {
     baseUrl:BASE_URL,
