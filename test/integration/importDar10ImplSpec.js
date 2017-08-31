@@ -343,8 +343,6 @@ describe('Import af changesets', () => {
           vejkode: "0700"
         })
       };
-      console.log(JSON.stringify(navngivenVejKommunedelChange, null, 2));
-      console.log(JSON.stringify(yield client.queryRows('select * from adgangsadresser'), null, 2));
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
         yield importDarImpl.importChangeset(client, navngivenVejKommunedelChange);
       }));
