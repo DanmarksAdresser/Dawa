@@ -604,7 +604,9 @@ function getNextVirkningTime(client, darEntitiesWithNewRows) {
     });
     const selectMaxRegistrationQuery = `SELECT GREATEST((${registrationTimeSelects.join('),(')}))`;
     const virkningTimeChanges = (yield client.queryp(`${selectMaxRegistrationQuery} as v`)).rows[0].v;
-    return  moment.max(moment(virkningTimeDb), moment(virkningTimeChanges)).toISOString();
+    const latest = virkningTimeChanges ? moment.max(moment(virkningTimeDb), moment(virkningTimeChanges)) :
+      moment(virkningTimeDb);
+    return latest.toISOString();
   })();
 }
 

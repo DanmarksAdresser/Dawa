@@ -18,10 +18,10 @@ var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 
 var app = express();
 app.set('views', __dirname + '/views');
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 app.get('/', function (req, res) {
-  res.render('home.jade', {url: paths.baseUrl(req)});
+  res.render('home.pug', {url: paths.baseUrl(req)});
 });
 
 var jsonSchemas = _.reduce(registry.entriesWhere({
@@ -42,7 +42,7 @@ var autocompleteSchemas = _.reduce(registry.entriesWhere({
   return memo;
 }, {});
 
-function jadeDocumentationParams(req) {
+function pugDocumentationParams(req) {
   return {url: paths.baseUrl(req),
     jsonSchemas: jsonSchemas,
     autocompleteSchemas: autocompleteSchemas,
@@ -52,9 +52,9 @@ function jadeDocumentationParams(req) {
   };
 }
 
-function setupJadePage(path, page){
+function setupPugPage(path, page){
   app.get(path, function (req, res) {
-    res.render(page, jadeDocumentationParams(req));
+    res.render(page, pugDocumentationParams(req));
   });
 }
 
@@ -92,16 +92,16 @@ function setupSchemaPage(path) {
   });
 }
 
-setupJadePage('/autocompletedok'             , 'autocompletedok.jade');
-setupJadePage('/generelt'             , 'generelt.jade');
-setupJadePage('/adressedok'           , 'adressedok.jade');
-setupJadePage('/adgangsadressedok'    , 'adgangsadressedok.jade');
-setupJadePage('/vejedok'              , 'vejedok.jade');
-setupJadePage('/postnummerdok'        , 'postnummerdok.jade');
-setupJadePage('/listerdok'            , 'listerdok.jade');
-setupJadePage('/oisdok'            , 'oisdok.jade');
-setupJadePage('/om'                   , 'om.jade');
-setupJadePage('/replikeringdok', 'replikeringdok.jade');
+setupPugPage('/autocompletedok'             , 'autocompletedok.pug');
+setupPugPage('/generelt'             , 'generelt.pug');
+setupPugPage('/adressedok'           , 'adressedok.pug');
+setupPugPage('/adgangsadressedok'    , 'adgangsadressedok.pug');
+setupPugPage('/vejedok'              , 'vejedok.pug');
+setupPugPage('/postnummerdok'        , 'postnummerdok.pug');
+setupPugPage('/listerdok'            , 'listerdok.pug');
+setupPugPage('/oisdok'            , 'oisdok.pug');
+setupPugPage('/om'                   , 'om.pug');
+setupPugPage('/replikeringdok', 'replikeringdok.pug');
 setupSchemaPage('/replikeringdok/schema.json');
 
 module.exports = app;

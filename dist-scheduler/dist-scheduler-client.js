@@ -1,7 +1,7 @@
 "use strict";
 
 const {go, Signal, Channel } = require('ts-csp');
-const uuid = require('node-uuid');
+const uuid = require('uuid');
 
 const { takeWithTimeout } = require('../util/cspUtil');
 const logger = require('../logger').forCategory('distSchedulerClient');

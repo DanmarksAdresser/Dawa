@@ -3,7 +3,7 @@
 const cluster = require('cluster');
 const {go, parallel, Channel, TAKE, Signal } = require('ts-csp');
 const {filter, map} = require('transducers-js');
-const uuid = require('node-uuid');
+const uuid = require('uuid');
 const {sleep, channelEvents, pipe } = require('../util/cspUtil');
 
 const channelIncomingMessages = (channel) => go(function*() {

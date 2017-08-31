@@ -3,7 +3,7 @@
 var cluster = require('cluster');
 var fs = require('fs');
 var q = require('q');
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 
 const { instance: distSchedulerInstance } = require('../dist-scheduler/dist-scheduler-master-instance');
 
