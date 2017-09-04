@@ -12,6 +12,8 @@ const logger = require('../logger').forCategory('darImport');
 const darApiClient = require('./darApiClient');
 const notificationClient = require('./notificationClient');
 
+const { withImportTransaction } = require('../importUtil/importUtil');
+
 function getRecordsForEntity(darClient, eventStart, eventSlut, entitet) {
   return q.async(function*() {
     let rows = [];
@@ -97,15 +99,15 @@ function fetchAndImport(client, darClient, remoteEventIds) {
     const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
     const transactions = splitInTransactions(rowsMap);
     if (transactions.length === 0) {
-      yield importDarImpl.withDar1Transaction(client, 'api', () => {
-        return importDarImpl.applyIncrementalDifferences(client, false, []);
-      });
+      yield importDarImpl.withDar1Transaction(client, 'api', () =>
+        withImportTransaction(client, 'importDarApi', (txid) =>
+          importDarImpl.applyIncrementalDifferences(client, txid, false, [])));
     }
     else {
       for (let transaction of transactions) {
-        yield importDarImpl.withDar1Transaction(client, 'api', () => {
-          return importDarImpl.importChangeset(client, transaction, false);
-        });
+        yield importDarImpl.withDar1Transaction(client, 'api', () =>
+          withImportTransaction(client, 'importDarApi', (txid) =>
+            importDarImpl.importChangeset(client, txid, transaction, false)));
       }
     }
   })();

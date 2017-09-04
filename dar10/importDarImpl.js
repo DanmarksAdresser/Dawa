@@ -1,10 +1,10 @@
 "use strict";
 
 const path = require('path');
+const { go } = require('ts-csp');
 const q = require('q');
 const _ = require('underscore');
 
-const tableDiff = require('../importUtil/tablediff');
 const darTablediff = require('./darTablediff');
 const dawaSpec = require('./dawaSpec');
 const importBebyggelserImpl = require('../bebyggelser/importBebyggelserImpl');
@@ -12,11 +12,13 @@ const importUtil = require('../importUtil/importUtil');
 const initialization = require('../psql/initialization');
 const moment = require('moment');
 const tablediff = require('../importUtil/tablediff');
+const tableDiffNg = require('../importUtil/tableDiffNg');
 const postgresMapper = require('./postgresMapper');
 
 const sqlCommon = require('../psql/common');
 const sqlUtil = require('../darImport/sqlUtil');
 const streamToTable = require('./streamToTable');
+const tableModels = require('../psql/tableModel');
 const Range = require('../psql/databaseTypes').Range;
 
 const selectList = sqlUtil.selectList;
@@ -161,41 +163,37 @@ function alreadyImported(client) {
   return client.queryp('select * from dar1_adressepunkt limit 1').then(result => result.rows.length > 0);
 }
 
-function importFromFiles(client, dataDir, skipDawa) {
-  return q.async(function*() {
-    const hasAlreadyImported = yield alreadyImported(client);
-    if (hasAlreadyImported) {
-      yield importIncremental(client, dataDir, skipDawa);
-    }
-    else {
-      yield importInitial(client, dataDir, skipDawa);
-    }
-  })();
-}
+const importFromFiles = (client, txid, dataDir, skipDawa) => go(function*() {
+  const hasAlreadyImported = yield alreadyImported(client);
+  if (hasAlreadyImported) {
+    yield importIncremental(client, txid, dataDir, skipDawa);
+  }
+  else {
+    yield importInitial(client, txid, dataDir, skipDawa);
+  }
+});
 
 function getDawaSeqNum(client) {
   return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history').then(result => result.rows[0].seqnum);
 }
 
-function importInitial(client, dataDir, skipDawa) {
-  return q.async(function*() {
-    yield setInitialMeta(client);
-    yield withDar1Transaction(client, 'initial', q.async(function*() {
-      for (let entityName of ALL_DAR_ENTITIES) {
-        const filePath = path.join(dataDir, ndjsonFileName(entityName));
-        const tableName = postgresMapper.tables[entityName];
-        yield streamToTable(client, entityName, filePath, tableName, true);
-        const columns = postgresMapper.columns[entityName].join(', ');
-        yield client.queryp(`INSERT INTO dar1_${entityName}_current(${columns}) (SELECT ${columns} FROM ${tableName}_current_view)`);
-      }
-      const maxEventId = yield getMaxEventId(client, '');
-      yield setMeta(client, {last_event_id: maxEventId});
-      if(!skipDawa) {
-        yield updateDawa(client);
-      }
-    }));
-  })();
-}
+const importInitial = (client, txid, dataDir, skipDawa) => go(function*() {
+  yield setInitialMeta(client);
+  yield withDar1Transaction(client, 'initial', () => go(function*() {
+    for (let entityName of ALL_DAR_ENTITIES) {
+      const filePath = path.join(dataDir, ndjsonFileName(entityName));
+      const tableName = postgresMapper.tables[entityName];
+      yield streamToTable(client, entityName, filePath, tableName, true);
+      const columns = postgresMapper.columns[entityName].join(', ');
+      yield client.queryp(`INSERT INTO dar1_${entityName}_current(${columns}) (SELECT ${columns} FROM ${tableName}_current_view)`);
+    }
+    const maxEventId = yield getMaxEventId(client, '');
+    yield setMeta(client, {last_event_id: maxEventId});
+    if (!skipDawa) {
+      yield updateDawa(client, txid);
+    }
+  }));
+});
 
 function clearDar(client) {
   return q.async(function*() {
@@ -248,38 +246,36 @@ function initDawa(client) {
  * Perform a "full update" of DAWA tables, based on DAR1 tables
  * and the virkning time stored in dar1_meta table.
  * @param client
+ * @param txid
  */
-function updateDawa(client) {
-  return q.async(function*() {
-    for (let entity of Object.keys(dawaSpec)) {
-      const spec = dawaSpec[entity];
-      const table = spec.table;
-      yield tableDiff.computeDifferences(client, `dar1_${table}_view`, table, spec.idColumns, spec.columns);
-    }
-    yield applyDawaChanges(client);
-  })();
-}
+const updateDawa = (client, txid) => go(function*() {
+  for (let entity of Object.keys(dawaSpec)) {
+    const spec = dawaSpec[entity];
+    const table = spec.table;
+    yield tableDiffNg.computeDifferences(client, txid, `dar1_${table}_view`, tableModels.tables[table], spec.columns);
+  }
+  yield applyDawaChanges(client, txid);
+});
 
-function applyDawaChanges(client) {
-  return q.async(function*() {
-    for (let change of dawaChangeOrder) {
-      const spec = dawaSpec[change.entity];
-      const table = spec.table;
-      if (change.type === 'insert') {
-        yield tablediff.applyInserts(client, `insert_${table}`, table, spec.columns);
-      }
-      else if (change.type === 'update') {
-        yield tableDiff.applyUpdates(client, `update_${table}`, table, spec.idColumns, spec.columns);
-      }
-      else if (change.type === 'delete') {
-        yield tableDiff.applyDeletes(client, `delete_${table}`, table, spec.idColumns);
-      }
-      else {
-        throw new Error();
-      }
+const applyDawaChanges = (client, txid) => go(function*() {
+  for (let change of dawaChangeOrder) {
+    const spec = dawaSpec[change.entity];
+    const table = spec.table;
+    const tableModel = tableModels.tables[table];
+    if (change.type === 'insert') {
+      yield tableDiffNg.applyInserts(client, txid, tableModel);
     }
-  })();
-}
+    else if (change.type === 'update') {
+      yield tableDiffNg.applyUpdates(client, txid,tableModel);
+    }
+    else if (change.type === 'delete') {
+      yield tableDiffNg.applyDeletes(client, txid, tableModel);
+    }
+    else {
+      throw new Error();
+    }
+  }
+});
 
 const dirtyDeps = {
   vejstykke: [
@@ -388,12 +384,12 @@ function applyDarDifferences(client, darEntities) {
  * @param skipDawa
  * @returns {*}
  */
-function importIncremental(client, dataDir, skipDawa) {
+function importIncremental(client, txid, dataDir, skipDawa) {
   return withDar1Transaction(client, 'csv', () => {
     return q.async(function*() {
       yield copyDumpToTables(client, dataDir);
       yield computeDumpDifferences(client);
-      yield applyIncrementalDifferences(client, skipDawa, ALL_DAR_ENTITIES);
+      yield applyIncrementalDifferences(client, txid, skipDawa, ALL_DAR_ENTITIES);
     })();
   });
 }
@@ -525,20 +521,18 @@ function applyChangesToCurrentDar(client, darEntities) {
   })();
 }
 
-function updateDawaIncrementally(client) {
-  return q.async(function*() {
-
-    for (let dawaEntity of Object.keys(dawaSpec)) {
-      const spec = dawaSpec[dawaEntity];
-      const table = spec.table;
-      const dirtyTable = `dirty_${table}`;
-      const view = `dar1_${table}_view`;
-      yield tablediff.computeDifferencesSubset(client, dirtyTable, view, table, spec.idColumns,
-        spec.columns);
-    }
-    yield applyDawaChanges(client);
-  })();
-}
+const updateDawaIncrementally = (client, txid) => go(function*() {
+  for (let dawaEntity of Object.keys(dawaSpec)) {
+    const spec = dawaSpec[dawaEntity];
+    const table = spec.table;
+    const tableModel = tableModels.tables[table];
+    const dirtyTable = `dirty_${table}`;
+    const view = `dar1_${table}_view`;
+    yield tableDiffNg.computeDifferencesSubset(client, txid, view, dirtyTable, tableModel,
+      spec.columns);
+  }
+  yield applyDawaChanges(client, txid);
+});
 
 function dropDawaDirtyTables(client) {
   return q.async(function*() {
@@ -547,18 +541,6 @@ function dropDawaDirtyTables(client) {
     }
   })();
 }
-
-function dropDawaChangeTables(client) {
-  return q.async(function*() {
-    for(let dawaEntity of Object.keys(dawaSpec)) {
-      yield tablediff.dropChangeTables(client, dawaSpec[dawaEntity].table);
-    }
-  })();
-}
-
-/**
- *
- */
 
 function getChangedEntitiesDueToVirkningTime(client) {
   const entities = Object.keys(postgresMapper.tables);
@@ -635,7 +617,7 @@ function advanceVirkningTime(client, darEntitiesWithNewRows) {
  * @param darEntities the list of dar entities which has changes
  * @returns {*}
  */
-function applyIncrementalDifferences(client, skipDawaUpdate, darEntitiesWithNewRows) {
+function applyIncrementalDifferences(client, txid, skipDawaUpdate, darEntitiesWithNewRows) {
   return q.async(function*() {
     yield advanceVirkningTime(client, darEntitiesWithNewRows);
     yield applyDarDifferences(client, darEntitiesWithNewRows);
@@ -663,9 +645,8 @@ function applyIncrementalDifferences(client, skipDawaUpdate, darEntitiesWithNewR
     yield dropDarCurrentChangeTables(client, allChangedEntities);
     if (!skipDawaUpdate) {
       yield dropDirtyDarIdTables(client, allChangedEntities);
-      yield updateDawaIncrementally(client);
+      yield updateDawaIncrementally(client, txid);
       yield dropDawaDirtyTables(client);
-      yield dropDawaChangeTables(client);
     }
   })();
 }
@@ -693,7 +674,7 @@ function storeChangesetInFetchTables(client, changeset) {
  * @param skipDawa
  * @returns {*}
  */
-function importChangeset(client, changeset, skipDawa) {
+function importChangeset(client, txid, changeset, skipDawa) {
   const entities = Object.keys(changeset);
   return q.async(function*() {
     yield storeChangesetInFetchTables(client, changeset);
@@ -705,7 +686,7 @@ function importChangeset(client, changeset, skipDawa) {
       yield importUtil.dropTable(client, `dirty_${table}`);
       yield importUtil.dropTable(client, `fetch_${table}`);
     }
-    yield applyIncrementalDifferences(client, skipDawa, entities);
+    yield applyIncrementalDifferences(client, txid, skipDawa, entities);
   })();
 }
 

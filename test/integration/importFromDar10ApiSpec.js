@@ -2,12 +2,14 @@
 
 const expect = require('chai').expect;
 const q = require('q');
+const { go } = require('ts-csp');
 const _ = require('underscore');
 
 const darApiClient = require('../../dar10/darApiClient');
 const importDarImpl = require('../../dar10/importDarImpl');
 const importFromApiImpl = require('../../dar10/importFromApiImpl');
 const testdb = require('../helpers/testdb2');
+const { withImportTransaction } = require('../../importUtil/importUtil');
 
 
 q.longStackSupport = true;
@@ -88,8 +90,10 @@ describe('Import from DAR 1.0 API', () => {
       };
       const client = clientFn();
       yield importDarImpl.internal.setInitialMeta(client);
-      yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(changeset)));
+      yield importDarImpl.withDar1Transaction(client, 'api', () => go(function*() {
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(changeset)));
+        }));
       }));
 
 

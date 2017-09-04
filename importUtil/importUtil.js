@@ -99,12 +99,12 @@ function streamArrayToTable(client, array, targetTable, columns) {
  * @returns {*}
  */
 function streamNdjsonToTable(client, filePath, targetTable, columns, mapFn) {
-  var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
+  const inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
   mapFn = mapFn || _.identity;
   const parseAndMapFn = str => {
     const parsed = JSON.parse(str);
     return mapFn(parsed);
-  }
+  };
   return promisingStreamCombiner(
     [
       inputStream,

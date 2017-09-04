@@ -11,6 +11,8 @@ const databaseTypes = require('../../psql/databaseTypes');
 const dawaSpec = require('../../dar10/dawaSpec');
 const importDarImpl = require('../../dar10/importDarImpl');
 const testdb = require('../helpers/testdb2');
+const { go } = require('ts-csp');
+const { withImportTransaction } = require('../../importUtil/importUtil');
 
 const Range = databaseTypes.Range;
 
@@ -19,7 +21,9 @@ describe('Import af DAR 1.0 udtræk', function () {
   testdb.withTransactionEach('empty', (clientFn) => {
     it('Kan importere initielt udtræk', q.async(function*() {
       const client = clientFn();
-      yield importDarImpl.importInitial(client, path.join(__dirname, '../data/dar10'));
+      yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+        yield importDarImpl.importInitial(client, txid, path.join(__dirname, '../data/dar10'));
+      }));
 
       // check we actually imported some rows
       const queryResult = (yield client.queryp('select * from dar1_husnummer')).rows;
@@ -59,7 +63,8 @@ describe('Import af DAR 1.0 udtræk', function () {
   });
 });
 
-describe('Import af changesets', () => {
+describe('Import af changesets', function() {
+  this.timeout(10000);
   testdb.withTransactionEach('empty', clientFn => {
     const INITIAL_CHANGESET = {
       Adressepunkt: [{
@@ -209,7 +214,9 @@ describe('Import af changesets', () => {
       const client = clientFn();
       yield importDarImpl.internal.setInitialMeta(client);
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+        }));
       }));
 
       // check at vi har importeret et vejstykke, adgangsadresse og adresse
@@ -265,7 +272,9 @@ describe('Import af changesets', () => {
 
       // import a changeset with a change occuring in the future
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(firstChangeset)));
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(firstChangeset)));
+        }));
       }));
 
       // check at vejen ikke eksisterer endnu
@@ -301,7 +310,9 @@ describe('Import af changesets', () => {
 
       // import a changeset with a registration time in future will advance virkning time in db
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(secondChangeset)));
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(secondChangeset)));
+        }));
       }));
 
       // check that virkning time has been incremented
@@ -333,7 +344,9 @@ describe('Import af changesets', () => {
       };
       yield importDarImpl.internal.setInitialMeta(client);
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
+        }));
       }));
 
       // check that address is updated when vejkode changes
@@ -344,7 +357,9 @@ describe('Import af changesets', () => {
         })
       };
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, navngivenVejKommunedelChange);
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, navngivenVejKommunedelChange);
+        }));
       }));
 
       let updatedAddress = (yield client.queryRows('select * from adgangsadresser'))[0];
@@ -359,7 +374,9 @@ describe('Import af changesets', () => {
         })
       };
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
-        yield importDarImpl.importChangeset(client, postnummerChange);
+        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+          yield importDarImpl.importChangeset(client, txid, postnummerChange);
+        }));
       }));
 
       updatedAddress = (yield client.queryp('select * from adgangsadresser')).rows[0];

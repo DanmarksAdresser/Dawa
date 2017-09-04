@@ -23,7 +23,7 @@ const { createChangeTable } = require('../importUtil/tableDiffNg');
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
 const createChangeTables = (client)=> go(function*() {
-  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter'];
+  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej', 'navngivenvej_postnummer', 'vejstykkerpostnumremat'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }

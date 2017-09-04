@@ -194,6 +194,44 @@ const supplerendebynavne = {
   ]
 };
 
+const navngivenvej = {
+  table: 'navngivenvej',
+  primaryKey: ['id'],
+  columns: [
+    {name: 'id'},
+    {name: 'darstatus'},
+    {name: 'oprettet'},
+    {name: 'ændret'},
+    {name: 'navn'},
+    {name: 'adresseringsnavn'},
+    {name: 'administreresafkommune'},
+    {name: 'beskrivelse'},
+    {name: 'retskrivningskontrol'},
+    {name: 'udtaltvejnavn'}
+  ]
+};
+
+const navngivenvej_postnummer = {
+  table: 'navngivenvej_postnummer',
+  primaryKey: ['navngivenvej_id', 'postnr'],
+  columns: [
+    {name: 'navngivenvej_id'},
+    {name: 'postnr'},
+    {name: 'tekst'}
+  ]
+};
+
+const vejstykkerpostnumremat = {
+  table: 'vejstykkerpostnumremat',
+  primaryKey: ['postnr', 'kommunekode', 'vejkode'],
+  columns: [
+    {name: 'kommunekode'},
+    {name: 'vejkode'},
+    {name: 'postnr'},
+    {name: 'tekst'}
+  ]
+};
+
 const postnrTsVector = (nr, navn) => `to_tsvector('adresser', coalesce(to_char(${nr}, '0000'), '') || ' ' || coalesce(${navn}, ''))`;
 
 const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
@@ -277,7 +315,10 @@ exports.tables = {
   adresser_mat,
   temaer,
   supplerendebynavne,
-  vejpunkter
+  vejpunkter,
+  navngivenvej,
+  navngivenvej_postnummer,
+  vejstykkerpostnumremat
 };
 
 exports.materializations = {
