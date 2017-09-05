@@ -69,5 +69,10 @@ module.exports = {
     table: 'vejstykkerpostnumremat',
     columns: ['kommunekode', 'vejkode', 'postnr'],
     key: ['kommunekode', 'vejkode']
+  },
+  vejpunkt: {
+    name: 'vejpunk',
+    table: 'vejpunkter',
+    columns: ['id', 'husnummerid', 'kilde', 'noejagtighedsklasse', 'tekniskstandard', 'geom']
   }
 };

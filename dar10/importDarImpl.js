@@ -73,6 +73,14 @@ const dawaChangeOrder = [
     entity: 'adresse'
   },
   {
+    type: 'insert',
+    entity: 'vejpunkt'
+  },
+  {
+    type: 'update',
+    entity: 'vejpunkt'
+  },
+  {
     type: 'delete',
     entity: 'adgangsadresse'
   },
@@ -83,6 +91,10 @@ const dawaChangeOrder = [
   {
     type: 'delete',
     entity: 'navngivenvej'
+  },
+  {
+    type: 'delete',
+    entity: 'vejpunkt'
   },
   {
     type: 'update',
@@ -305,6 +317,9 @@ const dirtyDeps = {
   ],
   navngivenvej: [
     'NavngivenVej'
+  ],
+  vejpunkt: [
+    'Adressepunkt', 'Husnummer'
   ]
 };
 

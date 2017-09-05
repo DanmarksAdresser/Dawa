@@ -295,7 +295,7 @@ const vejpunkter = {
   table: 'vejpunkter',
   primaryKey: ['id'],
   columns: [
-    { name: 'id '},
+    { name: 'id' },
     { name: 'husnummerid' },
     { name: 'kilde' },
     { name: 'noejagtighedsklasse' },

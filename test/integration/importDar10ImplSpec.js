@@ -82,6 +82,21 @@ describe('Import af changesets', function() {
         "oprindelse_registrering": "2011-12-13T11:46:43.177Z",
         "oprindelse_tekniskstandard": "TD",
         "position": "POINT (688947.86 6159449.31)"
+      }, { // vejpunkt
+        "eventopret": null,
+        "eventopdater": null,
+        "rowkey": 6277709,
+        "id": "79740068-fbe9-11e5-a32f-063320a53a26",
+        "registreringfra": "2016-04-21T00:00:00Z",
+        "registreringtil": null,
+        "virkningfra": "2016-04-21T00:00:00Z",
+        "virkningtil": null,
+        "status": "8",
+        "oprindelse_kilde": "Adressemyn",
+        "oprindelse_nøjagtighedsklasse": "A",
+        "oprindelse_registrering": "2011-12-13T11:46:43.177Z",
+        "oprindelse_tekniskstandard": "TD",
+        "position": "POINT (688947.86 6159449.31)"
       }],
       Adresse: [{
         "eventopret": null,
@@ -228,7 +243,7 @@ describe('Import af changesets', function() {
 
       // check, at vi logger noget historik
       const changelog = (yield client.queryp('select * from dar1_changelog')).rows;
-      expect(changelog).to.have.length(8);
+      expect(changelog).to.have.length(9);
       const change = changelog[0];
       expect(change.tx_id).to.equal(1);
       expect(change.entity).to.not.be.empty;

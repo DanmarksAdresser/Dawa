@@ -37,5 +37,10 @@ module.exports = {
     table: datamodels.navngivenvej.table,
     columns: datamodels.navngivenvej.columns,
     idColumns: ['id']
+  },
+  vejpunkt: {
+    table: datamodels.vejpunkt.table,
+    columns: datamodels.vejpunkt.columns,
+    idColumns: ['id']
   }
 };
