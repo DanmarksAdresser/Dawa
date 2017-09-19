@@ -2,12 +2,14 @@
 
 const copyFrom = require('pg-copy-streams').from;
 const csvStringify = require('csv-stringify');
-const es = require('event-stream');
 const fs = require('fs');
 const logger = require('../logger').forCategory('importCpr');
 const moment = require('moment-timezone');
 const q = require('q');
 const _ = require('underscore');
+const split2 = require('split2');
+const through2 = require('through2');
+
 
 const proddb = require('../psql/proddb');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
@@ -16,7 +18,7 @@ const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 
 function createCopyStream(client, table, columnNames) {
   var sql = "COPY " + table + "(" + columnNames.join(',') + ") FROM STDIN WITH (ENCODING 'utf8',HEADER TRUE, FORMAT csv, DELIMITER ';', QUOTE '\"', ESCAPE '\\', NULL '')";
-  return client.query(copyFrom(sql));
+  return client.copyFrom(sql);
 }
 
 const YEAR_1900 = moment.tz('1900-01-01T00:00:00', 'Europe/Copenhagen');
@@ -43,7 +45,7 @@ function parseDateTime(str) {
   return result.format('YYYY-MM-DDTHH:mm:ssZ');
 }
 
-var historyTransformStream = es.map(function(line, cb) {
+var historyTransformStream = through2.obj(function(line, encoding, cb) {
   var recordType = line.substring(0, 3);
   if (recordType !== '016') {
     return cb();
@@ -78,7 +80,7 @@ var historyTransformStream = es.map(function(line, cb) {
   }
 });
 
-var currentTransformStream = es.map(function(line, cb) {
+var currentTransformStream = through2.obj(function(line, encoding, cb) {
   var recordType = line.substring(0, 3);
   if (recordType !== '001') {
     return cb();
@@ -111,7 +113,7 @@ function importFile(client, filePath, transformer) {
   const inputStream = fs.createReadStream(filePath);
   return promisingStreamCombiner([
     inputStream,
-    es.split(),
+    split2(),
     transformer,
     csvStringify({
       delimiter: ';',
@@ -134,13 +136,14 @@ var optionSpec = {
 
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
-    connString: options.pgConnectionUrl
+    connString: options.pgConnectionUrl,
+    pooled: false
   });
 
   proddb.withTransaction('READ_WRITE', function (client) {
     return q.async(function*() {
       try {
-        yield client.queryp('delete from cpr_vej');
+        yield client.query('delete from cpr_vej');
         yield importFile(client, options.historyFile, historyTransformStream);
         yield importFile(client, options.currentFile, currentTransformStream);
       }
