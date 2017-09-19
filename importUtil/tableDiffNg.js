@@ -173,6 +173,15 @@ const createChangeTable = (client, tableModel) => go(function*() {
   yield client.query(`CREATE INDEX ON ${changeTableName}(txid) `);
 });
 
+const initChangeTable = (client, txid, tableModel)=> go(function*() {
+  const columnList = selectList(null, allColumnNames(tableModel));
+  const changeTableName = `${tableModel.table}_changes`;
+  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, ${columnList}) 
+  (SELECT ${txid}, 'insert', ${columnList} FROM ${tableModel.table})`);
+});
+
+
+
 const migrateInserts = (client, txid, tableModel) => {
   const selectFields = selectList(null, publicColumnNames(tableModel));
   const changeTableName = `${tableModel.table}_changes`;
@@ -314,6 +323,7 @@ module.exports = {
   applyChanges,
   migrateHistoryToChangeTable,
   createChangeTable,
+  initChangeTable,
   initializeFromScratch,
   insert,
   update,

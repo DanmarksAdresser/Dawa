@@ -298,6 +298,10 @@ exports.wfsFeatureToTema = function (feature, mapping) {
 
 const updateAdresserTemaerView = (client, temaDef, initializing, maxChanges, disableNearestNeighbor, callback) => {
   return q.async(function*() {
+    const hasTema = (yield client.queryRows(`SELECT EXISTS(SELECT * FROM temaer WHERE tema = $1) as ex`, [temaDef.singular]))[0].ex;
+    if(!hasTema) {
+      return;
+    }
     const selectCoveredMappings =
       `SELECT DISTINCT Adgangsadresser.id as adgangsadresse_id, gridded_temaer_matview.id as tema_id, '${temaDef.singular}'::tema_type as tema
       FROM Adgangsadresser_mat adgangsadresser JOIN gridded_temaer_matview  
@@ -325,7 +329,9 @@ FROM adrs a`
       yield sqlCommon.disableTriggersQ(client);
       yield client.queryp(`INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema) (${selectCoveredMappings})`);
       if (!disableNearestNeighbor && temaDef.useNearestForAdgangsadresseMapping) {
-        yield client.queryp(`INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema) (${selectNearestMappings('adgangsadresser_temaer_matview')})`)
+        if(hasTema) {
+          yield client.queryp(`INSERT INTO adgangsadresser_temaer_matview(adgangsadresse_id, tema_id, tema) (${selectNearestMappings('adgangsadresser_temaer_matview')})`)
+        }
       }
       yield client.queryp(
         `INSERT INTO adgangsadresser_temaer_matview_history(adgangsadresse_id, tema_id, tema)

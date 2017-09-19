@@ -335,13 +335,4 @@ function initializeHistoryTable(client, entityName) {
   return client.queryp(query, []);
 }
 
-function initializeHistory(client) {
-  return q.async(function*() {
-    for (let tableName of ['navngivenvej']) {
-      yield initializeHistoryTable(client, tableName);
-    }
-  })();
-}
-
 exports.initializeHistoryTable = initializeHistoryTable;
-exports.initializeHistory = initializeHistory;

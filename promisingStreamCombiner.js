@@ -10,9 +10,7 @@ var q = require('q');
  */
 module.exports = function promisingStreamCombiner(streams) {
   return q.Promise(function(resolve, reject) {
-    streams.reduce(function(memo, stream) {
-      return memo.pipe(stream);
-    });
+    streams.reduce((memo, stream) => memo.pipe(stream));
     streams.forEach(function(stream) {
       stream.on('error', reject);
     });

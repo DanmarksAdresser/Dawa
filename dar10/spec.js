@@ -8,6 +8,8 @@ const wkt = require('terraformer-wkt-parser');
 const husnrUtil = require('../apiSpecification/husnrUtil');
 const _ = require('underscore');
 
+const { round10 } = require('round10');
+
 const parseHusnr = husnrUtil.parseHusnr;
 
 const udtrækDir = path.join(__dirname, 'schemas', 'Udtræk')
@@ -48,11 +50,15 @@ const fieldTransforms = {
         return null;
       }
       const coordinates = wkt.parse(wktText).coordinates;
-      let resultGons = (Math.atan(coordinates[1]/coordinates[0])) * 400 / (2*Math.PI);
+      let resultGons = Math.atan2(coordinates[1],coordinates[0]) * 400 / (2*Math.PI);
       if(resultGons < 0) {
-        resultGons = resultGons + 400;
+        resultGons += 400;
       }
-      return resultGons.toFixed(2);
+      resultGons = round10(resultGons, -2);
+      if(resultGons === 400) {
+        resultGons = 0;
+      }
+      return resultGons;
     }
   },
   NavngivenVejKommunedel: {

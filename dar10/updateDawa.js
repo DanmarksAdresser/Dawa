@@ -1,29 +1,45 @@
 "use strict";
 
-var q = require('q');
-var _ = require('underscore');
+const q = require('q');
+const _ = require('underscore');
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var importDarImpl = require('./importDarImpl');
-var logger = require('../logger').forCategory('darImport');
-var proddb = require('../psql/proddb');
+const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const importDarImpl = require('./importDarImpl');
+const logger = require('../logger').forCategory('darImport');
+const proddb = require('../psql/proddb');
+const { withImportTransaction } = require('../importUtil/importUtil');
 
 
-var optionSpec = {
+const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+const NON_PUBLIC_OVERRIDES = {
+  vejstykker: {
+    aendret: true
+  },
+  adgangsadresser: {
+    aendret: true,
+    tekstretning: true,
+    adressepunktaendringsdato: true,
+    navngivenvej_id: true
+  },
+  enhedsadresser: {
+    aendret: true
+  }
+}
+
+cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
 
   proddb.withTransaction('READ_WRITE', function (client) {
-    return importDarImpl.withDar1Transaction(client, 'updateDawa', function() {
-      return importDarImpl.updateDawa(client);
-    });
-  }).catch(function(err) {
+    return importDarImpl.withDar1Transaction(client, 'updateDawa', () =>
+      withImportTransaction(client, 'importDar', (txid) =>
+        importDarImpl.updateDawa(client, txid, NON_PUBLIC_OVERRIDES)));
+  }).catch(function (err) {
     logger.error('Caught error in updateDawa', err);
     return q.reject(err);
   }).done();

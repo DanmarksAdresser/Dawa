@@ -111,7 +111,18 @@ function transformStatus(entity) {
 }
 
 exports.createMapper = function (entityName, validate) {
+  const seenRowkeys = new Set();
   return function (rawObject) {
+    if(seenRowkeys.has(rawObject.rowkey)) {
+      logger.error("Skipping row (duplicate rowkey)", {
+        entityName,
+        rowkey: rawObject.rowkey
+      });
+      return null;
+    }
+    else {
+      seenRowkeys.add(rawObject.rowkey);
+    }
     if (validate) {
       const validatorFn = spec.validateFns[entityName];
       if (!validatorFn(rawObject)) {

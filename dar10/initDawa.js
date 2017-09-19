@@ -1,13 +1,13 @@
 "use strict";
 
-var q = require('q');
+const { go } = require('ts-csp');
 var _ = require('underscore');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const importDar09Impl = require('../darImport/importDarImpl');
 var importDarImpl = require('./importDarImpl');
-var logger = require('../logger').forCategory('darImport');
 var proddb = require('../psql/proddb');
+const { withImportTransaction } = require('../importUtil/importUtil');
 
 
 var optionSpec = {
@@ -20,14 +20,11 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE', q.async(function*(client) {
-    try {
+  proddb.withTransaction('READ_WRITE', client => go(function*() {
+    yield withImportTransaction(client, 'initDawa', (txid) => go(function*() {
       yield importDar09Impl.clearDawa(client);
-      yield importDarImpl.initDawa(client);
-    }
-    catch(err) {
-      logger.error('Caught error in initDawa', err);
-      throw err;
-    }
+      yield importDarImpl.initDawa(client, txid);
+    }));
   })).done();
+
 });

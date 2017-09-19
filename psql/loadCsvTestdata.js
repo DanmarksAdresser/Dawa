@@ -78,7 +78,6 @@ module.exports = function (client, dataDir) {
       `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
          WHERE v.kommunekode = g.kommunekode AND v.kode = g.kode`);
 
-    yield initialization.initializeHistory(client);
     yield initialization.initializeTables(client);
     yield sqlCommon.enableTriggersQ(client);
   })();

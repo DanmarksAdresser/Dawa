@@ -29,8 +29,13 @@ function streamToTablePipeline(client, targetTable, columns, mapFn) {
   return [through2.obj(function (obj, enc, callback) {
     try {
       const result = mapFn(obj);
-      const csvResult = postgresify(result);
-      callback(null, csvResult);
+      if(result === null) {
+        callback();
+      }
+      else {
+        const csvResult = postgresify(result);
+        callback(null, csvResult);
+      }
     }
     catch (e) {
       callback(e);

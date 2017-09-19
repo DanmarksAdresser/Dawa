@@ -43,6 +43,7 @@
     "pug": "^2.0.0-rc.3",
     "q": "1.1.2",
     "request-promise": "0.4.0",
+    "round10": "^1.0.3",
     "sax": "^1.2.4",
     "split2": "^2.0.1",
     "stream-combiner": "^0.2.1",

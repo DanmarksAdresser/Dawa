@@ -13,8 +13,8 @@ CREATE VIEW dar1_enhedsadresser_view AS
             WHERE enhedsadresser.id = adr.id
           )) AS oprettet,
     lower(adr.virkning) AT TIME ZONE 'Europe/Copenhagen' AS aendret,
-    adr.etagebetegnelse AS etage,
-    adr.dørbetegnelse AS doer
+    lower(adr.etagebetegnelse) AS etage,
+    lower(adr.dørbetegnelse) AS doer
   FROM dar1_adresse_current adr
     JOIN dar1_husnummer_current hn on hn.id = adr.husnummer_id
     JOIN dar1_darkommuneinddeling_current k

@@ -528,8 +528,17 @@ LIMIT 1`;
           const activeResults = results.filter(result => {
             return result.aktueladresse && result.aktueladresse.status !== 2 && result.aktueladresse.status !== 4;
           });
-          if(activeResults.length === 1) {
+          if(activeResults.length >= 1) {
             results = activeResults;
+          }
+          // In rare cases, we may have both historical and current matches. In this case, we return only the
+          // current matches
+          if(results.length > 1) {
+            const currentMatches = results.filter(result =>  result.aktueladresse && result.aktueladresse.status !== 2 && result.aktueladresse.status !== 4
+              && addressTextToCategory[util.adressebetegnelse(result.aktueladresse)] === chosenCategory);
+            if(currentMatches.length >= 1) {
+              results = currentMatches;
+            }
           }
         }
 

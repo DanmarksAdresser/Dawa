@@ -1,6 +1,5 @@
 "use strict";
 
-const copyFrom = require('pg-copy-streams').from;
 const csvStringify = require('csv-stringify');
 const fs = require('fs');
 const logger = require('../logger').forCategory('importCpr');

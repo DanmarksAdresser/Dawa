@@ -16,6 +16,12 @@ const { withImportTransaction } = require('../../importUtil/importUtil');
 
 const Range = databaseTypes.Range;
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+}
+
 describe('Import af DAR 1.0 udtræk', function () {
   this.timeout(10000);
   testdb.withTransactionEach('empty', (clientFn) => {
@@ -350,12 +356,12 @@ describe('Import af changesets', function() {
         }),
         Object.assign({}, result, {
           registreringfra: time,
-          virkningtil: time
-        }),
+          virkningtil: time,
+        }, {rowkey: getRandomInt(0, 1000000000)}),
         Object.assign({}, result, {
           registreringfra: time,
           virkningfra: time
-        })]
+        }, {rowkey: getRandomInt(0, 1000000000)})]
       };
       yield importDarImpl.internal.setInitialMeta(client);
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
@@ -363,7 +369,6 @@ describe('Import af changesets', function() {
           yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(INITIAL_CHANGESET)));
         }));
       }));
-
       // check that address is updated when vejkode changes
       const time2 = '2016-04-22T00:00:00Z';
       const navngivenVejKommunedelChange = {
@@ -399,3 +404,17 @@ describe('Import af changesets', function() {
     }));
   });
 });
+
+// describe('Konvertering af tekstretning', () => {
+//   const convert = require('../../dar10/spec').fieldTransforms.Husnummer.husnummerretning;
+//   it('POINT (-0.522498564715948 0.852640164354093) konverteres til 335', () => {
+//     expect(convert('POINT (-0.522498564715948 0.852640164354093)')).to.equal(335);
+//   });
+//
+//   it('POINT (1 -2.44921270764475E-16) konverteres til 200', () => {
+//     expect(convert('POINT (-0.522498564715948 0.852640164354093)')).to.equal(200);
+//   });
+//   it('POINT (0.467929814260573 -0.883765630088694) konverteres til 331', () => {
+//     expect(convert('POINT (0.467929814260573 -0.883765630088694)')).to.equal(331);
+//   });
+// });

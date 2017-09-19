@@ -3,7 +3,8 @@
 var expect = require('chai').expect;
 var q = require('q');
 
-var generateHistory = require('../../history/generateHistoryImpl');
+const {mergeValidTime, createHeadTailTempTable} = require('../../history/common');
+const generateHistory = require('../../history/generateHistoryImpl');
 var testdb = require('../helpers/testdb2');
 
 q.longStackSupport = true;
@@ -22,7 +23,7 @@ describe('History generation', () => {
       }));
       it('Heads and tails of intervals to be merged should be computed correctly', q.async(function*() {
         var client = clientFn();
-        yield generateHistory.createHeadTailTempTable(client, 'foo', 'foo_hts', ['id1', 'id2'], ['id1', 'id2', 'a'], false);
+        yield createHeadTailTempTable(client, 'foo', 'foo_hts', ['id1', 'id2'], ['id1', 'id2', 'a'], false);
         var result = (yield client.queryp('SELECT * FROM foo_hts order by lower(virkning)'));
         var rows = result.rows;
         expect(rows).to.have.length(4);
@@ -37,7 +38,7 @@ describe('History generation', () => {
       }));
       it('Should correctly merge intervals', q.async(function*() {
         var client = clientFn();
-        yield generateHistory.mergeValidTime(client, 'foo', 'foo_merged', ['id1', 'id2'], ['id1', 'id2', 'a'], false);
+        yield mergeValidTime(client, 'foo', 'foo_merged', ['id1', 'id2'], ['id1', 'id2', 'a'], false);
         var rows = (yield client.queryp('SELECT * from foo_merged ORDER BY lower(virkning)')).rows;
         expect(rows).to.have.length(3);
         expect(rows[0].virkning.lower).to.equal('2000-01-01T00:00:00.000Z');
