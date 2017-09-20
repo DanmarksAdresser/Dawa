@@ -217,7 +217,8 @@ const navngivenvej_postnummer = {
   columns: [
     {name: 'navngivenvej_id'},
     {name: 'postnr'},
-    {name: 'tekst'}
+    {name: 'tekst',
+     public: false}
   ]
 };
 
@@ -228,7 +229,8 @@ const vejstykkerpostnumremat = {
     {name: 'kommunekode'},
     {name: 'vejkode'},
     {name: 'postnr'},
-    {name: 'tekst'}
+    {name: 'tekst',
+     public: false}
   ]
 };
 
@@ -357,5 +359,8 @@ exports.materializations = {
       table: 'adgangsadresser_mat',
       columns: ['adgangsadresseid']
     }]
+  },
+  vejstykkerpostnumremat: {
+
   }
 };

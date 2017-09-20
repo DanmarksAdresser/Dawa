@@ -26,9 +26,12 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   databasePools.get('prod').withConnection({pooled: false}, (client) => {
       return withImportTransaction(client, 'migrateHistory', (txid) => go(function*() {
         for(let table of tables) {
-          const model = tableModel.tables[table];
+          let model = tableModel.tables[table];
           if(!model) {
             throw new Error('No table model for ' + tableModel);
+          }
+          if(table === 'vejstykkerpostnumremat') {
+            model = Object.assign({}, model, {columns: model.columns.filter(column => column.name !== 'tekst')});
           }
           yield migrateHistoryToChangeTable(client, txid, model);
         }
