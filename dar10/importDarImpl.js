@@ -260,7 +260,7 @@ const updateDawa = (client, txid, nonPublicOverrides) => go(function*() {
     if(nonPublicOverrides[table]) {
       tableModel = Object.assign({}, tableModel);
       tableModel.columns = tableModel.columns.map(column => {
-        if(nonPublicOverrides[table][column]) {
+        if(nonPublicOverrides[table][column.name]) {
           return Object.assign({}, column, {public: false});
         }
         else {
