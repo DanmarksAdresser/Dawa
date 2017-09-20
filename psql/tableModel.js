@@ -360,7 +360,4 @@ exports.materializations = {
       columns: ['adgangsadresseid']
     }]
   },
-  vejstykkerpostnumremat: {
-
-  }
 };

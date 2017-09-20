@@ -39,7 +39,11 @@ const makePublicClause = (client, tableModel) =>  {
   if(!hasNonpublicFields) {
     return 'true'
   }
-  return columnsDistinctClause('before', 'after', publicNonKeyColumnNames(tableModel));
+  const publicCols = publicNonKeyColumnNames(tableModel);
+  if(publicCols.length === 0) {
+    return 'false';
+  }
+  return columnsDistinctClause('before', 'after', publicCols);
 };
 
 const computeUpdatesSubset = (client, txid, sourceTableOrView, dirtyTable, tableModel, nonPreservedColumns) => go(function*() {
