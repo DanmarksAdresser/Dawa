@@ -14,7 +14,7 @@ CREATE VIEW dar1_navngivenvej_view AS
     retskrivningskontrol,
     udtaltvejnavn
   FROM dar1_navngivenvej_current n
-  WHERE n.status IN (2,3);
+  WHERE n.status IN (2,3) AND n.vejnavn IS NOT NULL;
 
 DROP VIEW IF EXISTS dar1_navngivenvej_dirty_view CASCADE;
 CREATE VIEW dar1_navngivenvej_dirty_view AS
