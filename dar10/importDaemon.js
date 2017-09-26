@@ -13,7 +13,9 @@ const optionSpec = {
   darApiUri: [false, 'URI til DAR endpoint', 'string', 'https://pp-sg.danmarksadresseregister.dk/AWSDeltaService'],
   notificationUrl: [false, 'WS URI til notifikationer', 'string'],
   pollInterval: [false, 'Millisekunder mellem API poll for nye records', 'number', 5000],
-  pretend: [false, 'Rul transaktion tilbage (ingen ændringer)', 'boolean', false]
+  pretend: [false, 'Rul transaktion tilbage (ingen ændringer)', 'boolean', false],
+  noDaemon: [false, 'Kør kun én import', 'boolean', false],
+  importFuture: [false, 'Anvend virkningstid 14 dage i fremtiden i stedet for aktuel tid', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), function(args, options) {
@@ -21,7 +23,12 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'notification
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  importFromApiImpl.importDaemon(options.darApiUri, options.pollInterval, options.notificationUrl, options.pretend).catch(err => {
+  importFromApiImpl.importDaemon(options.darApiUri,
+    options.pollInterval,
+    options.notificationUrl,
+    options.pretend,
+    options.noDaemon,
+    options.importFuture).catch(err => {
     logger.error('Import daemon error', err);
     throw err;
   }).done();

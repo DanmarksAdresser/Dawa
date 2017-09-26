@@ -572,14 +572,14 @@ function getChangedEntitiesDueToVirkningTime(client) {
   return q.async(function*() {
     const sql = 'SELECT ' + entities.map(entity => {
         const table = postgresMapper.tables[entity];
-        const selectPrevVirkning = '(SELECT prev_virkning FROM dar1_meta)';
-        const selectVirkning = '(SELECT virkning FROM dar1_meta)';
-        return `(SELECT count(*) FROM ${table} 
-        WHERE (lower(virkning) > ${selectPrevVirkning} AND lower(virkning) <= ${selectVirkning}) or 
-              (upper(virkning) > ${selectPrevVirkning} AND upper(virkning) <= ${selectVirkning})
+        return `(SELECT count(*) FROM ${table}, 
+        (SELECT virkning as current_virkning FROM dar1_meta) cv,
+        (select prev_virkning from dar1_meta) as pv
+        WHERE (lower(virkning) > prev_virkning AND lower(virkning) <= current_virkning) or 
+              (upper(virkning) > prev_virkning AND upper(virkning) <= current_virkning)
               ) > 0 as "${entity}"`;
       }).join(',');
-    const queryResult = (yield client.queryp(sql)).rows[0];
+    const queryResult = (yield client.queryRows(sql))[0];
     return Object.keys(queryResult).reduce((memo, entityName) => {
       if (queryResult[entityName]) {
         memo.push(entityName);
@@ -626,10 +626,13 @@ function getNextVirkningTime(client, darEntitiesWithNewRows) {
  * @param client db client
  * @param darEntities the list of dar entities which has changes
  */
-function advanceVirkningTime(client, darEntitiesWithNewRows) {
+function advanceVirkningTime(client, darEntitiesWithNewRows, virkningTime) {
   return q.async(function*() {
     const prevVirkning = (yield getMeta(client)).virkning;
-    const virkning = yield getNextVirkningTime(client, darEntitiesWithNewRows);
+    const virkning = virkningTime ? virkningTime : yield getNextVirkningTime(client, darEntitiesWithNewRows);
+    if(moment(prevVirkning).isAfter(moment(virkning))) {
+      throw new Error("Cannot move back in virkning time");
+    }
     yield setMeta(client, {prev_virkning: prevVirkning, virkning: virkning});
     return virkning;
   })();
@@ -642,9 +645,9 @@ function advanceVirkningTime(client, darEntitiesWithNewRows) {
  * @param darEntities the list of dar entities which has changes
  * @returns {*}
  */
-function applyIncrementalDifferences(client, txid, skipDawaUpdate, darEntitiesWithNewRows) {
+function applyIncrementalDifferences(client, txid, skipDawaUpdate, darEntitiesWithNewRows, virkningTime) {
   return q.async(function*() {
-    yield advanceVirkningTime(client, darEntitiesWithNewRows);
+    yield advanceVirkningTime(client, darEntitiesWithNewRows, virkningTime);
     yield applyDarDifferences(client, darEntitiesWithNewRows);
     const entitiesChangedDueToVirkningTime = yield getChangedEntitiesDueToVirkningTime(client);
     if (darEntitiesWithNewRows.length === 0 && entitiesChangedDueToVirkningTime.length === 0) {
@@ -699,7 +702,7 @@ function storeChangesetInFetchTables(client, changeset) {
  * @param skipDawa
  * @returns {*}
  */
-function importChangeset(client, txid, changeset, skipDawa) {
+function importChangeset(client, txid, changeset, skipDawa, virkningTime) {
   const entities = Object.keys(changeset);
   return q.async(function*() {
     yield storeChangesetInFetchTables(client, changeset);
@@ -711,7 +714,7 @@ function importChangeset(client, txid, changeset, skipDawa) {
       yield importUtil.dropTable(client, `dirty_${table}`);
       yield importUtil.dropTable(client, `fetch_${table}`);
     }
-    yield applyIncrementalDifferences(client, txid, skipDawa, entities);
+    yield applyIncrementalDifferences(client, txid, skipDawa, entities, virkningTime);
   })();
 }
 

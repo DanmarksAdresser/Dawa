@@ -10,6 +10,7 @@ const postgresMapper = require('./postgresMapper');
 const proddb = require('../psql/proddb');
 const spec = require('./spec');
 const logger = require('../logger').forCategory('darImport');
+const moment = require('moment');
 
 const darApiClient = require('./darApiClient');
 const notificationClient = require('./notificationClient');
@@ -98,7 +99,7 @@ function getCurrentEventIds(client) {
   })();
 }
 
-function fetchAndImport(client, darClient, remoteEventIds) {
+function fetchAndImport(client, darClient, remoteEventIds, virkningTime) {
   return q.async(function*() {
     const localEventIds = yield getCurrentEventIds(client);
     const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
@@ -106,13 +107,13 @@ function fetchAndImport(client, darClient, remoteEventIds) {
     if (transactions.length === 0) {
       yield importDarImpl.withDar1Transaction(client, 'api', () =>
         withImportTransaction(client, 'importDarApi', (txid) =>
-          importDarImpl.applyIncrementalDifferences(client, txid, false, [])));
+          importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
     }
     else {
       for (let transaction of transactions) {
         yield importDarImpl.withDar1Transaction(client, 'api', () =>
           withImportTransaction(client, 'importDarApi', (txid) =>
-            importDarImpl.importChangeset(client, txid, transaction, false)));
+            importDarImpl.importChangeset(client, txid, transaction, false, virkningTime)));
       }
     }
   })();
@@ -148,7 +149,7 @@ function race(promises) {
  * @param notificationWsUrl
  * @returns {*}
  */
-function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend) {
+function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDaemon, importFuture) {
 
   return q.async(function*() {
     const darClient = darApiClient.createClient(baseUrl);
@@ -170,7 +171,8 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend) {
           return memo;
         }, {});
         return yield proddb.withTransaction('READ_WRITE', (client) => go(function*() {
-          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap);
+          const virkningTime = importFuture ? moment().add(14, 'days').toISOString() : null;
+          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap, virkningTime);
           if(pretend) {
             throw new Error("Rolling back due to pretend param");
           }
@@ -182,6 +184,9 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend) {
     while (!aborted) {
       try {
         yield doImport();
+        if(noDaemon) {
+          break;
+        }
       }
       catch (e) {
         logger.error('Error importing from DAR1.0', {error: e});
