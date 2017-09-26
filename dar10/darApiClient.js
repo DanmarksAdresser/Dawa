@@ -2,6 +2,7 @@
 
 const url = require('url');
 const request = require('request-promise');
+const logger = require('../logger').forCategory('dar10ApiClient');
 
 exports.recordsUrl = (baseUrl, eventStart, eventSlut, entitet, startindeks) => {
   const parsedUrl = url.parse(baseUrl +  '/Records', true);
@@ -18,11 +19,13 @@ exports.createClient = (baseUrl)  => {
 
   return {
     getEventStatus: () => {
+      logger.info('Getting DAR 1.0 status');
         const statusUrl = baseUrl + '/Status';
         return  request.get({uri: statusUrl, json: true});
       },
     getRecordsPage: (eventStart, eventSlut, entitet, startindeks) => {
       const queryUrl = exports.recordsUrl(baseUrl, eventStart, eventSlut, entitet, startindeks);
+      logger.info('Getting DAR 1.0 entities', {url: queryUrl});
       return request.get({
         uri: queryUrl,
         json: true

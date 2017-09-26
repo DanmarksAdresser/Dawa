@@ -26,9 +26,6 @@ CREATE TABLE dar1_changelog(
 CREATE INDEX ON dar1_changelog(tx_id);
 CREATE INDEX ON dar1_changelog(rowkey);
 
--- TODO possibly not helpful
---create index on adgangsadresser_changes(txid, id);
-
 CREATE TABLE navngivenvej_changes as (SELECT null::integer as txid, null::integer as changeid, null::operation_type as operation, null::boolean as public, navngivenvej.* FROM navngivenvej WHERE false);
 ALTER TABLE navngivenvej_changes ALTER COLUMN txid SET NOT NULL;
 ALTER TABLE navngivenvej_changes ALTER COLUMN operation SET NOT NULL;
@@ -49,3 +46,7 @@ ALTER TABLE vejstykkerpostnumremat_changes ALTER COLUMN operation SET NOT NULL;
 ALTER TABLE vejstykkerpostnumremat_changes ALTER COLUMN public SET NOT NULL;
 CREATE INDEX ON vejstykkerpostnumremat_changes(txid, operation);
 CREATE INDEX ON vejstykkerpostnumremat_changes(changeid, public);
+
+ALTER TYPE dar1_entity ADD VALUE 'ReserveretVejnavn';
+create index on dar1_adresse_current(husnummer_id);
+create index on dar1_darkommuneinddeling(kommunekode,id);

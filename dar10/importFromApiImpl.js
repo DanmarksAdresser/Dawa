@@ -3,6 +3,8 @@
 const q = require('q');
 const _ = require('underscore');
 
+const { go } = require('ts-csp');
+
 const importDarImpl = require('./importDarImpl');
 const postgresMapper = require('./postgresMapper');
 const proddb = require('../psql/proddb');
@@ -85,9 +87,12 @@ function getCurrentEventIds(client) {
     const selects = spec.entities.map(entity => `(SELECT coalesce(MAX(GREATEST(eventopret,eventopdater)), 0) FROM ${postgresMapper.tables[entity]}) as ${entity}`);
     const queryResult = yield client.queryp(`SELECT ${selects.join(', ')}`);
     const row = queryResult.rows[0];
-    // fix the casing of result
+    // fix casing and filter
+    const lowercaseDarEntities = importDarImpl.ALL_DAR_ENTITIES.map(entityName => entityName.toLowerCase());
     return spec.entities.reduce((memo, entity) => {
-      memo[entity] = row[entity.toLowerCase()];
+      if(lowercaseDarEntities.includes(entity.toLowerCase()))  {
+        memo[entity] = row[entity.toLowerCase()];
+      }
       return memo;
     }, {});
   })();
@@ -143,7 +148,7 @@ function race(promises) {
  * @param notificationWsUrl
  * @returns {*}
  */
-function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
+function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend) {
 
   return q.async(function*() {
     const darClient = darApiClient.createClient(baseUrl);
@@ -164,9 +169,13 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl) {
           memo[pair.entitet] = pair.eventid;
           return memo;
         }, {});
-        return yield proddb.withTransaction('READ_WRITE', (client) => {
-          return fetchAndImport(client, darClient, remoteEventsIdMap);
-        });
+        return yield proddb.withTransaction('READ_WRITE', (client) => go(function*() {
+          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap);
+          if(pretend) {
+            throw new Error("Rolling back due to pretend param");
+          }
+          return result;
+        }));
       })();
     };
 

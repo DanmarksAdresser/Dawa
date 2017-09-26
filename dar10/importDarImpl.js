@@ -18,7 +18,7 @@ const sqlUtil = require('../darImport/sqlUtil');
 const streamToTable = require('./streamToTable');
 const tableModels = require('../psql/tableModel');
 const Range = require('../psql/databaseTypes').Range;
-const { recomputeMaterializedDawa} = require('../importUtil/materialize');
+const { recomputeMaterializedDawa, materializeDawa} = require('../importUtil/materialize');
 
 const selectList = sqlUtil.selectList;
 const columnsEqualClause = sqlUtil.columnsEqualClause;
@@ -39,6 +39,7 @@ const ALL_DAR_ENTITIES = [
   'NavngivenVejPostnummerRelation',
   'NavngivenVejSupplerendeBynavnRelation',
   'Postnummer',
+  'ReserveretVejnavn',
   'SupplerendeBynavn'
 ];
 
@@ -438,9 +439,11 @@ function computeIncrementalChangesToCurrentTables(client, darEntitiesWithNewRows
           .join(' UNION '));
       }
       if (_.contains(entitiesWithChangedVirkning, entity)) {
-        dirty.push(`SELECT rowkey FROM ${table}, tstzrange(
-        (select prev_virkning from dar1_meta), (select virkning from dar1_meta), '(]') as
-      virkrange WHERE virkrange @> lower(virkning) or virkrange @> upper(virkning)`);
+        dirty.push(`SELECT rowkey FROM ${table}, 
+        (select prev_virkning from dar1_meta) as pv, 
+        (select virkning as current_virkning from dar1_meta) as
+      cv WHERE (prev_virkning <  lower(virkning) and current_virkning >= lower(virkning))
+             or (prev_virkning <  upper(virkning) and current_virkning >= upper(virkning))`);
       }
 
       const selectDirty = dirty.join(' UNION ');
@@ -513,7 +516,6 @@ function computeDirtyDawaIds(client, darEntities) {
       const dawaTable = dawaSpec[dawaEntity].table;
       const dawaIdColumns = dawaSpec[dawaEntity].idColumns;
       const relevantEntities = _.intersection(dirtyDeps[dawaEntity], darEntities);
-
       const selectDirtys = relevantEntities.map(darEntity => {
         const darTable = postgresMapper.tables[darEntity];
         const darTableCurrent = `${darTable}_current`;
@@ -554,6 +556,7 @@ const updateDawaIncrementally = (client, txid) => go(function*() {
       spec.columns);
   }
   yield applyDawaChanges(client, txid);
+  yield materializeDawa(client, txid);
 });
 
 function dropDawaDirtyTables(client) {
@@ -745,6 +748,7 @@ module.exports = {
   initDawa: initDawa,
   updateDawa: updateDawa,
   clearDar: clearDar,
+  ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
   internal: {
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,

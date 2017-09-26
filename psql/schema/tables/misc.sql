@@ -55,6 +55,7 @@ ENUM (
   'NavngivenVejPostnummerRelation',
   'NavngivenVejSupplerendeBynavnRelation',
   'Postnummer',
+  'ReserveretVejnavn',
   'SupplerendeBynavn'
 );
 
