@@ -59,6 +59,12 @@ const fieldTransforms = {
         resultGons = 0;
       }
       return resultGons;
+    },
+    supplerendebynavn_id: uuid => {
+      if(uuid === '00000000-0000-0000-0000-000000000000') {
+        return null;
+      }
+      return uuid;
     }
   },
   NavngivenVejKommunedel: {
@@ -130,7 +136,10 @@ const sqlIndices = {
     ['kommune', 'navngivenvej_id']
   ],
   DARKommuneInddeling: [
-    ['kommunekode']
+    ['kommunekode', 'id']
+  ],
+  Adresse: [
+    ['husnummer_id']
   ]
 };
 

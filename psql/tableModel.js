@@ -196,6 +196,7 @@ const supplerendebynavne = {
 
 const navngivenvej = {
   table: 'navngivenvej',
+  entity: 'navngivenvej',
   primaryKey: ['id'],
   columns: [
     {name: 'id'},
@@ -213,6 +214,7 @@ const navngivenvej = {
 
 const navngivenvej_postnummer = {
   table: 'navngivenvej_postnummer',
+  entity: 'navngivenvejpostnummerrelation',
   primaryKey: ['navngivenvej_id', 'postnr'],
   columns: [
     {name: 'navngivenvej_id'},
@@ -224,6 +226,7 @@ const navngivenvej_postnummer = {
 
 const vejstykkerpostnumremat = {
   table: 'vejstykkerpostnumremat',
+  entity: 'vejstykkepostnummerrelation',
   primaryKey: ['postnr', 'kommunekode', 'vejkode'],
   columns: [
     {name: 'kommunekode'},
@@ -295,6 +298,7 @@ const adresser_mat = {
 
 const vejpunkter = {
   table: 'vejpunkter',
+  entity: 'vejpunkt',
   primaryKey: ['id'],
   columns: [
     { name: 'id' },
