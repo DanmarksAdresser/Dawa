@@ -342,6 +342,10 @@ var navngivneVejeDok = {
         doc: 'Find de navngivne veje, som har det angivne adresseringsnavn. Navnet er case-sensitivt.'
       },
       {
+        name: 'kommunekode',
+        doc: 'Find de navngivne veje, som ligger i kommunen med den angivne kommunekode.'
+      },
+      {
         name: 'regex',
         doc: 'Find de navngivne veje, som matcher det angivne regulære udtryk.'
       }

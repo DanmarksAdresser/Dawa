@@ -21,6 +21,28 @@ var columns = {
     select: `(SELECT json_agg(CAST((v.kommunekode, v.kode) AS VejstykkeRef))
     FROM vejstykker v
     WHERE v.navngivenvej_id = navngivenvej.id)`
+  },
+  kommunekode: {
+    select: null,
+    where: function(sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['vejstykker'],
+        whereClauses: ['navngivenvej_id = navngivenvej.id'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'kommunekode',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {kommunekode: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
   }
 };
 
