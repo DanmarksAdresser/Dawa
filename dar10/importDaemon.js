@@ -15,7 +15,8 @@ const optionSpec = {
   pollInterval: [false, 'Millisekunder mellem API poll for nye records', 'number', 5000],
   pretend: [false, 'Rul transaktion tilbage (ingen ændringer)', 'boolean', false],
   noDaemon: [false, 'Kør kun én import', 'boolean', false],
-  importFuture: [false, 'Anvend virkningstid 14 dage i fremtiden i stedet for aktuel tid', 'boolean', false]
+  importFuture: [false, 'Anvend virkningstid 14 dage i fremtiden i stedet for aktuel tid', 'boolean', false],
+  oneTxOnly: [false, 'Gennemfør kun én transaktion fra DAR 1.0', 'boolean', false]
 };
 
 cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), function(args, options) {
@@ -28,7 +29,8 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'notification
     options.notificationUrl,
     options.pretend,
     options.noDaemon,
-    options.importFuture).catch(err => {
+    options.importFuture,
+    options.oneTxOnly).catch(err => {
     logger.error('Import daemon error', err);
     throw err;
   }).done();

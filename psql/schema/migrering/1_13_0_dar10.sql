@@ -50,3 +50,4 @@ CREATE INDEX ON vejstykkerpostnumremat_changes(changeid, public);
 ALTER TYPE dar1_entity ADD VALUE 'ReserveretVejnavn';
 create index on dar1_adresse_current(husnummer_id);
 create index on dar1_darkommuneinddeling(kommunekode,id);
+create index on dar1_navngivenvejpostnummerrelation_current(navngivenvej_id, postnummer_id);

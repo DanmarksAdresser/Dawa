@@ -19,6 +19,7 @@ const streamToTable = require('./streamToTable');
 const tableModels = require('../psql/tableModel');
 const Range = require('../psql/databaseTypes').Range;
 const { recomputeMaterializedDawa, materializeDawa} = require('../importUtil/materialize');
+const logger = require('../logger').forCategory('dar10Import');
 
 const selectList = sqlUtil.selectList;
 const columnsEqualClause = sqlUtil.columnsEqualClause;
@@ -484,7 +485,7 @@ SELECT ${currentTable}.id FROM delete_${currentTable} NATURAL JOIN ${currentTabl
 SELECT ${currentTable}.id FROM update_${currentTable} \
     JOIN ${currentTable} ON ${columnsEqualClause(`update_${currentTable}`, currentTable, ['rowkey'])} UNION \
 SELECT id FROM update_${currentTable} UNION \
-SELECT id FROM insert_${currentTable})`);
+SELECT id FROM insert_${currentTable}); ANALYZE ${dirtyTable}`);
     }
   })();
 }
@@ -669,6 +670,14 @@ function applyIncrementalDifferences(client, txid, skipDawaUpdate, darEntitiesWi
       // due to the joining, some dirty DAWA ids is computed before changing the current dar tables,
       // and some are computed after
       yield computeDirtyDawaIds(client, allChangedEntities);
+      const dirtyCounts = {};
+      for(let entity of Object.keys(dawaSpec)) {
+        const table = dawaSpec[entity].table;
+        dirtyCounts[entity] = (yield client.queryRows(`analyze dirty_${table}; select count(*)  as c from dirty_${table}`))[0].c;
+      }
+      logger.info('Dirty counts', {
+        dirtyCounts
+      });
     }
     yield dropDarCurrentChangeTables(client, allChangedEntities);
     if (!skipDawaUpdate) {

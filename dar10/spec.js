@@ -140,6 +140,12 @@ const sqlIndices = {
   ],
   Adresse: [
     ['husnummer_id']
+  ],
+  NavngivenVejPostnummerRelation: [
+    ['navngivenvej_id', 'postnr']
+  ],
+  Postnummer: [
+    ['postnr', 'id']
   ]
 };
 
