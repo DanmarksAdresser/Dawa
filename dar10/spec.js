@@ -142,7 +142,7 @@ const sqlIndices = {
     ['husnummer_id']
   ],
   NavngivenVejPostnummerRelation: [
-    ['navngivenvej_id', 'postnr']
+    ['navngivenvej_id', 'postnummer_id']
   ],
   Postnummer: [
     ['postnr', 'id']
