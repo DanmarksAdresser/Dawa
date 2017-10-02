@@ -12,7 +12,7 @@ export default {
     resolve(),
     commonjs(),
     inject({
-      include: 'node_modules/jquery-ui-dist/**/*.js',
+      include: ['node_modules/jquery-ui-dist/**/*.js','public/js/bootstrap-*.js'],
       jQuery: 'jquery'
     }),
     css({ output: 'dist/css/dawa.css' }),

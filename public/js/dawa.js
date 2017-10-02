@@ -6,9 +6,11 @@ import 'leaflet/dist/leaflet.css';
 import '../css/style.css';
 import '../css/autocomplete.css';
 import 'jquery-ui-dist/jquery-ui.min.css';
+
 import L from 'leaflet';
 import $ from 'jquery';
-window.jQuery = $;
+import './bootstrap-transition';
+import './/bootstrap-collapse';
 import 'jquery-ui-dist/jquery-ui.min';
 import {dawaAutocomplete} from 'dawa-autocomplete2';
 
