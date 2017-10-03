@@ -367,7 +367,7 @@ var supplerendeBynavneIdParameters = {
 var supplerendeBynavneParameters = [{
   name: 'q',
   doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche det supplerende bynavn. ' +
-  'Wildcard * er tilladt i slutningen af hvert ord.'
+  'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
 },
   supplerendeBynavneIdParameters,
   {
@@ -637,8 +637,8 @@ var adgangsadresseParameters = [
   {
     name: 'q',
     doc: 'Søgetekst. Der søges i vejnavn, husnr, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adgangsadressen. ' +
-    'Wildcard * er tilladt i slutningen af hvert ord. ' +
-    'Der skelnes ikke mellem store og små bogstaver.',
+    'Wildcard * er tilladt i slutningen af hvert ord.' +
+    'Der skelnes ikke mellem store og små bogstaver. Der returneres højst 1000 resultater ved anvendelse af parameteren.',
     examples: ['tværv*']
   },
   fuzzyParameter,
@@ -764,7 +764,7 @@ var adresseParameters = [{
   name: 'q',
   doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adressebetegnelsen. ' +
   'Wildcard * er tilladt i slutningen af hvert ord. ' +
-  'Der skelnes ikke mellem store og små bogstaver.',
+  'Der skelnes ikke mellem store og små bogstaver. Der returneres højst 1000 resultater ved anvendelse af parameteren.',
   examples: ['tværv*']
 },
   fuzzyParameter,
@@ -905,7 +905,7 @@ var postnummerParameters = [{
   {
     name: 'q',
     doc: 'Søgetekst. Der søges i postnummernavnet. Alle ord i søgeteksten skal matche postnummernavnet. ' +
-    'Wildcard * er tilladt i slutningen af hvert ord.'
+    'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
   },
   {
     name: 'stormodtagere',
@@ -1006,7 +1006,7 @@ var ejerlavParameters = [
   {
     name: 'q',
     doc: 'Søgetekst. Der søges i ejerlavsnavnet. Alle ord i søgeteksten skal matche ejerlavsnavnet. ' +
-    'Wildcard * er tilladt i slutningen af hvert ord.'
+    'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
   }];
 
 var ejerlavIdParameter = _.find(ejerlavParameters, function (p) {
@@ -1175,7 +1175,7 @@ function dagiQParameter() {
   return {
     name: 'q',
     doc: 'Søgetekst. Der søges i kode og navn. Alle ord i søgeteksten skal matche. ' +
-    'Wildcard * er tilladt i slutningen af hvert ord.'
+    'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
   };
 }
 function dagiKodeNavnParameters(tema) {

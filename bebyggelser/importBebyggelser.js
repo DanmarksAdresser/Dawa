@@ -1,9 +1,9 @@
 "use strict";
 
-const q = require('q');
+const go = require('ts-csp');
 const _ = require('underscore');
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const { runImporter } = require('../importUtil/runImporter');
 const importBebyggelserImpl = require('./importBebyggelserImpl');
 const proddb = require('../psql/proddb');
 
@@ -16,15 +16,13 @@ const optionSpec = {
   skipsanitycheck: [false, 'Spring over sanity check af import', 'boolean', false]
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
+runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE', client => {
-    return q.async(function*() {
+  return proddb.withTransaction('READ_WRITE', client => go(function*() {
       yield importBebyggelserImpl.importBebyggelser(client, options.file, options.initial, options.skipsanitycheck);
-    })();
-  }).done();
+  }));
 });

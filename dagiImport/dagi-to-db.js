@@ -3,8 +3,8 @@
 var fs = require('fs');
 var path = require('path');
 var _ = require('underscore');
-var async = require('async');
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const { go } = require('ts-csp');
+const { runImporter } = require('../importUtil/runImporter');
 var logger = require('../logger').forCategory('dagiToDb');
 
 var dagiTemaer = require('../temaer/tema');
@@ -45,7 +45,7 @@ var optionSpec = {
   maxChanges: [false, 'Maximalt antal ændringer der udføres på adressetilknytninger (pr. tema)', 'number', 10000]
 };
 
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
+runImporter('dagi-to-db', optionSpec, _.without(_.keys(optionSpec), 'temaer'), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
@@ -59,13 +59,13 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
 
   var temaer = options.temaer ? options.temaer.split(',') : _.keys(featureMappings);
 
-  function putDagiTemaer(temaNavn, temaer, maxChanges, callback) {
+  function putDagiTemaer(temaNavn, temaer, maxChanges) {
     return proddb.withTransaction('READ_WRITE', function(client) {
       return tema.putTemaer(dagiTemaer.findTema(temaNavn), temaer, client, options.init, {}, true, maxChanges);
-    }).nodeify(callback);
+    });
   }
 
-  function indlaesDagiTema(temaNavn, maxChanges, callback) {
+  function indlaesDagiTema(temaNavn, maxChanges) {
     logger.info('Indlæser DAGI tema ' + temaNavn);
     var mapping = featureMappings[temaNavn];
     if(!mapping) {
@@ -77,18 +77,22 @@ cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'temaer'), fu
     var body = fs.readFileSync(path.join(directory, filename));
     return tema.parseTemaer(body, temaDef, mapping).then(function(temaer) {
       return putDagiTemaer(temaNavn, temaer, maxChanges);
-    }).nodeify(callback);
+    });
   }
 
-  async.eachSeries(temaer, function (temaNavn, callback) {
-    indlaesDagiTema(temaNavn, options.maxChanges, callback);
-  }, function (err) {
-    if(err) {
-      logger.error('Indlæsning af DAGI tema fejlet', err);
-      process.exit(1);
+  return go(function*() {
+    for(let temaNavn of temaer) {
+      try {
+        yield indlaesDagiTema(temaNavn, options.maxChanges);
+      }
+      catch(err) {
+        logger.error('Indlæsning af DAGI tema fejlet', {
+          temaNavn,
+          error: err
+        });
+        throw err;
+      }
     }
-    else {
-      logger.info('Indlæsning af DAGI temaer gennemført', { temaer: temaer});
-    }
+    logger.info('Indlæsning af DAGI temaer gennemført', { temaer: temaer});
   });
 });

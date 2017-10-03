@@ -1,5 +1,7 @@
 "use strict";
 
+const q = require('q');
+const { go } = require('ts-csp');
 var request = require('request-promise');
 var _ = require('underscore');
 var fs = require('fs');
@@ -8,7 +10,7 @@ var async = require('async');
 var xml2js = require('xml2js');
 var logger = require('../logger');
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const { runImporter } = require('../importUtil/runImporter');
 
 var wfsServices = {
   newDagi: {
@@ -65,7 +67,7 @@ var optionSpec = {
   service: [false, 'Angiver, om der anvendes ny eller gammel service (zone, oldDagi eller newDagi)', 'string']
 };
 
-cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
+runImporter('download-dagi', optionSpec, ['service'], function (args, options) {
   process.env.pgConnectionUrl = options.pgConnectionUrl;
 
   var serviceSpec = wfsServices[options.service];
@@ -135,13 +137,10 @@ cliParameterParsing.main(optionSpec, ['service'], function (args, options) {
     });
   }
 
-  async.eachSeries(featuresToDownload, function (temaNavn, callback) {
-    saveDagiTema(temaNavn, callback);
-  }, function (err) {
-    if(err) {
-      logger.error('downloadDagi', 'Fejl ved download af DAGI temaer', err);
-      process.exit(1);
+  return go(function*() {
+    for(let temaNavn of featuresToDownload) {
+      yield q.nfcall(saveDagiTema, temaNavn);
+
     }
-    logger.info('downloadDagi', 'download af dagi temaer afsluttet');
   });
 });

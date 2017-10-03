@@ -181,7 +181,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDae
     if (!wsClient) {
       logger.info("Running DAR 1.0 import daemon without WebSocket listener");
     }
-    const aborted = false;
+    let aborted = false;
 
     const doImport = () => {
       return q.async(function*() {

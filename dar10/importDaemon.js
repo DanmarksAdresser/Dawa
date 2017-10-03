@@ -2,8 +2,7 @@
 
 const _ = require('underscore');
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
-const logger = require('../logger');
+const { runImporter } = require('../importUtil/runImporter');
 const proddb = require('../psql/proddb');
 
 const importFromApiImpl = require('./importFromApiImpl');
@@ -19,21 +18,18 @@ const optionSpec = {
   oneTxOnly: [false, 'Gennemfør kun én transaktion fra DAR 1.0', 'boolean', false]
 };
 
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), function(args, options) {
+runImporter("importDar10Daemon", optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), function(args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  importFromApiImpl.importDaemon(options.darApiUri,
+  return importFromApiImpl.importDaemon(options.darApiUri,
     options.pollInterval,
     options.notificationUrl,
     options.pretend,
     options.noDaemon,
     options.importFuture,
-    options.oneTxOnly).catch(err => {
-    logger.error('Import daemon error', err);
-    throw err;
-  }).done();
+    options.oneTxOnly);
 });
 
 

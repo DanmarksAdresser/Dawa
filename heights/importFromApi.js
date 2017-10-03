@@ -2,7 +2,7 @@
 
 const _ = require('underscore');
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const { runImporter } = require('../importUtil/runImporter');
 const importAdresseHeightsImpl = require('./importAdresseHeightsImpl');
 const proddb = require('../psql/proddb');
 
@@ -13,11 +13,11 @@ const optionSpec = {
   password: [false, 'Password til kortforsyningen', 'string']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
+runImporter("højder", optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
 
-  importAdresseHeightsImpl.importFromApiDaemon(options.url, options.login, options.password);
+  return importAdresseHeightsImpl.importFromApiDaemon(options.url, options.login, options.password);
 });
