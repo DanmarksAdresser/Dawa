@@ -2,7 +2,7 @@
 
 var moment = require('moment');
 var _ = require('underscore');
-const { go } = require('ts-csp');
+const {go} = require('ts-csp');
 
 var importDarImpl = require('./importDarImpl');
 var logger = require('../logger').forCategory('darImport');
@@ -24,13 +24,13 @@ var defaultOptions = {
   darClient: defaultDarClient
 };
 
-module.exports = function(opt) {
+module.exports = function (opt) {
   var options = _.defaults({}, opt, defaultOptions);
   var getPage = options.darClient.getPage;
   var maxReturnedRecords = options.maxReturnedRecords;
   var maxDarTxDuration = options.maxDarTxDuration;
 
-  var rowKey = function(row) {
+  var rowKey = function (row) {
     // we ensure that rows with registreringslut is first, so
     // it is the one that remains when we use uniq afterwards.
     return row.versionid + '-' + (row.registreringslut ? 'A' : 'B');
@@ -38,10 +38,10 @@ module.exports = function(opt) {
 
   function mergeResults(result, page) {
     var unsorted = result.concat(page);
-    var sorted = unsorted.sort(function(a, b) {
+    var sorted = unsorted.sort(function (a, b) {
       return rowKey(a).localeCompare(rowKey(b));
     });
-    var unique = _.uniq(sorted, true, function(row) {
+    var unique = _.uniq(sorted, true, function (row) {
       return row.versionid;
     });
 
@@ -49,7 +49,7 @@ module.exports = function(opt) {
   }
 
   function getTimestamp(item) {
-    if(item.registreringslut) {
+    if (item.registreringslut) {
       return moment(item.registreringslut);
     }
     else {
@@ -58,11 +58,11 @@ module.exports = function(opt) {
   }
 
   function allHasSameTimestamp(page) {
-    if(page.length === 0) {
+    if (page.length === 0) {
       return false;
     }
     var ts = getTimestamp(page[0]);
-    return _.every(page, function(item) {
+    return _.every(page, function (item) {
       return getTimestamp(item).isSame(ts);
     });
   }
@@ -75,14 +75,16 @@ module.exports = function(opt) {
    * @param tsFrom
    */
   function getRecordsInInterval(baseUrl, entityName, tsFrom, tsTo, report) {
-    return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function(page) {
+    return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function (page) {
       var result = page;
       return qUtil.awhile(
-        function() { return page.length >= maxReturnedRecords; },
-        function() {
-          var maxPageTs = _.reduce(page, function(memo, item) {
+        function () {
+          return page.length >= maxReturnedRecords;
+        },
+        function () {
+          var maxPageTs = _.reduce(page, function (memo, item) {
             var ts = getTimestamp(item);
-            if(memo.isBefore(ts)) {
+            if (memo.isBefore(ts)) {
               return ts;
             }
             else {
@@ -93,9 +95,9 @@ module.exports = function(opt) {
           // This is neccessary because we do paging using timestamps.
           // If more than 10K items have same timestamp, and we
           // can only get 10K items, then we cannot get them all.
-          if(allHasSameTimestamp(page)) {
+          if (allHasSameTimestamp(page)) {
             logger.error('Received a page with 10000 items with equal timestamp.' +
-            ' This will result in lost records.', {
+              ' This will result in lost records.', {
               entityName: entityName,
               tsFrom: tsFrom.toISOString(),
               tsTo: tsTo.toISOString(),
@@ -106,13 +108,13 @@ module.exports = function(opt) {
           else {
             tsFrom = maxPageTs;
           }
-          return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function(_page) {
+          return getPage(baseUrl, entityName, tsFrom, tsTo, report).then(function (_page) {
             page = _page;
             result = mergeResults(result, page);
             return result;
           });
         })
-        .then(function() {
+        .then(function () {
           return result;
         });
     });
@@ -130,11 +132,11 @@ module.exports = function(opt) {
     // we fetch records up to one minute after tsTo,
     // in order to ensure that we do not get a partial transaction
     var fetchedTsTo = tsTo.clone().add(1, 'minute');
-    return qUtil.reduce(['adgangspunkt', 'husnummer', 'adresse'], function(memo, entityName) {
-      return getRecordsInInterval(baseUrl, entityName, tsFrom, fetchedTsTo, report).then(function(result) {
+    return qUtil.reduce(['adgangspunkt', 'husnummer', 'adresse'], function (memo, entityName) {
+      return getRecordsInInterval(baseUrl, entityName, tsFrom, fetchedTsTo, report).then(function (result) {
         // Since we fetched records later than tsTo,
         // we remove those which has both registreringstart and slut in the future
-        memo[entityName] = _.filter(result, function(record) {
+        memo[entityName] = _.filter(result, function (record) {
           var startBetween = moment(record.registreringstart).isBetween(tsFrom, tsTo);
           var slutBetween = record.registreringslut &&
             moment(record.registreringslut).isBetween(tsFrom, tsTo);
@@ -157,24 +159,25 @@ module.exports = function(opt) {
    */
   function fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo, report) {
     function countResults(resultSet) {
-      return Object.keys(resultSet).reduce(function(memo, entityName) {
+      return Object.keys(resultSet).reduce(function (memo, entityName) {
         return memo + resultSet[entityName].length;
       }, 0);
     }
-    if(!resultSet) {
-      return fetch(baseUrl, tsFrom, tsTo, report).then(function(resultSet) {
+
+    if (!resultSet) {
+      return fetch(baseUrl, tsFrom, tsTo, report).then(function (resultSet) {
         return fetchUntilStable(baseUrl, resultSet, tsFrom, tsTo, report);
       });
     }
-    if(countResults(resultSet) === 0) {
+    if (countResults(resultSet) === 0) {
       // no results, no need to check for changes
       return resultSet;
     }
     // If we get some results, we fetch again to ensure that we
     // did not receive a partial transaction
-    return fetch(baseUrl, tsFrom, tsTo, report).then(function(secondResult) {
-      if(countResults(resultSet) === countResults(secondResult)) {
-        if(report) {
+    return fetch(baseUrl, tsFrom, tsTo, report).then(function (secondResult) {
+      if (countResults(resultSet) === countResults(secondResult)) {
+        if (report) {
           report.fetchUntilStable = secondResult;
         }
         return secondResult;
@@ -186,8 +189,8 @@ module.exports = function(opt) {
   }
 
   function getLastFetched(client) {
-    return client.queryp('SELECT lastfetched FROM dar_lastfetched', []).then(function(result) {
-      if(result.rows && result.rows[0] && result.rows[0].lastfetched) {
+    return client.queryp('SELECT lastfetched FROM dar_lastfetched', []).then(function (result) {
+      if (result.rows && result.rows[0] && result.rows[0].lastfetched) {
         return moment(result.rows[0].lastfetched);
       }
       return null;
@@ -200,10 +203,10 @@ module.exports = function(opt) {
 
   function getLastSeenTs(client) {
     return client.queryp('SELECT GREATEST(' +
-    '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_adgangspunkt), ' +
-    '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_husnummer),' +
-    '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_adresse)) as lastseen',[]).then(function(result) {
-      if(result.rows && result.rows.length > 0) {
+      '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_adgangspunkt), ' +
+      '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_husnummer),' +
+      '(SELECT max(coalesce(upper(dbregistrering), lower(dbregistrering))) from dar_adresse)) as lastseen', []).then(function (result) {
+      if (result.rows && result.rows.length > 0) {
         return moment(result.rows[0].lastseen);
       }
       return null;
@@ -214,10 +217,10 @@ module.exports = function(opt) {
     // Look for rows witch has been both created and expired in the same batch, and
     // create a record for the creation. If we do not do this,
     // we will never see the address in DAWA.
-    changeset = _.reduce(changeset, function(memo, rows, entityName) {
+    changeset = _.reduce(changeset, function (memo, rows, entityName) {
       var result = _.clone(rows);
-      rows.forEach(function(row) {
-        if(row.registreringslut &&
+      rows.forEach(function (row) {
+        if (row.registreringslut &&
           !tsFrom.isAfter(moment(row.registreringstart))) {
           var creationRow = _.clone(row);
           creationRow.registreringslut = null;
@@ -227,43 +230,43 @@ module.exports = function(opt) {
       memo[entityName] = result;
       return memo;
     }, {});
-    var groupedChangeset = _.reduce(changeset, function(memo, rows, entityName) {
-      memo[entityName] = _.groupBy(rows, function(row) {
+    var groupedChangeset = _.reduce(changeset, function (memo, rows, entityName) {
+      memo[entityName] = _.groupBy(rows, function (row) {
         return row.registreringslut || row.registreringstart;
       });
       return memo;
     }, {});
-    var transactionTimestamps = _.reduce(groupedChangeset, function(memo, entityTimestampMap) {
+    var transactionTimestamps = _.reduce(groupedChangeset, function (memo, entityTimestampMap) {
       return _.union(memo, Object.keys(entityTimestampMap));
     }, []).sort();
     // we do not apply transactions outside tsFrom and tsTo, they may be partial transactions
-    transactionTimestamps = _.filter(transactionTimestamps, function(timestamp) {
+    transactionTimestamps = _.filter(transactionTimestamps, function (timestamp) {
       return moment(timestamp).isBetween(tsFrom, tsTo);
     });
-    var transactions = transactionTimestamps.map(function(timestamp) {
-      return Object.keys(changeset).reduce(function(memo, entityName) {
+    var transactions = transactionTimestamps.map(function (timestamp) {
+      return Object.keys(changeset).reduce(function (memo, entityName) {
         memo[entityName] = groupedChangeset[entityName][timestamp] || [];
         return memo;
       }, {});
     });
-    if(report) {
+    if (report) {
       report.transactions = transactions;
     }
     return transactions;
   }
 
   function transactionAlreadyPerformed(client, rowMap) {
-    var entityWithRows = _.find(Object.keys(rowMap), function(entityName) {
+    var entityWithRows = _.find(Object.keys(rowMap), function (entityName) {
       return rowMap[entityName].length > 0;
     });
     var row = rowMap[entityWithRows][0];
     var expired = !!row.registreringslut;
     var sql = 'SELECT EXISTS(SELECT * FROM dar_' + entityWithRows + ' WHERE versionid=$1';
-    if(expired) {
+    if (expired) {
       sql += ' AND NOT upper_inf(registrering)';
     }
     sql += ') as performed';
-    return client.queryp(sql, [row.versionid]).then(function(result) {
+    return client.queryp(sql, [row.versionid]).then(function (result) {
       return result.rows[0].performed;
     });
   }
@@ -278,25 +281,25 @@ module.exports = function(opt) {
       return lastFetchedTs;
     }));
 
-      const tsFrom = lastFetchedTs ? lastFetchedTs : moment.unix(0);
-      const tsTo = moment();
-      report.tsFrom = tsFrom.toISOString();
-      report.tsTo = tsTo.toISOString();
-      const resultSet = yield fetchUntilStable(url, null, tsFrom, tsTo, report);
-      report.fetchedResult = resultSet;
+    const tsFrom = lastFetchedTs ? lastFetchedTs : moment.unix(0);
+    const tsTo = moment();
+    report.tsFrom = tsFrom.toISOString();
+    report.tsTo = tsTo.toISOString();
+    const resultSet = yield fetchUntilStable(url, null, tsFrom, tsTo, report);
+    report.fetchedResult = resultSet;
 
-      if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
-        logger.info('No new records on API', {
-          tsFrom: tsFrom.toISOString(),
-          tsTo: tsTo.toISOString()
-        });
-        return;
-      }
-      const transactions = splitInTransactions(resultSet, tsFrom, tsTo, report);
+    if (resultSet.adgangspunkt.length + resultSet.husnummer.length + resultSet.adresse.length === 0) {
+      logger.info('No new records on API', {
+        tsFrom: tsFrom.toISOString(),
+        tsTo: tsTo.toISOString()
+      });
+      return;
+    }
+    const transactions = splitInTransactions(resultSet, tsFrom, tsTo, report);
     for (let transactionSet of transactions) {
-      yield db.withTransaction('READ_WRITE', client =>
-        withImportTransaction(client, "darImportFromApi", txid => go(function*() {
-          try {
+      try {
+        yield db.withTransaction('READ_WRITE', client =>
+          withImportTransaction(client, "darImportFromApi", txid => go(function*() {
             const alreadyPerformed = yield transactionAlreadyPerformed(client, transactionSet);
             if (alreadyPerformed) {
               return;
@@ -307,24 +310,25 @@ module.exports = function(opt) {
             const txTimestamp = someRow.registreringslut || someRow.registreringstart;
             report['tx_' + txTimestamp] = {};
             yield importDarImpl.withDarTransaction(client, 'api', () => go(function*() {
-              yield importDarImpl.applyDarChanges(client, txid, transactionSet, skipDawa, report['tx_' +txTimestamp]);
+              yield importDarImpl.applyDarChanges(client, txid, transactionSet, skipDawa, report['tx_' + txTimestamp]);
             }));
             logger.info('DAR import delay', {
               delay: moment().diff(moment(txTimestamp))
             });
-          }
-          catch(err) {
-            logger.error('Import From API transaction failed', {
-              transaction: transactionSet,
-              error: err
-            });
-          }
-        })));
+          })));
       }
+      catch (err) {
+        logger.error('Import From API transaction failed', {
+          transaction: transactionSet,
+          error: err
+        });
+        // we just skip failing transactions.
+      }
+    }
 
-      yield db.withTransaction('READ_WRITE', function(client) {
-        return setLastFetched(client, tsTo.clone().subtract(maxDarTxDuration));
-      });
+    yield db.withTransaction('READ_WRITE', function (client) {
+      return setLastFetched(client, tsTo.clone().subtract(maxDarTxDuration));
+    });
   });
 
   return {
