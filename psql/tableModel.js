@@ -219,8 +219,36 @@ const navngivenvej_postnummer = {
   columns: [
     {name: 'navngivenvej_id'},
     {name: 'postnr'},
-    {name: 'tekst',
-     public: false}
+    {
+      name: 'tekst',
+      public: false
+    }
+  ]
+};
+
+const stednavne = {
+  table: 'stednavne',
+  entity: 'stednavn',
+  primaryKey: ['id'],
+  columns: [
+    {name: 'id'},
+    {name: 'ændret'},
+    {name: 'geo_version'},
+    {name: 'geo_ændret'},
+    {name: 'hovedtype'},
+    {name: 'undertype'},
+    {name: 'navn'},
+    {name: 'navnestatus'},
+    {name: 'egenskaber'},
+    {
+      name: 'tsv',
+      derive: table => `to_tsvector('adresser', ${table}.navn)`
+    },
+    {
+      name:'centroide',
+      derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
+    },
+    {name: 'geom'}
   ]
 };
 
@@ -232,8 +260,10 @@ const vejstykkerpostnumremat = {
     {name: 'kommunekode'},
     {name: 'vejkode'},
     {name: 'postnr'},
-    {name: 'tekst',
-     public: false}
+    {
+      name: 'tekst',
+      public: false
+    }
   ]
 };
 
@@ -279,7 +309,7 @@ const adresser_mat = {
   primaryKey: ['id'],
   columns: [
     ...enhedsadresser.columns,
-    ...adgangsadresser_mat.columns.filter( col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(col.name)),
+    ...adgangsadresser_mat.columns.filter(col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(col.name)),
     {name: 'a_objekttype'},
     {name: 'a_oprettet'},
     {name: 'a_aendret'},
@@ -287,7 +317,7 @@ const adresser_mat = {
     {name: 'geom', public: false},
     {
       name: 'tsv',
-    public: false,
+      public: false,
       derive: table =>
         `setweight(to_tsvector('adresser', processforindexing(${table}.vejnavn || ' ' || formatHusnr(${table}.husnr))), 'A') ||
          setweight(to_tsvector('adresser', processforindexing(COALESCE(etage, '') ||' ' || COALESCE(doer, ''))), 'B') || 
@@ -301,12 +331,12 @@ const vejpunkter = {
   entity: 'vejpunkt',
   primaryKey: ['id'],
   columns: [
-    { name: 'id' },
-    { name: 'husnummerid' },
-    { name: 'kilde' },
-    { name: 'noejagtighedsklasse' },
-    { name: 'tekniskstandard' },
-    { name: 'geom' }
+    {name: 'id'},
+    {name: 'husnummerid'},
+    {name: 'kilde'},
+    {name: 'noejagtighedsklasse'},
+    {name: 'tekniskstandard'},
+    {name: 'geom'}
   ]
 };
 
@@ -324,7 +354,8 @@ exports.tables = {
   vejpunkter,
   navngivenvej,
   navngivenvej_postnummer,
-  vejstykkerpostnumremat
+  vejstykkerpostnumremat,
+  stednavne
 };
 
 exports.materializations = {

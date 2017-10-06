@@ -23,7 +23,7 @@ const { createChangeTable } = require('../importUtil/tableDiffNg');
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
 const createChangeTables = (client)=> go(function*() {
-  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej', 'navngivenvej_postnummer', 'vejstykkerpostnumremat'];
+  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej', 'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -118,6 +118,9 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'bebyggelser', init: false},
   {name: 'bebyggelser_adgadr', init: false},
   {name: 'bebyggelser_divided', init: false},
+  {name: 'stednavne', init: false},
+  {name: 'stednavne_adgadr', init: false},
+  {name: 'stednavne_divided', init: false},
   {name: 'ois_importlog', init: false}
 ]);
 
@@ -153,7 +156,6 @@ exports.loadTables = function(client, scriptDir) {
     yield psqlScriptQ(client, path.join(scriptDir, 'tables'), 'misc.sql');
     for (let spec of exports.tableSpecs) {
       if(spec.type !== 'view') {
-        console.log("loading script tables/" + spec.scriptFile);
         yield psqlScriptQ(client, path.join(scriptDir, 'tables'), spec.scriptFile);
       }
     }

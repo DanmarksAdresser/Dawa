@@ -2254,6 +2254,41 @@ module.exports['/historik/adgangsadresser'] = {
   ]
 };
 
+module.exports['/stednavne'] = {
+  subtext: 'Hent Stednavne.',
+  parameters: [
+    {
+      name: 'id',
+      doc: 'Find stednavn med det angivne, unikke ID'
+    },
+    {
+      name: 'hovedtype',
+      doc: 'Find stednavne med den angivne hovedtype, eksempelvis "bebyggelse"'
+    },
+    {
+      name: 'undertype',
+      doc: 'Find stednavne med den angivne undertype, eksempelvis "bydel"'
+    },
+    {
+      name: 'navn',
+      doc: 'Find stednavne med det angivne navn. Case-senstiv.'
+    },
+      ...formatAndPagingParams],
+
+};
+
+module.exports['/stednavne/{id}'] = {
+  subtext: 'Modtag stednavn med id.',
+    parameters: [
+      {
+        name: 'id',
+        doc: 'Stednavnets unikke ID'
+      }, ...formatParameters],
+    nomulti: true,
+    examples: []
+};
+
+
 module.exports['/historik/adresser'] = {
   subtext: 'ADVARSEL: Experimentelt API. Der vil ske ændringer i dette API uden varsel, som ikke er bagudkompatible. Hent historik for adresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +
   ' Bemærk, at udgåede adresser (statuskode 2 og 4) også medtages i svaret. Historikken returneres som en array af JSON-objekter,' +

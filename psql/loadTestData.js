@@ -19,6 +19,7 @@ const importBebyggelserImpl = require('../bebyggelser/importBebyggelserImpl');
 const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
 const importOisImpl = require('../ois/importOisImpl');
 const { withImportTransaction } = require('../importUtil/importUtil');
+const importStednavneImpl = require('../stednavne/importStednavneImpl');
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -59,7 +60,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       yield importBebyggelserImpl.importBebyggelser(client, 'test/data/Bebyggelse.json', true, false);
       yield importJordstykkerImpl.importEjerlav(client, 'test/data/matrikelkort', '60851_GML_UTM32-EUREF89.zip', true);
       yield importOisImpl.importOis(client, 'test/data/ois');
-      yield client.queryp('analyze');
+      yield withImportTransaction(client, 'importStednavne', txid => importStednavneImpl.importStednavne(client, txid, 'test/data/Stednavn.json'));
+      yield client.query('analyze');
     })();
   }).done();
 });

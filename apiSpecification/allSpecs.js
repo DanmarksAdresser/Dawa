@@ -18,3 +18,4 @@ require('./replikering/udtraek/resources');
 require('./consistency');
 require('./autocomplete/autocomplete.js');
 require('./ois/resources');
+require('./stednavn/resources');

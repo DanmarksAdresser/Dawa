@@ -538,6 +538,25 @@ var sampleParameters = {
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
     }
   },
+  stednavn: {
+    id: {
+      values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
+      verifier: (stednavn, id) => stednavn.id === id
+    },
+    navn: {
+      values: ['Humlehavehallen'],
+      verifier: (stednavn, navn)  => stednavn.navn === navn
+    },
+    hovedtype: {
+      values: ['Bygning'],
+      verifier: (stednavn, hovedtype) => stednavn.hovedtype === hovedtype
+    },
+    undertype: {
+      values: ['hal'],
+      verifier: (stednavn, undertype) => stednavn.undertype === undertype
+    }
+
+  },
   ois_grund: {
     id: {
       values: ['003b8b83-a7da-4cd1-9ebf-9d2ed4b2d522'],
