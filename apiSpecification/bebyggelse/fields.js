@@ -9,19 +9,13 @@ module.exports = [
     name: 'id'
   },
   {
-    name: 'hovedtype'
-  },
-  {
-    name: 'undertype'
+    name: 'type'
   },
   {
     name: 'navn'
   },
   {
-    name: 'navnestatus'
-  },
-  {
-    name: 'bebyggelseskode'
+    name: 'kode'
   },
   {
     name: 'ændret',
@@ -37,19 +31,6 @@ module.exports = [
   },
   {
     name: 'geom_json'
-  },
-  {
-    name: 'kommuner',
-    multi: true
-  },
-  {
-    name: 'visueltcenter'
-  },
-  {
-    name: 'visueltcenter_x'
-  },
-  {
-    name: 'visueltcenter_y'
   }];
 
 fieldsUtil.applySelectability(module.exports, sqlModel);

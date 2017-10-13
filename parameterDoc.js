@@ -1499,26 +1499,6 @@ function dagiReverseEndpointDoc(tema) {
 
 const flatExamples = {
   bebyggelse: {
-    query: [
-      {
-        description: 'Find alle bebyggelser',
-        query: []
-      },
-      {
-        description: 'Find alle bebyggelser af typen "kolonihave".',
-        query: [{
-          name: 'type',
-          value: 'kolonihave'
-        }]
-      },
-      {
-        description: 'Modtag bebyggelser i GeoJSON format',
-        query: [{
-          name: 'format',
-          value: 'geojson'
-        }]
-      }
-    ],
     get: [{
       description: 'Modtag bebyggelse med ID "12337669-a084-6b98-e053-d480220a5a3f" (Båring Ege)',
       path: ['/bebyggelser/12337669-a084-6b98-e053-d480220a5a3f']
@@ -1529,7 +1509,7 @@ const flatExamples = {
 
   },
   jordstykke: {
-    query: [],
+    query: [[adgangsadresseIdParameter, strukturParameterAdresse, geometriParam]],
     get: []
   }
 };
@@ -2090,7 +2070,7 @@ var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({
@@ -2262,6 +2242,10 @@ module.exports['/stednavne'] = {
       doc: 'Find stednavn med det angivne, unikke ID'
     },
     {
+      name: 'q',
+      doc: 'Find stednavne, hvor navnet matcher den angivne søgetekst'
+    },
+    {
       name: 'hovedtype',
       doc: 'Find stednavne med den angivne hovedtype, eksempelvis "bebyggelse"'
     },
@@ -2273,8 +2257,23 @@ module.exports['/stednavne'] = {
       name: 'navn',
       doc: 'Find stednavne med det angivne navn. Case-senstiv.'
     },
-      ...formatAndPagingParams],
-
+    {
+      name: 'kommunekode',
+      doc: 'Find stednavne i kommunen med den angivne kommunekode'
+    },
+    {
+      name: 'x',
+      doc: 'Find stednavne der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendes angives bredde-værdien.'
+    },
+    {
+      name: 'y',
+      doc: 'Find stednavne der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk ' +
+      'anvendes angives længde-værdien.'
+    },
+    ...dagiSridCirkelPolygonParameters('stednavne'),
+    strukturParameter,
+    ...formatAndPagingParams, dagiSridCirkelPolygonParameters('stednavne')],
+  examples: []
 };
 
 module.exports['/stednavne/{id}'] = {
@@ -2283,11 +2282,68 @@ module.exports['/stednavne/{id}'] = {
       {
         name: 'id',
         doc: 'Stednavnets unikke ID'
-      }, ...formatParameters],
+      },
+      SRIDParameter,
+      strukturParameter,
+      ...formatParameters],
     nomulti: true,
     examples: []
 };
 
+module.exports['/bebyggelser'] = {
+  subtext: `DEPRECATED: Anvend stednavne-API'et i stedet. Søg efter bebyggelser. `,
+  parameters: [{
+    name: 'id',
+    doc: 'Find bebyggelse med det angivne ID'
+  }, {
+    name: 'navn',
+    doc: 'Find bebyggelse med det angivne navn. Case-sensitiv.'
+  }, {
+    name: 'type',
+    doc: 'Find bebyggelser af den angivne type'
+  }, SRIDParameter,
+    {
+      name: 'x',
+      doc: 'Find bebyggelser der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendes angives bredde-værdien.'
+    },
+    {
+      name: 'y',
+      doc: 'Find bebyggelser der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk ' +
+      'anvendes angives længde-værdien.'
+    }, ...dagiSridCirkelPolygonParameters('bebyggelser'), ...formatAndPagingParams],
+  examples: [
+    {
+      description: 'Find alle bebyggelser',
+      query: []
+    },
+    {
+      description: 'Find alle bebyggelser af typen "kolonihave".',
+      query: [{
+        name: 'type',
+        value: 'kolonihave'
+      }]
+    },
+    {
+      description: 'Modtag bebyggelser i GeoJSON format',
+      query: [{
+        name: 'format',
+        value: 'geojson'
+      }]
+    }
+  ]
+};
+
+module.exports['/bebyggelser/{id}'] = {
+  subtext: 'Modtag enkelt bebyggelse',
+  parameters: [{name: 'id', doc: 'Bebyggelsens ID'}, ...formatParameters],
+  examples: [{
+    description: 'Modtag bebyggelse med ID "12337669-a084-6b98-e053-d480220a5a3f" (Båring Ege)',
+    path: ['/bebyggelser/12337669-a084-6b98-e053-d480220a5a3f']
+  }, {
+    description: 'Hent bebyggelsen med ID "12337669-c79d-6b98-e053-d480220a5a3f" (Stavtrup) i GeoJSON format med ETRS89 Zone 32N som koordinatsystem',
+    path: ['/bebyggelser/12337669-c79d-6b98-e053-d480220a5a3f?format=geojson&srid=25832']
+  }]
+};
 
 module.exports['/historik/adresser'] = {
   subtext: 'ADVARSEL: Experimentelt API. Der vil ske ændringer i dette API uden varsel, som ikke er bagudkompatible. Hent historik for adresser. Det er kun historiske værdier for udvalgte felter, der er medtaget.' +

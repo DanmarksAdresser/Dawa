@@ -8,9 +8,9 @@ CREATE TABLE stednavne(
   undertype text NOT NULL,
   navn text NOT NULL,
   navnestatus text not null,
-  egenskaber jsonb NOT NULL,
+  bebyggelseskode integer,
   tsv tsvector,
-  centroide geometry(point, 25832),
+  visueltcenter geometry(point, 25832),
   geom geometry(geometry, 25832)
 );
 

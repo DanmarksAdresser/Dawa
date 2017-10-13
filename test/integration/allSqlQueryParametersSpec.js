@@ -278,7 +278,7 @@ var sampleParameters = {
       }
     },
     bebyggelsesid: {
-      values: ['12337669-af32-6b98-e053-d480220a5a3f'],
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: function(adr, bebyggelsesid) {
         return adr.bebyggelser.filter(bebyggelse => bebyggelse.id === bebyggelsesid).length === 1;
       }
@@ -444,7 +444,7 @@ var sampleParameters = {
       }
     },
     bebyggelsesid: {
-      values: ['12337669-af32-6b98-e053-d480220a5a3f'],
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: function(adr, bebyggelsesid) {
         return adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === bebyggelsesid).length === 1;
       }
@@ -492,11 +492,11 @@ var sampleParameters = {
   },
   bebyggelse: {
     id: {
-      values: ['12337669-af32-6b98-e053-d480220a5a3f'],
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: (bebyggelse, id) => bebyggelse.id === id
     },
     navn: {
-      values: ['Emtekær'],
+      values: ['Aarhus'],
       verifier: (bebyggelse, navn) => bebyggelse.navn === navn
     },
     type: {
@@ -554,8 +554,11 @@ var sampleParameters = {
     undertype: {
       values: ['hal'],
       verifier: (stednavn, undertype) => stednavn.undertype === undertype
+    },
+    kommunekode: {
+      values: ['99'],
+      verifier: (stednavn, kommunekode) => parseInt(stednavn.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
     }
-
   },
   ois_grund: {
     id: {

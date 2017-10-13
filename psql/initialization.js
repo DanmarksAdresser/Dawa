@@ -88,7 +88,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar_vejstykker_view', type: 'view'},
   {name: 'dar_adgangsadresser_view', type: 'view'},
   {name: 'dar_enhedsadresser_view', type: 'view'},
-  {name: 'temaer-views', type: 'view', init: false},
+  {name: 'temaer-views', init: false},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql', init: false},
@@ -121,6 +121,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'stednavne', init: false},
   {name: 'stednavne_adgadr', init: false},
   {name: 'stednavne_divided', init: false},
+  {name: 'stednavn_kommune', init: false},
   {name: 'ois_importlog', init: false}
 ]);
 
@@ -242,7 +243,7 @@ function createFlatTilknytningTriggers(client) {
  */
 function createHistoryTriggers(client) {
 
-  var sql = _.reduce(['adgangsadresse_tema', 'bebyggelsestilknytning', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(sql, datamodelName) {
+  var sql = _.reduce(['adgangsadresse_tema', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(sql, datamodelName) {
     var datamodel = datamodels[datamodelName];
     var table = datamodel.table;
     sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);

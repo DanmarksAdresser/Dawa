@@ -5,6 +5,7 @@
   "author": "Ministeriet for By, Bolig og Landdistrikter",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
   "dependencies": {
+    "@mapbox/polylabel": "^1.0.2",
     "JSONStream": "^1.1.1",
     "ajv": "^4.1.0",
     "async": "0.9.0",

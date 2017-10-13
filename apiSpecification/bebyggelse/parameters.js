@@ -27,23 +27,11 @@ module.exports = {
         multi: true
       },
       {
-        name: 'hovedtype',
+        name: 'type',
         type: 'string',
-        multi: true
-      },
-      {
-        name: 'undertype',
-        type: 'string',
-        multi: true
-      },
-      {
-        name: 'kommunekode',
-        type: 'integer',
-        schema: schema.kode4,
         multi: true
       }
-    ]),
-
+    ])
 };
 
-registry.addMultiple('stednavn', 'parameterGroup', module.exports);
+registry.addMultiple('bebyggelse', 'parameterGroup', module.exports);

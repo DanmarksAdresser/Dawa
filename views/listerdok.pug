@@ -92,6 +92,12 @@ block content
               li <a href='#bebyggelsesoegning'>Bebyggelsesøgning</a>
               li <a href='#bebyggelseopslag'>Bebyggelseopslag</a>
               li <a href='#bebyggelsedata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#stednavne').nav-header Stednavne API
+            ul#bebyggelse.nav.nav-list
+              li <a href='#stednavnsoegning'>Stednavnsøgning</a>
+              li <a href='#stednavnopslag'>Stednavnopslag</a>
+              li <a href='#stednavneedata'>Databeskrivelse</a>
+
 
         div.span9
           section
@@ -299,6 +305,16 @@ block content
             h3.anchor-header#bebyggelsedata Beskrivelse af bebyggelser
             p Web API'et udstiller for hver bebyggelse følgende informationer:
             +documentSchema(jsonSchemas.bebyggelse)
+          section
+            h3.anchor-header#stednavnsoegning Stednavnsøgning
+            +documentResource(parameterDoc, '/stednavne')
+            div.page-header
+            h3.anchor-header#stednavnopslag Stednavnopslag
+            +documentResource(parameterDoc, '/stednavne/{id}')
+            div.page-header
+            h3.anchor-header#stednavndata Beskrivelse af stednavne
+            p Web API'et udstiller for hvert stednavn følgende informationer:
+            +documentSchema(jsonSchemas.stednavn)
 block append scripts
   script.
     dawa.activateTab('listerdok');

@@ -239,13 +239,13 @@ const stednavne = {
     {name: 'undertype'},
     {name: 'navn'},
     {name: 'navnestatus'},
-    {name: 'egenskaber'},
+    {name: 'bebyggelseskode'},
     {
       name: 'tsv',
       derive: table => `to_tsvector('adresser', ${table}.navn)`
     },
     {
-      name:'centroide',
+      name:'visueltcenter',
       derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
     },
     {name: 'geom'}

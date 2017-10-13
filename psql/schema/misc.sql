@@ -72,7 +72,7 @@ DROP TYPE IF EXISTS BebyggelseRef CASCADE;
 CREATE TYPE BebyggelseRef AS (
   id   UUID,
   kode INTEGER,
-  type bebyggelsestype,
+  type text,
   navn VARCHAR
 );
 

@@ -3,10 +3,10 @@
 const parameters = require('./parameters');
 const nameAndKey = require('./nameAndKey');
 const representations = require('./representations');
+const commonParameters = require('../common/commonParameters');
 const sqlModel = require('./sqlModel');
 const registry = require('../registry');
 const resourcesUtil = require('../common/resourcesUtil');
-const commonParameters = require('../common/commonParameters');
 
 
 exports.query = resourcesUtil.queryResourceSpec(
@@ -14,9 +14,7 @@ exports.query = resourcesUtil.queryResourceSpec(
     propertyFilter: parameters.propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
-    reverseGeocoding: commonParameters.reverseGeocodingOptional,
-    struktur: commonParameters.struktur,
-    search: commonParameters.search
+    reverseGeocoding: commonParameters.reverseGeocodingOptional
   },
   representations,
   sqlModel
@@ -24,13 +22,12 @@ exports.query = resourcesUtil.queryResourceSpec(
 
 exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id, {
-    crs: commonParameters.crs,
-    struktur: commonParameters.struktur
+    crs: commonParameters.crs
   },
   representations,
   sqlModel
 );
 
 Object.keys(exports).forEach(key => {
-  registry.add('stednavn', 'resource', key, exports[key]);
+  registry.add('bebyggelse', 'resource', key, exports[key]);
 });

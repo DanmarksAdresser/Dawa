@@ -43,16 +43,16 @@ module.exports =  {
       // correct parameter indices for the subquery
       var subquery = {
         select: ["*"],
-        from: ['bebyggelser_adgadr'],
-        whereClauses: ['a_id  = bebyggelser_adgadr.adgangsadresse_id'],
+        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
+        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id AND stednavne.hovedtype = 'Bebyggelse'`],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
       var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
-        name: 'bebyggelse_id',
+        name: 'stednavn_id',
         multi: true
       }], {});
-      propertyFilterFn(subquery, {bebyggelse_id: parameterArray});
+      propertyFilterFn(subquery, {stednavn_id: parameterArray});
       var subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
@@ -66,16 +66,16 @@ module.exports =  {
       // correct parameter indices for the subquery
       var subquery = {
         select: ["*"],
-        from: ['bebyggelser_adgadr JOIN bebyggelser ON bebyggelser_adgadr.bebyggelse_id = bebyggelser.id'],
-        whereClauses: ['a_id  = bebyggelser_adgadr.adgangsadresse_id'],
+        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
+        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id AND stednavne.hovedtype = 'Bebyggelse'`],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
       var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
-        name: 'type',
+        name: 'undertype',
         multi: true
       }], {});
-      propertyFilterFn(subquery, {type: parameterArray});
+      propertyFilterFn(subquery, {undertype: parameterArray});
       var subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }

@@ -3,6 +3,7 @@
 const fs = require('fs');
 const JSONStream = require('JSONStream');
 const { go } = require('ts-csp');
+const polylabel = require('@mapbox/polylabel');
 
 const { streamToTablePipeline} = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
@@ -16,13 +17,15 @@ const {
 
 
 const importStednavneFromStream = (client, txid, stream) => go(function*() {
-  yield client.query('create temp table fetch_stednavne_raw(id uuid, hovedtype text, undertype text, navn text, navnestatus text, egenskaber jsonb, geomjson text)');
+  yield client.query('create temp table fetch_stednavne_raw(id uuid, hovedtype text, undertype text, navn text, navnestatus text, bebyggelseskode integer, visueltcenter text, geomjson text)');
   const jsonTransformer = JSONStream.parse('features.*');
   const mapFn = geojsonFeature => {
     const raw = geojsonFeature.properties;
-    const egenskaber = {};
-    if(raw.FEAT_TYPE === 'Bebyggelse') {
-      egenskaber.bebyggelseskode = raw.BEBYGGELSESKODE
+    const geometry = geojsonFeature.geometry;
+    let visueltCenter = null;
+    if(geometry.type === 'Polygon') {
+      const coordinates = geometry.coordinates;
+      visueltCenter = polylabel(coordinates, 0.1);
     }
     return {
       id: raw.ID_LOKALID,
@@ -30,25 +33,28 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
       undertype: raw.UNDER_TYPE,
       navn: raw.NAVN,
       navnestatus: raw.NAVNESTATUS,
-      egenskaber: JSON.stringify(egenskaber),
+      bebyggelseskode: raw.BEBYGGELSESKODE,
+      visueltcenter: visueltCenter ? JSON.stringify({type: 'Point', coordinates: visueltCenter}) : null,
       geomjson: geojsonFeature.geometry ? JSON.stringify(geojsonFeature.geometry) : null
     };
   };
-  const rawColumns = ['id', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'egenskaber', 'geomjson'];
+  const rawColumns = ['id', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'bebyggelseskode', 'visueltcenter', 'geomjson'];
 
   yield promisingStreamCombiner([stream, jsonTransformer, ...streamToTablePipeline(client, 'fetch_stednavne_raw', rawColumns, mapFn)]);
-  yield client.query(`CREATE TEMP TABLE fetch_stednavne AS (SELECT DISTINCT ON(id) id, hovedtype, undertype, navn, navnestatus,egenskaber, st_setsrid(st_geomfromgeojson(geomjson), 25832)::geometry as geom FROM fetch_stednavne_raw)`);
-  yield client.query('DROP TABLE fetch_stednavne_raw');
+  yield client.query(`CREATE TEMP TABLE fetch_stednavne AS (SELECT DISTINCT ON(id) id, hovedtype, undertype, navn, navnestatus,bebyggelseskode, st_setsrid(st_geomfromgeojson(visueltcenter), 25832)::geometry as visueltcenter, st_setsrid(st_geomfromgeojson(geomjson), 25832)::geometry as geom FROM fetch_stednavne_raw)`);
+  yield client.query('DROP TABLE fetch_stednavne_raw; ANALYZE fetch_stednavne');
 
   const idColumns = ['id'];
-  const nonIdColumns = ['hovedtype', 'undertype', 'navn', 'navnestatus', 'egenskaber', 'geom'];
+  const nonIdColumns = ['hovedtype', 'undertype', 'navn', 'navnestatus', 'bebyggelseskode', 'geom'];
   const allColumns = [...idColumns, ...nonIdColumns];
   yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel, allColumns);
   yield client.query('analyze stednavne; analyze stednavne_changes');
+  yield client.query('UPDATE stednavne_changes c SET visueltcenter = f.visueltcenter FROM fetch_stednavne f WHERE c.id = f.id');
   yield updateGeometricTableNg(client, txid, stednavneTableModel);
   yield updateSubdividedTableNg(client, txid, 'stednavne');
-  yield client.query('drop table fetch_stednavne');
-  yield refreshAdgangsadresserRelation(client, ['id'], 'stednavne', ['stednavn_id'], 'stednavne_adgadr');
+  yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
+  yield refreshAdgangsadresserRelation(client, ['id'], 'stednavne_divided', ['stednavn_id'], 'stednavne_adgadr');
+  yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
 
 });
 

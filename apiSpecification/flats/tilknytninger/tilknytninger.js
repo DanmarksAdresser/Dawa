@@ -1,14 +1,14 @@
 "use strict";
 
 module.exports = {
-  bebyggelse: {
-    keyFieldNames: {
-      id: 'bebyggelsesid'
-    },
-    keyFieldColumns: {
-      id: 'bebyggelse_id'
-    }
-  },
+  // bebyggelse: {
+  //   keyFieldNames: {
+  //     id: 'bebyggelsesid'
+  //   },
+  //   keyFieldColumns: {
+  //     id: 'bebyggelse_id'
+  //   }
+  // },
   jordstykke: {
     keyFieldNames: {
       ejerlavkode: 'ejerlavkode',

@@ -11,3 +11,4 @@ require('./navngivenvej/nameAndKey');
 require('./tematilknytninger/namesAndKeys');
 require('./flats/flats');
 require('./flats/tilknytninger/namesAndKeys');
+require('./bebyggelse/nameAndKey');
