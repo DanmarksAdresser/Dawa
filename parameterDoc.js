@@ -618,6 +618,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     nullable: true
   },
   {
+    name: 'stednavnid',
+    doc: 'Find de adresser som ligger indenfor stednavnet med den angivne ID'
+  },
+  {
     name: 'bebyggelsesid',
     doc: 'Find de adresser som ligger indenfor bebyggelsen med den angivne ID'
   },
@@ -2372,6 +2376,32 @@ module.exports['/historik/adresser'] = {
       description: 'Vis historik for adressen med id "4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd"',
       query: [{name: 'id', value: '4210f8ff-cfca-4b3d-b5c4-ca1c795c14dd'}]
     }
+  ]
+};
+
+module.exports['/stednavntyper'] = {
+  subtext: 'Hent liste af hovedtyper for stednavne. For hver hovedtype returneres en liste af undertyper.',
+  parameters: [
+    {
+      name: 'hovedtype',
+      doc: 'Hent den angivne stednavntype'
+    }].concat(formatAndPagingParams),
+  examples: [
+    {
+      description: 'Hent alle stednavntyper',
+      query: []
+    }
+  ]
+};
+
+module.exports['/stednavntyper/{hovedtype}'] = {
+  subtext: 'Hent en enkelt stednavnhovedtype',
+  parameters: [
+    {
+      name: 'hovedtype',
+      doc: 'Hovedtypen der ønskes, eksempelvis "Bebyggelse'
+    }, ...formatParameters],
+  examples: [
   ]
 };
 

@@ -63,6 +63,7 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
   yield refreshAdgangsadresserRelation(client, ['id'], 'stednavne_divided', ['stednavn_id'], 'stednavne_adgadr');
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
+  yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 
 });
 

@@ -77,6 +77,12 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
+    name: 'stednavnid',
+    type: 'string',
+    schema: schema.uuid,
+    multi: true
+  },
+  {
     name: 'bebyggelsesid',
     type: 'string',
     schema: schema.uuid,

@@ -20,3 +20,4 @@ require('./autocomplete/autocomplete.js');
 require('./ois/resources');
 require('./stednavn/resources');
 require('./bebyggelse/resources');
+require('./stednavntype/resources');

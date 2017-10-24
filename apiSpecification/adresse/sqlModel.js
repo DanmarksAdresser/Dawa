@@ -64,6 +64,7 @@ var columns = {
   adgangsadresse_ikrafttrædelse: {
     select: selectIsoTimestamp('a_ikraftfra')
   },
+  stednavnid: adgangsadresseColumns.stednavnid,
   bebyggelsesid: adgangsadresseColumns.bebyggelsesid,
   bebyggelsestype: adgangsadresseColumns.bebyggelsestype,
   x: adgangsadresseColumns.x,

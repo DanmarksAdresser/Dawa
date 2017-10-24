@@ -277,6 +277,11 @@ var sampleParameters = {
         return adr.jordstykke && adr.jordstykke.matrikelnr === matrikelnr;
       }
     },
+    stednavnid: {
+      // note, verification only works for bebyggelser
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
+      verifier: (adr, stednavnid) => adr.bebyggelser.filter(bebyggelse => bebyggelse.id === stednavnid).length === 1
+    },
     bebyggelsesid: {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: function(adr, bebyggelsesid) {
@@ -442,6 +447,11 @@ var sampleParameters = {
       verifier: function(adr, matrikelnr) {
         return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
       }
+    },
+    stednavnid: {
+      // note, verification only works for bebyggelser
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
+      verifier: (adr, stednavnid) => adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === stednavnid).length === 1
     },
     bebyggelsesid: {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],

@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS stednavne;
+DROP TABLE IF EXISTS stednavne CASCADE;
 CREATE TABLE stednavne(
   id uuid PRIMARY KEY,
   ændret timestamptz NOT NULL DEFAULT now(),

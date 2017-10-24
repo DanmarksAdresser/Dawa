@@ -35,6 +35,29 @@ module.exports =  {
   adressepunktændringsdato: {
     column: selectIsoTimestamp('adressepunktaendringsdato')
   },
+  stednavnid: {
+    select: null,
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      var subquery = {
+        select: ["*"],
+        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
+        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'stednavn_id',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {stednavn_id: parameterArray});
+      var subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+
+  },
   bebyggelsesid: {
     select: null,
     where: function (sqlParts, parameterArray) {

@@ -119,6 +119,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'bebyggelser_adgadr', init: false},
   {name: 'bebyggelser_divided', init: false},
   {name: 'stednavne', init: false},
+  {name: 'stednavntyper', init: false},
   {name: 'stednavne_adgadr', init: false},
   {name: 'stednavne_divided', init: false},
   {name: 'stednavn_kommune', init: false},
