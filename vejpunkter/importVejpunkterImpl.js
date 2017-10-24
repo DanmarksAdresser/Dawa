@@ -49,6 +49,7 @@ module.exports = (client, txid, inputFile) => go(function*() {
     yield importUtil.createTempTableFromTemplate(client, 'updated_vejpunkter', 'vejpunkter', VEJPUNKTER_COLUMNS);
     yield loadVejpunktCsv(client, inputFile, 'updated_vejpunkter');
     yield tableDiffNg.computeDifferences(client, txid, 'updated_vejpunkter', vejpunkterTableModel);
+    yield client.query('ANALYZE vejpunkter_changes');
     yield importUtil.dropTable(client, 'updated_vejpunkter');
     yield tableDiffNg.applyChanges(client, txid, vejpunkterTableModel);
     yield materializeDawa(client, txid);
