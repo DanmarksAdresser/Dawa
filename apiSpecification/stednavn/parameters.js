@@ -42,8 +42,7 @@ module.exports = {
         schema: schema.kode4,
         multi: true
       }
-    ]),
-
+    ])
 };
 
 registry.addMultiple('stednavn', 'parameterGroup', module.exports);

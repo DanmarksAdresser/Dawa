@@ -268,7 +268,7 @@ exports.geomWithin = function (geom) {
 exports.reverseGeocoding = function (geom) {
   geom = geom || 'geom';
   return function (sqlParts, params) {
-    if (notNull(params.x) && notNull(params.y)) {
+    if (params.reverseGeocodingNearest !== false && notNull(params.x) && notNull(params.y)) {
       if (!params.srid) {
         params.srid = 4326;
       }

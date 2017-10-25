@@ -2274,6 +2274,11 @@ module.exports['/stednavne'] = {
       doc: 'Find stednavne der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives nord-værdien.) Hvis WGS84/geografisk ' +
       'anvendes angives længde-værdien.'
     },
+    {
+      name: 'nærmeste',
+      doc: 'Anvendes sammen med x- og y-parametrene. Angiver, at det stednavn som ligger nærmest det angivne punktet skal returneres i stedet for de' +
+      ' stednavne som overlapper med punktet. Anvendes typisk sammen med hovedtype eller undertype parametrene.'
+    },
     ...dagiSridCirkelPolygonParameters('stednavne'),
     strukturParameter,
     ...formatAndPagingParams, dagiSridCirkelPolygonParameters('stednavne')],

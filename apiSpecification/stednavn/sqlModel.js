@@ -67,6 +67,7 @@ const columns = {
 const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.reverseGeocodingWithin(),
+  sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key)

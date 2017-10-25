@@ -16,7 +16,8 @@ exports.query = resourcesUtil.queryResourceSpec(
     geomWithin: commonParameters.geomWithin,
     reverseGeocoding: commonParameters.reverseGeocodingOptional,
     struktur: commonParameters.struktur,
-    search: commonParameters.search
+    search: commonParameters.search,
+    reverseGeocodingNearest: commonParameters.reverseGeocodingNearest
   },
   representations,
   sqlModel
