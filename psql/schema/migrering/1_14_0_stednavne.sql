@@ -71,4 +71,5 @@ CREATE  INDEX ON stednavn_kommune(kommunekode);
 
 create materialized view stednavntyper AS (select distinct hovedtype, undertype FROM stednavne);
 create unique index on stednavntyper(hovedtype);
-CREATE INDEX ON stednave USING GIST(geom);
+CREATE INDEX ON stednavne USING GIST(navn gist_trgm_ops);
+CREATE INDEX ON stednavne USING GIST(geom);

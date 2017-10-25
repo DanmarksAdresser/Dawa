@@ -18,3 +18,5 @@ CREATE INDEX ON stednavne USING GIN(tsv);
 CREATE INDEX ON stednavne(navn);
 CREATE INDEX ON stednavne(hovedtype, undertype);
 CREATE INDEX ON stednavne(undertype);
+CREATE INDEX ON stednavne USING GIST(navn gist_trgm_ops);
+CREATE INDEX ON stednavne USING GIST(geom);

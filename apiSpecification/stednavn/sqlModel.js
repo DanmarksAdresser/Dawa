@@ -6,6 +6,7 @@ const parameters = require('./parameters');
 const  {assembleSqlModel}  = require('../common/sql/sqlUtil');
 const dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
+const { applyFallbackToFuzzySearch }= require('../common/sql/sqlUtil')
 
 const columns = {
   geom_json: {
@@ -63,6 +64,13 @@ const columns = {
      WHERE sk.stednavn_id = stednavne.id)`
   }
 };
+const fuzzySearchParameterImpl = (sqlParts, params) => {
+  if(params.fuzzyq) {
+    const fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
+    sqlParts.whereClauses.push("stednavne.navn IN (select distinct ON (navn, dist) navn from (SELECT navn, navn <-> " + fuzzyqAlias + " as dist from stednavne ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)");
+    sqlParts.orderClauses.push(`levenshtein(lower(stednavne.navn), lower(${fuzzyqAlias}), 2, 1, 3)`);
+  }
+}
 
 const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
@@ -70,6 +78,7 @@ const parameterImpls = [
   sqlParameterImpl.reverseGeocoding(),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.search(columns),
+  fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
@@ -81,7 +90,8 @@ const baseQuery = () => ({
     sqlParams: []
   });
 
-module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
+const sqlModel = assembleSqlModel(columns, parameterImpls, baseQuery);
+module.exports = applyFallbackToFuzzySearch(sqlModel);
 
 const registry = require('../registry');
 registry.add('stednavn', 'sqlModel', undefined, module.exports);

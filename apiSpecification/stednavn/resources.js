@@ -17,11 +17,23 @@ exports.query = resourcesUtil.queryResourceSpec(
     reverseGeocoding: commonParameters.reverseGeocodingOptional,
     struktur: commonParameters.struktur,
     search: commonParameters.search,
-    reverseGeocodingNearest: commonParameters.reverseGeocodingNearest
+    reverseGeocodingNearest: commonParameters.reverseGeocodingNearest,
+    fuzzy: commonParameters.fuzzy
   },
   representations,
   sqlModel
 );
+
+exports.autocomplete =   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
+    propertyFilter: parameters.propertyFilter,
+    crs: commonParameters.crs,
+    geomWithin: commonParameters.geomWithin,
+    struktur: commonParameters.struktur,
+    search: commonParameters.search,
+    fuzzy: commonParameters.fuzzy
+  },
+  representations.json,
+  sqlModel);
 
 exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id, {

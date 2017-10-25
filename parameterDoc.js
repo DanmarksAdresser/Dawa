@@ -2238,33 +2238,40 @@ module.exports['/historik/adgangsadresser'] = {
   ]
 };
 
+const commonStednavnParameters = [
+  fuzzyParameter,
+  {
+    name: 'id',
+    doc: 'Find stednavn med det angivne, unikke ID'
+  },
+  {
+    name: 'hovedtype',
+    doc: 'Find stednavne med den angivne hovedtype, eksempelvis "bebyggelse"'
+  },
+  {
+    name: 'undertype',
+    doc: 'Find stednavne med den angivne undertype, eksempelvis "bydel"'
+  },
+  {
+    name: 'navn',
+    doc: 'Find stednavne med det angivne navn. Case-senstiv.'
+  },
+  {
+    name: 'kommunekode',
+    doc: 'Find stednavne i kommunen med den angivne kommunekode'
+  },
+  ...dagiSridCirkelPolygonParameters('stednavne'),
+  strukturParameter,
+  ...formatAndPagingParams,
+];
 module.exports['/stednavne'] = {
   subtext: 'Hent Stednavne.',
   parameters: [
     {
-      name: 'id',
-      doc: 'Find stednavn med det angivne, unikke ID'
-    },
-    {
       name: 'q',
       doc: 'Find stednavne, hvor navnet matcher den angivne søgetekst'
     },
-    {
-      name: 'hovedtype',
-      doc: 'Find stednavne med den angivne hovedtype, eksempelvis "bebyggelse"'
-    },
-    {
-      name: 'undertype',
-      doc: 'Find stednavne med den angivne undertype, eksempelvis "bydel"'
-    },
-    {
-      name: 'navn',
-      doc: 'Find stednavne med det angivne navn. Case-senstiv.'
-    },
-    {
-      name: 'kommunekode',
-      doc: 'Find stednavne i kommunen med den angivne kommunekode'
-    },
+    ...commonStednavnParameters,
     {
       name: 'x',
       doc: 'Find stednavne der overlapper med det angivne punkt. Både x- og y-parameter skal angives. (Hvis ETRS89/UTM32 anvendes angives øst-værdien.) Hvis WGS84/geografisk anvendes angives bredde-værdien.'
@@ -2278,10 +2285,19 @@ module.exports['/stednavne'] = {
       name: 'nærmeste',
       doc: 'Anvendes sammen med x- og y-parametrene. Angiver, at det stednavn som ligger nærmest det angivne punktet skal returneres i stedet for de' +
       ' stednavne som overlapper med punktet. Anvendes typisk sammen med hovedtype eller undertype parametrene.'
+    }],
+  examples: []
+};
+
+module.exports['/stednavne/autocomplete'] = {
+  subtext: autocompleteSubtext('stednavne'),
+  parameters: [
+    {
+      name: 'q',
+      doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'
     },
-    ...dagiSridCirkelPolygonParameters('stednavne'),
-    strukturParameter,
-    ...formatAndPagingParams, dagiSridCirkelPolygonParameters('stednavne')],
+    ...commonStednavnParameters
+  ],
   examples: []
 };
 
