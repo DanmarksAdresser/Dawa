@@ -70,6 +70,6 @@ CREATE UNIQUE INDEX ON stednavn_kommune(stednavn_id, kommunekode);
 CREATE  INDEX ON stednavn_kommune(kommunekode);
 
 create materialized view stednavntyper AS (select distinct hovedtype, undertype FROM stednavne);
-create unique index on stednavntyper(hovedtype);
+create unique index on stednavntyper(hovedtype, undertype);
 CREATE INDEX ON stednavne USING GIST(navn gist_trgm_ops);
 CREATE INDEX ON stednavne USING GIST(geom);
