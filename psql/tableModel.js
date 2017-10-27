@@ -255,6 +255,7 @@ const adresser_mat = {
 
 const vejpunkter = {
   table: 'vejpunkter',
+  entity: 'vejpunkt',
   primaryKey: ['id'],
   columns: [
     { name: 'id '},
