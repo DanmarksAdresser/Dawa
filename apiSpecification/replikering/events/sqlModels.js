@@ -86,7 +86,7 @@ const baseQuery2 = (datamodelName, tableName, columnMappings) => {
     select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectClause(columnMappings)),
     from: [" transaction_history h" +
     " JOIN " + tableName + "_changes i ON h.sequence_number = i.changeid"],
-    whereClauses: ['public'],
+    whereClauses: ['public', `h.entity = '${datamodelName}'`],
     orderClauses: ['changeid'],
     sqlParams: []
   };
