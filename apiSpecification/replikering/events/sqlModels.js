@@ -81,12 +81,12 @@ function baseQuery(datamodelName, tableName, columnMappings) {
   return query;
 }
 
-const baseQuery2 = (tableName, columnMappings) => {
+const baseQuery2 = (datamodelName, tableName, columnMappings) => {
   var query = {
     select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectClause(columnMappings)),
     from: [" transaction_history h" +
     " JOIN " + tableName + "_changes i ON h.sequence_number = i.changeid"],
-    whereClauses: ['public'],
+    whereClauses: ['public', `h.entity = '${datamodelName}'`],
     orderClauses: ['changeid'],
     sqlParams: []
   };
@@ -109,7 +109,7 @@ var oldSqlModels = oldSqlModelNames.reduce(function(memo, datamodelName) {
 const newSqlModels = newSqlModelNames.reduce((memo, datamodelName) => {
   var columnMappings = mappings.columnMappings[datamodelName];
   var baseQueryFn = function() {
-    return baseQuery2(mappings.tables[datamodelName], columnMappings);
+    return baseQuery2(datamodelName, mappings.tables[datamodelName], columnMappings);
   };
 
   memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName], baseQueryFn);
