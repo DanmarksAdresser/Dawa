@@ -2759,6 +2759,138 @@ describe('OIS', function(){
 
 
 });
+
+
+describe('Stednavne', function(){
+
+  it("stednavnetyper", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavntyper';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavntyper= JSON.parse(response.body);
+      assert(stednavntyper.length>10, "Der er fundet for få: "+stednavntyper.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("stednavnereverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.x= 12.511274124050752;
+    options.qs.y= 55.69826837488762;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 3: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("hovedtypesøgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.hovedtype= 'Begravelsesplads';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 10 begravelsespladser: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("undertypesøgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.undertype= 'ø';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 10 øer: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("adresser indeholdt i et stednavns geometri", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='adresser';
+    options.qs= {};
+    options.qs.stednavnid= '564e1e26-3f8c-d458-e053-d480220a2d36';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length===1, "Der burde være en: "+stednavne.length);
+      assert(stednavne[0].adressebetegnelse === 'Søtorvet 4, 8600 Silkeborg', "Burde være 'Søtorvet 4, 8600 Silkeborg'");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  function gandhi(stednavn) {
+    return stednavn.navn==='Gandhiparken';
+  }
+
+  it("stednavne fuzzy søgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.q= 'gandi';
+    options.qs.fuzzy= true;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 3: "+stednavne.length);
+      assert(stednavne.find(gandhi), "Gandhiparken findes ikke");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+
+});
+
 // describe('HAProxy', function(){
 
 //    it("http status code 429 og body har korrekt format", Q.async(function*() {
