@@ -93,10 +93,15 @@ block content
               li <a href='#bebyggelseopslag'>Bebyggelseopslag</a>
               li <a href='#bebyggelsedata'>Databeskrivelse</a>
             li(data-toggle='collapse', data-target='#stednavne').nav-header Stednavne API
-            ul#bebyggelse.nav.nav-list
+            ul.nav.nav-list
               li <a href='#stednavnsoegning'>Stednavnsøgning</a>
               li <a href='#stednavnopslag'>Stednavnopslag</a>
-              li <a href='#stednavneedata'>Databeskrivelse</a>
+              li <a href='#stednavnautocomplete'>Stednavn autocomplete</a>
+              li <a href='#stednavndata'>Databeskrivelse</a>
+            li(data-toggle='collapse', data-target='#stednavntyper').nav-header Stednavntyper API
+            ul#stednavntyper.nav.nav-list
+              li <a href='#stednavntype'>Stednavntyper</a>
+
 
 
         div.span9
@@ -312,9 +317,18 @@ block content
             h3.anchor-header#stednavnopslag Stednavnopslag
             +documentResource(parameterDoc, '/stednavne/{id}')
             div.page-header
-            h3.anchor-header#stednavndata Beskrivelse af stednavne
+            h3.anchor-header#stednavnautocomplete Stednavn autocomplete
+              +documentResource(parameterDoc, '/stednavne/autocomplete')
+              div.page-header
+              h3.anchor-header#stednavndata Beskrivelse af stednavne
             p Web API'et udstiller for hvert stednavn følgende informationer:
             +documentSchema(jsonSchemas.stednavn)
+          section
+            h3.anchor-header#stednavntype Stednavntyper
+            +documentResource(parameterDoc, '/stednavntyper')
+            div.page-header
+            p Web API'et udstiller for hver stednavntype følgende informationer:
+            +documentSchema(jsonSchemas.stednavntype)
 block append scripts
   script.
     dawa.activateTab('listerdok');

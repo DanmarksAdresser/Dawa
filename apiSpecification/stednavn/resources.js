@@ -29,7 +29,7 @@ exports.autocomplete =   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
     struktur: commonParameters.struktur,
-    search: commonParameters.search,
+    autocomplete: commonParameters.autocomplete,
     fuzzy: commonParameters.fuzzy
   },
   representations.json,

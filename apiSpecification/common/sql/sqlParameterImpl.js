@@ -265,7 +265,7 @@ exports.geomWithin = function (geom) {
 
 // Adds an ORDER BY clause which returns the object closest to the specified X- and Y parameters.
 // Sets limit to 1.
-exports.reverseGeocoding = function (geom) {
+exports.reverseGeocoding = function (geom, noLimit) {
   geom = geom || 'geom';
   return function (sqlParts, params) {
     if (params.reverseGeocodingNearest !== false && notNull(params.x) && notNull(params.y)) {
@@ -282,7 +282,9 @@ exports.reverseGeocoding = function (geom) {
         dbapi.addSqlParameter(sqlParts, params.y) + "), " +
         dbapi.addSqlParameter(sqlParts, params.srid) + "), 25832)::geometry";
       sqlParts.orderClauses.push(orderby);
-      sqlParts.limit = "1";
+      if(!noLimit) {
+        sqlParts.limit = "1";
+      }
     }
   };
 };

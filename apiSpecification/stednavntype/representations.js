@@ -21,12 +21,15 @@ exports.json = {
         '$ref': '#/definitions/Href'
       },
       'hovedtype': {
-        type: 'string'
+        type: 'string',
+        description: 'Hovedtypen.'
       },
       undertyper: {
         type: 'array',
+        description: 'Undertyper for hovedtypen.',
         items: {
-          type: 'string'
+          type: 'string',
+          description: 'Undertypens navn'
         }
       }
     },
