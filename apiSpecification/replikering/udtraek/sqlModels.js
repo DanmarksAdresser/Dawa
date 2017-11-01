@@ -95,7 +95,7 @@ function createSqlModel(columnMappings, baseQueryFn) {
   };
 }
 
-const newModelNames = ['ejerlav', 'postnummer', 'vejstykke', 'adgangsadresse', 'adresse'];
+const newModelNames = ['ejerlav', 'postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'vejstykkepostnummerrelation'];
 const oldModelNames = _.difference(Object.keys(mappings.columnMappings), newModelNames);
 
 var oldSqlModels = oldModelNames.reduce(function(memo, datamodelName) {

@@ -58,6 +58,16 @@ FROM ${geomTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
   yield tablediff.dropChangeTables(client, relTable);
 });
 
+const refreshAdgangsadresserRelationNg = (client, txid, geomIdColumns, geomTable, relIdColumns, tableModel) => go(function*() {
+  const selectClause = _.zip(geomIdColumns, relIdColumns).map(([geomId, relId]) => `f.${geomId} as ${relId}`).concat('a.id as adgangsadresse_id').join(', ');
+  yield client.queryp(`CREATE TEMP table desired_view AS \
+(SELECT DISTINCT  ${selectClause} \
+FROM ${geomTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
+  yield tableDiffNg.computeDifferences(
+    client, txid, 'desired_view', tableModel, ['stednavn_id', 'adgangsadresse_id']);
+  yield client.queryp('DROP table desired_view');
+  yield tableDiffNg.applyChanges(client, txid, tableModel);
+});
 
 module.exports = {
   initializeSubdividedTable,
@@ -65,5 +75,6 @@ module.exports = {
   updateGeometricTable,
   updateGeometricTableNg,
   refreshAdgangsadresserRelation,
+  refreshAdgangsadresserRelationNg,
   updateSubdividedTableNg
 };

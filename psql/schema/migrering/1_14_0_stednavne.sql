@@ -40,17 +40,15 @@ CREATE TABLE stednavne_adgadr(
 -- Covering index for better performance
 CREATE INDEX ON stednavne_adgadr(adgangsadresse_id, stednavn_id);
 
-CREATE TABLE stednavne_adgadr_history(
-  valid_from integer,
-  valid_to integer,
-  stednavn_id uuid NOT NULL,
-  adgangsadresse_id uuid NOT NULL
-);
+CREATE TABLE stednavne_adgadr_changes as (SELECT null::integer as txid, null::integer as changeid, null::operation_type as operation, null::boolean as public, stednavne_adgadr.* FROM stednavne_adgadr WHERE false);
+ALTER TABLE stednavne_adgadr_changes ALTER COLUMN txid SET NOT NULL;
+ALTER TABLE stednavne_adgadr_changes ALTER COLUMN operation SET NOT NULL;
+ALTER TABLE stednavne_adgadr_changes ALTER COLUMN public SET NOT NULL;
+CREATE INDEX ON stednavne_adgadr_changes(txid, operation);
+CREATE INDEX ON stednavne_adgadr_changes(changeid, public);
 
-CREATE INDEX ON stednavne_adgadr_history(valid_from);
-CREATE INDEX ON stednavne_adgadr_history(valid_to);
-CREATE INDEX ON stednavne_adgadr_history(adgangsadresse_id);
-CREATE INDEX ON stednavne_adgadr_history(stednavn_id, adgangsadresse_id);
+CREATE INDEX ON stednavne_adgadr_changes(adgangsadresse_id);
+CREATE INDEX ON stednavne_adgadr_changes(stednavn_id, adgangsadresse_id);
 
 CREATE TABLE stednavne_divided(
   id uuid,

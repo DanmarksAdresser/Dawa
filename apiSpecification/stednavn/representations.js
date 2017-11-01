@@ -12,7 +12,7 @@ const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const {nullableType} = require('../schemaUtil');
-const { mapKommuneRefArray } = require('../commonMappers');
+const { mapKommuneRefArray, makeHref } = require('../commonMappers');
 
 var schema = require('../parameterSchema');
 
@@ -28,6 +28,10 @@ exports.json = {
         type: 'string',
         schema: schema.uuid,
         description: 'Stednavnets unikke ID'
+      },
+      href: {
+        type: 'string',
+        description: 'Stednavnets unikke URL'
       },
       hovedtype: {
         type: 'string',
@@ -55,7 +59,7 @@ exports.json = {
         }
       },
       'kommuner': {
-        description: 'De kommuner hvis areal overlapper postnumeret areal.',
+        description: 'De kommuner hvis areal overlapper stednavnets areal.',
         type: 'array',
         items: {
           '$ref': '#/definitions/KommuneRef'
@@ -76,7 +80,7 @@ exports.json = {
       }
 
     },
-    docOrder: ['id', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'egenskaber', 'visueltcenter', 'kommuner', 'ændret', 'geo_ændret', 'geo_version']
+    docOrder: ['id', 'href', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'egenskaber', 'visueltcenter', 'kommuner', 'ændret', 'geo_ændret', 'geo_version']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -87,6 +91,7 @@ exports.json = {
         memo[prop] = row[prop];
         return memo;
       }, {});
+    result.href = makeHref(baseUrl, 'stednavn', [row.id]);
     result.egenskaber = {};
     if(result.hovedtype === 'Bebyggelse') {
       result.egenskaber.bebyggelseskode = row.bebyggelseskode;

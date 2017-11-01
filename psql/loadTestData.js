@@ -48,7 +48,10 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function(args, opt
       }));
       yield runScriptImpl(client, ['psql/load-dagi-test-data.sql'], false);
       yield loadCsvTestdata(client, 'test/data');
-      yield importDarImpl.updateVejstykkerPostnumreMat(client, true);
+      yield withImportTransaction(client, 'loadtestData', (txid) => go(function*() {
+        yield importDarImpl.updateVejstykkerPostnumreMat(client, txid);
+        yield importDarImpl.updatePostnumreKommunekoderMat(client);
+      }));
       client.allowParallelQueries = true;
       yield generateHistoryImpl.generateAdgangsadresserHistory(client);
       yield generateHistoryImpl.generateAdresserHistory(client);

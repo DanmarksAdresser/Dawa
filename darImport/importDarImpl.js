@@ -29,7 +29,6 @@ var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
 const schemaModel = require('../psql/tableModel');
 
-const tablediff = require('../importUtil/tablediff');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const importUtil = require('../importUtil/importUtil');
 
@@ -429,30 +428,26 @@ const fullCompareAndUpdate = (client, txid) => go(function*() {
   yield materializeDawa(client, txid);
 });
 
-function updateVejstykkerPostnumreMat(client, initial) {
-  return q.async(function*() {
-    const selectVejstykkerPostnumreMat = `SELECT DISTINCT a.kommunekode, a.vejkode, a.postnr,
+const updateVejstykkerPostnumreMat = (client, txid) => go(function* () {
+  const selectVejstykkerPostnumreMat = `SELECT DISTINCT a.kommunekode, a.vejkode, a.postnr,
      COALESCE(v.vejnavn, '') || ' ' || to_char(p.nr, 'FM0000') || ' ' || COALESCE(p.navn, '') as tekst
     from adgangsadresser a
     JOIN vejstykker v ON a.kommunekode = v.kommunekode and a.vejkode = v.kode
     JOIN postnumre p ON a.postnr = p.nr`;
-    yield client.queryp(`CREATE TEMP VIEW vejstykkerpostnumremat_view AS (${selectVejstykkerPostnumreMat})`);
-    if(initial) {
-      yield sqlCommon.disableHistoryTrigger(client, 'vejstykkerpostnumremat');
-      yield client.queryp('INSERT INTO vejstykkerpostnumremat(kommunekode, vejkode, postnr, tekst) (SELECT * FROM vejstykkerpostnumremat_view)');
-      yield client.queryp('INSERT INTO vejstykkerpostnumremat_history(kommunekode, vejkode, postnr)' +
-        '(select kommunekode, vejkode, postnr FROM vejstykkerpostnumremat)');
-      yield sqlCommon.enableHistoryTrigger(client, 'vejstykkerpostnumremat');
-    }
-    else {
-      const idColumns = ['kommunekode', 'vejkode', 'postnr'];
-      const nonIdColumns = ['tekst'];
-      yield tablediff.computeDifferences(client, 'vejstykkerpostnumremat_view', 'vejstykkerpostnumremat', idColumns, nonIdColumns);
-      yield tablediff.applyChanges(client, 'vejstykkerpostnumremat', 'vejstykkerpostnumremat', idColumns, idColumns.concat(nonIdColumns), nonIdColumns);
-    }
-    yield client.queryp('DROP VIEW vejstykkerpostnumremat_view');
-  })();
-}
+  yield client.queryp(`CREATE TEMP TABLE vejstykkerpostnumremat_view AS (${selectVejstykkerPostnumreMat})`);
+  const idColumns = ['kommunekode', 'vejkode', 'postnr'];
+  const nonIdColumns = ['tekst'];
+  const tableModel = schemaModel.tables.vejstykkerpostnumremat;
+  yield tableDiffNg.computeDifferences(client, txid, 'vejstykkerpostnumremat_view', tableModel,
+    [...idColumns, ...nonIdColumns]);
+  yield tableDiffNg.applyChanges(client, txid, tableModel);
+  yield client.queryp('DROP TABLE vejstykkerpostnumremat_view');
+});
+
+const updatePostnumreKommunekoderMat = client => go(function*() {
+  yield client.query(`DELETE FROM postnumre_kommunekoder_mat;
+   insert into postnumre_kommunekoder_mat(postnr, kommunekode) (SELECT DISTINCT postnr, kommunekode FROM adgangsadresser)`);
+});
 
 /**
  * Assuming DAR tables are already populated, update DAR tables
@@ -478,7 +473,8 @@ const updateFromDar = (client, txid, dataDir, fullCompare, skipDawa, skipRowsCon
       yield computeDirtyObjects(client, report);
       yield performDawaChanges(client, txid, report);
     }
-    yield updateVejstykkerPostnumreMat(client, false);
+    yield updateVejstykkerPostnumreMat(client, txid);
+    yield updatePostnumreKommunekoderMat(client);
   }
   else {
     logger.info('Skipping DAWA updates');
@@ -722,6 +718,7 @@ exports.updateFromDar = updateFromDar;
 exports.initDarTables = initDarTables;
 exports.fullCompareAndUpdate = fullCompareAndUpdate;
 exports.updateVejstykkerPostnumreMat = updateVejstykkerPostnumreMat;
+exports.updatePostnumreKommunekoderMat = updatePostnumreKommunekoderMat;
 
 exports.internal = {
   createTableAndLoadData: createTableAndLoadData,

@@ -252,6 +252,17 @@ const stednavne = {
   ]
 };
 
+const stednavne_adgadr = {
+  table: 'stednavne_adgadr',
+  entity: 'stednavn_adgangsadresse',
+  primaryKey: ['stednavn_id', 'adgangsadresse_id'],
+  columns: [{
+    name: 'stednavn_id'
+  }, {
+    name: 'adgangsadresse_id'
+  }]
+};
+
 const vejstykkerpostnumremat = {
   table: 'vejstykkerpostnumremat',
   entity: 'vejstykkepostnummerrelation',
@@ -355,7 +366,8 @@ exports.tables = {
   navngivenvej,
   navngivenvej_postnummer,
   vejstykkerpostnumremat,
-  stednavne
+  stednavne,
+  stednavne_adgadr
 };
 
 exports.materializations = {

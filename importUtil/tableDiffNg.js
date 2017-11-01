@@ -82,7 +82,8 @@ const computeUpdatesSubset = (client, txid, sourceTableOrView, dirtyTable, table
 const computeUpdates = (client, txid, sourceTableOrView, tableModel, nonPreservedColumns) => go(function*() {
   nonPreservedColumns = nonPreservedColumns ? _.union(nonPreservedColumns, derivedColumnNames(tableModel)) : allColumnNames(tableModel);
   const columnsFromSource = _.difference(nonPreservedColumns, derivedColumnNames(tableModel));
-  const changedColumnClause = columnsDistinctClause('before', 'after', nonPrimaryColumnNames(tableModel));
+  const nonPrimaryColumns = nonPrimaryColumnNames(tableModel);
+  const changedColumnClause = columnsDistinctClause('before', 'after', nonPrimaryColumns);
   const publicClause = makePublicClause(client, tableModel);
   const preservedColumns = _.difference(allColumnNames(tableModel), nonPreservedColumns);
   let rawAfterPreservedSelectClause = selectList('raw_after', columnsFromSource);
@@ -97,7 +98,7 @@ const computeUpdates = (client, txid, sourceTableOrView, tableModel, nonPreserve
      after AS (SELECT ${makeSelectClause('raw_after_preserved', tableModel, allColumnNames(tableModel))} FROM raw_after_preserved),
      changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}, ${publicClause} as is_public 
   FROM ${tableModel.table} before JOIN after ON ${columnsEqualClause('before', 'after', tableModel.primaryKey)}
-  WHERE ${changedColumnClause})
+  ${nonPrimaryColumns.length > 0 ? `WHERE ${changedColumnClause}` : ''})
    INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, allColumnNames(tableModel))}) (SELECT ${txid}, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
 `;
   yield client.query(sql);
@@ -155,9 +156,11 @@ const applyDeletes = (client, txid, tableModel) => go(function*() {
 
 const applyUpdates = (client, txid, tableModel) => go(function*() {
   const columnsToUpdate = nonPrimaryColumnNames(tableModel);
-  const updateClause = columnsToUpdate.map(column => `${column} = c.${column}`).join(', ');
-  yield assignSequenceNumbers(client, txid, tableModel, 'update');
-  yield client.query(`UPDATE ${tableModel.table} t SET ${updateClause} FROM ${tableModel.table}_changes c WHERE c.txid = ${txid} AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
+  if(columnsToUpdate.length > 0) {
+    const updateClause = columnsToUpdate.map(column => `${column} = c.${column}`).join(', ');
+    yield assignSequenceNumbers(client, txid, tableModel, 'update');
+    yield client.query(`UPDATE ${tableModel.table} t SET ${updateClause} FROM ${tableModel.table}_changes c WHERE c.txid = ${txid} AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
+  }
 });
 
 const applyChanges = (client, txid, tableModel) => go(function*() {

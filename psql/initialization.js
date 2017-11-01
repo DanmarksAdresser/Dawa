@@ -23,7 +23,7 @@ const { createChangeTable } = require('../importUtil/tableDiffNg');
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
 const createChangeTables = (client)=> go(function*() {
-  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej', 'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne'];
+  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej', 'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -93,7 +93,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql', init: false},
   {name: 'navngivenvej_postnummer', init: false},
-  {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql'},
+  {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql', init: false},
   {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql'},
   {name: 'gridded_temaer_matview',     scriptFile: 'gridded-temaer-matview.sql'},
   {name: 'adgangsadresser_temaer_matview' },
@@ -244,7 +244,7 @@ function createFlatTilknytningTriggers(client) {
  */
 function createHistoryTriggers(client) {
 
-  var sql = _.reduce(['adgangsadresse_tema', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'], function(sql, datamodelName) {
+  var sql = _.reduce(['adgangsadresse_tema', 'jordstykketilknytning'], function(sql, datamodelName) {
     var datamodel = datamodels[datamodelName];
     var table = datamodel.table;
     sql += format('DROP FUNCTION IF EXISTS %s_history_update() CASCADE;\n', table);

@@ -10,11 +10,13 @@ const _ = require('underscore');
 const { streamToTablePipeline} = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tableDiffNg = require('../importUtil/tableDiffNg');
-const stednavneTableModel = require('../psql/tableModel').tables.stednavne;
+const tableModel = require('../psql/tableModel');
+const stednavneTableModel = tableModel.tables.stednavne;
+const stednavneAdgangsadresserTableModel = tableModel.tables.stednavne_adgadr;
 const {
   updateSubdividedTableNg,
   updateGeometricTableNg,
-  refreshAdgangsadresserRelation
+  refreshAdgangsadresserRelationNg
 } = require('../apiSpecification/flats/importFlatUtil');
 
 
@@ -61,7 +63,7 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield updateGeometricTableNg(client, txid, stednavneTableModel);
   yield updateSubdividedTableNg(client, txid, 'stednavne');
   yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
-  yield refreshAdgangsadresserRelation(client, ['id'], 'stednavne_divided', ['stednavn_id'], 'stednavne_adgadr');
+  yield refreshAdgangsadresserRelationNg(client, txid, ['id'], 'stednavne_divided', ['stednavn_id'], stednavneAdgangsadresserTableModel);
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 
