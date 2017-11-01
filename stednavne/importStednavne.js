@@ -10,11 +10,7 @@ const proddb = require('../psql/proddb');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  file: [false, 'Fil med bebyggelser', 'string'],
-  initial: [false,
-    'Sættes til true hvis dette er initiel import.',
-    'boolean', false],
-  skipsanitycheck: [false, 'Spring over sanity check af import', 'boolean', false]
+  file: [false, 'Fil med bebyggelser', 'string']
 };
 
 runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options) {
