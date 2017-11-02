@@ -93,8 +93,8 @@ const baseQuery2 = (datamodelName, tableName, columnMappings) => {
   return query;
 };
 
-const oldSqlModelNames = ['navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'];
-const newSqlModelNames = ['ejerlav', 'postnummer','vejstykke', 'adgangsadresse', 'adresse'];
+const oldSqlModelNames = ['jordstykketilknytning'];
+const newSqlModelNames = ['ejerlav', 'postnummer','vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej', 'vejstykkepostnummerrelation', 'stednavntilknytning'];
 
 var oldSqlModels = oldSqlModelNames.reduce(function(memo, datamodelName) {
   var columnMappings = mappings.columnMappings[datamodelName];

@@ -34,7 +34,7 @@ exports.json = {
         description: 'Unik URL for bebyggelsen'
       },
       kode: {
-        type: 'integer',
+        type: ['integer', 'null'],
         description: 'Unik kode for bebyggelsen.'
       },
       type: {

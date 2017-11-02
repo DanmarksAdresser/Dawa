@@ -379,6 +379,17 @@ var fields = {
     schema: definitions.Kode4,
     formatter: kode4String,
     primary: true
+  }],
+  stednavntilknytning: [{
+    name: 'stednavn_id',
+    description: 'stednavnets ID',
+    schema: definitions.UUID,
+    primary: true
+  }, {
+    name: 'adgangsadresse_id',
+    description: 'adgangsadressens ID',
+    schema: definitions.UUID,
+    primary: true
   }]
 };
 

@@ -33,6 +33,18 @@ keyParameters.vejstykkepostnummerrelation = normalizeParameters([
     schema: schema.postnr
   }
 ]);
+keyParameters.stednavntilknytning = normalizeParameters([
+  {
+    name: 'stednavn_id',
+    type: 'string',
+    schema: schema.uuid
+  },
+  {
+    name: 'adgangsadresse_id',
+    type: 'string',
+    schema: schema.uuid
+  }
+]);
 
 exports.keyParameters = keyParameters;
 

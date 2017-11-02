@@ -44,11 +44,13 @@ CREATE TABLE stednavne_adgadr_changes as (SELECT null::integer as txid, null::in
 ALTER TABLE stednavne_adgadr_changes ALTER COLUMN txid SET NOT NULL;
 ALTER TABLE stednavne_adgadr_changes ALTER COLUMN operation SET NOT NULL;
 ALTER TABLE stednavne_adgadr_changes ALTER COLUMN public SET NOT NULL;
+ALTER TABLE stednavne_adgadr_changes ALTER COLUMN stednavn_id SET NOT NULL;
+ALTER TABLE stednavne_adgadr_changes ALTER COLUMN adgangsadresse_id SET NOT NULL;
 CREATE INDEX ON stednavne_adgadr_changes(txid, operation);
 CREATE INDEX ON stednavne_adgadr_changes(changeid, public);
 
 CREATE INDEX ON stednavne_adgadr_changes(adgangsadresse_id);
-CREATE INDEX ON stednavne_adgadr_changes(stednavn_id, adgangsadresse_id);
+CREATE INDEX ON stednavne_adgadr_changes(stednavn_id, adgangsadresse_id, changeid desc nulls last);
 
 CREATE TABLE stednavne_divided(
   id uuid,

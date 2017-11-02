@@ -14,4 +14,4 @@ require('./flats/tilknytninger/namesAndKeys');
 require('./bebyggelse/nameAndKey');
 require('./stednavn/nameAndKey');
 require('./stednavntype/nameAndKey');
-
+require('./stednavntilknytning/nameAndKey');

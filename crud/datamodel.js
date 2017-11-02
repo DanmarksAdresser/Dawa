@@ -71,8 +71,15 @@ module.exports = {
     key: ['kommunekode', 'vejkode']
   },
   vejpunkt: {
-    name: 'vejpunk',
+    name: 'vejpunkt',
     table: 'vejpunkter',
-    columns: ['id', 'husnummerid', 'kilde', 'noejagtighedsklasse', 'tekniskstandard', 'geom']
+    columns: ['id', 'husnummerid', 'kilde', 'noejagtighedsklasse', 'tekniskstandard', 'geom'],
+    key: ['id']
+  },
+  stednavntilknytning: {
+    name: 'stednavntilknytning',
+    table: 'stednavne_adgadr',
+    columns: ['stednavn_id', 'adgangsadresse_id'],
+    key: ['stednavn_id', 'adgangsadresse_id']
   }
 };

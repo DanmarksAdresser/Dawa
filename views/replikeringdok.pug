@@ -195,6 +195,16 @@ block content
               +documentResource(parameterDoc, '/replikering/jordstykketilknytninger/haendelser')
               h5 Hændelsesformat for jordstykketilknytninger
               +documentSchema(jsonSchemas.jordstykketilknytning_hændelse)
+            section
+              h4 Stednavntilknytninger
+              p Her udstilles adgangsadressernes tilknyttede stednavne, som den beregnes ud fra adgangspunktet og stednavnets geometri. Adgangsadresserne er altså tilknyttet de stednavne, hvor adgangsadressen ligger indenfor stednavnets geometri.
+
+              h5 Stednavntilknytninger - udtræk
+              +documentResource(parameterDoc, '/replikering/stednavntilknytninger')
+              h5 Stednavntilknytninger - hændelser
+              +documentResource(parameterDoc, '/replikering/stednavntilknytninger/haendelser')
+              h5 Hændelsesformat for stednavntilknytninger
+              +documentSchema(jsonSchemas.stednavntilknytning_hændelse)
 
   block append scripts
     script.

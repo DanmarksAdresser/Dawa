@@ -1643,7 +1643,15 @@ var keyParams = {
       name: 'postnr',
       doc: 'Postnummer. 4 cifre.',
       examples: ['8000']
-    }]
+    }],
+  stednavntilknytning: [
+    {name: 'stednavn_id',
+     doc: 'Stednavnets ID',
+    examples: []},
+    {name: 'adgangsadresse_id',
+    doc: 'Adgangsadressens ID',
+    examples: []}
+  ]
 };
 
 _.each(tilknytninger, function (tilknytning, temaNavn) {
@@ -2074,7 +2082,7 @@ var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;
 });
 
-['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation'].concat(tilknytningTemaer.map(function (tema) {
+['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'ejerlav', 'navngivenvej', 'jordstykketilknytning', 'vejstykkepostnummerrelation', 'stednavntilknytning'].concat(tilknytningTemaer.map(function (tema) {
   return tema.prefix + 'tilknytning';
 })).forEach(function (replicatedModelName) {
   var nameAndKey = registry.findWhere({
