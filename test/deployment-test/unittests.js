@@ -2795,6 +2795,78 @@ describe('Stednavne', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>10, "Der er burde være mindst 3: "+stednavne.length);
+      stednavne.forEach(function(element) {
+        console.log(element.navn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+
+  it("polygon", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.polygon= '[[[12.509943668963547, 55.69947895194342],[12.51370394018313, 55.69929935996996],[12.51175895655753, 55.69735533932972],[12.509943668963547, 55.69947895194342]]]';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
+      stednavne.forEach(function(element) {
+        console.log(element.navn);
+      });
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("cirkel", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.cirkel= '12.509943668963547,55.69947895194342,20';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
+      stednavne.forEach(function(element) {
+        console.log(element.navn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("nærmeste", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.x= 9.323853;
+    options.qs.y= 54.989794;
+    options.qs.nærmeste= true;
+    options.qs.undertype= 'mindesten';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length===1, "Der er burde kun være 1: "+stednavne.length);
+      assert(stednavne[0].navn==='Urnehoved Tingsted', "Det er burde kun være Urnehoved Tingsted: "+stednavne[0].navn);
 
       done();
     })
