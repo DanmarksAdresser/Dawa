@@ -446,7 +446,7 @@ const updateVejstykkerPostnumreMat = (client, txid) => go(function* () {
 
 const updatePostnumreKommunekoderMat = client => go(function*() {
   yield client.query(`DELETE FROM postnumre_kommunekoder_mat;
-   insert into postnumre_kommunekoder_mat(postnr, kommunekode) (SELECT DISTINCT postnr, kommunekode FROM adgangsadresser)`);
+   insert into postnumre_kommunekoder_mat(postnr, kommunekode) (SELECT DISTINCT postnr, kommunekode FROM adgangsadresser where postnr is not null and kommunekode is not null)`);
 });
 
 /**
