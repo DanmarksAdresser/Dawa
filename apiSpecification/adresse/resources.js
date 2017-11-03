@@ -7,6 +7,7 @@ var representations = require('./representations');
 var sqlModel = require('./sqlModel');
 var resourcesUtil = require('../common/resourcesUtil');
 var commonParameters = require('../common/commonParameters');
+const adgangsadresseParameters = require('../adgangsadresse/parameters');
 var kvhxTransformer = require('./kvhxTransformer');
 
 function kvhxDecorator(resourceSpec) {
@@ -43,7 +44,8 @@ module.exports = [
           type: 'string',
           validateFun: kvhxTransformer.validate
         },
-        geometri: parameters.geometri
+        geometri: parameters.geometri,
+      stednavnafstand: adgangsadresseParameters.stednavnafstand
       }, representations,
       sqlModel)),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
@@ -54,7 +56,8 @@ module.exports = [
     dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,
     crs: commonParameters.crs,
-    fuzzy: commonParameters.fuzzy
+    fuzzy: commonParameters.fuzzy,
+    stednavnafstand: adgangsadresseParameters.stednavnafstand
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,

@@ -79,8 +79,7 @@ exports.propertyFilter = normalizeParameters([
   {
     name: 'stednavnid',
     type: 'string',
-    schema: schema.uuid,
-    multi: true
+    schema: schema.uuid
   },
   {
     name: 'bebyggelsesid',
@@ -132,6 +131,17 @@ exports.geometri = [
     schema: {
       enum: ['adgangspunkt', 'vejpunkt']
     }
-  }]
+  }];
+
+exports.stednavnafstand = [
+  {
+    name: 'stednavnafstand',
+    type: 'integer',
+    schema: {
+      type: 'number',
+      minimum: 0
+    }
+  }
+]
 
 registry.addMultiple('adgangsadresse', 'parameterGroup', module.exports);

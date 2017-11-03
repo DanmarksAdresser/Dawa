@@ -37,24 +37,16 @@ module.exports =  {
   },
   stednavnid: {
     select: null,
-    where: function (sqlParts, parameterArray) {
-      // this is a bit hackish, we add the parameters from
-      // the parent query to the subquery to get
-      // correct parameter indices for the subquery
-      var subquery = {
-        select: ["*"],
-        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
-        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id`],
-        orderClauses: [],
-        sqlParams: sqlParts.sqlParams
-      };
-      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
-        name: 'stednavn_id',
-        multi: true
-      }], {});
-      propertyFilterFn(subquery, {stednavn_id: parameterArray});
-      var subquerySql = dbapi.createQuery(subquery).sql;
-      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    where: function (sqlParts, stednavnId, params) {
+      const stednavnIdAlias = dbapi.addSqlParameter(sqlParts, stednavnId);
+      if(params.stednavnafstand) {
+        const stednavnAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stednavnafstand);
+        sqlParts.whereClauses.push(`geom && st_expand((select geom from stednavne where id = ${stednavnIdAlias}), ${stednavnAfstandAlias})
+AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}), ${stednavnAfstandAlias})`)
+      }
+      else {
+        sqlParts.whereClauses.push(`EXISTS(SELECT * FROM stednavne_adgadr WHERE stednavn_id = ${stednavnIdAlias} AND stednavne_adgadr.adgangsadresse_id = a_id)`);
+      }
     }
 
   },

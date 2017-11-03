@@ -622,6 +622,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     doc: 'Find de adresser som ligger indenfor stednavnet med den angivne ID'
   },
   {
+    name: 'stednavnafstand',
+    doc: 'Anvendes sammen med stednavnid. Find de adresser, hvor afstanden til stednavnet angivet ved stednavnid er mindre end den angivne værdi.'
+  },
+  {
     name: 'bebyggelsesid',
     doc: 'Find de adresser som ligger indenfor bebyggelsen med den angivne ID'
   },

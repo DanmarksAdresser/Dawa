@@ -38,6 +38,7 @@ module.exports = [
         geomWithin: commonParameters.geomWithin,
         dagiFilter: commonParameters.dagiFilter,
         fuzzy: commonParameters.fuzzy,
+        stednavnafstand: parameters.stednavnafstand,
         kvh: {
           name: 'kvh',
           type: 'string',
@@ -55,7 +56,8 @@ module.exports = [
     geomWithin: commonParameters.geomWithin,
     dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,
-    fuzzy: commonParameters.fuzzy
+    fuzzy: commonParameters.fuzzy,
+    stednavnafstand: parameters.stednavnafstand
   }, representations.autocomplete, sqlModel),
   resourcesUtil.reverseGeocodingResourceSpec(
     '/adgangsadresser/reverse',

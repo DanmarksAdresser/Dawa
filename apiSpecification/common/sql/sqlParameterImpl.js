@@ -311,7 +311,13 @@ exports.reverseGeocodingWithin = function (geom) {
       const yAlias = dbapi.addSqlParameter(sqlParts, params.y);
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid);
       const pointSql = `ST_Transform(ST_SetSRID(ST_Point(${xAlias}, ${yAlias}), ${sridAlias}), 25832)`;
-      dbapi.addWhereClause(sqlParts, `ST_Contains(${geom}, ${pointSql})`);
+      if(params.reversewithindistance) {
+        const distAlias = dbapi.addSqlParameter(sqlParts, params.reversewithindistance);
+        dbapi.addWhereClause(sqlParts, `ST_Distance(${geom}, ${pointSql}) < ${distAlias}`);
+      }
+      else {
+        dbapi.addWhereClause(sqlParts, `ST_Contains(${geom}, ${pointSql})`);
+      }
     }
   };
 };
