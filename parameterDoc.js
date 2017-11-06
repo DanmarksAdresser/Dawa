@@ -623,7 +623,7 @@ var parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'stednavnafstand',
-    doc: 'Anvendes sammen med stednavnid. Find de adresser, hvor afstanden til stednavnet angivet ved stednavnid er mindre end den angivne værdi.'
+    doc: 'Anvendes sammen med stednavnid. Find de adresser, hvor afstanden til stednavnet angivet ved stednavnid er mindre end den angivne værdi. Afstanden angives i meter.'
   },
   {
     name: 'bebyggelsesid',

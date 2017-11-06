@@ -136,7 +136,7 @@ exports.geometri = [
 exports.stednavnafstand = [
   {
     name: 'stednavnafstand',
-    type: 'integer',
+    type: 'float',
     schema: {
       type: 'number',
       minimum: 0
