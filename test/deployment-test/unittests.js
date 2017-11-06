@@ -829,6 +829,25 @@ describe('Postnummersøgning', function(){
     })
   })
 
+
+  it("Kommunetilknytning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='postnumre/5601';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var postnummer= JSON.parse(response.body);
+      assert(postnummer.kommuner.length>=1, "Der er burde være mindst 1: "+postnummer.kommuner.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
   it("autocomplete navn", function(done){
     var options= {};
     options.baseUrl= host;
@@ -2794,7 +2813,7 @@ describe('Stednavne', function(){
     rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
-      assert(stednavne.length>10, "Der er burde være mindst 3: "+stednavne.length);
+      assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
       stednavne.forEach(function(element) {
         console.log(element.navn);
       });
@@ -2928,6 +2947,26 @@ describe('Stednavne', function(){
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length===1, "Der burde være en: "+stednavne.length);
       assert(stednavne[0].adressebetegnelse === 'Søtorvet 4, 8600 Silkeborg', "Burde være 'Søtorvet 4, 8600 Silkeborg'");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("adresser indeholdt i et stednavns geometri samt 200 meter derfra", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='adresser';
+    options.qs= {};
+    options.qs.stednavnid= '1233766a-2e10-6b98-e053-d480220a5a3f';
+    options.qs.stednavnafstand= 200;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adresser= JSON.parse(response.body);
+      assert(adresser.length>3, "Der burde være mere end tre adresser: "+adresser.length);
       done();
     })
     .catch((err) => {
