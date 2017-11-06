@@ -13,6 +13,7 @@ const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
 
 /******************************************************************************/
 /*** Utils ********************************************************************/
+
 /******************************************************************************/
 
 function autocompleteSubtext(name) {
@@ -63,7 +64,6 @@ const strukturParameterAdresse = {
   ' Det anbefales at benytte mini-formatet hvis der ikke er behov for den fulde struktur, da dette vil' +
   ' give bedre svartider.'
 }
-
 
 
 var pagingParameters = [{
@@ -507,7 +507,7 @@ var kommuneDoc = {
 
 const geometriParam = {
   name: 'geometri',
-    doc: 'Hvis GeoJSON formatet anvendes, angiver parameteren om det er adgangspunktet eller vejpunktet der anvendes. Mulige værdier: "adgangspunkt" eller "vejpunkt"'
+  doc: 'Hvis GeoJSON formatet anvendes, angiver parameteren om det er adgangspunktet eller vejpunktet der anvendes. Mulige værdier: "adgangspunkt" eller "vejpunkt"'
 };
 
 var parametersForBothAdresseAndAdgangsAdresse = [
@@ -1179,6 +1179,7 @@ function dagiNavnParameter(tema) {
     doc: firstUpper(tema.singularSpecific) + 's navn. Der er forskel på store og små bogstaver.'
   };
 }
+
 function dagiQParameter() {
   return {
     name: 'q',
@@ -1186,6 +1187,7 @@ function dagiQParameter() {
     'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
   };
 }
+
 function dagiKodeNavnParameters(tema) {
   return [
     {
@@ -1449,6 +1451,7 @@ function dagiListEndpointDoc(tema) {
     examples: dagiExamples[tema.singular].query || []
   };
 }
+
 function dagiByKodeEndpointDoc(tema) {
   return {
     subtext: 'Modtag ' + tema.singular + ' med kode.',
@@ -1459,6 +1462,7 @@ function dagiByKodeEndpointDoc(tema) {
     examples: dagiExamples[tema.singular].get || []
   };
 }
+
 function dagiAutocompleteEndpointDoc(tema) {
   return {
     subtext: autocompleteSubtext(tema.plural),
@@ -1466,6 +1470,7 @@ function dagiAutocompleteEndpointDoc(tema) {
     examples: dagiExamples[tema.singular].autocomplete || []
   };
 }
+
 function dagiReverseEndpointDoc(tema) {
   return {
     subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
@@ -1621,6 +1626,7 @@ function dagiStorkredsDoc() {
 
   return doc;
 }
+
 _.extend(module.exports, dagiValglandsDelsDoc().resources);
 _.extend(module.exports, dagiStorkredsDoc().resources);
 
@@ -1649,12 +1655,16 @@ var keyParams = {
       examples: ['8000']
     }],
   stednavntilknytning: [
-    {name: 'stednavn_id',
-     doc: 'Stednavnets ID',
-    examples: []},
-    {name: 'adgangsadresse_id',
-    doc: 'Adgangsadressens ID',
-    examples: []}
+    {
+      name: 'stednavn_id',
+      doc: 'Stednavnets ID',
+      examples: []
+    },
+    {
+      name: 'adgangsadresse_id',
+      doc: 'Adgangsadressens ID',
+      examples: []
+    }
   ]
 };
 
@@ -1809,7 +1819,7 @@ const oisFilterParameterDoc = {
       },
       {
         name: 'polygon',
-        doc: 'Find bygninger, hvor bygningspunktet ligger indenfor det angivne polygon.'+
+        doc: 'Find bygninger, hvor bygningspunktet ligger indenfor det angivne polygon.' +
         ' Polygonet specificeres som et array af koordinater på samme måde som' +
         ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
         ' Bemærk at polygoner skal' +
@@ -1865,7 +1875,7 @@ const oisFilterParameterDoc = {
       },
       {
         name: 'polygon',
-        doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.'+
+        doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.' +
         ' Polygonet specificeres som et array af koordinater på samme måde som' +
         ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
         ' Bemærk at polygoner skal' +
@@ -1889,7 +1899,7 @@ const oisFilterParameterDoc = {
         doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
         'i det koordinatsystem som er angivet ved srid-parameteren.'
       }
-      ],
+    ],
     examples: []
 
   },
@@ -2000,7 +2010,7 @@ const oisFilterParameterDoc = {
       },
       {
         name: 'polygon',
-        doc: 'Find bygningspunkter der ligger indenfor det angivne polygon.'+
+        doc: 'Find bygningspunkter der ligger indenfor det angivne polygon.' +
         ' Polygonet specificeres som et array af koordinater på samme måde som' +
         ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
         ' Bemærk at polygoner skal' +
@@ -2066,7 +2076,7 @@ Object.keys(oisApiModel).forEach(apiModelName => {
   parameterDoc.parameters.push(strukturParam);
   parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
   module.exports[path] = parameterDoc;
-  if(apiModelName !== 'matrikelreference') {
+  if (apiModelName !== 'matrikelreference') {
     const getByKeyPath = `/ois/${plural}/{id}`;
     const pathParameter = {
       name: 'id',
@@ -2298,7 +2308,28 @@ module.exports['/stednavne'] = {
       doc: 'Anvendes sammen med x- og y-parametrene. Angiver, at det stednavn som ligger nærmest det angivne punktet skal returneres i stedet for de' +
       ' stednavne som overlapper med punktet. Anvendes typisk sammen med hovedtype eller undertype parametrene.'
     }],
-  examples: []
+  examples: [
+    {
+      description: 'Find alle byer i Danmark',
+      query: [{
+        name: 'hovedtype',
+        value: 'Bebyggelse'
+      }, {
+        name: 'undertype',
+        value: 'by'
+      }]
+    },
+    {
+      description: 'Find alle golfbaner',
+      query:[{
+        name: 'hovedtype',
+        value: 'Idraetsanlæg'
+      }, {
+        name: 'undertype',
+        value: 'golfbane'
+      }]
+    }
+  ]
 };
 
 module.exports['/stednavne/autocomplete'] = {
@@ -2315,16 +2346,16 @@ module.exports['/stednavne/autocomplete'] = {
 
 module.exports['/stednavne/{id}'] = {
   subtext: 'Modtag stednavn med id.',
-    parameters: [
-      {
-        name: 'id',
-        doc: 'Stednavnets unikke ID'
-      },
-      SRIDParameter,
-      strukturParameter,
-      ...formatParameters],
-    nomulti: true,
-    examples: []
+  parameters: [
+    {
+      name: 'id',
+      doc: 'Stednavnets unikke ID'
+    },
+    SRIDParameter,
+    strukturParameter,
+    ...formatParameters],
+  nomulti: true,
+  examples: []
 };
 
 module.exports['/bebyggelser'] = {
@@ -2434,8 +2465,7 @@ module.exports['/stednavntyper/{hovedtype}'] = {
       name: 'hovedtype',
       doc: 'Hovedtypen der ønskes, eksempelvis "Bebyggelse'
     }, ...formatParameters],
-  examples: [
-  ]
+  examples: []
 };
 
 _.extend(module.exports, vejnavneDoc.resources, vejstykkerDoc.resources, supplerendeBynavneDoc.resources, kommuneDoc.resources,
@@ -2470,4 +2500,5 @@ function addMultiParameters() {
     }
   });
 }
+
 addMultiParameters();
