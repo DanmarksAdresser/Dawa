@@ -146,7 +146,20 @@ describe('Import af stednavne', () => {
       const result = yield helpers.getJson(clientFn(), adgadrResource, {}, {
         stednavnid: '12337669-8e23-6b98-e053-d480220a5a3f',
         struktur: 'mini',
-        stednavnafstand: '1000'
+        stednavnafstand: '1000.1'
+      });
+      assert.strictEqual(result.length, 3);
+    }));
+    it('Kan finde adresser indenfor en bestemt afstand fra stednavn', () => go(function*() {
+      const adrResource = registry.get({
+        entityName: 'adresse',
+        type: 'resource',
+        qualifier: 'query'
+      });
+      const result = yield helpers.getJson(clientFn(), adrResource, {}, {
+        stednavnid: '12337669-8e23-6b98-e053-d480220a5a3f',
+        struktur: 'mini',
+        stednavnafstand: '1000.1'
       });
       assert.strictEqual(result.length, 3);
     }));
