@@ -46,8 +46,8 @@ exports.json = {
         description: 'Stednavnets navn'
       },
       navnestatus: {
-        type: nullableType('string'),
-        description: 'Stednavnets navnestatus'
+        enum: ['officielt', 'uofficielt', 'suAutoriseret'],
+        description: 'Stednavnets navnestatus. Mulige værdier: "officielt", "uofficielt", "suAutoriseret"',
       },
       egenskaber: {
         description: 'Yderligere egenskaber for stednavnet, som er specifikke for den pågældende hovedtype'

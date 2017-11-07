@@ -12,6 +12,14 @@ CREATE OR REPLACE FUNCTION makeRectangle(xmin DOUBLE PRECISION,
 
 CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEGER)
   RETURNS SETOF geometry AS
+$$
+BEGIN
+  RETURN QUERY SELECT splitToGridRecursive(g, maxPointCount, true);
+END;
+$$ LANGUAGE PLPGSQL;
+
+CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEGER, forceMultiPolygons BOOLEAN)
+  RETURNS SETOF geometry AS
   $$
   DECLARE
     xmin DOUBLE PRECISION;
@@ -31,7 +39,11 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
 --    RAISE NOTICE 'Points: (%)', points;
 
     IF points <= maxPointCount THEN
-      RETURN QUERY SELECT ST_Multi(g);
+      IF(forceMultiPolygons) THEN
+        RETURN QUERY SELECT ST_Multi(g);
+      ELSE
+        RETURN QUERY SELECT g;
+      END IF;
       RETURN;
     END IF;
     xmin := ST_XMin(g);
@@ -49,10 +61,17 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
       r1 := makeRectangle(xmin, ymin, xmax, ymin + dy/2, srid);
       r2 := makeRectangle(xmin, ymin + dy/2, xmax, ymax, srid);
     END IF;
-    i1 := ST_Multi(ST_CollectionExtract(st_intersection(g, r1), 3));
-    i2 := ST_Multi(ST_CollectionExtract(st_intersection(g, r2), 3));
-    RETURN QUERY SELECT splitToGridRecursive(i1, maxPointCount);
-    RETURN QUERY SELECT splitToGridRecursive(i2, maxPointCount);
+--    RAISE NOTICE 'bbox: (%)', st_astext(makerectangle(xmin, ymin, xmax, ymax, srid));
+--    RAISE NOTICE 'r1: (%), r2: (%)', st_astext(r1), st_astext(r2);
+    IF (forceMultiPolygons) THEN
+      i1 := ST_Multi(ST_CollectionExtract(st_intersection(g, r1), 3));
+      i2 := ST_Multi(ST_CollectionExtract(st_intersection(g, r2), 3));
+    ELSE
+      i1 := st_intersection(g, r1);
+      i2 := st_intersection(g, r2);
+    END IF;
+    RETURN QUERY SELECT splitToGridRecursive(i1, maxPointCount, forceMultiPolygons);
+    RETURN QUERY SELECT splitToGridRecursive(i2, maxPointCount, forceMultiPolygons);
     RETURN;
   END;
   $$ LANGUAGE plpgsql IMMUTABLE STRICT;

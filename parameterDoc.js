@@ -2282,6 +2282,10 @@ const commonStednavnParameters = [
     name: 'kommunekode',
     doc: 'Find stednavne i kommunen med den angivne kommunekode'
   },
+  {
+    name: 'navnestatus',
+    doc: 'Stednavnets navnestatus. Mulige værdier: "officielt", "uofficielt", "suAutoriseret"'
+  },
   ...dagiSridCirkelPolygonParameters('stednavne'),
   strukturParameter,
   ...formatAndPagingParams,

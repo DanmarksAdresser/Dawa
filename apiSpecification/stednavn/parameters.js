@@ -41,6 +41,13 @@ module.exports = {
         type: 'integer',
         schema: schema.kode4,
         multi: true
+      },
+      {
+        name: 'navnestatus',
+        type: 'string',
+        schema: {
+          enum: ['officielt', 'uofficielt', 'suAutoriseret']
+        }
       }
     ])
 };

@@ -568,6 +568,10 @@ var sampleParameters = {
     kommunekode: {
       values: ['99'],
       verifier: (stednavn, kommunekode) => parseInt(stednavn.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
+    },
+    navnestatus: {
+      values: ['officielt', 'suAutoriseret'],
+      verifier: (stednavn, status) => stednavn.navnestatus === status
     }
   },
   ois_grund: {

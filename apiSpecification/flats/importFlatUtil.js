@@ -16,11 +16,11 @@ const updateSubdividedTable = (client, table) => go(function*() {
   yield client.queryp(`INSERT INTO ${table}_divided(id, geom) (SELECT id, splitToGridRecursive(geom, 64) AS geom FROM update_${table})`);
 });
 
-const updateSubdividedTableNg = (client, txid, table) => go(function*() {
-  yield client.queryp(`DELETE FROM ${table}_divided d USING ${table}_changes c WHERE txid = ${txid} AND d.id = c.id`);
-  yield client.queryp(`INSERT INTO ${table}_divided(id, geom) (SELECT id, splitToGridRecursive(geom, 64) AS geom 
+const updateSubdividedTableNg = (client, txid, table, forcePolygons) => go(function*() {
+  yield client.query(`DELETE FROM ${table}_divided d USING ${table}_changes c WHERE txid = ${txid} AND d.id = c.id`);
+  yield client.query(`INSERT INTO ${table}_divided(id, geom) (SELECT id, splitToGridRecursive(geom, 64, $1) AS geom 
   FROM ${table}_changes 
-  WHERE txid = ${txid} AND operation <> 'delete')`);
+  WHERE txid = ${txid} AND operation <> 'delete')`, [forcePolygons]);
 });
 
 const updateGeometricTable = (client, table, idColumns, allColumns, columnsToUpdate) => go(function*() {
