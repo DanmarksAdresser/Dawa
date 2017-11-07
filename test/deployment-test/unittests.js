@@ -2848,6 +2848,26 @@ describe('Stednavne', function(){
     });
   });
 
+  it("navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne';
+    options.qs= {};
+    options.qs.navn= 'Gudenå';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length===1, "Der er burde være en: "+stednavne.length);
+      assert(stednavne[0].kommuner.length > 0, "Der burde være tilknyttet mindst en kommune ")
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
   it("cirkel", function(done){
     var options= {};
     options.baseUrl= host;
