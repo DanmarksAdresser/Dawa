@@ -65,7 +65,7 @@ const refreshAdgangsadresserRelationNg = (client, txid, geomIdColumns, geomTable
 FROM ${geomTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
   yield tableDiffNg.computeDifferences(
     client, txid, 'desired_view', tableModel, ['stednavn_id', 'adgangsadresse_id']);
-  yield client.queryp('DROP table desired_view');
+  yield client.query(`DROP table desired_view; ANALYZE ${tableModel.table}_changes`);
   yield tableDiffNg.applyChanges(client, txid, tableModel);
 });
 

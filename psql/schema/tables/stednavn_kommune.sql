@@ -5,3 +5,4 @@ CREATE MATERIALIZED VIEW stednavn_kommune AS
     JOIN kommuner k ON g.id = k.tema_id);
 
 CREATE UNIQUE INDEX ON stednavn_kommune(stednavn_id, kommunekode);
+CREATE  INDEX ON stednavn_kommune(kommunekode);
