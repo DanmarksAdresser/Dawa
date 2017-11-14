@@ -14,7 +14,6 @@ exports.runImporter = (importerName, optionSpec, requiredOptions, importerFn) =>
       });
     }
     catch(e) {
-      console.log('CAUGHT ERROR');
       logger.error('Importer failed', {
         importerName,
         error: e

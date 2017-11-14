@@ -61,7 +61,7 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield client.query('analyze stednavne; analyze stednavne_changes');
   yield client.query('UPDATE stednavne_changes c SET visueltcenter = f.visueltcenter FROM fetch_stednavne f WHERE c.id = f.id and f.visueltcenter is not null');
   yield updateGeometricTableNg(client, txid, stednavneTableModel);
-  yield updateSubdividedTableNg(client, txid, 'stednavne');
+  yield updateSubdividedTableNg(client, txid, 'stednavne', false);
   yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
   yield refreshAdgangsadresserRelationNg(client, txid, ['id'], 'stednavne_divided', ['stednavn_id'], stednavneAdgangsadresserTableModel);
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
