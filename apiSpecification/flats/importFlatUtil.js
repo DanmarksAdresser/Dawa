@@ -62,7 +62,7 @@ const refreshAdgangsadresserRelationNg = (client, txid, geomIdColumns, geomTable
   const selectClause = _.zip(geomIdColumns, relIdColumns).map(([geomId, relId]) => `f.${geomId} as ${relId}`).concat('a.id as adgangsadresse_id').join(', ');
   yield client.queryp(`CREATE TEMP table desired_view AS \
 (SELECT DISTINCT  ${selectClause} \
-FROM ${geomTable} f JOIN adgangsadresser_mat a ON ST_Covers(f.geom, a.geom))`);
+FROM ${geomTable} f JOIN adgangsadresser_mat a ON ST_DWithin(f.geom, a.geom, 0))`);
   yield tableDiffNg.computeDifferences(
     client, txid, 'desired_view', tableModel, ['stednavn_id', 'adgangsadresse_id']);
   yield client.query(`DROP table desired_view; ANALYZE ${tableModel.table}_changes`);
