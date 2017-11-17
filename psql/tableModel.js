@@ -254,7 +254,7 @@ const stednavne = {
 
 const stednavne_adgadr = {
   table: 'stednavne_adgadr',
-  entity: 'stednavn_adgangsadresse',
+  entity: 'stednavntilknytning',
   primaryKey: ['stednavn_id', 'adgangsadresse_id'],
   columns: [{
     name: 'stednavn_id'
