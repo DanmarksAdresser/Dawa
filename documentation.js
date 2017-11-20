@@ -2,9 +2,9 @@
 
 var express = require('express');
 var fs = require('fs');
-var parameterDoc   = require('./parameterDoc');
+var parameterDoc = require('./parameterDoc');
 var paths = require('./apiSpecification/paths');
-var docUtil        = require('./docUtil');
+var docUtil = require('./docUtil');
 var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
@@ -27,8 +27,8 @@ app.get('/', function (req, res) {
 var jsonSchemas = _.reduce(registry.entriesWhere({
   type: 'representation',
   qualifier: 'json'
-}), function(memo, entry) {
-  if(entry.object.schema) {
+}), function (memo, entry) {
+  if (entry.object.schema) {
     memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
   }
   return memo;
@@ -37,13 +37,14 @@ var jsonSchemas = _.reduce(registry.entriesWhere({
 var autocompleteSchemas = _.reduce(registry.entriesWhere({
   type: 'representation',
   qualifier: 'autocomplete'
-}), function(memo, entry) {
+}), function (memo, entry) {
   memo[entry.entityName] = schemaUtil.compileSchema(entry.object.schema);
   return memo;
 }, {});
 
 function pugDocumentationParams(req) {
-  return {url: paths.baseUrl(req),
+  return {
+    url: paths.baseUrl(req),
     jsonSchemas: jsonSchemas,
     autocompleteSchemas: autocompleteSchemas,
     parameterDoc: parameterDoc,
@@ -52,7 +53,7 @@ function pugDocumentationParams(req) {
   };
 }
 
-function setupPugPage(path, page){
+function setupPugPage(path, page) {
   app.get(path, function (req, res) {
     res.render(page, pugDocumentationParams(req));
   });
@@ -92,15 +93,16 @@ function setupSchemaPage(path) {
   });
 }
 
-setupPugPage('/autocompletedok'             , 'autocompletedok.pug');
-setupPugPage('/generelt'             , 'generelt.pug');
-setupPugPage('/adressedok'           , 'adressedok.pug');
-setupPugPage('/adgangsadressedok'    , 'adgangsadressedok.pug');
-setupPugPage('/vejedok'              , 'vejedok.pug');
-setupPugPage('/postnummerdok'        , 'postnummerdok.pug');
-setupPugPage('/listerdok'            , 'listerdok.pug');
-setupPugPage('/oisdok'            , 'oisdok.pug');
-setupPugPage('/om'                   , 'om.pug');
+setupPugPage('/autocompletedok', 'autocompletedok.pug');
+setupPugPage('/generelt', 'generelt.pug');
+setupPugPage('/adressedok', 'adressedok.pug');
+setupPugPage('/adgangsadressedok', 'adgangsadressedok.pug');
+setupPugPage('/vejedok', 'vejedok.pug');
+setupPugPage('/postnummerdok', 'postnummerdok.pug');
+setupPugPage('/listerdok', 'listerdok.pug');
+setupPugPage('/oisdok', 'oisdok.pug');
+setupPugPage('/oislightdok', 'oisdok.pug');
+setupPugPage('/om', 'om.pug');
 setupPugPage('/replikeringdok', 'replikeringdok.pug');
 setupSchemaPage('/replikeringdok/schema.json');
 

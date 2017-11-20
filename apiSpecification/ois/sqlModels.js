@@ -7,7 +7,7 @@ const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 const namesAndKeys = require('./namesAndKeys');
 const sqlUtil = require('../common/sql/sqlUtil');
 const registry = require('../registry');
-const parametersMap = require('./parameters');
+const parametersMap = require('./parameters').full;
 function baseQuery(oisModelName) {
   const apiModel = oisApiModels[oisModelName];
   const sqlParts = {
@@ -47,6 +47,7 @@ for(let apiModelName of Object.keys(oisApiModels)) {
     parameterImpls,
     () => baseQuery(apiModelName));
 
-  registry.add(`ois_${apiModelName}`, 'sqlModel', undefined, module.exports[apiModelName]);
+  registry.add(`ois_${apiModelName}_full`, 'sqlModel', undefined, module.exports[apiModelName]);
+  registry.add(`ois_${apiModelName}_public`, 'sqlModel', undefined, module.exports[apiModelName]);
 }
 

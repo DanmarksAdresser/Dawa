@@ -1844,7 +1844,14 @@ const oisFilterParameterDoc = {
         'i det koordinatsystem som er angivet ved srid-parameteren.'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find bygninger for adgangsadresseid 0a3f5096-91d3-32b8-e044-0003ba298018',
+        query: [
+          {name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'}
+        ]
+      }
+    ]
   },
   tekniskanlaeg: {
     subtext: `Find tekniske anlæg fra OIS. ${oisReferenceText}`,
@@ -2063,34 +2070,41 @@ const oisFilterParameterDoc = {
   }
 };
 
-Object.keys(oisApiModel).forEach(apiModelName => {
-  const strukturParam = {
-    name: 'struktur',
-    doc: 'Angiver hvilken svarstruktur der ønskes. "mini" angiver, OIS-entiten uden relatede entiteter. "nestet" angiver, at evt. relaterede' +
-    'entiter skal medtages. "flad" angiver, at relaterede entiter skal medtages, men i en flad struktur.' +
-    ' "nestet" er default for JSON format, "flad" er default for GeoJSON og CSV.'
-  };
-  const plural = oisNamesAndKeys[apiModelName].plural;
-  const path = `/ois/${plural}`;
-  const parameterDoc = oisFilterParameterDoc[apiModelName];
-  parameterDoc.parameters.push(strukturParam);
-  parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
-  module.exports[path] = parameterDoc;
-  if (apiModelName !== 'matrikelreference') {
-    const getByKeyPath = `/ois/${plural}/{id}`;
-    const pathParameter = {
-      name: 'id',
-      doc: `ID (${oisModels[apiModelName].key[0]})`
+const oisPaths = {
+  'public': '/oislight',
+  full: '/ois'
+};
+
+for(let variant of ['full', 'public']) {
+  Object.keys(oisApiModel).forEach(apiModelName => {
+    const strukturParam = {
+      name: 'struktur',
+      doc: 'Angiver hvilken svarstruktur der ønskes. "mini" angiver, OIS-entiten uden relatede entiteter. "nestet" angiver, at evt. relaterede' +
+      'entiter skal medtages. "flad" angiver, at relaterede entiter skal medtages, men i en flad struktur.' +
+      ' "nestet" er default for JSON format, "flad" er default for GeoJSON og CSV.'
     };
-    const parameters = [pathParameter].concat(formatParameters).concat(strukturParam);
-    const subtext = `Enkeltopslag af ${apiModelName}`;
-    module.exports[getByKeyPath] = {
-      subtext,
-      parameters,
-      examples: []
-    };
-  }
-});
+    const plural = oisNamesAndKeys[apiModelName].plural;
+    const path = `${oisPaths[variant]}/${plural}`;
+    const parameterDoc = oisFilterParameterDoc[apiModelName];
+    parameterDoc.parameters.push(strukturParam);
+    parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
+    module.exports[path] = parameterDoc;
+    if (apiModelName !== 'matrikelreference') {
+      const getByKeyPath = `${oisPaths[variant]}/${plural}/{id}`;
+      const pathParameter = {
+        name: 'id',
+        doc: `ID (${oisModels[apiModelName].key[0]})`
+      };
+      const parameters = [pathParameter].concat(formatParameters).concat(strukturParam);
+      const subtext = `Enkeltopslag af ${apiModelName}`;
+      module.exports[getByKeyPath] = {
+        subtext,
+        parameters,
+        examples: []
+      };
+    }
+  });
+}
 
 var tilknytningTemaer = dagiTemaer.filter(function (tema) {
   return tilknytninger[tema.singular] !== undefined;

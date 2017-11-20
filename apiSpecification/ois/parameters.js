@@ -1,11 +1,17 @@
 "use strict";
 
-const oisModels= require('../../ois/oisModels');
+const fullOisModels= require('../../ois/oisModels');
+const publicOisModels= require('../../ois/publicOisModels');
 const fieldSpec = require('./fieldSpec');
 const schemas = require('./schemas');
 
 const registry = require('../registry');
 const filtersMap = require('./filterParameterSpec');
+
+const modelsMap = {
+  public: publicOisModels,
+  full: fullOisModels
+};
 
 const parametertypeFromField = field => {
   const schema = schemas.schemaFromField(field, false);
@@ -23,10 +29,12 @@ const parametertypeFromField = field => {
   }
 };
 
-const keyParams = oisApiModelName => {
-  const oisModel = oisModels[oisApiModelName];
+const keyParams = (variant, oisApiModelName) => {
+  const oisModels = modelsMap[variant];
+  const oisModel  = oisModels[oisApiModelName];
   const filters = filtersMap[oisApiModelName];
-  const field  = fieldSpec[oisApiModelName].find(field => field.name === oisModel.key[0]);
+  const field  = fieldSpec[variant][oisApiModelName].find(field => field.name === oisModel.key[0]);
+
   const filter = filters.find(filter => filter.field === field.name);
   if(!filter) {
     return [];
@@ -43,12 +51,13 @@ const keyParams = oisApiModelName => {
   return [result];
 };
 
-const filterParams = oisApiModelName => {
+const filterParams = (variant, oisApiModelName) => {
+  const oisModels = modelsMap[variant];
   const filters = filtersMap[oisApiModelName];
   return filters.map(filter => {
-    const field  = fieldSpec[oisApiModelName].find(field => field.name === filter.field);
+    const field  = fieldSpec[variant][oisApiModelName].find(field => field.name === filter.field);
     if(!field) {
-      throw new Error(`Could not find field to filter: ${oisApiModelName}, ${filter.field}`);
+      return null;
     }
     const sourceModel = field.source ? field.source.relation : oisApiModelName;
     const sourceName = field.source ? field.source.name : field.name;
@@ -64,13 +73,17 @@ const filterParams = oisApiModelName => {
       result.process = filter.process;
     }
     return result;
-  });
+  }).filter(t => t !== null);
 };
 
-for(let oisApiModelName of Object.keys(filtersMap)) {
-  exports[oisApiModelName] = {
-    propertyFilter: filterParams(oisApiModelName),
-    id: keyParams(oisApiModelName)
-  };
-  registry.addMultiple(`ois_${oisApiModelName}`, 'parameterGroup', module.exports[oisApiModelName]);
+for(let variant of ['public', 'full']) {
+  exports[variant] = {};
+  for(let oisApiModelName of Object.keys(filtersMap)) {
+    exports[variant][oisApiModelName] = {
+      propertyFilter: filterParams(variant, oisApiModelName),
+      id: keyParams(variant, oisApiModelName)
+    };
+    registry.addMultiple(`ois_${oisApiModelName}_${variant}`, 'parameterGroup', module.exports[variant][oisApiModelName]);
+  }
+
 }

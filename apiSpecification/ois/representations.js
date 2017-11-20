@@ -4,20 +4,29 @@ const _ = require('underscore');
 
 const namesAndKeys = require('./namesAndKeys');
 const oisApiModels = require('./oisApiModels');
-const oisModels = require('../../ois/oisModels');
+const fullOisModels = require('../../ois/oisModels');
+const publicOisModels = require('../../ois/publicOisModels');
 const fieldsMap = require('./fields');
 const representationUtil = require('../common/representationUtil');
 const registry = require('../registry');
 
-const makeOisHref = (baseUrl, apiModelName, id) => `${baseUrl}/ois/${namesAndKeys[apiModelName].plural}/${id}`;
+const oisModelsMap = {
+  full: fullOisModels,
+  public: publicOisModels
+};
 
-const extractNonprefixedEntity = (entity, row) => {
-  const fields = oisModels[entity].fields;
+const makeOisHref = (baseUrl, variant, apiModelName, id) => {
+  const path = variant === 'full' ? '/ois' : '/oislight';
+  return `${baseUrl}${path}/${namesAndKeys[apiModelName].plural}/${id}`;
+};
+
+const extractNonprefixedEntity = ( model, row) => {
+  const fields = model.fields;
   const obj = fields.reduce((memo, field) => {
     memo[field.name] = row[field.name];
     return memo;
   }, {});
-  const geomField = _.findWhere(oisModels[entity].derivedFields, { name: 'geom'});
+  const geomField = _.findWhere(model.derivedFields, { name: 'geom'});
   if(geomField) {
     obj.koordinater =  row.koordinater_x ?
       [row.koordinater_x, row.koordinater_y]
@@ -25,7 +34,7 @@ const extractNonprefixedEntity = (entity, row) => {
   }
   return obj;
 };
-const extractPrefixedEntity = (baseUrl, entity, row) => {
+const extractPrefixedEntity = (variant, oisModels, baseUrl, entity, row) => {
   const oisModel = oisModels[entity];
   if(row[`${entity}_${oisModel.key[0]}`]) {
     const fields = oisModels[entity].fields;
@@ -39,7 +48,7 @@ const extractPrefixedEntity = (baseUrl, entity, row) => {
         [row[`${entity}_koordinater_x`], row[`${entity}_koordinater_y`]] :
         null;
     }
-    obj.href = makeOisHref(baseUrl, entity, row[`${entity}_${oisModel.key[0]}`]);
+    obj.href = makeOisHref(baseUrl, variant, entity, row[`${entity}_${oisModel.key[0]}`]);
     return obj;
   }
   else {
@@ -47,7 +56,7 @@ const extractPrefixedEntity = (baseUrl, entity, row) => {
   }
 };
 
-const extractAggregateEntity = (entity, row) => {
+const extractAggregateEntity = (oisModels, entity, row) => {
   const fixFieldCasing = obj => {
     const model = oisModels[entity];
     return model.fields.reduce((memo, field) => {
@@ -60,58 +69,68 @@ const extractAggregateEntity = (entity, row) => {
   const result = {};
   result[plural] = objects;
   return result;
-}
+};
 
-const fieldsIncludedInFlatMap = Object.keys(oisApiModels).reduce((memo, apiModelName) => {
-  const excludedFields = ['geom_json'];
+const fieldsIncludedInFlatMap =  variant => {
+  return Object.keys(oisApiModels).reduce((memo, apiModelName) => {
+    const excludedFields = ['geom_json'];
 
-  const allFields = fieldsMap[apiModelName];
-  memo[apiModelName] = representationUtil.fieldsWithoutNames(allFields, excludedFields);
-  return memo;
-}, {});
+    const allFields = fieldsMap[variant][apiModelName];
+    memo[apiModelName] = representationUtil.fieldsWithoutNames(allFields, excludedFields);
+    return memo;
+  }, {});
+};
 
-for(let apiModelName of Object.keys(oisApiModels)) {
-  const apiModel = oisApiModels[apiModelName];
-  const flatFields = fieldsIncludedInFlatMap[apiModelName];
-  const flatRepresentation = representationUtil.defaultFlatRepresentation(flatFields);
-  const miniFieldNames = _.pluck(oisModels[apiModelName].fields, 'name');
-  const miniFields = _.filter(flatFields, field => _.contains(miniFieldNames, field.name));
+const createRepresentations = variant => {
+  exports[variant] = {};
+  const oisModels = oisModelsMap[variant];
+  for(let apiModelName of Object.keys(oisApiModels)) {
+    const apiModel = oisApiModels[apiModelName];
+    const flatFields = fieldsIncludedInFlatMap(variant)[apiModelName];
+    const flatRepresentation = representationUtil.defaultFlatRepresentation(flatFields);
+    const miniFieldNames = _.pluck(oisModels[apiModelName].fields, 'name');
+    const miniFields = _.filter(flatFields, field => _.contains(miniFieldNames, field.name));
 
-  const miniRepresentation = representationUtil.defaultFlatRepresentation(miniFields);
+    const miniRepresentation = representationUtil.defaultFlatRepresentation(miniFields);
 
 
-  const jsonMapper = baseUrl => row => {
-    let result = extractNonprefixedEntity(apiModel.primaryRelation, row);
-    if(apiModelName !== 'matrikelreference') {
-      result.href = makeOisHref(baseUrl, apiModelName, row[oisModels[apiModel.primaryRelation].key[0]]);
-    }
-    for(let secondaryRelation of apiModel.secondaryRelations) {
-      if(!secondaryRelation.aggregate) {
-        result[secondaryRelation.relationName] =
-          extractPrefixedEntity(baseUrl, secondaryRelation.relationName, row);
+    const jsonMapper = baseUrl => row => {
+      let result = extractNonprefixedEntity(oisModels[apiModel.primaryRelation], row);
+      if(apiModelName !== 'matrikelreference') {
+        result.href = makeOisHref(baseUrl, variant, apiModelName, row[oisModels[apiModel.primaryRelation].key[0]]);
       }
-      else {
-        result = Object.assign(result, extractAggregateEntity(secondaryRelation.relationName, row));
+      for(let secondaryRelation of apiModel.secondaryRelations) {
+        if(!secondaryRelation.aggregate) {
+          result[secondaryRelation.relationName] =
+            extractPrefixedEntity(variant, oisModels, baseUrl, secondaryRelation.relationName, row);
+        }
+        else {
+          result = Object.assign(result, extractAggregateEntity(oisModels, secondaryRelation.relationName, row));
+        }
       }
+      return result;
+    };
+
+    const representations = {
+      flat: flatRepresentation,
+      json: {
+        fields: fieldsIncludedInFlatMap(variant)[apiModelName],
+        mapper: jsonMapper
+      },
+      mini: miniRepresentation
+    };
+
+    if(apiModel.geojson) {
+      const geojsonField = _.findWhere(fieldsMap[apiModelName], {name: 'geom_json'});
+      representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
+      representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
+      representations.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniRepresentation);
     }
-    return result;
-  };
-
-  const representations = {
-    flat: flatRepresentation,
-    json: {
-      fields: fieldsIncludedInFlatMap[apiModelName],
-      mapper: jsonMapper
-    },
-    mini: miniRepresentation
-  };
-
-  if(apiModel.geojson) {
-    const geojsonField = _.findWhere(fieldsMap[apiModelName], {name: 'geom_json'});
-    representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
-    representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
-    representations.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniRepresentation);
+    exports[variant][apiModelName] = representations;
+    registry.addMultiple(`ois_${apiModelName}_${variant}`, 'representation', representations);
   }
-  exports[apiModelName] = representations;
-  registry.addMultiple(`ois_${apiModelName}`, 'representation', representations);
+};
+
+for(let variant of ['full', 'public']) {
+  createRepresentations(variant);
 }

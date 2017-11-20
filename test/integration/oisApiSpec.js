@@ -466,7 +466,7 @@ describe('OIS API', () => {
   testdb.withTransactionEach('test', (clientFn) => {
     for (let modelName of Object.keys(oisApiModels)) {
       const getByKeyResource = registry.findWhere({
-        entityName: `ois_${modelName}`,
+        entityName: `ois_${modelName}_full`,
         type: 'resource',
         qualifier: 'getByKey'
       });

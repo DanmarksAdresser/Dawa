@@ -3,11 +3,17 @@
 const _ = require('underscore');
 
 const oisApiModels = require('./oisApiModels');
-const oisModels = require('../../ois/oisModels');
+const fullOisModels = require('../../ois/oisModels');
+const publicOisModels = require('../../ois/publicOisModels');
 const namesAndKeys = require('./namesAndKeys');
 const schemas = require('./schemas');
 
-const fieldsFromSecondaryRelation = secondaryRelation => {
+const oisModelsMap = {
+  'public': publicOisModels,
+  full: fullOisModels
+};
+
+const fieldsFromSecondaryRelation = (oisModels, secondaryRelation) => {
   const oisModel = oisModels[secondaryRelation.relationName];
   const oisFields = oisModel.fields;
   const regularFields = oisFields.map(field => (
@@ -56,12 +62,12 @@ const fieldsFromPrimaryRelation = oisModel => {
 };
 
 
-const fields = apiModelName => {
+const fields = (oisModels, apiModelName) => {
   const apiModel = oisApiModels[apiModelName];
   const primaryFields = fieldsFromPrimaryRelation(oisModels[apiModel.primaryRelation]);
 
   const secondaryNonaggregateFields = apiModel.secondaryRelations.filter(rel => !rel.aggregate)
-    .map(fieldsFromSecondaryRelation)
+    .map(secondaryRelation => fieldsFromSecondaryRelation(oisModels, secondaryRelation))
     .reduce((memo, fields) => memo.concat(fields), []);
 
   const secondaryAggregateFields = apiModel.secondaryRelations.filter(rel => rel.aggregate).map(rel => {
@@ -79,7 +85,10 @@ const fields = apiModelName => {
   return result;
 };
 
-
-for (let apiModelName of Object.keys(oisApiModels)) {
-  exports[apiModelName] = fields(apiModelName);
+for(let variant of ['public', 'full']) {
+  const oisModels = oisModelsMap[variant];
+  exports[variant]= {};
+  for (let apiModelName of Object.keys(oisApiModels)) {
+    exports[variant][apiModelName] = fields(oisModels, apiModelName);
+  }
 }
