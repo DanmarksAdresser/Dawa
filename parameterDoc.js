@@ -10,6 +10,7 @@ require('./apiSpecification/allSpecs');
 const oisApiModel = require('./apiSpecification/ois/oisApiModels');
 const oisModels = require('./ois/oisModels');
 const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
+const oisParameters = require('./apiSpecification/ois/parameters');
 
 /******************************************************************************/
 /*** Utils ********************************************************************/
@@ -1783,6 +1784,90 @@ var eventExamples = {
 
 const oisReferenceText = `For dokumentation af begreber, felter, kodelister m.v. henvises til <a href="http://w2l.dk/file/632761/bbr_logisk_datamodel_v_12.2.pdf">BBR datamodellen</a>, <a href="http://bbr.dk/registreringsindhold/0/30">BBR's registreringsindhold</a> og <a href="https://www.ois.dk/Documents/PDFPrint/ois_datamodel.doc">OIS-dokumentationen</a>.`;
 
+const oisAdditionalParameterDoc = {
+  grund: [],
+  bygning: [
+    {
+      name: 'polygon',
+      doc: 'Find bygninger, hvor bygningspunktet ligger indenfor det angivne polygon.' +
+      ' Polygonet specificeres som et array af koordinater på samme måde som' +
+      ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+      ' Bemærk at polygoner skal' +
+      ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+      ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+      ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+      ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+    },
+    {
+      name: 'cirkel',
+      doc: 'Find de bygninger, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+      examples: []
+    },
+    {
+      name: 'x',
+      doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+      'i det koordinatsystem som er angivet ved srid-parameteren.'
+    },
+    {
+      name: 'y',
+      doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+      'i det koordinatsystem som er angivet ved srid-parameteren.'
+    }
+  ],
+  tekniskanlaeg: [{
+    name: 'polygon',
+    doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.' +
+    ' Polygonet specificeres som et array af koordinater på samme måde som' +
+    ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+    ' Bemærk at polygoner skal' +
+    ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+    ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+    ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+    ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+  },
+    {
+      name: 'cirkel',
+      doc: 'Find de tekniske anlæg, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+      examples: []
+    },
+    {
+      name: 'x',
+      doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+      'i det koordinatsystem som er angivet ved srid-parameteren.'
+    },
+    {
+      name: 'y',
+      doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+      'i det koordinatsystem som er angivet ved srid-parameteren.'
+    }],
+  bygningspunkt: [{
+    name: 'polygon',
+    doc: 'Find bygningspunkter der ligger indenfor det angivne polygon.' +
+    ' Polygonet specificeres som et array af koordinater på samme måde som' +
+    ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+    ' Bemærk at polygoner skal' +
+    ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+    ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+    ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+    ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+  },
+    {
+      name: 'cirkel',
+      doc: 'Find bygningspunkter der overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+      examples: []
+    },
+    {
+      name: 'x',
+      doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+      'i det koordinatsystem som er angivet ved srid-parameteren.'
+    },
+    {
+      name: 'y',
+      doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+      'i det koordinatsystem som er angivet ved srid-parameteren.'
+    }]
+};
+
 const oisFilterParameterDoc = {
   grund: {
     subtext: `Find grunde fra OIS. ${oisReferenceText}`,
@@ -1816,39 +1901,15 @@ const oisFilterParameterDoc = {
       {
         name: 'kommunekode',
         doc: 'Find bygninger med den angivne kommunekode (KomKode)'
-      },
-      {
-        name: 'polygon',
-        doc: 'Find bygninger, hvor bygningspunktet ligger indenfor det angivne polygon.' +
-        ' Polygonet specificeres som et array af koordinater på samme måde som' +
-        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
-        ' Bemærk at polygoner skal' +
-        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
-        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
-        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
-        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
-      },
-      {
-        name: 'cirkel',
-        doc: 'Find de bygninger, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
-        examples: []
-      },
-      {
-        name: 'x',
-        doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
-        'i det koordinatsystem som er angivet ved srid-parameteren.'
-      },
-      {
-        name: 'y',
-        doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
-        'i det koordinatsystem som er angivet ved srid-parameteren.'
       }
     ],
     examples: [
       {
         description: 'Find bygninger for adgangsadresseid 0a3f5096-91d3-32b8-e044-0003ba298018',
         query: [
-          {name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'}
+          {name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'},
+          {name: 'y', value: '6176652.55'},
+          {name: 'srid', value: '25832'}
         ]
       }
     ]
@@ -1879,32 +1940,6 @@ const oisFilterParameterDoc = {
       {
         name: 'klassifikation',
         doc: 'Find tekniske anlæg med den angivne klassifikation'
-      },
-      {
-        name: 'polygon',
-        doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.' +
-        ' Polygonet specificeres som et array af koordinater på samme måde som' +
-        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
-        ' Bemærk at polygoner skal' +
-        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
-        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
-        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
-        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
-      },
-      {
-        name: 'cirkel',
-        doc: 'Find de tekniske anlæg, hvor bygningspunktet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
-        examples: []
-      },
-      {
-        name: 'x',
-        doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
-        'i det koordinatsystem som er angivet ved srid-parameteren.'
-      },
-      {
-        name: 'y',
-        doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
-        'i det koordinatsystem som er angivet ved srid-parameteren.'
       }
     ],
     examples: []
@@ -2014,34 +2049,7 @@ const oisFilterParameterDoc = {
       {
         name: 'id',
         doc: 'Find bygningspunktet med det angivne ID (BygPkt_id)'
-      },
-      {
-        name: 'polygon',
-        doc: 'Find bygningspunkter der ligger indenfor det angivne polygon.' +
-        ' Polygonet specificeres som et array af koordinater på samme måde som' +
-        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
-        ' Bemærk at polygoner skal' +
-        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
-        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
-        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
-        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
-      },
-      {
-        name: 'cirkel',
-        doc: 'Find bygningspunkter der overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
-        examples: []
-      },
-      {
-        name: 'x',
-        doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
-        'i det koordinatsystem som er angivet ved srid-parameteren.'
-      },
-      {
-        name: 'y',
-        doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
-        'i det koordinatsystem som er angivet ved srid-parameteren.'
       }
-
     ],
     examples: []
   },
@@ -2085,7 +2093,10 @@ for(let variant of ['full', 'public']) {
     };
     const plural = oisNamesAndKeys[apiModelName].plural;
     const path = `${oisPaths[variant]}/${plural}`;
-    const parameterDoc = oisFilterParameterDoc[apiModelName];
+    const parameterDoc = Object.assign({}, oisFilterParameterDoc[apiModelName]);
+    const allFilterParameterNames = oisParameters[variant][apiModelName].propertyFilter.map(param => param.name);
+    parameterDoc.parameters = parameterDoc.parameters.filter(param => allFilterParameterNames.includes(param.name));
+    parameterDoc.parameters = parameterDoc.parameters.concat(oisAdditionalParameterDoc[apiModelName] || []);
     parameterDoc.parameters.push(strukturParam);
     parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
     module.exports[path] = parameterDoc;

@@ -124,18 +124,18 @@ exports.extractDocumentationForProperty = function (property, propertyName) {
   return result;
 };
 
-exports.getOisQueryResourcePath = oisEntityName => {
+exports.getOisQueryResourcePath = (oisEntityName, variant) => {
   const resource = registry.get({
-    entityName: `ois_${oisEntityName}`,
+    entityName: `ois_${oisEntityName}_${variant}`,
     type: 'resource',
     qualifier: 'query'
   });
   return resource.path;
 };
 
-exports.getOisGetByKeyResourcePath = oisEntityName => {
+exports.getOisGetByKeyResourcePath = (oisEntityName, variant) => {
   const resource = registry.findWhere({
-    entityName: `ois_${oisEntityName}`,
+    entityName: `ois_${oisEntityName}_${variant}`,
     type: 'resource',
     qualifier: 'getByKey'
   });

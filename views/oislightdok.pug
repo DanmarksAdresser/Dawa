@@ -14,14 +14,14 @@ block content
           ul#indhold.nav.nav-list
             li(data-toggle='collapse', data-target='#ois').nav-header OIS API
               ul#ois.nav.nav-list
-                - each oisEntityName in docUtil.getOisEntityNames()
-                li
-                  a(href='#ois_' + oisEntityName) #{docUtil.getOisPlural(oisEntityName)}
+                each oisEntityName in docUtil.getOisEntityNames()
+                  li
+                    a(href='#ois_' + oisEntityName) #{docUtil.getOisPlural(oisEntityName)}
 
         div.span9
           section
-            - each oisEntityName in docUtil.getOisEntityNames()
-            h3.anchor-header(id='ois_' + oisEntityName) OIS #{docUtil.getOisPlural(oisEntityName)} søgning
-            +documentOisQueryResource(oisEntityName + '_public')
-            +documentOisGetByKeyResource(oisEntityName +'_public')
+            each oisEntityName in docUtil.getOisEntityNames()
+              h3.anchor-header(id='ois_' + oisEntityName) OIS #{docUtil.getOisPlural(oisEntityName)} søgning
+              +documentOisQueryResource(oisEntityName, 'public')
+              +documentOisGetByKeyResource(oisEntityName, 'public')
 block append scripts

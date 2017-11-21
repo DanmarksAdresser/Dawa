@@ -22,6 +22,6 @@ block content
           section
             each oisEntityName in docUtil.getOisEntityNames()
               h3.anchor-header(id='ois_' + oisEntityName) OIS #{docUtil.getOisPlural(oisEntityName)} søgning
-              +documentOisQueryResource(oisEntityName + '_full')
-              +documentOisGetByKeyResource(oisEntityName +'_full')
+              +documentOisQueryResource(oisEntityName, 'full')
+              +documentOisGetByKeyResource(oisEntityName, 'full')
 block append scripts
