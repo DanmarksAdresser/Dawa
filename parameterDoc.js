@@ -1907,9 +1907,7 @@ const oisFilterParameterDoc = {
       {
         description: 'Find bygninger for adgangsadresseid 0a3f5096-91d3-32b8-e044-0003ba298018',
         query: [
-          {name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'},
-          {name: 'y', value: '6176652.55'},
-          {name: 'srid', value: '25832'}
+          {name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'}
         ]
       }
     ]
