@@ -1877,7 +1877,14 @@ const oisFilterParameterDoc = {
         doc: 'Find grund med den angivne id (Grund_id)'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find grunden med id 000000b1-6158-40f2-971a-86885749e705',
+        query: [
+          { name: 'id', value: '000000b1-6158-40f2-971a-86885749e705'}
+        ]
+      }
+    ]
   },
   bygning: {
     subtext: `Find bygninger fra OIS. ${oisReferenceText}`,
@@ -1905,9 +1912,9 @@ const oisFilterParameterDoc = {
     ],
     examples: [
       {
-        description: 'Find bygninger for adgangsadresseid 0a3f5096-91d3-32b8-e044-0003ba298018',
+        description: 'Find bygninger for adgangsadresseid 0a3f5098-ac99-32b8-e044-0003ba298018',
         query: [
-          {name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'}
+          {name: 'adgangsadresseid', value: '0a3f5098-ac99-32b8-e044-0003ba298018'}
         ]
       }
     ]
@@ -1940,7 +1947,15 @@ const oisFilterParameterDoc = {
         doc: 'Find tekniske anlæg med den angivne klassifikation'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find teknisk anlæg med bygningsid 0035a14b-3546-47c6-881e-934ca71f66fa',
+        query: [
+          { name: 'bygningsid', value: '0035a14b-3546-47c6-881e-934ca71f66fa'}
+        ]
+
+      }
+    ]
 
   },
   enhed: {
@@ -1967,7 +1982,20 @@ const oisFilterParameterDoc = {
         doc: 'Find enheder, der ligger i en bygning med den angivne kommunekode (KomKode)'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find enheder for adressen med id 0a3f50ad-9b51-32b8-e044-0003ba298018',
+        query: [
+          {name: 'adresseid', value: '0a3f50ad-9b51-32b8-e044-0003ba298018'}
+        ]
+      },
+      {
+        description: 'Find enheder i bygningen med id c09059c8-ddcc-4616-8d6a-5a033c43d27d',
+        query: [
+          {name: 'bygningsid', value: 'c09059c8-ddcc-4616-8d6a-5a033c43d27d'}
+        ]
+      }
+    ]
 
   },
   etage: {
@@ -1982,7 +2010,12 @@ const oisFilterParameterDoc = {
         doc: 'Find etager med den angivne bygningsid (Bygning_id)'
       }
     ],
-    examples: []
+    examples: [
+      {description: 'Find etager i bygningen med ID 8ee3af1f-2619-41c4-9d27-11cb5f24cc94',
+      query: [
+        {name: 'bygningsid', value: '8ee3af1f-2619-41c4-9d27-11cb5f24cc94'}
+      ]}
+    ]
 
   },
   ejerskab: {
@@ -2005,7 +2038,30 @@ const oisFilterParameterDoc = {
         doc: 'Find ejerskab med det angivne ESR ejendomsnr (ESREjdNr)'
       }
     ],
-    examples: []
+    examples: [
+      {description: 'Find ejerskaber for grunden med med id 7024c919-21bf-4557-bf04-ba913b44c0bc',
+      query: [
+        {name: 'bbrid', value: '7024c919-21bf-4557-bf04-ba913b44c0bc'}
+      ]},
+      {
+        description: 'Find ejerskaber for bygningen med id 8ce8dd4d-8fa9-4200-aca5-5093b99ff4c9',
+        query: [
+          { name: 'bbrid', value: '8ce8dd4d-8fa9-4200-aca5-5093b99ff4c9'}
+        ]
+      },
+      {
+        description: 'Find ejerskaber for enheden med id e9b7f6b5-b818-42d1-9b36-04b4fc9370f6',
+        query: [
+          { name: 'bbrid', value: 'e9b7f6b5-b818-42d1-9b36-04b4fc9370f6'}
+        ]
+      },
+      {
+        description: 'Find ejerskaber for det tekniske anlæg med id 24b089fb-dde9-443a-bba3-8099a67f8b18',
+        query: [
+          { name: 'bbrid', value: '24b089fb-dde9-443a-bba3-8099a67f8b18'}
+        ]
+      }
+    ]
 
   },
   kommune: {
@@ -2020,7 +2076,14 @@ const oisFilterParameterDoc = {
         doc: 'Find kommunen ud fra kommunekode'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find kommunen med kommunekode 0101',
+        query: [
+          { name: 'kommunekode', value: '0101'}
+        ]
+      }
+    ]
   },
   opgang: {
     subtext: `Find opgange fra OIS. ${oisReferenceText}`,
@@ -2038,7 +2101,14 @@ const oisFilterParameterDoc = {
         doc: 'Find opgange med den angivne adgangsadresseid (AdgAdr_id)'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find opgange for adgangsadresseid 0a3f5096-91d3-32b8-e044-0003ba298018',
+        query: [
+          { name: 'adgangsadresseid', value: '0a3f5096-91d3-32b8-e044-0003ba298018'}
+        ]
+      }
+    ]
 
   },
   bygningspunkt: {
