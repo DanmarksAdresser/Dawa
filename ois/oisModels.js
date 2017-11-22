@@ -279,7 +279,7 @@ module.exports = {
          { name: 'CRUD_ID', oisType: 'bigint' },
          { name: 'ByggeSag_id', oisType: 'uniqueidentifier' },
          { name: 'EtageStam_id', oisType: 'uniqueidentifier' },
-         { name: 'Bygning_id', oisType: 'uniqueidentifier' },
+         { name: 'Bygning_id', oisType: 'uniqueidentifier', public: true},
          { name: 'SamletAreal', oisType: 'int' },
          { name: 'TAGETAGE_ARL_UDNYT', oisType: 'int' },
          { name: 'KAELDER_ARL_U_125M', oisType: 'int' },
