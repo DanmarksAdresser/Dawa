@@ -3293,6 +3293,28 @@ describe('OIS Light', function(){
   });
 
 
+ it("geojson", function(done) {
+    var reverseopt= {};
+    reverseopt.baseUrl= host;
+    reverseopt.url='oislight/bygninger';
+    reverseopt.qs= {};
+    reverseopt.qs.cache= 'no-cache';
+    reverseopt.qs.adgangsadresseid= '0a3f5098-ac99-32b8-e044-0003ba298018';
+    reverseopt.qs.format= 'geojson';
+    reverseopt.resolveWithFullResponse= true;
+    var reverserp= rp(reverseopt);       
+    reverserp.then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length>1, "Der er flere end én bygning, men " + bygninger.length);                
+      assert(typeof bygninger[0].BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
+      assert(typeof bygninger[0].OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
 });
 
 describe('Stednavne', function(){
