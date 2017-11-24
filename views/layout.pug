@@ -5,43 +5,38 @@ html(lang='da')
     meta(http-equiv="Content-Type", content="text/html; charset=UTF-8")
     meta(charset="UTF-8")
     title DAWA
-    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    meta(name="viewport", content="width=device-width,initial-scale=1,shrink-to-fit=no")
     meta(name="description", content="Danmarks adresse web API")
     meta(name="author", content="Finn Jordal")
     link(href="css/dawa.css", rel="stylesheet")
     link(rel="shortcut icon", href="img/favicon.ico")
   body
-    div.navbar.navbar-inverse.navbar-fixed-top
-      div.navbar-inner
-        //img.pull-right.nav-collapse(id="logo",src="img/logo.png")
-        div.container
-          button.btn.btn-navbar(type="button", data-toggle="collapse", data-target=".nav-collapse")
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-          a.brand(href="/") DAWA
-          div#topbar.nav-collapse.collapse
-            ul.nav
-              li.active
-                a(href='/') Introduktion
-              li
-                a(href='generelt') Generelt
-              li
-                a(href='adressedok') Adresser
-              li
-                a(href='adgangsadressedok') Adgangsadresser
-              li
-                a(href='vejedok') Veje
-              li
-                a(href='postnummerdok') Postnumre
-              li
-                a(href='autocompletedok') Autocomplete
-              li
-                a(href='listerdok') Lister
-              li
-                a(href='replikeringdok') Replikering
-              li
-                a(href='om') Om
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light
+      a.navbar-brand(href="/") DAWA
+      button.navbar-toggler(type="button", data-toggle="collapse", data-target="#navbarSupportedContent", aria-controls="navbarSupportedContent", aria-expanded="false", aria-label="Toggle navigation")
+        span.navbar-toggler-icon
+      div.collapse.navbar-collapse(id="navbarSupportedContent")
+        ul.navbar-nav.mr-auto
+          li.nav-item.active
+            a.nav-link(href='/') Introduktion
+          li.nav-item
+            a.nav-link(href='generelt') Generelt
+          li.nav-item
+            a.nav-link(href='adressedok') Adresser
+          li.nav-item
+            a.nav-link(href='adgangsadressedok') Adgangsadresser
+          li.nav-item
+            a.nav-link(href='vejedok') Veje
+          li.nav-item
+            a.nav-link(href='postnummerdok') Postnumre
+          li.nav-item
+            a.nav-link(href='autocompletedok') Autocomplete
+          li.nav-item
+            a.nav-link(href='listerdok') Lister
+          li.nav-item
+            a.nav-link(href='replikeringdok') Replikering
+          li.nav-item
+            a.nav-link(href='om') Om
 
     block content
 

@@ -1,7 +1,6 @@
 "use strict";
 
-import 'bootstrap-2.3.2/css/bootstrap.css';
-import 'bootstrap-2.3.2/css/bootstrap-responsive.css';
+import 'bootstrap/dist/css/bootstrap.css';
 import 'leaflet/dist/leaflet.css';
 import '../css/style.css';
 import '../css/autocomplete.css';
@@ -9,8 +8,8 @@ import 'jquery-ui-dist/jquery-ui.min.css';
 
 import L from 'leaflet';
 import $ from 'jquery';
-import './bootstrap-transition';
-import './/bootstrap-collapse';
+// import './bootstrap-transition';
+import 'bootstrap/js/src/index';
 import 'jquery-ui-dist/jquery-ui.min';
 import {dawaAutocomplete} from 'dawa-autocomplete2';
 
