@@ -2119,7 +2119,12 @@ const oisFilterParameterDoc = {
         doc: 'Find bygningspunktet med det angivne ID (BygPkt_id)'
       }
     ],
-    examples: []
+    examples: [
+      {description: 'Find bygningspunktet med ID 000004bc-f76a-4a51-a549-2b53425132a0',
+      query: [
+        {name: 'id', value: '000004bc-f76a-4a51-a549-2b53425132a0'}
+      ]}
+    ]
   },
   matrikelreference: {
     subtext: `Find matrikelreferencer fra OIS. ${oisReferenceText}`,
@@ -2142,7 +2147,14 @@ const oisFilterParameterDoc = {
         ' med ejerlavkode parameteren.'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find matrikelreferencer med grund ID 011af923-08cb-47b6-994e-d11c1fc1f22b',
+        query: [
+          {name: 'grundid', value: '011af923-08cb-47b6-994e-d11c1fc1f22b'}
+        ]
+      }
+    ]
   }
 };
 
