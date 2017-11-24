@@ -638,6 +638,11 @@ describe('OIS API', () => {
             type: 'resource',
             qualifier: 'getByKey'
           });
+          const queryResource = registry.findWhere({
+            entityName: `ois_${modelName}_${variant}`,
+            type: 'resource',
+            qualifier: 'query'
+          });
           if (expectedResults[modelName]) {
             const tests = expectedResults[modelName];
             for (let id of Object.keys(tests)) {
@@ -654,6 +659,24 @@ describe('OIS API', () => {
                   }));
               }
             }
+          }
+          const oisApiModel = oisApiModels[modelName];
+          if (oisApiModel.geojson) {
+            it(`Kan returnere GeoJSON format for entity=${modelName}`, () => go(function* () {
+              const result = yield helpers.getJson(clientFn(),
+                queryResource,
+                {},
+                {
+                  per_side: 1,
+                  format: 'geojson'
+                });
+              assert.strictEqual(result.features.length, 1);
+              const feature = result.features[0];
+              if(modelName !== 'tekniskanlaeg') {
+                const coordinates = feature.geometry.coordinates;
+                assert.strictEqual(coordinates.length, 2);
+              }
+            }));
           }
         }
       });
