@@ -87,10 +87,12 @@
     "rimraf": "^2.6.1",
     "rollup": "^0.43.0",
     "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-collect-sass": "^1.0.9",
     "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-css-only": "^0.2.0",
     "rollup-plugin-inject": "^2.0.0",
     "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-scss": "^0.3.0",
     "xp": "^1.0.1"
   },
   "subdomain": "dawa",

@@ -8,40 +8,40 @@ html(lang='da')
     meta(name="viewport", content="width=device-width,initial-scale=1,shrink-to-fit=no")
     meta(name="description", content="Danmarks adresse web API")
     meta(name="author", content="Finn Jordal")
-    link(href="css/dawa.css", rel="stylesheet")
+    link(href="/css/dawa.css", rel="stylesheet")
     link(rel="shortcut icon", href="img/favicon.ico")
   body
-    nav.navbar.navbar-expand-lg.navbar-light.bg-light
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light.sticky-top
       a.navbar-brand(href="/") DAWA
       button.navbar-toggler(type="button", data-toggle="collapse", data-target="#navbarSupportedContent", aria-controls="navbarSupportedContent", aria-expanded="false", aria-label="Toggle navigation")
         span.navbar-toggler-icon
       div.collapse.navbar-collapse(id="navbarSupportedContent")
-        ul.navbar-nav.mr-auto
-          li.nav-item.active
-            a.nav-link(href='/') Introduktion
+        ul.navbar-nav
           li.nav-item
-            a.nav-link(href='generelt') Generelt
+            a.nav-link(href='/dok/adresser', class={active: path === '/dok/adresser'}) Adresser
+          li.nav-item.dropdown
+            a.nav-link.dropdown-toggle(href="#" id="navbarDropdown" role="button"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false",
+            class={active: ['/dok/stednavne', '/dok/dagi', '/dok/bbr', '/dok/matrikelkortet'].includes(path)}).
+              Relaterede data
+            div.dropdown-menu(aria-labelledby="navbarDropdown")
+              a.dropdown-item(href="/dok/stednavne") Stednavne
+              a.dropdown-item(href="/dok/dagi") DAGI
+              a.dropdown-item(href="/dok/bbr") BBR
+              a.dropdown-item(href="/dok/matrikelkortet") Matrikelkortet
           li.nav-item
-            a.nav-link(href='adressedok') Adresser
+            a.nav-link(href='/dok/api', class={active: path.startsWith('/dok/api')}) API
           li.nav-item
-            a.nav-link(href='adgangsadressedok') Adgangsadresser
+            a.nav-link(href='/dok/guides', class={active: path.startsWith('/dok/guides')}) Guides
           li.nav-item
-            a.nav-link(href='vejedok') Veje
+            a.nav-link(href='/dok/faq', class={active: path === '/dok/faq'}) FAQ
           li.nav-item
-            a.nav-link(href='postnummerdok') Postnumre
-          li.nav-item
-            a.nav-link(href='autocompletedok') Autocomplete
-          li.nav-item
-            a.nav-link(href='listerdok') Lister
-          li.nav-item
-            a.nav-link(href='replikeringdok') Replikering
-          li.nav-item
-            a.nav-link(href='om') Om
+            a.nav-link(href='/dok/om', class={active: path === '/dok/om'}) Om
 
     block content
 
     block scripts
-      script(src="js/dawa.js")
+      script(src="/js/dawa.js")
 
     script(type='text/javascript').
       var _gaq = _gaq || [];

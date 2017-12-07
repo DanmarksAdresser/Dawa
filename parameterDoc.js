@@ -4,33 +4,7 @@ const _ = require('underscore');
 const registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
 
-const allDocs = [
-  ...require('./apidoc/adgangsadresse'),
-  ...require('./apidoc/adresse'),
-  ...require('./apidoc/autocomplete'),
-  ...require('./apidoc/bebyggelse'),
-  ...require('./apidoc/ejerlav'),
-  ...require('./apidoc/jordstykke'),
-  ...require('./apidoc/kommune'),
-  ...require('./apidoc/navngivenvej'),
-  ...require('./apidoc/ois'),
-  ...require('./apidoc/opstillingskreds'),
-  ...require('./apidoc/politikreds'),
-  ...require('./apidoc/postnummer'),
-  ...require('./apidoc/region'),
-  ...require('./apidoc/retskreds'),
-  ...require('./apidoc/senesteSekvensnummer'),
-  ...require('./apidoc/sogn'),
-  ...require('./apidoc/stednavn'),
-  ...require('./apidoc/stednavntype'),
-  ...require('./apidoc/storkreds'),
-  ...require('./apidoc/supplerendebynavn'),
-  ...require('./apidoc/valglandsdel'),
-  ...require('./apidoc/vejnavn'),
-  ...require('./apidoc/vejstykke'),
-  ...require('./apidoc/vejstykkepostnummerrelation'),
-  ...require('./apidoc/zone')
-];
+const allDocs =  require('./apidoc/all');
 
 module.exports = allDocs.reduce((memo, doc) => {
   memo[doc.path] = doc;

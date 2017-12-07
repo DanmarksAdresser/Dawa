@@ -1,8 +1,10 @@
 "use strict";
 
-import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/scss/bootstrap.scss';
 import 'leaflet/dist/leaflet.css';
 import '../css/style.css';
+import '../scss/dawa.scss';
+import '../scss/forside.scss';
 import '../css/autocomplete.css';
 import 'jquery-ui-dist/jquery-ui.min.css';
 
@@ -13,7 +15,7 @@ import 'bootstrap/js/src/index';
 import 'jquery-ui-dist/jquery-ui.min';
 import {dawaAutocomplete} from 'dawa-autocomplete2';
 
-var apiBase = '';
+var apiBase = '/';
 
 function searchPostnr(input) {
   $.ajax({
@@ -221,54 +223,6 @@ function inverseGeocoding()
   map.on('click', onMapClick);
 }
 
-function valider(pnr,vej,husnr,etage,doer) {
-  var parametre= {per_side: 2};
-  var ptext = $(pnr).val();
-  var reg = /(\d{4})/g;
-  var match = reg.exec(ptext);
-  if (match !== null) {
-    parametre.postnr= match[1];
-  }
-  var vtext = $(vej).val();
-  if (vtext!==null && vtext.length > 0) {
-    parametre.vejnavn= vtext;
-  }
-  var htext = $(husnr).val();
-  if (htext!==null && htext.length > 0) {
-    parametre.husnr= htext;
-  }
-  parametre.etage = $(etage).val() || '';
-  parametre.dør = $(doer).val() || '';
-
-  $.ajax({
-    cache: true,
-    url:'/adresser',
-    data: parametre,
-    dataType: "json",
-    error: function (xhr, status, errorThrown) {
-      $('#ervalideringok').text('Der opstod en fejl under valideringen') ;
-    } ,
-    success: function (adresser) {
-      if(adresser.length > 1) {
-        $('#ervalideringok').text('Adressen er ugyldig, der er mere end én adresse der matcher det indtastede.') ;
-      }
-      else if(adresser.length === 0) {
-        $('#ervalideringok').text('Adressen er ugyldig, der er ingen adresser der matcher det indtastede.') ;
-      }
-      else {
-        $('#ervalideringok').text('Adressen er gyldig') ;
-      }
-    }
-  });
-}
-
-export function activateTab(tab) {
-  var topbar = $('#topbar');
-  topbar.find('li').removeClass('active');
-  var a = topbar.find(`li a[href='${tab}']`)[0];
-  var li = $(a).parent().addClass('active');
-}
-
 export function initForside() {
   $(function () {
     function errorHandler(query) {
@@ -310,9 +264,6 @@ export function initForside() {
     });
     $('#doer').focus(function () {
       searchDør('#postnummer','#vej','#husnummer', '#etage', '#doer');
-    });
-    $('#valider').click(function () {
-      valider('#vpostnummer','#vvej','#vhusnummer', '#vetage', '#vdoer');
     });
     inverseGeocoding();
   });

@@ -1,0 +1,19 @@
+.dw-sidebar {
+  border-right: 1px solid rgba(0,0,0,.1);
+}
+
+.dw-sidebar-menu {
+  position: sticky;
+  top: 4rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 4rem);
+}
+
+// Fix anchor scrolling
+.dw-sidebar-main h2[id]::before, .dw-sidebar-main h3[id]::before, .dw-sidebar-main h4[id]::before {
+  display: block;
+  height: 4rem;
+  margin-top: -4rem;
+  visibility: hidden;
+  content: "";
+}

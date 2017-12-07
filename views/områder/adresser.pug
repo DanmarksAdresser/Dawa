@@ -1,0 +1,162 @@
+extends ../layout
+
+block content
+  div.container-fluid
+    h1 DAWA - Adressefunktionalitet
+    p.
+      DAWA kan bruges til at etablere mange forskellige former for adressefunktionalitet i it-systemer.
+      Det kan f.eks. være adresseindtastning, adressesøgning, adresseopslag, adressevask,
+      adressevalidering eller etablering af en opdateret, lokal kopi af adressedata.
+      Få et overblik over adressefunktionaliteten <a href="/adresse-overblik">her</a>.
+
+    section#adresseindtastning
+      h2 Adresseindtastning
+      p.
+        Indtastning af adresser er et væsentligt element i mange applikationer.
+        Det skal både være let for brugeren at indtaste en gyldig adresse og for udvikleren
+        at implementere denne funktionalitet. DAWA er designet med dette for øje.
+      h3 Autocomplete
+      p.
+        Autocomplete i forbindelse med adresseindtastning er en mekanisme til at forudsige,
+        hvilken adresse brugeren ønsker at indtaste uden at brugeren behøver at
+        taste hele adressen. Dette gør det muligt at indtaste hele adressen i ét tekstfelt,
+        og det er ikke nødvendigt at validere adressen, da det kun er muligt
+        for brugeren at vælge gyldige adresser.
+      form
+        fieldset.form-group
+          legend Autocomplete af adresse
+          div.row
+            label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adresse:
+
+            div.col-sm-6(style={position: 'relative'})
+              input.form-control#autocomplete-adresse(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+          div.row
+            div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
+            div.col-sm-6.col-form-label
+              span#autocomplete-adresse-choice
+        fieldset.form-group
+          legend Autocomplete af adgangsadresse
+          div.row
+            label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adgangsadresse:
+            div.col-sm-6(style={position: 'relative'})
+              input.form-control#autocomplete-adgangsadresse(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+          div.row
+            div.col-sm-3.col-lg-2.col-form-label Valgt adgangsadresse:
+            div.col-sm-6.col-form-label
+              span#autocomplete-adgangsadresse-choice
+        fieldset
+          legend Autocomplete af adresse i København
+          div.row
+            label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adresse:
+            div.col-sm-6(style={position: 'relative'})
+              input.form-control#autocomplete-adresse-kbh(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+          div.row
+            div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
+              div.col-sm-6.col-form-label
+                span#autocomplete-adresse-kbh-choice
+      h3 Feltindtastning
+      p.
+        Indtastning af en adresse kan også baseres på felter til hver enkel bestandel af
+        adressen. De enkelte felter indeholder autocompletefunktionalitet. For hvert udfyldt
+        felt indskrænkes udfaldsrummet for de efterfølgende feltet. Hvis du f.eks. indtaster
+        3450 Allerød, som postnummer, giver vejnavnefeltet dig kun mulighed for at vælge blandt
+        vejnavne i postnummer 3450. Samme mekanisme gælder for husnummer, etage og dør.
+      form
+        div.form-group.row
+          label.col-sm-3.col-lg-2.col-form-label(for='postnummer') Postnummer
+          input.form-control.col-sm-6(type='text', autocomplete='off', placeholder='postnummer', id='postnummer')
+        div.form-group.row
+          label.col-sm-3.col-lg-2.col-form-label(for='vej') Vej
+          input.form-control.col-sm-6(type='text', autocomplete='off', placeholder='vejnavn', id='vej')
+        div.form-group.row
+          label.col-sm-3.col-lg-2.col-form-label(for='husnummer') Husnr
+          input.form-control.col-sm-6(type='text', autocomplete='off', placeholder='Husnummer', id='husnummer')
+        div.form-group.row
+          label.col-sm-3.col-lg-2.col-form-label(for='etage') Etage
+          input.form-control.col-sm-6(type='text', autocomplete='off', placeholder='Etage', id='etage')
+        div.form-group.row
+          label.col-sm-3.col-lg-2.col-form-label(for='doer') Dør
+          input.form-control.col-sm-6(type='text', autocomplete='off', placeholder='Dør', id='doer')
+      h3 Reverse geocoding
+      p.
+        Det sidste eksempel på indtastning af en adresse er sådan set ikke en indtastning,
+        men mere en udpegning. Brugeren præsenteres for et kort,
+        hvorpå brugeren med et klik påkortet udpeger nærmeste adresse.
+      p Klik på kortet nedenfor og få nærmeste adresse.
+      div#map.mb-4.mt-4
+
+      h2 Adressevask
+      p.
+        Adresser bliver brugt i mange forskellige sammenhænge. Det kommer klart til udtryk i
+        det store antal it-systemer, som rummer adresser. Adresserne er typisk blevet indtastet
+        uden kontrol af adressens gyldighed og kan være ændret eller nedlagt efter indtastningen.
+        Det resulterer i, at it-systemet med stor sandsynlighed rummer ugyldige adresser.
+        Konsekvenserne kan være: Problemer med kundebesøg, postlevering, manuelt arbejde med at
+        vedligeholde adresser og lignende. Det kan også resultere i, at man ikke kan anvende
+        adresserne til at foretage analyser. Grundet de ufuldstændige adresseoplysninger kan man
+        ikke kan slå adressen op i DAWA og derved skaffe yderligere oplysninger om adressen, som
+        f.eks. adressens placering og tilknytningen til administrative inddelinger.
+        Disse oplysninger kan anvendes til analyse af geografisk fordeling af ens kunder,
+        placering i sogn og kommune, fordeling mellem land, by og sommerhuszone og andre
+        anvendelige analyser. Det er kort sagt værdifuldt at have gyldige adresser i sit it-system.
+      p.
+        DAWA tilbyder funktionalitet til at vaske adresser, som du kan anvende til at implementere
+        adressevask i dit eget it-system.  Adressevask er en proces, hvor en ustruktureret adresse,
+        som kan være ufuldstændig og indeholde stavefejl, oversættes til den korrekte,
+        strukturerede, autoritative adresse.
+
+      h2 Adressedata
+      p.
+        Hver enkel adresse er repræsenteret af en række oplysninger. Udover data om selve adressen:
+        vejnavn, husnr, supplerende bynavn, postnummer, etage og dør, er der knyttet en lang række
+        andre data til adressen. Her kan nævnes unik identifikation, placering (koordinater),
+         ejerlav, matrikelnr, ejendomsnr samt tilknytning til administrative inddelinger: kommune,
+         sogn, region, retskreds, politikreds og opstillingskreds.
+      p.
+        Adressen kan på denne måde være indgang til andre områder, som f.eks. ejendomsområdet.
+        Udfra en adresse kan du få fat i det tilknyttede ejensdomsnummer, som du så kan anvendes
+        til opslag i ejendomssystemer efter ejendomsdata.
+
+      h3 Adressesøgning
+      p.
+        DAWA kan anvendes til at udvælge præcist de adresser, du er interesseret i.
+        Det kan dreje sig om adresser i et enkelt sogn eller kommune. Det kan dreje som adresser
+        indenfor en bestemt afstand til punkt. Eller adresser på en enkelt vej.
+        Dawa giver mulighed for at udsøge adresser efter mange parametre og kombinationer af disse.
+
+      h3 Download af adresser
+      p.
+        Har du behov for at kunne arbejde med adressedata på din egen PC? Til at etablere din egen
+        kopi af Danmarks Adresser? Til at lave en statistisk eller geografisk analyse baseret
+        på adressedata? Til dette kan du bruge DAWA’s download funktionalitet.
+        Her kan du downloade aktuelle data om adresser, adgangsadresser, vejnavne, postnumre,
+        supplerende bynavne, kommuner, sogne, opstillingskredse, regioner, retskredse samt
+        politikredse. Det er ikke nødvendigt at downloade alle data. Du kan nøjes med at udvælge
+        præcist de data, du er interesseret i. Lad os se på nogle eksempler:
+      pre
+        a(href='#{url}/adresser?kommunekode=0326&format=csv').
+          CSV fil med alle adresser i Kalundborg kommune
+
+      pre
+        a(href='#{url}/adresser?husnr=77&format=csv').
+          CSV fil med alle adresser med husnummeret 77
+
+      pre
+        a(href='#{url}/adresser/?cirkel=12.5816211914972,55.681219613782,50&format=csv').
+          CSV fil med de adresser, som ligger som har en afstand på mindre end 50 m til Gammel mønt 4, 1117 København K.
+
+      pre
+        a(href='#{url}/adresser?kommunekode=0101|0147&format=geojson').
+          GeoJSON fil med København og Frederiksberg kommuners adresser.
+
+      h3 Etablering af lokal adressedatabase
+      p.
+        Nogle har behov for at have en lokal, opdateret kopi af adressedata. DAWA kan anvendes til
+        at etablere og holde kopien af adressedata opdateret. Til dette anvendes
+        <a href='http://dawa.aws.dk/replikeringdok'>Replikerings API'et</a>.
+
+
+
+block append scripts
+  script(type='text/javascript').
+    dawa.initForside()
