@@ -9,6 +9,6 @@ block content
       - const page = docUtil.getPageForEntity(entity)
       ul
         each endpoint in page.sections.filter(section => section.type === 'endpoint')
-          li <a href="/apidok/#{entity}##{endpoint.anchor}">#{endpoint.heading}</a>
+          li <a href="/dok/api/#{entity}##{endpoint.anchor}">#{endpoint.heading}</a>
 
 block append scripts

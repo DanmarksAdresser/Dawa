@@ -10,12 +10,11 @@ import 'jquery-ui-dist/jquery-ui.min.css';
 
 import L from 'leaflet';
 import $ from 'jquery';
-// import './bootstrap-transition';
 import 'bootstrap/js/src/index';
 import 'jquery-ui-dist/jquery-ui.min';
 import {dawaAutocomplete} from 'dawa-autocomplete2';
 
-var apiBase = '/';
+const apiBase = '/';
 
 function searchPostnr(input) {
   $.ajax({
@@ -267,4 +266,8 @@ export function initForside() {
     });
     inverseGeocoding();
   });
+}
+
+export function activateScrollspy(target) {
+  $('body').scrollspy({target});
 }
