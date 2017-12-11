@@ -1,14 +1,11 @@
-extends layout
+extends sidebar-auto
 include includes/parameterDocMixins
 
-block content
-  div.container
-    h1 API oversigt
-    each entity in docUtil.getEntityNames()
-      h2 #{entity}
-      - const page = docUtil.getPageForEntity(entity)
-      ul
-        each endpoint in page.sections.filter(section => section.type === 'endpoint')
-          li <a href="/dok/api/#{entity}##{endpoint.anchor}">#{endpoint.heading}</a>
-
-block append scripts
+block main
+  h1 API oversigt
+  each entity in docUtil.getEntityNames()
+    h2 #{entity}
+    - const page = docUtil.getPageForEntity(entity)
+    ul
+      each endpoint in page.sections.filter(section => section.type === 'endpoint')
+        li <a href="/dok/api/#{entity}##{endpoint.anchor}">#{endpoint.heading}</a>

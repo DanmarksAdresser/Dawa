@@ -13,6 +13,7 @@ import $ from 'jquery';
 import 'bootstrap/js/src/index';
 import 'jquery-ui-dist/jquery-ui.min';
 import {dawaAutocomplete} from 'dawa-autocomplete2';
+import { initToc } from './bootstrap-toc';
 
 const apiBase = '/';
 
@@ -268,6 +269,10 @@ export function initForside() {
   });
 }
 
+export const generateSidebar = (navSelector) => {
+  const $myNav = $(navSelector);
+  initToc($myNav);
+};
 export function activateScrollspy(target) {
   $('body').scrollspy({target});
 }
