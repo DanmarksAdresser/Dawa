@@ -492,7 +492,7 @@ const publicResults = {
         "AENDR_TS": "2008-12-08T11:16:19.000",
         "Ophoert_ts": null,
         "Gyldighedsdato": null,
-        "href": "http://dawa/oislight/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
+        "href": "http://dawa/bbrlight/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
       },
       flad: {
         "ois_id": 49881,
@@ -532,13 +532,13 @@ const publicResults = {
         "MatrNr": "2afÃ¸",
         "ESREjdNr": "051692",
         "Grund_id": "db50f6b0-c332-45cf-8f7a-1161933e367a",
-        "href": "http://dawa/oislight/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
+        "href": "http://dawa/bbrlight/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
         "ejerskaber": [],
         "bygningspunkt": {
           "ois_id": 6093147,
           "ois_ts": "2016-12-12 19:26:53.370",
           "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-          "href": "http://dawa/oislight/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
+          "href": "http://dawa/bbrlight/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
           "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
           "PktRevDato": "2016-12-12T09:29:07.017",
           "KoorOest": 726016.09,

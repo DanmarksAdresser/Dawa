@@ -16,7 +16,7 @@ const oisModelsMap = {
 };
 
 const makeOisHref = (baseUrl, variant, apiModelName, id) => {
-  const path = variant === 'full' ? '/ois' : '/oislight';
+  const path = variant === 'full' ? '/ois' : '/bbrlight';
   return `${baseUrl}${path}/${namesAndKeys[apiModelName].plural}/${id}`;
 };
 

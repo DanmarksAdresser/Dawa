@@ -2159,7 +2159,7 @@ const oisFilterParameterDoc = {
 };
 
 const oisPaths = {
-  'public': '/oislight',
+  'public': '/bbrlight',
   full: '/ois'
 };
 
