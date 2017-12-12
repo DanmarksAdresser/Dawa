@@ -1,1 +1,56 @@
 extends ../layout
+block content
+  div.container-fluid
+    div.row
+      div.offset-lg-2.col-lg-8
+        h1 Guides
+        div.card-deck.mb-5.mt-5
+          div.card
+            h4.card-header Introduktion
+            div.card-body
+              p.
+                Basal introduktion til DAWA
+            div.card-footer
+              a.btn.btn-primary(href="/dok/guide/introduktion") Læs mere
+          div.card
+            h4.card-header Autocomplete
+            div.card-body
+              p.
+                Anvend DAWAs autocomplete-komponent på en webside.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/guide/autocomplete") Læs mere
+          div.card
+            h4.card-header Replikering
+            div.card-body
+              p.
+                Etabler en lokal, opdateret kopi af adressedata.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/guide/replikering") Læs mere
+        div.card-deck.mb-5
+          div.card
+            h4.card-header Datavask
+            div.card-body
+              p.
+                Valider adresser og korriger mindre fejl.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/guide/datavask") Læs mere
+          div.card
+            h4.card-header Reverse geocoding
+            div.card-body
+              p.
+                Find adresse eller andre objekter nær et punkt.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/guide/reverse") Læs mere
+          div.card
+            h4.card-header Autocomplete - egen implementation
+            div.card-body
+              p.
+                Implementer din egen autocomplete-component baseret
+                på DAWAs autocomplete-API.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/guide/reverse") Læs mere
+
+
+
+
+

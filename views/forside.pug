@@ -2,62 +2,59 @@ extends layout
 
 block content
   div.container-fluid
-    h1 Danmarks Adressers Web API
-    section#intro
-      p.
-        Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks
-        adresser og relateret information.
-        DAWA anvendes til at etablere adressefunktionalitet i it-systemer.
-        Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressefunktionalitet
-        i deres it-systemer. DAWA er en del af <a href='http://aws.dk'>AWS Suiten</a>.
-      div.row.mt-4.mb-4
-        div.offset-sm-2.col-sm-8
+    div.offset-sm-2.col-sm-8
+      h1 Danmarks Adressers Web API
+      section#intro
+        p.
+          Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks
+          adresser og relateret information.
+          DAWA anvendes til at etablere adressefunktionalitet i it-systemer.
+          Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressefunktionalitet
+          i deres it-systemer. DAWA er en del af <a href='http://aws.dk'>AWS Suiten</a>.
+        div.card.mb-5
+          h4.card-header Adressedata
+          div.card-body
+            p.
+              Adresseområdet indeholder data om adresser, adgangsadresser, veje, postnumre og
+              supplerende bynavne.
+          div.card-footer
+            a.btn.btn-primary(href="/dok/adresser") Læs mere
+
+        p.
+          DAWA udstiller også data og funktionalitet for andre typer af data, som kan relateres til
+          adresser:
+
+        div.card-deck.mb-5
           div.card
-            h4.card-header Adressedata
+            h4.card-header Stednavne
             div.card-body
               p.
-                Adresseområdet indeholder data om adresser, adgangsadresser, veje, postnumre og
-                supplerende bynavne.
+                Stednavne omfatter mange forskellige typer af data, eksempelvis byer, bydele,
+                skoler, øer, farvande, oldtidsminder.
             div.card-footer
-              a.btn.btn-primary(href="/dok/adresser") Læs mere
+              a.btn.btn-primary(href="/dok/stednavne") Læs mere
+          div.card
+            h4.card-header Matrikelkortet
+            div.card-body
+              p.
+                Indeholder data fra matrikelkortet, dvs. ejerlav og jordstykker.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/matrikelkortet") Læs mere
+        div.card-deck
+          div.card
+            h4.card-header DAGI
+            div.card-body
+              p.
+                DAGI indeholder de officielle administrative afgrænsninger i Danmark, dvs.
+                kommuner, regioner, valgkredse, sogne, politikredse, retskredse m.v.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/dagi") Læs mere
+          div.card
+            h4.card-header BBR
+            div.card-body
+              p.
+                Data fra bygnings- og boligregistret, dvs. bygninger, enheder, tekniske anlæg, ejerskaber m.v.
+            div.card-footer
+              a.btn.btn-primary(href="/dok/bbr") Læs mere
 
-      p.
-        DAWA udstiller også data og funktionalitet for andre typer af data, som kan relateres til
-        adresser:
 
-      div.row
-        div.offset-sm-2.col-sm-8
-          div.card-deck
-            div.card
-              h4.card-header Stednavne
-              div.card-body
-                p.
-                  Stednavne omfatter mange forskellige typer af data, eksempelvis byer, bydele,
-                  skoler, øer, farvande, oldtidsminder.
-              div.card-footer
-                a.btn.btn-primary(href="/dok/stednavne") Læs mere
-            div.card
-              h4.card-header Matrikelkortet
-              div.card-body
-                p.
-                  Indeholder data fra matrikelkortet, dvs. ejerlav og jordstykker.
-              div.card-footer
-                a.btn.btn-primary(href="/dok/matrikelkortet") Læs mere
-      div.row.mt-4.mb-4
-        div.offset-sm-2.col-sm-8
-          div.card-deck
-            div.card
-              h4.card-header DAGI
-              div.card-body
-                p.
-                  DAGI indeholder de officielle administrative afgrænsninger i Danmark, dvs.
-                  kommuner, regioner, valgkredse, sogne, politikredse, retskredse m.v.
-              div.card-footer
-                a.btn.btn-primary(href="/dok/dagi") Læs mere
-            div.card
-              h4.card-header BBR
-              div.card-body
-                p.
-                  Data fra bygnings- og boligregistret, dvs. bygninger, enheder, tekniske anlæg, ejerskaber m.v.
-              div.card-footer
-                a.btn.btn-primary(href="/dok/bbr") Læs mere
