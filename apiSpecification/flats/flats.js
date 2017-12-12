@@ -77,7 +77,7 @@ module.exports = {
         type: 'string',
         description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som jordstykket er en del af.' +
-        ' Repræsenteret ved 10 cifre, hvor de første 4 cifre er kommunekoden. Eksempel ”6070035512”.',
+        ' Repræsenteret ved 10 cifre, hvor de første 3 cifre er kommunekoden hvor ejerskabet er placeret. Eksempel ”6070035512”.',
 
         schema: {
           type: ['null', 'string']
@@ -91,7 +91,7 @@ module.exports = {
         name: 'esrejendomsnr',
         description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som jordstykket er en del af.' +
-        ' Repræsenteret ved 6 cifre. Eksempel ”035512”.',
+        ' Repræsenteret ved 7 cifre. Eksempel ”0035512”.',
         schema: commonSchemaDefinitions.Nullableesrejendomsnr,
         parameterSchema: {
           type: 'string',

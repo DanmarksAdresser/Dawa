@@ -48,7 +48,7 @@ exports.parseEjerlav = function (body) {
         path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
         parseFn: (strValue) => {
           if (strValue.length > 7) {
-            return parseInteger(strValue.substring(4));
+            return parseInteger(strValue.substring(3));
           }
           else {
             const integer = parseInteger(strValue);
