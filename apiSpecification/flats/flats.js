@@ -24,47 +24,6 @@ const kode4ParameterSchema = {
 
 
 module.exports = {
-  // bebyggelse: {
-  //   singular: 'bebyggelse',
-  //   plural: 'bebyggelser',
-  //   singularSpecific: 'bebyggelsen',
-  //   prefix: 'bebyggelses',
-  //   fields: [{
-  //     name: 'id',
-  //     type: 'string',
-  //     schema: commonSchemaDefinitions.UUID,
-  //     description: 'Unik identifikator for bebyggelsen.'
-  //   },{
-  //     name: 'kode',
-  //     type: ['integer', 'null'],
-  //     description: 'Unik kode for bebyggelsen.'
-  //   }, {
-  //     name: 'type',
-  //     type: 'string',
-  //     description: 'Angiver typen af bebyggelse. Mulige værdier: "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby".',
-  //     schema: {
-  //         enum: [
-  //           'kolonihave',
-  //           'sommerhusområdedel',
-  //           'industriområde',
-  //           'storby',
-  //           'by',
-  //           'spredtBebyggelse',
-  //           'sommerhusområde',
-  //           'bydel'
-  //         ]
-  //
-  //     }
-  //   }, {
-  //     name: 'navn',
-  //     type: 'string',
-  //     description: 'Bebyggelsens navn.'
-  //   }],
-  //   secondaryFields: [],
-  //   filters: ['type', 'navn'],
-  //   key: ['id'],
-  //   geometryType: 'area'
-  // },
   jordstykke: {
     singular: 'jordstykke',
     plural: 'jordstykker',
@@ -114,18 +73,31 @@ module.exports = {
         processParameter: processIntegerAsString,
         formatter: kode4String
       }, {
-        name: 'esrejendomsnr',
+        name: 'udvidet_esrejendomsnr',
         type: 'string',
         description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
         ' ESR, som jordstykket er en del af.' +
-        ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
+        ' Repræsenteret ved 10 cifre, hvor de første 4 cifre er kommunekoden. Eksempel ”6070035512”.',
 
+        schema: {
+          type: ['null', 'string']
+        },
+        parameterSchema: {
+          type: 'string',
+          pattern: '^\\d{1,10}$'
+        },
+        processParameter: processIntegerAsString
+      }, {
+        name: 'esrejendomsnr',
+        description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
+        ' ESR, som jordstykket er en del af.' +
+        ' Repræsenteret ved 6 cifre. Eksempel ”035512”.',
         schema: commonSchemaDefinitions.Nullableesrejendomsnr,
         parameterSchema: {
           type: 'string',
           pattern: '^\\d{1,7}$'
         },
-        processParameter: processIntegerAsString
+        processParameter: processIntegerAsString,
       }, {
         name: 'sfeejendomsnr',
         type: 'string',
@@ -134,7 +106,7 @@ module.exports = {
       }
     ],
     secondaryFields: [{name: 'ejerlavnavn'}],
-    filters: ['ejerlavkode', 'matrikelnr', 'kommunekode', 'regionskode', 'sognekode', 'retskredskode', 'esrejendomsnr', 'sfeejendomsnr'],
+    filters: ['ejerlavkode', 'matrikelnr', 'kommunekode', 'regionskode', 'sognekode', 'retskredskode', 'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr'],
     key: ['ejerlavkode', 'matrikelnr'],
     geometryType: 'area',
     legacyReverseResource: true,

@@ -8,6 +8,7 @@ CREATE TABLE jordstykker(
   regionskode smallint,
   retskredskode smallint,
   esrejendomsnr text,
+  udvidet_esrejendomsnr text,
   sfeejendomsnr text,
   ændret timestamptz NOT NULL DEFAULT now(),
   geo_version integer NOT NULL DEFAULT 1,
@@ -21,6 +22,7 @@ CREATE INDEX ON jordstykker(kommunekode);
 CREATE INDEX ON jordstykker(sognekode);
 CREATE INDEX ON jordstykker(retskredskode);
 CREATE INDEX ON jordstykker(esrejendomsnr);
+CREATE INDEX ON jordstykker(udvidet_esrejendomsnr);
 CREATE INDEX ON jordstykker(sfeejendomsnr);
 CREATE INDEX ON jordstykker USING GIST(geom);
 

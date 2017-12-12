@@ -527,6 +527,10 @@ var sampleParameters = {
       values: ['8571' ,'08571'],
       verifier: (jordstykke, esrejendomsnr) => jordstykke.esrejendomsnr === parseInt(esrejendomsnr, 10).toString()
     },
+    udvidet_esrejendomsnr: {
+      values: ['3500009633'],
+      verifier: (jordstykke, esrejendomsnr) => jordstykke.udvidet_esrejendomsnr === parseInt(esrejendomsnr, 10).toString()
+    },
     sfeejendomsnr: {
       values: ['1305735'],
       verifier: (jordstykke, sfeejendomsnr) => jordstykke.sfeejendomsnr === sfeejendomsnr

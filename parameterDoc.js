@@ -572,6 +572,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     name: 'esrejendomsnr',
     doc: 'ESR Ejendomsnummer. Indtil 7 cifre. Søger på esrejendomsnummeret for det tilknyttede jordstykke.'
   },
+  {
+    name: 'esrejendomsnr',
+    doc: 'ESR Ejendomsnummer. Indtil 7 cifre. Søger på esrejendomsnummeret for det tilknyttede jordstykke.'
+  },
   SRIDParameter,
   {
     name: 'polygon',
@@ -1090,6 +1094,10 @@ var jordstykkeParameters = [
   {
     name: 'esrejendomsnr',
     doc: 'Find de jordstykker som er tilknyttet det angivne ESR ejendomsnummer.'
+  },
+  {
+    name: 'udvidet_esrejendomsnr',
+    doc: 'Find de jordstykker som er tilknyttet det angivne udvidede ESR ejendomsnummer (10 cifre)'
   },
   {
     name: 'sfeejendomsnr',
@@ -2303,7 +2311,22 @@ module.exports['/autocomplete'] = {
     doc: 'Returner adresse eller adgangsadresse med den angivne ID. type-parameteren afgør, om der søges' +
     ' efter adgangsadresser eller adresser. Der returneres en tom array hvis (adgangs)adressen ikke findes.'
   }].concat(formatAndPagingParams),
-  examples: []
+  examples: [
+    {
+      description: 'Autocomplete "Magreteplasen 4, 8" med fuzzy søgning slået til og careten placeret i slutningen af teksten',
+      query: [
+        {name: 'q', value: 'Magreteplasen 4, 8'},
+        {name: 'caretpos', value: 'Magreteplasen 4, 8'.length},
+        {name: 'fuzzy', value: ''}]
+    },
+    {
+      description: 'Autocomplete "Marg 4, 8000 Aarhus C" med careten placeret efter "Marg"',
+      query: [
+        {name: 'q', value: 'Marg 4, 8000 Aarhus C'},
+        {name: 'caretpos', value: "4"}
+      ]
+    }
+  ]
 };
 
 module.exports['/datavask/adgangsadresser'] = {
