@@ -263,6 +263,15 @@ const migrateHistoryToChangeTable = (client, txid, tableModel) => go(function*()
   yield migrateDeletes(client, txid, tableModel);
 });
 
+const clearHistory = (client, txid, tableModel) => go(function*() {
+  const selectFields = selectList(null, allColumnNames(tableModel));
+  const changeTableName = `${tableModel.table}_changes`;
+  yield client.query(`DELETE FROM ${changeTableName}`);
+  const sql = `INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${selectFields}) 
+  (SELECT ${txid}, null, 'insert', false, ${selectFields} FROM ${tableModel.table})`;
+  yield client.query(sql);
+});
+
 const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, columns) => go(function*() {
   columns = columns || nonDerivedColumnNames(tableModel);
   const selectFields = selectList(null, columns);
@@ -332,6 +341,7 @@ module.exports = {
   createChangeTable,
   initChangeTable,
   initializeFromScratch,
+  clearHistory,
   insert,
   update,
   del

@@ -492,7 +492,7 @@ const publicResults = {
         "AENDR_TS": "2008-12-08T11:16:19.000",
         "Ophoert_ts": null,
         "Gyldighedsdato": null,
-        "href": "http://dawa/oislight/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
+        "href": "http://dawa/bbrlight/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
       },
       flad: {
         "ois_id": 49881,
@@ -532,13 +532,13 @@ const publicResults = {
         "MatrNr": "2afÃ¸",
         "ESREjdNr": "051692",
         "Grund_id": "db50f6b0-c332-45cf-8f7a-1161933e367a",
-        "href": "http://dawa/oislight/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
+        "href": "http://dawa/bbrlight/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
         "ejerskaber": [],
         "bygningspunkt": {
           "ois_id": 6093147,
           "ois_ts": "2016-12-12 19:26:53.370",
           "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-          "href": "http://dawa/oislight/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
+          "href": "http://dawa/bbrlight/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
           "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
           "PktRevDato": "2016-12-12T09:29:07.017",
           "KoorOest": 726016.09,
@@ -638,6 +638,11 @@ describe('OIS API', () => {
             type: 'resource',
             qualifier: 'getByKey'
           });
+          const queryResource = registry.findWhere({
+            entityName: `ois_${modelName}_${variant}`,
+            type: 'resource',
+            qualifier: 'query'
+          });
           if (expectedResults[modelName]) {
             const tests = expectedResults[modelName];
             for (let id of Object.keys(tests)) {
@@ -654,6 +659,24 @@ describe('OIS API', () => {
                   }));
               }
             }
+          }
+          const oisApiModel = oisApiModels[modelName];
+          if (oisApiModel.geojson) {
+            it(`Kan returnere GeoJSON format for entity=${modelName}`, () => go(function* () {
+              const result = yield helpers.getJson(clientFn(),
+                queryResource,
+                {},
+                {
+                  per_side: 1,
+                  format: 'geojson'
+                });
+              assert.strictEqual(result.features.length, 1);
+              const feature = result.features[0];
+              if(modelName !== 'tekniskanlaeg') {
+                const coordinates = feature.geometry.coordinates;
+                assert.strictEqual(coordinates.length, 2);
+              }
+            }));
           }
         }
       });

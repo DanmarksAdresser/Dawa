@@ -111,6 +111,7 @@ setupPugPage('/dok/faq', 'faq.pug');
 for(let page of allPages) {
   setupApidocDetails(page);
 }
+
 setupSchemaPage('/replikeringdok/schema.json');
 
 module.exports = app;

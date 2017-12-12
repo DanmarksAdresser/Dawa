@@ -16,7 +16,7 @@ const oisModelsMap = {
 };
 
 const makeOisHref = (baseUrl, variant, apiModelName, id) => {
-  const path = variant === 'full' ? '/ois' : '/oislight';
+  const path = variant === 'full' ? '/ois' : '/bbrlight';
   return `${baseUrl}${path}/${namesAndKeys[apiModelName].plural}/${id}`;
 };
 
@@ -121,7 +121,7 @@ const createRepresentations = variant => {
     };
 
     if(apiModel.geojson) {
-      const geojsonField = _.findWhere(fieldsMap[apiModelName], {name: 'geom_json'});
+      const geojsonField = _.findWhere(fieldsMap[variant][apiModelName], {name: 'geom_json'});
       representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
       representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
       representations.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniRepresentation);

@@ -2796,7 +2796,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/enheder';
+      enhedopt.url='bbrlight/enheder';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -2805,7 +2805,7 @@ describe('OIS Light', function(){
 
       var opgangopt= {};
       opgangopt.baseUrl= host;
-      opgangopt.url='oislight/opgange';
+      opgangopt.url='bbrlight/opgange';
       opgangopt.qs= {};
       opgangopt.qs.cache= enhedopt.qs.cache;
       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
@@ -2815,7 +2815,7 @@ describe('OIS Light', function(){
 
       var bygningopt= {};
       bygningopt.baseUrl= host;
-      bygningopt.url='oislight/bygninger';
+      bygningopt.url='bbrlight/bygninger';
       bygningopt.qs= {};
       bygningopt.qs.cache= enhedopt.qs.cache;
       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
@@ -2825,7 +2825,7 @@ describe('OIS Light', function(){
 
       var tekniskanlægopt= {};
       tekniskanlægopt.baseUrl= host;
-      tekniskanlægopt.url='oislight/tekniskeanlaeg';
+      tekniskanlægopt.url='bbrlight/tekniskeanlaeg';
       tekniskanlægopt.qs= {};
       tekniskanlægopt.qs.cache= enhedopt.qs.cache;
       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
@@ -2859,7 +2859,7 @@ describe('OIS Light', function(){
 
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
-      ejerskabopt.url='oislight/ejerskaber';
+      ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= /* '0'+ */ enheder[0].Enhed_id; // fjern '0' +
@@ -2895,7 +2895,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/enheder';
+      enhedopt.url='bbrlight/enheder';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -2912,7 +2912,7 @@ describe('OIS Light', function(){
 
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
-      ejerskabopt.url='oislight/ejerskaber';
+      ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
@@ -2950,7 +2950,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/enheder';
+      enhedopt.url='bbrlight/enheder';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -2969,7 +2969,7 @@ describe('OIS Light', function(){
 
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
-      ejerskabopt.url='oislight/ejerskaber';
+      ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
@@ -3005,7 +3005,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/enheder';
+      enhedopt.url='bbrlight/enheder';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adresseid= adresser[0].id;
@@ -3022,7 +3022,7 @@ describe('OIS Light', function(){
      
       var eejerskabopt= {};
       eejerskabopt.baseUrl= host;
-      eejerskabopt.url='oislight/ejerskaber';
+      eejerskabopt.url='bbrlight/ejerskaber';
       eejerskabopt.qs= {};
       eejerskabopt.qs.cache= 'no-cache';
       eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
@@ -3031,7 +3031,7 @@ describe('OIS Light', function(){
 
       var bejerskabopt= {};
       bejerskabopt.baseUrl= host;
-      bejerskabopt.url='oislight/ejerskaber';
+      bejerskabopt.url='bbrlight/ejerskaber';
       bejerskabopt.qs= {};
       bejerskabopt.qs.cache= 'no-cache';
       bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
@@ -3080,7 +3080,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/tekniskeanlaeg';
+      enhedopt.url='bbrlight/tekniskeanlaeg';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adgangsadresseid= adresser[0].id;
@@ -3095,7 +3095,7 @@ describe('OIS Light', function(){
      
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
-      ejerskabopt.url='oislight/ejerskaber';
+      ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
@@ -3132,7 +3132,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/opgange';
+      enhedopt.url='bbrlight/opgange';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.adgangsadresseid= adresser[0].id;
@@ -3146,7 +3146,7 @@ describe('OIS Light', function(){
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
-      enhedopt.url='oislight/bygninger';
+      enhedopt.url='bbrlight/bygninger';
       enhedopt.qs= {};
       enhedopt.qs.cache= 'no-cache';
       enhedopt.qs.id= opgange[0].Bygning_id;
@@ -3161,7 +3161,7 @@ describe('OIS Light', function(){
      
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
-      ejerskabopt.url='oislight/ejerskaber';
+      ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
@@ -3240,7 +3240,7 @@ describe('OIS Light', function(){
  it("fra ejerskab til adresse", function(done) {
     var ejerskabopt= {};
     ejerskabopt.baseUrl= host;
-    ejerskabopt.url='oislight/ejerskaber';
+    ejerskabopt.url='bbrlight/ejerskaber';
     ejerskabopt.qs= {};
     ejerskabopt.qs.cache= 'no-cache';
     ejerskabopt.qs.kommunekode= "0201";
@@ -3273,7 +3273,7 @@ describe('OIS Light', function(){
  it("reverse geokodning af bygning", function(done) {
     var reverseopt= {};
     reverseopt.baseUrl= host;
-    reverseopt.url='oislight/bygninger';
+    reverseopt.url='bbrlight/bygninger';
     reverseopt.qs= {};
     reverseopt.qs.cache= 'no-cache';
     reverseopt.qs.x= 12.5108572474172;
@@ -3292,6 +3292,28 @@ describe('OIS Light', function(){
     });
   });
 
+
+ it("geojson", function(done) {
+    var reverseopt= {};
+    reverseopt.baseUrl= host;
+    reverseopt.url='bbrlight/bygninger';
+    reverseopt.qs= {};
+    reverseopt.qs.cache= 'no-cache';
+    reverseopt.qs.adgangsadresseid= '0a3f5098-ac99-32b8-e044-0003ba298018';
+    reverseopt.qs.format= 'geojson';
+    reverseopt.resolveWithFullResponse= true;
+    var reverserp= rp(reverseopt);       
+    reverserp.then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length>1, "Der er flere end én bygning, men " + bygninger.length);                
+      assert(typeof bygninger[0].BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
+      assert(typeof bygninger[0].OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
 
 });
 

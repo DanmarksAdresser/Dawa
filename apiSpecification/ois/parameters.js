@@ -7,6 +7,7 @@ const schemas = require('./schemas');
 
 const registry = require('../registry');
 const filtersMap = require('./filterParameterSpec');
+const  { normalizeParameters }  = require('../common/parametersUtil');
 
 const modelsMap = {
   public: publicOisModels,
@@ -80,8 +81,8 @@ for(let variant of ['public', 'full']) {
   exports[variant] = {};
   for(let oisApiModelName of Object.keys(filtersMap)) {
     exports[variant][oisApiModelName] = {
-      propertyFilter: filterParams(variant, oisApiModelName),
-      id: keyParams(variant, oisApiModelName)
+      propertyFilter: normalizeParameters(filterParams(variant, oisApiModelName)),
+      id: normalizeParameters(keyParams(variant, oisApiModelName))
     };
     registry.addMultiple(`ois_${oisApiModelName}_${variant}`, 'parameterGroup', module.exports[variant][oisApiModelName]);
   }

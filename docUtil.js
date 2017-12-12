@@ -1,6 +1,5 @@
 "use strict";
 
-const oisApiModels = require('./apiSpecification/ois/oisApiModels');
 const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
 const registry = require('./apiSpecification/registry');
 var _ = require('underscore');
@@ -164,7 +163,18 @@ exports.getOisGetByKeyResourcePath = (oisEntityName, variant) => {
 };
 
 exports.getOisEntityNames = () => {
-  return Object.keys(oisApiModels);
+  return [
+    'enhed',
+    'bygning',
+    'tekniskanlaeg',
+    'ejerskab',
+    'grund',
+    'matrikelreference',
+    'opgang',
+    'etage',
+    'bygningspunkt',
+    'kommune'
+  ];
 };
 
 exports.getOisPlural = (oisEntityName) => {
@@ -182,6 +192,13 @@ exports.getDocForPath = (path) => {
 };
 
 exports.getPageForEntity = entityName => entityPageMap[entityName];
+
+exports.uppercaseFirst = str => {
+  if(!str || str === '') {
+    return str;
+  }
+  return str.substring(0,1).toUpperCase() + str.substring(1);
+};
 
 
 exports.exampleDoc = [

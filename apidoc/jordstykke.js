@@ -44,6 +44,10 @@ const jordstykkeParameters = [
     doc: 'Find de jordstykker som er tilknyttet det angivne ESR ejendomsnummer.'
   },
   {
+    name: 'udvidet_esrejendomsnr',
+    doc: 'Find de jordstykker som er tilknyttet det angivne udvidede ESR ejendomsnummer (10 cifre)'
+  },
+  {
     name: 'sfeejendomsnr',
     doc: 'Find de jordstykker som er tilknyttet det angivne SFE ejendomsnummer.'
   },

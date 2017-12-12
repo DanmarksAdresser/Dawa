@@ -56,6 +56,21 @@ module.exports = [
       doc: 'Returner adresse eller adgangsadresse med den angivne ID. type-parameteren afgør, om der søges' +
       ' efter adgangsadresser eller adresser. Der returneres en tom array hvis (adgangs)adressen ikke findes.'
     }].concat(formatAndPagingParams),
-    examples: []
+    examples: [
+      {
+        description: 'Autocomplete "Magreteplasen 4, 8" med fuzzy søgning slået til og careten placeret i slutningen af teksten',
+        query: [
+          {name: 'q', value: 'Magreteplasen 4, 8'},
+          {name: 'caretpos', value: 'Magreteplasen 4, 8'.length},
+          {name: 'fuzzy', value: ''}]
+      },
+      {
+        description: 'Autocomplete "Marg 4, 8000 Aarhus C" med careten placeret efter "Marg"',
+        query: [
+          {name: 'q', value: 'Marg 4, 8000 Aarhus C'},
+          {name: 'caretpos', value: "4"}
+        ]
+      }
+    ]
   }
 ];
