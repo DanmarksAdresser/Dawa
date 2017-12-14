@@ -1,6 +1,5 @@
-extends layout
-include includes/parameterDocMixins
-block content
+extends ../sidebar-auto
+block main
   h1 Etablering af adressekopiregister
   p.lead Etablering af lokal kopi af Danmarks adresser
   section
@@ -44,7 +43,9 @@ block content
       section
         div.page-header
           h3.anchor-header#udtraek Udtræk
-        p Udtræk leveres i JSON- eller CSV-format (se <a href="#{url}/generelt#dataformater">dataformater</a>). Feltnavne og indhold er det samme som feltnavne for hændelserne dokumenteret nedenfor.
+        p.
+          Udtræk leveres i JSON- eller CSV-format (se <a href="#{url}/generelt#dataformater">dataformater</a>). Der henvises til <a href="/dok/api">API oversigten</a> for detaljerede
+          beskrivelser af de enkelte replikerede datatyper.
         p En list af datakilder og beskrives af deres feltnavne, kan også findes i JSON format på <a href="#{url}/replikeringdok/schema.json">/replikeringdok/schema.json</a>.
       section
         div.page-header
