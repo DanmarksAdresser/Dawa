@@ -2,7 +2,13 @@ extends sidebar-auto
 include includes/parameterDocMixins
 
 block main
-  h1 API oversigt
+  h1 API dokumentation
+  p.
+    Det anbefales at læse <a href="/dok/api/generelt">generel information om DAWA API'et</a> igennem
+    før DAWA API'et tages i brug.
+
+  p.
+    Nedenfor er en oversigt over samtlige ressourcer som udstilles af DAWA:
   each entity in docUtil.getEntityNames()
     h2 #{entity}
     - const page = docUtil.getPageForEntity(entity)

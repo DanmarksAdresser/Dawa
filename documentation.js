@@ -105,6 +105,7 @@ for(let område of ['adresser', 'dagi', 'bbr', 'matrikelkortet', 'stednavne']) {
 setupPugPage('/', 'forside.pug');
 setupPugPage('/dok/om', 'om.pug');
 setupPugPage('/dok/api', 'apidoc-oversigt.pug');
+setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guide/oversigt.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
 for(let guide of ['autocomplete', 'datavask', 'replikering']) {
