@@ -1,5 +1,5 @@
 extends ../sidebar-auto
-
+include ../includes/datavask-demo
 block main
   div.container-fluid
     h1 DAWA - Adressefunktionalitet
@@ -91,19 +91,13 @@ block main
         det store antal it-systemer, som rummer adresser. Adresserne er typisk blevet indtastet
         uden kontrol af adressens gyldighed og kan være ændret eller nedlagt efter indtastningen.
         Det resulterer i, at it-systemet med stor sandsynlighed rummer ugyldige adresser.
-        Konsekvenserne kan være: Problemer med kundebesøg, postlevering, manuelt arbejde med at
-        vedligeholde adresser og lignende. Det kan også resultere i, at man ikke kan anvende
-        adresserne til at foretage analyser. Grundet de ufuldstændige adresseoplysninger kan man
-        ikke kan slå adressen op i DAWA og derved skaffe yderligere oplysninger om adressen, som
-        f.eks. adressens placering og tilknytningen til administrative inddelinger.
-        Disse oplysninger kan anvendes til analyse af geografisk fordeling af ens kunder,
-        placering i sogn og kommune, fordeling mellem land, by og sommerhuszone og andre
-        anvendelige analyser. Det er kort sagt værdifuldt at have gyldige adresser i sit it-system.
       p.
         DAWA tilbyder funktionalitet til at vaske adresser, som du kan anvende til at implementere
         adressevask i dit eget it-system.  Adressevask er en proces, hvor en ustruktureret adresse,
         som kan være ufuldstændig og indeholde stavefejl, oversættes til den korrekte,
         strukturerede, autoritative adresse.
+
+      +renderDatavaskDemo()
 
       h2 Adressedata
       p.
@@ -160,3 +154,5 @@ block main
 block append scripts
   script(type='text/javascript').
     dawa.initForside()
+    dawa.setupDatavaskDemo('#vask-adresse-input', '#vask-adresse-btn', '#datavask-adresse-result', 'adresse');
+    dawa.setupDatavaskDemo('#vask-adgangsadresse-input', '#vask-adgangsadresse-btn', '#datavask-adgangsadresse-result', 'adgangsadresse');
