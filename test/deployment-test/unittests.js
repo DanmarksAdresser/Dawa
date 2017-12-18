@@ -3306,9 +3306,9 @@ describe('OIS Light', function(){
     reverserp.then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var bygninger= JSON.parse(response.body);
-      assert(bygninger.length>1, "Der er flere end én bygning, men " + bygninger.length);                
-      assert(typeof bygninger[0].BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
-      assert(typeof bygninger[0].OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
+      assert(bygninger.features.length>1, "Der er flere end én bygning, men " + bygninger.features.length);                
+      assert(typeof bygninger.features[0].properties.BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
+      assert(typeof bygninger.features[0].properties.OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
       done();
     }).catch((err) => {
       done(err);
