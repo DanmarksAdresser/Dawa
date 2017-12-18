@@ -108,7 +108,7 @@ setupPugPage('/dok/api', 'apidoc-oversigt.pug');
 setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guide/oversigt.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
-for(let guide of ['autocomplete', 'datavask', 'replikering']) {
+for(let guide of ['autocomplete', 'datavask', 'replikering', 'autocomplete-old']) {
   setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
 }
 setupPugPage('/dok/faq', 'faq.pug');
