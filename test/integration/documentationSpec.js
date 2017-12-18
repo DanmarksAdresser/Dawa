@@ -61,7 +61,7 @@ describe('Documentation page', function() {
     });
   });
 
-  ['adressedok', 'adgangsadressedok', 'vejedok', 'postnummerdok', 'listerdok', 'oisdok', 'oislightdok'].forEach(function(docPageName) {
+  ['adressedok', 'adgangsadressedok', 'vejedok', 'postnummerdok', 'listerdok', 'oisdok', 'bbrlightdok'].forEach(function(docPageName) {
     it(docPageName + ' should contain examples', function(done) {
       request.get("http://localhost:3002/"+ docPageName, function(error, response, body) {
         expect(body).to.contain('<h4>Eksempler</h4>');

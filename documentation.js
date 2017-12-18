@@ -101,7 +101,7 @@ setupPugPage('/vejedok', 'vejedok.pug');
 setupPugPage('/postnummerdok', 'postnummerdok.pug');
 setupPugPage('/listerdok', 'listerdok.pug');
 setupPugPage('/oisdok', 'oisdok.pug');
-setupPugPage('/oislightdok', 'oislightdok.pug');
+setupPugPage('/bbrlightdok', 'bbrlightdok.pug');
 setupPugPage('/om', 'om.pug');
 setupPugPage('/replikeringdok', 'replikeringdok.pug');
 setupSchemaPage('/replikeringdok/schema.json');

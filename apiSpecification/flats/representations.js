@@ -56,7 +56,7 @@ const jsonSchema = (flat, fields) => {
 
 var jordstykkeJsonSchema = function () {
   var schema = jsonSchema(flats.jordstykke, flats.jordstykke.fields.filter(field =>
-    _.contains(['matrikelnr', 'esrejendomsnr','sfeejendomsnr'], field.name)));
+    _.contains(['matrikelnr', 'esrejendomsnr', 'udvidet_esrejendomsnr','sfeejendomsnr'], field.name)));
   schema.properties.ejerlav = {
     description: 'Ejerlavet som jordstykket tilhører.',
     $ref: '#/definitions/EjerlavRef'
@@ -77,7 +77,6 @@ var jordstykkeJsonSchema = function () {
     description: 'Retskredsen, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
     $ref: '#/definitions/NullableRetskredsRefNoName'
   };
-
   schema.docOrder = schema.docOrder.concat(['ejerlav', 'kommune', 'region', 'sogn', 'retskreds']);
   return globalSchemaObject(schema);
 };
@@ -101,6 +100,7 @@ const customRepresentations = {
           result.sogn = commonMappers.mapKode4NavnTemaNoName('sogn', value.sognekode, baseUrl);
           result.retskreds = commonMappers.mapKode4NavnTemaNoName('retskreds', value.retskredskode, baseUrl);
           result.esrejendomsnr = value.esrejendomsnr ? ('' + value.esrejendomsnr) : null;
+          result.udvidet_esrejendomsnr = value.udvidet_esrejendomsnr ? ('' + value.udvidet_esrejendomsnr) : null;
           result.sfeejendomsnr = value.sfeejendomsnr ? ('' + value.sfeejendomsnr) : null;
           return result;
         };

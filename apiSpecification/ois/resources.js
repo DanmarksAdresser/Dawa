@@ -10,7 +10,7 @@ const parametersMap = require('./parameters');
 const oisApiModels = require('./oisApiModels');
 
 const oisPaths = {
-  'public': '/oislight',
+  'public': '/bbrlight',
   full: '/ois'
 };
 

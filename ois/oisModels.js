@@ -596,7 +596,7 @@ module.exports = {
          { name: 'LandsejerlavKode', oisType: 'int', public: true },
          { name: 'KomEjerlav_id', oisType: 'uniqueidentifier', public: true },
          { name: 'MatrNr', oisType: 'varchar', oisLength: 10, public: true },
-         { name: 'Udskrivning', oisType: 'char', oisLength: 1 },
+         { name: 'Udskrivning', oisType: 'char', oisLength: 1, public: true },
          { name: 'OPRET_TS', oisType: 'varchar', oisLength: 26, public: true },
          { name: 'AENDR_TS', oisType: 'varchar', oisLength: 26, public: true },
          { name: 'Aendr_Funk', oisType: 'varchar', oisLength: 40 },

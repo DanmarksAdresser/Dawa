@@ -9,7 +9,7 @@ function parseInteger(str) {
   return parseInt(str, 10);
 }
 
-exports.parseEjerlav = function(body) {
+exports.parseEjerlav = function (body) {
   var mapping = {
     name: 'jordstykke',
     geometry: 'surfaceProperty',
@@ -46,19 +46,28 @@ exports.parseEjerlav = function(body) {
       esrejendomsnr: {
         name: 'esr_Ejendomsnummer',
         path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
-        parseFn: function(strValue) {
-          // there is (as of 2015-02-16) a bug in the data, such that
-          // esrejendomsnr is prefixed with kommunekode
-          if(strValue.length > 7) {
-            return parseInteger(strValue.substring(4));
+        parseFn: (strValue) => {
+          if (strValue.length > 7) {
+            return parseInteger(strValue.substring(3));
           }
           else {
-            var integer = parseInteger(strValue);
-            if(integer === 0) {
+            const integer = parseInteger(strValue);
+            if (integer === 0) {
               return null;
             }
             return integer;
           }
+        }
+      },
+      udvidet_esrejendomsnr: {
+        name: 'esr_Ejendomsnummer',
+        path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
+        parseFn: (strValue) => {
+          const integer = parseInteger(strValue);
+          if (integer === 0) {
+            return null;
+          }
+          return integer;
         }
       },
       sfeejendomsnr: {
@@ -67,13 +76,15 @@ exports.parseEjerlav = function(body) {
         parseFn: parseInteger
       }
     },
-    filterFn: function() { return true; }
+    filterFn: function () {
+      return true;
+    }
   };
 
   return tema.parseGml(body, 'jordstykke', ['ejerlavkode', 'matrikelnr'], mapping);
 }
 
-exports.storeEjerlav = function(ejerlavkode, jordstykker, client, options) {
+exports.storeEjerlav = function (ejerlavkode, jordstykker, client, options) {
   var temaDef = tema.findTema('jordstykke');
   return tema.putTemaer(temaDef, jordstykker, client, options.init, {ejerlavkode: ejerlavkode}, false);
 };

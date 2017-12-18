@@ -89,7 +89,7 @@ exports.setupRoutes = function () {
   });
   if(!oisEnabled || oisProtected) {
     app.use((req, res, next) => {
-      if ((req.path.toLowerCase().indexOf('/ois') !== -1) && !req.path.startsWith('/oislight')) {
+      if ((req.path.toLowerCase().indexOf('/ois') !== -1)) {
         if(!oisEnabled) {
           return res.status(403).send('OIS currently disabled for all users');
         }

@@ -572,6 +572,10 @@ var parametersForBothAdresseAndAdgangsAdresse = [
     name: 'esrejendomsnr',
     doc: 'ESR Ejendomsnummer. Indtil 7 cifre. Søger på esrejendomsnummeret for det tilknyttede jordstykke.'
   },
+  {
+    name: 'esrejendomsnr',
+    doc: 'ESR Ejendomsnummer. Indtil 7 cifre. Søger på esrejendomsnummeret for det tilknyttede jordstykke.'
+  },
   SRIDParameter,
   {
     name: 'polygon',
@@ -1090,6 +1094,10 @@ var jordstykkeParameters = [
   {
     name: 'esrejendomsnr',
     doc: 'Find de jordstykker som er tilknyttet det angivne ESR ejendomsnummer.'
+  },
+  {
+    name: 'udvidet_esrejendomsnr',
+    doc: 'Find de jordstykker som er tilknyttet det angivne udvidede ESR ejendomsnummer (10 cifre)'
   },
   {
     name: 'sfeejendomsnr',
@@ -1875,6 +1883,18 @@ const oisFilterParameterDoc = {
       {
         name: 'id',
         doc: 'Find grund med den angivne id (Grund_id)'
+      },
+      {
+        name: 'adgangsadresseid',
+        doc: 'Find grunde med den angivne adgangsadresseid (AdgAdr_id)'
+      },
+      {
+        name: 'esrejendomsnr',
+        doc: 'Find grunde med det angivne ESR ejendomsnummer (EsrEjdNr)'
+      },
+      {
+        name: 'sfeejendomsnr',
+        doc: 'Find grunde med det angivne SFE ejendomsnr (MatrSFE_id)'
       }
     ],
     examples: [
@@ -2119,7 +2139,12 @@ const oisFilterParameterDoc = {
         doc: 'Find bygningspunktet med det angivne ID (BygPkt_id)'
       }
     ],
-    examples: []
+    examples: [
+      {description: 'Find bygningspunktet med ID 000004bc-f76a-4a51-a549-2b53425132a0',
+      query: [
+        {name: 'id', value: '000004bc-f76a-4a51-a549-2b53425132a0'}
+      ]}
+    ]
   },
   matrikelreference: {
     subtext: `Find matrikelreferencer fra OIS. ${oisReferenceText}`,
@@ -2142,12 +2167,19 @@ const oisFilterParameterDoc = {
         ' med ejerlavkode parameteren.'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find matrikelreferencer med grund ID 011af923-08cb-47b6-994e-d11c1fc1f22b',
+        query: [
+          {name: 'grundid', value: '011af923-08cb-47b6-994e-d11c1fc1f22b'}
+        ]
+      }
+    ]
   }
 };
 
 const oisPaths = {
-  'public': '/oislight',
+  'public': '/bbrlight',
   full: '/ois'
 };
 
@@ -2291,7 +2323,22 @@ module.exports['/autocomplete'] = {
     doc: 'Returner adresse eller adgangsadresse med den angivne ID. type-parameteren afgør, om der søges' +
     ' efter adgangsadresser eller adresser. Der returneres en tom array hvis (adgangs)adressen ikke findes.'
   }].concat(formatAndPagingParams),
-  examples: []
+  examples: [
+    {
+      description: 'Autocomplete "Magreteplasen 4, 8" med fuzzy søgning slået til og careten placeret i slutningen af teksten',
+      query: [
+        {name: 'q', value: 'Magreteplasen 4, 8'},
+        {name: 'caretpos', value: 'Magreteplasen 4, 8'.length},
+        {name: 'fuzzy', value: ''}]
+    },
+    {
+      description: 'Autocomplete "Marg 4, 8000 Aarhus C" med careten placeret efter "Marg"',
+      query: [
+        {name: 'q', value: 'Marg 4, 8000 Aarhus C'},
+        {name: 'caretpos', value: "4"}
+      ]
+    }
+  ]
 };
 
 module.exports['/datavask/adgangsadresser'] = {
