@@ -582,6 +582,18 @@ var sampleParameters = {
     id: {
       values: ['003b8b83-a7da-4cd1-9ebf-9d2ed4b2d522'],
       verifier: (grund, id) => grund.Grund_id === id
+    },
+    adgangsadresseid: {
+      values: ['0a3f507e-0409-32b8-e044-0003ba298018'],
+      verifier: (grund, id) => grund.AdgAdr_id === id
+    },
+    esrejendomsnr: {
+      values: ['2632', '002632'],
+      verifier: (grund, nr) =>   parseInt(grund.ESREjdNr, 10) === parseInt(nr, 10)
+    },
+    sfeejendomsnr: {
+      values: ['2695110', '02695110'],
+      verifier: (grund, sfeejendomsnr) => parseInt(grund.MatrSFE_id, 10) === parseInt(sfeejendomsnr, 10)
     }
   },
   ois_bygning_full: {

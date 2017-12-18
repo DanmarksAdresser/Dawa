@@ -13,6 +13,19 @@ module.exports = {
   grund: [{
     name: 'id',
     field: 'Grund_id'
+  }, {
+    name: 'adgangsadresseid',
+    field: 'AdgAdr_id'
+  }, {
+    name: 'esrejendomsnr',
+    field: 'ESREjdNr',
+    schema: {
+      type: 'string'
+    },
+    process: processEsr
+  }, {
+    name: 'sfeejendomsnr',
+    field: 'MatrSFE_id'
   }],
   bygning: [{
     name: 'id',

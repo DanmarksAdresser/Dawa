@@ -1883,6 +1883,18 @@ const oisFilterParameterDoc = {
       {
         name: 'id',
         doc: 'Find grund med den angivne id (Grund_id)'
+      },
+      {
+        name: 'adgangsadresseid',
+        doc: 'Find grunde med den angivne adgangsadresseid (AdgAdr_id)'
+      },
+      {
+        name: 'esrejendomsnr',
+        doc: 'Find grunde med det angivne ESR ejendomsnummer (EsrEjdNr)'
+      },
+      {
+        name: 'sfeejendomsnr',
+        doc: 'Find grunde med det angivne SFE ejendomsnr (MatrSFE_id)'
       }
     ],
     examples: [

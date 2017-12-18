@@ -1,6 +1,15 @@
 "use strict";
 
 module.exports = [{
+  entity: 'grund',
+  columns: ['AdgAdr_id']
+}, {
+  entity: 'grund',
+  columns: ['ESREjdNr']
+}, {
+  entity: 'grund',
+  columns: ['MatrSFE_id']
+}, {
   entity: 'bygning',
   columns: ['AdgAdr_id']
 }, {
