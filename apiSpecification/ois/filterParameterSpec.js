@@ -17,6 +17,9 @@ module.exports = {
     name: 'adgangsadresseid',
     field: 'AdgAdr_id'
   }, {
+    name: 'kommuneid',
+    field: 'Kommune_id'
+  }, {
     name: 'esrejendomsnr',
     field: 'ESREjdNr',
     schema: {
