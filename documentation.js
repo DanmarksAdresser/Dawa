@@ -119,4 +119,24 @@ for(let page of allPages) {
 
 setupSchemaPage('/replikeringdok/schema.json');
 
+const redirects = [
+  ['/autocompletedok', '/dok/guide/autocomplete'],
+  ['/generelt', '/dok/api/generelt'],
+  ['/adressedok', '/dok/api/adresse'],
+  ['/adgangsadressedok', '/dok/api/adgangsadresse'],
+  ['/vejedok', '/dok/api/vejstykke'],
+  ['/postnummerdok', '/dok/api/postnummer'],
+  ['/om', '/dok/om'],
+  ['/listerdok', '/dok/api'],
+  ['/bbrlightdok', '/dok/bbr'],
+  ['/replikeringdok', '/dok/guide/replikering']
+];
+
+for(let [oldPath, newPath] of redirects) {
+  app.get(oldPath, function (req, res) {
+    res.redirect(newPath);
+  });
+
+}
+
 module.exports = app;
