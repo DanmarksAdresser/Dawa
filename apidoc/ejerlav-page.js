@@ -28,6 +28,18 @@ module.exports = {
       lead: `API'et udstiller for hvert ejerlav følgende informationer:`,
       entity: 'ejerlav',
       qualifier: 'json'
+    },
+    {
+      type: 'endpoint',
+      anchor: 'udtræk',
+      heading: 'Ejerlav - udtræk',
+      path: '/replikering/ejerlav'
+    },
+    {
+      type: 'endpoint',
+      anchor: 'hændelser',
+      heading: 'Ejerlav - hændelser',
+      path: '/replikering/ejerlav/haendelser'
     }
   ]
 };
