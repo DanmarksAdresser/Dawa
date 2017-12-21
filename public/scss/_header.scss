@@ -1,0 +1,17 @@
+nav.navbar {
+	background: $white;
+
+	-webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+	-moz-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+
+	.navbar-collapse {
+		justify-content: flex-end;
+	}
+}
+
+.nav-item {
+	a.nav-item {
+
+	}
+}
