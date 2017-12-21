@@ -1,6 +1,6 @@
 {
   "name": "DAWA",
-  "version": "1.15.2",
+  "version": "1.15.3",
   "private": true,
   "author": "Ministeriet for By, Bolig og Landdistrikter",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
@@ -93,6 +93,7 @@
     "rollup-plugin-inject": "^2.0.0",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-scss": "^0.3.0",
+    "rollup-watch": "^4.3.1",
     "xp": "^1.0.1"
   },
   "subdomain": "dawa",

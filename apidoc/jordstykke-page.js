@@ -22,6 +22,18 @@ module.exports = {
       lead: `API'et udstiller for hvert jordstykke følgende informationer:`,
       entity: 'jordstykke',
       qualifier: 'json'
+    },
+    {
+      type: 'endpoint',
+      anchor: 'udtræk',
+      heading: 'Jordstykketilknytninger - udtræk',
+      path: '/replikering/jordstykketilknytninger'
+    },
+    {
+      type: 'endpoint',
+      anchor: 'hændelser',
+      heading: 'Jordstykketilknytninger - hændelser',
+      path: '/replikering/jordstykketilknytninger/haendelser'
     }
   ]
 };

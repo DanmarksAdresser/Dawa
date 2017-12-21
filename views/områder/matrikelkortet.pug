@@ -1,2 +1,49 @@
 extends ../sidebar-auto
 
+block main
+  h1 Matrikelkortet
+  p.lead Information om Ejerlav og Jordstykker.
+  p.
+    Danmarks areal er opdelt i et antal <em>jordstykker</em> bl.a. med det formål at kunne registrere
+    ejerskabet over jorden. Hvert jordstykke er identificeret ved en <em>ejerlavkode</em> og et
+    <em>matrikelnummer</em>.
+  p.
+    Ejerlavkoden identificerer det <em>ejerlav</em>, som jordstykket tilhører. Ejerlav var
+    oprindeligt et jordfællesskab og forum for forskellige beslutningsprocesser, men i dag er ejerlav blot en
+    samlebetegnelse for jordstykker i et bestemt område og har ingen juridisk eller administrativ betydning.
+
+  h2 Ejerlav
+  p DAWA udstiller en liste over ejerlav i Danmark:
+  pre
+    a(href="//dawa.aws.dk/ejerlav") https://dawa.aws.dk/ejerlav
+  p Endvidere udstiller DAWA autocomplete-funktionalitet på ejerlavets navn:
+  pre
+    a(href="//dawa.aws.dk/ejerlav/autocomplete?q=Sønder") https://dawa.aws.dk/ejerlav/autocomplete?q=Sønder
+  p.
+    Ejerlav kan som andre ressourcer modtages i forsellige formater, eksempelvis CSV-format, se #[a(href='/dok/api/generelt#dataformater') dataformater].
+    For yderligere information om ejerlav, se #[a(href='/dok/api/ejerlav') API dokumentationen].
+
+  h2 Jordstykker
+  p Jordstykker er identificeret ved en ejerlavkode og et matrikelnummer. Matrikelnumre er således
+    | Unikke indenfor et ejerlav.
+
+  p
+    | Ønskes information om jordstykkers geografiske udstrækning vælges GeoJSON formatet:
+    pre
+      a(href='//dawa.aws.dk/jordstykker?format=geojson&per_side=10') https://dawa.aws.dk/jordstykker?format=geojson&per_side=10
+    | For mere information om formatvalg se #[a(href='/dok/api/generelt#dataformater') dataformater].
+
+  h3 Tilknytning til adresser
+  p Jordstykkers tilknytning til adgangsadresser beregnes ud fra adgangsadressens adgangspunkt og
+    |  jordstykkets geografiske udstrækning. Man kan finde adgangsadresserne på et jordstykke
+    |  ved at benytte ejerlavkode og matrikelnr parametrene:
+  pre
+    a(href='//dawa.aws.dk/adgangsadresser?ejerlavkode=1101052&matrikelnr=10a').
+      https://dawa.aws.dk/adgangsadresser?ejerlavkode=1101052&matrikelnr=10a
+
+  h2 Replikering
+  p Ejerlav samt jordstykkers tilknytning til adresser er udstillet på replikerings-API'et, hvilket
+    |  gør det muligt at etablere og vedligeholde en lokal kopi af disse data. For mere
+    |  information om replikering, se #[a(href='/dok/guide/replikering') replikeringsguiden].
+  p Jordstykker er aktuelt ikke udstillet på replikerings-API'et. Den eneste mulighed for at etablere
+    |  og vedligeholde en lokal kopi af jordstykker er at hente alle jordstykkerne jævnligt.
