@@ -8,3 +8,6 @@ adressevaskscripts
 deployment-test
 dist
 rollup.config.js
+rollup-dev.config.js
+rollup-css.config.js
+
