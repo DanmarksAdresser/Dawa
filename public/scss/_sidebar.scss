@@ -8,6 +8,7 @@
 	a.nav-link {
 		position: relative;
 		font-size: 14px;
+		line-height: 17px;
 		color: $dark-600;
 		padding: 0.4rem 1.5rem;
 		transition: 
@@ -22,17 +23,18 @@
 	a.nav-link.active {
 		background: transparent;
 		color: $primary;
-		padding: 0.4rem 1rem 0.4rem 2rem;
+		padding: 0.4rem 0.7rem 0.4rem 2.3rem;
 		background-color: $white;
 	}
 	a.nav-link:before {
 		position: absolute;
 		display: block;
 		content: "";
-		width: 4px;
-		height: 8px;
-		background-color: $primary;
-		top: calc(50% - 4px);
+		width: 8px;
+		height: 12px;
+		background: url(/img/ic_sidebar-arrow.svg) no-repeat;
+		background-size: 100% 100%;
+		top: calc(50% - 7px);
 		left: -10px;
 		opacity: 0;
 		transition: 
