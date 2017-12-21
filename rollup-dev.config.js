@@ -17,5 +17,9 @@ export default {
       output: 'dist/css/dawa.css' })
   ],
   format: 'iife',
-  dest: 'dist/js/dawa.js'
+  dest: 'dist/js/dawa.js',
+  watch: {
+    include: ['public/scss/*']
+  }
+
 };

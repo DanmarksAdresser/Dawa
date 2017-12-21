@@ -1,13 +1,5 @@
 "use strict";
-
-import 'bootstrap/scss/bootstrap.scss';
-import 'leaflet/dist/leaflet.css';
-import '../css/style.css';
-import '../scss/dawa.scss';
-import '../scss/forside.scss';
-import '../css/autocomplete.css';
-import 'jquery-ui-dist/jquery-ui.min.css';
-
+import './css-imports';
 import L from 'leaflet';
 import $ from 'jquery';
 import 'bootstrap/js/src/index';

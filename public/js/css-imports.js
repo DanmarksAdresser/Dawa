@@ -1,0 +1,9 @@
+import 'bootstrap/scss/bootstrap.scss';
+import 'leaflet/dist/leaflet.css';
+import '../css/style.css';
+import '../scss/dawa.scss';
+import '../scss/forside.scss';
+import '../scss/_header.scss';
+import '../scss/_variables.scss';
+import '../css/autocomplete.css';
+import 'jquery-ui-dist/jquery-ui.min.css';
