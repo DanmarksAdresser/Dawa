@@ -1,0 +1,63 @@
+//... --- SIDEBAR --- ...//
+
+.dw-sidebar {
+  max-width: 320px;
+	background: $sand-700;
+	border-right: 0px;
+	padding: 0;
+	a.nav-link {
+		position: relative;
+		font-size: 14px;
+		color: $dark-600;
+		padding: 0.4rem 1.5rem;
+		transition: 
+				padding 0.2s ease-in-out 0.15s,
+				background-color 0.1s ease-in-out 0s,
+				color 0.2s ease-in-out 0.15s;
+	}
+	a.nav-link:hover {
+		color: $primary;
+		background-color: $white;
+	}
+	a.nav-link.active {
+		background: transparent;
+		color: $primary;
+		padding: 0.4rem 1rem 0.4rem 2rem;
+		background-color: $white;
+	}
+	a.nav-link:before {
+		position: absolute;
+		display: block;
+		content: "";
+		width: 4px;
+		height: 8px;
+		background-color: $primary;
+		top: calc(50% - 4px);
+		left: -10px;
+		opacity: 0;
+		transition: 
+				left 0.3s ease-in-out 0.15s,
+				opacity 0.2s ease-in-out 0.15s,
+	}
+	a.nav-link.active:before {
+		left: 20px;
+		opacity: 1;
+	}
+}
+
+.dw-sidebar-menu {
+  position: sticky;
+  top: 56px;
+  padding: 20px 0;
+  overflow-y: auto;
+  max-height: calc(100vh - 56px);
+}
+
+// Fix anchor scrolling
+.dw-sidebar-main h2[id]::before, .dw-sidebar-main h3[id]::before, .dw-sidebar-main h4[id]::before {
+  display: block;
+  height: 4rem;
+  margin-top: -4rem;
+  visibility: hidden;
+  content: "";
+}

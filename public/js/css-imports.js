@@ -5,5 +5,6 @@ import '../scss/dawa.scss';
 import '../scss/forside.scss';
 import '../scss/_header.scss';
 import '../scss/_variables.scss';
+import '../scss/_sidebar.scss';
 import '../css/autocomplete.css';
 import 'jquery-ui-dist/jquery-ui.min.css';

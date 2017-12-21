@@ -1,17 +1,88 @@
-nav.navbar {
-	background: $white;
+//... --- HEADER --- ...//
 
-	-webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
-	-moz-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
-	box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+nav.navbar.sticky-top {
+  background: $white;
 
-	.navbar-collapse {
-		justify-content: flex-end;
-	}
+  -webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+  -moz-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+  padding-top: 0;
+  padding-bottom: 0;
+  height: 56px;
+  #navbarSupportedContent {
+    position: relative;
+    height: 100%;
+    justify-content: flex-end;
+    ul.navbar-nav {
+      position: relative;
+      height: 100%;
+      .nav-item {
+        a.nav-link {
+          position: relative;
+          display: block;
+          height: calc(100% - 2px);
+          margin-top: 2px;
+          padding: 17px 20px 0;
+          font-size: 15px;
+          color: $dark;
+          background: transparent;
+          transition: 0.2s ease-in-out;
+        }
+        a.nav-link:hover {
+          color: $primary;
+        }
+        a.nav-link:before {
+          position: absolute;
+          display: block;
+          content: "";
+          width: 0px;
+          height: 2px;
+          background: $gray;
+          padding-bottom: 0;
+          left: 50%;
+          bottom: 0;
+          opacity: 0;
+          transition: 0.2s ease-in-out;
+        }
+        a.nav-link:hover:before {
+          opacity: 1;
+          width: 100%;
+          left: 0;
+        }
+        a.nav-link.active {
+          background: $sand-500;
+          color: $primary;
+          font-weight: 500;
+        }
+        a.nav-link.active:before {
+          opacity: 1;
+          width: 100%;
+          left: 0;
+          background: $primary;
+        }
+      }
+    }
+  }
 }
 
-.nav-item {
-	a.nav-item {
 
-	}
+.dropdown-toggle::after {
+  position: absolute;
+  left: calc(50% - 8px);
+  top: 40px;
+  content: "";
+  background: url(./public/img/ic_dropdown-arrow.svg);
+  width: 8px;
+  height: 4px;
+  background-size: 8px 4px;
+}
+
+.navbar-brand {
+  span {
+    position: absolute;
+    font-size: 14px;
+    color: $dark-600;
+    padding-top: 6px;
+    padding-left: 7px;
+  }
 }
