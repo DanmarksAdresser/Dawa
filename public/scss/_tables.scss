@@ -1,0 +1,105 @@
+// TABLES //
+
+table {
+	position: relative;
+	border-bottom: 1px solid $divider-light;
+	thead {
+		background-color: $gray-200;
+		border-top: 1px solid $divider-light;
+		tr {
+			th {
+				border-top: 0 !important;
+				border-bottom: 0 !important;
+				font-size: 12px;
+				text-transform: uppercase;
+				color: $dark-850;
+				padding-top: 10px !important;
+				padding-bottom: 8px !important;
+				font-weight: 500;
+			}
+			th:first-child {
+				padding-left: 17px !important;
+			}
+		}
+	}
+	tbody {
+		position: relative;
+		tr {
+			position: relative;
+			border-top: 1px solid $divider-light;
+			transition: 0.15s ease-in-out;
+			td {
+				position: relative;
+				border-top: 0 !important;
+				font-size: 14px;
+				transition: 0.2s;
+				vertical-align: middle !important;
+				a {
+					position: relative;
+					display: inline-block;
+					color: $primary;
+					font-weight: 500;
+				}
+				a:hover {
+					color: $primary;
+					text-decoration: none;
+				}
+				a:after {
+					display: block;
+					content: "";
+					position: absolute;
+					width: 100%;
+					height: 2px;
+					bottom: 1px;
+					background-color: $primary;
+					opacity: 0.2;
+				}
+				a:before {
+					display: block;
+					content: "";
+					position: absolute;
+					width: 0px;
+					height: 2px;
+					bottom: 1px;
+					background-color: $primary;
+					opacity: 0;
+					transition: 0.14s ease-in-out;
+				}
+				a:hover:before {
+					width: 100%;
+					opacity: 1;
+				}
+			}
+			td:first-child {
+				padding-left: 17px !important;
+			}
+			td:first-child:before {
+				position: absolute;
+				display: block;
+				content: "";
+				width: 8px;
+				height: 12px;
+				background: url(/img/ic_sidebar-arrow.svg) no-repeat;
+				background-size: 100% 100%;
+				top: calc(50% - 7px);
+				left: -5px;
+				opacity: 0;
+				transition: 
+					left 0.2s ease-in-out 0s,
+					opacity 0.1s ease-in-out 0s,
+			}
+		}
+		tr:hover {
+			background-color: $gray-100 !important;
+			td {
+				code {
+					background: $white-500;
+				}
+			}
+			td:first-child:before {
+				left: 6px;
+				opacity: 1;
+			}
+		}
+	}
+}

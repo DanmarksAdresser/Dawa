@@ -1,14 +1,20 @@
 //... --- VARIABLES --- ...//
 
 $white:     #fff;
+$white-500: rgba(255,255,255,0.5);
 
 $primary:   #0097A7;
 
 $dark:      rgba(37,37,37,1);
+$dark-850:  rgba(37,37,37,0.85);
 $dark-600:  rgba(37,37,37,0.6);
+
+$divider:  rgba(37,37,37,0.25);
+$divider-light: rgba(37,37,37,0.1);
 
 $gray:      rgba(222,222,222,1);
 $gray-200:  rgba(222,222,222,0.2);
+$gray-100:  rgba(222,222,222,0.2);
 
 $sand:      rgba(241,240,235,1);
 $sand-700:  rgba(241,240,235,0.7);
@@ -17,9 +23,14 @@ $sand-500:  rgba(241,240,235,0.5);
 
 $font-family-sans-serif:  'Roboto', 'Helvetica Neue', 'Arial', sans-serif;
 
+
+//... --- IMPORTS --- ...//
+
 @import 'variables';
+@import 'typography';
 @import 'header';
 @import 'sidebar';
+@import 'tables';
 
 
 
@@ -28,7 +39,9 @@ body {
   font-family: $font-family-sans-serif;
 }
 
-
+.dw-sidebar-main {
+	padding: 50px 40px;
+}
 
 
 
