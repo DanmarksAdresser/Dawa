@@ -30,10 +30,15 @@ table {
 			transition: 0.15s ease-in-out;
 			td {
 				position: relative;
-				border-top: 0 !important;
 				font-size: 14px;
 				transition: 0.2s;
 				vertical-align: middle !important;
+				p {
+					position: relative;
+					font-size: 14px;
+					transition: 0.2s;
+					vertical-align: middle !important;
+				}
 				a {
 					position: relative;
 					display: inline-block;
@@ -94,6 +99,7 @@ table {
 			td {
 				code {
 					background: $white-500;
+					border: 1px solid $divider;
 				}
 			}
 			td:first-child:before {
