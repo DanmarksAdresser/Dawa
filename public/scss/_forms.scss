@@ -1,0 +1,67 @@
+form {
+	border: 1px solid $divider-light;
+	padding: 1.75rem;
+	background: $gray-100;
+	margin-top: 20px;
+	margin-bottom: 60px;
+	border-radius: 0;
+	legend {
+		font-size: 18px;
+		line-height: 22px;
+		color: $dark-850;
+		font-weight: 500;
+		margin-top: 20px;
+	}
+	label, .col-form-label {
+		font-size: 12px;
+		text-transform: uppercase;
+		color: $dark-850;
+		font-weight: 500;
+	}
+	label.col-form-label {
+		padding-top: 13px;
+	}
+}
+
+input[type=text] {
+	height: 40px;
+	border: 1px solid $divider-light !important;
+	border-bottom: 2px solid $primary !important;
+	border-radius: 0;
+	font-size: 14px;
+	font-weight: 300;
+	color: $dark;
+	outline: none !important;
+	box-shadow:inset 0 2px 1px 0 rgba(0,0,0,0.04) !important;
+	transition: 0.2s ease-in-out;
+}
+
+input[type=text]:focus {
+	border: 1px solid $divider !important;
+	box-shadow:inset 0 3px 2px 0 rgba(0,0,0,0.1) !important;
+}
+
+button.form-control.btn {
+	background: $white;
+	border: 2px solid $gray;
+	border-radius: 0px;
+	color: $primary;
+	cursor: pointer;
+	outline: none !important;
+	box-shadow: none !important;
+	transition: 0.1s ease-in-out;
+	font-size: 14px;
+	height: 40px;
+}
+
+button.form-control.btn:hover {
+	color: $primary;
+	border: 2px solid $primary;
+}
+
+button.form-control.btn:active {
+	background: $primary !important;
+	color: $primary;
+	border: 2px solid $primary !important;
+	box-shadow: none !important;
+}
