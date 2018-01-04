@@ -17,18 +17,17 @@ html(lang='da')
         span.navbar-toggler-icon
       div.collapse.navbar-collapse(id="navbarSupportedContent")
         ul.navbar-nav
-          li.nav-item
-            a.nav-link(href='/dok/adresser', class={active: path === '/dok/adresser'}) Adresser
           li.nav-item.dropdown
             a.nav-link.dropdown-toggle(href="#" id="navbarDropdown" role="button"
             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false",
-            class={active: ['/dok/stednavne', '/dok/dagi', '/dok/bbr', '/dok/matrikelkortet'].includes(path)}).
-              Relaterede data
+            class={active: ['/dok/adresser', '/dok/stednavne', '/dok/dagi', '/dok/bbr', '/dok/matrikelkortet'].includes(path)}).
+              Data
             div.dropdown-menu(aria-labelledby="navbarDropdown")
-              a.dropdown-item(href="/dok/stednavne") Stednavne
+              a.dropdown-item(href='/dok/adresser') Adresser
               a.dropdown-item(href="/dok/dagi") DAGI
-              a.dropdown-item(href="/dok/bbr") BBR
               a.dropdown-item(href="/dok/matrikelkortet") Matrikelkortet
+              a.dropdown-item(href="/dok/bbr") BBR
+              a.dropdown-item(href="/dok/stednavne") Stednavne
           li.nav-item
             a.nav-link(href='/dok/api', class={active: path.startsWith('/dok/api')}) API
           li.nav-item
