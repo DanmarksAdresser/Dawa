@@ -86,3 +86,33 @@ nav.navbar.sticky-top {
     padding-left: 7px;
   }
 }
+
+
+.dropdown-menu {
+  border-radius: 0;
+  margin-left: -40px;
+  margin-top: -5px;
+  border: 1px solid $divider-light;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  transition: 0.2s ease-in-out;
+  a {
+    font-size: 14px;
+    font-weight: 500;
+    color: $dark-850;
+    transition: 0.2s ease-in-out;
+  }
+  a:hover {
+    background: $sand-500;
+    color: $primary;
+  }
+  a:active {
+    background: $primary;
+  }
+}
+
+
+
+
+
+
+
