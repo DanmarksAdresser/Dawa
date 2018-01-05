@@ -5,6 +5,7 @@
 	background: $sand-700;
 	border-right: 0px;
 	padding: 0;
+	min-height: calc(100vh - 56px);
 	a.nav-link {
 		position: relative;
 		font-size: 14px;

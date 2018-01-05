@@ -30,7 +30,8 @@ h3 {
 	font-size: 24px;
 	line-height: 28px;
 	margin-bottom: 20px;
-	margin-top: 60px;
+	margin-top: 60px !important;
+	padding-top: 0 !important;
 }
 
 h4 {
@@ -39,6 +40,12 @@ h4 {
 	color: $dark-850;
 	font-weight: 500;
 	margin-top: 20px;
+}
+
+p.lead {
+	font-size: 18px;
+	line-height: 24px;
+	font-weight: 400;
 }
 
 
@@ -152,7 +159,7 @@ p {
 
 // CODE //
 
-code {
+code, kbd {
 	background: $sand-500;
 	border: 1px solid $divider-light;
 	border-radius: 0;
@@ -162,7 +169,7 @@ code {
 	transition: 0.15s ease-in-out;
 }
 
-p {
+p, kbd {
 	code {
 		padding: 0px 3px !important;
 	}
@@ -174,9 +181,28 @@ p {
 	border-left: 2px solid $primary;
 	border-radius: 0px;
 	margin-bottom: 30px;
-	code {
+	code, kbd {
 		border: 0px;
 		background: transparent;
+	}
+}
+
+.codetext {
+	background: transparent;
+	border: 0;
+	textarea {
+		background: $sand-500;
+		border: 1px solid $divider-light;
+		border-left: 2px solid $primary;
+		padding: 30px 30px;
+		line-height: 22px;
+		outline: none;
+		transition: 0.2s;
+	}
+	textarea:focus {
+		border: 1px solid $divider;
+		border-left: 2px solid $primary;
+		background: $sand-200;
 	}
 }
 
@@ -189,7 +215,8 @@ pre {
 	border: 1px solid $divider-light;
 	border-left: 2px solid $primary;
 	padding: 0.75rem 1.25rem;
-	margin-bottom: 30px;
+	margin-top: 10px;
+	margin-bottom: 20px;
 	white-space: pre-wrap;
 	a {
 		position: relative;
@@ -200,5 +227,22 @@ pre {
 	}
 	a:hover {
 		color: $primary;
+	}
+}
+
+ul {
+	pre {
+		font-size: 13px !important;
+		font-weight: 400 !important;
+		a {
+			font-size: 13px !important;
+			font-weight: 400 !important;
+		}
+		a:hover {
+			text-decoration: underline !important;
+		}
+		a:before, a:after {
+			display: none !important;
+		}
 	}
 }

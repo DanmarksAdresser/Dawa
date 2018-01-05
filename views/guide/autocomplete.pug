@@ -14,8 +14,8 @@ block main
   h2 Trin 1 - Start
   p.
     Lav en folder, kaldet Guide, indeholdende to filer. En html fil kaldet index.html:
-  code.text-muted
-    textarea(rows='13', cols='80').
+  code.codetext
+    textarea(rows='12', cols='80').
 
       <html>
       <meta charset="utf-8">
@@ -30,7 +30,7 @@ block main
       </body>
       </html>
   p En css fil kaldet style.css indholdende:
-  code.text-muted
+  code.codetext
     textarea(rows='3', cols='80').
       label {
       color: red;
@@ -52,13 +52,13 @@ block main
     Nu skal vores web applikation tilpasses DAWA Autocomplete2 komponenten. Først indsættes en
     reference til komponentens javascript kode. Det gøres ved at indsætte nedenstående i
     index.html:
-  code.text-muted
+  code.codetext
     textarea(rows='3', cols='80').
       &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.min.js&quot;&gt;&lt;/script&gt;
       &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js&quot;&gt;&lt;/script&gt;
       &lt;script src='node_modules/dawa-autocomplete2/dist/dawa-autocomplete2.min.js'&gt;&lt;/script&gt;
   p Nu indeholder index.html følgende:
-  code.text-muted
+  code.codetext
     textarea(rows='17', cols='80').
       <!doctype html>
       <html>
@@ -80,8 +80,8 @@ block main
     DAWA Autocomplete er baseret på et nyere browser API, så ældre browsere som Internet Explore
     11, skal håndteres med de så kaldte polyfills core.min.js og fetch.min.js.
   p I style.css indsættes i slutningen følgende DAWA autocomplete specifik css styles:
-  code.text-muted
-    textarea(rows='55', cols='80').
+  code.codetext
+    textarea(rows='48', cols='80').
       .autocomplete-container {
         /* relative position for at de absolut positionerede forslag får korrekt placering.*/
         position: relative;
@@ -133,7 +133,7 @@ block main
   p.
     Input-feltet skal forbindes med adresse autocomplete funktionaliteten i komponenten. Det
     gøres ved at oprette script.js filen i guide folderen med følgende indhold:
-  code.text-muted
+  code.codetext
     textarea(rows='7', cols='80').
       "use strict"
       dawaAutocomplete.dawaAutocomplete( document.getElementById("adresse"), {
@@ -144,7 +144,7 @@ block main
   p.
     Lad index.html referer til script.js og indsæt input-feltet i et div-element med klassen
     autocomplete-container:
-  code.text-muted
+  code.codetext
     textarea(rows='20', cols='80').
       <!doctype html>
       <html>
