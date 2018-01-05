@@ -79,6 +79,7 @@ exports.setupRoutes = function () {
   app.use(cachingMiddleware);
   const oisEnabled = config.getOption('ois.enabled');
   const oisProtected = !config.getOption('ois.unprotected');
+  const replicationEnabled = !config.getOption("replication.disabled");
   const oisUsers = {};
   oisUsers[config.getOption('ois.login')] = config.getOption('ois.password');
 
@@ -96,6 +97,15 @@ exports.setupRoutes = function () {
         if(oisProtected) {
           return oisBasicAuthMiddleware(req, res, next);
         }
+      }
+      next();
+    });
+  }
+
+  if(!replicationEnabled) {
+    app.use((req, res, next) => {
+      if ((req.path.toLowerCase().indexOf('/replikering/') !== -1)) {
+        return res.status(500).send("Replikerings-API'et er deaktiveret.");
       }
       next();
     });

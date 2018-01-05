@@ -129,5 +129,11 @@
     "description": "Autocomplete query slot timeout",
     "type": "number",
     "default": 2000
+  },
+  {
+    "name": "replication.disabled",
+    "description": "Whether the replication API is disabled. Should be disabled for backup env.",
+    "type": "number",
+    "default": 0
   }
 ]
