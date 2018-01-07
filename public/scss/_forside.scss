@@ -69,7 +69,7 @@
 			padding: 0;
 			p {
 				font-size: 14px;
-				line-height: 18px;
+				line-height: 17px;
 				padding: 15px;
 				margin-bottom: 0;
 			}
@@ -141,9 +141,9 @@
 			position: absolute;
 			content: "";
 			width: 1px;
-			height: 100%;
+			height: calc(100% + 4px);
 			right: -2px;
-			top: 0;
+			top: -2px;
 			background: $divider-light;
 		}
 		.card:hover {

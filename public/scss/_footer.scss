@@ -1,3 +1,33 @@
 footer {
+	position: relative;
 	background: $dark;
+	width: 100%;
+	padding: 45px 30px 40px 30px;
+	text-align: left;
+	height: auto;
+}
+
+.footer-container {
+	position: relative;
+	.col-sm-3 {
+		position: relative;
+		h5 {
+			color: $white;
+		}
+		ul {
+			list-style-type: none;
+			padding: 0;
+			li {
+				a {
+					color: $white;
+					font-size: 14px;
+				}
+			}
+		}
+	}
+	.footer-logo {
+		img {
+			margin-top: 30px;
+		}
+	}
 }
