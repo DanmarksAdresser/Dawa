@@ -48,3 +48,10 @@
 		}
 	}
 }
+
+
+@media only screen and (max-width: 658px)  {
+  .col.main-left.faq {
+    display: none;
+  }
+}

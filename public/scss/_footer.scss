@@ -31,3 +31,15 @@ footer {
 		}
 	}
 }
+
+
+
+
+@media only screen and (max-width: 575px)  {
+  .footer-container {
+  	.col-sm-3 {
+  		text-align: center;
+  		margin-bottom: 20px;
+  	}
+  }
+}

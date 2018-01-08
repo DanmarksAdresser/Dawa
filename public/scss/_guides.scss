@@ -80,3 +80,10 @@
 		right: 20px;
 	}
 }
+
+
+@media only screen and (max-width: 658px)  {
+  .col.main-left.guides {
+    display: none;
+  }
+}
