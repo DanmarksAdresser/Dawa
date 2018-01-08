@@ -1393,7 +1393,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};
-    optvej.qs.cirkel= '11.2543533,55.72774095,10'; // Alleshavevej 48, 4593
+    optvej.qs.cirkel= '11.24841865,55.72338078,10'; // Alleshavevej 48, 4593
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -1432,7 +1432,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};      // Alleshavevej 48, 4593
-    optvej.qs.polygon= '[[[11.253927730614917, 55.728246510030615],[11.255578599937305, 55.727267076544436],[11.253441999510827, 55.72733506505552],[11.253927730614917, 55.728246510030615]]]';
+    optvej.qs.polygon= '[[[11.248430546192973, 55.723716732037296],[11.248881118413367, 55.72313325642938],[11.248022327050677, 55.72326402688884],[11.248430546192973, 55.723716732037296]]]';
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -1527,8 +1527,8 @@ describe('Adgangsadresseopslag', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser/reverse';
     optvej.qs= {};
-    optvej.qs.x= 11.254677072750962; // Alleshavevej 48, 4593
-    optvej.qs.y= 55.72665088543518;
+    optvej.qs.x= 11.24841865; // Alleshavevej 48, 4593
+    optvej.qs.y= 55.72338078;
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -3309,6 +3309,27 @@ describe('BBR Light', function(){
       assert(bygninger.features.length===1, "Der er flere end én bygning, men " + bygninger.features.length); 
       assert(typeof bygninger.features[0].properties.BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
       assert(typeof bygninger.features[0].properties.OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
+      done();
+    }).catch((err) => {
+      done(err);
+    });
+  });
+
+
+  it("Grund", function(done) {
+    var grundopt= {};
+    grundopt.baseUrl= host;
+    grundopt.url='bbrlight/grunde';
+    grundopt.qs= {};
+    grundopt.qs.cache= 'no-cache';
+    grundopt.qs.adgangsadresseid= '0a3f507e-436a-32b8-e044-0003ba298018';
+    grundopt.resolveWithFullResponse= true;
+    var reverserp= rp(grundopt);       
+    reverserp.then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var grunde= JSON.parse(response.body);
+      assert(grunde.length===1, "Der er flere end én grund, men " + grunde.length); 
+      assert(grunde[0].AdgAdr_id.localeCompare(grundopt.qs.adgangsadresseid) === 0, "Forkert adgangsadresseid");
       done();
     }).catch((err) => {
       done(err);
