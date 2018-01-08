@@ -11,5 +11,6 @@ import '../scss/_tables.scss';
 import '../scss/_forms.scss';
 import '../scss/_footer.scss';
 import '../scss/_guides.scss';
+import '../scss/_faq.scss';
 import '../css/autocomplete.css';
 import 'jquery-ui-dist/jquery-ui.min.css';

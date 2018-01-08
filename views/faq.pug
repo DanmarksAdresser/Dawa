@@ -2,24 +2,61 @@ extends layout
 
 block content
   div.container-fluid
-    div.offset-sm-2.col-sm-8
-      h1 FAQ
-      p.lead Simple svar på hyppige spørgsmål
-      p
-        span.faq-spm#manglende_adresse
-          b Der mangler en adresse. Hvordan får jeg den oprettet?<br>
-        span.faq-svar.
-          Du henvender dig til den kommunale adressemyndighed i den kommune, hvor adressen ligger.
-      p
-        span.faq-spm#geometri
-          b Hvordan får jeg geometrien for f.eks. et jordstykke?<br>
-        span.faq-svar.
-          Du anvender <code>format=geojson</code> parameteren.
-      p
-        span.faq-spm#driftsnedlaeggelse
-          b Hvor længe forventes DAWA at være i drift?<br>
-        span.faq-svar.
-          Der er ikke fastsat nogen slutdato for nedlæggelse af DAWA. Når datafordeleren tilbyder
-          tilsvarende funktionalitet vil der være paralleldrift i mindst et år.
-
+    div.row.front
+      div.col.main-left
+        section#intro
+          h1 Danmarks Adressers Web API
+          p.
+            Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks
+            adresser.
+            DAWA kan anvendes til at etablere adressedata og -funktionalitet i it-systemer.
+            Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressedata og -funktionalitet
+            i deres it-systemer. 
+          p.
+            Udover adresseområdet rummer DAWA også data og funktionalitet vedrørende områder, som er tæt relateret til adressen. Det drejer sig om Danmarks Administrative Geografiske Inddeling (DAGI), Matrikelkortet, Bygnings- og Boligregisteret samt Danske Stednavne.
+          img(src='/img/logo_sdfe.png')
+      div.col.main-right.faq
+        div.row
+          h1 FAQ
+          p.lead Simple svar på hyppige spørgsmål
+          p.question
+            span.faq-spm#manglende_adresse
+              b Der mangler en adresse. Hvordan får jeg den oprettet?<br>
+            span.faq-svar.
+              Du henvender dig til den kommunale adressemyndighed i den kommune, hvor adressen ligger.
+          p.question
+            span.faq-spm#geometri
+              b Hvordan får jeg geometrien for f.eks. et jordstykke?<br>
+            span.faq-svar.
+              Du anvender <code>format=geojson</code> parameteren.
+          p.question
+            span.faq-spm#driftsnedlaeggelse
+              b Hvor længe forventes DAWA at være i drift?<br>
+            span.faq-svar.
+              Der er ikke fastsat nogen slutdato for nedlæggelse af DAWA. Når datafordeleren tilbyder
+              tilsvarende funktionalitet vil der være paralleldrift i mindst et år.
+    div.row
+      footer
+        div.footer-container.offset-sm-1.col-sm-10
+          div.row
+            div.col-sm-3
+              h5 Kontakt
+              ul
+                li <a href="mailto:awssuiten@sdfe.dk">awssuiten@sdfe.dk</a>
+                li <a href="https://twitter.com/AWS_Suiten">Twitter</a>
+                li <a href="https://digitaliser.dk/group/334445/forum">Support-forum på digitaliser</a>
+            div.col-sm-3
+              h5 Links
+              ul
+                li <a href="http://localhost:3000/dok/om#vilk-r">Vilkår</a>
+                li <a href="http://stats.pingdom.com/tdobb0hqaff9/1299924">Pingdom driftsstatus</a>
+            div.col-sm-3
+              h5 Se også
+              ul
+                li <a href="http://aws.dk/">AWS Suiten</a>
+                li <a href="http://korttjenester.aws.dk/">Korttjenester</a>
+                li <a href="http://download.aws.dk/">download.aws.dk</a>
+                li <a href="http://file.aws.dk/inspire.html">AWS3 Download (INPSPIRE)</a>
+            div.col-sm-3.footer-logo
+              img(src='/img/logo-footer.svg')
 
