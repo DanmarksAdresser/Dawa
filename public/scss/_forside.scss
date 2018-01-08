@@ -20,6 +20,9 @@
 	display: flex;
   flex-direction: column;
   padding: 0;
+}
+
+.col.main-right.front {
 	.card.main-card {
 		flex:3;
   	display:flex;
@@ -170,6 +173,7 @@
 	margin-right: auto;
 	border-radius: 2px;
 	box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+	max-width: 90%;
 	h1 {
 		font-size: 24px;
 		color: $dark;

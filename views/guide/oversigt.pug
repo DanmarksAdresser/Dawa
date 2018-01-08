@@ -1,54 +1,84 @@
 extends ../layout
+
 block content
   div.container-fluid
-    div.row
-      div.offset-lg-2.col-lg-8
-        h1 Guides
-        div.card-deck.mb-5.mt-5
+    div.row.front
+      div.col.main-left
+        section#intro
+          h1 Danmarks Adressers Web API
+          p.
+            Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks
+            adresser.
+            DAWA kan anvendes til at etablere adressedata og -funktionalitet i it-systemer.
+            Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressedata og -funktionalitet
+            i deres it-systemer. 
+          p.
+            Udover adresseområdet rummer DAWA også data og funktionalitet vedrørende områder, som er tæt relateret til adressen. Det drejer sig om Danmarks Administrative Geografiske Inddeling (DAGI), Matrikelkortet, Bygnings- og Boligregisteret samt Danske Stednavne.
+          img(src='/img/logo_sdfe.png')
+      div.col.main-right.guides
+        div.row
+          h1 Guides
           div.card
             h4.card-header Introduktion
             div.card-body
               p.
                 Basal introduktion til DAWA
-            div.card-footer
-              a.btn.btn-primary(href="/dok/guide/introduktion") Læs mere
+              a.btn.btn-primary(href="/dok/guide/introduktion")  
           div.card
             h4.card-header Autocomplete
             div.card-body
               p.
                 Anvend DAWAs autocomplete-komponent på en webside.
-            div.card-footer
-              a.btn.btn-primary(href="/dok/guide/autocomplete") Læs mere
+              a.btn.btn-primary(href="/dok/guide/autocomplete")  
           div.card
             h4.card-header Replikering
             div.card-body
               p.
                 Etabler en lokal, opdateret kopi af adressedata.
-            div.card-footer
-              a.btn.btn-primary(href="/dok/guide/replikering") Læs mere
-        div.card-deck.mb-5
+              a.btn.btn-primary(href="/dok/guide/replikering")  
           div.card
             h4.card-header Datavask
             div.card-body
               p.
                 Valider adresser og korriger mindre fejl.
-            div.card-footer
-              a.btn.btn-primary(href="/dok/guide/datavask") Læs mere
+              a.btn.btn-primary(href="/dok/guide/datavask")  
           div.card
             h4.card-header Reverse geocoding
             div.card-body
               p.
                 Find adresse eller andre objekter nær et punkt.
-            div.card-footer
-              a.btn.btn-primary(href="/dok/guide/reverse") Læs mere
+              a.btn.btn-primary(href="/dok/guide/reverse")  
           div.card
             h4.card-header Autocomplete - egen implementation
             div.card-body
               p.
                 Implementer din egen autocomplete-component baseret
                 på DAWAs autocomplete-API.
-            div.card-footer
-              a.btn.btn-primary(href="/dok/guide/reverse") Læs mere
+              a.btn.btn-primary(href="/dok/guide/reverse")                 
+    div.row
+      footer
+        div.footer-container.offset-sm-1.col-sm-10
+          div.row
+            div.col-sm-3
+              h5 Kontakt
+              ul
+                li <a href="mailto:awssuiten@sdfe.dk">awssuiten@sdfe.dk</a>
+                li <a href="https://twitter.com/AWS_Suiten">Twitter</a>
+                li <a href="https://digitaliser.dk/group/334445/forum">Support-forum på digitaliser</a>
+            div.col-sm-3
+              h5 Links
+              ul
+                li <a href="http://localhost:3000/dok/om#vilk-r">Vilkår</a>
+                li <a href="http://stats.pingdom.com/tdobb0hqaff9/1299924">Pingdom driftsstatus</a>
+            div.col-sm-3
+              h5 Se også
+              ul
+                li <a href="http://aws.dk/">AWS Suiten</a>
+                li <a href="http://korttjenester.aws.dk/">Korttjenester</a>
+                li <a href="http://download.aws.dk/">download.aws.dk</a>
+                li <a href="http://file.aws.dk/inspire.html">AWS3 Download (INPSPIRE)</a>
+            div.col-sm-3.footer-logo
+              img(src='/img/logo-footer.svg')
 
 
 
