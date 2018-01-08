@@ -19,7 +19,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE', function (client) {
+  proddb.withTransaction('READ_WRITE_CONCURRENT', function (client) {
      client.allowParallelQueries = true;
     return go(function*() {
       try {

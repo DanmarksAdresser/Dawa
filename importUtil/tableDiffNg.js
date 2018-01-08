@@ -83,6 +83,9 @@ const computeUpdates = (client, txid, sourceTableOrView, tableModel, nonPreserve
   nonPreservedColumns = nonPreservedColumns ? _.union(nonPreservedColumns, derivedColumnNames(tableModel)) : allColumnNames(tableModel);
   const columnsFromSource = _.difference(nonPreservedColumns, derivedColumnNames(tableModel));
   const nonPrimaryColumns = nonPrimaryColumnNames(tableModel);
+  if(nonPrimaryColumns.length === 0) {
+    return;
+  }
   const changedColumnClause = columnsDistinctClause('before', 'after', nonPrimaryColumns);
   const publicClause = makePublicClause(client, tableModel);
   const preservedColumns = _.difference(allColumnNames(tableModel), nonPreservedColumns);

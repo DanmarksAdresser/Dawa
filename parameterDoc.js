@@ -1885,6 +1885,10 @@ const oisFilterParameterDoc = {
         doc: 'Find grund med den angivne id (Grund_id)'
       },
       {
+        name: 'kommuneid',
+        doc: 'Find grund med den angivne kommuneid (Kommune_id).'
+      },
+      {
         name: 'adgangsadresseid',
         doc: 'Find grunde med den angivne adgangsadresseid (AdgAdr_id)'
       },

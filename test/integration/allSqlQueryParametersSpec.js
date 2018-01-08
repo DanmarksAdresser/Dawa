@@ -587,6 +587,10 @@ var sampleParameters = {
       values: ['0a3f507e-0409-32b8-e044-0003ba298018'],
       verifier: (grund, id) => grund.AdgAdr_id === id
     },
+    kommuneid: {
+      values: ['07c7b9a2-7320-436a-bf28-33883768e7e4'],
+      verifier: (grund, kommuneid) => grund.Kommune_id === kommuneid
+    },
     esrejendomsnr: {
       values: ['2632', '002632'],
       verifier: (grund, nr) =>   parseInt(grund.ESREjdNr, 10) === parseInt(nr, 10)
