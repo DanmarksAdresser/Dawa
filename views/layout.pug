@@ -38,6 +38,32 @@ html(lang='da')
             a.nav-link(href='/dok/om', class={active: path === '/dok/om'}) Om
 
     block content
+    div.container-fluid
+      div.row
+        footer
+          div.footer-container.offset-sm-1.col-sm-10
+            div.row
+              div.col-sm-3
+                h5 Kontakt
+                ul
+                  li <a href="mailto:awssuiten@sdfe.dk">awssuiten@sdfe.dk</a>
+                  li <a href="https://twitter.com/AWS_Suiten">Twitter</a>
+                  li <a href="https://digitaliser.dk/group/334445/forum">Support-forum på digitaliser</a>
+              div.col-sm-3
+                h5 Links
+                ul
+                  li <a href="http://localhost:3000/dok/om#vilk-r">Vilkår</a>
+                  li <a href="http://stats.pingdom.com/tdobb0hqaff9/1299924">Pingdom driftsstatus</a>
+              div.col-sm-3
+                h5 Se også
+                ul
+                  li <a href="http://aws.dk/">AWS Suiten</a>
+                  li <a href="http://korttjenester.aws.dk/">Korttjenester</a>
+                  li <a href="http://download.aws.dk/">download.aws.dk</a>
+                  li <a href="http://file.aws.dk/inspire.html">AWS3 Download (INPSPIRE)</a>
+              div.col-sm-3.footer-logo
+                img(src='/img/logo-footer.svg')
+
 
     block scripts
       script(src="/js/dawa.js")
