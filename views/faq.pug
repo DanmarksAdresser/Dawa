@@ -1,37 +1,23 @@
-extends layout
+extends left-intro
 
-block content
-  div.container-fluid
-    div.row.front
-      div.col.main-left.faq
-        section#intro
-          h1 Danmarks Adressers Web API
-          p.
-            Danmarks Adressers Web API (DAWA) udstiller data og funktionalitet vedrørende Danmarks
-            adresser.
-            DAWA kan anvendes til at etablere adressedata og -funktionalitet i it-systemer.
-            Målgruppen for nærværende website er udviklere, som ønsker at indbygge adressedata og -funktionalitet
-            i deres it-systemer. 
-          p.
-            Udover adresseområdet rummer DAWA også data og funktionalitet vedrørende områder, som er tæt relateret til adressen. Det drejer sig om Danmarks Administrative Geografiske Inddeling (DAGI), Matrikelkortet, Bygnings- og Boligregisteret samt Danske Stednavne.
-          img(src='/img/logo_sdfe.png')
-      div.col.main-right.faq
-        div.row
-          h1 FAQ
-          p.lead Simple svar på hyppige spørgsmål
-          p.question
-            span.faq-spm#manglende_adresse
-              b Der mangler en adresse. Hvordan får jeg den oprettet?<br>
-            span.faq-svar.
-              Du henvender dig til den kommunale adressemyndighed i den kommune, hvor adressen ligger.
-          p.question
-            span.faq-spm#geometri
-              b Hvordan får jeg geometrien for f.eks. et jordstykke?<br>
-            span.faq-svar.
-              Du anvender <code>format=geojson</code> parameteren.
-          p.question
-            span.faq-spm#driftsnedlaeggelse
-              b Hvor længe forventes DAWA at være i drift?<br>
-            span.faq-svar.
-              Der er ikke fastsat nogen slutdato for nedlæggelse af DAWA. Når datafordeleren tilbyder
-              tilsvarende funktionalitet vil der være paralleldrift i mindst et år.
+block content-right
+  div.col.main-right.faq
+    div.row
+      h1 FAQ
+      p.lead Simple svar på hyppige spørgsmål
+      p.question
+        span.faq-spm#manglende_adresse
+          b Der mangler en adresse. Hvordan får jeg den oprettet?<br>
+        span.faq-svar.
+          Du henvender dig til den kommunale adressemyndighed i den kommune, hvor adressen ligger.
+      p.question
+        span.faq-spm#geometri
+          b Hvordan får jeg geometrien for f.eks. et jordstykke?<br>
+        span.faq-svar.
+          Du anvender <code>format=geojson</code> parameteren.
+      p.question
+        span.faq-spm#driftsnedlaeggelse
+          b Hvor længe forventes DAWA at være i drift?<br>
+        span.faq-svar.
+          Der er ikke fastsat nogen slutdato for nedlæggelse af DAWA. Når datafordeleren tilbyder
+          tilsvarende funktionalitet vil der være paralleldrift i mindst et år.
