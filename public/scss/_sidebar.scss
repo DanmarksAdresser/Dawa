@@ -68,6 +68,76 @@
 
 
 @media only screen and (max-width: 768px)  {
+	.dw-sidebar-main {
+		padding-top: 80px !important;
+		padding-left: 20px !important;
+		padding-right: 20px !important;
+	}
+	.dw-sidebar {
+		position: fixed;
+		background: #F5F4F1;
+		left: 0;
+		top: 56px;
+  	width: 100%;
+  	max-width: 100%;
+  	max-height: 56px;
+  	transition: 0.4s ease-in-out;
+  	z-index: 99;
+  	overflow: hidden;
+  	box-shadow: 0 2px 1px rgba(0,0,0,0.1);
+  	nav.nav {
+			position: relative;
+			margin-top: 36px;
+			border-top: 1px solid $divider-light;
+			ul {
+				display: block;
+				padding-top: 10px !important;
+				padding-bottom: 10px !important;
+				position: relative;
+				max-height: calc(100vh - 163px);
+				overflow: scroll;
+				li {
+					min-width: 100% !important;
+					a {
+						padding-top: 10px !important;
+						padding-bottom: 10px !important;
+						color: $dark-850 !important;
+					}
+				}
+			}
+		}
+	}
+	.dw-sidebar:before {
+		display: block;
+		position: absolute;
+		content: "Sorter";
+		font-size: 16px;
+		font-weight: 500;
+		color: $dark-850;
+		left: 20px;
+		top: 17px;
+	}
+	.dw-sidebar:after {
+		content: "";
+		display: block;
+		width: 50px;
+		height: 56px;
+		position: absolute;
+		right: 18px;
+		top: 0;
+		background: url(/img/ic_dropdown-arrow.svg) center center no-repeat;
+		transform: scale(1.25);
+		transition: 0.3s ease-in-out;
+	}
+	.dw-sidebar.open {
+		max-height: calc(100vh - 106px);
+	}
+	.dw-sidebar.open:after {
+		transform: scale(1.25) rotate(180deg);
+	}
+}
+
+@media only screen and (max-width: 768px)  {
 	.dw-sidebar {
   	min-height: auto;
 	}

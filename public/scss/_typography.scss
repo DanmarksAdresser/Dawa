@@ -208,6 +208,7 @@ p, kbd {
 		line-height: 22px;
 		outline: none;
 		transition: 0.2s;
+		max-width: 100%;
 	}
 	textarea:focus {
 		border: 1px solid $divider;
