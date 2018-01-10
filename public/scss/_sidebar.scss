@@ -74,12 +74,13 @@
 		padding-right: 20px !important;
 	}
 	.dw-sidebar {
-		position: fixed;
+		position: fixed !important;
+		display: block !important;
 		background: #F5F4F1;
 		left: 0;
 		top: 56px;
   	width: 100%;
-  	max-width: 100%;
+  	max-width: 100% !important;
   	max-height: 56px;
   	transition: 0.4s ease-in-out;
   	z-index: 99;
@@ -129,10 +130,10 @@
 		transform: scale(1.25);
 		transition: 0.3s ease-in-out;
 	}
-	.dw-sidebar.open {
-		max-height: calc(100vh - 106px);
+	.dw-sidebar.collapse.show {
+		max-height: calc(100vh - 106px) !important;
 	}
-	.dw-sidebar.open:after {
+	.dw-sidebar.collapse.show:after {
 		transform: scale(1.25) rotate(180deg);
 	}
 }
