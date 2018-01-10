@@ -124,9 +124,9 @@ nav.navbar.sticky-top {
 }
 
 @media (max-width: 992px) {
-  .navbar-collapse.show {
+  .navbar-collapse {
     ul.navbar-nav {
-      position: absolute;
+      position: absolute !important;
       background: $white;
       height: auto;
       top: 51px;
@@ -140,8 +140,17 @@ nav.navbar.sticky-top {
         position: relative;
         background: $white;
         text-align: left;
+        .dropdown-menu {
+          margin-left: -20px !important;
+          border: 1px solid $divider-light !important;
+        }
         a {
           padding: 5px 15px 5px 15px;
+          font-weight: 400 !important;
+          color: $dark-850 !important;
+        }
+        a.nav-link:after {
+          display: none;
         }
         a.nav-link.active {
           background: $white !important;
