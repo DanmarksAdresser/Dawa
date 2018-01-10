@@ -189,4 +189,20 @@
 }
 
 
-// GENERAL DESCRIPTION
+@media only screen and (max-width: 1050px)  {
+	.col.main-left {
+		align-items: flex-start;
+		#intro {
+			width: 340px;
+		}
+	}
+	.col.main-right.front { 
+		.card-deck {
+			border-top: 0px !important;
+			.card {
+				min-width: 100%;
+				border-bottom: 1px solid $divider-light !important;
+			}
+		}
+	}
+}
