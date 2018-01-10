@@ -59,17 +59,17 @@
   		padding: 30px;
   	}
   	h4 {
-  		font-size: 32px;
+  		font-size: 36px;
   		color: $dark;
   		font-weight: 300;
   		padding-top: 5px;
   	}
   	p {
-  		font-size: 16px;
+  		font-size: 16px !important;
   		color: $dark;
   		font-weight: 400;
   		max-width: 460px;
-  		line-height: 22px;
+  		line-height: 20px !important;
   	}
   	.btn {
       padding-top: 8px;
@@ -115,7 +115,7 @@
 		margin-left: 30px;
 		margin-right: 30px;
 		margin-bottom: 30px;
-		background: $white;
+		background: $white-500;
 		border: 1px solid $divider-light;
 	}
 	.card-deck {
@@ -178,6 +178,7 @@
 		.card:hover {
 			border: 2px solid $primary !important;
 			box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+			background: $white;
 			a.btn-primary:after {
 				margin-left: 8px;
 			}
@@ -185,6 +186,20 @@
 	}
 	.card-deck:last-child {
 		border-top: 1px solid $divider-light;
+	}
+}
+
+@media only screen and (min-width: 1400px)  {
+	.col.main-right.front {
+		.card.main-card {
+			h4 {
+				font-size: 44px !important;
+			}
+			p {
+				font-size: 17px !important;
+				line-height: 22px !important;
+			}
+		}
 	}
 }
 

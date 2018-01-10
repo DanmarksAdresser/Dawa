@@ -84,7 +84,7 @@
   	max-height: 56px;
   	transition: 0.4s ease-in-out;
   	z-index: 99;
-  	overflow: hidden;
+  	overflow: hidden !important;
   	box-shadow: 0 2px 1px rgba(0,0,0,0.1);
   	nav.nav {
 			position: relative;
@@ -99,6 +99,11 @@
 				overflow: scroll;
 				li {
 					min-width: 100% !important;
+					ul {
+						padding-top: 0px !important;
+						padding-bottom: 0px !important;
+						overflow: auto;
+					}
 					a {
 						padding-top: 10px !important;
 						padding-bottom: 10px !important;
@@ -130,10 +135,10 @@
 		transform: scale(1.25);
 		transition: 0.3s ease-in-out;
 	}
-	.dw-sidebar.collapse.show {
+	.dw-sidebar.open {
 		max-height: calc(100vh - 106px) !important;
 	}
-	.dw-sidebar.collapse.show:after {
+	.dw-sidebar.open:after {
 		transform: scale(1.25) rotate(180deg);
 	}
 }

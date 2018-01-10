@@ -4,6 +4,9 @@ table {
 	position: relative;
 	border-bottom: 1px solid $divider-light;
 	margin-top: 20px;
+	max-width: 100%;
+	table-layout: fixed;
+	overflow-x: scroll;
 	thead {
 		background-color: $gray-200;
 		border-top: 1px solid $divider-light;
@@ -106,6 +109,16 @@ table {
 			td:first-child:before {
 				left: 6px;
 				opacity: 1;
+			}
+		}
+	}
+}
+
+@media only screen and (max-width: 800px)  {
+	table {
+		tr {
+			td {
+				font-size: 11px !important;
 			}
 		}
 	}

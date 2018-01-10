@@ -8,8 +8,42 @@ h1 {
 	font-weight: 300;
 	font-size: 36px;
 	line-height: 40px;
-	margin-bottom: 10px;
+	margin-bottom: 15px;
 }
+
+h1.h1-icon:before {
+	content: "";
+	display: inline-block;
+	width: 50px;
+	height: 50px;
+	margin-right: 6px;
+	margin-bottom: -12px;
+}
+
+h1.h1-adresser:before {
+	background: url(/img/ic_adresser.svg) center center no-repeat;
+}
+
+h1.h1-bbr:before {
+	background: url(/img/ic_bbr.svg) center center no-repeat;
+}
+
+h1.h1-matrikel:before {
+	background: url(/img/ic_matrikel.svg) center center no-repeat;
+}
+
+h1.h1-sted:before {
+	background: url(/img/ic_sted.svg) center center no-repeat;
+	margin-bottom: -14px;
+	margin-right: 10px;
+}
+
+h1.h1-dagi:before {
+	background: url(/img/ic_dagi.svg) center center no-repeat;
+}
+
+
+
 
 h2 {
 	font-weight: 300;
