@@ -17,8 +17,20 @@
 				background-color 0.1s ease-in-out 0s,
 				color 0.2s ease-in-out 0.15s;
 	}
-	li.nav-item > ul.nav > li.nav-item a.nav-link {
-		color: green;
+	nav#sidebar-nav > ul.nav > li.nav-item {
+		// rammer top level li
+		> a.nav-link {
+			// rammer top level a
+			color: blue;
+		}
+		> ul.nav > li.nav-item {
+			// rammer nestet li
+			> a.nav-link {
+				// rammer nestet a
+				color: green;
+
+			}
+		}
 	}
 	a.nav-link:hover {
 		color: $primary;
