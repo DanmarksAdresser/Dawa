@@ -30,6 +30,7 @@ h1.h1-bbr:before {
 
 h1.h1-matrikel:before {
 	background: url(/img/ic_matrikel.svg) center center no-repeat;
+	margin-bottom: -13px;
 }
 
 h1.h1-sted:before {
@@ -80,6 +81,29 @@ p.lead {
 	font-size: 18px;
 	line-height: 24px;
 	font-weight: 400;
+}
+
+
+@media only screen and (max-width: 700px)  {
+	.dw-sidebar-main {
+		h1 {
+			font-size: 28px;
+			line-height: 32px;
+		}
+		h2 {
+			font-size: 22px;
+			line-height: 24px;
+		}
+		h3 {
+			font-size: 18px;
+			line-height: 20px;
+		}
+		h4 {
+			font-size: 16px;
+			font-weight: 500;
+			line-height: 18px;
+		}
+	}
 }
 
 
@@ -186,6 +210,15 @@ p {
 			left: -12px;
     	top: 9px;
 		}
+	}
+}
+
+@media only screen and (max-width: 600px)  {
+	.dw-sidebar-main p {
+		font-size: 14px;
+	}
+	.dw-sidebar-main p.lead {
+		font-size: 18px !important;
 	}
 }
 

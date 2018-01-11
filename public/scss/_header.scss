@@ -173,6 +173,11 @@ nav.navbar.sticky-top {
   }
 }
 
-
+@media only screen and (max-width: 768px)  {
+  nav.navbar {
+    position: fixed;
+    width: 100%;
+  }
+}
 
 

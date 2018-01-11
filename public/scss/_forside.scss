@@ -48,6 +48,15 @@
   padding: 0;
 }
 
+@media only screen and (max-width: 768px)  {
+	.col.main-left, .col.main-right {
+		padding-top: 56px;
+	}
+	 .col.main-right.front {
+	 	padding-top: 0;
+	 }
+}
+
 .col.main-right.front {
 	.card.main-card {
 		flex:3;
@@ -68,7 +77,7 @@
   		font-size: 16px !important;
   		color: $dark;
   		font-weight: 400;
-  		max-width: 460px;
+  		max-width: 460px !important;
   		line-height: 20px !important;
   	}
   	.btn {
@@ -100,7 +109,9 @@
 				font-size: 14px;
 				line-height: 17px;
 				padding: 15px;
-				margin-bottom: 0;
+				display: block;
+  			max-width: 340px;
+  			margin: 0 auto;
 			}
 		}
 		.card-footer {
@@ -203,6 +214,14 @@
 	}
 }
 
+@media only screen and (min-width: 1600px)  {
+	.card-deck-container {
+		margin-left: auto !important;
+		margin-right: auto !important;
+		max-width: 1300px;
+	}
+}
+
 
 @media only screen and (max-width: 1050px)  {
 	.col.main-left {
@@ -217,6 +236,20 @@
 			.card {
 				min-width: 100%;
 				border-bottom: 1px solid $divider-light !important;
+			}
+		}
+	}
+}
+
+@media only screen and (max-width: 800px)  {
+	.col.main-right.front {
+		.card.main-card { 
+			h4 {
+				font-size: 28px;
+			}
+			p {
+				font-size: 16px !important;
+				font-weight: 300;
 			}
 		}
 	}

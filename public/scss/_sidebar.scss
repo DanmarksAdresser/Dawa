@@ -10,7 +10,7 @@
 		position: relative;
 		font-size: 14px;
 		line-height: 17px;
-		color: $dark-600;
+		color: $dark-850;
 		padding: 0.4rem 1.5rem;
 		transition: 
 				padding 0.2s ease-in-out 0.15s,
@@ -21,14 +21,24 @@
 		// rammer top level li
 		> a.nav-link {
 			// rammer top level a
-			color: blue;
+			
 		}
 		> ul.nav > li.nav-item {
 			// rammer nestet li
 			> a.nav-link {
 				// rammer nestet a
-				color: green;
-
+				font-size: 12px;
+				padding-left: 40px !important;
+				padding-right: 1.5rem !important;
+				color: $dark-600;
+				font-weight: 500;
+			}
+			> a.nav-link.active {
+				color: $primary;
+				background: transparent;
+			}
+			> a.nav-link:before {
+				display: none;
 			}
 		}
 	}
@@ -84,7 +94,7 @@
 
 @media only screen and (max-width: 768px)  {
 	.dw-sidebar-main {
-		padding-top: 80px !important;
+		padding-top: 162px !important;
 		padding-left: 20px !important;
 		padding-right: 20px !important;
 	}
@@ -122,7 +132,6 @@
 					a {
 						padding-top: 10px !important;
 						padding-bottom: 10px !important;
-						color: $dark-850 !important;
 					}
 				}
 			}

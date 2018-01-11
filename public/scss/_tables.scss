@@ -5,8 +5,6 @@ table {
 	border-bottom: 1px solid $divider-light;
 	margin-top: 20px;
 	max-width: 100%;
-	table-layout: fixed;
-	overflow-x: scroll;
 	thead {
 		background-color: $gray-200;
 		border-top: 1px solid $divider-light;
