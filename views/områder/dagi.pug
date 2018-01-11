@@ -1,4 +1,25 @@
 extends ../sidebar-auto
-
+include ../includes/datavask-demo
 block main
-  h1.h1-icon.h1-dagi DAGI
+  div.container-fluid
+    h1.h1-icon.h1-dagi DAGI
+    p.
+      Danmarks Administrative Geografiske Inddeling (DAGI) beskriver landets administrative og geografiske inddeling i kommuner, regioner, sogne, retskredse, politikredse, postnumre, opstillingskredse og lignende. 
+    p.
+      DAGI API’et kan f.eks. anvendes til at danne en oversigt over de adminstrative inddelinger som f.eks. en liste over danmarks sogne, til at implementere en indtastning af en kommune med autocomplete eller valg af et postdistrikt ved reverse geokoding.
+
+    h2 Lister
+    p.
+      Listen over danmarks sogne:
+    pre
+      a(href="//dawa.aws.dk/sogne") https://dawa.aws.dk/sogne
+    
+    h2 Indtastning med autocomplete
+    p.
+      DAWA kan anvendes til at implementere en indtastning af f.eks. en kommune med autocomplete. Brugeren kan indtaste kommunekode eller kommunenavn og undervejs i indtastningen bliver præsenteret for valgmuligheder. Brugeren har indtast 10 og bliver præsenteret for alle kommuner, som starter med 10 i kommunekode:
+    pre
+      a(href="//dawa.aws.dk/kommuner/autocomplete?q=10") https://dawa.aws.dk/kommuner/autocomplete?q=10
+    p.
+      Eller har indtastet "kø" og bliver præsenteret for alle kommuner, hvor "kø" er starten af kommunenavnet: 
+    pre
+      a(href="//dawa.aws.dk/kommuner/autocomplete?q=kø") https://dawa.aws.dk/kommuner/autocomplete?q=kø
