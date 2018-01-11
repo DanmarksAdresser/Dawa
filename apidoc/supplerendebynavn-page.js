@@ -1,6 +1,6 @@
 module.exports = {
   entity: 'supplerendebynavn',
-  heading: 'Syp',
+  heading: 'Supplerende bynavne',
   lead: `API'et udstiller Danmarks supplerende bynavne samt tilhørende funktionalitet.`,
   sections: [
     {
