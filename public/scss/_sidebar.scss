@@ -17,6 +17,9 @@
 				background-color 0.1s ease-in-out 0s,
 				color 0.2s ease-in-out 0.15s;
 	}
+	li.nav-item > ul.nav > li.nav-item a.nav-link {
+		color: green;
+	}
 	a.nav-link:hover {
 		color: $primary;
 		background-color: $white;

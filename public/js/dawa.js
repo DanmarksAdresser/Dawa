@@ -341,3 +341,9 @@ export const generateSidebar = (navSelector) => {
 export function activateScrollspy(target) {
   $('body').scrollspy({target});
 }
+
+export const setupSidebarButton = () => {
+  $('.dw-sidebar').click(function() {
+    $(".dw-sidebar").toggleClass("open");
+  });
+};
