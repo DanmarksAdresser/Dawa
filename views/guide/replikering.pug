@@ -38,7 +38,7 @@ block main
     div.page-header
       h3.anchor-header#detaljer Detaljer
     p DAWA garanterer ikke <em>referentiel integritet</em>. F.eks. er det muligt at der kan være oprettet adresser med en vejkode og kommunekode, som endnu ikke refererer til et vejstykke. Klientsystemet bør håndtere dette.
-    p Hændelser udstilles i <em>nær realtid</em>. Kildesystemet der ligger til grund for hændelserne er BBR. Klientsystemer skal være opmærksom på, at adressers postnumre og supplerende bynavne p.t. kun opdateres en gang i døgnet.
+    p Hændelser udstilles i <em>nær realtid</em>. Kildesystemet der ligger til grund for hændelserne er Danmarks Adresseregister (DAR). Klientsystemer skal være opmærksom på, at adressers postnumre og supplerende bynavne p.t. kun opdateres en gang i døgnet.
     p Hvis man ønsker at vedligeholde en lokal kopi af en <em>delmængde</em> af adresserne (f.eks. en kommune) skal man være opmærksom på, at det er noget mere kompliceret at vedligeholde en lokal kopi, da det i princippet er muligt for en adresse at flytte fra en kommune til en anden. Hvis der anvendes en SQL-database kan det overvejes at replikere alle adresserne og anvende et <em>View</em>, som evt. kan være et <a href="http://en.wikipedia.org/wiki/Materialized_view">Materialized View</a>.
       section
         div.page-header

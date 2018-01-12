@@ -2,12 +2,16 @@ extends ../sidebar-auto
 include ../includes/datavask-demo
 block main
   div.container-fluid
-    h1.h1-icon.h1-adresser Adressedata og -funktionalitet
+    h1.h1-icon.h1-adresser Adresser
     p.
-      Adresseområdet i DAWA indeholder data og funktionalitet vedrørende <a href="/dok/api/adresse">adresser</a>, <a href="/dok/api/adgangsadresse">adgangsadresser</a>, <a href="/dok/api/vejnavn">vejnavne</a>, <a href="/dok/api/vejstykke">vejstykker</a>, <a href="/dok/api/supplerendebynavn">supplerende bynavne</a> samt <a href="/dok/api/postnummer">postnumre</a>.
+      Adresseområdet i DAWA indeholder data og funktionalitet vedrørende adresser, adgangsadresser, vejnavne, vejstykker, supplerende bynavne samt postnumre. Data stammer fra Danmarks Adresserregister (DAR).
     p.
-      DAWA kan anvendes til at etablere mange forskellige former for adressefunktionalitet i it-systemer:
-      adresseindtastning, adressesøgning, adresseopslag, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. Du kan nedenfor prøve en række eksempler på anvendelser af API'et.
+      Adresseområdets API kan anvendes til at etablere mange forskellige former for adressefunktionalitet i it-systemer:
+      adresseindtastning, adressesøgning, adresseopslag, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. 
+    p.  
+      Dokumentationen for de enkelte ressourcer i adresseområdets API finder du på <a href="/dok/api/adresse">adresser</a>, <a href="/dok/api/adgangsadresse">adgangsadresser</a>, <a href="/dok/api/vejnavn">vejnavne</a>, <a href="/dok/api/vejstykke">vejstykker</a>, <a href="/dok/api/supplerendebynavn">supplerende bynavne</a> samt <a href="/dok/api/postnummer">postnumre</a>.
+    p.  
+      Du kan nedenfor prøve en række eksempler på anvendelser af API'et.
 
     section#adresseindtastning
       h2 Adresseindtastning
@@ -54,6 +58,8 @@ block main
             div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
               div.col-sm-6.col-form-label
                 span#autocomplete-adresse-kbh-choice
+      p.
+        DAWA's autocomplete komponent er anvendt til at etablere adresseindtastningen med autocomplete. Hvordan den anvendes er beskrevet i <a href='/dok/guide/autocomplete'>autocomplete guiden</a>. Du kan også anvende <a href='/dok/api/autocomplete'>autocomplete API'et</a> direkte.
       h3 Feltindtastning
       p.
         Indtastning af en adresse kan også baseres på felter til hver enkel bestandel af
@@ -111,14 +117,14 @@ block main
         Udfra en adresse kan du få fat i det tilknyttede ejensdomsnummer, som du så kan anvendes
         til opslag i ejendomssystemer efter ejendomsdata.
 
-      h3 Adressesøgning
+      h2 Adressesøgning
       p.
         DAWA kan anvendes til at udvælge præcist de adresser, du er interesseret i.
         Det kan dreje sig om adresser i et enkelt sogn eller kommune. Det kan dreje som adresser
         indenfor en bestemt afstand til punkt. Eller adresser på en enkelt vej.
         Dawa giver mulighed for at udsøge adresser efter mange parametre og kombinationer af disse.
 
-      h3 Download af adresser
+      h2 Download af adresser
       p.
         Har du behov for at kunne arbejde med adressedata på din egen PC? Til at etablere din egen
         kopi af Danmarks Adresser? Til at lave en statistisk eller geografisk analyse baseret
@@ -143,11 +149,11 @@ block main
         a(href='#{url}/adresser?kommunekode=0101|0147&format=geojson').
           GeoJSON fil med København og Frederiksberg kommuners adresser.
 
-      h3 Etablering af lokal adressedatabase
+      h2 Etablering af lokal adressedatabase
       p.
         Nogle har behov for at have en lokal, opdateret kopi af adressedata. DAWA kan anvendes til
         at etablere og holde kopien af adressedata opdateret. Til dette anvendes
-        <a href='http://dawa.aws.dk/replikeringdok'>Replikerings API'et</a>.
+        <a href='#{url}//dok/guide/replikering'>Replikerings API'et</a>.
 
 
 
