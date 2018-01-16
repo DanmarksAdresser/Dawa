@@ -2,36 +2,26 @@ extends ../sidebar-auto
 
 block main
   h1.h1-icon.h1-bbr BBR
-  p.lead Udvalgte data om bygninger og boliger fra BBR-registeret. Data hentes dagligt fra OIS. 
-  h2 Baggrund
   p.
-    Siden lanceringen af DAWA har der været en stor efterspørgsel efter at knytte DAWA’s adresser
-    til BBR’s enheder, bygninger og tekniske anlæg samt deres ejerskab. Vi har i dette release
-    forsøgt at imødekomme dette ønske. BBR domænet har tilknytning til adressedomænet, men ligger
+    BBR-området i DAWA indeholder data og funktionalitet vedrørende enheder, bygninger, tekniske anlæg, ejerskaber, grunde, matrikelreferencer, etager, opgange, kommuner samt bygningspunkter. BBR API'et knytter danmarks adresser til BBR's enheder, bygninger og tekniske anlæg. Data stammer fra Bygnings og Boligregisteret (BBR) og hentes via OIS.
+  
+  p.
+    BBR domænet har tilknytning til adressedomænet, men ligger
     uden for det, så vores viden om området er begrænset. Det har resulteret i, at den
-    domænespecifike dokumentation af DAWA’s BBR Light API henviser til OIS og BBR dokumentation.
-    Dokumentationen af de mere API tekniske emner i det nye BBR Light API finder du selvfølgelig
+    domænespecifike dokumentation af BBR-områdets API henviser til OIS og BBR dokumentation.
+    Dokumentationen af de mere API tekniske emner finder du selvfølgelig
     som vanlig i DAWA dokumentationen.
+  p.  
+    Dokumentationen for de enkelte ressourcer i BBR-områdets API finder du på <a href="/dok/api/enhed">enhed</a>, <a href="/dok/api/bygning">bygning</a>, <a href="/dok/api/tekniskeanlaeg">tekniske anlæg</a>, <a href="/dok/api/ejerskab">ejerskab</a>, <a href="/dok/api/grund">grund</a>, <a href="/dok/api/matrikelreference">matrikelreference</a>, <a href="/dok/api/etage">etage</a>, <a href="/dok/api/opgang">opgang</a>, <a href="/dok/api/kommune">kommune</a> samt <a href="/dok/api/bygningspunkt">bygningspunkt</a>.
   p.
     Det har ikke været muligt at udstille alle data fra BBR, da en del af disse er underlagt
     § 6, stk. 1, nr. 7, i persondataloven. Hver ressource indeholder hovedsagligt kun ressourcens
     id, samt identer til relaterede ressourcer, hvilket er tilstrækkeligt til at danne relationer
     mellem adresser og BBR ressourcerne.
-  p DAWA udstiller følgende BBR/OIS ressourcer:
-    ul
-     li Enheder
-     li Bygninger
-     li Tekniske anlæg (tekniskeanlaeg)
-     li Ejerskaber
-     li Grunde
-     li Matrikelreferencer
-     li Etager
-     li Opgange
-     li Kommuner
-     li Bygningspunkter
+  
 
   h2 Brugsscenarier
-  p Nedenfor gennemgås typiske brugsscenarier af DAWA’s BBR Light API.
+  p Nedenfor gennemgås typiske brugsscenarier af BBR-områdets API.
   h3 Find en enhed ud fra dens adresse
   p Først fremskaffes adressens id:
     pre
