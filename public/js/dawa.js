@@ -334,8 +334,9 @@ export const setupDatavaskDemo = (inputElmSel, buttonSel, resultElmSel, type) =>
   };
 
 export const generateSidebar = (navSelector) => {
-  const $myNav = $(navSelector);
-  initToc($myNav);
+  const $nav = $(navSelector);
+  const $scope = $('.dw-sidebar-main');
+  initToc({$scope, $nav});
 };
 
 export function activateScrollspy(target) {
