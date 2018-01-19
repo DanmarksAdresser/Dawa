@@ -58,7 +58,7 @@ function setupPugPage(path, page) {
 }
 
 const setupApidocDetails = (page ) => {
-  const path = `/dok/api/${page.entity}`;
+  const path = `/dok/api/${encodeURIComponent(page.entity)}`;
   app.get(path, function (req, res) {
     res.render('apidoc-detaljer', Object.assign(pugDocumentationParams(req), {page}));
   });

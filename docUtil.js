@@ -10,6 +10,7 @@ const allPages = require('./apidoc/all-pages');
 
 const entityPageMap = _.indexBy(allPages, 'entity');
 const allEntityNames = Object.keys(entityPageMap).sort();
+const sections = require('./apidoc/sections');
 
 exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
   var url = baseUrl + path;
@@ -180,6 +181,8 @@ exports.getOisEntityNames = () => {
 exports.getOisPlural = (oisEntityName) => {
   return oisNamesAndKeys[oisEntityName].plural;
 };
+
+exports.getSections = () => sections;
 
 exports.getEntityNames = () => allEntityNames;
 
