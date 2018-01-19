@@ -6,7 +6,6 @@ module.exports = [
   require('./ejerlav-page'),
   require("./jordstykke-page"),
   require('./kommune-page'),
-  require('./navngivenvej-page'),
   ... require('./ois-pages'),
   require('./opstillingskreds-page'),
   require('./politikreds-page'),
