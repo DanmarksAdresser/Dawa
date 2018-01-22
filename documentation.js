@@ -108,7 +108,7 @@ setupPugPage('/dok/api', 'apidoc-oversigt.pug');
 setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guides.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
-setupPugPage('/dok/bbr-intern', 'bbr-api-fuld.pug');
+setupPugPage('/dok/bbr-intern', 'bbr-intern.pug');
 for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old']) {
   setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
 }
