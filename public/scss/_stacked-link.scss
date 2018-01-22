@@ -1,0 +1,63 @@
+.stacked-link-container {
+  margin-top: 20px;
+  .stacked-link {
+    position: relative;
+    width: 100%;
+    border: 1px solid $divider-light;
+    background: $light;
+    margin-bottom: 10px;
+    box-shadow: 0 0px 0px rgba(0,0,0,0);
+    h4.stacked-link-header {
+      margin: 0;
+      background: transparent;
+      padding-bottom: 5px;
+      padding-top: 23px;
+      border: 0;
+      font-size: 24px;
+      font-weight: 300;
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+    .stacked-link-body {
+      padding-top: 0px;
+      padding-bottom: 14px;
+      padding-left: 1.25rem;
+      padding-right: 60px;
+      p {
+        font-size: 14px;
+        font-weight: 300;
+      }
+      a {
+        position: absolute;
+        display: block;
+        width: calc(100% + 2px);
+        height: calc(100% + 2px);
+        left: -1px;
+        top: -1px;
+        background: transparent;
+        border: 2px solid transparent;
+      }
+      a:hover {
+        border: 2px solid $primary;
+      }
+    }
+    .stacked-link:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    }
+    .stacked-link-body:after {
+      position: absolute;
+      display: block;
+      content: "";
+      right: 30px;
+      width: 21px;
+      height: 14px;
+      background: url(/img/ic_arrow.svg) center center no-repeat;
+      background-size: 21px 14px;
+      top: calc(50% - 7px);
+      transition: 0.2s ease-in-out;
+    }
+    .stacked-link-body:hover:after {
+      right: 20px;
+    }
+  }
+}
