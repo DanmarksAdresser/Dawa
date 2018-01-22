@@ -1,18 +1,17 @@
 //... --- HEADER --- ...//
 
-nav.navbar.sticky-top {
-  background: $white;
-
-  -webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
-  -moz-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
-  padding-top: 0;
-  padding-bottom: 0;
-  height: 56px;
-}
-
-
 @media (min-width: 992px) {
+  nav.navbar.sticky-top {
+    z-index: 9999999;
+    background: $white;
+
+    -webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+    -moz-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 56px;
+  }
   nav.navbar.sticky-top {
     #navbarSupportedContent {
       position: relative;
@@ -100,6 +99,8 @@ nav.navbar.sticky-top {
   margin-left: -40px;
   margin-top: -5px;
   border: 1px solid $divider-light;
+  -webkit-box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 1px 6px rgba(0,0,0,0.1);
   box-shadow: 0 1px 6px rgba(0,0,0,0.1);
   transition: 0.2s ease-in-out;
   a {
@@ -123,26 +124,34 @@ nav.navbar.sticky-top {
   outline: none !important;
 }
 
+
+
 @media (max-width: 992px) {
+  nav.navbar.sticky-top {
+    z-index: 9999999;
+    background: white;
+    -webkit-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+    -moz-box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.10), inset 0 2px 0 0 $primary;
+  }
   .navbar-collapse {
     ul.navbar-nav {
-      position: absolute !important;
       background: $white;
       height: auto;
-      top: 51px;
       right: 0;
-      width: 100%;
-      max-width: 150px;
-      border: 1px solid $divider-light;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      left: 0;
+      margin-left: -16px;
+      width: 100vw;
       right: 0;
+      border-radius: 0;
       li {
         position: relative;
         background: $white;
         text-align: left;
         .dropdown-menu {
-          margin-left: -20px !important;
           border: 1px solid $divider-light !important;
+          background: $gray-100;
+          margin-left: 0px;
         }
         a {
           padding: 5px 15px 5px 15px;
