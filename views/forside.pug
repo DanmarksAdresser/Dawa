@@ -1,0 +1,58 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row.front
+      div.col.main-left.front
+        include left-intro
+      div.col.main-right.front
+        div.card.main-card
+          div.main-card-container
+            img(src='/img/ic_adresser.svg')
+            h4.card-header Danmarks adresser
+            div.card-body
+              p.
+                Adresseområdet indeholder data og funktionalitet inden for adresser, adgangsadresser, veje,
+                supplerende bynavne og postnumre.
+              a.btn.btn-primary(href="/dok/adresser") Læs mere
+
+        div.card-deck-container
+          div.card-deck
+            div.carddiv.card
+              img(src='/img/ic_dagi.svg')
+              h4.card-header DAGI
+              div.card-body
+                p.
+                  DAGI-området udstiller data og funktionalitet vedrørende danmarks administrative geografiske inddelinger, som f.eks. kommuner, regioner, opstillingskredse, sogne, politikredse og retskredse.
+                a.btn.btn-primary(href="/dok/dagi") Læs mere
+                a.btn.btn-hover(href="/dok/dagi")
+            div.card
+              img(src='/img/ic_matrikel.svg')
+              h4.card-header Matrikelkortet
+              div.card-body
+                p.
+                  Det matrikulære område udstiller data og funktionalitet vedrørende ejerlav og jordstykker.
+                a.btn.btn-primary(href="/dok/matrikelkortet") Læs mere
+                a.btn.btn-hover(href="/dok/matrikelkortet")
+
+          div.card-deck
+            div.carddiv.card
+              img(src='/img/ic_sted.svg')
+              h4.card-header Danske Stednavne
+              div.card-body
+                p.
+                  Stednavneområdet udstiller data og funktionalitet vedrørende danske stednavne som f.eks. byer, bydele,
+                  bygninger, øer, farvande og fortidsminder.
+                a.btn.btn-primary(href="/dok/stednavne") Læs mere
+                a.btn.btn-hover(href="/dok/stednavne")
+
+            div.card
+              img(src='/img/ic_bbr.svg')
+              h4.card-header BBR
+              div.card-body
+                p.
+                  BBR-området udstiller data fra Bygnings- og boliregisteret om bygninger, enheder, tekniske anlæg, ejerskaber m.v.
+                a.btn.btn-primary(href="/dok/bbr") Læs mere
+                a.btn.btn-hover(href="/dok/bbr")
+
+

@@ -1,0 +1,40 @@
+extends ../sidebar-auto
+include ../includes/datavask-demo
+block main
+  div.container-fluid
+    h1.h1-icon.h1-dagi DAGI
+    p.
+      Danmarks Administrative Geografiske Inddeling (DAGI) beskriver landets administrative og geografiske inddeling i kommuner, regioner, sogne, retskredse, politikredse, postnumre, opstillingskredse og lignende. 
+    p.  
+      Dokumentationen for de enkelte ressourcer i DAGI API'et finder du på <a href="/dok/api/kommune">kommuner</a>, <a href="/dok/api/region">regioner</a>, <a href="/dok/api/sogn">sogne</a>, <a href="/dok/api/retskreds">retskredse</a>, <a href="/dok/api/politikreds">politikredse</a>, <a href="/dok/api/opstillingskreds">opstillingskredse</a> og <a href="/dok/api/postnummer">postnumre</a>.
+    p.
+      DAGI API’et kan f.eks. anvendes til at danne en oversigt over de adminstrative inddelinger som f.eks. en liste over danmarks sogne, til at implementere en indtastning af en kommune med autocomplete eller valg af et postdistrikt ved reverse geokoding.
+
+    h2 Lister
+    p.
+      DAGI API'et kan anvendes til at danne en oversigt over DAGI's forskellige inddelinger. Listen over danmarks sogne kan dannes på følgende måde:
+    pre
+      a(href="//dawa.aws.dk/sogne") https://dawa.aws.dk/sogne
+    
+    h2 Indtastning med autocomplete
+    p.
+      DAWA kan anvendes til at implementere en indtastning af f.eks. en kommune med autocomplete. Brugeren kan indtaste kommunekode eller kommunenavn og undervejs i indtastningen bliver præsenteret for valgmuligheder. Brugeren har indtast 10 og bliver præsenteret for alle kommuner, som starter med 10 i kommunekode:
+    pre
+      a(href="//dawa.aws.dk/kommuner/autocomplete?q=10") https://dawa.aws.dk/kommuner/autocomplete?q=10
+    p.
+      Eller har indtastet "kø" og bliver præsenteret for alle kommuner, hvor "kø" er starten af kommunenavnet: 
+    pre
+      a(href="//dawa.aws.dk/kommuner/autocomplete?q=kø") https://dawa.aws.dk/kommuner/autocomplete?q=kø
+
+
+    h2 Reverse geokodning
+    p. 
+      Ud fra en placering angivet i form af et sæt koordinater, kan du afgøre hvilken DAGI inddeling, som inderholder denne placering. Hvis du er på lokationen bestemt af WGS84 koordinaterne (12.58514, 55.68323), kan du f.eks. afgøre hvilket postnummer du befinder dig i:
+    pre
+      a(href="//dawa.aws.dk/postnumre/reverse?x=12.58514&y=55.68323") http://dawa.aws.dk/postnumre/reverse?x=12.58514&y=55.68323
+
+    h2 Adressens relation til DAGI inddelingerne
+    p.
+      Danmarks adresser er knyttet til de DAGI inddelinger, som de ligger i. Denne tilknytning etableres ved en beregning baseret på adressens placering og DAGI inddelingernes grænser. Hver enkel adresse er forsynet med oplysninger om hvilke DAGI inddelinger den ligger i. Derudover kan adresserne i en DAGI inddeling fremsøges. F.eks. alle adresser i Hillerød retskreds:
+    pre
+      a(href="//dawa.aws.dk/adresser?retskredskode=1115") http://dawa.aws.dk//adresser?retskredskode=1115

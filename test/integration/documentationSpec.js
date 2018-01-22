@@ -1,12 +1,14 @@
 "use strict";
 
-var expect = require('chai').expect;
+const { go } = require('ts-csp');
+const { expect, assert } = require('chai');
 var request    = require('request-promise');
 var _            = require('underscore');
 
 var parameterDoc = require('../../parameterDoc');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
+const allPages = require('../../apidoc/all-pages');
 
 describe('Parameter documentation.', function() {
   var undocumented = ['format', 'callback', 'srid', 'noformat', 'ndjson', 'medtagugyldige'];
@@ -49,7 +51,11 @@ describe('Parameter documentation.', function() {
 });
 
 describe('Documentation page', function() {
-  ['generelt', 'adressedok', 'adgangsadressedok', 'vejedok', 'autocompletedok', 'postnummerdok', 'listerdok', 'om', 'replikeringdok'].forEach(function(docPageName) {
+  ['', '/dok/api', '/dok/adresser',
+    '/dok/dagi', '/dok/bbr', '/dok/stednavne', '/dok/matrikelkortet',
+    '/dok/guides',
+    '/dok/bbr-intern',
+    '/dok/faq', '/dok/om'].forEach(function(docPageName) {
     it(docPageName + ' should be retrievable', function() {
       request.get({
         uri: "http://localhost:3002/"+ docPageName,
@@ -60,13 +66,14 @@ describe('Documentation page', function() {
       });
     });
   });
-
-  ['adressedok', 'adgangsadressedok', 'vejedok', 'postnummerdok', 'listerdok', 'oisdok', 'bbrlightdok'].forEach(function(docPageName) {
-    it(docPageName + ' should contain examples', function(done) {
-      request.get("http://localhost:3002/"+ docPageName, function(error, response, body) {
-        expect(body).to.contain('<h4>Eksempler</h4>');
-        done();
+  for(let page of allPages) {
+    it(`Kan hente apidocs siden for ${page.entity}`, () => go(function*() {
+      const response = yield request.get({
+        uri: `http://localhost:3002/dok/api/${page.entity}`,
+        resolveWithFullResponse: true
       });
-    });
-  });
+      assert.strictEqual(response.statusCode, 200);
+      assert.strictEqual(response.headers['content-type'],"text/html; charset=utf-8");
+    }));
+  }
 });

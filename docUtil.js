@@ -4,6 +4,15 @@ const oisNamesAndKeys = require('./apiSpecification/ois/namesAndKeys');
 const registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 
+const allDocs = require('./apidoc/all');
+const pathToDocMap = _.indexBy(allDocs, 'path');
+const allPages = require('./apidoc/all-pages');
+
+const entityPageMap = _.indexBy(allPages, 'entity');
+const allEntityNames = Object.keys(entityPageMap).sort();
+const sections = require('./apidoc/sections');
+const sectionsBbrFull = require('./apidoc/sections-bbr-full');
+
 exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
   var url = baseUrl + path;
   if (!_.isEmpty(query)) {
@@ -45,6 +54,17 @@ exports.extractDocumentationForObject = function (schema) {
   else {
     return [];
   }
+};
+
+exports.extractDocumentationForResourceResponse = (entity, qualifier) => {
+  const representation = registry.findWhere({
+    entityName: entity,
+    type: 'representation',
+    qualifier: qualifier
+  });
+
+  const schema = representation.schema;
+  return exports.extractDocumentationForObject(schema);
 };
 
 // for now, this one just assumes that the schema is compiled
@@ -162,6 +182,22 @@ exports.getOisEntityNames = () => {
 exports.getOisPlural = (oisEntityName) => {
   return oisNamesAndKeys[oisEntityName].plural;
 };
+
+exports.getSections = () => sections;
+
+exports.getSectionsBbrFull = () => sectionsBbrFull;
+
+exports.getEntityNames = () => allEntityNames;
+
+exports.getResourcesForEntity = entityName => allDocs.filter(doc => doc.entity === entityName);
+exports.getDocForPath = (path) => {
+  if(!pathToDocMap[path]) {
+    throw new Error(`No documentation for path ${path}`);
+  }
+  return pathToDocMap[path];
+};
+
+exports.getPageForEntity = entityName => entityPageMap[entityName];
 
 exports.uppercaseFirst = str => {
   if(!str || str === '') {

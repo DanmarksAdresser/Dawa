@@ -1,0 +1,28 @@
+extends sidebar
+include includes/parameterDocMixins
+include includes/renderSidebar
+
+mixin renderSections(sections, nesting)
+  each section in sections
+    #{'h' + nesting}(id=section.anchor) #{section.heading}
+    div.lead !{section.lead}
+    if section.type === 'endpoint'
+      +documentResource2(docUtil.getDocForPath(section.path))
+    if section.type === 'datadescription'
+      +documentSchema2(section.entity, section.qualifier)
+    if section.sections
+      +renderSections(section.sections, nesting + 1)
+
+block sidebar
+  +renderSidebar(page)
+block main
+  div.container
+    h1 #{page.heading}
+    p.lead #{page.lead}
+    if page.body
+      div !{page.body}
+    +renderSections(page.sections, 2)
+
+block append scripts
+  script.
+    dawa.activateScrollspy('#sidebar-nav')

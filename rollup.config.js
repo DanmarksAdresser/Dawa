@@ -2,7 +2,9 @@
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
+import collectSass from 'rollup-plugin-collect-sass';
 import css from 'rollup-plugin-css-only';
+import scss from 'rollup-plugin-scss'
 import inject from 'rollup-plugin-inject';
 
 export default {
@@ -15,7 +17,8 @@ export default {
       include: ['node_modules/jquery-ui-dist/**/*.js','public/js/bootstrap-*.js'],
       jQuery: 'jquery'
     }),
-    css({ output: 'dist/css/dawa.css' }),
+    scss({
+      output: 'dist/css/dawa.css' }),
     babel({
       "presets": [
         "es2015-rollup"

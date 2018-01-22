@@ -1,0 +1,16 @@
+import 'bootstrap/scss/bootstrap.scss';
+import 'leaflet/dist/leaflet.css';
+import '../css/style.css';
+import '../scss/dawa.scss';
+import '../scss/_variables.scss';
+import '../scss/_typography.scss';
+import '../scss/_forside.scss';
+import '../scss/_header.scss';
+import '../scss/_sidebar.scss';
+import '../scss/_tables.scss';
+import '../scss/_forms.scss';
+import '../scss/_footer.scss';
+import '../scss/_guides.scss';
+import '../scss/_faq.scss';
+import '../css/autocomplete.css';
+import 'jquery-ui-dist/jquery-ui.min.css';

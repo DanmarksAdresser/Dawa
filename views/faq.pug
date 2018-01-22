@@ -1,0 +1,32 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row.faq
+      div.col.main-left.faq
+        include left-intro
+      div.col.main-right.faq
+        div.row
+          h1 FAQ
+          p.lead Simple svar på hyppige spørgsmål
+          p.question
+            span.faq-spm#manglende_adresse
+              b Der mangler en adresse. Hvordan får jeg den oprettet?<br>
+            span.faq-svar.
+              Du henvender dig til den kommunale adressemyndighed i den kommune, hvor adressen ligger.
+          p.question
+            span.faq-spm#geometri
+              b Hvordan får jeg geometrien for f.eks. et jordstykke?<br>
+            span.faq-svar.
+              Du anvender <code>format=geojson</code> parameteren.
+          p.question
+            span.faq-spm#koordinatsystem
+              b Hvordan vælger jeg koordinatsystem?<br>
+            span.faq-svar.
+              WGS84 koordinatsystemet anvendes som default (srid=4326). Hvis du ønsker at anvende UTM zone 32 ETRS89 kan du anvende queryparamereter <code>srid=25832</code>.
+          p.question
+            span.faq-spm#driftsnedlaeggelse
+              b Hvor længe forventes DAWA at være i drift?<br>
+            span.faq-svar.
+              Der er ikke fastsat nogen slutdato for nedlæggelse af DAWA. Når datafordeleren tilbyder
+              tilsvarende funktionalitet vil der være paralleldrift i mindst et år.

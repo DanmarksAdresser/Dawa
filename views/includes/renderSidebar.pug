@@ -1,0 +1,4 @@
+mixin renderSidebar(page)
+  nav#sidebar-nav.nav.nav-pills.flex-column
+    each section in page.sections
+      a.nav-link(href='#'+section.anchor)=section.heading

@@ -10,6 +10,7 @@ var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
 
 require('./apiSpecification/allSpecs');
+const allPages = require('./apidoc/all-pages');
 
 /*jslint stupid: true */
 /*stupid:true makes JSLint allow use of .readFileSync */
@@ -19,10 +20,6 @@ var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 var app = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'pug');
-
-app.get('/', function (req, res) {
-  res.render('home.pug', {url: paths.baseUrl(req)});
-});
 
 var jsonSchemas = _.reduce(registry.entriesWhere({
   type: 'representation',
@@ -45,6 +42,7 @@ var autocompleteSchemas = _.reduce(registry.entriesWhere({
 function pugDocumentationParams(req) {
   return {
     url: paths.baseUrl(req),
+    path: req.path,
     jsonSchemas: jsonSchemas,
     autocompleteSchemas: autocompleteSchemas,
     parameterDoc: parameterDoc,
@@ -58,6 +56,13 @@ function setupPugPage(path, page) {
     res.render(page, pugDocumentationParams(req));
   });
 }
+
+const setupApidocDetails = (page ) => {
+  const path = `/dok/api/${encodeURIComponent(page.entity)}`;
+  app.get(path, function (req, res) {
+    res.render('apidoc-detaljer', Object.assign(pugDocumentationParams(req), {page}));
+  });
+};
 
 function setupSchemaPage(path) {
   var source2name = {
@@ -93,17 +98,47 @@ function setupSchemaPage(path) {
   });
 }
 
-setupPugPage('/autocompletedok', 'autocompletedok.pug');
-setupPugPage('/generelt', 'generelt.pug');
-setupPugPage('/adressedok', 'adressedok.pug');
-setupPugPage('/adgangsadressedok', 'adgangsadressedok.pug');
-setupPugPage('/vejedok', 'vejedok.pug');
-setupPugPage('/postnummerdok', 'postnummerdok.pug');
-setupPugPage('/listerdok', 'listerdok.pug');
-setupPugPage('/oisdok', 'oisdok.pug');
-setupPugPage('/bbrlightdok', 'bbrlightdok.pug');
-setupPugPage('/om', 'om.pug');
-setupPugPage('/replikeringdok', 'replikeringdok.pug');
+for(let område of ['adresser', 'dagi', 'bbr', 'matrikelkortet', 'stednavne']) {
+  setupPugPage(`/dok/${område}`, `områder/${område}.pug`);
+
+}
+setupPugPage('/', 'forside.pug');
+setupPugPage('/dok/om', 'om.pug');
+setupPugPage('/dok/api', 'apidoc-oversigt.pug');
+setupPugPage('/dok/api/generelt', 'generelt.pug');
+setupPugPage('/dok/guides', 'guides.pug');
+setupPugPage('/dok/release-noter', 'release-noter.pug');
+setupPugPage('/dok/bbr-intern', 'bbr-api-fuld.pug');
+for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old']) {
+  setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
+}
+setupPugPage('/dok/faq', 'faq.pug');
+
+for(let page of allPages) {
+  setupApidocDetails(page);
+}
+
 setupSchemaPage('/replikeringdok/schema.json');
+
+const redirects = [
+  ['/autocompletedok', '/dok/guide/autocomplete'],
+  ['/generelt', '/dok/api/generelt'],
+  ['/adressedok', '/dok/api/adresse'],
+  ['/adgangsadressedok', '/dok/api/adgangsadresse'],
+  ['/vejedok', '/dok/api/vejstykke'],
+  ['/postnummerdok', '/dok/api/postnummer'],
+  ['/om', '/dok/om'],
+  ['/listerdok', '/dok/api'],
+  ['/bbrlightdok', '/dok/bbr'],
+  ['/replikeringdok', '/dok/guide/replikering'],
+  ['/oisdok', '/dok/bbr-intern']
+];
+
+for(let [oldPath, newPath] of redirects) {
+  app.get(oldPath, function (req, res) {
+    res.redirect(newPath);
+  });
+
+}
 
 module.exports = app;

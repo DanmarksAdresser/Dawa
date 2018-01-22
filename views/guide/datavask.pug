@@ -1,0 +1,31 @@
+extends ../sidebar-auto
+include ../includes/datavask-demo
+block main
+  h1 Datavask
+  p.
+    Datavask-API'et gør det muligt at oversætte en ustruktureret adressetekst til en officiel,
+    struktureret adresse med ID, også selvom adressen evt. indeholder en stavefejl eller den officielle
+    adressebetegnelse er ændret.
+
+  p.
+    Datavask-API'et anvendes ofte i en situation hvor man har tidligere indtastede adresser, som
+    man ønsker at validere og evt. korrigere.
+  p.
+    Datavask-API'et tager imod en adressetekst og returnerer den adresse, som bedst matcher adressen.
+    Har anvenderen en struktueret adresse i forvejen skal anvenderen selv sammensætte adresseteksten.
+  p.
+    Datavask svar indeholder en angivelse af hvor sikkert svaret er, anført som en kategori A, B eller C.
+    Kategori A indikerer, at der er tale om et eksakt match. Kategori B indikerer, at der ikke er tale
+    om et helt eksakt match, men at resultatet stadig er sikkert. Kategori C angiver, at resultatet
+    usikkert.
+  p.
+    Datavask anvender også historiske adresser som datagrundlag, således at adresser som er ændret
+    også kan vaskes. Endvidere håndterer datavasken også adresser hvor der er anvendt stormodtagerpostnumre.
+
+  h2 Demo
+  +renderDatavaskDemo()
+
+block append scripts
+  script.
+    dawa.setupDatavaskDemo('#vask-adresse-input', '#vask-adresse-btn', '#datavask-adresse-result', 'adresse');
+    dawa.setupDatavaskDemo('#vask-adgangsadresse-input', '#vask-adgangsadresse-btn', '#datavask-adgangsadresse-result', 'adgangsadresse');

@@ -1,0 +1,23 @@
+extends ../sidebar-auto
+
+block main
+	h1 Introduktion til DAWA
+	p.lead
+		|Hvordan kommer jeg i gang med at anvende DAWA?
+
+	h2 Formål
+	p.
+		Formålet med DAWA er at udstille data og funktionalitet om Danmarks Adresser, så de kan anvendes af andre it-systemer. Fordelene ved at anvende DAWA er:
+
+	ul
+		li DAWA er baseret på de autoritative adresser fra Danmarks Adresseregister (DAR)
+		li Adressedata er af høj kvalitet
+		li Til hver adresse er der knyttet en lang række til adressen relevante data, som eksempler kan nævnes placering i form af koordinater, tilknytning til kommune, sogn, retskreds, politikreds m.fl. samt højde over havets overflade
+		li DAWA rummer meget funktionalitet, som kan anvendes i forbindelse med adresser. F.eks. funktionalitet til søgning med mange forskellige parametre, adresseindtastning med autocomplete, datavask af adresser, reverse geokodning og meget andet
+		li Udover adressedata rummer DAWA også data og funktionalitet til en række tilknyttede områder. Det drejer sig om data og funtionlitet vedrørende Danske Stednavne, Danmarks Administrative Geografiske Inddelinger (DAGI), Matrikelkortet samt Bygning og Boligregisteret (BBR)
+		li DAWA er nem at anvende i sin udvikling
+		li DAWA har gode driftsegenskaber: Høj oppetid/tilgængelighed og lave svartider.
+
+	h2 DAWA er et API
+	p.
+		DAWA er et web API, som bruges til at forsyne it-systemer med adressedata og funktionalitet. Web API'et kaldes via http fra det programmeringssprog som du anvender. Alle udbredte programmeringssprog har mulighed for at kalde et web API. Hvis du f.eks. bruger client side JavaScript kan du anvende fetch eller jQuerys Ajax, Hvis du anvender node kan du anvende modulerne Request eller rp. C# og Java har også deres moduler/libraries til web API kald. 
