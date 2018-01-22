@@ -108,6 +108,7 @@ setupPugPage('/dok/api', 'apidoc-oversigt.pug');
 setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guides.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
+setupPugPage('/dok/bbr-intern', 'bbr-api-fuld.pug');
 for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old']) {
   setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
 }
@@ -129,7 +130,8 @@ const redirects = [
   ['/om', '/dok/om'],
   ['/listerdok', '/dok/api'],
   ['/bbrlightdok', '/dok/bbr'],
-  ['/replikeringdok', '/dok/guide/replikering']
+  ['/replikeringdok', '/dok/guide/replikering'],
+  ['/oisdok', '/dok/bbr-intern']
 ];
 
 for(let [oldPath, newPath] of redirects) {

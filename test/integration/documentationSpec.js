@@ -54,6 +54,7 @@ describe('Documentation page', function() {
   ['', '/dok/api', '/dok/adresser',
     '/dok/dagi', '/dok/bbr', '/dok/stednavne', '/dok/matrikelkortet',
     '/dok/guides',
+    '/dok/bbr-intern',
     '/dok/faq', '/dok/om'].forEach(function(docPageName) {
     it(docPageName + ' should be retrievable', function() {
       request.get({

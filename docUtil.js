@@ -11,6 +11,7 @@ const allPages = require('./apidoc/all-pages');
 const entityPageMap = _.indexBy(allPages, 'entity');
 const allEntityNames = Object.keys(entityPageMap).sort();
 const sections = require('./apidoc/sections');
+const sectionsBbrFull = require('./apidoc/sections-bbr-full');
 
 exports.addBaseUrlAndParameters = function (baseUrl, path, query) {
   var url = baseUrl + path;
@@ -183,6 +184,8 @@ exports.getOisPlural = (oisEntityName) => {
 };
 
 exports.getSections = () => sections;
+
+exports.getSectionsBbrFull = () => sectionsBbrFull;
 
 exports.getEntityNames = () => allEntityNames;
 

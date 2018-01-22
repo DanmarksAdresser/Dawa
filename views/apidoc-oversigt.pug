@@ -1,5 +1,6 @@
 extends sidebar-auto
 include includes/parameterDocMixins
+include includes/api-oversigt
 
 block main
   h1 API dokumentation
@@ -9,12 +10,4 @@ block main
 
   p.
     Nedenfor er en oversigt over samtlige ressourcer som udstilles af DAWA:
-  each section in docUtil.getSections()
-    h2(class=section.headingClass) #{section.name}
-    p.lead !{section.lead}
-    each entity in section.entities
-      h3 <a href="/dok/api/#{entity}">#{entity}</a>
-      - const page = docUtil.getPageForEntity(entity)
-      ul
-        each endpoint in page.sections.filter(section => section.type === 'endpoint')
-          li <a href="/dok/api/#{entity}##{endpoint.anchor}">#{endpoint.heading}</a>
+  +renderApiOversigt(docUtil.getSections())
