@@ -32,8 +32,9 @@ block main
           div.row
             label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adresse:
 
-            div.col-sm-6(style={position: 'relative'})
-              input.form-control#autocomplete-adresse(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+            div.col-sm-6
+              div(style={position: 'relative'})
+                input.form-control#autocomplete-adresse(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
           div.row
             div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
             div.col-sm-6.col-form-label
@@ -42,8 +43,9 @@ block main
           legend Autocomplete af adgangsadresse
           div.row
             label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adgangsadresse:
-            div.col-sm-6(style={position: 'relative'})
-              input.form-control#autocomplete-adgangsadresse(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+            div.col-sm-6
+              div(style={position: 'relative'})
+                input.form-control#autocomplete-adgangsadresse(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
           div.row
             div.col-sm-3.col-lg-2.col-form-label Valgt adgangsadresse:
             div.col-sm-6.col-form-label
@@ -52,12 +54,13 @@ block main
           legend Autocomplete af adresse i København
           div.row
             label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adresse:
-            div.col-sm-6(style={position: 'relative'})
-              input.form-control#autocomplete-adresse-kbh(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+            div.col-sm-6
+              div(style={position: 'relative'})
+                input.form-control#autocomplete-adresse-kbh(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
           div.row
             div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
-              div.col-sm-6.col-form-label
-                span#autocomplete-adresse-kbh-choice
+            div.col-sm-6.col-form-label
+              span#autocomplete-adresse-kbh-choice
       p.
         DAWA's autocomplete komponent er anvendt til at etablere adresseindtastningen med autocomplete. Hvordan den anvendes er beskrevet i <a href='/dok/guide/autocomplete'>autocomplete guiden</a>. Du kan også anvende <a href='/dok/api/autocomplete'>autocomplete API'et</a> direkte.
       h3 Feltindtastning
