@@ -48,9 +48,9 @@
   padding: 0;
 }
 
-@media only screen and (max-width: 768px)  {
+@media only screen and (max-width: 920px)  {
 	.col.main-left, .col.main-right {
-		padding-top: 56px;
+		padding-top: 56px !important;
 	}
 	 .col.main-right.front {
 	 	padding-top: 0;
