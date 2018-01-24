@@ -6,6 +6,14 @@
 	min-height: calc(100vh - 156px);
 }
 
+.card-img {
+	position: relative;
+	margin-left: auto;
+	margin-right: auto;
+	width: 70px;
+	height: 60px;
+}
+
 .col.main-left {
 	background: $primary url(/img/img_main-bg.jpg) center center no-repeat;
 	background-size: cover;
@@ -59,7 +67,10 @@
 
 .col.main-right.front {
 	.card.main-card {
-		flex:3;
+		flex: 3 0 auto;
+	}
+	.card.main-card {
+		flex:3 0 auto;
   	display:flex;
   	align-items: center;
   	justify-content: center;
