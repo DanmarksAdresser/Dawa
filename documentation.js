@@ -99,7 +99,7 @@ function setupSchemaPage(path) {
 }
 
 for(let område of ['adresser', 'dagi', 'bbr', 'matrikelkortet', 'stednavne']) {
-  setupPugPage(`/dok/${område}`, `områder/${område}.pug`);
+  setupPugPage(`/dok/${område}`, `omraader/${område}.pug`);
 
 }
 setupPugPage('/', 'forside.pug');
