@@ -166,20 +166,19 @@ const createFetchTable = (client, entityName) => {
   return importUtil.createTempTableFromTemplate(client, fetchTable, template, columns);
 };
 
-const clean = client => go(function*() {
-  for (const entityName of Object.keys(oisModels)) {
-    const table = oisCommon.dawaTableName(entityName);
-    yield client.query(`delete from ${table}`);
-  }
-  yield client.query('delete from ois_importlog');
+const clean = (client,entityName) => go(function*() {
+  const table = oisCommon.dawaTableName(entityName);
+  yield client.query(`delete from ${table}`);
+  yield client.query('delete from ois_importlog where entity = $1', [entityName]);
 });
 
-function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst) {
+function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst, entityNames) {
   return q.async(function*() {
-    if(shouldCleanFirst) {
-      yield clean(client);
-    }
-    for (const entityName of Object.keys(oisModels)) {
+    entityNames = entityNames ? entityNames : Object.keys(oisModels);
+    for (const entityName of entityNames) {
+      if(shouldCleanFirst) {
+        yield clean(client, entityName);
+      }
       const fileDescriptors = yield findFilesToImportForEntity(client, entityName, dataDir);
       for (let fileDescriptor of fileDescriptors) {
         const fileName = fileDescriptor.fileName;
