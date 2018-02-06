@@ -26,7 +26,6 @@ const FIELDS_NOT_IN_TEST_DATA = {
     "GruTilAltAfldDato"
   ],
   bygning: [
-    "bygningsnr",
     "BevarVaerdig",
     "UdlejForhold1",
     "HuslejeOplysDato",

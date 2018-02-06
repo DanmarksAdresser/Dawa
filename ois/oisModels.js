@@ -53,7 +53,7 @@ module.exports = {
       {name: 'ois_id', oisType: 'int', public: true},
       {name: 'ois_ts', oisType: 'varchar', oisLength: 26, public: true},
       {name: 'Bygning_id', oisType: 'uniqueidentifier', public: true},
-      {name: 'bygningsnr', oisType: 'char', oisLength: 3, public: true},
+      {name: 'Bygningsnr', oisType: 'char', oisLength: 3, public: true},
       {name: 'ObjStatus', oisType: 'tinyint', public: true},
       {name: 'NyByg', oisType: 'tinyint'},
       {name: 'Crud_id', oisType: 'bigint'},
