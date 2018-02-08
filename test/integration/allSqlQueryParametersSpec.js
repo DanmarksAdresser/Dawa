@@ -741,6 +741,12 @@ var sampleParameters = {
       values: ['5f'],
       verifier: (matref, nr) => matref.MatrNr === nr
     }
+  },
+  stednavntype: {
+    hovedtype: {
+      values: ['Bebyggelse'],
+      verifier: (t, hovedtype) => t.hovedtype === hovedtype
+    }
   }
 };
 
