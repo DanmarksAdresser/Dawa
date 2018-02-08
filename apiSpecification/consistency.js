@@ -71,7 +71,7 @@ var consistencyChecks = [
     description: 'Find adgangsadresser, der ligger på mere end ét jordstykke',
     query: `with adrs AS (SELECT a.id, a.geom FROM adgangsadresser_mat a 
     JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
-     GROUP BY a.id, a.geom HAVING count(*) > 2)
+     GROUP BY a.id, a.geom HAVING count(*) >= 2)
 SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jordstykker j ON ST_Covers(j.geom, a.geom)`
   },
   {
