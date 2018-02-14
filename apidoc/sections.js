@@ -22,7 +22,7 @@ module.exports = [{
   name: 'Stednavne',
   headingClass: 'h2-icon h2-sted',
   lead: 'For en generel introduktion til stednavne, se <a href="/dok/stednavne">her<a/>.',
-  entities: [ 'stednavn', 'stednavntype']
+  entities: [ 'stednavn', 'stednavntype', 'bebyggelse']
 }, {
   name: 'Andet',
   entities: ['senesteSekvensnummer', 'zone']
