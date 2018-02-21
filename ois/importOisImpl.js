@@ -17,7 +17,7 @@ const tablediff = require('../importUtil/tablediff');
 const logger = require('../logger').forCategory('oisImport');
 const tmp = require('tmp');
 
-const OIS_FILE_REGEX = /^ois_bbrt_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$/;
+const OIS_FILE_REGEX = /^ois_bbrt_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$/i;
 
 
 function createUnzippedStream(filePath, filePattern) {
@@ -68,8 +68,8 @@ const fileNameToDescriptor = fileName => {
   if (!match) {
     throw new Error(`Filename ${fileName} did not match regex`);
   }
-  const oisTable = match[1];
-  const total = match[2] !== 'da';
+  const oisTable = match[1].toLowerCase();
+  const total = match[2].toLowerCase() !== 'da';
   const serial = parseInt(match[3], 10);
   return {
     oisTable: oisTable,
