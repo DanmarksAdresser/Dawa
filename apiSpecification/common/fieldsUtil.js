@@ -20,4 +20,5 @@ exports.normalize = function(fields) {
       field.formatter = _.identity;
     }
   });
+  return fields;
 };

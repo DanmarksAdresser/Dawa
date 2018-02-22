@@ -117,7 +117,7 @@ describe('Stable API', () => {
               "navn": "Opstillingskreds test",
               "href": "http://dawa/opstillingskredse/99"
             },
-            "zone": "Landzone",
+            "zone": "Sommerhusområde",
             "jordstykke": null,
             "bebyggelser": []
           }
@@ -199,7 +199,7 @@ describe('Stable API', () => {
               "retskredsnavn": "retskreds test",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Landzone"
+              "zone": "Sommerhusområde"
             }
           }
         }, {
@@ -277,7 +277,7 @@ describe('Stable API', () => {
               "retskredsnavn": "retskreds test",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Landzone"
+              "zone": "Sommerhusområde"
             }
           }
         }]
@@ -403,7 +403,7 @@ describe('Stable API', () => {
                 "navn": "Opstillingskreds test",
                 "href": "http://dawa/opstillingskredse/99"
               },
-              "zone": "Landzone",
+              "zone": "Sommerhusområde",
               "jordstykke": null,
               "bebyggelser": []
             }
@@ -493,7 +493,7 @@ describe('Stable API', () => {
               "retskredsnavn": "retskreds test",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Landzone"
+              "zone": "Sommerhusområde"
             }
           }
         }]

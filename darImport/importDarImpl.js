@@ -24,8 +24,6 @@ var nontemporal = require('./nontemporal');
 var promisingStreamCombiner = require('../promisingStreamCombiner');
 var sqlCommon = require('../psql/common');
 var sqlUtil = require('./sqlUtil');
-var tema = require('../temaer/tema');
-var temaer = require('../apiSpecification/temaer/temaer');
 var qUtil = require('../q-util');
 const schemaModel = require('../psql/tableModel');
 
@@ -383,10 +381,6 @@ const initDawaFromScratch = (client, txid) => go(function*() {
     }
   }));
   yield materializeDawa(client, txid);
-  logger.info('initializing adresserTemaerView');
-  for(let temaSpec of temaer) {
-    yield tema.updateAdresserTemaerView(client, temaSpec, true, 100000000, false);
-  }
 });
 
 /**

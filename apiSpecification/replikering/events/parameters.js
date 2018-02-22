@@ -1,13 +1,11 @@
 "use strict";
 
-var _ = require('underscore');
-var schema = require('../../parameterSchema');
-var temaer = require('../../temaer/temaer');
-var tilknytninger = require('../../tematilknytninger/tilknytninger');
-var keyParameters = {};
+const schema = require('../../parameterSchema');
+const keyParameters = {};
 const flatTilknytninger = require('../../flats/tilknytninger/tilknytninger');
 const flats = require('../../flats/flats');
 const normalizeParameters = require('../../common/parametersUtil').normalizeParameters;
+const temaModels = require('../../../dagiImport/temaModels');
 
 // For events we support retrieval of the events by object id
 keyParameters.vejstykke = require('../../vejstykke/parameters').id;
@@ -48,16 +46,15 @@ keyParameters.stednavntilknytning = normalizeParameters([
 
 exports.keyParameters = keyParameters;
 
-_.each(tilknytninger, function(tilknytning, temaNavn) {
-  var tema = _.findWhere(temaer, {singular: temaNavn});
-  keyParameters[tema.prefix + 'tilknytning'] = [
+for(let model of temaModels.modelList) {
+  keyParameters[model.tilknytningName] = [
     {
       name: 'adgangsadresseid',
       type: 'string',
       schema: schema.uuid
     }
   ];
-});
+}
 
 Object.keys(flatTilknytninger).forEach(flatName => {
   const flat = flats[flatName];
@@ -69,9 +66,8 @@ Object.keys(flatTilknytninger).forEach(flatName => {
     }
   ];
 });
-
 // sequence number filtering is supported for all events
-exports.sekvensnummer = [
+exports.sekvensnummer = normalizeParameters([
   {
     name: 'sekvensnummerfra',
     type: 'integer'
@@ -80,10 +76,10 @@ exports.sekvensnummer = [
     name: 'sekvensnummertil',
     type: 'integer'
   }
-];
+]);
 
 // timestamp filtering is supported for all events
-exports.tidspunkt = [
+exports.tidspunkt = normalizeParameters([
   {
     name: 'tidspunktfra',
     type: 'string'
@@ -91,5 +87,5 @@ exports.tidspunkt = [
     name: 'tidspunkttil',
     type: 'string'
   }
-];
+]);
 

@@ -7,7 +7,7 @@ var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 var dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
-var geomQuery = "(select geom from temaer where tema = 'postnummer' and (fields->>'nr')::integer = nr limit 1)";
+var geomQuery = "(select geom from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
 
 var columns = {
   kommunekode: {
@@ -39,9 +39,9 @@ var columns = {
     }
   },
   kommuner: {
-    select: "(select json_agg((kommunekode, temaer.fields->>'navn')::kommuneref order by kommunekode)" +
+    select: "(select json_agg((kommunekode, kommuner.navn)::kommuneref order by kommunekode)" +
       " from postnumre_kommunekoder_mat" +
-      " left join temaer on postnumre_kommunekoder_mat.kommunekode = (temaer.fields->>'kode')::integer and temaer.tema = 'kommune'" +
+      " left join kommuner on postnumre_kommunekoder_mat.kommunekode = kommuner.kode" +
       " where  postnr = nr)"
   },
   tsv: {

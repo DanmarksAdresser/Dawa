@@ -1,27 +1,26 @@
 "use strict";
 
-var _ = require('underscore');
-
-var datamodels = require('../crud/datamodel');
-
 /**
  * Specification of DAWA tables and fields, which are updated based on data from DAR 1.0
  */
 module.exports = {
   vejstykke: {
-    table: datamodels.vejstykke.table,
-    columns: _.without(datamodels.vejstykke.columns, 'oprettet', 'aendret', 'geom'),
-    idColumns: datamodels.vejstykke.key
+    table: 'vejstykker',
+    columns: ['kommunekode', 'kode', 'vejnavn', 'adresseringsnavn', 'navngivenvej_id'],
+    idColumns: ['kommunekode', 'kode']
   },
   adgangsadresse: {
-    table: datamodels.adgangsadresse.table,
-    columns:  _.without(datamodels.adgangsadresse.columns, 'ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'husnummerkilde', 'esdhreference', 'journalnummer', 'placering', 'hoejde'),
-    idColumns: datamodels.adgangsadresse.key
+    table: 'adgangsadresser',
+    columns:  ['id', 'kommunekode', 'vejkode', 'husnr', 'supplerendebynavn', 'postnr', 'objekttype',
+      'oprettet', 'aendret', 'adgangspunktid', 'etrs89oest', 'etrs89nord', 'noejagtighed',
+      'adgangspunktkilde', 'tekniskstandard', 'tekstretning',
+      'adressepunktaendringsdato', 'navngivenvej_id'],
+    idColumns: ['id']
   },
   adresse: {
-    table: datamodels.adresse.table,
-    columns: _.without(datamodels.adresse.columns, 'ikraftfra', 'kilde', 'esdhreference', 'journalnummer'),
-    idColumns: datamodels.adresse.key
+    table: 'enhedsadresser',
+    columns: ['id', 'objekttype', 'oprettet', 'aendret', 'etage', 'doer', 'adgangsadresseid'],
+    idColumns: ['id']
   },
   navngivenvej_postnummer: {
     table: 'navngivenvej_postnummer',
@@ -34,13 +33,15 @@ module.exports = {
     idColumns: ['kommunekode', 'vejkode', 'postnr']
   },
   navngivenvej: {
-    table: datamodels.navngivenvej.table,
-    columns: datamodels.navngivenvej.columns,
+    table: 'navngivenvej',
+    columns: ['id', 'darstatus', 'oprettet',
+      'ændret', 'navn', 'adresseringsnavn', 'administreresafkommune',
+      'beskrivelse', 'retskrivningskontrol', 'udtaltvejnavn'],
     idColumns: ['id']
   },
   vejpunkt: {
-    table: datamodels.vejpunkt.table,
-    columns: datamodels.vejpunkt.columns,
+    table: 'vejpunkter',
+    columns: ['id', 'husnummerid', 'kilde', 'noejagtighedsklasse', 'tekniskstandard', 'geom'],
     idColumns: ['id']
   }
 };

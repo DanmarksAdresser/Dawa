@@ -1,33 +1,16 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
 const { go } = require('ts-csp');
 const cursorChannel = require('../../../util/cursor-channel');
 
-var querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
-var dbapi = require('../../../dbapi');
-var mappings = require('./../columnMappings');
-var registry = require('../../registry');
-var sqlUtil = require('../../common/sql/sqlUtil');
-var temaer = require('../../temaer/temaer');
-
-const selectClause = columnMappings =>
-  _.map(columnMappings, function (mapping) {
-    var columnName = mapping.column || mapping.name;
-    var transformed = (mapping.selectTransform || _.identity)(columnName);
-    return transformed + ' AS ' + mapping.name;
-  });
-
-function baseQuery(tableName, columnMappings, keyColumns) {
-  return {
-    select: selectClause(columnMappings),
-    from: [tableName + '_history'],
-    whereClauses: [],
-    orderClauses: keyColumns,
-    sqlParams: []
-  };
-}
+const querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
+const dbapi = require('../../../dbapi');
+const registry = require('../../registry');
+const sqlUtil = require('../../common/sql/sqlUtil');
+const datamodels = require('../datamodel');
+const dbBindings = require('../dbBindings');
 
 const validateParams = (client, params) => go(function*() {
   const senesteHaendelse = yield querySenesteSekvensnummer(client);
@@ -36,110 +19,56 @@ const validateParams = (client, params) => go(function*() {
   }
 });
 
-const baseQuery2 = (tableName, keyColumns, columnMappings, sequenceNumber) => {
-  let subselect =
-    `SELECT *, row_number()
-  OVER (PARTITION BY ${keyColumns.join(', ')}
+const createSqlModel = (model, binding) => {
+  const allAttrNames = model.attributes.map(attr => attr.name);
+  const tableName = binding.table;
+  const selectClause = _.pluck(model.attributes, 'name').map(attName => {
+    const bindingAttr = binding.attributes[attName];
+    const columnName = binding.attributes[attName].column;
+    const transformed = bindingAttr.selectTransform(columnName);
+    return `${transformed} AS ${attName}`;
+  }).join(', ');
+  const primaryAttrNames = model.attributes.filter(attr => attr.primary).map(attr => attr.name);
+  const primaryColumnNames = primaryAttrNames.map(attrName => binding.attributes[attrName].column);
+  const createBaseQuery = (sequenceNumber) => {
+    let subselect =
+      `SELECT *, row_number()
+  OVER (PARTITION BY ${primaryColumnNames.join(', ')}
     ORDER BY changeid desc NULLS LAST) as row_num
 FROM ${tableName}_changes`;
-  if(sequenceNumber) {
-    subselect += ` WHERE (changeid IS NULL OR changeid <= $1)`
+    if(sequenceNumber) {
+      subselect += ` WHERE (changeid IS NULL OR changeid <= $1)`
+    }
+    const baseQuery = {
+      select: [selectClause],
+      from: [`(${subselect}) t`],
+      whereClauses: ['row_num = 1 ', `operation <> 'delete'`],
+      groupBy: '',
+      orderClauses: [],
+      sqlParams: []
+    };
+    if(sequenceNumber) {
+      baseQuery.sqlParams.push(sequenceNumber);
+    }
+    return baseQuery;
   }
-  const baseQuery = {
-    select: selectClause(columnMappings),
-    from: [`(${subselect}) t`],
-    whereClauses: ['row_num = 1 ', `operation <> 'delete'`],
-    groupBy: '',
-    orderClauses: [],
-    sqlParams: []
-  };
-  if(sequenceNumber) {
-    baseQuery.sqlParams.push(sequenceNumber);
-  }
-  return baseQuery;
-};
-
-const createSqlModel2 = (columnMappings, baseQueryFn) => {
   return {
     allSelectableFieldNames: function () {
-      return _.pluck(columnMappings, 'name');
+      return allAttrNames
     },
     validateParams: validateParams,
     processStream: (client, fieldNames, params, channel, options) => {
-      const sqlParts = baseQueryFn(params.sekvensnummer);
+      const sqlParts = createBaseQuery(params.sekvensnummer);
       const query = dbapi.createQuery(sqlParts);
       return cursorChannel(client, query.sql, query.params, channel, options);
     }
   };
 };
 
-function createSqlModel(columnMappings, baseQueryFn) {
-  return {
-    allSelectableFieldNames: function () {
-      return _.pluck(columnMappings, 'name');
-    },
-    validateParams: validateParams,
-    processStream: (client, fieldNames, params, channel, options) => {
-      const sqlParts = baseQueryFn();
-      if (params.sekvensnummer) {
-        const sekvensnummerAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummer);
-        dbapi.addWhereClause(sqlParts, '(valid_from <= ' + sekvensnummerAlias + ' OR valid_from IS NULL)');
-        dbapi.addWhereClause(sqlParts, '(valid_to > ' + sekvensnummerAlias + ' OR valid_to IS NULL)');
-      }
-      else {
-        dbapi.addWhereClause(sqlParts, 'valid_to IS NULL');
-      }
-      var query = dbapi.createQuery(sqlParts);
-      return cursorChannel(client, query.sql, query.params, channel, options);
-    }
-  };
+for(let entityName of Object.keys(datamodels)) {
+  const datamodel = datamodels[entityName];
+  const binding = dbBindings[entityName];
+  const sqlModel = createSqlModel(datamodel, binding);
+  exports[entityName] = sqlModel;
+  registry.add(`${entityName}udtraek`, 'sqlModel', undefined, sqlModel);
 }
-
-const newModelNames = ['ejerlav', 'postnummer', 'vejstykke', 'adgangsadresse', 'adresse', 'vejstykkepostnummerrelation', 'stednavntilknytning'];
-const oldModelNames = _.difference(Object.keys(mappings.columnMappings), newModelNames);
-
-var oldSqlModels = oldModelNames.reduce(function(memo, datamodelName) {
-  const columnMappings = mappings.columnMappings[datamodelName];
-  var baseQueryFn = function() {
-    return baseQuery(mappings.tables[datamodelName], columnMappings, mappings.keys[datamodelName]);
-  };
-  memo[datamodelName] = createSqlModel(columnMappings, baseQueryFn);
-  return memo;
-}, {});
-
-const newSqlModels = newModelNames.reduce((memo, datamodelName) => {
-  const columnMappings = mappings.columnMappings[datamodelName];
-  const baseQueryFn = (sequenceNumber) => baseQuery2(
-    mappings.tables[datamodelName],
-    mappings.keys[datamodelName],
-    columnMappings,
-    sequenceNumber
-  );
-  memo[datamodelName] = createSqlModel2(columnMappings, baseQueryFn);
-  return memo;
-}, {});
-
-var tilknytningModels = _.reduce(temaer, function(memo, tema) {
-  var name = tema.prefix + 'tilknytning';
-  var columnMappings = mappings.columnMappings[name];
-
-  var baseQueryFn = function() {
-    var query = baseQuery('adgangsadresser_temaer_matview',
-      columnMappings,
-      _.pluck(columnMappings, 'name'));
-    query.from.push('JOIN temaer ON temaer.id = tema_id');
-    query.orderClauses=['adgangsadresse_id, tema_id'];
-    var temaAlias = dbapi.addSqlParameter(query, tema.singular);
-    dbapi.addWhereClause(query, 'adgangsadresser_temaer_matview_history.tema = ' + temaAlias);
-    return query;
-  };
-  memo[name] = createSqlModel(columnMappings, baseQueryFn);
-  return memo;
-}, {});
-
-const allSqlModels = Object.assign({}, oldSqlModels, tilknytningModels, newSqlModels);
-module.exports = allSqlModels;
-
-_.each(allSqlModels, function(sqlModel, key) {
-  registry.add(key + 'udtraek', 'sqlModel', undefined, sqlModel);
-});

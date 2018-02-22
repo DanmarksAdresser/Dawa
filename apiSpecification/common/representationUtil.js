@@ -1,10 +1,6 @@
 "use strict";
 
-var dagiTemaer = require('../temaer/temaer');
-var _ = require('underscore');
-
-var kode4String = require('../util').kode4String;
-var zoneFormatter = require('../util').zoneKodeFormatter;
+const _ = require('underscore');
 
 /*
  * Computes the list of fieldMap that should be included in the CSV representation for the given type
@@ -106,29 +102,24 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
   };
 };
 
+const insertAfter = (arr, elm, ins) => {
+  const index = arr.indexOf(elm) + 1;
+  arr.splice(index, 0, ins);
+}
+
 exports.adresseFlatRepresentation = function (fields, additionalFieldsMapper) {
   var fieldsExcludedFromFlat = ['geom_json', 'x', 'y', 'vejpunkt_geom_json', 'adgangspunkt_geom_json'];
-  var defaultFlatFields = exports
-    .fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat)
-    .concat(exports.fieldsWithNames(fields, ['kvh', 'kvhx']));
+  var defaultFlatFields = exports.fieldsWithoutNames(exports.flatCandidateFields(fields), fieldsExcludedFromFlat);
 
-  var requiredFlatFields = defaultFlatFields
-    .concat(exports.fieldsWithNames(fields, ['temaer', 'kvh', 'kvhx']));
+  const requiredFlatFields = defaultFlatFields;
 
-  var includedDagiTemaer = ['sogn', 'politikreds', 'retskreds', 'opstillingskreds'];
-  var dagiTemaMap = _.indexBy(dagiTemaer, 'singular');
-  var outputFlatFields = _.reduce(includedDagiTemaer, function (memo, temaNavn) {
-    memo.push(dagiTemaMap[temaNavn].prefix + 'kode');
-    memo.push(dagiTemaMap[temaNavn].prefix + 'navn');
-    return memo;
-  }, _.pluck(defaultFlatFields, 'name'));
-
-  outputFlatFields.push('zone');
+  let outputFlatFields = _.pluck(defaultFlatFields, 'name');
 
   // vi skal sikre, at nye felter tilføjes til sidst
   const newFields = ['jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr'];
   outputFlatFields = _.difference(outputFlatFields, newFields).concat(newFields);
-
+  const kvhField = exports.fieldsWithNames(fields, ['kvh', 'kvhx']).map(field => field.name)[0];
+  insertAfter(outputFlatFields, 'jordstykke_ejerlavnavn', kvhField);
   var defaultFlatMapper = exports.defaultFlatMapper(defaultFlatFields);
 
   return {
@@ -136,27 +127,11 @@ exports.adresseFlatRepresentation = function (fields, additionalFieldsMapper) {
     outputFields: outputFlatFields,
     mapper: function () {
       return function (obj) {
-        var result = defaultFlatMapper(obj);
+        let result = defaultFlatMapper(obj);
         if (additionalFieldsMapper) {
           result = _.extend(result, additionalFieldsMapper(obj));
         }
-        includedDagiTemaer.forEach(function (temaNavn) {
-          var tema = _.findWhere(obj.temaer, {tema: temaNavn});
-          if (tema) {
-            result[dagiTemaMap[temaNavn].prefix + 'kode'] = kode4String(tema.fields.kode);
-            result[dagiTemaMap[temaNavn].prefix + 'navn'] = tema.fields.navn;
-          }
-        });
-        var zoneTema = _.findWhere(obj.temaer, {tema: 'zone'});
-        var zoneKode = zoneTema ? zoneTema.fields.zone : 2;
-        result.zone = zoneFormatter(zoneKode);
-        var jordstykke = _.findWhere(obj.temaer, {tema: 'jordstykke'});
-        if (jordstykke) {
-          result.jordstykke_ejerlavkode = jordstykke.fields.ejerlavkode;
-          result.jordstykke_matrikelnr = jordstykke.fields.matrikelnr;
-          result.jordstykke_esrejendomsnr = jordstykke.fields.esrejendomsnr ? "" + jordstykke.fields.esrejendomsnr : null;
-        }
-
+        // result.zone = zoneFormatter(obj.zonekode);
         return result;
       };
     }

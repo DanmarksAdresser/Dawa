@@ -1,21 +1,37 @@
--- Init function
-DROP FUNCTION IF EXISTS temaer_init() CASCADE;
-CREATE FUNCTION temaer_init() RETURNS void
-LANGUAGE sql AS
-$$
-UPDATE temaer SET tsv = to_tsvector('adresser',coalesce(temaer.fields->>'kode', '') || ' ' || coalesce(temaer.fields->>'navn')) WHERE temaer.tema <> 'jordstykke';
-$$;
-
--- Trigger which maintains the tsv column
-DROP FUNCTION IF EXISTS temaer_tsv_update() CASCADE;
-CREATE OR REPLACE FUNCTION temaer_tsv_update()
-  RETURNS TRIGGER AS $$
-BEGIN
-  NEW.tsv = to_tsvector('adresser', coalesce(NEW.fields->>'kode', '') || ' ' || coalesce(NEW.fields->>'navn', ''));
-  RETURN NEW;
-END;
-$$ LANGUAGE PLPGSQL;
-
-CREATE TRIGGER temaer_tsv_update BEFORE INSERT OR UPDATE
-ON temaer FOR EACH ROW EXECUTE PROCEDURE
-  temaer_tsv_update();
+DROP VIEW IF EXISTS tilknytninger_mat_view;
+CREATE VIEW tilknytninger_mat_view AS (
+    SELECT a.id AS adgangsadresseid,
+      k.kode as kommunekode,
+      k.navn as kommunenavn,
+      reg.kode as regionskode,
+      reg.navn as regionsnavn,
+      st.sognekode,
+      s.navn AS sognenavn,
+      pt.politikredskode,
+      p.navn AS politikredsnavn,
+      rt.retskredskode,
+      r.navn as retskredsnavn,
+      ot.opstillingskredskode,
+      o.navn as opstillingskredsnavn,
+      vt.valglandsdelsbogstav,
+      v.navn as valglandsdelsnavn,
+      stort.storkredsnummer,
+      stor.navn as storkredsnavn,
+      zt.zone
+    FROM adgangsadresser_mat a
+  LEFT JOIN sognetilknytninger st ON a.id = st.adgangsadresseid
+  LEFT JOIN sogne s ON st.sognekode = s.kode
+  LEFT JOIN politikredstilknytninger pt ON a.id = pt.adgangsadresseid
+  LEFT JOIN politikredse p ON pt.politikredskode = p.kode
+  LEFT JOIN retskredstilknytninger rt ON a.id = rt.adgangsadresseid
+  LEFT JOIN retskredse r ON rt.retskredskode = r.kode
+  LEFT JOIN kommuner k ON a.kommunekode = k.kode
+  LEFT JOIN regioner reg ON k.regionskode = reg.kode
+  LEFT JOIN opstillingskredstilknytninger ot ON a.id = ot.adgangsadresseid
+  LEFT JOIN opstillingskredse o ON ot.opstillingskredskode = o.kode
+  LEFT JOIN valglandsdelstilknytninger vt ON a.id = vt.adgangsadresseid
+  LEFT JOIN valglandsdele v ON vt.valglandsdelsbogstav = v.bogstav
+  LEFT JOIN storkredstilknytninger stort ON a.id = stort.adgangsadresseid
+  LEFT JOIN storkredse stor ON stort.storkredsnummer = stor.nummer
+  LEFT JOIN zonetilknytninger zt ON a.id = zt.adgangsadresseid
+);

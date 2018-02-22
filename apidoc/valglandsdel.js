@@ -11,10 +11,10 @@ const {
   dagiReverseDoc,
   dagiReverseParameters,
   dagiSridCirkelPolygonParameters,
-  getTemaDef
+  getTemaModel
 } = require('./dagiCommon');
 
-const temaDef = getTemaDef('valglandsdel');
+const temaModel = getTemaModel('valglandsdel');
 const bogstavParameter = {
   name: 'bogstav',
   doc: 'Valglandsdelens bogstav.'
@@ -22,9 +22,9 @@ const bogstavParameter = {
 
 const valglandsdelParameters = [
   bogstavParameter,
-  dagiNavnParameter(temaDef),
+  dagiNavnParameter(temaModel),
   dagiQParameter(),
-  ...dagiSridCirkelPolygonParameters(temaDef.plural)
+  ...dagiSridCirkelPolygonParameters(temaModel.plural)
 ];
 
 const examples = {
@@ -65,7 +65,7 @@ module.exports = [
     subtext: 'Søg efter valglandsdele. Returnerer de valglandsdele der opfylder kriteriet.',
     parameters: [
       ...valglandsdelParameters,
-      ...dagiReverseParameters(temaDef),
+      ...dagiReverseParameters(temaModel),
       ...formatAndPagingParams
     ],
     examples: examples.query
@@ -82,13 +82,13 @@ module.exports = [
   {
     entity: 'valglandsdel',
     path: '/valglandsdele/autocomplete',
-    subtext: autocompleteSubtext(temaDef.plural),
+    subtext: autocompleteSubtext(temaModel.plural),
     parameters: [
       ...overwriteWithAutocompleteQParameter(valglandsdelParameters),
       ...formatAndPagingParams
     ],
     examples: examples.autocomplete
   },
-  dagiReverseDoc(temaDef),
-  ...dagiReplikeringTilknytningDoc(temaDef)
+  dagiReverseDoc(temaModel),
+  ...dagiReplikeringTilknytningDoc(temaModel)
 ];

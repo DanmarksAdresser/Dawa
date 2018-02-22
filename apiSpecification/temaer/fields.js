@@ -1,13 +1,12 @@
 "use strict";
 
-var _ = require('underscore');
+const fieldsUtil = require('../common/fieldsUtil');
+const temaModels = require('../../dagiImport/temaModels');
+const sqlModels = require('./sqlModels');
 
-var fieldsUtil = require('../common/fieldsUtil');
-
-
-var additionalFields = require('./additionalFields');
-var fieldMap = _.reduce(additionalFields, function (memo, fields, temaNavn) {
-  memo[temaNavn] = fields.concat([
+const fieldMap = temaModels.modelList.filter(model => model.published).reduce((memo, model) => {
+  const result = fieldsUtil.normalize([
+    ...model.fields,
     {
       name: 'ændret',
       selectable: true
@@ -23,11 +22,10 @@ var fieldMap = _.reduce(additionalFields, function (memo, fields, temaNavn) {
     {
       name: 'geom_json',
       selectable: true
-    }
-  ]);
+    }]);
+  fieldsUtil.applySelectability(result, sqlModels[model.singular]);
+  memo[model.singular] = result;
   return memo;
 }, {});
 
-module.exports = _.each(fieldMap, function(fields, temaNavn) {
-  fieldsUtil.normalize(fields);
-});
+module.exports = fieldMap;

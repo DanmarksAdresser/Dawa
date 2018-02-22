@@ -1,13 +1,10 @@
 "use strict";
 
-var _ = require('underscore');
+const representationUtil = require('../../common/representationUtil');
+const fields = require('./fields');
 
-var representationUtil = require('../../common/representationUtil');
-var columnMappings = require('../columnMappings').columnMappings;
-var fields = require('./fields');
-
-module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelName) {
-  var flatRepresentation = representationUtil.defaultFlatRepresentation(fields[datamodelName]);
+module.exports = Object.keys(fields).reduce((memo, datamodelName) => {
+  const flatRepresentation = representationUtil.defaultFlatRepresentation(fields[datamodelName]);
   memo[datamodelName] = {
     flat: flatRepresentation,
     json: {

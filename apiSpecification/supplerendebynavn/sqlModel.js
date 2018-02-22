@@ -19,7 +19,7 @@ var columns = {
     where: 'filter.postnr'
   },
   kommuner: {
-    select: "json_agg(DISTINCT CAST((k.fields->>'kode', k.fields->>'navn') AS KommuneRef))"
+    select: "json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef))"
   },
   postnumre: {
     select: 'json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef))'
@@ -34,7 +34,7 @@ var baseQuery = function () {
     select: [],
     from: [' supplerendebynavne s' +
       ' LEFT JOIN supplerendebynavne filter ON s.supplerendebynavn = filter.supplerendebynavn' +
-      " LEFT JOIN temaer k ON k.tema = 'kommune' AND s.kommunekode = (k.fields->>'kode')::integer" +
+      " LEFT JOIN kommuner k ON s.kommunekode = k.kode" +
       ' LEFT JOIN postnumre p ON s.postnr = p.nr'],
     whereClauses: [],
     groupBy: 's.supplerendebynavn, s.tsv',

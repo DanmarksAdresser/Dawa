@@ -2,6 +2,7 @@
 
 var express = require('express');
 var fs = require('fs');
+const path  = require('path');
 var parameterDoc = require('./parameterDoc');
 var paths = require('./apiSpecification/paths');
 var docUtil = require('./docUtil');
@@ -64,37 +65,10 @@ const setupApidocDetails = (page ) => {
   });
 };
 
-function setupSchemaPage(path) {
-  var source2name = {
-    postnumre: 'postnummer_hændelse',
-    vejstykker: 'vejstykke_hændelse',
-    adgangsadresser: 'adgangsadresse_hændelse',
-    adresser: 'adresse_hændelse',
-    ejerlav: 'ejerlav_hændelse',
-    regionstilknytninger: 'regionstilknytning_hændelse',
-    kommunetilknytninger: 'kommunetilknytning_hændelse',
-    postnummertilknytninger: 'postnummertilknytning_hændelse',
-    sognetilknytninger: 'sognetilknytning_hændelse',
-    politikredstilknytninger: 'politikredstilknytning_hændelse',
-    opstillingskredstilknytninger: 'opstillingskredstilknytning_hændelse',
-    valglandsdelstilknytninger: 'valglandsdelstilknytning_hændelse',
-    zonetilknytninger: 'zonetilknytning_hændelse',
-    jordstykketilknytninger: 'jordstykketilknytning_hændelse'
-  };
-
-  var docSchemas = {};
-  Object.keys(source2name).forEach(function (tableName) {
-    docSchemas[tableName] = {
-      source: 'http://dawa.aws.dk/replikering/' + tableName,
-      schema: docUtil.extractDocumentationForObject(jsonSchemas[source2name[tableName]])
-    };
-  });
-
-  var schemas = new Buffer(JSON.stringify(docSchemas, null, '\t'));
-
-  app.get(path, function (req, res) {
+function setupLegacySchemaPage(uriPath) {
+  app.get(uriPath, function (req, res) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.end(schemas);
+    res.sendFile(path.resolve('apidoc/schema.json'));
   });
 }
 
@@ -118,7 +92,7 @@ for(let page of allPages) {
   setupApidocDetails(page);
 }
 
-setupSchemaPage('/replikeringdok/schema.json');
+setupLegacySchemaPage('/replikeringdok/schema.json');
 
 const redirects = [
   ['/autocompletedok', '/dok/guide/autocomplete'],

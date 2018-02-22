@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS stednavne_divided;
+DROP TABLE IF EXISTS stednavne_divided CASCADE;
 CREATE TABLE stednavne_divided(
   id uuid,
   geom geometry(geometry, 25832)

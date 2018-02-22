@@ -92,7 +92,6 @@ const tableModel = {
 const testMaterialization = {
   table: 'primary_mat',
   view: 'primary_mat_view',
-  primaryKey: ['id'],
   dependents: [{
     table: 'prim',
     columns: ['id']

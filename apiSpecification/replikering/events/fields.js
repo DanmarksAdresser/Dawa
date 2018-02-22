@@ -1,17 +1,20 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var fieldsUtil = require('../../common/fieldsUtil');
-var sqlModels = require('./sqlModels');
-var mappings = require('../columnMappings');
+const fieldsUtil = require('../../common/fieldsUtil');
+const datamodel = require('../datamodel');
+const dbBindings = require('../dbBindings');
+const sqlModels = require('./sqlModels');
 
-var d = require('../../util').d;
+const d = require('../../util').d;
 
-var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
+const fields = Object.keys(datamodel).reduce((memo, entityName) => {
+  const model = datamodel[entityName];
+  const binding = dbBindings[entityName];
 
   // All events has these fields
-  var commonFields = [{
+  const commonFields = [{
     name: 'sekvensnummer'
   }, {
     name: 'tidspunkt',
@@ -23,13 +26,13 @@ var fields = _.reduce(sqlModels, function(memo, sqlModel, datamodelName) {
   // The fields specific for this entity are retrieved from the SQL model,
   // because there is a 1-1 correspondence between the internal and external model
   // on the replication APIs.
-  var entityFields = mappings.columnMappings[datamodelName].map(columnMapping => ({
-    name: columnMapping.name,
+  const entityFields = model.attributes.map(field => ({
+    name: field.name,
     selectable: true,
-    formatter: columnMapping.formatter
+    formatter: binding.attributes[field.name].formatter
   }));
 
-  memo[datamodelName] = commonFields.concat(entityFields);
+  memo[entityName] = [...commonFields, ...entityFields];
   return memo;
 }, {});
 

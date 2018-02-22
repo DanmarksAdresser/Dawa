@@ -3,7 +3,6 @@
 var _ = require('underscore');
 
 var ddknSchemas = require('./ddknSchemas');
-var temaNameAndKeys = require('../temaer/namesAndKeys');
 var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
@@ -335,15 +334,6 @@ vej, som adgangspunktets adresser refererer til.</p>`,
   }),
   mapper: function (baseUrl){
     return function(rs) {
-      function mapDagiTema(tema) {
-        var result = _.clone(tema.fields);
-        // this is a hack, and should be fixed.
-        if(result.kode) {
-          result.kode = kode4String(result.kode);
-        }
-        result.href = makeHref(baseUrl, tema.tema, [tema.fields[temaNameAndKeys[tema.tema].key[0]]]);
-        return result;
-      }
       var adr = {};
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
@@ -413,25 +403,12 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         km10: maybeNull(rs.ddkn_km10)
       } : null;
       // DAGI temaer
-      adr.sogn = null;
+      adr.sogn = commonMappers.mapKode4NavnTema('sogn', rs.sognekode, rs.sognenavn, baseUrl);
       adr.region = commonMappers.mapKode4NavnTema('region', rs.regionskode, rs.regionsnavn, baseUrl);
-      adr.retskreds = null;
-      adr.politikreds = null;
-      adr.opstillingskreds = null;
-      var includedDagiTemaer = ['sogn', 'retskreds','politikreds','opstillingskreds'];
-      var temaer = rs.temaer || [];
-      var dagiTemaArray =temaer.filter(function(tema) { return _.contains(includedDagiTemaer, tema.tema); });
-      var dagiTemaMap = _.indexBy(dagiTemaArray, 'tema');
-      var mappedDagiTemaer = _.reduce(dagiTemaMap, function(memo, tema, temaNavn) {
-        memo[temaNavn] = mapDagiTema(tema);
-        return memo;
-      }, {});
-      var zoneTemaer = _.where(temaer, {tema: 'zone'});
-      if(zoneTemaer.length <= 1) {
-        var zoneTema = zoneTemaer[0];
-        var zoneKode = zoneTema ? zoneTema.fields.zone : 2;
-        adr.zone = util.zoneKodeFormatter(zoneKode);
-      }
+      adr.retskreds = commonMappers.mapKode4NavnTema('retskreds', rs.retskredskode, rs.retskredsnavn, baseUrl);
+      adr.politikreds = commonMappers.mapKode4NavnTema('politikreds', rs.politikredskode, rs.politikredsnavn, baseUrl);
+      adr.opstillingskreds = commonMappers.mapKode4NavnTema('opstillingskreds', rs.opstillingskredskode, rs.opstillingskredsnavn, baseUrl);
+      adr.zone = rs.zone ? util.zoneKodeFormatter(rs.zone) : null;
       if(rs.jordstykke_matrikelnr) {
         const jordstykke = {};
         jordstykke.href = makeHref(baseUrl, 'jordstykke', [rs.jordstykke_ejerlavkode, rs.jordstykke_matrikelnr]),
@@ -444,16 +421,10 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         adr.jordstykke = null;
       }
 
-      // hvis mere en én zone overlapper, eller ingen, så sætter vi zone til null.
-      if(adr.zone === undefined) {
-        adr.zone = null;
-      }
-
       adr.bebyggelser = rs.bebyggelser.map(bebyggelse => {
         bebyggelse.href = makeHref(baseUrl, 'bebyggelse', [bebyggelse.id]);
         return bebyggelse;
       });
-      _.extend(adr, mappedDagiTemaer);
       return adr;
     };
   }

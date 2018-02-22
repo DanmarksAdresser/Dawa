@@ -1,147 +1,86 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 const { go } = require('ts-csp');
 const cursorChannel = require('../../../util/cursor-channel');
 
-var dbapi = require('../../../dbapi');
-var mappings = require('./../columnMappings');
-var sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
-var sqlUtil = require('../../common/sql/sqlUtil');
-var parameters = require('./parameters');
-var querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
-var temaer = require('../../temaer/temaer');
+const dbapi = require('../../../dbapi');
+const sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
+const sqlUtil = require('../../common/sql/sqlUtil');
+const parameters = require('./parameters');
+const querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
+const datamodels = require('../datamodel');
+const dbBindings = require('../dbBindings');
+const registry = require('../../registry');
 
-const selectClause = columnMappings =>
-  columnMappings.map(function(columnMapping) {
-    var selectTransform = columnMapping.selectTransform;
-    var columnName = columnMapping.column || columnMapping.name;
-    var transformedColumn = selectTransform ? selectTransform(columnName) : columnName;
-    return transformedColumn + ' AS ' + columnMapping.name;
+
+const validateSekvensnummerParams = (client, params) => go(function*() {
+  const senesteHaendelse = yield querySenesteSekvensnummer(client);
+  if (params.sekvensnummertil && senesteHaendelse.sekvensnummer < params.sekvensnummertil) {
+    throw new sqlUtil.InvalidParametersError("Hændelse med sekvensnummer " + params.sekvensnummertil + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer);
+  }
+});
+
+const baseQuery = (model, binding) => {
+  const tableName = binding.table;
+  const selectAttributesClauses = _.pluck(model.attributes, 'name').map(attName => {
+    const bindingAttr = binding.attributes[attName];
+    const columnName = binding.attributes[attName].column;
+    const transformed = bindingAttr.selectTransform(columnName);
+    return `${transformed} AS ${attName}`;
   });
-
-function createSqlModel( columnMappings , simpleFilterParameters, baseQuery) {
-  return {
-    allSelectableFieldNames: function () {
-      return ['sekvensnummer', 'operation', 'tidspunkt'].concat(_.pluck(columnMappings, 'name'));
-    },
-    validateParams: (client, params) => go(function*() {
-      const senesteHaendelse = yield querySenesteSekvensnummer(client);
-      if (params.sekvensnummertil && senesteHaendelse.sekvensnummer < params.sekvensnummertil) {
-        throw new sqlUtil.InvalidParametersError("Hændelse med sekvensnummer " + params.sekvensnummertil + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer);
-      }
-    }),
-    processStream: function (client, fieldNames, params, channel, options) {
-      var query = baseQuery();
-      if (params.sekvensnummerfra) {
-        var fromAlias = dbapi.addSqlParameter(query, params.sekvensnummerfra);
-        dbapi.addWhereClause(query, 'h.sequence_number >= ' + fromAlias);
-      }
-      if (params.sekvensnummertil) {
-        var toAlias = dbapi.addSqlParameter(query, params.sekvensnummertil);
-        dbapi.addWhereClause(query, 'h.sequence_number <= ' + toAlias);
-      }
-      if (params.tidspunktfra) {
-        var timeFromAlias = dbapi.addSqlParameter(query, params.tidspunktfra);
-        dbapi.addWhereClause(query, 'h.time >=' + timeFromAlias);
-      }
-
-      if (params.tidspunkttil) {
-        var timeToAlias = dbapi.addSqlParameter(query, params.tidspunkttil);
-        dbapi.addWhereClause(query, 'h.time <=' + timeToAlias);
-      }
-      // we want to be able to find events for a specific ID.
-      var keyColumns = _.reduce(columnMappings, function (memo, mapping) {
-        var columnName = mapping.column || mapping.name;
-        memo[mapping.name] = {
-          where: columnName
-        };
-        return memo;
-      }, {});
-      var propertyFilter = sqlParameterImpl.simplePropertyFilter(simpleFilterParameters, keyColumns);
-      propertyFilter(query, params);
-      var dbQuery = dbapi.createQuery(query);
-      return cursorChannel(client, dbQuery.sql, dbQuery.params, channel, options);
-    }
-  };
-}
-
-function baseQuery(datamodelName, tableName, columnMappings) {
-
-  var query = {
-    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectClause(columnMappings)),
-    from: [" transaction_history h" +
-      " LEFT JOIN " + tableName + "_history i ON ((h.operation IN ('insert', 'update') AND h.sequence_number = i.valid_from) OR (h.operation = 'delete' AND h.sequence_number = i.valid_to))"],
-    whereClauses: [],
-    orderClauses: ['sekvensnummer'],
-    sqlParams: []
-  };
-  var datamodelAlias = dbapi.addSqlParameter(query, datamodelName);
-  dbapi.addWhereClause(query, "h.entity = " + datamodelAlias);
-  return query;
-}
-
-const baseQuery2 = (datamodelName, tableName, columnMappings) => {
-  var query = {
-    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer'].concat(selectClause(columnMappings)),
-    from: [" transaction_history h" +
-    " JOIN " + tableName + "_changes i ON h.sequence_number = i.changeid"],
-    whereClauses: ['public', `h.entity = '${datamodelName}'`],
+  const query = {
+    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer',
+      ...selectAttributesClauses],
+    from: [`transaction_history h JOIN ${tableName}_changes i ON h.sequence_number = i.changeid`],
+    whereClauses: ['public'],
     orderClauses: ['changeid'],
     sqlParams: []
   };
   return query;
 };
 
-const oldSqlModelNames = ['jordstykketilknytning'];
-const newSqlModelNames = ['ejerlav', 'postnummer','vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej', 'vejstykkepostnummerrelation', 'stednavntilknytning'];
 
-var oldSqlModels = oldSqlModelNames.reduce(function(memo, datamodelName) {
-  var columnMappings = mappings.columnMappings[datamodelName];
-  var baseQueryFn = function() {
-    return baseQuery(datamodelName, mappings.tables[datamodelName], columnMappings);
-  };
+const createSqlModel = (model, binding, filterParams) => {
+  const allAttrNames = model.attributes.map(attr => attr.name);
+  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParams, binding.attributes);
+  return {
+    allSelectableFieldNames: function () {
+      return ['operation', 'tidspunkt', 'sekvensnummer', ...allAttrNames]
+    },
+    validateParams: validateSekvensnummerParams,
+    processStream: (client, fieldNames, params, channel, options) => {
+      const sqlParts = baseQuery(model, binding);
+      if (params.sekvensnummerfra) {
+        const fromAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummerfra);
+        dbapi.addWhereClause(sqlParts, 'h.sequence_number >= ' + fromAlias);
+      }
+      if (params.sekvensnummertil) {
+        const toAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummertil);
+        dbapi.addWhereClause(sqlParts, 'h.sequence_number <= ' + toAlias);
+      }
+      if (params.tidspunktfra) {
+        const timeFromAlias = dbapi.addSqlParameter(sqlParts, params.tidspunktfra);
+        dbapi.addWhereClause(sqlParts, 'h.time >=' + timeFromAlias);
+      }
 
-  memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName], baseQueryFn);
-  return memo;
-}, {});
+      if (params.tidspunkttil) {
+        const timeToAlias = dbapi.addSqlParameter(sqlParts, params.tidspunkttil);
+        dbapi.addWhereClause(sqlParts, 'h.time <=' + timeToAlias);
+      }
+      propertyFilter(sqlParts, params);
+      const query = dbapi.createQuery(sqlParts);
+      return cursorChannel(client, query.sql, query.params, channel, options);
+    }
 
-const newSqlModels = newSqlModelNames.reduce((memo, datamodelName) => {
-  var columnMappings = mappings.columnMappings[datamodelName];
-  var baseQueryFn = function() {
-    return baseQuery2(datamodelName, mappings.tables[datamodelName], columnMappings);
-  };
+  }
+};
 
-  memo[datamodelName] = createSqlModel( columnMappings, parameters.keyParameters[datamodelName], baseQueryFn);
-  return memo;
-}, {});
-
-function createTilknytningModel(tema) {
-  var sqlModelName = tema.prefix + 'tilknytning';
-  var columnMappings = mappings.columnMappings[sqlModelName];
-
-  var baseQueryFn = function() {
-    var query = baseQuery('adgangsadresse_tema', 'adgangsadresser_temaer_matview', columnMappings);
-    query.from.push('LEFT JOIN temaer ON temaer.id = tema_id');
-    var temaNameAlias = dbapi.addSqlParameter(query, tema.singular);
-    dbapi.addWhereClause(query, 'i.tema = ' + temaNameAlias);
-    return query;
-  };
-
-  var result = {};
-  result[tema.prefix + 'tilknytning'] = createSqlModel(columnMappings, parameters.keyParameters[sqlModelName], baseQueryFn);
-  return result;
+for(let entityName of Object.keys(datamodels)) {
+  const datamodel = datamodels[entityName];
+  const binding = dbBindings[entityName];
+  const filterParams = parameters.keyParameters[entityName] || [];
+  const sqlModel = createSqlModel(datamodel, binding, filterParams);
+  exports[entityName] = sqlModel;
+  registry.add(`${entityName}_hændelse`, 'sqlModel', undefined, sqlModel);
 }
-const sqlModels = Object.assign({}, oldSqlModels, newSqlModels);
-
-temaer.forEach(function(tema) {
-  _.extend(sqlModels, createTilknytningModel(tema));
-});
-
-
-module.exports = sqlModels;
-
-var registry = require('../../registry');
-_.each(sqlModels, function(sqlModel, key) {
-  registry.add(key + '_hændelse', 'sqlModel', undefined, sqlModel);
-});

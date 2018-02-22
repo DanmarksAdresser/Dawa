@@ -1,5 +1,8 @@
 "use strict";
 
+const temaModels = require('../dagiImport/temaModels');
+const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
+
 const vejstykker = {
   entity: 'vejstykke',
   table: 'vejstykker',
@@ -167,19 +170,6 @@ const stormodtagere = {
   }]
 };
 
-// incomplete, just for deriving TSV column when reindexing
-const temaer = {
-  table: 'temaer',
-  primaryKey: ['id'],
-  columns: [
-    {name: 'id'},
-    {
-      name: 'tsv',
-      derive: table => `to_tsvector('adresser', coalesce(${table}.fields->>'kode', '') || ' ' || coalesce(${table}.fields->>'navn', ''))`
-    }
-  ]
-};
-
 const supplerendebynavne = {
   table: 'supplerendebynavne',
   primaryKey: ['supplerendebynavn', 'kommunekode', 'postnr'],
@@ -245,10 +235,13 @@ const stednavne = {
       derive: table => `to_tsvector('adresser', ${table}.navn)`
     },
     {
-      name:'visueltcenter',
+      name: 'visueltcenter',
       derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
     },
-    {name: 'geom'}
+    {
+      name: 'geom',
+      distinctClause: geomDistinctClause
+    }
   ]
 };
 
@@ -350,9 +343,82 @@ const vejpunkter = {
     {name: 'geom'}
   ]
 };
+const jordstykker = {
+  table: 'jordstykker',
+  entity: 'jordstykke',
+  primaryKey: ['ejerlavkode', 'matrikelnr'],
+  columns: [{
+    name: 'ejerlavkode'
+  }, {
+    name: 'matrikelnr'
+  }, {
+    name: 'kommunekode'
+  }, {
+    name: 'sognekode'
+  }, {
+    name: 'regionskode'
+  }, {
+    name: 'retskredskode'
+  }, {
+    name: 'esrejendomsnr'
+  }, {
+    name: 'udvidet_esrejendomsnr'
+  }, {
+    name: 'sfeejendomsnr'
+  }, {
+    name: 'geom',
+    distinctClause: geomDistinctClause
+  }]
+};
 
-exports.tables = {
-  vejstykker,
+const jordstykker_adgadr = {
+  table: 'jordstykker_adgadr',
+  entity: 'jordstykketilknytning',
+  primaryKey: ['ejerlavkode', 'matrikelnr', 'adgangsadresse_id'],
+  columns: [
+    {name: 'ejerlavkode'},
+    {name: 'matrikelnr'},
+    {name: 'adgangsadresse_id'}
+  ]
+};
+
+const dagiTables = temaModels.modelList.reduce((memo, temaModel) => {
+  memo[temaModel.table] = temaModels.toTableModel(temaModel);
+  memo[temaModel.tilknytningTable] = temaModels.toTilknytningTableModel(temaModel);
+  return memo;
+}, {});
+
+const dagiMaterializations = temaModels.modelList.reduce((memo, temaModel) => {
+  memo[temaModel.tilknytningTable] = temaModels.toTilknytningMaterialization(temaModel);
+  return memo;
+}, {});
+
+const tilknytninger_mat = {
+  table: 'tilknytninger_mat',
+  primaryKey: ['adgangsadresseid'],
+  columns: [
+    {name: 'adgangsadresseid'},
+    {name: 'kommunekode'},
+    {name: 'kommunenavn'},
+    {name: 'regionskode'},
+    {name: 'regionsnavn'},
+    {name: 'sognekode'},
+    {name: 'sognenavn'},
+    {name: 'politikredskode'},
+    {name: 'politikredsnavn'},
+    {name: 'retskredskode'},
+    {name: 'retskredsnavn'},
+    {name: 'opstillingskredskode'},
+    {name: 'opstillingskredsnavn'},
+    {name: 'valglandsdelsbogstav'},
+    {name: 'valglandsdelsnavn'},
+    {name: 'storkredsnummer'},
+    {name: 'storkredsnavn'},
+    {name: 'zone'},
+  ]
+};
+
+exports.tables = Object.assign({
   adgangsadresser,
   enhedsadresser,
   adgangsadresser_mat,
@@ -360,21 +426,24 @@ exports.tables = {
   postnumre,
   stormodtagere,
   adresser_mat,
-  temaer,
   supplerendebynavne,
   vejpunkter,
   navngivenvej,
   navngivenvej_postnummer,
+  vejstykker,
   vejstykkerpostnumremat,
   stednavne,
-  stednavne_adgadr
-};
+  stednavne_adgadr,
+  jordstykker,
+  jordstykker_adgadr,
+  tilknytninger_mat
+}, dagiTables);
 
-exports.materializations = {
+exports.materializations = Object.assign({
+
   adgangsadresser_mat: {
     table: 'adgangsadresser_mat',
     view: 'adgangsadresser_mat_view',
-    primaryKey: ['id'],
     dependents: [{
       table: 'adgangsadresser',
       columns: ['id']
@@ -398,7 +467,6 @@ exports.materializations = {
   adresser_mat: {
     table: 'adresser_mat',
     view: 'adresser_mat_view',
-    primaryKey: ['id'],
     dependents: [{
       table: 'enhedsadresser',
       columns: ['id']
@@ -407,4 +475,36 @@ exports.materializations = {
       columns: ['adgangsadresseid']
     }]
   },
-};
+  jordstykker_adgadr: {
+    table: 'jordstykker_adgadr',
+    view: 'jordstykker_adgadr_view',
+    dependents: [
+      {
+        table: 'adgangsadresser_mat',
+        columns: ['adgangsadresse_id']
+      }
+      // also depends on jordstykker, but we don't have history on these and
+      // therefore don't support incremental updates of these, so they are updated separately.
+    ]
+  },
+  stednavne_adgadr: {
+    table: 'stednavne_adgadr',
+    view: 'stednavne_adgadr_view',
+    dependents: [
+      {
+        table: 'adgangsadresser_mat',
+        columns: ['adgangsadresse_id']
+      }
+    ]
+  },
+  tilknytninger_mat: {
+    table: 'tilknytninger_mat',
+    view: 'tilknytninger_mat_view',
+    dependents: [
+      {
+        table: 'adgangsadresser_mat',
+        columns: ['adgangsadresseid']
+      }
+    ]
+  }
+}, dagiMaterializations);

@@ -11,10 +11,10 @@ const {
   dagiReverseDoc,
   dagiReverseParameters,
   dagiSridCirkelPolygonParameters,
-  getTemaDef
+  getTemaModel
 } = require('./dagiCommon');
 
-const temaDef = getTemaDef('storkreds');
+const temaModel = getTemaModel('storkreds');
 
 const nummerParameter = {
   name: 'nummer',
@@ -22,9 +22,9 @@ const nummerParameter = {
 };
 const storkredsParameters = [
   nummerParameter,
-  dagiNavnParameter(temaDef),
+  dagiNavnParameter(temaModel),
   dagiQParameter(),
-  ...dagiSridCirkelPolygonParameters(temaDef.plural)
+  ...dagiSridCirkelPolygonParameters(temaModel.plural)
 ];
 
 const examples = {
@@ -63,7 +63,7 @@ module.exports = [
     entity: 'storkreds',
     path: '/storkredse',
     subtext: 'Søg efter storkredse. Returnerer de storkredse der opfylder kriteriet.',
-    parameters: storkredsParameters.concat(dagiReverseParameters(temaDef)).concat(formatAndPagingParams),
+    parameters: storkredsParameters.concat(dagiReverseParameters(temaModel)).concat(formatAndPagingParams),
     examples: examples.query
   },
   {
@@ -80,12 +80,12 @@ module.exports = [
   {
     entity: 'storkreds',
     path: '/storkredse/autocomplete',
-    subtext: autocompleteSubtext(temaDef.plural),
+    subtext: autocompleteSubtext(temaModel.plural),
     parameters: [
       ...overwriteWithAutocompleteQParameter(storkredsParameters),
       ...formatAndPagingParams],
     examples: examples.autocomplete || []
   },
-  dagiReverseDoc(temaDef),
-  ...  dagiReplikeringTilknytningDoc(temaDef)
+  dagiReverseDoc(temaModel),
+  ...  dagiReplikeringTilknytningDoc(temaModel)
 ];

@@ -11,7 +11,6 @@ var _ = require('underscore');
 var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
-var commonParameters = require('../../apiSpecification/common/commonParameters');
 var adgangsadresseParameters = require('../../apiSpecification/adgangsadresse/parameters');
 var testdb = require('../helpers/testdb2');
 var husnrUtil = require('../../apiSpecification/husnrUtil');
@@ -254,15 +253,15 @@ var sampleParameters = {
       }
     },
     zone: {
-      values: ['Landzone'],
+      values: ['Byzone'],
       verifier: function(adr, zone) {
         return adr.zone === zone;
       }
     },
     zonekode: {
-      values: ['2'],
+      values: ['1'],
       verifier: function(adr) {
-        return adr.zone === 'Landzone';
+        return adr.zone === 'Byzone';
       }
     },
     ejerlavkode: {
@@ -424,15 +423,15 @@ var sampleParameters = {
       }
     },
     zone: {
-      values: ['Landzone'],
+      values: ['Byzone'],
       verifier: function(adr, zone) {
         return adr.adgangsadresse.zone === zone;
       }
     },
     zonekode: {
-      values: ['2'],
+      values: ['1'],
       verifier: function(adr) {
-        return adr.adgangsadresse.zone === 'Landzone';
+        return adr.adgangsadresse.zone === 'Byzone';
       }
     },
     ejerlavkode: {
@@ -745,8 +744,8 @@ var sampleParameters = {
 };
 
 var additionalParameters = {
-  adgangsadresse: commonParameters.dagiFilter.concat(adgangsadresseParameters.husnrinterval),
-  adresse: commonParameters.dagiFilter.concat(adgangsadresseParameters.husnrinterval)
+  adgangsadresse: adgangsadresseParameters.husnrinterval,
+  adresse: adgangsadresseParameters.husnrinterval
 };
 
 _.keys(sampleParameters).forEach(function(specName) {

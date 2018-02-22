@@ -24,9 +24,6 @@ const logger = require('../logger').forCategory('dar10Import');
 const selectList = sqlUtil.selectList;
 const columnsEqualClause = sqlUtil.columnsEqualClause;
 
-const tema = require('../temaer/tema');
-const temaer = require('../apiSpecification/temaer/temaer');
-
 const ALL_DAR_ENTITIES = [
   'Adresse',
   'Adressepunkt',
@@ -242,9 +239,6 @@ const initDawa = (client, txid) => go(function*() {
   }
   yield sqlCommon.enableTriggersQ(client);
   yield recomputeMaterializedDawa(client, txid);
-  for (let temaSpec of temaer) {
-    yield tema.updateAdresserTemaerView(client, temaSpec, true, 10000, false);
-  }
 });
 
 /**

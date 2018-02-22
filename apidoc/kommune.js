@@ -9,10 +9,10 @@ const {
   dagiReplikeringTilknytningDoc,
   dagiReverseParameters,
   dagiSridCirkelPolygonParameters,
-  getTemaDef
+  getTemaModel
 } = require('./dagiCommon');
 
-const temaDef = getTemaDef('kommune');
+const temaModel = getTemaModel('kommune');
 
 const kommuneIdParameters = {
   name: 'kode',
@@ -38,7 +38,7 @@ module.exports = [
     subtext: 'Søg efter kommuner. Returnerer de kommuner som opfylder kriteriet.',
     parameters: [
       ...kommuneParameters,
-      ...dagiReverseParameters(temaDef),
+      ...dagiReverseParameters(temaModel),
       ...formatAndPagingParams,
       ...dagiSridCirkelPolygonParameters('kommuner')],
     examples: [{
@@ -98,5 +98,5 @@ module.exports = [
       }
     ]
   },
-  ...dagiReplikeringTilknytningDoc(temaDef)
+  ...dagiReplikeringTilknytningDoc(temaModel)
 ];

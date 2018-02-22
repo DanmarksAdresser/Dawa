@@ -1,16 +1,15 @@
 "use strict";
 
-var _ = require('underscore');
-var temaer = require('../temaer/temaer');
-var columnMappings = require('../replikering/columnMappings');
-var registry = require('../registry');
+const _ = require('underscore');
+const temaModels = require('../../dagiImport/temaModels');
+const registry = require('../registry');
 
-module.exports = temaer.reduce(function(memo, tema) {
-  var name = tema.prefix + 'tilknytning';
+module.exports = temaModels.modelList.reduce(function(memo, model) {
+  const name = model.tilknytningName;
   memo[name] = {
     singular: name,
     plural: name + 'er',
-    key: _.pluck(columnMappings[tema.prefix + 'tilknytning'], 'name')
+    key: model.tilknytningKey
   };
   return memo;
 }, {});

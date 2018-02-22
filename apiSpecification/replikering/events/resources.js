@@ -9,21 +9,18 @@ var resourcesUtil = require('../../common/resourcesUtil');
 require('../../allNamesAndKeys');
 var registry = require('../../registry');
 var commonParameters = require('../../common/commonParameters');
-var columnMappings = require('../columnMappings').columnMappings;
+const datamodel = require('../datamodel');
 
-_.each(Object.keys(columnMappings), function(entityName) {
-  var nameAndKey = registry.findWhere({
-    entityName: entityName,
-    type: 'nameAndKey'
-  });
+_.each(Object.keys(datamodel), function(entityName) {
+  const model = datamodel[entityName];
   exports[entityName] = {
     hændelser:   {
-      path: '/replikering/' + nameAndKey.plural + '/haendelser',
+      path: `${model.path}/haendelser`,
       pathParameters: [],
       queryParameters: resourcesUtil.flattenParameters({
+        keyParameters: parameters.keyParameters[entityName],
         sekvensnummer: parameters.sekvensnummer,
         tidspunkt: parameters.tidspunkt,
-        keyParameters: parameters.keyParameters[entityName] || [],
         formatParameters: commonParameters.format
       }),
       representations: representations[entityName],

@@ -62,7 +62,7 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'zonekode',
-    doc: 'Heltalskoden for den zone som adressen skal ligge i. Mulige værdier er 1 for byzone, 2 for sommerhusområde og 3 for landzone.'
+    doc: 'Heltalskoden for den zone som adressen skal ligge i. Mulige værdier er 1 for byzone, 2 for landzone og 3 for sommerhusområde.'
   },
   {
     name: 'zone',

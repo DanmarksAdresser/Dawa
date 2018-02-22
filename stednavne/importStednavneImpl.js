@@ -12,12 +12,12 @@ const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
 const stednavneTableModel = tableModel.tables.stednavne;
-const stednavneAdgangsadresserTableModel = tableModel.tables.stednavne_adgadr;
+const { recomputeMaterialization } = require('../importUtil/materialize');
+
 const {
-  updateSubdividedTableNg,
-  updateGeometricTableNg,
-  refreshAdgangsadresserRelationNg
-} = require('../apiSpecification/flats/importFlatUtil');
+  updateSubdividedTable,
+  updateGeometricFields
+} = require('../importUtil/geometryImport');
 
 
 const importStednavneFromStream = (client, txid, stream) => go(function*() {
@@ -60,10 +60,11 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel, allColumns);
   yield client.query('analyze stednavne; analyze stednavne_changes');
   yield client.query('UPDATE stednavne_changes c SET visueltcenter = f.visueltcenter FROM fetch_stednavne f WHERE c.id = f.id and f.visueltcenter is not null');
-  yield updateGeometricTableNg(client, txid, stednavneTableModel);
-  yield updateSubdividedTableNg(client, txid, 'stednavne', false);
+  yield updateGeometricFields(client, txid, stednavneTableModel);
+  yield tableDiffNg.applyChanges(client, txid, stednavneTableModel);
+  yield updateSubdividedTable(client, txid, 'stednavne', 'stednavne_divided', ['id']);
   yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
-  yield refreshAdgangsadresserRelationNg(client, txid, ['id'], 'stednavne_divided', ['stednavn_id'], stednavneAdgangsadresserTableModel);
+  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stednavne_adgadr);
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 

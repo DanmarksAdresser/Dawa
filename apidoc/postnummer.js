@@ -13,10 +13,10 @@ const {
 
 const {
   dagiReplikeringTilknytningDoc,
-  getTemaDef
+  getTemaModel
 } = require('./dagiCommon');
 
-const temaDef = getTemaDef('postnummer');
+const temaModel = getTemaModel('postnummer');
 
 const nrParameter = {
   name: 'nr',
@@ -145,5 +145,5 @@ module.exports = [
       ]
   },
   ...replikeringDoc('postnummer', [nrParameter], postnummerEventExamples),
-  ...dagiReplikeringTilknytningDoc(temaDef)
+  ...dagiReplikeringTilknytningDoc(temaModel)
 ];

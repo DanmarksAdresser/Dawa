@@ -11,9 +11,6 @@ const util = require('../../util');
 
 var notNull = util.notNull;
 
-var dagiTemaer = require('../../temaer/temaer');
-var tilknytninger = require('../../tematilknytninger/tilknytninger');
-
 function removeSpecialSearchChars(q) {
   return q.replace(/[^a-zA-Z0-9ÆæØøÅåéÉëËüÜäÄöÖ\*]/g, ' ');
 }
@@ -322,126 +319,11 @@ exports.reverseGeocodingWithin = function (geom) {
   };
 };
 
-// Adds a where clause which requires the queried object to contain the point specified by the x and y parameters
-exports.reverseGeocodingWithinTema = function (temaName) {
-  return function (sqlParts, params) {
-    if (notNull(params.x) && notNull(params.y)) {
-      if (!params.srid) {
-        params.srid = 4326;
-      }
-      const xAlias = dbapi.addSqlParameter(sqlParts, params.x);
-      const yAlias = dbapi.addSqlParameter(sqlParts, params.y);
-      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid);
-      const pointSql = `ST_Transform(ST_SetSRID(ST_Point(${xAlias}, ${yAlias}), ${sridAlias}), 25832)`;
-      if (params.reverseGeocodingNearest) {
-        dbapi.addWhereClause(sqlParts,
-          `temaer.id = (select id from gridded_temaer_matview g
-           WHERE g.tema = '${temaName}' ORDER BY geom <-> ${pointSql} LIMIT 1)`);
-      }
-      else {
-        dbapi.addWhereClause(sqlParts,
-          `temaer.id = (select id from gridded_temaer_matview g
-           WHERE g.tema = '${temaName}' and ST_Covers(geom, ${pointSql}) LIMIT 1)`);
-      }
-    }
-  };
-};
 exports.postnummerStormodtagerFilter = function () {
   return function (sqlParts, params) {
     if (typeof(params.stormodtagere) !== 'undefined' && !params.stormodtagere) {
       dbapi.addWhereClause(sqlParts, 'NOT stormodtager');
     }
-  };
-};
-
-var tilknytningKeyNames = _.reduce(tilknytninger, function (memo, tilknytning, temaName) {
-  if (tilknytning.filterable) {
-    memo[temaName] = tilknytning.keyFieldNames;
-  }
-  return memo;
-}, {});
-var temaKeys = _.reduce(dagiTemaer, function (memo, tema) {
-  memo[tema.singular] = tema.key;
-  return memo;
-}, {});
-
-var tilknytningKeyToTemaKey = _.reduce(tilknytningKeyNames, function (memo, tilknytningNames, temaName) {
-  memo[temaName] = _.reduce(tilknytningNames, function (memo, tilknytningName, index) {
-    memo[tilknytningName] = temaKeys[temaName][index];
-    return memo;
-  }, {});
-  return memo;
-}, {});
-
-exports.dagiFilter = function () {
-  return function (sqlParts, params) {
-    _.each(tilknytningKeyNames, function (tilknytningKeyName, temaName) {
-
-      // paramValues maps each key name to a list of values supplied
-      var paramValues = _.reduce(tilknytningKeyName, function (memo, keyNamePart) {
-        if (params[keyNamePart]) {
-          memo[keyNamePart] = params[keyNamePart].values;
-        }
-        return memo;
-      }, {});
-
-      if (_.isEmpty(paramValues)) {
-        // no parameters supplied for this tema
-        return;
-      }
-      // list of parameters where the query requires the tema to be absent
-      var absentKeys = [];
-      // list of parameters where the query requires at least one of the values in the array
-      var presentKeys = {};
-      _.each(paramValues, function (paramValue, keyNamePart) {
-        if (paramValue) {
-          if (_.contains(paramValue, null)) {
-            absentKeys.push(keyNamePart);
-          }
-          else if (keyNamePart === 'zone' && _.contains(paramValue, 2)) {
-            // this is a bit hackish, but for zone, if the key is missing, the zone is landzone (2)
-            absentKeys.push(keyNamePart);
-          }
-          presentKeys[keyNamePart] = _.without(paramValue, null);
-        }
-      });
-
-      var temaAlias = dbapi.addSqlParameter(sqlParts, temaName);
-
-      const clauses = [];
-      if (absentKeys.length !== 0) {
-        // it does not matter which part of the key that is not present
-        clauses.push(`a_id NOT IN (
-        SELECT adgangsadresse_id
-        FROM adgangsadresser_temaer_matview
-        WHERE tema = ${temaAlias} AND tema_id IN (SELECT id
-        FROM temaer
-        WHERE tema = ${temaAlias}))`);
-      }
-
-      // due to zones having a default (2) we may require the key to be either absent OR equal
-      // to one of the values
-      if (_.some(_.values(presentKeys), (values) => values.length > 0)) {
-        let temaClauses = _.map(presentKeys, function (keyValues, tilknytningKeyName) {
-          var valueAliases = _.map(keyValues, function (param) {
-            return dbapi.addSqlParameter(sqlParts, param);
-          });
-          var temaKey = tilknytningKeyToTemaKey[temaName][tilknytningKeyName];
-          var temaKeyName = temaKey.name;
-          var temaKeyType = temaKey.sqlType;
-          return "(temaer.fields->>'" + temaKeyName + "')::" + temaKeyType + " IN (" + valueAliases.join(', ') + ")";
-        }).join(' AND ');
-        var temaQuery = `SELECT id FROM temaer WHERE tema = ${temaAlias} AND ${temaClauses}`;
-        clauses.push(`a_id IN (
-        WITH tema_ids AS (${temaQuery})
-        SELECT adgangsadresse_id
-        FROM adgangsadresser_temaer_matview
-        WHERE tema = ${temaAlias} AND tema_id IN (select id from tema_ids))`);
-      }
-      if (clauses.length > 0) {
-        dbapi.addWhereClause(sqlParts, `(${clauses.join(') OR (')})`);
-      }
-    });
   };
 };
 

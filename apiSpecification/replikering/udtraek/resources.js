@@ -1,26 +1,21 @@
 "use strict";
 
-var _ = require('underscore');
 
-var sqlModels = require('./sqlModels');
-var columnMappings = require('../columnMappings').columnMappings;
-var representations = require('./representations');
-var parameters = require('./parameters');
-var resourcesUtil = require('../../common/resourcesUtil');
-var commonParameters = require('../../common/commonParameters');
+const sqlModels = require('./sqlModels');
+const representations = require('./representations');
+const parameters = require('./parameters');
+const resourcesUtil = require('../../common/resourcesUtil');
+const commonParameters = require('../../common/commonParameters');
+const datamodels = require('../datamodel');
+const registry = require('../../registry');
 
 require('../../allNamesAndKeys');
-var registry = require('../../registry');
 
-module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelName) {
-  var nameAndKey = registry.findWhere({
-    entityName: datamodelName,
-    type: 'nameAndKey'
-  });
-
+module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
+  const datamodel = datamodels[datamodelName];
   memo[datamodelName]=
   {
-    path: '/replikering/' + nameAndKey.plural,
+    path: datamodel.path,
       pathParameters: [],
     queryParameters: resourcesUtil.flattenParameters({
       sekvensnummer: parameters.sekvensnummer,
@@ -33,10 +28,6 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
     },
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
-
+  registry.add(datamodelName, 'resource', 'udtraek', memo[datamodelName]);
   return memo;
 }, {});
-
-_.each(module.exports, function(resource, key) {
-  registry.add(key, 'resource', 'udtraek', resource);
-});

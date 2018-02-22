@@ -1,15 +1,14 @@
 "use strict";
 
 var _ = require('underscore');
-var dagiTemaer = require('./temaer');
 var representationUtil = require('../common/representationUtil');
 var fieldMap = require('./fields');
 var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-var additionalFields = require('./additionalFields');
 
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHrefFromPath = commonMappers.makeHrefFromPath;
+const temaModels = require('../../dagiImport/temaModels');
 
 var registry = require('../registry');
 
@@ -42,12 +41,12 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
 
 
 
-function schemaForFlatFields(tema, additionalFieldsSpec, excludedFieldNames) {
+function schemaForFlatFields(model, excludedFieldNames) {
   var result = {
-    title: tema.singular,
+    title: model.singular,
     properties: {
       'href': {
-        description: tema.singularSpecific + 's unikke URL.',
+        description: model.singularSpecific + 's unikke URL.',
         $ref: '#/definitions/Href'
       },
       'ændret': {
@@ -67,7 +66,7 @@ function schemaForFlatFields(tema, additionalFieldsSpec, excludedFieldNames) {
     docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version']
   };
 
-  additionalFieldsSpec.filter(function (additionalField) {
+  model.fields.filter(function (additionalField) {
     return !_.contains(excludedFieldNames, additionalField.name);
   }).forEach(function (fieldSpec) {
     result.properties[fieldSpec.name] = _.clone(fieldSpec.schema);
@@ -78,29 +77,23 @@ function schemaForFlatFields(tema, additionalFieldsSpec, excludedFieldNames) {
 }
 
 
-var customRepresentations = {
-};
-
 // postnumre, zoner eksporteres ikke
-_.filter(dagiTemaer, function(tema) {
-  return tema.published;
-}).forEach(function(tema) {
-  var fields = fieldMap[tema.singular];
+temaModels.modelList.filter(model => model.published).forEach(model => {
+  const fields = fieldMap[model.singular];
   var representations = {};
   var fieldsExcludedFromFlat = ['geom_json'];
   var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 
 
   representations.flat = representationUtil.defaultFlatRepresentation(flatFields);
-  function jsonSchema(additionalFields) {
-    return schemaForFlatFields(tema, additionalFields, []);
+  function jsonSchema() {
+    return schemaForFlatFields(model, []);
   }
-  function dagiTemaJsonMapper(keySpec, additionalFields) {
-    var keyNames = _.pluck(keySpec, 'name');
+  function dagiTemaJsonMapper() {
     return function(baseUrl) {
       return function(row) {
         var result = {};
-        additionalFields.forEach(function(fieldSpec) {
+        model.fields.forEach(function(fieldSpec) {
           result[fieldSpec.name] = fieldSpec.formatter(row[fieldSpec.name]);
         });
 
@@ -108,7 +101,7 @@ _.filter(dagiTemaer, function(tema) {
         result.geo_version = row.geo_version;
         result.geo_ændret = row.geo_ændret;
 
-        result.href = makeHrefFromPath(baseUrl, tema.plural, _.map(keyNames, function(keyName) { return result[keyName]; }));
+        result.href = makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function(keyName) { return result[keyName]; }));
 
         return result;
       };
@@ -118,14 +111,14 @@ _.filter(dagiTemaer, function(tema) {
   function dagiAutocompleteSchema() {
     var properties = {
       tekst: {
-        description: autocompleteTekst[tema.singular].description(tema),
+        description: autocompleteTekst[model.singular].description(model),
         type: 'string'
       }
     };
-    properties[tema.singular] = jsonSchema(additionalFields[tema.singular]);
+    properties[model.singular] = jsonSchema();
     return globalSchemaObject({
       properties: properties,
-      docOrder: ['tekst', tema.singular]
+      docOrder: ['tekst', model.singular]
     });
   }
 
@@ -134,25 +127,20 @@ _.filter(dagiTemaer, function(tema) {
       var dagiTemaMapper = representations.json.mapper(baseUrl);
       return function(row) {
         var result = {
-          tekst: autocompleteTekst[tema.singular].mapper(row)
+          tekst: autocompleteTekst[model.singular].mapper(row)
         };
-        result[tema.singular] = dagiTemaMapper(row);
+        result[model.singular] = dagiTemaMapper(row);
         return result;
       };
     };
   }
-  if(customRepresentations[tema.singular] && customRepresentations[tema.singular].json) {
-    representations.json = customRepresentations[tema.singular].json;
-  }
-  else {
-    representations.json = {
-      // geomentry for the (huge) DAGI temaer is only returned in geojson format.
-      fields: representationUtil.fieldsWithoutNames(fields, ['geom_json']),
-      schema: globalSchemaObject(jsonSchema(additionalFields[tema.singular])),
-      mapper: dagiTemaJsonMapper(tema.key, additionalFields[tema.singular])
-    };
-  }
-  if(tema.searchable) {
+  representations.json = {
+    // geomentry for the (huge) DAGI temaer is only returned in geojson format.
+    fields: representationUtil.fieldsWithoutNames(fields, ['geom_json']),
+    schema: globalSchemaObject(jsonSchema()),
+    mapper: dagiTemaJsonMapper(model.primaryKey)
+  };
+  if(model.searchable) {
     representations.autocomplete = {
       fields: representations.json.fields,
       schema: globalSchemaObject(dagiAutocompleteSchema()),
@@ -161,10 +149,7 @@ _.filter(dagiTemaer, function(tema) {
   }
   const geojsonField = _.findWhere(fields, {name: 'geom_json'});
   representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
-  if(tema.nested) {
-    representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
-  }
-  exports[tema.singular] = representations;
+  exports[model.singular] = representations;
 
-  registry.addMultiple(tema.singular, 'representation', module.exports[tema.singular]);
+  registry.addMultiple(model.singular, 'representation', module.exports[model.singular]);
 });

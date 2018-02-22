@@ -1,18 +1,19 @@
 "use strict";
 
-var columnMappings = require('./../columnMappings').columnMappings;
-var _ = require('underscore');
-var globalSchemaObject = require('../../commonSchemaDefinitionsUtil').globalSchemaObject;
-var normalizedFieldSchemas = require('../normalizedFieldSchemas');
+const _ = require('underscore');
+const globalSchemaObject = require('../../commonSchemaDefinitionsUtil').globalSchemaObject;
+const normalizedFieldSchemas = require('../normalizedFieldSchemas');
 const fieldsMap = require('./fields');
 const representationUtil = require('../../common/representationUtil');
 
-var datamodelNames = Object.keys(columnMappings);
+const datamodels = require('../datamodel');
+const bindings = require('../dbBindings');
 
-_.each(datamodelNames, function(datamodelName) {
+for(let datamodelName of Object.keys(datamodels)) {
   const fields = fieldsMap[datamodelName];
-
-  var schema = globalSchemaObject({
+  const datamodel = datamodels[datamodelName];
+  const binding = bindings[datamodelName];
+  const schema = globalSchemaObject({
     title: datamodelName + "hændelse",
     properties: {
       sekvensnummer: {
@@ -32,17 +33,17 @@ _.each(datamodelNames, function(datamodelName) {
     },
     docOrder: ['sekvensnummer', 'tidspunkt', 'operation', 'data']
   });
-  var jsonMapper = function(row) {
-    var result = {
+  const jsonMapper = function(row) {
+    const result = {
       operation: row.operation,
       tidspunkt: row.tidspunkt,
       sekvensnummer: row.sekvensnummer
     };
-    result.data = _.reduce(columnMappings[datamodelName], function(memo, columnMapping) {
-      var formatFn = columnMapping.formatter || _.identity;
-      memo[columnMapping.name] = formatFn(row[columnMapping.name]);
-      if(memo[columnMapping.name] === undefined) {
-        memo[columnMapping.name] = null;
+    result.data = datamodel.attributes.reduce((memo, attribute) => {
+      const formatFn = binding.attributes[attribute.name].formatter;
+      memo[attribute.name] = formatFn(row[attribute.name]);
+      if(memo[attribute.name] === undefined) {
+        memo[attribute.name] = null;
       }
       return memo;
     }, {});
@@ -57,9 +58,9 @@ _.each(datamodelNames, function(datamodelName) {
     },
     flat: representationUtil.defaultFlatRepresentation(fields)
   };
-});
+}
 
-var registry = require('../../registry');
+const registry = require('../../registry');
 _.each(exports, function(representation, key) {
   registry.add(key + '_hændelse', 'representation', 'json', representation.json);
 });

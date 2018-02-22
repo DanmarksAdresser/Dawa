@@ -1,0 +1,505 @@
+[
+  {
+    "kode": 165,
+    "navn": "Albertslund",
+    "geom": null
+  },
+  {
+    "kode": 201,
+    "navn": "Allerød",
+    "geom": null
+  },
+  {
+    "kode": 420,
+    "navn": "Assens",
+    "geom": null
+  },
+  {
+    "kode": 151,
+    "navn": "Ballerup",
+    "geom": null
+  },
+  {
+    "kode": 530,
+    "navn": "Billund",
+    "geom": null
+  },
+  {
+    "kode": 400,
+    "navn": "Bornholm",
+    "geom": null
+  },
+  {
+    "kode": 153,
+    "navn": "Brøndby",
+    "geom": null
+  },
+  {
+    "kode": 810,
+    "navn": "Brønderslev",
+    "geom": null
+  },
+  {
+    "kode": 155,
+    "navn": "Dragør",
+    "regionskode": 99,
+    "geom": null
+  },
+  {
+    "kode": 240,
+    "navn": "Egedal",
+    "geom": null
+  },
+  {
+    "kode": 561,
+    "navn": "Esbjerg",
+    "geom": null
+  },
+  {
+    "kode": 563,
+    "navn": "Fanø",
+    "geom": null
+  },
+  {
+    "kode": 710,
+    "navn": "Favrskov",
+    "geom": null
+  },
+  {
+    "kode": 320,
+    "navn": "Faxe",
+    "geom": null
+  },
+  {
+    "kode": 210,
+    "navn": "Fredensborg",
+    "geom": null
+  },
+  {
+    "kode": 607,
+    "navn": "Fredericia",
+    "geom": null
+  },
+  {
+    "kode": 147,
+    "navn": "Frederiksberg",
+    "geom": null
+  },
+  {
+    "kode": 813,
+    "navn": "Frederikshavn",
+    "geom": null
+  },
+  {
+    "kode": 250,
+    "navn": "Frederikssund",
+    "geom": null
+  },
+  {
+    "kode": 190,
+    "navn": "Furesø",
+    "geom": null
+  },
+  {
+    "kode": 430,
+    "navn": "Faaborg-Midtfyn",
+    "geom": null
+  },
+  {
+    "kode": 157,
+    "navn": "Gentofte",
+    "geom": null
+  },
+  {
+    "kode": 159,
+    "navn": "Gladsaxe",
+    "geom": null
+  },
+  {
+    "kode": 161,
+    "navn": "Glostrup",
+    "geom": null
+  },
+  {
+    "kode": 253,
+    "navn": "Greve",
+    "geom": null
+  },
+  {
+    "kode": 270,
+    "navn": "Gribskov",
+    "geom": null
+  },
+  {
+    "kode": 376,
+    "navn": "Guldborgsund",
+    "geom": null
+  },
+  {
+    "kode": 510,
+    "navn": "Haderslev",
+    "geom": null
+  },
+  {
+    "kode": 260,
+    "navn": "Halsnæs",
+    "geom": null
+  },
+  {
+    "kode": 766,
+    "navn": "Hedensted",
+    "geom": null
+  },
+  {
+    "kode": 217,
+    "navn": "Helsingør",
+    "geom": null
+  },
+  {
+    "kode": 163,
+    "navn": "Herlev",
+    "geom": null
+  },
+  {
+    "kode": 657,
+    "navn": "Herning",
+    "geom": null
+  },
+  {
+    "kode": 219,
+    "navn": "Hillerød",
+    "geom": null
+  },
+  {
+    "kode": 860,
+    "navn": "Hjørring",
+    "geom": null
+  },
+  {
+    "kode": 316,
+    "navn": "Holbæk",
+    "geom": null
+  },
+  {
+    "kode": 661,
+    "navn": "Holstebro",
+    "geom": null
+  },
+  {
+    "kode": 615,
+    "navn": "Horsens",
+    "geom": null
+  },
+  {
+    "kode": 167,
+    "navn": "Hvidovre",
+    "geom": null
+  },
+  {
+    "kode": 169,
+    "navn": "Høje-Taastrup",
+    "geom": null
+  },
+  {
+    "kode": 223,
+    "navn": "Hørsholm",
+    "geom": null
+  },
+  {
+    "kode": 756,
+    "navn": "Ikast-Brande",
+    "geom": null
+  },
+  {
+    "kode": 183,
+    "navn": "Ishøj",
+    "geom": null
+  },
+  {
+    "kode": 849,
+    "navn": "Jammerbugt",
+    "geom": null
+  },
+  {
+    "kode": 326,
+    "navn": "Kalundborg",
+    "geom": null
+  },
+  {
+    "kode": 440,
+    "navn": "Kerteminde",
+    "geom": null
+  },
+  {
+    "kode": 621,
+    "navn": "Kolding",
+    "geom": null
+  },
+  {
+    "kode": 101,
+    "navn": "København",
+    "geom": null
+  },
+  {
+    "kode": 259,
+    "navn": "Køge",
+    "geom": null
+  },
+  {
+    "kode": 482,
+    "navn": "Langeland",
+    "geom": null
+  },
+  {
+    "kode": 350,
+    "navn": "Lejre",
+    "geom": null
+  },
+  {
+    "kode": 665,
+    "navn": "Lemvig",
+    "geom": null
+  },
+  {
+    "kode": 360,
+    "navn": "Lolland",
+    "geom": null
+  },
+  {
+    "kode": 173,
+    "navn": "Lyngby-Taarbæk",
+    "geom": null
+  },
+  {
+    "kode": 825,
+    "navn": "Læsø",
+    "geom": null
+  },
+  {
+    "kode": 846,
+    "navn": "Mariagerfjord",
+    "geom": null
+  },
+  {
+    "kode": 410,
+    "navn": "Middelfart",
+    "geom": null
+  },
+  {
+    "kode": 773,
+    "navn": "Morsø",
+    "geom": null
+  },
+  {
+    "kode": 707,
+    "navn": "Norddjurs",
+    "geom": null
+  },
+  {
+    "kode": 480,
+    "navn": "Nordfyns",
+    "geom": null
+  },
+  {
+    "kode": 450,
+    "navn": "Nyborg",
+    "geom": null
+  },
+  {
+    "kode": 370,
+    "navn": "Næstved",
+    "geom": null
+  },
+  {
+    "kode": 727,
+    "navn": "Odder",
+    "geom": null
+  },
+  {
+    "kode": 461,
+    "navn": "Odense",
+    "geom": null
+  },
+  {
+    "kode": 306,
+    "navn": "Odsherred",
+    "geom": null
+  },
+  {
+    "kode": 730,
+    "navn": "Randers",
+    "geom": null
+  },
+  {
+    "kode": 840,
+    "navn": "Rebild",
+    "geom": null
+  },
+  {
+    "kode": 760,
+    "navn": "Ringkøbing-Skjern",
+    "geom": null
+  },
+  {
+    "kode": 329,
+    "navn": "Ringsted",
+    "geom": null
+  },
+  {
+    "kode": 265,
+    "navn": "Roskilde",
+    "geom": null
+  },
+  {
+    "kode": 230,
+    "navn": "Rudersdal",
+    "geom": null
+  },
+  {
+    "kode": 175,
+    "navn": "Rødovre",
+    "geom": null
+  },
+  {
+    "kode": 741,
+    "navn": "Samsø",
+    "geom": null
+  },
+  {
+    "kode": 740,
+    "navn": "Silkeborg",
+    "geom": null
+  },
+  {
+    "kode": 746,
+    "navn": "Skanderborg",
+    "geom": null
+  },
+  {
+    "kode": 779,
+    "navn": "Skive",
+    "geom": null
+  },
+  {
+    "kode": 330,
+    "navn": "Slagelse",
+    "geom": null
+  },
+  {
+    "kode": 269,
+    "navn": "Solrød",
+    "geom": null
+  },
+  {
+    "kode": 340,
+    "navn": "Sorø",
+    "geom": null
+  },
+  {
+    "kode": 336,
+    "navn": "Stevns",
+    "geom": null
+  },
+  {
+    "kode": 671,
+    "navn": "Struer",
+    "geom": null
+  },
+  {
+    "kode": 479,
+    "navn": "Svendborg",
+    "geom": null
+  },
+  {
+    "kode": 706,
+    "navn": "Syddjurs",
+    "geom": null
+  },
+  {
+    "kode": 540,
+    "navn": "Sønderborg",
+    "geom": null
+  },
+  {
+    "kode": 787,
+    "navn": "Thisted",
+    "geom": null
+  },
+  {
+    "kode": 550,
+    "navn": "Tønder",
+    "geom": null
+  },
+  {
+    "kode": 185,
+    "navn": "Tårnby",
+    "geom": null
+  },
+  {
+    "kode": 187,
+    "navn": "Vallensbæk",
+    "geom": null
+  },
+  {
+    "kode": 573,
+    "navn": "Varde",
+    "geom": null
+  },
+  {
+    "kode": 575,
+    "navn": "Vejen",
+    "geom": null
+  },
+  {
+    "kode": 630,
+    "navn": "Vejle",
+    "geom": null
+  },
+  {
+    "kode": 820,
+    "navn": "Vesthimmerland",
+    "geom": null
+  },
+  {
+    "kode": 791,
+    "navn": "Viborg",
+    "geom": null
+  },
+  {
+    "kode": 390,
+    "navn": "Vordingborg",
+    "geom": null
+  },
+  {
+    "kode": 492,
+    "navn": "Ærø",
+    "geom": null
+  },
+  {
+    "kode": 580,
+    "navn": "Aabenraa",
+    "geom": null
+  },
+  {
+    "kode": 851,
+    "navn": "Aalborg",
+    "geom": null
+  },
+  {
+    "kode": 751,
+    "navn": "Aarhus",
+    "geom": null
+  },
+  {
+    "kode": 999,
+    "navn": "Testkommune",
+    "regionskode": 1,
+    "geom": "SRID=25832;MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))"
+  },
+  {
+    "kode": 99,
+    "navn": "Kommune test",
+    "regionskode": 99,
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+  }
+]

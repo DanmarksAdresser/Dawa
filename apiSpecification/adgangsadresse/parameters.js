@@ -61,6 +61,30 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
+    name: 'sognekode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'retskredskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'politikredskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'opstillingskredskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
     name: 'esrejendomsnr',
     type: 'integer',
     schema: {
@@ -103,9 +127,44 @@ exports.propertyFilter = normalizeParameters([
     type: 'string',
     multi: false,
     renameTo: 'jordstykke_matrikelnr'
+  },
+  {
+    name: 'regionskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'opstillingskredskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'politikredskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'sognekode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'retskredskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'zone',
+    type: 'zone',
+    multi: true
+  },
+  {
+    name: 'zonekode',
+    type: 'integer',
+    multi: true,
+    renameTo: 'zone'
   }
-
-]);
+  ]);
 
 exports.husnrinterval = normalizeParameters([
   {
