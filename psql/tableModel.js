@@ -1,7 +1,9 @@
 "use strict";
 
+const _ = require('underscore');
 const temaModels = require('../dagiImport/temaModels');
 const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
+const dar10TableModels = require('../dar10/dar10TableModels');
 
 const vejstykker = {
   entity: 'vejstykke',
@@ -30,6 +32,8 @@ const vejstykker = {
     public: false
   }, {
     name: 'navngivenvej_id'
+  }, {
+    name: 'navngivenvejkommunedel_id'
   }]
 };
 
@@ -120,6 +124,16 @@ const adgangsadresser = {
     name: 'hoejde'
   }, {
     name: 'navngivenvej_id'
+  }, {
+    name: 'navngivenvejkommunedel_id',
+  }, {
+    name: 'supplerendebynavn_id'
+  }, {
+    name: 'darkommuneinddeling_id'
+  }, {
+    name: 'adressepunkt_id'
+  }, {
+    name: 'postnummer_id'
   }]
 };
 
@@ -207,7 +221,9 @@ const navngivenvej_postnummer = {
   entity: 'navngivenvejpostnummerrelation',
   primaryKey: ['navngivenvej_id', 'postnr'],
   columns: [
+    {name: 'id'},
     {name: 'navngivenvej_id'},
+    {name: 'postnummer_id'},
     {name: 'postnr'},
     {
       name: 'tekst',
@@ -261,6 +277,10 @@ const vejstykkerpostnumremat = {
   entity: 'vejstykkepostnummerrelation',
   primaryKey: ['postnr', 'kommunekode', 'vejkode'],
   columns: [
+    {name: 'navngivenvej_id'},
+    {name: 'navngivenvejkommunedel_id'},
+    {name: 'postnummer_id'},
+    {name: 'husnummer_id'},
     {name: 'kommunekode'},
     {name: 'vejkode'},
     {name: 'postnr'},
@@ -418,6 +438,10 @@ const tilknytninger_mat = {
   ]
 };
 
+dar10TableModels.rawTableModels
+
+const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
+const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
 exports.tables = Object.assign({
   adgangsadresser,
   enhedsadresser,
@@ -437,7 +461,9 @@ exports.tables = Object.assign({
   jordstykker,
   jordstykker_adgadr,
   tilknytninger_mat
-}, dagiTables);
+}, dagiTables,
+  dar10RawTables,
+  dar10CurrentTables);
 
 exports.materializations = Object.assign({
 

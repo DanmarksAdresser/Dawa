@@ -38,6 +38,11 @@ CREATE VIEW dar1_adgangsadresser_view AS
     hn.husnummerretning                                         AS tekstretning,
     ap.oprindelse_registrering AT TIME ZONE 'Europe/Copenhagen' AS adressepunktaendringsdato,
     nv.id                                                       AS navngivenvej_id,
+    nvk.id                                                      AS navngivenvejkommunedel_id,
+    s.id                                                        AS supplerendebynavn_id,
+    k.id                                                        AS darkommuneinddeling_id,
+    ap.id                                                       AS adressepunkt_id,
+    p.id                                                        AS postnummer_id,
     ap.position                                                 AS geom
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k
@@ -52,35 +57,5 @@ CREATE VIEW dar1_adgangsadresser_view AS
     JOIN dar1_postnummer_current p
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_adressepunkt_current ap
-      ON hn.adgangspunkt_id = ap.id
-  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3);
-
--- This view is used for dirty-checking (computing which adgangsadresser has changed
--- due to changes in DAR 1.0 entities)
-
-DROP VIEW IF EXISTS dar1_adgangsadresser_dirty_view CASCADE;
-CREATE VIEW dar1_adgangsadresser_dirty_view AS
-  SELECT
-    hn.id  AS id,
-    hn.id  AS husnummer_id,
-    k.id   AS darkommuneinddeling_id,
-    nv.id  AS navngivenvej_id,
-    nvk.id AS navngivenvejkommunedel_id,
-    p.id   AS postnummer_id,
-    ap.id  AS adressepunkt_id,
-    s.id   AS supplerendebynavn_id
-  FROM dar1_husnummer_current hn
-    JOIN dar1_darkommuneinddeling_current k
-      ON hn.darkommune_id = k.id
-    JOIN dar1_navngivenvej_current nv
-      ON hn.navngivenvej_id = nv.id
-    JOIN dar1_navngivenvejkommunedel_current nvk
-      ON nv.id = nvk.navngivenvej_id AND
-         k.kommunekode = nvk.kommune
-    LEFT JOIN dar1_supplerendebynavn_current s
-      ON hn.supplerendebynavn_id = s.id
-    JOIN dar1_postnummer_current p
-      ON hn.postnummer_id = p.id
-    JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
   WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3);

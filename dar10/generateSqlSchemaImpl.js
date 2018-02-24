@@ -6,6 +6,8 @@ const spec = require('./spec');
 
 const schemas = spec.schemas;
 const sqlTypes = spec.sqlTypes;
+const { getChangeTableSql } = require('../importUtil/tableDiffNg');
+const tableSchema = require('../psql/tableModel');
 
 
 const standardFields = ['rowkey', 'id', 'eventopret', 'eventopdater', 'status', 'registreringfra', 'registreringtil', 'virkningfra', 'virkningtil'];
@@ -110,8 +112,11 @@ module.exports = () => {
 CREATE TABLE dar1_${entityName}(\n  ${columnSql.join(',\n  ')}\n);\
 DROP TABLE IF EXISTS dar1_${entityName}_current CASCADE;\n\
 CREATE TABLE dar1_${entityName}_current(\n  ${columnSql.join(',\n  ')}\n);\n\
-CREATE INDEX ON dar1_${entityName}_current(id);\n` + indicesSql + '\n';
+CREATE INDEX ON dar1_${entityName}_current(id);\n` + indicesSql + '\n' +
+      getChangeTableSql(tableSchema.tables[`dar1_${entityName}`]) +
+      getChangeTableSql(tableSchema.tables[`dar1_${entityName}_current`]);
   });
+
 
   return ddlStatements.join('\n\n');
 };

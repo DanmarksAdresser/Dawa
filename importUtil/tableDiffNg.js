@@ -202,15 +202,20 @@ const applyChanges = (client, txid, tableModel) => go(function* () {
   yield applyInserts(client, txid, tableModel);
 });
 
-const createChangeTable = (client, tableModel) => go(function* () {
+const getChangeTableSql = tableModel => {
   const selectFields = selectList(null, allColumnNames(tableModel));
   const selectKeyClause = selectList(null, tableModel.primaryKey);
   const changeTableName = `${tableModel.table}_changes`;
-  yield client.query(`DROP TABLE IF EXISTS ${changeTableName} CASCADE`);
-  yield client.query(`CREATE TABLE ${changeTableName} AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, ${selectFields} FROM ${tableModel.table} WHERE false)`);
-  yield client.query(`CREATE INDEX ON ${changeTableName}(${selectKeyClause}, changeid desc NULLS LAST)`);
-  yield client.query(`CREATE INDEX ON ${changeTableName}(changeid desc NULLS LAST) `);
-  yield client.query(`CREATE INDEX ON ${changeTableName}(txid) `);
+  return `
+  DROP TABLE IF EXISTS ${changeTableName} CASCADE;
+  CREATE TABLE ${changeTableName} AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, ${selectFields} FROM ${tableModel.table} WHERE false);
+  CREATE INDEX ON ${changeTableName}(${selectKeyClause}, changeid desc NULLS LAST);
+  CREATE INDEX ON ${changeTableName}(changeid desc NULLS LAST);
+  CREATE INDEX ON ${changeTableName}(txid) ;`
+};
+
+const createChangeTable = (client, tableModel) => go(function* () {
+  yield client.query(getChangeTableSql(tableModel));
 });
 
 const initChangeTable = (client, txid, tableModel) => go(function* () {
@@ -377,5 +382,6 @@ module.exports = {
   clearHistory,
   insert,
   update,
-  del
+  del,
+  getChangeTableSql
 };

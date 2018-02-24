@@ -8,8 +8,8 @@ const path = require('path');
 const q = require('q');
 
 const databaseTypes = require('../../psql/databaseTypes');
-const dawaSpec = require('../../dar10/dawaSpec');
 const importDarImpl = require('../../dar10/importDarImpl');
+const dar10TableModels = require('../../dar10/dar10TableModels');
 const testdb = require('../helpers/testdb2');
 const { go } = require('ts-csp');
 const { withImportTransaction } = require('../../importUtil/importUtil');
@@ -50,8 +50,8 @@ describe('Import af DAR 1.0 udtræk', function () {
       expect(transaction.dawa_seq_range).to.not.be.null;
 
       // check that DAWA entities has been created
-      for (let dawaEntity of Object.keys(dawaSpec)) {
-        const table = dawaSpec[dawaEntity].table;
+      for (let dawaEntity of Object.keys(dar10TableModels.dawaMaterializations)) {
+        const table = dar10TableModels.dawaMaterializations[dawaEntity].table;
         const count = (yield client.queryp(`SELECT COUNT(*) as c FROM ${table} `)).rows[0].c;
         expect(count).to.be.greaterThan(1);
       }
@@ -231,7 +231,7 @@ describe('Import af changesets', function() {
       }]
     };
 
-    it('Kan importere et changeset', q.async(function*() {
+    it('Kan importere et changeset', () => go(function*() {
       const client = clientFn();
       yield importDarImpl.internal.setInitialMeta(client);
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
@@ -241,21 +241,12 @@ describe('Import af changesets', function() {
       }));
 
       // check at vi har importeret et vejstykke, adgangsadresse og adresse
-      for (let dawaEntity of Object.keys(dawaSpec)) {
-        const table = dawaSpec[dawaEntity].table;
+      for (let dawaEntity of Object.keys(dar10TableModels.dawaMaterializations)) {
+        const table = dar10TableModels.dawaMaterializations[dawaEntity].table;
         const count = (yield client.queryp(`SELECT COUNT(*)::integer as c FROM ${table} `)).rows[0].c;
         expect(count).to.equal(1);
       }
-
-      // check, at vi logger noget historik
-      const changelog = (yield client.queryp('select * from dar1_changelog')).rows;
-      expect(changelog).to.have.length(9);
-      const change = changelog[0];
-      expect(change.tx_id).to.equal(1);
-      expect(change.entity).to.not.be.empty;
-      expect(change.operation).to.equal('insert');
-      expect(change.rowkey).to.be.above(0);
-    }));
+      }));
 
     it('Når virkningstid avanceres, håndteres fremtidige ændringer', q.async(function*() {
       const client = clientFn();
@@ -297,6 +288,7 @@ describe('Import af changesets', function() {
           yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(firstChangeset)));
         }));
       }));
+
 
       // check at vejen ikke eksisterer endnu
       const entityCount = (yield client.queryp('select count(*)::integer  as c from navngivenvej')).rows[0].c;
