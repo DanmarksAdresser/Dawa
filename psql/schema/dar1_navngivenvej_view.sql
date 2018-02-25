@@ -6,7 +6,9 @@ CREATE VIEW dar1_navngivenvej_view AS
     (SELECT min(lower(virkning) at time zone 'Europe/Copenhagen')
      FROM dar1_navngivenvej_history nh
      WHERE nh.id = n.id) AS oprettet,
-    lower(n.virkning) AT TIME ZONE 'Europe/Copenhagen' AS ændret,
+    (SELECT MAX(lower(virkning) at time zone 'Europe/Copenhagen')
+     FROM dar1_navngivenvej_history nh
+     WHERE nh.id = n.id) AS ændret,
     COALESCE(n.vejnavn, '') as navn,
     COALESCE(n.vejadresseringsnavn, '') as adresseringsnavn,
     administreresafkommune,

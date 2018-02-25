@@ -8,7 +8,7 @@ var path = require('path');
 var q = require('q');
 var _ = require('underscore');
 
-const generateSqlSchemaImpl = require('../dar10/generateSqlSchemaImpl');
+const dar10SqlSchema = require('../dar10/generateSqlSchemaImpl');
 const generateViews = require('../dar10/generateViews');
 var sqlCommon = require('./common');
 const generateOisSchemaImpl = require('../ois/generateSqlSchemaImpl');
@@ -160,7 +160,7 @@ exports.loadTables = function(client, scriptDir) {
         yield psqlScriptQ(client, path.join(scriptDir, 'tables'), spec.scriptFile);
       }
     }
-    yield client.queryp(generateSqlSchemaImpl());
+    yield client.query(dar10SqlSchema);
     yield client.queryp(generateOisSchemaImpl());
     yield createChangeTables(client);
   })();

@@ -5,6 +5,7 @@ const { go } = require('ts-csp');
 const { Range } = require('../../psql/databaseTypes');
 
 const {internal: {prepareDar1Postnummer, preparePostnummerHistory, mergePostnr, prepareDar1Husnummer}} = require('../../history/generateHistoryImplDar1');
+const {internal: {initializeDar10HistoryTables}} = require('../../dar10/importDarImpl');
 
 const insert = (client, tableName, row) => {
   const columns = Object.keys(row);
@@ -73,6 +74,7 @@ describe('Generate history DAR1', () => {
         nr: 8000,
         navn: 'Aarhus C'
       });
+      yield initializeDar10HistoryTables(client);
       yield prepareDar1Husnummer(client);
       yield prepareDar1Postnummer(client);
       yield preparePostnummerHistory(client, time3);

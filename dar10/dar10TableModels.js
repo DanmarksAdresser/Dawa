@@ -11,38 +11,37 @@ const standardFields = ['rowkey', 'id', 'eventopret', 'eventopdater', 'status', 
 const standardColumns = [
   {
     name: 'rowkey',
-    type: 'integer',
-    nullable: false,
-    primaryKey: true
+    sqlType: 'integer',
+    nullable: false
   },
   {
     name: 'id',
-    type: 'uuid',
+    sqlType: 'uuid',
     nullable: false
   },
   {
     name: 'eventopret',
-    type: 'integer',
+    sqlType: 'integer',
     nullable: true
   },
   {
     name: 'eventopdater',
-    type: 'integer',
+    sqlType: 'integer',
     nullable: true
   },
   {
     name: 'registrering',
-    type: 'tstzrange',
+    sqlType: 'tstzrange',
     nullable: false
   },
   {
     name: 'virkning',
-    type: 'tstzrange',
+    sqlType: 'tstzrange',
     nullable: false
   },
   {
     name: 'status',
-    type: 'smallint',
+    sqlType: 'smallint',
     nullable: false
   }
 ];
@@ -50,25 +49,7 @@ const standardColumns = [
 /**
  * SQL type overrides.
  */
-const sqlTypeOverrides = {
-  Adressepunkt: {
-    position: 'geometry(Point,25832)'
-  },
-  Husnummer: {
-    husnummertekst: 'husnr',
-    husnummerretning: 'float4'
-  },
-  NavngivenVejKommunedel: {
-    kommune: 'smallint',
-    vejkode: 'smallint'
-  },
-  DARKommuneinddeling: {
-    kommunekode: 'smallint'
-  },
-  Postnummer: {
-    postnr: 'smallint'
-  }
-};
+const sqlTypeOverrides = spec.sqlTypes;
 
 
 function defaultSqlType(jsonSchemaType) {
@@ -117,12 +98,29 @@ exports.rawTableModels = entityNames.reduce((memo, entityName) => {
   return memo;
 }, {});
 
+const fieldsExcludedFromHistory = {
+  Husnummer: ['adgangsadressebetegnelse'],
+  Adresse: ['adressebetegnelse']
+};
+
+exports.historyTableModels = entityNames.reduce((memo, entityName) => {
+  const rawTableModel = exports.rawTableModels[entityName];
+  const excludedFields = ['registrering', 'eventopret', 'eventopdater', ...(fieldsExcludedFromHistory[entityName] || [])];
+  memo[entityName] = {
+    table: `dar1_${entityName}_history`,
+    entity: `dar1_${entityName}_history`,
+    primaryKey: ['rowkey'],
+    columns: rawTableModel.columns.filter(column => !(excludedFields.includes(column.name)))
+  };
+  return memo;
+}, {});
+
 exports.currentTableModels = entityNames.reduce((memo, entityName) => {
   memo[entityName] = {
     table: `dar1_${entityName}_current`,
     entity: `dar1_${entityName}_current`,
     primaryKey: ['id'],
-    columns: exports.rawTableModels[entityName].columns.slice()
+    columns: exports.historyTableModels[entityName].columns.filter(column => column.name !== 'virkning')
   };
   return memo;
 }, {});

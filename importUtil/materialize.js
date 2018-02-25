@@ -115,6 +115,7 @@ const materialize = (client, txid, tableModels, materialization) => go(function*
 const  materializeFromScratch = (client, txid, tablemodels, materialization) => go(function*() {
   const model = tablemodels[materialization.table];
   yield initializeFromScratch(client, txid, materialization.view, model);
+  yield client.query(`ANALYZE ${materialization.table}`);
 
 });
 

@@ -23,7 +23,7 @@ function getRandomInt(min, max) {
 }
 
 describe('Import af DAR 1.0 udtræk', function () {
-  this.timeout(10000);
+  this.timeout(60000);
   testdb.withTransactionEach('empty', (clientFn) => {
     it('Kan importere initielt udtræk', q.async(function*() {
       const client = clientFn();
@@ -70,7 +70,7 @@ describe('Import af DAR 1.0 udtræk', function () {
 });
 
 describe('Import af changesets', function() {
-  this.timeout(10000);
+  this.timeout(60000);
   testdb.withTransactionEach('empty', clientFn => {
     const INITIAL_CHANGESET = {
       Adressepunkt: [{
@@ -373,7 +373,6 @@ describe('Import af changesets', function() {
           yield importDarImpl.importChangeset(client, txid, navngivenVejKommunedelChange);
         }));
       }));
-
       let updatedAddress = (yield client.queryRows('select * from adgangsadresser'))[0];
       expect(updatedAddress.vejkode).to.equal(700);
 

@@ -11,14 +11,14 @@ CREATE VIEW dar1_adgangsadresser_view AS
     dar1_status_til_dawa_status(hn.status)
                                                                 AS objekttype,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
-     FROM dar1_husnummer hn2
+     FROM dar1_husnummer_history hn2
      WHERE hn.id = hn2.id)
                                                                 AS oprettet,
     GREATEST((SELECT max(lower(ap2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
-              FROM dar1_adressepunkt_current ap2
+              FROM dar1_adressepunkt_history ap2
               WHERE ap2.id = hn.adgangspunkt_id),
              (SELECT max(lower(hn2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
-              FROM dar1_husnummer_current hn2
+              FROM dar1_husnummer_history hn2
               WHERE hn.id = hn2.id))
                                                                 AS aendret,
     ap.id                                                       AS adgangspunktid,

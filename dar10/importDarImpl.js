@@ -16,6 +16,7 @@ const tableModels = require('../psql/tableModel');
 const Range = require('../psql/databaseTypes').Range;
 const materialize = require('../importUtil/materialize');
 const {recomputeMaterializedDawa, materializeDawa} = materialize;
+const { mergeValidTime } = require('../history/common');
 
 const ALL_DAR_ENTITIES = [
   'Adresse',
@@ -93,6 +94,20 @@ function getDawaSeqNum(client) {
   return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history').then(result => result.rows[0].seqnum);
 }
 
+const initializeDar10HistoryTables = (client) => go(function*() {
+  for(let entityName of Object.keys(dar10TableModels.historyTableModels)) {
+    const rawTableModel = dar10TableModels.rawTableModels[entityName];
+    const historyTableModel = dar10TableModels.historyTableModels[entityName];
+    const historyColumnNames = historyTableModel.columns.map(column => column.name);
+    yield client.query(`CREATE TEMP TABLE unmerged AS (
+    SELECT ${historyColumnNames} FROM ${rawTableModel.table} WHERE upper_inf(registrering)); analyze unmerged`);
+    yield mergeValidTime(client, 'unmerged', 'merged', ['id'], _.without(historyColumnNames, 'virkning'));
+    yield client.query(`UPDATE merged SET rowkey = nextval('rowkey_sequence')`);
+    yield client.query(`INSERT INTO ${historyTableModel.table}(${historyColumnNames.join(', ')}) (SELECT ${historyColumnNames.join(', ')} FROM merged)`);
+    yield client.query(`DROP TABLE unmerged; DROP TABLE merged; ANALYZE ${historyTableModel.table}`);
+  }
+});
+
 const importInitial = (client, txid, dataDir, skipDawa) => go(function* () {
   yield setInitialMeta(client);
   yield withDar1Transaction(client, 'initial', () => go(function* () {
@@ -100,6 +115,10 @@ const importInitial = (client, txid, dataDir, skipDawa) => go(function* () {
       const filePath = path.join(dataDir, ndjsonFileName(entityName));
       const tableName = dar10TableModels.rawTableModels[entityName].table;
       yield streamToTable(client, entityName, filePath, tableName, true);
+      yield client.query(`ANALYZE ${tableName}`);
+    }
+    yield initializeDar10HistoryTables(client);
+    for (let entityName of ALL_DAR_ENTITIES) {
       yield materialize.materializeFromScratch(client, txid, tableModels.tables,
         dar10TableModels.currentTableMaterializations[entityName]);
     }
@@ -232,6 +251,31 @@ const materializeCurrent = (client, txid, entityName) => go(function* () {
   yield materialize.dropTempDirtyTable(client, tableModel);
 });
 
+const materializeHistory = (client, txid, entity) => go(function*() {
+  const historyTableModel = dar10TableModels.historyTableModels[entity];
+  const historyTableColumnNames = historyTableModel.columns.map(column => column.name);
+  const rawTableModel = dar10TableModels.rawTableModels[entity];
+  yield client.query(`CREATE TEMP TABLE dirty AS (SELECT DISTINCT id FROM ${rawTableModel.table}_changes WHERE txid = ${txid})`);
+  yield client.query(`CREATE TEMP TABLE unmerged AS (SELECT null::integer as rowkey, ${_.without(historyTableColumnNames, 'rowkey').join(', ')}
+  FROM ${rawTableModel.table} NATURAL JOIN dirty WHERE upper_inf(registrering))`);
+  yield mergeValidTime(client, 'unmerged', 'desired', ['id'], _.without(historyTableColumnNames, 'virkning'));
+  yield client.query(`CREATE TEMP TABLE current AS (select * from ${historyTableModel.table} NATURAL JOIN dirty)`);
+  yield client.query(`UPDATE desired SET rowkey = current.rowkey FROM current WHERE desired.id = current.id AND desired.virkning = current.virkning`);
+  yield client.query(`UPDATE desired SET rowkey = nextval('rowkey_sequence') WHERE rowkey IS NULL`);
+  yield tableDiffNg.computeDifferencesView(client, txid, 'desired', 'current', historyTableModel);
+  yield client.query('DROP TABLE dirty; DROP TABLE unmerged; DROP TABLE desired; DROP TABLE current');
+  yield client.query(`analyze ${historyTableModel.table}`);
+  yield client.query(`analyze ${historyTableModel.table}_changes`);
+  yield tableDiffNg.applyChanges(client, txid, historyTableModel);
+});
+
+const materializeHistoryDarTables =
+  (client, txid, darEntitiesWithNewRows) => go(function* () {
+    for (let entity of darEntitiesWithNewRows) {
+      yield materializeHistory(client, txid, entity);
+    }
+  });
+
 /**
  * Given updated DAR tables, but the corresponding insert_, update_ and delete_ tables still present,
  * incrementially update the _current tables.
@@ -344,6 +388,7 @@ const propagateIncrementalChanges =
     if (darEntitiesWithNewRows.length === 0 && entitiesChangedDueToVirkningTime.length === 0) {
       return;
     }
+    yield materializeHistoryDarTables(client, txid, darEntitiesWithNewRows);
     yield materializeCurrentDarTables(
       client,
       txid,
@@ -422,7 +467,7 @@ VALUES ((select current_tx from dar1_meta), NOW(), $1, $2)`,
 
 module.exports = {
   importFromFiles: importFromFiles,
-  importInitial: importInitial,
+  importInitial,
   importIncremental,
   applyIncrementalDifferences: propagateIncrementalChanges,
   withDar1Transaction: withDar1Transaction,
@@ -432,6 +477,7 @@ module.exports = {
   clearDar: clearDar,
   ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
   internal: {
+    initializeDar10HistoryTables,
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,
     getMeta: getMeta,

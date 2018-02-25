@@ -12,7 +12,7 @@ CREATE VIEW dar1_enhedsadresser_view AS
             FROM enhedsadresser
             WHERE enhedsadresser.id = adr.id
           )) AS oprettet,
-    lower(adr.virkning) AT TIME ZONE 'Europe/Copenhagen' AS aendret,
+    (SELECT MAX(lower(virkning)) AT TIME ZONE 'Europe/Copenhagen' from dar1_adresse_history h WHERE h.id = adr.id) AS aendret,
     lower(adr.etagebetegnelse) AS etage,
     lower(adr.dørbetegnelse) AS doer
   FROM dar1_adresse_current adr
