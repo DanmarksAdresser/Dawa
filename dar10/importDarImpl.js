@@ -360,8 +360,7 @@ function advanceVirkningTime(client, txid, darEntitiesWithNewRows, virkningTime)
 }
 
 const materializeDawaBaseTables = (client, txid) => go(function* () {
-  for (let entity of ['vejstykke', 'adgangsadresse', 'adresse', 'vejpunkt', 'navngivenvej', 'vejstykke_postnummer', 'navngivenvej_postnummer']) {
-    let materialization = dar10TableModels.dawaMaterializations[entity];
+  for (let materialization  of Object.values(dar10TableModels.dawaMaterializations)) {
     yield materialize.materialize(client, txid, tableModels.tables, materialization);
   }
 });

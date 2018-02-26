@@ -120,7 +120,7 @@ exports.currentTableModels = entityNames.reduce((memo, entityName) => {
     table: `dar1_${entityName}_current`,
     entity: `dar1_${entityName}_current`,
     primaryKey: ['id'],
-    columns: exports.historyTableModels[entityName].columns.filter(column => column.name !== 'virkning')
+    columns: exports.historyTableModels[entityName].columns.filter(column => !['virkning', 'rowkey'].includes(column.name))
   };
   return memo;
 }, {});
@@ -269,6 +269,7 @@ const vejpunktMaterialization = {
     }
   ]
 };
+
 
 exports.dawaMaterializations = {
   vejstykke: vejstykkerMaterialization,

@@ -381,6 +381,7 @@ exports.toReplikeringTilknytningModel = temaModel => {
 exports.toReplikeringTilknytningDbBinding = temaModel => {
   return {
     table: temaModel.tilknytningTable,
+    legacyResource: true,
     attributes: temaModel.tilknytningFields.reduce((memo, tilknytningField) => {
       const attr = {};
       if(tilknytningField.formatter) {

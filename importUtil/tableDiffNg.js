@@ -178,12 +178,10 @@ const computeDifferencesSubset = (client, txid, srcTableOrView, dirtyTable, tabl
 
 const applyInserts = (client, txid, tableModel) => go(function* () {
   const columnList = selectList(null, allColumnNames(tableModel));
-  yield assignSequenceNumbers(client, txid, tableModel, 'insert');
   yield client.query(`INSERT INTO ${tableModel.table}(${columnList}) (SELECT ${columnList} FROM ${tableModel.table}_changes WHERE txid = ${txid} and operation = 'insert')`);
 });
 
 const applyDeletes = (client, txid, tableModel) => go(function* () {
-  yield assignSequenceNumbers(client, txid, tableModel, 'delete');
   yield client.query(`DELETE FROM ${tableModel.table} t USING ${tableModel.table}_changes c WHERE c.txid = ${txid} AND operation='delete' AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
 });
 
@@ -191,7 +189,6 @@ const applyUpdates = (client, txid, tableModel) => go(function* () {
   const columnsToUpdate = nonPrimaryColumnNames(tableModel);
   if (columnsToUpdate.length > 0) {
     const updateClause = columnsToUpdate.map(column => `${column} = c.${column}`).join(', ');
-    yield assignSequenceNumbers(client, txid, tableModel, 'update');
     yield client.query(`UPDATE ${tableModel.table} t SET ${updateClause} FROM ${tableModel.table}_changes c WHERE c.txid = ${txid} AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
   }
 });
@@ -361,6 +358,25 @@ const del = (client, txid, tableModel, row) => go(function* () {
   (SELECT $1, null, 'delete', false, ${nonDerivedParamExpr})`, params);
 });
 
+/**
+ * Assign sequence number to multiple changes in correct order, respecting any foreign key relationships.
+ * Tables must be provided in order, such that any table only references tables before it.
+ * Assumes that foreign keys are immutable, such that order of updates does not matter.
+ * @param client
+ * @param txid
+ * @param orderedTableModels
+ */
+const assignSequenceNumbersToDependentTables = (client, txid, orderedTableModels) => go(function*() {
+  const reversedTableModels = orderedTableModels.slice().reverse();
+  for(let tableModel of reversedTableModels) {
+    yield assignSequenceNumbers(client, txid, tableModel, 'delete');
+  }
+  for(let tableModel of orderedTableModels) {
+    yield assignSequenceNumbers(client, txid, tableModel, 'insert');
+    yield assignSequenceNumbers(client, txid, tableModel, 'update');
+  }
+});
+
 module.exports = {
   computeInserts,
   computeInsertsSubset,
@@ -383,5 +399,6 @@ module.exports = {
   insert,
   update,
   del,
-  getChangeTableSql
+  getChangeTableSql,
+  assignSequenceNumbersToDependentTables
 };

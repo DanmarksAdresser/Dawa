@@ -438,9 +438,8 @@ const tilknytninger_mat = {
   ]
 };
 
-dar10TableModels.rawTableModels
-
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
+const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
 exports.tables = Object.assign({
   adgangsadresser,
@@ -463,6 +462,7 @@ exports.tables = Object.assign({
   tilknytninger_mat
 }, dagiTables,
   dar10RawTables,
+  dar10HistoryTables,
   dar10CurrentTables);
 
 exports.materializations = Object.assign({

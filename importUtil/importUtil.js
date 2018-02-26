@@ -12,6 +12,7 @@ const q = require('q');
 const split2 = require('split2');
 const through2 = require('through2');
 const _ = require('underscore');
+const {applySequenceNumbersInOrder} = require('./materialize');
 
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 
@@ -157,6 +158,8 @@ const withImportTransaction = (client, description, fn) =>
        d AS (UPDATE current_tx SET txid = (SELECT txid FROM id))
        INSERT INTO transactions(txid, description) (select txid, $1 FROM id) RETURNING txid`, [description])).rows[0].txid;
     const result = yield fn(txid);
+
+    yield applySequenceNumbersInOrder(client, txid);
     yield client.query(`UPDATE current_tx SET txid=null`);
     return result;
   }));

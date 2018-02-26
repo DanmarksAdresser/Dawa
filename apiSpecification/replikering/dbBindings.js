@@ -3,6 +3,7 @@ const {formatHusnr} = require('../husnrUtil');
 const datamodels = require("./datamodel");
 const {selectIsoDate: selectLocalDateTime, selectIsoDateUtc: selectIsoTimestampUtc} = require('../common/sql/sqlUtil');
 const temaModels = require('../../dagiImport/temaModels');
+const darReplikeringModels = require('../../dar10/replikeringModels');
 
 const normalizeAttr = (attrName, bindingAttr) =>
   Object.assign(
@@ -32,6 +33,7 @@ const normalize = (datamodels, unnormalizedBindings) =>
 const unnormalizedBindings = {
   adgangsadresse: {
     table: 'adgangsadresser',
+    legacyResource: true,
     attributes: {
       status: {
         column: 'objekttype'
@@ -89,6 +91,7 @@ const unnormalizedBindings = {
   },
   adresse: {
     table: 'enhedsadresser',
+    legacyResource: true,
     attributes: {
       status: {
         column: 'objekttype'
@@ -114,10 +117,12 @@ const unnormalizedBindings = {
   },
   ejerlav: {
     table: 'ejerlav',
+    legacyResource: true,
     attributes: {}
   },
   jordstykketilknytning: {
     table: 'jordstykker_adgadr',
+    legacyResource: true,
     attributes: {
       adgangsadresseid: {
         column: 'adgangsadresse_id'
@@ -126,6 +131,7 @@ const unnormalizedBindings = {
   },
   navngivenvej: {
     table: 'navngivenvej',
+    legacyResource: true,
     attributes: {
       oprettet: {
         formatter: timestampFormatter,
@@ -139,10 +145,12 @@ const unnormalizedBindings = {
   },
   stednavntilknytning: {
     table: 'stednavne_adgadr',
+    legacyResource: true,
     attributes: {}
   },
   vejstykke: {
     table: 'vejstykker',
+    legacyResource: true,
     attributes: {
       kommunekode: {
         formatter: kode4String,
@@ -167,6 +175,7 @@ const unnormalizedBindings = {
   },
   vejstykkepostnummerrelation: {
     table: 'vejstykkerpostnumremat',
+    legacyResource: true,
     attributes: {
       kommunekode: {
         formatter: kode4String
@@ -181,6 +190,7 @@ const unnormalizedBindings = {
   },
   postnummer: {
     table: 'postnumre',
+    legacyResource: true,
     attributes: {
       nr: {
         formatter: kode4String
@@ -188,6 +198,14 @@ const unnormalizedBindings = {
     }
   },
 };
+
+for(let [entityName, binding] of Object.entries( darReplikeringModels.currentReplikeringBindings)) {
+  unnormalizedBindings[`${entityName}_current`] = binding;
+}
+
+for(let [entityName, binding] of Object.entries( darReplikeringModels.historyReplikeringBindings)) {
+  unnormalizedBindings[`${entityName}_history`] = binding;
+}
 
 for (let temaModel of temaModels.modelList) {
   unnormalizedBindings[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningDbBinding(temaModel);

@@ -3,6 +3,7 @@ const assert = require('assert');
 const definitions = require('../commonSchemaDefinitions');
 const temaModels = require('../../dagiImport/temaModels');
 const schemaUtl = require('../../apiSpecification/schemaUtil');
+const darReplikeringModels = require('../../dar10/replikeringModels');
 
 // const VALID_TYPES = [
 //   'integer',
@@ -23,7 +24,7 @@ const defaultSchemas = {
   uuid: definitions.UUID,
   timestamp: {type: 'string'},
   localdatetime: {type: 'string'},
-  
+  point2d: {type: 'object'}
 };
 module.exports = {
   adgangsadresse: {
@@ -488,6 +489,14 @@ module.exports = {
 
 for (let temaModel of temaModels.modelList) {
   module.exports[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningModel(temaModel);
+}
+
+for(let [entityName, model] of Object.entries( darReplikeringModels.currentReplikeringModels)) {
+  module.exports[`${entityName}_current`] = model;
+}
+
+for(let [entityName, model] of Object.entries( darReplikeringModels.historyReplikeringModels)) {
+  module.exports[`${entityName}_history`] = model;
 }
 
 const getDefaultSchema = (type, nullable) => {
