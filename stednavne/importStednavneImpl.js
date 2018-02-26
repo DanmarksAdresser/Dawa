@@ -25,6 +25,9 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   const jsonTransformer = JSONStream.parse('features.*');
   const mapFn = geojsonFeature => {
     const raw = geojsonFeature.properties;
+    if(raw.BRUGSPRIORITET !== 'primær') {
+      return null;
+    }
     const geometry = geojsonFeature.geometry;
     let visueltCenter = null;
     if(geometry.type === 'Polygon') {
