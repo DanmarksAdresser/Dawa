@@ -133,6 +133,21 @@ const getRequestId = req => {
   return req.header('X-Amz-Cf-Id');
 };
 
+const parseQueryParams = (parameterSpec, params) => {
+  const parseResult = parseParameters(parameterSpec, params);
+  if (parseResult.errors.length > 0) {
+      return [queryParameterFormatErrorResponse(parseResult.errors), null];
+  }
+  const validationErrors = validateParameters(parameterSpec, parseResult.params);
+  if (validationErrors.length > 0) {
+    return [queryParameterFormatErrorResponse(validationErrors), null];
+  }
+  return [null, parseResult.params];
+
+};
+
+exports.parseQueryParams = parseQueryParams;
+
 function parseAndProcessParameters(resourceSpec, pathParams, queryParams) {
   /*
    * Parse and validate the parameters
@@ -345,7 +360,10 @@ exports.materializeResponse = (client, resourceSpec, baseUrl, pathParams, queryP
   }
 });
 
-exports.createExpressHandler = function (resourceSpec) {
+exports.resourceResponseHandler = resourceSpec => (client, baseUrl, pathParams, queryParams) =>
+  prepareResponse(client, resourceSpec, baseUrl, pathParams, queryParams);
+
+exports.createExpressHandler = function (responseHandler) {
   return function (req, res) {
     go(function* () {
       const requestContext = {
@@ -390,7 +408,7 @@ exports.createExpressHandler = function (resourceSpec) {
       };
       const process = databasePools.get('prod').withConnection(clientOptions, (client) => {
         return go(function* () {
-          const preparedResponse = yield this.delegateAbort(prepareResponse(client, resourceSpec, baseUrl, req.params, req.query));
+          const preparedResponse = yield this.delegateAbort(responseHandler(client, baseUrl, req.params, req.query));
           requestContext.status = preparedResponse.status;
           return yield this.delegateAbort(serveResponse(client, req, res, preparedResponse, initialDataSignal));
         });

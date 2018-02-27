@@ -32,6 +32,7 @@ const normalize = (datamodels, unnormalizedBindings) =>
 
 const unnormalizedBindings = {
   adgangsadresse: {
+    path: '/replikering/adgangsadresser',
     table: 'adgangsadresser',
     legacyResource: true,
     attributes: {
@@ -90,6 +91,7 @@ const unnormalizedBindings = {
     }
   },
   adresse: {
+    path: '/replikering/adresser',
     table: 'enhedsadresser',
     legacyResource: true,
     attributes: {
@@ -116,11 +118,13 @@ const unnormalizedBindings = {
     }
   },
   ejerlav: {
+    path: '/replikering/ejerlav',
     table: 'ejerlav',
     legacyResource: true,
     attributes: {}
   },
   jordstykketilknytning: {
+    path: '/replikering/jordstykketilknytninger',
     table: 'jordstykker_adgadr',
     legacyResource: true,
     attributes: {
@@ -130,6 +134,7 @@ const unnormalizedBindings = {
     }
   },
   navngivenvej: {
+    path: '/replikering/navngivneveje',
     table: 'navngivenvej',
     legacyResource: true,
     attributes: {
@@ -144,11 +149,13 @@ const unnormalizedBindings = {
     }
   },
   stednavntilknytning: {
+    path: '/replikering/stednavntilknytninger',
     table: 'stednavne_adgadr',
     legacyResource: true,
     attributes: {}
   },
   vejstykke: {
+    path: '/replikering/vejstykker',
     table: 'vejstykker',
     legacyResource: true,
     attributes: {
@@ -174,6 +181,7 @@ const unnormalizedBindings = {
     }
   },
   vejstykkepostnummerrelation: {
+    path: '/replikering/vejstykkepostnummerrelationer',
     table: 'vejstykkerpostnumremat',
     legacyResource: true,
     attributes: {
@@ -189,6 +197,7 @@ const unnormalizedBindings = {
     }
   },
   postnummer: {
+    path: '/replikering/postnumre',
     table: 'postnumre',
     legacyResource: true,
     attributes: {
@@ -200,11 +209,11 @@ const unnormalizedBindings = {
 };
 
 for(let [entityName, binding] of Object.entries( darReplikeringModels.currentReplikeringBindings)) {
-  unnormalizedBindings[`${entityName}_current`] = binding;
+  unnormalizedBindings[`dar_${entityName.toLowerCase()}_aktuel`] = binding;
 }
 
 for(let [entityName, binding] of Object.entries( darReplikeringModels.historyReplikeringBindings)) {
-  unnormalizedBindings[`${entityName}_history`] = binding;
+  unnormalizedBindings[`dar_${entityName.toLowerCase()}_historik`] = binding;
 }
 
 for (let temaModel of temaModels.modelList) {

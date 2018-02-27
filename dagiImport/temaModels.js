@@ -373,13 +373,13 @@ exports.toReplikeringTilknytningModel = temaModel => {
   });
   const attributes = [adgAdrAttr, ...tilknytningTemaKeyFields];
   return {
-    path: `/replikering/${temaModel.tilknytningPlural}`,
     attributes: attributes
   }
 };
 
 exports.toReplikeringTilknytningDbBinding = temaModel => {
   return {
+    path: `/replikering/${temaModel.tilknytningPlural}`,
     table: temaModel.tilknytningTable,
     legacyResource: true,
     attributes: temaModel.tilknytningFields.reduce((memo, tilknytningField) => {

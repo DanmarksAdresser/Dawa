@@ -28,7 +28,6 @@ const defaultSchemas = {
 };
 module.exports = {
   adgangsadresse: {
-    path: '/replikering/adgangsadresser',
     attributes: [
       {
         name: 'id',
@@ -212,7 +211,6 @@ module.exports = {
     ]
   },
   adresse: {
-    path: '/replikering/adresser',
     attributes: [
       {
         name: 'id',
@@ -279,7 +277,6 @@ module.exports = {
     ]
   },
   ejerlav: {
-    path: '/replikering/ejerlav',
     attributes: [
       {
         name: 'kode',
@@ -295,7 +292,6 @@ module.exports = {
       }]
   },
   jordstykketilknytning: {
-    path: '/replikering/jordstykketilknytninger',
     attributes: [
       {
         name: 'ejerlavkode',
@@ -318,7 +314,6 @@ module.exports = {
     ]
   },
   navngivenvej: {
-    path: '/replikering/navngivneveje',
     attributes: [
       {
         name: 'id',
@@ -377,7 +372,6 @@ module.exports = {
   },
   postnummer:
     {
-      path: '/replikering/postnumre',
       attributes: [
         {
           name: 'nr',
@@ -402,7 +396,6 @@ module.exports = {
         }]
     },
   stednavntilknytning: {
-    path: '/replikering/stednavntilknytninger',
     attributes: [{
       name: 'stednavn_id',
       type: 'uuid',
@@ -416,7 +409,6 @@ module.exports = {
     }]
   },
   vejstykke: {
-    path: '/replikering/vejstykker',
     attributes: [
       {
         name: 'kommunekode',
@@ -464,7 +456,6 @@ module.exports = {
     ]
   },
   vejstykkepostnummerrelation: {
-    path: '/replikering/vejstykkepostnummerrelationer',
     attributes: [
       {
         name: 'kommunekode',
@@ -492,11 +483,11 @@ for (let temaModel of temaModels.modelList) {
 }
 
 for(let [entityName, model] of Object.entries( darReplikeringModels.currentReplikeringModels)) {
-  module.exports[`${entityName}_current`] = model;
+  module.exports[`dar_${entityName.toLowerCase()}_aktuel`] = model;
 }
 
 for(let [entityName, model] of Object.entries( darReplikeringModels.historyReplikeringModels)) {
-  module.exports[`${entityName}_history`] = model;
+  module.exports[`dar_${entityName.toLowerCase()}_historik`] = model;
 }
 
 const getDefaultSchema = (type, nullable) => {
