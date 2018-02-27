@@ -116,13 +116,14 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
     }
     const serials = Object.keys(serialToFileMap).map(serial => parseInt(serial, 10));
     const lastImportedSerial = yield getLastImportedSerial(client, oisModelName);
-    const serialsToImport = serials.filter(serial => serial > lastImportedSerial);
+    const lastTotalSerial = _.max(descriptors.filter(descriptor => descriptor.total).map(descriptor => descriptor.serial));
+    const firstSerialToImport = Math.max(lastImportedSerial+1, lastTotalSerial);
+    const serialsToImport = serials.filter(serial => serial >= firstSerialToImport);
     serialsToImport.sort((a, b) => a - b);
     if(serialsToImport.length === 0) {
       return [];
     }
-    const firstSerialToImport = serialsToImport[0];
-    if (lastImportedSerial + 1 !== firstSerialToImport) {
+    if (lastImportedSerial + 1 !== firstSerialToImport && firstSerialToImport !== lastTotalSerial) {
       logger.error('Missing serial', {
         entity: oisModelName,
         serial: lastImportedSerial + 1
