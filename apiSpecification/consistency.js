@@ -34,7 +34,7 @@ var consistencyChecks = [
   {
     key: 'AdresserUdenRegion',
     description: 'Find alle adresser med adgangspunkt der geografisk ikke ligger indenfor en region',
-    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresser_temaer_matview rel  ON (rel.adgangsadresse_id = adgangsadresser.id AND rel.tema = 'region') where rel.adgangsadresse_id is null AND adgangsadresser.noejagtighed <> 'U'"
+    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN regionstilknytninger rt  ON (rt.adgangsadresseid = adgangsadresser.id) where rt.adgangsadresseid is null AND adgangsadresser.noejagtighed <> 'U'"
   },
   {
     key: 'AdresserUdenPostnr',

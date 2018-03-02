@@ -3,7 +3,9 @@ DROP TABLE IF EXISTS transactions CASCADE;
 CREATE TABLE transactions(
   txid INTEGER PRIMARY KEY,
   ts TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  description text NOT NULL
+  description text NOT NULL,
+  sekvensnummerfra INTEGER,
+  sekvensnummertil INTEGER
 );
 
 DROP TABLE IF EXISTS current_tx;

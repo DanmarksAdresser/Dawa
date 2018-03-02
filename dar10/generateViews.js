@@ -8,7 +8,9 @@ module.exports = function() {
     const currentTableModel = dar10TableModels.currentTableModels[entityName];
     const historyTable = dar10TableModels.historyTableModels[entityName].table;
     const columnNames = currentTableModel.columns.map(column => column.name);
-    currentViews.push(`CREATE VIEW ${currentTableModel.table}_view AS SELECT ${columnNames.join(', ')} FROM ${historyTable} WHERE dar1_current_time() <@ virkning;`);
+    currentViews.push(`DROP VIEW IF EXISTS ${currentTableModel.table}_view  CASCADE; 
+    CREATE VIEW ${currentTableModel.table}_view AS SELECT ${columnNames.join(', ')} 
+    FROM ${historyTable} WHERE dar1_current_time() <@ virkning;`);
   }
   return currentViews.join('\n');
 };

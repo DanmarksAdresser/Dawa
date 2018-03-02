@@ -9,9 +9,10 @@ const temaModels = require('../dagiImport/temaModels');
 const tableSchema = require('./tableModel');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const proddb = require('./proddb');
-const {withImportTransaction} = require('../importUtil/importUtil');
+const {withImportTransaction, withMigrationTransaction} = require('../importUtil/importUtil');
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
 const {refreshSubdividedTable} = require('../importUtil/geometryImport');
+const dar10Schema = require('../dar10/generateSqlSchemaImpl');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -73,12 +74,48 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
   });
 
   proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+      yield client.query(dar10Schema);
       yield client.query('DROP MATERIALIZED VIEW IF EXISTS kommuner CASCADE;DROP MATERIALIZED VIEW IF EXISTS regioner CASCADE;');
       yield createChangeTable(client, tableSchema.tables.jordstykker_adgadr);
       yield createChangeTable(client, tableSchema.tables.jordstykker);
       yield createChangeTable(client, tableSchema.tables.stednavne);
 
       yield client.query(generateAllTemaTables());
+      yield client.query(fs.readFileSync('psql/schema/tables/tx_operation_counts.sql', {encoding: 'utf8'}));
+      yield client.query(`
+ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
+ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
+ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
+CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_idx ON adgangsadresser(navngivenvejkommunedel_id); 
+ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
+ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
+ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
+CREATE INDEX IF NOT EXISTS adgangsadresser_supplerendebynavn_id_idx ON adgangsadresser(supplerendebynavn_id); 
+ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
+ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
+ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
+CREATE INDEX IF NOT EXISTS adgangsadresser_darkommuneinddeling_id_idx ON adgangsadresser(darkommuneinddeling_id); 
+ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
+ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
+ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
+CREATE INDEX IF NOT EXISTS adgangsadresser_adressepunkt_id_idx ON adgangsadresser(adressepunkt_id); 
+ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS postnummer_id UUID;
+ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS postnummer_id UUID;
+ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS postnummer_id UUID;
+CREATE INDEX IF NOT EXISTS adgangsadresser_postnummer_id_idx ON adgangsadresser(postnummer_id); 
+ALTER TABLE vejstykker ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
+CREATE INDEX IF NOT EXISTS vejstykker_navngivenvejkommunedel_id_idx ON vejstykker(navngivenvejkommunedel_id); 
+ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS navngivenvej_id UUID;
+CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_navngivenvej_id_idx ON vejstykkerpostnumremat(navngivenvej_id);
+ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
+CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_navngivenvejkommunedel_id_idx ON vejstykkerpostnumremat(navngivenvejkommunedel_id);
+ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS husnummer_id UUID;
+CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_husnummer_id_idx ON vejstykkerpostnumremat(husnummer_id);
+ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS postnummer_id UUID;
+CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_postnummer_id_idx ON vejstykkerpostnumremat(postnummer_id);
+ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS postnummer_id UUID;
+CREATE INDEX IF NOT EXISTS navngivenvej_postnummer_postnummer_id_idx ON navngivenvej_postnummer(postnummer_id);`);
+
       yield client.query(fs.readFileSync('psql/schema/tables/tilknytninger_mat.sql', {encoding: 'utf8'}));
       yield reloadDatabaseCode(client, 'psql/schema');
       for (let tema of temaModels.modelList) {
@@ -113,8 +150,20 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
 `);
         yield refreshSubdividedTable(client, tema.table, `${tema.table}_divided`, tema.primaryKey);
       }
+      yield client.query('ALTER TABLE transactions ADD COLUMN IF NOT EXISTS sekvensnummerfra INTEGER');
+      yield client.query('ALTER TABLE transactions ADD COLUMN IF NOT EXISTS sekvensnummertil INTEGER');
+      yield client.query(`WITH seqs AS (SELECT txid,
+                min(sequence_number) AS sekvensnummerfra,
+                max(sequence_number) AS sekvensnummertil
+              FROM transaction_history
+              GROUP BY txid)
+    UPDATE transactions  set sekvensnummerfra = seqs.sekvensnummerfra, sekvensnummertil = seqs.sekvensnummertil
+    FROM seqs WHERE transactions.txid = seqs.txid;`);
+      yield client.query(`INSERT INTO tx_operation_counts(txid, entity, operation, operation_count) 
+    (select txid, entity, operation, count(*) FROM transaction_history 
+    WHERE txid IS NOT NULL and entity <> 'undefined' group by txid, entity, operation)`);
       yield client.query('analyze');
-      yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+      yield withMigrationTransaction(client, '1.17.0 migrering', txid => go(function* () {
         for (let tema of temaModels.modelList) {
           yield migrateHistoryToChangeTable(client, txid, tableSchema.tables[tema.tilknytningTable]);
           yield client.query(`DROP TABLE ${tema.tilknytningTable}_history`);

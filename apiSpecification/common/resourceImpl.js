@@ -349,6 +349,8 @@ const materializeBody = (client, preparedResponse) => go(function* () {
   return result.join('');
 });
 
+exports.materializeBody = materializeBody;
+
 exports.materializeResponse = (client, resourceSpec, baseUrl, pathParams, queryParams) => go(function* () {
   const preparedResponse = yield this.delegateAbort(prepareResponse(client, resourceSpec, baseUrl, pathParams, queryParams));
   const body = yield materializeBody(client, preparedResponse);

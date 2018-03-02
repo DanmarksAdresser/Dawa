@@ -12,6 +12,7 @@ module.exports = [
   ...require('./politikreds'),
   ...require('./postnummer'),
   ...require('./region'),
+  ...require('./replikering'),
   ...require('./retskreds'),
   ...require('./senesteSekvensnummer'),
   ...require('./sogn'),

@@ -22,6 +22,12 @@ exports.getStringResponse = (dbClient, resourceSpec, pathParams, queryParams) =>
   return res.body;
 });
 
+exports.getJsonFromHandler = (client, handler, pathParams, queryParams) => go(function*() {
+  const response = yield handler(client, 'http://dawa', pathParams, queryParams);
+  const body =   yield resourceImpl.materializeBody(client, response);
+  return JSON.parse(body);
+});
+
 // Get the response of a resource as JSON
 exports.getJson = (dbClient, resourceSpec, pathParams, queryParams) => go(function*() {
   const str = yield exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams);
