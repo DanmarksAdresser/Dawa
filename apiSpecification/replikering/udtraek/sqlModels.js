@@ -28,7 +28,7 @@ const createSqlModel = (model, binding) => {
     const transformed = bindingAttr.selectTransform(columnName);
     return `${transformed} AS ${attName}`;
   }).join(', ');
-  const primaryAttrNames = model.attributes.filter(attr => attr.primary).map(attr => attr.name);
+  const primaryAttrNames = model.key;
   const primaryColumnNames = primaryAttrNames.map(attrName => binding.attributes[attrName].column);
   const createBaseQuery = (sequenceNumber) => {
     let subselect =

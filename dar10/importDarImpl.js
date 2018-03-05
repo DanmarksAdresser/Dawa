@@ -13,7 +13,6 @@ const postgresMapper = require('./postgresMapper');
 
 const streamToTable = require('./streamToTable');
 const tableModels = require('../psql/tableModel');
-const Range = require('../psql/databaseTypes').Range;
 const materialize = require('../importUtil/materialize');
 const {recomputeMaterializedDawa, materializeDawa} = materialize;
 const { mergeValidTime } = require('../history/common');
@@ -37,15 +36,14 @@ const ALL_DAR_ENTITIES = [
 
 /**
  * We have a single-row table with some metadata about the dar1 import process.
- * current_tx is the id of the currently executing transaction
  * last_event_id is the id of the last processed event from DAR1.
  * virkning is virkning time for computing DAWA values
  * @param client
  * @returns {*}
  */
-function getMeta(client) {
-  return client.queryp('select * from dar1_meta').then(result => result.rows[0]);
-}
+const getMeta = client => go(function*() {
+  return (yield client.queryRows('select * from dar1_meta'))[0];
+});
 
 function setMeta(client, meta) {
   const params = [];
@@ -90,10 +88,6 @@ const importFromFiles = (client, txid, dataDir, skipDawa) => go(function* () {
   }
 });
 
-function getDawaSeqNum(client) {
-  return client.queryp('SELECT MAX(sequence_number) as seqnum FROM transaction_history').then(result => result.rows[0].seqnum);
-}
-
 const initializeDar10HistoryTables = (client) => go(function*() {
   for(let entityName of Object.keys(dar10TableModels.historyTableModels)) {
     const rawTableModel = dar10TableModels.rawTableModels[entityName];
@@ -134,11 +128,10 @@ function clearDar(client) {
   return q.async(function* () {
     for(let tableModel of [...Object.values(dar10TableModels.rawTableModels),
       ...Object.values(dar10TableModels.currentTableModels),
-      'dar1_changelog', 'dar1_transaction']) {
+      ...Object.values(dar10TableModels.historyTableModels)]) {
       yield client.queryBatched(`delete from ${tableModel.table}`);
     }
     yield setMeta(client, {
-      current_tx: null,
       last_event_id: null,
       virkning: null,
       prev_virkning: null
@@ -245,7 +238,7 @@ const materializeCurrent = (client, txid, entityName) => go(function* () {
         (select virkning as current_virkning from dar1_meta) as
       cv WHERE (prev_virkning <  lower(virkning) and current_virkning >= lower(virkning))
              or (prev_virkning <  upper(virkning) and current_virkning >= upper(virkning))
-             and not exists(select * from ${tableModel.table}_dirty d WHERE d.id = ${rawTableModel.table}.id))`)
+             EXCEPT (SELECT id from ${tableModel.table}_dirty))`);
   yield materialize.computeChanges(client, txid, tableModels.tables, materialization);
   yield tableDiffNg.applyChanges(client, txid, tableModel);
   yield materialize.dropTempDirtyTable(client, tableModel);
@@ -452,15 +445,7 @@ function importChangeset(client, txid, changeset, skipDawa, virkningTime) {
  */
 function withDar1Transaction(client, source, fn) {
   return q.async(function* () {
-    const dawaSeqBefore = yield getDawaSeqNum(client);
-    yield client.queryp("update dar1_meta set current_tx= COALESCE( (SELECT max(id)+1 from dar1_transaction), 1)");
     yield fn();
-    const dawaSeqAfter = yield getDawaSeqNum(client);
-    const dawaSeqRange = new Range(dawaSeqBefore, dawaSeqAfter, '(]');
-    yield client.queryp(`insert into dar1_transaction(id, ts, source, dawa_seq_range) \
-VALUES ((select current_tx from dar1_meta), NOW(), $1, $2)`,
-      [source, dawaSeqRange]);
-    yield client.queryp("update dar1_meta set current_tx = NULL");
   })();
 }
 
@@ -473,13 +458,13 @@ module.exports = {
   importChangeset,
   initDawa: initDawa,
   updateDawa: updateDawa,
-  clearDar: clearDar,
+  clearDar,
   ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
   internal: {
+    getMeta,
     initializeDar10HistoryTables,
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,
-    getMeta: getMeta,
     setInitialMeta: setInitialMeta
   }
 };

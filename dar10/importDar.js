@@ -26,8 +26,11 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
     yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
       if (options.clear) {
         yield importDarImpl.clearDar(client);
+        yield importDarImpl.importInitial(client, txid, options.dataDir, options.skipDawa);
       }
-      yield importDarImpl.importIncremental(client, txid, options.dataDir, options.skipDawa);
+      else {
+        yield importDarImpl.importIncremental(client, txid, options.dataDir, options.skipDawa);
+      }
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
   }));

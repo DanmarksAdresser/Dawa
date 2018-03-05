@@ -12,6 +12,7 @@ module.exports = [
   require('./politikreds-page'),
   require('./postnummer-page'),
   require('./region-page'),
+  require('./replikering-page'),
   require('./retskreds-page'),
   require('./senesteSekvensnummer-page'),
   require('./sogn-page'),

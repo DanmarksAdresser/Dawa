@@ -31,7 +31,6 @@ exports.schemas = Object.keys(replikeringModels).reduce((memo, modelName) => {
   const properties = model.attributes.reduce((memo, attr) => {
     const property = JSON.parse(JSON.stringify(attr.schema));
     property.description = attr.description;
-    property.primary = attr.primary;
     property.deprecated = attr.deprecated;
     memo[attr.name] = property;
     return memo;

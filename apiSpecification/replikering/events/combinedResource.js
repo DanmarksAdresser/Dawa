@@ -5,6 +5,7 @@ const resourceImpl = require('../../common/resourceImpl');
 const resources = require('./resources');
 const registry = require('../../registry');
 const replikeringModels = require('../datamodel');
+const commonReplikeringParameters = require('../commonParameters');
 
 const parameters = [{
   name: 'entitet',
@@ -28,7 +29,8 @@ const combinedEventHandler = (client, baseUrl, pathParams, queryParams) => go(fu
 
 module.exports = {
   path: '/replikering/haendelser',
-  responseHandler: combinedEventHandler
+  responseHandler: combinedEventHandler,
+  queryParameters: [...commonReplikeringParameters.entitet]
 };
 
 registry.add('replikering', 'httpHandler', 'hændelser', module.exports);

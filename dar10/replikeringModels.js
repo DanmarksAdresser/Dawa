@@ -46,7 +46,6 @@ const replikeringBindingOverrides = {
 };
 
 const historyReplikeringModels = Object.entries(dar10TableModels.historyTableModels).reduce((memo, [entityName, tableModel]) => {
-  const path = `/replikering/${entityName}_history`;
   const typeOverrides = replikeringTypeOverrides[entityName] || {};
   const virkningAttributes = [
     {
@@ -65,16 +64,17 @@ const historyReplikeringModels = Object.entries(dar10TableModels.historyTableMod
       typeOverrides[column.name] :
       defaultReplikeringType[column.sqlType];
     assert(type);
-    const primary = column.name === 'id';
     return {
       name: column.name,
       type,
-      primary,
       description: 'Iikke tilgængelig'
     };
   });
   const attributes = [...virkningAttributes, ...otherAttributes];
-  memo[entityName] = {path, attributes};
+  memo[entityName] = {
+    key: ['rowkey'],
+    attributes
+  };
   return memo;
 }, {});
 
@@ -96,22 +96,22 @@ const historyReplikeringBindings = Object.entries(dar10TableModels.historyTableM
 }, {});
 
 const currentReplikeringModels = Object.entries(dar10TableModels.currentTableModels).reduce((memo, [entityName, tableModel]) => {
-  const path = `/replikering/${entityName}_current`;
   const typeOverrides = replikeringTypeOverrides[entityName] || {};
   const attributes = tableModel.columns.map(column => {
     const type = typeOverrides[column.name] ?
       typeOverrides[column.name] :
       defaultReplikeringType[column.sqlType];
     assert(type);
-    const primary = column.name === 'id';
     return {
       name: column.name,
       type,
-      primary,
       description: 'Iikke tilgængelig'
     };
   });
-  memo[entityName] = {path, attributes};
+  memo[entityName] = {
+    key: ['id'],
+    attributes
+  };
   return memo;
 }, {});
 

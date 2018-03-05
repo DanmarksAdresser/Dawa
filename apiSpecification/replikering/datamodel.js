@@ -5,17 +5,6 @@ const temaModels = require('../../dagiImport/temaModels');
 const schemaUtl = require('../../apiSpecification/schemaUtil');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 
-// const VALID_TYPES = [
-//   'integer',
-//   'real',
-//   'boolean',
-//   'string',
-//   'uuid',
-//   'timestamp',
-//   'localdatetime'
-// ];
-//
-
 const defaultSchemas = {
   integer: {type: 'integer'},
   real: {type: 'number'},
@@ -28,11 +17,11 @@ const defaultSchemas = {
 };
 module.exports = {
   adgangsadresse: {
+    key: ['id'],
     attributes: [
       {
         name: 'id',
         type: 'uuid',
-        primary: true,
         description: 'Universel, unik identifikation af adressen af datatypen UUID. ' +
         'Er stabil over hele adressens levetid (ligesom et CPR-nummer) ' +
         'dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode. ' +
@@ -211,11 +200,11 @@ module.exports = {
     ]
   },
   adresse: {
+    key: ['id'],
     attributes: [
       {
         name: 'id',
         type: 'uuid',
-        primary: true,
         description: 'Universel, unik identifikation af adressen af datatypen UUID.' +
         ' Er stabil over hele adressens levetid (ligesom et CPR-nummer)' +
         ' dvs. uanset om adressen evt. ændrer vejnavn, husnummer, postnummer eller kommunekode.' +
@@ -277,11 +266,11 @@ module.exports = {
     ]
   },
   ejerlav: {
+    key: ['kode'],
     attributes: [
       {
         name: 'kode',
         type: 'integer',
-        primary: true,
         schema: definitions.UpTo7,
         description: 'Unik identifikation af det matrikulære ”ejerlav”.' +
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.'
@@ -292,33 +281,31 @@ module.exports = {
       }]
   },
   jordstykketilknytning: {
+    key: ['ejerlavkode', 'matrikelnr', 'adgangsadresseid'],
     attributes: [
       {
         name: 'ejerlavkode',
         type: 'string',
-        primary: true,
         description: 'Ejerlavkoden. 4 cifre.'
       },
       {
         name: 'matrikelnr',
         type: 'string',
-        primary: true,
         description: 'Matrikelnummeret for jordstykket.'
       },
       {
         name: 'adgangsadresseid',
         type: 'uuid',
-        primary: true,
         description: 'Adgangsadressens id.',
       }
     ]
   },
   navngivenvej: {
+    key: ['id'],
     attributes: [
       {
         name: 'id',
         type: 'uuid',
-        primary: true,
         description: 'Den navngivne vejs unikke ID',
       },
       {
@@ -372,11 +359,11 @@ module.exports = {
   },
   postnummer:
     {
+      key: ['nr'],
       attributes: [
         {
           name: 'nr',
           type: 'string',
-          primary: true,
           schema: definitions.Postnr,
           description: 'Unik identifikation af det postnummeret. Postnumre fastsættes af Post Danmark.' +
           ' Repræsenteret ved fire cifre. Eksempel: ”2400” for ”København NV”.'
@@ -396,24 +383,23 @@ module.exports = {
         }]
     },
   stednavntilknytning: {
+    key: ['stednavn_id', 'adgangsadresse_id'],
     attributes: [{
       name: 'stednavn_id',
       type: 'uuid',
-      primary: true,
       description: 'stednavnets ID',
     }, {
       name: 'adgangsadresse_id',
       type: 'uuid',
-      primary: true,
       description: 'adgangsadressens ID'
     }]
   },
   vejstykke: {
+    key: ['kommunekode', 'kode'],
     attributes: [
       {
         name: 'kommunekode',
         type: 'string',
-        primary: true,
         description: 'Kommunekoden. 4 cifre.',
         schema: definitions.Kode4,
 
@@ -421,7 +407,6 @@ module.exports = {
       {
         name: 'kode',
         type: 'string',
-        primary: true,
         schema: definitions.Kode4,
         description: 'Identifikation af vejstykke. Er unikt indenfor den pågældende kommune. ' +
         'Repræsenteret ved fire cifre. Eksempel: I Københavns kommune er ”0004” lig ”Abel Cathrines Gade”.'
@@ -456,21 +441,19 @@ module.exports = {
     ]
   },
   vejstykkepostnummerrelation: {
+    key: ['kommunekode', 'vejkode', 'postnr'],
     attributes: [
       {
         name: 'kommunekode',
         type: 'string',
-        primary: true,
         schema: definitions.Kode4,
         description: 'Kommunekoden. 4 cifre.'
       }, {
         name: 'vejkode',
-        primary: true,
         schema: definitions.Kode4,
         description: 'Vejkoden. 4 cifre.'
       }, {
         name: 'postnr',
-        primary: true,
         schema: definitions.Kode4,
         description: 'Postnummeret. 4 cifre.'
       }]
@@ -500,7 +483,6 @@ for(let modelName of Object.keys(module.exports)) {
   const model = module.exports[modelName];
   for(let attr of model.attributes) {
     attr.schema = attr.schema || getDefaultSchema(attr.type, attr.nullable);
-    attr.primary = !!attr.primary;
     attr.deprecated = !!attr.deprecated;
   }
 }

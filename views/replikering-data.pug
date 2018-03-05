@@ -1,0 +1,11 @@
+extends sidebar-auto
+include includes/parameterDocMixins
+
+block main
+  h1 Replikering - databeskrivelser
+  p.lead Databeskrivelser for alle de entiteter, som udstilles på DAWAs replikerings-API.
+  - let sortedEntities = Object.keys(replikeringSchemas).sort();
+  each entity in sortedEntities
+    h2 #{entity}
+    +documentSchema3(replikeringSchemas[entity])
+

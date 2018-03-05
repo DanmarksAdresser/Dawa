@@ -181,9 +181,7 @@ describe('Import from DAR 1.0 API', () => {
         {
           Postnummer: 5
         });
-      const transactions = (yield client.queryp('select * from dar1_transaction')).rows;
       const records = (yield client.queryp('select * from dar1_postnummer order by rowkey')).rows;
-      expect(transactions).to.have.length(2);
       expect(records).to.have.length(2);
       const first = records[0];
       expect(first.eventopret).to.equal(1);

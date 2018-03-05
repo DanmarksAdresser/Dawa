@@ -3,9 +3,9 @@
 
 const sqlModels = require('./sqlModels');
 const representations = require('./representations');
-const parameters = require('./parameters');
 const resourcesUtil = require('../../common/resourcesUtil');
 const commonParameters = require('../../common/commonParameters');
+const commonReplikeringParameters = require("../commonParameters");
 const datamodels = require('../datamodel');
 const bindings = require('../dbBindings');
 const registry = require('../../registry');
@@ -18,10 +18,9 @@ module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
   {
     path: binding.path,
       pathParameters: [],
-    queryParameters: resourcesUtil.flattenParameters({
-      sekvensnummer: parameters.sekvensnummer,
-      formatParameters: commonParameters.format
-    }),
+    queryParameters: [...commonReplikeringParameters.sekvensnummer,
+      ...commonParameters.format]
+    ,
     representations: representations[datamodelName],
     sqlModel: sqlModels[datamodelName],
     singleResult: false,

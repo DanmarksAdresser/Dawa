@@ -358,7 +358,6 @@ exports.toReplikeringTilknytningModel = temaModel => {
   const adgAdrAttr = {
     name: 'adgangsadresseid',
     type: 'uuid',
-    primary: true,
     description: 'Adgangsadressens id.'
   };
   const tilknytningTemaKeyFields = _.zip(temaModel.primaryKey, temaModel.tilknytningKey).map(([primaryKeyCol, tilknytningKeyCol]) => {
@@ -366,13 +365,13 @@ exports.toReplikeringTilknytningModel = temaModel => {
     return {
       name: tilknytningKeyCol,
       type: temaField.type,
-      primary: true,
       schema: temaField.schema,
       description: temaField.description
     };
   });
   const attributes = [adgAdrAttr, ...tilknytningTemaKeyFields];
   return {
+    key: ['adgangsadresseid', ...temaModel.tilknytningKey],
     attributes: attributes
   }
 };

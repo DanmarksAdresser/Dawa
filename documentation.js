@@ -9,6 +9,8 @@ var docUtil = require('./docUtil');
 var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
+const replikeringModels = require('./apiSpecification/replikering/datamodel');
+const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/normalizedFieldSchemas');
 
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
@@ -44,11 +46,13 @@ function pugDocumentationParams(req) {
   return {
     url: paths.baseUrl(req),
     path: req.path,
-    jsonSchemas: jsonSchemas,
-    autocompleteSchemas: autocompleteSchemas,
-    parameterDoc: parameterDoc,
-    docUtil: docUtil,
-    packageJson: packageJson
+    jsonSchemas,
+    autocompleteSchemas,
+    parameterDoc,
+    docUtil,
+    packageJson,
+    replikeringModels,
+    replikeringSchemas
   };
 }
 
@@ -76,6 +80,7 @@ for(let område of ['adresser', 'dagi', 'bbr', 'matrikelkortet', 'stednavne']) {
   setupPugPage(`/dok/${område}`, `omraader/${område}.pug`);
 
 }
+setupPugPage('/dok/api/replikering-data', 'replikering-data.pug');
 setupPugPage('/', 'forside.pug');
 setupPugPage('/dok/om', 'om.pug');
 setupPugPage('/dok/api', 'apidoc-oversigt.pug');

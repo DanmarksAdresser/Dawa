@@ -5,43 +5,22 @@ SELECT virkning
 FROM dar1_meta;
 $$;
 
-CREATE OR REPLACE FUNCTION dar1_current_tx()
-  RETURNS INTEGER LANGUAGE SQL AS
-$$
-SELECT current_tx
-FROM dar1_meta;
-$$;
+DROP FUNCTION IF EXISTS dar1_current_tx();
 
 --
 -- From: https://wiki.postgresql.org/wiki/First/last_(aggregate)
 --
 -- Create a function that always returns the first non-NULL item
-CREATE OR REPLACE FUNCTION public.first_agg(ANYELEMENT, ANYELEMENT)
-  RETURNS ANYELEMENT LANGUAGE SQL IMMUTABLE STRICT AS $$
-SELECT $1;
-$$;
+DROP FUNCTION IF EXISTS public.first_agg(ANYELEMENT, ANYELEMENT) CASCADE;
 
 -- And then wrap an aggregate around it
 DROP AGGREGATE IF EXISTS public.first( ANYELEMENT ) CASCADE;
-CREATE AGGREGATE public.first (
-SFUNC = PUBLIC.first_agg,
-BASETYPE = ANYELEMENT,
-STYPE = ANYELEMENT
-);
 
 -- Create a function that always returns the last non-NULL item
-CREATE OR REPLACE FUNCTION public.last_agg(ANYELEMENT, ANYELEMENT)
-  RETURNS ANYELEMENT LANGUAGE SQL IMMUTABLE STRICT AS $$
-SELECT $2;
-$$;
+DROP FUNCTION IF EXISTS public.last_agg(ANYELEMENT, ANYELEMENT) CASCADE;
 
 -- And then wrap an aggregate around it
 DROP AGGREGATE IF EXISTS public.last( ANYELEMENT ) CASCADE;
-CREATE AGGREGATE public.last (
-SFUNC = PUBLIC.last_agg,
-BASETYPE = ANYELEMENT,
-STYPE = ANYELEMENT
-);
 
 CREATE OR REPLACE FUNCTION processForIndexing(TEXT)
   RETURNS TEXT AS $$
