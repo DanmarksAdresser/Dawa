@@ -14,14 +14,18 @@ const fields = Object.keys(datamodel).reduce((memo, entityName) => {
   const binding = dbBindings[entityName];
 
   // All events has these fields
-  const commonFields = [{
-    name: 'sekvensnummer'
-  }, {
-    name: 'tidspunkt',
-    formatter: d
-  }, {
-    name: 'operation'
-  }];
+  const commonFields = [
+    {
+      name: 'txid'
+    },
+    {
+      name: 'sekvensnummer'
+    }, {
+      name: 'tidspunkt',
+      formatter: d
+    }, {
+      name: 'operation'
+    }];
 
   // The fields specific for this entity are retrieved from the SQL model,
   // because there is a 1-1 correspondence between the internal and external model

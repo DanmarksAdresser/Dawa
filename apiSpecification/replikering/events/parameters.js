@@ -89,3 +89,14 @@ exports.tidspunkt = normalizeParameters([
   }
 ]);
 
+exports.txidInterval = normalizeParameters([
+  {
+    name: 'txidfra',
+    type: 'integer'
+  },
+  {
+    name: 'txidtil',
+    type: 'integer'
+  }
+]);
+

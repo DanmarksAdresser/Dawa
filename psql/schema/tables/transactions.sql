@@ -8,6 +8,8 @@ CREATE TABLE transactions(
   sekvensnummertil INTEGER
 );
 
+CREATE INDEX ON transactions(ts);
+
 DROP TABLE IF EXISTS current_tx;
 CREATE TABLE current_tx(
   txid INTEGER

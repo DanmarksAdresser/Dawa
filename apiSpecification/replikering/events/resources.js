@@ -21,6 +21,7 @@ _.each(Object.keys(datamodel), function(entityName) {
       keyParameters: parameters.keyParameters[entityName] || [],
       sekvensnummer: parameters.sekvensnummer,
       tidspunkt: parameters.tidspunkt,
+      txidInterval: parameters.txidInterval,
       formatParameters: commonParameters.format
     }),
     representations: representations[entityName],

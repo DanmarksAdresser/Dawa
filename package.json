@@ -54,6 +54,7 @@
     "terraformer-wkt-parser": "^1.1.0",
     "through2": "^2.0.1",
     "tmp": "0.0.31",
+    "toni": "^0.6.2",
     "transducers-js": "^0.4.174",
     "ts-csp": "^0.7.2",
     "underscore": "1.8.3",

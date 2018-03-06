@@ -20,7 +20,9 @@ const combinedUdtraekHandler = (client, baseUrl, pathParams, queryParams) => go(
 module.exports = {
   path: '/replikering/udtraek',
   responseHandler: combinedUdtraekHandler,
-  queryParameters: [...commonReplikeringParameters.entitet, ...commonReplikeringParameters.sekvensnummer]
+  queryParameters: [...commonReplikeringParameters.entitet,
+    ...commonReplikeringParameters.txid,
+    ...commonReplikeringParameters.sekvensnummer,]
 };
 
 registry.add('replikering', 'httpHandler', 'udtræk', module.exports);

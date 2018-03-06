@@ -9,6 +9,9 @@ const _ = require('underscore');
 const databaseTypes = require('../psql/databaseTypes');
 const logger = require('../logger').forCategory('darImport');
 const spec = require('./spec');
+const Toni = require('toni');
+
+const MAX_ROWKEY = 1024 * 1024 * 1024;
 
 
 const Range = databaseTypes.Range;
@@ -44,9 +47,12 @@ function transformStatus(entity) {
 }
 
 exports.createMapper = function (entityName, validate) {
-  const seenRowkeys = new Set();
+  const seenRowkeys = new Toni(MAX_ROWKEY);
   return function (rawObject) {
-    if(seenRowkeys.has(rawObject.rowkey)) {
+    if(rawObject.rowkey >= MAX_ROWKEY) {
+      throw new Error('Rowkey too large: ' + rawObject.rowkey);
+    }
+    if(seenRowkeys.chk(rawObject.rowkey)) {
       logger.error("Skipping row (duplicate rowkey)", {
         entityName,
         rowkey: rawObject.rowkey

@@ -7,6 +7,13 @@ exports.sekvensnummer = [
   },
 ];
 
+exports.txid = [
+  {
+    name: 'txid',
+    type: 'integer'
+  },
+];
+
 exports.entitet = [{
   name: 'entitet',
   type: 'string',

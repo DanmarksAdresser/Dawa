@@ -30,9 +30,9 @@ const baseQuery = (model, binding) => {
     return `${transformed} AS ${attName}`;
   });
   const query = {
-    select: ['h.operation as operation', sqlUtil.selectIsoDateUtc('h.time') + ' as tidspunkt', 'h.sequence_number as sekvensnummer',
+    select: ['i.txid, i.operation as operation', sqlUtil.selectIsoDateUtc('t.ts') + ' as tidspunkt', 'changeid as sekvensnummer',
       ...selectAttributesClauses],
-    from: [`transaction_history h JOIN ${tableName}_changes i ON h.sequence_number = i.changeid`],
+    from: [`transactions t JOIN ${tableName}_changes i ON t.txid = i.txid`],
     whereClauses: ['public'],
     orderClauses: ['changeid'],
     sqlParams: []
@@ -53,20 +53,28 @@ const createSqlModel = (model, binding, filterParams) => {
       const sqlParts = baseQuery(model, binding);
       if (params.sekvensnummerfra) {
         const fromAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummerfra);
-        dbapi.addWhereClause(sqlParts, 'h.sequence_number >= ' + fromAlias);
+        dbapi.addWhereClause(sqlParts, 'changeid >= ' + fromAlias);
       }
       if (params.sekvensnummertil) {
         const toAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummertil);
-        dbapi.addWhereClause(sqlParts, 'h.sequence_number <= ' + toAlias);
+        dbapi.addWhereClause(sqlParts, 'changeid <= ' + toAlias);
       }
       if (params.tidspunktfra) {
         const timeFromAlias = dbapi.addSqlParameter(sqlParts, params.tidspunktfra);
-        dbapi.addWhereClause(sqlParts, 'h.time >=' + timeFromAlias);
+        dbapi.addWhereClause(sqlParts, 't.ts >=' + timeFromAlias);
       }
 
       if (params.tidspunkttil) {
         const timeToAlias = dbapi.addSqlParameter(sqlParts, params.tidspunkttil);
-        dbapi.addWhereClause(sqlParts, 'h.time <=' + timeToAlias);
+        dbapi.addWhereClause(sqlParts, 't.ts <=' + timeToAlias);
+      }
+      if(params.txidfra) {
+        const fromAlias = dbapi.addSqlParameter(sqlParts, params.txidfra);
+        dbapi.addWhereClause(sqlParts, 'i.txid >= ' + fromAlias);
+      }
+      if (params.txidtil) {
+        const toAlias = dbapi.addSqlParameter(sqlParts, params.txidtil);
+        dbapi.addWhereClause(sqlParts, 'i.txid <= ' + toAlias);
       }
       propertyFilter(sqlParts, params);
       const query = dbapi.createQuery(sqlParts);

@@ -16,6 +16,11 @@ for(let datamodelName of Object.keys(datamodels)) {
   const schema = globalSchemaObject({
     title: datamodelName + "hændelse",
     properties: {
+      txid: {
+        description: `Transaktions-ID. Transaktions-ID er fortløbende og genereres af DAWA hver gang
+        nye kildedata indlæses.`,
+        type: 'integer'
+      },
       sekvensnummer: {
         description: 'Unikt sekvensnummer for hændelsen.',
         type: 'integer'
@@ -31,10 +36,11 @@ for(let datamodelName of Object.keys(datamodels)) {
       },
       data: normalizedFieldSchemas.schemas[datamodelName]
     },
-    docOrder: ['sekvensnummer', 'tidspunkt', 'operation', 'data']
+    docOrder: ['txid', 'sekvensnummer', 'tidspunkt', 'operation', 'data']
   });
   const jsonMapper = function(row) {
     const result = {
+      txid: row.txid,
       operation: row.operation,
       tidspunkt: row.tidspunkt,
       sekvensnummer: row.sekvensnummer
