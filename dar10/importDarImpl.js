@@ -16,6 +16,7 @@ const tableModels = require('../psql/tableModel');
 const materialize = require('../importUtil/materialize');
 const {recomputeMaterializedDawa, materializeDawa} = materialize;
 const { mergeValidTime } = require('../history/common');
+const importDar09Impl = require('../darImport/importDarImpl');
 
 const ALL_DAR_ENTITIES = [
   'Adresse',
@@ -86,6 +87,7 @@ const importFromFiles = (client, txid, dataDir, skipDawa) => go(function* () {
   else {
     yield importInitial(client, txid, dataDir, skipDawa);
   }
+  yield importDar09Impl.updateSupplerendeBynavne(client);
 });
 
 const initializeDar10HistoryTables = (client) => go(function*() {

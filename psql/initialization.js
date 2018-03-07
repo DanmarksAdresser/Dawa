@@ -21,7 +21,10 @@ const stednavnTilknytningModel = require('../stednavne/stednavnTilknytningModel'
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
 const createChangeTables = (client)=> go(function*() {
-  const tableNames = ['ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser', 'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej', 'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr'];
+  const tableNames = [
+    'ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser',
+    'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
+    'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -93,7 +96,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql', init: false},
   {name: 'navngivenvej_postnummer', init: false},
   {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql', init: false},
-  {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql'},
+  {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql', init: false},
   {name: 'gridded_temaer_matview',     scriptFile: 'gridded-temaer-matview.sql', init:false},
   {name: 'tilknytninger_mat', init: false},
   {name: 'adgangsadresser_temaer_matview', init: false },

@@ -443,6 +443,20 @@ const updatePostnumreKommunekoderMat = client => go(function*() {
    insert into postnumre_kommunekoder_mat(postnr, kommunekode) (SELECT DISTINCT postnr, kommunekode FROM adgangsadresser where postnr is not null and kommunekode is not null)`);
 });
 
+const updateSupplerendeBynavne = client => go(function*() {
+  const tsvCol = _.findWhere(schemaModel.tables.supplerendebynavne_mat.columns, {name: 'tsv'});
+  yield client.query(`DELETE FROM supplerendebynavne_mat;
+  INSERT INTO supplerendebynavne_mat(navn, tsv)
+  (SELECT DISTINCT ON(navn) navn, ${tsvCol.derive('v')}
+  FROM supplerendebynavne_mat_view v)`);
+  yield client.query('DELETE FROM supplerendebynavn_kommune_mat;' +
+    'INSERT INTO supplerendebynavn_kommune_mat(supplerendebynavn, kommunekode)' +
+    '(SELECT supplerendebynavn, kommunekode from supplerendebynavn_kommune_mat_view)');
+  yield client.query('DELETE FROM supplerendebynavn_postnr_mat;' +
+    'INSERT INTO supplerendebynavn_postnr_mat(supplerendebynavn, postnr)' +
+    '(SELECT supplerendebynavn, postnr from supplerendebynavn_postnr_mat_view)');
+});
+
 /**
  * Assuming DAR tables are already populated, update DAR tables
  * from CSV, followed by an update of DAWA tables.
@@ -469,6 +483,7 @@ const updateFromDar = (client, txid, dataDir, fullCompare, skipDawa, skipRowsCon
     }
     yield updateVejstykkerPostnumreMat(client, txid);
     yield updatePostnumreKommunekoderMat(client);
+    yield updateSupplerendeBynavne(client);
   }
   else {
     logger.info('Skipping DAWA updates');
@@ -713,6 +728,7 @@ exports.initDarTables = initDarTables;
 exports.fullCompareAndUpdate = fullCompareAndUpdate;
 exports.updateVejstykkerPostnumreMat = updateVejstykkerPostnumreMat;
 exports.updatePostnumreKommunekoderMat = updatePostnumreKommunekoderMat;
+exports.updateSupplerendeBynavne = updateSupplerendeBynavne;
 
 exports.internal = {
   createTableAndLoadData: createTableAndLoadData,

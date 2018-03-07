@@ -23,6 +23,7 @@ module.exports = {
     },
     {
       name: 'postnr',
+      type: 'integer',
       multi: true
     }
   ])

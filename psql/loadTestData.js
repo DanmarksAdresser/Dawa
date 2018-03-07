@@ -51,6 +51,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
         yield importDarImpl.updateVejstykkerPostnumreMat(client, txid);
         yield importDarImpl.updatePostnumreKommunekoderMat(client);
+        yield importDarImpl.updateSupplerendeBynavne(client);
       }));
       client.allowParallelQueries = true;
       yield generateHistoryImpl.generateAdgangsadresserHistory(client);

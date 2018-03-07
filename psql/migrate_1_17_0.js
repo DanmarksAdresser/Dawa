@@ -79,6 +79,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield client.query(`DROP SEQUENCE IF EXISTS rowkey_sequence CASCADE;
 CREATE SEQUENCE rowkey_sequence START 1;
 `);
+      yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavne-view.sql', {encoding: 'utf8'}));
       yield createChangeTable(client, tableSchema.tables.jordstykker_adgadr);
       yield createChangeTable(client, tableSchema.tables.jordstykker);
       yield createChangeTable(client, tableSchema.tables.stednavne);
@@ -139,6 +140,8 @@ ALTER TABLE vejstykkerpostnumremat_changes ADD COLUMN IF NOT EXISTS postnummer_i
 CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_postnummer_id_idx ON vejstykkerpostnumremat(postnummer_id);
 ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE navngivenvej_postnummer_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
+ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS id UUID;
+ALTER TABLE navngivenvej_postnummer_changes ADD COLUMN IF NOT EXISTS id UUID;
 CREATE INDEX IF NOT EXISTS navngivenvej_postnummer_postnummer_id_idx ON navngivenvej_postnummer(postnummer_id);`);
 
       yield client.query(fs.readFileSync('psql/schema/tables/tilknytninger_mat.sql', {encoding: 'utf8'}));

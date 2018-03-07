@@ -184,20 +184,6 @@ const stormodtagere = {
   }]
 };
 
-const supplerendebynavne = {
-  table: 'supplerendebynavne',
-  primaryKey: ['supplerendebynavn', 'kommunekode', 'postnr'],
-  columns: [
-    {name: 'supplerendebynavn'},
-    {name: 'kommunekode'},
-    {name: 'postnr'},
-    {
-      name: 'tsv',
-      derive: table => ` to_tsvector('adresser', ${table}.supplerendebynavn)`
-    }
-  ]
-};
-
 const navngivenvej = {
   table: 'navngivenvej',
   entity: 'navngivenvej',
@@ -402,6 +388,56 @@ const jordstykker_adgadr = {
   ]
 };
 
+const supplerendebynavne_mat = {
+  table: 'supplerendebynavne_mat',
+  primaryKey: ['navn'],
+  columns: [
+    {
+      name: 'navn'
+    },
+    {
+      name: 'adgangsadresseid'
+    },
+    {
+      name: 'tsv',
+      derive: table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+    }]
+};
+
+const supplerendebynavn_postnr_mat = {
+  table: 'supplerendebynavn_postnr_mat',
+  primaryKey: ['supplerendebynavn', 'postnr'],
+  columns: [
+    {
+      name: 'supplerendebynavn'
+    },
+    {
+      name: 'postnr'
+    },
+    {
+      name: 'adgangsadresseid',
+      public: false
+    }
+  ]
+};
+
+const supplerendebynavn_kommune_mat = {
+  table: 'supplerendebynavn_kommune_mat',
+  primaryKey: ['supplerendebynavn', 'kommunekode'],
+  columns: [
+    {
+      name: 'supplerendebynavn'
+    },
+    {
+      name: 'kommunekode'
+    },
+    {
+      name: 'adgangsadresseid',
+      public: false
+    }
+  ]
+};
+
 const dagiTables = temaModels.modelList.reduce((memo, temaModel) => {
   memo[temaModel.table] = temaModels.toTableModel(temaModel);
   memo[temaModel.tilknytningTable] = temaModels.toTilknytningTableModel(temaModel);
@@ -442,25 +478,27 @@ const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels),
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
 exports.tables = Object.assign({
-  adgangsadresser,
-  enhedsadresser,
-  adgangsadresser_mat,
-  ejerlav,
-  postnumre,
-  stormodtagere,
-  adresser_mat,
-  supplerendebynavne,
-  vejpunkter,
-  navngivenvej,
-  navngivenvej_postnummer,
-  vejstykker,
-  vejstykkerpostnumremat,
-  stednavne,
-  stednavne_adgadr,
-  jordstykker,
-  jordstykker_adgadr,
-  tilknytninger_mat
-}, dagiTables,
+    adgangsadresser,
+    enhedsadresser,
+    adgangsadresser_mat,
+    ejerlav,
+    postnumre,
+    stormodtagere,
+    adresser_mat,
+    supplerendebynavne_mat,
+    supplerendebynavn_postnr_mat,
+    supplerendebynavn_kommune_mat,
+    vejpunkter,
+    navngivenvej,
+    navngivenvej_postnummer,
+    vejstykker,
+    vejstykkerpostnumremat,
+    stednavne,
+    stednavne_adgadr,
+    jordstykker,
+    jordstykker_adgadr,
+    tilknytninger_mat
+  }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
   dar10CurrentTables);
@@ -532,5 +570,36 @@ exports.materializations = Object.assign({
         columns: ['adgangsadresseid']
       }
     ]
+  },
+  supplerendebynavne: {
+    table: 'supplerendebynavne',
+    view: 'supplerendebynavne_view',
+    dependents: [
+      {
+        table: 'adgangsadresser',
+        columns: ['adgangsadresseid']
+      }
+    ]
+  },
+  supplerendebynavn_postnr: {
+    table: 'supplerendebynavn_postnr',
+    view: 'supplerendebynavn_postnr_view',
+    dependents: [
+      {
+        table: 'adgangsadresser',
+        columns: ['adgangsadresseid']
+      }
+    ]
+  },
+  supplerendebynavn_kommune: {
+    table: 'supplerendebynavn_kommune',
+    view: 'supplerendebynavn_kommune_view',
+    dependents: [
+      {
+        table: 'adgangsadresser',
+        columns: ['adgangsadresseid']
+      }
+    ]
   }
+
 }, dagiMaterializations);
