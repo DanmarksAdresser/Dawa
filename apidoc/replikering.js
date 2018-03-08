@@ -15,13 +15,14 @@ module.exports = [
   {
     path: '/replikering/udtraek',
     entity: 'udtraek',
-    subtext: 'Komplette dataudtræk',
+    subtext: `Modtag et komplet dataudtræk for en given entitet.`,
     parameters: [
       {
         name: 'entitet',
         doc: `Modtag et udtræk for den angivne entitet. Parameteren skal angives, man kan således
          kun hente udtræk for én entitet ad gangen. Eksempel: Hvis værdien 'adgangsadresse' angives
-         modtages et udtræk af adgangsadresser.`
+         modtages et udtræk af adgangsadresser. Se <a href="/dok/api/replikering-data">databeskrivelser</a>
+         for mulige værdier.`
       },
       {
       name: 'txid',
@@ -42,13 +43,15 @@ module.exports = [
   {
     path: '/replikering/haendelser',
     entity: 'haendelse',
-    subtext: 'Modtag hændelser om ændringer til data',
+    subtext: 'Modtag hændelser om ændringer til en given entitet.',
     parameters: [
       {
         name: 'entitet',
         doc: `Modtag hændelser for den pågældende entitet (type). Parameteren skal angives, man kan
         således kun modtage hændelser for én entitet ad gangen. Eksempel: Hvis værdien
-        'adgangsadresse' angives modtages hændelser for adgangsadresser.`
+        'adgangsadresse' angives modtages hændelser for adgangsadresser. 
+        Se <a href="/dok/api/replikering-data">databeskrivelser</a>
+         for mulige værdier.`
       },
       ...txidIntervalDoc,
       ...sekvensnummerIntervalDoc,
@@ -59,11 +62,12 @@ module.exports = [
   {
     path: '/replikering/transaktioner',
     entity: 'transaktion',
-    subtext: 'Transaktioner indeholder information om ændrede entiter.',
+    subtext: `Modtag metadata om udførte transaktioner, herunder transaktions-ID (txid) samt hvilke entiteter
+    der er ændrede af transaktionen.`,
     parameters: [
       {
         name: 'txid',
-        doc: 'Find transaktion med bestemt transaktionsid'
+        doc: 'Modtag transaktion med bestemt transaktionsid'
       },
       {
         name: 'txidfra',
@@ -81,7 +85,7 @@ module.exports = [
   {
     path: '/replikering/senestetransaktion',
     entity: 'transaktion',
-    subtext: 'Hent den senest udførte transaktion.',
+    subtext: 'Modtag metadata om den senest udførte transaktion herunder transaktions-ID.',
     parameters: [
       ...formatParameters
     ],

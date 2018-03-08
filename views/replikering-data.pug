@@ -3,7 +3,11 @@ include includes/parameterDocMixins
 
 block main
   h1 Replikering - databeskrivelser
-  p.lead Databeskrivelser for alle de entiteter, som udstilles på DAWAs replikerings-API.
+  p.lead
+    | Databeskrivelser for alle de entiteter, som udstilles på DAWAs replikerings-API.
+    | Se <a href="/dok/api/replikering">replikerings-guiden</a> for information om hvordan
+    | en klient kan etablere en lokal kopi af data.
+
   - let sortedEntities = Object.keys(replikeringSchemas).sort();
   each entity in sortedEntities
     h2 #{entity}
