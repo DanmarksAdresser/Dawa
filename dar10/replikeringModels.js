@@ -47,6 +47,11 @@ const replikeringBindingOverrides = {
 
 const historyReplikeringModels = Object.entries(dar10TableModels.historyTableModels).reduce((memo, [entityName, tableModel]) => {
   const typeOverrides = replikeringTypeOverrides[entityName] || {};
+  const rowkeyAttribute = {
+    name: 'rowkey',
+    type: 'integer',
+    description: 'Unik ID for den angivne række. '
+  }
   const virkningAttributes = [
     {
       name: 'virkningstart',
@@ -56,10 +61,11 @@ const historyReplikeringModels = Object.entries(dar10TableModels.historyTableMod
     {
       name: 'virkningslut',
       type: 'timestamp',
-      description: 'Sluttidspunktet for rækkens virkningstid. '
+      description: 'Sluttidspunktet for rækkens virkningstid. ',
+      nullable: true
     }
   ];
-  const otherAttributes = tableModel.columns.filter(col => col.name !== 'virkning').map(column => {
+  const otherAttributes = tableModel.columns.filter(col => !(['virkning', 'rowkey'].includes(col.name))).map(column => {
     const type = typeOverrides[column.name] ?
       typeOverrides[column.name] :
       defaultReplikeringType[column.sqlType];
@@ -67,10 +73,11 @@ const historyReplikeringModels = Object.entries(dar10TableModels.historyTableMod
     return {
       name: column.name,
       type,
-      description: 'Iikke tilgængelig'
+      description: 'Iikke tilgængelig',
+      nullable: column.nullable
     };
   });
-  const attributes = [...virkningAttributes, ...otherAttributes];
+  const attributes = [rowkeyAttribute, ...virkningAttributes, ...otherAttributes];
   memo[entityName] = {
     key: ['rowkey'],
     attributes
@@ -105,7 +112,8 @@ const currentReplikeringModels = Object.entries(dar10TableModels.currentTableMod
     return {
       name: column.name,
       type,
-      description: 'Iikke tilgængelig'
+      description: 'Iikke tilgængelig',
+      nullable: column.nullable
     };
   });
   memo[entityName] = {
