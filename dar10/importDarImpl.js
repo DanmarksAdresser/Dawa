@@ -90,7 +90,7 @@ const importFromFiles = (client, txid, dataDir, skipDawa) => go(function* () {
   yield importDar09Impl.updateSupplerendeBynavne(client);
 });
 
-const initializeDar10HistoryTables = (client) => go(function*() {
+const initializeDar10HistoryTables = (client, txid) => go(function*() {
   for(let entityName of Object.keys(dar10TableModels.historyTableModels)) {
     const rawTableModel = dar10TableModels.rawTableModels[entityName];
     const historyTableModel = dar10TableModels.historyTableModels[entityName];
@@ -101,6 +101,7 @@ const initializeDar10HistoryTables = (client) => go(function*() {
     yield client.query(`UPDATE merged SET rowkey = nextval('rowkey_sequence')`);
     yield client.query(`INSERT INTO ${historyTableModel.table}(${historyColumnNames.join(', ')}) (SELECT ${historyColumnNames.join(', ')} FROM merged)`);
     yield client.query(`DROP TABLE unmerged; DROP TABLE merged; ANALYZE ${historyTableModel.table}`);
+    yield tableDiffNg.initializeChangeTable(client, txid, historyTableModel);
   }
 });
 
@@ -113,7 +114,7 @@ const importInitial = (client, txid, dataDir, skipDawa) => go(function* () {
       yield streamToTable(client, entityName, filePath, tableName, true);
       yield client.query(`ANALYZE ${tableName}`);
     }
-    yield initializeDar10HistoryTables(client);
+    yield initializeDar10HistoryTables(client, txid);
     for (let entityName of ALL_DAR_ENTITIES) {
       yield materialize.materializeFromScratch(client, txid, tableModels.tables,
         dar10TableModels.currentTableMaterializations[entityName]);
@@ -131,7 +132,7 @@ function clearDar(client) {
     for(let tableModel of [...Object.values(dar10TableModels.rawTableModels),
       ...Object.values(dar10TableModels.currentTableModels),
       ...Object.values(dar10TableModels.historyTableModels)]) {
-      yield client.queryBatched(`delete from ${tableModel.table}`);
+      yield client.queryBatched(`delete from ${tableModel.table}; delete from ${tableModel.table}_changes`);
     }
     yield setMeta(client, {
       last_event_id: null,

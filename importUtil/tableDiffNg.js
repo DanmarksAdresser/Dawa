@@ -306,6 +306,13 @@ const clearHistory = (client, txid, tableModel) => go(function* () {
   yield client.query(sql);
 });
 
+const initializeChangeTable = (client, txid, tableModel) => {
+  const selectFields = selectList(null, tableModel.columns.map(column => column.name));
+  const changeTableName = `${tableModel.table}_changes`;
+  return client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${selectFields}) 
+  (SELECT ${txid}, null, 'insert', false, ${selectFields} FROM ${tableModel.table})`);
+};
+
 const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, columns) => go(function* () {
   columns = columns || nonDerivedColumnNames(tableModel);
   const selectFields = selectList(null, columns);
@@ -400,5 +407,6 @@ module.exports = {
   update,
   del,
   getChangeTableSql,
-  assignSequenceNumbersToDependentTables
+  assignSequenceNumbersToDependentTables,
+  initializeChangeTable
 };

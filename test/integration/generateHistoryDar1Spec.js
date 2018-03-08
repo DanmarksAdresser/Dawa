@@ -74,7 +74,7 @@ describe('Generate history DAR1', () => {
         nr: 8000,
         navn: 'Aarhus C'
       });
-      yield initializeDar10HistoryTables(client);
+      yield initializeDar10HistoryTables(client, 2);
       yield prepareDar1Husnummer(client);
       yield prepareDar1Postnummer(client);
       yield preparePostnummerHistory(client, time3);

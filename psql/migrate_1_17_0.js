@@ -13,6 +13,7 @@ const {withImportTransaction, withMigrationTransaction} = require('../importUtil
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
 const {refreshSubdividedTable} = require('../importUtil/geometryImport');
 const dar10Schema = require('../dar10/generateSqlSchemaImpl');
+const importDar09Impl = require('../darImport/importDarImpl');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -87,7 +88,7 @@ CREATE SEQUENCE rowkey_sequence START 1;
       yield client.query(generateAllTemaTables());
       yield client.query(fs.readFileSync('psql/schema/tables/tx_operation_counts.sql', {encoding: 'utf8'}));
       yield client.query(`
-      ALTER TABLE enhedsadresser DROP CONSTRAINT adgangsadresse_fk;
+      ALTER TABLE enhedsadresser DROP CONSTRAINT IF EXISTS adgangsadresse_fk;
 ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE adgangsadresser_changes ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
@@ -200,6 +201,7 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
         yield migrateHistoryToChangeTable(client, txid, tableSchema.tables.jordstykker_adgadr);
       }));
       yield client.query('analyze');
+      yield importDar09Impl.updateSupplerendeBynavne(client);
       yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
         yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
       }));
