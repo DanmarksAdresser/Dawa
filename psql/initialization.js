@@ -17,6 +17,7 @@ const { createChangeTable } = require('../importUtil/tableDiffNg');
 const { generateAllTemaTables, generateTilknytningMatViews } = require('../dagiImport/sqlGen');
 const { generateTilknytningMatView } = require('../importUtil/tilknytningUtil');
 const stednavnTilknytningModel = require('../stednavne/stednavnTilknytningModel');
+const jordstykkeTilknytningModel = require('../matrikeldata/jordstykkeTilknytningModel');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
@@ -24,7 +25,8 @@ const createChangeTables = (client)=> go(function*() {
   const tableNames = [
     'ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser',
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
-    'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr'];
+    'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr',
+  'navngivenvejkommunedel_postnr_mat'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -51,7 +53,6 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'transactions', init: false},
   {name: 'transaction_history', init: false},
   {name: 'bbr_events'},
-  {name: 'temaer', init: false},
   {name: 'vejstykker', init: false},
   {name: 'postnumre'},
   {name: 'stormodtagere'},
@@ -63,6 +64,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'ejerlav_ts'},
   {name: 'adgangsadresser_mat', init: false },
   {name: 'adresser_mat', init: false },
+  {name: 'navngivenvejkommunedel_postnr_mat', init: false},
+  {name: 'navngivenvejkommunedel_postnr_mat_view', type: 'view'},
   {name: 'cpr_vej', init: false},
   {name: 'cpr_postnr', init: false},
   {name: 'dar1_transaction', init: false},
@@ -126,6 +129,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'stednavne_adgadr', init: false},
   {name: 'stednavne_divided', init: false},
   {name: 'stednavn_kommune', init: false},
+  {name: 'tilknytninger_mat_view', type: 'view'},
   {name: 'ois_importlog', init: false}
 ]);
 
@@ -188,6 +192,7 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
     }
     yield client.query(generateTilknytningMatViews());
     yield client.query(generateTilknytningMatView(stednavnTilknytningModel));
+    yield client.query(generateTilknytningMatView(jordstykkeTilknytningModel));
   })();
 };
 

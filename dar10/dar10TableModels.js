@@ -1,5 +1,8 @@
 "use strict";
 
+const assert = require('assert');
+const { go } = require('ts-csp');
+
 const _ = require('underscore');
 
 const spec = require('./spec');
@@ -221,10 +224,25 @@ const navngivenvejPostnummerMaterialization = {
   ]
 };
 
+const navngivenvejkommunedelPostnummerMaterialization = {
+  table: 'navngivenvejkommunedel_postnr_mat',
+  view: 'navngivenvejkommunedel_postnr_mat_view',
+  computeDirty: (client, txid) => go(function*() {
+    yield client.query(`INSERT INTO navngivenvejkommunedel_postnr_mat_dirty(navngivenvejkommunedel_id, postnummer_id)
+    (SELECT navngivenvejkommunedel_id, postnummer_id FROM adgangsadresser_changes where txid = ${txid}
+      UNION SELECT nvp.navngivenvejkommunedel_id, nvp.postnummer_id
+       FROM navngivenvejkommunedel_postnr_mat nvp JOIN adgangsadresser_changes a ON a.txid = ${txid} AND nvp.adgangsadresseid = a.id)`);
+  })
+};
+
 const vejstykkePostnummerMaterialization = {
   table: 'vejstykkerpostnumremat',
   view: 'dar1_vejstykkerpostnumremat_view',
   dependents: [
+    {
+      table: 'navngivenvejkommunedel_postnr_mat',
+      columns: ['navngivenvejkommunedel_id', 'postnummer_id']
+    },
     {
       table: 'dar1_NavngivenVej_current',
       columns: ['navngivenvej_id']
@@ -236,10 +254,6 @@ const vejstykkePostnummerMaterialization = {
     {
       table: 'dar1_Postnummer_current',
       columns: ['postnummer_id']
-    },
-    {
-      table: 'dar1_Husnummer_current',
-      columns: ['husnummer_id']
     }
   ]
 };
@@ -278,5 +292,12 @@ exports.dawaMaterializations = {
   navngivenvej_postnummer: navngivenvejPostnummerMaterialization,
   vejstykke_postnummer: vejstykkePostnummerMaterialization,
   navngivenvej: navngivenvejMaterialiation,
-  vejpunkt: vejpunktMaterialization
+  vejpunkt: vejpunktMaterialization,
+  navngivenvejkommunedel_postnummer: navngivenvejkommunedelPostnummerMaterialization,
 };
+
+exports.dawaMaterializationOrder =
+  ['vejstykke', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer', 'navngivenvej',
+    'vejpunkt', 'navngivenvejkommunedel_postnummer', 'vejstykke_postnummer'];
+
+assert(Object.keys(exports.dawaMaterializations).length === exports.dawaMaterializationOrder.length);

@@ -133,9 +133,8 @@ CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_navngivenvej_id_idx ON vejstyk
 ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE vejstykkerpostnumremat_changes ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_navngivenvejkommunedel_id_idx ON vejstykkerpostnumremat(navngivenvejkommunedel_id);
-ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS husnummer_id UUID;
-ALTER TABLE vejstykkerpostnumremat_changes ADD COLUMN IF NOT EXISTS husnummer_id UUID;
-CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_husnummer_id_idx ON vejstykkerpostnumremat(husnummer_id);
+ALTER TABLE vejstykkerpostnumremat DROP COLUMN IF EXISTS husnummer_id;
+ALTER TABLE vejstykkerpostnumremat_changes DROP COLUMN IF EXISTS husnummer_id;
 ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE vejstykkerpostnumremat_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_postnummer_id_idx ON vejstykkerpostnumremat(postnummer_id);
@@ -143,9 +142,11 @@ ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE navngivenvej_postnummer_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS id UUID;
 ALTER TABLE navngivenvej_postnummer_changes ADD COLUMN IF NOT EXISTS id UUID;
-CREATE INDEX IF NOT EXISTS navngivenvej_postnummer_postnummer_id_idx ON navngivenvej_postnummer(postnummer_id);`);
+CREATE INDEX IF NOT EXISTS navngivenvej_postnummer_postnummer_id_idx ON navngivenvej_postnummer(postnummer_id);
+CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_postnummer_id_id_idx ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);`);
 
       yield client.query(fs.readFileSync('psql/schema/tables/tilknytninger_mat.sql', {encoding: 'utf8'}));
+    yield client.query(fs.readFileSync('psql/schema/tables/navngivenvejkommunedel_postnr_mat.sql', {encoding: 'utf8'}));
       yield reloadDatabaseCode(client, 'psql/schema');
       for (let tema of temaModels.modelList) {
         yield client.query(`

@@ -100,7 +100,7 @@ const initializeDar10HistoryTables = (client, txid) => go(function*() {
     yield mergeValidTime(client, 'unmerged', 'merged', ['id'], _.without(historyColumnNames, 'virkning'));
     yield client.query(`UPDATE merged SET rowkey = nextval('rowkey_sequence')`);
     yield client.query(`INSERT INTO ${historyTableModel.table}(${historyColumnNames.join(', ')}) (SELECT ${historyColumnNames.join(', ')} FROM merged)`);
-    yield client.query(`DROP TABLE unmerged; DROP TABLE merged; ANALYZE ${historyTableModel.table}`);
+    yield client.query(`DROP TABLE unmerged; DROP TABLE merged;`);
     yield tableDiffNg.initializeChangeTable(client, txid, historyTableModel);
   }
 });
@@ -260,8 +260,6 @@ const materializeHistory = (client, txid, entity) => go(function*() {
   yield client.query(`UPDATE desired SET rowkey = nextval('rowkey_sequence') WHERE rowkey IS NULL`);
   yield tableDiffNg.computeDifferencesView(client, txid, 'desired', 'current', historyTableModel);
   yield client.query('DROP TABLE dirty; DROP TABLE unmerged; DROP TABLE desired; DROP TABLE current');
-  yield client.query(`analyze ${historyTableModel.table}`);
-  yield client.query(`analyze ${historyTableModel.table}_changes`);
   yield tableDiffNg.applyChanges(client, txid, historyTableModel);
 });
 
@@ -356,13 +354,14 @@ function advanceVirkningTime(client, txid, darEntitiesWithNewRows, virkningTime)
 }
 
 const materializeDawaBaseTables = (client, txid) => go(function* () {
-  for (let materialization  of Object.values(dar10TableModels.dawaMaterializations)) {
+  for (let materializationTable  of dar10TableModels.dawaMaterializationOrder) {
+    const materialization = dar10TableModels.dawaMaterializations[materializationTable];
     yield materialize.materialize(client, txid, tableModels.tables, materialization);
   }
 });
 
 const rematerializeDawa = (client, txid) => go(function*() {
-  for (let entity of ['vejstykke', 'adgangsadresse', 'adresse', 'vejpunkt', 'navngivenvej', 'vejstykke_postnummer', 'navngivenvej_postnummer']) {
+  for (let entity of dar10TableModels.dawaMaterializationOrder) {
     let materialization = dar10TableModels.dawaMaterializations[entity];
     yield materialize.recomputeMaterialization(client, txid, tableModels.tables, materialization);
   }

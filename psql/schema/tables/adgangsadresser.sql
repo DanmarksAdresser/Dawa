@@ -46,6 +46,7 @@ CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id);
 CREATE INDEX ON adgangsadresser(supplerendebynavn_id);
 CREATE INDEX ON adgangsadresser(darkommuneinddeling_id);
 CREATE INDEX ON adgangsadresser(adressepunkt_id);
+CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);
 
 -- Index for lookup of adgangsadresser where we need to fetch the height
 CREATE INDEX ON adgangsadresser (id)

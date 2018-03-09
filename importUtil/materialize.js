@@ -110,8 +110,15 @@ const computeChanges = (client, txid, tableModels, materialization) => go(functi
 
 const materialize = (client, txid, tableModels, materialization) => go(function* () {
   const tableModel = tableModels[materialization.table];
+
   assert(tableModel);
-  yield computeDirty(client, txid, tableModels, materialization);
+  if(materialization.computeDirty) {
+    yield createTempDirtyTable(client, tableModel);
+    yield materialization.computeDirty(client, txid);
+  }
+  else {
+    yield computeDirty(client, txid, tableModels, materialization);
+  }
   yield computeChanges(client, txid, tableModels, materialization);
   yield applyChanges(client, txid, tableModel);
   yield dropTempDirtyTable(client, tableModel);

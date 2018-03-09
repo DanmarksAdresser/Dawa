@@ -218,6 +218,17 @@ const navngivenvej_postnummer = {
   ]
 };
 
+const navngivenvejkommunedel_postnr_mat = {
+  table: 'navngivenvejkommunedel_postnr_mat',
+  entity: 'navngivenvejkommunedel_postnummer',
+  primaryKey: ['navngivenvejkommunedel_id', 'postnummer_id'],
+  columns: [
+    {name: 'navngivenvejkommunedel_id'},
+    {name: 'postnummer_id'},
+    {name: 'adgangsadresseid'}
+  ]
+};
+
 const stednavne = {
   table: 'stednavne',
   entity: 'stednavn',
@@ -266,7 +277,6 @@ const vejstykkerpostnumremat = {
     {name: 'navngivenvej_id'},
     {name: 'navngivenvejkommunedel_id'},
     {name: 'postnummer_id'},
-    {name: 'husnummer_id'},
     {name: 'kommunekode'},
     {name: 'vejkode'},
     {name: 'postnr'},
@@ -491,6 +501,7 @@ exports.tables = Object.assign({
     vejpunkter,
     navngivenvej,
     navngivenvej_postnummer,
+    navngivenvejkommunedel_postnr_mat,
     vejstykker,
     vejstykkerpostnumremat,
     stednavne,

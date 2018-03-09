@@ -26,8 +26,9 @@ const getTableSql = (tableModel) => {
 };
 
 const getEventIndexSql = tableModel => `CREATE INDEX ON ${tableModel.table}(GREATEST(eventopret, eventopdater));`;
+const getVirkningIndexSql = tableModel => `CREATE INDEX ON ${tableModel.table}(lower(virkning));CREATE INDEX ON ${tableModel.table}(upper(virkning)) `;
 const getDomainKeyIndex = tableModel => `CREATE INDEX ON ${tableModel.table}(id);`;
-const getVirkningIndices = tableModel => `CREATE INDEX ON ${tableModel.table}(lower(virkning)); CREATE INDEX ON ${tableModel.table}(upper(virkning));`
+const getVirkningIndices = tableModel => `CREATE INDEX ON ${tableModel.table}(lower(virkning)); CREATE INDEX ON ${tableModel.table}(upper(virkning));`;
 const getAdditionalCurrentIndices = entityName => {
   const indicesSpec = spec.sqlIndices[entityName] || [];
   return indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n')
@@ -40,6 +41,7 @@ const ddlStatements = entityNames.map(entityName => {
     `${getTableSql(rawTableModel)};
   ${getDomainKeyIndex(rawTableModel)};
   ${getEventIndexSql(rawTableModel)};
+  ${getVirkningIndexSql(rawTableModel)};
   ${getChangeTableSql(rawTableModel)};`;
 
   const historyTableModel = dar10TableModels.historyTableModels[entityName];
