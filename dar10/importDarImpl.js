@@ -101,6 +101,7 @@ const initializeDar10HistoryTables = (client, txid) => go(function*() {
     yield client.query(`UPDATE merged SET rowkey = nextval('rowkey_sequence')`);
     yield client.query(`INSERT INTO ${historyTableModel.table}(${historyColumnNames.join(', ')}) (SELECT ${historyColumnNames.join(', ')} FROM merged)`);
     yield client.query(`DROP TABLE unmerged; DROP TABLE merged;`);
+    yield client.query(`ANALYZE ${historyTableModel.table}`);
     yield tableDiffNg.initializeChangeTable(client, txid, historyTableModel);
   }
 });

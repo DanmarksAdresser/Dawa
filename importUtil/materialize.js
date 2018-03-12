@@ -64,6 +64,7 @@ const computeDirty = (client, txid, tablemodels, materialization) => go(function
     `${materialization.table}_dirty`);
   yield computeDirtyPart(client, txid, tablemodels, materialization, materialization.view,
     `${materialization.table}_dirty`);
+  yield client.query(`ANALYZE ${materialization.table}_dirty`);
 });
 
 
@@ -133,6 +134,7 @@ const materializeFromScratch = (client, txid, tablemodels, materialization) => g
 
 const recomputeMaterialization = (client, txid, tableModels, materialization) => go(function* () {
   yield client.query(`create temp table desired as (SELECT * FROM ${materialization.view})`);
+  yield client.query(`ANALYZE desired`);
   const tableModel = tableModels[materialization.table];
   const includedColumns = computeMaterializedColumns(tableModel, materialization);
   yield computeDifferences(client, txid, 'desired', tableModels[materialization.table], includedColumns);

@@ -77,6 +77,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
   proddb.withTransaction('READ_WRITE', (client) => go(function* () {
       yield client.query(dar10Schema);
       yield client.query('DROP MATERIALIZED VIEW IF EXISTS kommuner CASCADE;DROP MATERIALIZED VIEW IF EXISTS regioner CASCADE;');
+      yield client.query(`alter database dawadb set join_collapse_limit=20;alter database dawadb set from_collapse_limit=20;`);
       yield client.query(`DROP SEQUENCE IF EXISTS rowkey_sequence CASCADE;
 CREATE SEQUENCE rowkey_sequence START 1;
 `);
