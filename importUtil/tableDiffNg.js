@@ -320,8 +320,10 @@ const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, colu
   const sql = `INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${selectFields}) 
   (SELECT ${txid}, null, 'insert', false, ${selectFields} FROM ${sourceTableOrView})`;
   yield client.query(sql);
+  yield client.query(`ANALYZE ${changeTableName}`);
   yield deriveColumnsForChange(client, txid, tableModel);
   yield applyChanges(client, txid, tableModel);
+  yield client.query(`ANALYZE ${tableModel.table}`);
 });
 
 /**
