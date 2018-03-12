@@ -14,7 +14,7 @@ const { runImporter } = require('../importUtil/runImporter');
 
 var wfsServices = {
   newDagi: {
-    defaultUrl: 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2?',
+    defaultUrl: 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2_v2?',
     loginRequired: true,
     defaultLogin: 'dawa',
     featureNames: {
