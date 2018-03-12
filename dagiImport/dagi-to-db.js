@@ -9,7 +9,6 @@ const logger = require('../logger').forCategory('dagiToDb');
 
 const { importTemaerWfs } = require('./importDagiImpl');
 const featureMappingsNew = require('./featureMappingsNew');
-const featureMappingsOld = require('./featureMappingsOld');
 const proddb = require('../psql/proddb');
 
 function parseInteger(str) {
@@ -17,7 +16,6 @@ function parseInteger(str) {
 }
 
 const featureMappingsMap = {
-  oldDagi: featureMappingsOld,
   newDagi: featureMappingsNew,
   zone: {
     zone: {
@@ -39,7 +37,7 @@ const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med DAGI tema-filer', 'string', '.'],
   filePrefix: [false, 'Prefix på DAGI tema-filer', 'string', ''],
-  service: [false, 'WFS kilde: oldDagi eller newDagi', 'string'],
+  service: [false, 'WFS kilde: newDagi eller zone', 'string'],
   temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string'],
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false],
   maxChanges: [false, 'Maximalt antal ændringer der udføres på adressetilknytninger (pr. tema)', 'number', 10000]

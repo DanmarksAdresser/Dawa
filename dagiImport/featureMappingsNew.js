@@ -21,6 +21,10 @@ exports.kommune = {
   geometry: 'geometri',
   wfsName: 'Kommuneinddeling',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'kommunekode',
       parseFn: parseInteger
@@ -41,6 +45,10 @@ exports.region = {
   wfsName: 'Regionsinddeling',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'regionskode',
       parseFn: parseInteger
@@ -54,6 +62,10 @@ exports.sogn = {
   wfsName: 'Sogneinddeling',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'sognekode',
       parseFn: parseInteger
@@ -67,8 +79,20 @@ exports.opstillingskreds = {
   wfsName: 'Opstillingskreds',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'opstillingskredsnummer',
+      parseFn: parseInteger
+    },
+    valgkredsnummer: {
+      name: 'valgkredsnummer',
+      parseFn: parseInteger
+    },
+    storkredsnummer: {
+      name: 'storkredsnummer',
       parseFn: parseInteger
     },
     navn: 'navn'
@@ -80,6 +104,10 @@ exports.politikreds = {
   wfsName: 'Politikreds',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'myndighedskode',
       parseFn: parseInteger
@@ -93,6 +121,10 @@ exports.retskreds = {
   wfsName: 'Retskreds',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'myndighedskode',
       parseFn: parseInteger
@@ -106,6 +138,10 @@ exports.postnummer = {
   wfsName: 'Postnummerinddeling',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     nr: {
       name: 'postnummer',
       parseFn: parseInteger
@@ -119,6 +155,10 @@ exports.valglandsdel = {
 	wfsName: 'Valglandsdel',
 	geometry: 'geometri',
 	fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
 		navn: 'navn',
 		bogstav: 'valglandsdelsbogstav'
 	}
@@ -129,10 +169,69 @@ exports.storkreds = {
   wfsName: 'Storkreds',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     navn: 'navn',
-    nummer: 'storkredsnummer'
+    nummer: {
+      name: 'storkredsnummer',
+      parseFn: parseInteger
+    }
   }
 };
+
+exports.afstemningsområde = {
+  name: 'afstemningsområde',
+  wfsName: 'Afstemningsomraade',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
+    nummer: {
+      name: 'afstemningsomraadenummer',
+      parseFn: parseInteger
+    },
+    afstemningsstednavn: 'afstemningsstedNavn',
+    kommunekode: {
+      name: 'kommunekode',
+      parseFn: parseInteger
+    },
+    opstillingskredsnummer: {
+      name: 'opstillingskredsnummer',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  }
+};
+
+exports.menighedsrådsafstemningsområde = {
+  name: 'menighedsraadsafstemningsområde',
+  wfsName: 'Menighedsraadsafstemningsomraade',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
+    nummer: {
+      name: 'MRafstemningsomraadenummer',
+      parseFn: parseInteger
+    },
+    afstemningsstednavn: 'afstemningsstedNavn',
+    kommunekode: {
+      name: 'kommunekode',
+      parseFn: parseInteger
+    },
+    sognekode: {
+      name: 'sognekode',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  }
+}
 
 // normalize, such that every field has a name and a parseFn and a filterFn.
 _.each(exports, function(mapping) {

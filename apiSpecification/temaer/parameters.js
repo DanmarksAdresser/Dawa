@@ -51,7 +51,8 @@ module.exports.valglandsdel = {
 module.exports.storkreds = {
   id: normalizeParameters([
     {
-      name: 'nummer'
+      name: 'nummer',
+      type: 'integer'
     }
   ]),
   propertyFilter: normalizeParameters([
@@ -61,6 +62,99 @@ module.exports.storkreds = {
     },
     {
       name: 'nummer',
+      type: 'integer',
+      multi: true
+    }
+  ])
+};
+
+module.exports.afstemningsområde = {
+  id: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'opstillingskredsnummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    }
+  ])
+};
+
+module.exports.menighedsrådsafstemningsområde = {
+  id: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'sognekode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    }
+  ])
+};
+
+module.exports.supplerendebynavn = {
+  id: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'navn',
       multi: true
     }
   ])

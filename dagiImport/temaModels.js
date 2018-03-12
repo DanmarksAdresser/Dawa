@@ -29,7 +29,13 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'kode',
     type: 'string',
     formatter: kode4String,
@@ -55,7 +61,13 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'kode',
     type: 'string',
     formatter: kode4String,
@@ -88,7 +100,13 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'kode',
     type: 'string',
     formatter: kode4String,
@@ -113,7 +131,13 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'kode',
     type: 'string',
     formatter: kode4String,
@@ -138,7 +162,12 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [{
+  fields: [    {
+    name: 'dagi_id',
+    type: 'integer',
+    nullable: false
+  },
+    {
     name: 'kode',
     type: 'string',
     formatter: kode4String,
@@ -163,7 +192,13 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'kode',
     type: 'string',
     formatter: kode4String,
@@ -188,7 +223,13 @@ exports.modelList = [{
   table: 'dagi_postnumre',
   primaryKey: ['nr'],
   published: false,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'nr',
     type: 'string',
     formatter: kode4String,
@@ -231,7 +272,13 @@ exports.modelList = [{
   primaryKey: ['bogstav'],
   published: true,
   searchable: true,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'bogstav',
     type: 'string',
     sqlType: 'CHAR(1)',
@@ -255,7 +302,13 @@ exports.modelList = [{
   primaryKey: ['nummer'],
   published: true,
   searchable: true,
-  fields: [{
+  fields: [
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      nullable: false
+    },
+    {
     name: 'nummer',
     type: 'string',
     sqlType: 'SMALLINT',
@@ -273,7 +326,160 @@ exports.modelList = [{
   tilknytningKey: ['storkredsnummer'],
   useNearestForAdgangsadresseMapping: true,
   deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn)`
-}];
+},
+  {
+    singular: 'afstemningsområde',
+    singularSpecific: 'afstemningsområdet',
+    plural: 'afstemningsområder',
+    prefix: 'aftemningsområde',
+    primaryKey: ['dagi_id'],
+    published: true,
+    searchable: true,
+    table: 'afstemningsomraader',
+    fields: [
+      {
+        name: 'dagi_id',
+        type: 'integer',
+        nullable: false
+      },
+      {
+        name: 'nummer',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        description: 'Aftemningsområdets nummer. Heltal. Udgør nøglen.',
+        formatter: nummer => {
+          return '' + nummer;
+        }
+      },
+      {
+        name: 'navn',
+        type: 'string',
+        nullable: false,
+        description: 'Afstemningsområdets navn.'
+      },
+      {
+        name: 'afstemningsstednavn',
+        type: 'string',
+        nullable: false,
+        description: 'Afstemningsstedets navn.'
+      },
+      {
+        name: 'kommunekode',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        formatter: kode4String,
+        description: 'Kommunekoden for den kommune, som afstemningsmrådet ligger i.'
+      },
+      {
+        name: 'opstillingskredsnummer',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        formatter: nummer => {
+          return '' + nummer;
+        },
+        description: 'Opstillingskredsnummeret for den opstillingskreds, som afstemningsområdet tilhører.'
+      }],
+    tilknytningKey: ['dagi_id'],
+    tilknytningTable: 'afstemningsomraadetilknytninger',
+    useNearestForAdgangsadresseMapping: true,
+    deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn)`
+
+  },
+  {
+    singular: 'menighedsrådsafstemningsområde',
+    singularSpecific: 'menighedsrådsafstemningsområdet',
+    plural: 'menighedsrådsafstemningsområder',
+    prefix: 'menighedsrådsafstemningsområde',
+    primaryKey: ['dagi_id'],
+    published: true,
+    searchable: true,
+    table: 'menighedsraadsafstemningsomraader',
+    fields: [
+      {
+        name: 'dagi_id',
+        type: 'integer',
+        nullable: false
+      },
+      {
+        name: 'nummer',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        nullable: false,
+        formatter: nummer => {
+          return '' + nummer;
+        },
+        description: 'Menighedsrådsafstemningsområdets nummer. Udgør nøglen.'
+      },
+      {
+        name: 'navn',
+        type: 'string',
+        nullable: false,
+        description: 'Menighedsrådsafstemningsområdets navn.'
+      },
+      {
+        name: 'afstemningsstednavn',
+        type: 'string',
+        nullable: false,
+        description: 'Afstemningsstedets navn'
+      },
+      {
+        name: 'kommunekode',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        nullable: false,
+        formatter: kode4String,
+        description: 'Kommunekoden for den kommune, som menighedsrådsafstemningsmrådet tilhører.'
+      },
+      {
+        name: 'sognekode',
+        type: 'string',
+        nullable: false,
+        formatter: kode4String,
+        description: 'Sognekoden for det sogn, som menighedsrådsafstemningsområdet tilhører.'
+      }
+    ],
+    tilknytningKey: ['dagi_id'],
+    tilknytningTable: 'menighedsraadsafstemningsomraadetilknytninger',
+    useNearestForAdgangsadresseMapping: true,
+    deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn)`
+  },
+  {
+    singular: 'supplerendebynavn',
+    singularSpecific: 'supplerendebynavnet',
+    plural: 'supplerendebynavne',
+    prefix: 'supplerendebynavn',
+    primaryKey: ['dagi_id'],
+    published: true,
+    searchable: true,
+    table: 'dagi_supplerendebynavne',
+    fields: [
+      {
+        name: 'dagi_id',
+        type: 'integer',
+        nullable: false
+      },
+      {
+        name: 'navn',
+        type: 'string',
+        nullable: false,
+        description: 'Det supplerende bynavns navn.'
+      },
+      {
+        name: 'kommunekode',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        nullable: false,
+        formatter: kode4String,
+        description: 'Kommunekoden for den kommune, som det supplerende bynavn tilhører.'
+      }
+    ],
+    tilknytningKey: ['dagi_id'],
+    tilknytningTable: 'supplerendebynavntilknytninger',
+    useNearestForAdgangsadresseMapping: false,
+    deriveTsv: table => `to_tsvector('adresser', ${table}.navn)`
+
+  }
+];
 
 for (let model of exports.modelList) {
   model.table = model.table || model.plural;
@@ -284,7 +490,7 @@ for (let model of exports.modelList) {
     return field;
   });
   model.tilknytningName = model.prefix + 'tilknytning';
-  model.tilknytningTable = model.tilknytningName + 'er';
+  model.tilknytningTable =  model.tilknytningTable || model.tilknytningName + 'er';
   model.tilknytningPlural = model.tilknytningName + 'er';
   model.tilknytningFields = [{
     name: 'adgangsadresseid',

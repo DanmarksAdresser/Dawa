@@ -1,0 +1,11 @@
+[
+  {
+    "kommunekode": 99,
+    "nummer": 2,
+    "navn": "Test afstemningsområde",
+    "afstemningsstednavn": "Test afstemningsstednavn",
+    "opstillingskredsnummer": 1,
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+
+  }
+]

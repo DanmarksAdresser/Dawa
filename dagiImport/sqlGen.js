@@ -86,7 +86,12 @@ const generateTilknytningMatViews = () =>  {
   return sql;
 };
 
+const generateTemaTable = temaNavn => {
+  const model = temaModels.modelMap[temaNavn];
+  return generateTemaTableSql(model);
+}
 module.exports = {
   generateAllTemaTables,
-  generateTilknytningMatViews
+  generateTilknytningMatViews,
+  generateTemaTable
 };

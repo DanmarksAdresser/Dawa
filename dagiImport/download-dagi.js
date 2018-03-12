@@ -25,10 +25,10 @@ var wfsServices = {
       region: 'Regionsinddeling',
       retskreds: 'Retskreds',
       sogn: 'Sogneinddeling',
-      afstemningsomraade: 'Afstemningsomraade',
+      afstemningsområde: 'Afstemningsomraade',
       storkreds: 'Storkreds',
       danmark: 'Danmark',
-      menighedsraadsafstemningsomraade: 'Menighedsraadsafstemningsomraade',
+      menighedsrådsafstemningsområde: 'Menighedsraadsafstemningsomraade',
       valglandsdel: 'Valglandsdel',
       samlepostnummer: 'Samlepostnummer',
       supplerendebynavn: 'SupplerendeBynavn'
