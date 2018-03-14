@@ -11,6 +11,7 @@ var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
 const replikeringModels = require('./apiSpecification/replikering/datamodel');
 const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/normalizedFieldSchemas');
+const replikeringDataSections = require('./apidoc/replikering-data-page');
 
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
@@ -52,7 +53,8 @@ function pugDocumentationParams(req) {
     docUtil,
     packageJson,
     replikeringModels,
-    replikeringSchemas
+    replikeringSchemas,
+    replikeringDataSections
   };
 }
 
