@@ -91,4 +91,11 @@ module.exports = [
     ],
     examples:
       []
+  },
+  {
+    path: '/replikering/datamodel',
+    entity: 'replikering',
+    subtext: `Modtag maskin-læsbar datamodel for alle de data, som udstilles på replikerings-API'et.`,
+    parameters: [],
+    examples: []
   }];

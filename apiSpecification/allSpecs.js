@@ -18,6 +18,7 @@ require('./replikering/udtraek/resources');
 require('./replikering/udtraek/combinedResource');
 require('./replikering/events/combinedResource');
 require('./replikering/transactions/resources');
+require('./replikering/model/datamodelResource');
 require('./consistency');
 require('./autocomplete/autocomplete.js');
 require('./ois/resources');
