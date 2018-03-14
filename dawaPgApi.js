@@ -129,6 +129,10 @@ exports.setupRoutes = function () {
   }).forEach(function(httpHandler) {
     app.get(httpHandler.path, resourceImpl.createExpressHandler(httpHandler.responseHandler));
   });
+
+  registry.where({
+    type: 'expressHandler'
+  }).forEach(({path, handler}) => app.get(path, handler));
   return app;
 };
 

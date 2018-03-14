@@ -6,6 +6,8 @@ mixin renderApiOversigt(sections)
       h3 <a href="/dok/api/#{entity}">#{entity}</a>
       - const page = docUtil.getPageForEntity(entity)
       ul.ul-dawa
-        each endpoint in page.sections.filter(section => section.type === 'endpoint')
-          li <a href="/dok/api/#{entity}##{endpoint.anchor}">#{endpoint.heading}</a>
+        each section in page.sections
+          if section.type == 'endpoint' || section.type === 'datadescription'
+            li <a href="/dok/api/#{entity}##{section.anchor}">#{section.heading}</a>
+
 

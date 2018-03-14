@@ -87,9 +87,15 @@ const sqlTypes = {
   Adressepunkt: {
     position: 'geometry(Point,25832)'
   },
+  Adresse: {
+    fk_bbr_bygning_bygning: 'uuid'
+  },
   Husnummer: {
     husnummertekst: 'husnr',
-    husnummerretning: 'float4'
+    husnummerretning: 'float4',
+    fk_bbr_bygning_adgangtilbygning: 'uuid',
+    fk_bbr_tekniskanlæg_adgangtiltekniskanlæg: 'uuid'
+
   },
   NavngivenVejKommunedel: {
     kommune: 'smallint',

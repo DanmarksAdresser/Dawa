@@ -11,6 +11,7 @@ var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
 const replikeringModels = require('./apiSpecification/replikering/datamodel');
 const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/normalizedFieldSchemas');
+const replikeringDataSections = require('./apidoc/replikering-data-page');
 
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
@@ -52,7 +53,8 @@ function pugDocumentationParams(req) {
     docUtil,
     packageJson,
     replikeringModels,
-    replikeringSchemas
+    replikeringSchemas,
+    replikeringDataSections
   };
 }
 
@@ -88,7 +90,7 @@ setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guides.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
 setupPugPage('/dok/bbr-intern', 'bbr-intern.pug');
-for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old']) {
+for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old', 'replikering-old']) {
   setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
 }
 setupPugPage('/dok/faq', 'faq.pug');

@@ -9,7 +9,10 @@ block main
     | en klient kan etablere en lokal kopi af data.
 
   - let sortedEntities = Object.keys(replikeringSchemas).sort();
-  each entity in sortedEntities
-    h2 #{entity}
-    +documentSchema3(replikeringSchemas[entity])
+  each section in replikeringDataSections
+    h2 #{section.title}
+    p !{section.lead}
+    each entity in section.entities
+      h3 #{entity}
+      +documentSchema3(replikeringSchemas[entity])
 
