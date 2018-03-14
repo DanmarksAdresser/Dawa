@@ -2,6 +2,9 @@ extends ../sidebar-auto
 block main
   h1 Etablering af adressekopiregister
   p.lead Etablering af lokal kopi af Danmarks adresser
+  p.lead
+    | Leder du efter den gamle replikerings-guide, hvor der benyttes sekvensnumre?
+    | Den kan stadig tilgås <a href="/dok/guide/replikering-old">her</a>.
   section
     h2.anchor-header#introduktion Introduktion
     p
@@ -45,9 +48,9 @@ block main
       | Det er ønskværdigt, at udtrækkene for de forskellige entiteter er konsistente.
       | Dette sikres ved at anvende samme transaktions-ID for de forskellige udtræk.
       | Det mest hensigtsmæssige er at anvende transaktions-ID for den senest udførte transaktion:
-        pre <code>GET https://dawa.aws.dk/replikering/senestetransaktion</code>.
-        | Svaret indeholder transaktions-ID (<code>txid</code>) for den seneste transaktion som DAWA
-        | har udført.
+      pre <code>GET https://dawa.aws.dk/replikering/senestetransaktion</code>.
+      | Svaret indeholder transaktions-ID (<code>txid</code>) for den seneste transaktion som DAWA
+      | har udført.
     h3 Hent udtræk
     p
       | Hent et udtræk for hver entitet der ønskes en lokal kopi for. <code>txid</code>-parameteren
@@ -58,13 +61,17 @@ block main
         |GET https://dawa.aws.dk/replikering/udtraek?entitet=adresse&txid=123123
         |GET https://dawa.aws.dk/replikering/udtraek?entitet=vejstykke&txid=123123
         |GET https://dawa.aws.dk/replikering/udtraek?entitet=postnummer&txid=123123</code>
-      | Typisk anvendes enten CSV eller NDJSON format til udtræk. Mange databaser (bl.a. PostgreSQL og SQL Server)
+      | Typisk anvendes enten CSV eller NDJSON format til udtræk. Mange databaser (bl.a. <a href="https://www.postgresql.org/docs/current/static/sql-copy.html">PostgreSQL</a> og SQL Server)
       | understøtter at CSV-format indlæses direkte i en databasetabel.
       | Se <a href="/dok/api/replikering#udtraek">API dokumentationen</a> for detaljer.
     h3 Gem udtræk og transaktions-ID
     p
       | Udtræk og transaktions-ID gemmes lokalt. Det er vigtigt også at gemme transaktions-ID, da dette anvendes
       | når den lokale kopi efterfølgende skal opdateres.
+    p
+      | Hvordan udtræk helt gemmes afhænger af hvilken database der anvendes. Replikerings-API'et
+      | udstiller en normaliseret datamodel, som er velegnet til at at gemme i en SQL-database, hvor
+      | der anvendes en tabel pr. entitet.
     h2 Opdatering af lokal kopi
     p
       | En lokal kopi kan opdateres ved hjælp af DAWAs hændelses-API. Hændelses-API'et udstiller
