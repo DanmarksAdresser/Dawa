@@ -90,6 +90,7 @@ CREATE SEQUENCE rowkey_sequence START 1;
       yield client.query(fs.readFileSync('psql/schema/tables/tx_operation_counts.sql', {encoding: 'utf8'}));
       yield client.query(`
       ALTER TABLE enhedsadresser DROP CONSTRAINT IF EXISTS adgangsadresse_fk;
+      ALTER TABLE enhedsadresser DROP CONSTRAINT IF EXISTS enhedsadresser_adgangsadresseid_fkey;
 ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE adgangsadresser_changes ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
@@ -148,6 +149,7 @@ CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_postnummer_
 
       yield client.query(fs.readFileSync('psql/schema/tables/tilknytninger_mat.sql', {encoding: 'utf8'}));
     yield client.query(fs.readFileSync('psql/schema/tables/navngivenvejkommunedel_postnr_mat.sql', {encoding: 'utf8'}));
+    yield createChangeTable(client, tableSchema.tables.navngivenvejkommunedel_postnr_mat);
       yield reloadDatabaseCode(client, 'psql/schema');
       for (let tema of temaModels.modelList) {
         yield client.query(`
