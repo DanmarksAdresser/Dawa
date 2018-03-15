@@ -66,7 +66,17 @@ const SELECT_JSON_FIELD = {
     nummer: `(fields->>'nummer')::smallint`,
     navn: selectNavn
   }
-}
+};
+
+const migrateZone = client => go(function*() {
+  const table = 'zoner';
+  // ensure byzone and sommerhusområde do not overlap
+  yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference(geom, (select geom from ${table} where zone = 1))) WHERE zone = 3`);
+  // // landzone is everything not byzone and sommerhusområde
+  yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference((select ST_Union(geom) FROM regioner) , (select ST_Union(geom) from ${table} where zone IN (1, 3)))) WHERE zone = 2`);
+  yield refreshSubdividedTable(client, 'zoner', 'zoner_divided', 'zone');
+
+});
 
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, options) {
   proddb.init({
@@ -85,6 +95,7 @@ CREATE SEQUENCE rowkey_sequence START 1;
       yield createChangeTable(client, tableSchema.tables.jordstykker_adgadr);
       yield createChangeTable(client, tableSchema.tables.jordstykker);
       yield createChangeTable(client, tableSchema.tables.stednavne);
+    yield client.query(fs.readFileSync('psql/schema/tables/stednavn_kommune.sql', {encoding: 'utf8'}));
 
       yield client.query(generateAllTemaTables());
       yield client.query(fs.readFileSync('psql/schema/tables/tx_operation_counts.sql', {encoding: 'utf8'}));
@@ -206,6 +217,7 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
       }));
       yield client.query('analyze');
       yield importDar09Impl.updateSupplerendeBynavne(client);
+      yield migrateZone(client);
       yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
         yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
       }));
