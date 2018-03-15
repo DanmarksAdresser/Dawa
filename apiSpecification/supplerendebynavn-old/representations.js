@@ -82,4 +82,4 @@ exports.autocomplete = {
 };
 
 var registry = require('../registry');
-registry.addMultiple('supplerendebynavn', 'representation', module.exports);
+registry.addMultiple('supplerendebynavn-old', 'representation', module.exports);

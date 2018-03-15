@@ -1941,7 +1941,7 @@ describe('Zone', function(){
     })
   })
 
-  it("Kalvebodvej 1, 2791 Dragør", function(done){
+  it("Kalvebodvej 30, 2791 Dragør", function(done){
     var options= {};
     options.baseUrl= host;
     options.url='adgangsadresser';

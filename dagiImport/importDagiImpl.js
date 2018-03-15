@@ -14,6 +14,14 @@ const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
 const { updateSubdividedTable, updateGeometricFields } = require('../importUtil/geometryImport');
 
 const postProcess = {
+  storkreds:
+  (client, table) => go(function*() {
+    const additionalFields = JSON.parse(fs.readFileSync('data/storkredse.json', {encoding: 'utf-8'}));
+    yield client.query(`CREATE TEMP TABLE additional AS (select nummer, valglandsdelsbogstav, regionskode FROM ${table} where false)`);
+    yield streamArrayToTable(client, additionalFields, 'additional', ['nummer', 'valglandsdelsbogstav', 'regionskode']);
+    yield client.query(`UPDATE ${table} t SET valglandsdelsbogstav = a.valglandsdelsbogstav, regionskode = a.regionskode 
+    FROM additional a WHERE t.nummer = a.nummer; DROP TABLE additional`);
+}),
   zone: (client, table) => go(function*() {
     // ensure byzone and sommerhusområde do not overlap
     yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference(geom, (select geom from ${table} where zone = 1))) WHERE zone = 3`);

@@ -9,7 +9,7 @@ const defaultSqlType = {
 };
 
 const defaultSchema = (type, nullable) => {
-  if(nullable) {
+  if (nullable) {
     return {type: [type, 'null']};
   }
   else {
@@ -33,22 +33,23 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'kode',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Regionens myndighedskode. Er unik for hver region. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Regionens navn'
-  }],
+      name: 'kode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Regionens myndighedskode. Er unik for hver region. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Regionens navn'
+    }],
   tilknytningKey: ['regionskode'],
   useNearestForAdgangsadresseMapping: true,
 
@@ -65,30 +66,31 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'kode',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Kommunens myndighedskode. Er unik for hver kommune. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Kommunens navn'
-  }, {
-    name: 'regionskode',
-    type: 'string',
-    sqlType: 'SMALLINT',
-    nullable: true,
-    schema: commonSchemaDefinitions.NullableKode4,
-    description: 'Regionskode for den region kommunen er beliggende i. 4 cifre.',
-    formatter: kode4String
-  }],
+      name: 'kode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Kommunens myndighedskode. Er unik for hver kommune. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Kommunens navn'
+    }, {
+      name: 'regionskode',
+      type: 'string',
+      sqlType: 'SMALLINT',
+      nullable: true,
+      schema: commonSchemaDefinitions.NullableKode4,
+      description: 'Regionskode for den region kommunen er beliggende i. 4 cifre.',
+      formatter: kode4String
+    }],
   tilknytningKey: ['kommunekode'],
   useNearestForAdgangsadresseMapping: true
 }, {
@@ -104,22 +106,23 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'kode',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Sognets myndighedskode. Er unik for hvert sogn. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Sognets navn'
-  }],
+      name: 'kode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Sognets myndighedskode. Er unik for hvert sogn. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Sognets navn'
+    }],
   tilknytningKey: ['sognekode'],
   useNearestForAdgangsadresseMapping: true
 }, {
@@ -135,22 +138,23 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'kode',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Politikredsens myndighedskode. Er unik for hver politikreds. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Politikredsens navn.'
-  }],
+      name: 'kode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Politikredsens myndighedskode. Er unik for hver politikreds. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Politikredsens navn.'
+    }],
   tilknytningKey: ['politikredskode'],
   useNearestForAdgangsadresseMapping: true
 }, {
@@ -162,25 +166,26 @@ exports.modelList = [{
   published: true,
   searchable: true,
   deriveTsv: kodeNavnDeriveTsv,
-  fields: [    {
+  fields: [{
     name: 'dagi_id',
     type: 'integer',
-    nullable: false
+    nullable: false,
+    description: 'Unik ID'
   },
     {
-    name: 'kode',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Retskredsens myndighedskode. Er unik for hver retskreds. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Retskredsens navn.'
-  }],
+      name: 'kode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Retskredsens myndighedskode. Er unik for hver retskreds. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Retskredsens navn.'
+    }],
   tilknytningKey: ['retskredskode'],
   useNearestForAdgangsadresseMapping: true
 }, {
@@ -196,22 +201,38 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'kode',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Opstillingskredsens kode. Er unik for hver opstillingskreds. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Opstillingskredsens navn.'
-  }],
+      name: 'kode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Opstillingskredsens kode. Er unik for hver opstillingskreds. 4 cifre.'
+    },
+    {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Opstillingskredsens navn.'
+    },
+    {
+      name: 'valgkredsnummer',
+      type: 'string',
+      sqlType: 'SMALLINT',
+      nullable: false,
+      description: 'Valgkredsnummer. Unikt indenfor storkredsen.'
+    },
+    {
+      name: 'storkredsnummer',
+      type: 'string',
+      sqlType: 'SMALLINT',
+      nullable: false,
+      description: 'Nummeret på storkredsen, som opstillingskredsen tilhører.'
+    }],
   tilknytningKey: ['opstillingskredskode'],
   useNearestForAdgangsadresseMapping: true
 }, {
@@ -227,22 +248,23 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'nr',
-    type: 'string',
-    formatter: kode4String,
-    sqlType: "SMALLINT",
-    nullable: false,
-    schema: commonSchemaDefinitions.kode4,
-    description: 'Postnummeret. 4 cifre.'
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Postnummerets navn.'
-  }],
+      name: 'nr',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Postnummeret. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Postnummerets navn.'
+    }],
   tilknytningKey: ['postnummer'],
   useNearestForAdgangsadresseMapping: false
 }, {
@@ -276,21 +298,22 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'bogstav',
-    type: 'string',
-    sqlType: 'CHAR(1)',
-    nullable: false,
-    description: 'Valgslandsdelens bogstav, udgør nøglen.',
-    schema: commonSchemaDefinitions.ValglandsdelBogstav
-  }, {
-    name: 'navn',
-    type: 'string',
-    nullable: false,
-    description: 'Valglandsdelens navn.'
-  }],
+      name: 'bogstav',
+      type: 'string',
+      sqlType: 'CHAR(1)',
+      nullable: false,
+      description: 'Valgslandsdelens bogstav, udgør nøglen.',
+      schema: commonSchemaDefinitions.ValglandsdelBogstav
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Valglandsdelens navn.'
+    }],
   tilknytningKey: ['valglandsdelsbogstav'],
   useNearestForAdgangsadresseMapping: true,
   deriveTsv: table => `to_tsvector('adresser', ${table}.bogstav || ' ' || ${table}.navn)`
@@ -306,22 +329,38 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false
+      nullable: false,
+      description: 'Unik ID'
     },
     {
-    name: 'nummer',
-    type: 'string',
-    sqlType: 'SMALLINT',
-    description: 'Storkredsens nummer. Heltal. Udgør nøglen.',
-    formatter: nummer => {
-      return '' + nummer;
-    }
-  },
+      name: 'nummer',
+      type: 'string',
+      sqlType: 'SMALLINT',
+      description: 'Storkredsens nummer. Heltal. Udgør nøglen.',
+      formatter: nummer => {
+        return '' + nummer;
+      }
+    },
     {
       name: 'navn',
       type: 'string',
       nullable: false,
       description: 'Storkredsens navn.'
+    },
+    {
+      name: 'regionskode',
+      type: 'string',
+      nullable: false,
+      sqlType: 'SMALLINT',
+      formatter: kode4String,
+      description: 'Koden på den region som storkredsen ligger i.'
+    },
+    {
+      name: 'valglandsdelsbogstav',
+      type: 'string',
+      nullable: false,
+      sqlType: 'char(1)',
+      description: 'Bogstav for den valglandsdel, som storkredsen ligger i.'
     }],
   tilknytningKey: ['storkredsnummer'],
   useNearestForAdgangsadresseMapping: true,
@@ -340,13 +379,14 @@ exports.modelList = [{
       {
         name: 'dagi_id',
         type: 'integer',
-        nullable: false
+        nullable: false,
+        description: 'Unik ID'
       },
       {
         name: 'nummer',
         type: 'string',
         sqlType: 'SMALLINT',
-        description: 'Aftemningsområdets nummer. Heltal. Udgør nøglen.',
+        description: 'Aftemningsområdets nummer. Heltal.',
         formatter: nummer => {
           return '' + nummer;
         }
@@ -398,7 +438,8 @@ exports.modelList = [{
       {
         name: 'dagi_id',
         type: 'integer',
-        nullable: false
+        nullable: false,
+        description: 'Unik ID'
       },
       {
         name: 'nummer',
@@ -445,18 +486,20 @@ exports.modelList = [{
   },
   {
     singular: 'supplerendebynavn',
-    singularSpecific: 'supplerendebynavnet',
+    singularSpecific: 'det supplerende bynavn',
     plural: 'supplerendebynavne',
     prefix: 'supplerendebynavn',
     primaryKey: ['dagi_id'],
     published: true,
+    path: '/supplerendebynavne2',
     searchable: true,
     table: 'dagi_supplerendebynavne',
     fields: [
       {
         name: 'dagi_id',
         type: 'integer',
-        nullable: false
+        nullable: false,
+        description: 'Unik ID'
       },
       {
         name: 'navn',
@@ -490,7 +533,7 @@ for (let model of exports.modelList) {
     return field;
   });
   model.tilknytningName = model.prefix + 'tilknytning';
-  model.tilknytningTable =  model.tilknytningTable || model.tilknytningName + 'er';
+  model.tilknytningTable = model.tilknytningTable || model.tilknytningName + 'er';
   model.tilknytningPlural = model.tilknytningName + 'er';
   model.tilknytningFields = [{
     name: 'adgangsadresseid',
@@ -589,10 +632,10 @@ exports.toReplikeringTilknytningDbBinding = temaModel => {
     legacyResource: true,
     attributes: temaModel.tilknytningFields.reduce((memo, tilknytningField) => {
       const attr = {};
-      if(tilknytningField.formatter) {
+      if (tilknytningField.formatter) {
         attr.formatter = tilknytningField.formatter;
       }
-      if(tilknytningField.selecttransform) {
+      if (tilknytningField.selecttransform) {
         attr.selectTransform = tilknytningField.selectTransform;
       }
       memo[tilknytningField.name] = attr;

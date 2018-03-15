@@ -1,5 +1,6 @@
 [
   {
+    "dagi_id": 100103,
     "kode": 1,
     "navn": "Opstillingskreds",
     "valgkredsnummer": 1,
@@ -7,6 +8,7 @@
     "geom": null
   },
   {
+    "dagi_id": 100104,
     "kode": 99,
     "navn": "Opstillingskreds test",
     "valgkredsnummer": 2,

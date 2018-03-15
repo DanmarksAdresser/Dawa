@@ -7,7 +7,7 @@ require('./flats/resources');
 require('./history/resources');
 require('./postnummer/resources');
 require('./temaer/resources');
-require('./supplerendebynavn/resources');
+require('./supplerendebynavn-old/resources');
 require('./vejnavn/resources');
 require('./vejstykke/resources');
 require('./ejerlav/resources');

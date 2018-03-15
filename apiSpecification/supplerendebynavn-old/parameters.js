@@ -29,4 +29,4 @@ module.exports = {
   ])
 };
 
-registry.addMultiple('supplerendebynavn', 'parameterGroup', module.exports);
+registry.addMultiple('supplerendebynavn-old', 'parameterGroup', module.exports);

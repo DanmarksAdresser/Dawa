@@ -26,9 +26,10 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
 
   queryParams.reverseGeocoding = commonParameters.reverseGeocodingOptional;
   queryParams.reverseGeocodingNearest = commonParameters.reverseGeocodingNearest;
-
+  const path = model.path || `/${nameAndKey.plural}`;
   let resources = [
-    resourcesUtil.queryResourceSpec(nameAndKey,
+    resourcesUtil.queryResourcePathSpec(
+      path,
       queryParams,
       representations,
       sqlModel)];

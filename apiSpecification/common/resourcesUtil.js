@@ -79,11 +79,10 @@ function flattenParameters(parameterGroups) {
 
 exports.flattenParameters = flattenParameters;
 
-
-exports.queryResourceSpec = function(nameAndKey, parameterGroups, representations, sqlModel) {
-  var allParameters = _.extend({}, parameterGroups, {format: commonParameters.format, paging: commonParameters.paging });
+exports.queryResourcePathSpec = function(path, parameterGroups, representations, sqlModel) {
+  const allParameters = _.extend({}, parameterGroups, {format: commonParameters.format, paging: commonParameters.paging });
   return {
-    path: '/' + nameAndKey.plural,
+    path: path,
     pathParameters: [],
     queryParameters: flattenParameters(allParameters),
     representations: representations,
@@ -94,10 +93,15 @@ exports.queryResourceSpec = function(nameAndKey, parameterGroups, representation
   };
 };
 
-exports.autocompleteResourceSpec = function(nameAndKey, parameters, autocompleteRepresentation, sqlModel) {
-  var allParameters = _.extend({}, parameters, {format: commonParameters.format, paging: commonParameters.paging });
+exports.queryResourceSpec = function(nameAndKey, parameterGroups, representations, sqlModel) {
+  return exports.queryResourcePathSpec(`/${nameAndKey.plural}`, parameterGroups, representations, sqlModel);
+};
+
+
+exports.autocompleteResourcePathSpec = function(path, parameters, autocompleteRepresentation, sqlModel) {
+  const allParameters = _.extend({}, parameters, {format: commonParameters.format, paging: commonParameters.paging });
   return {
-    path: '/' + nameAndKey.plural + '/autocomplete',
+    path: path,
     pathParameters: [],
     queryParameters: flattenParameters(allParameters),
     representations: { autocomplete: autocompleteRepresentation },
@@ -107,6 +111,9 @@ exports.autocompleteResourceSpec = function(nameAndKey, parameters, autocomplete
     processParameters: exports.applyDefaultPagingForAutocomplete
   };
 };
+
+exports.autocompleteResourceSpec = (nameAndKey, parameters, autocompleteRepresentation, sqlModel) =>
+  exports.autocompleteResourcePathSpec('/' + nameAndKey.plural + '/autocomplete', parameters, autocompleteRepresentation, sqlModel);
 
 exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameters, representations, sqlModel) {
   var path = _.reduce(nameAndKey.key, function(memo, key) {

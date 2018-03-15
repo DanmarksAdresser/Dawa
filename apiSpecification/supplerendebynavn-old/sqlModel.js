@@ -76,4 +76,4 @@ var parameterImpls = [
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
 
 var registry = require('../registry');
-registry.add('supplerendebynavn', 'sqlModel', undefined, module.exports);
+registry.add('supplerendebynavn-old', 'sqlModel', undefined, module.exports);

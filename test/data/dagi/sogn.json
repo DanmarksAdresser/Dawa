@@ -1,10 +1,12 @@
 [
   {
+    "dagi_id": 100112,
     "kode": 1,
     "navn": "Sogn",
     "geom": null
   },
   {
+    "dagi_id": 100113,
     "kode": 99,
     "navn": "Sogn test",
     "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"

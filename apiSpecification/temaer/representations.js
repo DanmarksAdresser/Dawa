@@ -25,7 +25,8 @@ var autocompleteTekst = {
   valglandsdel: nameOnlyAutocomplete,
   storkreds: nameOnlyAutocomplete,
   menighedsrådsafstemningsområde: nameOnlyAutocomplete,
-  afstemningsområde: nameOnlyAutocomplete
+  afstemningsområde: nameOnlyAutocomplete,
+  supplerendebynavn: nameOnlyAutocomplete
 };
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {

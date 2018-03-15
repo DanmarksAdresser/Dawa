@@ -5,4 +5,4 @@ module.exports = {
 };
 
 var registry = require('../registry');
-registry.add('supplerendebynavn', 'nameAndKey', undefined, module.exports);
+registry.add('supplerendebynavn-old', 'nameAndKey', undefined, module.exports);

@@ -2,7 +2,7 @@ require('./adgangsadresse/nameAndKey');
 require('./adresse/nameAndKey');
 require('./temaer/namesAndKeys');
 require('./postnummer/nameAndKey');
-require('./supplerendebynavn/nameAndKey');
+require('./supplerendebynavn-old/nameAndKey');
 require('./vejnavn/nameAndKey');
 require('./vejstykke/nameAndKey');
 require('./vejstykkepostnummerrelation/nameAndKey');
