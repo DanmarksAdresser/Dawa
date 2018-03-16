@@ -2102,10 +2102,9 @@ describe('Bebyggelser', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var bebyggelser= JSON.parse(response.body);
-      assert(bebyggelser.length === 3, "Antal bebyggelsestyper != 3");
+      assert(bebyggelser.length === 2, "Antal bebyggelsestyper != 2");
       assert(bebyggelser.find(findNavn('Grøndal')), 'Mangler bydel Grøndal');
       assert(bebyggelser.find(findNavn('København')), 'Mangler by København');
-      assert(bebyggelser.find(findNavn('Storkøbenhavn')), 'Mangler storby Storkøbenhavn');
       done();
     })
     .catch((err) => {
