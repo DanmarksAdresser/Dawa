@@ -117,7 +117,7 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, oneTxOn
     });
     const transactions = splitInTransactions(rowsMap);
     if (transactions.length === 0) {
-      if(importDarImpl.hasChangedEntitiesDueToVirkningTime(client)) {
+      if(yield importDarImpl.hasChangedEntitiesDueToVirkningTime(client)) {
         yield importDarImpl.withDar1Transaction(client, 'api', () =>
           withImportTransaction(client, 'importDarApi', (txid) =>
             importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
