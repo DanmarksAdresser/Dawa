@@ -49,8 +49,8 @@ function normaliseTableSpec(specs){
 // Note, the sequence of the tables matter!
 exports.tableSpecs = normaliseTableSpec([
   {name: 'tx_log', init: false},
-  {name: 'tx_operation_counts', init: false},
   {name: 'transactions', init: false},
+  {name: 'tx_operation_counts', init: false},
   {name: 'transaction_history', init: false},
   {name: 'bbr_events'},
   {name: 'vejstykker', init: false},

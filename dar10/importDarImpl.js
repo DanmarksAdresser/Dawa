@@ -370,6 +370,32 @@ const rematerializeDawa = (client, txid) => go(function*() {
 });
 
 /**
+ * Called *before* metadata is updated to check if any entities changed due to advancing virkning time,
+ * assuming that virkning time is advanced to current transaction timestamp
+ * @param client
+ * @returns {*}
+ */
+const hasChangedEntitiesDueToVirkningTime = (client) => go(function* () {
+  const entities = Object.keys(dar10TableModels.rawTableModels);
+  const sql = 'SELECT ' + entities.map(entity => {
+    const table = dar10TableModels.rawTableModels[entity].table;
+    return `(SELECT count(*) FROM ${table}, 
+        (SELECT virkning as prev_virkning FROM dar1_meta) cv
+        WHERE (lower(virkning) > prev_virkning AND lower(virkning) <= now()) or 
+              (upper(virkning) > prev_virkning AND upper(virkning) <= now())
+              ) > 0 as "${entity}"`;
+  }).join(',');
+  const queryResult = (yield client.queryRows(sql))[0];
+  const changedEntities = Object.keys(queryResult).reduce((memo, entityName) => {
+    if (queryResult[entityName]) {
+      memo.push(entityName);
+    }
+    return memo;
+  }, []);
+  return changedEntities.length > 0;
+});
+
+/**
  * Propagate changes to DAR 1.0 raw tables to all derived tables.
  * @param client
  * @param skipDawaUpdate don't update DAWA tables
@@ -454,6 +480,7 @@ function withDar1Transaction(client, source, fn) {
 
 module.exports = {
   importFromFiles: importFromFiles,
+  hasChangedEntitiesDueToVirkningTime,
   importInitial,
   importIncremental,
   applyIncrementalDifferences: propagateIncrementalChanges,

@@ -117,9 +117,11 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, oneTxOn
     });
     const transactions = splitInTransactions(rowsMap);
     if (transactions.length === 0) {
-      yield importDarImpl.withDar1Transaction(client, 'api', () =>
-        withImportTransaction(client, 'importDarApi', (txid) =>
-          importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
+      if(importDarImpl.hasChangedEntitiesDueToVirkningTime(client)) {
+        yield importDarImpl.withDar1Transaction(client, 'api', () =>
+          withImportTransaction(client, 'importDarApi', (txid) =>
+            importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
+      }
     }
     else {
       const transactionsToImport = oneTxOnly ? transactions.slice(0, 1) : transactions;
