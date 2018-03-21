@@ -112,7 +112,7 @@ block main
       p.
         Hver enkel adresse er repræsenteret af en række oplysninger. Udover data om selve adressen:
         vejnavn, husnr, supplerende bynavn, postnummer, etage og dør, er der knyttet en lang række
-        andre data til adressen. Her kan nævnes unik identifikation, placering (koordinater),
+        andre data til adressen. Her kan nævnes unik identifikation, placering (koordinater),højde over havets overflade, 
          ejerlav, matrikelnr, ejendomsnr samt tilknytning til administrative inddelinger: kommune,
          sogn, region, retskreds, politikreds og opstillingskreds.
       p.
@@ -136,21 +136,27 @@ block main
         supplerende bynavne, kommuner, sogne, opstillingskredse, regioner, retskredse samt
         politikredse. Det er ikke nødvendigt at downloade alle data. Du kan nøjes med at udvælge
         præcist de data, du er interesseret i. Lad os se på nogle eksempler:
-      pre
-        a(href='#{url}/adresser?kommunekode=0326&format=csv').
-          CSV fil med alle adresser i Kalundborg kommune
 
+      p.
+        CSV fil med alle adresser i Kalundborg kommune:
       pre
-        a(href='#{url}/adresser?husnr=77&format=csv').
-          CSV fil med alle adresser med husnummeret 77
+        <a href='#{url}/adresser?kommunekode=0326&format=csv'>#{url}/adresser?kommunekode=0326&format=csv</a>.
 
+      p.
+        CSV fil med alle adresser med husnummeret 77:
       pre
-        a(href='#{url}/adresser/?cirkel=12.5816211914972,55.681219613782,50&format=csv').
-          CSV fil med de adresser, som ligger som har en afstand på mindre end 50 m til Gammel mønt 4, 1117 København K.
+        <a href='#{url}/adresser?husnr=77&format=csv'>'#{url}/adresser?husnr=77&format=csv'</a>.
 
+      p.
+        CSV fil med de adresser, som ligger som har en afstand på mindre end 50 m til Gammel mønt 4, 1117 København K.
       pre
-        a(href='#{url}/adresser?kommunekode=0101|0147&format=geojson').
-          GeoJSON fil med København og Frederiksberg kommuners adresser.
+        <a href='#{url}/adresser/?cirkel=12.5816211914972,55.681219613782,50&format=csv'>#{url}/adresser/?cirkel=12.5816211914972,55.681219613782,50&format=csv</a>
+
+      p.
+        GeoJSON fil med København og Frederiksberg kommuners adresser.
+      pre
+        <a href='#{url}/adresser?kommunekode=0101|0147&format=geojson'>#{url}/adresser?kommunekode=0101|0147&format=geojson</a>
+          
 
       h2 Etablering af lokal adressedatabase
       p.
