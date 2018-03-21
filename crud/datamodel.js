@@ -68,7 +68,7 @@ module.exports = {
     name: 'vejstykkepostnummerrelation',
     table: 'vejstykkerpostnumremat',
     columns: ['kommunekode', 'vejkode', 'postnr'],
-    key: ['kommunekode', 'vejkode']
+    key: ['kommunekode', 'vejkode', 'postnr']
   },
   vejpunkt: {
     name: 'vejpunkt',
