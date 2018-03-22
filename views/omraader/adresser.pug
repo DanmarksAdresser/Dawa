@@ -9,7 +9,7 @@ block main
       Adresseområdets API kan anvendes til at etablere mange forskellige former for adressefunktionalitet i it-systemer:
       adresseindtastning, adressesøgning, adresseopslag, adressevask, adressevalidering eller etablering af en opdateret, lokal kopi af adressedata. 
     p.  
-      Dokumentationen for de enkelte ressourcer i adresseområdets API finder du på <a href="/dok/api/adresse">adresser</a>, <a href="/dok/api/adgangsadresse">adgangsadresser</a>, <a href="/dok/api/vejnavn">vejnavne</a>, <a href="/dok/api/vejstykke">vejstykker</a>, <a href="/dok/api/supplerendebynavn">supplerende bynavne</a>, <a href="/dok/api/autocomplete">autocomplete</a> samt <a href="/dok/api/postnummer">postnumre</a>.
+      Dokumentationen for de enkelte ressourcer i adresseområdets API finder du på <a href="/dok/api#adresser">her</a>.
     p.  
       Du kan nedenfor prøve en række eksempler på anvendelser af API'et.
 
@@ -93,6 +93,7 @@ block main
         hvorpå brugeren med et klik påkortet udpeger nærmeste adresse.
       p Klik på kortet nedenfor og få nærmeste adresse.
       div#map.mb-4.mt-4
+      p Dokumentationen for reverse geokodning af adgangsadresser finder du <a href='/dok/api/adgangsadresse#reverse'>her</a>
 
       h2 Adressevask
       p.
@@ -108,6 +109,8 @@ block main
 
       +renderDatavaskDemo()
 
+      p Dokumentationen for datavask af adresser finder du <a href='/dok/api/adresse#datavask'>her</a> og for datavask af adgangsadresser <a href='/dok/api/adgangsadresse#datavask'>her</a>
+
       h2 Adressedata
       p.
         Hver enkel adresse er repræsenteret af en række oplysninger. Udover data om selve adressen:
@@ -119,6 +122,8 @@ block main
         Adressen kan på denne måde være indgang til andre områder, som f.eks. ejendomsområdet.
         Udfra en adresse kan du få fat i det tilknyttede ejensdomsnummer, som du så kan anvendes
         til opslag i ejendomssystemer efter ejendomsdata.
+      p.
+       Databeskrivelse for adresser finder du <a href='/dok/api/adgangsadresse#databeskrivelse'>her</a> og for adgangsadresser <a href='/dok/api/adgangsadresse#databeskrivelse'>her</a>
 
       h2 Adressesøgning
       p.
@@ -126,6 +131,8 @@ block main
         Det kan dreje sig om adresser i et enkelt sogn eller kommune. Det kan dreje som adresser
         indenfor en bestemt afstand til punkt. Eller adresser på en enkelt vej.
         Dawa giver mulighed for at udsøge adresser efter mange parametre og kombinationer af disse.
+      p.
+       Dokumentationen for adressesøgning finder du <a href='/dok/api/adresse#søgning'>her</a> og for adgangsadressesøgning <a href='/dok/api/adgangsadresse#søgning'>her</a>
 
       h2 Download af adresser
       p.
@@ -140,12 +147,12 @@ block main
       p.
         CSV fil med alle adresser i Kalundborg kommune:
       pre
-        <a href='#{url}/adresser?kommunekode=0326&format=csv'>#{url}/adresser?kommunekode=0326&format=csv</a>.
+        <a href='#{url}/adresser?kommunekode=0326&format=csv'>#{url}/adresser?kommunekode=0326&format=csv</a>
 
       p.
         CSV fil med alle adresser med husnummeret 77:
       pre
-        <a href='#{url}/adresser?husnr=77&format=csv'>'#{url}/adresser?husnr=77&format=csv'</a>.
+        <a href='#{url}/adresser?husnr=77&format=csv'>#{url}/adresser?husnr=77&format=csv</a>
 
       p.
         CSV fil med de adresser, som ligger som har en afstand på mindre end 50 m til Gammel mønt 4, 1117 København K.
