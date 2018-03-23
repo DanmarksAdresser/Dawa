@@ -13,7 +13,7 @@ const columns = {
   operationer: {
     select:
 `
-(select  json_agg(operations) from
+(select  coalesce(json_agg(operations), '[]'::json) from
   (select json_build_object('entitet', entity,
                             'inserts', COALESCE((SELECT operation_count
                                                  FROM tx_operation_counts t3
