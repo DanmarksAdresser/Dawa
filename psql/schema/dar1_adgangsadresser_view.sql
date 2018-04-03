@@ -59,4 +59,4 @@ CREATE VIEW dar1_adgangsadresser_view AS
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
-  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3);
+  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3) AND hn.husnummertekst IS NOT NULL;
