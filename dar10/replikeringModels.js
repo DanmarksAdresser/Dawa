@@ -18,7 +18,8 @@ const defaultReplikeringType = {
 
 const replikeringTypeOverrides = {
   Husnummer: {
-    husnummertekst: 'string'
+    husnummertekst: 'string',
+    husnummerretning: 'point2d'
   },
   Adressepunkt: {
     position: 'point2d'
@@ -36,7 +37,13 @@ const replikeringBindingOverrides = {
   Husnummer: {
     husnummertekst: {
       formatter: formatHusnr
+    },
+    husnummerretning: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+
     }
+
   },
   DARKommuneinddeling: {
     kommunekode: {

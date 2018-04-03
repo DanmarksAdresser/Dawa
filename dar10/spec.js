@@ -8,8 +8,6 @@ const wkt = require('terraformer-wkt-parser');
 const husnrUtil = require('../apiSpecification/husnrUtil');
 const _ = require('underscore');
 
-const { round10 } = require('round10');
-
 const parseHusnr = husnrUtil.parseHusnr;
 
 const udtrækDir = path.join(__dirname, 'schemas', 'Udtræk')
@@ -49,16 +47,11 @@ const fieldTransforms = {
       if(!wktText) {
         return null;
       }
+      if(wktText === 'POINT EMPTY') {
+        return null;
+      }
       const coordinates = wkt.parse(wktText).coordinates;
-      let resultGons = Math.atan2(coordinates[1],coordinates[0]) * 400 / (2*Math.PI);
-      if(resultGons < 0) {
-        resultGons += 400;
-      }
-      resultGons = round10(resultGons, -2);
-      if(resultGons === 400) {
-        resultGons = 0;
-      }
-      return resultGons;
+      return `SRID=25832;POINT(${coordinates[0]} ${coordinates[1]})`;
     },
     supplerendebynavn_id: uuid => {
       if(uuid === '00000000-0000-0000-0000-000000000000') {
@@ -92,7 +85,7 @@ const sqlTypes = {
   },
   Husnummer: {
     husnummertekst: 'husnr',
-    husnummerretning: 'float4',
+    husnummerretning: 'geometry(Point,25832)',
     fk_bbr_bygning_adgangtilbygning: 'uuid',
     fk_bbr_tekniskanlæg_adgangtiltekniskanlæg: 'uuid'
 
