@@ -25,6 +25,16 @@ function parseInteger(tekst) {
   return parseInt(tekst, 10);
 }
 
+const transformGeometry = (wktText) => {
+  if(!wktText) {
+    return null;
+  }
+  if(wktText.indexOf('EMPTY') !== -1) {
+    return null;
+  }
+  return `SRID=25832;${wktText}`;
+};
+
 /**
  * Some fields needs to be transformed before storing in Postgres.
  */
@@ -60,6 +70,11 @@ const fieldTransforms = {
       return uuid;
     }
   },
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: transformGeometry,
+    vejnavnebeliggenhed_vejnavneområde: transformGeometry,
+    vejnavnebeliggenhed_vejtilslutningspunkter: transformGeometry
+  },
   NavngivenVejKommunedel: {
     kommune: parseInteger,
     vejkode: parseInteger
@@ -89,6 +104,11 @@ const sqlTypes = {
     fk_bbr_bygning_adgangtilbygning: 'uuid',
     fk_bbr_tekniskanlæg_adgangtiltekniskanlæg: 'uuid'
 
+  },
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: 'geometry(geometry, 25832)',
+    vejnavnebeliggenhed_vejnavneområde: 'geometry(geometry, 25832)',
+    vejnavnebeliggenhed_vejtilslutningspunkter: 'geometry(geometry, 25832)'
   },
   NavngivenVejKommunedel: {
     kommune: 'smallint',

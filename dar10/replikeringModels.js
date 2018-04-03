@@ -23,6 +23,11 @@ const replikeringTypeOverrides = {
   },
   Adressepunkt: {
     position: 'point2d'
+  },
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: 'geometry',
+    vejnavnebeliggenhed_vejnavneområde: 'geometry',
+    vejnavnebeliggenhed_vejtilslutningspunkter: 'geometry'
   }
 };
 
@@ -41,9 +46,23 @@ const replikeringBindingOverrides = {
     husnummerretning: {
       selectTransform: col => `ST_AsGeoJSON(${col})`,
       formatter: JSON.parse
-
     }
-
+  },
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+    }
+    ,
+    vejnavnebeliggenhed_vejnavneområde: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+    }
+    ,
+    vejnavnebeliggenhed_vejtilslutningspunkter: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+    }
   },
   DARKommuneinddeling: {
     kommunekode: {
