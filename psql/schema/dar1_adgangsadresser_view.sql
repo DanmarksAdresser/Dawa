@@ -35,7 +35,8 @@ CREATE VIEW dar1_adgangsadresser_view AS
     WHEN 'Adressemyn'
       THEN 5 END                                                AS adgangspunktkilde,
     ap.oprindelse_tekniskstandard                               AS tekniskstandard,
-    hn.husnummerretning                                         AS tekstretning,
+    (round((atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
+           400 / (2 * pi()))::numeric, 2) + 400) % 400                    AS tekstretning,
     ap.oprindelse_registrering AT TIME ZONE 'Europe/Copenhagen' AS adressepunktaendringsdato,
     nv.id                                                       AS navngivenvej_id,
     nvk.id                                                      AS navngivenvejkommunedel_id,
@@ -58,4 +59,4 @@ CREATE VIEW dar1_adgangsadresser_view AS
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
-  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3);
+  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3) AND hn.husnummertekst IS NOT NULL;

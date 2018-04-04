@@ -13,7 +13,8 @@ const defaultSchemas = {
   uuid: definitions.UUID,
   timestamp: {type: 'string'},
   localdatetime: {type: 'string'},
-  point2d: {type: 'object'}
+  point2d: {type: 'object'},
+  geometry: {type: 'object'}
 };
 module.exports = {
   adgangsadresse: {

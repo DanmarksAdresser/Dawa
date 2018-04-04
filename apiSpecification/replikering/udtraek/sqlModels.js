@@ -34,7 +34,7 @@ const createSqlModel = (model, binding) => {
     let subselect =
       `SELECT *, row_number()
   OVER (PARTITION BY ${primaryColumnNames.join(', ')}
-    ORDER BY changeid desc NULLS LAST) as row_num
+    ORDER BY txid desc nulls last, changeid desc NULLS LAST) as row_num
 FROM ${tableName}_changes`;
     if(sequenceNumber) {
       subselect += ` WHERE (changeid IS NULL OR changeid <= $1)`

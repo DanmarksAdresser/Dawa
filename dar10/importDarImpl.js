@@ -106,7 +106,7 @@ const initializeDar10HistoryTables = (client, txid) => go(function*() {
   }
 });
 
-const importInitial = (client, txid, dataDir, skipDawa) => go(function* () {
+const importInitial = (client, txid, dataDir, skipDawa, noEvents) => go(function* () {
   yield setInitialMeta(client);
   yield withDar1Transaction(client, 'initial', () => go(function* () {
     for (let entityName of ALL_DAR_ENTITIES) {

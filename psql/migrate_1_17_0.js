@@ -74,7 +74,7 @@ const migrateZone = client => go(function*() {
   yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference(geom, (select geom from ${table} where zone = 1))) WHERE zone = 3`);
   // // landzone is everything not byzone and sommerhusområde
   yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference((select ST_Union(geom) FROM regioner) , (select ST_Union(geom) from ${table} where zone IN (1, 3)))) WHERE zone = 2`);
-  yield refreshSubdividedTable(client, 'zoner', 'zoner_divided', 'zone');
+  yield refreshSubdividedTable(client, 'zoner', 'zoner_divided', ['zone']);
 
 });
 
@@ -95,9 +95,8 @@ CREATE SEQUENCE rowkey_sequence START 1;
       yield createChangeTable(client, tableSchema.tables.jordstykker_adgadr);
       yield createChangeTable(client, tableSchema.tables.jordstykker);
       yield createChangeTable(client, tableSchema.tables.stednavne);
-    yield client.query(fs.readFileSync('psql/schema/tables/stednavn_kommune.sql', {encoding: 'utf8'}));
-
       yield client.query(generateAllTemaTables());
+      yield client.query(fs.readFileSync('psql/schema/tables/stednavn_kommune.sql', {encoding: 'utf8'}));
       yield client.query(fs.readFileSync('psql/schema/tables/tx_operation_counts.sql', {encoding: 'utf8'}));
       yield client.query(`
       ALTER TABLE enhedsadresser DROP CONSTRAINT IF EXISTS adgangsadresse_fk;

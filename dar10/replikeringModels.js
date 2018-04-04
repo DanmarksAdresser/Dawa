@@ -18,10 +18,16 @@ const defaultReplikeringType = {
 
 const replikeringTypeOverrides = {
   Husnummer: {
-    husnummertekst: 'string'
+    husnummertekst: 'string',
+    husnummerretning: 'point2d'
   },
   Adressepunkt: {
     position: 'point2d'
+  },
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: 'geometry',
+    vejnavnebeliggenhed_vejnavneområde: 'geometry',
+    vejnavnebeliggenhed_vejtilslutningspunkter: 'geometry'
   }
 };
 
@@ -36,6 +42,26 @@ const replikeringBindingOverrides = {
   Husnummer: {
     husnummertekst: {
       formatter: formatHusnr
+    },
+    husnummerretning: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+    }
+  },
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+    }
+    ,
+    vejnavnebeliggenhed_vejnavneområde: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
+    }
+    ,
+    vejnavnebeliggenhed_vejtilslutningspunkter: {
+      selectTransform: col => `ST_AsGeoJSON(${col})`,
+      formatter: JSON.parse
     }
   },
   DARKommuneinddeling: {

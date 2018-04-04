@@ -201,6 +201,12 @@ const orderedTableModels = orderedTableNames.map(tableName => {
 const applySequenceNumbersInOrder = (client, txid) =>
   assignSequenceNumbersToDependentTables(client, txid, orderedTableModels);
 
+const makeAllChangesNonPublic = (client, txid) => go(function*() {
+  for (let tableModel of orderedTableModels) {
+    yield client.query(`UPDATE ${tableModel.table}_changes SET public=false WHERE txid = $1`, [txid]);
+  }
+});
+
 module.exports = {
   computeDirty,
   createChangeTable,
@@ -215,5 +221,6 @@ module.exports = {
   recomputeMaterialization,
   recomputeTemaTilknytninger,
   dropTempDirtyTable,
-  applySequenceNumbersInOrder
+  applySequenceNumbersInOrder,
+  makeAllChangesNonPublic
 };
