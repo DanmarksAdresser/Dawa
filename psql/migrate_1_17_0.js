@@ -167,7 +167,7 @@ CREATE INDEX ON adgangsadresser_changes(id, txid desc nulls last, changeid desc 
 DROP INDEX enhedsadresser_changes_id_changeid_idx;
 CREATE INDEX ON enhedsadresser_changes(id, txid desc nulls last, changeid desc nulls last);
 DROP INDEX vejstykker_changes_kommunekode_kode_changeid_idx;
-CREATE INDEX ON adgangsadresser_changes(kommunekode, kode, txid desc nulls last, changeid desc nulls last);
+CREATE INDEX ON vejstykker_changes(kommunekode, kode, txid desc nulls last, changeid desc nulls last);
 DROP INDEX ejerlav_changes_kode_changeid_idx;
 CREATE INDEX ON ejerlav_changes(kode, txid desc nulls last, changeid desc nulls last);
 DROP INDEX postnumre_changes_nr_changeid_idx;
