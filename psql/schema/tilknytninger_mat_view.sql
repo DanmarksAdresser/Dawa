@@ -12,6 +12,7 @@ CREATE VIEW tilknytninger_mat_view AS (
       rt.retskredskode,
       r.navn as retskredsnavn,
       ao.nummer as afstemningsområdenummer,
+      ao.navn as afstemningsområdenavn,
       ot.opstillingskredskode,
       o.navn as opstillingskredsnavn,
       vt.valglandsdelsbogstav,

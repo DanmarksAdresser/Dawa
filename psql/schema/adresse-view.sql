@@ -40,6 +40,8 @@ CREATE OR REPLACE VIEW adresser AS
     A.adresseringsvejnavn,
 
     A.kommunekode AS kommunekode,
+    T.afstemningsområdenummer,
+    T.afstemningsområdenavn,
     T.kommunenavn,
     T.regionskode,
     T.regionsnavn,

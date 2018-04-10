@@ -406,23 +406,6 @@ const definitions = {
     },
     docOrder: ['href', 'id']
   }),
-  AfstemningsområdeRef: schemaObject({
-    properties: {
-      href: {
-        description: 'Afstemningsområdets URL',
-        type: 'string'
-      },
-      dagi_id: {
-        description: 'Afstemningsområdets DAGI ID',
-        type: 'number'
-      },
-      navn: {
-        description: 'Afstemningsområdets unikke navn',
-        type: 'string'
-      }
-    },
-    docOrder: ['href', 'dagi_id', 'navn']
-  }),
   OpstillingskredsRef: schemaObject({
     properties: {
       href: {

@@ -119,7 +119,12 @@ describe('Stable API', () => {
             },
             "zone": "Sommerhusområde",
             "jordstykke": null,
-            "bebyggelser": []
+            "bebyggelser": [],
+            "afstemningsområde": {
+              "href": "http://dawa/afstemningsomraader/461/2",
+              "navn": "Test afstemningsområde",
+              "nummer": "2"
+            }
           }
         }]
       },
@@ -197,6 +202,8 @@ describe('Stable API', () => {
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
+              "afstemningsområdenummer": "2",
+              "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde"
@@ -275,6 +282,8 @@ describe('Stable API', () => {
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
+              "afstemningsområdenummer": "2",
+              "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde"
@@ -398,6 +407,11 @@ describe('Stable API', () => {
                 "navn": "Politikreds test",
                 "href": "http://dawa/politikredse/99"
               },
+              "afstemningsområde": {
+                "href": "http://dawa/afstemningsomraader/461/2",
+                "navn": "Test afstemningsområde",
+                "nummer": "2"
+              },
               "opstillingskreds": {
                 "kode": "0099",
                 "navn": "Opstillingskreds test",
@@ -491,6 +505,8 @@ describe('Stable API', () => {
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
+              "afstemningsområdenummer": "2",
+              "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde"

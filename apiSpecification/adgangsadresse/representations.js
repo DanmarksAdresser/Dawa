@@ -48,7 +48,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -265,6 +265,23 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         },
         docOrder: ['href', 'kode', 'navn']
       }),
+      'afstemningsområde': schemaObject({
+        properties: {
+          href: {
+            description: 'Afstemningsområdets URL',
+            type: 'string'
+          },
+          nummer: {
+            description: 'Afstemningsområdets nummer indenfor kommunen',
+            type: 'string'
+          },
+          navn: {
+            description: 'Afstemningsområdets unikke navn',
+            type: 'string'
+          }
+        },
+        docOrder: ['href', 'nummer', 'navn']
+      }),
       'opstillingskreds': schemaObject({
         nullable: true,
         description: 'Opstillingskresen som adressen er beliggende i. Beregnes udfra adgangspunktet og opstillingskredsinddelingerne fra DAGI.',
@@ -330,7 +347,8 @@ vej, som adgangspunktets adresser refererer til.</p>`,
     },
     docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds','opstillingskreds', 'zone', 'jordstykke', 'bebyggelser']
+      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
+      'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -408,6 +426,11 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       adr.retskreds = commonMappers.mapKode4NavnTema('retskreds', rs.retskredskode, rs.retskredsnavn, baseUrl);
       adr.politikreds = commonMappers.mapKode4NavnTema('politikreds', rs.politikredskode, rs.politikredsnavn, baseUrl);
       adr.opstillingskreds = commonMappers.mapKode4NavnTema('opstillingskreds', rs.opstillingskredskode, rs.opstillingskredsnavn, baseUrl);
+      adr.afstemningsområde = rs.afstemningsområdenummer ? {
+        href: makeHref(baseUrl, 'afstemningsområde', [rs.kommunekode, rs.afstemningsområdenummer]),
+        nummer: "" + rs.afstemningsområdenummer,
+        navn: rs.afstemningsområdenavn
+        } : null,
       adr.zone = rs.zone ? util.zoneKodeFormatter(rs.zone) : null;
       if(rs.jordstykke_matrikelnr) {
         const jordstykke = {};

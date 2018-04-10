@@ -474,6 +474,8 @@ const tilknytninger_mat = {
     {name: 'politikredsnavn'},
     {name: 'retskredskode'},
     {name: 'retskredsnavn'},
+    {name: 'afstemningsområdenummer'},
+    {name: 'afstemningsområdenavn'},
     {name: 'opstillingskredskode'},
     {name: 'opstillingskredsnavn'},
     {name: 'valglandsdelsbogstav'},

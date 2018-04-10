@@ -12,6 +12,7 @@ CREATE TABLE tilknytninger_mat(
   politikredskode smallint,
   politikredsnavn text,
   afstemningsområdenummer smallint,
+  afstemningsområdenavn text,
   opstillingskredskode smallint,
   opstillingskredsnavn text,
   zone smallint,

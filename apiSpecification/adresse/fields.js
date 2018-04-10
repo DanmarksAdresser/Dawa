@@ -211,7 +211,9 @@ var fields = [
   {
     name: 'opstillingskredsnavn'
   },
-  adgangsadresseField('zone')
+  adgangsadresseField('zone'),
+  adgangsadresseField('afstemningsområdenummer'),
+  adgangsadresseField('afstemningsområdenavn')
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

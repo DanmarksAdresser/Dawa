@@ -41,6 +41,8 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     t.politikredsnavn,
     T.retskredskode,
     T.retskredsnavn,
+    t.afstemningsområdenummer,
+    t.afstemningsområdenavn,
     T.opstillingskredskode,
     T.opstillingskredsnavn,
     T.zone,

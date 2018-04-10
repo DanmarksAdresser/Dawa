@@ -173,6 +173,13 @@ var fields = [
   {
     name: 'zone',
     formatter: util.zoneKodeFormatter
+  },
+  {
+    name: 'afstemningsområdenummer',
+    formatter: util.numberToString
+  },
+  {
+    name: 'afstemningsområdenavn'
   }
 ];
 
