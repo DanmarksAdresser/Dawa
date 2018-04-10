@@ -11,6 +11,7 @@ const registry = require('../registry');
 module.exports = [
   // query
   resourcesUtil.queryResourceSpec(nameAndKey, {
+      propertyFilter: parameters.propertyFilter,
     }, representations,
     sqlModel),
   resourcesUtil.getByKeyResourceSpec(
