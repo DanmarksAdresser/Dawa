@@ -235,20 +235,20 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         docOrder: ['m100', 'km1', 'km10']
       }),
       'sogn': {
-        description: 'Sognet som adressen er beliggende i. Beregnes udfra adgangspunktet og sogneinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
+        description: 'Sognet som adressen er beliggende i. Beregnes udfra adgangspunktet og sogneinddelingerne fra DAGI.',
         $ref: '#/definitions/NullableSogneRef'
       },
       'region': {
-        description: 'Regionen som adressen er beliggende i. Beregnes udfra adgangspunktet og regionsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
+        description: 'Regionen som adressen er beliggende i. Beregnes udfra adgangspunktet og regionsinddelingerne fra DAGI.',
         $ref: '#/definitions/NullableRegionsRef'
       },
       'retskreds': {
-        description: 'Retskredsen som adressen er beliggende i. Beregnes udfra adgangspunktet og retskredsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
+        description: 'Retskredsen som adressen er beliggende i. Beregnes udfra adgangspunktet og retskredsinddelingerne fra DAGI.',
         $ref: '#/definitions/NullableRetskredsRef'
       },
       'politikreds': schemaObject({
         nullable: true,
-        description: 'Politikredsen som adressen er beliggende i. Beregnes udfra adgangspunktet og politikredsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
+        description: 'Politikredsen som adressen er beliggende i. Beregnes udfra adgangspunktet og politikredsinddelingerne fra DAGI.',
         properties: {
           href: {
             description: 'Politikredsens unikke URL',
@@ -267,7 +267,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       }),
       'opstillingskreds': schemaObject({
         nullable: true,
-        description: 'Opstillingskresen som adressen er beliggende i. Beregnes udfra adgangspunktet og opstillingskredsinddelingerne fra <a href="http://www.gst.dk/emner/frie-data/hvilke-data-er-omfattet/hvilke-data-er-frie/landinddelinger/danmarks-administrative-geografiske-inddelinger-(dagi)/">DAGI</a>',
+        description: 'Opstillingskresen som adressen er beliggende i. Beregnes udfra adgangspunktet og opstillingskredsinddelingerne fra DAGI.',
         properties: {
           href: {
             description: 'Opstillingskredsens unikke URL',
@@ -285,7 +285,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         docOrder: ['href', 'kode', 'navn']
       }),
       zone: {
-        description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone". Beregnes udfra adgangspunktet og zoneinddelingerne fra <a href="http://naturstyrelsen.dk/planlaegning/plansystemdk/services/wfs/">PlansystemDK</a>',
+        description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone". Beregnes udfra adgangspunktet og zoneinddelingerne fra PlansystemDK.',
         enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
       },
       jordstykke: schemaObject({
