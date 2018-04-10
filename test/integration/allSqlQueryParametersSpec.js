@@ -108,7 +108,7 @@ var sampleParameters = {
       }
     }
   },
-  supplerendebynavn: {
+  "supplerendebynavn-old": {
     navn: {
       values: ['Skallebølle'],
       verifier: function(supplerendeBynavn, navn) {
@@ -223,7 +223,7 @@ var sampleParameters = {
       }
     },
     regionskode: {
-      values: ['099'],
+      values: ['1084'],
       verifier: function(adr, kode) {
         return adr.region.kode === kode4String(kode);
       }
@@ -393,7 +393,7 @@ var sampleParameters = {
       }
     },
     regionskode: {
-      values: ['099'],
+      values: ['1084'],
       verifier: function(adr, kode) {
         return adr.adgangsadresse.region.kode === kode4String(kode);
       }

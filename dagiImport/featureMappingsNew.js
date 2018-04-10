@@ -83,6 +83,10 @@ exports.opstillingskreds = {
       name: 'DAGIid',
       parseFn: parseInteger
     },
+    nummer: {
+      name: 'opstillingskredsnummer',
+      parseFn: parseInteger
+    },
     kode: {
       name: 'opstillingskredsnummer',
       parseFn: parseInteger
@@ -199,8 +203,8 @@ exports.afstemningsområde = {
       name: 'kommunekode',
       parseFn: parseInteger
     },
-    opstillingskredsnummer: {
-      name: 'opstillingskredsnummer',
+    opstillingskreds_dagi_id: {
+      name: 'opstillingskredsLokalId',
       parseFn: parseInteger
     },
     navn: 'navn'

@@ -406,6 +406,74 @@ const definitions = {
     },
     docOrder: ['href', 'id']
   }),
+  AfstemningsområdeRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Afstemningsområdets URL',
+        type: 'string'
+      },
+      dagi_id: {
+        description: 'Afstemningsområdets DAGI ID',
+        type: 'number'
+      },
+      navn: {
+        description: 'Afstemningsområdets unikke navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'dagi_id', 'navn']
+  }),
+  OpstillingskredsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Opstillingskredsens URL',
+        type: 'string'
+      },
+      nummer: {
+        description: 'Opstillingskredsens unikke nummer',
+        type: 'string'
+      },
+      navn: {
+        description: 'Opstillingskredsens unikke navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'nummer', 'navn']
+  }),
+  StorkredsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Storkredsens URL',
+        type: 'string'
+      },
+      nummer: {
+        description: 'Storkredsens unikke nummer',
+        type: 'string'
+      },
+      navn: {
+        description: 'Storkredsens unikke navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'nummer', 'navn']
+  }),
+  ValglandsdelsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Valglandsdelens URL.',
+        type: 'string'
+      },
+      bogstav: {
+        description: 'Valglandsdelens bogstav.',
+        type: 'string'
+      },
+      navn: {
+        description: 'Valglandsdelens navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'bogstav', 'navn']
+  }),
   VejstykkeKodeOgNavn: schemaObject({
     properties: {
       href: {

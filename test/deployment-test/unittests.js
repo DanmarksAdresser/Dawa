@@ -338,12 +338,10 @@ describe('Adresseopslag', function(){
 
         let bydel= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Grøndal','bydel'));
         let by= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('København', 'by'));
-        let storby= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Storkøbenhavn', 'storby'));
 
         assert(adresse.adgangsadresse.bebyggelser.length === 3, "Antal bebyggelsestyper != 3");
         assert(bydel, 'Mangler bydel Grøndal');
         assert(by, 'Mangler by København');
-        assert(storby, 'Mangler storby Storkøbenhavn');
 
         var bydelopt= {};
         bydelopt.url= bydel.href;
@@ -359,14 +357,8 @@ describe('Adresseopslag', function(){
         byopt.resolveWithFullResponse= true;
         var byrequest= rp(byopt);
 
-        var storbyopt= {};
-        storbyopt.url= storby.href;
-        storbyopt.qs= {};
-        storbyopt.qs.cache= 'no-cache';
-        storbyopt.resolveWithFullResponse= true;
-        var storbyrequest= rp(storbyopt);
 
-        Promise.all([bydelrequest, byrequest, storbyrequest]).then((responses) => {
+        Promise.all([bydelrequest, byrequest]).then((responses) => {
           for (let i= 0; i<responses.length; i++) {
             assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")");
             //console.log(responses[i].body);
@@ -377,9 +369,6 @@ describe('Adresseopslag', function(){
               break;
             case 1:
               assert(by.navn===obj.navn,"Uoverenstemmelse i by")
-              break;
-            case 2:
-              assert(storby.navn===obj.navn,"Uoverenstemmelse i storby")
               break;
             }
           }
@@ -1941,7 +1930,7 @@ describe('Zone', function(){
     })
   })
 
-  it("Kalvebodvej 30, 2791 Dragør", function(done){
+  it("Kalvebodvej 3, 2791 Dragør", function(done){
     var options= {};
     options.baseUrl= host;
     options.url='adgangsadresser';

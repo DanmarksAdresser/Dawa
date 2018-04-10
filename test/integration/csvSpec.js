@@ -39,7 +39,7 @@ describe('CSV udtræk', function() {
     adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn', 'adresseringsvejnavn','husnr','supplerendebynavn','postnr','postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn', 'jordstykke_ejerlavnavn','kvh','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone', 'jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x','vejpunkt_y'],
     vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
     postnummer: ['nr','navn','stormodtager'],
-    kommune: ['kode','navn', 'regionskode', 'ændret', 'geo_ændret', 'geo_version'],
+    kommune: ['dagi_id', 'kode','navn', 'regionskode', 'ændret', 'geo_ændret', 'geo_version'],
     navngivenvej: ['id','darstatus', 'oprettet','ændret','navn','adresseringsnavn','administreresafkommune','beskrivelse','retskrivningskontrol','udtaltvejnavn']
   };
 

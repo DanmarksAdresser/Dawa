@@ -115,10 +115,10 @@ exports.autocompleteResourcePathSpec = function(path, parameters, autocompleteRe
 exports.autocompleteResourceSpec = (nameAndKey, parameters, autocompleteRepresentation, sqlModel) =>
   exports.autocompleteResourcePathSpec('/' + nameAndKey.plural + '/autocomplete', parameters, autocompleteRepresentation, sqlModel);
 
-exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameters, representations, sqlModel) {
-  var path = _.reduce(nameAndKey.key, function(memo, key) {
+exports.getByKeyResourcePathSpec = (pathPrefix, nameAndKey, idParameters, queryParameters, representations, sqlModel) => {
+  const path = _.reduce(nameAndKey.key, function(memo, key) {
     return memo + '/:' + key;
-  }, '/' + nameAndKey.plural);
+  },  pathPrefix);
   return {
     path: path,
     pathParameters: idParameters,
@@ -129,6 +129,10 @@ exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameter
     chooseRepresentation: exports.chooseRepresentationForQuery,
     processParameters:  function(params) { return; }
   };
+
+}
+exports.getByKeyResourceSpec = function(nameAndKey, idParameters, queryParameters, representations, sqlModel) {
+  return exports.getByKeyResourcePathSpec('/' + nameAndKey.plural, nameAndKey, idParameters, queryParameters, representations, sqlModel);
 };
 exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel, additionalParams) {
   const params = {

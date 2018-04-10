@@ -11,6 +11,7 @@ CREATE TABLE tilknytninger_mat(
   retskredsnavn text,
   politikredskode smallint,
   politikredsnavn text,
+  afstemningsområdenummer smallint,
   opstillingskredskode smallint,
   opstillingskredsnavn text,
   zone smallint,
@@ -28,6 +29,8 @@ CREATE INDEX ON tilknytninger_mat(politikredskode, adgangsadresseid);
 CREATE INDEX ON tilknytninger_mat(opstillingskredskode, adgangsadresseid);
 CREATE INDEX ON tilknytninger_mat(valglandsdelsbogstav, adgangsadresseid);
 CREATE INDEX ON tilknytninger_mat(storkredsnummer, adgangsadresseid);
+CREATE INDEX ON tilknytninger_mat(kommunekode, afstemningsområdenummer);
+CREATE INDEX ON tilknytninger_mat(afstemningsområdenummer);
 
 DROP TABLE IF EXISTS tilknytninger_mat_changes CASCADE;
 CREATE TABLE tilknytninger_mat_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, tilknytninger_mat.* FROM tilknytninger_mat WHERE false);

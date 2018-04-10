@@ -28,10 +28,12 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function () {
   const temaGeom = `SRID=25832;MULTIPOLYGON((${temaRingCounterclockwise}))`;
   const nonTemaGeom = `SRID=25832;MULTIPOLYGON((${containingRingCounterclockwise},${temaRingClockwise}))`;
   const kodeNavnSampleTemas = [{
+    dagi_id: 1,
     kode: 10,
     navn: 'Test tema',
     geom: temaGeom
   }, {
+    dagi_id: 2,
     kode: 11,
     navn: 'Udenfor test tema',
     geom: nonTemaGeom
@@ -40,7 +42,7 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function () {
     sogn: kodeNavnSampleTemas,
     retskreds: kodeNavnSampleTemas,
     politikreds: kodeNavnSampleTemas,
-    opstillingskreds: kodeNavnSampleTemas,
+    opstillingskreds: kodeNavnSampleTemas.map(tema => Object.assign({}, tema, {nummer: tema.kode, valgkredsnummer: 1, storkredsnummer: 1})),
     zone: [{
       zone: 1,
       geom: temaGeom

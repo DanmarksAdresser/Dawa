@@ -6,7 +6,7 @@ const path = require('path');
 const {go} = require('ts-csp');
 const temaModels = require('./temaModels');
 const {parseTemaGml} = require('./temaParsing');
-const {streamArrayToTable} = require('../importUtil/importUtil');
+const {streamArrayToTable, streamCsvToTable} = require('../importUtil/importUtil');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableSchema = require('../psql/tableModel');
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
@@ -14,8 +14,12 @@ const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
 const { updateSubdividedTable, updateGeometricFields } = require('../importUtil/geometryImport');
 
 const postProcess = {
-  storkreds:
-  (client, table) => go(function*() {
+  opstillingskreds: (client, table) => go(function*() {
+    yield client.query(`CREATE TEMP TABLE kredskommuner AS (select nummer, kredskommunekode FROM ${table} WHERE false)`);
+    yield streamCsvToTable(client, 'data/opstillingskredse.csv', 'kredskommuner', ['nummer', 'kredskommunekode']);
+    yield client.query(`UPDATE ${table} t SET kredskommunekode = k.kredskommunekode FROM kredskommuner k WHERE t.nummer = k.nummer; DROP TABLE kredskommuner`);
+  }),
+  storkreds: (client, table) => go(function*() {
     const additionalFields = JSON.parse(fs.readFileSync('data/storkredse.json', {encoding: 'utf-8'}));
     yield client.query(`CREATE TEMP TABLE additional AS (select nummer, valglandsdelsbogstav, regionskode FROM ${table} where false)`);
     yield streamArrayToTable(client, additionalFields, 'additional', ['nummer', 'valglandsdelsbogstav', 'regionskode']);

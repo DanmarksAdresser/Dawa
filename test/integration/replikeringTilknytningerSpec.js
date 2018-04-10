@@ -87,13 +87,14 @@ const multiContainingSecond = `SRID=25832;MULTIPOLYGON(${coordinatesContainingSe
 
 const temaObjects = {
   zone: [{"zone": 1}, {zone: 3}],
-  politikreds: [{"kode": 99, "navn": "Politikreds 1"}, {kode: 100, navn: "Politikreds 2"}],
-  region: [{"kode": 99, "navn": "Region 1"}, {kode: 100, navn: "Region 2"}],
-  kommune: [{"kode": 99, "navn": "Kommune 1", "regionskode": 99}, {kode: 100, navn: "Kommune 2", regionskode: 100}],
-  postnummer: [{"nr": 99, "navn": "Postdistrikt 1"}, {"nr": 100, "navn": "Postdistrikt 2"}],
-  sogn: [{"kode": 99, "navn": "Sogn 1"}, {kode: 100, "navn": "Sogn 2"}],
-  opstillingskreds: [{"kode": 99, "navn": "Opstillingskreds 1"}, {kode: 100, navn: "Opstillingskreds 2"}],
-  retskreds: [{"kode": 99, "navn": "Retskreds 1"}, {kode: 100, navn: "Retskreds 2"}]
+  politikreds: [{dagi_id: 1, "kode": 99, "navn": "Politikreds 1"}, {dagi_id: 2, kode: 100, navn: "Politikreds 2"}],
+  region: [{dagi_id: 3, "kode": 99, "navn": "Region 1"}, {dagi_id: 4, kode: 100, navn: "Region 2"}],
+  kommune: [{dagi_id: 5, "kode": 99, "navn": "Kommune 1", "regionskode": 99}, {dagi_id: 6, kode: 100, navn: "Kommune 2", regionskode: 100}],
+  postnummer: [{dagi_id: 7, "nr": 99, "navn": "Postdistrikt 1"}, {dagi_id: 8, "nr": 100, "navn": "Postdistrikt 2"}],
+  sogn: [{dagi_id: 9, "kode": 99, "navn": "Sogn 1"}, {dagi_id: 10, kode: 100, "navn": "Sogn 2"}],
+  opstillingskreds: [{dagi_id: 11, "kode": 99, nummer: 99, "navn": "Opstillingskreds 1", valgkredsnummer: 1, storkredsnummer: 2},
+    {dagi_id: 12, kode: 100, nummer: 100, navn: "Opstillingskreds 2", valgkredsnummer: 2, storkredsnummer: 2}],
+  retskreds: [{dagi_id: 13, "kode": 99, "navn": "Retskreds 1"}, {dagi_id: 14, kode: 100, navn: "Retskreds 2"}]
 };
 
 // const bebyggelseJsonContainingFirstAddress = {

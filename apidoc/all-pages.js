@@ -1,11 +1,13 @@
 module.exports = [
   require('./adgangsadresse-page'),
   require('./adresse-page'),
+  require('./afstemningsområde-page'),
   require('./autocomplete-page'),
   require('./bebyggelse-page'),
   require('./ejerlav-page'),
   require("./jordstykke-page"),
   require('./kommune-page'),
+  require('./menighedsrådsafstemningsområde-page'),
   ... require('./ois-pages')('public'),
   ... require('./ois-pages')('full'),
   require('./opstillingskreds-page'),

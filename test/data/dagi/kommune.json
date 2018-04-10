@@ -51,7 +51,7 @@
     "dagi_id": 100010,
     "kode": 155,
     "navn": "Dragør",
-    "regionskode": 99,
+    "regionskode": 1084,
     "geom": null
   },
   {
@@ -599,7 +599,7 @@
     "dagi_id": 100101,
     "kode": 99,
     "navn": "Kommune test",
-    "regionskode": 99,
+    "regionskode": 1084,
     "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
   }
 ]

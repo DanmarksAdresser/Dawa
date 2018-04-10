@@ -11,6 +11,7 @@ CREATE VIEW tilknytninger_mat_view AS (
       p.navn AS politikredsnavn,
       rt.retskredskode,
       r.navn as retskredsnavn,
+      ao.nummer as afstemningsområdenummer,
       ot.opstillingskredskode,
       o.navn as opstillingskredsnavn,
       vt.valglandsdelsbogstav,
@@ -27,6 +28,10 @@ CREATE VIEW tilknytninger_mat_view AS (
   LEFT JOIN retskredse r ON rt.retskredskode = r.kode
   LEFT JOIN kommuner k ON a.kommunekode = k.kode
   LEFT JOIN regioner reg ON k.regionskode = reg.kode
+  LEFT JOIN afstemningsomraadetilknytninger aot ON a.id = aot.adgangsadresseid
+  LEFT JOIN afstemningsomraader ao
+        ON ao.kommunekode = aot.kommunekode
+           AND ao.nummer = aot.afstemningsområdenummer
   LEFT JOIN opstillingskredstilknytninger ot ON a.id = ot.adgangsadresseid
   LEFT JOIN opstillingskredse o ON ot.opstillingskredskode = o.kode
   LEFT JOIN valglandsdelstilknytninger vt ON a.id = vt.adgangsadresseid

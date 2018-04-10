@@ -140,13 +140,14 @@
 	.dw-sidebar:before {
 		display: block;
 		position: absolute;
-		content: "Sideoversigt";
+		content: "Oversigt";
 		font-size: 16px;
 		font-weight: 500;
 		color: $dark-850;
 		left: 20px;
 		top: 17px;
 	}
+
 	.dw-sidebar:after {
 		content: "";
 		display: block;

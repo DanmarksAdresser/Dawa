@@ -179,7 +179,7 @@ var expectedResultsMap = {
       "zone": "Byzone"
     }
   }],
-  supplerendebynavn: [{
+  "supplerendebynavn-old": [{
     "href": BASE_URL + "/supplerendebynavne/Aasum",
     "navn": "Aasum",
     "postnumre": [
@@ -280,7 +280,7 @@ var expectedResultsMap = {
     "href": BASE_URL + "/kommuner/0999"
   }],
   region: [{
-    "kode": "0099",
+    "kode": "1084",
     "navn": "Region test",
     "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,

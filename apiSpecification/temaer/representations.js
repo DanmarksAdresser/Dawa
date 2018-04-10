@@ -3,14 +3,20 @@
 var _ = require('underscore');
 var representationUtil = require('../common/representationUtil');
 var fieldMap = require('./fields');
-var commonMappers = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-
+const {normalizedSchemaField} = require('../replikering/normalizedFieldSchemas');
+const commonSchemaDefinitions = require('../commonSchemaDefinitions');
+const { schemaObject } = require('../schemaUtil');
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHrefFromPath = commonMappers.makeHrefFromPath;
+const {makeHrefFromPath,
+  mapKode4NavnTema,
+  mapKommuneRefArray,
+makeHref} = require('../commonMappers');
 const temaModels = require('../../dagiImport/temaModels');
-
+const { kode4String } = require('../util');
 var registry = require('../registry');
+
+const numToStr = (num) => _.isNumber(num) ? '' + num : null;
 
 var nameOnlyAutocomplete =  {
   description: function(tema) {
@@ -40,7 +46,183 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
   };
 });
 
+const opstillingskredsJsonRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.opstillingskreds, ['geom_json']);
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('opstillingskreds', fieldName);
+  };
+  const mapper = baseUrl => row => {
+    const result = {
+      href: makeHref(baseUrl, 'opstillingskreds', [row.nummer]),
+      dagi_id: row.dagi_id,
+      ændret: row.ændret,
+      geo_version: row.geo_version,
+      geo_ændret: row.geo_ændret,
+      nummer: numToStr(row.nummer),
+      kode: kode4String(row.nummer),
+      navn: row.navn,
+      kredskommune: mapKode4NavnTema('kommune', row.kredskommunekode, row.kredskommunenavn, baseUrl),
+      region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
+      storkreds: {
+        href: makeHref(baseUrl, 'storkreds', [row.storkredsnummer]),
+        nummer: numToStr(row.storkredsnummer),
+        navn: row.storkredsnavn
+      },
+      valglandsdel: {
+        href: makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
+        bogstav: row.valglandsdelsbogstav,
+        navn: row.valglandsdelsnavn
+      },
+      kommuner: mapKommuneRefArray(row.kommuner, baseUrl)
+    };
+    return result;
+  };
+  const schema = globalSchemaObject({
+    title: 'Opstillingskreds',
+    properties: {
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      href: Object.assign({}, commonSchemaDefinitions.Href, { description: 'Opstillingskredsens URL' }),
+      navn: normalizedFieldSchema('navn'),
+      ændret: normalizedFieldSchema('ændret'),
+      geo_version: normalizedFieldSchema('geo_version'),
+      geo_ændret: normalizedFieldSchema('geo_ændret'),
+      nummer: normalizedFieldSchema('nummer'),
+      kode: normalizedFieldSchema('kode'),
+      kredskommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Opstillingskredsens kredskommune.'}),
+      region: Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som opstillingskredsen ligger i.'}),
+      storkreds: Object.assign({}, commonSchemaDefinitions.StorkredsRef, {description: 'Den storkreds, som opstillingskredsen tilhører.'}),
+      valglandsdel: Object.assign({}, commonSchemaDefinitions.ValglandsdelsRef, {description: 'Den valglandsdel, som opstillingskredsen tilhører'}),
+      kommuner: {
+        description: 'De kommuner som opstillingskredsen ligger i.',
+        type: 'array',
+        items:
+          commonSchemaDefinitions.KommuneRef
 
+      }
+    },
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer', 'kode',
+      'kredskommune', 'region', 'storkreds', 'valglandsdel', 'kommuner']
+  });
+  return {fields, mapper, schema};
+})();
+
+const afstemningsområdeJsonRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.afstemningsområde, ['geom_json']);
+  const mapper = baseUrl => row => {
+    const result = {
+      href: makeHref(baseUrl, 'afstemningsområde', [row.kommunekode, row.nummer]),
+      dagi_id: row.dagi_id,
+      ændret: row.ændret,
+      geo_version: row.geo_version,
+      geo_ændret: row.geo_ændret,
+      nummer: numToStr(row.nummer),
+      navn: row.navn,
+      afstemningssted: {
+        navn: row.afstemningsstednavn
+      },
+      kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
+      region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
+      opstillingskreds: {
+        href: makeHref(baseUrl, 'opstillingskreds', [row.opstillingskredsnummer]),
+        nummer: numToStr(row.opstillingskredsnummer),
+        navn: row.opstillingskredsnavn
+      },
+      storkreds: {
+        href: makeHref(baseUrl, 'storkreds', [row.storkredsnummer]),
+        nummer: numToStr(row.storkredsnummer),
+        navn: row.storkredsnavn
+      },
+      valglandsdel: {
+        href: makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
+        bogstav: row.valglandsdelsbogstav,
+        navn: row.valglandsdelsnavn
+      }
+    };
+    return result;
+  };
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('afstemningsområde', fieldName);
+  };
+  const schema = globalSchemaObject({
+    title: 'Afstemningsområde',
+    properties: {
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      href: commonSchemaDefinitions.Href,
+      navn: normalizedFieldSchema('navn'),
+      ændret: normalizedFieldSchema('ændret'),
+      geo_version: normalizedFieldSchema('geo_version'),
+      geo_ændret: normalizedFieldSchema('geo_ændret'),
+      nummer: normalizedFieldSchema('nummer'),
+      afstemningssted: schemaObject({
+        properties: {
+          navn: {
+            type: 'string',
+            description: 'Afstemningsstedets navn.'
+          }
+        },
+        docOrder: ['navn']
+      }),
+      kommune: commonSchemaDefinitions.KommuneRef,
+      region: commonSchemaDefinitions.RegionsRef,
+      opstillingskreds: commonSchemaDefinitions.OpstillingskredsRef,
+      storkreds: commonSchemaDefinitions.StorkredsRef,
+      valglandsdel: commonSchemaDefinitions.ValglandsdelsRef,
+    },
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer',
+      'afstemningssted',
+     'kommune', 'region', 'opstillingskreds', 'storkreds', 'valglandsdel']
+  });
+    return {fields, mapper, schema};
+})();
+
+const storkredsJsonRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.storkreds, ['geom_json']);
+  const mapper = baseUrl => row => {
+    const result = {
+      href: makeHref(baseUrl, 'storkreds', [row.nummer]),
+      dagi_id: row.dagi_id,
+      ændret: row.ændret,
+      geo_version: row.geo_version,
+      geo_ændret: row.geo_ændret,
+      nummer: numToStr(row.nummer),
+      navn: row.navn,
+      region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
+      valglandsdel: {
+        href: makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
+        bogstav: row.valglandsdelsbogstav,
+        navn: row.valglandsdelsnavn
+      }
+    };
+    return result;
+  };
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('storkreds', fieldName);
+  };
+  const schema = globalSchemaObject({
+    title: 'Storkreds',
+    properties: {
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      href: Object.assign({}, commonSchemaDefinitions.Href, { description: 'Storkredsens URL' }),
+      ændret: normalizedFieldSchema('ændret'),
+      geo_version: normalizedFieldSchema('geo_version'),
+      geo_ændret: normalizedFieldSchema('geo_ændret'),
+      nummer: normalizedFieldSchema('nummer'),
+      navn: normalizedFieldSchema('navn'),
+      region: Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som storkredsen ligger i.'}),
+      valglandsdel: Object.assign({}, commonSchemaDefinitions.ValglandsdelsRef, {description: 'Den valglandsdel, som storkredsen tilhører'}),
+    },
+    docOrder: ['dagi_id', 'href', 'ændret', 'geo_version', 'geo_ændret', 'nummer', 'navn',
+      'region', 'valglandsdel']
+  });
+  return {fields, mapper, schema};
+})();
+
+
+const jsonRepresentations = {
+  opstillingskreds: opstillingskredsJsonRepresentation,
+  afstemningsområde: afstemningsområdeJsonRepresentation,
+  storkreds: storkredsJsonRepresentation
+}
 
 
 
@@ -137,12 +319,13 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
       };
     };
   }
-  representations.json = {
+  const defaultJsonRepresentation = {
     // geomentry for the (huge) DAGI temaer is only returned in geojson format.
     fields: representationUtil.fieldsWithoutNames(fields, ['geom_json']),
     schema: globalSchemaObject(jsonSchema()),
     mapper: dagiTemaJsonMapper(model.primaryKey)
   };
+  representations.json = jsonRepresentations[model.singular] || defaultJsonRepresentation;
   if(model.searchable) {
     representations.autocomplete = {
       fields: representations.json.fields,

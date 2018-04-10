@@ -1,9 +1,15 @@
 const {
-  dagiAutocompleteDoc,
-  dagiQueryDoc,
-  dagiReplikeringTilknytningDoc,
+  formatAndPagingParams,
+  formatParameters,
+  autocompleteSubtext,
+  overwriteWithAutocompleteQParameter
+} = require('./common');
+const {
   dagiReverseDoc,
-  getTemaModel
+  getTemaModel,
+  dagiReverseParameters,
+  dagiSridCirkelPolygonParameters,
+  dagiReplikeringTilknytningDoc
 } = require('./dagiCommon');
 
 const model = getTemaModel('menighedsrådsafstemningsområde');
@@ -17,9 +23,81 @@ const examples = {
   autocomplete: []
 };
 
+
+const filterParams = [
+  {
+    name: 'q',
+    doc: `Tekstsøgning. Der søges i nummer og navn. Alle ord i søgeteksten skal matche. 
+       Wildcard * er tilladt i slutningen af hvert ord. 
+       Der returneres højst 1000 resultater ved anvendelse af parameteren.`
+  },
+  {
+    name: 'dagi_id',
+    doc: 'Find menighedsrådsafstemningsområdet med det angivne DAGI ID'
+  },
+  {
+    name: 'nummer',
+    doc: 'Find menighedsrådsafstemningsområder med det angivne nummer.'
+  },
+  {
+    name: 'navn',
+    doc: 'Find afstemningsområdet med det angivne navn. Case-sensitiv.',
+  },
+  {
+    name: 'kommunekode',
+    doc: 'Find menighedsrådsafstemningsområderne i den angivne kommune.'
+  },
+  {
+    name: 'sognekode',
+    doc: 'Find menighedsrådsafstemningsområderne i sognet med den angivne sognekode'
+  },
+  ...dagiReverseParameters(model),
+  ...formatAndPagingParams,
+  ...dagiSridCirkelPolygonParameters(model.plural)
+];
+const queryDoc = {
+  entity: 'menighedsrådsafstemningsområde',
+  path: `/menighedsraadsafstemningsomraader`,
+  subtext: `Søg efter menighedsrådsafstemningsområder. Returnerer de menighedsrådsafstemningsområder der opfylder kriteriet.`,
+  parameters: [
+    ... filterParams,
+    ...dagiReverseParameters(model),
+    ...formatAndPagingParams,
+    ...dagiSridCirkelPolygonParameters(model.plural)
+  ],
+  examples: examples.query
+};
+
+const getByKeyDoc = {
+  entity: 'afstemningsområde',
+  path: `/menighedsraadsafstemningsomraader/{kommunekode}/{nummer}`,
+  subtext: 'Modtag menighedsrådsafstemningsområde ud fra kommunekode og nummer',
+  parameters: [
+    {
+      name: 'kommunekode',
+      doc: 'Menighedsrådsafstemningsområdets kommunekode.'
+    },
+    {
+      name: 'nummer',
+      doc: 'Menighedsrådsfstemningsområdets nummer indenfor kommunen.'
+    },
+    ...formatParameters],
+  nomulti: true,
+  examples: examples.get
+};
+
+const autocompleteDoc = {
+  entity: 'menighedsrådsafstemningsområde',
+  path: `/menighedsraadsafstemningsomraader/autocomplete`,
+  subtext: autocompleteSubtext(model.plural),
+  parameters: [...overwriteWithAutocompleteQParameter(filterParams), ...formatAndPagingParams],
+  examples: examples.autocomplete
+};
+
 module.exports = [
-  dagiQueryDoc(model, examples.query),
-  dagiAutocompleteDoc(model, examples.autocomplete),
+  queryDoc,
+  getByKeyDoc,
+  autocompleteDoc,
   dagiReverseDoc(model),
-  ...dagiReplikeringTilknytningDoc(model)
+...dagiReplikeringTilknytningDoc(model)
 ];

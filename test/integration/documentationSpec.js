@@ -69,7 +69,7 @@ describe('Documentation page', function() {
   for(let page of allPages) {
     it(`Kan hente apidocs siden for ${page.entity}`, () => go(function*() {
       const response = yield request.get({
-        uri: `http://localhost:3002/dok/api/${page.entity}`,
+        uri: `http://localhost:3002/dok/api/${encodeURIComponent(page.entity)}`,
         resolveWithFullResponse: true
       });
       assert.strictEqual(response.statusCode, 200);

@@ -34,7 +34,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
       representations,
       sqlModel)];
   if (model.searchable) {
-    resources.push(resourcesUtil.autocompleteResourceSpec(nameAndKey, {
+    resources.push(resourcesUtil.autocompleteResourcePathSpec(`${path}/autocomplete`, {
       propertyFilter: parameters[model.singular].propertyFilter,
       autocomplete: commonParameters.autocomplete
     }, representations.autocomplete, sqlModel));
@@ -44,8 +44,8 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
   };
 
   resources = resources.concat([
-    resourcesUtil.reverseGeocodingResourceSpec('/' + nameAndKey.plural + '/reverse', representations, sqlModel),
-    resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters[model.singular].id, getByKeyParams, representations, sqlModel)
+    resourcesUtil.reverseGeocodingResourceSpec(`${path}/reverse`, representations, sqlModel),
+    resourcesUtil.getByKeyResourcePathSpec(path, nameAndKey, parameters[model.singular].id, getByKeyParams, representations, sqlModel)
   ]);
   exports[model.singular] = resources;
 

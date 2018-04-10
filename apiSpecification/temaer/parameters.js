@@ -25,10 +25,58 @@ var kodeAndNavn = {
   ])
 };
 
-var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
+var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function(dagiTemaNavn) {
   module.exports[dagiTemaNavn] = kodeAndNavn;
 });
+
+module.exports.opstillingskreds = {
+  id: normalizeParameters([
+    {
+      name: 'kode',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    },
+    {
+      name: 'kredskommunekode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'regionskode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'storkredsnummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'valglandsdelsbogstav',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    }
+  ])
+};
 
 module.exports.valglandsdel = {
   id: normalizeParameters([
@@ -71,9 +119,14 @@ module.exports.storkreds = {
 module.exports.afstemningsområde = {
   id: normalizeParameters([
     {
-      name: 'dagi_id',
+      name: 'kommunekode',
       type: 'integer'
-    }
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
   ]),
   propertyFilter: normalizeParameters([
     {
@@ -105,9 +158,13 @@ module.exports.afstemningsområde = {
 module.exports.menighedsrådsafstemningsområde = {
   id: normalizeParameters([
     {
-      name: 'dagi_id',
+      name: 'kommunekode',
       type: 'integer'
-    }
+    },
+    {
+      name: 'nummer',
+      type: 'integer'
+    },
   ]),
   propertyFilter: normalizeParameters([
     {
@@ -117,7 +174,8 @@ module.exports.menighedsrådsafstemningsområde = {
     },
     {
       name: 'kommunekode',
-      type: 'integer'
+      type: 'integer',
+      multi: true
     },
     {
       name: 'nummer',

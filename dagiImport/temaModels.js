@@ -205,6 +205,13 @@ exports.modelList = [{
       description: 'Unik ID'
     },
     {
+      name: 'nummer',
+      type: 'string',
+      sqlType: 'SMALLINT',
+      nullable: false,
+      description: 'Opstillingskredsens nummer.'
+    },
+    {
       name: 'kode',
       type: 'string',
       formatter: kode4String,
@@ -232,6 +239,14 @@ exports.modelList = [{
       sqlType: 'SMALLINT',
       nullable: false,
       description: 'Nummeret på storkredsen, som opstillingskredsen tilhører.'
+    },
+    {
+      name: 'kredskommunekode',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: 'SMALLINT',
+      nullable: true,
+      description: 'Opstillingskredsens kredskommune'
     }],
   tilknytningKey: ['opstillingskredskode'],
   useNearestForAdgangsadresseMapping: true
@@ -369,9 +384,10 @@ exports.modelList = [{
   {
     singular: 'afstemningsområde',
     singularSpecific: 'afstemningsområdet',
-    plural: 'afstemningsområder',
+    plural: 'afstemningsomraader',
     prefix: 'aftemningsområde',
-    primaryKey: ['dagi_id'],
+    primaryKey: ['kommunekode', 'nummer'],
+    path: '/afstemningsomraader',
     published: true,
     searchable: true,
     table: 'afstemningsomraader',
@@ -411,15 +427,12 @@ exports.modelList = [{
         description: 'Kommunekoden for den kommune, som afstemningsmrådet ligger i.'
       },
       {
-        name: 'opstillingskredsnummer',
-        type: 'string',
-        sqlType: 'SMALLINT',
-        formatter: nummer => {
-          return '' + nummer;
-        },
-        description: 'Opstillingskredsnummeret for den opstillingskreds, som afstemningsområdet tilhører.'
-      }],
-    tilknytningKey: ['dagi_id'],
+        name: 'opstillingskreds_dagi_id',
+        type: 'integer',
+        description: 'DAGI id for opstillingskredsen, som afstemningsområdet tilhører'
+      }
+      ],
+    tilknytningKey: ['kommunekode', 'afstemningsområdenummer'],
     tilknytningTable: 'afstemningsomraadetilknytninger',
     useNearestForAdgangsadresseMapping: true,
     deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn)`
@@ -430,9 +443,10 @@ exports.modelList = [{
     singularSpecific: 'menighedsrådsafstemningsområdet',
     plural: 'menighedsrådsafstemningsområder',
     prefix: 'menighedsrådsafstemningsområde',
-    primaryKey: ['dagi_id'],
+    primaryKey: ['kommunekode', 'nummer'],
     published: true,
     searchable: true,
+    path: '/menighedsraadsafstemningsomraader',
     table: 'menighedsraadsafstemningsomraader',
     fields: [
       {
@@ -479,7 +493,7 @@ exports.modelList = [{
         description: 'Sognekoden for det sogn, som menighedsrådsafstemningsområdet tilhører.'
       }
     ],
-    tilknytningKey: ['dagi_id'],
+    tilknytningKey: ['kommunekode', 'menighedsrådsafstemningsområdenummer'],
     tilknytningTable: 'menighedsraadsafstemningsomraadetilknytninger',
     useNearestForAdgangsadresseMapping: true,
     deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn)`
@@ -603,6 +617,39 @@ exports.toTilknytningMaterialization = temaModel => {
   }
 };
 
+exports.toReplikeringModel = temaModel => {
+  return {
+    key: [temaModel.primaryKey],
+    attributes: [{
+      name: 'ændret',
+      type: 'string',
+      schema: commonSchemaDefinitions.DateTimeUtc,
+      description: 'Tidspunkt for seneste ændring i DAWA'
+    }, {
+      name: 'geo_ændret',
+      type: 'string',
+      schema: commonSchemaDefinitions.DateTimeUtc,
+      description: 'Tidspunkt for seneste ændring af geometri i DAWA'
+    }, {
+      name: 'geo_version',
+      type: 'integer',
+      schema: {
+        type: 'integer'
+      },
+      description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.'
+    },
+      ...temaModel.fields.map(field => {
+        return {
+          name: field.name,
+          type: field.type,
+          schema: field.schema,
+          description: field.description
+        };
+      })
+    ]
+  }
+
+};
 exports.toReplikeringTilknytningModel = temaModel => {
   const adgAdrAttr = {
     name: 'adgangsadresseid',
@@ -635,7 +682,7 @@ exports.toReplikeringTilknytningDbBinding = temaModel => {
       if (tilknytningField.formatter) {
         attr.formatter = tilknytningField.formatter;
       }
-      if (tilknytningField.selecttransform) {
+      if (tilknytningField.selectTransform) {
         attr.selectTransform = tilknytningField.selectTransform;
       }
       memo[tilknytningField.name] = attr;
