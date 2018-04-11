@@ -235,7 +235,22 @@ exports.menighedsrådsafstemningsområde = {
     },
     navn: 'navn'
   }
-}
+};
+
+exports.supplerendebynavn = {
+  name: 'supplerendebynavn',
+  wfsName: 'SupplerendeBynavn',
+  geometry: 'geometri',
+  dagi_id: {
+    name: 'DAGIid',
+    parseFn: parseInteger
+  },
+  navn: 'navn',
+  kommunekode: {
+    name: 'kommunekode',
+    parseFn: parseInteger
+  },
+};
 
 // normalize, such that every field has a name and a parseFn and a filterFn.
 _.each(exports, function(mapping) {

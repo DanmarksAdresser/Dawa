@@ -20,7 +20,7 @@ const optionSpec = {
 };
 
 const selectKode = `(fields ->> 'kode') :: SMALLINT`;
-const selectNavn = `(fields->>'navn')`
+const selectNavn = `(fields->>'navn')`;
 const SELECT_JSON_FIELD = {
   kommune: {
     kode: selectKode,
@@ -174,11 +174,13 @@ DROP INDEX postnumre_changes_nr_changeid_idx;
 CREATE INDEX ON postnumre_changes(nr, txid desc nulls last, changeid desc nulls last);
 CREATE INDEX ON vejstykkerpostnumremat_changes(kommunekode, vejkode, postnr, txid desc nulls last, changeid desc nulls last);
 `);
+    const migratedTemas = temaModels.modelList.filter(tema => !!SELECT_JSON_FIELD[tema.singular]);
       yield reloadDatabaseCode(client, 'psql/schema');
-      for (let tema of temaModels.modelList) {
+      for (let tema of migratedTemas) {
+        const fieldNames = tema.fields.map(field => field.name).filter(name => !!(SELECT_JSON_FIELD[tema.singular][name]));
         yield client.query(`
-INSERT INTO ${tema.table}(ændret, geo_version, geo_ændret, geom, tsv, ${tema.fields.map(field => field.name).join(', ')})
-  (SELECT aendret, geo_version, geo_aendret, geom, tsv, ${tema.fields.map(field => `${SELECT_JSON_FIELD[tema.singular][field.name]} AS ${field.name}`).join(', ')} 
+INSERT INTO ${tema.table}(ændret, geo_version, geo_ændret, geom, tsv, ${fieldNames.join(', ')})
+  (SELECT aendret, geo_version, geo_aendret, geom, tsv, ${fieldNames.map(fieldName => `${SELECT_JSON_FIELD[tema.singular][fieldName]} AS ${fieldName}`).join(', ')} 
   FROM temaer where tema = '${tema.singular}' AND slettet IS NULL);
 INSERT INTO ${tema.tilknytningTable} (adgangsadresseid, ${tema.tilknytningKey.join(', ')})
   SELECT
@@ -222,7 +224,7 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
     WHERE txid IS NOT NULL and entity <> 'undefined' group by txid, entity, operation)`);
       yield client.query('analyze');
       yield withMigrationTransaction(client, '1.17.0 migrering', txid => go(function* () {
-        for (let tema of temaModels.modelList) {
+        for (let tema of migratedTemas) {
           yield migrateHistoryToChangeTable(client, txid, tableSchema.tables[tema.tilknytningTable]);
           yield client.query(`DROP TABLE ${tema.tilknytningTable}_history`);
         }

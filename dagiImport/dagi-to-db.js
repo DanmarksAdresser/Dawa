@@ -10,6 +10,7 @@ const logger = require('../logger').forCategory('dagiToDb');
 const { importTemaerWfs } = require('./importDagiImpl');
 const featureMappingsNew = require('./featureMappingsNew');
 const proddb = require('../psql/proddb');
+const {makeAllChangesNonPublic} = require('../importUtil/materialize');
 
 function parseInteger(str) {
   return parseInt(str, 10);
@@ -59,6 +60,9 @@ runImporter('dagi-to-db', optionSpec, _.without(_.keys(optionSpec), 'temaer'), f
       yield proddb.withTransaction('READ_WRITE', client => go(function*() {
         yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
           yield importTemaerWfs(client, txid, temaNames, featureMappings, options.dataDir, options.filePrefix, options.maxChanges);
+          if(options.init) {
+            yield makeAllChangesNonPublic(client, txid);
+          }
         }));
       }));
       logger.info('Indlæsning af DAGI temaer gennemført', { temaer: temaNames});

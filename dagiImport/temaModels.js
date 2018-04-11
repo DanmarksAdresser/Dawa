@@ -33,7 +33,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -66,7 +66,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -106,7 +106,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -138,7 +138,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -169,7 +169,7 @@ exports.modelList = [{
   fields: [{
     name: 'dagi_id',
     type: 'integer',
-    nullable: false,
+    nullable: true,
     description: 'Unik ID'
   },
     {
@@ -201,14 +201,14 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
       name: 'nummer',
       type: 'string',
       sqlType: 'SMALLINT',
-      nullable: false,
+      nullable: true,
       description: 'Opstillingskredsens nummer.'
     },
     {
@@ -230,14 +230,14 @@ exports.modelList = [{
       name: 'valgkredsnummer',
       type: 'string',
       sqlType: 'SMALLINT',
-      nullable: false,
+      nullable: true,
       description: 'Valgkredsnummer. Unikt indenfor storkredsen.'
     },
     {
       name: 'storkredsnummer',
       type: 'string',
       sqlType: 'SMALLINT',
-      nullable: false,
+      nullable: true,
       description: 'Nummeret på storkredsen, som opstillingskredsen tilhører.'
     },
     {
@@ -263,7 +263,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -313,7 +313,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -344,7 +344,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'integer',
-      nullable: false,
+      nullable: true,
       description: 'Unik ID'
     },
     {
@@ -365,7 +365,7 @@ exports.modelList = [{
     {
       name: 'regionskode',
       type: 'string',
-      nullable: false,
+      nullable: true,
       sqlType: 'SMALLINT',
       formatter: kode4String,
       description: 'Koden på den region som storkredsen ligger i.'
@@ -373,7 +373,7 @@ exports.modelList = [{
     {
       name: 'valglandsdelsbogstav',
       type: 'string',
-      nullable: false,
+      nullable: true,
       sqlType: 'char(1)',
       description: 'Bogstav for den valglandsdel, som storkredsen ligger i.'
     }],
