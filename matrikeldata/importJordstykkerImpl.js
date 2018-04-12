@@ -8,7 +8,7 @@ var path = require('path');
 var q = require('q');
 
 const ejerlav = require('./ejerlav');
-const tableDiffNg = require('../importUtil/tablediffNg');
+const tableDiffNg = require('../importUtil/tableDiffNg');
 const { recomputeMaterialization } = require('../importUtil/materialize');
 const logger = require('../logger').forCategory('matrikelImport');
 const {streamArrayToTable} = require('../importUtil/importUtil');
