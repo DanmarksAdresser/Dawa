@@ -26,7 +26,7 @@ const createChangeTables = (client)=> go(function*() {
     'ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser',
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr',
-  'navngivenvejkommunedel_postnr_mat'];
+  'navngivenvejkommunedel_postnr_mat', 'otilgang', 'ikke_brofaste_oer', 'ikke_brofaste_adresser'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -48,6 +48,9 @@ function normaliseTableSpec(specs){
 
 // Note, the sequence of the tables matter!
 exports.tableSpecs = normaliseTableSpec([
+  {name: 'otilgang', init: false},
+  {name: 'ikke_brofaste_oer', init: false},
+  {name: 'ikke_brofaste_adresser', init: false},
   {name: 'tx_log', init: false},
   {name: 'transactions', init: false},
   {name: 'tx_operation_counts', init: false},
@@ -129,6 +132,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'stednavne_adgadr', init: false},
   {name: 'stednavne_divided', init: false},
   {name: 'stednavn_kommune', init: false},
+  {name: 'ikke_brofaste_oer_view', type: 'view'},
+  {name: 'ikke_brofaste_adresser_view', type: 'view'},
   {name: 'tilknytninger_mat_view', type: 'view'},
   {name: 'ois_importlog', init: false}
 ]);

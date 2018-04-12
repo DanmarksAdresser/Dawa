@@ -48,7 +48,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -335,6 +335,10 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         type: 'array',
         items: commonSchemaDefinitions.bebyggelse
       },
+      brofast: {
+        description: 'Angiver, om adressen er brofast.',
+        type: 'boolean'
+      },
       kvh: {
         description: 'Sammensat nøgle for adgangsadressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
                      'KVH-nøglen er sammen således:' +
@@ -348,7 +352,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
     docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
-      'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser']
+      'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -448,6 +452,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         bebyggelse.href = makeHref(baseUrl, 'bebyggelse', [bebyggelse.id]);
         return bebyggelse;
       });
+      adr.brofast = rs.brofast;
       return adr;
     };
   }
@@ -502,7 +507,8 @@ exports.autocomplete = {
             type: nullableType('string')
           }
         },
-        docOrder: ['id', 'href', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn']
+        docOrder: ['id', 'href', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn',
+          'stormodtagerpostnr', 'stormodtagerpostnrnavn']
       }
     },
     docOrder: ['tekst', 'adgangsadresse']

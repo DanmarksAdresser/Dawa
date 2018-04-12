@@ -148,10 +148,12 @@ const materializeDawa = (client, txid) => go(function* () {
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adgangsadresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.stednavne_adgadr);
   for (let model of temaModels.modelList) {
     yield materialize(client, txid, schemaModel.tables, schemaModel.materializations[model.tilknytningTable]);
   }
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.tilknytninger_mat);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.ikke_brofaste_adresser);
 });
 
 const recomputeTemaTilknytninger = (client, txid, temaModelList) => go(function* () {

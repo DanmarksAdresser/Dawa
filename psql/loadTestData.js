@@ -18,6 +18,7 @@ const importOisImpl = require('../ois/importOisImpl');
 const {withImportTransaction} = require('../importUtil/importUtil');
 const importStednavneImpl = require('../stednavne/importStednavneImpl');
 const temaModels = require('../dagiImport/temaModels');
+const importØTilgangImpl = require("../stednavne/importØTilgangImpl");
 
 var optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -62,6 +63,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       }));
       yield importOisImpl.importOis(client, 'test/data/ois');
       yield withImportTransaction(client, 'loadTestData', txid => importStednavneImpl.importStednavne(client, txid, 'test/data/Stednavn.json'));
+      yield withImportTransaction(client, 'loadTestData', txid => importØTilgangImpl(client, txid, 'test/data/øtilgang.csv'));
       yield client.query('analyze');
     })();
   }).done();

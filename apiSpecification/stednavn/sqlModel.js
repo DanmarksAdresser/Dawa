@@ -56,6 +56,9 @@ const columns = {
       sqlParts.whereClauses.push(`EXISTS(${subquerySql})`);
     }
   },
+  brofast: {
+    select: `EXISTS(SELECT * FROM ikke_brofaste_oer ibo WHERE ibo.stednavn_id = stednavne.id)`
+  },
   kommuner: {
     select: `(select json_agg((kode, navn)::kommuneref order by kode) 
      FROM stednavn_kommune sk

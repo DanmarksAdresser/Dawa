@@ -213,7 +213,8 @@ var fields = [
   },
   adgangsadresseField('zone'),
   adgangsadresseField('afstemningsområdenummer'),
-  adgangsadresseField('afstemningsområdenavn')
+  adgangsadresseField('afstemningsområdenavn'),
+  adgangsadresseField('brofast')
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

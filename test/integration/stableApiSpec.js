@@ -120,6 +120,7 @@ describe('Stable API', () => {
             "zone": "Sommerhusområde",
             "jordstykke": null,
             "bebyggelser": [],
+            "brofast": true,
             "afstemningsområde": {
               "href": "http://dawa/afstemningsomraader/461/2",
               "navn": "Test afstemningsområde",
@@ -206,7 +207,8 @@ describe('Stable API', () => {
               "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Sommerhusområde"
+              "zone": "Sommerhusområde",
+              "brofast": true,
             }
           }
         }, {
@@ -286,7 +288,8 @@ describe('Stable API', () => {
               "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Sommerhusområde"
+              "zone": "Sommerhusområde",
+              "brofast": true
             }
           }
         }]
@@ -419,7 +422,8 @@ describe('Stable API', () => {
               },
               "zone": "Sommerhusområde",
               "jordstykke": null,
-              "bebyggelser": []
+              "bebyggelser": [],
+              "brofast": true
             }
           }
         }]
@@ -509,7 +513,8 @@ describe('Stable API', () => {
               "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Sommerhusområde"
+              "zone": "Sommerhusområde",
+              "brofast": true
             }
           }
         }]

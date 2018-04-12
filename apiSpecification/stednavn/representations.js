@@ -99,6 +99,9 @@ exports.json = {
 
     result.visueltcenter = row.visueltcenter_x ? [row.visueltcenter_x, row.visueltcenter_y] : null;
     result.kommuner = row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : [];
+    if(result.undertype === 'ø') {
+      result.egenskaber.brofast = row.brofast;
+    }
     return result;
   }
 };

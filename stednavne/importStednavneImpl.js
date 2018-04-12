@@ -12,7 +12,7 @@ const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
 const stednavneTableModel = tableModel.tables.stednavne;
-const { recomputeMaterialization } = require('../importUtil/materialize');
+const { recomputeMaterialization, materialize } = require('../importUtil/materialize');
 
 const {
   updateSubdividedTable,
@@ -68,6 +68,8 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield updateSubdividedTable(client, txid, 'stednavne', 'stednavne_divided', ['id']);
   yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stednavne_adgadr);
+  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_oer);
+  yield materialize(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_adresser);
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 

@@ -50,6 +50,9 @@ module.exports = [
   },
   {
     name: 'visueltcenter_y'
+  },
+  {
+    name: 'brofast'
   }];
 
 fieldsUtil.applySelectability(module.exports, sqlModel);

@@ -486,6 +486,34 @@ const tilknytninger_mat = {
   ]
 };
 
+const otilgang = {
+  table: 'otilgang',
+  primaryKey: ['sdfe_id'],
+  columns: [
+    { name: 'sdfe_id'},
+    { name: 'gv_adgang_bro'},
+    { name: 'gv_adgang_faerge'},
+    { name: 'ikke_oe'},
+    { name: 'manually_checked'},
+    { name: 'geom'}
+  ]
+};
+
+const ikke_brofaste_oer = {
+  table: 'ikke_brofaste_oer',
+  primaryKey: ['stednavn_id'],
+  columns: [
+    { name: 'stednavn_id'}
+  ]
+};
+const ikke_brofaste_adresser = {
+  table: 'ikke_brofaste_adresser',
+  primaryKey: ['adgangsadresse_id', 'stednavn_id'],
+  columns: [
+    { name: 'adgangsadresse_id'},
+    { name: 'stednavn_id'}
+  ]
+};
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
@@ -510,7 +538,10 @@ exports.tables = Object.assign({
     stednavne_adgadr,
     jordstykker,
     jordstykker_adgadr,
-    tilknytninger_mat
+    tilknytninger_mat,
+    otilgang,
+    ikke_brofaste_oer,
+    ikke_brofaste_adresser
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
@@ -611,6 +642,30 @@ exports.materializations = Object.assign({
       {
         table: 'adgangsadresser',
         columns: ['adgangsadresseid']
+      }
+    ]
+  },
+  ikke_brofaste_oer: {
+    table: 'ikke_brofaste_oer',
+    view: 'ikke_brofaste_oer_view',
+    dependents: [
+      {
+        table: 'stednavne',
+        columns: ['stednavn_id']
+      }
+    ]
+  },
+  ikke_brofaste_adresser: {
+    table: 'ikke_brofaste_adresser',
+    view: 'ikke_brofaste_adresser_view',
+    dependents: [
+      {
+        table: 'stednavne_adgadr',
+        columns: ['adgangsadresse_id', 'stednavn_id']
+      },
+      {
+        table: 'ikke_brofaste_oer',
+        columns: ['stednavn_id']
       }
     ]
   }

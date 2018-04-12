@@ -180,6 +180,9 @@ var fields = [
   },
   {
     name: 'afstemningsområdenavn'
+  },
+  {
+    name: 'brofast'
   }
 ];
 

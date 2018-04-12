@@ -157,7 +157,6 @@ const withTransaction = (client, description, applySequenceNumbers, fn) =>
        d AS (UPDATE current_tx SET txid = (SELECT txid FROM id))
        INSERT INTO transactions(txid, description) (select txid, $1 FROM id) RETURNING txid`, [description])).rows[0].txid;
     const result = yield fn(txid);
-
     if(applySequenceNumbers) {
       yield applySequenceNumbersInOrder(client, txid);
     }
