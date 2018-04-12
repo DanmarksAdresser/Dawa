@@ -96,7 +96,7 @@ const initializeDar10HistoryTables = (client, txid) => go(function*() {
     const historyTableModel = dar10TableModels.historyTableModels[entityName];
     const historyColumnNames = historyTableModel.columns.map(column => column.name);
     yield client.query(`CREATE TEMP TABLE unmerged AS (
-    SELECT ${historyColumnNames} FROM ${rawTableModel.table} WHERE upper_inf(registrering)); analyze unmerged`);
+    SELECT ${_.without(historyColumnNames, 'rowkey')} FROM ${rawTableModel.table} WHERE upper_inf(registrering)); analyze unmerged`);
     yield mergeValidTime(client, 'unmerged', 'merged', ['id'], _.without(historyColumnNames, 'virkning'));
     yield client.query(`UPDATE merged SET rowkey = nextval('rowkey_sequence')`);
     yield client.query(`INSERT INTO ${historyTableModel.table}(${historyColumnNames.join(', ')}) (SELECT ${historyColumnNames.join(', ')} FROM merged)`);
