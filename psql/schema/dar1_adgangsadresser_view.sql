@@ -36,7 +36,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
       THEN 5 END                                                AS adgangspunktkilde,
     ap.oprindelse_tekniskstandard                               AS tekniskstandard,
     (round((atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
-           400 / (2 * pi()))::numeric, 2) + 400) % 400                    AS tekstretning,
+            400 / (2 * pi())) :: NUMERIC, 2) + 200) % 400 AS tekstretning,
     ap.oprindelse_registrering AT TIME ZONE 'Europe/Copenhagen' AS adressepunktaendringsdato,
     nv.id                                                       AS navngivenvej_id,
     nvk.id                                                      AS navngivenvejkommunedel_id,
