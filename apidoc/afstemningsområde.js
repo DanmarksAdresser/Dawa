@@ -54,8 +54,6 @@ const filterParams = [
     name: 'regionskode',
     doc: 'Find afstemningsområderne i regionen med den angivne regionskode'
   },
-  ...dagiReverseParameters(model),
-  ...formatAndPagingParams,
   ...dagiSridCirkelPolygonParameters(model.plural)
 ];
 const queryDoc = {
@@ -66,7 +64,6 @@ const queryDoc = {
     ... filterParams,
     ...dagiReverseParameters(model),
     ...formatAndPagingParams,
-    ...dagiSridCirkelPolygonParameters(model.plural)
   ],
   examples: examples.query
 };
@@ -93,7 +90,9 @@ const autocompleteDoc = {
   entity: 'afstemningsområde',
   path: `/afstemningsomraader/autocomplete`,
   subtext: autocompleteSubtext(model.plural),
-  parameters: [...overwriteWithAutocompleteQParameter(filterParams), ...formatAndPagingParams],
+  parameters: [
+    ...overwriteWithAutocompleteQParameter(filterParams),
+    ...formatAndPagingParams],
   examples: examples.autocomplete
 };
 

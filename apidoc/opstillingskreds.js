@@ -85,8 +85,6 @@ const filterParams = [
     name: 'kode',
     doc: 'Deprecated. Anvend parameteren nummer i stedet.'
   },
-  ...dagiReverseParameters(model),
-  ...formatAndPagingParams,
   ...dagiSridCirkelPolygonParameters(model.plural)
 ];
 const queryDoc = {
@@ -97,7 +95,6 @@ const queryDoc = {
     ... filterParams,
     ...dagiReverseParameters(model),
     ...formatAndPagingParams,
-    ...dagiSridCirkelPolygonParameters(model.plural)
   ],
   examples: examples.query
 };
@@ -120,7 +117,9 @@ const autocompleteDoc = {
   entity: 'opstillingskreds',
   path: `/opstillingskredse/autocomplete`,
   subtext: autocompleteSubtext(model.plural),
-  parameters: [...overwriteWithAutocompleteQParameter(filterParams), ...formatAndPagingParams],
+  parameters: [
+    ...overwriteWithAutocompleteQParameter(filterParams),
+    ...formatAndPagingParams],
   examples: examples.autocomplete
 };
 
