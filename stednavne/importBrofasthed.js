@@ -13,7 +13,7 @@ const optionSpec = {
   init: [false, 'Initiel import', 'boolean', false]
 };
 
-runImporter('ikke-brofaste-øer', optionSpec, _.keys(optionSpec), function (args, options) {
+runImporter('brofasthed', optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false

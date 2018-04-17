@@ -80,7 +80,7 @@ module.exports = {
     column: 'p_stednavn.navnestatus'
   },
   brofast: {
-    select: `EXISTS(SELECT * FROM ikke_brofaste_oer ibo WHERE ibo.stedid = steder.id)`
+    select: `(SELECT b.brofast FROM brofasthed b WHERE b.stedid = steder.id)`
   },
   sekundærenavne: {
     select: `(select json_agg(json_build_object('navn', navn, 'navnestatus', navnestatus))
