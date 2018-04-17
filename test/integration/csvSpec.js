@@ -1,5 +1,5 @@
 "use strict";
-
+const { go } = require('ts-csp');
 var expect = require('chai').expect;
 var request = require("request-promise");
 var q = require('q');
@@ -12,24 +12,25 @@ var testdb = require('../helpers/testdb2');
 
 require('../../apiSpecification/allSpecs');
 
-describe('CSV udtræk', function() {
-  describe('Alle søgninger kan leveres i CSV-format', function() {
+describe('CSV udtræk', function () {
+  describe('Alle søgninger kan leveres i CSV-format', function () {
     var resources = registry.where({
       type: 'resource',
       qualifier: 'query'
     });
-    resources.forEach(function(resource) {
-      it('søgning i ' + resource.path + ' kan leveres i CSV-format', function(done) {
-        request.get("http://localhost:3002"+ resource.path +"?per_side=1&format=csv", function(error, response, body) {
-          expect(response.headers['content-type']).to.equal("text/csv; charset=UTF-8");
-          csv()
-            .from.string(body, {columns: true})
-            .to.array(function (data) {
-              expect(data.length).to.equal(1);
-              done();
-            });
+    resources.forEach(function (resource) {
+      it('søgning i ' + resource.path + ' kan leveres i CSV-format', () => go(function* () {
+        const response = yield request.get({
+          url: "http://localhost:3002" + resource.path + "?per_side=1&format=csv",
+          resolveWithFullResponse: true
         });
-      });
+        expect(response.headers['content-type']).to.equal("text/csv; charset=UTF-8");
+        csv()
+          .from.string(response.body, {columns: true})
+          .to.array(function (data) {
+          expect(data.length).to.equal(1);
+        });
+      }));
     });
   });
 

@@ -8,19 +8,15 @@ const schema = require('../parameterSchema');
 module.exports = {
   id: normalizeParameters([
     {
-      name: 'sted_id',
+      name: 'id',
       type: 'string',
       schema: schema.uuid
-    },
-    {
-      name: 'navn',
-      type: 'string'
     }
   ]),
   propertyFilter: normalizeParameters(
     [
       {
-        name: 'sted_id',
+        name: 'id',
         type: 'string',
         schema: schema.uuid,
         multi: true
@@ -44,8 +40,7 @@ module.exports = {
         name: 'kommunekode',
         type: 'integer',
         schema: schema.kode4,
-        multi: true,
-        renameTo: 'sted_kommunekode'
+        multi: true
       },
       {
         name: 'navnestatus',
@@ -53,16 +48,8 @@ module.exports = {
         schema: {
           enum: ['officielt', 'uofficielt', 'suAutoriseret']
         }
-      },
-      {
-        name: 'brugsprioritet',
-        type: 'string',
-        schema: {
-          enum: ['primær', 'sekundær']
-        }
       }
-
     ])
 };
 
-registry.addMultiple('stednavn', 'parameterGroup', module.exports);
+registry.addMultiple('stednavn-legacy', 'parameterGroup', module.exports);

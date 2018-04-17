@@ -9,34 +9,20 @@ const resourcesUtil = require('../common/resourcesUtil');
 const commonParameters = require('../common/commonParameters');
 
 
-exports.query = resourcesUtil.queryResourcePathSpec(
-  '/stednavne2', {
+exports.query = resourcesUtil.queryResourceSpec(
+  nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
     reverseGeocoding: commonParameters.reverseGeocodingOptional,
     struktur: commonParameters.struktur,
-    search: commonParameters.search,
-    reverseGeocodingNearest: commonParameters.reverseGeocodingNearest,
-    fuzzy: commonParameters.fuzzy
+    reverseGeocodingNearest: commonParameters.reverseGeocodingNearest
   },
   representations,
   sqlModel
 );
 
-exports.autocomplete =   resourcesUtil.autocompleteResourcePathSpec('/stednavne2/autocomplete', {
-    propertyFilter: parameters.propertyFilter,
-    crs: commonParameters.crs,
-    geomWithin: commonParameters.geomWithin,
-    struktur: commonParameters.struktur,
-    autocomplete: commonParameters.autocomplete,
-    fuzzy: commonParameters.fuzzy
-  },
-  representations.json,
-  sqlModel);
-
-exports.getByKey = resourcesUtil.getByKeyResourcePathSpec(
-  '/stednavne2',
+exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id, {
     crs: commonParameters.crs,
     struktur: commonParameters.struktur
@@ -46,5 +32,5 @@ exports.getByKey = resourcesUtil.getByKeyResourcePathSpec(
 );
 
 Object.keys(exports).forEach(key => {
-  registry.add('stednavn', 'resource', key, exports[key]);
+  registry.add('sted', 'resource', key, exports[key]);
 });

@@ -12,6 +12,8 @@ require('./tematilknytninger/namesAndKeys');
 require('./flats/flats');
 require('./flats/tilknytninger/namesAndKeys');
 require('./bebyggelse/nameAndKey');
+require('./sted/nameAndKey');
 require('./stednavn/nameAndKey');
+require('./stednavn-legacy/nameAndKey');
 require('./stednavntype/nameAndKey');
 require('./stednavntilknytning/nameAndKey');

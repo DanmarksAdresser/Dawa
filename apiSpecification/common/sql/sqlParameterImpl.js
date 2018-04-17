@@ -136,6 +136,25 @@ exports.simplePropertyFilter = function (parameterSpec, columnSpec) {
 
 exports.queryForRanking = queryForRanking;
 
+const applyOrdering = (sqlParts, columnSpecs, transformed, fieldNames) => {
+  if(!fieldNames) {
+    return;
+  }
+  for(let fieldName of fieldNames) {
+    const columnSpec = columnSpecs[fieldName];
+    if(transformed || !columnSpec) {
+      sqlParts.orderClauses.push(fieldName);
+    }
+    else {
+      const columnName = columnSpec.column;
+      if(!columnName) {
+        throw new Error("No Column name for " + JSON.stringify(columnSpec));
+      }
+      sqlParts.orderClauses.push(columnName);
+    }
+  }
+};
+
 function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
   dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
@@ -157,6 +176,7 @@ function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
   var rankAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
   transformedQuery.orderClauses.unshift(searchOrderClause(rankAlias));
   _.extend(sqlParts, transformedQuery);
+  params.transformedQuery = true;
 
 }
 
@@ -171,7 +191,7 @@ exports.search = function (columnSpec, orderFields) {
     if (notNull(params.search)) {
       var tsQuery = toPgSearchQuery(params.search);
       applyTsQuery(sqlParts, params, tsQuery, columnSpec);
-      sqlParts.orderClauses = sqlParts.orderClauses.concat(orderFields);
+      applyOrdering(sqlParts, columnSpec, params.transformedQuery, orderFields);
     }
   };
 };
@@ -185,7 +205,7 @@ exports.autocomplete = function (columnSpec, orderFields) {
     if (notNull(params.autocomplete)) {
       var tsQuery = toPgSuggestQuery(params.autocomplete);
       applyTsQuery(sqlParts, params, tsQuery, columnSpec);
-      sqlParts.orderClauses = sqlParts.orderClauses.concat(orderFields);
+      applyOrdering(sqlParts, columnSpec, params.transformedQuery, orderFields);
     }
   };
 };
@@ -202,19 +222,12 @@ function toOffsetLimit(paging) {
   }
 }
 
-function applyOrderByKey(sqlParts, keyArray) {
-  keyArray.forEach(function (key) {
-    sqlParts.orderClauses.push(key);
-  });
-}
-
 exports.paging = function (columnSpec, key, alwaysOrderByKey) {
   return function (sqlParts, params) {
     var offsetLimit = toOffsetLimit(params);
     _.extend(sqlParts, offsetLimit);
     if (params.per_side || alwaysOrderByKey) {
-      const orderBy = _.isFunction(key) ? key(params) : key;
-      applyOrderByKey(sqlParts, orderBy);
+      applyOrdering(sqlParts, columnSpec, params.transformedQuery, key);
     }
   };
 };

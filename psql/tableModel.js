@@ -232,6 +232,22 @@ const navngivenvejkommunedel_postnr_mat = {
 const stednavne = {
   table: 'stednavne',
   entity: 'stednavn',
+  primaryKey: ['stedid', 'navn'],
+  columns: [
+    {name: 'stedid'},
+    {name: 'navn'},
+    {name: 'navnestatus'},
+    {name: 'brugsprioritet'},
+    {
+      name: 'tsv',
+      derive: table => `to_tsvector('adresser', ${table}.navn)`
+    },
+  ]
+};
+
+const steder = {
+  table: 'steder',
+  entity: 'sted',
   primaryKey: ['id'],
   columns: [
     {name: 'id'},
@@ -240,13 +256,8 @@ const stednavne = {
     {name: 'geo_ændret'},
     {name: 'hovedtype'},
     {name: 'undertype'},
-    {name: 'navn'},
-    {name: 'navnestatus'},
     {name: 'bebyggelseskode'},
-    {
-      name: 'tsv',
-      derive: table => `to_tsvector('adresser', ${table}.navn)`
-    },
+    {name: 'indbyggerantal'},
     {
       name: 'visueltcenter',
       derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
@@ -256,16 +267,16 @@ const stednavne = {
       distinctClause: geomDistinctClause
     }
   ]
-};
+}
 
-const stednavne_adgadr = {
-  table: 'stednavne_adgadr',
-  entity: 'stednavntilknytning',
-  primaryKey: ['stednavn_id', 'adgangsadresse_id'],
+const stedtilknytninger = {
+  table: 'stedtilknytninger',
+  entity: 'stedtilknytning',
+  primaryKey: ['stedid', 'adgangsadresseid'],
   columns: [{
-    name: 'stednavn_id'
+    name: 'stedid'
   }, {
-    name: 'adgangsadresse_id'
+    name: 'adgangsadresseid'
   }]
 };
 
@@ -486,32 +497,20 @@ const tilknytninger_mat = {
   ]
 };
 
-const otilgang = {
-  table: 'otilgang',
-  primaryKey: ['sdfe_id'],
+const brofasthed = {
+  table: 'brofasthed',
+  primaryKey: ['stedid'],
   columns: [
-    { name: 'sdfe_id'},
-    { name: 'gv_adgang_bro'},
-    { name: 'gv_adgang_faerge'},
-    { name: 'ikke_oe'},
-    { name: 'manually_checked'},
-    { name: 'geom'}
-  ]
-};
-
-const ikke_brofaste_oer = {
-  table: 'ikke_brofaste_oer',
-  primaryKey: ['stednavn_id'],
-  columns: [
-    { name: 'stednavn_id'}
+    { name: 'stedid'},
+    { name: 'brofast'}
   ]
 };
 const ikke_brofaste_adresser = {
   table: 'ikke_brofaste_adresser',
-  primaryKey: ['adgangsadresse_id', 'stednavn_id'],
+  primaryKey: ['adgangsadresseid', 'stedid'],
   columns: [
-    { name: 'adgangsadresse_id'},
-    { name: 'stednavn_id'}
+    { name: 'adgangsadresseid'},
+    { name: 'stedid'}
   ]
 };
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
@@ -534,13 +533,13 @@ exports.tables = Object.assign({
     navngivenvejkommunedel_postnr_mat,
     vejstykker,
     vejstykkerpostnumremat,
+    steder,
     stednavne,
-    stednavne_adgadr,
+    stedtilknytninger,
     jordstykker,
     jordstykker_adgadr,
     tilknytninger_mat,
-    otilgang,
-    ikke_brofaste_oer,
+    brofasthed,
     ikke_brofaste_adresser
   }, dagiTables,
   dar10RawTables,
@@ -595,13 +594,13 @@ exports.materializations = Object.assign({
       // therefore don't support incremental updates of these, so they are updated separately.
     ]
   },
-  stednavne_adgadr: {
-    table: 'stednavne_adgadr',
-    view: 'stednavne_adgadr_view',
+  stedtilknytninger: {
+    table: 'stedtilknytninger',
+    view: 'stedtilknytninger_view',
     dependents: [
       {
         table: 'adgangsadresser_mat',
-        columns: ['adgangsadresse_id']
+        columns: ['adgangsadresseid']
       }
     ]
   },
@@ -645,27 +644,17 @@ exports.materializations = Object.assign({
       }
     ]
   },
-  ikke_brofaste_oer: {
-    table: 'ikke_brofaste_oer',
-    view: 'ikke_brofaste_oer_view',
-    dependents: [
-      {
-        table: 'stednavne',
-        columns: ['stednavn_id']
-      }
-    ]
-  },
   ikke_brofaste_adresser: {
     table: 'ikke_brofaste_adresser',
     view: 'ikke_brofaste_adresser_view',
     dependents: [
       {
-        table: 'stednavne_adgadr',
-        columns: ['adgangsadresse_id', 'stednavn_id']
+        table: 'stedtilknytninger',
+        columns: ['adgangsadresseid', 'stedid']
       },
       {
-        table: 'ikke_brofaste_oer',
-        columns: ['stednavn_id']
+        table: 'brofasthed',
+        columns: ['stedid']
       }
     ]
   }

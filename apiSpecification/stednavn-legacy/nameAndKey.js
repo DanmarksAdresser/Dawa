@@ -3,8 +3,8 @@
 module.exports = {
   singular: 'stednavn',
   plural: 'stednavne',
-  key: ['sted_id', 'navn']
+  key: ['id']
 };
 
 var registry = require('../registry');
-registry.add('stednavn', 'nameAndKey', undefined, module.exports);
+registry.add('stednavn-legacy', 'nameAndKey', undefined, module.exports);

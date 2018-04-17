@@ -22,6 +22,7 @@
         "ID_LOKALID": "1233766a-103b-6b98-e053-d480220a5a3f",
         "NAVN": "Skærvebakken",
         "NAVNESTATUS": "uofficielt",
+        "BRUGSPRIORITET": "primær",
         "FEAT_TYPE": "Test",
         "UNDER_TYPE": "benbrud",
         "LAENGDE": null,

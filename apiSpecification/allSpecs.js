@@ -23,5 +23,7 @@ require('./consistency');
 require('./autocomplete/autocomplete.js');
 require('./ois/resources');
 require('./stednavn/resources');
+require('./stednavn-legacy/resources');
+require('./sted/resources');
 require('./bebyggelse/resources');
 require('./stednavntype/resources');

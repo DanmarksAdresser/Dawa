@@ -150,7 +150,7 @@ const unnormalizedBindings = {
   },
   stednavntilknytning: {
     path: '/replikering/stednavntilknytninger',
-    table: 'stednavne_adgadr',
+    table: 'stedtilknytninger',
     legacyResource: true,
     attributes: {}
   },

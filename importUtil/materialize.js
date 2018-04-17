@@ -148,7 +148,7 @@ const materializeDawa = (client, txid) => go(function* () {
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adgangsadresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
-  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.stednavne_adgadr);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.stedtilknytninger);
   for (let model of temaModels.modelList) {
     yield materialize(client, txid, schemaModel.tables, schemaModel.materializations[model.tilknytningTable]);
   }
@@ -178,7 +178,7 @@ const recomputeMaterializedDawa = (client, txid) => go(function* () {
 const tilknytningTableNames =
   [...temaModels.modelList.map(model => model.tilknytningTable),
     'jordstykker_adgadr',
-    'stednavne_adgadr'];
+    'stedtilknytninger'];
 
 const dar10HistoryTableNames = Object.values(dar10TableModels.historyTableModels).map(model => model.table);
 const dar10currentTableTableNames = Object.values(dar10TableModels.currentTableModels).map(model => model.table);
@@ -203,9 +203,12 @@ const orderedTableModels = orderedTableNames.map(tableName => {
 const applySequenceNumbersInOrder = (client, txid) =>
   assignSequenceNumbersToDependentTables(client, txid, orderedTableModels);
 
+const makeChangesNonPublic = (client, txid, tableModel) =>
+  client.query(`UPDATE ${tableModel.table}_changes SET public=false WHERE txid = $1`, [txid]);
+
 const makeAllChangesNonPublic = (client, txid) => go(function*() {
   for (let tableModel of orderedTableModels) {
-    yield client.query(`UPDATE ${tableModel.table}_changes SET public=false WHERE txid = $1`, [txid]);
+    yield makeChangesNonPublic(client, txid, tableModel);
   }
 });
 
@@ -224,5 +227,6 @@ module.exports = {
   recomputeTemaTilknytninger,
   dropTempDirtyTable,
   applySequenceNumbersInOrder,
-  makeAllChangesNonPublic
+  makeAllChangesNonPublic,
+  makeChangesNonPublic
 };

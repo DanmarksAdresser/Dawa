@@ -39,14 +39,14 @@ module.exports = {
   stednavnid: {
     select: null,
     where: function (sqlParts, stednavnId, params) {
-      const stednavnIdAlias = dbapi.addSqlParameter(sqlParts, stednavnId);
+      const stedIdAlias = dbapi.addSqlParameter(sqlParts, stednavnId);
       if (params.stednavnafstand) {
-        const stednavnAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stednavnafstand);
-        sqlParts.whereClauses.push(`geom && st_expand((select geom from stednavne where id = ${stednavnIdAlias}), ${stednavnAfstandAlias})
-AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}), ${stednavnAfstandAlias})`)
+        const stedAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stednavnafstand);
+        sqlParts.whereClauses.push(`geom && st_expand((select geom from steder where id = ${stedIdAlias}), ${stedAfstandAlias})
+AND ST_DWithin(geom, (select geom from steder where id = ${stedIdAlias}), ${stedAfstandAlias})`)
       }
       else {
-        sqlParts.whereClauses.push(`EXISTS(SELECT * FROM stednavne_adgadr WHERE stednavn_id = ${stednavnIdAlias} AND stednavne_adgadr.adgangsadresse_id = a_id)`);
+        sqlParts.whereClauses.push(`EXISTS(SELECT * FROM stedtilknytninger WHERE stedid = ${stedIdAlias} AND stedtilknytninger.adgangsadresseid = a_id)`);
       }
     }
   },
@@ -58,16 +58,16 @@ AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}),
       // correct parameter indices for the subquery
       var subquery = {
         select: ["*"],
-        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
-        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id AND stednavne.hovedtype = 'Bebyggelse'`],
+        from: ['stedtilknytninger st JOIN steder s ON st.stedid = s.id'],
+        whereClauses: [`a_id  = st.adgangsadresseid AND s.hovedtype = 'Bebyggelse'`],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
       var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
-        name: 'stednavn_id',
+        name: 'stedid',
         multi: true
       }], {});
-      propertyFilterFn(subquery, {stednavn_id: parameterArray});
+      propertyFilterFn(subquery, {stedid: parameterArray});
       var subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
@@ -81,8 +81,8 @@ AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}),
       // correct parameter indices for the subquery
       var subquery = {
         select: ["*"],
-        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
-        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id AND stednavne.hovedtype = 'Bebyggelse'`],
+        from: ['stedtilknytninger st JOIN steder s ON st.stedid = s.id'],
+        whereClauses: [`a_id  = st.adgangsadresseid AND s.hovedtype = 'Bebyggelse'`],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };

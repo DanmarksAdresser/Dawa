@@ -11,6 +11,7 @@ const { streamToTablePipeline} = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
+const stederTableModel = tableModel.tables.steder;
 const stednavneTableModel = tableModel.tables.stednavne;
 const { recomputeMaterialization, materialize } = require('../importUtil/materialize');
 
@@ -21,13 +22,10 @@ const {
 
 
 const importStednavneFromStream = (client, txid, stream) => go(function*() {
-  yield client.query('create temp table fetch_stednavne_raw(id uuid, hovedtype text, undertype text, navn text, navnestatus text, bebyggelseskode integer, visueltcenter text, geomjson text)');
+  yield client.query('create temp table fetch_stednavne_raw(id uuid, hovedtype text, undertype text, navn text, navnestatus text, brugsprioritet text, indbyggerantal integer, bebyggelseskode integer, visueltcenter text, geomjson text)');
   const jsonTransformer = JSONStream.parse('features.*');
   const mapFn = geojsonFeature => {
     const raw = geojsonFeature.properties;
-    if(raw.BRUGSPRIORITET === 'sekundær') {
-      return null;
-    }
     const geometry = geojsonFeature.geometry;
     let visueltCenter = null;
     if(geometry.type === 'Polygon') {
@@ -47,32 +45,42 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
       navn: raw.NAVN,
       navnestatus: raw.NAVNESTATUS,
       bebyggelseskode: raw.BEBYGGELSESKODE,
+      indbyggerantal: raw.INDB_ANTAL,
+      brugsprioritet: raw.BRUGSPRIORITET,
       visueltcenter: visueltCenter ? JSON.stringify({type: 'Point', coordinates: visueltCenter}) : null,
       geomjson: geojsonFeature.geometry ? JSON.stringify(geojsonFeature.geometry) : null
     };
   };
-  const rawColumns = ['id', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'bebyggelseskode', 'visueltcenter', 'geomjson'];
+  const rawColumns = ['id', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'brugsprioritet', 'indbyggerantal', 'bebyggelseskode', 'visueltcenter', 'geomjson'];
 
   yield promisingStreamCombiner([stream, jsonTransformer, ...streamToTablePipeline(client, 'fetch_stednavne_raw', rawColumns, mapFn)]);
-  yield client.query(`CREATE TEMP TABLE fetch_stednavne AS (SELECT DISTINCT ON(id) id, hovedtype, undertype, navn, navnestatus,bebyggelseskode, st_setsrid(st_geomfromgeojson(visueltcenter), 25832)::geometry as visueltcenter, st_setsrid(st_geomfromgeojson(geomjson), 25832)::geometry as geom FROM fetch_stednavne_raw)`);
-  yield client.query('DROP TABLE fetch_stednavne_raw; ANALYZE fetch_stednavne');
 
-  const idColumns = ['id'];
-  const nonIdColumns = ['hovedtype', 'undertype', 'navn', 'navnestatus', 'bebyggelseskode', 'geom'];
-  const allColumns = [...idColumns, ...nonIdColumns];
-  yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel, allColumns);
-  yield client.query('analyze stednavne; analyze stednavne_changes');
-  yield client.query('UPDATE stednavne_changes c SET visueltcenter = f.visueltcenter FROM fetch_stednavne f WHERE c.id = f.id and f.visueltcenter is not null');
-  yield updateGeometricFields(client, txid, stednavneTableModel);
+  const stederColumns = ['id', 'hovedtype', 'undertype', 'indbyggerantal', 'bebyggelseskode', 'visueltcenter', 'geom'];
+  const stednavneColumns = ['stedid', 'navn', 'navnestatus', 'brugsprioritet'];
+  yield client.query('CREATE TEMP TABLE fetch_steder AS select * from steder WHERE false');
+  yield client.query(`INSERT INTO fetch_steder(${stederColumns.join(',')})
+  (select distinct on (id) id, hovedtype, undertype, indbyggerantal, bebyggelseskode, 
+   st_setsrid(st_geomfromgeojson(visueltcenter), 25832), 
+   st_setsrid(ST_GeomFromGeoJSON(geomjson), 25832)
+   FROM fetch_stednavne_raw WHERE brugsprioritet = 'primær')`);
+
+  yield client.query('CREATE TEMP TABLE fetch_stednavne AS select * from stednavne WHERE false');
+  yield client.query(`INSERT INTO fetch_stednavne(${stednavneColumns.join(',')}) (
+  SELECT distinct on (id, brugsprioritet,navn) id, navn, navnestatus, brugsprioritet FROM fetch_stednavne_raw)`);
+
+  yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel, stednavneColumns);
   yield tableDiffNg.applyChanges(client, txid, stednavneTableModel);
-  yield updateSubdividedTable(client, txid, 'stednavne', 'stednavne_divided', ['id']);
-  yield client.query('drop table fetch_stednavne; analyze stednavne_divided');
-  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stednavne_adgadr);
-  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_oer);
-  yield materialize(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_adresser);
-  yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavn_kommune');
-  yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 
+  yield tableDiffNg.computeDifferences(client, txid, `fetch_steder`, stederTableModel, stederColumns);
+  yield client.query('analyze stednavne; analyze stednavne_changes; analyze steder; analyze steder_changes');
+  yield updateGeometricFields(client, txid, stederTableModel);
+  yield tableDiffNg.applyChanges(client, txid, stederTableModel);
+  yield updateSubdividedTable(client, txid, 'steder', 'steder_divided', ['id']);
+  yield client.query('drop table fetch_stednavne_raw; drop table fetch_stednavne; drop table fetch_steder; analyze steder_divided');
+  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stedtilknytninger);
+  yield materialize(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_adresser);
+  yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY sted_kommune');
+  yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 });
 
 const importStednavne = (client,txid,  filePath) => go(function*() {

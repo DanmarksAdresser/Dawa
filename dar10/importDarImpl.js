@@ -257,7 +257,7 @@ const materializeHistory = (client, txid, entity) => go(function*() {
   FROM ${rawTableModel.table} NATURAL JOIN dirty WHERE upper_inf(registrering))`);
   yield mergeValidTime(client, 'unmerged', 'desired', ['id'], _.without(historyTableColumnNames, 'virkning'));
   yield client.query(`CREATE TEMP TABLE current AS (select * from ${historyTableModel.table} NATURAL JOIN dirty)`);
-  yield client.query(`UPDATE desired SET rowkey = current.rowkey FROM current WHERE desired.id = current.id AND desired.virkning = current.virkning`);
+  yield client.query(`UPDATE desired SET rowkey = current.rowkey FROM current WHERE desired.id = current.id AND lower(desired.virkning) =  lower(current.virkning)`);
   yield client.query(`UPDATE desired SET rowkey = nextval('rowkey_sequence') WHERE rowkey IS NULL`);
   yield tableDiffNg.computeDifferencesView(client, txid, 'desired', 'current', historyTableModel);
   yield client.query('DROP TABLE dirty; DROP TABLE unmerged; DROP TABLE desired; DROP TABLE current');

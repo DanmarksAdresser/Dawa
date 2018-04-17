@@ -1,5 +1,6 @@
-DROP TABLE IF EXISTS ikke_brofaste_oer CASCADE;
+DROP TABLE IF EXISTS brofasthed CASCADE;
 
-CREATE TABLE ikke_brofaste_oer(
-  stednavn_id UUID PRIMARY KEY
+CREATE TABLE brofasthed(
+  stedid UUID PRIMARY KEY,
+  brofast boolean NULL
 );

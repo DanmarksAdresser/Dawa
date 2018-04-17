@@ -9,8 +9,8 @@ const resourcesUtil = require('../common/resourcesUtil');
 const commonParameters = require('../common/commonParameters');
 
 
-exports.query = resourcesUtil.queryResourcePathSpec(
-  '/stednavne2', {
+exports.query = resourcesUtil.queryResourceSpec(
+  nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
@@ -24,7 +24,7 @@ exports.query = resourcesUtil.queryResourcePathSpec(
   sqlModel
 );
 
-exports.autocomplete =   resourcesUtil.autocompleteResourcePathSpec('/stednavne2/autocomplete', {
+exports.autocomplete =   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
@@ -35,8 +35,7 @@ exports.autocomplete =   resourcesUtil.autocompleteResourcePathSpec('/stednavne2
   representations.json,
   sqlModel);
 
-exports.getByKey = resourcesUtil.getByKeyResourcePathSpec(
-  '/stednavne2',
+exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id, {
     crs: commonParameters.crs,
     struktur: commonParameters.struktur
@@ -46,5 +45,5 @@ exports.getByKey = resourcesUtil.getByKeyResourcePathSpec(
 );
 
 Object.keys(exports).forEach(key => {
-  registry.add('stednavn', 'resource', key, exports[key]);
+  registry.add('stednavn-legacy', 'resource', key, exports[key]);
 });

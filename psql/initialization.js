@@ -16,7 +16,7 @@ const tableModel = require('./tableModel');
 const { createChangeTable } = require('../importUtil/tableDiffNg');
 const { generateAllTemaTables, generateTilknytningMatViews } = require('../dagiImport/sqlGen');
 const { generateTilknytningMatView } = require('../importUtil/tilknytningUtil');
-const stednavnTilknytningModel = require('../stednavne/stednavnTilknytningModel');
+const stednavnTilknytningModels = require('../stednavne/stednavnTilknytningModels');
 const jordstykkeTilknytningModel = require('../matrikeldata/jordstykkeTilknytningModel');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
@@ -25,8 +25,8 @@ const createChangeTables = (client)=> go(function*() {
   const tableNames = [
     'ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser',
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
-    'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'stednavne_adgadr',
-  'navngivenvejkommunedel_postnr_mat', 'otilgang', 'ikke_brofaste_oer', 'ikke_brofaste_adresser'];
+    'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
+  'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -48,7 +48,6 @@ function normaliseTableSpec(specs){
 
 // Note, the sequence of the tables matter!
 exports.tableSpecs = normaliseTableSpec([
-  {name: 'otilgang', init: false},
   {name: 'ikke_brofaste_oer', init: false},
   {name: 'ikke_brofaste_adresser', init: false},
   {name: 'tx_log', init: false},
@@ -106,8 +105,6 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'gridded_temaer_matview',     scriptFile: 'gridded-temaer-matview.sql', init:false},
   {name: 'tilknytninger_mat', init: false},
   {name: 'adgangsadresser_temaer_matview', init: false },
-  {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
-  {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
   {name: 'vask_postnumre', init: false},
   {name: 'vask_postnrinterval', init: false},
   {name: 'vask_vejnavn', init: false},
@@ -116,26 +113,28 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'vask_adgangsadresser_unikke', init: false},
   {name: 'vask_adresser', init: false},
   {name: 'vask_adresser_unikke', init: false},
-  {name: 'gt_pk_metadata', init: false},
-  {name: 'wms_housenumber_inspire', type: 'view'},
-  {name: 'wms_adgangsadresser', type: 'view'},
-  {name: 'wms_vejpunkter', type: 'view'},
-  {name: 'wms_vejpunktlinjer', init: false},
-  {name: 'wfs_adgangsadresser', type: 'view'},
-  {name: 'wfs_adresser', type: 'view'},
   {name: 'jordstykker', init: false },
   {name: 'bebyggelser', init: false},
   {name: 'bebyggelser_adgadr', init: false},
   {name: 'bebyggelser_divided', init: false},
   {name: 'stednavne', init: false},
   {name: 'stednavntyper', init: false},
-  {name: 'stednavne_adgadr', init: false},
-  {name: 'stednavne_divided', init: false},
-  {name: 'stednavn_kommune', init: false},
-  {name: 'ikke_brofaste_oer_view', type: 'view'},
+  {name: 'stedtilknytninger', init: false},
+  {name: 'steder_divided', init: false},
+  {name: 'sted_kommune', init: false},
   {name: 'ikke_brofaste_adresser_view', type: 'view'},
   {name: 'tilknytninger_mat_view', type: 'view'},
-  {name: 'ois_importlog', init: false}
+  {name: 'ois_importlog', init: false},
+  {name: 'bebyggelser_view', type: 'view'},
+  {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
+  {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
+  {name: 'gt_pk_metadata', init: false},
+  {name: 'wms_housenumber_inspire', type: 'view'},
+  {name: 'wms_adgangsadresser', type: 'view'},
+  {name: 'wms_vejpunkter', type: 'view'},
+  {name: 'wms_vejpunktlinjer', init: false},
+  {name: 'wfs_adgangsadresser', type: 'view'},
+  {name: 'wfs_adresser', type: 'view'}
 ]);
 
 exports.forAllTableSpecs = function(client, func){
@@ -196,7 +195,9 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
       }
     }
     yield client.query(generateTilknytningMatViews());
-    yield client.query(generateTilknytningMatView(stednavnTilknytningModel));
+    for(let model of stednavnTilknytningModels) {
+      yield client.query(generateTilknytningMatView(model));
+    }
     yield client.query(generateTilknytningMatView(jordstykkeTilknytningModel));
   })();
 };

@@ -551,7 +551,56 @@ var sampleParameters = {
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
     }
   },
-  stednavn: {
+  "sted": {
+    id: {
+      values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
+      verifier: (sted, id) => sted.id === id
+    },
+    hovedtype: {
+      values: ['Bygning'],
+      verifier: (sted, hovedtype) => sted.hovedtype === hovedtype
+    },
+    undertype: {
+      values: ['hal'],
+      verifier: (sted, undertype) => sted.undertype === undertype
+    },
+    kommunekode: {
+      values: ['99'],
+      verifier: (sted, kommunekode) => parseInt(sted.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
+    }
+
+  },
+  "stednavn": {
+      sted_id: {
+        values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
+        verifier: (stednavn, id) => stednavn.sted.id === id
+      },
+      navn: {
+        values: ['Humlehavehallen'],
+        verifier: (stednavn, navn)  => stednavn.navn === navn
+      },
+      hovedtype: {
+        values: ['Bygning'],
+        verifier: (stednavn, hovedtype) => stednavn.sted.hovedtype === hovedtype
+      },
+      undertype: {
+        values: ['hal'],
+        verifier: (stednavn, undertype) => stednavn.sted.undertype === undertype
+      },
+      kommunekode: {
+        values: ['99'],
+        verifier: (stednavn, kommunekode) => parseInt(stednavn.sted.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
+      },
+      navnestatus: {
+        values: ['officielt', 'suAutoriseret'],
+        verifier: (stednavn, status) => stednavn.navnestatus === status
+      },
+    brugsprioritet: {
+        values: ['primær', 'sekundær'],
+      verifier: (stednavn, brugsprioritet) => stednavn.brugsprioritet === brugsprioritet
+    }
+  },
+  "stednavn-legacy": {
     id: {
       values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
       verifier: (stednavn, id) => stednavn.id === id
