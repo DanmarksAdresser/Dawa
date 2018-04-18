@@ -80,12 +80,28 @@ const fieldTransforms = {
     vejkode: parseInteger
   },
   DARKommuneinddeling: {
-    kommunekode: parseInteger
+    kommunekode: parseInteger,
+    kommuneinddeling: parseInteger
   },
   Postnummer: {
-    postnr: parseInteger
+    postnr: parseInteger,
+    postnummerinddeling: parseInteger
+  },
+  DARSogneinddeling: {
+    sogneinddeling: parseInteger,
+    sognekode: parseInteger
+  },
+  DARMenighedsrådsafstemningsområde: {
+    mrafstemningsområde: parseInteger,
+    mrafstemningsområdenummer: parseInteger
+  },
+  DARAfstemningsområde: {
+    afstemningsområde: parseInteger,
+    afstemningsområdenummer: parseInteger
+  },
+  SupplerendeBynavn: {
+    supplerendebynavn1: parseInteger
   }
-
 };
 
 /**
@@ -115,11 +131,29 @@ const sqlTypes = {
     vejkode: 'smallint'
   },
   DARKommuneinddeling: {
-    kommunekode: 'smallint'
+    kommunekode: 'smallint',
+    kommuneinddeling: 'integer'
+  },
+  DARSogneinddeling: {
+    sogneinddeling: 'integer',
+    sognekode: 'smallint'
   },
   Postnummer: {
-    postnr: 'smallint'
+    postnr: 'smallint',
+    postnummerinddeling: 'integer'
+  },
+  DARMenighedsrådsafstemningsområde: {
+    mrafstemningsområde: 'integer',
+    mrafstemningsområdenummer: 'smallint'
+  },
+  DARAfstemningsområde: {
+    afstemningsområde: 'integer',
+    afstemningsområdenummer: 'smallint'
+  },
+  SupplerendeBynavn: {
+    supplerendebynavn1: 'integer'
   }
+
 };
 
 const sqlIndicesHistory = {
@@ -165,7 +199,8 @@ const sqlIndices = {
   ],
   Postnummer: [
     ['postnr', 'id']
-  ]
+  ],
+  SupplerendeBynavn: [['supplerendebynavn1']],
 };
 
 module.exports = {
