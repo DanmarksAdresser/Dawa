@@ -14,6 +14,7 @@ const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
 const {refreshSubdividedTable} = require('../importUtil/geometryImport');
 const dar10Schema = require('../dar10/generateSqlSchemaImpl');
 const importDar09Impl = require('../darImport/importDarImpl');
+const importBrofasthedImpl = require('../stednavne/importBrofasthedImpl');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -91,12 +92,35 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield client.query(`DROP SEQUENCE IF EXISTS rowkey_sequence CASCADE;
 CREATE SEQUENCE rowkey_sequence START 1;
 `);
-      yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavne-view.sql', {encoding: 'utf8'}));
+      yield client.query(`
+      ALTER TABLE stednavne_adgadr RENAME TO stedtilknytninger;
+      ALTER TABLE stedtilknytninger RENAME adgangsadresse_id to adgangsadresseid;
+      ALTER TABLE stedtilknytninger RENAME stednavn_id to stedid;
+      ALTER TABLE stednavne_adgadr_changes RENAME TO stedtilknytninger_changes;
+      ALTER TABLE stedtilknytninger_changes RENAME adgangsadresse_id to adgangsadresseid;
+      ALTER TABLE stedtilknytninger_changes RENAME stednavn_id to stedid;
+      ALTER TABLE stednavne RENAME TO stednavne_legacy;
+      `);
+    yield client.query(fs.readFileSync('psql/schema/tables/stednavne.sql', {encoding: 'utf8'}));
+    yield client.query(fs.readFileSync('psql/schema/tables/steder_divided.sql', {encoding: 'utf8'}));
+    yield client.query(fs.readFileSync('psql/schema/tables/brofasthed.sql', {encoding: 'utf8'}));
+    yield client.query(fs.readFileSync('psql/schema/tables/ikke_brofaste_adresser.sql', {encoding: 'utf8'}));
+    yield createChangeTable(client, tableSchema.tables.steder);
+    yield createChangeTable(client, tableSchema.tables.stednavne);
+    yield createChangeTable(client, tableSchema.tables.brofasthed);
+    yield createChangeTable(client, tableSchema.tables.ikke_brofaste_adresser);
+    yield client.query(`
+    insert into steder(id, hovedtype, undertype, bebyggelseskode, visueltcenter,geom, ændret, geo_ændret, geo_version)
+    (select id, hovedtype, undertype, bebyggelseskode, visueltcenter,geom, ændret, geo_ændret, geo_version from stednavne_legacy);
+    insert into stednavne(stedid, navn, navnestatus, brugsprioritet, tsv) (select id, navn, navnestatus, 'primær', tsv FROM stednavne_legacy); 
+    `);
+
+    yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavne-view.sql', {encoding: 'utf8'}));
       yield createChangeTable(client, tableSchema.tables.jordstykker_adgadr);
       yield createChangeTable(client, tableSchema.tables.jordstykker);
       yield createChangeTable(client, tableSchema.tables.stednavne);
       yield client.query(generateAllTemaTables());
-      yield client.query(fs.readFileSync('psql/schema/tables/stednavn_kommune.sql', {encoding: 'utf8'}));
+      yield client.query(fs.readFileSync('psql/schema/tables/sted_kommune.sql', {encoding: 'utf8'}));
       yield client.query(fs.readFileSync('psql/schema/tables/tx_operation_counts.sql', {encoding: 'utf8'}));
       yield client.query(`
       ALTER TABLE enhedsadresser DROP CONSTRAINT IF EXISTS adgangsadresse_fk;
@@ -236,6 +260,7 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
       yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
         yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
       }));
+      yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
     }
   )).done();
 });

@@ -311,12 +311,6 @@ exports.modelList = [{
   searchable: true,
   fields: [
     {
-      name: 'dagi_id',
-      type: 'integer',
-      nullable: true,
-      description: 'Unik ID'
-    },
-    {
       name: 'bogstav',
       type: 'string',
       sqlType: 'CHAR(1)',
@@ -341,12 +335,6 @@ exports.modelList = [{
   published: true,
   searchable: true,
   fields: [
-    {
-      name: 'dagi_id',
-      type: 'integer',
-      nullable: true,
-      description: 'Unik ID'
-    },
     {
       name: 'nummer',
       type: 'string',
