@@ -71,6 +71,7 @@ const fieldTransforms = {
     }
   },
   NavngivenVej: {
+    administreresafkommune: parseInteger,
     vejnavnebeliggenhed_vejnavnelinje: transformGeometry,
     vejnavnebeliggenhed_vejnavneområde: transformGeometry,
     vejnavnebeliggenhed_vejtilslutningspunkter: transformGeometry
@@ -122,6 +123,7 @@ const sqlTypes = {
 
   },
   NavngivenVej: {
+    administreresafkommune: 'smallint',
     vejnavnebeliggenhed_vejnavnelinje: 'geometry(geometry, 25832)',
     vejnavnebeliggenhed_vejnavneområde: 'geometry(geometry, 25832)',
     vejnavnebeliggenhed_vejtilslutningspunkter: 'geometry(geometry, 25832)'
