@@ -20,20 +20,8 @@ var wfsServices = {
     defaultLogin: 'dawa',
     wfsVersion: '1.0.0',
     featureNames: {
-      kommune: 'Kommuneinddeling',
-      opstillingskreds: 'Opstillingskreds',
-      politikreds: 'Politikreds',
-      postnummer: 'Postnummerinddeling',
-      region: 'Regionsinddeling',
-      retskreds: 'Retskreds',
-      sogn: 'Sogneinddeling',
-      afstemningsområde: 'Afstemningsomraade',
       storkreds: 'Storkreds',
-      danmark: 'Danmark',
-      menighedsrådsafstemningsområde: 'Menighedsraadsafstemningsomraade',
       valglandsdel: 'Valglandsdel',
-      samlepostnummer: 'Samlepostnummer',
-      supplerendebynavn: 'SupplerendeBynavn'
     }
   },
   zone: {
@@ -59,10 +47,10 @@ var wfsServices = {
       retskreds: 'Retskreds',
       sogn: 'Sogneinddeling',
       afstemningsområde: 'Afstemningsomraade',
-      storkreds: 'Storkreds',
+      // storkreds: 'Storkreds',
       danmark: 'Danmark',
       menighedsrådsafstemningsområde: 'Menighedsraadsafstemningsomraade',
-      valglandsdel: 'Valglandsdel',
+      // valglandsdel: 'Valglandsdel',
       samlepostnummer: 'Samlepostnummer',
       supplerendebynavn: 'SupplerendeBynavn'
     }
