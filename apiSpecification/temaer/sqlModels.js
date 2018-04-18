@@ -116,9 +116,6 @@ from (select distinct k.kode, k.navn
     }
   },
   storkreds: {
-    dagi_id: {
-      column:'t.dagi_id'
-    },
     nummer: {
       column: 't.nummer'
     },

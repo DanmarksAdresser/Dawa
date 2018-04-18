@@ -202,7 +202,6 @@ const storkredsJsonRepresentation = (() => {
   const mapper = baseUrl => row => {
     const result = {
       href: makeHref(baseUrl, 'storkreds', [row.nummer]),
-      dagi_id: row.dagi_id,
       ændret: row.ændret,
       geo_version: row.geo_version,
       geo_ændret: row.geo_ændret,
@@ -223,7 +222,6 @@ const storkredsJsonRepresentation = (() => {
   const schema = globalSchemaObject({
     title: 'Storkreds',
     properties: {
-      dagi_id: normalizedFieldSchema('dagi_id'),
       href: Object.assign({}, commonSchemaDefinitions.Href, { description: 'Storkredsens URL' }),
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
@@ -233,7 +231,7 @@ const storkredsJsonRepresentation = (() => {
       region: Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som storkredsen ligger i.'}),
       valglandsdel: Object.assign({}, commonSchemaDefinitions.ValglandsdelsRef, {description: 'Den valglandsdel, som storkredsen tilhører'}),
     },
-    docOrder: ['dagi_id', 'href', 'ændret', 'geo_version', 'geo_ændret', 'nummer', 'navn',
+    docOrder: ['href', 'ændret', 'geo_version', 'geo_ændret', 'nummer', 'navn',
       'region', 'valglandsdel']
   });
   return {fields, mapper, schema};

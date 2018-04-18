@@ -99,9 +99,6 @@ const additionalFieldsMap = {
   ],
   storkreds: [
     {
-      name: 'dagi_id'
-    },
-    {
       name: 'nummer'
     },
     {
