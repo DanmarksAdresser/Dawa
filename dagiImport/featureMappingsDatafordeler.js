@@ -6,6 +6,50 @@ function parseInteger(str) {
   return parseInt(str, 10);
 }
 
+exports.kommune = {
+  name: 'kommune',
+  geometry: 'geometri',
+  wfsName: 'Kommuneinddeling',
+  fields: {
+    dagi_id: {
+      name: 'id.lokalId',
+      parseFn: parseInteger
+    },
+    kode: {
+      name: 'kommunekode',
+      parseFn: parseInteger
+    },
+    regionskode: {
+      name: 'regionskode',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  },
+  filterFn: function(wfsFeature) {
+    return wfsFeature.Kommuneinddeling[0].udenforKommuneinddeling[0] === 'false';
+  }
+};
+
+exports.region = {
+  name: 'region',
+  wfsName: 'Regionsinddeling',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'id.lokalId',
+      parseFn: parseInteger
+    },
+    kode: {
+      name: 'regionskode',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  }
+};
+
+
+
+
 exports.afstemningsområde = {
   name: 'afstemningsområde',
   wfsName: 'Afstemningsomraade',
@@ -129,6 +173,57 @@ exports.opstillingskreds = {
     },
     storkredsnummer: {
       name: 'storkredsnummer',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  }
+};
+
+exports.politikreds = {
+  name: 'politikreds',
+  wfsName: 'Politikreds',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'id.lokalId',
+      parseFn: parseInteger
+    },
+    kode: {
+      name: 'myndighedskode',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  }
+};
+
+exports.retskreds = {
+  name: 'retskreds',
+  wfsName: 'Retskreds',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'id.lokalId',
+      parseFn: parseInteger
+    },
+    kode: {
+      name: 'myndighedskode',
+      parseFn: parseInteger
+    },
+    navn: 'navn'
+  }
+};
+
+exports.postnummer = {
+  name: 'postdistrikt',
+  wfsName: 'Postnummerinddeling',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'id.lokalId',
+      parseFn: parseInteger
+    },
+    nr: {
+      name: 'postnummer',
       parseFn: parseInteger
     },
     navn: 'navn'
