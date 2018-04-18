@@ -16,7 +16,9 @@ var wfsServices = {
   newDagi: {
     defaultUrl: 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2_v2?',
     loginRequired: true,
+    loginParam: 'login',
     defaultLogin: 'dawa',
+    wfsVersion: '1.0.0',
     featureNames: {
       kommune: 'Kommuneinddeling',
       opstillingskreds: 'Opstillingskreds',
@@ -34,25 +36,35 @@ var wfsServices = {
       supplerendebynavn: 'SupplerendeBynavn'
     }
   },
-  oldDagi: {
-    defaultUrl: 'http://kortforsyningen.kms.dk/service?servicename=dagi_gml2',
-    loginRequired: true,
-    defaultLogin: 'dawa',
-    featureNames: {
-      kommune: 'KOMMUNE10',
-      opstillingskreds: 'OPSTILLINGSKREDS10',
-      politikreds: 'POLITIKREDS10',
-      postnummer: 'POSTDISTRIKT10',
-      region: 'REGION10',
-      retskreds: 'RETSKREDS10',
-      sogn: 'SOGN10'
-    }
-  },
   zone: {
+    wfsVersion: '1.0.0',
     loginRequired: false,
     defaultUrl: 'http://geoservice.plansystem.dk/wfs?',
     featureNames: {
       zone: "pdk:theme_pdk_zonekort_v"
+    }
+  },
+  datafordeler: {
+    wfsVersion: '2.0.0',
+    defaultUrl: "https://services.datafordeler.dk/DAGIM/DAGI_10MULTIGEOM_GMLSFP/1.0.0/WFS?",
+    loginRequired: true,
+    loginParam: 'username',
+    defaultLogin: 'ZJJLGHLNTT',
+    featureNames: {
+      kommune: 'Kommuneinddeling',
+      opstillingskreds: 'Opstillingskreds',
+      politikreds: 'Politikreds',
+      postnummer: 'Postnummerinddeling',
+      region: 'Regionsinddeling',
+      retskreds: 'Retskreds',
+      sogn: 'Sogneinddeling',
+      afstemningsområde: 'Afstemningsomraade',
+      storkreds: 'Storkreds',
+      danmark: 'Danmark',
+      menighedsrådsafstemningsområde: 'Menighedsraadsafstemningsomraade',
+      valglandsdel: 'Valglandsdel',
+      samlepostnummer: 'Samlepostnummer',
+      supplerendebynavn: 'SupplerendeBynavn'
     }
   }
 };
@@ -60,7 +72,7 @@ var optionSpec = {
   targetDir: [false, 'Folder hvor DAGI-temaerne gemmes', 'string', '.'],
   filePrefix: [false, 'Prefix, som tilføjes filerne med de gemte DAGI-temaer', 'string', ''],
   dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string'],
-  dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string', 'dawa'],
+  dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string'],
   dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
   retries: [false, 'Antal forsøg på kald til WFS service før der gives op', 'number', 5],
   temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string'],
@@ -94,15 +106,17 @@ runImporter('download-dagi', optionSpec, ['service'], function (args, options) {
     logger.info("downloadDagi", "Downloader DAGI tema " + temaNavn);
     var queryParams = {
       SERVICE: 'WFS',
-      VERSION: '1.0.0',
+      VERSION: serviceSpec.wfsVersion,
       REQUEST: 'GetFeature',
-      TYPENAME: featureNames[temaNavn]
     };
+    const typenameParamName = serviceSpec.wfsVersion === '2.0.0' ? 'TYPENAMES' : 'TYPENAME';
+    queryParams[typenameParamName] =  featureNames[temaNavn];
+
     if(serviceSpec.loginRequired){
       _.extend(queryParams, {
-        login: dagiLogin,
         password: dagiPassword
       });
+      queryParams[serviceSpec.loginParam] = dagiLogin;
     }
     var paramString = _.map(queryParams,function (value, name) {
       return name + '=' + encodeURIComponent(value);

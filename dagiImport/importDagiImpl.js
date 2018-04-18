@@ -5,7 +5,7 @@ const path = require('path');
 
 const {go} = require('ts-csp');
 const temaModels = require('./temaModels');
-const {parseTemaGml} = require('./temaParsing');
+const {parseTemaGml, parseTemaGml2} = require('./temaParsing');
 const {streamArrayToTable, streamCsvToTable} = require('../importUtil/importUtil');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableSchema = require('../psql/tableModel');
@@ -53,9 +53,33 @@ const readTema = (temaDef, mapping, filePath) => go(function* () {
   return yield parseTemaGml(body, mapping);
 });
 
+const readTema2 = (temaDef, mapping, filePath) => go(function*() {
+  const body = fs.readFileSync(filePath);
+  return yield parseTemaGml2(body, mapping);
+});
+
 const computeTemaDifferences = (client, txid, srcTable, tableModel, fetchColumnNames) => {
   return tableDiffNg.computeDifferences(client, txid, srcTable, tableModel, fetchColumnNames);
 };
+
+const storeTemaWfsMultiGeom = (client, temaModel, featureMapping, dataDir, filePrefix, targetTable) => go(function*() {
+  const temaName = temaModel.singular;
+  if (!featureMapping) {
+    throw new Error('No feature mapping for ' + temaName);
+  }
+  const additionalFields = temaModel.fields;
+  const additionalFieldNames = additionalFields.map(field => field.name);
+  const fetchColumnNames = [...additionalFieldNames, 'geom'];
+  const tableModel = tableSchema.tables[temaModel.table];
+  const temaFilePath = getTemaFileNameWfs(temaModel, dataDir, filePrefix);
+  const temaRows = yield readTema2(temaModel, featureMapping, temaFilePath);
+  // temaer afleveres i form af mange polygoner, og ikke et enkelt multipolygon.
+  // Vi streamer polygonerne til databasen og kombinerer dem derefter med ST_Collect
+  yield client.query(`CREATE TEMP TABLE ${targetTable} AS (SELECT ${additionalFieldNames.join(', ')}, null::text as geom FROM ${tableModel.table} WHERE false);`);
+  yield streamArrayToTable(client, temaRows, targetTable, fetchColumnNames);
+  yield client.query(`alter table ${targetTable} alter column geom type geometry(multipolygon, 25832) using st_multi(st_force2d(st_geomfromgml(geom, 25832)))`);
+});
+
 const storeTemaWfs = (client, temaModel, featureMapping, dataDir, filePrefix, targetTable) => go(function*() {
   const temaName = temaModel.singular;
   if (!featureMapping) {
@@ -100,6 +124,12 @@ const makeStoreTemaWfsFn = featureMappings =>
     return storeTemaWfs(client, temaDef, featureMapping, dataDir, filePrefix, targetTable);
   };
 
+const makeStoreTemaWfsMultiGeomFn = featureMappings =>
+  (client, temaDef, dataDir, filePrefix, targetTable) => {
+    const featureMapping = featureMappings[temaDef.singular];
+    return storeTemaWfsMultiGeom(client, temaDef, featureMapping, dataDir, filePrefix, targetTable);
+  };
+
 const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn) => go(function*(){
   for (let temaName of temaNames) {
     const temaModel = temaModels.modelMap[temaName];
@@ -137,6 +167,11 @@ const importTemaerWfs = (client, txid, temaNames, featureMappings, dataDir, file
   yield importTemaer(client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn);
 });
 
+const importTemaerWfsMulti = (client, txid, temaNames, featureMappings, dataDir, filePrefix, maxChanges) => go(function* () {
+  const storeTemaFn = makeStoreTemaWfsMultiGeomFn(featureMappings);
+  yield importTemaer(client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn);
+});
+
 const importTemaerJson = (client, txid, temaNames, dataDir, filePrefix, maxChanges) => go(function*() {
   yield importTemaer(client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaJson);
 });
@@ -149,6 +184,7 @@ const importSingleTema = (client, txid, temaModel, temaData, maxChanges) => go(f
 
 module.exports = {
   importTemaerWfs,
+  importTemaerWfsMulti,
   importTemaerJson,
   importSingleTema
 };
