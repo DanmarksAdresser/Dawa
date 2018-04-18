@@ -24,6 +24,13 @@ const additionalColumnsMap = {
     afstemningsstednavn: {
       column: 't.afstemningsstednavn'
     },
+    afstemningsstedadresseid: {
+      column: 't.afstemningsstedadresse'
+    },
+    afstemningsstedadressebetegnelse: {
+      select: `(select adressebetegnelse(vejnavn, husnr, null::text, null::text, supplerendebynavn, postnr::text, postnrnavn ) from
+      adgangsadresser_mat where adgangsadresser_mat.id = t.afstemningsstedadresse)`
+    },
     kommunekode: {
       column: 'k.kode',
     },

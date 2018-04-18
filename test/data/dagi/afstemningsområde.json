@@ -5,6 +5,7 @@
     "nummer": 2,
     "navn": "Test afstemningsområde",
     "afstemningsstednavn": "Test afstemningsstednavn",
+    "afstemningsstedadresse": "0a3f5089-86cc-32b8-e044-0003ba298018",
     "opstillingskreds_dagi_id": 100104,
     "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
 

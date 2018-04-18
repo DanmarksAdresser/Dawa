@@ -62,7 +62,12 @@ const wfsFeatureToTema2 =  (feature, mapping) => {
     else {
       objWithProperty = wfsFeature;
     }
-    memo[fieldName] = fieldMapping.parseFn(objWithProperty[fieldMapping.name][0]);
+    if(fieldMapping.parseXml) {
+      memo[fieldName] = fieldMapping.parseXml(objWithProperty[fieldMapping.name][0]);
+    }
+    else {
+      memo[fieldName] = fieldMapping.parseFn(objWithProperty[fieldMapping.name][0]);
+    }
     return memo;
   }, {});
 

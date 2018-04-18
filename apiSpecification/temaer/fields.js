@@ -19,6 +19,12 @@ const additionalFieldsMap = {
       name: 'afstemningsstednavn'
     },
     {
+      name: 'afstemningsstedadresseid'
+    },
+    {
+      name: 'afstemningsstedadressebetegnelse'
+    },
+    {
       name: 'kommunekode'
     },
     {

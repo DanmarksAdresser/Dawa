@@ -118,7 +118,12 @@ const afstemningsområdeJsonRepresentation = (() => {
       nummer: numToStr(row.nummer),
       navn: row.navn,
       afstemningssted: {
-        navn: row.afstemningsstednavn
+        navn: row.afstemningsstednavn,
+        adgangsadresse: {
+          href: makeHref(baseUrl, 'adgangsadresse', [row.afstemningsstedadresseid]),
+          id: row.afstemningsstedadresseid,
+          adressebetegnelse: row.afstemningsstedadressebetegnelse
+        }
       },
       kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
       region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
@@ -158,9 +163,26 @@ const afstemningsområdeJsonRepresentation = (() => {
           navn: {
             type: 'string',
             description: 'Afstemningsstedets navn.'
-          }
+          },
+          adgangsadresse: schemaObject({
+            description: 'Afstemningsstedets adgangsadresse',
+            properties: {
+              href: {
+                type: 'string',
+                description: 'Adgangsadressens unikke URL'
+              },
+              id: Object.assign({}, commonSchemaDefinitions.UUID, {
+                description: 'Adgangsadressens unikke ID.'
+                }),
+              adressebetegnelse: {
+                type: 'string',
+                description: 'Adressebetegnelse for adgangsadressen.'
+              }
+            },
+            docOrder: ['href', 'id', 'adressebetegnelse']
+          })
         },
-        docOrder: ['navn']
+        docOrder: ['navn', 'adgangsadresse']
       }),
       kommune: commonSchemaDefinitions.KommuneRef,
       region: commonSchemaDefinitions.RegionsRef,

@@ -420,6 +420,13 @@ exports.modelList = [{
         description: 'Afstemningsstedets navn.'
       },
       {
+        name: 'afstemningsstedadresse',
+        type: 'string',
+        sqlType: 'UUID',
+        description: 'UUID for afstemningssstedets adgangsadresse.',
+        nullable: true
+      },
+      {
         name: 'kommunekode',
         type: 'string',
         sqlType: 'SMALLINT',

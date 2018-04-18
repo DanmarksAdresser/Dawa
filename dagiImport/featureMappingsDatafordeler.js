@@ -28,11 +28,18 @@ exports.afstemningsområde = {
       name: 'opstillingskredsLokalId',
       parseFn: parseInteger
     },
-    afstemningssstedadresse: {
+    afstemningsstedadresse: {
       name: 'afstemningsstedAdresse',
       parseXml: (xml) => {
-        console.dir(xml)
-        return null;
+        const attrs = xml['$'];
+        const hrefAttr = Object.keys(attrs).filter(attrName => attrName.includes('href'))[0];
+        if(hrefAttr) {
+          const uuid = attrs[hrefAttr].substring(attrs[hrefAttr].indexOf('#') + 1);
+          return uuid;
+        }
+        else {
+          return null;
+        }
       }
     },
     navn: 'navn'
