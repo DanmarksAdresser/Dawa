@@ -22,8 +22,16 @@ module.exports = [{
   name: 'Stednavne',
   headingClass: 'h2-icon h2-sted',
   lead: 'For en generel introduktion til stednavne, se <a href="/dok/stednavne">her<a/>.',
-  entities: [ 'sted', 'stednavn', 'stednavn2', 'stednavntype', 'bebyggelse']
-}, {
-  name: 'Andet',
-  entities: ['senesteSekvensnummer', 'zone']
-}];
+  entities: ['sted', 'stednavn', 'stednavn2', 'stednavntype', 'bebyggelse']
+},
+  {
+    name: 'Replikering',
+    headingClass: 'h2-icon',
+    lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af de data som DAWA udstiller.
+ <a href="/dok/guide/replikering">Replikerings-guiden</a> anviser hvordan API'et benyttes.`,
+    entities: ['replikering']
+  },
+  {
+    name: 'Andet',
+    entities: ['senesteSekvensnummer', 'zone']
+  }];
