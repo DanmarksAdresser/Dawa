@@ -111,7 +111,7 @@ exports.historyTableModels = entityNames.reduce((memo, entityName) => {
   const excludedFields = ['registrering', 'eventopret', 'eventopdater', ...(fieldsExcludedFromHistory[entityName] || [])];
   memo[entityName] = {
     table: `dar1_${entityName}_history`,
-    entity: `dar1_${entityName}_history`,
+    entity: `dar1_${entityName.toLowerCase()}_historik`,
     primaryKey: ['rowkey'],
     columns: rawTableModel.columns.filter(column => !(excludedFields.includes(column.name)))
   };
@@ -121,7 +121,7 @@ exports.historyTableModels = entityNames.reduce((memo, entityName) => {
 exports.currentTableModels = entityNames.reduce((memo, entityName) => {
   memo[entityName] = {
     table: `dar1_${entityName}_current`,
-    entity: `dar1_${entityName}_current`,
+    entity: `dar1_${entityName.toLowerCase()}_aktuel`,
     primaryKey: ['id'],
     columns: exports.historyTableModels[entityName].columns.filter(column => !['virkning', 'rowkey'].includes(column.name))
   };
