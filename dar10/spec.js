@@ -117,9 +117,7 @@ const sqlTypes = {
   },
   Husnummer: {
     husnummertekst: 'husnr',
-    husnummerretning: 'geometry(Point,25832)',
-    fk_bbr_bygning_adgangtilbygning: 'uuid',
-    fk_bbr_tekniskanlæg_adgangtiltekniskanlæg: 'uuid'
+    husnummerretning: 'geometry(Point,25832)'
 
   },
   NavngivenVej: {

@@ -11,5 +11,5 @@ const optionSpec = {
 cliParameterParsing.main(optionSpec, _.keys(optionSpec), (args, options) => {
 
   /*eslint no-console: 0 */
-  console.log(generateSqlSchemaImpl());
+  console.log(generateSqlSchemaImpl);
 });
