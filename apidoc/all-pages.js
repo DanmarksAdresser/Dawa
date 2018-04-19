@@ -19,6 +19,8 @@ module.exports = [
   require('./senesteSekvensnummer-page'),
   require('./sogn-page'),
   require('./stednavn-page'),
+  require('./stednavn2-page'),
+  require('./sted-page'),
   require('./stednavntype-page'),
   require('./storkreds-page'),
   require('./supplerendebynavn-page'),
