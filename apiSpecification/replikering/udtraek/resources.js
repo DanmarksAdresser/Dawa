@@ -19,6 +19,7 @@ module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
     path: binding.path,
       pathParameters: [],
     queryParameters: [...commonReplikeringParameters.sekvensnummer,
+      ...commonReplikeringParameters.txid,
       ...commonParameters.format]
     ,
     representations: representations[datamodelName],

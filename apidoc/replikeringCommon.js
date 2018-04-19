@@ -45,10 +45,14 @@ const replikeringDoc = (entityName, eventQueryParams, eventExamples) => {
   const udtraekParameterDoc = {
     entity: entityName,
     path: '/replikering/' + nameAndKey.plural,
-    subtekst: `Udtraek for ${nameAndKey.plural}.`,
+    subtext: `DEPRECATED. Anvend det det <a href="/dok/api/replikering#udtraek">nye API</a> i stedet.
+Udtraek for ${nameAndKey.plural}.`,
     parameters: [{
       name: 'sekvensnummer',
       doc: 'Angiver sekvensnummeret for udtrækket. Alle hændelser til og med det angivne sekvensnummer er med i udtrækket.'
+    }, {
+      name: 'txid',
+      doc: 'Angiver transaktions-ID for udtrækket. Alle hændelser til og med det angivne transaktions-ID er med i udtrækket.'
     }].concat(formatParameters),
     examples: []
   };
@@ -56,9 +60,14 @@ const replikeringDoc = (entityName, eventQueryParams, eventExamples) => {
   const eventParameterDocs = {
     entity: entityName,
     path: '/replikering/' + nameAndKey.plural + '/haendelser',
-    subtekst: 'Hændelser for ' + nameAndKey.plural + '.',
+    subtext: `DEPRECATED. Anvend det det <a href="/dok/api/replikering#haendelser">nye API</a> i stedet. 
+Hændelser for ${nameAndKey.plural}.`,
     parameters: [
       ...txidIntervalDoc,
+      {
+        name: 'txid',
+        doc: 'Hent hændelser for transaktionen med den angivne transaktions-ID.'
+      },
       ...sekvensnummerIntervalDoc,
       ...tidspunktIntervalDoc,
       ...eventQueryParams
