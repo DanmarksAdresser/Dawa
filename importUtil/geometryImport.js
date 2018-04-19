@@ -3,15 +3,17 @@ const { go } = require('ts-csp');
 const {columnsEqualClause} = require('../darImport/sqlUtil');
 
 const updateSubdividedTable =
-  (client, txid, baseTable, divTable, keyColumnNames) => go(function* () {
+  (client, txid, baseTable, divTable, keyColumnNames, allowNonPolygons) => go(function* () {
+    const forcePolygons = !allowNonPolygons;
     yield client.query(`DELETE FROM ${divTable} d USING ${baseTable}_changes t WHERE ${columnsEqualClause('d', 't', keyColumnNames)} AND txid = ${txid}`);
-    yield client.query(`INSERT INTO ${divTable} (SELECT ${keyColumnNames.join(', ')}, splitToGridRecursive(geom, 64) AS geom FROM ${baseTable}_changes WHERE operation <> 'delete' AND txid = ${txid})`);
+    yield client.query(`INSERT INTO ${divTable} (SELECT ${keyColumnNames.join(', ')}, splitToGridRecursive(geom, 64, ${forcePolygons}) AS geom FROM ${baseTable}_changes WHERE operation <> 'delete' AND txid = ${txid})`);
   });
 
 const refreshSubdividedTable =
-  (client, baseTable, divTable, keyColumnNames) => go(function* () {
+  (client, baseTable, divTable, keyColumnNames, allowNonPolygons) => go(function* () {
+    const forcePolygons = !allowNonPolygons;
     yield client.query(`DELETE FROM ${divTable}`);
-    yield client.query(`INSERT INTO ${divTable} (SELECT ${keyColumnNames.join(', ')}, splitToGridRecursive(geom, 64) AS geom FROM ${baseTable})`);
+    yield client.query(`INSERT INTO ${divTable} (SELECT ${keyColumnNames.join(', ')}, splitToGridRecursive(geom, 64, ${forcePolygons}) AS geom FROM ${baseTable})`);
   });
 
 const updateGeometricFields = (client, txid, tableModel) => go(function* () {

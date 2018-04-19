@@ -145,6 +145,9 @@ const unnormalizedBindings = {
       ændret: {
         formatter: timestampFormatter,
         selectTransform: selectLocalDateTime
+      },
+      administreresafkommune: {
+        formatter: kode4String
       }
     }
   },

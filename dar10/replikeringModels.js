@@ -62,6 +62,9 @@ const replikeringBindingOverrides = {
     vejnavnebeliggenhed_vejtilslutningspunkter: {
       selectTransform: col => `ST_AsGeoJSON(${col})`,
       formatter: JSON.parse
+    },
+    administreresafkommune: {
+      formatter: kode4String
     }
   },
   DARKommuneinddeling: {
