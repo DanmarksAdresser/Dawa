@@ -178,6 +178,8 @@ ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE navngivenvej_postnummer_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE navngivenvej_postnummer ADD COLUMN IF NOT EXISTS id UUID;
 ALTER TABLE navngivenvej_postnummer_changes ADD COLUMN IF NOT EXISTS id UUID;
+ALTER TABLE navngivenvej alter administreresafkommune type smallint using administreresafkommune::smallint;
+ALTER TABLE navngivenvej_changes alter administreresafkommune type smallint using administreresafkommune::smallint;
 CREATE INDEX IF NOT EXISTS navngivenvej_postnummer_postnummer_id_idx ON navngivenvej_postnummer(postnummer_id);
 CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_postnummer_id_id_idx ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);`);
 
