@@ -41,11 +41,9 @@ const filterParams = [
   {
     name: 'kommunekode',
     doc: 'Find de supplerende bynavne i den angivne kommune.'
-  },
-  ...dagiReverseParameters(model),
-  ...formatAndPagingParams,
-  ...dagiSridCirkelPolygonParameters(model.plural)
+  }
 ];
+
 const queryDoc = {
   entity: 'supplerendebynavn',
   path: `/supplerendebynavne2`,

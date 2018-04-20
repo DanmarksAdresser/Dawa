@@ -23,8 +23,7 @@ const nummerParameter = {
 const storkredsParameters = [
   nummerParameter,
   dagiNavnParameter(temaModel),
-  dagiQParameter(),
-  ...dagiSridCirkelPolygonParameters(temaModel.plural)
+  dagiQParameter()
 ];
 
 const examples = {
@@ -63,7 +62,10 @@ module.exports = [
     entity: 'storkreds',
     path: '/storkredse',
     subtext: 'Søg efter storkredse. Returnerer de storkredse der opfylder kriteriet.',
-    parameters: storkredsParameters.concat(dagiReverseParameters(temaModel)).concat(formatAndPagingParams),
+    parameters: [...storkredsParameters,
+      ...dagiReverseParameters(temaModel),
+      ...dagiSridCirkelPolygonParameters(temaModel.plural),
+      ...formatAndPagingParams],
     examples: examples.query
   },
   {

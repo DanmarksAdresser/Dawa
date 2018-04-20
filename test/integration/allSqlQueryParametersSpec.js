@@ -567,8 +567,15 @@ var sampleParameters = {
     kommunekode: {
       values: ['99'],
       verifier: (sted, kommunekode) => parseInt(sted.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
+    },
+    primærtnavn: {
+      values: ["Aarhus"],
+      verifier: (sted, primærtnavn) => sted.primærtnavn === primærtnavn
+    },
+    primærnavnestatus: {
+      values: ['officielt'],
+      verifier: (sted, primærnavnestatus) => sted.primærnavnestatus === primærnavnestatus
     }
-
   },
   "stednavn": {
       sted_id: {

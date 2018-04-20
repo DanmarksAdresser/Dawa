@@ -1,7 +1,6 @@
 const {
   formatParameters,
   formatAndPagingParams,
-  fuzzyParameter,
   SRIDParameter,
   strukturParameter
 } = require('./common');
@@ -11,7 +10,6 @@ const {
 } = require('./dagiCommon');
 
 const commonStedParameters = [
-  fuzzyParameter,
   {
     name: 'id',
     doc: 'Find stedet med det angivne, unikke ID'

@@ -53,8 +53,7 @@ const filterParams = [
   {
     name: 'regionskode',
     doc: 'Find afstemningsområderne i regionen med den angivne regionskode'
-  },
-  ...dagiSridCirkelPolygonParameters(model.plural)
+  }
 ];
 const queryDoc = {
   entity: 'afstemningsområde',
@@ -63,6 +62,7 @@ const queryDoc = {
   parameters: [
     ... filterParams,
     ...dagiReverseParameters(model),
+    ...dagiSridCirkelPolygonParameters(model.plural),
     ...formatAndPagingParams,
   ],
   examples: examples.query

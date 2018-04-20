@@ -36,8 +36,16 @@ module.exports = {
         type: 'integer',
         schema: schema.kode4,
         multi: true
-      }
-    ])
+      },
+      {
+        name: 'primærtnavn',
+        type: 'string',
+        multi: true
+      },
+      {
+        name: 'primærnavnestatus',
+        type: 'string'
+      }])
 };
 
 registry.addMultiple('sted', 'parameterGroup', module.exports);

@@ -11,6 +11,7 @@ var registry = require('../../registry');
 var commonParameters = require('../../common/commonParameters');
 const datamodel = require('../datamodel');
 const bindings = require('../dbBindings');
+const commonReplikeringParams = require('../commonParameters');
 
 _.each(Object.keys(datamodel), function(entityName) {
   const binding = bindings[entityName];
@@ -21,6 +22,7 @@ _.each(Object.keys(datamodel), function(entityName) {
       keyParameters: parameters.keyParameters[entityName] || [],
       sekvensnummer: parameters.sekvensnummer,
       tidspunkt: parameters.tidspunkt,
+      txid: commonReplikeringParams.txid,
       txidInterval: parameters.txidInterval,
       formatParameters: commonParameters.format
     }),

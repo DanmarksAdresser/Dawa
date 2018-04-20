@@ -84,8 +84,7 @@ const filterParams = [
   {
     name: 'kode',
     doc: 'Deprecated. Anvend parameteren nummer i stedet.'
-  },
-  ...dagiSridCirkelPolygonParameters(model.plural)
+  }
 ];
 const queryDoc = {
   entity: 'opstillingskreds',
@@ -94,6 +93,7 @@ const queryDoc = {
   parameters: [
     ... filterParams,
     ...dagiReverseParameters(model),
+    ...dagiSridCirkelPolygonParameters(model.plural),
     ...formatAndPagingParams,
   ],
   examples: examples.query

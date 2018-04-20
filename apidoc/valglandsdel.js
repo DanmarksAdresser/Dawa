@@ -23,8 +23,7 @@ const bogstavParameter = {
 const valglandsdelParameters = [
   bogstavParameter,
   dagiNavnParameter(temaModel),
-  dagiQParameter(),
-  ...dagiSridCirkelPolygonParameters(temaModel.plural)
+  dagiQParameter()
 ];
 
 const examples = {
@@ -66,6 +65,7 @@ module.exports = [
     parameters: [
       ...valglandsdelParameters,
       ...dagiReverseParameters(temaModel),
+      ...dagiSridCirkelPolygonParameters(temaModel.plural),
       ...formatAndPagingParams
     ],
     examples: examples.query

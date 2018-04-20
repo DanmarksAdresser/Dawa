@@ -51,9 +51,7 @@ const filterParams = [
     name: 'sognekode',
     doc: 'Find menighedsrådsafstemningsområderne i sognet med den angivne sognekode'
   },
-  ...dagiReverseParameters(model),
-  ...formatAndPagingParams,
-  ...dagiSridCirkelPolygonParameters(model.plural)
+  ...formatAndPagingParams
 ];
 const queryDoc = {
   entity: 'menighedsrådsafstemningsområde',
@@ -62,8 +60,8 @@ const queryDoc = {
   parameters: [
     ... filterParams,
     ...dagiReverseParameters(model),
-    ...formatAndPagingParams,
-    ...dagiSridCirkelPolygonParameters(model.plural)
+    ...dagiSridCirkelPolygonParameters(model.plural),
+    ...formatAndPagingParams
   ],
   examples: examples.query
 };

@@ -39,6 +39,11 @@ module.exports.opstillingskreds = {
   ]),
   propertyFilter: normalizeParameters([
     {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
       name: 'nummer',
       type: 'integer',
       multi: true
@@ -137,6 +142,11 @@ module.exports.afstemningsområde = {
     {
       name: 'kommunekode',
       type: 'integer'
+    },
+    {
+      name: 'regionskode',
+      type: 'integer',
+      multi: true
     },
     {
       name: 'opstillingskredsnummer',
