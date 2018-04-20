@@ -16,7 +16,7 @@ const stednavneTableModel = tableModel.tables.stednavne;
 const { recomputeMaterialization, materialize } = require('../importUtil/materialize');
 
 const {
-  updateSubdividedTable,
+  refreshSubdividedTable,
   updateGeometricFields
 } = require('../importUtil/geometryImport');
 
@@ -75,7 +75,7 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield client.query('analyze stednavne; analyze stednavne_changes; analyze steder; analyze steder_changes');
   yield updateGeometricFields(client, txid, stederTableModel);
   yield tableDiffNg.applyChanges(client, txid, stederTableModel);
-  yield updateSubdividedTable(client, txid, 'steder', 'steder_divided', ['id'], true);
+  yield refreshSubdividedTable(client, 'steder', 'steder_divided', ['id'], true);
   yield client.query('drop table fetch_stednavne_raw; drop table fetch_stednavne; drop table fetch_steder; analyze steder_divided');
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stedtilknytninger);
   yield materialize(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_adresser);
