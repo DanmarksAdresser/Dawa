@@ -16,10 +16,10 @@ CREATE VIEW dar1_adgangsadresser_view AS
                                                                 AS oprettet,
     GREATEST((SELECT max(lower(ap2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
               FROM dar1_adressepunkt_history ap2
-              WHERE ap2.id = hn.adgangspunkt_id),
+              WHERE ap2.id = hn.adgangspunkt_id AND lower(ap2.virkning) <= (select virkning from dar1_meta)),
              (SELECT max(lower(hn2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
               FROM dar1_husnummer_history hn2
-              WHERE hn.id = hn2.id))
+              WHERE hn.id = hn2.id AND lower(hn2.virkning) <=(select virkning from dar1_meta)))
                                                                 AS aendret,
     ap.id                                                       AS adgangspunktid,
     ST_X(ap.position)                                           AS etrs89oest,
