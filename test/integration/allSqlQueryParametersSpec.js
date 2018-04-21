@@ -281,6 +281,11 @@ var sampleParameters = {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: (adr, stednavnid) => adr.bebyggelser.filter(bebyggelse => bebyggelse.id === stednavnid).length === 1
     },
+    stedid: {
+      // note, verification only works for bebyggelser
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
+      verifier: (adr, stedid) => adr.bebyggelser.filter(bebyggelse => bebyggelse.id === stedid).length === 1
+    },
     bebyggelsesid: {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: function(adr, bebyggelsesid) {
@@ -451,6 +456,11 @@ var sampleParameters = {
       // note, verification only works for bebyggelser
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: (adr, stednavnid) => adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === stednavnid).length === 1
+    },
+    stedid: {
+      // note, verification only works for bebyggelser
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
+      verifier: (adr, stedid) => adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === stedid).length === 1
     },
     bebyggelsesid: {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],

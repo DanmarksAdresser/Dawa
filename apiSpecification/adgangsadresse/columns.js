@@ -36,12 +36,12 @@ module.exports = {
   adressepunktændringsdato: {
     column: selectIsoTimestamp('adressepunktaendringsdato')
   },
-  stednavnid: {
+  stedid: {
     select: null,
-    where: function (sqlParts, stednavnId, params) {
-      const stedIdAlias = dbapi.addSqlParameter(sqlParts, stednavnId);
-      if (params.stednavnafstand) {
-        const stedAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stednavnafstand);
+    where: function (sqlParts, stedId, params) {
+      const stedIdAlias = dbapi.addSqlParameter(sqlParts, stedId);
+      if (params.stedafstand) {
+        const stedAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stedafstand);
         sqlParts.whereClauses.push(`geom && st_expand((select geom from steder where id = ${stedIdAlias}), ${stedAfstandAlias})
 AND ST_DWithin(geom, (select geom from steder where id = ${stedIdAlias}), ${stedAfstandAlias})`)
       }
