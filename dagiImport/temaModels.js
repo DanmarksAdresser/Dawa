@@ -493,6 +493,7 @@ exports.modelList = [{
       {
         name: 'sognekode',
         type: 'string',
+        sqlType: 'SMALLINT',
         nullable: false,
         formatter: kode4String,
         description: 'Sognekoden for det sogn, som menighedsrådsafstemningsområdet tilhører.'

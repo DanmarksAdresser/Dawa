@@ -134,6 +134,32 @@ from (select distinct k.kode, k.navn
     valglandsdelsnavn: {
       column: 'v.navn'
     },
+  },
+  menighedsrådsafstemningsområde: {
+    dagi_id: {
+      column:'t.dagi_id'
+    },
+    nummer: {
+      column: 't.nummer'
+    },
+    navn: {
+      column: 't.navn'
+    },
+    afstemningsstednavn: {
+      column: 't.afstemningsstednavn'
+    },
+    kommunekode: {
+      column: 'k.kode',
+    },
+    kommunenavn: {
+      column: 'k.navn'
+    },
+    sognekode: {
+      column: 't.sognekode'
+    },
+    sognenavn: {
+      column: 's.navn'
+    }
   }
 };
 
@@ -172,6 +198,17 @@ const baseQueries = {
       from: [`storkredse t 
       join regioner r on t.regionskode = r.kode
       join valglandsdele v on t.valglandsdelsbogstav = v.bogstav`],
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    }
+  },
+  menighedsrådsafstemningsområde: () => {
+    return {
+      select: [],
+      from: [`menighedsraadsafstemningsomraader t 
+      join kommuner k on t.kommunekode = k.kode
+      join sogne s on t.sognekode = s.kode`],
       whereClauses: [],
       orderClauses: [],
       sqlParams: []

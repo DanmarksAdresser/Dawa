@@ -6,20 +6,22 @@ var fieldMap = require('./fields');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const {normalizedSchemaField} = require('../replikering/normalizedFieldSchemas');
 const commonSchemaDefinitions = require('../commonSchemaDefinitions');
-const { schemaObject } = require('../schemaUtil');
+const {schemaObject} = require('../schemaUtil');
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-const {makeHrefFromPath,
+const {
+  makeHrefFromPath,
   mapKode4NavnTema,
   mapKommuneRefArray,
-makeHref} = require('../commonMappers');
+  makeHref
+} = require('../commonMappers');
 const temaModels = require('../../dagiImport/temaModels');
-const { kode4String, numberToString } = require('../util');
+const {kode4String, numberToString} = require('../util');
 var registry = require('../registry');
 
 const numToStr = (num) => _.isNumber(num) ? '' + num : null;
 
-var nameOnlyAutocomplete =  {
-  description: function(tema) {
+var nameOnlyAutocomplete = {
+  description: function (tema) {
     return 'Navnet på ' + tema.singularSpecific;
   },
   mapper: function (row) {
@@ -37,10 +39,10 @@ var autocompleteTekst = {
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
   autocompleteTekst[dagiTemaNavn] = {
-      description: function(tema) {
-        return 'Koden efterfulgt af navnet på ' + tema.singularSpecific;
+    description: function (tema) {
+      return 'Koden efterfulgt af navnet på ' + tema.singularSpecific;
     },
-    mapper: function(row) {
+    mapper: function (row) {
       return '' + row.kode + ' ' + row.navn;
     }
   };
@@ -81,7 +83,7 @@ const opstillingskredsJsonRepresentation = (() => {
     title: 'Opstillingskreds',
     properties: {
       dagi_id: normalizedFieldSchema('dagi_id'),
-      href: Object.assign({}, commonSchemaDefinitions.Href, { description: 'Opstillingskredsens URL' }),
+      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Opstillingskredsens URL'}),
       navn: normalizedFieldSchema('navn'),
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
@@ -96,7 +98,7 @@ const opstillingskredsJsonRepresentation = (() => {
         description: 'De kommuner som opstillingskredsen ligger i.',
         type: 'array',
         items:
-          commonSchemaDefinitions.KommuneRef
+        commonSchemaDefinitions.KommuneRef
 
       }
     },
@@ -173,7 +175,7 @@ const afstemningsområdeJsonRepresentation = (() => {
               },
               id: Object.assign({}, commonSchemaDefinitions.UUID, {
                 description: 'Adgangsadressens unikke ID.'
-                }),
+              }),
               adressebetegnelse: {
                 type: 'string',
                 description: 'Adressebetegnelse for adgangsadressen.'
@@ -192,9 +194,47 @@ const afstemningsområdeJsonRepresentation = (() => {
     },
     docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer',
       'afstemningssted',
-     'kommune', 'region', 'opstillingskreds', 'storkreds', 'valglandsdel']
+      'kommune', 'region', 'opstillingskreds', 'storkreds', 'valglandsdel']
   });
-    return {fields, mapper, schema};
+  return {fields, mapper, schema};
+})();
+
+const mrAfstemningsområdeRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.menighedsrådsafstemningsområde, ['geom_json']);
+  const mapper = baseUrl => row => {
+    const result = {
+      href: makeHref(baseUrl, 'menighedsrådsafstemningsområde', [row.kommunekode, row.nummer]),
+      dagi_id: numberToString(row.dagi_id),
+      ændret: row.ændret,
+      geo_version: row.geo_version,
+      geo_ændret: row.geo_ændret,
+      nummer: numToStr(row.nummer),
+      navn: row.navn,
+      kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
+      sogn: mapKode4NavnTema('sogn', row.sognekode, row.sognenavn, baseUrl)
+    };
+    return result;
+  };
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('menighedsrådsafstemningsområde', fieldName);
+  };
+  const schema = globalSchemaObject({
+    title: 'Menighedsrådsafstemningsområde',
+    properties: {
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      href: commonSchemaDefinitions.Href,
+      navn: normalizedFieldSchema('navn'),
+      ændret: normalizedFieldSchema('ændret'),
+      geo_version: normalizedFieldSchema('geo_version'),
+      geo_ændret: normalizedFieldSchema('geo_ændret'),
+      nummer: normalizedFieldSchema('nummer'),
+      kommune: commonSchemaDefinitions.KommuneRef,
+      sogn: commonSchemaDefinitions.SogneRef
+    },
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer',
+      'kommune', 'sogn']
+  });
+  return {fields, mapper, schema};
 })();
 
 const storkredsJsonRepresentation = (() => {
@@ -222,7 +262,7 @@ const storkredsJsonRepresentation = (() => {
   const schema = globalSchemaObject({
     title: 'Storkreds',
     properties: {
-      href: Object.assign({}, commonSchemaDefinitions.Href, { description: 'Storkredsens URL' }),
+      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
       geo_ændret: normalizedFieldSchema('geo_ændret'),
@@ -241,9 +281,9 @@ const storkredsJsonRepresentation = (() => {
 const jsonRepresentations = {
   opstillingskreds: opstillingskredsJsonRepresentation,
   afstemningsområde: afstemningsområdeJsonRepresentation,
-  storkreds: storkredsJsonRepresentation
-}
-
+  storkreds: storkredsJsonRepresentation,
+  menighedsrådsafstemningsområde: mrAfstemningsområdeRepresentation
+};
 
 
 function schemaForFlatFields(model, excludedFieldNames) {
@@ -291,22 +331,26 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
 
 
   representations.flat = representationUtil.defaultFlatRepresentation(flatFields);
+
   function jsonSchema() {
     return schemaForFlatFields(model, []);
   }
+
   function dagiTemaJsonMapper() {
-    return function(baseUrl) {
-      return function(row) {
+    return function (baseUrl) {
+      return function (row) {
         var result = {};
-        model.fields.forEach(function(fieldSpec) {
+        model.fields.forEach(function (fieldSpec) {
           result[fieldSpec.name] = fieldSpec.formatter(row[fieldSpec.name]);
         });
 
-        result.ændret =  row.ændret;
+        result.ændret = row.ændret;
         result.geo_version = row.geo_version;
         result.geo_ændret = row.geo_ændret;
 
-        result.href = makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function(keyName) { return result[keyName]; }));
+        result.href = makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function (keyName) {
+          return result[keyName];
+        }));
 
         return result;
       };
@@ -328,9 +372,9 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
   }
 
   function dagiTemaAutocompleteMapper() {
-    return function(baseUrl) {
+    return function (baseUrl) {
       var dagiTemaMapper = representations.json.mapper(baseUrl);
-      return function(row) {
+      return function (row) {
         var result = {
           tekst: autocompleteTekst[model.singular].mapper(row)
         };
@@ -339,6 +383,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
       };
     };
   }
+
   const defaultJsonRepresentation = {
     // geomentry for the (huge) DAGI temaer is only returned in geojson format.
     fields: representationUtil.fieldsWithoutNames(fields, ['geom_json']),
@@ -346,7 +391,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     mapper: dagiTemaJsonMapper(model.primaryKey)
   };
   representations.json = jsonRepresentations[model.singular] || defaultJsonRepresentation;
-  if(model.searchable) {
+  if (model.searchable) {
     representations.autocomplete = {
       fields: representations.json.fields,
       schema: globalSchemaObject(dagiAutocompleteSchema()),

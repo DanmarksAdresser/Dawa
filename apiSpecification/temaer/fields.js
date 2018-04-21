@@ -55,6 +55,29 @@ const additionalFieldsMap = {
       name: 'valglandsdelsnavn'
     }
   ],
+  menighedsrådsafstemningsområde: [
+    {
+      name: 'dagi_id'
+    },
+    {
+      name: 'nummer'
+    },
+    {
+      name: 'navn'
+    },
+    {
+      name: 'kommunekode'
+    },
+    {
+      name: 'kommunenavn'
+    },
+    {
+      name: 'sognekode'
+    },
+    {
+      name: 'sognenavn'
+    }
+  ],
   opstillingskreds: [
     {
       name: 'dagi_id'
