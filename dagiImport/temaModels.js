@@ -1,7 +1,7 @@
 const _ = require('underscore');
 
 const commonSchemaDefinitions = require('../apiSpecification/commonSchemaDefinitions');
-const {kode4String, zoneKodeFormatter} = require('../apiSpecification/util');
+const {kode4String, zoneKodeFormatter, numberToString} = require('../apiSpecification/util');
 
 const defaultSqlType = {
   string: 'text',
@@ -32,9 +32,10 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
-      type: 'integer',
+      type: 'string',
       nullable: true,
-      description: 'Unik ID'
+      description: 'Unik ID',
+      formatter: numberToString
     },
     {
       name: 'kode',
@@ -65,9 +66,10 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
-      type: 'integer',
+      type: 'string',
       nullable: true,
-      description: 'Unik ID'
+      description: 'Unik ID',
+      formatter: numberToString
     },
     {
       name: 'kode',
@@ -105,9 +107,10 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
-      type: 'integer',
+      type: 'string',
       nullable: true,
-      description: 'Unik ID'
+      description: 'Unik ID',
+      formatter: numberToString
     },
     {
       name: 'kode',
@@ -137,9 +140,10 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
-      type: 'integer',
+      type: 'string',
       nullable: true,
-      description: 'Unik ID'
+      description: 'Unik ID',
+      formatter: numberToString
     },
     {
       name: 'kode',
@@ -168,9 +172,10 @@ exports.modelList = [{
   deriveTsv: kodeNavnDeriveTsv,
   fields: [{
     name: 'dagi_id',
-    type: 'integer',
+    type: 'string',
     nullable: true,
-    description: 'Unik ID'
+    description: 'Unik ID',
+    formatter: numberToString
   },
     {
       name: 'kode',
@@ -200,9 +205,10 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
-      type: 'integer',
+      type: 'string',
       nullable: true,
-      description: 'Unik ID'
+      description: 'Unik ID',
+      formatter: numberToString
     },
     {
       name: 'nummer',
@@ -262,9 +268,10 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
-      type: 'integer',
+      type: 'string',
       nullable: true,
-      description: 'Unik ID'
+      description: 'Unik ID',
+      formatter: numberToString
     },
     {
       name: 'nr',
@@ -382,9 +389,10 @@ exports.modelList = [{
     fields: [
       {
         name: 'dagi_id',
-        type: 'integer',
+        type: 'string',
         nullable: false,
-        description: 'Unik ID'
+        description: 'Unik ID',
+        formatter: numberToString
       },
       {
         name: 'nummer',
@@ -423,7 +431,8 @@ exports.modelList = [{
       },
       {
         name: 'opstillingskreds_dagi_id',
-        type: 'integer',
+        type: 'string',
+        formatter: numberToString,
         description: 'DAGI id for opstillingskredsen, som afstemningsområdet tilhører'
       }
       ],
@@ -446,9 +455,10 @@ exports.modelList = [{
     fields: [
       {
         name: 'dagi_id',
-        type: 'integer',
+        type: 'string',
         nullable: false,
-        description: 'Unik ID'
+        description: 'Unik ID',
+        formatter: numberToString
       },
       {
         name: 'nummer',
@@ -506,9 +516,10 @@ exports.modelList = [{
     fields: [
       {
         name: 'dagi_id',
-        type: 'integer',
+        type: 'string',
         nullable: false,
-        description: 'Unik ID'
+        description: 'Unik ID',
+        formatter: numberToString
       },
       {
         name: 'navn',

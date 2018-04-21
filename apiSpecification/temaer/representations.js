@@ -13,7 +13,7 @@ const {makeHrefFromPath,
   mapKommuneRefArray,
 makeHref} = require('../commonMappers');
 const temaModels = require('../../dagiImport/temaModels');
-const { kode4String } = require('../util');
+const { kode4String, numberToString } = require('../util');
 var registry = require('../registry');
 
 const numToStr = (num) => _.isNumber(num) ? '' + num : null;
@@ -54,7 +54,7 @@ const opstillingskredsJsonRepresentation = (() => {
   const mapper = baseUrl => row => {
     const result = {
       href: makeHref(baseUrl, 'opstillingskreds', [row.nummer]),
-      dagi_id: row.dagi_id,
+      dagi_id: numberToString(row.dagi_id),
       ændret: row.ændret,
       geo_version: row.geo_version,
       geo_ændret: row.geo_ændret,
@@ -111,7 +111,7 @@ const afstemningsområdeJsonRepresentation = (() => {
   const mapper = baseUrl => row => {
     const result = {
       href: makeHref(baseUrl, 'afstemningsområde', [row.kommunekode, row.nummer]),
-      dagi_id: row.dagi_id,
+      dagi_id: numberToString(row.dagi_id),
       ændret: row.ændret,
       geo_version: row.geo_version,
       geo_ændret: row.geo_ændret,

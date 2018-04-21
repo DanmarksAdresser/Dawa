@@ -3,7 +3,7 @@
 const assert = require('assert');
 const dar10TableModels = require('./dar10TableModels');
 const {formatHusnr} = require('../apiSpecification/husnrUtil');
-const {kode4String} = require('../apiSpecification/util');
+const {kode4String, numberToString} = require('../apiSpecification/util');
 const { selectIsoDateUtc: selectIsoTimestampUtc} = require('../apiSpecification/common/sql/sqlUtil');
 
 
@@ -70,6 +70,27 @@ const replikeringBindingOverrides = {
   DARKommuneinddeling: {
     kommunekode: {
       formatter: kode4String
+    },
+    kommuneinddeling: numberToString
+  },
+  SupplerendeBynavn: {
+    supplerendebynavn1: {
+      formatter: numberToString
+    }
+  },
+  DARSogneinddeling: {
+    sogneinddeling: {
+      formatter: numberToString
+    }
+  },
+  DARMenighedsrådsafstemningsområde: {
+    mrafstemningsområde: {
+      formatter: numberToString
+    }
+  },
+  DARAfstemningsområde: {
+    afstemningsområde: {
+      formatter: numberToString
     }
   }
 };
