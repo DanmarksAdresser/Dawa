@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require('underscore');
 const expect = require('chai').expect;
 const uuid = require('uuid');
 
@@ -21,6 +22,13 @@ function getRandomInt(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
+
+describe('DAR 1.0 tablemodels', () => {
+  it('dar1_NavngivenVej geometrikolonner har distinctClause', () => {
+    const column = _.findWhere(dar10TableModels.rawTableModels.NavngivenVej.columns, {name: 'vejnavnebeliggenhed_vejnavnelinje'});
+    expect(column.distinctClause).to.exist;
+  });
+})
 
 describe('Import af DAR 1.0 udtræk', function () {
   this.timeout(60000);

@@ -11,6 +11,16 @@ const schemas = spec.schemas;
 
 const standardFields = ['rowkey', 'id', 'eventopret', 'eventopdater', 'status', 'registreringfra', 'registreringtil', 'virkningfra', 'virkningtil'];
 
+const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
+
+const distinctClauses = {
+  NavngivenVej: {
+    vejnavnebeliggenhed_vejnavnelinje: geomDistinctClause,
+    vejnavnebeliggenhed_vejnavneområde: geomDistinctClause,
+    vejnavnebeliggenhed_vejtilslutningspunkter: geomDistinctClause
+  }
+};
+
 const standardColumns = [
   {
     name: 'rowkey',
@@ -91,6 +101,13 @@ exports.rawTableModels = entityNames.reduce((memo, entityName) => {
     };
   });
   const allColumns = [...standardColumns, ...nonStandardColumns];
+  if(distinctClauses[entityName]) {
+    for(let column of allColumns) {
+      if(distinctClauses[entityName][column.name]) {
+        column.distinctClause = distinctClauses[entityName][column.name];
+      }
+    }
+  }
   const tableModel = {
     table: `dar1_${entityName}`,
     entity: `dar1_${entityName}_raw`,
