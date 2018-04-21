@@ -1,7 +1,7 @@
 module.exports = {
   entity: 'adresse',
-  heading: 'Adresse-API',
-  lead: `Adresse-API'et udstiller Danmarks adresser samt tilhørende funktionalitet.`,
+  heading: 'Adresser',
+  lead: `API'et udstiller Danmarks adresser samt tilhørende funktionalitet.`,
   sections: [
     {
       type: 'endpoint',
