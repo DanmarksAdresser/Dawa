@@ -9,8 +9,8 @@ const resourcesUtil = require('../common/resourcesUtil');
 const commonParameters = require('../common/commonParameters');
 
 
-exports.query = resourcesUtil.queryResourceSpec(
-  nameAndKey, {
+exports.query = resourcesUtil.queryResourcePathSpec(
+  '/stednavne2', {
     propertyFilter: parameters.propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
@@ -24,7 +24,7 @@ exports.query = resourcesUtil.queryResourceSpec(
   sqlModel
 );
 
-exports.autocomplete =   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
+exports.autocomplete =   resourcesUtil.autocompleteResourcePathSpec('/stednavne2/autocomplete', {
     propertyFilter: parameters.propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
@@ -35,7 +35,8 @@ exports.autocomplete =   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
   representations.json,
   sqlModel);
 
-exports.getByKey = resourcesUtil.getByKeyResourceSpec(
+exports.getByKey = resourcesUtil.getByKeyResourcePathSpec(
+  '/stednavne2',
   nameAndKey, parameters.id, {
     crs: commonParameters.crs,
     struktur: commonParameters.struktur

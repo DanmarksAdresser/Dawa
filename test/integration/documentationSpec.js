@@ -46,6 +46,16 @@ describe('Parameter documentation.', function() {
           expect(paramDoc.doc).to.exist;
         });
       });
+      const paramsNotDefined = ['kvh', 'kvhx'];
+      for(let paramDoc of docSpec.parameters) {
+        if(!paramsNotDefined.includes(paramDoc.name)) {
+          it(`The documented parameter ${paramDoc.name} should be defined`, () => {
+            const param = _.findWhere([...resource.queryParameters, ...resource.pathParameters],
+              {name: paramDoc.name});
+            expect(param).to.exist;
+          });
+        }
+      }
     });
   });
 });
@@ -69,7 +79,7 @@ describe('Documentation page', function() {
   for(let page of allPages) {
     it(`Kan hente apidocs siden for ${page.entity}`, () => go(function*() {
       const response = yield request.get({
-        uri: `http://localhost:3002/dok/api/${page.entity}`,
+        uri: `http://localhost:3002/dok/api/${encodeURIComponent(page.entity)}`,
         resolveWithFullResponse: true
       });
       assert.strictEqual(response.statusCode, 200);

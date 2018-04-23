@@ -38,7 +38,7 @@ const assignSequenceNumbers = (client, txid, tableModel, op) => go(function*() {
                             WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)}AND ${changeTable}.txid = ${txid})
                  INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
                    (SELECT s + (select * from last_seq), '${tableModel.entity || tableModel.table}', '${op}', ${txid} FROM seq)`;
-  yield client.queryBatched(sql);
+  yield client.query(sql);
 });
 
 const insert = (client, tableModel, object) => {

@@ -1,7 +1,9 @@
 "use strict";
 
+const _ = require('underscore');
 var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
+const adgangsadresseFields = require('../adgangsadresse/fields');
 
 var util = require('../util');
 var kode4String = util.kode4String;
@@ -16,6 +18,7 @@ var normalizedField = function (fieldName) {
 var normalizedAdgangsadresseField = function (fieldName) {
   return normalizedFieldSchemas.normalizedField('adgangsadresse', fieldName);
 };
+const adgangsadresseField = fieldName => _.findWhere(adgangsadresseFields, {name: fieldName});
 
 
 var fields = [
@@ -136,10 +139,6 @@ var fields = [
     name: 'jordstykke_ejerlavnavn'
   },
   {
-    name: 'temaer',
-    multi: true
-  },
-  {
     name: 'jordstykke_ejerlavkode'
   },
   {
@@ -196,7 +195,26 @@ var fields = [
   {
     name: 'geom_json'
   },
-
+  adgangsadresseField('sognekode'),
+  {
+    name: 'sognenavn'
+  },
+  adgangsadresseField('politikredskode'),
+  {
+    name: 'politikredsnavn'
+  },
+  adgangsadresseField('retskredskode'),
+  {
+    name: 'retskredsnavn'
+  },
+  adgangsadresseField('opstillingskredskode'),
+  {
+    name: 'opstillingskredsnavn'
+  },
+  adgangsadresseField('zone'),
+  adgangsadresseField('afstemningsområdenummer'),
+  adgangsadresseField('afstemningsområdenavn'),
+  adgangsadresseField('brofast')
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

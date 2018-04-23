@@ -1,58 +1,78 @@
 extends ../sidebar-auto
 
 block main
-  h1.h1-icon.h1-sted Stednavne
+  h1.h1-icon.h1-sted Steder og stednavne
   p.
+    DAWA udstiller steder og stednavne fra Danmarks officielle stednavneregister.
+
     Stednavne har samme sproglige funktion som adresser. De udpeger begge steder.
     Stednavne er ikke entydige som adresser. Ét stednavn kan udpege mange forskellige steder.
     Stednavnet Østergård udpeger f.eks.  722 steder - typisk gårde. En anden forskel er at
     stednavnes geometri kan være punkter, linjer eller polygoner. Adresser repræsenteres
     kun af punkter.
 
-  p.  
-    Dokumentationen for de enkelte ressourcer i stednavneområdets API finder du på <a href="/dok/api/stednavntype">stednavntype</a> og <a href="/dok/api/stednavn">stednavn</a>.
+  p.
+    På DAWA er steder og stednavne repræsenteret ved to forskellige ressourcer.
+    Et sted har et primært navn, og kan derudover have 0 eller flere sekundære navne.
+
+  p.
+    Dokumentationen for de enkelte ressourcer i stednavneområdets API finder du på
+    <a href="/dok/api/stednavntype">stednavntype</a>,
+    <a href="/dok/api/sted">sted</a> og
+    <a href="/dok/api/stednavn2">stednavn</a>.
   p.
 
   h2 Stednavntyper
   p
     .
-      Stednavne er opdelt i hovedtyper, som f.eks. bebyggelser, bygning og farvand. Hver hovedtype
-      er inddelt i undertyper, som f.eks. by, akvarium og bugt. Du kan anvende stednavne API’et til
+      Steder er opdelt i hovedtyper, som f.eks. bebyggelser, bygning og farvand. Hver hovedtype
+      er inddelt i undertyper, som f.eks. by, akvarium og bugt. Du kan anvende stednavntyper API’et til
       at få en oversigt over hovedtyper og deres undertyper:
     pre
-      a(href='https://dawa.aws.dk/stednavntyper').
+      a(href='/stednavntyper').
         https://dawa.aws.dk/stednavntyper
 
-  h2 Stednavnsøgning
+  h2 Stedsøgning
   p
     .
-      Stednavnetyperne kan anvendes til at finde de stednavne, du er interesseret i.
+      Stednavnetyperne kan anvendes til at finde de steder, du er interesseret i.
       Det kan f.eks. være alle danske byer:
     pre
-      a(href='https://dawa.aws.dk/stednavne?hovedtype=Bebyggelse&undertype=by').
-        https://dawa.aws.dk/stednavne?hovedtype=Bebyggelse&undertype=by
+      a(href='https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by').
+        https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by
 
-  p Hvis det er en bestemt by du søger, kan du angive navnet:
-    a(href='https://dawa.aws.dk/stednavne?hovedtype=Bebyggelse&undertype=by&navn=Blovstrød').
-      https://dawa.aws.dk/stednavne?hovedtype=Bebyggelse&undertype=by&navn=Blovstrød
+  p Hvis det er en bestemt by du søger, og den nøjagtige stavemåde for stedets primære navn er kendt:
+  pre
+    a(href='/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød').
+      https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød
   p Geometrien får du ved at sætte <code>format</code> parameteren til <code>geojson</code>:
     pre
-      a(href='https://dawa.aws.dk/stednavne?hovedtype=Bebyggelse&undertype=by&navn=Blovstrød&format=geojson').
-        https://dawa.aws.dk/stednavne?hovedtype=Bebyggelse&undertype=by&navn=Blovstrød&format=geojson
+      a(href='/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød&format=geojson').
+        https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød&format=geojson
   p
     .
-      Stednavnedata er også forsynet med et visuelt center, som kan anvendes til at placere navnet
+      Steder er også forsynet med et visuelt center, som kan anvendes til at placere navnet
       på et passende centralt sted på stednavnets geometri. Du kan se Blovstrøds polygon og
       dens visuelle center nedenfor.
     img(src='/img/stednavne-visuelt-center.jpg')
 
-  h2 Adresser indenfor stednavn
+  p
+    .
+      Sted-ressourcen understøtter ikke tekstsøgning eller autocomplete. Det gør stednavneressourcen
+      derimod. Der er også understøttelse for fuzzy søgning:
+    pre
+      a(href="/stednavne2?q=bloustrød&fuzzy") https://dawa.aws.dk/stednavne2?q=bloustrød&fuzzy
+    .
+      Ved søgning i stednavne søges som udgangspunkt både i primære og sekundære navne. Det samme
+      sted kan optræde flere gange i søgeresultatet hvis stedet har flere navne.
+
+  h2 Adresser indenfor sted
   p.
-    Du kan også finde de adresser, som er placeret i et stednavn. Hvis du f.eks. ønsker de adresser
-    der ligger i Blovstrød, kan du anvende stednavnets id på følgende måde:
+    Du kan også finde de adresser, som er placeret på et sted. Hvis du f.eks. ønsker de adresser
+    der ligger i Blovstrød, kan du anvende stedets id på følgende måde:
   pre
     a(href='http://dawa.aws.dk/adresser?stednavnid=12337669-dd6b-6b98-e053-d480220a5a3f').
-      http://dawa.aws.dk/adresser?stednavnid=12337669-dd6b-6b98-e053-d480220a5a3f
+      http://dawa.aws.dk/adresser?stedid=12337669-dd6b-6b98-e053-d480220a5a3f
   p Nedenfor ser du adresserne i Blovstrød.
     img(src='/img/stednavne-blovstroed-adresser.jpg')
 

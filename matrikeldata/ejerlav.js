@@ -2,7 +2,7 @@
 
 var _ = require('underscore');
 
-var tema = require('../temaer/tema');
+const { parseTemaGml } = require('../dagiImport/temaParsing');
 
 
 function parseInteger(str) {
@@ -81,10 +81,5 @@ exports.parseEjerlav = function (body) {
     }
   };
 
-  return tema.parseGml(body, 'jordstykke', ['ejerlavkode', 'matrikelnr'], mapping);
+  return parseTemaGml(body, mapping);
 }
-
-exports.storeEjerlav = function (ejerlavkode, jordstykker, client, options) {
-  var temaDef = tema.findTema('jordstykke');
-  return tema.putTemaer(temaDef, jordstykker, client, options.init, {ejerlavkode: ejerlavkode}, false);
-};

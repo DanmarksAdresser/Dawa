@@ -117,9 +117,15 @@ describe('Stable API', () => {
               "navn": "Opstillingskreds test",
               "href": "http://dawa/opstillingskredse/99"
             },
-            "zone": "Landzone",
+            "zone": "Sommerhusområde",
             "jordstykke": null,
-            "bebyggelser": []
+            "bebyggelser": [],
+            "brofast": true,
+            "afstemningsområde": {
+              "href": "http://dawa/afstemningsomraader/461/2",
+              "navn": "Test afstemningsområde",
+              "nummer": "2"
+            }
           }
         }]
       },
@@ -197,9 +203,12 @@ describe('Stable API', () => {
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
+              "afstemningsområdenummer": "2",
+              "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Landzone"
+              "zone": "Sommerhusområde",
+              "brofast": true,
             }
           }
         }, {
@@ -275,9 +284,12 @@ describe('Stable API', () => {
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
+              "afstemningsområdenummer": "2",
+              "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Landzone"
+              "zone": "Sommerhusområde",
+              "brofast": true
             }
           }
         }]
@@ -398,14 +410,20 @@ describe('Stable API', () => {
                 "navn": "Politikreds test",
                 "href": "http://dawa/politikredse/99"
               },
+              "afstemningsområde": {
+                "href": "http://dawa/afstemningsomraader/461/2",
+                "navn": "Test afstemningsområde",
+                "nummer": "2"
+              },
               "opstillingskreds": {
                 "kode": "0099",
                 "navn": "Opstillingskreds test",
                 "href": "http://dawa/opstillingskredse/99"
               },
-              "zone": "Landzone",
+              "zone": "Sommerhusområde",
               "jordstykke": null,
-              "bebyggelser": []
+              "bebyggelser": [],
+              "brofast": true
             }
           }
         }]
@@ -491,9 +509,12 @@ describe('Stable API', () => {
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
+              "afstemningsområdenummer": "2",
+              "afstemningsområdenavn": "Test afstemningsområde",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
-              "zone": "Landzone"
+              "zone": "Sommerhusområde",
+              "brofast": true
             }
           }
         }]

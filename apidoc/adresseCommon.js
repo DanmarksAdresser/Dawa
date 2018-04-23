@@ -62,7 +62,7 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'zonekode',
-    doc: 'Heltalskoden for den zone som adressen skal ligge i. Mulige værdier er 1 for byzone, 2 for sommerhusområde og 3 for landzone.'
+    doc: 'Heltalskoden for den zone som adressen skal ligge i. Mulige værdier er 1 for byzone, 2 for landzone og 3 for sommerhusområde.'
   },
   {
     name: 'zone',
@@ -124,11 +124,19 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'stednavnid',
-    doc: 'Find de adresser som ligger indenfor stednavnet med den angivne ID'
+    doc: 'Deprecated, anvend stedid parameteren i stedet. Find de adresser som ligger indenfor stedet med den angivne ID'
+  },
+  {
+    name: 'stedid',
+    doc: 'Find de adresser som ligger indenfor stedet med den angivne ID'
   },
   {
     name: 'stednavnafstand',
-    doc: 'Anvendes sammen med stednavnid. Find de adresser, hvor afstanden til stednavnet angivet ved stednavnid er mindre end den angivne værdi. Afstanden angives i meter.'
+    doc: 'Deprecated, anvend stedafstand parameteren i stedet. Anvendes sammen med stedid. Find de adresser, hvor afstanden til stedet angivet ved stedid er mindre end den angivne værdi. Afstanden angives i meter.'
+  },
+  {
+    name: 'stedafstand',
+    doc: 'Anvendes sammen med stedid. Find de adresser, hvor afstanden til stedet angivet ved stedid er mindre end den angivne værdi. Afstanden angives i meter.'
   },
   {
     name: 'bebyggelsesid',
@@ -137,8 +145,7 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'bebyggelsestype',
     doc: 'Find de adresser som ligger en bebyggelse af den angivne type. Mulige værdier: "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby".'
-  },
-  geometriParam
+  }
 ];
 
 module.exports = {

@@ -8,8 +8,6 @@ const wkt = require('terraformer-wkt-parser');
 const husnrUtil = require('../apiSpecification/husnrUtil');
 const _ = require('underscore');
 
-const { round10 } = require('round10');
-
 const parseHusnr = husnrUtil.parseHusnr;
 
 const udtrækDir = path.join(__dirname, 'schemas', 'Udtræk')
@@ -26,6 +24,16 @@ const validateFns = _.mapObject(schemas, schema => ajv.compile(schema));
 function parseInteger(tekst) {
   return parseInt(tekst, 10);
 }
+
+const transformGeometry = (wktText) => {
+  if(!wktText) {
+    return null;
+  }
+  if(wktText.indexOf('EMPTY') !== -1) {
+    return null;
+  }
+  return `SRID=25832;${wktText}`;
+};
 
 /**
  * Some fields needs to be transformed before storing in Postgres.
@@ -49,16 +57,11 @@ const fieldTransforms = {
       if(!wktText) {
         return null;
       }
+      if(wktText === 'POINT EMPTY') {
+        return null;
+      }
       const coordinates = wkt.parse(wktText).coordinates;
-      let resultGons = Math.atan2(coordinates[1],coordinates[0]) * 400 / (2*Math.PI);
-      if(resultGons < 0) {
-        resultGons += 400;
-      }
-      resultGons = round10(resultGons, -2);
-      if(resultGons === 400) {
-        resultGons = 0;
-      }
-      return resultGons;
+      return `SRID=25832;POINT(${coordinates[0]} ${coordinates[1]})`;
     },
     supplerendebynavn_id: uuid => {
       if(uuid === '00000000-0000-0000-0000-000000000000') {
@@ -67,17 +70,39 @@ const fieldTransforms = {
       return uuid;
     }
   },
+  NavngivenVej: {
+    administreresafkommune: parseInteger,
+    vejnavnebeliggenhed_vejnavnelinje: transformGeometry,
+    vejnavnebeliggenhed_vejnavneområde: transformGeometry,
+    vejnavnebeliggenhed_vejtilslutningspunkter: transformGeometry
+  },
   NavngivenVejKommunedel: {
     kommune: parseInteger,
     vejkode: parseInteger
   },
   DARKommuneinddeling: {
-    kommunekode: parseInteger
+    kommunekode: parseInteger,
+    kommuneinddeling: parseInteger
   },
   Postnummer: {
-    postnr: parseInteger
+    postnr: parseInteger,
+    postnummerinddeling: parseInteger
+  },
+  DARSogneinddeling: {
+    sogneinddeling: parseInteger,
+    sognekode: parseInteger
+  },
+  DARMenighedsrådsafstemningsområde: {
+    mrafstemningsområde: parseInteger,
+    mrafstemningsområdenummer: parseInteger
+  },
+  DARAfstemningsområde: {
+    afstemningsområde: parseInteger,
+    afstemningsområdenummer: parseInteger
+  },
+  SupplerendeBynavn: {
+    supplerendebynavn1: parseInteger
   }
-
 };
 
 /**
@@ -87,20 +112,48 @@ const sqlTypes = {
   Adressepunkt: {
     position: 'geometry(Point,25832)'
   },
+  Adresse: {
+    fk_bbr_bygning_bygning: 'uuid'
+  },
   Husnummer: {
     husnummertekst: 'husnr',
-    husnummerretning: 'float4'
+    husnummerretning: 'geometry(Point,25832)'
+
+  },
+  NavngivenVej: {
+    administreresafkommune: 'smallint',
+    vejnavnebeliggenhed_vejnavnelinje: 'geometry(geometry, 25832)',
+    vejnavnebeliggenhed_vejnavneområde: 'geometry(geometry, 25832)',
+    vejnavnebeliggenhed_vejtilslutningspunkter: 'geometry(geometry, 25832)'
   },
   NavngivenVejKommunedel: {
     kommune: 'smallint',
     vejkode: 'smallint'
   },
   DARKommuneinddeling: {
-    kommunekode: 'smallint'
+    kommunekode: 'smallint',
+    kommuneinddeling: 'integer'
+  },
+  DARSogneinddeling: {
+    sogneinddeling: 'integer',
+    sognekode: 'smallint'
   },
   Postnummer: {
-    postnr: 'smallint'
+    postnr: 'smallint',
+    postnummerinddeling: 'integer'
+  },
+  DARMenighedsrådsafstemningsområde: {
+    mrafstemningsområde: 'integer',
+    mrafstemningsområdenummer: 'smallint'
+  },
+  DARAfstemningsområde: {
+    afstemningsområde: 'integer',
+    afstemningsområdenummer: 'smallint'
+  },
+  SupplerendeBynavn: {
+    supplerendebynavn1: 'integer'
   }
+
 };
 
 const sqlIndicesHistory = {
@@ -146,7 +199,8 @@ const sqlIndices = {
   ],
   Postnummer: [
     ['postnr', 'id']
-  ]
+  ],
+  SupplerendeBynavn: [['supplerendebynavn1']],
 };
 
 module.exports = {

@@ -61,6 +61,30 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
+    name: 'sognekode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'retskredskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'politikredskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
+    name: 'opstillingskredskode',
+    type: 'integer',
+    schema: schema.kode4,
+    multi: true
+  },
+  {
     name: 'esrejendomsnr',
     type: 'integer',
     schema: {
@@ -77,9 +101,15 @@ exports.propertyFilter = normalizeParameters([
     multi: true
   },
   {
-    name: 'stednavnid',
+    name: 'stedid',
     type: 'string',
     schema: schema.uuid
+  },
+  {
+    name: 'stednavnid',
+    type: 'string',
+    schema: schema.uuid,
+    renameTo: 'stedid'
   },
   {
     name: 'bebyggelsesid',
@@ -103,9 +133,44 @@ exports.propertyFilter = normalizeParameters([
     type: 'string',
     multi: false,
     renameTo: 'jordstykke_matrikelnr'
+  },
+  {
+    name: 'regionskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'opstillingskredskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'politikredskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'sognekode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'retskredskode',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'zone',
+    type: 'zone',
+    multi: true
+  },
+  {
+    name: 'zonekode',
+    type: 'integer',
+    multi: true,
+    renameTo: 'zone'
   }
-
-]);
+  ]);
 
 exports.husnrinterval = normalizeParameters([
   {
@@ -140,8 +205,18 @@ exports.stednavnafstand = [
     schema: {
       type: 'number',
       minimum: 0
+    },
+    renameTo: 'stedafstand'
+  },
+  {
+    name: 'stedafstand',
+    type: 'float',
+    schema: {
+      type: 'number',
+      minimum: 0
     }
-  }
+  },
+
 ]
 
 registry.addMultiple('adgangsadresse', 'parameterGroup', module.exports);

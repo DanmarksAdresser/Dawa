@@ -294,6 +294,7 @@
         "ID_LOKALID": "1233766a-103b-6b98-e053-d480220a5a3f",
         "NAVN": "Klippeløkken",
         "NAVNESTATUS": "officielt",
+        "BRUGSPRIORITET": "primær",
         "FEAT_TYPE": "Andentopografi flade",
         "UNDER_TYPE": "stenbrud",
         "LAENGDE": null,

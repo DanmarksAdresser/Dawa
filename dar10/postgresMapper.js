@@ -8,8 +8,10 @@ const _ = require('underscore');
 
 const databaseTypes = require('../psql/databaseTypes');
 const logger = require('../logger').forCategory('darImport');
-const nontemporal = require('../darImport/nontemporal');
 const spec = require('./spec');
+const Toni = require('toni');
+
+const MAX_ROWKEY = 1024 * 1024 * 1024;
 
 
 const Range = databaseTypes.Range;
@@ -45,9 +47,12 @@ function transformStatus(entity) {
 }
 
 exports.createMapper = function (entityName, validate) {
-  const seenRowkeys = new Set();
+  const seenRowkeys = new Toni(MAX_ROWKEY);
   return function (rawObject) {
-    if(seenRowkeys.has(rawObject.rowkey)) {
+    if(rawObject.rowkey >= MAX_ROWKEY) {
+      throw new Error('Rowkey too large: ' + rawObject.rowkey);
+    }
+    if(seenRowkeys.chk(rawObject.rowkey)) {
       logger.error("Skipping row (duplicate rowkey)", {
         entityName,
         rowkey: rawObject.rowkey
@@ -96,26 +101,4 @@ exports.createMapper = function (entityName, validate) {
     return rawObject;
   }
 };
-
-exports.columns = Object.keys(spec.schemas).reduce((memo, entityName) => {
-  const schema = spec.schemas[entityName];
-  const properties = Object.keys(schema.properties);
-  memo[entityName] = _.without(
-    properties, 'registreringfra', 'registreringtil', 'virkningfra', 'virkningtil')
-    .concat(['registrering', 'virkning']);
-  return memo;
-}, {});
-
-exports.tables = Object.keys(spec.schemas).reduce((memo, entityName) => {
-  memo[entityName] = 'dar1_' + entityName;
-  return memo;
-}, {});
-
-exports.nontemporalImpls = _.mapObject(spec.schemas, (schema, entityName) => {
-  return nontemporal({
-    table: exports.tables[entityName],
-    columns: exports.columns[entityName],
-    idColumns: ['rowkey']
-  });
-});
 

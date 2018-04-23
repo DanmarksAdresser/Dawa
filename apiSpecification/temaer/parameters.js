@@ -25,10 +25,63 @@ var kodeAndNavn = {
   ])
 };
 
-var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
+var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function(dagiTemaNavn) {
   module.exports[dagiTemaNavn] = kodeAndNavn;
 });
+
+module.exports.opstillingskreds = {
+  id: normalizeParameters([
+    {
+      name: 'kode',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    },
+    {
+      name: 'kredskommunekode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'regionskode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'storkredsnummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'valglandsdelsbogstav',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    }
+  ])
+};
 
 module.exports.valglandsdel = {
   id: normalizeParameters([
@@ -51,7 +104,8 @@ module.exports.valglandsdel = {
 module.exports.storkreds = {
   id: normalizeParameters([
     {
-      name: 'nummer'
+      name: 'nummer',
+      type: 'integer'
     }
   ]),
   propertyFilter: normalizeParameters([
@@ -61,65 +115,118 @@ module.exports.storkreds = {
     },
     {
       name: 'nummer',
+      type: 'integer',
       multi: true
     }
   ])
 };
 
-// module.exports.jordstykke = {
-//   id: normalizeParameters([
-//     {
-//       name: 'ejerlavkode'
-//     },
-//     {
-//       name: 'matrikelnr'
-//     }
-//   ]),
-//   propertyFilter: [
-//     {
-//       name: 'ejerlavkode',
-//       multi: true
-//     },
-//     {
-//       name: 'matrikelnr',
-//       multi: true
-//     },
-//     {
-//       name: 'kommunekode',
-//       type: 'integer',
-//       schema: schema.kode4,
-//       multi: true
-//     },
-//     {
-//       name: 'regionskode',
-//       type: 'integer',
-//       schema: schema.kode4,
-//       multi: true
-//     },
-//     {
-//       name: 'sognekode',
-//       type: 'integer',
-//       schema: schema.kode4,
-//       multi: true
-//     },
-//     {
-//       name: 'retskredskode',
-//       type: 'integer',
-//       schema: schema.kode4,
-//       multi: true
-//     },
-//     {
-//       name: 'esrejendomsnr',
-//       type: 'integer',
-//       multi: true
-//     },
-//     {
-//       name: 'sfeejendomsnr',
-//       type: 'integer',
-//       multi: true
-//     }
-//   ]
-// };
+module.exports.afstemningsområde = {
+  id: normalizeParameters([
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'regionskode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'opstillingskredsnummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    }
+  ])
+};
+
+module.exports.menighedsrådsafstemningsområde = {
+  id: normalizeParameters([
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'nummer',
+      type: 'integer'
+    },
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'nummer',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'sognekode',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    }
+  ])
+};
+
+module.exports.supplerendebynavn = {
+  id: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'kommunekode',
+      type: 'integer'
+    },
+    {
+      name: 'navn',
+      multi: true
+    }
+  ])
+};
 
 _.each(module.exports, function(parameterGroup, temaName) {
   registry.addMultiple(temaName, 'parameterGroup', parameterGroup);

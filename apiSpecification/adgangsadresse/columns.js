@@ -1,4 +1,5 @@
 "use strict";
+
 var dbapi = require('../../dbapi');
 const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
@@ -6,7 +7,7 @@ var sqlUtil = require('../common/sql/sqlUtil');
 var selectIsoTimestamp = sqlUtil.selectIsoDate;
 const postgisUtil = require('../common/sql/postgisSqlUtil');
 
-module.exports =  {
+module.exports = {
   id: {
     column: 'a_id'
   },
@@ -35,20 +36,19 @@ module.exports =  {
   adressepunktændringsdato: {
     column: selectIsoTimestamp('adressepunktaendringsdato')
   },
-  stednavnid: {
+  stedid: {
     select: null,
-    where: function (sqlParts, stednavnId, params) {
-      const stednavnIdAlias = dbapi.addSqlParameter(sqlParts, stednavnId);
-      if(params.stednavnafstand) {
-        const stednavnAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stednavnafstand);
-        sqlParts.whereClauses.push(`geom && st_expand((select geom from stednavne where id = ${stednavnIdAlias}), ${stednavnAfstandAlias})
-AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}), ${stednavnAfstandAlias})`)
+    where: function (sqlParts, stedId, params) {
+      const stedIdAlias = dbapi.addSqlParameter(sqlParts, stedId);
+      if (params.stedafstand) {
+        const stedAfstandAlias = dbapi.addSqlParameter(sqlParts, params.stedafstand);
+        sqlParts.whereClauses.push(`geom && st_expand((select geom from steder where id = ${stedIdAlias}), ${stedAfstandAlias})
+AND ST_DWithin(geom, (select geom from steder where id = ${stedIdAlias}), ${stedAfstandAlias})`)
       }
       else {
-        sqlParts.whereClauses.push(`EXISTS(SELECT * FROM stednavne_adgadr WHERE stednavn_id = ${stednavnIdAlias} AND stednavne_adgadr.adgangsadresse_id = a_id)`);
+        sqlParts.whereClauses.push(`EXISTS(SELECT * FROM stedtilknytninger WHERE stedid = ${stedIdAlias} AND stedtilknytninger.adgangsadresseid = a_id)`);
       }
     }
-
   },
   bebyggelsesid: {
     select: null,
@@ -58,16 +58,16 @@ AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}),
       // correct parameter indices for the subquery
       var subquery = {
         select: ["*"],
-        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
-        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id AND stednavne.hovedtype = 'Bebyggelse'`],
+        from: ['stedtilknytninger st JOIN steder s ON st.stedid = s.id'],
+        whereClauses: [`a_id  = st.adgangsadresseid AND s.hovedtype = 'Bebyggelse'`],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
       var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
-        name: 'stednavn_id',
+        name: 'stedid',
         multi: true
       }], {});
-      propertyFilterFn(subquery, {stednavn_id: parameterArray});
+      propertyFilterFn(subquery, {stedid: parameterArray});
       var subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
@@ -81,8 +81,8 @@ AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}),
       // correct parameter indices for the subquery
       var subquery = {
         select: ["*"],
-        from: ['stednavne_adgadr JOIN stednavne ON stednavne_adgadr.stednavn_id = stednavne.id'],
-        whereClauses: [`a_id  = stednavne_adgadr.adgangsadresse_id AND stednavne.hovedtype = 'Bebyggelse'`],
+        from: ['stedtilknytninger st JOIN steder s ON st.stedid = s.id'],
+        whereClauses: [`a_id  = st.adgangsadresseid AND s.hovedtype = 'Bebyggelse'`],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
@@ -120,21 +120,21 @@ AND ST_DWithin(geom, (select geom from stednavne where id = ${stednavnIdAlias}),
     }
   },
   vejpunkt_geom_json: {
-    select: function(sqlParts, sqlModel, params) {
+    select: function (sqlParts, sqlModel, params) {
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
       return postgisUtil.geojsonColumn(srid, sridAlias, "vejpunkt_geom");
     }
   },
   adgangspunkt_geom_json: {
-    select: function(sqlParts, sqlModel, params) {
+    select: function (sqlParts, sqlModel, params) {
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
       return postgisUtil.geojsonColumn(srid, sridAlias, "geom");
     }
   },
   geom_json: {
-    select: function(sqlParts, sqlModel, params) {
+    select: function (sqlParts, sqlModel, params) {
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
       return postgisUtil.adgangsadresseGeojsonColumn(srid, sridAlias, params);

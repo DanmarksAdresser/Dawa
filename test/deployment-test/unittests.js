@@ -355,7 +355,7 @@ describe('Adresseopslag', function(){
         assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 3");
         assert(bydel, 'Mangler bydel Grøndal');
         assert(by, 'Mangler by København');
-       
+
         var bydelopt= {};
         bydelopt.url= bydel.href;
         bydelopt.qs= {};
@@ -2020,7 +2020,7 @@ describe('Zone', function(){
     })
   })
 
-  it("Kalvebodvej 1, 2791 Dragør", function(done){
+  it("Kalvebodvej 3, 2791 Dragør", function(done){
     var options= {};
     options.baseUrl= host;
     options.url='adgangsadresser';

@@ -25,7 +25,8 @@ module.exports = _.mapObject(flats, (flat => {
   }
   const queryResource = resourcesUtil.queryResourceSpec(flat, queryParams, representations, sqlModel);
   const getByKeyResource = resourcesUtil.getByKeyResourceSpec(flat, parameters.id, {
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    struktur: commonParameters.struktur
   }, representations, sqlModel);
 
   const resources= {

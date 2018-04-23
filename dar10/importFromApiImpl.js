@@ -6,7 +6,7 @@ const _ = require('underscore');
 const { go } = require('ts-csp');
 
 const importDarImpl = require('./importDarImpl');
-const postgresMapper = require('./postgresMapper');
+const dar10TableModels = require('./dar10TableModels');
 const proddb = require('../psql/proddb');
 const spec = require('./spec');
 const logger = require('../logger').forCategory('darImport');
@@ -85,8 +85,11 @@ function splitInTransactions(rowMap) {
 }
 
 function getCurrentEventIds(client) {
-  return q.async(function*() {
-    const selects = spec.entities.map(entity => `(SELECT coalesce(MAX(GREATEST(eventopret,eventopdater)), 0) FROM ${postgresMapper.tables[entity]}) as ${entity}`);
+  return q.async(function* () {
+    const selects = spec.entities.map(entity => {
+      const tableName = dar10TableModels.rawTableModels[entity].table;
+      return `(SELECT coalesce(MAX(GREATEST(eventopret,eventopdater)), 0) FROM ${tableName}) as ${entity}`;
+    });
     const queryResult = yield client.queryp(`SELECT ${selects.join(', ')}`);
     const row = queryResult.rows[0];
     // fix casing and filter
@@ -114,9 +117,11 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, oneTxOn
     });
     const transactions = splitInTransactions(rowsMap);
     if (transactions.length === 0) {
-      yield importDarImpl.withDar1Transaction(client, 'api', () =>
-        withImportTransaction(client, 'importDarApi', (txid) =>
-          importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
+      if(yield importDarImpl.hasChangedEntitiesDueToVirkningTime(client)) {
+        yield importDarImpl.withDar1Transaction(client, 'api', () =>
+          withImportTransaction(client, 'importDarApi', (txid) =>
+            importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
+      }
     }
     else {
       const transactionsToImport = oneTxOnly ? transactions.slice(0, 1) : transactions;

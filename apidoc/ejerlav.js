@@ -18,7 +18,7 @@ const ejerlavParameters = [
   ejerlavKodeParameter,
   {
     name: 'navn',
-    doc: 'Postnummernavn',
+    doc: 'Ejerlavets navn.',
     examples: ['Aarhus', 'København']
   },
   {

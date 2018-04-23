@@ -5,9 +5,12 @@ var registry = require('./registry');
 var _ = require('underscore');
 require('./allNamesAndKeys');
 
-var map = _.indexBy(registry.where({
+var map = registry.entriesWhere({
   type: 'nameAndKey'
-}),'singular');
+}).reduce((memo, entry) => {
+  memo[entry.entityName] = entry.object;
+  return memo;
+}, {});
 
 // Compute the base URL given a request
 // This functionality is tied to the CloudFront setup.

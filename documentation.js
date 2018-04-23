@@ -2,12 +2,16 @@
 
 var express = require('express');
 var fs = require('fs');
+const path  = require('path');
 var parameterDoc = require('./parameterDoc');
 var paths = require('./apiSpecification/paths');
 var docUtil = require('./docUtil');
 var registry = require('./apiSpecification/registry');
 var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
+const replikeringModels = require('./apiSpecification/replikering/datamodel');
+const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/normalizedFieldSchemas');
+const replikeringDataSections = require('./apidoc/replikering-data-page');
 
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
@@ -43,11 +47,14 @@ function pugDocumentationParams(req) {
   return {
     url: paths.baseUrl(req),
     path: req.path,
-    jsonSchemas: jsonSchemas,
-    autocompleteSchemas: autocompleteSchemas,
-    parameterDoc: parameterDoc,
-    docUtil: docUtil,
-    packageJson: packageJson
+    jsonSchemas,
+    autocompleteSchemas,
+    parameterDoc,
+    docUtil,
+    packageJson,
+    replikeringModels,
+    replikeringSchemas,
+    replikeringDataSections
   };
 }
 
@@ -64,37 +71,10 @@ const setupApidocDetails = (page ) => {
   });
 };
 
-function setupSchemaPage(path) {
-  var source2name = {
-    postnumre: 'postnummer_hændelse',
-    vejstykker: 'vejstykke_hændelse',
-    adgangsadresser: 'adgangsadresse_hændelse',
-    adresser: 'adresse_hændelse',
-    ejerlav: 'ejerlav_hændelse',
-    regionstilknytninger: 'regionstilknytning_hændelse',
-    kommunetilknytninger: 'kommunetilknytning_hændelse',
-    postnummertilknytninger: 'postnummertilknytning_hændelse',
-    sognetilknytninger: 'sognetilknytning_hændelse',
-    politikredstilknytninger: 'politikredstilknytning_hændelse',
-    opstillingskredstilknytninger: 'opstillingskredstilknytning_hændelse',
-    valglandsdelstilknytninger: 'valglandsdelstilknytning_hændelse',
-    zonetilknytninger: 'zonetilknytning_hændelse',
-    jordstykketilknytninger: 'jordstykketilknytning_hændelse'
-  };
-
-  var docSchemas = {};
-  Object.keys(source2name).forEach(function (tableName) {
-    docSchemas[tableName] = {
-      source: 'http://dawa.aws.dk/replikering/' + tableName,
-      schema: docUtil.extractDocumentationForObject(jsonSchemas[source2name[tableName]])
-    };
-  });
-
-  var schemas = new Buffer(JSON.stringify(docSchemas, null, '\t'));
-
-  app.get(path, function (req, res) {
+function setupLegacySchemaPage(uriPath) {
+  app.get(uriPath, function (req, res) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.end(schemas);
+    res.sendFile(path.resolve('apidoc/schema.json'));
   });
 }
 
@@ -102,6 +82,7 @@ for(let område of ['adresser', 'dagi', 'bbr', 'matrikelkortet', 'stednavne']) {
   setupPugPage(`/dok/${område}`, `omraader/${område}.pug`);
 
 }
+setupPugPage('/dok/api/replikering-data', 'replikering-data.pug');
 setupPugPage('/', 'forside.pug');
 setupPugPage('/dok/om', 'om.pug');
 setupPugPage('/dok/api', 'apidoc-oversigt.pug');
@@ -109,7 +90,7 @@ setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guides.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
 setupPugPage('/dok/bbr-intern', 'bbr-intern.pug');
-for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old']) {
+for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old', 'replikering-old']) {
   setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
 }
 setupPugPage('/dok/faq', 'faq.pug');
@@ -118,7 +99,7 @@ for(let page of allPages) {
   setupApidocDetails(page);
 }
 
-setupSchemaPage('/replikeringdok/schema.json');
+setupLegacySchemaPage('/replikeringdok/schema.json');
 
 const redirects = [
   ['/autocompletedok', '/dok/guide/autocomplete'],

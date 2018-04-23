@@ -1,31 +1,27 @@
 "use strict";
 
-var _ = require('underscore');
 
-var sqlModels = require('./sqlModels');
-var columnMappings = require('../columnMappings').columnMappings;
-var representations = require('./representations');
-var parameters = require('./parameters');
-var resourcesUtil = require('../../common/resourcesUtil');
-var commonParameters = require('../../common/commonParameters');
+const sqlModels = require('./sqlModels');
+const representations = require('./representations');
+const resourcesUtil = require('../../common/resourcesUtil');
+const commonParameters = require('../../common/commonParameters');
+const commonReplikeringParameters = require("../commonParameters");
+const datamodels = require('../datamodel');
+const bindings = require('../dbBindings');
+const registry = require('../../registry');
 
 require('../../allNamesAndKeys');
-var registry = require('../../registry');
 
-module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelName) {
-  var nameAndKey = registry.findWhere({
-    entityName: datamodelName,
-    type: 'nameAndKey'
-  });
-
+module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
+  const binding = bindings[datamodelName];
   memo[datamodelName]=
   {
-    path: '/replikering/' + nameAndKey.plural,
+    path: binding.path,
       pathParameters: [],
-    queryParameters: resourcesUtil.flattenParameters({
-      sekvensnummer: parameters.sekvensnummer,
-      formatParameters: commonParameters.format
-    }),
+    queryParameters: [...commonReplikeringParameters.sekvensnummer,
+      ...commonReplikeringParameters.txid,
+      ...commonParameters.format]
+    ,
     representations: representations[datamodelName],
     sqlModel: sqlModels[datamodelName],
     singleResult: false,
@@ -33,10 +29,8 @@ module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelN
     },
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
-
+  if(binding.legacyResource) {
+    registry.add(datamodelName, 'resource', 'udtraek', memo[datamodelName]);
+  }
   return memo;
 }, {});
-
-_.each(module.exports, function(resource, key) {
-  registry.add(key, 'resource', 'udtraek', resource);
-});

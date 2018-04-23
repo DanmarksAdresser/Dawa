@@ -111,10 +111,6 @@ var fields = [
     name: 'y'
   },
   {
-    name: 'temaer',
-    multi: true
-  },
-  {
     name: 'adgangspunkt_geom_json'
   },
   {
@@ -144,6 +140,49 @@ var fields = [
   },
   {
     name: 'vejpunkt_y'
+  },
+  {
+    name: 'sognekode',
+    formatter: kode4String
+  },
+  {
+    name: 'sognenavn'
+  },
+  {
+    name: 'politikredskode',
+    formatter: kode4String
+
+  },
+  {
+    name: 'politikredsnavn'
+  },
+  {
+    name: 'retskredskode',
+    formatter: kode4String
+  },
+  {
+    name: 'retskredsnavn'
+  },
+  {
+    name: 'opstillingskredskode',
+    formatter: kode4String
+  },
+  {
+    name: 'opstillingskredsnavn'
+  },
+  {
+    name: 'zone',
+    formatter: util.zoneKodeFormatter
+  },
+  {
+    name: 'afstemningsområdenummer',
+    formatter: util.numberToString
+  },
+  {
+    name: 'afstemningsområdenavn'
+  },
+  {
+    name: 'brofast'
   }
 ];
 

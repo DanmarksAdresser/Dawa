@@ -5,7 +5,7 @@ var q = require('q');
 var _ = require('underscore');
 const { go } = require('ts-csp');
 
-var datamodels = require('../../crud/datamodel');
+const tableSchema = require('../../psql/tableModel');
 var husnrUtil = require('../../apiSpecification/husnrUtil');
 var importDarImpl = require('../../darImport/importDarImpl');
 var qUtil = require('../../q-util');
@@ -68,9 +68,9 @@ var sampleData = {
 
 const  getDawaContent = client => go(function*() {
   const result = {};
-  for(let entity of ['vejstykke', 'adgangsadresse', 'adresse']) {
-    const datamodel = datamodels[entity];
-    result[entity] = yield client.queryRows('SELECT * FROM ' + datamodel.table + ' ORDER BY ' + datamodel.key.join(', '));
+  const tablemodels = ['vejstykker' ,'adgangsadresser', 'enhedsadresser'].map(tableName => tableSchema.tables[tableName]);
+  for(let tableModel of tablemodels) {
+    result[tableModel.entity] = yield client.queryRows(`SELECT * FROM ${tableModel.table} ORDER BY ${tableModel.primaryKey.join(', ')}`);
   }
   return result;
 });

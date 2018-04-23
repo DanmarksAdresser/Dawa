@@ -2,8 +2,8 @@ CREATE DATABASE DB_NAME ENCODING 'UTF-8' LC_COLLATE 'da_DK.UTF-8' LC_CTYPE 'da_D
 ALTER DATABASE DB_NAME SET cursor_tuple_fraction = 0.001;
 ALTER DATABASE DB_NAME SET random_page_cost = 1.1;
 ALTER DATABASE DB_NAME SET effective_cache_size='7GB';
-ALTER DATABASE DB_NAME SET join_collapse_limit=16;
-ALTER DATABASE DB_NAME SET from_collapse_limit=16;
+ALTER DATABASE DB_NAME SET join_collapse_limit=20;
+ALTER DATABASE DB_NAME SET from_collapse_limit=20;
 
 \c DB_NAME ;
 CREATE EXTENSION postgis;

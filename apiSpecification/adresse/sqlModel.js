@@ -64,7 +64,7 @@ var columns = {
   adgangsadresse_ikrafttrædelse: {
     select: selectIsoTimestamp('a_ikraftfra')
   },
-  stednavnid: adgangsadresseColumns.stednavnid,
+  stedid: adgangsadresseColumns.stedid,
   bebyggelsesid: adgangsadresseColumns.bebyggelsesid,
   bebyggelsestype: adgangsadresseColumns.bebyggelsestype,
   x: adgangsadresseColumns.x,
@@ -75,6 +75,7 @@ var columns = {
   adgangspunkt_geom_json: adgangsadresseColumns.adgangspunkt_geom_json,
   vejpunkt_geom_json: adgangsadresseColumns.vejpunkt_geom_json,
   geom_json: adgangsadresseColumns.geom_json,
+  zone: adgangsadresseColumns.zone,
   adgangsadresse_status: {
     column: 'a_objekttype'
   }
@@ -145,7 +146,6 @@ var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.adgangsadresseGeoFilter,
-  sqlParameterImpl.dagiFilter(),
   searchAdresse(columns),
   autocompleteAdresse(columns),
   fuzzySearchParameterImpl,

@@ -32,9 +32,20 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     A.adresseringsvejnavn,
 
     A.kommunekode AS kommunekode,
-    K.navn AS kommunenavn,
-    R.kode AS regionskode,
-    R.navn AS regionsnavn,
+    T.kommunenavn,
+    T.regionskode,
+    T.regionsnavn,
+    t.sognekode,
+    t.sognenavn,
+    t.politikredskode,
+    t.politikredsnavn,
+    T.retskredskode,
+    T.retskredsnavn,
+    t.afstemningsområdenummer,
+    t.afstemningsområdenavn,
+    T.opstillingskredskode,
+    T.opstillingskredsnavn,
+    T.zone,
     A.ejerlavkode,
     A.ejerlavnavn,
     A.matrikelnr,
@@ -50,17 +61,15 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     A.vejpunkt_noejagtighedsklasse,
     A.vejpunkt_tekniskstandard,
     A.vejpunkt_geom,
-    array_to_json((select array_agg(CAST((D.tema, D.fields) AS tema_data)) FROM adgangsadresser_temaer_matview DR
-      JOIN temaer D  ON (DR.adgangsadresse_id = A.id AND D.tema = DR.tema AND D.id = DR.tema_id))) AS temaer,
-    COALESCE((select json_agg(CAST((b.id, b.bebyggelseskode, b.undertype, b.navn) AS BebyggelseRef)) FROM stednavne_adgadr ba
-      JOIN stednavne b ON ba.stednavn_id = b.id WHERE b.hovedtype = 'Bebyggelse' and ba.adgangsadresse_id = A.id),'[]'::json)  as bebyggelser,
+    (NOT EXISTS(SELECT * FROM ikke_brofaste_adresser iba where A.id = iba.adgangsadresseid)) as brofast,
+    COALESCE((select json_agg(CAST((b.id, b.kode, b.type, b.navn) AS BebyggelseRef)) FROM stedtilknytninger ba
+      JOIN bebyggelser_view b ON ba.stedid = b.id WHERE  ba.adgangsadresseid = A.id),'[]'::json)  as bebyggelser,
     A.tsv
 
   FROM adgangsadresser_mat A
     LEFT JOIN jordstykker_adgadr JA ON JA.adgangsadresse_id = A.id
     LEFT JOIN jordstykker J ON JA.ejerlavkode = J.ejerlavkode AND JA.matrikelnr = J.matrikelnr
     LEFT JOIN Ejerlav JS_E ON JA.ejerlavkode = JS_E.kode
-    LEFT JOIN kommuner K ON A.kommunekode = k.kode
-    LEFT JOIN regioner R ON R.kode = K.regionskode;
+    LEFT JOIN tilknytninger_mat t ON A.id = T.adgangsadresseid;
 
 CREATE VIEW adgangsadresser_valid_view AS SELECT * from adgangsadresserview WHERE postnr IS NOT NULL AND husnr IS NOT NULL;

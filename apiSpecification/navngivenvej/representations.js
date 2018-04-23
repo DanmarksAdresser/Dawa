@@ -78,7 +78,7 @@ exports.json = {
         darstatus: row.darstatus,
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
-        administreresafkommune: row.administreresafkommune,
+        administreresafkommune: util.kode4String(row.administreresafkommune),
         beskrivelse: row.beskrivelse,
         retskrivningskontrol: row.retskrivningskontrol,
         udtaltvejnavn: row.udtaltvejnavn,

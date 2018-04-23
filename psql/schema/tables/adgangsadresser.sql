@@ -30,12 +30,23 @@ CREATE TABLE  adgangsadresser (
   z_x double precision null,
   z_y double precision null,
   disableheightlookup timestamptz,
-  navngivenvej_id uuid
+  navngivenvej_id uuid,
+  navngivenvejkommunedel_id uuid,
+  supplerendebynavn_id uuid,
+  darkommuneinddeling_id uuid,
+  adressepunkt_id uuid,
+  postnummer_id uuid
 );
 
 CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
 CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
 CREATE INDEX ON adgangsadresser(postnr, kommunekode);
+CREATE INDEX ON adgangsadresser(navngivenvej_id);
+CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id);
+CREATE INDEX ON adgangsadresser(supplerendebynavn_id);
+CREATE INDEX ON adgangsadresser(darkommuneinddeling_id);
+CREATE INDEX ON adgangsadresser(adressepunkt_id);
+CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);
 
 -- Index for lookup of adgangsadresser where we need to fetch the height
 CREATE INDEX ON adgangsadresser (id)

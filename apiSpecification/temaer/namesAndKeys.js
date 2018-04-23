@@ -1,14 +1,13 @@
 "use strict";
 
-var _ = require('underscore');
-var dagiTemaer = require('./temaer');
-var registry = require('../registry');
+const temaModels = require('../../dagiImport/temaModels');
+const registry = require('../registry');
 
-dagiTemaer.forEach(function(tema) {
-  exports[tema.singular] = {
-    singular: tema.singular,
-    plural: tema.plural,
-    key: _.pluck(tema.key, 'name')
+temaModels.modelList.forEach(model =>  {
+  exports[model.singular] = {
+    singular: model.singular,
+    plural: model.plural,
+    key: model.primaryKey
   };
-  registry.add(tema.singular, 'nameAndKey', undefined, exports[tema.singular]);
+  registry.add(model.singular, 'nameAndKey', undefined, exports[model.singular]);
 });

@@ -1,7 +1,7 @@
 const {
   dagiReplikeringTilknytningDoc,
-  getTemaDef
+  getTemaModel
 } = require('./dagiCommon');
 
-const temaDef = getTemaDef('zone');
-module.exports = dagiReplikeringTilknytningDoc(temaDef);
+const temaModel = getTemaModel('zone');
+module.exports = dagiReplikeringTilknytningDoc(temaModel);

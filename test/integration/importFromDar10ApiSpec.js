@@ -77,14 +77,14 @@ describe('Import from DAR 1.0 API', () => {
           "eventopret": 2,
           "eventopdater": 3,
           "rowkey": 70,
-          "id": "873e4c91-c2d3-4674-a491-2f0e30bac7eb",
+          "id": "873e4c91-c2d3-4674-a491-2f0e30bac7ec",
           "registreringfra": "2016-04-21T00:00:00Z",
           "registreringtil": null,
           "virkningfra": "2016-04-21T00:00:00Z",
           "virkningtil": null,
           "status": "3",
           "navn": "Viby Sjælland",
-          "postnr": "4130",
+          "postnr": "4131",
           "postnummerinddeling": "250767"
         }]
       };
@@ -181,9 +181,7 @@ describe('Import from DAR 1.0 API', () => {
         {
           Postnummer: 5
         });
-      const transactions = (yield client.queryp('select * from dar1_transaction')).rows;
       const records = (yield client.queryp('select * from dar1_postnummer order by rowkey')).rows;
-      expect(transactions).to.have.length(2);
       expect(records).to.have.length(2);
       const first = records[0];
       expect(first.eventopret).to.equal(1);

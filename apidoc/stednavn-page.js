@@ -28,7 +28,7 @@ samt landskaber som skove, strande og øer.</p>`,
       heading: 'Beskrivelse af stednavne',
       anchor: 'databeskrivelse',
       lead: `API'et udstiller for hvert stednavn følgende informationer:`,
-      entity: 'stednavn',
+      entity: 'stednavn-legacy',
       qualifier: 'json'
     }
   ]

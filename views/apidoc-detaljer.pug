@@ -18,7 +18,7 @@ block sidebar
 block main
   div.container
     h1 #{page.heading}
-    p.lead #{page.lead}
+    p.lead !{page.lead}
     if page.body
       div !{page.body}
     +renderSections(page.sections, 2)

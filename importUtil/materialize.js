@@ -2,21 +2,28 @@
 
 const {assert} = require('chai');
 const {go} = require('ts-csp');
+const _ = require('underscore');
 
 const {selectList} = require('../darImport/sqlUtil');
-const {computeInsertsSubset, computeUpdatesSubset, computeDeletesSubset, applyChanges, initializeFromScratch} = require('./tableDiffNg');
-const {enableTriggersQ, disableTriggersQ} = require('../psql/common');
+const {
+  computeInsertsSubset, computeUpdatesSubset, computeDeletesSubset, applyChanges,
+  initializeFromScratch, computeDifferences, assignSequenceNumbersToDependentTables
+} = require('./tableDiffNg');
 const schemaModel = require('../psql/tableModel');
+const temaModels = require('../dagiImport/temaModels');
+const dar10TableModels = require('../dar10/dar10TableModels');
+const replikeringDataModel = require('../apiSpecification/replikering/datamodel');
 
-const createTempDirtyTable = (client, materialization) => {
-  const selectClause = selectList(null, materialization.primaryKey);
+
+const createTempDirtyTable = (client, tableModel) => {
+  const selectClause = selectList(null, tableModel.primaryKey);
   return client.query(
-    `CREATE TEMP TABLE ${materialization.table}_dirty AS 
-     (SELECT ${selectClause} FROM ${materialization.table} WHERE false)`);
+    `CREATE TEMP TABLE ${tableModel.table}_dirty AS 
+     (SELECT ${selectClause} FROM ${tableModel.table} WHERE false)`);
 };
 
-const dropTempDirtyTable = (client, materialization) => {
-  return client.query(`DROP TABLE ${materialization.table}_dirty`);
+const dropTempDirtyTable = (client, tableModel) => {
+  return client.query(`DROP TABLE ${tableModel.table}_dirty`);
 };
 
 /**
@@ -29,16 +36,18 @@ const dropTempDirtyTable = (client, materialization) => {
  * @param targetTable table to store dirty rows. Only keys are stored.
  */
 const computeDirtyPart = (client, txid, tablemodels, materialization, srcTable, targetTable) => {
-  return go(function*() {
-    const matKeySelect = materialization.primaryKey.map(col => `t.${col}`).join(', ');
+  return go(function* () {
+    const tableModel = tablemodels[materialization.table];
+    const matKeySelect = tableModel.primaryKey.map(col => `t.${col}`).join(', ');
     const dirtySelects = materialization.dependents.map(dependent => {
       const dependentTableModel = tablemodels[dependent.table];
+      assert(dependentTableModel);
+      const references = dependent.references || dependentTableModel.primaryKey;
       assert.isObject(dependentTableModel);
-      const dependentKey = dependentTableModel.primaryKey;
-      assert.isArray(dependentKey);
-      assert.strictEqual(dependentKey.length, dependent.columns.length);
+      assert.isArray(references);
+      assert.strictEqual(references.length, dependent.columns.length);
       const joinClause = dependent.columns.map((column, index) => {
-        const pkColumn = dependentKey[index];
+        const pkColumn = references[index];
         return `t.${column} = c.${pkColumn}`;
       }).join(' AND ');
       return `SELECT ${matKeySelect} FROM ${srcTable} t JOIN ${dependent.table}_changes c ON ${joinClause} and txid = ${txid}`;
@@ -48,16 +57,18 @@ const computeDirtyPart = (client, txid, tablemodels, materialization, srcTable, 
   });
 };
 
-const computeDirty = (client, txid, tablemodels, materialization) => go(function*() {
-  yield createTempDirtyTable(client, materialization);
+const computeDirty = (client, txid, tablemodels, materialization) => go(function* () {
+  const tableModel = tablemodels[materialization.table];
+  yield createTempDirtyTable(client, tableModel);
   yield computeDirtyPart(client, txid, tablemodels, materialization, materialization.table,
     `${materialization.table}_dirty`);
   yield computeDirtyPart(client, txid, tablemodels, materialization, materialization.view,
     `${materialization.table}_dirty`);
+  yield client.query(`ANALYZE ${materialization.table}_dirty`);
 });
 
 
-const createChangeTable = (client, srcTableName) => go(function*() {
+const createChangeTable = (client, srcTableName) => go(function* () {
   const changeTableName = `${srcTableName}_changes`;
   yield client.query(
     `CREATE TABLE ${changeTableName} as (SELECT null::integer as txid, null::integer as changeid, null::operation_type as operation, null::boolean as public, ${srcTableName}.* FROM ${srcTableName} WHERE false);
@@ -68,9 +79,16 @@ const createChangeTable = (client, srcTableName) => go(function*() {
      CREATE INDEX ON ${changeTableName}(changeid, public)`);
 });
 
+const computeMaterializedColumns = (tableModel, materialization) => {
+  const excludedColumns = materialization.excludedColumns || [];
+  const allColumns = tableModel.columns.map(col => col.name);
+  return _.difference(allColumns, excludedColumns);
+};
+
 const computeInserts = (client, txid, tableModels, materialization) => {
   const tableModel = tableModels[materialization.table];
-  return computeInsertsSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel);
+  const includedColumns = computeMaterializedColumns(tableModel, materialization);
+  return computeInsertsSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel, includedColumns);
 };
 
 const computeDeletes = (client, txid, tableModels, materialization) => {
@@ -81,37 +99,116 @@ const computeDeletes = (client, txid, tableModels, materialization) => {
 
 const computeUpdates = (client, txid, tableModels, materialization) => {
   const tableModel = tableModels[materialization.table];
-  return computeUpdatesSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel);
+  const includedColumns = computeMaterializedColumns(tableModel, materialization);
+  return computeUpdatesSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel, includedColumns);
 };
 
-const computeChanges = (client, txid, tableModels, materialization) => go(function*() {
+const computeChanges = (client, txid, tableModels, materialization) => go(function* () {
   yield computeInserts(client, txid, tableModels, materialization);
   yield computeUpdates(client, txid, tableModels, materialization);
   yield computeDeletes(client, txid, tableModels, materialization);
 });
 
-const materialize = (client, txid, tableModels, materialization) => go(function*() {
-  yield computeDirty(client, txid, tableModels, materialization);
+const materialize = (client, txid, tableModels, materialization) => go(function* () {
+  const tableModel = tableModels[materialization.table];
+
+  assert(tableModel);
+  if(materialization.computeDirty) {
+    yield createTempDirtyTable(client, tableModel);
+    yield materialization.computeDirty(client, txid);
+  }
+  else {
+    yield computeDirty(client, txid, tableModels, materialization);
+  }
   yield computeChanges(client, txid, tableModels, materialization);
-  yield applyChanges(client, txid, tableModels[materialization.table]);
-  yield dropTempDirtyTable(client, materialization);
+  yield applyChanges(client, txid, tableModel);
+  yield dropTempDirtyTable(client, tableModel);
 });
 
-const materializeDawa = (client, txid) => go(function*() {
+const materializeFromScratch = (client, txid, tablemodels, materialization) => go(function* () {
+  const model = tablemodels[materialization.table];
+  yield initializeFromScratch(client, txid, materialization.view, model);
+  yield client.query(`ANALYZE ${materialization.table}`);
+
+});
+
+const recomputeMaterialization = (client, txid, tableModels, materialization) => go(function* () {
+  yield client.query(`create temp table desired as (SELECT * FROM ${materialization.view})`);
+  yield client.query(`ANALYZE desired`);
+  const tableModel = tableModels[materialization.table];
+  const includedColumns = computeMaterializedColumns(tableModel, materialization);
+  yield computeDifferences(client, txid, 'desired', tableModels[materialization.table], includedColumns);
+  yield client.query(`analyze ${materialization.table}_changes`);
+  yield client.query('DROP TABLE desired');
+  yield applyChanges(client, txid, tableModels[materialization.table]);
+});
+
+
+const materializeDawa = (client, txid) => go(function* () {
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adgangsadresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adresser_mat);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.stedtilknytninger);
+  for (let model of temaModels.modelList) {
+    yield materialize(client, txid, schemaModel.tables, schemaModel.materializations[model.tilknytningTable]);
+  }
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.tilknytninger_mat);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.ikke_brofaste_adresser);
 });
 
-const recomputeMaterializedDawa = (client, txid) => go(function*() {
-  for(let table of ['adgangsadresser_mat', 'adresser_mat']) {
+const recomputeTemaTilknytninger = (client, txid, temaModelList) => go(function* () {
+  for (let temaModel of temaModelList) {
+    yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations[temaModel.tilknytningTable]);
+  }
+  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.tilknytninger_mat);
+});
+
+const recomputeMaterializedDawa = (client, txid) => go(function* () {
+  for (let table of ['adgangsadresser_mat', 'adresser_mat']) {
     const model = schemaModel.materializations[table];
-    if(!model) {
+    if (!model) {
       throw new Error('No table model for ' + schemaModel);
     }
-    yield disableTriggersQ(client);
     yield client.query(`delete from ${table}; delete from ${table}_changes`);
     yield initializeFromScratch(client, txid, model.view, schemaModel.tables[table]);
-    yield enableTriggersQ(client);
+  }
+  yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
+});
+
+const tilknytningTableNames =
+  [...temaModels.modelList.map(model => model.tilknytningTable),
+    'jordstykker_adgadr',
+    'stedtilknytninger'];
+
+const dar10HistoryTableNames = Object.values(dar10TableModels.historyTableModels).map(model => model.table);
+const dar10currentTableTableNames = Object.values(dar10TableModels.currentTableModels).map(model => model.table);
+const dawaBaseTableNames = ['vejstykker', 'adgangsadresser',
+  'enhedsadresser', 'navngivenvej',
+  'vejstykkerpostnumremat', 'vejpunkter', 'navngivenvej_postnummer', 'ejerlav', 'postnumre'];
+
+
+const orderedTableNames = [...dar10HistoryTableNames,
+  ...dar10currentTableTableNames,
+  ...dawaBaseTableNames,
+  ...tilknytningTableNames];
+
+// no replication of navngivenvej_postnummer and vejpunkter
+assert(orderedTableNames.length === Object.keys(replikeringDataModel).length + 2);
+
+const orderedTableModels = orderedTableNames.map(tableName => {
+  assert(schemaModel.tables[tableName], 'table model for ' + tableName);
+  return schemaModel.tables[tableName]
+});
+
+const applySequenceNumbersInOrder = (client, txid) =>
+  assignSequenceNumbersToDependentTables(client, txid, orderedTableModels);
+
+const makeChangesNonPublic = (client, txid, tableModel) =>
+  client.query(`UPDATE ${tableModel.table}_changes SET public=false WHERE txid = $1`, [txid]);
+
+const makeAllChangesNonPublic = (client, txid) => go(function*() {
+  for (let tableModel of orderedTableModels) {
+    yield makeChangesNonPublic(client, txid, tableModel);
   }
 });
 
@@ -121,8 +218,15 @@ module.exports = {
   computeInserts,
   computeDeletes,
   computeUpdates,
-  createTempDirtyTable,
+  computeChanges,
   materialize,
+  materializeFromScratch,
   materializeDawa,
-  recomputeMaterializedDawa
+  recomputeMaterializedDawa,
+  recomputeMaterialization,
+  recomputeTemaTilknytninger,
+  dropTempDirtyTable,
+  applySequenceNumbersInOrder,
+  makeAllChangesNonPublic,
+  makeChangesNonPublic
 };

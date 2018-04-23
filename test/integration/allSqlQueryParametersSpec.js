@@ -11,7 +11,6 @@ var _ = require('underscore');
 var kode4String = require('../../apiSpecification/util').kode4String;
 var parameterParsing = require('../../parameterParsing');
 var registry = require('../../apiSpecification/registry');
-var commonParameters = require('../../apiSpecification/common/commonParameters');
 var adgangsadresseParameters = require('../../apiSpecification/adgangsadresse/parameters');
 var testdb = require('../helpers/testdb2');
 var husnrUtil = require('../../apiSpecification/husnrUtil');
@@ -109,7 +108,7 @@ var sampleParameters = {
       }
     }
   },
-  supplerendebynavn: {
+  "supplerendebynavn-old": {
     navn: {
       values: ['Skallebølle'],
       verifier: function(supplerendeBynavn, navn) {
@@ -224,7 +223,7 @@ var sampleParameters = {
       }
     },
     regionskode: {
-      values: ['099'],
+      values: ['1084'],
       verifier: function(adr, kode) {
         return adr.region.kode === kode4String(kode);
       }
@@ -254,15 +253,15 @@ var sampleParameters = {
       }
     },
     zone: {
-      values: ['Landzone'],
+      values: ['Byzone'],
       verifier: function(adr, zone) {
         return adr.zone === zone;
       }
     },
     zonekode: {
-      values: ['2'],
+      values: ['1'],
       verifier: function(adr) {
-        return adr.zone === 'Landzone';
+        return adr.zone === 'Byzone';
       }
     },
     ejerlavkode: {
@@ -281,6 +280,11 @@ var sampleParameters = {
       // note, verification only works for bebyggelser
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: (adr, stednavnid) => adr.bebyggelser.filter(bebyggelse => bebyggelse.id === stednavnid).length === 1
+    },
+    stedid: {
+      // note, verification only works for bebyggelser
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
+      verifier: (adr, stedid) => adr.bebyggelser.filter(bebyggelse => bebyggelse.id === stedid).length === 1
     },
     bebyggelsesid: {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
@@ -394,7 +398,7 @@ var sampleParameters = {
       }
     },
     regionskode: {
-      values: ['099'],
+      values: ['1084'],
       verifier: function(adr, kode) {
         return adr.adgangsadresse.region.kode === kode4String(kode);
       }
@@ -424,15 +428,15 @@ var sampleParameters = {
       }
     },
     zone: {
-      values: ['Landzone'],
+      values: ['Byzone'],
       verifier: function(adr, zone) {
         return adr.adgangsadresse.zone === zone;
       }
     },
     zonekode: {
-      values: ['2'],
+      values: ['1'],
       verifier: function(adr) {
-        return adr.adgangsadresse.zone === 'Landzone';
+        return adr.adgangsadresse.zone === 'Byzone';
       }
     },
     ejerlavkode: {
@@ -452,6 +456,11 @@ var sampleParameters = {
       // note, verification only works for bebyggelser
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
       verifier: (adr, stednavnid) => adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === stednavnid).length === 1
+    },
+    stedid: {
+      // note, verification only works for bebyggelser
+      values: ['12337669-a188-6b98-e053-d480220a5a3f'],
+      verifier: (adr, stedid) => adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.id === stedid).length === 1
     },
     bebyggelsesid: {
       values: ['12337669-a188-6b98-e053-d480220a5a3f'],
@@ -552,7 +561,63 @@ var sampleParameters = {
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
     }
   },
-  stednavn: {
+  "sted": {
+    id: {
+      values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
+      verifier: (sted, id) => sted.id === id
+    },
+    hovedtype: {
+      values: ['Bygning'],
+      verifier: (sted, hovedtype) => sted.hovedtype === hovedtype
+    },
+    undertype: {
+      values: ['hal'],
+      verifier: (sted, undertype) => sted.undertype === undertype
+    },
+    kommunekode: {
+      values: ['99'],
+      verifier: (sted, kommunekode) => parseInt(sted.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
+    },
+    primærtnavn: {
+      values: ["Aarhus"],
+      verifier: (sted, primærtnavn) => sted.primærtnavn === primærtnavn
+    },
+    primærnavnestatus: {
+      values: ['officielt'],
+      verifier: (sted, primærnavnestatus) => sted.primærnavnestatus === primærnavnestatus
+    }
+  },
+  "stednavn": {
+      sted_id: {
+        values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
+        verifier: (stednavn, id) => stednavn.sted.id === id
+      },
+      navn: {
+        values: ['Humlehavehallen'],
+        verifier: (stednavn, navn)  => stednavn.navn === navn
+      },
+      hovedtype: {
+        values: ['Bygning'],
+        verifier: (stednavn, hovedtype) => stednavn.sted.hovedtype === hovedtype
+      },
+      undertype: {
+        values: ['hal'],
+        verifier: (stednavn, undertype) => stednavn.sted.undertype === undertype
+      },
+      kommunekode: {
+        values: ['99'],
+        verifier: (stednavn, kommunekode) => parseInt(stednavn.sted.kommuner[0].kode, 10) === parseInt(kommunekode, 10)
+      },
+      navnestatus: {
+        values: ['officielt', 'suAutoriseret'],
+        verifier: (stednavn, status) => stednavn.navnestatus === status
+      },
+    brugsprioritet: {
+        values: ['primær', 'sekundær'],
+      verifier: (stednavn, brugsprioritet) => stednavn.brugsprioritet === brugsprioritet
+    }
+  },
+  "stednavn-legacy": {
     id: {
       values: ['12337669-8e23-6b98-e053-d480220a5a3f'],
       verifier: (stednavn, id) => stednavn.id === id
@@ -751,8 +816,8 @@ var sampleParameters = {
 };
 
 var additionalParameters = {
-  adgangsadresse: commonParameters.dagiFilter.concat(adgangsadresseParameters.husnrinterval),
-  adresse: commonParameters.dagiFilter.concat(adgangsadresseParameters.husnrinterval)
+  adgangsadresse: adgangsadresseParameters.husnrinterval,
+  adresse: adgangsadresseParameters.husnrinterval
 };
 
 _.keys(sampleParameters).forEach(function(specName) {

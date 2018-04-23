@@ -9,32 +9,30 @@ var resourcesUtil = require('../../common/resourcesUtil');
 require('../../allNamesAndKeys');
 var registry = require('../../registry');
 var commonParameters = require('../../common/commonParameters');
-var columnMappings = require('../columnMappings').columnMappings;
+const datamodel = require('../datamodel');
+const bindings = require('../dbBindings');
+const commonReplikeringParams = require('../commonParameters');
 
-_.each(Object.keys(columnMappings), function(entityName) {
-  var nameAndKey = registry.findWhere({
-    entityName: entityName,
-    type: 'nameAndKey'
-  });
+_.each(Object.keys(datamodel), function(entityName) {
+  const binding = bindings[entityName];
   exports[entityName] = {
-    hændelser:   {
-      path: '/replikering/' + nameAndKey.plural + '/haendelser',
-      pathParameters: [],
-      queryParameters: resourcesUtil.flattenParameters({
-        sekvensnummer: parameters.sekvensnummer,
-        tidspunkt: parameters.tidspunkt,
-        keyParameters: parameters.keyParameters[entityName] || [],
-        formatParameters: commonParameters.format
-      }),
-      representations: representations[entityName],
-      sqlModel: sqlModels[entityName],
-      singleResult: false,
-      chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-      processParameters:  function() {}
-    }
+    path: `${binding.path}/haendelser`,
+    pathParameters: [],
+    queryParameters: resourcesUtil.flattenParameters({
+      keyParameters: parameters.keyParameters[entityName] || [],
+      sekvensnummer: parameters.sekvensnummer,
+      tidspunkt: parameters.tidspunkt,
+      txid: commonReplikeringParams.txid,
+      txidInterval: parameters.txidInterval,
+      formatParameters: commonParameters.format
+    }),
+    representations: representations[entityName],
+    sqlModel: sqlModels[entityName],
+    singleResult: false,
+    chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
+    processParameters:  function() {}
   };
-});
-
-_.each(exports, function(resources, entityName) {
-  registry.add(entityName, 'resource', 'hændelser', resources['hændelser']);
+  if(binding.legacyResource) {
+    registry.add(entityName, 'resource', 'hændelser', exports[entityName]);
+  }
 });

@@ -3,7 +3,7 @@
 module.exports = {
   singular: 'stednavn',
   plural: 'stednavne',
-  key: ['id']
+  key: ['sted_id', 'navn']
 };
 
 var registry = require('../registry');

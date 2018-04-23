@@ -1,0 +1,14 @@
+[
+  {
+    "dagi_id": 100107,
+    "nr": 999,
+    "navn": "Testpostdistrikt",
+    "geom": "SRID=25832;MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))"
+  },
+  {
+    "dagi_id": 100108,
+    "nr": 800,
+    "navn": "Postdistrikt test",
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+  }
+]

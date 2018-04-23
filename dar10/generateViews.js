@@ -1,17 +1,16 @@
 "use strict";
 
-const postgresMapper = require('./postgresMapper');
+const dar10TableModels = require('./dar10TableModels');
 
 module.exports = function() {
   const currentViews = [];
-  const historyViews = [];
-  for(let entityName of Object.keys(postgresMapper.tables)) {
-    const tableName = postgresMapper.tables[entityName];
-    const columns = postgresMapper.columns[entityName];
-    historyViews.push(`DROP VIEW IF EXISTS ${tableName}_history CASCADE;`);
-    historyViews.push(`CREATE VIEW ${tableName}_history AS SELECT ${columns.join(', ')} FROM ${tableName} WHERE upper_inf(registrering);`);
-    currentViews.push(`DROP VIEW IF EXISTS ${tableName}_current_view CASCADE;`);
-    currentViews.push(`CREATE VIEW ${tableName}_current_view AS SELECT ${columns.join(', ')} FROM ${tableName}_history WHERE dar1_current_time() <@ virkning;`);
+  for(let entityName of Object.keys(dar10TableModels.currentTableModels)) {
+    const currentTableModel = dar10TableModels.currentTableModels[entityName];
+    const historyTable = dar10TableModels.historyTableModels[entityName].table;
+    const columnNames = currentTableModel.columns.map(column => column.name);
+    currentViews.push(`DROP VIEW IF EXISTS ${currentTableModel.table}_view  CASCADE; 
+    CREATE VIEW ${currentTableModel.table}_view AS SELECT ${columnNames.join(', ')} 
+    FROM ${historyTable} WHERE dar1_current_time() <@ virkning;`);
   }
-  return historyViews.join('\n') + '\n' + currentViews.join('\n');
+  return currentViews.join('\n');
 };

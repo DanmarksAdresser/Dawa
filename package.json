@@ -1,6 +1,6 @@
 {
   "name": "DAWA",
-  "version": "1.16.13",
+  "version": "1.18.9",
   "private": true,
   "author": "Ministeriet for By, Bolig og Landdistrikter",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
@@ -16,6 +16,7 @@
     "byline": "^5.0.0",
     "cli": "1.0.1",
     "compression": "^1.0.6",
+    "core-js": "^2.5.5",
     "csv": "~0.3.7",
     "csv-parse": "0.0.6",
     "csv-stringify": "0.0.6",
@@ -54,6 +55,7 @@
     "terraformer-wkt-parser": "^1.1.0",
     "through2": "^2.0.1",
     "tmp": "0.0.31",
+    "toni": "^0.6.2",
     "transducers-js": "^0.4.174",
     "ts-csp": "^0.7.2",
     "underscore": "1.8.3",
@@ -63,7 +65,7 @@
     "ws": "^1.1.1",
     "ws-heartbeats": "^1.0.0",
     "xml": "^1.0.1",
-    "xml2js": "~0.4.1",
+    "xml2js": "~0.4.3",
     "z-schema": "~3.0.1"
   },
   "devDependencies": {
@@ -103,14 +105,15 @@
   ],
   "scripts": {
     "clean": "rimraf dist",
-    "prepare-dist": "mkdir -p dist/css dist/demo",
+    "prepare-dist": "mkdir -p dist/css dist/demo dist/lib",
     "rollup": "rollup -c",
     "copy-images": "ncp public/img dist/img",
+    "copy-libs": "ncp public/lib dist/lib",
     "copy-autocomplete-js": "ncp node_modules/dawa-autocomplete2/dist dist/js/autocomplete",
     "copy-autocomplete-css": "ncp public/css/autocomplete.css dist/css/autocomplete.css",
     "copy-autocomplete-demo": "ncp public/demo/autocomplete dist/demo/autocomplete",
     "copy-autocomplete-demo-css": "ncp node_modules/dawa-autocomplete2/dist/dawa-autocomplete2.css dist/demo/autocomplete/dawa-autocomplete2.css",
-    "prepare": "run-s clean prepare-dist rollup copy-images copy-autocomplete-js copy-autocomplete-css copy-autocomplete-demo copy-autocomplete-demo-css",
+    "prepare": "run-s clean prepare-dist rollup copy-images copy-libs copy-autocomplete-js copy-autocomplete-css copy-autocomplete-demo copy-autocomplete-demo-css",
     "start": " node server.js",
     "test": "grunt test"
   },

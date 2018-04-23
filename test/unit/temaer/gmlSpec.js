@@ -2,7 +2,7 @@
 
 var expect = require('chai').expect;
 
-var gml = require('../../../temaer/gml');
+var gml = require('../../../dagiImport/gml');
 
 function simplePolygon() {
   return {

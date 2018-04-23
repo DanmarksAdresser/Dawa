@@ -1,17 +1,18 @@
 "use strict";
 
-var _ = require('underscore');
+const datamodels = require('../datamodel');
+const dbBindings = require('../dbBindings');
 
-var columnMappings = require('../columnMappings').columnMappings;
-
-module.exports = _.reduce(Object.keys(columnMappings), function(memo, datamodelName) {
-  var columnMapping = columnMappings[datamodelName];
-  memo[datamodelName] = _.map(columnMapping, function(mapping) {
+module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
+  const datamodel = datamodels[datamodelName];
+  const binding = dbBindings[datamodelName];
+  memo[datamodelName] = datamodel.attributes.map(attr => {
+    const attrBinding = binding.attributes[attr.name];
     return {
-      name: mapping.name,
+      name: attr.name,
       selectable: true,
       multi: false,
-      formatter: mapping.formatter
+      formatter: attrBinding.formatter
     };
   });
   return memo;

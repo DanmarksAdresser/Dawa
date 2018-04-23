@@ -4,10 +4,10 @@ const {
   dagiQueryDoc,
   dagiReplikeringTilknytningDoc,
   dagiReverseDoc,
-  getTemaDef
+  getTemaModel
 } = require('./dagiCommon');
 
-const temaDef = getTemaDef('region');
+const temaModel = getTemaModel('region');
 
 
 const examples = {
@@ -32,9 +32,9 @@ const examples = {
 };
 
 module.exports = [
-  dagiQueryDoc(temaDef, examples.query),
-  dagiByKodeDoc(temaDef, examples.get),
-  dagiAutocompleteDoc(temaDef, examples.autocomplete),
-  dagiReverseDoc(temaDef),
-  ...dagiReplikeringTilknytningDoc(temaDef)
+  dagiQueryDoc(temaModel, examples.query),
+  dagiByKodeDoc(temaModel, examples.get),
+  dagiAutocompleteDoc(temaModel, examples.autocomplete),
+  dagiReverseDoc(temaModel),
+  ...dagiReplikeringTilknytningDoc(temaModel)
 ];

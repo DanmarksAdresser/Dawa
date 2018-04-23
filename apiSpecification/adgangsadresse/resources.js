@@ -36,7 +36,6 @@ module.exports = [
         crs: commonParameters.crs,
         struktur: commonParameters.struktur,
         geomWithin: commonParameters.geomWithin,
-        dagiFilter: commonParameters.dagiFilter,
         fuzzy: commonParameters.fuzzy,
         stednavnafstand: parameters.stednavnafstand,
         kvh: {
@@ -54,7 +53,6 @@ module.exports = [
     crs: commonParameters.crs,
     husnrinterval: parameters.husnrinterval,
     geomWithin: commonParameters.geomWithin,
-    dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,
     fuzzy: commonParameters.fuzzy,
     stednavnafstand: parameters.stednavnafstand

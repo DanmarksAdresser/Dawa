@@ -8,8 +8,7 @@ const {
   reverseGeocodingParameters,
 } = require('./common');
 
-const dagiTemaer = require('../apiSpecification/temaer/temaer');
-// const tilknytninger = require('../apiSpecification/tematilknytninger/tilknytninger');
+const temaModels = require('../dagiImport/temaModels');
 
 const {
   replikeringDoc
@@ -68,23 +67,23 @@ const dagiSridCirkelPolygonParameters = (plural) => {
     }];
 };
 
-const dagiReverseParameters = (tema) => {
+const dagiReverseParameters = (temaModel) => {
   return [{
     name: 'x',
-    doc: `Reverse geocoding. Find ${tema.singularSpecific} for det angivne koordinat.
+    doc: `Reverse geocoding. Find ${temaModel.singularSpecific} for det angivne koordinat.
  Der benyttes det koordinatsystem, som er angivet i srid-parameteren (Default WGS84).`
   }, {
     name: 'y',
-    doc: `Reverse geocoding. Find ${tema.singularSpecific} for det angivne koordinat.' +
+    doc: `Reverse geocoding. Find ${temaModel.singularSpecific} for det angivne koordinat.' +
   'Der benyttes det koordinatsystem, som er angivet i srid-parameteren (Default WGS84).`
   }, {
     name: 'nærmeste',
-    doc: `Hvis denne parameter angives, sammen med x og y parametrene findes ${tema.singularSpecific} der
+    doc: `Hvis denne parameter angives, sammen med x og y parametrene findes ${temaModel.singularSpecific} der
  ligger nærmest det angivne punkt.`
   }];
 };
 
-const getTemaDef = temaName => _.findWhere(dagiTemaer, {singular: temaName});
+const getTemaModel = temaName => temaModels.modelMap[temaName];
 
 const dagiQueryDoc = (tema, examples) => {
   return {
@@ -125,9 +124,10 @@ const dagiAutocompleteDoc = (tema, examples) => {
 };
 
 const dagiReverseDoc = (tema) => {
+  const basePath = tema.path || `/${tema.plural}`;
   return {
     entity: tema.singular,
-    path: `/${tema.plural}/reverse`,
+    path: `${basePath}/reverse`,
     subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
     parameters: reverseGeocodingParameters,
     nomulti: true,
@@ -151,12 +151,12 @@ const dagiReverseDoc = (tema) => {
   };
 };
 
-const dagiReplikeringTilknytningDoc = tema => {
+const dagiReplikeringTilknytningDoc = model => {
   const eventParams = [{
     name: 'adgangsadresseid',
     doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
   }];
-  return replikeringDoc(`${tema.prefix}tilknytning`, eventParams, []);
+  return replikeringDoc(`${model.prefix}tilknytning`, eventParams, []);
 };
 
 
@@ -170,6 +170,6 @@ module.exports = {
   dagiReverseDoc,
   dagiReverseParameters,
   dagiSridCirkelPolygonParameters,
-  getTemaDef,
+  getTemaModel,
   dagiReplikeringTilknytningDoc
 };

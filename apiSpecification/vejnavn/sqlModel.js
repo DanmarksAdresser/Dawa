@@ -10,8 +10,7 @@ var assembleSqlModel = sqlUtil.assembleSqlModel;
 
 var columns = {
   navn: {
-    select: 'vejstykker.vejnavn',
-      where:'vejstykker.vejnavn'
+    column: 'vejstykker.vejnavn'
   },
   postnr: {
     select: null,

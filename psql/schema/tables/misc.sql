@@ -5,6 +5,9 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 DROP SEQUENCE IF EXISTS id_sequence CASCADE;
 CREATE SEQUENCE id_sequence START 1;
 
+DROP SEQUENCE IF EXISTS rowkey_sequence CASCADE;
+CREATE SEQUENCE rowkey_sequence START 1;
+
 DROP TYPE IF EXISTS PostnummerRef CASCADE;
 CREATE TYPE PostnummerRef AS (
   nr integer,

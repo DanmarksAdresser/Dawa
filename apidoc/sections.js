@@ -7,7 +7,7 @@ module.exports = [{
   name: 'DAGI',
   headingClass: 'h2-icon h2-dagi',
   lead: 'For en generel introduktion til DAGI, se <a href="/dok/dagi">her<a/>.',
-  entities: ['kommune', 'opstillingskreds', 'politikreds', 'postnummer', 'region', 'retskreds', 'sogn', 'storkreds', 'valglandsdel']
+  entities: ['afstemningsområde', 'kommune', 'menighedsrådsafstemningsområde','opstillingskreds', 'politikreds', 'postnummer', 'region', 'retskreds', 'sogn', 'storkreds', 'valglandsdel']
 }, {
   name: 'Matrikelkortet',
   headingClass: 'h2-icon h2-matrikel',
@@ -22,8 +22,16 @@ module.exports = [{
   name: 'Stednavne',
   headingClass: 'h2-icon h2-sted',
   lead: 'For en generel introduktion til stednavne, se <a href="/dok/stednavne">her<a/>.',
-  entities: [ 'stednavn', 'stednavntype', 'bebyggelse']
-}, {
-  name: 'Andet',
-  entities: ['senesteSekvensnummer', 'zone']
-}];
+  entities: ['sted', 'stednavn', 'stednavn2', 'stednavntype', 'bebyggelse']
+},
+  {
+    name: 'Replikering',
+    headingClass: 'h2-icon',
+    lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af de data som DAWA udstiller.
+ <a href="/dok/guide/replikering">Replikerings-guiden</a> anviser hvordan API'et benyttes.`,
+    entities: ['replikering']
+  },
+  {
+    name: 'Andet',
+    entities: ['senesteSekvensnummer', 'zone']
+  }];

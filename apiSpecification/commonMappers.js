@@ -79,7 +79,9 @@ exports.mapAdgangsadresseRef = function(adgangsadresseid, baseUrl) {
 };
 
 exports.mapKommuneRefArray = function(array, baseUrl) {
-  return _.map(array.filter(function(kommune) { return notNull(kommune.kode); }), function(kommune) { return exports.mapKommuneRef(kommune, baseUrl); });
+  array = array || [];
+  return _.map(array.filter(function(kommune) { return notNull(kommune.kode); }),
+    function(kommune) { return exports.mapKommuneRef(kommune, baseUrl); });
 };
 
 

@@ -1,5 +1,5 @@
 "use strict";
-
+const { go } = require('ts-csp');
 var expect = require('chai').expect;
 var request = require("request-promise");
 var q = require('q');
@@ -12,34 +12,35 @@ var testdb = require('../helpers/testdb2');
 
 require('../../apiSpecification/allSpecs');
 
-describe('CSV udtræk', function() {
-  describe('Alle søgninger kan leveres i CSV-format', function() {
+describe('CSV udtræk', function () {
+  describe('Alle søgninger kan leveres i CSV-format', function () {
     var resources = registry.where({
       type: 'resource',
       qualifier: 'query'
     });
-    resources.forEach(function(resource) {
-      it('søgning i ' + resource.path + ' kan leveres i CSV-format', function(done) {
-        request.get("http://localhost:3002"+ resource.path +"?per_side=1&format=csv", function(error, response, body) {
-          expect(response.headers['content-type']).to.equal("text/csv; charset=UTF-8");
-          csv()
-            .from.string(body, {columns: true})
-            .to.array(function (data) {
-              expect(data.length).to.equal(1);
-              done();
-            });
+    resources.forEach(function (resource) {
+      it('søgning i ' + resource.path + ' kan leveres i CSV-format', () => go(function* () {
+        const response = yield request.get({
+          url: "http://localhost:3002" + resource.path + "?per_side=1&format=csv",
+          resolveWithFullResponse: true
         });
-      });
+        expect(response.headers['content-type']).to.equal("text/csv; charset=UTF-8");
+        csv()
+          .from.string(response.body, {columns: true})
+          .to.array(function (data) {
+          expect(data.length).to.equal(1);
+        });
+      }));
     });
   });
 
   // the expected set of columns output in CSV format
   var expectedColumns = {
-    adresse: ['id','status','oprettet','ændret','vejkode','vejnavn', 'adresseringsvejnavn','husnr','etage','dør','supplerendebynavn','postnr','postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','ddkn_m100','ddkn_km1','ddkn_km10','adressepunktændringsdato','adgangsadresseid','adgangsadresse_status','adgangsadresse_oprettet','adgangsadresse_ændret','regionskode','regionsnavn', 'jordstykke_ejerlavnavn','kvhx','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone', 'jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr', 'kvh', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard','vejpunkt_x', 'vejpunkt_y'],
-    adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn', 'adresseringsvejnavn','husnr','supplerendebynavn','postnr','postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn', 'jordstykke_ejerlavnavn','kvh','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone', 'jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x','vejpunkt_y'],
+    adresse: ['id','status','oprettet','ændret','vejkode','vejnavn', 'adresseringsvejnavn','husnr','etage','dør','supplerendebynavn','postnr','postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','ddkn_m100','ddkn_km1','ddkn_km10','adressepunktændringsdato','adgangsadresseid','adgangsadresse_status','adgangsadresse_oprettet','adgangsadresse_ændret','regionskode','regionsnavn', 'jordstykke_ejerlavnavn','kvhx','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone', 'jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr', 'kvh', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard','vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast'],
+    adgangsadresse: ['id','status','oprettet','ændret','vejkode','vejnavn', 'adresseringsvejnavn','husnr','supplerendebynavn','postnr','postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn','kommunekode','kommunenavn','ejerlavkode','ejerlavnavn','matrikelnr','esrejendomsnr','etrs89koordinat_øst','etrs89koordinat_nord','wgs84koordinat_bredde','wgs84koordinat_længde','nøjagtighed','kilde','tekniskstandard','tekstretning','adressepunktændringsdato','ddkn_m100','ddkn_km1','ddkn_km10','regionskode','regionsnavn', 'jordstykke_ejerlavnavn','kvh','sognekode','sognenavn','politikredskode','politikredsnavn','retskredskode','retskredsnavn','opstillingskredskode','opstillingskredsnavn', 'zone', 'jordstykke_ejerlavkode', 'jordstykke_matrikelnr', 'jordstykke_esrejendomsnr', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x','vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast'],
     vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
     postnummer: ['nr','navn','stormodtager'],
-    kommune: ['kode','navn', 'regionskode', 'ændret', 'geo_ændret', 'geo_version'],
+    kommune: ['dagi_id', 'kode','navn', 'regionskode', 'ændret', 'geo_ændret', 'geo_version'],
     navngivenvej: ['id','darstatus', 'oprettet','ændret','navn','adresseringsnavn','administreresafkommune','beskrivelse','retskrivningskontrol','udtaltvejnavn']
   };
 

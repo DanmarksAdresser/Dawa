@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require('underscore');
 const expect = require('chai').expect;
 const uuid = require('uuid');
 
@@ -8,8 +9,8 @@ const path = require('path');
 const q = require('q');
 
 const databaseTypes = require('../../psql/databaseTypes');
-const dawaSpec = require('../../dar10/dawaSpec');
 const importDarImpl = require('../../dar10/importDarImpl');
+const dar10TableModels = require('../../dar10/dar10TableModels');
 const testdb = require('../helpers/testdb2');
 const { go } = require('ts-csp');
 const { withImportTransaction } = require('../../importUtil/importUtil');
@@ -22,8 +23,15 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+describe('DAR 1.0 tablemodels', () => {
+  it('dar1_NavngivenVej geometrikolonner har distinctClause', () => {
+    const column = _.findWhere(dar10TableModels.rawTableModels.NavngivenVej.columns, {name: 'vejnavnebeliggenhed_vejnavnelinje'});
+    expect(column.distinctClause).to.exist;
+  });
+})
+
 describe('Import af DAR 1.0 udtræk', function () {
-  this.timeout(10000);
+  this.timeout(60000);
   testdb.withTransactionEach('empty', (clientFn) => {
     it('Kan importere initielt udtræk', q.async(function*() {
       const client = clientFn();
@@ -38,20 +46,19 @@ describe('Import af DAR 1.0 udtræk', function () {
       // check metadata has been updated
       const meta = yield importDarImpl.internal.getMeta(client);
       expect(meta.virkning).to.not.be.null;
-      expect(meta.current_tx).to.be.null;
       expect(meta.last_event_id).to.equal(0);
 
       // check a transaction has been registered
-      const transactions = (yield client.queryp('SELECT * FROM dar1_transaction')).rows;
+      const transactions = (yield client.queryRows('SELECT * FROM transactions'));
       expect(transactions).to.have.length(1);
       const transaction = transactions[0];
-      expect(transaction.id).to.equal(1);
-      expect(transaction.ts).to.not.be.null;
-      expect(transaction.dawa_seq_range).to.not.be.null;
+      expect(transaction.txid).to.not.be.null;
+      expect(transaction.sekvensnummerfra).to.not.be.null;
+      expect(transaction.sekvensnummertil).to.not.be.null;
 
       // check that DAWA entities has been created
-      for (let dawaEntity of Object.keys(dawaSpec)) {
-        const table = dawaSpec[dawaEntity].table;
+      for (let dawaEntity of Object.keys(dar10TableModels.dawaMaterializations)) {
+        const table = dar10TableModels.dawaMaterializations[dawaEntity].table;
         const count = (yield client.queryp(`SELECT COUNT(*) as c FROM ${table} `)).rows[0].c;
         expect(count).to.be.greaterThan(1);
       }
@@ -70,7 +77,7 @@ describe('Import af DAR 1.0 udtræk', function () {
 });
 
 describe('Import af changesets', function() {
-  this.timeout(10000);
+  this.timeout(60000);
   testdb.withTransactionEach('empty', clientFn => {
     const INITIAL_CHANGESET = {
       Adressepunkt: [{
@@ -231,7 +238,7 @@ describe('Import af changesets', function() {
       }]
     };
 
-    it('Kan importere et changeset', q.async(function*() {
+    it('Kan importere et changeset', () => go(function*() {
       const client = clientFn();
       yield importDarImpl.internal.setInitialMeta(client);
       yield importDarImpl.withDar1Transaction(client, 'api', q.async(function*() {
@@ -241,21 +248,12 @@ describe('Import af changesets', function() {
       }));
 
       // check at vi har importeret et vejstykke, adgangsadresse og adresse
-      for (let dawaEntity of Object.keys(dawaSpec)) {
-        const table = dawaSpec[dawaEntity].table;
+      for (let dawaEntity of Object.keys(dar10TableModels.dawaMaterializations)) {
+        const table = dar10TableModels.dawaMaterializations[dawaEntity].table;
         const count = (yield client.queryp(`SELECT COUNT(*)::integer as c FROM ${table} `)).rows[0].c;
         expect(count).to.equal(1);
       }
-
-      // check, at vi logger noget historik
-      const changelog = (yield client.queryp('select * from dar1_changelog')).rows;
-      expect(changelog).to.have.length(9);
-      const change = changelog[0];
-      expect(change.tx_id).to.equal(1);
-      expect(change.entity).to.not.be.empty;
-      expect(change.operation).to.equal('insert');
-      expect(change.rowkey).to.be.above(0);
-    }));
+      }));
 
     it('Når virkningstid avanceres, håndteres fremtidige ændringer', q.async(function*() {
       const client = clientFn();
@@ -297,6 +295,7 @@ describe('Import af changesets', function() {
           yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(firstChangeset)));
         }));
       }));
+
 
       // check at vejen ikke eksisterer endnu
       const entityCount = (yield client.queryp('select count(*)::integer  as c from navngivenvej')).rows[0].c;
@@ -381,7 +380,6 @@ describe('Import af changesets', function() {
           yield importDarImpl.importChangeset(client, txid, navngivenVejKommunedelChange);
         }));
       }));
-
       let updatedAddress = (yield client.queryRows('select * from adgangsadresser'))[0];
       expect(updatedAddress.vejkode).to.equal(700);
 

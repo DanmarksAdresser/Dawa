@@ -16,109 +16,16 @@ function parseInteger(str) {
 //  fieldMap: {}
 //};
 
-exports.kommune = {
-  name: 'kommune',
-  geometry: 'geometri',
-  wfsName: 'Kommuneinddeling',
-  fields: {
-    kode: {
-      name: 'kommunekode',
-      parseFn: parseInteger
-    },
-    regionskode: {
-      name: 'regionskode',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  },
-  filterFn: function(wfsFeature) {
-    return wfsFeature.Kommuneinddeling[0].udenforKommuneinddeling[0] === 'false';
-  }
-};
-
-exports.region = {
-  name: 'region',
-  wfsName: 'Regionsinddeling',
-  geometry: 'geometri',
-  fields: {
-    kode: {
-      name: 'regionskode',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  }
-};
-
-exports.sogn = {
-  name: 'sogn',
-  wfsName: 'Sogneinddeling',
-  geometry: 'geometri',
-  fields: {
-    kode: {
-      name: 'sognekode',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  }
-};
-
-exports.opstillingskreds = {
-  name: 'opstillingskreds',
-  wfsName: 'Opstillingskreds',
-  geometry: 'geometri',
-  fields: {
-    kode: {
-      name: 'opstillingskredsnummer',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  }
-};
-
-exports.politikreds = {
-  name: 'politikreds',
-  wfsName: 'Politikreds',
-  geometry: 'geometri',
-  fields: {
-    kode: {
-      name: 'myndighedskode',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  }
-};
-
-exports.retskreds = {
-  name: 'retskreds',
-  wfsName: 'Retskreds',
-  geometry: 'geometri',
-  fields: {
-    kode: {
-      name: 'myndighedskode',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  }
-};
-
-exports.postnummer = {
-  name: 'postdistrikt',
-  wfsName: 'Postnummerinddeling',
-  geometry: 'geometri',
-  fields: {
-    nr: {
-      name: 'postnummer',
-      parseFn: parseInteger
-    },
-    navn: 'navn'
-  }
-};
 
 exports.valglandsdel = {
 	name: 'valglandsdel',
 	wfsName: 'Valglandsdel',
 	geometry: 'geometri',
 	fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
 		navn: 'navn',
 		bogstav: 'valglandsdelsbogstav'
 	}
@@ -129,10 +36,18 @@ exports.storkreds = {
   wfsName: 'Storkreds',
   geometry: 'geometri',
   fields: {
+    dagi_id: {
+      name: 'DAGIid',
+      parseFn: parseInteger
+    },
     navn: 'navn',
-    nummer: 'storkredsnummer'
+    nummer: {
+      name: 'storkredsnummer',
+      parseFn: parseInteger
+    }
   }
 };
+
 
 // normalize, such that every field has a name and a parseFn and a filterFn.
 _.each(exports, function(mapping) {

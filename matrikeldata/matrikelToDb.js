@@ -1,14 +1,15 @@
 "use strict";
 
-var q = require('q');
-var _ = require('underscore');
+const { go } = require('ts-csp');
+const q = require('q');
+const _ = require('underscore');
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const {runImporter} = require('../importUtil/runImporter');
 const proddb = require('../psql/proddb');
+const { withImportTransaction} = require('../importUtil/importUtil');
 const importJordstykkerImpl = require('./importJordstykkerImpl');
-const logger = require('../logger').forCategory('matrikelImport');
 
-var optionSpec = {
+const optionSpec = {
   sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false],
@@ -17,23 +18,16 @@ var optionSpec = {
 
 q.longStackSupport = true;
 
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'lastUpdated'), function (args, options) {
+runImporter('matrikelkortet', optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
 
-  q.async(function*() {
-    yield importJordstykkerImpl.doImport(proddb, options.sourceDir, options.init, options.refresh);
-    yield proddb.withTransaction('READ_ONLY', q.async(function*(client) {
-      const overlapping = yield client.queryRows(`with adrs AS (SELECT a.id, a.geom FROM adgangsadresser_mat a 
-    JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
-     GROUP BY a.id, a.geom HAVING count(*) > 1)
-SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jordstykker j 
-ON ST_Covers(j.geom, a.geom)`);
-      if (overlapping.length > 0) {
-        logger.info('Overlappende jordstykker', {rows: overlapping});
-      }
-    }));
-  })().done();
+  return proddb.withTransaction('READ_WRITE', client => go(function*() {
+    yield withImportTransaction(client, 'importJordstykker',
+        txid =>
+          importJordstykkerImpl.importJordstykkerImpl(
+            client, txid, options.sourceDir, options.refresh));
+  }));
 });

@@ -32,6 +32,8 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
     r2 geometry;
     i1 geometry;
     i2 geometry;
+    k1 geometry;
+    k2 geometry;
     points INTEGER;
   srid integer;
   BEGIN
@@ -63,52 +65,17 @@ CREATE OR REPLACE FUNCTION splitToGridRecursive(g geometry,  maxPointCount INTEG
     END IF;
 --    RAISE NOTICE 'bbox: (%)', st_astext(makerectangle(xmin, ymin, xmax, ymax, srid));
 --    RAISE NOTICE 'r1: (%), r2: (%)', st_astext(r1), st_astext(r2);
+    k1 := st_intersection(g, r1);
+    k2 := st_intersection(g, r2);
     IF (forceMultiPolygons) THEN
-      i1 := ST_Multi(ST_CollectionExtract(st_intersection(g, r1), 3));
-      i2 := ST_Multi(ST_CollectionExtract(st_intersection(g, r2), 3));
+      i1 := ST_Multi(ST_CollectionExtract(k1, 3));
+      i2 := ST_Multi(ST_CollectionExtract(k2, 3));
     ELSE
-      i1 := st_intersection(g, r1);
-      i2 := st_intersection(g, r2);
+      i1 := ST_Multi(ST_CollectionExtract(k1, st_dimension(k1) + 1));
+      i2 := ST_Multi(ST_CollectionExtract(k2, st_dimension(k2) + 1));
     END IF;
     RETURN QUERY SELECT splitToGridRecursive(i1, maxPointCount, forceMultiPolygons);
     RETURN QUERY SELECT splitToGridRecursive(i2, maxPointCount, forceMultiPolygons);
     RETURN;
   END;
   $$ LANGUAGE plpgsql IMMUTABLE STRICT;
-
-CREATE OR REPLACE FUNCTION update_gridded_temaer_matview()
-  RETURNS TRIGGER AS $$
-BEGIN
-  IF TG_OP = 'UPDATE' AND st_equals(OLD.geom, NEW.geom) THEN
-    RETURN NULL;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'DELETE'
-  THEN
-    DELETE FROM gridded_temaer_matview WHERE tema = OLD.tema AND id = OLD.id;
-  END IF;
-  IF TG_OP = 'UPDATE' OR TG_OP = 'INSERT'
-  THEN
-    INSERT INTO gridded_temaer_matview (tema, id, geom)
-      (SELECT
-         NEW.tema,
-        NEW.id,
-         splitToGridRecursive(NEW.geom, 100) as geom);
-  END IF;
-  RETURN NULL;
-END;
-$$ LANGUAGE PLPGSQL;
-
-DROP TRIGGER IF EXISTS update_gridded_temaer_matview_on_temaer ON temaer;
-CREATE TRIGGER update_gridded_temaer_matview_on_temaer AFTER INSERT OR UPDATE OR DELETE ON temaer
-FOR EACH ROW EXECUTE PROCEDURE update_gridded_temaer_matview();
-
-
--- Init function
-DROP FUNCTION IF EXISTS gridded_temaer_matview_init() CASCADE;
-CREATE FUNCTION gridded_temaer_matview_init() RETURNS void
-LANGUAGE plpgsql AS
-  $$
-  BEGIN
-    NULL;
-  END;
-$$;

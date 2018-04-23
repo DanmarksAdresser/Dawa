@@ -74,7 +74,7 @@ var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.adgangsadresseGeoFilter,
-  sqlParameterImpl.dagiFilter(),
+  // sqlParameterImpl.dagiFilter(),
   searchAdgangsadresse(columns),
   autocompleteAdgangsadresse(columns),
   fuzzySearchParameterImpl,

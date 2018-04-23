@@ -114,7 +114,8 @@ exports.setupRoutes = function () {
   registry.where({
     type: 'resource'
   }).forEach(function (resource) {
-      app.get(resource.path, resourceImpl.createExpressHandler(resource));
+    const responseHandler = resourceImpl.resourceResponseHandler(resource);
+      app.get(resource.path, resourceImpl.createExpressHandler(responseHandler));
     });
 
   registry.where({
@@ -123,6 +124,15 @@ exports.setupRoutes = function () {
     app.get(resourceImpl.path, resourceImpl.expressHandler);
   });
 
+  registry.where({
+    type: 'httpHandler'
+  }).forEach(function(httpHandler) {
+    app.get(httpHandler.path, resourceImpl.createExpressHandler(httpHandler.responseHandler));
+  });
+
+  registry.where({
+    type: 'expressHandler'
+  }).forEach(({path, handler}) => app.get(path, handler));
   return app;
 };
 

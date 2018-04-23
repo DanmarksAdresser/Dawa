@@ -29,7 +29,9 @@ const makePromise = () => {
 const withTransaction =
   (dbname, mode, transactionFn) =>
     databasePools.get(dbname).withConnection(
-      {},
+      {
+        statementTimeout: 30000
+      },
       client => client.withTransaction(mode, () => transactionFn(client)));
 
 

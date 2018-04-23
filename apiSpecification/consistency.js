@@ -26,16 +26,15 @@ var consistencyChecks = [
   {
     key: 'AdresserInkonsistentKommune',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i en anden kommune',
-    query: "SELECT a.id, vejkode, kommunekode, temaer.fields->>'kode' AS geografisk_kommunekode, a.oprettet, a.aendret" +
-    " FROM adgangsadresser a" +
-    " LEFT JOIN adgangsadresser_temaer_matview atm ON (a.id = atm.adgangsadresse_id AND tema = 'kommune')" +
-    " LEFT JOIN temaer ON atm.tema_id = temaer.id" +
-    " WHERE a.noejagtighed <> 'U' AND a.kommunekode IS DISTINCT FROM (temaer.fields->>'kode')::integer ORDER BY a.aendret DESC"
+    query: `SELECT a.id, vejkode, a.kommunekode, kt.kommunekode AS geografisk_kommunekode, a.oprettet, a.aendret
+    FROM adgangsadresser a
+    LEFT JOIN kommunetilknytninger kt ON a.id = kt.adgangsadresseid
+    WHERE a.noejagtighed <> 'U' AND a.kommunekode IS DISTINCT FROM kt.kommunekode ORDER BY a.aendret DESC`
   },
   {
     key: 'AdresserUdenRegion',
     description: 'Find alle adresser med adgangspunkt der geografisk ikke ligger indenfor en region',
-    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN adgangsadresser_temaer_matview rel  ON (rel.adgangsadresse_id = adgangsadresser.id AND rel.tema = 'region') where rel.adgangsadresse_id is null AND adgangsadresser.noejagtighed <> 'U'"
+    query: "SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser LEFT JOIN regionstilknytninger rt  ON (rt.adgangsadresseid = adgangsadresser.id) where rt.adgangsadresseid is null AND adgangsadresser.noejagtighed <> 'U'"
   },
   {
     key: 'AdresserUdenPostnr',
@@ -45,11 +44,10 @@ var consistencyChecks = [
   {
     key: 'AdresserInkonsistentPostnr',
     description: 'Find alle adresser hvor adressen har et adgangspunkt, men adgangspunktet er placeret i et andet postnummer',
-    query: "SELECT a.id, vejkode, kommunekode, postnr, (temaer.fields->>'nr')::integer AS geografisk_postnr, oprettet, a.aendret" +
-    " FROM adgangsadresser a" +
-    " LEFT JOIN adgangsadresser_temaer_matview atm ON (a.id = atm.adgangsadresse_id AND tema = 'postnummer')" +
-    " LEFT JOIN temaer ON atm.tema_id = temaer.id" +
-    " WHERE a.noejagtighed <> 'U' AND postnr IS DISTINCT FROM (temaer.fields->>'nr')::integer ORDER BY a.aendret DESC"
+    query: `SELECT a.id, vejkode, kommunekode, postnr, pt.postnummer AS geografisk_postnr, oprettet, a.aendret
+    FROM adgangsadresser a
+    LEFT JOIN postnummertilknytninger pt ON a.id = pt.adgangsadresseid
+    WHERE a.noejagtighed <> 'U' AND a.postnr = pt.postnummer ORDER BY a.aendret DESC`
   },
   {
     key: 'AdgangsadresserUdenEnhedsadresser',
@@ -57,21 +55,11 @@ var consistencyChecks = [
     query: 'SELECT id, vejkode, kommunekode, oprettet, aendret FROM adgangsadresser where not exists(select adgangsadresseid from enhedsadresser where adgangsadresseid = adgangsadresser.id) ORDER BY aendret DESC'
   },
   {
-    key: 'AdgangsadresserMatrikelafgivelser',
-    description: 'Find alle adgangsadresser hvor BBR matrikel og geografisk matrikel afviger',
-    query: "SELECT a.id, ejerlavkode, matrikelnr, t.fields->>'ejerlavkode' as geo_ejerlavkode, t.fields->>'matrikelnr' as geo_matrikelnr" +
-    " FROM adgangsadresser a" +
-    " LEFT JOIN adgangsadresser_temaer_matview atm ON atm.tema = 'jordstykke' AND a.id = atm.adgangsadresse_id" +
-    " LEFT JOIN temaer t ON t.tema = 'jordstykke' and T.id = atm.tema_id" +
-    " WHERE a.noejagtighed <> 'U'" +
-    " AND ((t.fields->>'ejerlavkode')::integer IS DISTINCT FROM a.ejerlavkode or (t.fields->>'matrikelnr') IS DISTINCT FROM a.matrikelnr)"
-  },
-  {
     key: 'AdgangsadresserFlereJordstykker',
     description: 'Find adgangsadresser, der ligger på mere end ét jordstykke',
     query: `with adrs AS (SELECT a.id, a.geom FROM adgangsadresser_mat a 
     JOIN jordstykker j ON ST_Covers(j.geom, a.geom)
-     GROUP BY a.id, a.geom HAVING count(*) > 2)
+     GROUP BY a.id, a.geom HAVING count(*) >= 2)
 SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jordstykker j ON ST_Covers(j.geom, a.geom)`
   },
   {
@@ -166,13 +154,12 @@ FROM byDay
   j.ejerlavkode,
   j.matrikelnr,
   ja.adgangsadresse_id              AS adgangsadresseid,
-  (t.fields ->> 'kode') :: SMALLINT AS adgangsadresse_kommunekode
+  kt.kommunekode AS adgangsadresse_kommunekode
 FROM jordstykker j
   JOIN jordstykker_adgadr ja ON j.ejerlavkode = ja.ejerlavkode AND j.matrikelnr = ja.matrikelnr
-  JOIN adgangsadresser_temaer_matview atm
-    ON atm.adgangsadresse_id = ja.adgangsadresse_id AND atm.tema = 'kommune'
-  JOIN temaer t ON atm.tema_id = t.id
-WHERE j.kommunekode <> (t.fields ->> 'kode') :: SMALLINT`
+  JOIN kommunetilknytninger  kt
+    ON ja.adgangsadresse_id = kt.adgangsadresseid
+WHERE j.kommunekode = kt.kommunekode`
   }
 ];
 

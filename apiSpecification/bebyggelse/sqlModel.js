@@ -8,12 +8,6 @@ const dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
 const columns = {
-  type: {
-    column: 'undertype'
-  },
-  kode: {
-    column: 'bebyggelseskode'
-  },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
@@ -31,8 +25,8 @@ const parameterImpls = [
 
 const baseQuery = () => ({
   select: [],
-  from: ['stednavne'],
-  whereClauses: [`hovedtype = 'Bebyggelse'`],
+  from: ['bebyggelser_view'],
+  whereClauses: [],
   orderClauses: [],
   sqlParams: []
 });

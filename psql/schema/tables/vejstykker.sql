@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS vejstykker (
   tsv tsvector,
   geom  geometry(MULTILINESTRINGZ, 25832),
   navngivenvej_id uuid,
+  navngivenvejkommunedel_id uuid,
   PRIMARY KEY(kommunekode, kode)
 );
 
@@ -18,5 +19,6 @@ CREATE INDEX ON vejstykker(vejnavn);
 CREATE INDEX ON vejstykker USING GIST(vejnavn gist_trgm_ops);
 CREATE INDEX ON vejstykker USING GIST(geom);
 CREATE INDEX ON vejstykker(navngivenvej_id);
+CREATE INDEX ON vejstykker(navngivenvejkommunedel_id);
 
 DROP TABLE IF EXISTS vejstykker_history CASCADE;

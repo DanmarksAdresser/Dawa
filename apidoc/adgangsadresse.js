@@ -61,7 +61,7 @@ module.exports = [
     subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet. Med mindre der er behov' +
     ' for felter  som kun er med i den fulde adressestruktur anbefaler vi at, man tilføjer parameteren <code>struktur=mini</code>,' +
     ' da dette vil resultere i bedre performance.',
-    parameters: adgangsadresseParameters.concat(formatAndPagingParams).concat([strukturParameterAdresse]),
+    parameters: [...adgangsadresseParameters, geometriParam, ...formatAndPagingParams, strukturParameterAdresse],
     examples: [{
       description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
       query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},

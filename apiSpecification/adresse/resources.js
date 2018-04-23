@@ -37,7 +37,6 @@ module.exports = [
         crs: commonParameters.crs,
         struktur: commonParameters.struktur,
         geomWithin: commonParameters.geomWithin,
-        dagiFilter: commonParameters.dagiFilter,
         fuzzy: commonParameters.fuzzy,
         kvhx: {
           name: 'kvhx',
@@ -53,7 +52,6 @@ module.exports = [
     husnrinterval: parameters.husnrinterval,
     includeInvalid: parameters.includeInvalid,
     geomWithin: commonParameters.geomWithin,
-    dagiFilter: commonParameters.dagiFilter,
     autocomplete: commonParameters.autocomplete,
     crs: commonParameters.crs,
     fuzzy: commonParameters.fuzzy,

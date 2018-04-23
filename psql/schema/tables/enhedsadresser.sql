@@ -10,8 +10,7 @@ CREATE TABLE IF NOT EXISTS enhedsadresser (
   doer VARCHAR(4),
   kilde smallint,
   esdhreference text,
-  journalnummer text,
-  FOREIGN KEY (adgangsadresseid) REFERENCES adgangsadresser(id)
+  journalnummer text
 );
 CREATE INDEX ON enhedsadresser(adgangsadresseid);
 DROP TABLE IF EXISTS enhedsadresser_history CASCADE;

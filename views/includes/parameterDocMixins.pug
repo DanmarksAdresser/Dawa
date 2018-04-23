@@ -124,6 +124,17 @@ mixin documentProperties(props, indent, idPrefix)
     if property.type === 'object'
       +documentProperties(property.properties, indent+1, idPrefix + '_' + property.name)
 
+mixin documentSchema3(schema)
+  table.table.table-hover
+    thead
+      th(colspan="5") Navn
+      th Type
+      th Optionelt
+      th Beskrivelse
+    tbody
+      +documentProperties(docUtil.extractDocumentationForObject(schema), 0, '')
+
+
 mixin documentSchema(schema, idPrefix)
   table.table.table-hover
     thead

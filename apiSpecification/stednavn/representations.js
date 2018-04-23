@@ -12,9 +12,11 @@ const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const {nullableType} = require('../schemaUtil');
-const { mapKommuneRefArray, makeHref } = require('../commonMappers');
+const {makeHref } = require('../commonMappers');
 
-var schema = require('../parameterSchema');
+const stedRepresentations = require('../sted/representations');
+
+const stedJsonRepresentation = stedRepresentations.json;
 
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
@@ -24,22 +26,9 @@ exports.json = {
   schema: globalSchemaObject({
     title: 'Stednavn',
     properties: {
-      id: {
-        type: 'string',
-        schema: schema.uuid,
-        description: 'Stednavnets unikke ID'
-      },
       href: {
         type: 'string',
         description: 'Stednavnets unikke URL'
-      },
-      hovedtype: {
-        type: 'string',
-        description: 'Stednavnets hovedtype, eksempelvis Bebyggelse'
-      },
-      undertype: {
-        type: 'string',
-        description: 'Stednavnets undertype, eksempelvis bydel'
       },
       navn: {
         type: nullableType('string'),
@@ -49,56 +38,32 @@ exports.json = {
         enum: ['officielt', 'uofficielt', 'suAutoriseret'],
         description: 'Stednavnets navnestatus. Mulige værdier: "officielt", "uofficielt", "suAutoriseret"',
       },
-      egenskaber: {
-        description: 'Yderligere egenskaber for stednavnet, som er specifikke for den pågældende hovedtype'
+      brugsprioritet: {
+        enum: ['primær', 'sekundær'],
+        description: 'Angiver stednavnets brugsprioritet. Et sted har et primært stednavn og 0 eller flere sekundære stednavne. Mulige værdier: primær, sekundær'
       },
-      visueltcenter: {
-        type: nullableType('array'),
-        items: {
-          type: 'number'
-        }
-      },
-      'kommuner': {
-        description: 'De kommuner hvis areal overlapper stednavnets areal.',
-        type: 'array',
-        items: {
-          '$ref': '#/definitions/KommuneRef'
-        }
-      },
-      'ændret': {
-        description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
-        ' geometrien (se felterne geo_ændret og geo_version).',
-        $ref: '#/definitions/DateTimeUtc'
-      },
-      'geo_ændret': {
-        description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
-        $ref: '#/definitions/DateTimeUtc'
-      },
-      geo_version: {
-        description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
-        type: 'integer'
+      sted: {
       }
-
     },
-    docOrder: ['id', 'href', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'egenskaber', 'visueltcenter', 'kommuner', 'ændret', 'geo_ændret', 'geo_version']
+    docOrder: ['href', 'navn', 'navnestatus', 'brugsprioritet', 'sted']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
   }),
   mapper: (baseUrl) => row => {
-    const result = ['id', 'hovedtype', 'undertype', 'navn', 'navnestatus', 'ændret', 'geo_ændret', 'geo_version'].reduce(
+    const result = ['navn', 'navnestatus', 'brugsprioritet'].reduce(
       (memo, prop) => {
         memo[prop] = row[prop];
         return memo;
       }, {});
-    result.href = makeHref(baseUrl, 'stednavn', [row.id]);
-    result.egenskaber = {};
-    if(result.hovedtype === 'Bebyggelse') {
-      result.egenskaber.bebyggelseskode = row.bebyggelseskode;
-    }
-
-    result.visueltcenter = row.visueltcenter_x ? [row.visueltcenter_x, row.visueltcenter_y] : null;
-    result.kommuner = row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : [];
+    result.href = makeHref(baseUrl, 'stednavn', [row.sted_id, row.navn]);
+    const stedRow = Object.entries(row).reduce((memo, [name, val]) => {
+      if(name.indexOf('sted_') === 0) {
+        memo[name.substring('sted_'.length)] = val;
+      }
+      return memo;
+    }, {});
+    result.sted = stedJsonRepresentation.mapper(baseUrl)(stedRow);
     return result;
   }
 };

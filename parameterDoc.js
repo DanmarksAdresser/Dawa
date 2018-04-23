@@ -15,16 +15,29 @@ const allResources = registry.where({
   type: 'resource'
 });
 
+const allHttpHandlers = registry.where({
+  type: 'httpHandler'
+});
+
+const allExpressHandlers = registry.where({
+  type: 'expressHandler'
+});
 function addMultiParameters() {
   _.each(module.exports, function (doc, path) {
     const resourcePath = path.replace(/\{([^\{\}]+)}/g, ':$1');
     const resource = _.findWhere(allResources, {
       path: resourcePath
     });
-    if (!resource) {
+    const httpHandler = _.findWhere(allHttpHandlers, {
+      path: resourcePath
+    });
+    const expressHandler = _.findWhere(allExpressHandlers, {
+      path: resourcePath
+    });
+    if (!resource && !httpHandler && !expressHandler) {
       throw new Error("Could not find a resource for path " + resourcePath);
     }
-    const queryParameters = resource.queryParameters;
+    const queryParameters = resource ? resource.queryParameters : httpHandler ? httpHandler.queryParameters : expressHandler.queryParameters;
     const parameterSpecs = _.indexBy(queryParameters, 'name');
     doc.parameters = JSON.parse(JSON.stringify(doc.parameters)); // Clone!
     if (doc.nomulti !== true) {

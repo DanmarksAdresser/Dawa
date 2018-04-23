@@ -1,0 +1,8 @@
+[
+  {
+    "dagi_id": 100116,
+    "kommunekode": 101,
+    "navn": "Supplerende bynavn test",
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+  }
+]

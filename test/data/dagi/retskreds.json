@@ -1,0 +1,14 @@
+[
+  {
+    "dagi_id": 100110,
+    "kode": 1,
+    "navn": "Retskreds",
+    "geom": null
+  },
+  {
+    "dagi_id": 100111,
+    "kode": 99,
+    "navn": "retskreds test",
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+  }
+]

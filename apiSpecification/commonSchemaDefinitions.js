@@ -1,14 +1,13 @@
 "use strict";
 
-var dagiTemaer = require('./temaer/temaer');
-var schemaUtil = require('./schemaUtil');
-var _ = require('underscore');
+const schemaUtil = require('./schemaUtil');
+const _ = require('underscore');
 
-var schemaObject = schemaUtil.schemaObject;
-var nullableType = schemaUtil.nullableType;
-var nullable = schemaUtil.nullable;
+const schemaObject = schemaUtil.schemaObject;
+const nullableType = schemaUtil.nullableType;
+const nullable = schemaUtil.nullable;
 
-var definitions = {
+const definitions = {
   'UUID' : {
     postgresql: 'UUID',
     type: 'string',
@@ -407,6 +406,57 @@ var definitions = {
     },
     docOrder: ['href', 'id']
   }),
+  OpstillingskredsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Opstillingskredsens URL',
+        type: 'string'
+      },
+      nummer: {
+        description: 'Opstillingskredsens unikke nummer',
+        type: 'string'
+      },
+      navn: {
+        description: 'Opstillingskredsens unikke navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'nummer', 'navn']
+  }),
+  StorkredsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Storkredsens URL',
+        type: 'string'
+      },
+      nummer: {
+        description: 'Storkredsens unikke nummer',
+        type: 'string'
+      },
+      navn: {
+        description: 'Storkredsens unikke navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'nummer', 'navn']
+  }),
+  ValglandsdelsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Valglandsdelens URL.',
+        type: 'string'
+      },
+      bogstav: {
+        description: 'Valglandsdelens bogstav.',
+        type: 'string'
+      },
+      navn: {
+        description: 'Valglandsdelens navn',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'bogstav', 'navn']
+  }),
   VejstykkeKodeOgNavn: schemaObject({
     properties: {
       href: {
@@ -432,31 +482,6 @@ var definitions = {
     docOrder: ['href', 'kode', 'navn', 'adresseringsnavn']
   })
 };
-
-function dagiSchema(dagiTema) {
-  return  {
-    'title': dagiTema.singular,
-    'properties': {
-      'href': {
-        description: dagiTema.singularSpecific + 's unikke URL.',
-        $ref: '#/definitions/Href'
-      },
-      'kode': {
-        description: 'Fircifret ' + dagiTema.singular + 'kode.',
-        $ref: '#/definitions/Kode4'
-      },
-      'navn': {
-        description: dagiTema + dagiTema.singularSpecific + 's navn.',
-        type: 'string'
-      }
-    },
-    'docOrder': ['href', 'kode', 'navn']
-  };
-}
-
-dagiTemaer.forEach(function(dagiTema) {
-  definitions[dagiTema.singular + 'Ref'] = schemaObject(dagiSchema(dagiTema));
-});
 
 definitions.bebyggelse = schemaObject(
   {

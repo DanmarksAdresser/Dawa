@@ -2,55 +2,21 @@
 
 
 const fieldsUtil = require('../common/fieldsUtil');
+const stedFields = require('../sted/fields');
 const sqlModel = require('./sqlModel');
 
 module.exports = [
+  ...stedFields.map(field => Object.assign({}, field, {name: `sted_${field.name}`})),
   {
-    name: 'id'
+    name: 'navn',
   },
   {
-    name: 'hovedtype'
-  },
-  {
-    name: 'undertype'
-  },
-  {
-    name: 'navn'
+    name: 'brugsprioritet'
   },
   {
     name: 'navnestatus'
-  },
-  {
-    name: 'bebyggelseskode'
-  },
-  {
-    name: 'ændret',
-    selectable: true
-  },
-  {
-    name: 'geo_ændret',
-    selectable: true
-  },
-  {
-    name: 'geo_version',
-    selectable: true
-  },
-  {
-    name: 'geom_json'
-  },
-  {
-    name: 'kommuner',
-    multi: true
-  },
-  {
-    name: 'visueltcenter'
-  },
-  {
-    name: 'visueltcenter_x'
-  },
-  {
-    name: 'visueltcenter_y'
-  }];
+  }
+];
 
 fieldsUtil.applySelectability(module.exports, sqlModel);
 fieldsUtil.normalize(module.exports);
