@@ -1,5 +1,7 @@
 "use strict";
 
+process.on('unhandledRejection', up => { throw up })
+
 var assert = require("assert")
 	,	request = require("request")
 	, util= require('util')
@@ -228,6 +230,7 @@ describe('Adresseopslag', function(){
       assert(adresse.adgangsadresse.jordstykke.esrejendomsnr==="242358", 'jordstykke.esrejendomsnr forskellig: ' + adresse.adgangsadresse.jordstykke.esrejendomsnr);
       assert(adresse.adgangsadresse.zone==="Byzone", 'Zone forskellig: ' + adresse.adgangsadresse.zone);
       assert(adresse.adgangsadresse.adgangspunkt.højde==24.1, 'Højde forskellig: ' + adresse.adgangsadresse.adgangspunkt.højde);
+      assert(adresse.adgangsadresse.brofast===true, 'Brofast forskellig: ' + adresse.adgangsadresse.brofast);
       
       var vejopt= {};
       vejopt.url=adresse.adgangsadresse.vejstykke.href;
@@ -285,6 +288,13 @@ describe('Adresseopslag', function(){
       opsopt.resolveWithFullResponse= true;
       var opsrequest= rp(opsopt);
 
+      var afsopt= {};
+      afsopt.url=adresse.adgangsadresse.afstemningsområde.href;
+      afsopt.qs= {};
+      afsopt.qs.cache= 'no-cache';
+      afsopt.resolveWithFullResponse= true;
+      var afsrequest= rp(afsopt);
+
       var jordopt= {};
       jordopt.url=adresse.adgangsadresse.jordstykke.href;
       jordopt.qs= {};
@@ -292,7 +302,7 @@ describe('Adresseopslag', function(){
       jordopt.resolveWithFullResponse= true;
       var jordrequest= rp(jordopt);
 
-      Promise.all([vejrequest, postrequest, komrequest, sognrequest, regionrequest, retsrequest, polrequest, opsrequest, jordrequest]).then((responses) => {
+      Promise.all([vejrequest, postrequest, komrequest, sognrequest, regionrequest, retsrequest, polrequest, opsrequest, afsrequest, jordrequest]).then((responses) => {
         for (let i= 0; i<responses.length; i++) {
           assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")");
           //console.log(responses[i].body);
@@ -323,6 +333,9 @@ describe('Adresseopslag', function(){
             assert(adresse.adgangsadresse.opstillingskreds.kode===obj.kode,"Uoverenstemmelse i opstillingskreds")
             break;
           case 8:
+            assert(adresse.adgangsadresse.afstemningsområde.kode===obj.kode,"Uoverenstemmelse i afstemningsområde")
+            break;
+          case 9:
             assert(adresse.adgangsadresse.jordstykke.matrikelnr===obj.matrikelnr,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.jordstykke.matrikelnr + ", " + obj.matrikelnr + ")");
             break;
           }
@@ -338,13 +351,11 @@ describe('Adresseopslag', function(){
 
         let bydel= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Grøndal','bydel'));
         let by= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('København', 'by'));
-        let storby= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Storkøbenhavn', 'storby'));
-
-        assert(adresse.adgangsadresse.bebyggelser.length === 3, "Antal bebyggelsestyper != 3");
+       
+        assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 3");
         assert(bydel, 'Mangler bydel Grøndal');
         assert(by, 'Mangler by København');
-        assert(storby, 'Mangler storby Storkøbenhavn');
-
+       
         var bydelopt= {};
         bydelopt.url= bydel.href;
         bydelopt.qs= {};
@@ -359,14 +370,7 @@ describe('Adresseopslag', function(){
         byopt.resolveWithFullResponse= true;
         var byrequest= rp(byopt);
 
-        var storbyopt= {};
-        storbyopt.url= storby.href;
-        storbyopt.qs= {};
-        storbyopt.qs.cache= 'no-cache';
-        storbyopt.resolveWithFullResponse= true;
-        var storbyrequest= rp(storbyopt);
-
-        Promise.all([bydelrequest, byrequest, storbyrequest]).then((responses) => {
+        Promise.all([bydelrequest, byrequest]).then((responses) => {
           for (let i= 0; i<responses.length; i++) {
             assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")");
             //console.log(responses[i].body);
@@ -377,9 +381,6 @@ describe('Adresseopslag', function(){
               break;
             case 1:
               assert(by.navn===obj.navn,"Uoverenstemmelse i by")
-              break;
-            case 2:
-              assert(storby.navn===obj.navn,"Uoverenstemmelse i storby")
               break;
             }
           }
@@ -1161,6 +1162,84 @@ it("autocomplete nr", function(done){
       assert.equal(response.statusCode,200);
       var politikredse= JSON.parse(body);
       assert(politikredse.length > 0, 'Der burde være politikredse, som starter med kø')
+      // postnumre.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+});
+
+
+describe('Afstemningsområder', function(){
+
+  it("q=nør*", function(done){
+    request(encodeURI(host+"/afstemningsomraader?q=nør*&cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      var navn= afstemningsområder[0].navn;
+
+      //console.log(util.inspect(bynavne[0]));
+      //console.log(navn);
+      assert(navn.search('Nør')!=-1,"Navn indeholder ikke Nør")
+      done();
+    })
+  })
+
+it("autocomplete nr", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'afstemningsomraader/autocomplete';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= '4';
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med 4')
+      // opstillingskredse.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("autocomplete navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'afstemningsomraader/autocomplete';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'ho';
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med ho')
+      // postnumre.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("reverse geokodning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'afstemningsomraader';
+    options.qs= {cache: 'no-cache'};
+    options.qs.x= 9.4808535;      
+    options.qs.y= 56.37780327;
+    //options.qs.nærmeste= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområde= JSON.parse(body);
+      //assert(sogne.length > 0, 'Der burde være sogne, som starter med gr')
       // postnumre.forEach(function (adgangsadresse, index) {
       //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
       // });
@@ -3530,6 +3609,183 @@ describe('Stednavne', function(){
       done(err);
     });
   });
+});
+
+describe('Stednavne2', function(){
+
+  it("stednavnereverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.x= 12.511274124050752;
+    options.qs.y= 55.69826837488762;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
+      stednavne.forEach(function(element) {
+        console.log(element.navn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+
+  it("polygon", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.polygon= '[[[12.509943668963547, 55.69947895194342],[12.51370394018313, 55.69929935996996],[12.51175895655753, 55.69735533932972],[12.509943668963547, 55.69947895194342]]]';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
+      stednavne.forEach(function(element) {
+        console.log(element.navn);
+      });
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.navn= 'Gudenå';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length===1, "Der er burde være en: "+stednavne.length);
+      assert(stednavne[0].sted.kommuner.length > 0, "Der burde være tilknyttet mindst en kommune ")
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("navnestatus", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.navn= 'Gudenå';
+    options.qs.navnestatus= 'officielt';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length===0, "Der er burde ikke være nogen: "+stednavne.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("cirkel", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.cirkel= '12.509943668963547,55.69947895194342,20';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
+      stednavne.forEach(function(element) {
+        console.log(element.navn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("nærmeste", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.x= 9.323853;
+    options.qs.y= 54.989794;
+    options.qs.nærmeste= true;
+    options.qs.undertype= 'mindesten';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length===1, "Der er burde kun være 1: "+stednavne.length);
+      assert(stednavne[0].navn==='Urnehoved Tingsted', "Det er burde kun være Urnehoved Tingsted: "+stednavne[0].navn);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("hovedtypesøgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.hovedtype= 'Begravelsesplads';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 10 begravelsespladser: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("undertypesøgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='stednavne2';
+    options.qs= {};
+    options.qs.undertype= 'ø';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 10 øer: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
 
   it("adresser indeholdt i et stednavns geometri", function(done){
     var options= {};
@@ -3596,6 +3852,184 @@ describe('Stednavne', function(){
     });
   });
 
+
+});
+
+
+describe('Steder', function(){
+
+  it("stednavnereverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.x= 12.511274124050752;
+    options.qs.y= 55.69826837488762;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
+      steder.forEach(function(element) {
+        console.log(element.primærtnavn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+
+  it("polygon", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.polygon= '[[[12.509943668963547, 55.69947895194342],[12.51370394018313, 55.69929935996996],[12.51175895655753, 55.69735533932972],[12.509943668963547, 55.69947895194342]]]';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
+      steder.forEach(function(element) {
+        console.log(element.primærtnavn);
+      });
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("primærtnavn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.primærtnavn= 'Gudenå';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length===1, "Der er burde være en: "+steder.length);
+      assert(steder[0].kommuner.length > 0, "Der burde være tilknyttet mindst en kommune ")
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("primærnavnestatus", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.primærnavnestatus= 'Gudenå';
+    options.qs.navnestatus= 'officielt';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length===0, "Der er burde ikke være nogen: "+steder.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("cirkel", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.cirkel= '12.509943668963547,55.69947895194342,20';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
+      steder.forEach(function(element) {
+        console.log(element.navn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("nærmeste", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.x= 9.323853;
+    options.qs.y= 54.989794;
+    options.qs.nærmeste= true;
+    options.qs.undertype= 'mindesten';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length===1, "Der er burde kun være 1: "+steder.length);
+      assert(steder[0].primærtnavn==='Urnehoved Tingsted', "Det er burde kun være Urnehoved Tingsted: "+steder[0].navn);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("hovedtypesøgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.hovedtype= 'Begravelsesplads';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 10 begravelsespladser: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("undertypesøgning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.undertype= 'ø';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var stednavne= JSON.parse(response.body);
+      assert(stednavne.length>10, "Der er burde være mindst 10 øer: "+stednavne.length);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
 
 });
 
