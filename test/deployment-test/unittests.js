@@ -3958,7 +3958,7 @@ describe('Steder', function(){
       var steder= JSON.parse(response.body);
       assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
       steder.forEach(function(element) {
-        console.log(element.navn);
+        console.log(element.primærtnavn);
       });
       done();
     })
