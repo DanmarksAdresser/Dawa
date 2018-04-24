@@ -20,11 +20,13 @@ const importDagiImpl = require('../dagiImport/importDagiImpl');
 const featureMappingsNew = require('../dagiImport/featureMappingsNew');
 const featureMappingsDatafordeler = require('../dagiImport/featureMappingsDatafordeler');
 const featureMappingsZone = require('../dagiImport/featureMappingsZone');
+const importStednavneImpl = require('../stednavne/importStednavneImpl');
 
 const { makeChangesNonPublic }= require('../importUtil/materialize');
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string'],
-  temaDir: [false, 'Directory med DAGI-temaer', 'string']
+  temaDir: [false, 'Directory med DAGI-temaer', 'string'],
+  stednavnFile: [false, 'Fil med stednavne', 'string']
 };
 
 const selectKode = `(fields ->> 'kode') :: SMALLINT`;
@@ -91,8 +93,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     connString: options.pgConnectionUrl,
     pooled: false
   });
-
-  proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+  go(function*() {
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
       yield client.query(dar10Schema);
       yield client.query('DROP MATERIALIZED VIEW IF EXISTS kommuner CASCADE;DROP MATERIALIZED VIEW IF EXISTS regioner CASCADE;');
       yield client.query(`alter database dawadb set join_collapse_limit=20;alter database dawadb set from_collapse_limit=20;`);
@@ -270,24 +272,38 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
       yield client.query('analyze');
       yield importDar09Impl.updateSupplerendeBynavne(client);
       yield migrateZone(client);
-    yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
-    logger.info('Migrerer storkreds og valglandsdel');
+    }));
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+      yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
+      logger.info('Migrerer storkreds og valglandsdel');
       yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
         yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsNew), featureMappingsNew, options.temaDir, '', 10000000);
       }));
-    logger.info('Migrerer resterende temaer');
-    yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
-      yield importDagiImpl.importTemaerWfsMulti(client, txid, Object.keys(featureMappingsDatafordeler), featureMappingsDatafordeler, options.temaDir, '', 10000000);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.supplerendebynavntilknytninger);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.afstemningsomraadetilknytninger);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.menighedsraadsafstemningsomraadetilknytninger);
     }));
-    logger.info('Migrerer zoner');
-    yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
-      yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsZone), featureMappingsZone, options.temaDir, '', 10000000);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.zonetilknytninger);
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+      logger.info('Migrerer resterende temaer');
+      yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+        yield importDagiImpl.importTemaerWfsMulti(client, txid, Object.keys(featureMappingsDatafordeler), featureMappingsDatafordeler, options.temaDir, '', 10000000);
+        yield makeChangesNonPublic(client, txid, tableSchema.tables.supplerendebynavntilknytninger);
+        yield makeChangesNonPublic(client, txid, tableSchema.tables.afstemningsomraadetilknytninger);
+        yield makeChangesNonPublic(client, txid, tableSchema.tables.menighedsraadsafstemningsomraadetilknytninger);
+      }));
     }));
-    }
-  )).done();
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+        logger.info('Migrerer zoner');
+        yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+          yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsZone), featureMappingsZone, options.temaDir, '', 10000000);
+          yield makeChangesNonPublic(client, txid, tableSchema.tables.zonetilknytninger);
+        }));
+      }
+    ));
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+        logger.info('Migrerer stednavne');
+        yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+          yield importStednavneImpl.importStednavne(client, txid, options.stednavnFile);
+        }));
+      }
+    ));
+  }).asPromise().done();
 });
 
