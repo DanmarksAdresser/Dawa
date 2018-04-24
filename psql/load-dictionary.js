@@ -4,7 +4,7 @@ const { go } = require('ts-csp');
 
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
 var proddb = require('./proddb');
-var sqlCommon = require('./common');
+const _ = require('underscore');
 const schemaModel = require('./tableModel');
 const {deriveColumn } = require('../importUtil/tableModelUtil');
 var optionSpec = {
@@ -42,11 +42,11 @@ ALTER TEXT SEARCH CONFIGURATION adresser_query
   ALTER MAPPING FOR asciiword,word,numword,asciihword,hword,numhword
   WITH adresser_unaccent_${options.version}, simple;
 `);
-    yield sqlCommon.disableTriggersQ(client);
-    for(let table of ['postnumre', 'ejerlav', 'vejstykker', 'adgangsadresser_mat', 'adresser_mat', 'temaer', 'supplerendebynavne']) {
-      const tableModel = schemaModel.tables[table];
-      yield deriveColumn(client, table, tableModel, 'tsv');
+    for(let tableModel of Object.values(schemaModel.tables)) {
+      const tsvColumn = _.findWhere(tableModel.colums, {name: 'tsv'});
+      if(tsvColumn) {
+        yield deriveColumn(client, tableModel.table, tableModel, 'tsv');
+      }
     }
-    yield sqlCommon.enableTriggersQ(client);
   })).done();
 });
