@@ -16,7 +16,7 @@ var assert = require("assert")
 var host= "http://dawa.aws.dk";
 //var host= "http://52.212.234.159";
 
-if (process.env.URL) host= process.env.URL; // windows: set URL=http://dawa-p1.aws.dk, mac: URL=http://dawa-p1.aws.dk mocha unittest.js -t 20000
+if (process.env.URL) host= process.env.URL; // windows: set URL=http://dawa-p1.aws.dk, mac: URL=http://dawa-p1.aws.dk mocha unittests.js -t 20000
 console.log(host);
 
 
@@ -351,8 +351,10 @@ describe('Adresseopslag', function(){
 
         let bydel= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Grøndal','bydel'));
         let by= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('København', 'by'));
-       
-        assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 3");
+
+
+        assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 2");
+        
         assert(bydel, 'Mangler bydel Grøndal');
         assert(by, 'Mangler by København');
 
