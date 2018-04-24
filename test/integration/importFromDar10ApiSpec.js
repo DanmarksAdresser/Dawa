@@ -10,6 +10,7 @@ const importDarImpl = require('../../dar10/importDarImpl');
 const importFromApiImpl = require('../../dar10/importFromApiImpl');
 const testdb = require('../helpers/testdb2');
 const { withImportTransaction } = require('../../importUtil/importUtil');
+const moment = require('moment');
 
 
 q.longStackSupport = true;
@@ -180,7 +181,9 @@ describe('Import from DAR 1.0 API', () => {
         darClient,
         {
           Postnummer: 5
-        });
+        },
+        moment().toISOString(),
+        50);
       const records = (yield client.queryp('select * from dar1_postnummer order by rowkey')).rows;
       expect(records).to.have.length(2);
       const first = records[0];
