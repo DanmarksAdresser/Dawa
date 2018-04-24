@@ -10,29 +10,13 @@ const logger = require('../logger').forCategory('dagiToDb');
 const { importTemaerWfs,importTemaerWfsMulti } = require('./importDagiImpl');
 const featureMappingsNew = require('./featureMappingsNew');
 const featureMappingsDatafordeler = require('./featureMappingsDatafordeler');
+const featureMappingsZone = require('./featureMappingsZone');
 const proddb = require('../psql/proddb');
 const {makeAllChangesNonPublic} = require('../importUtil/materialize');
 
-function parseInteger(str) {
-  return parseInt(str, 10);
-}
-
 const featureMappingsMap = {
   newDagi: featureMappingsNew,
-  zone: {
-    zone: {
-      name: 'theme_pdk_zonekort_v',
-      wfsName: 'theme_pdk_zonekort_v',
-      geometry: 'geometri',
-      fields: {
-        zone: {
-          name: 'zone',
-          parseFn: parseInteger
-        }
-      },
-      filterFn: function() { return true; }
-    }
-  },
+  zone: featureMappingsZone,
   datafordeler: featureMappingsDatafordeler
 };
 

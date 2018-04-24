@@ -15,7 +15,7 @@ const optionSpec = {
   pretend: [false, 'Rul transaktion tilbage (ingen ændringer)', 'boolean', false],
   noDaemon: [false, 'Kør kun én import', 'boolean', false],
   importFuture: [false, 'Anvend virkningstid 14 dage i fremtiden i stedet for aktuel tid', 'boolean', false],
-  oneTxOnly: [false, 'Gennemfør kun én transaktion fra DAR 1.0', 'boolean', false]
+  maxTransactions: [false, 'max antal transaktioner der gennemføres', 'number', 50]
 };
 
 runImporter("importDar10Daemon", optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), function(args, options) {
@@ -29,7 +29,7 @@ runImporter("importDar10Daemon", optionSpec, _.without(_.keys(optionSpec), 'noti
     options.pretend,
     options.noDaemon,
     options.importFuture,
-    options.oneTxOnly);
+    options.maxTransactions);
 });
 
 

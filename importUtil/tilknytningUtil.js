@@ -33,14 +33,15 @@ const generateTilknytningMatView = (tilknytningModel) => {
         SELECT ${relatedKey.join(', ')} 
         FROM ${relatedTable} related 
         WHERE ST_Covers(related.geom, a.geom) 
-        ORDER BY a.id LIMIT 1) related ON true);`
+        LIMIT 1) related ON true);`
   }
   else {
-    sql += `CREATE VIEW ${viewName} AS 
-      (SELECT DISTINCT ${selectKeyClause} 
-      FROM adgangsadresser_mat a 
-      JOIN ${relatedTable} related
-      ON ST_Covers(related.geom, a.geom));`;
+    sql += `CREATE VIEW ${viewName} AS (SELECT ${selectKeyClause}
+        FROM adgangsadresser_mat a
+        JOIN LATERAL (
+        SELECT distinct ${relatedKey.join(', ')} 
+        FROM ${relatedTable} related 
+        WHERE ST_Covers(related.geom, a.geom)) related ON true);`
   }
   return sql;
 };
