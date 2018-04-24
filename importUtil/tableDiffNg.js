@@ -228,16 +228,18 @@ const migrateInserts = (client, txid, tableModel) => {
   const changeTableName = `${tableModel.table}_changes`;
   const historyTableName = `${tableModel.table}_history`;
   const sql = `WITH inserts AS (SELECT
+  txid,
                    valid_from,
                    ${selectFields}
                  FROM ${historyTableName} h
-                 WHERE valid_from IS NULL OR NOT EXISTS
+                 join transaction_history th on h.valid_from = th.sequence_number
+                  WHERE valid_from IS NULL OR NOT EXISTS
                  (SELECT *
                   FROM ${historyTableName} h2
                   WHERE h2.valid_to = h.valid_from))
 INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectFields})
   (SELECT
-     ${txid},
+     COALESCE(txid, 1),
      valid_from,
      'insert',
      TRUE,
@@ -252,16 +254,18 @@ const migrateUpdates = (client, txid, tableModel) => {
   const historyTableName = `${tableModel.table}_history`;
   const sql = `WITH updates AS
 (SELECT
+   txid,
    valid_from,
    ${selectFields}
  FROM ${historyTableName} h
+ join transaction_history th on h.valid_from = th.sequence_number
  WHERE valid_from IS NOT NULL AND EXISTS
  (SELECT *
   FROM ${historyTableName} h2
   WHERE h2.valid_to = h.valid_from))
 INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectFields})
   (SELECT
-     ${txid},
+     COALESCE(txid, 1),
      valid_from,
      'update',
      TRUE,
@@ -270,19 +274,20 @@ INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectField
   return client.query(sql);
 };
 
-const migrateDeletes = (client, tid, tableModel) => {
+const migrateDeletes = (client, txid, tableModel) => {
   const selectFields = selectList(null, publicColumnNames(tableModel));
   const changeTableName = `${tableModel.table}_changes`;
   const historyTableName = `${tableModel.table}_history`;
-  const sql = `WITH deletes AS (select valid_to, ${selectFields}
+  const sql = `WITH deletes AS ( select txid, valid_to, ${selectFields}
 FROM ${historyTableName} h
+join transaction_history th on h.valid_to = th.sequence_number
 WHERE valid_to IS NOT NULL AND NOT EXISTS
 (SELECT *
  FROM ${historyTableName} h2
  WHERE h2.valid_from = h.valid_to))
 INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectFields})
   (SELECT
-     1,
+     COALESCE(txid, 1),
      valid_to,
      'delete',
      TRUE,
