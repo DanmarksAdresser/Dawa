@@ -10,14 +10,21 @@ const tableSchema = require('./tableModel');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const proddb = require('./proddb');
 const {withImportTransaction, withMigrationTransaction} = require('../importUtil/importUtil');
-const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
+const logger = require('../logger').forCategory('Migrering');
+
 const {refreshSubdividedTable} = require('../importUtil/geometryImport');
 const dar10Schema = require('../dar10/generateSqlSchemaImpl');
 const importDar09Impl = require('../darImport/importDarImpl');
 const importBrofasthedImpl = require('../stednavne/importBrofasthedImpl');
+const importDagiImpl = require('../dagiImport/importDagiImpl');
+const featureMappingsNew = require('../dagiImport/featureMappingsNew');
+const featureMappingsDatafordeler = require('../dagiImport/featureMappingsDatafordeler');
+const featureMappingsZone = require('../dagiImport/featureMappingsZone');
 
+const { makeChangesNonPublic }= require('../importUtil/materialize');
 const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
+  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string'],
+  temaDir: [false, 'Directory med DAGI-temaer', 'string']
 };
 
 const selectKode = `(fields ->> 'kode') :: SMALLINT`;
@@ -69,7 +76,7 @@ const SELECT_JSON_FIELD = {
   }
 };
 
-const migrateZone = client => go(function*() {
+const migrateZone = client => go(function* () {
   const table = 'zoner';
   // ensure byzone and sommerhusområde do not overlap
   yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference(geom, (select geom from ${table} where zone = 1))) WHERE zone = 3`);
@@ -105,21 +112,21 @@ CREATE SEQUENCE rowkey_sequence START 1;
       create index on stedtilknytninger(stedid, adgangsadresseid);
       ALTER TABLE stednavne RENAME TO stednavne_legacy;
       `);
-    yield client.query(fs.readFileSync('psql/schema/tables/stednavne.sql', {encoding: 'utf8'}));
-    yield client.query(fs.readFileSync('psql/schema/tables/steder_divided.sql', {encoding: 'utf8'}));
-    yield client.query(fs.readFileSync('psql/schema/tables/brofasthed.sql', {encoding: 'utf8'}));
-    yield client.query(fs.readFileSync('psql/schema/tables/ikke_brofaste_adresser.sql', {encoding: 'utf8'}));
-    yield createChangeTable(client, tableSchema.tables.steder);
-    yield createChangeTable(client, tableSchema.tables.stednavne);
-    yield createChangeTable(client, tableSchema.tables.brofasthed);
-    yield createChangeTable(client, tableSchema.tables.ikke_brofaste_adresser);
-    yield client.query(`
+      yield client.query(fs.readFileSync('psql/schema/tables/stednavne.sql', {encoding: 'utf8'}));
+      yield client.query(fs.readFileSync('psql/schema/tables/steder_divided.sql', {encoding: 'utf8'}));
+      yield client.query(fs.readFileSync('psql/schema/tables/brofasthed.sql', {encoding: 'utf8'}));
+      yield client.query(fs.readFileSync('psql/schema/tables/ikke_brofaste_adresser.sql', {encoding: 'utf8'}));
+      yield createChangeTable(client, tableSchema.tables.steder);
+      yield createChangeTable(client, tableSchema.tables.stednavne);
+      yield createChangeTable(client, tableSchema.tables.brofasthed);
+      yield createChangeTable(client, tableSchema.tables.ikke_brofaste_adresser);
+      yield client.query(`
     insert into steder(id, hovedtype, undertype, bebyggelseskode, visueltcenter,geom, ændret, geo_ændret, geo_version)
     (select id, hovedtype, undertype, bebyggelseskode, visueltcenter,geom, ændret, geo_ændret, geo_version from stednavne_legacy);
     insert into stednavne(stedid, navn, navnestatus, brugsprioritet, tsv) (select id, navn, navnestatus, 'primær', tsv FROM stednavne_legacy); 
     `);
 
-    yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavne-view.sql', {encoding: 'utf8'}));
+      yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavne-view.sql', {encoding: 'utf8'}));
       yield createChangeTable(client, tableSchema.tables.jordstykker_adgadr);
       yield createChangeTable(client, tableSchema.tables.jordstykker);
       yield createChangeTable(client, tableSchema.tables.stednavne);
@@ -188,10 +195,10 @@ CREATE INDEX IF NOT EXISTS navngivenvej_postnummer_postnummer_id_idx ON navngive
 CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_postnummer_id_id_idx ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);`);
 
       yield client.query(fs.readFileSync('psql/schema/tables/tilknytninger_mat.sql', {encoding: 'utf8'}));
-    yield client.query(fs.readFileSync('psql/schema/tables/navngivenvejkommunedel_postnr_mat.sql', {encoding: 'utf8'}));
-    yield createChangeTable(client, tableSchema.tables.navngivenvejkommunedel_postnr_mat);
-    // opret korrekte indices til udtræk
-    yield client.query(`
+      yield client.query(fs.readFileSync('psql/schema/tables/navngivenvejkommunedel_postnr_mat.sql', {encoding: 'utf8'}));
+      yield createChangeTable(client, tableSchema.tables.navngivenvejkommunedel_postnr_mat);
+      // opret korrekte indices til udtræk
+      yield client.query(`
 DROP INDEX adgangsadresser_changes_id_changeid_idx;
 CREATE INDEX ON adgangsadresser_changes(id, txid desc nulls last, changeid desc nulls last);
 DROP INDEX enhedsadresser_changes_id_changeid_idx;
@@ -204,7 +211,7 @@ DROP INDEX postnumre_changes_nr_changeid_idx;
 CREATE INDEX ON postnumre_changes(nr, txid desc nulls last, changeid desc nulls last);
 CREATE INDEX ON vejstykkerpostnumremat_changes(kommunekode, vejkode, postnr, txid desc nulls last, changeid desc nulls last);
 `);
-    const migratedTemas = temaModels.modelList.filter(tema => !!SELECT_JSON_FIELD[tema.singular]);
+      const migratedTemas = temaModels.modelList.filter(tema => !!SELECT_JSON_FIELD[tema.singular]);
       yield reloadDatabaseCode(client, 'psql/schema');
       for (let tema of migratedTemas) {
         const fieldNames = tema.fields.map(field => field.name).filter(name => !!(SELECT_JSON_FIELD[tema.singular][name]));
@@ -263,10 +270,23 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
       yield client.query('analyze');
       yield importDar09Impl.updateSupplerendeBynavne(client);
       yield migrateZone(client);
+    yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
+    logger.info('Migrerer storkreds og valglandsdel');
       yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
-        yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
+        yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsNew), featureMappingsNew, options.temaDir, '', 10000000);
       }));
-      yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
+    logger.info('Migrerer resterende temaer');
+    yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+      yield importDagiImpl.importTemaerWfsMulti(client, txid, Object.keys(featureMappingsDatafordeler), featureMappingsDatafordeler, options.temaDir, '', 10000000);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.supplerendebynavntilknytninger);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.afstemningsomraadetilknytninger);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.menighedsraadsafstemningsomraadetilknytninger);
+    }));
+    logger.info('Migrerer zoner');
+    yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+      yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsZone), featureMappingsZone, options.temaDir, '', 10000000);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.zonetilknytninger);
+    }));
     }
   )).done();
 });
