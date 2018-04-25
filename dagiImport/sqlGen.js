@@ -36,12 +36,16 @@ CREATE TABLE ${temaModel.table}_divided(
 CREATE INDEX ON ${temaModel.table}_divided USING GIST(geom);
 CREATE INDEX ON ${temaModel.table}_divided(${temaModel.primaryKey.join(', ')});
   `;
-
-  const tilknytningKeySqls = _.zip(temaModel.tilknytningKey, temaModel.primaryKey).map(([tilknytningKeyName, primaryKeyName]) => {
-    const field = _.findWhere(temaModel.fields, {name: primaryKeyName});
-    return `${tilknytningKeyName} ${field.sqlType}`;
-  });
-  const tilknytningTable = `
+  let sql = `
+${temaTable}
+${temaChangeTable}
+${dividedTable}`;
+  if (!temaModel.withoutTilknytninger) {
+    const tilknytningKeySqls = _.zip(temaModel.tilknytningKey, temaModel.primaryKey).map(([tilknytningKeyName, primaryKeyName]) => {
+      const field = _.findWhere(temaModel.fields, {name: primaryKeyName});
+      return `${tilknytningKeyName} ${field.sqlType}`;
+    });
+    const tilknytningTable = `
 DROP TABLE IF EXISTS  ${temaModel.tilknytningTable} CASCADE;
 CREATE TABLE ${temaModel.tilknytningTable}(
   adgangsadresseid uuid not null,
@@ -50,7 +54,7 @@ CREATE TABLE ${temaModel.tilknytningTable}(
 );
 CREATE INDEX ON ${temaModel.tilknytningTable}(${temaModel.tilknytningKey.join(', ')}, adgangsadresseid);
 `;
-  const tilknytningChangeTable = `
+    const tilknytningChangeTable = `
 DROP TABLE IF EXISTS ${temaModel.tilknytningTable}_changes CASCADE;
 CREATE TABLE ${temaModel.tilknytningTable}_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, ${temaModel.tilknytningTable}.* FROM ${temaModel.tilknytningTable} WHERE false);
 CREATE INDEX ON ${temaModel.tilknytningTable}_changes(adgangsadresseid, ${temaModel.tilknytningKey.join(', ')}, changeid DESC NULLS LAST);
@@ -58,12 +62,11 @@ CREATE INDEX ON ${temaModel.tilknytningTable}_changes(${temaModel.tilknytningKey
 CREATE INDEX ON ${temaModel.tilknytningTable}_changes(changeid DESC NULLS LAST);
 CREATE INDEX ON ${temaModel.tilknytningTable}_changes(txid);
 `;
-  return `
-${temaTable}
-${temaChangeTable}
-${dividedTable}
-${tilknytningTable}
-${tilknytningChangeTable}`;
+    sql +=
+      `${tilknytningTable}
+${tilknytningChangeTable}`
+  }
+  return sql;
 };
 
 const generateAllTemaTables = () => temaModels.modelList.reduce((memo, temaModel) => memo + '\n' + generateTemaTableSql(temaModel), '');
@@ -72,16 +75,18 @@ const generateAllTemaTables = () => temaModels.modelList.reduce((memo, temaModel
 const generateTilknytningMatViews = () =>  {
   let sql ='';
   for (let temaModel of temaModels.modelList) {
-    const tilknytningModel = {
-      relatedTable: `${temaModel.table}_divided`,
-      relationTable: temaModel.tilknytningTable,
-      relatedKey: temaModel.primaryKey,
-      relationKey: temaModel.tilknytningKey,
-      adgangsadresseIdColumn: 'adgangsadresseid',
-      useNearest: temaModel.useNearestForAdgangsadresseMapping,
-      forceUnique: true
-    };
-    sql += generateTilknytningMatView(tilknytningModel);
+    if(!temaModel.withoutTilknytninger) {
+      const tilknytningModel = {
+        relatedTable: `${temaModel.table}_divided`,
+        relationTable: temaModel.tilknytningTable,
+        relatedKey: temaModel.primaryKey,
+        relationKey: temaModel.tilknytningKey,
+        adgangsadresseIdColumn: 'adgangsadresseid',
+        useNearest: temaModel.useNearestForAdgangsadresseMapping,
+        forceUnique: true
+      };
+      sql += generateTilknytningMatView(tilknytningModel);
+    }
   }
   return sql;
 };

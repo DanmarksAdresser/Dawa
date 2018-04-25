@@ -47,13 +47,15 @@ describe('Parameter documentation.', function() {
         });
       });
       const paramsNotDefined = ['kvh', 'kvhx'];
-      for(let paramDoc of docSpec.parameters) {
-        if(!paramsNotDefined.includes(paramDoc.name)) {
-          it(`The documented parameter ${paramDoc.name} should be defined`, () => {
-            const param = _.findWhere([...resource.queryParameters, ...resource.pathParameters],
-              {name: paramDoc.name});
-            expect(param).to.exist;
-          });
+      if(docSpec) {
+        for(let paramDoc of docSpec.parameters) {
+          if(!paramsNotDefined.includes(paramDoc.name)) {
+            it(`The documented parameter ${paramDoc.name} should be defined`, () => {
+              const param = _.findWhere([...resource.queryParameters, ...resource.pathParameters],
+                {name: paramDoc.name});
+              expect(param).to.exist;
+            });
+          }
         }
       }
     });

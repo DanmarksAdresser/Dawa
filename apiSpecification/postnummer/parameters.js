@@ -37,6 +37,13 @@ module.exports = {
       type: 'boolean',
       defaultValue: 'false'
     }
+  ]),
+  landpostnumre: normalizeParameters([
+    {
+      name: 'landpostnumre',
+      type: 'boolean',
+      defaultValue: 'false'
+    }
   ])
 };
 

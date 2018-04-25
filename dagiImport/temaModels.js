@@ -290,6 +290,31 @@ exports.modelList = [{
   tilknytningKey: ['postnummer'],
   useNearestForAdgangsadresseMapping: false
 }, {
+  singular: 'landpostnummer',
+  singularSpecific: 'landpostnummeret',
+  plural: 'landpostnumre',
+  prefix: 'landpostnummer',
+  entity: 'landpostnummer',
+  table: 'landpostnumre',
+  primaryKey: ['nr'],
+  published: false,
+  withoutTilknytninger: true,
+  fields: [
+    {
+      name: 'nr',
+      type: 'string',
+      formatter: kode4String,
+      sqlType: "SMALLINT",
+      nullable: false,
+      schema: commonSchemaDefinitions.kode4,
+      description: 'Postnummeret. 4 cifre.'
+    }, {
+      name: 'navn',
+      type: 'string',
+      nullable: false,
+      description: 'Postnummerets navn.'
+    }],
+}, {
   singular: 'zone',
   singularSpecific: 'zonen',
   plural: 'zoner',

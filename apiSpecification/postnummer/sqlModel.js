@@ -7,8 +7,9 @@ var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 var dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
-var geomQuery = "(select geom from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
-
+const normalGeomQuery = "(select geom from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
+const landpostnummerGeomQuery = "(select geom from landpostnumre where landpostnumre.nr = postnumre.nr limit 1)";
+const geomQueryFunc = params =>  params.landpostnumre ? landpostnummerGeomQuery : normalGeomQuery;
 var columns = {
   kommunekode: {
     select: null,
@@ -35,7 +36,7 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias,geomQuery);
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias,geomQueryFunc(params));
     }
   },
   kommuner: {
@@ -63,8 +64,8 @@ var baseQuery = function () {
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
-  sqlParameterImpl.geomWithin(geomQuery),
-  sqlParameterImpl.reverseGeocodingWithin(geomQuery),
+  sqlParameterImpl.geomWithin(geomQueryFunc),
+  sqlParameterImpl.reverseGeocodingWithin(geomQueryFunc),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key, true)

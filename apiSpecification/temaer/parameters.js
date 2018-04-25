@@ -30,6 +30,27 @@ kodeAndNavnTemaer.forEach(function(dagiTemaNavn) {
   module.exports[dagiTemaNavn] = kodeAndNavn;
 });
 
+module.exports.landpostnummer = {
+  id: normalizeParameters([
+    {
+      name: 'nr',
+      type: 'integer'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'navn',
+      multi: true
+    },
+    {
+      name: 'nr',
+      type: 'integer',
+      multi: true
+    }
+  ])
+};
+
+
 module.exports.opstillingskreds = {
   id: normalizeParameters([
     {

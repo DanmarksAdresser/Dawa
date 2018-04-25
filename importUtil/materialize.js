@@ -150,7 +150,9 @@ const materializeDawa = (client, txid) => go(function* () {
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.stedtilknytninger);
   for (let model of temaModels.modelList) {
-    yield materialize(client, txid, schemaModel.tables, schemaModel.materializations[model.tilknytningTable]);
+    if(!model.withoutTilknytninger) {
+      yield materialize(client, txid, schemaModel.tables, schemaModel.materializations[model.tilknytningTable]);
+    }
   }
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.tilknytninger_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.ikke_brofaste_adresser);
@@ -158,7 +160,9 @@ const materializeDawa = (client, txid) => go(function* () {
 
 const recomputeTemaTilknytninger = (client, txid, temaModelList) => go(function* () {
   for (let temaModel of temaModelList) {
-    yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations[temaModel.tilknytningTable]);
+    if(!temaModel.withoutTilknytninger) {
+      yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations[temaModel.tilknytningTable]);
+    }
   }
   yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.tilknytninger_mat);
 });
@@ -176,7 +180,7 @@ const recomputeMaterializedDawa = (client, txid) => go(function* () {
 });
 
 const tilknytningTableNames =
-  [...temaModels.modelList.map(model => model.tilknytningTable),
+  [...temaModels.modelList.filter(model => !model.withoutTilknytninger).map(model => model.tilknytningTable),
     'jordstykker_adgadr',
     'stedtilknytninger'];
 

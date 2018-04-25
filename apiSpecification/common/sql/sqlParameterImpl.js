@@ -248,9 +248,15 @@ function polygonTransformer(paramValue) {
 
 // Generates WHERE clauses for whether the queried object intersects a given geometric shape
 // Supported shapes are a poloygon or a circle.
-exports.geomWithin = function (geom) {
-  geom = geom || 'geom';
+exports.geomWithin = function (geomOrFunc) {
   return function (sqlParts, params) {
+    let geom;
+    if(_.isFunction(geomOrFunc)) {
+      geom = geomOrFunc(params);
+    }
+    else {
+      geom = geomOrFunc || 'geom';
+    }
     var srid = params.srid || 4326;
     var sridAlias;
     if (params.polygon || params.cirkel) {
@@ -306,10 +312,16 @@ exports.adgangsadresseGeoFilter = function(sqlParts, params) {
 };
 
 // Adds a where clause which requires the queried object to contain the point specified by the x and y parameters
-exports.reverseGeocodingWithin = function (geom) {
-  geom = geom || 'geom';
-  const reverseGeocoding = exports.reverseGeocoding(geom);
+exports.reverseGeocodingWithin = function (geomOrFunc) {
   return function (sqlParts, params) {
+    let geom;
+    if(_.isFunction(geomOrFunc)) {
+      geom = geomOrFunc(params);
+    }
+    else {
+      geom = geomOrFunc || 'geom';
+    }
+    const reverseGeocoding = exports.reverseGeocoding(geom);
     if (params.reverseGeocodingNearest) {
       return reverseGeocoding(sqlParts, params);
     }

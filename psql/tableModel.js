@@ -461,12 +461,16 @@ const supplerendebynavn_kommune_mat = {
 
 const dagiTables = temaModels.modelList.reduce((memo, temaModel) => {
   memo[temaModel.table] = temaModels.toTableModel(temaModel);
-  memo[temaModel.tilknytningTable] = temaModels.toTilknytningTableModel(temaModel);
+  if(!temaModel.withoutTilknytninger) {
+    memo[temaModel.tilknytningTable] = temaModels.toTilknytningTableModel(temaModel);
+  }
   return memo;
 }, {});
 
 const dagiMaterializations = temaModels.modelList.reduce((memo, temaModel) => {
-  memo[temaModel.tilknytningTable] = temaModels.toTilknytningMaterialization(temaModel);
+  if (!temaModel.withoutTilknytninger) {
+    memo[temaModel.tilknytningTable] = temaModels.toTilknytningMaterialization(temaModel);
+  }
   return memo;
 }, {});
 

@@ -16,7 +16,8 @@ module.exports = [
       crs: commonParameters.crs,
       struktur: commonParameters.struktur,
       geomWithin: commonParameters.geomWithin,
-      stormodtagerFilter: parameters.stormodtagerFilter
+      stormodtagerFilter: parameters.stormodtagerFilter,
+      landpostnumre: parameters.landpostnumre
     }, representations,
     sqlModel),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
@@ -24,12 +25,15 @@ module.exports = [
     autocomplete: commonParameters.autocomplete,
     stormodtagerFilter: parameters.stormodtagerFilter
   }, representations.autocomplete, sqlModel),
-  resourcesUtil.reverseGeocodingResourceSpec('/postnumre/reverse', representations, sqlModel),
+  resourcesUtil.reverseGeocodingResourceSpec('/postnumre/reverse', representations, sqlModel, {
+    landpostnumre: parameters.landpostnumre
+  }),
   resourcesUtil.getByKeyResourceSpec(
     nameAndKey, parameters.id,
     {
       crs: commonParameters.crs,
-      struktur: commonParameters.struktur
+      struktur: commonParameters.struktur,
+      landpostnumre: parameters.landpostnumre
     },
     representations,
     sqlModel)

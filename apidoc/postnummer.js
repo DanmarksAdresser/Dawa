@@ -24,6 +24,11 @@ const nrParameter = {
   examples: ['2690', '8600']
 };
 
+const landpostnumreParam = {
+  name: 'landpostnumre',
+  doc: 'Hvis denne parameter er sat vil den returnerede geometri for postnumre være afgrænset af kyster.'
+};
+
 const postnummerParameters = [nrParameter,
   {
     name: 'navn',
@@ -68,7 +73,11 @@ module.exports = [
     path: '/postnumre',
     subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
     parameters:
-      postnummerParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('postnumre')).concat([strukturParameter]),
+      [...postnummerParameters,
+        landpostnumreParam,
+        ...dagiSridCirkelPolygonParameters('postnumre'),
+        ...formatAndPagingParams,
+        strukturParameter],
     examples:
       [{description: 'Hent alle postnumre', query: []},
         {
@@ -97,7 +106,7 @@ module.exports = [
     entity: 'postnummer',
     subtext: 'Modtag postnummer med id.',
     parameters:
-      [nrParameter].concat([strukturParameter]),
+      [nrParameter].concat([landpostnumreParam, strukturParameter]),
     nomulti:
       true,
     examples:
@@ -123,7 +132,7 @@ module.exports = [
     entity: 'postnummer',
     subtext: 'Modtage postnummeret for det punkt der angives med x- og y-parametrene',
     parameters:
-      reverseGeocodingParameters.concat([strukturParameter]),
+      reverseGeocodingParameters.concat([landpostnumreParam, strukturParameter]),
     nomulti:
       true,
     examples:

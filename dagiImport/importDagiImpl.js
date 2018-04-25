@@ -158,7 +158,12 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     // Vi gemmer ikke historik på temaer.
     yield client.query(`DELETE FROM ${tableModel.table}_changes`);
   }
-  yield recomputeTemaTilknytninger(client, txid, temaNames.map(temaName => temaModels.modelMap[temaName]));
+  const hasTilknytninger = temaNames.map(temaName => temaModels.modelMap[temaName])
+    .filter(temaModel => !temaModel.withoutTilknytninger)
+    .length > 0;
+  if(hasTilknytninger) {
+    yield recomputeTemaTilknytninger(client, txid, temaNames.map(temaName => temaModels.modelMap[temaName]));
+  }
   yield client.query(`DELETE FROM tilknytninger_mat_changes`);
 });
 
@@ -182,9 +187,26 @@ const importSingleTema = (client, txid, temaModel, temaData, maxChanges) => go(f
   yield importTemaer(client, txid, [temaModel.singular], null, null, maxChanges, storeTemaFn);
 });
 
+const importLandpostnummer = (client, txid) =>  {
+  const storeTemaFn = (client, temaDef, dataDir, filePrefix, targetTable) => {
+    return client.query(`
+  CREATE TEMP TABLE ${targetTable} AS (
+  WITH dkgeom AS (SELECT ST_Union(geom) AS dkgeom
+                  FROM regioner)
+  SELECT
+    nr,
+    navn,
+    st_multi(ST_CollectionExtract(st_intersection(dkgeom, geom), 3)) as geom
+  FROM dagi_postnumre
+    JOIN dkgeom on true)`)
+  };
+  return importTemaer(client, txid, ['landpostnummer'], null, null, 10000000, storeTemaFn);
+};
+
 module.exports = {
   importTemaerWfs,
   importTemaerWfsMulti,
   importTemaerJson,
-  importSingleTema
+  importSingleTema,
+  importLandpostnummer: importLandpostnummer
 };

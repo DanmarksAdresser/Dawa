@@ -463,7 +463,9 @@ module.exports = {
 };
 
 for (let temaModel of temaModels.modelList) {
-  module.exports[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningModel(temaModel);
+  if(!temaModel.withoutTilknytninger) {
+    module.exports[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningModel(temaModel);
+  }
 }
 
 for(let [entityName, model] of Object.entries( darReplikeringModels.currentReplikeringModels)) {
