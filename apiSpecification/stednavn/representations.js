@@ -42,8 +42,7 @@ exports.json = {
         enum: ['primær', 'sekundær'],
         description: 'Angiver stednavnets brugsprioritet. Et sted har et primært stednavn og 0 eller flere sekundære stednavne. Mulige værdier: primær, sekundær'
       },
-      sted: {
-      }
+      sted: Object.assign({}, stedRepresentations.json.schema, {description: 'Stedet, som stednavnet tilhører'})
     },
     docOrder: ['href', 'navn', 'navnestatus', 'brugsprioritet', 'sted']
   }),

@@ -43,6 +43,7 @@ exports.json = {
       },
       sekundærenavne: {
         type: 'array',
+        description: 'Stedets sekundære navne',
         items: schemaObject({
           properties: {
             navn: {
@@ -70,6 +71,7 @@ exports.json = {
       },
       visueltcenter: {
         type: nullableType('array'),
+        description: 'Koordinater for stedets visuelle center. Kan eksempelvis benyttes til at placere stedets navn på et kort.',
         items: {
           type: 'number'
         }
