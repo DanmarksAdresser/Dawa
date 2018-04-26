@@ -68,7 +68,7 @@ CREATE OR REPLACE VIEW adresser AS
     A.vejpunkt_noejagtighedsklasse,
     A.vejpunkt_tekniskstandard,
     A.vejpunkt_geom,
-    NOT EXISTS(SELECT * FROM ikke_brofaste_adresser iba where A.id = iba.adgangsadresseid) as brofast,
+    NOT EXISTS(SELECT * FROM ikke_brofaste_adresser iba where A.adgangsadresseid = iba.adgangsadresseid) as brofast,
     COALESCE((select json_agg(CAST((b.id, b.kode, b.type, b.navn) AS BebyggelseRef)) FROM stedtilknytninger ba
       JOIN bebyggelser_view b ON ba.stedid = b.id WHERE  ba.adgangsadresseid = A.adgangsadresseid),'[]'::json)  as bebyggelser,
     A.tsv as e_tsv
