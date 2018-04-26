@@ -95,8 +95,8 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
 });
 
 const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() {
-  yield client.query(`CREATE TEMP TABLE desired_jordstykker AS (SELECT ${jordstykkeColumns.join(',')}, geom FROM jordstykker WHERE false)`);
-  yield client.query(`CREATE TEMP TABLE actual_jordstykker AS (SELECT ${jordstykkeColumns.join(',')}, geom FROM jordstykker WHERE false)`);
+  yield client.query(`CREATE TEMP TABLE desired_jordstykker AS (SELECT jordstykker.* FROM jordstykker WHERE false)`);
+  yield client.query(`CREATE TEMP TABLE actual_jordstykker AS (SELECT jordstykker.* FROM jordstykker WHERE false)`);
   const files = fs.readdirSync(srcDir).filter(function (file) {
     return /^.+\.zip$/.test(file);
   });
