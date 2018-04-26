@@ -383,6 +383,18 @@ module.exports = {
           ' der er tilknyttet en organisation der modtager en større mængde post.'
         }]
     },
+  stedtilknytning: {
+    key: ['adgangsadresseid', 'stedid'],
+    attributes: [{
+      name: 'stedid',
+      type: 'uuid',
+      description: 'stedets ID',
+    }, {
+      name: 'adgangsadresseid',
+      type: 'uuid',
+      description: 'adgangsadressens ID'
+    }]
+  },
   stednavntilknytning: {
     key: ['stednavn_id', 'adgangsadresse_id'],
     attributes: [{

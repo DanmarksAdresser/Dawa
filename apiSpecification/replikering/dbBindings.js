@@ -151,11 +151,25 @@ const unnormalizedBindings = {
       }
     }
   },
+  stedtilknytning: {
+    path: '/replikering/stednavntilknytninger',
+    table: 'stedtilknytninger',
+    legacyResource: false,
+    attributes: {
+    }
+  },
   stednavntilknytning: {
     path: '/replikering/stednavntilknytninger',
     table: 'stedtilknytninger',
     legacyResource: true,
-    attributes: {}
+    attributes: {
+      stednavn_id: {
+        column: 'stedid'
+      },
+      adgangsadresse_id: {
+        column: 'adgangsadresseid'
+      }
+    }
   },
   vejstykke: {
     path: '/replikering/vejstykker',

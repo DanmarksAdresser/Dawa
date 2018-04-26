@@ -29,6 +29,13 @@ på replikerings-API'et.`,
       heading: 'Seneste transaktion',
       anchor: 'senestetransaktion',
       path: '/replikering/senestetransaktion'
+    },
+    {
+      type: 'endpoint',
+      heading: 'Datamodel (maskinlæsbar)',
+      anchor: 'senestetransaktion',
+      path: '/replikering/datamodel'
     }
+
   ]
 };
