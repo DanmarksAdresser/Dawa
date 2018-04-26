@@ -738,6 +738,25 @@ describe('Vejstykkesøgning', function(){
     });
   });
 
+  it("reverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/vejstykker/reverse';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.x= 12.510814300000002;
+    options.qs.y= 55.69837060000;
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var vejstykker= JSON.parse(response.body);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
 });
 
 describe('Unik vejstykke', function(){
