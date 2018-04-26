@@ -1271,6 +1271,84 @@ it("autocomplete nr", function(done){
 
 });
 
+
+describe('Menighedsrådsafstemningsområder', function(){
+
+  it("q=Tri*", function(done){
+    request(encodeURI(host+"/menighedsraadsafstemningsomraader?q=tri*&cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      var navn= afstemningsområder[0].navn;
+
+      //console.log(util.inspect(bynavne[0]));
+      //console.log(navn);
+      assert(navn.search('Tri')!=-1,"Navn indeholder ikke Tri")
+      done();
+    })
+  })
+
+it("autocomplete nr", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader/autocomplete';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= '4';
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med 4')
+      // opstillingskredse.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("autocomplete navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader/autocomplete';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'ho';
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med ho')
+      // postnumre.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("reverse geokodning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader';
+    options.qs= {cache: 'no-cache'};
+    options.qs.x= 9.4808535;      
+    options.qs.y= 56.37780327;
+    //options.qs.nærmeste= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområde= JSON.parse(body);
+      //assert(sogne.length > 0, 'Der burde være sogne, som starter med gr')
+      // postnumre.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+});
+
 describe('Opstillingskredssøgning', function(){
 
   it("q=nør*", function(done){
