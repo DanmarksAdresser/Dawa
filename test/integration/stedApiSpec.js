@@ -7,7 +7,7 @@ const helpers = require('./helpers');
 const resources = require('../../apiSpecification/vejstykke/resources');
 const testdb = require('../helpers/testdb2');
 
-describe('Vejstykker', () => {
+describe('Sted API', () => {
   const queryResource = resources.query;
   const naboResource = resources.neighbors;
   testdb.withTransactionEach('test', (clientFn) => {
@@ -39,9 +39,7 @@ describe('Vejstykker', () => {
     });
 
     describe('/vejstykker/reverse', () => go(function*(){
-      const result = yield helpers.getJson(clientFn(), naboResource, {
-        x:12.510814300000002, y:55.69837060000
-        }, {});
+      const result = yield helpers.getJson(clientFn(), naboResource, {kommunekode: '329', kode: '4317'}, {});
       assert.strictEqual(result.kode, '6100');
     }));
   });
