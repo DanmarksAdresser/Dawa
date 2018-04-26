@@ -86,8 +86,8 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
     }
   });
   yield streamJordstykkerToTable(client, rows, 'desired_jordstykker');
-  yield client.query(`INSERT INTO actual_jordstykker(${jordstykkeColumns.join(', ')}, geom) 
-  (SELECT ${jordstykkeColumns.join(', ')}, geom FROM jordstykker WHERE ejerlavkode = $1)`,
+  yield client.query(`INSERT INTO actual_jordstykker(${jordstykkeColumns.join(', ')}, ændret, geo_ændret, geo_version, geom) 
+  (SELECT ${jordstykkeColumns.join(', ')}, ændret, geo_ændret, geo_version, geom FROM jordstykker WHERE ejerlavkode = $1)`,
     [ejerlavkode]);
 
   yield setLastUpdated(client, ejerlavkode, ctimeMillis);
