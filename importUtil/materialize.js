@@ -192,8 +192,8 @@ const orderedTableNames = [...dar10HistoryTableNames,
   ...dawaBaseTableNames,
   ...tilknytningTableNames];
 
-// no replication of navngivenvej_postnummer and vejpunkter
-assert(orderedTableNames.length === Object.keys(replikeringDataModel).length + 2);
+// no replication of navngivenvej_postnummer and vejpunkter, but an additional replication of stednavntilknytninger
+assert(orderedTableNames.length === Object.keys(replikeringDataModel).length + 1);
 
 const orderedTableModels = orderedTableNames.map(tableName => {
   assert(schemaModel.tables[tableName], 'table model for ' + tableName);
