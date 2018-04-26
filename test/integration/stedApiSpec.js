@@ -1,46 +1,63 @@
 "use strict";
 
-const{ assert, expect} = require('chai');
+const{ assert} = require('chai');
 const { go } = require('ts-csp');
 
 const helpers = require('./helpers');
-const resources = require('../../apiSpecification/vejstykke/resources');
+const stedResources = require('../../apiSpecification/sted/resources');
+const stednavnResources = require('../../apiSpecification/stednavn/resources');
 const testdb = require('../helpers/testdb2');
 
 describe('Sted API', () => {
-  const queryResource = resources.query;
-  const naboResource = resources.neighbors;
+  const queryResource = stedResources.query;
   testdb.withTransactionEach('test', (clientFn) => {
-    it('Kan finde vejstykker med fuzzy søgning', () => go(function*() {
-      const result = yield helpers.getJson(clientFn(), queryResource, [], {q: 'elliasgade', fuzzy: ''});
-      expect(result).to.not.be.empty;
-      expect(result[0].navn).to.equal('Eliasgade');
+    it('Kan hente steder i geojson format', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, {}, {
+        format: 'geojson'
+      });
+      const features = result.features;
+      assert(features.length > 0);
     }));
-    it('Kan finde vejstykker ud fra regulært udtryk', () => go(function*() {
-      const result = yield helpers.getJson(clientFn(), queryResource, [], {regex: 'marken'});
-      expect(result).to.have.length(2);
-      const names = new Set(result.map(result => result.navn));
-      expect(names.has('Strandmarken')).to.be.true;
-      expect(names.has('Nedermarken')).to.be.true;
+    it('Kan lave reverse geocoding', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, {}, {
+        x: '10.19187927246094',y:'56.13713314002935'
+      });
+      assert(result.length === 1);
+      const sted = result[0];
+      assert.strictEqual(sted.primærtnavn, 'Aarhus');
+    }));
+    it('Kan lave reverse geocoding med srid 25832', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, {}, {
+        x: '574069.4531614',y:'6221982.06594698', srid: '25832'
+      });
+      assert(result.length === 1);
+      const sted = result[0];
+      assert.strictEqual(sted.primærtnavn, 'Aarhus');
     }));
 
-    describe('/vejstykker/{kommunekode}/{kode}/naboer', () => {
-      it('Kan finde naboer som støder direkte op til vejstykke', () => go(function*() {
-        const result = yield helpers.getJson(clientFn(), naboResource, {kommunekode: '329', kode: '4317'}, {});
-        expect(result).to.have.length(2);
-        const names = new Set(result.map(result => result.navn));
-        expect(names.has('Langebjergvej')).to.be.true;
-        expect(names.has('Skeevej')).to.be.true;
-      }));
-      it('Kan finde naboer i GeoJSON format', () => go(function*() {
-        const result = yield helpers.getJson(clientFn(), naboResource, {kommunekode: '329', kode: '4317'}, {format: 'geojson'});
-        expect(result.features).to.have.length(2);
-      }));
-    });
+  });
+});
 
-    describe('/vejstykker/reverse', () => go(function*(){
-      const result = yield helpers.getJson(clientFn(), naboResource, {kommunekode: '329', kode: '4317'}, {});
-      assert.strictEqual(result.kode, '6100');
+describe('Stednavn2 API', () => {
+  const queryResource = stednavnResources.query;
+  testdb.withTransactionEach('test', (clientFn) => {
+    it('Kan finde stednavn via søgning', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, {
+      }, {
+        q: 'Aarhus'
+      });
+      assert(result.length === 1);
+      const stednavn = result[0];
+      assert.strictEqual(stednavn.navn, 'Aarhus');
+    }));
+    it('Kan finde stednavn via fuzzy søgning', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, {}, {
+        q: 'aahrus',
+        fuzzy: ''
+      });
+      assert(result.length > 1);
+      const stednavn = result[0];
+      assert.strictEqual(stednavn.navn, 'Aarhus');
     }));
   });
 });
