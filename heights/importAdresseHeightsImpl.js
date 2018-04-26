@@ -105,7 +105,8 @@ function hoejdeClient(apiUrl, login, password) {
 }
 
 const importFromApi = (client, txid, apiClient) => go(function*() {
-  const rows = (yield client.queryp(`SET enable_seqscan=0;
+  yield client.query('SET enable_seqscan=0');
+  const rows = (yield client.queryp(`
         SELECT id, etrs89oest as x, etrs89nord as y 
         FROM adgangsadresser 
         WHERE etrs89oest IS NOT NULL AND etrs89nord IS NOT NULL AND 

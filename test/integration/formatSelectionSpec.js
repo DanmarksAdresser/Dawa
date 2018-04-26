@@ -1,6 +1,6 @@
 "use strict";
 
-var csv     = require('csv');
+const csvParseSync = require('csv-parse/lib/sync')
 const { expect, assert } = require('chai');
 var request = require("request-promise");
 var _       = require('underscore');
@@ -65,17 +65,13 @@ describe('Format selection', function () {
     });
   });
 
-  it("If format=csv is passed as query parameter, CSV should be returned (single result mode)", function(done) {
+  it("If format=csv is passed as query parameter, CSV should be returned (single result mode)", function() {
     var id = "0a3f50b4-2737-32b8-e044-0003ba298018";
-    request.get("http://localhost:3002/adresser/" + id + "?format=csv", function(error, response, body) {
+    return request.get("http://localhost:3002/adresser/" + id + "?format=csv", function(error, response, body) {
       expect(response.headers['content-type']).to.equal('text/csv; charset=UTF-8');
-      csv()
-        .from.string(body, {columns: true})
-        .to.array(function (data) {
-          expect(data.length).to.equal(1);
-          expect(data[0].id).to.deep.equal(id);
-          done();
-        });
+      const data =csvParseSync(body, {columns: true});
+      expect(data.length).to.equal(1);
+      expect(data[0].id).to.deep.equal(id);
     });
   });
 

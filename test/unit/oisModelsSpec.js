@@ -13,12 +13,12 @@ describe('OIS models', () => {
         expect(model.oisTable).to.be.a.string;
       });
       it('Has a key consisting of one column', () => {
-        expect(model.key).to.be.an.array;
+        expect(model.key).to.be.an('array');
         expect(model.key.length).to.equal(1);
       });
 
       it('Has fields', () => {
-        expect(model.fields).to.be.an.array;
+        expect(model.fields).to.be.an('array');
       });
       for(let field of model.fields) {
         it(`The field ${field.name} is valid`, () => {
@@ -26,7 +26,7 @@ describe('OIS models', () => {
           const validOisTypes = ['tinyint', 'smallint', 'int', 'bigint', 'char', 'varchar', 'uniqueidentifier', 'decimal'];
           expect(_.contains(validOisTypes, field.oisType)).to.be.true;
           if(_.contains(['char', 'varchar', 'decimal'], field.oisType)) {
-            expect(field.oisLength).to.be.a.number;
+            expect(field.oisLength).to.be.a('number');
           }
           else {
             expect(field.oisLength).to.be.undefined;

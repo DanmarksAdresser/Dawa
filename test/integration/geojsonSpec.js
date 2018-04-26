@@ -100,7 +100,7 @@ describe('GeoJSON format', function() {
     return request.get({url: 'http://localhost:3002/vejstykker?navn=Eliasgade&format=geojson&struktur=nestet', json: true}).then(result => {
       const feature = result.features[0];
       expect(Array.isArray(feature.properties.postnumre)).to.be.true;
-      expect(feature.geometry).to.be.an.object;
+      expect(feature.geometry).to.be.an('object');
     });
   });
 
@@ -108,8 +108,8 @@ describe('GeoJSON format', function() {
     return request.get({url: 'http://localhost:3002/adresser?vejnavn=Eliasgade&format=geojson&struktur=nestet', json: true}).then(result => {
       const feature = result.features[0];
       console.dir(result);
-      expect(feature.properties.adgangsadresse.kommune.kommunekode).to.be.a.number;
-      expect(feature.geometry).to.be.an.object;
+      expect(feature.properties.adgangsadresse.kommune.kode).to.match(/\d{4}/);
+      expect(feature.geometry).to.be.an('object');
     });
   });
 

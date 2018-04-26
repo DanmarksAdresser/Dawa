@@ -8,8 +8,7 @@ import scss from 'rollup-plugin-scss'
 import inject from 'rollup-plugin-inject';
 
 export default {
-  entry: 'public/js/dawa.js',
-  moduleName: 'dawa',
+  input: 'public/js/dawa.js',
   plugins: [
     resolve(),
     commonjs(),
@@ -22,9 +21,13 @@ export default {
     babel({
       "presets": [
         "es2015-rollup"
-      ]
+      ],
+      "plugins": ["transform-object-rest-spread"]
     })
   ],
-  format: 'iife',
-  dest: 'dist/js/dawa.js'
+  output: [{
+    name: 'dawa',
+    format: 'iife',
+    file: 'dist/js/dawa.js'
+  }]
 };

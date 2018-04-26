@@ -26,7 +26,7 @@ describe('Parsing and serialization of composite types', function() {
     var literal = '["(12,B)",)';
     var parsedValue = databaseTypes.Range.fromPostgres(literal, databaseTypes.Husnr.fromPostgres);
     expect(parsedValue.upperInfinite).to.be.true;
-    expect(parsedValue.upper).to.not.be.defined;
+    expect(parsedValue.upper).to.not.exist;
     expect(parsedValue.upperOpen).to.be.true;
   });
 

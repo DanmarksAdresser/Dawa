@@ -171,7 +171,7 @@ module.exports = {
       {name: 'ESDH_Ref', oisType: 'varchar', oisLength: 200},
       {name: 'SikKlas', oisType: 'tinyint'},
       {name: 'OPRET_TS', oisType: 'varchar', oisLength: 26, public: true},
-      {name: 'AENDR_TS', oisType: 'varchar', oisLengt: 26, public: true},
+      {name: 'AENDR_TS', oisType: 'varchar', oisLength: 26, public: true},
       {name: 'Aendr_Funk', oisType: 'varchar', oisLength: 40},
       {name: 'Ophoert_ts', oisType: 'varchar', oisLength: 26, public: true},
       {name: 'Gyldighedsdato', oisType: 'varchar', oisLength: 26, public: true}
@@ -217,7 +217,7 @@ module.exports = {
       {name: 'AnvKonvKilde', oisType: 'tinyint'},
       {name: 'BOLIGTYPE_KODE', oisType: 'char', oisLength: 1},
       {name: 'BOLIG_KONDEM', oisType: 'tinyint'},
-      {name: 'IdentOpretDato', oisType: 'varchar', oisLength: '26'},
+      {name: 'IdentOpretDato', oisType: 'varchar', oisLength: 26},
       {name: 'ENH_ARL_SAML', oisType: 'int'},
       {name: 'BEBO_ARL', oisType: 'int'},
       {name: 'ENH_ERHV_ARL', oisType: 'int'},
@@ -259,7 +259,7 @@ module.exports = {
       {name: 'ESDH_Ref', oisType: 'varchar', oisLength: 200},
       {name: 'SikKlas', oisType: 'tinyint'},
       {name: 'OPRET_TS', oisType: 'varchar', oisLength: 26, public: true},
-      {name: 'AENDR_TS', oisType: 'varchar', oisLengt: 26, public: true},
+      {name: 'AENDR_TS', oisType: 'varchar', oisLength: 26, public: true},
       {name: 'Aendr_Funk', oisType: 'varchar', oisLength: 40},
       {name: 'Ophoert_ts', oisType: 'varchar', oisLength: 26, public: true},
       {name: 'Gyldighedsdato', oisType: 'varchar', oisLength: 26, public: true}

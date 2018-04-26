@@ -27,7 +27,7 @@ module.exports = [{
   lead: `DAWA modtager adressedata fra DAR (Danmarks Adresse Register). Vi udstiller rådata fra DAR \
 på replikerings-API'et, når DAR 1.0 tages i produktion (forventet ultimo maj 2018). DAR 1.0 anvender en lidt anden \
 datamodel og begreber end DAWA. Der er endnu ikke udarbejdet dokumentation for de udstillede attributter - der henvises til <a href="http://data.gov.dk/model/">grunddatamodellen.</a> \
-Vær opmærksom på, at struktur, indhold og feltnavne på DAR data er af en intern karakter. Såfremt DAR ændrer i disse, vil\ 
+Vær opmærksom på, at struktur, indhold og feltnavne på DAR data er af en intern karakter. Såfremt DAR ændrer i disse, vil \ 
 replikerings-API'et følge disse ændringer, og dette vil ske uden varsel. Nedenstående strukturer er altså <em>ikke</em> omfattet af
 DAWAs sædvanlige garantier om bagudkompatibiletet.`,
   entities: darReplikeringEntities

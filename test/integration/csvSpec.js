@@ -5,7 +5,7 @@ var request = require("request-promise");
 var q = require('q');
 var _ = require('underscore');
 
-var csv = require('csv');
+const csvParseSync = require('csv-parse/lib/sync')
 var helpers = require('./helpers');
 var registry = require('../../apiSpecification/registry');
 var testdb = require('../helpers/testdb2');
@@ -25,11 +25,8 @@ describe('CSV udtræk', function () {
           resolveWithFullResponse: true
         });
         expect(response.headers['content-type']).to.equal("text/csv; charset=UTF-8");
-        csv()
-          .from.string(response.body, {columns: true})
-          .to.array(function (data) {
-          expect(data.length).to.equal(1);
-        });
+        const data = csvParseSync(response.body, {columns: true});
+        expect(data.length).to.equal(1);
       }));
     });
   });

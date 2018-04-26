@@ -1,22 +1,23 @@
 "use strict";
 
+const { go } = require('ts-csp');
 const expect = require('chai').expect;
 const path = require('path');
-const q = require('q');
+const Promise = require('bluebird');
 
-var testdb = require('../helpers/testdb2');
+const testdb = require('../helpers/testdb2');
 
 const {importFromApi, importHeights } = require('../../heights/importAdresseHeightsImpl');
 const {withImportTransaction} = require('../../importUtil/importUtil');
 
-const successMockClient = () => q.resolve(4.22);
-const failMockClient = () => q.reject(new Error('someError'));
+const successMockClient = () => Promise.resolve(4.22);
+const failMockClient = () => Promise.reject(new Error('someError'));
 const FIRST_ADDRESS_WITHOUT_HEIGHT = '0a3f5082-f256-32b8-e044-0003ba298018';
 
 
 describe('importFromApi', () => {
   testdb.withTransactionEach('test', clientFn=> {
-    it('Can import a height from API', q.async(function*() {
+    it('Can import a height from API', () => go(function*() {
       const previousHeight = (yield clientFn().queryp('select hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0].hoejde;
       expect(previousHeight).to.be.null;
       yield withImportTransaction(clientFn(), "test", txid => importFromApi(clientFn(), txid, successMockClient));
@@ -28,7 +29,7 @@ describe('importFromApi', () => {
       expect(after_mat.hoejde).to.equal(4.2);
     }));
 
-    it('If importing height fails, we will mark the point to not be queried again for 1 day', q.async(function*() {
+    it('If importing height fails, we will mark the point to not be queried again for 1 day', () => go(function*() {
       const previousHeight = (yield clientFn().queryp('select hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0].hoejde;
       expect(previousHeight).to.be.null;
       yield withImportTransaction(clientFn(), "test", txid => importFromApi(clientFn(), txid, failMockClient));
@@ -41,7 +42,7 @@ describe('importFromApi', () => {
 
 describe('Import from CSV', () => {
   testdb.withTransactionEach('test', clientFn => {
-    it('Can perform initial import of højde', q.async(function*() {
+    it('Can perform initial import of højde', () => go(function*() {
       const CSV_POINTS = {
         '0a3f5089-792a-32b8-e044-0003ba298018': 2.8,
         '0a3f5089-792c-32b8-e044-0003ba298018': 2.8

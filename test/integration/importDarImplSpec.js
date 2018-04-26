@@ -5,6 +5,7 @@ var fs = require('fs');
 var path = require('path');
 var q = require('q');
 var _ = require('underscore');
+const { go } = require('ts-csp');
 
 var bitemporal = require('../../darImport/bitemporal');
 var csvSpecs = require('../../darImport/csvSpec');
@@ -141,27 +142,25 @@ describe('Importing DAR CSV files to database', function () {
       var dbSpecImpl = darDbSpecImpls[entityName];
       it('Should import ' + entityName + ' correctly', function () {
         return testdb.withTransaction('empty', 'ROLLBACK', function (client) {
-          return importDarImpl.withDarTransaction(client, 'csv', function() {
-            return importDarImpl.loadCsvFile(client,
+          return importDarImpl.withDarTransaction(client, 'csv', () => go(function*() {
+            yield importDarImpl.loadCsvFile(client,
               path.join(SYNTHETIC_DIR, csvSpec.filename),
-              dbSpecImpl.table,dbSpecImpl, csvSpec).then(function () {
-                return client.queryp("SELECT * FROM " + dbSpecImpl.table, []);
-              }).then(function (result) {
-                expect(result.rows).to.have.length(1);
-                var obj = result.rows[0];
-                if (dbSpecImpl.temporality !== 'bitemporal') {
-                  var registrering = obj.registrering;
-                  delete obj.registrering;
-                  var versionid = obj.versionid;
-                  delete obj.versionid;
-                  expect(registrering.empty).to.be.false;
-                  expect(registrering.lower).to.be.a.string;
-                  expect(registrering.upperInfinite).to.be.true;
-                  expect(versionid).to.be.a.number;
-                }
-                expect(obj).to.deep.equal(syntheticDbContent[entityName]);
-              });
-          });
+              dbSpecImpl.table, dbSpecImpl, csvSpec);
+            const result = yield client.queryRows("SELECT * FROM " + dbSpecImpl.table, []);
+            expect(result).to.have.length(1);
+            var obj = result[0];
+            if (dbSpecImpl.temporality !== 'bitemporal') {
+              var registrering = obj.registrering;
+              delete obj.registrering;
+              var versionid = obj.versionid;
+              delete obj.versionid;
+              expect(registrering.empty).to.be.false;
+              expect(registrering.lower).to.be.a('string');
+              expect(registrering.upperInfinite).to.be.true;
+              expect(versionid).to.be.a('number');
+            }
+            expect(obj).to.deep.equal(syntheticDbContent[entityName]);
+          }));
         });
       });
     });

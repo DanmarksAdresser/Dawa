@@ -59,7 +59,7 @@ describe('Import af DAR 1.0 udtræk', function () {
       // check that DAWA entities has been created
       for (let dawaEntity of Object.keys(dar10TableModels.dawaMaterializations)) {
         const table = dar10TableModels.dawaMaterializations[dawaEntity].table;
-        const count = (yield client.queryp(`SELECT COUNT(*) as c FROM ${table} `)).rows[0].c;
+        const count = (yield client.queryRows(`SELECT COUNT(*)::integer as c FROM ${table} `))[0].c;
         expect(count).to.be.greaterThan(1);
       }
     }));
