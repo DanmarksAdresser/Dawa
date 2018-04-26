@@ -354,7 +354,7 @@ describe('Adresseopslag', function(){
 
 
         assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 2");
-        
+
         assert(bydel, 'Mangler bydel Grøndal');
         assert(by, 'Mangler by København');
 
@@ -4026,6 +4026,68 @@ describe('Steder', function(){
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>10, "Der er burde være mindst 10 øer: "+stednavne.length);
 
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+});
+
+describe('Brofast', function(){
+
+  it("ø", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.hovedtype= "Landskabsform";
+    options.qs.undertype= "ø";
+    options.qs.primærtnavn="Sejerø";
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length===1, "Der er burde være 1: "+steder.length);
+      assert(steder[0].egenskaber.brofast===false, "Sejerø burde ikke være brofast: "+steder[0].egenskaber.brofast);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("adgangsadresse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adgangsadresser/0a3f5082-88a1-32b8-e044-0003ba298018';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adgangsadresse= JSON.parse(response.body);
+      assert(adgangsadresse.brofast===false, "En adgangsadresse på Sejerø burde ikke være brofast: "+adgangsadresse.brofast);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("adresse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adresser/0a3f50ac-9837-32b8-e044-0003ba298018';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adresse= JSON.parse(response.body);
+      assert(adresse.adgangsadresse.brofast===false, "En adgangsadresse på Sejerø burde ikke være brofast: "+adresse.adgangsadresse.brofast);
       done();
     })
     .catch((err) => {

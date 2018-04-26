@@ -379,6 +379,12 @@ const jordstykker = {
   }, {
     name: 'matrikelnr'
   }, {
+    name: 'ændret'
+  }, {
+    name: 'geo_ændret'
+  }, {
+    name: 'geo_version'
+  }, {
     name: 'kommunekode'
   }, {
     name: 'sognekode'
