@@ -402,17 +402,3 @@ describe('Import af changesets', function() {
     }));
   });
 });
-
-// describe('Konvertering af tekstretning', () => {
-//   const convert = require('../../dar10/spec').fieldTransforms.Husnummer.husnummerretning;
-//   it('POINT (-0.522498564715948 0.852640164354093) konverteres til 335', () => {
-//     expect(convert('POINT (-0.522498564715948 0.852640164354093)')).to.equal(335);
-//   });
-//
-//   it('POINT (1 -2.44921270764475E-16) konverteres til 200', () => {
-//     expect(convert('POINT (-0.522498564715948 0.852640164354093)')).to.equal(200);
-//   });
-//   it('POINT (0.467929814260573 -0.883765630088694) konverteres til 331', () => {
-//     expect(convert('POINT (0.467929814260573 -0.883765630088694)')).to.equal(331);
-//   });
-// });

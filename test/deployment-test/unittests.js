@@ -4184,7 +4184,7 @@ describe('Brofast', function(){
     rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresse= JSON.parse(response.body);
-      assert(adresse.adgangsadresse.brofast===false, "En adgangsadresse på Sejerø burde ikke være brofast: "+adresse.adgangsadresse.brofast);
+      assert(adresse.adgangsadresse.brofast===false, "En adresse på Sejerø burde ikke være brofast: "+adresse.adgangsadresse.brofast);
       done();
     })
     .catch((err) => {
