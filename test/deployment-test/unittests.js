@@ -354,7 +354,7 @@ describe('Adresseopslag', function(){
 
 
         assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 2");
-        
+
         assert(bydel, 'Mangler bydel Grøndal');
         assert(by, 'Mangler by København');
 
@@ -727,6 +727,25 @@ describe('Vejstykkesøgning', function(){
     options.qs= {};
     options.qs.cache= 'no-cache';
     options.qs.format= 'geojson';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var vejstykker= JSON.parse(response.body);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("reverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/vejstykker/reverse';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.x= 12.510814300000002;
+    options.qs.y= 55.69837060000;
     options.resolveWithFullResponse= true;
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
@@ -1233,6 +1252,84 @@ it("autocomplete nr", function(done){
     var options= {};
     options.baseUrl= host;
     options.url= 'afstemningsomraader';
+    options.qs= {cache: 'no-cache'};
+    options.qs.x= 9.4808535;      
+    options.qs.y= 56.37780327;
+    //options.qs.nærmeste= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområde= JSON.parse(body);
+      //assert(sogne.length > 0, 'Der burde være sogne, som starter med gr')
+      // postnumre.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+});
+
+
+describe('Menighedsrådsafstemningsområder', function(){
+
+  it("q=Tri*", function(done){
+    request(encodeURI(host+"/menighedsraadsafstemningsomraader?q=tri*&cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      var navn= afstemningsområder[0].navn;
+
+      //console.log(util.inspect(bynavne[0]));
+      //console.log(navn);
+      assert(navn.search('Tri')!=-1,"Navn indeholder ikke Tri")
+      done();
+    })
+  })
+
+it("autocomplete nr", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader/autocomplete';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= '4';
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med 4')
+      // opstillingskredse.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("autocomplete navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader/autocomplete';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'ho';
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med ho')
+      // postnumre.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("reverse geokodning", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader';
     options.qs= {cache: 'no-cache'};
     options.qs.x= 9.4808535;      
     options.qs.y= 56.37780327;
@@ -4026,6 +4123,68 @@ describe('Steder', function(){
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>10, "Der er burde være mindst 10 øer: "+stednavne.length);
 
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+});
+
+describe('Brofast', function(){
+
+  it("ø", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='steder';
+    options.qs= {};
+    options.qs.hovedtype= "Landskabsform";
+    options.qs.undertype= "ø";
+    options.qs.primærtnavn="Sejerø";
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var steder= JSON.parse(response.body);
+      assert(steder.length===1, "Der er burde være 1: "+steder.length);
+      assert(steder[0].egenskaber.brofast===false, "Sejerø burde ikke være brofast: "+steder[0].egenskaber.brofast);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("adgangsadresse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adgangsadresser/0a3f5082-88a1-32b8-e044-0003ba298018';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adgangsadresse= JSON.parse(response.body);
+      assert(adgangsadresse.brofast===false, "En adgangsadresse på Sejerø burde ikke være brofast: "+adgangsadresse.brofast);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("adresse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adresser/0a3f50ac-9837-32b8-e044-0003ba298018';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var adresse= JSON.parse(response.body);
+      assert(adresse.adgangsadresse.brofast===false, "En adresse på Sejerø burde ikke være brofast: "+adresse.adgangsadresse.brofast);
       done();
     })
     .catch((err) => {

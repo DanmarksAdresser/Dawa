@@ -15,7 +15,9 @@ module.exports = [
   {
     path: '/replikering/udtraek',
     entity: 'udtraek',
-    subtext: `Modtag et komplet dataudtræk for en given entitet.`,
+    subtext: `Modtag et komplet dataudtræk for en given entitet. Entitet-parameteren (kræves) angiver
+    hvilken entitet, der modtages et udtræk for.  <a href="/dok/api/replikering-data">databeskrivelser</a> for en liste
+af entiteter og hvilke data de forskellige entiter indeholder.`,
     parameters: [
       {
         name: 'entitet',
@@ -43,7 +45,9 @@ module.exports = [
   {
     path: '/replikering/haendelser',
     entity: 'haendelse',
-    subtext: 'Modtag hændelser om ændringer til en given entitet.',
+    subtext: `Modtag hændelser om ændringer til en given entitet. Entitet-parameteren (kræves) angiver
+    hvilken entitet, der modtages hændelser for.  <a href="/dok/api/replikering-data">databeskrivelser</a> for en liste
+af entiteter og hvilke data de forskellige entiter indeholder.`,
     parameters: [
       {
         name: 'entitet',

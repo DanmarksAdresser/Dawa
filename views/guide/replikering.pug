@@ -94,13 +94,13 @@ block main
       | Klienten kan vælge at indlæse begge transaktioner på én gang, eller klienten kan vælge at indlæse
       | hver transaktion enkeltvis. I eksempelt her indlæser vi transaktionerne enkeltvist. Først hentes metadata
       | for den næste transaktion der skal indlæses, som har transaktions-ID 123124:
-      pre <code>GET https://dawa.aws.dk/replikering/transaktioner?txid=123124</code
+      pre <code>GET https://dawa.aws.dk/replikering/transaktioner?txid=123124</code>
       | Det fremgår af svaret hvilke entiteter der er ændret i transaktionen. Klienten skal hente hændelserne
       | for alle de entiteter, som klienten vedligeholder en lokal kopi af. Hvis det f.eks. er entiteterne
       | "adgangsadresse" og "adresse" der har tilknyttede hændelser hentes hændelserne for disse:
       pre
-        |<code>GET https://dawa.aws.dk/replikering/haendelser?entitet=adgangsadresse&txid=123124
-        |GET https://dawa.aws.dk/replikering/haendelser?entitet=adresse&txid=123124
+        | <code>GET https://dawa.aws.dk/replikering/haendelser?entitet=adgangsadresse&txid=123124
+        | GET https://dawa.aws.dk/replikering/haendelser?entitet=adresse&txid=123124</code>
       | Se <a href="/dok/api/replikering#haendelser">API-dokumentationen</a> for detaljer om hændelses-API'et.
     p
       | Herefter udføres de ændringer som hændelserne angiver på den lokale kopi. Hvis der anvendes

@@ -3,6 +3,7 @@
 const assert = require('chai').assert;
 const path = require('path');
 const {go} = require('ts-csp');
+const _ = require('underscore');
 
 const helpers = require('./helpers');
 const importStednavneImpl = require('../../stednavne/importStednavneImpl');
@@ -173,6 +174,23 @@ describe('Import af stednavne', () => {
           stednavnafstand: '1000.1'
         });
         assert.strictEqual(result.length, 3);
+      }));
+
+      it('Kan hente stednavntyper', () => go(function*() {
+        const resource = registry.findWhere({entityName: 'stednavntype', type: 'resource', qualifier:'query'});
+        const result = yield helpers.getJson(clientFn(), resource, {}, {} );
+        const bebyggelseType = _.findWhere(result, {hovedtype: 'Bebyggelse'});
+        assert(bebyggelseType);
+        assert.strictEqual('http://dawa/stednavntyper/Bebyggelse', bebyggelseType.href);
+        assert.deepEqual(bebyggelseType.undertyper, ['by']);
+      }));
+
+      it('Kan lave enkeltopslag på stednavntype', () => go(function*() {
+        const resource = registry.findWhere({entityName: 'stednavntype', type: 'resource', qualifier:'getByKey'});
+        const result = yield helpers.getJson(clientFn(), resource, {hovedtype: 'Bebyggelse'}, {} );
+        assert(result);
+        assert.strictEqual(result.hovedtype, 'Bebyggelse');
+        assert.deepEqual(result.undertyper, ['by']);
       }));
     });
   });

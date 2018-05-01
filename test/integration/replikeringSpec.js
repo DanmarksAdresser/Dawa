@@ -5,12 +5,14 @@ const {go} = require('ts-csp');
 const testdb = require('../helpers/testdb2');
 const registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
+const request = require('request-promise');
 
 const tableModel = require('../../psql/tableModel');
 
 const {computeDifferences, applyChanges} = require('../../importUtil/tableDiffNg');
 const {withImportTransaction} = require('../../importUtil/importUtil');
 const helpers = require('./helpers');
+const replikeringModel = require('../../apiSpecification/replikering/datamodel');
 
 const ejerlavTableModel = tableModel.tables.ejerlav;
 const ejerlavUdtraekResource = registry.findWhere({
@@ -75,4 +77,53 @@ describe('Replikering', () => {
       assert.deepEqual(result.map(event => event.sekvensnummer), [3, 4]);
     }));
   });
+});
+
+const attrVerifiers = {
+  integer: (val) => Number.isInteger(val),
+  real: (val) => typeof(val) === 'number',
+  boolean: val => typeof(val) === 'boolean',
+  string: val => typeof(val) === 'string',
+  uuid: val => /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(val),
+  timestamp: val => typeof(val) === 'string',
+  localdatetime: val => typeof(val) === 'string',
+  point2d: val => Array.isArray(val) && val.length === 2 && typeof(val[0]) === 'number' && typeof(val[1]) === 'number',
+  geometry: val => typeof(val) === 'object'
+};
+
+const verifyAttr = (attr, val) => {
+  if(val === null) {
+    assert(attr.nullable);
+    return;
+  }
+  const verifier = attrVerifiers[attr.type];
+  assert(verifier(val), `Value ${val} is of type ${attr.type}`);
+};
+
+const entitiesWithoutData = [
+  ...Object.keys(replikeringModel).filter(entityName => entityName.startsWith('dar')),
+  'navngivenvej'];
+describe('Replikerede entiteter', () => {
+  for(let entity of Object.keys(replikeringModel)) {
+    it(`Kan hente udtræk for ${entity}`, () => go(function*() {
+      const response = yield request.get({url:`http://localhost:3002/replikering/udtraek?entitet=${entity}`, json: true});
+      if(!entitiesWithoutData.includes(entity)) {
+        assert(response.length > 0);
+        const model = replikeringModel[entity];
+        for(let row of response) {
+          for(let attr of model.attributes) {
+            const val = row[attr.name];
+            verifyAttr(attr, val);
+          }
+        }
+      }
+    }));
+  }
+});
+
+describe('Transaktioner inspektion', () => {
+    it('Kan inspicere en transaktion', () => go(function*() {
+      const response = yield request.get({url:`http://localhost:3002/replikering/transaktioner/inspect?txid=4`, json: true});
+      assert.notDeepEqual(response, {});
+    }));
 });

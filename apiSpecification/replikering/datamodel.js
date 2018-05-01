@@ -55,13 +55,13 @@ module.exports = {
         description: 'Adgangsadressens ikrafttrædelsesdato'
       }, {
         name: 'kommunekode',
-        type: 'integer',
+        type: 'string',
         nullable: true,
         schema: definitions.NullableKode4,
         description: 'Kommunekoden. 4 cifre.'
       }, {
         name: 'vejkode',
-        type: 'integer',
+        type: 'string',
         nullable: true,
         schema: definitions.NullableKode4,
         description: 'Identifikation af vejstykket, adgangsadressen befinder sig på.' +
@@ -286,8 +286,8 @@ module.exports = {
     attributes: [
       {
         name: 'ejerlavkode',
-        type: 'string',
-        description: 'Ejerlavkoden. 4 cifre.'
+        type: 'integer',
+        description: 'Ejerlavkoden.'
       },
       {
         name: 'matrikelnr',
@@ -383,6 +383,18 @@ module.exports = {
           ' der er tilknyttet en organisation der modtager en større mængde post.'
         }]
     },
+  stedtilknytning: {
+    key: ['adgangsadresseid', 'stedid'],
+    attributes: [{
+      name: 'stedid',
+      type: 'uuid',
+      description: 'stedets ID',
+    }, {
+      name: 'adgangsadresseid',
+      type: 'uuid',
+      description: 'adgangsadressens ID'
+    }]
+  },
   stednavntilknytning: {
     key: ['stednavn_id', 'adgangsadresse_id'],
     attributes: [{
@@ -451,10 +463,12 @@ module.exports = {
         description: 'Kommunekoden. 4 cifre.'
       }, {
         name: 'vejkode',
+        type: 'string',
         schema: definitions.Kode4,
         description: 'Vejkoden. 4 cifre.'
       }, {
         name: 'postnr',
+        type: 'string',
         schema: definitions.Kode4,
         description: 'Postnummeret. 4 cifre.'
       }]

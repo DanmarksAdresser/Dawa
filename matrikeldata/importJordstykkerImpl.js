@@ -86,8 +86,8 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
     }
   });
   yield streamJordstykkerToTable(client, rows, 'desired_jordstykker');
-  yield client.query(`INSERT INTO actual_jordstykker(${jordstykkeColumns.join(', ')}, geom) 
-  (SELECT ${jordstykkeColumns.join(', ')}, geom FROM jordstykker WHERE ejerlavkode = $1)`,
+  yield client.query(`INSERT INTO actual_jordstykker(${jordstykkeColumns.join(', ')}, ændret, geo_ændret, geo_version, geom) 
+  (SELECT ${jordstykkeColumns.join(', ')}, ændret, geo_ændret, geo_version, geom FROM jordstykker WHERE ejerlavkode = $1)`,
     [ejerlavkode]);
 
   yield setLastUpdated(client, ejerlavkode, ctimeMillis);
@@ -95,8 +95,8 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
 });
 
 const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() {
-  yield client.query(`CREATE TEMP TABLE desired_jordstykker AS (SELECT ${jordstykkeColumns.join(',')}, geom FROM jordstykker WHERE false)`);
-  yield client.query(`CREATE TEMP TABLE actual_jordstykker AS (SELECT ${jordstykkeColumns.join(',')}, geom FROM jordstykker WHERE false)`);
+  yield client.query(`CREATE TEMP TABLE desired_jordstykker AS (SELECT jordstykker.* FROM jordstykker WHERE false)`);
+  yield client.query(`CREATE TEMP TABLE actual_jordstykker AS (SELECT jordstykker.* FROM jordstykker WHERE false)`);
   const files = fs.readdirSync(srcDir).filter(function (file) {
     return /^.+\.zip$/.test(file);
   });

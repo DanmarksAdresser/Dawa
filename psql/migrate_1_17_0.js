@@ -20,11 +20,13 @@ const importDagiImpl = require('../dagiImport/importDagiImpl');
 const featureMappingsNew = require('../dagiImport/featureMappingsNew');
 const featureMappingsDatafordeler = require('../dagiImport/featureMappingsDatafordeler');
 const featureMappingsZone = require('../dagiImport/featureMappingsZone');
+const importStednavneImpl = require('../stednavne/importStednavneImpl');
 
-const { makeChangesNonPublic }= require('../importUtil/materialize');
+const { makeChangesNonPublic, recomputeTemaTilknytninger }= require('../importUtil/materialize');
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string'],
-  temaDir: [false, 'Directory med DAGI-temaer', 'string']
+  temaDir: [false, 'Directory med DAGI-temaer', 'string'],
+  stednavnFile: [false, 'Fil med stednavne', 'string']
 };
 
 const selectKode = `(fields ->> 'kode') :: SMALLINT`;
@@ -91,8 +93,8 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     connString: options.pgConnectionUrl,
     pooled: false
   });
-
-  proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+  go(function*() {
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
       yield client.query(dar10Schema);
       yield client.query('DROP MATERIALIZED VIEW IF EXISTS kommuner CASCADE;DROP MATERIALIZED VIEW IF EXISTS regioner CASCADE;');
       yield client.query(`alter database dawadb set join_collapse_limit=20;alter database dawadb set from_collapse_limit=20;`);
@@ -123,7 +125,7 @@ CREATE SEQUENCE rowkey_sequence START 1;
       yield client.query(`
     insert into steder(id, hovedtype, undertype, bebyggelseskode, visueltcenter,geom, ændret, geo_ændret, geo_version)
     (select id, hovedtype, undertype, bebyggelseskode, visueltcenter,geom, ændret, geo_ændret, geo_version from stednavne_legacy);
-    insert into stednavne(stedid, navn, navnestatus, brugsprioritet, tsv) (select id, navn, navnestatus, 'primær', tsv FROM stednavne_legacy); 
+    insert into stednavne(stedid, navn, navnestatus, brugsprioritet, tsv) (select id, navn, navnestatus, 'primær', tsv FROM stednavne_legacy);
     `);
 
       yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavne-view.sql', {encoding: 'utf8'}));
@@ -142,38 +144,38 @@ ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_
 ALTER TABLE adgangsadresser_mat_changes ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE adresser_mat_changes ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
-CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_idx ON adgangsadresser(navngivenvejkommunedel_id); 
+CREATE INDEX IF NOT EXISTS adgangsadresser_navngivenvejkommunedel_id_idx ON adgangsadresser(navngivenvejkommunedel_id);
 ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
 ALTER TABLE adgangsadresser_changes ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
 ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
 ALTER TABLE adgangsadresser_mat_changes ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
 ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
 ALTER TABLE adresser_mat_changes ADD COLUMN IF NOT EXISTS supplerendebynavn_id UUID;
-CREATE INDEX IF NOT EXISTS adgangsadresser_supplerendebynavn_id_idx ON adgangsadresser(supplerendebynavn_id); 
+CREATE INDEX IF NOT EXISTS adgangsadresser_supplerendebynavn_id_idx ON adgangsadresser(supplerendebynavn_id);
 ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
 ALTER TABLE adgangsadresser_changes ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
 ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
 ALTER TABLE adgangsadresser_mat_changes ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
 ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
 ALTER TABLE adresser_mat_changes ADD COLUMN IF NOT EXISTS darkommuneinddeling_id UUID;
-CREATE INDEX IF NOT EXISTS adgangsadresser_darkommuneinddeling_id_idx ON adgangsadresser(darkommuneinddeling_id); 
+CREATE INDEX IF NOT EXISTS adgangsadresser_darkommuneinddeling_id_idx ON adgangsadresser(darkommuneinddeling_id);
 ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
 ALTER TABLE adgangsadresser_changes ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
 ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
 ALTER TABLE adgangsadresser_mat_changes ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
 ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
 ALTER TABLE adresser_mat_changes ADD COLUMN IF NOT EXISTS adressepunkt_id UUID;
-CREATE INDEX IF NOT EXISTS adgangsadresser_adressepunkt_id_idx ON adgangsadresser(adressepunkt_id); 
+CREATE INDEX IF NOT EXISTS adgangsadresser_adressepunkt_id_idx ON adgangsadresser(adressepunkt_id);
 ALTER TABLE adgangsadresser ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE adgangsadresser_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE adgangsadresser_mat ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE adgangsadresser_mat_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE adresser_mat ADD COLUMN IF NOT EXISTS postnummer_id UUID;
 ALTER TABLE adresser_mat_changes ADD COLUMN IF NOT EXISTS postnummer_id UUID;
-CREATE INDEX IF NOT EXISTS adgangsadresser_postnummer_id_idx ON adgangsadresser(postnummer_id); 
+CREATE INDEX IF NOT EXISTS adgangsadresser_postnummer_id_idx ON adgangsadresser(postnummer_id);
 ALTER TABLE vejstykker ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
 ALTER TABLE vejstykker_changes ADD COLUMN IF NOT EXISTS navngivenvejkommunedel_id UUID;
-CREATE INDEX IF NOT EXISTS vejstykker_navngivenvejkommunedel_id_idx ON vejstykker(navngivenvejkommunedel_id); 
+CREATE INDEX IF NOT EXISTS vejstykker_navngivenvejkommunedel_id_idx ON vejstykker(navngivenvejkommunedel_id);
 ALTER TABLE vejstykkerpostnumremat ADD COLUMN IF NOT EXISTS navngivenvej_id UUID;
 ALTER TABLE vejstykkerpostnumremat_changes ADD COLUMN IF NOT EXISTS navngivenvej_id UUID;
 CREATE INDEX IF NOT EXISTS vejstykkerpostnumremat_navngivenvej_id_idx ON vejstykkerpostnumremat(navngivenvej_id);
@@ -217,7 +219,7 @@ CREATE INDEX ON vejstykkerpostnumremat_changes(kommunekode, vejkode, postnr, txi
         const fieldNames = tema.fields.map(field => field.name).filter(name => !!(SELECT_JSON_FIELD[tema.singular][name]));
         yield client.query(`
 INSERT INTO ${tema.table}(ændret, geo_version, geo_ændret, geom, tsv, ${fieldNames.join(', ')})
-  (SELECT aendret, geo_version, geo_aendret, geom, tsv, ${fieldNames.map(fieldName => `${SELECT_JSON_FIELD[tema.singular][fieldName]} AS ${fieldName}`).join(', ')} 
+  (SELECT aendret, geo_version, geo_aendret, geom, tsv, ${fieldNames.map(fieldName => `${SELECT_JSON_FIELD[tema.singular][fieldName]} AS ${fieldName}`).join(', ')}
   FROM temaer where tema = '${tema.singular}' AND slettet IS NULL);
 INSERT INTO ${tema.tilknytningTable} (adgangsadresseid, ${tema.tilknytningKey.join(', ')})
   SELECT
@@ -242,7 +244,7 @@ CREATE TABLE ${tema.tilknytningTable}_history AS
   WHERE atm.tema = '${tema.singular}';
 UPDATE transaction_history
 SET entity = '${tema.tilknytningName}' FROM ${tema.tilknytningTable}_history
-WHERE valid_from = sequence_number OR valid_to = sequence_number;  
+WHERE valid_from = sequence_number OR valid_to = sequence_number;
 `);
         yield refreshSubdividedTable(client, tema.table, `${tema.table}_divided`, tema.primaryKey);
       }
@@ -256,8 +258,8 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
               GROUP BY txid)
     UPDATE transactions  set sekvensnummerfra = seqs.sekvensnummerfra, sekvensnummertil = seqs.sekvensnummertil
     FROM seqs WHERE transactions.txid = seqs.txid;`);
-      yield client.query(`INSERT INTO tx_operation_counts(txid, entity, operation, operation_count) 
-    (select txid, entity, operation, count(*) FROM transaction_history 
+      yield client.query(`INSERT INTO tx_operation_counts(txid, entity, operation, operation_count)
+    (select txid, entity, operation, count(*) FROM transaction_history
     WHERE txid IS NOT NULL and entity <> 'undefined' group by txid, entity, operation)`);
       yield client.query('analyze');
       yield withMigrationTransaction(client, '1.17.0 migrering', txid => go(function* () {
@@ -270,24 +272,45 @@ WHERE valid_from = sequence_number OR valid_to = sequence_number;
       yield client.query('analyze');
       yield importDar09Impl.updateSupplerendeBynavne(client);
       yield migrateZone(client);
-    yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
-    logger.info('Migrerer storkreds og valglandsdel');
+    }));
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+        logger.info('Genberegner tilknytninger');
+        yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+          yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
+        }));
+      }
+    ));
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+        logger.info('Migrerer zoner');
+        yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+          yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsZone), featureMappingsZone, options.temaDir, '', 10000000);
+          yield makeChangesNonPublic(client, txid, tableSchema.tables.zonetilknytninger);
+        }));
+      }
+    ));
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+      yield withImportTransaction(client, '1.17.0 migrering', txid => importBrofasthedImpl(client, txid, 'data/brofasthed.csv', true));
+      logger.info('Migrerer storkreds og valglandsdel');
       yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
         yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsNew), featureMappingsNew, options.temaDir, '', 10000000);
       }));
-    logger.info('Migrerer resterende temaer');
-    yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
-      yield importDagiImpl.importTemaerWfsMulti(client, txid, Object.keys(featureMappingsDatafordeler), featureMappingsDatafordeler, options.temaDir, '', 10000000);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.supplerendebynavntilknytninger);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.afstemningsomraadetilknytninger);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.menighedsraadsafstemningsomraadetilknytninger);
     }));
-    logger.info('Migrerer zoner');
-    yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
-      yield importDagiImpl.importTemaerWfs(client, txid, Object.keys(featureMappingsZone), featureMappingsZone, options.temaDir, '', 10000000);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.zonetilknytninger);
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+      logger.info('Migrerer resterende temaer');
+      yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+        yield importDagiImpl.importTemaerWfsMulti(client, txid, Object.keys(featureMappingsDatafordeler), featureMappingsDatafordeler, options.temaDir, '', 10000000);
+        yield makeChangesNonPublic(client, txid, tableSchema.tables.supplerendebynavntilknytninger);
+        yield makeChangesNonPublic(client, txid, tableSchema.tables.afstemningsomraadetilknytninger);
+        yield makeChangesNonPublic(client, txid, tableSchema.tables.menighedsraadsafstemningsomraadetilknytninger);
+      }));
     }));
-    }
-  )).done();
+    yield proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+        logger.info('Migrerer stednavne');
+        yield withImportTransaction(client, '1.17.0 migrering', txid => go(function* () {
+          yield importStednavneImpl.importStednavne(client, txid, options.stednavnFile);
+        }));
+      }
+    ));
+  }).asPromise().done();
 });
 

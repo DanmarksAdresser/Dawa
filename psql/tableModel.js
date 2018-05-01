@@ -165,7 +165,7 @@ const postnumre = {
     name: 'tsv',
     public: false,
     derive: (table) =>
-      `to_tsvector('adresser', coalesce(to_char(${table}.nr, '0000'), '') || ' ' || coalesce(${table}.navn, ''))`
+      `to_tsvector('adresser', processForIndexing(coalesce(to_char(${table}.nr, '0000'), '') || ' ' || coalesce(${table}.navn, '')))`
   }, {
     name: 'stormodtager'
   }]
@@ -378,6 +378,12 @@ const jordstykker = {
     name: 'ejerlavkode'
   }, {
     name: 'matrikelnr'
+  }, {
+    name: 'ændret'
+  }, {
+    name: 'geo_ændret'
+  }, {
+    name: 'geo_version'
   }, {
     name: 'kommunekode'
   }, {

@@ -2,7 +2,7 @@
 
 module.exports = {
   singular: 'stednavn',
-  plural: 'stednavne',
+  plural: 'stednavne2',
   key: ['sted_id', 'navn']
 };
 

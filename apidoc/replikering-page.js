@@ -1,6 +1,6 @@
 module.exports = {
   entity: 'replikering',
-  heading: 'Replikerings-API',
+  heading: 'Replikering',
   lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af data fra DAWA. 
 Se <a href="/dok/guide/replikering">replikerings-guiden</a> for information om hvordan replikerings-API'et anvendes.
 Se <a href="/dok/api/replikering-data">databeskrivelser</a> for information hvilke data der udstilles
@@ -29,6 +29,13 @@ på replikerings-API'et.`,
       heading: 'Seneste transaktion',
       anchor: 'senestetransaktion',
       path: '/replikering/senestetransaktion'
+    },
+    {
+      type: 'endpoint',
+      heading: 'Datamodel (maskinlæsbar)',
+      anchor: 'senestetransaktion',
+      path: '/replikering/datamodel'
     }
+
   ]
 };
