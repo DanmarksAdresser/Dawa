@@ -12,7 +12,7 @@ const { columnsEqualClause } = require('../../../darImport/sqlUtil');
 const inspectInsertOrUpdate = (client, txid, tableModel, operation) => go(function*() {
   const selectList = tableModel.columns.map(column => `${column.name}::text`).join(',');
   const result =  yield client.queryRows(`select ${selectList} from ${tableModel.table}_changes
-  WHERE txid = $1 and operation = $2`, [txid, operation]);
+  WHERE txid = $1 and operation = $2 limit 100`, [txid, operation]);
   return result.map(row => {
     const key = tableModel.primaryKey.reduce((memo, keyName) => {
       memo[keyName] = row[keyName];
@@ -31,7 +31,7 @@ left join lateral (
   where c2.txid < ${txid} and ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)}
   order by txid desc, changeid desc
   limit 1) c2 on true
-where c1.txid = ${txid} and c1.operation = 'update'`;
+where c1.txid = ${txid} and c1.operation = 'update' limit 100`;
   const rows = yield client.queryRows(sql);
   return rows.map(row => {
     const key = tableModel.primaryKey.reduce((memo, keyName) => {
