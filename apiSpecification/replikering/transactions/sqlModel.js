@@ -56,7 +56,6 @@ const txidIntervalParameterImpl = (sqlParts, params) => {
     const toAlias = dbapi.addSqlParameter(sqlParts, params.txidtil);
     dbapi.addWhereClause(sqlParts, `txid <= ${toAlias}`);
   }
-
 };
 
 const parameterImpls = [

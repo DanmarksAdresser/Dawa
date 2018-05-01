@@ -120,3 +120,10 @@ describe('Replikerede entiteter', () => {
     }));
   }
 });
+
+describe('Transaktioner inspektion', () => {
+    it('Kan inspicere en transaktion', () => go(function*() {
+      const response = yield request.get({url:`http://localhost:3002/replikering/transaktioner/inspect?txid=4`, json: true});
+      assert.notDeepEqual(response, {});
+    }));
+});
