@@ -19,13 +19,15 @@ require('./apiSpecification/replikering/events/resources');
 var dayInSeconds = 24 * 60 * 60;
 var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
 
+const isOisPath = req => (req.path.toLowerCase().indexOf('/ois') !== -1 && req.path.toLowerCase() !== '/oisdok');
+
 function cachingMiddleware(req, res, next) {
   // this looks like a mess, but we cannot set the caching headers before we
   // know the response code
   var baseFunc = res.writeHead;
   res.writeHead = function(statusCode, reasonPhrase, headers) {
     var header;
-    if(statusCode >= 300 || req.query.cache === 'no-cache' || req.path.indexOf('/replikering') === 0) {
+    if(statusCode >= 300 || req.query.cache === 'no-cache' || req.path.indexOf('/replikering') === 0 || isOisPath(req)) {
       header = 'no-cache';
     }
     else {
@@ -63,7 +65,6 @@ function corsMiddleware(req, res, next) {
   next();
 }
 
-
 /******************************************************************************/
 /*** Routes *******************************************************************/
 /******************************************************************************/
@@ -90,7 +91,7 @@ exports.setupRoutes = function () {
   });
   if(!oisEnabled || oisProtected) {
     app.use((req, res, next) => {
-      if ((req.path.toLowerCase().indexOf('/ois') !== -1 && req.path.toLowerCase() !== '/oisdok')) {
+      if (isOisPath(req)) {
         if(!oisEnabled) {
           return res.status(403).send('OIS currently disabled for all users');
         }
