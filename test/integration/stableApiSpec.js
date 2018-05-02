@@ -12,6 +12,260 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
+    afstemningsområde: {
+      json: {
+        nestet: [{
+          params: {
+            dagi_id: '101000'
+          },
+          value: {
+            "href": "http://dawa/afstemningsomraader/99/2",
+            "dagi_id": "101000",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "nummer": "2",
+            "navn": "Test afstemningsområde",
+            "afstemningssted": {
+              "navn": "Test afstemningsstednavn",
+              "adgangsadresse": {
+                "href": "http://dawa/adgangsadresser/0a3f5089-86cc-32b8-e044-0003ba298018",
+                "id": "0a3f5089-86cc-32b8-e044-0003ba298018",
+                "adressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V"
+              }
+            },
+            "kommune": {
+              "href": "http://dawa/kommuner/99",
+              "kode": "0099",
+              "navn": "Kommune test"
+            },
+            "region": {
+              "href": "http://dawa/regioner/1084",
+              "kode": "1084",
+              "navn": "Region test"
+            },
+            "opstillingskreds": {
+              "href": "http://dawa/opstillingskredse/99",
+              "nummer": "99",
+              "navn": "Opstillingskreds test"
+            },
+            "storkreds": {
+              "href": "http://dawa/storkredse/1",
+              "nummer": "1",
+              "navn": "Storkreds test"
+            },
+            "valglandsdel": {
+              "href": "http://dawa/valglandsdele/A",
+              "bogstav": "A",
+              "navn": "Valglandsdel test"
+            }
+          }
+        }],
+        flad: [{
+          params: {
+            dagi_id: '101000'
+          },
+          value: {
+            "dagi_id": "101000",
+            "nummer": "2",
+            "navn": "Test afstemningsområde",
+            "afstemningsstednavn": "Test afstemningsstednavn",
+            "afstemningsstedadresseid": "0a3f5089-86cc-32b8-e044-0003ba298018",
+            "afstemningsstedadressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
+            "kommunekode": "0099",
+            "kommunenavn": "Kommune test",
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
+            "opstillingskredsnummer": "99",
+            "opstillingskredsnavn": "Opstillingskreds test",
+            "storkredsnummer": "1",
+            "storkredsnavn": "Storkreds test",
+            "valglandsdelsbogstav": "A",
+            "valglandsdelsnavn": "Valglandsdel test",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1
+          }
+        }]
+      }
+    },
+    opstillingskreds: {
+      json: {
+        nestet: [{
+          params: {
+            nummer: '99'
+          },
+          value: {
+            "href": "http://dawa/opstillingskredse/99",
+            "dagi_id": "100104",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "nummer": "99",
+            "kode": "0099",
+            "navn": "Opstillingskreds test",
+            "kredskommune": {
+              "href": "http://dawa/kommuner/99",
+              "kode": "0099",
+              "navn": "Kommune test"
+            },
+            "region": {
+              "href": "http://dawa/regioner/1084",
+              "kode": "1084",
+              "navn": "Region test"
+            },
+            "storkreds": {
+              "href": "http://dawa/storkredse/1",
+              "nummer": "1",
+              "navn": "Storkreds test"
+            },
+            "valglandsdel": {
+              "href": "http://dawa/valglandsdele/A",
+              "bogstav": "A",
+              "navn": "Valglandsdel test"
+            },
+            "kommuner": [
+              {
+                "href": "http://dawa/kommuner/0099",
+                "kode": "0099",
+                "navn": "Kommune test"
+              }
+            ]
+          }
+        }],
+        flad: [{
+          params: {
+            nummer: '99'
+          },
+          value: {
+            "dagi_id": "100104",
+            "nummer": "99",
+            "kode": "0099",
+            "navn": "Opstillingskreds test",
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
+            "kredskommunekode": "0099",
+            "kredskommunenavn": "Kommune test",
+            "storkredsnummer": "1",
+            "storkredsnavn": "Storkreds test",
+            "valglandsdelsbogstav": "A",
+            "valglandsdelsnavn": "Valglandsdel test",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1
+          }
+        }]
+      }
+    },
+    storkreds: {
+      json: {
+        nestet: [{
+          params: {
+            nummer: '1'
+          },
+          value: {
+            "href": "http://dawa/storkredse/1",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "nummer": "1",
+            "navn": "Storkreds test",
+            "region": {
+              "href": "http://dawa/regioner/1084",
+              "kode": "1084",
+              "navn": "Region test"
+            },
+            "valglandsdel": {
+              "href": "http://dawa/valglandsdele/A",
+              "bogstav": "A",
+              "navn": "Valglandsdel test"
+            }
+          }
+        }],
+        flad: [{
+          params: {
+            nummer: '1'
+          },
+          value: {
+            "nummer": "1",
+            "navn": "Storkreds test",
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
+            "valglandsdelsbogstav": "A",
+            "valglandsdelsnavn": "Valglandsdel test",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1
+          }
+        }]
+      }
+    },
+    valglandsdel: {
+      json: {
+        nestet: [{
+          params: {
+            bogstav: 'A'
+          },
+          value: {
+            "bogstav": "A",
+            "navn": "Valglandsdel test",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "href": "http://dawa/valglandsdele/A"
+          }
+
+        }],
+        flad: [{
+          params: {
+            bogstav: 'A'
+          },
+          value: {
+            "bogstav": "A",
+            "navn": "Valglandsdel test",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+          }
+        }]
+      }
+    },
+    supplerendebynavn: {
+      json: {
+        nestet: [{
+          params: {
+            dagi_id: "100116"
+          },
+          value: {
+            "href": "http://dawa/supplerendebynavne/100116",
+            "dagi_id": "100116",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "navn": "Supplerende bynavn test",
+            "kommune": {
+              "href": "http://dawa/kommuner/101",
+              "kode": "0101",
+              "navn": "København"
+            }
+          }
+        }],
+        flad: [{
+          params: {
+            dagi_id: "100116"
+          },
+          value: {
+            "dagi_id": "100116",
+            "navn": "Supplerende bynavn test",
+            "kommunekode": "0101",
+            "kommunenavn": "København",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "geo_version": 1
+          }
+        }]
+      }
+    },
     adgangsadresse: {
       json: {
         mini: [{
