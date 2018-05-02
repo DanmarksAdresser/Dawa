@@ -79,3 +79,13 @@ describe('Import af DAGI temaer', () => {
     }));
   });
 });
+
+describe('landpostnumre', () => {
+  testdb.withTransactionEach('test', clientFn => {
+    it('landpostnumre er afgrænset af regioner', () =>go(function*() {
+      const areas = (yield clientFn().queryRows(`select (select st_area(geom) from dagi_postnumre where nr = 1000) as postnummerarea, (select st_area(geom) from landpostnumre where nr = 1000) as landpostnummerarea`))[0];
+      assert(areas.postnummerarea > areas.landpostnummerarea);
+    }));
+  });
+
+});
