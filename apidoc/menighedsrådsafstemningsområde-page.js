@@ -1,6 +1,6 @@
 module.exports = {
   entity: 'menighedsrådsafstemningsområde',
-  heading: 'Afstemningsområder',
+  heading: 'Menighedsrådsafstemningsområder',
   lead: `API'et udstiller alle Danmarks menighedsrådsafstemningsområder.`,
   sections: [
     {

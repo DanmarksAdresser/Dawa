@@ -110,7 +110,7 @@ var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.geomWithin('vejstykker.geom'),
-  sqlParameterImpl.reverseGeocoding(),
+  sqlParameterImpl.reverseGeocoding('vejstykker.geom'),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   distanceParameterImpl,
   regexParameterImpl,
