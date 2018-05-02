@@ -140,9 +140,7 @@ exports.reverseGeocodingResourceSpec = function(path, representations, sqlModel,
     crs: commonParameters.crs,
     reverseGeocoding: commonParameters.reverseGeocoding
   };
-  if(representations.geojsonNested) {
-    params.struktur = commonParameters.struktur;
-  }
+  params.struktur = commonParameters.struktur;
   if(additionalParams) {
     Object.assign(params, additionalParams);
   }

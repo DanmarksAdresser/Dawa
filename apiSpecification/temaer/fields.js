@@ -3,6 +3,7 @@
 const fieldsUtil = require('../common/fieldsUtil');
 const temaModels = require('../../dagiImport/temaModels');
 const sqlModels = require('./sqlModels');
+const { kode4String, numberToString } = require('../util');
 
 const additionalFieldsMap = {
   afstemningsområde: [
@@ -25,25 +26,29 @@ const additionalFieldsMap = {
       name: 'afstemningsstedadressebetegnelse'
     },
     {
-      name: 'kommunekode'
+      name: 'kommunekode',
+      formatter: kode4String
     },
     {
       name: 'kommunenavn'
     },
     {
-      name: 'regionskode'
+      name: 'regionskode',
+      formatter: kode4String
     },
     {
       name: 'regionsnavn'
     },
     {
-      name: 'opstillingskredsnummer'
+      name: 'opstillingskredsnummer',
+      formatter: numberToString
     },
     {
       name: 'opstillingskredsnavn'
     },
     {
-      name: 'storkredsnummer'
+      name: 'storkredsnummer',
+      formatter: numberToString
     },
     {
       name: 'storkredsnavn'
@@ -60,19 +65,22 @@ const additionalFieldsMap = {
       name: 'dagi_id'
     },
     {
-      name: 'nummer'
+      name: 'nummer',
+      formatter: numberToString
     },
     {
       name: 'navn'
     },
     {
-      name: 'kommunekode'
+      name: 'kommunekode',
+      formatter: kode4String
     },
     {
       name: 'kommunenavn'
     },
     {
-      name: 'sognekode'
+      name: 'sognekode',
+      formatter: kode4String
     },
     {
       name: 'sognenavn'
@@ -83,22 +91,26 @@ const additionalFieldsMap = {
       name: 'dagi_id'
     },
     {
-      name: 'nummer'
+      name: 'nummer',
+      formatter: numberToString
     },
     {
-      name: 'kode'
+      name: 'kode',
+      formatter: kode4String
     },
     {
       name: 'navn'
     },
     {
-      name: 'regionskode'
+      name: 'regionskode',
+      formatter: kode4String
     },
     {
       name: 'regionsnavn'
     },
     {
-      name: 'kredskommunekode'
+      name: 'kredskommunekode',
+      formatter: kode4String
     },
     {
       name: 'kredskommunenavn'
@@ -108,7 +120,8 @@ const additionalFieldsMap = {
       multi: true
     },
     {
-      name: 'storkredsnummer'
+      name: 'storkredsnummer',
+      formatter: numberToString
     },
     {
       name: 'storkredsnavn'
@@ -122,13 +135,15 @@ const additionalFieldsMap = {
   ],
   storkreds: [
     {
-      name: 'nummer'
+      name: 'nummer',
+      formatter: numberToString
     },
     {
       name: 'navn'
     },
     {
-      name: 'regionskode'
+      name: 'regionskode',
+      formatter: kode4String
     },
     {
       name: 'regionsnavn'
@@ -138,6 +153,21 @@ const additionalFieldsMap = {
     },
     {
       name: 'valglandsdelsnavn'
+    }
+  ],
+  supplerendebynavn: [
+    {
+      name: 'dagi_id'
+    },
+    {
+      name: 'navn'
+    },
+    {
+      name: 'kommunekode',
+      formatter: kode4String
+    },
+    {
+      name: 'kommunenavn'
     }
   ]
 };

@@ -2,7 +2,8 @@ const {
   formatAndPagingParams,
   formatParameters,
   autocompleteSubtext,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  strukturParameter
 } = require('./common');
 const {
   getTemaModel,
@@ -52,7 +53,8 @@ const queryDoc = {
     ... filterParams,
     ...dagiReverseParameters(model),
     ...formatAndPagingParams,
-    ...dagiSridCirkelPolygonParameters(model.plural)
+    ...dagiSridCirkelPolygonParameters(model.plural),
+    strukturParameter
   ],
   examples: examples.query
 };
@@ -66,7 +68,7 @@ const getByKeyDoc = {
       name: 'dagi_id',
       doc: 'Det supplerende bynavns unikke DAGI ID.'
     },
-    ...formatParameters],
+    ...formatParameters, strukturParameter],
   nomulti: true,
   examples: examples.get
 };

@@ -2,7 +2,8 @@ const {
   autocompleteSubtext,
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
-  reverseGeocodingParameters
+  reverseGeocodingParameters,
+  strukturParameter
 } = require('./common');
 
 const {
@@ -14,7 +15,7 @@ const {
 
 const temaModel = getTemaModel('kommune');
 
-const kommuneIdParameters = {
+const kommuneIdParameter = {
   name: 'kode',
   doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
   examples: ['0101']
@@ -29,7 +30,7 @@ const kommuneParameters = [{
     doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
     examples: ['Aarhus', 'København']
   },
-  kommuneIdParameters];
+  kommuneIdParameter];
 
 module.exports = [
   {
@@ -40,6 +41,7 @@ module.exports = [
       ...kommuneParameters,
       ...dagiReverseParameters(temaModel),
       ...formatAndPagingParams,
+      strukturParameter,
       ...dagiSridCirkelPolygonParameters('kommuner')],
     examples: [{
       description: 'Hent alle kommuner',
@@ -54,7 +56,7 @@ module.exports = [
     entity: 'kommune',
     path: '/kommuner/{kode}',
     subtext: 'Modtag kommune.',
-    parameters: [kommuneIdParameters],
+    parameters: [kommuneIdParameter, strukturParameter],
     nomulti: true,
     examples: [{
       description: 'Hent Københavns kommune (kode 101)',
@@ -78,7 +80,7 @@ module.exports = [
     entity: 'kommune',
     path: '/kommuner/reverse',
     subtext: 'Modtage kommunen for det punkt der angives med x- og y-parametrene',
-    parameters: reverseGeocodingParameters,
+    parameters: [...reverseGeocodingParameters, strukturParameter],
     nomulti: true,
     examples: [
       {

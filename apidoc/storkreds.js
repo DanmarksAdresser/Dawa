@@ -2,7 +2,8 @@ const {
   autocompleteSubtext,
   formatParameters,
   formatAndPagingParams,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  strukturParameter
 } = require('./common');
 const {
   dagiNavnParameter,
@@ -65,7 +66,7 @@ module.exports = [
     parameters: [...storkredsParameters,
       ...dagiReverseParameters(temaModel),
       ...dagiSridCirkelPolygonParameters(temaModel.plural),
-      ...formatAndPagingParams],
+      ...formatAndPagingParams, strukturParameter],
     examples: examples.query
   },
   {
@@ -74,7 +75,8 @@ module.exports = [
     subtext: 'Modtag storkreds ud fra nummer.',
     parameters: [
       nummerParameter,
-      ...formatParameters
+      ...formatParameters,
+      strukturParameter
     ],
     nomulti: true,
     examples: examples.get

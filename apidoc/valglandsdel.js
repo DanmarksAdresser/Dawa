@@ -2,7 +2,8 @@ const {
   autocompleteSubtext,
   formatAndPagingParams,
   formatParameters,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  strukturParameter
 } = require('./common');
 const {
   dagiNavnParameter,
@@ -66,7 +67,8 @@ module.exports = [
       ...valglandsdelParameters,
       ...dagiReverseParameters(temaModel),
       ...dagiSridCirkelPolygonParameters(temaModel.plural),
-      ...formatAndPagingParams
+      ...formatAndPagingParams,
+      strukturParameter
     ],
     examples: examples.query
   },
@@ -75,7 +77,8 @@ module.exports = [
     path: '/valglandsdele/{bogstav}',
     subtext: 'Modtag valglandsdel ud fra bogstav.',
     parameters: [bogstavParameter,
-      ...formatParameters],
+      ...formatParameters,
+      strukturParameter],
     nomulti: true,
     examples: examples.get
   },
