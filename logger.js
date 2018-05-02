@@ -1,7 +1,8 @@
 "use strict";
 
 var cluster = require('cluster');
-var winston = require('winston');
+const { format, createLogger } = require('winston');
+const { combine, timestamp } = format;
 var winstonDailyRotateFile = require('winston-daily-rotate-file');
 
 
@@ -14,13 +15,13 @@ var levels = {
   "debug": 7 // Information only useful for debugging purposes
 };
 
-var winstonLogger = winston;
+let winstonLogger = createLogger();
 var thresholds = {};
 var defaultThreshold = levels.debug;
 var initialized = false;
 exports.initialize = function(logOptions) {
   if(initialized){
-    doLog(winston, 'error', 'logger', 'Attempted to configure logger more than once');
+    doLog(winstonLogger, 'error', 'logger', 'Attempted to configure logger more than once');
     return;
   }
   logOptions = logOptions || {};
@@ -28,17 +29,15 @@ exports.initialize = function(logOptions) {
   var directory = logOptions.directory || '.';
   var fileNameSuffix = logOptions.fileNameSuffix;
   if(fileNameSuffix) {
-    winstonLogger =  new (winston.Logger)({
+    winstonLogger =  createLogger({
       transports: [
         new winstonDailyRotateFile({
-          name: 'file',
-          datePattern: '.yyyy-MM-ddTHH.log',
-          filename: directory + '/' + filenamePrefix + fileNameSuffix})
-      ]
+          filename: `${filenamePrefix}${fileNameSuffix}.%DATE%.log`,
+          directory,
+          format: combine(timestamp(), format.json()),
+          datePattern: 'YYYY-MM-DDTHH'
+        })]
     });
-  }
-  else {
-    winstonLogger = winston;
   }
   defaultThreshold = levels[logOptions.defaultLevel || 'debug'];
   if(logOptions.levels) {
