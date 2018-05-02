@@ -1,6 +1,6 @@
 "use strict";
 
-const expect = require('chai').expect;
+const {assert, expect} = require('chai');
 const q = require('q');
 
 const helpers = require('./helpers');
@@ -776,6 +776,38 @@ describe('Stable API', () => {
     }
   };
 
+  const propertiesToIgnoreMap = {
+    afstemningsområde: {
+      json: {
+        flad: ['geo_ændret', 'ændret'],
+        nestet: ['geo_ændret', 'ændret']
+      }
+    },
+    opstillingskreds: {
+      json: {
+        flad: ['geo_ændret', 'ændret'],
+        nestet: ['geo_ændret', 'ændret']
+      }
+    },
+    storkreds: {
+      json: {
+        flad: ['geo_ændret', 'ændret'],
+        nestet: ['geo_ændret', 'ændret']
+      }
+    },
+    valglandsdel: {
+      json: {
+        flad: ['geo_ændret', 'ændret'],
+        nestet: ['geo_ændret', 'ændret']
+      }
+    },
+    supplerendebynavn: {
+      json: {
+        flad: ['geo_ændret', 'ændret'],
+        nestet: ['geo_ændret', 'ændret']
+      }
+    }
+  };
 
   testdb.withTransactionEach('test', (clientFn) => {
     for (let entityName of Object.keys(expectedResults)) {
@@ -795,6 +827,14 @@ describe('Stable API', () => {
                 format: format,
                 struktur: struktur
               });
+              if(propertiesToIgnoreMap[entityName] && propertiesToIgnoreMap[entityName][format] && propertiesToIgnoreMap[entityName][format][struktur]) {
+                const propertiesToIgnore = propertiesToIgnoreMap[entityName][format][struktur];
+                for(let property of propertiesToIgnore) {
+                  assert(jsonResult.hasOwnProperty(property));
+                  delete jsonResult[property];
+                  delete test.value[property];
+                }
+              }
               expect(jsonResult).to.deep.equal(test.value);
             }
           }))
