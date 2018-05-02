@@ -11,7 +11,8 @@ const additionalFieldsMap = {
       name: 'dagi_id'
     },
     {
-      name: 'nummer'
+      name: 'nummer',
+      formatter: numberToString
     },
     {
       name: 'navn'
