@@ -1,6 +1,7 @@
 "use strict";
 
-var expect = require('chai').expect;
+const { go } = require('ts-csp');
+var {assert, expect} = require('chai');
 var request = require("request-promise");
 var _ = require('underscore');
 
@@ -53,7 +54,7 @@ describe("PostnumreApi", function() {
     });
   });
 
-  it('Jeg kan hente stormodtagerpostnumre', function(done) {
+  it('Kan hente stormodtagerpostnumre', function(done) {
     request.get({url: "http://localhost:3002/postnumre?stormodtagere=true", json: true}, function(error, response, result) {
       var fandtStormodtager = _.some(result, function(postnummer) {
         return _.isArray(postnummer.stormodtageradresser) && postnummer.stormodtageradresser.length > 0;
@@ -62,10 +63,16 @@ describe("PostnumreApi", function() {
       done();
     });
   });
-  it('Jeg kan hente et enkelt stormodtagerpostnummer', function() {
-    return request.get({url: "http://localhost:3002/postnumre/1786", json: true}, function(error, response, result) {
-      expect(result.nr).to.equal('1786');
-    });
-  });
+  it('Kan hente et enkelt stormodtagerpostnummer', () => go(function* () {
+    const result = yield request.get({url: "http://localhost:3002/postnumre/1786", json: true});
+    assert.strictEqual(result.nr, '1786');
+  }));
+
+  it('Kan hente kystafgrænsede postnumre', () => go(function*() {
+    const ikkeAfgrænset = yield request.get({url: 'http://localhost:3002/postnumre/1050?format=geojson&srid=25832', json: true});
+    const afgrænset = yield request.get({url: 'http://localhost:3002/postnumre/1050?format=geojson&landpostnumre&srid=25832', json: true});
+    assert.deepEqual(ikkeAfgrænset.geometry.coordinates, [[[[725025,6166300],[725040,6166300],[725040,6166310],[725025,6166310],[725025,6166300]]]]);
+    assert.deepEqual(afgrænset.geometry.coordinates, [[[[725030,6166300],[725025,6166300],[725025,6166310],[725030,6166310],[725030,6166300]]]]);
+  }));
 
 });

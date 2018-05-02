@@ -1,7 +1,6 @@
 "use strict";
 
 var fs = require('fs');
-var winston = require('winston');
 
 var qUtil = require('../q-util');
 
@@ -9,7 +8,6 @@ function exitOnErr(err){
   if (err){
     /*eslint no-console: 0 */
     console.dir(err);
-    winston.error("Error: %j", err, {});
     process.exit(1);
   }
 }
@@ -43,9 +41,6 @@ exports.withoutTriggers = function(client, fn) {
 };
 
 exports.execSQL = function(sql, client, echo, done){
-  if (echo){
-    winston.info("Executing sql: %s", sql);
-  }
   return client.queryp(sql, []).nodeify(done);
 };
 
@@ -59,7 +54,6 @@ exports.psqlScriptQ = function(client, scriptDir, scriptfile) {
   var script = fs.readFileSync(scriptDir + '/' + scriptfile, {
     encoding: 'utf8'
   });
-  winston.info('Executing psqlScript %s', scriptDir + '/' + scriptfile);
   return client.queryp(script, []);
 };
 

@@ -1,8 +1,8 @@
 "use strict";
 
 var cluster = require('cluster');
-const { format, createLogger } = require('winston');
-const { combine, timestamp } = format;
+const { format, createLogger, transports } = require('winston');
+const { combine, timestamp,simple } = format;
 var winstonDailyRotateFile = require('winston-daily-rotate-file');
 
 
@@ -15,9 +15,17 @@ var levels = {
   "debug": 7 // Information only useful for debugging purposes
 };
 
-let winstonLogger = createLogger();
+let winstonLogger = createLogger({
+  format: combine(
+    timestamp(),
+    simple()
+  ),
+  transports: [new transports.Console()]
+});
+
 var thresholds = {};
 var defaultThreshold = levels.debug;
+
 var initialized = false;
 exports.initialize = function(logOptions) {
   if(initialized){

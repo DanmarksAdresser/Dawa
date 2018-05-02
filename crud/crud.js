@@ -1,7 +1,7 @@
 "use strict";
 
 var q = require('q');
-var winston = require('winston');
+const logger = require('../logger').forCategory('test');
 var _ = require('underscore');
 
 var dbapi = require('../dbapi');
@@ -42,7 +42,7 @@ exports.create = function(client, datamodel, object, callback) {
   var params = _.map(columns, function(column) {
     return object[column];
   });
-  winston.debug("Executing SQL %s", sql);
+  logger.debug(`Executing SQL ${sql}`);
   return client.queryp(sql, params).nodeify(callback);
 };
 
@@ -71,7 +71,7 @@ exports.update = function(client, datamodel, object, callback) {
     return object[column];
   });
   var params = updateParams.concat(keyParams);
-  winston.info(sql);
+  logger.info(sql);
   return client.queryp(sql, params).nodeify(callback);
 };
 

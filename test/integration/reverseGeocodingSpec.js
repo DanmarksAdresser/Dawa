@@ -16,12 +16,12 @@ describe('Reverse geocoding', function () {
   }
   ['postnumre', 'kommuner', 'regioner'].forEach(function(entityPlural) {
     it('Skal kunne lave reverse geocoding opslag på ' + entityPlural, function() {
-      return getJson("http://localhost:3002/" + entityPlural + "/reverse?x=725025&y=6166305&srid=25832");
+      return getJson("http://localhost:3002/" + entityPlural + "/reverse?x=725023&y=6166305&srid=25832");
     });
     it('Hvis punktet ligger udenfor temaet skal der returneres en 404', function() {
       return request.get(
         {
-          uri: "http://localhost:3002/" + entityPlural + "/reverse?x=725035&y=6166305&srid=25832",
+          uri: "http://localhost:3002/" + entityPlural + "/reverse?x=725055&y=6166305&srid=25832",
           resolveWithFullResponse: true,
           simple: false
         }
