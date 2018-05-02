@@ -2,7 +2,8 @@ const {
   formatAndPagingParams,
   formatParameters,
   autocompleteSubtext,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  strukturParameter
 } = require('./common');
 const {
   dagiReverseDoc,
@@ -64,6 +65,7 @@ const queryDoc = {
     ...dagiReverseParameters(model),
     ...dagiSridCirkelPolygonParameters(model.plural),
     ...formatAndPagingParams,
+    strukturParameter
   ],
   examples: examples.query
 };
@@ -81,7 +83,7 @@ const getByKeyDoc = {
       name: 'nummer',
       doc: 'Afstemningsområdets nummer indenfor kommunen.'
     },
-    ...formatParameters],
+    ...formatParameters, strukturParameter],
   nomulti: true,
   examples: examples.get
 };

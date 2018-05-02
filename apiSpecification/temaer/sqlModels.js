@@ -160,6 +160,20 @@ from (select distinct k.kode, k.navn
     sognenavn: {
       column: 's.navn'
     }
+  },
+  supplerendebynavn: {
+    dagi_id: {
+      column: 't.dagi_id'
+    },
+    navn: {
+      column: 't.navn'
+    },
+    kommunekode: {
+      column: 't.kommunekode'
+    },
+    kommunenavn: {
+      column: 'k.navn'
+    }
   }
 };
 
@@ -209,6 +223,16 @@ const baseQueries = {
       from: [`menighedsraadsafstemningsomraader t 
       join kommuner k on t.kommunekode = k.kode
       join sogne s on t.sognekode = s.kode`],
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    }
+  },
+  supplerendebynavn: () => {
+    return {
+      select: [],
+      from: [`dagi_supplerendebynavne t
+      join kommuner k on t.kommunekode = k.kode`],
       whereClauses: [],
       orderClauses: [],
       sqlParams: []

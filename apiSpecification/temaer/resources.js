@@ -18,7 +18,8 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
   const queryParams = {
     propertyFilter: parameters[model.singular].propertyFilter,
     crs: commonParameters.crs,
-    geomWithin: commonParameters.geomWithin
+    geomWithin: commonParameters.geomWithin,
+    struktur: commonParameters.struktur
   };
   if (model.searchable) {
     queryParams.search = commonParameters.search
@@ -40,7 +41,8 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     }, representations.autocomplete, sqlModel));
   }
   const getByKeyParams = {
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    struktur: commonParameters.struktur
   };
 
   resources = resources.concat([

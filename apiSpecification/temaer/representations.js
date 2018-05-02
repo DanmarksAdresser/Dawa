@@ -277,12 +277,47 @@ const storkredsJsonRepresentation = (() => {
   return {fields, mapper, schema};
 })();
 
+const supplerendebynavnRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.supplerendebynavn, ['geom_json']);
+  const mapper = baseUrl => row => {
+    const result = {
+      href: makeHref(baseUrl, 'supplerendebynavn', [row.dagi_id]),
+      dagi_id: row.dagi_id,
+      ændret: row.ændret,
+      geo_version: row.geo_version,
+      geo_ændret: row.geo_ændret,
+      navn: row.navn,
+      kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
+    };
+    return result;
+  };
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('supplerendebynavn', fieldName);
+  };
+  const schema = globalSchemaObject({
+    title: 'Supplerende Bynavn',
+    properties: {
+      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      ændret: normalizedFieldSchema('ændret'),
+      geo_version: normalizedFieldSchema('geo_version'),
+      geo_ændret: normalizedFieldSchema('geo_ændret'),
+      navn: normalizedFieldSchema('navn'),
+      kommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'})
+    },
+    docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'navn',
+      'kommune']
+  });
+  return {fields, mapper, schema};
+})();
+
 
 const jsonRepresentations = {
   opstillingskreds: opstillingskredsJsonRepresentation,
   afstemningsområde: afstemningsområdeJsonRepresentation,
   storkreds: storkredsJsonRepresentation,
-  menighedsrådsafstemningsområde: mrAfstemningsområdeRepresentation
+  menighedsrådsafstemningsområde: mrAfstemningsområdeRepresentation,
+  supplerendebynavn: supplerendebynavnRepresentation
 };
 
 

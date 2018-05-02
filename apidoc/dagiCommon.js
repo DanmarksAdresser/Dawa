@@ -6,6 +6,7 @@ const {
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
   reverseGeocodingParameters,
+  strukturParameter
 } = require('./common');
 
 const temaModels = require('../dagiImport/temaModels');
@@ -94,6 +95,7 @@ const dagiQueryDoc = (tema, examples) => {
       ...dagiKodeNavnParameters(tema),
       ...dagiReverseParameters(tema),
       ...formatAndPagingParams,
+      strukturParameter,
       ...dagiSridCirkelPolygonParameters(tema.plural)
     ],
     examples: examples || []
@@ -107,7 +109,7 @@ const dagiByKodeDoc = (tema, examples) => {
     subtext: 'Modtag ' + tema.singular + ' med kode.',
     parameters: [_.find(dagiKodeNavnParameters(tema), function (p) {
       return p.name === 'kode';
-    })].concat(formatParameters),
+    }), strukturParameter, ...formatParameters],
     nomulti: true,
     examples: examples || []
   };
@@ -129,7 +131,7 @@ const dagiReverseDoc = (tema) => {
     entity: tema.singular,
     path: `${basePath}/reverse`,
     subtext: 'Modtag ' + tema.singularSpecific + ' for det angivne koordinat.',
-    parameters: reverseGeocodingParameters,
+    parameters: [...reverseGeocodingParameters, strukturParameter],
     nomulti: true,
     examples: [
       {
