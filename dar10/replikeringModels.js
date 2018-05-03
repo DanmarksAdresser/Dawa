@@ -123,7 +123,7 @@ const historyReplikeringModels = Object.entries(dar10TableModels.historyTableMod
     return {
       name: column.name,
       type,
-      description: 'Iikke tilgængelig',
+      description: 'Ikke tilgængelig',
       nullable: column.nullable
     };
   });
