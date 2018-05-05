@@ -9,7 +9,8 @@ const inspect = require('./inspectImpl');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  txid: [false, 'Transaktions-id', 'number']
+  txid: [false, 'Transaktions-id', 'number'],
+  aggregate: [false, 'Aggreger ændringer', 'boolean', false]
 };
 
 runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options) {
@@ -20,6 +21,6 @@ runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options
 
   return proddb.withTransaction('READ_ONLY', client => go(function*() {
     /* eslint no-console: 0 */
-    console.log(JSON.stringify(yield inspect(client, options.txid, true), null, 2));
+    console.log(JSON.stringify(yield inspect(client, options.txid, options.aggregate), null, 2));
   }));
 });

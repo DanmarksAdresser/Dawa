@@ -26,7 +26,7 @@ const inspectUpdates = (client, txid, tableModel) => go(function*() {
 left join lateral (
   select * from ${tableModel.table}_changes c2
   where c2.txid < ${txid} and ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)}
-  order by txid desc, changeid desc
+  order by txid desc nulls last, changeid desc nulls last
   limit 1) c2 on true
 where c1.txid = ${txid} and c1.operation = 'update' limit 100`;
   const rows = yield client.queryRows(sql);
@@ -63,7 +63,7 @@ const inspectAggregated = (client, txid, tableModel) => go(function*() {
   LEFT JOIN LATERAL (
   select * from ${tableModel.table}_changes c2
   where c2.txid < $1 and ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)}
-  order by txid desc, changeid desc
+  order by txid desc nulls last, changeid desc nulls last
   limit 1) c2 on true
 where c1.txid = $1 and c1.operation = 'update'`;
   const updateResult = (yield client.queryRows(updatesSql, [txid]))[0];
