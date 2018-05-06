@@ -132,7 +132,7 @@ module.exports = (client, txid, tableName, columnName, aggregate) =>go(function*
   else {
     for(let tableModel of Object.values(schemaModel.tables)) {
       const existRows = yield client.queryRows(`SELECT (EXISTS (
-   SELECT 1 FROM information_schema.tables WHERE table_name = '${tableModel.table}_changes')) as exist`);
+   SELECT 1 FROM information_schema.tables WHERE table_name = '${tableModel.table.toLowerCase()}_changes')) as exist`);
       const exists = existRows[0].exist;
       if(exists) {
         const tableResult = yield inspectTable(client, txid, tableModel, aggregate);
