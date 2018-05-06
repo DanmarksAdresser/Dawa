@@ -15,7 +15,7 @@ const combinedEventHandler = (client, baseUrl, pathParams, queryParams) => go(fu
     return errResponse;
   }
   const txid = validatedParams.txid;
-  const result = yield inspect(client, txid, validatedParams.aggregate);
+  const result = yield inspect(client, txid, null, null, validatedParams.aggregate);
   return {
     status: 200,
     headers: {

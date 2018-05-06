@@ -1,7 +1,7 @@
 "use strict";
 
 const { go } = require('ts-csp');
-
+const _ = require('underscore');
 const schemaModel = require('../psql/tableModel');
 const { columnsEqualClause } = require('../darImport/sqlUtil');
 const logger = require('../logger').forCategory('inspect');
@@ -107,18 +107,40 @@ const inspectNonAggregated = (client, txid, tableModel) => go(function*() {
   }
 });
 
-module.exports = (client, txid, aggregate) =>go(function*() {
+const inspectTable = (client, txid, tableModel, aggregate) =>
+  aggregate ? inspectAggregated(client, txid, tableModel) : inspectNonAggregated(client, txid, tableModel);
+
+/** Warning: This function is susceptible to SQL injection attacks. Ensure all parameters are properly sanitized. */
+const inspectColumn = (client, txid, tableModel, colName) => {
+  const columnDef = _.findWhere(tableModel.columns, {name: colName});
+  const distinctClause = columnDef.distinctClause ? columnDef.distinctClause('c1', 'c2') : `c1.${colName} is distinct from c2.${colName}`;
+  const sql =`select c1.${colName} as after, c2.${colName} as before, count(*)::integer as cnt from ${tableModel.table}_changes c1
+left join lateral (
+  select * from ${tableModel.table}_changes c2
+  where c2.txid < ${txid} and ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)}
+  order by txid desc nulls last, changeid desc nulls last
+  limit 1) c2 on true
+where c1.txid = ${txid} and c1.operation = 'update'  and ${distinctClause} group by c1.${colName}, c2.${colName} order by count(*) desc`;
+  return client.queryRows(sql);
+};
+
+module.exports = (client, txid, tableName, columnName, aggregate) =>go(function*() {
   const result = {};
-  for(let tableModel of Object.values(schemaModel.tables)) {
-    const existRows = yield client.queryRows(`SELECT (EXISTS (
+  if(!!tableName && !!columnName) {
+    return inspectColumn(client, txid, schemaModel.tables[tableName], columnName);
+  }
+  else {
+    for(let tableModel of Object.values(schemaModel.tables)) {
+      const existRows = yield client.queryRows(`SELECT (EXISTS (
    SELECT 1 FROM information_schema.tables WHERE table_name = '${tableModel.table}_changes')) as exist`);
-    const exists = existRows[0].exist;
-    if(exists) {
-      const tableResult = aggregate ? yield inspectAggregated(client, txid, tableModel) : yield inspectNonAggregated(client, txid, tableModel);
-      if(tableResult) {
-        result[tableModel.table] = tableResult;
+      const exists = existRows[0].exist;
+      if(exists) {
+        const tableResult = yield inspectTable(client, txid, tableModel, aggregate);
+        if(tableResult) {
+          result[tableModel.table] = tableResult;
+        }
       }
     }
+    return result;
   }
-  return result;
 });
