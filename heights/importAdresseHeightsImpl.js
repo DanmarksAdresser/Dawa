@@ -115,12 +115,12 @@ const importFromApi = (client, apiClient) => go(function*() {
         LIMIT 1
         `)).rows;
   yield client.queryp('SET enable_seqscan=1');
-
   if (rows.length === 1) {
     const row = rows[0];
     const id = row.id;
     const x = row.x;
     const y = row.y;
+    logger.info('Importerer højde for adgangsadresse', {id, x, y});
     try {
       const z = roundHeight(yield apiClient(x, y));
       yield createHeightTable(client, 'heights');
