@@ -122,11 +122,13 @@ const importFromApi = (client, apiClient) => go(function*() {
     logger.info('Importerer højde for adgangsadresse', {id, x, y});
     try {
       const z = roundHeight(yield apiClient(x, y));
+      logger.info('Modtog højde for adgangsasdresse', {id, x, y, z});
       yield createHeightTable(client, 'heights');
       yield client.query('INSERT INTO heights(id, x, y, z) VALUES ($1, $2, $3, $4)', [id, x, y, z]);
       yield importUtil.withImportTransaction(client, "importHeightFromApi", (txid) =>
         importHeightsFromTable(client, txid, 'heights')
       );
+      logger.info('Højde indlæst for adgangsasdresse', {id, x, y, z});
       yield importUtil.dropTable(client, 'heights');
     }
     catch (e) {
