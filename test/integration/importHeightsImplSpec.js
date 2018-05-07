@@ -19,7 +19,7 @@ describe('importFromApi', () => {
     it('Can import a height from API', q.async(function*() {
       const previousHeight = (yield clientFn().queryp('select hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0].hoejde;
       expect(previousHeight).to.be.null;
-      yield withImportTransaction(clientFn(), "test", txid => importFromApi(clientFn(), txid, successMockClient));
+      yield importFromApi(clientFn(), successMockClient);
       const after = (yield clientFn().queryRows('select z_x, z_y, hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
       expect(after.hoejde).to.equal(4.2);
       expect(after.z_x).to.equal(637993.47);
@@ -31,7 +31,7 @@ describe('importFromApi', () => {
     it('If importing height fails, we will mark the point to not be queried again for 1 day', q.async(function*() {
       const previousHeight = (yield clientFn().queryp('select hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0].hoejde;
       expect(previousHeight).to.be.null;
-      yield withImportTransaction(clientFn(), "test", txid => importFromApi(clientFn(), txid, failMockClient));
+      yield importFromApi(clientFn(), failMockClient);
       const after = (yield clientFn().queryp('select hoejde, disableheightlookup from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT])).rows[0];
       expect(after.hoejde).to.be.null;
       expect(after.disableheightlookup).to.be.a('string');

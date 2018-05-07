@@ -11,7 +11,6 @@ const proddb = require('../psql/proddb');
 const spec = require('./spec');
 const logger = require('../logger').forCategory('darImport');
 const moment = require('moment');
-const sqlCommon = require('../psql/common');
 
 const darApiClient = require('./darApiClient');
 const notificationClient = require('./notificationClient');
@@ -105,7 +104,6 @@ function getCurrentEventIds(client) {
 
 function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTransactions) {
   return q.async(function*() {
-    yield sqlCommon.disableTriggersQ(client);
     const localEventIds = yield getCurrentEventIds(client);
     const beforeApiFetchMillis = Date.now();
     const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
@@ -118,6 +116,7 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTran
     const transactions = splitInTransactions(rowsMap);
     if (transactions.length === 0) {
       if(yield importDarImpl.hasChangedEntitiesDueToVirkningTime(client)) {
+        logger.info('Has changed entities due to advancing virkning time');
         yield importDarImpl.withDar1Transaction(client, 'api', () =>
           withImportTransaction(client, 'importDarApi', (txid) =>
             importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
@@ -243,7 +242,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDae
 }
 
 module.exports = {
-  importDaemon: importDaemon,
+  importDaemon,
   internal: {
     getRecords: getRecordsForEntity,
     getCurrentEventIds: getCurrentEventIds,

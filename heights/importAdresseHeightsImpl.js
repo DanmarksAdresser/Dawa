@@ -104,7 +104,7 @@ function hoejdeClient(apiUrl, login, password) {
   }
 }
 
-const importFromApi = (client, txid, apiClient) => go(function*() {
+const importFromApi = (client, apiClient) => go(function*() {
   const rows = (yield client.queryp(`SET enable_seqscan=0;
         SELECT id, etrs89oest as x, etrs89nord as y 
         FROM adgangsadresser 
@@ -125,7 +125,9 @@ const importFromApi = (client, txid, apiClient) => go(function*() {
       const z = roundHeight(yield apiClient(x, y));
       yield createHeightTable(client, 'heights');
       yield client.query('INSERT INTO heights(id, x, y, z) VALUES ($1, $2, $3, $4)', [id, x, y, z]);
-      yield importHeightsFromTable(client, txid, 'heights');
+      yield importUtil.withImportTransaction(client, "importHeightFromApi", (txid) =>
+        importHeightsFromTable(client, txid, 'heights')
+      );
       yield importUtil.dropTable(client, 'heights');
     }
     catch (e) {
@@ -147,8 +149,7 @@ const importFromApiDaemon = (apiUrl, login, password) => go(function*() {
   /*eslint no-constant-condition: 0 */
   while (true) {
     const importedAHeight = yield proddb.withTransaction('READ_WRITE', client =>
-      importUtil.withImportTransaction(client, "importHeightFromApi", (txid) =>
-        importFromApi(client, txid, apiClient)));
+      importFromApi(client, apiClient));
     if (!importedAHeight) {
       break;
     }
