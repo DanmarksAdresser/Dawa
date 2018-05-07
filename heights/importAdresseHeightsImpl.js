@@ -105,16 +105,15 @@ function hoejdeClient(apiUrl, login, password) {
 }
 
 const importFromApi = (client, apiClient) => go(function*() {
-  const rows = (yield client.queryp(`SET enable_seqscan=0;
+  const rows = (yield client.queryp(`
         SELECT id, etrs89oest as x, etrs89nord as y 
         FROM adgangsadresser 
         WHERE etrs89oest IS NOT NULL AND etrs89nord IS NOT NULL AND 
         (disableheightlookup IS NULL OR disableheightlookup < NOW())  AND
-        (z_x IS NULL OR z_y IS NULL OR z_x <> etrs89oest OR z_y <> etrs89nord)
+        (z_x IS NULL OR z_y IS NULL OR z_x::numeric(11,3) <> etrs89oest::numeric(11,3) OR z_y::numeric(11,3) <> etrs89nord::numeric(11,3))
         ORDER BY id
         LIMIT 1
         `)).rows;
-  yield client.queryp('SET enable_seqscan=1');
   if (rows.length === 1) {
     const row = rows[0];
     const id = row.id;
