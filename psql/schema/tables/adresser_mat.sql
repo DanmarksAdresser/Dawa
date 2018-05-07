@@ -31,7 +31,7 @@ CREATE TABLE adresser_mat(
   husnummerkilde smallint,
   placering smallint,
   tekniskstandard CHAR(2) NULL,
-  tekstretning float4 NULL,
+  tekstretning numeric(5,2) NULL,
   adressepunktaendringsdato timestamp NULL,
   geom  geometry(point, 25832),
   tsv tsvector,

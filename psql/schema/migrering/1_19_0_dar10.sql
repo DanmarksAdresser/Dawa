@@ -1,0 +1,11 @@
+DROP VIEW adgangsadresserview cascade;
+DROP VIEW adresser cascade;
+DROP VIEW wms_adgangsadresser cascade;
+DROP VIEW wms_housenumber_inspire cascade;
+DROP VIEW adresser_mat_view;
+ALTER TABLE adgangsadresser alter column tekstretning set data type numeric(5,2);
+ALTER TABLE adgangsadresser_changes alter column tekstretning set data type numeric(5,2);
+ALTER TABLE adgangsadresser_mat alter column tekstretning set data type numeric(5,2);
+ALTER TABLE adgangsadresser_mat_changes alter column tekstretning set data type numeric(5,2);
+ALTER TABLE adresser_mat alter column tekstretning set data type numeric(5,2);
+ALTER TABLE adresser_mat_changes alter column tekstretning set data type numeric(5,2);
