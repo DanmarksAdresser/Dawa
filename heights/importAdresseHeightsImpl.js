@@ -61,8 +61,8 @@ const importHeightsFromTable = (client, txid, table) => go(function*() {
   yield client.query('CREATE TEMP TABLE adgangsadresser_dirty AS ' +
     `(SELECT a.id FROM adgangsadresser a 
       JOIN ${table} h 
-      ON a.id = h.id AND a.etrs89oest = h.x AND a.etrs89nord = h.y
-      AND (a.hoejde is null or a.hoejde <> h.z or (a.z_x <> a.etrs89oest or a.z_y <> a.etrs89nord)))`);
+      ON a.id = h.id AND a.etrs89oest::numeric(11,3) = h.x::numeric(11,3) AND a.etrs89nord::numeric(11,3) = h.y::numeric(11,3)
+      AND (a.hoejde is distinct from h.z or (a.z_x is distinct from a.etrs89oest or a.z_y is distinct from a.etrs89nord)))`);
   yield client.query(`CREATE TEMP VIEW adgangsadresser_hoejder AS(select id, z as hoejde FROM ${table})`);
   yield tableDiffNg.computeDifferencesSubset(client, txid, 'adgangsadresser_hoejder', 'adgangsadresser_dirty', schemaModel.tables.adgangsadresser, ["id", "hoejde"]);
   yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser);
