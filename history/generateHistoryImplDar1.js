@@ -8,7 +8,7 @@ require('moment-timezone');
 const tableModels = require('../psql/tableModel');
 
 const {createTempHistoryTable, mergeValidTime, TableInserter,
-processAdgangsadresserHistory, processAdresserHistory, createVejstykkerPostnumreHistory} = require('./common');
+processAdgangsadresserHistory, processAdresserHistory, createVejstykkerPostnumreHistory, createPostnumreHistory} = require('./common');
 const Range = require('../psql/databaseTypes').Range;
 const intervalMath = require('../intervalMath');
 const dbapi = require('../dbapi');
@@ -77,7 +77,6 @@ const createCombinedPostnrHistory = client => go(function*() {
     new TableInserter(client, 'combined_postnr_history_unmerged', columns)
   ]);
   yield mergeValidTime(client, 'combined_postnr_history_unmerged', 'combined_postnr_history_merged', ['adresseid'], ['adresseid', 'postnr'], false);
-
 });
 
 
@@ -94,22 +93,22 @@ const prepareDar1Postnummer = client => mergeValidTime(client,
   ['id', 'postnr', 'navn']);
 
 const prepareDar1SupplerendeBynavn = client =>
-  mergeValidTime(client, 'dar1_supplerendebynavn_history', 'dar1_supplerendebynavn_prepared', ['id'], ['id', 'navn'], true)
+  mergeValidTime(client, 'dar1_supplerendebynavn_history', 'dar1_supplerendebynavn_prepared', ['id'], ['id', 'navn'])
 
 const prepareDar1Adresse = client =>
-  mergeValidTime(client, 'dar1_adresse_history', 'dar1_adresse_prepared', ['id'], ['id', 'status', 'husnummer_id', 'etagebetegnelse', 'dørbetegnelse'], true)
+  mergeValidTime(client, 'dar1_adresse_history', 'dar1_adresse_prepared', ['id'], ['id', 'status', 'husnummer_id', 'etagebetegnelse', 'dørbetegnelse']);
 
 const prepareDar1Adressepunkt = client =>
-  mergeValidTime(client, 'dar1_adressepunkt_history', 'dar1_adressepunkt_prepared', ['id'], ['id', 'status'], true);
+  mergeValidTime(client, 'dar1_adressepunkt_history', 'dar1_adressepunkt_prepared', ['id'], ['id', 'status']);
 
 const prepareDar1Kommune = client =>
-  mergeValidTime(client, 'dar1_darkommuneinddeling_history', 'dar1_kommune_prepared', ['id'], ['id', 'kommunekode'], true);
+  mergeValidTime(client, 'dar1_darkommuneinddeling_history', 'dar1_kommune_prepared', ['id'], ['id', 'kommunekode']);
 
 const prepareDar1NavngivenVej = client =>
-  mergeValidTime(client, 'dar1_navngivenvej_history', 'dar1_navngivenvej_prepared', ['id'], ['id', 'vejnavn', 'vejadresseringsnavn'], true);
+  mergeValidTime(client, 'dar1_navngivenvej_history', 'dar1_navngivenvej_prepared', ['id'], ['id', 'vejnavn', 'vejadresseringsnavn']);
 
 const prepareDar1NavngivenVejKommunedel = client =>
-  mergeValidTime(client, 'dar1_navngivenvejkommunedel_history', 'dar1_navngivenvejkommunedel_prepared', ['id'], ['id', 'navngivenvej_id', 'kommune', 'vejkode'], true);
+  mergeValidTime(client, 'dar1_navngivenvejkommunedel_history', 'dar1_navngivenvejkommunedel_prepared', ['id'], ['id', 'navngivenvej_id', 'kommune', 'vejkode']);
 
 const mergePostnr = client =>
   client.query(`CREATE TEMP TABLE postnummer_merged AS (SELECT hn.id, hn.status as hn_status, husnummertekst as husnr, adgangspunkt_id, darkommune_id,
@@ -150,7 +149,7 @@ const mergeVejnavn = client =>
       AND aa.virkning && vn.virkning)`);
 
 const generateAdgangsadresser = client => go(function*() {
-  const select = `SELECT aa.id, dar1_status_til_dawa_status(hn_status) as hn_status, dar1_status_til_dawa_status(ap.status) as ap_status, husnr,
+  const select = `SELECT aa.id, dar1_status_til_dawa_status(hn_status) as hn_status, dar1_status_til_dawa_status(hn_status) as ap_status, husnr,
      postnr, postnrnavn, supplerendebynavn, kommunekode, vejkode, vejnavn, adresseringsvejnavn,
      aa.virkning * ap.virkning as virkning
     FROM vejnavn_merged aa LEFT JOIN dar1_adressepunkt_prepared ap
@@ -213,7 +212,7 @@ const prepareVejnavnHistory = (client, dar1CutoffDate) => go(function*() {
    (SELECT kommunekode, vejkode, 
   vejnavn, adresseringsvejnavn, tstzrange(greatest(lower(virkning), $1), upper(virkning), '[)') as virkning FROM 
   dar_vejnavn_joined
-  WHERE greatest(lower(virkning), $1) < upper(virkning))`, [dar1CutoffDate]);
+  WHERE upper_inf(virkning) or greatest(lower(virkning), $1) < upper(virkning))`, [dar1CutoffDate]);
   yield mergeValidTime(
     client,
     'vejnavn_history_unmerged',
@@ -221,6 +220,8 @@ const prepareVejnavnHistory = (client, dar1CutoffDate) => go(function*() {
     ['kommunekode', 'vejkode'],
     ['kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn'],
     false);
+  yield client.query('delete from vask_vejnavn; insert into vask_vejnavn(kommunekode,vejkode,navn,adresseringsnavn,virkning)' +
+    '(select kommunekode,vejkode,vejnavn,adresseringsvejnavn,virkning from vejnavn_history_merged)');
 });
 
 const generateHistoryImpl = (client, dar1CutoffDate) => go(function*() {
@@ -254,6 +255,7 @@ const generateHistoryImpl = (client, dar1CutoffDate) => go(function*() {
   yield generateAdresser(client);
   yield processAdgangsadresserHistory(client);
   yield processAdresserHistory(client);
+  yield createPostnumreHistory(client);
   yield createVejstykkerPostnumreHistory(client);
 });
 module.exports = {

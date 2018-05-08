@@ -11,7 +11,9 @@ const {withImportTransaction} = require('../../importUtil/importUtil');
 
 const successMockClient = () => q.resolve(4.22);
 const failMockClient = () => q.reject(new Error('someError'));
-const FIRST_ADDRESS_WITHOUT_HEIGHT = '0a3f5082-f256-32b8-e044-0003ba298018';
+const FIRST_ADDRESS_WITHOUT_HEIGHT =  '0a3f507b-ba08-32b8-e044-0003ba298018';
+const FIRST_ADDRESS_X=728516.25;
+const FIRST_ADDRESS_Y=6166987.04;
 
 
 describe('importFromApi', () => {
@@ -22,8 +24,8 @@ describe('importFromApi', () => {
       yield importFromApi(clientFn(), successMockClient);
       const after = (yield clientFn().queryRows('select z_x, z_y, hoejde from adgangsadresser where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
       expect(after.hoejde).to.equal(4.2);
-      expect(after.z_x).to.equal(637993.47);
-      expect(after.z_y).to.equal(6149778.93);
+      expect(after.z_x).to.equal(FIRST_ADDRESS_X);
+      expect(after.z_y).to.equal(FIRST_ADDRESS_Y);
       const after_mat = (yield clientFn().queryRows('select hoejde from adgangsadresser_mat where id = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
       expect(after_mat.hoejde).to.equal(4.2);
     }));

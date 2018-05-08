@@ -8,6 +8,7 @@ const { go } = require('ts-csp');
 
 const {allColumnNames, } = require('../importUtil/tableModelUtil');
 const sqlUtil = require('../darImport/sqlUtil');
+const tableSchema = require('../psql/tableModel');
 
 util.inherits(TableInserter, Writable);
 function TableInserter(client, table, columns) {
@@ -142,60 +143,15 @@ INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, 
 
 
 function createVejstykkerPostnumreHistory(client) {
-  return client.queryp(`
-DELETE FROM vask_vejstykker_postnumre;    
-INSERT INTO vask_vejstykker_postnumre (SELECT DISTINCT
-                                         vask_vejnavn.kommunekode,
-                                         vask_vejnavn.vejkode,
-                                         vask_vejnavn.navn               AS vejnavn,
-                                         vask_postnrinterval.nr          AS postnr,
-                                         vask_vejnavn.navn || ' ' || vask_postnrinterval.nr || ' '
-                                         || vp.navn AS tekst
-                                       FROM vask_vejnavn
-                                         JOIN vask_postnrinterval
-                                           ON vask_vejnavn.virkning && vask_postnrinterval.virkning
-                                              AND vask_vejnavn.kommunekode =
-                                                  vask_postnrinterval.kommunekode
-                                              AND vask_vejnavn.vejkode = vask_postnrinterval.vejkode
-                                         JOIN vask_postnumre vp
-                                           ON vask_postnrinterval.nr = vp.nr
-                                           AND vask_postnrinterval.virkning && vp.virkning);
-INSERT INTO vask_vejstykker_postnumre (SELECT DISTINCT
-                                         vask_vejnavn.kommunekode,
-                                         vask_vejnavn.vejkode,
-                                         vask_vejnavn.adresseringsnavn   AS vejnavn,
-                                         vask_postnrinterval.nr          AS postnr,
-                                         vask_vejnavn.navn || ' ' || vp.nr || ' '
-                                         || vp.navn AS tekst
-                                       FROM vask_vejnavn
-                                         JOIN vask_postnrinterval
-                                           ON vask_vejnavn.virkning && vask_postnrinterval.virkning
-                                              AND vask_vejnavn.kommunekode =
-                                                  vask_postnrinterval.kommunekode
-                                              AND vask_vejnavn.vejkode = vask_postnrinterval.vejkode
-                                         JOIN vask_postnumre vp
-                                           ON vask_postnrinterval.nr = vp.nr
-                                           AND vask_postnrinterval.virkning && vp.virkning
-                                       WHERE vask_vejnavn.adresseringsnavn <> vask_vejnavn.navn);
-INSERT INTO vask_vejstykker_postnumre (SELECT DISTINCT
-                                         vask_vejnavn.kommunekode,
-                                         vask_vejnavn.vejkode,
-                                         vask_vejnavn.navn               AS vejnavn,
-                                         vp.nr AS postnr,
-                                         vask_vejnavn.navn || ' ' || vp.nr || ' '
-                                         || vp.navn AS tekst
-                                       FROM vask_vejnavn
-                                         JOIN vask_adgangsadresser a
-                                           ON vask_vejnavn.kommunekode = a.kommunekode
-                                              AND vask_vejnavn.vejkode = a.vejkode
-                                              AND vask_vejnavn.virkning && a.virkning
-                                         JOIN stormodtagere s
-                                           ON a.id = s.adgangsadresseid
-                                         JOIN vask_postnumre vp
-                                           ON s.nr = vp.nr
-                                              AND vask_vejnavn.virkning && vp.virkning);
-
-DELETE FROM vask_vejstykker_postnumre  vp WHERE NOT EXISTS(select * from vask_adgangsadresser a where vp.kommunekode = a.kommunekode and vp.vejkode = a.vejkode);
+  return client.query(`
+DELETE FROM vask_vejstykker_postnumre; 
+insert into vask_vejstykker_postnumre(kommunekode,vejkode,vejnavn,postnr,tekst)
+(select kommunekode,vejkode,vejnavn,postnr, vejnavn|| ' ' || postnr || ' ' || postnrnavn as tekst
+from vask_adgangsadresser group by kommunekode,vejkode,vejnavn,postnr, vejnavn|| ' ' || postnr || ' ' || postnrnavn)
+UNION
+(select kommunekode,vejkode,adresseringsvejnavn,postnr, adresseringsvejnavn|| ' ' || postnr || ' ' || postnrnavn as tekst
+from vask_adgangsadresser group by kommunekode,vejkode,adresseringsvejnavn,postnr, adresseringsvejnavn|| ' ' || postnr || ' ' || postnrnavn)
+;   
 `);
 }
 
@@ -271,6 +227,15 @@ INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendeby
 
 });
 
+const createPostnumreHistory = (client) => go(function*(){
+    yield createTempHistoryTable(client, tableSchema.tables.postnumre);
+    yield client.queryp('DELETE FROM vask_postnumre');
+    yield client.queryp(`INSERT INTO vask_postnumre(nr, navn, virkning) (SELECT nr, navn, \
+tstzrange((CASE WHEN tf.time < '2016-01-01' THEN NULL ELSE tf.time END),tt.time, '[)') as virkning\    
+FROM postnumre_history p \
+LEFT JOIN transaction_history tf ON p.valid_from = tf.sequence_number \
+LEFT JOIN transaction_history tt ON p.valid_to = tt.sequence_number)`);
+});
 
 module.exports = {
   createHeadTailTempTable,
@@ -279,6 +244,7 @@ module.exports = {
   mergeValidTime,
   processAdgangsadresserHistory,
   processAdresserHistory,
-  createVejstykkerPostnumreHistory
+  createVejstykkerPostnumreHistory,
+  createPostnumreHistory
 };
 

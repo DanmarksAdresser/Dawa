@@ -84,3 +84,10 @@ CREATE TYPE VejstykkeRef AS (
   kommunekode integer,
   kode integer
 );
+
+DROP AGGREGATE IF EXISTS range_merge(anyrange);
+CREATE AGGREGATE range_merge(anyrange)
+(
+  sfunc = range_merge,
+  stype = anyrange
+);

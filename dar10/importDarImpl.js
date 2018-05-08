@@ -87,7 +87,6 @@ const importFromFiles = (client, txid, dataDir, skipDawa) => go(function* () {
   else {
     yield importInitial(client, txid, dataDir, skipDawa);
   }
-  yield importDar09Impl.updateSupplerendeBynavne(client);
 });
 
 const initializeDar10HistoryTables = (client, txid) => go(function*() {
@@ -163,6 +162,8 @@ const initDawa = (client, txid) => go(function* () {
 const updateDawa = (client, txid, nonPublicOverrides) => go(function* () {
   nonPublicOverrides = nonPublicOverrides || {};
   yield rematerializeDawa(client,txid);
+  yield importDar09Impl.updateSupplerendeBynavne(client);
+  yield importDar09Impl.updatePostnumreKommunekoderMat(client);
 });
 
 function createFetchTable(client, tableName) {
