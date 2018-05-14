@@ -4,7 +4,7 @@ var expect = require('chai').expect;
 var q = require('q');
 
 const {mergeValidTime, createHeadTailTempTable} = require('../../history/common');
-const generateHistory = require('../../history/generateHistoryImpl');
+const generateHistory = require('../../history/generateCombinedHistoryImpl');
 var testdb = require('../helpers/testdb2');
 
 q.longStackSupport = true;
@@ -47,22 +47,12 @@ describe('History generation', () => {
     });
   });
 
-  describe('Generate adgangsadresser history', () => {
+  describe('Generate history', () => {
     testdb.withTransactionEach('empty', (clientFn) => {
       it('Can generate a completely empty history', q.async(function*() {
         var client = clientFn();
         client.allowParallelQueries = true;
-        yield generateHistory.generateAdgangsadresserHistory(client);
-      }));
-    });
-  });
-
-  describe('Generate adresser history', () => {
-    testdb.withTransactionEach('empty', (clientFn) => {
-      it('Can generate a completely empty history', q.async(function*() {
-        var client = clientFn();
-        client.allowParallelQueries = true;
-        yield generateHistory.generateAdresserHistory(client);
+        yield generateHistory.generateHistory(client, '2018-04-05T00:00:00.000Z');
       }));
     });
   });

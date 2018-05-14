@@ -1,5 +1,6 @@
 "use strict";
 
+const { go } = require('ts-csp');
 const { Transform } = require('stream');
 const util = require('util');
 const q = require('q');
@@ -16,9 +17,7 @@ const tableModels = require('../psql/tableModel');
 const { TableInserter,
   mergeValidTime,
   createTempHistoryTable,
-  processAdgangsadresserHistory,
-  createVejstykkerPostnumreHistory,
-  processAdresserHistory } = require('./common');
+  cutoffAfter, adrCols } = require('./common');
 
 util.inherits(ExtendStreetIntervalTransformer, Transform);
 function ExtendStreetIntervalTransformer(refify, unrefify) {
@@ -132,6 +131,10 @@ tstzrange((CASE WHEN tf.time < '2016-01-01' THEN NULL ELSE tf.time END),tt.time,
 FROM postnumre_history p \
 LEFT JOIN transaction_history tf ON p.valid_from = tf.sequence_number \
 LEFT JOIN transaction_history tt ON p.valid_to = tt.sequence_number)`);
+    yield client.query(`
+    update vask_postnumre o set virkning = tstzrange(null, upper(virkning), '[)') where
+    not exists(select * from vask_postnumre i where o.nr = i.nr and upper(i.virkning) <= lower(o.virkning))`);
+
   })();
 }
 
@@ -243,7 +246,7 @@ ON u.postnr = vp.nr AND u.virkning && vp.virkning)`);
   })();
 }
 
-function generateAdgangsadresserHistory(client) {
+function generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10CutoffDate) {
   return q.async(function*() {
     yield createVejnavnHistory(client);
     yield createPostnumreHistory(client);
@@ -279,39 +282,44 @@ function generateAdgangsadresserHistory(client) {
                         ELSE 'U' END)
          AND m.husnr <@ sb.husnrinterval
 `;
-    yield client.queryp(`DELETE FROM vask_adgangsadresser; INSERT INTO vask_adgangsadresser (${query})`);
-    yield client.queryp(`DROP TABLE ${mergedTableWithPostnr}`);
-    yield processAdgangsadresserHistory(client);
-    yield createVejstykkerPostnumreHistory(client);
+    yield client.query(`create temp table suppl_merged as (${query})`);
+    yield cutoffAfter(client, 'suppl_merged', dar10CutoffDate);
+    yield client.query(`insert into ${adgangsadresseDestTable} (select * from suppl_merged)`);
   })();
 }
 
-function generateAdresserHistory(client) {
+function generateAdresserHistory(client, dar10CutoffDate, adgangsadresseTable, adresseDestTable) {
   return q.async(function*() {
     var adresseHistoryTable = 'adresse_history';
     var unmerged = 'adresse_unmerged';
     var merged = 'adresse_merged';
     yield mergeValidTime(client, 'dar_adresse', adresseHistoryTable, ['id'], ['id', 'bkid', 'statuskode', 'husnummerid', 'etagebetegnelse', 'doerbetegnelse'], true);
     var query =
-      `SELECT a.bkid as id, a.id as dar_id, aa.id as adgangspunktid,
+      `SELECT a.bkid as id, a.id as dar_id, aa.id as adgangsadresseid,
 ap_statuskode, hn_statuskode, a.statuskode, kommunekode, vejkode, vejnavn, adresseringsvejnavn, husnr,
 a.etagebetegnelse as etage, a.doerbetegnelse as doer,
 supplerendebynavn, postnr, postnrnavn,
 a.virkning * aa.virkning as virkning
-FROM ${adresseHistoryTable} a JOIN vask_adgangsadresser aa ON a.husnummerid = hn_id AND aa.virkning && a.virkning
+FROM ${adresseHistoryTable} a JOIN ${adgangsadresseTable} aa ON a.husnummerid = hn_id AND aa.virkning && a.virkning
 `;
     yield client.queryp(`CREATE TEMP TABLE ${unmerged} AS (${query})`);
     yield client.queryp(`DROP TABLE ${adresseHistoryTable}`);
-    yield mergeValidTime(client, unmerged, merged, ['id'], ['id', 'dar_id', 'adgangspunktid', 'ap_statuskode', 'hn_statuskode', 'statuskode', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'etage', 'doer', 'supplerendebynavn', 'postnr', 'postnrnavn'], false);
+    yield mergeValidTime(client, unmerged, merged, ['id'], adrCols, false);
     yield client.queryp(`DROP TABLE ${unmerged}`);
-    yield client.queryp(`DELETE FROM vask_adresser; INSERT INTO vask_adresser (SELECT * FROM ${merged})`);
-    yield client.queryp(`DROP TABLE ${merged}`);
-    yield processAdresserHistory(client);
+    yield cutoffAfter(client, merged, dar10CutoffDate);
+    yield client.queryp(`INSERT INTO ${adresseDestTable}(${adrCols}, virkning) (SELECT ${adrCols},virkning FROM ${merged})`);
+    yield client.query(`drop table ${merged}`);
   })();
 }
 
+const generateHistory = (client, dar10CutoffDate, adgangsadresseDestTable, adresseDestTable) => go(function*(){
+  yield generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10CutoffDate);
+  yield generateAdresserHistory(client, dar10CutoffDate, adgangsadresseDestTable, adresseDestTable);
+});
+
 module.exports = {
-  mergeValidTime: mergeValidTime,
-  generateAdgangsadresserHistory: generateAdgangsadresserHistory,
-  generateAdresserHistory: generateAdresserHistory
+  mergeValidTime,
+  generateAdgangsadresserHistory,
+  generateAdresserHistory,
+  generateHistory
 };

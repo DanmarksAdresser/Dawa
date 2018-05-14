@@ -3,7 +3,7 @@
 const _ = require('underscore');
 
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
-const generateHistoryImpl = require('./generateHistoryImplDar1');
+const generateHistoryImpl = require('./generateCombinedHistoryImpl');
 const logger = require('../logger').forCategory('generateHistoryDar1');
 const proddb = require('../psql/proddb');
 const { go } = require('ts-csp');
@@ -23,7 +23,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     client.allowParallelQueries = true;
     return go(function*() {
       try {
-        yield generateHistoryImpl.generateHistoryImpl(client, '2017-09-01T00:00:00.000Z');
+        yield generateHistoryImpl.generateHistory(client, '2018-04-05T00:00:00.000Z');
         logger.info("Successfully generated history");
       }
       catch(err) {

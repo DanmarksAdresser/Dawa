@@ -39,6 +39,16 @@ TableInserter.prototype._writev = function(chunks, callback) {
     parameters).asPromise().nodeify(callback);
 };
 
+const cutoffAfter = (client, table, cutoffDate) => go(function*() {
+  yield client.query(`delete from ${table} where lower(virkning) >= $1::timestamptz`, [cutoffDate]);
+  yield client.query(`update ${table} SET virkning = tstzrange(lower(virkning), least(upper(virkning), $1::timestamptz), '[)')`, [cutoffDate]);
+});
+
+const cutoffBefore = (client, table, cutoffDate) => go(function*(){
+  yield client.query(` delete from ${table} where upper(virkning) <= $1::timestamptz`, [cutoffDate]);
+  yield client.query(`update ${table} SET virkning = tstzrange(greatest(lower(virkning), $1::timestamptz), upper(virkning), '[)')`, [cutoffDate]);
+});
+
 const createTempHistoryTable = (client, tableModel) => {
   const partitionClause = sqlUtil.selectList(null, tableModel.primaryKey);
   const subselect = `select *, last_value(changeid) OVER (PARTITION BY ${partitionClause} ORDER BY changeid NULLS FIRST ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) as next_valid from ${tableModel.table}_changes`;
@@ -237,6 +247,9 @@ LEFT JOIN transaction_history tf ON p.valid_from = tf.sequence_number \
 LEFT JOIN transaction_history tt ON p.valid_to = tt.sequence_number)`);
 });
 
+const adgAdrCols = ['id', 'hn_statuskode', 'ap_statuskode', 'husnr', 'postnr', 'postnrnavn', 'supplerendebynavn', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn'];
+const adrCols = [...adgAdrCols, 'adgangsadresseid', 'statuskode', 'etage', 'doer'];
+
 module.exports = {
   createHeadTailTempTable,
   TableInserter,
@@ -245,6 +258,10 @@ module.exports = {
   processAdgangsadresserHistory,
   processAdresserHistory,
   createVejstykkerPostnumreHistory,
-  createPostnumreHistory
+  createPostnumreHistory,
+  cutoffAfter,
+  cutoffBefore,
+  adgAdrCols,
+  adrCols
 };
 

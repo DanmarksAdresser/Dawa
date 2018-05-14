@@ -19,7 +19,8 @@ function copyCsvToTable(client, table, csvFile, columns) {
 
 module.exports = (client, dataDir) => go(function* () {
 
-  for (let table of ['cpr_vej', 'cpr_postnr']) {
+  for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr',
+    'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
     const file = path.resolve(path.join(dataDir, `${table}.csv`));
     const columns = getColumnsFromCsv(file);
     yield copyCsvToTable(client, table, file, columns);

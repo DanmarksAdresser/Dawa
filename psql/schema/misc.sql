@@ -62,6 +62,21 @@ CREATE TYPE JordstykkeRef AS (
   ejerlavnavn text
 );
 
+CREATE OR REPLACE FUNCTION dar1_ap_status_til_dawa_status(INTEGER)
+  RETURNS INTEGER AS
+$$
+SELECT CASE $1
+       WHEN 7 -- Ikke i brug
+         THEN 3 -- foreløbig
+       WHEN 8 -- I brug
+         THEN 1 -- gældende
+       WHEN 9
+         THEN 2 -- nedlagt
+       ELSE
+         4 -- henlagt
+       END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(INTEGER)
   RETURNS INTEGER AS
 $$

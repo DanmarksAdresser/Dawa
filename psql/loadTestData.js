@@ -4,7 +4,7 @@ var q = require('q');
 const {go} = require('ts-csp');
 var initialization = require('./initialization');
 var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var generateHistoryImpl = require('../history/generateHistoryImplDar1');
+const generateHistoryImpl = require('../history/generateCombinedHistoryImpl');
 var logger = require('../logger');
 var loadCsvTestdata = require('./loadCsvTestdata');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
@@ -57,7 +57,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       }));
       yield loadCsvTestdata(client, 'test/data');
       client.allowParallelQueries = true;
-      yield generateHistoryImpl.generateHistoryImpl(client, '2018-05-04T00:00:00.000Z');
+      yield generateHistoryImpl.generateHistory(client, '2018-05-04T00:00:00.000Z');
       client.allowParallelQueries = false;
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
         yield importJordstykkerImpl.importJordstykkerImpl(client, txid, 'test/data/matrikelkort', true);

@@ -1,3 +1,5 @@
+DROP INDEX stednavne_adgadr_changes_stednavn_id_adgangsadresse_id_chan_idx;
+CREATE INDEX ON stedtilknytninger(stedid, adgangsadresseid, txid desc nulls last, changeid desc nulls last);
 DROP VIEW adgangsadresserview cascade;
 DROP VIEW adresser cascade;
 DROP VIEW wms_adgangsadresser cascade;
