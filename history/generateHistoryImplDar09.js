@@ -260,15 +260,9 @@ function generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10Cu
     const mergedTableWithVejnavn = 'adgangsadresser_vejnavne_history';
     const mergedTableWithPostnr = 'adgangsadresser_postnumre_history';
     yield mergeAdgangspunktHusnummer(client, mergedTable);
-    console.log('mergeAdgangspunktHusnummer');
-    console.dir(yield client.queryRows(`select * from ${mergedTable} where bkid = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield mergeVejnavn(client, mergedTable, mergedTableWithVejnavn);
-    console.log('mergeVejnavn');
-    console.dir(yield client.queryRows(`select * from ${mergedTableWithVejnavn} where bkid = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield client.queryp(`DROP TABLE ${mergedTable}`);
     yield mergePostnr(client, mergedTableWithVejnavn, mergedTableWithPostnr);
-    console.log('mergePostnr');
-    console.dir(yield client.queryRows(`select * from ${mergedTableWithPostnr} where bkid = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield client.queryp(`DROP TABLE ${mergedTableWithVejnavn}`);
     var query = `SELECT
     m.bkid               AS id,
@@ -295,8 +289,6 @@ function generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10Cu
 `;
     yield client.query(`create temp table suppl_merged as (${query})`);
     yield cutoffAfter(client, 'suppl_merged', dar10CutoffDate);
-    console.log('suppl_merged');
-    console.dir(yield client.queryRows(`select * from suppl_merged where id = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield client.query(`insert into ${adgangsadresseDestTable} (select * from suppl_merged)`);
   })();
 }

@@ -89,11 +89,7 @@ const mergeAdgangspunkt = (client) => go(function*(){
 });
 
 const generateAdgangsadresser = (client, adgangsadresserDestTable, dar10CutoffDate) => go(function*() {
-  console.log('before cutoff');
-  console.dir(yield client.queryRows('select count(*) from adgangspunkt_merged'));
   yield cutoffBefore(client, 'adgangspunkt_merged', dar10CutoffDate);
-  console.log('after cutoff');
-  console.dir(yield client.queryRows('select count(*) from adgangspunkt_merged'));
   const query = `INSERT INTO ${adgangsadresserDestTable}
   (id, hn_statuskode, ap_statuskode, husnr, postnr, postnrnavn, supplerendebynavn, kommunekode, vejkode, vejnavn, adresseringsvejnavn, virkning) 
   (select id, hn_statuskode, ap_statuskode, husnr, postnr, postnrnavn, supplerendebynavn, kommunekode, vejkode, vejnavn, adresseringsvejnavn, virkning
@@ -141,30 +137,20 @@ const generateHistory = (client, dar1CutoffDate, adgangsadresserDestTable, adres
   yield prepareDar1Husnummer(client);
   yield prepareDar1Postnummer(client);
   yield mergePostnr(client);
-  console.log('postnummer_merged');
-  console.dir(yield client.queryRows('select count(*) from postnummer_merged'));
   yield prepareDar1SupplerendeBynavn(client);
   yield mergeSupplerendeBynavn(client);
-  console.log('supplerendebynavn_merged');
-  console.dir(yield client.queryRows('select count(*) from supplerendebynavn_merged'));
   yield client.query('drop table dar1_supplerendebynavn_prepared');
   yield client.query('drop table postnummer_merged');
   yield prepareDar1Kommune(client);
   yield mergeKommune(client);
-  console.log('kommune_merged');
-  console.dir(yield client.queryRows('select count(*) from kommune_merged'));
   yield client.query('drop table dar1_kommune_prepared');
   yield client.query('drop table supplerendebynavn_merged');
   yield mergeVejkode(client);
-  console.log('vejkode_merged');
-  console.dir(yield client.queryRows('select count(*) from vejkode_merged'));
   yield prepareDar1NavngivenVej(client);
   yield prepareVejnavnHistory(client, dar1CutoffDate);
   yield client.query('drop table dar1_navngivenvejkommunedel_prepared');
   yield client.query('drop table kommune_merged');
   yield mergeVejnavn(client);
-  console.log('vejnavn_merged');
-  console.dir(yield client.queryRows('select count(*) from vejnavn_merged'));
   yield client.query('drop table dar1_navngivenvej_prepared');
   yield client.query('drop table vejkode_merged');
   yield prepareDar1Adressepunkt(client);
