@@ -71,9 +71,9 @@ SELECT CASE $1
        WHEN 8 -- I brug
          THEN 1 -- gældende
        WHEN 9
-         THEN 2 -- nedlagt
+         THEN 4 -- henlagt
        ELSE
-         4 -- henlagt
+         2  -- nedlagt
        END;
 $$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
 

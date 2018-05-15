@@ -77,7 +77,8 @@ function formatVersion(version) {
     postnr: kode4String(version.postnr),
     postnrnavn: version.postnrnavn,
     status: version.status,
-    virkning: version.virkning
+    virkningstart: version.virkningstart,
+    virkningslut: version.virkningslut
   };
 
   if(!_.isUndefined(version.adgangsadresseid)) {
@@ -393,7 +394,6 @@ function createSqlModel(entityName) {
 
         // compute map of address id -> current address version
         var idToCurrentVersion = _.indexBy(allCurrentVersions, (version) => version.id);
-
 
         let addressTextToCategory = yield this.delegateAbort(
           mapObjectAsync(addressTextToParseResult,

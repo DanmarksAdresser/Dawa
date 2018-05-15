@@ -26,8 +26,30 @@ const prepareDar1SupplerendeBynavn = client =>
 const prepareDar1Adresse = client =>
   mergeValidTime(client, 'dar1_adresse_history', 'dar1_adresse_prepared', ['id'], ['id', 'status', 'husnummer_id', 'etagebetegnelse', 'dørbetegnelse']);
 
-const prepareDar1Adressepunkt = client =>
-  mergeValidTime(client, 'dar1_adressepunkt_history', 'dar1_adressepunkt_prepared', ['id'], ['id', 'status']);
+const prepareDar1Adressepunkt = client => go(function*() {
+  yield mergeValidTime(client, 'dar1_adressepunkt_history', 'dar1_adressepunkt_prepared', ['id'], ['id', 'status']);
+  // Vi modtager ikke adressepunkter med status "slettet", dem skal vi lige have tilføjet
+  yield client.query(`
+  WITH idsWithMissingHistory AS (SELECT DISTINCT id
+                               FROM dar1_adressepunkt_prepared ap1
+                               EXCEPT
+                               (SELECT DISTINCT id
+                                FROM dar1_adressepunkt_prepared
+                                WHERE upper_inf(virkning))),
+    virkningFroms AS
+  (SELECT
+     id,
+     max(upper(virkning)) AS virkning
+   FROM dar1_adressepunkt_prepared
+     NATURAL JOIN idsWithMissingHistory
+   GROUP BY id)
+INSERT INTO dar1_adressepunkt_prepared (id, status, virkning)
+  (SELECT
+     id,
+     10,
+     tstzrange(virkning, NULL, '[)')
+   FROM virkningFroms)`)
+});
 
 const prepareDar1Kommune = client =>
   mergeValidTime(client, 'dar1_darkommuneinddeling_history', 'dar1_kommune_prepared', ['id'], ['id', 'kommunekode']);

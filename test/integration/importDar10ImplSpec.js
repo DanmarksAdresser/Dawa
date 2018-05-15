@@ -46,7 +46,7 @@ describe('Import af DAR 1.0 udtræk', function () {
       // check metadata has been updated
       const meta = yield importDarImpl.internal.getMeta(client);
       expect(meta.virkning).to.not.be.null;
-      expect(meta.last_event_id).to.equal(196);
+      expect(meta.last_event_id).to.equal(2203);
 
       // check a transaction has been registered
       const transactions = (yield client.queryRows('SELECT * FROM transactions'));

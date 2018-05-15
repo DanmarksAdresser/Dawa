@@ -6,9 +6,7 @@ const _ = require('underscore');
 const { go } = require('ts-csp');
 
 
-const {allColumnNames, } = require('../importUtil/tableModelUtil');
 const sqlUtil = require('../darImport/sqlUtil');
-const tableSchema = require('../psql/tableModel');
 
 util.inherits(TableInserter, Writable);
 function TableInserter(client, table, columns) {
