@@ -102,7 +102,7 @@ function getCurrentEventIds(client) {
   })();
 }
 
-function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTransactions) {
+function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTransactions, multipleLocalTransactions) {
   return q.async(function*() {
     const localEventIds = yield getCurrentEventIds(client);
     const beforeApiFetchMillis = Date.now();
@@ -123,7 +123,13 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTran
       }
     }
     else {
-      const transactionsToImport = transactions.slice(0, Math.min(maxTransactions, transactions.length));
+      let transactionsToImport;
+      if(multipleLocalTransactions) {
+        transactionsToImport = transactions.slice(0, Math.min(maxTransactions, transactions.length));
+      }
+      else {
+        transactionsToImport = [rowsMap];
+      }
       for (let transaction of transactionsToImport) {
         const rowCounts = _.mapObject(transaction, row => row.length);
         const totalRowCount = Object.keys(rowCounts).reduce((memo, key) => memo + rowCounts[key], 0);
@@ -177,7 +183,7 @@ function race(promises) {
  * @param notificationWsUrl
  * @returns {*}
  */
-function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDaemon, importFuture, maxTransactions) {
+function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDaemon, importFuture, maxTransactions, multipleLocalTransactions) {
 
   return q.async(function*() {
     const darClient = darApiClient.createClient(baseUrl);
@@ -200,7 +206,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDae
         }, {});
         return yield proddb.withTransaction('READ_WRITE', (client) => go(function*() {
           const virkningTime = importFuture ? moment().add(14, 'days').toISOString() : null;
-          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap, virkningTime, maxTransactions);
+          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap, virkningTime, maxTransactions, multipleLocalTransactions);
           if(pretend) {
             throw new Error("Rolling back due to pretend param");
           }

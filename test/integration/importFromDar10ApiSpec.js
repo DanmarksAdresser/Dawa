@@ -183,7 +183,7 @@ describe('Import from DAR 1.0 API', () => {
           Postnummer: 5
         },
         moment().toISOString(),
-        50);
+        50, true);
       const records = (yield client.queryp('select * from dar1_postnummer order by rowkey')).rows;
       expect(records).to.have.length(2);
       const first = records[0];
