@@ -11,12 +11,9 @@ const extendStreetIntervals = require('./extendStreetIntervals');
 const extendVejnavnIntervals = require('./extendVejnavnIntervals');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const sqlUtil = require('../darImport/sqlUtil');
-const tableModels = require('../psql/tableModel');
-
 
 const { TableInserter,
   mergeValidTime,
-  createTempHistoryTable,
   cutoffAfter, adrCols } = require('./common');
 
 util.inherits(ExtendStreetIntervalTransformer, Transform);
@@ -123,19 +120,27 @@ GROUP BY kommunekode, vejkode;`;
 }
 
 function createPostnumreHistory(client) {
-  return q.async(function*() {
-    yield createTempHistoryTable(client, tableModels.tables.postnumre);
-    yield client.queryp('DELETE FROM vask_postnumre');
-    yield client.queryp(`INSERT INTO vask_postnumre(nr, navn, virkning) (SELECT nr, navn, \
-tstzrange((CASE WHEN tf.time < '2016-01-01' THEN NULL ELSE tf.time END),tt.time, '[)') as virkning\    
-FROM postnumre_history p \
-LEFT JOIN transaction_history tf ON p.valid_from = tf.sequence_number \
-LEFT JOIN transaction_history tt ON p.valid_to = tt.sequence_number)`);
-    yield client.query(`
-    update vask_postnumre o set virkning = tstzrange(null, upper(virkning), '[)') where
-    not exists(select * from vask_postnumre i where o.nr = i.nr and upper(i.virkning) <= lower(o.virkning))`);
-
-  })();
+  return client.query(`
+  CREATE TEMP TABLE timedPostnrChanges AS
+  (SELECT
+    operation,
+     nr,
+     navn,
+     coalesce((SELECT time
+               FROM transaction_history h
+               WHERE h.sequence_number = c.changeid),(select ts from transactions t where t.txid = c.txid and txid <> 1)) as ts
+    FROM postnumre_changes c);
+create index on timedPostnrChanges(nr);
+delete from timedPostnrChanges where ts is null;
+delete from vask_postnumre;
+insert into vask_postnumre(nr,navn,virkning)
+  (select c1.nr, c1.navn,
+    tstzrange(ts, (select ts from timedPostnrChanges c2 where c1.nr = c2.nr and c1.ts < c2.ts order by ts desc limit 1), '[)')
+  FROM timedPostnrChanges c1
+  WHERE operation <> 'delete');
+DROP TABLE timedPostnrChanges;
+UPDATE vask_postnumre p1 SET virkning = tstzrange(null, upper(virkning), '[)')
+WHERE not exists(select * from vask_postnumre p2 where p1.nr = p2.nr and upper(p2.virkning) <= lower(p1.virkning));`);
 }
 
 function prepareAdgangspunkt(client, adgangspunktHistoryTable) {
@@ -248,16 +253,22 @@ ON u.postnr = vp.nr AND u.virkning && vp.virkning)`);
 
 function generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10CutoffDate) {
   return q.async(function*() {
-    yield createVejnavnHistory(client);
     yield createPostnumreHistory(client);
+    yield createVejnavnHistory(client);
     yield createPostnummerIntervalHistory(client, 'vask_postnrinterval');
     var mergedTable = 'merged_adgangsadresser_history';
     const mergedTableWithVejnavn = 'adgangsadresser_vejnavne_history';
     const mergedTableWithPostnr = 'adgangsadresser_postnumre_history';
     yield mergeAdgangspunktHusnummer(client, mergedTable);
+    console.log('mergeAdgangspunktHusnummer');
+    console.dir(yield client.queryRows(`select * from ${mergedTable} where bkid = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield mergeVejnavn(client, mergedTable, mergedTableWithVejnavn);
+    console.log('mergeVejnavn');
+    console.dir(yield client.queryRows(`select * from ${mergedTableWithVejnavn} where bkid = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield client.queryp(`DROP TABLE ${mergedTable}`);
     yield mergePostnr(client, mergedTableWithVejnavn, mergedTableWithPostnr);
+    console.log('mergePostnr');
+    console.dir(yield client.queryRows(`select * from ${mergedTableWithPostnr} where bkid = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield client.queryp(`DROP TABLE ${mergedTableWithVejnavn}`);
     var query = `SELECT
     m.bkid               AS id,
@@ -284,6 +295,8 @@ function generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10Cu
 `;
     yield client.query(`create temp table suppl_merged as (${query})`);
     yield cutoffAfter(client, 'suppl_merged', dar10CutoffDate);
+    console.log('suppl_merged');
+    console.dir(yield client.queryRows(`select * from suppl_merged where id = $1`, ['0002d3d2-1d1c-4503-8527-4934e974fd35']));
     yield client.query(`insert into ${adgangsadresseDestTable} (select * from suppl_merged)`);
   })();
 }

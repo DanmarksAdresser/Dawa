@@ -418,7 +418,7 @@ FROM ${tableName}_changes`;
   FROM ${tableModel.table}_changes c1
   LEFT JOIN LATERAL (SELECT * from ${tableModel.table}_changes c2
   where ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)} 
-  and (c2.txid < c1.txid or ((c2.changeid is null and c1.changeid is not null) or (c2.changeid < c1.changeid)))
+  and (c2.txid < c1.txid or (c1.txid = c2.txid and (c2.changeid is null and c1.changeid is not null) or (c2.changeid < c1.changeid)))
   order by txid desc nulls last, changeid desc nulls last
   limit 1) c2
   ON true
@@ -430,7 +430,7 @@ FROM ${tableName}_changes`;
   FROM ${tableModel.table}_changes c1
   LEFT JOIN LATERAL (SELECT * from ${tableModel.table}_changes c2
   where ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)} 
-  and (c2.txid < c1.txid or ((c2.changeid is null and c1.changeid is not null) or (c2.changeid < c1.changeid)))
+  and (c2.txid < c1.txid or (c1.txid = c2.txid and (c2.changeid is null and c1.changeid is not null) or (c2.changeid < c1.changeid)))
   order by txid desc nulls last, changeid desc nulls last
   limit 1) c2
   ON true
@@ -442,7 +442,7 @@ FROM ${tableName}_changes`;
   FROM ${tableModel.table}_changes c1
   LEFT JOIN LATERAL (SELECT * from ${tableModel.table}_changes c2
   where ${columnsEqualClause('c1', 'c2', tableModel.primaryKey)} 
-  and (c2.txid < c1.txid or ((c2.changeid is null and c1.changeid is not null) or (c2.changeid < c1.changeid)))
+  and (c2.txid < c1.txid or (c1.txid = c2.txid and (c2.changeid is null and c1.changeid is not null) or (c2.changeid < c1.changeid)))
   order by txid desc nulls last, changeid desc nulls last
   limit 1) c2
   ON true

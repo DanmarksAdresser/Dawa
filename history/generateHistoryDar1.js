@@ -23,7 +23,7 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
     client.allowParallelQueries = true;
     return go(function*() {
       try {
-        yield generateHistoryImpl.generateHistory(client, '2018-04-05T00:00:00.000Z');
+        yield generateHistoryImpl.generateHistory(client, '2018-05-05T00:00:00.000Z');
         logger.info("Successfully generated history");
       }
       catch(err) {

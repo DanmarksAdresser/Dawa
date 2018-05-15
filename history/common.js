@@ -49,16 +49,6 @@ const cutoffBefore = (client, table, cutoffDate) => go(function*(){
   yield client.query(`update ${table} SET virkning = tstzrange(greatest(lower(virkning), $1::timestamptz), upper(virkning), '[)')`, [cutoffDate]);
 });
 
-const createTempHistoryTable = (client, tableModel) => {
-  const partitionClause = sqlUtil.selectList(null, tableModel.primaryKey);
-  const subselect = `select *, last_value(changeid) OVER (PARTITION BY ${partitionClause} ORDER BY changeid NULLS FIRST ROWS BETWEEN CURRENT ROW AND 1 FOLLOWING) as next_valid from ${tableModel.table}_changes`;
-  const selectClause = sqlUtil.selectList(null, allColumnNames(tableModel));
-  const select =
-    `select changeid as valid_from, CASE WHEN next_valid = changeid THEN NULL ELSE next_valid END as valid_to, ${selectClause}
-     FROM (${subselect}) t WHERE operation <> 'delete'`;
-  return client.query(`CREATE TEMP TABLE ${tableModel.table}_history AS (${select})`);
-};
-
 const createHeadTailTempTable = (client, tableName, htsTableName, idColumns, columns, bitemporal) => {
   const selectIds = sqlUtil.selectList(tableName, idColumns.concat('virkning'));
   const selectHead = "(lag(virkning, 1) OVER w) IS NULL OR COALESCE(upper(lag(virkning, 1) OVER w) <> lower(virkning), TRUE) AS head";
@@ -93,18 +83,19 @@ const mergeValidTime = (client, tableName, targetTableName, idColumns, columns, 
 const processAdgangsadresserHistory = client => go(function*() {
   yield client.queryp('DELETE FROM vask_adgangsadresser_unikke');
   yield client.queryp(`
-INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, postnr, postnrnavn)
-  (SELECT DISTINCT
+  WITH uniques AS (
+  (SELECT
      id,
      vejnavn,
      husnr,
+     null::text as supplerendebynavn,
      postnr,
      postnrnavn
    FROM
-     vask_adgangsadresser);
+     vask_adgangsadresser)
 
-INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn)
-  (SELECT DISTINCT
+  UNION
+  (SELECT
      id,
      vejnavn,
      husnr,
@@ -113,21 +104,22 @@ INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, 
      postnrnavn
    FROM
      vask_adgangsadresser
-   WHERE supplerendebynavn IS NOT NULL);
+   WHERE supplerendebynavn IS NOT NULL)
 
-INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, postnr, postnrnavn)
-  (SELECT DISTINCT
+  UNION
+  (SELECT
      id,
      adresseringsvejnavn,
      husnr,
+     null::text as supplerendebynavn,
      postnr,
      postnrnavn
    FROM
      vask_adgangsadresser
-   WHERE adresseringsvejnavn <> vejnavn);
+   WHERE adresseringsvejnavn <> vejnavn)
 
-INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn)
-  (SELECT DISTINCT
+  UNION 
+  (SELECT
      id,
      adresseringsvejnavn,
      husnr,
@@ -136,8 +128,10 @@ INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, 
      postnrnavn
    FROM
      vask_adgangsadresser
-   WHERE supplerendebynavn IS NOT NULL AND adresseringsvejnavn <> vejnavn);
+   WHERE supplerendebynavn IS NOT NULL AND adresseringsvejnavn <> vejnavn))
 INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, postnr, postnrnavn)
+  ((SELECT id,vejnavn,husnr,supplerendebynavn,postnr,postnrnavn from uniques)
+  UNION
   (SELECT
      v.id,
      v.vejnavn,
@@ -145,10 +139,9 @@ INSERT INTO vask_adgangsadresser_unikke (id, vejnavn, husnr, supplerendebynavn, 
      v.supplerendebynavn,
      s.nr   AS postnr,
      s.navn AS postnrnavn
-   FROM vask_adgangsadresser_unikke v JOIN stormodtagere s ON v.id = s.adgangsadresseid);
+   FROM uniques v JOIN stormodtagere s ON v.id = s.adgangsadresseid));
 `);
   yield client.queryp('SELECT vask_adgangsadresser_unikke_update_tsv()');
-
 });
 
 
@@ -168,20 +161,21 @@ from vask_adgangsadresser group by kommunekode,vejkode,adresseringsvejnavn,postn
 const processAdresserHistory = client => go(function*() {
   yield client.queryp('DELETE FROM vask_adresser_unikke');
   yield client.queryp(`
-INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, postnr, postnrnavn)
-  (SELECT DISTINCT
+WITH uniques AS (
+  (SELECT
      id,
      vejnavn,
      husnr,
      etage,
      doer,
+     null::text as supplerendebynavn,
      postnr,
      postnrnavn
    FROM
-     vask_adresser);
+     vask_adresser)
 
-INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn)
-  (SELECT DISTINCT
+  UNION
+  (SELECT
      id,
      vejnavn,
      husnr,
@@ -192,23 +186,23 @@ INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendeby
      postnrnavn
    FROM
      vask_adresser
-   WHERE supplerendebynavn IS NOT NULL);
+   WHERE supplerendebynavn IS NOT NULL)
 
-INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, postnr, postnrnavn)
-  (SELECT DISTINCT
+  UNION
+  (SELECT
      id,
      adresseringsvejnavn,
      husnr,
      etage,
      doer,
+     null::text as supplerendebynavn,
      postnr,
      postnrnavn
    FROM
      vask_adresser
-   WHERE adresseringsvejnavn <> vejnavn);
-
-INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn)
-  (SELECT DISTINCT
+   WHERE adresseringsvejnavn <> vejnavn)
+  UNION
+  (SELECT
      id,
      adresseringsvejnavn,
      husnr,
@@ -219,9 +213,11 @@ INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendeby
      postnrnavn
    FROM
      vask_adresser
-   WHERE supplerendebynavn IS NOT NULL AND adresseringsvejnavn <> vejnavn);
+   WHERE supplerendebynavn IS NOT NULL AND adresseringsvejnavn <> vejnavn))
 
 INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn)
+  ((select id, vejnavn, husnr, etage, doer, supplerendebynavn, postnr, postnrnavn from uniques)
+  UNION
   (SELECT
      v.id,
      v.vejnavn,
@@ -231,20 +227,10 @@ INSERT INTO vask_adresser_unikke (id, vejnavn, husnr, etage, doer, supplerendeby
      v.supplerendebynavn,
      s.nr   AS postnr,
      s.navn AS postnrnavn
-   FROM vask_adresser_unikke v JOIN (SELECT DISTINCT va.id, va.adgangsadresseid FROM vask_adresser va) as va ON v.id = va.id JOIN stormodtagere s ON va.adgangsadresseid = s.adgangsadresseid);
+   FROM uniques v JOIN (SELECT DISTINCT va.id, va.adgangsadresseid FROM vask_adresser va) as va ON v.id = va.id JOIN stormodtagere s ON va.adgangsadresseid = s.adgangsadresseid));
 `);
   yield client.queryp('SELECT vask_adresser_unikke_update_tsv()');
 
-});
-
-const createPostnumreHistory = (client) => go(function*(){
-    yield createTempHistoryTable(client, tableSchema.tables.postnumre);
-    yield client.queryp('DELETE FROM vask_postnumre');
-    yield client.queryp(`INSERT INTO vask_postnumre(nr, navn, virkning) (SELECT nr, navn, \
-tstzrange((CASE WHEN tf.time < '2016-01-01' THEN NULL ELSE tf.time END),tt.time, '[)') as virkning\    
-FROM postnumre_history p \
-LEFT JOIN transaction_history tf ON p.valid_from = tf.sequence_number \
-LEFT JOIN transaction_history tt ON p.valid_to = tt.sequence_number)`);
 });
 
 const adgAdrCols = ['id', 'hn_statuskode', 'ap_statuskode', 'husnr', 'postnr', 'postnrnavn', 'supplerendebynavn', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn'];
@@ -253,12 +239,10 @@ const adrCols = [...adgAdrCols, 'adgangsadresseid', 'statuskode', 'etage', 'doer
 module.exports = {
   createHeadTailTempTable,
   TableInserter,
-  createTempHistoryTable,
   mergeValidTime,
   processAdgangsadresserHistory,
   processAdresserHistory,
   createVejstykkerPostnumreHistory,
-  createPostnumreHistory,
   cutoffAfter,
   cutoffBefore,
   adgAdrCols,
