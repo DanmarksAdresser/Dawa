@@ -438,6 +438,26 @@ function storeChangesetInFetchTables(client, changeset) {
   })();
 }
 
+const mergeOpretUpdateRows = changeset => {
+  const newChangeset = {};
+  for(let [entity, rows] of Object.entries(changeset)) {
+    const grouped = _.groupBy(rows, 'rowkey');
+    const result = Object.values(grouped).map(([firstRow, secondRow])=> {
+      if(!secondRow) {
+        return firstRow;
+      }
+      else if(secondRow.eventopdater) {
+        return Object.assign({}, secondRow, {eventopret: firstRow.eventopret});
+      }
+      else {
+        return Object.assign({}, firstRow, {eventopret: secondRow.eventopret});
+      }
+    });
+    newChangeset[entity] = result;
+  }
+  return newChangeset;
+};
+
 /**
  * Import a collection of records to the database. Each record either represents
  * an insert or an update.
@@ -447,6 +467,7 @@ function storeChangesetInFetchTables(client, changeset) {
  * @returns {*}
  */
 function importChangeset(client, txid, changeset, skipDawa, virkningTime) {
+  changeset = mergeOpretUpdateRows(changeset);
   const entities = Object.keys(changeset);
   return q.async(function* () {
     yield storeChangesetInFetchTables(client, changeset);
@@ -496,6 +517,7 @@ module.exports = {
     initializeDar10HistoryTables,
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,
-    setInitialMeta: setInitialMeta
+    setInitialMeta: setInitialMeta,
+    removeRedundantOpretRows: mergeOpretUpdateRows
   }
 };
