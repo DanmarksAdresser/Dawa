@@ -8,7 +8,8 @@ const { kode4String, numberToString } = require('../util');
 const additionalFieldsMap = {
   afstemningsområde: [
     {
-      name: 'dagi_id'
+      name: 'dagi_id',
+      formatter: numberToString
     },
     {
       name: 'nummer',
@@ -63,7 +64,8 @@ const additionalFieldsMap = {
   ],
   menighedsrådsafstemningsområde: [
     {
-      name: 'dagi_id'
+      name: 'dagi_id',
+      formatter: numberToString
     },
     {
       name: 'nummer',
@@ -89,7 +91,8 @@ const additionalFieldsMap = {
   ],
   opstillingskreds: [
     {
-      name: 'dagi_id'
+      name: 'dagi_id',
+      formatter: numberToString
     },
     {
       name: 'nummer',
@@ -158,7 +161,8 @@ const additionalFieldsMap = {
   ],
   supplerendebynavn: [
     {
-      name: 'dagi_id'
+      name: 'dagi_id',
+      formatter: numberToString
     },
     {
       name: 'navn'

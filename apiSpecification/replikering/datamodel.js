@@ -337,7 +337,7 @@ module.exports = {
         description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn,' +
         ' som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.',
       }, {
-        name: 'administreresafkommune',
+        name: 'administrerendekommune',
         type: 'string',
         nullable: true,
         description: '?',
@@ -356,7 +356,32 @@ module.exports = {
         type: 'string',
         nullable: true,
         description: '?',
-      }]
+      },
+      {
+        name: 'beliggenhed_oprindelse_kilde',
+        type: 'string',
+        nullable: true,
+        description: '?'
+      },
+      {
+        name: 'beliggenhed_oprindelse_nøjagtighedsklasse',
+        type: 'string',
+        nullable: true,
+        description: '?'
+      },
+      {
+        name: 'beliggenhed_oprindelse_registrering',
+        type: 'timestamp',
+        nullable: true,
+        description: '?'
+      },
+      {
+        name: 'beliggenhed_oprindelse_tekniskstandard',
+        type: 'string',
+        nullable: true,
+        description: '?'
+      }
+    ]
   },
   postnummer:
     {

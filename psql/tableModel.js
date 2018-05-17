@@ -195,10 +195,26 @@ const navngivenvej = {
     {name: 'ændret'},
     {name: 'navn'},
     {name: 'adresseringsnavn'},
-    {name: 'administreresafkommune'},
+    {name: 'administrerendekommune'},
     {name: 'beskrivelse'},
     {name: 'retskrivningskontrol'},
-    {name: 'udtaltvejnavn'}
+    {name: 'udtaltvejnavn'},
+    {name: 'beliggenhed_oprindelse_kilde'},
+    {name: 'beliggenhed_oprindelse_nøjagtighedsklasse'},
+    {name: 'beliggenhed_oprindelse_registrering'},
+    {name: 'beliggenhed_oprindelse_tekniskstandard'},
+    {
+      name: 'beliggenhed_vejnavnelinje',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'beliggenhed_vejnavneområde',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'beliggenhed_vejtilslutningspunkter',
+      distinctClause: geomDistinctClause
+    }
   ]
 };
 

@@ -176,6 +176,9 @@ const recomputeMaterializedDawa = (client, txid) => go(function* () {
     yield client.query(`delete from ${table}; delete from ${table}_changes`);
     yield initializeFromScratch(client, txid, model.view, schemaModel.tables[table]);
   }
+  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
+  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.stedtilknytninger);
+  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.ikke_brofaste_adresser);
   yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
 });
 

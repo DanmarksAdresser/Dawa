@@ -47,7 +47,7 @@ var consistencyChecks = [
     query: `SELECT a.id, vejkode, kommunekode, postnr, pt.postnummer AS geografisk_postnr, oprettet, a.aendret
     FROM adgangsadresser a
     LEFT JOIN postnummertilknytninger pt ON a.id = pt.adgangsadresseid
-    WHERE a.noejagtighed <> 'U' AND a.postnr = pt.postnummer ORDER BY a.aendret DESC`
+    WHERE a.noejagtighed <> 'U' AND a.postnr <> pt.postnummer ORDER BY a.aendret DESC`
   },
   {
     key: 'AdgangsadresserUdenEnhedsadresser',

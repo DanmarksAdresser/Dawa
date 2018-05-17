@@ -2,17 +2,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const q = require('q');
 
-const { go } = require('ts-csp');
-
-
-const importDarImpl = require('../darImport/importDarImpl');
-const initialization = require('./initialization');
-const sqlCommon = require('./common');
-
-const { withImportTransaction } = require('../importUtil/importUtil');
-const { createHeightTable, importHeightsFromTable } = require('../heights/importAdresseHeightsImpl');
+const {go} = require('ts-csp');
 
 
 function getColumnsFromCsv(file) {
@@ -26,45 +17,26 @@ function copyCsvToTable(client, table, csvFile, columns) {
 }
 
 
-module.exports = function (client, dataDir) {
-  return q.async(function*() {
+module.exports = (client, dataDir) => go(function* () {
 
-    // we need triggers to be enabled when loading temaer
-    //yield loadTemaer(client, dataDir);
-
-    yield sqlCommon.disableTriggersQ(client);
-    for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr', 'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr', 'navngivenvej', 'vejpunkter']) {
-      const file = path.resolve(path.join(dataDir, `${table}.csv`));
-      const columns = getColumnsFromCsv(file);
-      yield copyCsvToTable(client, table, file, columns);
-    }
-
-    yield client.queryp(`CREATE TEMP TABLE vejstykker_geom (
+  for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr',
+    'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
+    const file = path.resolve(path.join(dataDir, `${table}.csv`));
+    const columns = getColumnsFromCsv(file);
+    yield copyCsvToTable(client, table, file, columns);
+  }
+  yield client.queryp(`CREATE TEMP TABLE vejstykker_geom (
   kommunekode integer NOT NULL,
   kode integer NOT NULL,
   geom  geometry(MULTILINESTRINGZ, 25832),
   PRIMARY KEY(kommunekode, kode)
 );`);
-    yield createHeightTable(client, 'hoejder');
-    yield copyCsvToTable(client,
-      'hoejder',
-      path.resolve(path.join(dataDir, 'hoejder.csv')),
-      ['id', 'x', 'y', 'z']);
-    yield withImportTransaction(client, 'loadTestData-adresser', txid => go(function*() {
-      yield importDarImpl.fullCompareAndUpdate(client, txid);
-    }));
-    yield withImportTransaction(client, 'loadTestData-højder', txid => go(function*() {
-      yield importHeightsFromTable(client, txid, 'hoejder');
-    }));
-    yield copyCsvToTable(client,
-      'vejstykker_geom',
-      path.resolve(path.join(dataDir, 'vejstykker_geom.csv')),
-      ['kommunekode', 'kode', 'geom']);
-    yield client.queryp(
-      `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
+  yield copyCsvToTable(client,
+    'vejstykker_geom',
+    path.resolve(path.join(dataDir, 'vejstykker_geom.csv')),
+    ['kommunekode', 'kode', 'geom']);
+  yield client.queryp(
+    `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
          WHERE v.kommunekode = g.kommunekode AND v.kode = g.kode`);
 
-    yield initialization.initializeTables(client);
-    yield sqlCommon.enableTriggersQ(client);
-  })();
-};
+});

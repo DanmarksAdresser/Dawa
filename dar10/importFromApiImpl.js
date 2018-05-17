@@ -11,7 +11,6 @@ const proddb = require('../psql/proddb');
 const spec = require('./spec');
 const logger = require('../logger').forCategory('darImport');
 const moment = require('moment');
-const sqlCommon = require('../psql/common');
 
 const darApiClient = require('./darApiClient');
 const notificationClient = require('./notificationClient');
@@ -103,9 +102,8 @@ function getCurrentEventIds(client) {
   })();
 }
 
-function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTransactions) {
+function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTransactions, multipleLocalTransactions) {
   return q.async(function*() {
-    yield sqlCommon.disableTriggersQ(client);
     const localEventIds = yield getCurrentEventIds(client);
     const beforeApiFetchMillis = Date.now();
     const rowsMap = yield getRows(darClient, localEventIds, remoteEventIds);
@@ -118,13 +116,20 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTran
     const transactions = splitInTransactions(rowsMap);
     if (transactions.length === 0) {
       if(yield importDarImpl.hasChangedEntitiesDueToVirkningTime(client)) {
+        logger.info('Has changed entities due to advancing virkning time');
         yield importDarImpl.withDar1Transaction(client, 'api', () =>
           withImportTransaction(client, 'importDarApi', (txid) =>
             importDarImpl.applyIncrementalDifferences(client, txid, false, [], virkningTime)));
       }
     }
     else {
-      const transactionsToImport = transactions.slice(0, Math.min(maxTransactions, transactions.length));
+      let transactionsToImport;
+      if(multipleLocalTransactions) {
+        transactionsToImport = transactions.slice(0, Math.min(maxTransactions, transactions.length));
+      }
+      else {
+        transactionsToImport = [rowsMap];
+      }
       for (let transaction of transactionsToImport) {
         const rowCounts = _.mapObject(transaction, row => row.length);
         const totalRowCount = Object.keys(rowCounts).reduce((memo, key) => memo + rowCounts[key], 0);
@@ -178,7 +183,7 @@ function race(promises) {
  * @param notificationWsUrl
  * @returns {*}
  */
-function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDaemon, importFuture, maxTransactions) {
+function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDaemon, importFuture, maxTransactions, multipleLocalTransactions) {
 
   return q.async(function*() {
     const darClient = darApiClient.createClient(baseUrl);
@@ -201,7 +206,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDae
         }, {});
         return yield proddb.withTransaction('READ_WRITE', (client) => go(function*() {
           const virkningTime = importFuture ? moment().add(14, 'days').toISOString() : null;
-          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap, virkningTime, maxTransactions);
+          const result = yield fetchAndImport(client, darClient, remoteEventsIdMap, virkningTime, maxTransactions, multipleLocalTransactions);
           if(pretend) {
             throw new Error("Rolling back due to pretend param");
           }
@@ -243,7 +248,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDae
 }
 
 module.exports = {
-  importDaemon: importDaemon,
+  importDaemon,
   internal: {
     getRecords: getRecordsForEntity,
     getCurrentEventIds: getCurrentEventIds,

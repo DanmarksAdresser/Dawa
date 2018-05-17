@@ -61,8 +61,8 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function () {
   };
 
   const expectedResultsInner = {
-    adgangsadresse: 281,
-    adresse: 283
+    adgangsadresse: 280,
+    adresse: 282
   };
 
   ['adgangsadresse', 'adresse'].forEach(function (entityName) {

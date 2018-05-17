@@ -39,7 +39,8 @@ af entiteter og hvilke data de forskellige entiter indeholder.`,
         doc: 'Hent udtrækket med det angivne sekvensnummer. Alle ændringer til og med dette sekvensnummer' +
         ' er med i udtrækket, og alle senere ændringer er ikke med. Det anbefales at nye klienter anvender ' +
         ' txid parameteren i stedet.'
-      }],
+      },
+      ...formatParameters],
     examples: []
   },
   {
@@ -59,7 +60,8 @@ af entiteter og hvilke data de forskellige entiter indeholder.`,
       },
       ...txidIntervalDoc,
       ...sekvensnummerIntervalDoc,
-      ...tidspunktIntervalDoc
+      ...tidspunktIntervalDoc,
+      ...formatParameters
     ],
     examples: []
   },

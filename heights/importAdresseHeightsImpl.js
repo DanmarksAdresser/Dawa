@@ -61,8 +61,8 @@ const importHeightsFromTable = (client, txid, table) => go(function*() {
   yield client.query('CREATE TEMP TABLE adgangsadresser_dirty AS ' +
     `(SELECT a.id FROM adgangsadresser a 
       JOIN ${table} h 
-      ON a.id = h.id AND a.etrs89oest = h.x AND a.etrs89nord = h.y
-      AND (a.hoejde is null or a.hoejde <> h.z or (a.z_x <> a.etrs89oest or a.z_y <> a.etrs89nord)))`);
+      ON a.id = h.id AND a.etrs89oest::numeric(11,3) = h.x::numeric(11,3) AND a.etrs89nord::numeric(11,3) = h.y::numeric(11,3)
+      AND (a.hoejde is distinct from h.z or (a.z_x is distinct from a.etrs89oest or a.z_y is distinct from a.etrs89nord)))`);
   yield client.query(`CREATE TEMP VIEW adgangsadresser_hoejder AS(select id, z as hoejde FROM ${table})`);
   yield tableDiffNg.computeDifferencesSubset(client, txid, 'adgangsadresser_hoejder', 'adgangsadresser_dirty', schemaModel.tables.adgangsadresser, ["id", "hoejde"]);
   yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser);
@@ -104,29 +104,31 @@ function hoejdeClient(apiUrl, login, password) {
   }
 }
 
-const importFromApi = (client, txid, apiClient) => go(function*() {
-  yield client.query('SET enable_seqscan=0');
+const importFromApi = (client, apiClient) => go(function*() {
   const rows = (yield client.queryp(`
         SELECT id, etrs89oest as x, etrs89nord as y 
         FROM adgangsadresser 
         WHERE etrs89oest IS NOT NULL AND etrs89nord IS NOT NULL AND 
         (disableheightlookup IS NULL OR disableheightlookup < NOW())  AND
-        (z_x IS NULL OR z_y IS NULL OR z_x <> etrs89oest OR z_y <> etrs89nord)
+        (z_x IS NULL OR z_y IS NULL OR z_x::numeric(11,3) <> etrs89oest::numeric(11,3) OR z_y::numeric(11,3) <> etrs89nord::numeric(11,3))
         ORDER BY id
         LIMIT 1
         `)).rows;
-  yield client.queryp('SET enable_seqscan=1');
-
   if (rows.length === 1) {
     const row = rows[0];
     const id = row.id;
     const x = row.x;
     const y = row.y;
+    logger.info('Importerer højde for adgangsadresse', {id, x, y});
     try {
       const z = roundHeight(yield apiClient(x, y));
+      logger.info('Modtog højde for adgangsasdresse', {id, x, y, z});
       yield createHeightTable(client, 'heights');
       yield client.query('INSERT INTO heights(id, x, y, z) VALUES ($1, $2, $3, $4)', [id, x, y, z]);
-      yield importHeightsFromTable(client, txid, 'heights');
+      yield importUtil.withImportTransaction(client, "importHeightFromApi", (txid) =>
+        importHeightsFromTable(client, txid, 'heights')
+      );
+      logger.info('Højde indlæst for adgangsasdresse', {id, x, y, z});
       yield importUtil.dropTable(client, 'heights');
     }
     catch (e) {
@@ -148,8 +150,7 @@ const importFromApiDaemon = (apiUrl, login, password) => go(function*() {
   /*eslint no-constant-condition: 0 */
   while (true) {
     const importedAHeight = yield proddb.withTransaction('READ_WRITE', client =>
-      importUtil.withImportTransaction(client, "importHeightFromApi", (txid) =>
-        importFromApi(client, txid, apiClient)));
+      importFromApi(client, apiClient));
     if (!importedAHeight) {
       break;
     }

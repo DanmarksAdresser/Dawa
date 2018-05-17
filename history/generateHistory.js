@@ -1,15 +1,15 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var generateHistoryImpl = require('./generateHistoryImpl');
-var logger = require('../logger').forCategory('generateHistory');
-var proddb = require('../psql/proddb');
+const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const generateHistoryImpl = require('./generateCombinedHistoryImpl');
+const logger = require('../logger').forCategory('generateHistoryDar1');
+const proddb = require('../psql/proddb');
 const { go } = require('ts-csp');
 
 
-var optionSpec = {
+const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
@@ -20,11 +20,10 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
   });
 
   proddb.withTransaction('READ_WRITE_CONCURRENT', function (client) {
-     client.allowParallelQueries = true;
+    client.allowParallelQueries = true;
     return go(function*() {
       try {
-        yield generateHistoryImpl.generateAdgangsadresserHistory(client);
-        yield generateHistoryImpl.generateAdresserHistory(client);
+        yield generateHistoryImpl.generateHistory(client, '2018-05-05T00:00:00.000Z');
         logger.info("Successfully generated history");
       }
       catch(err) {

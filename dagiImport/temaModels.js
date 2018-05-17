@@ -32,6 +32,7 @@ exports.modelList = [{
   fields: [
     {
       name: 'dagi_id',
+      sqlType: 'INTEGER',
       type: 'string',
       nullable: true,
       description: 'Unik ID',
@@ -67,6 +68,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'string',
+      sqlType: 'INTEGER',
       nullable: true,
       description: 'Unik ID',
       formatter: numberToString
@@ -108,6 +110,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'string',
+      sqlType: 'INTEGER',
       nullable: true,
       description: 'Unik ID',
       formatter: numberToString
@@ -141,6 +144,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'string',
+      sqlType: 'INTEGER',
       nullable: true,
       description: 'Unik ID',
       formatter: numberToString
@@ -173,6 +177,7 @@ exports.modelList = [{
   fields: [{
     name: 'dagi_id',
     type: 'string',
+    sqlType: 'INTEGER',
     nullable: true,
     description: 'Unik ID',
     formatter: numberToString
@@ -206,6 +211,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'string',
+      sqlType: 'INTEGER',
       nullable: true,
       description: 'Unik ID',
       formatter: numberToString
@@ -269,6 +275,7 @@ exports.modelList = [{
     {
       name: 'dagi_id',
       type: 'string',
+      sqlType: 'INTEGER',
       nullable: true,
       description: 'Unik ID',
       formatter: numberToString
@@ -415,6 +422,7 @@ exports.modelList = [{
       {
         name: 'dagi_id',
         type: 'string',
+        sqlType: 'INTEGER',
         nullable: false,
         description: 'Unik ID',
         formatter: numberToString
@@ -457,6 +465,7 @@ exports.modelList = [{
       {
         name: 'opstillingskreds_dagi_id',
         type: 'string',
+        sqlType: 'INTEGER',
         formatter: numberToString,
         description: 'DAGI id for opstillingskredsen, som afstemningsområdet tilhører'
       }
@@ -481,6 +490,7 @@ exports.modelList = [{
       {
         name: 'dagi_id',
         type: 'string',
+        sqlType: 'INTEGER',
         nullable: false,
         description: 'Unik ID',
         formatter: numberToString
@@ -544,6 +554,7 @@ exports.modelList = [{
         name: 'dagi_id',
         type: 'string',
         nullable: false,
+        sqlType: 'INTEGER',
         description: 'Unik ID',
         formatter: numberToString
       },

@@ -320,7 +320,7 @@ describe('Stable API', () => {
             "matrikelnr": null,
             "historik": {
               "oprettet": "2000-02-05T06:08:50.000",
-              "ændret": "2012-01-17T21:00:12.943"
+              "ændret": "2018-05-03T18:58:34.000"
             },
             "adgangspunkt": {
               "id": "0a3f5089-0408-32b8-e044-0003ba298018",
@@ -336,7 +336,7 @@ describe('Stable API', () => {
               "ændret": "2009-02-11T23:59:00.000"
             },
             vejpunkt: {
-              "id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+              "id": "16147a6a-af45-11e7-847e-066cff24d637",
               "kilde": "Ekstern",
               "koordinater": [
                 10.33144075,
@@ -408,10 +408,10 @@ describe('Stable API', () => {
               "id": "0a3f5089-0408-32b8-e044-0003ba298018",
               "status": 1,
               "oprettet": "2000-02-05T06:08:50.000",
-              "ændret": "2012-01-17T21:00:12.943",
+              "ændret": "2018-05-03T18:58:34.000",
               "vejkode": "0855",
               "vejnavn": "Brammingevej",
-              "vejpunkt_id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+              "vejpunkt_id": "16147a6a-af45-11e7-847e-066cff24d637",
               "vejpunkt_kilde": "Ekstern",
               "vejpunkt_nøjagtighed": "B",
               "vejpunkt_tekniskstandard": "V0",
@@ -489,11 +489,11 @@ describe('Stable API', () => {
               "id": "0a3f5081-c394-32b8-e044-0003ba298018",
               "status": 1,
               "oprettet": "2000-02-05T21:40:29.000",
-              "ændret": "2013-11-01T11:23:52.353",
+              "ændret": "2018-05-03T18:58:34.000",
               "vejkode": "0347",
               "vejnavn": "Jonstrupvej",
               "adresseringsvejnavn": "Jonstrupvej",
-              "vejpunkt_id": "360943f8-2efe-11e7-bb3a-063320a53a26",
+              "vejpunkt_id": "13be931d-af45-11e7-847e-066cff24d637",
               "vejpunkt_kilde": "Ekstern",
               "vejpunkt_nøjagtighed": "B",
               "vejpunkt_tekniskstandard": "V0",
@@ -519,7 +519,7 @@ describe('Stable API', () => {
               "nøjagtighed": "A",
               "kilde": 5,
               "tekniskstandard": "TK",
-              "tekstretning": 378,
+              "tekstretning": 178,
               "adressepunktændringsdato": "2000-01-01T23:59:00.000",
               "ddkn_m100": "100m_61587_6852",
               "ddkn_km1": "1km_6158_685",
@@ -618,7 +618,7 @@ describe('Stable API', () => {
               "matrikelnr": null,
               "historik": {
                 "oprettet": "2000-02-05T06:08:50.000",
-                "ændret": "2012-01-17T21:00:12.943"
+                "ændret": "2018-05-03T18:58:34.000"
               },
               "adgangspunkt": {
                 "id": "0a3f5089-0408-32b8-e044-0003ba298018",
@@ -634,7 +634,7 @@ describe('Stable API', () => {
                 "ændret": "2009-02-11T23:59:00.000"
               },
               "vejpunkt": {
-                "id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+                "id": "16147a6a-af45-11e7-847e-066cff24d637",
                 "kilde": "Ekstern",
                 "koordinater": [
                   10.33144075,
@@ -710,7 +710,7 @@ describe('Stable API', () => {
               "ændret": "2000-02-05T06:08:50.000",
               "vejkode": "0855",
               "vejnavn": "Brammingevej",
-              "vejpunkt_id": "39a03418-2efe-11e7-bb3a-063320a53a26",
+              "vejpunkt_id": "16147a6a-af45-11e7-847e-066cff24d637",
               "vejpunkt_kilde": "Ekstern",
               "vejpunkt_nøjagtighed": "B",
               "vejpunkt_tekniskstandard": "V0",
@@ -747,7 +747,7 @@ describe('Stable API', () => {
               "adgangsadresseid": "0a3f5089-0408-32b8-e044-0003ba298018",
               "adgangsadresse_status": 1,
               "adgangsadresse_oprettet": "2000-02-05T06:08:50.000",
-              "adgangsadresse_ændret": "2012-01-17T21:00:12.943",
+              "adgangsadresse_ændret": "2018-05-03T18:58:34.000",
               "regionskode": null,
               "regionsnavn": null,
               "jordstykke_ejerlavnavn": null,

@@ -8,7 +8,7 @@ const registry = require('../registry');
 var sqlUtil = require('../common/sql/sqlUtil');
 
 const assembleSqlModel = sqlUtil.assembleSqlModel;
-const selectIsoTimestamp = sqlUtil.selectIsoDate;
+const selectIsoTimestamp = sqlUtil.selectIsoDateUtc;
 
 var columns = {
   oprettet: {
@@ -17,10 +17,19 @@ var columns = {
   ændret: {
     select: selectIsoTimestamp('ændret')
   },
+  beliggenhed_oprindelse_registrering: {
+    select: selectIsoTimestamp('beliggenhed_oprindelse_registrering')
+  },
   vejstykker: {
     select: `(SELECT json_agg(CAST((v.kommunekode, v.kode) AS VejstykkeRef))
     FROM vejstykker v
-    WHERE v.navngivenvej_id = navngivenvej.id)`
+    WHERE v.navngivenvej_id = nv.id)`
+  },
+  administrerendekommunekode: {
+    column: 'administrerendekommune'
+  },
+  administrerendekommunenavn: {
+    select: `(select navn from kommuner k where k.kode = nv.administrerendekommune)`
   },
   kommunekode: {
     select: null,
@@ -31,7 +40,7 @@ var columns = {
       const subquery = {
         select: ["*"],
         from: ['vejstykker'],
-        whereClauses: ['navngivenvej_id = navngivenvej.id'],
+        whereClauses: ['navngivenvej_id = nv.id'],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
@@ -62,7 +71,7 @@ var parameterImpls = [
 var baseQuery = function() {
   return {
     select: [],
-    from: ['navngivenvej'],
+    from: ['navngivenvej nv'],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []

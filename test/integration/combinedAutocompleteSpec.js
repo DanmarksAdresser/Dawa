@@ -291,10 +291,10 @@ describe('Combined Autocomplete', function () {
           stormodtagerpostnumre: 'true'
         }
       );
-      expect(result[0].tekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
-      expect(result[0].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
-      expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
-      expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
+      expect(result[0].tekst).to.equal("Girostrøget 1, Høje Taastrup, 0800 Høje Taastrup");
+      expect(result[0].forslagstekst).to.equal("Girostrøget 1, Høje Taastrup, 0800 Høje Taastrup");
+      expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastrup, 2630 Taastrup");
+      expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastrup, 2630 Taastrup");
 
     }));
     it('stormodtagerpostnumre kan aktiveres for adresser', () => go(function*() {
@@ -305,10 +305,10 @@ describe('Combined Autocomplete', function () {
           stormodtagerpostnumre: 'true'
         }
       );
-      expect(result[0].tekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
-      expect(result[0].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 2630 Taastrup");
-      expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
-      expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastr., 0800 Høje Taastrup");
+      expect(result[0].tekst).to.equal("Girostrøget 1, Høje Taastrup, 2630 Taastrup");
+      expect(result[0].forslagstekst).to.equal("Girostrøget 1, Høje Taastrup, 2630 Taastrup");
+      expect(result[1].tekst).to.equal("Girostrøget 1, Høje Taastrup, 0800 Høje Taastrup");
+      expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastrup, 0800 Høje Taastrup");
     }));
 
     it('Kan hente en adresse ud fra id', () => go(function*() {

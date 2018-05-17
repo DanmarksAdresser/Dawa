@@ -127,6 +127,9 @@ const DATA_CSV_OPTIONS = {
 };
 
 function streamCsvToTable(client, filePath, targetTable, columns, mapFn) {
+  if(!fs.existsSync(filePath)) {
+    throw new Error('File not found: ' + filePath);
+  }
   var inputStream = fs.createReadStream(filePath, {encoding: 'utf8'});
   const streams =  [
     inputStream,

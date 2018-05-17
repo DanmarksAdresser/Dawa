@@ -67,6 +67,14 @@ const replikeringBindingOverrides = {
       formatter: kode4String
     }
   },
+  NavngivenVejKommunedel: {
+    kommune: {
+      formatter: kode4String
+    },
+    vejkode: {
+      formatter: kode4String
+    }
+  },
   DARKommuneinddeling: {
     kommunekode: {
       formatter: kode4String
@@ -123,7 +131,7 @@ const historyReplikeringModels = Object.entries(dar10TableModels.historyTableMod
     return {
       name: column.name,
       type,
-      description: 'Iikke tilgængelig',
+      description: 'Ikke tilgængelig',
       nullable: column.nullable
     };
   });

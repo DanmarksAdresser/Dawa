@@ -62,6 +62,21 @@ CREATE TYPE JordstykkeRef AS (
   ejerlavnavn text
 );
 
+CREATE OR REPLACE FUNCTION dar1_ap_status_til_dawa_status(INTEGER)
+  RETURNS INTEGER AS
+$$
+SELECT CASE $1
+       WHEN 7 -- Ikke i brug
+         THEN 3 -- foreløbig
+       WHEN 8 -- I brug
+         THEN 1 -- gældende
+       WHEN 9
+         THEN 4 -- henlagt
+       ELSE
+         2  -- nedlagt
+       END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(INTEGER)
   RETURNS INTEGER AS
 $$
@@ -83,4 +98,11 @@ DROP TYPE IF EXISTS VejstykkeRef CASCADE;
 CREATE TYPE VejstykkeRef AS (
   kommunekode integer,
   kode integer
+);
+
+DROP AGGREGATE IF EXISTS range_merge(anyrange);
+CREATE AGGREGATE range_merge(anyrange)
+(
+  sfunc = range_merge,
+  stype = anyrange
 );
