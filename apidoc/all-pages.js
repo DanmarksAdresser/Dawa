@@ -8,6 +8,7 @@ module.exports = [
   require("./jordstykke-page"),
   require('./kommune-page'),
   require('./menighedsrådsafstemningsområde-page'),
+  require('./navngivenvej-page'),
   ... require('./ois-pages')('public'),
   ... require('./ois-pages')('full'),
   require('./opstillingskreds-page'),

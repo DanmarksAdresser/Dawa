@@ -2,7 +2,7 @@ module.exports = [{
   name: 'Adresser',
   headingClass: 'h2-icon h2-adresser',
   lead: 'For en generel introduktion til adresseområdet, se <a href="/dok/adresser">her<a/>.',
-  entities: ['adgangsadresse', 'adresse', 'autocomplete', 'vejstykke', 'vejnavn', 'supplerendebynavn', 'postnummer'],
+  entities: ['adgangsadresse', 'adresse', 'autocomplete', 'navngivenvej', 'vejstykke', 'vejnavn', 'supplerendebynavn', 'postnummer'],
 }, {
   name: 'DAGI',
   headingClass: 'h2-icon h2-dagi',

@@ -42,6 +42,9 @@ var fields = [
   },
   {
     name: 'beliggenhed_vejtilslutningspunkter'
+  },
+  {
+    name: 'beliggenhed_geometritype'
   }
 ];
 

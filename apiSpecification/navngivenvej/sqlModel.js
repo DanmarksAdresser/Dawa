@@ -6,6 +6,7 @@ var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 const registry = require('../registry');
 var sqlUtil = require('../common/sql/sqlUtil');
+const {geojsonColumn} = require('../common/sql/postgisSqlUtil');
 
 const assembleSqlModel = sqlUtil.assembleSqlModel;
 const selectIsoTimestamp = sqlUtil.selectIsoDateUtc;
@@ -31,6 +32,9 @@ var columns = {
   administrerendekommunenavn: {
     select: `(select navn from kommuner k where k.kode = nv.administrerendekommune)`
   },
+  beliggenhed_geometritype: {
+    select: `(case when beliggenhed_vejnavnelinje is not null then 'vejnavnelinje' else 'vejnavneområde' end)`
+  },
   kommunekode: {
     select: null,
     where: function(sqlParts, parameterArray) {
@@ -52,7 +56,34 @@ var columns = {
       const subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
-  }
+  },
+  'beliggenhed_vejnavnelinje': {
+    select: function (sqlParts, sqlModel, params) {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return geojsonColumn(params.srid || 4326, sridAlias, 'nv.beliggenhed_vejnavnelinje');
+    }
+
+  },
+  'beliggenhed_vejnavneområde': {
+    select: function (sqlParts, sqlModel, params) {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return geojsonColumn(params.srid || 4326, sridAlias, 'nv.beliggenhed_vejnavneområde');
+    }
+  },
+  'beliggenhed_vejtilslutningspunkter': {
+    select: function (sqlParts, sqlModel, params) {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return geojsonColumn(params.srid || 4326, sridAlias, 'nv.beliggenhed_vejtilslutningspunkter');
+    }
+  },
+  geom_json: {
+    select: function (sqlParts, sqlModel, params) {
+      const geomColumn = params.geometri === 'vejnavnelinje' ? 'beliggenhed_vejnavnelinje' : 'beliggenhed_vejnavneområde';
+      const srid = params.srid || 4326;
+      const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+      return geojsonColumn(geomColumn, srid, sridAlias);
+    }
+  },
 };
 
 const regexParameterImpl = (sqlParts, params) => {

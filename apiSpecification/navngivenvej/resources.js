@@ -6,20 +6,26 @@ var representations = require('./representations');
 var sqlModel = require('./sqlModel');
 const registry = require('../registry');
 var resourcesUtil = require('../common/resourcesUtil');
+const commonParameters = require('../common/commonParameters');
 
 
 
 exports.query = resourcesUtil.queryResourceSpec(
   nameAndKey, {
     propertyFilter: parameters.propertyFilter,
-    regex: parameters.regex
+    struktur: commonParameters.struktur,
+    regex: parameters.regex,
+    crs: commonParameters.crs
   },
   representations,
   sqlModel
 );
 
 exports.getByKey = resourcesUtil.getByKeyResourceSpec(
-  nameAndKey, parameters.id,{},
+  nameAndKey, parameters.id,{
+    struktur: commonParameters.struktur,
+    crs: commonParameters.crs
+  },
   representations,
   sqlModel
 );

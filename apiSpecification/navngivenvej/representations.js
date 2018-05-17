@@ -27,6 +27,13 @@ const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnav
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
+const miniFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn'];
+
+const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
+
+exports.mini = representationUtil.defaultFlatRepresentation(miniFields);
+
+
 exports.json = {
   schema: globalSchemaObject({
     'title': 'navngivenvej',
@@ -89,9 +96,13 @@ exports.json = {
               })
             },
             docOrder: ['kilde', 'tekniskstandard', 'nøjagtighedsklasse', 'registrering']
-          })
+          }),
+          geometritype: {
+            type: 'string',
+            description: 'Anvender typen af geometri for den navngivne vej: "vejnavnelinje" eller "vejn'
+          }
         },
-        docOrder: ['oprindelse']
+        docOrder: ['oprindelse', 'geometritype']
       })
     },
     docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'beliggenhed']
@@ -120,12 +131,21 @@ exports.json = {
             tekniskstandard: row.beliggenhed_oprindelse_tekniskstandard,
             registrering: row.beliggenhed_oprindelse_registrering,
             nøjagtighedsklasse: row.beliggenhed_oprindelse_nøjagtighedsklasse
-          }
+          },
+          geometritype: row.beliggenhed_geometritype
         }
       };
     };
   }
 };
+
+const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
+exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
+
+const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFields);
+exports.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
+
 
 var registry = require('../registry');
 registry.addMultiple('navngivenvej', 'representation', module.exports);

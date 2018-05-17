@@ -136,7 +136,7 @@ const unnormalizedBindings = {
   navngivenvej: {
     path: '/replikering/navngivneveje',
     table: 'navngivenvej',
-    legacyResource: true,
+    legacyResource: false,
     attributes: {
       oprettet: {
         formatter: timestampFormatter,

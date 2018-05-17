@@ -1,11 +1,7 @@
 const {
-  formatAndPagingParams
+  formatAndPagingParams,
+  strukturParameter
 } = require('./common');
-
-const {
-  replikeringDoc
-} = require('./replikeringCommon');
-
 
 const navngivenVejIdParameter =
   {
@@ -36,6 +32,8 @@ module.exports = [
         name: 'regex',
         doc: 'Find de navngivne veje, som matcher det angivne regulære udtryk.'
       },
+
+      strukturParameter,
       ...formatAndPagingParams],
     examples: []
   },
@@ -44,9 +42,11 @@ module.exports = [
     entity: 'navngivenvej',
     path: '/navngivneveje/{id}',
     subtext: 'Opslag på enkelt vejstykke ud fra id.',
-    parameters: [navngivenVejIdParameter],
+    parameters: [
+      navngivenVejIdParameter,
+      strukturParameter
+    ],
     nomulti: true,
     examples: []
-  },
-  ...replikeringDoc('navngivenvej', [navngivenVejIdParameter], [])
+  }
 ];
