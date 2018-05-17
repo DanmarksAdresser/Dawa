@@ -282,7 +282,7 @@ const supplerendebynavnRepresentation = (() => {
   const mapper = baseUrl => row => {
     const result = {
       href: makeHref(baseUrl, 'supplerendebynavn', [row.dagi_id]),
-      dagi_id: row.dagi_id,
+      dagi_id: numberToString(row.dagi_id),
       ændret: row.ændret,
       geo_version: row.geo_version,
       geo_ændret: row.geo_ændret,

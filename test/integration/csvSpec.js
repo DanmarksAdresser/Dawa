@@ -41,7 +41,14 @@ describe('CSV udtræk', function () {
     vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn'],
     postnummer: ['nr','navn','stormodtager'],
     kommune: ['dagi_id', 'kode','navn', 'regionskode', 'ændret', 'geo_ændret', 'geo_version'],
-    navngivenvej: ['id','darstatus', 'oprettet','ændret','navn','adresseringsnavn','administreresafkommune','beskrivelse','retskrivningskontrol','udtaltvejnavn']
+    navngivenvej: ['id','darstatus', 'oprettet','ændret','navn','adresseringsnavn',
+      'administrerendekommunekode','administrerendekommunenavn',
+      'retskrivningskontrol','udtaltvejnavn',
+      'beliggenhed_oprindelse_kilde',
+      'beliggenhed_oprindelse_nøjagtighedsklasse',
+      'beliggenhed_oprindelse_registrering',
+      'beliggenhed_oprindelse_tekniskstandard'
+    ]
   };
 
   _.each(expectedColumns, function (colNames, datamodelName) {

@@ -18,13 +18,13 @@ describe('Import af DAGI temaer', () => {
         yield importDagiImpl.importTemaerWfsMulti(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', 1000000);
         const temaRow = (yield client.queryRows('select dagi_id, nummer, navn, afstemningsstednavn, afstemningsstedadresse, kommunekode, opstillingskreds_dagi_id, ændret, geo_ændret, geo_version, st_asgeojson(geom) as geom_json from afstemningsomraader'))[0];
         assert(temaRow);
-        assert.strictEqual(temaRow.dagi_id, '707412');
+        assert.strictEqual(temaRow.dagi_id, 707412);
         assert.strictEqual(temaRow.nummer, 5);
         assert.strictEqual(temaRow.navn, 'Glejbjerg');
         assert.strictEqual(temaRow.afstemningsstednavn, 'Glejbjerg Fritidscenter');
         assert.strictEqual(temaRow.afstemningsstedadresse, '0a3f508e-2896-32b8-e044-0003ba298018');
         assert.strictEqual(temaRow.kommunekode, 575);
-        assert.strictEqual(temaRow.opstillingskreds_dagi_id, '403623');
+        assert.strictEqual(temaRow.opstillingskreds_dagi_id, 403623);
         assert.strictEqual(temaRow.geo_version, 1);
         assert(datetimeRegex.test(temaRow.ændret));
         assert(datetimeRegex.test(temaRow.geo_ændret));
@@ -62,7 +62,7 @@ describe('Import af DAGI temaer', () => {
         yield importDagiImpl.importTemaerWfsMulti(client, txid, ['opstillingskreds'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', 1000000);
         const temaRow = (yield client.queryRows('select dagi_id, nummer, navn, kode, valgkredsnummer, storkredsnummer, kredskommunekode, ændret, geo_ændret, geo_version, st_asgeojson(geom) as geom_json from opstillingskredse'))[0];
         assert(temaRow);
-        assert.strictEqual(temaRow.dagi_id, '403577');
+        assert.strictEqual(temaRow.dagi_id, 403577);
         assert.strictEqual(temaRow.nummer, 26);
         assert.strictEqual(temaRow.kode, 26);
         assert.strictEqual(temaRow.navn, 'Rudersdal');

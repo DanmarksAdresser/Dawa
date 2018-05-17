@@ -440,6 +440,7 @@ exports.modelList = [{
       {
         name: 'opstillingskreds_dagi_id',
         type: 'string',
+        sqlType: 'INTEGER',
         formatter: numberToString,
         description: 'DAGI id for opstillingskredsen, som afstemningsområdet tilhører'
       }

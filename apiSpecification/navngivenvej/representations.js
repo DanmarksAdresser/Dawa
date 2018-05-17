@@ -9,6 +9,7 @@ var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 
 var normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('navngivenvej', fieldName);
@@ -22,8 +23,9 @@ var d = util.d;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHref = commonMappers.makeHref;
 var schemaObject = schemaUtil.schemaObject;
-
-exports.flat = representationUtil.defaultFlatRepresentation(fields);
+const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnavneområde', 'beliggenhed_vejtilslutningspunkter'];
+const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
+exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
 exports.json = {
   schema: globalSchemaObject({
@@ -46,8 +48,7 @@ exports.json = {
         docOrder: ['oprettet', 'ændret']
 
       }),
-      administreresafkommune: normalizedFieldSchema('administreresafkommune'),
-      beskrivelse: normalizedFieldSchema('beskrivelse'),
+      administrerendekommune: commonSchemaDefinitions.KommuneRef,
       retskrivningskontrol: normalizedFieldSchema('retskrivningskontrol'),
       udtaltvejnavn: normalizedFieldSchema('udtaltvejnavn'),
       vejstykker: {
@@ -65,9 +66,35 @@ exports.json = {
           },
           docOrder: ['href', 'kommunekode', 'kode']
         }
-      }
+      },
+      beliggenhed: schemaObject({
+        description: 'Information om vejens beliggenhed',
+        properties: {
+          oprindelse: schemaObject({
+            properties: {
+              kilde: {
+                type: 'string',
+                description: '?'
+              },
+              tekniskstandard: {
+                type: 'string',
+                description: '?'
+              },
+              nøjagtighedsklasse: {
+                type: 'string',
+                description: '?'
+              },
+              registrering: Object.assign({}, commonSchemaDefinitions.DateTimeUtc, {
+                description: '?'
+              })
+            },
+            docOrder: ['kilde', 'tekniskstandard', 'nøjagtighedsklasse', 'registrering']
+          })
+        },
+        docOrder: ['oprindelse']
+      })
     },
-    docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administreresafkommune', 'beskrivelse', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker']
+    docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'beliggenhed']
   }),
   fields: _.where(fields, {'selectable' : true}),
   mapper: function(baseUrl) {
@@ -78,8 +105,7 @@ exports.json = {
         darstatus: row.darstatus,
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
-        administreresafkommune: util.kode4String(row.administreresafkommune),
-        beskrivelse: row.beskrivelse,
+        administrerendekommune: commonMappers.mapKode4NavnTema('kommune', row.administrerendekommunekode, row.administrerendekommunenavn, baseUrl),
         retskrivningskontrol: row.retskrivningskontrol,
         udtaltvejnavn: row.udtaltvejnavn,
         historik: {
@@ -87,7 +113,15 @@ exports.json = {
           ændret: d(row.ændret)
         },
         vejstykker:
-          (row.vejstykker || []).map(vejstykke => commonMappers.mapVejstykkeRef(vejstykke, baseUrl))
+          (row.vejstykker || []).map(vejstykke => commonMappers.mapVejstykkeRef(vejstykke, baseUrl)),
+        beliggenhed: {
+          oprindelse: {
+            kilde: row.beliggenhed_oprindelse_kilde,
+            tekniskstandard: row.beliggenhed_oprindelse_tekniskstandard,
+            registrering: row.beliggenhed_oprindelse_registrering,
+            nøjagtighedsklasse: row.beliggenhed_oprindelse_nøjagtighedsklasse
+          }
+        }
       };
     };
   }
