@@ -15,14 +15,14 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
   });
   proddb.withTransaction('READ_WRITE', (client) => go(function* () {
     yield client.query(`
-    DROP VIEW adgangsadresserview cascade;
-DROP VIEW adresser cascade;
-DROP VIEW wms_adgangsadresser cascade;
-DROP VIEW wms_housenumber_inspire cascade;
-DROP VIEW adresser_mat_view;
-DROP VIEW dar1_adgangsadresser_view CASCADE;
-DROP VIEW adgangsadresser_mat_view CASCADE;
-DROP VIEW adresser_mat_view CASCADE;
+    DROP VIEW IF EXISTS adgangsadresserview cascade;
+DROP VIEW  IF EXISTS adresser cascade;
+DROP VIEW  IF EXISTS wms_adgangsadresser cascade;
+DROP VIEW  IF EXISTS wms_housenumber_inspire cascade;
+DROP VIEW  IF EXISTS adresser_mat_view;
+DROP VIEW  IF EXISTS dar1_adgangsadresser_view CASCADE;
+DROP VIEW  IF EXISTS adgangsadresser_mat_view CASCADE;
+DROP VIEW  IF EXISTS adresser_mat_view CASCADE;
 ALTER TABLE adgangsadresser alter column tekstretning set data type numeric(5,2);
 ALTER TABLE adgangsadresser_changes alter column tekstretning set data type numeric(5,2);
 ALTER TABLE adgangsadresser_mat alter column tekstretning set data type numeric(5,2);
@@ -41,7 +41,14 @@ ALTER TABLE afstemningsomraader alter dagi_id type INTEGER USING dagi_id::INTEGE
 ALTER TABLE afstemningsomraader_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE menighedsraadsafstemningsomraader alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE menighedsraadsafstemningsomraader_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
-
+ALTER TABLE adgangsadresser ADD COLUMN supplerendebynavn_dagi_id integer;
+ALTER TABLE adgangsadresser_mat ADD COLUMN supplerendebynavn_dagi_id integer;
+ALTER TABLE adresser_mat ADD COLUMN supplerendebynavn_dagi_id integer;
+ALTER TABLE adgangsadresser_changes ADD COLUMN supplerendebynavn_dagi_id integer;
+ALTER TABLE adgangsadresser_mat_changes ADD COLUMN supplerendebynavn_dagi_id integer;
+ALTER TABLE adresser_mat_changes ADD COLUMN supplerendebynavn_dagi_id integer;
+CREATE INDEX ON adgangsadresser_mat(supplerendebynavn_dagi_id);
+CREATE INDEX ON adresser_mat(supplerendebynavn_dagi_id);
 `)
   }));
 });
