@@ -23,7 +23,7 @@ var d = util.d;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 var makeHref = commonMappers.makeHref;
 var schemaObject = schemaUtil.schemaObject;
-const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnavneområde', 'beliggenhed_vejtilslutningspunkter'];
+const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnavneområde', 'beliggenhed_vejtilslutningspunkter', 'geom_json'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 

@@ -81,7 +81,7 @@ var columns = {
       const geomColumn = params.geometri === 'vejnavnelinje' ? 'beliggenhed_vejnavnelinje' : 'beliggenhed_vejnavneområde';
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
-      return geojsonColumn(geomColumn, srid, sridAlias);
+      return geojsonColumn(srid, sridAlias,geomColumn);
     }
   },
 };

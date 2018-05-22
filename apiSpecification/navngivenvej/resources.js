@@ -15,7 +15,8 @@ exports.query = resourcesUtil.queryResourceSpec(
     propertyFilter: parameters.propertyFilter,
     struktur: commonParameters.struktur,
     regex: parameters.regex,
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    geometri: parameters.geometri
   },
   representations,
   sqlModel
@@ -24,7 +25,8 @@ exports.query = resourcesUtil.queryResourceSpec(
 exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id,{
     struktur: commonParameters.struktur,
-    crs: commonParameters.crs
+    crs: commonParameters.crs,
+    geometri: parameters.geometri
   },
   representations,
   sqlModel

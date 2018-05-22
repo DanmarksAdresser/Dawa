@@ -10,6 +10,12 @@ const navngivenVejIdParameter =
     examples: ['11ebfac2-37d2-7205-e044-0003ba298018']
   };
 
+const navngivenVejGeometriParameter = {
+  name: 'geometri',
+  doc: `Angiver hvilken geometri der returneres for GeoJSON format. Mulige værdier: "vejnavnelinje", "vejnavneområde". Default værdi
+   er "vejnavnelinje"`
+};
+
 module.exports = [
   {
     entity: 'navngivenvej',
@@ -32,7 +38,7 @@ module.exports = [
         name: 'regex',
         doc: 'Find de navngivne veje, som matcher det angivne regulære udtryk.'
       },
-
+      navngivenVejGeometriParameter,
       strukturParameter,
       ...formatAndPagingParams],
     examples: []
@@ -44,6 +50,7 @@ module.exports = [
     subtext: 'Opslag på enkelt vejstykke ud fra id.',
     parameters: [
       navngivenVejIdParameter,
+      navngivenVejGeometriParameter,
       strukturParameter
     ],
     nomulti: true,

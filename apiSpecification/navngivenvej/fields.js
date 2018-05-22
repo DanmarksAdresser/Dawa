@@ -45,6 +45,9 @@ var fields = [
   },
   {
     name: 'beliggenhed_geometritype'
+  },
+  {
+    name: 'geom_json'
   }
 ];
 

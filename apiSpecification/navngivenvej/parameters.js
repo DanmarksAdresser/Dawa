@@ -52,6 +52,14 @@ module.exports = {
         throw e.message;
       }
     }
-  }])
+  }]),
+  geometri: {
+    name: 'geometri',
+    type: 'string',
+    schema: {
+      enum: ['vejnavnelinje', 'vejnavneområde']
+    },
+    defaultValue: 'vejnavnelinje'
+  }
 };
 registry.addMultiple('navngivenvej', 'parameterGroup', module.exports);
