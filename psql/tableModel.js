@@ -134,6 +134,8 @@ const adgangsadresser = {
     name: 'adressepunkt_id'
   }, {
     name: 'postnummer_id'
+  }, {
+    name: 'supplerendebynavn_dagi_id'
   }]
 };
 

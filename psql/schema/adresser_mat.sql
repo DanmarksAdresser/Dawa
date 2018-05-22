@@ -21,6 +21,7 @@ CREATE VIEW adresser_mat_view AS
     a.vejkode,
     a.husnr         husnr,
     a.supplerendebynavn,
+    a.supplerendebynavn_dagi_id,
     a.postnr,
     a.ejerlavkode,
     a.matrikelnr,

@@ -197,6 +197,12 @@ module.exports = {
         type: 'uuid',
         nullable: true,
         description: 'Adgangspunktets unikke ID'
+      },
+      {
+        name: 'supplerendebynavn_dagi_id',
+        type: 'string',
+        nullable: true,
+        description: 'DAGI ID på det supplerende bynavn, som adgangsadressen ligger i.'
       }
     ]
   },

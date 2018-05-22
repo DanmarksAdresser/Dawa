@@ -304,6 +304,10 @@ describe('Stable API', () => {
             },
             "husnr": "18",
             "supplerendebynavn": "Bolbro",
+            "supplerendebynavn2": {
+              "dagi_id": "675271",
+              "href": "http://dawa/supplerendebynavne2/675271"
+            },
             "postnummer": {
               "href": "http://dawa/postnumre/5200",
               "nr": "5200",
@@ -420,6 +424,7 @@ describe('Stable API', () => {
               "adresseringsvejnavn": "Brammingevej",
               "husnr": "18",
               "supplerendebynavn": "Bolbro",
+              "supplerendebynavn_dagi_id": "675271",
               "postnr": "5200",
               "postnrnavn": "Odense V",
               "stormodtagerpostnr": null,
@@ -501,6 +506,7 @@ describe('Stable API', () => {
               "vejpunkt_y": 55.53903448,
               "husnr": "1B",
               "supplerendebynavn": "Boruphuse",
+              "supplerendebynavn_dagi_id": "664217",
               "postnr": "4320",
               "postnrnavn": "Lejre",
               "stormodtagerpostnr": null,
@@ -602,6 +608,10 @@ describe('Stable API', () => {
               },
               "husnr": "18",
               "supplerendebynavn": "Bolbro",
+              "supplerendebynavn2": {
+                "dagi_id": "675271",
+                "href": "http://dawa/supplerendebynavne2/675271"
+              },
               "postnummer": {
                 "href": "http://dawa/postnumre/5200",
                 "nr": "5200",
@@ -721,6 +731,7 @@ describe('Stable API', () => {
               "etage": "1",
               "dør": "tv",
               "supplerendebynavn": "Bolbro",
+              "supplerendebynavn_dagi_id": "675271",
               "postnr": "5200",
               "postnrnavn": "Odense V",
               "stormodtagerpostnr": null,
@@ -929,15 +940,15 @@ describe('Stable API', () => {
         const strukturMap = formatMap[format];
         for (let struktur of Object.keys(strukturMap)) {
           const tests = strukturMap[struktur];
-          it(`Return value for entity=${entityName},format=${format},struktur=${struktur}`, q.async(function*() {
+          it(`Return value for entity=${entityName},format=${format},struktur=${struktur}`, q.async(function* () {
             for (let test of tests) {
               let jsonResult = yield helpers.getJson(clientFn(), resource, test.params, {
                 format: format,
                 struktur: struktur
               });
-              if(propertiesToIgnoreMap[entityName] && propertiesToIgnoreMap[entityName][format] && propertiesToIgnoreMap[entityName][format][struktur]) {
+              if (propertiesToIgnoreMap[entityName] && propertiesToIgnoreMap[entityName][format] && propertiesToIgnoreMap[entityName][format][struktur]) {
                 const propertiesToIgnore = propertiesToIgnoreMap[entityName][format][struktur];
-                for(let property of propertiesToIgnore) {
+                for (let property of propertiesToIgnore) {
                   assert(jsonResult.hasOwnProperty(property));
                   delete jsonResult[property];
                   delete test.value[property];

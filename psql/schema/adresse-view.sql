@@ -13,6 +13,7 @@ CREATE OR REPLACE VIEW adresser AS
     A.objekttype as a_objekttype,
     A.husnr,
     A.supplerendebynavn,
+    A.supplerendebynavn_dagi_id,
     a_oprettet,
     a_ikraftfra,
     a_aendret,

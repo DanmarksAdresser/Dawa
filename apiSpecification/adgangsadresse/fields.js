@@ -183,7 +183,8 @@ var fields = [
   },
   {
     name: 'brofast'
-  }
+  },
+  normalizedField('supplerendebynavn_dagi_id')
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

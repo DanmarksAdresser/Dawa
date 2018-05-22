@@ -5,6 +5,7 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     A.objekttype as a_objekttype,
     A.husnr,
     A.supplerendebynavn,
+    A.supplerendebynavn_dagi_id,
     A.oprettet AS a_oprettet,
     A.ikraftfra as a_ikraftfra,
     A.aendret  AS a_aendret,

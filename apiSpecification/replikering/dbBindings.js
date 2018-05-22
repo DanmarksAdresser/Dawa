@@ -87,6 +87,9 @@ const unnormalizedBindings = {
       },
       højde: {
         column: 'hoejde'
+      },
+      supplerendebynavn_dagi_id: {
+        formatter: numberToString
       }
     }
   },

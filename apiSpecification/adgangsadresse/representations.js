@@ -15,12 +15,11 @@ var util = require('../util');
 var adressebetegnelse = util.adressebetegnelse;
 var schemaObject = schemaUtil.schemaObject;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHref = commonMappers.makeHref;
+const { makeHref, makeHrefFromPath}  = commonMappers;
+
 var mapPostnummerRef = commonMappers.mapPostnummerRef;
 var mapKommuneRef = commonMappers.mapKommuneRef;
-var d = util.d;
-
-var maybeNull = util.maybeNull;
+const { d, numberToString, maybeNull, kode4String }= util;
 
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 var normalizedFieldSchema = function(fieldName) {
@@ -28,7 +27,6 @@ var normalizedFieldSchema = function(fieldName) {
 };
 
 var nullableType = schemaUtil.nullableType;
-var kode4String = require('../util').kode4String;
 var kvhFormat = require('./kvhTransformer').format;
 var kvhFieldsDts = require('./kvhTransformer').kvhFieldsDts;
 
@@ -48,7 +46,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -79,6 +77,22 @@ exports.json = {
       },
       'husnr'  : normalizedFieldSchema('husnr'),
       'supplerendebynavn': normalizedFieldSchema('supplerendebynavn'),
+      'supplerendebynavn2': schemaObject({
+        description: 'Det supplerende bynavn, som adgangsadressen ligger i',
+        properties: {
+          href: {
+            description: 'Det supplerende bynavns unikke URL',
+            type: 'string'
+          },
+          dagi_id: {
+            description: 'Det supplerende bynavns unikke ID i DAGI',
+            type: 'string'
+          }
+        },
+        nullable: true,
+        docOrder: ['href', 'dagi_id']
+      }),
+
       'postnummer': {
         description: 'Postnummeret som adressen er beliggende i.',
         $ref: '#/definitions/NullablePostnummerRef'
@@ -349,7 +363,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         type: 'string'
       }
     },
-    docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn',
+    docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn', 'supplerendebynavn2',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
       'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
@@ -369,6 +383,10 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       };
       adr.husnr = husnrUtil.formatHusnr(rs.husnr);
       adr.supplerendebynavn = maybeNull(rs.supplerendebynavn);
+      adr.supplerendebynavn2 = rs.supplerendebynavn_dagi_id ? {
+        href: makeHrefFromPath(baseUrl, 'supplerendebynavne2', [rs.supplerendebynavn_dagi_id]),
+        dagi_id: numberToString(rs.supplerendebynavn_dagi_id)
+      } : null;
       adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, baseUrl);
       if(rs.stormodtagerpostnr) {
         adr.stormodtagerpostnummer = mapPostnummerRef(

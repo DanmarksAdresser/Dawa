@@ -6,6 +6,7 @@ CREATE VIEW adgangsadresser_mat_view AS
     A.vejkode,
     A.husnr,
     A.supplerendebynavn,
+    A.supplerendebynavn_dagi_id,
     A.postnr,
     A.ejerlavkode,
     A.matrikelnr,

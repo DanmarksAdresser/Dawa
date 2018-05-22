@@ -35,7 +35,8 @@ CREATE TABLE  adgangsadresser (
   supplerendebynavn_id uuid,
   darkommuneinddeling_id uuid,
   adressepunkt_id uuid,
-  postnummer_id uuid
+  postnummer_id uuid,
+  supplerendebynavn_dagi_id integer
 );
 
 CREATE INDEX ON Adgangsadresser(ejerlavkode, id);

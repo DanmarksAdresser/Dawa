@@ -42,7 +42,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
              aa_old.adgangspunktkilde)                              AS adgangspunktkilde,
     coalesce(ap.oprindelse_tekniskstandard,
              aa_old.tekniskstandard)                                AS tekniskstandard,
-    coalesce((round((atan(ST_Y(hn.husnummerretning)/ST_X(hn.husnummerretning)) *
+    coalesce((round((atan(ST_Y(hn.husnummerretning) / ST_X(hn.husnummerretning)) *
                      400 / (2 * pi())) :: NUMERIC, 2) + 200) % 400,
              aa_old.tekstretning)                                   AS tekstretning,
     coalesce(ap.oprindelse_registrering AT TIME ZONE
@@ -53,6 +53,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
     k.id                                                            AS darkommuneinddeling_id,
     ap.id                                                           AS adressepunkt_id,
     p.id                                                            AS postnummer_id,
+    s.supplerendebynavn1                                            AS supplerendebynavn_dagi_id,
     ap.position                                                     AS geom
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k

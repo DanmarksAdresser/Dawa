@@ -5,6 +5,7 @@ CREATE TABLE adgangsadresser_mat(
   vejkode INTEGER NOT NULL,
   husnr husnr,
   supplerendebynavn text NULL,
+  supplerendebynavn_dagi_id integer,
   postnr INTEGER NULL,
   ejerlavkode INTEGER,
   matrikelnr text NULL,
@@ -64,3 +65,4 @@ CREATE INDEX ON adgangsadresser_mat(vejnavn, postnr);
 CREATE INDEX ON adgangsadresser_mat(vejkode,postnr);
 CREATE INDEX ON adgangsadresser_mat(vejpunkt_id);
 CREATE INDEX ON adgangsadresser_mat USING GIST (vejpunkt_geom);
+CREATE INDEX ON adgangsadresser_mat(supplerendebynavn_dagi_id);
