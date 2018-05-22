@@ -1,4 +1,4 @@
-import 'bootstrap/scss/bootstrap.scss';
+// import 'bootstrap/scss/bootstrap.scss';
 import 'leaflet/dist/leaflet.css';
 import '../css/style.css';
 import '../scss/dawa.scss';

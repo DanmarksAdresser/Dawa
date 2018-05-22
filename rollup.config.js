@@ -2,8 +2,6 @@
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
-import collectSass from 'rollup-plugin-collect-sass';
-import css from 'rollup-plugin-css-only';
 import scss from 'rollup-plugin-scss'
 import inject from 'rollup-plugin-inject';
 
@@ -20,9 +18,15 @@ export default {
       output: 'dist/css/dawa.css' }),
     babel({
       "presets": [
-        "es2015-rollup"
+        [
+          "env",
+          {
+            "modules": false
+          }
+        ]
       ],
-      "plugins": ["transform-object-rest-spread"]
+      exclude: ["*.css", "*.scss"],
+      "plugins": ["external-helpers", "transform-object-rest-spread"]
     })
   ],
   output: [{
