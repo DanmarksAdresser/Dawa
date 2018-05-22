@@ -773,6 +773,114 @@ describe('Stable API', () => {
           }
         }]
       }
+    },
+    navngivenvej: {
+      json: {
+        nestet: [{
+          params: {
+            id: "1e260555-5c81-434f-af77-1bea6fc4c8a8"
+          },
+          value: {
+            "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
+            "href": "http://dawa/navngivneveje/1e260555-5c81-434f-af77-1bea6fc4c8a8",
+            "darstatus": 3,
+            "navn": "Gl. Assensvej",
+            "adresseringsnavn": "Gl. Assensvej",
+            "administrerendekommune": {
+              "href": "http://dawa/kommuner/420",
+              "kode": "0420",
+              "navn": "Assens"
+            },
+            "retskrivningskontrol": "Godkendt",
+            "udtaltvejnavn": "Gl. Assensvej",
+            "historik": {
+              "oprettet": "1900-01-01T12:00:00.000Z",
+              "ændret": "1900-01-01T12:00:00.000Z"
+            },
+            "vejstykker": [
+              {
+                "href": "http://dawa/vejstykker/0420/0480",
+                "kommunekode": "0420",
+                "kode": "0480"
+              }
+            ],
+            "beliggenhed": {
+              "oprindelse": {
+                "kilde": "Ekstern",
+                "tekniskstandard": "N0",
+                "registrering": "2018-05-03T15:57:30.356Z",
+                "nøjagtighedsklasse": "B"
+              },
+              "geometritype": "vejnavnelinje"
+            }
+          }
+        }],
+        flad: [{
+          params: {
+            id: "1e260555-5c81-434f-af77-1bea6fc4c8a8"
+          },
+          value: {
+            "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
+            "darstatus": 3,
+            "oprettet": "1900-01-01T12:00:00.000Z",
+            "ændret": "1900-01-01T12:00:00.000Z",
+            "navn": "Gl. Assensvej",
+            "adresseringsnavn": "Gl. Assensvej",
+            "administrerendekommunekode": "0420",
+            "administrerendekommunenavn": "Assens",
+            "retskrivningskontrol": "Godkendt",
+            "udtaltvejnavn": "Gl. Assensvej",
+            "beliggenhed_oprindelse_kilde": "Ekstern",
+            "beliggenhed_oprindelse_nøjagtighedsklasse": "B",
+            "beliggenhed_oprindelse_registrering": "2018-05-03T15:57:30.356Z",
+            "beliggenhed_oprindelse_tekniskstandard": "N0",
+            "beliggenhed_geometritype": "vejnavnelinje"
+          }
+        }]
+      },
+      geojson: {
+        flad: [{
+          params: {
+            id: "1e260555-5c81-434f-af77-1bea6fc4c8a8"
+          },
+          value: {
+            "type": "Feature",
+            "geometry": {
+              "type": "MultiLineString",
+              "coordinates": [[[10.09803611, 55.37158792], [10.09815016, 55.37170048],
+                [10.09838166, 55.37192873], [10.09851168, 55.37205355],
+                [10.09854461, 55.37209163], [10.09858488, 55.37214401],
+                [10.09860355, 55.37217449], [10.09860958, 55.37219843],
+                [10.09861386, 55.37222733], [10.09861081, 55.37225404],
+                [10.09859725, 55.37229425], [10.09858836, 55.37233225]]]
+            },
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "properties": {
+              "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
+              "darstatus": 3,
+              "oprettet": "1900-01-01T12:00:00.000Z",
+              "ændret": "1900-01-01T12:00:00.000Z",
+              "navn": "Gl. Assensvej",
+              "adresseringsnavn": "Gl. Assensvej",
+              "administrerendekommunekode": "0420",
+              "administrerendekommunenavn": "Assens",
+              "retskrivningskontrol": "Godkendt",
+              "udtaltvejnavn": "Gl. Assensvej",
+              "beliggenhed_oprindelse_kilde": "Ekstern",
+              "beliggenhed_oprindelse_nøjagtighedsklasse": "B",
+              "beliggenhed_oprindelse_registrering": "2018-05-03T15:57:30.356Z",
+              "beliggenhed_oprindelse_tekniskstandard": "N0",
+              "beliggenhed_geometritype": "vejnavnelinje"
+            }
+          }
+
+        }]
+      }
     }
   };
 
