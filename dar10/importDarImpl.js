@@ -159,8 +159,7 @@ const initDawa = (client, txid) => go(function* () {
  * @param client
  * @param txid
  */
-const updateDawa = (client, txid, nonPublicOverrides) => go(function* () {
-  nonPublicOverrides = nonPublicOverrides || {};
+const updateDawa = (client, txid) => go(function* () {
   yield rematerializeDawa(client,txid);
   yield importDar09Impl.updateSupplerendeBynavne(client);
   yield importDar09Impl.updatePostnumreKommunekoderMat(client);
