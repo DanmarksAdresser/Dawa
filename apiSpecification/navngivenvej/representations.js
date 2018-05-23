@@ -100,9 +100,17 @@ exports.json = {
           geometritype: {
             type: 'string',
             description: 'Anvender typen af geometri for den navngivne vej: "vejnavnelinje" eller "vejn'
+          },
+          vejtilslutningspunkter: {
+            type: ['null', 'object'],
+            description: 'Vejtilslutningspunkter for den navngivne vej',
+            properties: {
+              type: {},
+              coordinates: {}
+            }
           }
         },
-        docOrder: ['oprindelse', 'geometritype']
+        docOrder: ['oprindelse', 'geometritype', 'vejtilslutningspunkter']
       })
     },
     docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'beliggenhed']
@@ -132,6 +140,7 @@ exports.json = {
             registrering: row.beliggenhed_oprindelse_registrering,
             nøjagtighedsklasse: row.beliggenhed_oprindelse_nøjagtighedsklasse
           },
+          vejtilslutningspunkter: row.beliggenhed_vejtilslutningspunkter ? JSON.parse(row.beliggenhed_vejtilslutningspunkter ) : null,
           geometritype: row.beliggenhed_geometritype
         }
       };

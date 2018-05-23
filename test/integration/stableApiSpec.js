@@ -822,7 +822,8 @@ describe('Stable API', () => {
                 "registrering": "2018-05-03T15:57:30.356Z",
                 "nøjagtighedsklasse": "B"
               },
-              "geometritype": "vejnavnelinje"
+              "geometritype": "vejnavnelinje",
+              vejtilslutningspunkter: null
             }
           }
         }],
