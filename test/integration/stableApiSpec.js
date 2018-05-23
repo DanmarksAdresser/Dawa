@@ -794,7 +794,7 @@ describe('Stable API', () => {
           value: {
             "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
             "href": "http://dawa/navngivneveje/1e260555-5c81-434f-af77-1bea6fc4c8a8",
-            "darstatus": 3,
+            "darstatus": "gældende",
             "navn": "Gl. Assensvej",
             "adresseringsnavn": "Gl. Assensvej",
             "administrerendekommune": {
@@ -833,7 +833,7 @@ describe('Stable API', () => {
           },
           value: {
             "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
-            "darstatus": 3,
+            "darstatus": "gældende",
             "oprettet": "1900-01-01T12:00:00.000Z",
             "ændret": "1900-01-01T12:00:00.000Z",
             "navn": "Gl. Assensvej",
@@ -874,7 +874,7 @@ describe('Stable API', () => {
             },
             "properties": {
               "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
-              "darstatus": 3,
+              "darstatus": "gældende",
               "oprettet": "1900-01-01T12:00:00.000Z",
               "ændret": "1900-01-01T12:00:00.000Z",
               "navn": "Gl. Assensvej",

@@ -121,7 +121,7 @@ exports.json = {
       return {
         id: row.id,
         href: makeHref(baseUrl, 'navngivenvej', [row.id]),
-        darstatus: row.darstatus,
+        darstatus: commonMappers.formatDarStatus(row.darstatus),
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
         administrerendekommune: commonMappers.mapKode4NavnTema('kommune', row.administrerendekommunekode, row.administrerendekommunenavn, baseUrl),

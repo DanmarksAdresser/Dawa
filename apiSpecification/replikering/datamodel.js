@@ -317,8 +317,9 @@ module.exports = {
       },
       {
         name: 'darstatus',
-        schema: definitions.Status,
-        description: 'Statuskode. Mulige værdier: 2 (Foreløbig), 3 (Gældende).',
+        type: 'string',
+        schema: definitions.DARStatus,
+        description: 'Den navngivne vejs status i DAR.'
       },
       {
         name: 'oprettet',
@@ -481,6 +482,11 @@ module.exports = {
         schema: definitions.NullableVejnavnForkortet,
         description: 'En evt. forkortet udgave af vejnavnet på højst 20 tegn,' +
         ' som bruges ved adressering på labels og rudekuverter og lign., hvor der ikke plads til det fulde vejnavn.'
+      },
+      {
+        name: 'navngivenvej_id',
+        type: 'uuid',
+        description: 'Den navngivne vej, som vejstykket tilhører'
       }
     ]
   },

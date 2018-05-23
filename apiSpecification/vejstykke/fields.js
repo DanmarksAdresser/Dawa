@@ -30,6 +30,12 @@ var fields = [
   {
     name: 'geom_json',
     selectable: true
+  },
+  {
+    name: 'navngivenvej_id',
+  },
+  {
+    name: 'navngivenvej_darstatus'
   }
 ];
 

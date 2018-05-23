@@ -69,6 +69,12 @@ var columns = {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'vejstykker.geom');
     }
+  },
+  navngivenvej_id: {
+    column: 'vejstykker.navngivenvej_id'
+  },
+  navngivenvej_darstatus: {
+    column: 'nv.darstatus'
   }
 };
 
@@ -121,8 +127,9 @@ var parameterImpls = [
 var baseQuery = function() {
   return {
     select: [],
-    from: ['vejstykker' +
-      " LEFT JOIN kommuner k ON (vejstykker.kommunekode = k.kode)"],
+    from: [`vejstykker
+      LEFT JOIN kommuner k ON (vejstykker.kommunekode = k.kode)
+      LEFT JOIN navngivenvej nv ON vejstykker.navngivenvej_id = nv.id`],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []

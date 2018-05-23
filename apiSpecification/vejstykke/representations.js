@@ -5,6 +5,7 @@ var _ = require('underscore');
 var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 var commonMappers = require('../commonMappers');
+const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
@@ -74,6 +75,22 @@ exports.json = {
         description: 'Kommunen som vejstykket er beliggende i.',
         $ref: '#/definitions/KommuneRef'
       },
+      navngivenvej: schemaObject({
+        description: 'Den navngivne vej, som vejstykket er en del af',
+        properties: {
+          href: {
+            description: 'Den navngivne vejs unikke URL',
+            type: 'string'
+          },
+          id: Object.assign({}, commonSchemaDefinitions.UUID, {
+            description: 'Den navngivne vejs unikke ID (UUID)',
+          }),
+          darstatus: {
+            type: 'integer'
+          }
+        },
+        docOrder: ['href', 'id', 'darstatus']
+      }),
       'postnumre': {
         description: 'Postnummrene som vejstykket er beliggende i.',
         type: 'array',
@@ -88,10 +105,9 @@ exports.json = {
           'ændret': normalizedFieldSchema('ændret')
         },
         docOrder: ['oprettet', 'ændret']
-
       })
     },
-    docOrder: ['href', 'kode', 'navn', 'adresseringsnavn', 'kommune', 'postnumre', 'historik']
+    docOrder: ['href', 'kode', 'navn', 'adresseringsnavn', 'navngivenvej', 'kommune', 'postnumre', 'historik']
   }),
   fields: representationUtil.fieldsWithoutNames(_.where(fields, {'selectable' : true}), ['geom_json']),
   mapper: function(baseUrl) {
@@ -101,6 +117,11 @@ exports.json = {
         kode: kode4String(row.kode),
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
+        navngivenvej: {
+          href: makeHref(baseUrl, 'navngivenvej', [row.navngivenvej_id]),
+          id: row.navngivenvej_id,
+          darstatus: row.navngivenvej_darstatus
+        },
         kommune: mapKommuneRef({ kode: row.kommunekode, navn: row.kommunenavn}, baseUrl),
         postnumre: mapPostnummerRefArray(row.postnumre || [], baseUrl),
         historik: {

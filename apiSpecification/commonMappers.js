@@ -99,3 +99,18 @@ exports.mapPostnummerRef = function(dbJson, baseUrl) {
   }
   return null;
 };
+
+exports.formatDarStatus = darstatus => {
+  switch(darstatus) {
+    case 1 : return "intern forberedelse";
+    case 2 : return "foreløbig";
+    case 3 : return "gældende";
+    case 4 : return "nedlagt";
+    case 5 : return "henlagt";
+    case 6 : return "slettet";
+    case 7 : return "ikke i brug";
+    case 8 : return "i brug";
+    case 9 : return "udgået";
+    default: return null;
+  }
+};

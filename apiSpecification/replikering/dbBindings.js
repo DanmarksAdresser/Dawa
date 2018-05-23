@@ -4,6 +4,7 @@ const datamodels = require("./datamodel");
 const {selectIsoDate: selectLocalDateTime, selectIsoDateUtc: selectIsoTimestampUtc} = require('../common/sql/sqlUtil');
 const temaModels = require('../../dagiImport/temaModels');
 const darReplikeringModels = require('../../dar10/replikeringModels');
+const {formatDarStatus } = require('../../apiSpecification/commonMappers');
 
 const normalizeAttr = (attrName, bindingAttr) =>
   Object.assign(
@@ -141,6 +142,9 @@ const unnormalizedBindings = {
     table: 'navngivenvej',
     legacyResource: false,
     attributes: {
+      darstatus: {
+        formatter: formatDarStatus
+      },
       oprettet: {
         formatter: timestampFormatter,
         selectTransform: selectIsoTimestampUtc

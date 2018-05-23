@@ -14,7 +14,12 @@ exports.nullableType = function(type) {
 
 exports.nullable = function(schemaType) {
   var result = _.clone(schemaType);
-  result.type = exports.nullableType(schemaType.type);
+  if(result.enum) {
+    result.enum = [...result.enum, null];
+  }
+  else {
+    result.type = exports.nullableType(schemaType.type);
+  }
   return result;
 };
 

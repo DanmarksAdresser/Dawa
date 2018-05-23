@@ -150,6 +150,9 @@ const definitions = {
     postgresql: 'INTEGER',
     type: 'integer'
   },
+  'DARStatus': {
+    enum: ["intern forberedelse", "foreløbig", "gældende", "nedlagt", "henlagt", "slettet", "ikke i brug", "i brug", "udgået"]
+  },
   GeoJsonCoordinates: {
     type: 'array',
     items: {
