@@ -1,5 +1,6 @@
 "use strict";
 
+const fs = require('fs');
 const {go} = require('ts-csp');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const proddb = require('./proddb');
@@ -14,6 +15,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     pooled: false
   });
   proddb.withTransaction('READ_WRITE', (client) => go(function* () {
+    yield client.query(fs.readFileSync('psql/schema/tables/navngivenvej.sql', {encoding: 'utf8'}));
     yield client.query(`
     DROP VIEW IF EXISTS adgangsadresserview cascade;
 DROP VIEW  IF EXISTS adresser cascade;
