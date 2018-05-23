@@ -168,17 +168,9 @@ const recomputeTemaTilknytninger = (client, txid, temaModelList) => go(function*
 });
 
 const recomputeMaterializedDawa = (client, txid) => go(function* () {
-  for (let table of ['adgangsadresser_mat', 'adresser_mat']) {
-    const model = schemaModel.materializations[table];
-    if (!model) {
-      throw new Error('No table model for ' + schemaModel);
-    }
-    yield client.query(`delete from ${table}; delete from ${table}_changes`);
-    yield initializeFromScratch(client, txid, model.view, schemaModel.tables[table]);
+  for (let table of ['adgangsadresser_mat', 'adresser_mat', 'jordstykker_adgadr', 'stedtilknytninger', 'ikke_brofaste_adresser']) {
+    yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations[table]);
   }
-  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
-  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.stedtilknytninger);
-  yield recomputeMaterialization(client, txid, schemaModel.tables, schemaModel.materializations.ikke_brofaste_adresser);
   yield recomputeTemaTilknytninger(client, txid, temaModels.modelList);
 });
 
