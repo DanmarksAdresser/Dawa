@@ -20,7 +20,7 @@ CREATE VIEW dar1_enhedsadresser_view AS
     lower(adr.etagebetegnelse)              AS etage,
     lower(adr.dørbetegnelse)                AS doer
   FROM dar1_adresse_current adr
-    JOIN dar1_husnummer_current hn ON adr.husnummer_id = hn.id AND dar1_status_til_dawa_status(hn.status) IN (1, 3)
+    JOIN adgangsadresser adgadr ON adr.husnummer_id = adgadr.id AND adgadr.status IN (1, 3)
   WHERE dar1_status_til_dawa_status(adr.status) IN (1, 3);
 
 DROP VIEW IF EXISTS dar1_enhedsadresser_dirty_view CASCADE;
