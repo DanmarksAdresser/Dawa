@@ -109,7 +109,8 @@ const adgangsadresser = {
   }, {
     name: 'tekniskstandard'
   }, {
-    name: 'tekstretning'
+    name: 'tekstretning',
+    distinctClause: (a,b) => `${a}::numeric(5,2) IS DISTINCT FROM ${b}::numeric(5,2)`
   }, {
     name: 'adressepunktaendringsdato'
   }, {
