@@ -105,7 +105,7 @@ const initializeDar10HistoryTables = (client, txid) => go(function*() {
   }
 });
 
-const importInitial = (client, txid, dataDir, skipDawa, noEvents) => go(function* () {
+const importInitial = (client, txid, dataDir, skipDawa) => go(function* () {
   yield setInitialMeta(client);
   yield withDar1Transaction(client, 'initial', () => go(function* () {
     for (let entityName of ALL_DAR_ENTITIES) {
@@ -177,7 +177,16 @@ function copyDumpToTables(client, dataDir) {
       const tableName = dar10TableModels.rawTableModels[entityName].table;
       const fetchTable = `fetch_${tableName}`;
       yield createFetchTable(client, tableName);
+      // Workaround for NavngivenVej:
+      // Nogle navngivne veje kommer med z-koordinat for vejnavnelinjen. Det håndterer postgis
+      // ikke i kolonner med SRID constraint. Derfor konverterer vi dem til 2D efter indlæsningen
+      if(entityName === 'NavngivenVej') {
+        yield client.query(`alter ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry`);
+      }
       yield streamToTable(client, entityName, filePath, fetchTable, true);
+      if(entityName === 'NavngivenVej') {
+        yield client.query(`update ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry(geometry, 25832) USING st_setsrid(st_force2d(vejnavnebeliggenhed_vejnavnelinje), 25832)`);
+      }
     }
   })()
 }
