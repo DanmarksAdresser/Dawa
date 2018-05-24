@@ -42,8 +42,8 @@ CREATE VIEW dar1_adgangsadresser_view AS
              aa_old.adgangspunktkilde)                              AS adgangspunktkilde,
     coalesce(ap.oprindelse_tekniskstandard,
              aa_old.tekniskstandard)                                AS tekniskstandard,
-    coalesce((round((atan(ST_Y(hn.husnummerretning) / ST_X(hn.husnummerretning)) *
-                     400 / (2 * pi())) :: NUMERIC, 2) + 200) % 400,
+    coalesce(((atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
+                     400 / (2 * pi())) :: NUMERIC(5,2) + 300) % 200 + 100,
              aa_old.tekstretning)                                   AS tekstretning,
     coalesce(ap.oprindelse_registrering AT TIME ZONE
              'Europe/Copenhagen', aa_old.adressepunktaendringsdato) AS adressepunktaendringsdato,
