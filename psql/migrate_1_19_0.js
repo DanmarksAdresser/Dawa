@@ -8,6 +8,9 @@ const proddb = require('./proddb');
 const {createChangeTable} = require('../importUtil/tableDiffNg');
 const tableSchema = require('./tableModel');
 const { materializeFromScratch } = require('../importUtil/materialize');
+const { reloadDatabaseCode } = require('./initialization');
+const {withImportTransaction} = require('../importUtil/importUtil');
+
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
 };
@@ -76,7 +79,9 @@ FROM mostRecent a WHERE c.id = a.id AND c.txid IS NOT DISTINCT FROM a.txid AND c
     yield client.query(fs.readFileSync('psql/schema/tables/vejpunkter.sql', {encoding: 'utf8'}));
     yield createChangeTable(client, tableSchema.tables.navngivenvej);
     yield createChangeTable(client, tableSchema.tables.vejpunkter);
-    yield materializeFromScratch(tableSchema.materializations.vejpunkter);
+    yield reloadDatabaseCode(client, 'psql/schema');
+    yield withImportTransaction(client, 'migrate_1_19_0', txid =>
+      materializeFromScratch(client, txid, tableSchema.tables, tableSchema.materializations.vejpunkter));
   }));
 });
 
