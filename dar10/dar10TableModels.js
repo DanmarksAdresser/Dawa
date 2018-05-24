@@ -295,7 +295,7 @@ const vejpunktMaterialization = {
       columns: ['id']
     },
     {
-      table: 'dar1_Husnummer_current',
+      table: 'adgangsadresser',
       columns: ['husnummerid']
     }
   ]

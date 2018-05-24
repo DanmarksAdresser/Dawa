@@ -178,6 +178,19 @@ const unnormalizedBindings = {
       }
     }
   },
+  vejpunkt: {
+    table: 'vejpunkter',
+    attributes: {
+      nøjagtighedsklasse: {
+        column: 'noejagtighedsklasse'
+      },
+      position: {
+        column: 'geom',
+        selectTransform: col => `ST_AsGeoJSON(${col})`,
+        formatter: JSON.parse
+      }
+    }
+  },
   vejstykke: {
     path: '/replikering/vejstykker',
     table: 'vejstykker',

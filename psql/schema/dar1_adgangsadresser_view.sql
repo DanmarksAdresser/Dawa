@@ -24,6 +24,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
                                                                FROM dar1_meta)))
                                                                     AS aendret,
     hn.adgangspunkt_id                                              AS adgangspunktid,
+    hn.vejpunkt_id,
     coalesce(ST_X(ap.position),
              aa_old.etrs89oest)                                     AS etrs89oest,
     coalesce(ST_Y(ap.position),
@@ -43,7 +44,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
     coalesce(ap.oprindelse_tekniskstandard,
              aa_old.tekniskstandard)                                AS tekniskstandard,
     coalesce(((atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
-                     400 / (2 * pi())) :: NUMERIC(5,2) + 300) % 200 + 100,
+               400 / (2 * pi())) :: NUMERIC(5, 2) + 300) % 200 + 100,
              aa_old.tekstretning)                                   AS tekstretning,
     coalesce(ap.oprindelse_registrering AT TIME ZONE
              'Europe/Copenhagen', aa_old.adressepunktaendringsdato) AS adressepunktaendringsdato,

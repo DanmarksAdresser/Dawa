@@ -203,6 +203,12 @@ module.exports = {
         type: 'string',
         nullable: true,
         description: 'DAGI ID på det supplerende bynavn, som adgangsadressen ligger i.'
+      },
+      {
+        name: 'vejpunkt_id',
+        type: 'uuid',
+        nullable: true,
+        description: 'Vejpunktets unikke ID.'
       }
     ]
   },
@@ -438,6 +444,37 @@ module.exports = {
       type: 'uuid',
       description: 'adgangsadressens ID'
     }]
+  },
+  vejpunkt: {
+    key: ['id'],
+    attributes: [
+      {
+        name: 'id',
+        type: 'uuid',
+        description: 'Vejpunktets unikke ID.',
+      },
+      {
+        name: 'kilde',
+        type: 'string',
+        description: 'Vejpunktets kilde.'
+      },
+      {
+        name: 'tekniskstandard',
+        type: 'string',
+        description: 'Vejpunktets tekniske standard.'
+      },
+      {
+        name: 'nøjagtighedsklasse',
+        type: 'string',
+        description: 'Vejpunktets nøjagtighedsklasse.'
+      },
+      {
+        name: 'position',
+        type: 'geometry',
+        description: 'Vejpunktets position.'
+      },
+
+    ]
   },
   vejstykke: {
     key: ['kommunekode', 'kode'],

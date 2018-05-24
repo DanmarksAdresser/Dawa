@@ -50,4 +50,4 @@ CREATE VIEW adgangsadresser_mat_view AS
     LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
     LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
   LEFT JOIN stormodtagere AS S ON A.id = S.adgangsadresseid
-LEFT JOIN vejpunkter vp ON A.id = vp.husnummerid;
+LEFT JOIN vejpunkter vp ON vp.id = A.vejpunkt_id;

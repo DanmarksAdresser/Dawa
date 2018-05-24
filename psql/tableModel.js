@@ -134,6 +134,8 @@ const adgangsadresser = {
   }, {
     name: 'adressepunkt_id'
   }, {
+    name: 'vejpunkt_id'
+  }, {
     name: 'postnummer_id'
   }, {
     name: 'supplerendebynavn_dagi_id'
@@ -345,7 +347,6 @@ const adgangsadresser_mat = {
     {name: 'postnrnavn'},
     {name: 'stormodtagerpostnr'},
     {name: 'stormodtagerpostnrnavn'},
-    {name: 'vejpunkt_id'},
     {name: 'vejpunkt_kilde'},
     {name: 'vejpunkt_noejagtighedsklasse'},
     {name: 'vejpunkt_tekniskstandard'},

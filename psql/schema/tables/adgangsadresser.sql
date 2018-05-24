@@ -36,7 +36,8 @@ CREATE TABLE  adgangsadresser (
   darkommuneinddeling_id uuid,
   adressepunkt_id uuid,
   postnummer_id uuid,
-  supplerendebynavn_dagi_id integer
+  supplerendebynavn_dagi_id integer,
+  vejpunkt_id UUID
 );
 
 CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
@@ -47,6 +48,7 @@ CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id);
 CREATE INDEX ON adgangsadresser(supplerendebynavn_id);
 CREATE INDEX ON adgangsadresser(darkommuneinddeling_id);
 CREATE INDEX ON adgangsadresser(adressepunkt_id);
+CREATE INDEX ON adgangsadresser(vejpunkt_id);
 CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);
 
 -- Index for lookup of adgangsadresser where we need to fetch the height
