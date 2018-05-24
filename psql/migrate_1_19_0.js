@@ -10,7 +10,7 @@ const tableSchema = require('./tableModel');
 const { materializeFromScratch } = require('../importUtil/materialize');
 const { reloadDatabaseCode } = require('./initialization');
 const {withImportTransaction} = require('../importUtil/importUtil');
-
+const dar10TableModels = require('../dar10/dar10TableModels');
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
 };
@@ -81,7 +81,7 @@ FROM mostRecent a WHERE c.id = a.id AND c.txid IS NOT DISTINCT FROM a.txid AND c
     yield createChangeTable(client, tableSchema.tables.vejpunkter);
     yield reloadDatabaseCode(client, 'psql/schema');
     yield withImportTransaction(client, 'migrate_1_19_0', txid =>
-      materializeFromScratch(client, txid, tableSchema.tables, tableSchema.materializations.vejpunkter));
-  }));
+      materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.vejpunkt));
+  })).done();
 });
 
