@@ -63,17 +63,29 @@ function getRows(darClient, currentEventIds, targetEventIds) {
     return result;
   })();
 }
+function txTimestamp(row) {
+  if (row.registreringtil) {
+    return row.registreringtil;
+  }
+  else {
+    return row.registreringfra;
+  }
+}
 
-
-function splitInTransactions(rowMap) {
-  function txTimestamp(row) {
-    if (row.registreringtil) {
-      return row.registreringtil;
-    }
-    else {
-      return row.registreringfra;
+const getImportDelay = (changeset) => {
+  let firstRegistrering = moment();
+  console.dir(firstRegistrering.toISOString())
+  const allRows = _.flatten(Object.values(changeset), true);
+  for(let row of allRows) {
+    const ts = moment(txTimestamp(row));
+    if(ts.isBefore(firstRegistrering)) {
+      firstRegistrering = ts;
     }
   }
+  return moment().diff(firstRegistrering, 'seconds', true);
+}
+
+function splitInTransactions(rowMap) {
 
   const uniqueTransactionTimestamps = _.uniq(_.flatten(_.values(rowMap)).map(txTimestamp)
     .sort((a, b) => Date.parse(a) - Date.parse(b)), true);
@@ -139,12 +151,14 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTran
         });
         yield importDarImpl.withDar1Transaction(client, 'api', () =>go(function*() {
           const before = Date.now();
-          const result = yield withImportTransaction(client, 'importDarApi', (txid) =>
-            importDarImpl.importChangeset(client, txid, transaction, false, virkningTime));
+          const result = yield withImportTransaction(client, 'importDarApi', (txid) => go(function*() {
+            yield importDarImpl.importChangeset(client, txid, transaction, false, virkningTime);
+          }));
           const after = Date.now();
           logger.info("Imported Transaction", {
             duration: after - before,
-            totalRowCount
+            totalRowCount,
+            delay: getImportDelay(transaction)
           });
           return result;
         }));
