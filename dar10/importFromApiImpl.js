@@ -74,7 +74,6 @@ function txTimestamp(row) {
 
 const getImportDelay = (changeset) => {
   let firstRegistrering = moment();
-  console.dir(firstRegistrering.toISOString())
   const allRows = _.flatten(Object.values(changeset), true);
   for(let row of allRows) {
     const ts = moment(txTimestamp(row));
