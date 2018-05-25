@@ -5,8 +5,6 @@
 
 const expect = require('chai').expect;
 const q = require('q');
-// const Readable = require('stream').Readable;
-// const WKT = require('terraformer-wkt-parser');
 const _ = require('underscore');
 const {go} = require('ts-csp');
 const {withImportTransaction} = require('../../importUtil/importUtil');
@@ -19,9 +17,6 @@ require('../../apiSpecification/allSpecs');
 
 const Husnr = require('../../psql/databaseTypes').Husnr;
 const testdb = require('../helpers/testdb2');
-// const flats = require('../../apiSpecification/flats/flats');
-// const flatTilknytninger = require('../../apiSpecification/flats/tilknytninger/tilknytninger');
-// const importJordstykkerImpl = require('../../matrikeldata/importJordstykkerImpl');
 const temaModels = require('../../dagiImport/temaModels');
 const {importSingleTema} = require('../../dagiImport/importDagiImpl');
 
@@ -80,8 +75,6 @@ const adgangsadresser = [
 
 const coordinatesContainingFirstAddress = '((530000 6100000,530000 6300000,550000 6300000,550000 6100000,530000 6100000))';
 const coordinatesContainingSecondAddress = '((550000 6100000,550000 6300000,570000 6300000,570000 6100000,550000 6100000))';
-// const polygonContainingFirstAddress = `POLYGON${coordinatesContainingFirstAddress}`;
-// const polygonContainingSecondAddress = `POLYGON${coordinatesContainingSecondAddress}`;
 const multiContainingFirst = `SRID=25832;MULTIPOLYGON(${coordinatesContainingFirstAddress})`;
 const multiContainingSecond = `SRID=25832;MULTIPOLYGON(${coordinatesContainingSecondAddress})`;
 
@@ -97,69 +90,6 @@ const temaObjects = {
   retskreds: [{dagi_id: 13, "kode": 99, "navn": "Retskreds 1"}, {dagi_id: 14, kode: 100, navn: "Retskreds 2"}]
 };
 
-// const bebyggelseJsonContainingFirstAddress = {
-//   "name": "Bebyggelse", "type": "FeatureCollection"
-//   , "crs": {"type": "name", "properties": {"name": "EPSG:25832"}}
-//   , "features": [
-//     {
-//       "type": "Feature",
-//       "geometry": WKT.parse(polygonContainingFirstAddress),
-//       "properties": {
-//         "OBJECTID": 145053,
-//         "ID_LOKALID": "12337669-a241-6b98-e053-d480220a5a3f",
-//         "REGISTRERINGFRA": "2015-03-26T16:33:21",
-//         "SKRIVEMAADE": "Sønderhede",
-//         "BEBYGGELSESTYPE": "spredtBebyggelse",
-//         "BEBYGGELSESKODE": null,
-//         "AREAL": 821951,
-//         "DANMARKSSTATISTIK": "ukendt"
-//       }
-//     }]
-// };
-// const bebyggelseJsonContainingSecondAdresses = (() => {
-//   const json = JSON.parse(JSON.stringify(bebyggelseJsonContainingFirstAddress));
-//   json.features[0].geometry = WKT.parse(polygonContainingSecondAddress);
-//   return json;
-// })();
-//
-// function asTextStream(json) {
-//   const s = new Readable();
-//   s.push(JSON.stringify(json));
-//   s.push(null);
-//   return s;
-// }
-
-// const importEjerlav = (client, dir, file, initial, skipModificationCheck) => go(function* () {
-//   yield importJordstykkerImpl.importEjerlav(client, dir, file, initial, skipModificationCheck);
-//
-//   yield withImportTransaction(client, 'importJordstykker', txid =>
-//     importing.updateAdgangsadresserRelationNg(client, txid, 'jordstykke'));
-// });
-
-// const loadFlatFns = {
-//   bebyggelse: {
-//     load1: (client) =>
-//       importBebyggelserImpl.importBebyggelserFromStream(
-//         client,
-//         asTextStream(bebyggelseJsonContainingFirstAddress), true, false)
-//     ,
-//     load2: (client) =>
-//       importBebyggelserImpl.importBebyggelserFromStream(
-//         client,
-//         asTextStream(bebyggelseJsonContainingSecondAdresses), false, false)
-//
-//   },
-//   jordstykke: {
-//     load1: client => importEjerlav(client, __dirname, '60851_testmatrikel1.gml.zip', true),
-//     load2: client =>
-//       importEjerlav(client, __dirname, '60851_testmatrikel2.gml.zip', false, true),
-//     loadOverlappende: client =>
-//       importEjerlav(client, __dirname, '60851_overlappende.gml.zip', true),
-//     updateOverlappende: client =>
-//       importEjerlav(client, __dirname, '60851_overlappende.gml.zip', false)
-//   }
-// };
-
 // how we expect the keys to be formatted when returned
 const expectedKeys = {
   zone: [['Byzone'], ['Sommerhusområde']],
@@ -172,31 +102,6 @@ const expectedKeys = {
   retskreds: [['0099'], ['0100']]
 };
 
-// const expectedFlatResults1 = {
-//   bebyggelse: [{
-//     adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb3546800',
-//     bebyggelsesid: '12337669-a241-6b98-e053-d480220a5a3f'
-//   }],
-//   jordstykke: [{
-//     adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb3546800',
-//     ejerlavkode: 60851,
-//     matrikelnr: '2c'
-//   }]
-// };
-//
-// const expectedFlatResults2 = {
-//   bebyggelse: [{
-//     adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb354680f',
-//     bebyggelsesid: '12337669-a241-6b98-e053-d480220a5a3f'
-//   }],
-//   jordstykke: [{
-//     adgangsadresseid: '038edf0e-001b-4d9d-a1c7-b71cb354680f',
-//     ejerlavkode: 60851,
-//     matrikelnr: '2c'
-//   }]
-// };
-
-
 const loadAdresse = (client, adgangsadresse) => go(function* () {
   yield withImportTransaction(client, 'test', txid => go(function* () {
     const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
@@ -205,85 +110,6 @@ const loadAdresse = (client, adgangsadresse) => go(function* () {
     yield materializeDawa(client, txid);
   }));
 });
-
-// const updateAdresse = (client, adgangsadresse) => go(function* () {
-//   yield withImportTransaction(client, 'test', txid => go(function* () {
-//     const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
-//     yield tableDiffNg.update(client, txid, schemaModel.tables.adgangsadresser, sqlObject);
-//     yield doDawaChanges(client, txid);
-//     yield materializeDawa(client, txid);
-//   }));
-// });
-//
-// const deleteAdresse = (client, adgangsadresse) => go(function* () {
-//   yield withImportTransaction(client, 'test', txid => go(function* () {
-//     const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
-//     yield tableDiffNg.del(client, txid, schemaModel.tables.adgangsadresser, sqlObject);
-//     yield doDawaChanges(client, txid);
-//     yield materializeDawa(client, txid);
-//   }));
-// });
-
-// describe('Opdatering af tilknytninger', function () {
-//   testdb.withTransactionAll('empty', function (clientFn) {
-//     it('Når en adresse oprettes, skal jordstykket tilknyttes adressen', q.async(function* () {
-//       const client = clientFn();
-//       yield loadFlatFns.jordstykke.load1(client);
-//       yield loadAdresse(client, adgangsadresser[0]);
-//
-//       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
-//       expect(result).to.have.length(1);
-//       expect(result[0].adgangsadresse_id).to.equal(adgangsadresser[0].id);
-//       expect(result[0].ejerlavkode).to.equal(60851);
-//       expect(result[0].matrikelnr).to.equal('2c');
-//     }));
-//
-//     it('Når adressen flytter udenfor jordstykket slettes tilknytningen', q.async(function* () {
-//       const client = clientFn();
-//       const adresseUdenfor = Object.assign({}, adgangsadresser[0], {"etrs89koordinat_nord": 6500000.00});
-//       yield updateAdresse(client, adresseUdenfor);
-//       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
-//       expect(result).to.have.length(0);
-//     }));
-//
-//     it('Når adressen flytter indenfor oprettes tilknytningen igen', q.async(function* () {
-//       const client = clientFn();
-//       yield updateAdresse(client, adgangsadresser[0]);
-//       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
-//       expect(result).to.have.length(1);
-//       expect(result[0].adgangsadresse_id).to.equal(adgangsadresser[0].id);
-//       expect(result[0].ejerlavkode).to.equal(60851);
-//       expect(result[0].matrikelnr).to.equal('2c');
-//     }));
-//
-//     it('Når adressen slettes fjernes tilknytingen', q.async(function* () {
-//       const client = clientFn();
-//       yield deleteAdresse(client, adgangsadresser[0]);
-//       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
-//       expect(result).to.have.length(0);
-//     }));
-//   });
-// });
-//
-// describe('Håndtering af overlappende jordstykker)', () => {
-//   testdb.withTransactionEach('empty', clientFn => {
-//     it('Hvis en adresse oprettes oven på to overlappende jordstykker skal kun et jordstykke tilknyttes', q.async(function* () {
-//       const client = clientFn();
-//       yield loadFlatFns.jordstykke.loadOverlappende(client);
-//       yield loadAdresse(client, adgangsadresser[0]);
-//       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
-//       expect(result).to.have.length(1);
-//     }));
-//
-//     it('Hvis overlappende jordstykker indlæses tilknyttes eksisterende adresse kun til en', q.async(function* () {
-//       const client = clientFn();
-//       yield loadAdresse(client, adgangsadresser[0]);
-//       yield loadFlatFns.jordstykke.updateOverlappende(client);
-//       const result = (yield client.queryp('select * from jordstykker_adgadr')).rows;
-//       expect(result).to.have.length(1);
-//     }));
-//   });
-// });
 
 describe('Replikering af tilknytninger', function () {
   testdb.withTransactionEach('empty', function (clientFn) {
@@ -364,43 +190,5 @@ describe('Replikering af tilknytninger', function () {
         expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).to.be.true;
       }));
     });
-
-    // describe('Replikering af flat-tilknytninger', () => {
-    //   Object.keys(flatTilknytninger).forEach(flatName => {
-    //     const flat = flats[flatName];
-    //     const tilknytningName = flat.prefix + 'tilknytning';
-    //     const udtraekResource = registry.findWhere({
-    //       entityName: tilknytningName,
-    //       type: 'resource',
-    //       qualifier: 'udtraek'
-    //     });
-    //     const eventResource = registry.findWhere({
-    //       entityName: tilknytningName,
-    //       type: 'resource',
-    //       qualifier: 'hændelser'
-    //     });
-    //
-    //     it('Skal replikere adgangsadressetilknytninger for ' + flatName, q.async(function* () {
-    //       const client = clientFn();
-    //       yield loadFlatFns[flatName].load1(client);
-    //       let jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});
-    //       expect(jsonResult).to.deep.equal(expectedFlatResults1[flatName]);
-    //       yield loadFlatFns[flatName].load2(client);
-    //       jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});
-    //       expect(jsonResult).to.deep.equal(expectedFlatResults2[flatName]);
-    //       const tilknytningName = flat.prefix + 'tilknytning';
-    //       const eventRepresentation = registry.findWhere({
-    //         entityName: tilknytningName + '_hændelse',
-    //         type: 'representation',
-    //         qualifier: 'json'
-    //       });
-    //       const eventSchema = eventRepresentation.schema;
-    //       const eventResult = yield helpers.getJson(client, eventResource, {}, {});
-    //       expect(schemaValidationUtil.isSchemaValid(eventResult[0], eventSchema)).to.be.true;
-    //       expect(schemaValidationUtil.isSchemaValid(eventResult[1], eventSchema)).to.be.true;
-    //     }));
-    //
-    //   });
-    // });
   });
 });

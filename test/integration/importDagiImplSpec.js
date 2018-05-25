@@ -10,6 +10,21 @@ const path = require('path');
 
 const datetimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,3}Z$/;
 describe('Import af DAGI temaer', () => {
+  testdb.withTransactionEach('test', clientFn => {
+    it('Import afvises hvis der er for mange ændringer', () => go(function* () {
+      const client = clientFn();
+      const doImport =
+        maxChanges => withImportTransaction(client, 'dagiToDb', (txid) => importDagiImpl.importTemaerWfsMulti(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', maxChanges));
+      try {
+        yield doImport(1);
+        throw new Error('Did not fail');
+      }
+      catch (e) {
+        assert.instanceOf(e, Error);
+        assert.strictEqual(e.message, 'Too Many Changes');
+      }
+    }));
+  });
   testdb.withTransactionAll('empty', clientFn => {
     let initialGeom;
     it('Kan importere afstemningsområde', () => go(function*(){

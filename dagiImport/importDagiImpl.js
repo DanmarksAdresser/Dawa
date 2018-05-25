@@ -163,6 +163,19 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     .length > 0;
   if(hasTilknytninger) {
     yield recomputeTemaTilknytninger(client, txid, temaNames.map(temaName => temaModels.modelMap[temaName]));
+    for(let temaName of temaNames) {
+      const temaModel = temaModels.modelMap[temaName];
+      if(maxChanges) {
+        const changes = (yield client.queryRows(`SELECT COUNT(*)::INTEGER as c FROM ${temaModel.tilknytningTable}_changes WHERE txid = ${txid}`))[0].c;
+        if(changes > maxChanges) {
+          throw new Error("Too Many Changes", {
+            temaName,
+            changes,
+            maxChanges
+          });
+        }
+      }
+    }
   }
   yield client.query(`DELETE FROM tilknytninger_mat_changes`);
 });
