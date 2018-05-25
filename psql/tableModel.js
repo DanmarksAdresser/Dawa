@@ -219,6 +219,13 @@ const navngivenvej = {
     {
       name: 'beliggenhed_vejtilslutningspunkter',
       distinctClause: geomDistinctClause
+    },
+    {
+      name: 'tsv',
+      public: false,
+      derive: (table) => {
+        return `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`;
+      }
     }
   ]
 };

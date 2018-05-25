@@ -82,6 +82,7 @@ FROM mostRecent a WHERE c.id = a.id AND c.txid IS NOT DISTINCT FROM a.txid AND c
     yield reloadDatabaseCode(client, 'psql/schema');
     yield withImportTransaction(client, 'migrate_1_19_0', txid =>
       materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.vejpunkt));
+    yield client.query('analyze');
   })).done();
 });
 

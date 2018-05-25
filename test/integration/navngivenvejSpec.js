@@ -18,6 +18,16 @@ describe('NavngivenVej API', () => {
       qualifier: 'getByKey'
     });
 
+    const queryResource = registry.get({
+      entityName: 'navngivenvej',
+      type: 'resource',
+      qualifier: 'query'
+    });
+    const autocompleteResource = registry.get({
+      entityName: 'navngivenvej',
+      type: 'resource',
+      qualifier: 'autocomplete'
+    });
     it('Hvis jeg henter en navngivenvej med område i stedet for linje, så får jeg null tilbage i geometri-feltet', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), getByKeyResource, {id: ID_OMRÅDE}, {
         format: 'geojson'
@@ -32,6 +42,35 @@ describe('NavngivenVej API', () => {
         geometri: 'vejnavneområde'
       });
       assert.isNotNull(result.geometry);
+    }));
+
+    it(`Kan søge efter navngiven vej`, () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), queryResource, {}, {
+        q: 'engvangsv*'
+      });
+      assert.strictEqual(result.length, 1);
+      assert.strictEqual(result[0].navn, 'Engvangsvej');
+    }));
+
+    it(`Kan lave fuzzy søgning efter navngiven vej`, () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), queryResource, {}, {
+        q: 'envangsvej',
+        fuzzy: ''
+      });
+      assert.strictEqual(result[0].navn, 'Engvangsvej');
+    }));
+    it(`Kan autocomplete navngiven vej`, () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), autocompleteResource, {}, {
+        q: 'engvangsv'
+      });
+      assert.strictEqual(result[0].tekst, 'Engvangsvej');
+    }));
+    it(`Kan fuzzy autocomplete navngiven vej`, () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), autocompleteResource, {}, {
+        q: 'envangsv',
+        fuzzy: ''
+      });
+      assert.strictEqual(result[0].tekst, 'Engvangsvej');
     }));
   });
 });

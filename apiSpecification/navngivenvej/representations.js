@@ -148,6 +148,52 @@ exports.json = {
   }
 };
 
+const autocompleteFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn']
+
+const autocompleteFields = fields.filter(field => autocompleteFieldNames.includes(field.name));
+
+exports.autocomplete = {
+  schema: globalSchemaObject( {
+    properties: {
+      tekst: {
+        description: 'Navnet på den navngivne vej',
+        type: 'string'
+      },
+      navngivenvej: schemaObject({
+        description: 'Link og basale data for den navngivne vej',
+        properties: {
+          'href': {
+            description: 'Den navngivne vejs unikke URL.',
+            $ref: '#/definitions/Href'
+          },
+          'id': normalizedFieldSchema('id'),
+          'darstatus': normalizedFieldSchema('darstatus'),
+          'navn': normalizedFieldSchema('navn'),
+          'adresseringsnavn': normalizedFieldSchema('adresseringsnavn'),
+        },
+        docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn']
+      })
+    },
+    docOrder: ['tekst', 'navngivenvej']
+  }),
+  fields: autocompleteFields,
+  mapper: function (baseUrl, params) {
+    return function(row) {
+      return {
+        tekst: row.navn,
+        navngivenvej: {
+          href: makeHref(baseUrl, 'navngivenvej', [row.id]),
+          id: row.id,
+          darstatus: commonMappers.formatDarStatus(row.darstatus),
+          navn: row.navn,
+          adresseringsnavn: row.adresseringsnavn
+        }
+      };
+    };
+  }
+};
+
+
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
 exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
