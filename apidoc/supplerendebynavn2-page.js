@@ -1,27 +1,25 @@
 module.exports = {
-  entity: 'supplerendebynavn',
+  entity: 'supplerendebynavn2',
   heading: 'Supplerende bynavne',
-  lead: `
-<p>DEPRECATED: Der er udgivet et nyt API for supplerende bynavne: <a href="/dok/api/supplerendebynavn2">supplerendebynavn2</a>.</p>
-<p>API'et udstiller Danmarks supplerende bynavne samt tilhørende funktionalitet.</p>`,
+  lead: `API'et udstiller Danmarks supplerende bynavne samt tilhørende funktionalitet.`,
   sections: [
     {
       type: 'endpoint',
       heading: 'Supplerende bynavnesøgning',
       anchor: 'søgning',
-      path: '/supplerendebynavne'
+      path: '/supplerendebynavne2'
     },
     {
       type: 'endpoint',
       heading: 'Supplerende bynavnopslag',
       anchor: 'opslag',
-      path: '/supplerendebynavne/{navn}'
+      path: '/supplerendebynavne2/{dagi_id}'
     },
     {
       type: 'endpoint',
       heading: 'Supplerende bynavn autocomplete',
       anchor: 'autocomplete',
-      path: '/supplerendebynavne/autocomplete'
+      path: '/supplerendebynavne2/autocomplete'
     },
     {
       type: 'datadescription',
@@ -29,7 +27,7 @@ module.exports = {
       anchor: 'databeskrivelse',
       lead: `<p>Ovenstående Web API udstiller supplerende bynavne. Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn der er fastsat af kommunen for at præcisere adressens beliggenhed indenfor postnummeret. Indgår som en del af den officielle adressebetegnelse. Indtil 34 tegn. Eksempel: ”Sønderholm”.</p>
 <p>API'et udstiller for hver supplerende bynavn følgende informationer:</p>`,
-      entity: 'supplerendebynavn-old',
+      entity: 'supplerendebynavn',
       qualifier: 'json'
     }
   ]

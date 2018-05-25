@@ -281,7 +281,7 @@ const supplerendebynavnRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.supplerendebynavn, ['geom_json']);
   const mapper = baseUrl => row => {
     const result = {
-      href: makeHref(baseUrl, 'supplerendebynavn', [row.dagi_id]),
+      href: makeHrefFromPath(baseUrl, 'supplerendebynavne2', [row.dagi_id]),
       dagi_id: numberToString(row.dagi_id),
       ændret: row.ændret,
       geo_version: row.geo_version,

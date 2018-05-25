@@ -237,7 +237,7 @@ describe('Stable API', () => {
             dagi_id: "100116"
           },
           value: {
-            "href": "http://dawa/supplerendebynavne/100116",
+            "href": "http://dawa/supplerendebynavne2/100116",
             "dagi_id": "100116",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,

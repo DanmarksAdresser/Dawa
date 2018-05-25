@@ -25,6 +25,7 @@ module.exports = [
   require('./stednavntype-page'),
   require('./storkreds-page'),
   require('./supplerendebynavn-page'),
+  require('./supplerendebynavn2-page'),
   require('./valglandsdel-page'),
   require('./vejnavn-page'),
   require('./vejstykke-page'),

@@ -31,7 +31,7 @@ module.exports = [
   {
     entity: 'supplerendebynavn',
     path: '/supplerendebynavne',
-    subtext: 'Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.',
+    subtext: '(DEPRECATED) Søg efter supplerende bynavne. Returnerer de supplerende bynavne som opfylder kriteriet.',
     parameters: supplerendeBynavneParameters.concat(formatAndPagingParams),
     examples: [{
       description: 'Find de supplerende bynavne som ligger i postnummeret <em>3700 Rønne</em>',
@@ -45,7 +45,7 @@ module.exports = [
   {
     entity: 'supplerendebynavn',
     path:'/supplerendebynavne/{navn}',
-    subtext: 'Modtag supplerende bynavn.',
+    subtext: '(DEPRECATED) Modtag supplerende bynavn.',
     parameters: [supplerendeBynavneIdParameters],
     nomulti: true,
     examples: [{
@@ -56,7 +56,7 @@ module.exports = [
   {
     entity: 'supplerendebynavn',
     path: '/supplerendebynavne/autocomplete',
-    subtext: autocompleteSubtext('supplerendebynavne'),
+    subtext: '(DEPRECATED) ' + autocompleteSubtext('supplerendebynavne'),
     parameters: overwriteWithAutocompleteQParameter(supplerendeBynavneParameters).concat(formatAndPagingParams),
     examples: [{
       description: 'Find alle supplerende bynavne som indeholder <em>sejr</em>',
