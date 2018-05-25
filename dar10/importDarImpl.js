@@ -181,11 +181,11 @@ function copyDumpToTables(client, dataDir) {
       // Nogle navngivne veje kommer med z-koordinat for vejnavnelinjen. Det håndterer postgis
       // ikke i kolonner med SRID constraint. Derfor konverterer vi dem til 2D efter indlæsningen
       if(entityName === 'NavngivenVej') {
-        yield client.query(`alter ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry`);
+        yield client.query(`alter table ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry`);
       }
       yield streamToTable(client, entityName, filePath, fetchTable, true);
       if(entityName === 'NavngivenVej') {
-        yield client.query(`update ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry(geometry, 25832) USING st_setsrid(st_force2d(vejnavnebeliggenhed_vejnavnelinje), 25832)`);
+        yield client.query(`alter table ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry(geometry, 25832) USING st_setsrid(st_force2d(vejnavnebeliggenhed_vejnavnelinje), 25832)`);
       }
     }
   })()
