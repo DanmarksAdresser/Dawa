@@ -21,7 +21,7 @@ else {
 
 process.on('uncaughtException', function(err) {
   /* eslint no-console: 0 */
-  console.log('UNCAUGHT EXCEPTION!');
+  console.log('Uncaught exception', err);
   logger.error('uncaughtException', 'An uncaught exception occured, terminating process', err);
   process.exit(1);
 });
