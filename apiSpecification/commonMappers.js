@@ -100,8 +100,8 @@ exports.mapPostnummerRef = function(dbJson, baseUrl) {
   return null;
 };
 
-exports.formatDarStatus = darstatus => {
-  switch(darstatus) {
+exports.formatDarStatus = darstatuskode => {
+  switch(darstatuskode) {
     case 1 : return "intern forberedelse";
     case 2 : return "foreløbig";
     case 3 : return "gældende";
@@ -114,3 +114,22 @@ exports.formatDarStatus = darstatus => {
     default: return null;
   }
 };
+
+exports.parseDarStatus = darstatustekst => {
+  if(!darstatustekst) {
+    return null;
+  }
+  darstatustekst = darstatustekst.toLowerCase();
+  switch(darstatustekst) {
+    case "intern forberedelse" : return 1;
+    case "foreløbig" : return 2;
+    case "gældende" : return 3;
+    case "nedlagt" : return 4;
+    case "henlagt" : return 5;
+    case "slettet" : return 6;
+    case "ikke i brug" : return 7;
+    case "i brug" : return 8;
+    case "udgået" : return 9;
+    default: return null;
+  }
+}

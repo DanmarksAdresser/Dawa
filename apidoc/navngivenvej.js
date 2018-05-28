@@ -33,6 +33,10 @@ const autocompleteQParam = {
 const commonFilterParams= [
   navngivenVejIdParameter,
   {
+    name: 'darstatus',
+    doc: 'Find navngivne veje med den angivne status. Mulige værdier "gældende", "foreløbig".'
+  },
+  {
     name: 'navn',
     doc: 'Find de navngivne veje, som har det angivne navn. Navnet er case-sensitivt.'
   },
