@@ -32,6 +32,7 @@ DROP VIEW  IF EXISTS adresser_mat_view;
 DROP VIEW  IF EXISTS dar1_adgangsadresser_view CASCADE;
 DROP VIEW  IF EXISTS adgangsadresser_mat_view CASCADE;
 DROP VIEW  IF EXISTS adresser_mat_view CASCADE;
+DROP VIEW IF EXISTS supplerendebynavntilknytninger_view CASCADE;
 ALTER TABLE adgangsadresser alter column tekstretning set data type numeric(5,2);
 ALTER TABLE adgangsadresser_changes alter column tekstretning set data type numeric(5,2);
 ALTER TABLE adgangsadresser_mat alter column tekstretning set data type numeric(5,2);
@@ -39,6 +40,7 @@ ALTER TABLE adgangsadresser_mat_changes alter column tekstretning set data type 
 ALTER TABLE adresser_mat alter column tekstretning set data type numeric(5,2);
 ALTER TABLE adresser_mat_changes alter column tekstretning set data type numeric(5,2);
 ALTER TABLE dagi_supplerendebynavne alter dagi_id type INTEGER USING dagi_id::INTEGER;
+ALTER TABLE dagi_supplerendebynavne_divided alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE dagi_supplerendebynavne_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE supplerendebynavntilknytninger alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE supplerendebynavntilknytninger_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
@@ -72,7 +74,8 @@ CREATE INDEX ON adresser_mat(supplerendebynavn_dagi_id);
     ALTER TABLE adgangsadresser_changes ADD COLUMN vejpunkt_id UUID;
     CREATE INDEX ON adgangsadresser(vejpunkt_id);
     UPDATE adgangsadresser a SET vejpunkt_id = hn.vejpunkt_id FROM dar1_husnummer_current hn where a.id = hn.id;
-WITH mostRecent AS (SELECT a.id, a.vejpunkt_id, t.txid, t.changeid
+    UPDATE adgangsadresser a SET supplerendebynavn_dagi_id = sb.supplerendebynavn1 FROM dar1_supplerendebynavn_current sb WHERE a.supplerendebynavn_id = sb.id;
+WITH mostRecent AS (SELECT a.id, a.vejpunkt_id, a.supplerendebynavn_dagi_id, t.txid, t.changeid
                           FROM adgangsadresser a
                             JOIN LATERAL
                             (SELECT
@@ -84,7 +87,7 @@ WITH mostRecent AS (SELECT a.id, a.vejpunkt_id, t.txid, t.changeid
                              ORDER BY txid DESC NULLS LAST,
                                changeid DESC NULLS LAST
                              LIMIT 1) t ON TRUE)
-UPDATE adgangsadresser_changes c SET vejpunkt_id = a.vejpunkt_id
+UPDATE adgangsadresser_changes c SET vejpunkt_id = a.vejpunkt_id, supplerendebynavn_dagi_id = a.supplerendebynavn_dagi_id
 FROM mostRecent a WHERE c.id = a.id AND c.txid IS NOT DISTINCT FROM a.txid AND c.changeid IS NOT DISTINCT FROM a.changeid;`);
     yield client.query(`DROP TABLE IF EXISTS  landpostnumre CASCADE;
 CREATE TABLE landpostnumre(
