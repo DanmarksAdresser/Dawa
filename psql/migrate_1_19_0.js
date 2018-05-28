@@ -74,14 +74,41 @@ WITH mostRecent AS (SELECT a.id, a.vejpunkt_id, t.txid, t.changeid
                                changeid DESC NULLS LAST
                              LIMIT 1) t ON TRUE)
 UPDATE adgangsadresser_changes c SET vejpunkt_id = a.vejpunkt_id
-FROM mostRecent a WHERE c.id = a.id AND c.txid IS NOT DISTINCT FROM a.txid AND c.changeid IS NOT DISTINCT FROM a.changeid;`)
+FROM mostRecent a WHERE c.id = a.id AND c.txid IS NOT DISTINCT FROM a.txid AND c.changeid IS NOT DISTINCT FROM a.changeid;`);
+    yield client.query(`DROP TABLE IF EXISTS  landpostnumre CASCADE;
+CREATE TABLE landpostnumre(
+  nr SMALLINT NOT NULL,
+navn text NOT NULL,
+  ændret timestamptz NOT NULL,
+  geo_version integer NOT NULL,
+  geo_ændret timestamptz NOT NULL,
+  geom geometry(MultiPolygon, 25832),
+  tsv tsvector,
+  PRIMARY KEY (nr)
+);
+
+DROP TABLE IF EXISTS landpostnumre_changes CASCADE;
+CREATE TABLE landpostnumre_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, landpostnumre.* FROM landpostnumre WHERE false);
+CREATE INDEX ON landpostnumre_changes(txid);
+
+
+DROP TABLE IF EXISTS landpostnumre_divided CASCADE;
+CREATE TABLE landpostnumre_divided(
+  nr SMALLINT NOT NULL,
+  geom geometry(geometry, 25832)
+);
+
+CREATE INDEX ON landpostnumre_divided USING GIST(geom);
+CREATE INDEX ON landpostnumre_divided(nr);`);
     yield client.query(fs.readFileSync('psql/schema/tables/navngivenvej.sql', {encoding: 'utf8'}));
     yield client.query(fs.readFileSync('psql/schema/tables/vejpunkter.sql', {encoding: 'utf8'}));
     yield createChangeTable(client, tableSchema.tables.navngivenvej);
     yield createChangeTable(client, tableSchema.tables.vejpunkter);
     yield reloadDatabaseCode(client, 'psql/schema');
-    yield withImportTransaction(client, 'migrate_1_19_0', txid =>
-      materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.vejpunkt));
+    yield withImportTransaction(client, 'migrate_1_19_0', txid => go(function*() {
+      yield materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.vejpunkt);
+      yield materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.navngivenvej);
+    }));
     yield client.query('analyze');
   })).done();
 });
