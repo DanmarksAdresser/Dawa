@@ -41,7 +41,7 @@ exports.initialize = function(logOptions) {
       transports: [
         new winstonDailyRotateFile({
           filename: `${filenamePrefix}${fileNameSuffix}.%DATE%.log`,
-          directory,
+          dirname: directory,
           format: combine(timestamp(), format.json()),
           datePattern: 'YYYY-MM-DDTHH'
         })]
