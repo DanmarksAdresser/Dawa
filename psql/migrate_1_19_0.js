@@ -11,6 +11,7 @@ const { materializeFromScratch } = require('../importUtil/materialize');
 const { reloadDatabaseCode } = require('./initialization');
 const {withImportTransaction} = require('../importUtil/importUtil');
 const dar10TableModels = require('../dar10/dar10TableModels');
+const importDagiImpl = require('../dagiImport/importDagiImpl');
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
 };
@@ -108,6 +109,7 @@ CREATE INDEX ON landpostnumre_divided(nr);`);
     yield withImportTransaction(client, 'migrate_1_19_0', txid => go(function*() {
       yield materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.vejpunkt);
       yield materializeFromScratch(client, txid, tableSchema.tables, dar10TableModels.dawaMaterializations.navngivenvej);
+      yield importDagiImpl.importLandpostnummer(client, txid);
     }));
     yield client.query('analyze');
   })).done();
