@@ -17,6 +17,7 @@ const materialize = require('../importUtil/materialize');
 const {recomputeMaterializedDawa, materializeDawa} = materialize;
 const { mergeValidTime } = require('../history/common');
 const importDar09Impl = require('../darImport/importDarImpl');
+const logger = require('../logger').forCategory('darImport');
 
 const ALL_DAR_ENTITIES = [
   'Adresse',
@@ -216,6 +217,11 @@ function computeDumpDifferences(client, txid) {
       yield tableDiffNg.computeDifferences(client, txid, fetchTable, dar10TableModels.rawTableModels[entityName]);
       yield importUtil.dropTable(client, fetchTable);
       yield tableDiffNg.applyChanges(client, txid, dar10TableModels.rawTableModels[entityName]);
+      const changes = (yield client.queryRows(`select count(*)::integer as c from ${dar10TableModels.rawTableModels[entityName].table}_changes where txid=$1`, [txid]))[0].c;
+      logger.info('Gemte ændringer til rå DAR tabeller', {
+        entityName,
+        changes
+      })
     }
   })();
 }
