@@ -215,7 +215,9 @@ var fields = [
   adgangsadresseField('afstemningsområdenummer'),
   adgangsadresseField('afstemningsområdenavn'),
   adgangsadresseField('brofast'),
-  adgangsadresseField('supplerendebynavn_dagi_id')
+  adgangsadresseField('supplerendebynavn_dagi_id'),
+  adgangsadresseField('navngivenvej_id')
+
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

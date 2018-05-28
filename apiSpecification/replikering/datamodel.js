@@ -209,6 +209,12 @@ module.exports = {
         type: 'uuid',
         nullable: true,
         description: 'Vejpunktets unikke ID.'
+      },
+      {
+        name: 'navngivenvej_id',
+        type: 'uuid',
+        nullable: true,
+        description: 'Den navngivne vejs unikke ID'
       }
     ]
   },
