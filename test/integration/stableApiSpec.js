@@ -314,6 +314,10 @@ describe('Stable API', () => {
               "navn": "Odense V"
             },
             "stormodtagerpostnummer": null,
+            "navngivenvej": {
+              "href": "http://dawa/navngivneveje/a8121066-1db3-4e0e-a7e8-75d54d8723e9",
+              "id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
+            },
             "kommune": {
               "href": "http://dawa/kommuner/0461",
               "kode": "0461",
@@ -620,6 +624,10 @@ describe('Stable API', () => {
                 "navn": "Odense V"
               },
               "stormodtagerpostnummer": null,
+              "navngivenvej": {
+                "href": "http://dawa/navngivneveje/a8121066-1db3-4e0e-a7e8-75d54d8723e9",
+                "id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
+              },
               "kommune": {
                 "href": "http://dawa/kommuner/0461",
                 "kode": "0461",

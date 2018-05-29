@@ -76,6 +76,20 @@ exports.json = {
         $ref: '#/definitions/VejstykkeKodeOgNavn'
       },
       'husnr'  : normalizedFieldSchema('husnr'),
+      navngivenvej: schemaObject({
+        description: 'Den navngivne vej, som adgangsadressen er placeret på',
+        properties: {
+          href: {
+            description: 'Den navngivne vejs URL',
+            $ref: '#/definitions/Href'
+          },
+          id: {
+            description: 'Den navngivne vejs ID',
+            $ref: '#/definitions/UUID'
+          }
+        },
+        docOrder: ['href', 'id']
+      }),
       'supplerendebynavn': normalizedFieldSchema('supplerendebynavn'),
       'supplerendebynavn2': schemaObject({
         description: 'Det supplerende bynavn, som adgangsadressen ligger i',
@@ -363,7 +377,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         type: 'string'
       }
     },
-    docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','supplerendebynavn', 'supplerendebynavn2',
+    docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','navngivenvej','supplerendebynavn', 'supplerendebynavn2',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
       'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
@@ -382,6 +396,10 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         kode: kode4String(rs.vejkode)
       };
       adr.husnr = husnrUtil.formatHusnr(rs.husnr);
+      adr.navngivenvej = rs.navngivenvej_id ? {
+        href: makeHref(baseUrl, 'navngivenvej', [rs.navngivenvej_id]),
+        id: rs.navngivenvej_id
+      } : null;
       adr.supplerendebynavn = maybeNull(rs.supplerendebynavn);
       adr.supplerendebynavn2 = rs.supplerendebynavn_dagi_id ? {
         href: makeHrefFromPath(baseUrl, 'supplerendebynavne2', [rs.supplerendebynavn_dagi_id]),
