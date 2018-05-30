@@ -58,7 +58,7 @@ ALTER TABLE regioner alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE regioner_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE afstemningsomraader alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE afstemningsomraader_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
-ALTER TABLE afstemningsomraader alter dopstillingskreds_dagi_id type INTEGER USING opstillingskreds_dagi_id::INTEGER;
+ALTER TABLE afstemningsomraader alter opstillingskreds_dagi_id type INTEGER USING opstillingskreds_dagi_id::INTEGER;
 ALTER TABLE afstemningsomraader_changes alter opstillingskreds_dagi_id type INTEGER USING opstillingskreds_dagi_id::INTEGER;
 ALTER TABLE opstillingskredse alter dagi_id type INTEGER USING dagi_id::INTEGER;
 ALTER TABLE opstillingskredse_changes alter dagi_id type INTEGER USING dagi_id::INTEGER;
