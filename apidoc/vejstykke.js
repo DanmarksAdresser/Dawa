@@ -37,6 +37,10 @@ const vejstykkerParameters = [{
   vejstykkerIdParameters[0],
   vejstykkerIdParameters[1],
   {
+    name: 'navngivenvej_id',
+    doc: 'Find vejstykker for den navngivne vej'
+  },
+  {
     name: 'navn',
     doc: "Vejnavn. Der skelnes mellem store og små bogstaver. Der kan anvendes wildcard-søgning.",
     examples: ['Margrethepladsen', 'Viborgvej']

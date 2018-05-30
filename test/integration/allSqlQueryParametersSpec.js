@@ -27,6 +27,28 @@ function multiVerifier(verifierFn) {
 }
 
 var sampleParameters = {
+  navngivenvej: {
+    id: {
+      values: ['6cb22adb-a6d6-4889-a440-4811ded6db34'],
+      verifier: (vej, id) => vej.id === id
+    },
+    darstatus: {
+      values: ['gældende'],
+      verifier: (vej, darstatus) => vej.darstatus === darstatus
+    },
+    navn: {
+      values: ["Søndre Kinkelgade"],
+      verifier: (vej,navn) => vej.navn === navn
+    },
+    adresseringsnavn: {
+      values: ['Borgm Christiansensg'],
+      verifier: (vej, adresseringsnavn) => vej.adresseringsnavn === adresseringsnavn
+    },
+    kommunekode: {
+      values: ['420', '0461'],
+      verifier: (vej, kommunekode) => _.some(vej.vejstykker, vejstykke => parseInt(vejstykke.kommunekode) === parseInt(kommunekode))
+    }
+  },
   vejstykke: {
     kode: {
       values: ['522', '0522'],
@@ -35,6 +57,11 @@ var sampleParameters = {
       }
     },
 
+    navngivenvej_id: {
+      values: ['67980870-86f6-4b2f-9334-c1f9b3a409de'],
+      verifier: (vejstykke, navngivenvej_id) =>
+        vejstykke.navngivenvej.id === navngivenvej_id
+    },
     kommunekode: {
       values: ['269', '0269'],
       verifier: function(vejstykke, kommunekode) {

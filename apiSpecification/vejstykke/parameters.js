@@ -19,6 +19,11 @@ module.exports =  {
     }
   ]),
   propertyFilter: normalizeParameters([
+    {
+      name: 'navngivenvej_id',
+      type: 'string',
+      schema: schema.uuid
+    },
   {
     name: 'kode',
     type: 'integer',

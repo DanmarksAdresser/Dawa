@@ -314,6 +314,10 @@ describe('Stable API', () => {
               "navn": "Odense V"
             },
             "stormodtagerpostnummer": null,
+            "navngivenvej": {
+              "href": "http://dawa/navngivneveje/a8121066-1db3-4e0e-a7e8-75d54d8723e9",
+              "id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
+            },
             "kommune": {
               "href": "http://dawa/kommuner/0461",
               "kode": "0461",
@@ -468,6 +472,7 @@ describe('Stable API', () => {
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
               "brofast": true,
+              "navngivenvej_id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
             }
           }
         }, {
@@ -549,7 +554,8 @@ describe('Stable API', () => {
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
-              "brofast": true
+              "brofast": true,
+              "navngivenvej_id": "14328bc4-4870-40f6-9d07-7ed985389998"
             }
           }
         }]
@@ -618,6 +624,10 @@ describe('Stable API', () => {
                 "navn": "Odense V"
               },
               "stormodtagerpostnummer": null,
+              "navngivenvej": {
+                "href": "http://dawa/navngivneveje/a8121066-1db3-4e0e-a7e8-75d54d8723e9",
+                "id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
+              },
               "kommune": {
                 "href": "http://dawa/kommuner/0461",
                 "kode": "0461",
@@ -779,7 +789,8 @@ describe('Stable API', () => {
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
-              "brofast": true
+              "brofast": true,
+              "navngivenvej_id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
             }
           }
         }]

@@ -17,6 +17,7 @@ const materialize = require('../importUtil/materialize');
 const {recomputeMaterializedDawa, materializeDawa} = materialize;
 const { mergeValidTime } = require('../history/common');
 const importDar09Impl = require('../darImport/importDarImpl');
+const logger = require('../logger').forCategory('darImport');
 
 const ALL_DAR_ENTITIES = [
   'Adresse',
@@ -68,9 +69,10 @@ function ndjsonFileName(entityName) {
  * @param client
  * @returns {*}
  */
-function getMaxEventId(client, tablePrefix) {
+function getMaxEventId(client, tablePrefix, entityName) {
+  const entities = entityName ? [entityName] : ALL_DAR_ENTITIES;
   const singleTableSql = (tableName) => `SELECT MAX(GREATEST(eventopret, eventopdater)) FROM ${tablePrefix + tableName}`;
-  const list = ALL_DAR_ENTITIES.map(entityName => `(${singleTableSql(`dar1_${entityName}`)})`).join(', ');
+  const list = entities.map(entityName => `(${singleTableSql(`dar1_${entityName}`)})`).join(', ');
   const sql = `select GREATEST(${list}) as maxeventid`;
   return client.queryp(sql).then(result => result.rows[0].maxeventid || 0);
 }
@@ -170,23 +172,26 @@ function createFetchTable(client, tableName) {
   return client.queryp(`create temp table ${fetchTable} (LIKE ${tableName})`);
 }
 
+const copyEntityToTable = (client, entityName, dataDir) => go(function*(){
+  const filePath = path.join(dataDir, ndjsonFileName(entityName));
+  const tableName = dar10TableModels.rawTableModels[entityName].table;
+  const fetchTable = `fetch_${tableName}`;
+  yield createFetchTable(client, tableName);
+  // Workaround for NavngivenVej:
+  // Nogle navngivne veje kommer med z-koordinat for vejnavnelinjen. Det håndterer postgis
+  // ikke i kolonner med SRID constraint. Derfor konverterer vi dem til 2D efter indlæsningen
+  if(entityName === 'NavngivenVej') {
+    yield client.query(`alter table ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry`);
+  }
+  yield streamToTable(client, entityName, filePath, fetchTable, true);
+  if(entityName === 'NavngivenVej') {
+    yield client.query(`alter table ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry(geometry, 25832) USING st_setsrid(st_force2d(vejnavnebeliggenhed_vejnavnelinje), 25832)`);
+  }
+});
 function copyDumpToTables(client, dataDir) {
   return q.async(function* () {
     for (let entityName of ALL_DAR_ENTITIES) {
-      const filePath = path.join(dataDir, ndjsonFileName(entityName));
-      const tableName = dar10TableModels.rawTableModels[entityName].table;
-      const fetchTable = `fetch_${tableName}`;
-      yield createFetchTable(client, tableName);
-      // Workaround for NavngivenVej:
-      // Nogle navngivne veje kommer med z-koordinat for vejnavnelinjen. Det håndterer postgis
-      // ikke i kolonner med SRID constraint. Derfor konverterer vi dem til 2D efter indlæsningen
-      if(entityName === 'NavngivenVej') {
-        yield client.query(`alter table ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry`);
-      }
-      yield streamToTable(client, entityName, filePath, fetchTable, true);
-      if(entityName === 'NavngivenVej') {
-        yield client.query(`alter table ${fetchTable} alter vejnavnebeliggenhed_vejnavnelinje type geometry(geometry, 25832) USING st_setsrid(st_force2d(vejnavnebeliggenhed_vejnavnelinje), 25832)`);
-      }
+      yield copyEntityToTable(client, entityName, dataDir)
     }
   })()
 }
@@ -199,23 +204,31 @@ function copyEventIdsToFetchTable(client, fetchTable, table) {
 
 }
 
+const computeEntityDifferences = (client, txid, entityName, eventId) => go(function*(){
+  const tableName = dar10TableModels.rawTableModels[entityName].table;
+  const fetchTable = `fetch_${tableName}`;
+  yield client.queryp(`CREATE UNIQUE INDEX ON ${fetchTable}(rowkey)`);
+  // add/expire any rows added/expired after the dump was generated
+  yield client.queryp(`INSERT INTO ${fetchTable} (SELECT * FROM ${tableName} 
+      WHERE eventOpret > $1 OR eventopdater > $1) 
+      ON CONFLICT (rowkey) DO UPDATE SET registrering = EXCLUDED.registrering`, [eventId]);
+  // ensure we do not overwite eventopret and eventopdater with NULLs
+  // DAR1 may discard them
+  yield copyEventIdsToFetchTable(client, fetchTable, tableName);
+  yield tableDiffNg.computeDifferences(client, txid, fetchTable, dar10TableModels.rawTableModels[entityName]);
+  yield importUtil.dropTable(client, fetchTable);
+  yield tableDiffNg.applyChanges(client, txid, dar10TableModels.rawTableModels[entityName]);
+  const changes = (yield client.queryRows(`select count(*)::integer as c from ${dar10TableModels.rawTableModels[entityName].table}_changes where txid=$1`, [txid]))[0].c;
+  logger.info('Gemte ændringer til rå DAR tabeller', {
+    entityName,
+    changes
+  });
+});
 function computeDumpDifferences(client, txid) {
   return q.async(function* () {
     const eventId = yield getMaxEventId(client, 'fetch_');
     for (let entityName of ALL_DAR_ENTITIES) {
-      const tableName = dar10TableModels.rawTableModels[entityName].table;
-      const fetchTable = `fetch_${tableName}`;
-      yield client.queryp(`CREATE UNIQUE INDEX ON ${fetchTable}(rowkey)`);
-      // add/expire any rows added/expired after the dump was generated
-      yield client.queryp(`INSERT INTO ${fetchTable} (SELECT * FROM ${tableName} 
-      WHERE eventOpret > $1 OR eventopdater > $1) 
-      ON CONFLICT (rowkey) DO UPDATE SET registrering = EXCLUDED.registrering`, [eventId]);
-      // ensure we do not overwite eventopret and eventopdater with NULLs
-      // DAR1 may discard them
-      yield copyEventIdsToFetchTable(client, fetchTable, tableName);
-      yield tableDiffNg.computeDifferences(client, txid, fetchTable, dar10TableModels.rawTableModels[entityName]);
-      yield importUtil.dropTable(client, fetchTable);
-      yield tableDiffNg.applyChanges(client, txid, dar10TableModels.rawTableModels[entityName]);
+      yield computeEntityDifferences(client, txid, entityName, eventId);
     }
   })();
 }
@@ -517,7 +530,7 @@ module.exports = {
   withDar1Transaction: withDar1Transaction,
   importChangeset,
   initDawa: initDawa,
-  updateDawa: updateDawa,
+  updateDawa,
   clearDar,
   ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
   internal: {
@@ -526,6 +539,10 @@ module.exports = {
     ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
     getMaxEventId: getMaxEventId,
     setInitialMeta: setInitialMeta,
-    removeRedundantOpretRows: mergeOpretUpdateRows
-  }
+    removeRedundantOpretRows: mergeOpretUpdateRows,
+  },
+  copyEntityToTable,
+  computeEntityDifferences,
+  getMaxEventId
+
 };

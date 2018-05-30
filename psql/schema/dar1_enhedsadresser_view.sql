@@ -21,6 +21,6 @@ CREATE VIEW dar1_enhedsadresser_view AS
     lower(adr.dørbetegnelse)                AS doer
   FROM dar1_adresse_current adr
     JOIN adgangsadresser adgadr ON adr.husnummer_id = adgadr.id AND adgadr.objekttype IN (1, 3)
-  WHERE dar1_status_til_dawa_status(adr.status) IN (1, 3);
+  WHERE adr.status IN (2, 3);
 
 DROP VIEW IF EXISTS dar1_enhedsadresser_dirty_view CASCADE;

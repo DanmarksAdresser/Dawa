@@ -77,6 +77,7 @@ const getImportDelay = (changeset) => {
   const allRows = _.flatten(Object.values(changeset), true);
   for(let row of allRows) {
     const ts = moment(txTimestamp(row));
+
     if(ts.isBefore(firstRegistrering)) {
       firstRegistrering = ts;
     }
@@ -152,13 +153,14 @@ function fetchAndImport(client, darClient, remoteEventIds, virkningTime, maxTran
           const before = Date.now();
           const result = yield withImportTransaction(client, 'importDarApi', (txid) => go(function*() {
             yield importDarImpl.importChangeset(client, txid, transaction, false, virkningTime);
+            const after = Date.now();
+            logger.info("Imported Transaction", {
+              duration: after - before,
+              txid,
+              totalRowCount,
+              delay: getImportDelay(transaction)
+            });
           }));
-          const after = Date.now();
-          logger.info("Imported Transaction", {
-            duration: after - before,
-            totalRowCount,
-            delay: getImportDelay(transaction)
-          });
           return result;
         }));
       }

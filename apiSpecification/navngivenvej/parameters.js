@@ -3,7 +3,7 @@
 var schema = require('../parameterSchema');
 var registry = require('../registry');
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
-
+const { parseDarStatus } = require('../commonMappers');
 
 module.exports = {
   id: normalizeParameters([
@@ -19,6 +19,14 @@ module.exports = {
       type: 'string',
       schema: schema.uuid,
       multi: true
+    },
+    {
+      name: 'darstatus',
+      type: 'string',
+      schema: {
+        enum: ['gældende', 'foreløbig']
+      },
+      process: parseDarStatus
     },
     {
       name: 'navn',
