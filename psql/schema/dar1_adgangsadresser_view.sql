@@ -63,7 +63,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
       ON hn.navngivenvej_id = nv.id
     JOIN dar1_navngivenvejkommunedel_current nvk
       ON nv.id = nvk.navngivenvej_id AND
-         k.kommunekode = nvk.kommune
+         k.kommunekode = nvk.kommune and nvk.status in(2,3)
     LEFT JOIN dar1_supplerendebynavn_current s
       ON hn.supplerendebynavn_id = s.id
     JOIN dar1_postnummer_current p
@@ -71,4 +71,4 @@ CREATE VIEW dar1_adgangsadresser_view AS
     LEFT JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
     LEFT JOIN adgangsadresser aa_old ON hn.id = aa_old.id
-  WHERE dar1_status_til_dawa_status(hn.status) IN (1, 3) AND hn.husnummertekst IS NOT NULL;
+  WHERE hn.status IN (2, 3) AND hn.husnummertekst IS NOT NULL;

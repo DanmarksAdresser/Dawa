@@ -530,7 +530,7 @@ module.exports = {
   withDar1Transaction: withDar1Transaction,
   importChangeset,
   initDawa: initDawa,
-  updateDawa: updateDawa,
+  updateDawa,
   clearDar,
   ALL_DAR_ENTITIES: ALL_DAR_ENTITIES,
   internal: {
