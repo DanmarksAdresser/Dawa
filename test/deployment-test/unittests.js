@@ -192,7 +192,9 @@ describe('Adresseopslag', function(){
       assert(adresse.adgangsadresse.vejstykke.kode==="6100", 'adresse.vejstykke.kodeforskellig: ' + adresse.adgangsadresse.vejstykke.kode);
       assert(adresse.adgangsadresse.vejstykke.adresseringsnavn==="Rødkildevej", 'adresse.vejstykke.adresseringsnavn forskellig: ' + adresse.adgangsadresse.vejstykke.adresseringsnavn);
       assert(adresse.adgangsadresse.husnr==="46", 'adresse.husnr: ' + adresse.adgangsadresse.husnr);
+      assert(adresse.adgangsadresse.navngivenvej.id==="d05d536a-febb-49f1-bcb8-8a2849e31fe2", 'adresse.navngivenvej.id forskellig: ' + adresse.adgangsadresse.navngivenvej.id);
       assert(adresse.adgangsadresse.supplerendebynavn===null, 'adresse.supplerendebynavn forskellig: ' + adresse.adgangsadresse.supplerendebynavn);
+      assert(adresse.adgangsadresse.supplerendebynavn2===null, 'adresse.supplerendebynavn2 forskellig: ' + adresse.adgangsadresse.supplerendebynavn2);
       assert(adresse.adgangsadresse.postnummer.nr==="2400", 'adresse.postnummer.nr forskellig: ' + adresse.adgangsadresse.postnummer.nr);
       assert(adresse.adgangsadresse.postnummer.navn==="København NV", 'adresse.postnummer.navn forskellig: ' + adresse.adgangsadresse.postnummer.navn);
       assert(adresse.adgangsadresse.stormodtagerpostnummer===null, 'adresse.stormodtagerpostnummer forskellig: ' + adresse.adgangsadresse.stormodtagerpostnummer);
@@ -302,7 +304,14 @@ describe('Adresseopslag', function(){
       jordopt.resolveWithFullResponse= true;
       var jordrequest= rp(jordopt);
 
-      Promise.all([vejrequest, postrequest, komrequest, sognrequest, regionrequest, retsrequest, polrequest, opsrequest, afsrequest, jordrequest]).then((responses) => {
+      var ngvej= {};
+      ngvej.url=adresse.adgangsadresse.navngivenvej.href;
+      ngvej.qs= {};
+      ngvej.qs.cache= 'no-cache';
+      ngvej.resolveWithFullResponse= true;
+      var ngvejrequest= rp(ngvej);
+
+      Promise.all([vejrequest, postrequest, komrequest, sognrequest, regionrequest, retsrequest, polrequest, opsrequest, afsrequest, jordrequest, ngvejrequest]).then((responses) => {
         for (let i= 0; i<responses.length; i++) {
           assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")");
           //console.log(responses[i].body);
@@ -337,6 +346,9 @@ describe('Adresseopslag', function(){
             break;
           case 9:
             assert(adresse.adgangsadresse.jordstykke.matrikelnr===obj.matrikelnr,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.jordstykke.matrikelnr + ", " + obj.matrikelnr + ")");
+            break;
+          case 10:
+            assert(adresse.adgangsadresse.navngivenvej.id===obj.id,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.navngivenvej.id + ", " + obj.id + ")");
             break;
           }
         }
@@ -443,6 +455,7 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.husnr===adressecsv.husnr, 'adresse.husnr i json og csv format forskellig. json: ' + adressejson.adgangsadresse.husnr + ', csv: ' + adressecsv.husnr);
         assert(adressejson.adgangsadresse.husnr===optjson.qs.husnr, 'adresse.husnr i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.husnr + ', søgekriterie: ' + optjson.qs.husnr);
         assert(adressejson.adgangsadresse.supplerendebynavn==adressecsv.supplerendebynavn||adressejson.adgangsadresse.supplerendebynavn===null&&adressecsv.supplerendebynavn=="", 'adresse.supplerendebynavn i json og csv format forskellig. json: ' + adressejson.adgangsadresse.supplerendebynavn + ', csv: ' + adressecsv.supplerendebynavn);
+        assert(adressejson.adgangsadresse.navngivenvej.id==adressecsv.navngivenvej_id, 'adresse.navngivenvejid i json og csv format forskellig. json: ' + adressejson.adgangsadresse.navngivenvej.id + ', csv: ' + adressecsv.navngivenvej_id);
         assert(adressejson.adgangsadresse.postnummer.nr===adressecsv.postnr, 'adresse.postnummer.nr i json og csv format forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', csv: ' + adressecsv.postnr);
         assert(adressejson.adgangsadresse.postnummer.nr===optjson.qs.postnr, 'adresse.postnummer.nr i json og søgekriterie er forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', søgekriterie: ' + optjson.qs.postnr);
         assert(adressejson.adgangsadresse.postnummer.navn===adressecsv.postnrnavn, 'adresse.postnummer.navn i json og csv format forskellig. json: ' + adressejson.adgangsadresse.postnummer.navn + ', csv: ' + adressecsv.postnrnavn);
@@ -537,6 +550,7 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.husnr===adressegeojson.husnr, 'adresse.husnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.husnr + ', geojson: ' + adressegeojson.husnr);
         assert(adressejson.adgangsadresse.husnr===optjson.qs.husnr, 'adresse.husnr i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.husnr + ', søgekriterie: ' + optjson.qs.husnr);
         assert(adressejson.adgangsadresse.supplerendebynavn==adressegeojson.supplerendebynavn||adressejson.adgangsadresse.supplerendebynavn===null&&adressegeojson.supplerendebynavn=="", 'adresse.supplerendebynavn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.supplerendebynavn + ', geojson: ' + adressegeojson.supplerendebynavn);
+        assert(adressejson.adgangsadresse.navngivenvej.id==adressegeojson.navngivenvejid, 'adresse.navngivenvejid i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.navngivenvej.id + ', csv: ' + adressegeojson.id);
         assert(adressejson.adgangsadresse.postnummer.nr===adressegeojson.postnr, 'adresse.postnummer.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', geojson: ' + adressegeojson.postnr);
         assert(adressejson.adgangsadresse.postnummer.nr===optjson.qs.postnr, 'adresse.postnummer.nr i json og søgekriterie er forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', søgekriterie: ' + optjson.qs.postnr);
         assert(adressejson.adgangsadresse.postnummer.navn===adressegeojson.postnrnavn, 'adresse.postnummer.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.postnummer.navn + ', geojson: ' + adressegeojson.postnrnavn);
@@ -738,6 +752,26 @@ describe('Vejstykkesøgning', function(){
     });
   });
 
+  it("Navngiven vej id", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/vejstykker';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.navngivenvej_id= 'c0f08a1a-b9a4-465b-8372-d12babe7fbd6';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var vejstykker= JSON.parse(response.body);
+      //console.log(util.inspect(vejstykker));
+      assert(vejstykker.length >= 5, "Antal vejstykker < 5 (" + vejstykker.length + ")");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
   it("reverse", function(done){
     var options= {};
     options.baseUrl= host;
@@ -773,6 +807,30 @@ describe('Unik vejstykke', function(){
 
 });
 
+describe('Navngiven vej', function(){
+
+ 
+  it("navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='navngivneveje';
+    options.qs= {};
+    options.qs.navn= 'Holbækmotorvejen';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var navngivneveje= JSON.parse(response.body);
+      assert(navngivneveje.length>=1, "Der er burde være en: "+navngivneveje.length);
+      assert(navngivneveje[0].vejstykker.length>=5, "Der er burde være mindst 5 vejstykker: "+navngivneveje[0].vejstykker.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+});
 
 describe('Supplerendebynavnsøgning', function(){
 
@@ -789,6 +847,122 @@ describe('Supplerendebynavnsøgning', function(){
       done();
     })
   })
+
+});
+
+describe('Supplerende bynavne 2', function(){
+
+  it("supplerendebynavne2reverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='supplerendebynavne2';
+    options.qs= {};
+    options.qs.x= 8.91172755486213;
+    options.qs.y= 56.59274886518194;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var supplerendebynavne= JSON.parse(response.body);
+      assert(supplerendebynavne.length>=1, "Der er burde være mindst 1: "+supplerendebynavne.length);
+      supplerendebynavne.forEach(function(element) {
+        console.log(element.primærtnavn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+
+  it("polygon", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='supplerendebynavne2';
+    options.qs= {};
+    options.qs.polygon= '[[[8.91172755486213, 56.59274886518194],[8.948437235894998, 56.57437007272818],[8.876752381627279, 56.579839531262145],[8.91172755486213, 56.59274886518194]]]';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var supplerendebynavne= JSON.parse(response.body);
+      assert(supplerendebynavne.length>=1, "Der er burde være mindst 1: "+supplerendebynavne.length);
+      supplerendebynavne.forEach(function(element) {
+        console.log(element.primærtnavn);
+      });
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='supplerendebynavne2';
+    options.qs= {};
+    options.qs.navn= 'Solrød';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var supplerendebynavne= JSON.parse(response.body);
+      assert(supplerendebynavne.length===1, "Der er burde være en: "+supplerendebynavne.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("cirkel", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='supplerendebynavne2';
+    options.qs= {};
+    options.qs.cirkel= '8.91172755486213,56.59274886518194,2000';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var supplerendebynavne= JSON.parse(response.body);
+      assert(supplerendebynavne.length>=1, "Der er burde være mindst 1: "+supplerendebynavne.length);
+      supplerendebynavne.forEach(function(element) {
+        console.log(element.primærtnavn);
+      });
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("nærmeste", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='supplerendebynavne2';
+    options.qs= {};
+    options.qs.x= 9.194696328972807;
+    options.qs.y=  56.16942630302476;
+    options.qs.nærmeste= true;
+    options.qs.undertype= 'mindesten';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var supplerendebynavne= JSON.parse(response.body);
+      assert(supplerendebynavne.length===1, "Der er burde kun være 1: "+supplerendebynavne.length);
+      assert(supplerendebynavne[0].navn==='Hammerum', "Det er burde kun være Hammerum: "+supplerendebynavne[0].navn);
+
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
 
 });
 
@@ -888,6 +1062,50 @@ describe('Postnummersøgning', function(){
       done();
     })
   })
+
+
+  it("Landpostnumre", function(done){
+    const minøst = (accumulator, currentValue) => {console.log('value: ' + currentValue[0]); if (accumulator>currentValue[0]) accumulator= currentValue[0]; return accumulator}; 
+
+    var optpostnumre= {};
+    optpostnumre.baseUrl= host;
+    optpostnumre.url='/postnumre';
+    optpostnumre.qs= {};
+    optpostnumre.qs.nr= '6720'; 
+    optpostnumre.qs.format= 'geojson'; 
+    optpostnumre.qs.cache= 'no-cache';
+    optpostnumre.resolveWithFullResponse= true;
+    optpostnumre.simple= false;
+    var postnumrerequest= rp(optpostnumre);
+
+    var optlandpostnumre= {};
+    optlandpostnumre.baseUrl= host;
+    optlandpostnumre.url='/postnumre';
+    optlandpostnumre.qs= {};
+    optlandpostnumre.qs.nr= '6720';
+    optlandpostnumre.qs.format= 'geojson'; 
+    optlandpostnumre.qs.cache= 'no-cache';
+    optlandpostnumre.resolveWithFullResponse= true;
+    optlandpostnumre.simple= false;
+    var landpostnumrerequest= rp(optlandpostnumre);
+
+    Promise.all([postnumrerequest, landpostnumrerequest]).then(function (responses) {
+      assert.equal(responses[0].statusCode,200);
+      assert.equal(responses[1].statusCode,200);
+      var postnumre= JSON.parse(responses[0].body);
+      var landpostnumre= JSON.parse(responses[1].body);
+      var postnumreminøst= postnumre.features[0].geometry.coordinates[0][0].reduce(minøst, 15.0);
+      var landpostnumreminøst= landpostnumre.features[0].geometry.coordinates[0][0].reduce(minøst, 15.0);
+      console.log('postnumreminøst: %d, landpostnumreminøst: %d',postnumreminøst,landpostnumreminøst);
+      assert(postnumreminøst<landpostnumreminøst, 'landpostnumre ligger i havet');
+      done();
+    }).catch(reason => { 
+      done(reason);
+    });
+
+  });
+
+
 });
 
 describe('Kommunesøgning', function(){
