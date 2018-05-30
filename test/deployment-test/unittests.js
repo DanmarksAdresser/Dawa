@@ -550,7 +550,7 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.husnr===adressegeojson.husnr, 'adresse.husnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.husnr + ', geojson: ' + adressegeojson.husnr);
         assert(adressejson.adgangsadresse.husnr===optjson.qs.husnr, 'adresse.husnr i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.husnr + ', søgekriterie: ' + optjson.qs.husnr);
         assert(adressejson.adgangsadresse.supplerendebynavn==adressegeojson.supplerendebynavn||adressejson.adgangsadresse.supplerendebynavn===null&&adressegeojson.supplerendebynavn=="", 'adresse.supplerendebynavn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.supplerendebynavn + ', geojson: ' + adressegeojson.supplerendebynavn);
-        assert(adressejson.adgangsadresse.navngivenvej.id==adressegeojson.navngivenvejid, 'adresse.navngivenvejid i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.navngivenvej.id + ', csv: ' + adressegeojson.id);
+        assert(adressejson.adgangsadresse.navngivenvej.id==adressegeojson.navngivenvej_id, 'adresse.navngivenvejid i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.navngivenvej.id + ', csv: ' + adressegeojson.navngivenvej_id);
         assert(adressejson.adgangsadresse.postnummer.nr===adressegeojson.postnr, 'adresse.postnummer.nr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', geojson: ' + adressegeojson.postnr);
         assert(adressejson.adgangsadresse.postnummer.nr===optjson.qs.postnr, 'adresse.postnummer.nr i json og søgekriterie er forskellig. json: ' + adressejson.adgangsadresse.postnummer.nr + ', søgekriterie: ' + optjson.qs.postnr);
         assert(adressejson.adgangsadresse.postnummer.navn===adressegeojson.postnrnavn, 'adresse.postnummer.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.postnummer.navn + ', geojson: ' + adressegeojson.postnrnavn);
@@ -1083,6 +1083,7 @@ describe('Postnummersøgning', function(){
     optlandpostnumre.url='/postnumre';
     optlandpostnumre.qs= {};
     optlandpostnumre.qs.nr= '6720';
+    optlandpostnumre.qs.landpostnumre= true;
     optlandpostnumre.qs.format= 'geojson'; 
     optlandpostnumre.qs.cache= 'no-cache';
     optlandpostnumre.resolveWithFullResponse= true;
