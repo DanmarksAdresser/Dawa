@@ -5,13 +5,16 @@ const {selectIsoDate: selectLocalDateTime, selectIsoDateUtc: selectIsoTimestampU
 const temaModels = require('../../dagiImport/temaModels');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 const {formatDarStatus } = require('../../apiSpecification/commonMappers');
-
-const normalizeAttr = (attrName, bindingAttr) =>
+const parameterSchema = require('../../apiSpecification/parameterSchema');
+const { defaultSchemas } = require('./datamodelUtil');
+const normalizeAttr = (attrName, bindingAttr, modelAttr) =>
   Object.assign(
     {
       column: attrName,
       formatter: v => v,
-      selectTransform: col => col
+      selectTransform: col => col,
+      parameterType: defaultParameterTypes[modelAttr.type],
+      parameterSchema: defaultSchemas[modelAttr.type]
     },
     bindingAttr || {});
 
@@ -23,13 +26,23 @@ const normalize = (datamodels, unnormalizedBindings) =>
       throw new Error('No db replication binding for ' + entityName);
     }
     const normalizedAttributes = datamodel.attributes.reduce((memo, modelAttr) => {
-      memo[modelAttr.name] = normalizeAttr(modelAttr.name, binding.attributes[modelAttr.name]);
+      memo[modelAttr.name] = normalizeAttr(modelAttr.name, binding.attributes[modelAttr.name], modelAttr);
       return memo;
     }, {});
     const normalizedBinding = Object.assign({}, binding, {attributes: normalizedAttributes});
     memo[entityName] = normalizedBinding;
     return memo;
   }, {});
+
+const defaultParameterTypes = {
+  integer: 'integer',
+  real: 'number',
+  boolean: 'boolean',
+  string: 'string',
+  uuid: 'string',
+  timestamp: 'string',
+  localdatetime: 'string'
+};
 
 const unnormalizedBindings = {
   adgangsadresse: {
@@ -198,9 +211,13 @@ const unnormalizedBindings = {
     attributes: {
       kommunekode: {
         formatter: kode4String,
+        parameterType: 'integer',
+        parameterSchema: parameterSchema.kode4
       },
       kode: {
-        formatter: kode4String
+        formatter: kode4String,
+        parameterType: 'integer',
+        parameterSchema: parameterSchema.kode4
       },
       navn: {
         column: 'vejnavn'
@@ -223,13 +240,19 @@ const unnormalizedBindings = {
     legacyResource: true,
     attributes: {
       kommunekode: {
-        formatter: kode4String
+        formatter: kode4String,
+        parameterType: 'integer',
+        parameterSchema: parameterSchema.kode4
       },
       vejkode: {
-        formatter: kode4String
+        formatter: kode4String,
+        parameterType: 'integer',
+        parameterSchema: parameterSchema.kode4
       },
       postnr: {
         formatter: kode4String,
+        parameterType: 'integer',
+        parameterSchema: parameterSchema.kode4
       }
     }
   },
@@ -239,7 +262,9 @@ const unnormalizedBindings = {
     legacyResource: true,
     attributes: {
       nr: {
-        formatter: kode4String
+        formatter: kode4String,
+        type: 'integer',
+        schema: parameterSchema.postnr
       }
     }
   },

@@ -36,7 +36,7 @@ const tidspunktIntervalDoc = [
   }
 ];
 
-const replikeringDoc = (entityName, eventQueryParams, eventExamples) => {
+const replikeringDoc = (entityName, idParams, eventExamples) => {
   const nameAndKey = registry.findWhere({
     entityName: entityName,
     type: 'nameAndKey'
@@ -53,7 +53,7 @@ Udtraek for ${nameAndKey.plural}.`,
     }, {
       name: 'txid',
       doc: 'Angiver transaktions-ID for udtrækket. Alle hændelser til og med det angivne transaktions-ID er med i udtrækket.'
-    }].concat(formatParameters),
+    }, ...idParams, ...formatParameters],
     examples: []
   };
 
@@ -70,7 +70,7 @@ Hændelser for ${nameAndKey.plural}.`,
       },
       ...sekvensnummerIntervalDoc,
       ...tidspunktIntervalDoc,
-      ...eventQueryParams
+      ...idParams
     ],
     examples: eventExamples
   };

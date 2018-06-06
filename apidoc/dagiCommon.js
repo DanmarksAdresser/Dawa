@@ -158,6 +158,10 @@ const dagiReplikeringTilknytningDoc = model => {
     name: 'adgangsadresseid',
     doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
   }];
+  for(let [key, tilknytningKey] of _.zip(model.primaryKey, model.tilknytningKey)) {
+    const field = _.findWhere(model.fields, {name: key});
+    eventParams.push({name: tilknytningKey, doc: field.description});
+  }
   return replikeringDoc(`${model.prefix}tilknytning`, eventParams, []);
 };
 

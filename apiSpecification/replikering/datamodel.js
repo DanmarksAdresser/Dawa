@@ -2,20 +2,10 @@ const assert = require('assert');
 
 const definitions = require('../commonSchemaDefinitions');
 const temaModels = require('../../dagiImport/temaModels');
-const schemaUtl = require('../../apiSpecification/schemaUtil');
+const schemaUtil = require('../../apiSpecification/schemaUtil');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 
-const defaultSchemas = {
-  integer: {type: 'integer'},
-  real: {type: 'number'},
-  boolean: {type: 'boolean'},
-  string: {type: 'string'},
-  uuid: definitions.UUID,
-  timestamp: {type: 'string'},
-  localdatetime: {type: 'string'},
-  point2d: {type: 'object'},
-  geometry: {type: 'object'}
-};
+const { defaultSchemas } = require('./datamodelUtil');
 module.exports = {
   adgangsadresse: {
     key: ['id'],
@@ -573,7 +563,7 @@ for(let [entityName, model] of Object.entries( darReplikeringModels.historyRepli
 const getDefaultSchema = (type, nullable) => {
   const schemaType = defaultSchemas[type];
   assert(schemaType);
-  return nullable ? schemaUtl.nullable(schemaType) : schemaType;
+  return nullable ? schemaUtil.nullable(schemaType) : schemaType;
 };
 
 for(let modelName of Object.keys(module.exports)) {

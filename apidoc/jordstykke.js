@@ -78,7 +78,17 @@ const jordstykkeIdParameters = [
 const eventParams = [{
   name: 'adgangsadresseid',
   doc: 'Adgangsadressens unikke id, f.eks. 0a3f5095-45ec-32b8-e044-0003ba298018.'
-}];
+},   {
+  name: 'ejerlavkode',
+  doc: 'Jordstykkets ejerlavkode.',
+  examples: ['170354', '80652']
+},
+  {
+    name: 'matrikelnr',
+    doc: 'Jordstykkets matrikelnr.',
+    examples: ['7kn', '5bv']
+  }
+];
 
 
 module.exports = [

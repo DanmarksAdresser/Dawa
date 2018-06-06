@@ -11,6 +11,8 @@ const registry = require('../../registry');
 const sqlUtil = require('../../common/sql/sqlUtil');
 const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
+const { keyParameters: keyParametersMap  } = require('../commonParameters');
+const sqlParameterImpl = require('../../../apiSpecification/common/sql/sqlParameterImpl');
 
 const validateParams = (client, params) => go(function*() {
   const senesteHaendelse = yield querySenesteSekvensnummer(client);
@@ -19,9 +21,10 @@ const validateParams = (client, params) => go(function*() {
   }
 });
 
-const createSqlModel = (model, binding) => {
+const createSqlModel = (model, binding, keyParameters) => {
   const allAttrNames = model.attributes.map(attr => attr.name);
   const tableName = binding.table;
+  const propertyFilter = sqlParameterImpl.simplePropertyFilter(keyParameters, binding.attributes);
   const selectClause = _.pluck(model.attributes, 'name').map(attName => {
     const bindingAttr = binding.attributes[attName];
     const columnName = binding.attributes[attName].column;
@@ -59,6 +62,7 @@ FROM ${tableName}_changes`;
     validateParams: validateParams,
     processStream: (client, fieldNames, params, channel, options) => {
       const sqlParts = createBaseQuery(params.sekvensnummer);
+      propertyFilter(sqlParts, params);
       const query = dbapi.createQuery(sqlParts);
       return cursorChannel(client, query.sql, query.params, channel, options);
     }
@@ -68,7 +72,8 @@ FROM ${tableName}_changes`;
 for(let entityName of Object.keys(datamodels)) {
   const datamodel = datamodels[entityName];
   const binding = dbBindings[entityName];
-  const sqlModel = createSqlModel(datamodel, binding);
+  const keyParameters = keyParametersMap[entityName] || [];
+  const sqlModel = createSqlModel(datamodel, binding, keyParameters);
   exports[entityName] = sqlModel;
   registry.add(`${entityName}udtraek`, 'sqlModel', undefined, sqlModel);
 }

@@ -174,27 +174,30 @@ module.exports = (options) => {
         deferred: deferred
       });
 
-      const nextIsPriorityTask = queuePeek().priority < topPriority - requiredPriorityOffset;
-      const remainingPrioritySlots = Math.max(0, prioritySlots - priorityRunning);
-      const mayRunAsNonPriority = activeCount < slots - remainingPrioritySlots;
-      const mayRunAsPriority = nextIsPriorityTask && remainingPrioritySlots > 0;
-      if(mayRunAsPriority || mayRunAsNonPriority) {
-        q.async(function*() {
-          /* eslint no-constant-condition: 0 */
-          while(true) {
-            removeTasklessSources();
-            if(queue.isEmpty()) {
-              break;
+      if(!queue.isEmpty()) {
+        const nextIsPriorityTask = queuePeek().priority < topPriority - requiredPriorityOffset;
+        const remainingPrioritySlots = Math.max(0, prioritySlots - priorityRunning);
+        const mayRunAsNonPriority = activeCount < slots - remainingPrioritySlots;
+        const mayRunAsPriority = nextIsPriorityTask && remainingPrioritySlots > 0;
+        if(mayRunAsPriority || mayRunAsNonPriority) {
+          q.async(function*() {
+            /* eslint no-constant-condition: 0 */
+            while(true) {
+              removeTasklessSources();
+              if(queue.isEmpty()) {
+                break;
+              }
+              const nextIsPriorityTask =  queuePeek().priority < topPriority;
+              if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < slots - prioritySlots + priorityRunning)) {
+                yield runTopTask();
+              }
+              else {
+                break;
+              }
             }
-            const nextIsPriorityTask = queuePeek().priority < topPriority;
-            if((nextIsPriorityTask && remainingPrioritySlots > 0) ||  (activeCount < slots - prioritySlots + priorityRunning)) {
-              yield runTopTask();
-            }
-            else {
-              break;
-            }
-          }
-        })();
+          })();
+        }
+
       }
       return deferred.promise;
     },
