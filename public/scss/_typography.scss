@@ -245,6 +245,7 @@ code, kbd {
 	font-family: 'Source Code Pro', monospace;
 	font-size: 14px;
 	transition: 0.15s ease-in-out;
+	word-break: inherit;
 }
 
 p, kbd {
