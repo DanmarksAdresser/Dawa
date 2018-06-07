@@ -11,7 +11,7 @@ module.exports = [{
 }, {
   name: 'Matrikelkortet',
   headingClass: 'h2-icon h2-matrikel',
-  lead: 'For en generel introduktion til DAGI, se <a href="/dok/matrikelkortet">her<a/>.',
+  lead: 'For en generel introduktion til matrikelkortet, se <a href="/dok/matrikelkortet">her<a/>.',
   entities: ['ejerlav', 'jordstykke']
 }, {
   name: 'BBR',
