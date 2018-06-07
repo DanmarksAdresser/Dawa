@@ -140,6 +140,28 @@ const unnormalizedBindings = {
     legacyResource: true,
     attributes: {}
   },
+  jordstykke: {
+    table: 'jordstykker',
+    attributes: {
+      kommunekode: {
+        formatter: kode4String,
+      },
+      regionskode: {
+        formatter: kode4String,
+      },
+      sognekode: {
+        formatter: kode4String,
+      },
+      retskredskode: {
+        formatter: kode4String,
+      },
+      geometri: {
+        column: 'geom',
+        selectTransform: col => `ST_AsGeoJSON(${col})`,
+        formatter: JSON.parse
+      }
+    },
+  },
   jordstykketilknytning: {
     path: '/replikering/jordstykketilknytninger',
     table: 'jordstykker_adgadr',

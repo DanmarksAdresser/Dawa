@@ -289,6 +289,72 @@ module.exports = {
         description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.'
       }]
   },
+  jordstykke: {
+    key: ['ejerlavkode', 'matrikelnr'],
+    attributes: [
+      {
+        name: 'ejerlavkode',
+        type: 'integer',
+        schema: definitions.UpTo7,
+        description: 'Unik identifikation af det matrikulære ”ejerlav”.' +
+        ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.',
+      },
+      {
+        name: 'matrikelnr',
+        type: 'string',
+        description: 'Unik identifikation af jordstykket indenfor ejerlavet. Består af bogstaver og tal.'
+      },
+      {
+        name: 'kommunekode',
+        type: 'string',
+        description: 'Kommunekoden. 4 cifre.',
+        schema: definitions.Kode4
+      },
+      {
+        name: 'regionskode',
+        type: 'string',
+        description: 'Regionskoden. 4 cifre.',
+        schema: definitions.Kode4
+      },
+      {
+        name: 'sognekode',
+        type: 'string',
+        description: 'Sognekoden. 4 cifre.',
+        schema: definitions.Kode4
+      },
+      {
+        name: 'retskredskode',
+        type: 'string',
+        description: 'Retskredskoden. 4 cifre.',
+        schema: definitions.Kode4
+      },
+      {
+        name: 'esrejendomsnr',
+        type: 'string',
+        nullable: true,
+        description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ESR, som jordstykket er en del af. Repræsenteret ved 7 cifre. Eksempel ”0035512”.',
+      },
+      {
+        name: 'udvidet_esrejendomsnr',
+        type: 'string',
+        nullable: true,
+        description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ESR, som jordstykket er en del af. Repræsenteret ved 10 cifre, hvor de første 3 cifre er kommunekoden hvor ejerskabet er placeret. Eksempel ”6070035512”.'
+      },
+      {
+        name: 'sfeejendomsnr',
+        type: 'string',
+        nullable: true,
+        description: 'SFE ejendomsnummer.'
+      },
+      {
+        name: 'geometri',
+        type: 'geometry',
+        description: 'Jordstykkets geometri. Leveres som GeoJSON polygon.'
+      }
+
+    ]
+
+  },
   jordstykketilknytning: {
     key: ['ejerlavkode', 'matrikelnr', 'adgangsadresseid'],
     attributes: [

@@ -93,7 +93,7 @@ const attrVerifiers = {
 
 const verifyAttr = (attr, val) => {
   if(val === null) {
-    assert(attr.nullable);
+    assert(attr.nullable, `Null-værdi i ikke-nullable attribut ${attr.name}`);
     return;
   }
   const verifier = attrVerifiers[attr.type];

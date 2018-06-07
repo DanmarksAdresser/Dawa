@@ -108,7 +108,6 @@ const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() 
   yield tableDiffNg.applyChanges(client, txid, jordstykkeTableModel);
   yield client.query('drop table desired_jordstykker; drop table actual_jordstykker; analyze jordstykker; analyze jordstykker_changes;');
   yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.jordstykker_adgadr);
-  yield client.query('delete from jordstykker_changes');
 });
 
 module.exports = {
