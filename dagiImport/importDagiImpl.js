@@ -10,6 +10,7 @@ const {streamArrayToTable, streamCsvToTable} = require('../importUtil/importUtil
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableSchema = require('../psql/tableModel');
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
+const logger = require('../logger').forCategory('dagiImport');
 
 const { updateSubdividedTable, updateGeometricFields } = require('../importUtil/geometryImport');
 
@@ -168,11 +169,12 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
       if(maxChanges) {
         const changes = (yield client.queryRows(`SELECT COUNT(*)::INTEGER as c FROM ${temaModel.tilknytningTable}_changes WHERE txid = ${txid}`))[0].c;
         if(changes > maxChanges) {
-          throw new Error("Too Many Changes", {
+          logger.error("Too Many Changes", {
             temaName,
             changes,
             maxChanges
           });
+          throw new Error("Too Many Changes");
         }
       }
     }
