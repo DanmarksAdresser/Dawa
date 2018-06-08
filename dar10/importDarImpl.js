@@ -165,6 +165,7 @@ const updateDawa = (client, txid) => go(function* () {
   yield rematerializeDawa(client,txid);
   yield importDar09Impl.updateSupplerendeBynavne(client);
   yield importDar09Impl.updatePostnumreKommunekoderMat(client);
+
 });
 
 function createFetchTable(client, tableName) {

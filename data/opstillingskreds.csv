@@ -1,0 +1,93 @@
+﻿nummer;navn;kommuner;kredskommunekode
+1;Østerbro;101;101
+2;Sundbyvester;101;101
+3;Indre By;101;101
+4;Sundbyøster;101;101
+5;Nørrebro;101;101
+6;Bispebjergkredsen;101;101
+7;Brønshøj;101;101
+8;Valby;101;101
+9;Vesterbro;101;101
+10;Falkoner;147;147
+11;Slots;147;147
+12;Tårnby;155,185;185
+13;Gentofte;157;157
+14;Lyngby;173;173
+15;Gladsaxe;159;159
+16;Rødovre;163,175;175
+17;Hvidovre;167;167
+18;Brøndby;153,183,187;153
+19;Taastrup;165,169;169
+20;Ballerup;151,161;151
+21;Helsingør;217;217
+22;Fredensborg;210,223;210
+23;Hillerød;270,219;219
+24;Frederikssund;250,260;250
+25;Egedal;240,190;240
+26;Rudersdal;201,230;230
+27;Rønne;400;400
+28;Aakirkeby;400;400
+29;Lolland;360;360
+30;Guldborgsund;376;376
+31;Vordingborg;390;390
+32;Næstved;370;370
+33;Faxe;320,336;320
+34;Køge;259,350;259
+35;Greve;253,269;253
+36;Roskilde;265;265
+37;Holbæk;316;316
+38;Kalundborg;326,306;326
+39;Ringsted;329,340;329
+40;Slagelse;330;330
+41;Odense Øst;461;461
+42;Odense Vest;461;461
+43;Odense Syd;461;461
+44;Assens;420;420
+45;Middelfart;480,410;410
+46;Nyborg;440,450;450
+47;Svendborg;482,479;479
+48;Faaborg;430,492;430
+49;Sønderborg;540;540
+50;Aabenraa;580;580
+51;Tønder;550;550
+52;Esbjerg By;561;561
+53;Esbjerg Omegn;561;561
+54;Varde;573;573
+55;Vejen;530,575;575
+56;Vejle Nord;630;630
+57;Vejle Syd;630;630
+58;Fredericia;607;607
+59;Kolding Nord;621;621
+60;Kolding Syd;621;621
+61;Haderslev;510;510
+62;Aarhus Syd;751;751
+63;Aarhus Vest;751;751
+64;Aarhus Nord;751;751
+65;Aarhus Øst;751;751
+66;Djurs;707,706;706
+67;Randers Nord;730;730
+68;Randers Syd;730;730
+69;Favrskov;710;710
+70;Skanderborg;727,741,746;746
+71;Horsens;615;615
+72;Hedensted;766;766
+73;Struer;665,671;671
+74;Skive;779;779
+75;Viborg Vest;791;791
+76;Viborg Øst;791;791
+77;Silkeborg Nord;740;740
+78;Silkeborg Syd;740;740
+79;Ikast;756;756
+80;Herning Syd;657;657
+81;Herning Nord;657;657
+82;Holstebro;661;661
+83;Ringkøbing;760;760
+84;Frederikshavn;813,825;813
+85;Hjørring;860;860
+86;Brønderslev;810,849;810
+87;Thisted;787,773;787
+88;Himmerland;840,820;820
+89;Mariagerfjord;846;846
+90;Aalborg Øst;851;851
+91;Aalborg Vest;851;851
+92;Aalborg Nord;851;851

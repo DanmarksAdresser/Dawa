@@ -69,8 +69,8 @@ describe("PostnumreApi", function() {
   }));
 
   it('Kan hente kystafgrænsede postnumre', () => go(function*() {
-    const ikkeAfgrænset = yield request.get({url: 'http://localhost:3002/postnumre/1050?format=geojson&srid=25832', json: true});
-    const afgrænset = yield request.get({url: 'http://localhost:3002/postnumre/1050?format=geojson&landpostnumre&srid=25832', json: true});
+    const ikkeAfgrænset = yield request.get({url: 'http://localhost:3002/postnumre/8000?format=geojson&srid=25832', json: true});
+    const afgrænset = yield request.get({url: 'http://localhost:3002/postnumre/8000?format=geojson&landpostnumre&srid=25832', json: true});
     assert.deepEqual(ikkeAfgrænset.geometry.coordinates, [[[[725025,6166300],[725040,6166300],[725040,6166310],[725025,6166310],[725025,6166300]]]]);
     assert.deepEqual(afgrænset.geometry.coordinates, [[[[725030,6166300],[725025,6166300],[725025,6166310],[725030,6166310],[725030,6166300]]]]);
   }));
