@@ -69,35 +69,34 @@ SELECT a.id as adgangsadresse_id, ejerlavkode, matrikelnr FROM adrs a JOIN jords
 WITH changes AS (
   SELECT
     to_char(date_trunc('day', lower(virkning)), 'YYYY-MM-DD') AS day,
-    statuskode,
+    status,
     count(*)                                                  AS change
-  FROM dar_adresse
-  WHERE upper(registrering) IS NULL
-  GROUP BY date_trunc('day', lower(virkning)), statuskode
+  FROM dar1_adresse_history
+  GROUP BY date_trunc('day', lower(virkning)), status
   UNION ALL
   SELECT
     to_char(date_trunc('day', upper(virkning)), 'YYYY-MM-DD') AS day,
-    statuskode,
+    status,
     -count(*)                                                 AS change
-  FROM dar_adresse
-  WHERE upper(registrering) IS NULL AND upper(virkning) IS NOT NULL
-  GROUP BY date_trunc('day', upper(virkning)), statuskode),
+  FROM dar1_adresse_history
+  WHERE upper(virkning) IS NOT NULL
+  GROUP BY date_trunc('day', upper(virkning)), status),
   byDay AS (SELECT
   day,
-  sum(CASE WHEN statuskode = 1
-    THEN change
-      ELSE 0 END) AS status1,
-  sum(CASE WHEN statuskode = 2
+  sum(CASE WHEN status = 2
     THEN change
       ELSE 0 END) AS status2,
-  sum(CASE WHEN statuskode = 3
+  sum(CASE WHEN status = 3
     THEN change
       ELSE 0 END) AS status3,
-  sum(CASE WHEN statuskode = 4
+  sum(CASE WHEN status = 4
     THEN change
-      ELSE 0 END) AS status4
+      ELSE 0 END) AS status4,
+  sum(CASE WHEN status = 5
+    THEN change
+      ELSE 0 END) AS status5
 FROM changes group by day)
-SELECT day, sum(status1) over w as status1, sum(status2) over w as status2, sum(status3) over w as status3, sum(status4) over w as status4
+SELECT day, sum(status2) over w as status2, sum(status3) over w as status3, sum(status4) over w as status4, sum(status5) over w as status5
 FROM byDay
   WINDOW w AS (order by day)`
   },
@@ -108,35 +107,34 @@ FROM byDay
 WITH changes AS (
   SELECT
     to_char(date_trunc('day', lower(virkning)), 'YYYY-MM-DD') AS day,
-    statuskode,
+    status,
     count(*)                                                  AS change
-  FROM dar_husnummer
-  WHERE upper(registrering) IS NULL
-  GROUP BY date_trunc('day', lower(virkning)), statuskode
+  FROM dar1_husnummer_history
+  GROUP BY date_trunc('day', lower(virkning)), status
   UNION ALL
   SELECT
     to_char(date_trunc('day', upper(virkning)), 'YYYY-MM-DD') AS day,
-    statuskode,
+    status,
     -count(*)                                                 AS change
-  FROM dar_husnummer
-  WHERE upper(registrering) IS NULL AND upper(virkning) IS NOT NULL
-  GROUP BY date_trunc('day', upper(virkning)), statuskode),
+  FROM dar1_husnummer_history
+  WHERE upper(virkning) IS NOT NULL
+  GROUP BY date_trunc('day', upper(virkning)), status),
   byDay AS (SELECT
   day,
-  sum(CASE WHEN statuskode = 1
-    THEN change
-      ELSE 0 END) AS status1,
-  sum(CASE WHEN statuskode = 2
+  sum(CASE WHEN status = 2
     THEN change
       ELSE 0 END) AS status2,
-  sum(CASE WHEN statuskode = 3
+  sum(CASE WHEN status = 3
     THEN change
       ELSE 0 END) AS status3,
-  sum(CASE WHEN statuskode = 4
+  sum(CASE WHEN status = 4
     THEN change
-      ELSE 0 END) AS status4
+      ELSE 0 END) AS status4,
+  sum(CASE WHEN status = 5
+    THEN change
+      ELSE 0 END) AS status5
 FROM changes group by day)
-SELECT day, sum(status1) over w as status1, sum(status2) over w as status2, sum(status3) over w as status3, sum(status4) over w as status4
+SELECT day, sum(status2) over w as status2, sum(status3) over w as status3, sum(status4) over w as status4, sum(status5) over w as status5
 FROM byDay
   WINDOW w AS (order by day)`
   },
