@@ -18,4 +18,12 @@ describe('Jordstykke API', () => {
     expect(properties.ejerlavkode).to.equal(60851);
     expect(properties.matrikelnr).to.equal("1a");
   }));
+
+  it('Kan lave reverse geocoding af jordstykke', () => go(function*() {
+    const results = yield request.get({url: 'http://localhost:3002/jordstykker?srid=25832&x=685477.186430184&y=6159305.17270726', json: true});
+    expect(results.length).to.equal(1);
+    const jordstykke = results[0];
+    expect(jordstykke.ejerlav.kode).to.equal(60851);
+    expect(jordstykke.matrikelnr).to.equal("4b");
+  }));
 });

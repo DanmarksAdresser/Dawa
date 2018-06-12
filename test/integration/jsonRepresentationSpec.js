@@ -243,11 +243,6 @@ var expectedResultsMap = {
       }
     ]
   }],
-  "ejerlav": [{
-    "href": BASE_URL + "/ejerlav/11659",
-    "kode": 11659,
-    "navn": "Tømmerup By, Tårnby"
-  }],
   "vejstykke": [{
     "href": BASE_URL + "/vejstykker/316/510",
     "kode": "0510",

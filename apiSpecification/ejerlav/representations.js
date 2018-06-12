@@ -1,25 +1,25 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var representationUtil = require('../common/representationUtil');
-var fields = require('./fields');
-var commonMappers = require('../commonMappers');
-var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const representationUtil = require('../common/representationUtil');
+const fields = require('./fields');
+const commonMappers = require('../commonMappers');
+const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
-var normalizedFieldSchema = function(fieldName) {
+const normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('ejerlav', fieldName);
 };
 
 
-var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHref = commonMappers.makeHref;
+const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
+const makeHref = commonMappers.makeHref;
 
-exports.flat = representationUtil.defaultFlatRepresentation(fields);
+exports.flat = representationUtil.defaultFlatRepresentation(representationUtil.fieldsWithoutNames(fields, ['geom_json']));
 
-var autocompleteFieldNames = ['navn', 'kode'];
-var autocompleteFields = _.filter(fields, function(field) {
+const autocompleteFieldNames = ['navn', 'kode'];
+const autocompleteFields = _.filter(fields, function(field) {
   return _.contains(autocompleteFieldNames, field.name);
 });
 
@@ -77,5 +77,9 @@ exports.json = {
   }
 };
 
-var registry = require('../registry');
+const geomJsonField = _.findWhere(fields, {name: 'geom_json'});
+exports.geojson = representationUtil.geojsonRepresentation(geomJsonField, exports.flat);
+exports.geojsonNested = representationUtil.geojsonRepresentation(geomJsonField, exports.json);
+
+const registry = require('../registry');
 registry.addMultiple('ejerlav', 'representation', module.exports);

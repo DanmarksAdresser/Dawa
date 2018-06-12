@@ -44,7 +44,7 @@ const wfsFeatureToTema2 =  (feature, mapping) => {
   const wfsFeature = featureCandidates[0];
 
   const builder = new xml2js.Builder({renderOpts: {pretty: false}, headless: true});
-  const geometryRoot = wfsFeature[mapping.geometry][0];
+  const geometryRoot = (wfsFeature.surfaceProperty || wfsFeature.multiSurfaceProperty || wfsFeature.geometri)[0];
   const rootElmName = Object.keys(geometryRoot);
   const rootElm = {};
   rootElm[rootElmName] = geometryRoot[rootElmName][0];
@@ -74,8 +74,7 @@ const wfsFeatureToTema2 =  (feature, mapping) => {
   return Object.assign({geom}, fields);
 };
 
-
-const parseTemaGml = (gmlText, mapping) => go(function*() {
+const gmlToJson = gmlText => go(function*() {
   const result =  yield q.nfcall(xml2js.parseString, gmlText, {
     tagNameProcessors: [xml2js.processors.stripPrefix],
     trim: true
@@ -83,7 +82,22 @@ const parseTemaGml = (gmlText, mapping) => go(function*() {
   if (!result.FeatureCollection) {
     throw new Error('Unexpected contents in tema file file: ' + JSON.stringify(result));
   }
+  return result;
+});
 
+const extractFeatures = (json, mapping) =>  {
+  let features = json.FeatureCollection.member || json.FeatureCollection.featureMember;
+  features = features.filter(feature => feature[mapping.wfsName]);
+  features = features.filter(mapping.filterFn);
+  // old school loop to conserve some memory
+  for(let i = 0; i < features.length; ++i){
+    features[i] = wfsFeatureToTema2(features[i], mapping);
+  }
+  return features;
+};
+
+const parseTemaGml = (gmlText, mapping) => go(function*() {
+  const result = yield gmlToJson(gmlText);
   let features = result.FeatureCollection.featureMember;
   features = features.filter(feature => feature[mapping.wfsName]);
   features = features.filter(mapping.filterFn);
@@ -96,24 +110,9 @@ const parseTemaGml = (gmlText, mapping) => go(function*() {
 });
 
 const parseTemaGml2 = (gmlText, mapping) => go(function*() {
-  const result =  yield q.nfcall(xml2js.parseString, gmlText, {
-    tagNameProcessors: [xml2js.processors.stripPrefix],
-    trim: true
-  });
-  if (!result.FeatureCollection) {
-    throw new Error('Unexpected contents in tema file file: ' + JSON.stringify(result));
-  }
-
-  let features = result.FeatureCollection.member;
-
-  features = features.filter(feature => feature[mapping.wfsName]);
-  features = features.filter(mapping.filterFn);
-  // old school loop to conserve some memory
-  for(let i = 0; i < features.length; ++i){
-    features[i] = wfsFeatureToTema2(features[i], mapping);
-  }
-  return features;
+  const json = yield gmlToJson(gmlText);
+  return extractFeatures(json, mapping);
 });
 
-module.exports = { parseTemaGml,parseTemaGml2};
+module.exports = { parseTemaGml,parseTemaGml2, gmlToJson, extractFeatures};
 

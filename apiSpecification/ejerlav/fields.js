@@ -12,7 +12,12 @@ var normalizedField = function(fieldName) {
 
 var fields = [
   normalizedField('kode'),
-  normalizedField('navn')
+  normalizedField('navn'),
+  {
+    name: 'geom_json',
+    selectable: true
+  }
+
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

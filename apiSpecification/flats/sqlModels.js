@@ -29,8 +29,18 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
   columns.geom_json = {
     select: function (sqlParts, sqlModel, params) {
       var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias);
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, `${sqlSpec.table}.geom`);
     }
+  };
+
+  columns.ændret = {
+    column: `${sqlSpec.table}.ændret`
+  };
+  columns.geo_ændret = {
+    column: `${sqlSpec.table}.geo_ændret`
+  };
+  columns.geo_version = {
+    column: `${sqlSpec.table}.geo_version`
   };
 
   const table = sqlSpec.table;

@@ -1,12 +1,14 @@
 "use strict";
 
-var nameAndKey = require('./nameAndKey');
-var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
-var parameters = require('./parameters');
-var sqlUtil = require('../common/sql/sqlUtil');
-var assembleSqlModel = sqlUtil.assembleSqlModel;
+const nameAndKey = require('./nameAndKey');
+const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+const parameters = require('./parameters');
+const sqlUtil = require('../common/sql/sqlUtil');
+const assembleSqlModel = sqlUtil.assembleSqlModel;
+const dbapi = require('../../dbapi');
+const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
-var columns = {
+const columns = {
   kode: {
     column: 'ejerlav.kode'
   },
@@ -15,17 +17,25 @@ var columns = {
   },
   tsv: {
     column: 'ejerlav.tsv'
-  }
+  },
+  geom_json: {
+    select: function (sqlParts, sqlModel, params) {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'ejerlav.geom');
+    }
+  },
 };
 
-var parameterImpls = [
+const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+  sqlParameterImpl.reverseGeocodingWithin(),
+  sqlParameterImpl.geomWithin(),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
-var baseQuery = function() {
+const baseQuery = function() {
   return {
     select: [],
     from: ['ejerlav'],
@@ -38,5 +48,5 @@ var baseQuery = function() {
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
 
-var registry = require('../registry');
+const registry = require('../registry');
 registry.add('ejerlav', 'sqlModel', undefined, module.exports);

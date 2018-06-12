@@ -11,13 +11,13 @@ module.exports = {
     columns: {
       ejerlavnavn: {
         column: "ejerlav.navn"
-      }
+      },
     },
     subdividedGeometryIndex: false,
     geometryType: 'Polygon',
     baseQuery: () => ({
       select: [],
-      from: [`jordstykker LEFT JOIN ejerlav ON jordstykker.ejerlavkode = ejerlav.kode`],
+      from: [`jordstykker LEFT JOIN (select kode, navn from ejerlav) ejerlav ON jordstykker.ejerlavkode = ejerlav.kode`],
       whereClauses: [],
       orderClauses: [],
       sqlParams: []

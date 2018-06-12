@@ -31,8 +31,8 @@ describe('Replikering', () => {
     beforeEach(() => go(function*() {
       const client = clientFn();
       yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (2, 'foobar')`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (1, 'foo', now(), now(), 1)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (2, 'foobar', now(), now(), 1)`);
       yield withImportTransaction(client, 'test', txid => go(function*() {
         yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
         yield applyChanges(client, txid, ejerlavTableModel);
