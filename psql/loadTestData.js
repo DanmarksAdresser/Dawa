@@ -11,7 +11,7 @@ var loadCsvTestdata = require('./loadCsvTestdata');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
 var proddb = require('./proddb');
 const {importTemaerJson, importLandpostnummer} = require('../dagiImport/importDagiImpl');
-var updateEjerlavImpl = require('./updateEjerlavImpl');
+// var updateEjerlavImpl = require('./updateEjerlavImpl');
 const importDar10Impl = require('../dar10/importDarImpl');
 const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
 const importOisImpl = require('../ois/importOisImpl');
@@ -44,7 +44,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield initialization.disableTriggersAndInitializeTables(client);
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
         yield loadStormodtagereImpl(client, txid, 'data/stormodtagere.csv');
-        yield updateEjerlavImpl(client, txid, 'data/ejerlav.csv');
+        // yield updateEjerlavImpl(client, txid, 'data/ejerlav.csv');
         const temaNames = _.without(temaModels.modelList.map(tema => tema.singular), 'landpostnummer');
         yield importTemaerJson(client, txid, temaNames, 'test/data/dagi', '', 1000000);
         yield importLandpostnummer(client, txid);

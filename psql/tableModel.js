@@ -151,10 +151,19 @@ const ejerlav = {
   }, {
     name: 'navn'
   }, {
+    name: 'ændret'
+  }, {
+    name: 'geo_ændret'
+  }, {
+    name: 'geo_version'
+  }, {
     name: 'tsv',
     public: false,
     derive: (table) =>
       `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+  }, {
+    name: 'geom',
+    distinctClause: geomDistinctClause
   }]
 };
 

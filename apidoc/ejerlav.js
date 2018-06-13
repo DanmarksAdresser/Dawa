@@ -1,12 +1,17 @@
 const {
   autocompleteSubtext,
   formatAndPagingParams,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  strukturParameter
 } = require('./common');
 
 const {
   replikeringDoc
 } = require('./replikeringCommon');
+
+const {
+  dagiSridCirkelPolygonParameters
+} = require('./dagiCommon');
 
 
 const ejerlavKodeParameter = {
@@ -47,13 +52,23 @@ const ejerlavEventExamples =  [
   }
 ];
 
+const reverseParameters = [  {
+  name: 'x',
+  doc: 'Find ejerlavet for det angivne punkt. Både x- og y-parameter skal angives. Hvis ETRS89/UTM32 anvendes angives øst-værdien. Hvis WGS84/geografisk anvendes angives bredde-værdien.'
+},
+  {
+    name: 'y',
+    doc: 'Find ejerlavet for det angivne punkt. Både x- og y-parameter skal angives. Hvis ETRS89/UTM32 anvendes angives nord-værdien. Hvis WGS84/geografisk ' +
+    'anvendes angives længde-værdien.'
+  }
+]
 
 module.exports = [
   {
     entity: 'ejerlav',
     path: '/ejerlav',
     subtext: 'Søg efter ejerlav. Returnerer de ejerlav som opfylder kriteriet.',
-    parameters: ejerlavParameters.concat(formatAndPagingParams),
+    parameters: [...ejerlavParameters, ...reverseParameters, ...dagiSridCirkelPolygonParameters('ejerlav'), strukturParameter, ...formatAndPagingParams],
     examples: [{description: 'Hent alle ejerlav', query: []},
       {
         description: 'Find ejerlav <em>80652</em>',
@@ -68,7 +83,7 @@ module.exports = [
     entity: 'ejerlav',
     path: '/ejerlav/{kode}',
     subtext: 'Modtag ejerlav med angivet kode.',
-    parameters: [ejerlavKodeParameter],
+    parameters: [ejerlavKodeParameter, strukturParameter],
     nomulti: true,
     examples: [{
       description: 'Hent ejerlav 80652',
@@ -79,7 +94,7 @@ module.exports = [
     entity: 'ejerlav',
     path: '/ejerlav/autocomplete',
     subtext: autocompleteSubtext('ejerlav'),
-    parameters: overwriteWithAutocompleteQParameter(ejerlavParameters).concat(formatAndPagingParams),
+    parameters: overwriteWithAutocompleteQParameter([...ejerlavParameters, ...dagiSridCirkelPolygonParameters('ejerlav'), ...formatAndPagingParams]),
     examples: [{
       description: 'Find alle ejerlav som indeholder <em>by</em> i navnet',
       query: [{name: 'q', value: 'by'}]

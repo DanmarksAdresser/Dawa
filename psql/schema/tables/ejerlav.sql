@@ -4,6 +4,10 @@ CREATE TABLE ejerlav (
   kode INTEGER,
   navn VARCHAR(255) NOT NULL,
   tsv tsvector,
+  ændret timestamptz NOT NULL DEFAULT now(),
+  geo_version integer NOT NULL DEFAULT 1,
+  geo_ændret timestamptz NOT NULL DEFAULT now(),
+  geom geometry(multipolygon, 25832),
   PRIMARY KEY(kode)
 );
 
