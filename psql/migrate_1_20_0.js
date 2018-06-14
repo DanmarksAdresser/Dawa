@@ -4,6 +4,8 @@ const {go} = require('ts-csp');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const proddb = require('./proddb');
 
+const temaModels = require('../dagiImport/temaModels');
+
 const { reloadDatabaseCode } = require('./initialization');
 const {withImportTransaction} = require('../importUtil/importUtil');
 const optionSpec = {
@@ -37,6 +39,10 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield client.query('ALTER TABLE ejerlav_changes alter column GEO_ændret DROP DEFAULT');
       yield client.query('ALTER TABLE ejerlav_changes alter column geo_version DROP DEFAULT');
     }));
+    for(let model of temaModels.modelList) {
+      yield client.query(`ALTER TABLE ${model.table} ADD COLUMN bbox geometry(polygon, 25832);
+      ALTER TABLE ${model.table}_changes ADD COLUMN bbox geometry(polygon, 25832);`);
+    }
     yield client.query('analyze');
   })).done();
 });

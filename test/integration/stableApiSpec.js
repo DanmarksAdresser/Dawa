@@ -62,6 +62,12 @@ describe('Stable API', () => {
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
             "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "nummer": "2",
             "navn": "Test afstemningsområde",
             "afstemningssted": {
@@ -122,6 +128,12 @@ describe('Stable API', () => {
             "valglandsdelsnavn": "Valglandsdel test",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "geo_version": 1
           }
         }]
@@ -139,6 +151,12 @@ describe('Stable API', () => {
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
             "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "nummer": "99",
             "kode": "0099",
             "navn": "Opstillingskreds test",
@@ -190,7 +208,13 @@ describe('Stable API', () => {
             "valglandsdelsnavn": "Valglandsdel test",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_ændret": "2018-05-02T06:50:28.217Z",
-            "geo_version": 1
+            "geo_version": 1,
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ]
           }
         }]
       }
@@ -206,6 +230,12 @@ describe('Stable API', () => {
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
             "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "nummer": "1",
             "navn": "Storkreds test",
             "region": {
@@ -233,7 +263,13 @@ describe('Stable API', () => {
             "valglandsdelsnavn": "Valglandsdel test",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_ændret": "2018-05-02T06:50:28.217Z",
-            "geo_version": 1
+            "geo_version": 1,
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ]
           }
         }]
       }
@@ -250,6 +286,12 @@ describe('Stable API', () => {
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
             "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "href": "http://dawa/valglandsdele/A"
           }
 
@@ -263,6 +305,12 @@ describe('Stable API', () => {
             "navn": "Valglandsdel test",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "geo_ændret": "2018-05-02T06:50:28.217Z",
           }
         }]
@@ -280,6 +328,12 @@ describe('Stable API', () => {
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
             "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
             "navn": "Supplerende bynavn test",
             "kommune": {
               "href": "http://dawa/kommuner/101",
@@ -299,7 +353,14 @@ describe('Stable API', () => {
             "kommunenavn": "København",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_ændret": "2018-05-02T06:50:28.217Z",
-            "geo_version": 1
+            "geo_version": 1,
+            "bbox": [
+              12.5711324,
+              55.59055905,
+              12.57129891,
+              55.59064411
+            ],
+
           }
         }]
       }

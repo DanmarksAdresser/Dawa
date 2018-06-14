@@ -248,6 +248,12 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
         return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 't.geom');
       }
     },
+    bbox: {
+      select: function (sqlParts, sqlModel, params) {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return postgisSqlUtil.bboxColumn(params.srid || 4326, sridAlias, 't.bbox');
+      }
+    },
     geo_version: {
       column: 't.geo_version'
     },

@@ -631,6 +631,10 @@ exports.toTableModel = temaModel => {
       {
         name: 'geom',
         distinctClause: geomDistinctClause
+      },
+      {
+        name: 'bbox',
+        derive: table => `st_envelope(${table}.geom)`
       }]
   }
 };
@@ -680,6 +684,20 @@ exports.toReplikeringModel = temaModel => {
         type: 'integer'
       },
       description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.'
+    }, {
+      name: 'bbox',
+
+      type: 'bbox',
+      schema: {
+        minItems: 4,
+        maxItems: 4,
+        items: {
+          type: 'number'
+        }
+      },
+      description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne.`
     },
       ...temaModel.fields.map(field => {
         return {

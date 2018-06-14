@@ -8,6 +8,14 @@ const nullableType = schemaUtil.nullableType;
 const nullable = schemaUtil.nullable;
 
 const definitions = {
+  Bbox: {
+    type: 'array',
+    minItems: 4,
+    maxItems: 4,
+    items: {
+      type: 'number'
+    }
+  },
   'UUID' : {
     postgresql: 'UUID',
     type: 'string',

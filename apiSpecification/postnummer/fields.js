@@ -4,6 +4,7 @@ var fieldsUtil = require('../common/fieldsUtil');
 var sqlModel = require('./sqlModel');
 
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const commonMappers = require('../commonMappers');
 
 var normalizedField = function(fieldName) {
   return normalizedFieldSchemas.normalizedField('postnummer', fieldName);
@@ -27,8 +28,12 @@ var fields = [
   {
     name: 'kommuner',
     multi: true
-  }
-];
+  },
+  {
+    name: 'bbox',
+    selectable: true,
+    formatter: commonMappers.mapBbox
+  }];
 
 fieldsUtil.applySelectability(fields, sqlModel);
 fieldsUtil.normalize(fields);

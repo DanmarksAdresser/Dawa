@@ -133,3 +133,8 @@ exports.parseDarStatus = darstatustekst => {
     default: return null;
   }
 }
+
+exports.mapBbox = bboxText => {
+  const coordinates = bboxText ? JSON.parse(bboxText).coordinates : null;
+  return coordinates ? [...coordinates[0][0], ...coordinates[0][2]] : null;
+};

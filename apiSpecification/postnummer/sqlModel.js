@@ -1,41 +1,52 @@
 "use strict";
 
-var nameAndKey = require('./nameAndKey');
-var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
-var parameters = require('./parameters');
-var assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
-var dbapi = require('../../dbapi');
+const nameAndKey = require('./nameAndKey');
+const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+const parameters = require('./parameters');
+const assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
+const dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
 const normalGeomQuery = "(select geom from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
 const landpostnummerGeomQuery = "(select geom from landpostnumre where landpostnumre.nr = postnumre.nr limit 1)";
+
+const normalBboxQuery = "(select bbox from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
+const landpostnummerBboxQuery = "(select bbox from landpostnumre where landpostnumre.nr = postnumre.nr limit 1)";
+
 const geomQueryFunc = params =>  params.landpostnumre ? landpostnummerGeomQuery : normalGeomQuery;
-var columns = {
+const bboxQueryFunc = params =>  params.landpostnumre ? landpostnummerBboxQuery : normalBboxQuery;
+const columns = {
   kommunekode: {
     select: null,
     where: function(sqlParts, parameterArray) {
       // this is a bit hackish, we add the parameters from
       // the parent query to the subquery to get
       // correct parameter indices for the subquery
-      var subquery = {
+      const subquery = {
         select: ["*"],
         from: ['postnumre_kommunekoder_mat'],
         whereClauses: ['postnr = nr'],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
-      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{name: 'kommunekode', multi: true}], {});
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{name: 'kommunekode', multi: true}], {});
       propertyFilterFn(subquery, {kommunekode: parameterArray});
-      var subquerySql = dbapi.createQuery(subquery).sql;
+      const subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
   },
   stormodtageradresser: {
     select: '(select json_agg(adgangsadresseid) from stormodtagere where stormodtagere.nr = postnumre.nr)'
   },
+  bbox: {
+    select: function (sqlParts, sqlModel, params) {
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      return postgisSqlUtil.bboxColumn(params.srid || 4326, sridAlias,bboxQueryFunc(params));
+    }
+  },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
-      var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias,geomQueryFunc(params));
     }
   },
@@ -50,7 +61,7 @@ var columns = {
   }
 };
 
-var baseQuery = function () {
+const baseQuery = function () {
   return {
     select: [],
     from: ['postnumre'],
@@ -61,7 +72,7 @@ var baseQuery = function () {
 };
 
 
-var parameterImpls = [
+const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
   sqlParameterImpl.geomWithin(geomQueryFunc),
@@ -73,5 +84,5 @@ var parameterImpls = [
 
 module.exports = assembleSqlModel(columns, parameterImpls, baseQuery);
 
-var registry = require('../registry');
+const registry = require('../registry');
 registry.add('postnummer', 'sqlModel', undefined, module.exports);

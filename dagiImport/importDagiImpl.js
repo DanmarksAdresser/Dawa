@@ -151,6 +151,8 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     // Opdater meta-felter (oprettet, ændret, geo_version, geo_ændret)
     yield updateGeometricFields(client, txid, tableModel);
 
+
+
     yield tableDiffNg.applyChanges(client, txid, tableModel);
 
     // Temaer opdeles i mindre polygoner ad hensyn til query-performance. Disse ligger i en separat tabel.

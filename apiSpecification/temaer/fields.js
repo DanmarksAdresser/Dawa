@@ -4,6 +4,7 @@ const fieldsUtil = require('../common/fieldsUtil');
 const temaModels = require('../../dagiImport/temaModels');
 const sqlModels = require('./sqlModels');
 const { kode4String, numberToString } = require('../util');
+const commonMappers = require('../commonMappers');
 
 const additionalFieldsMap = {
   afstemningsområde: [
@@ -195,6 +196,11 @@ const fieldMap = temaModels.modelList.filter(model => model.published).reduce((m
     {
       name: 'geom_json',
       selectable: true
+    },
+    {
+      name: 'bbox',
+      selectable: true,
+      formatter: commonMappers.mapBbox
     }]);
   fieldsUtil.applySelectability(result, sqlModels[model.singular]);
   memo[model.singular] = result;

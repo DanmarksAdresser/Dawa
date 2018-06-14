@@ -5,6 +5,7 @@ var representationUtil = require('../common/representationUtil');
 var fieldMap = require('./fields');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const {normalizedSchemaField} = require('../replikering/normalizedFieldSchemas');
+const commonMappers = require('../commonMappers');
 const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 const {schemaObject} = require('../schemaUtil');
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
@@ -48,18 +49,24 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
   };
 });
 
+const mapMetaFields = row => {
+  return {
+    ændret: row.ændret,
+    geo_version: row.geo_version,
+    geo_ændret: row.geo_ændret,
+    bbox: commonMappers.mapBbox(row.bbox)
+  };
+}
+
 const opstillingskredsJsonRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.opstillingskreds, ['geom_json']);
   const normalizedFieldSchema = (fieldName) => {
     return normalizedSchemaField('opstillingskreds', fieldName);
   };
   const mapper = baseUrl => row => {
-    const result = {
+    const result = Object.assign(mapMetaFields(row), {
       href: makeHref(baseUrl, 'opstillingskreds', [row.nummer]),
       dagi_id: numberToString(row.dagi_id),
-      ændret: row.ændret,
-      geo_version: row.geo_version,
-      geo_ændret: row.geo_ændret,
       nummer: numToStr(row.nummer),
       kode: kode4String(row.nummer),
       navn: row.navn,
@@ -76,7 +83,7 @@ const opstillingskredsJsonRepresentation = (() => {
         navn: row.valglandsdelsnavn
       },
       kommuner: mapKommuneRefArray(row.kommuner, baseUrl)
-    };
+    });
     return result;
   };
   const schema = globalSchemaObject({
@@ -88,6 +95,7 @@ const opstillingskredsJsonRepresentation = (() => {
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
       geo_ændret: normalizedFieldSchema('geo_ændret'),
+      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       kode: normalizedFieldSchema('kode'),
       kredskommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Opstillingskredsens kredskommune.'}),
@@ -102,7 +110,7 @@ const opstillingskredsJsonRepresentation = (() => {
 
       }
     },
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer', 'kode',
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'nummer', 'kode',
       'kredskommune', 'region', 'storkreds', 'valglandsdel', 'kommuner']
   });
   return {fields, mapper, schema};
@@ -111,12 +119,9 @@ const opstillingskredsJsonRepresentation = (() => {
 const afstemningsområdeJsonRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.afstemningsområde, ['geom_json']);
   const mapper = baseUrl => row => {
-    const result = {
+    const result = Object.assign(mapMetaFields(row), {
       href: makeHref(baseUrl, 'afstemningsområde', [row.kommunekode, row.nummer]),
       dagi_id: numberToString(row.dagi_id),
-      ændret: row.ændret,
-      geo_version: row.geo_version,
-      geo_ændret: row.geo_ændret,
       nummer: numToStr(row.nummer),
       navn: row.navn,
       afstemningssted: {
@@ -144,7 +149,7 @@ const afstemningsområdeJsonRepresentation = (() => {
         bogstav: row.valglandsdelsbogstav,
         navn: row.valglandsdelsnavn
       }
-    };
+    });
     return result;
   };
   const normalizedFieldSchema = (fieldName) => {
@@ -159,6 +164,7 @@ const afstemningsområdeJsonRepresentation = (() => {
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
       geo_ændret: normalizedFieldSchema('geo_ændret'),
+      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       afstemningssted: schemaObject({
         properties: {
@@ -192,7 +198,7 @@ const afstemningsområdeJsonRepresentation = (() => {
       storkreds: commonSchemaDefinitions.StorkredsRef,
       valglandsdel: commonSchemaDefinitions.ValglandsdelsRef,
     },
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer',
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'nummer',
       'afstemningssted',
       'kommune', 'region', 'opstillingskreds', 'storkreds', 'valglandsdel']
   });
@@ -202,7 +208,7 @@ const afstemningsområdeJsonRepresentation = (() => {
 const mrAfstemningsområdeRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.menighedsrådsafstemningsområde, ['geom_json']);
   const mapper = baseUrl => row => {
-    const result = {
+    const result = Object.assign(mapMetaFields(row), {
       href: makeHref(baseUrl, 'menighedsrådsafstemningsområde', [row.kommunekode, row.nummer]),
       dagi_id: numberToString(row.dagi_id),
       ændret: row.ændret,
@@ -212,7 +218,7 @@ const mrAfstemningsområdeRepresentation = (() => {
       navn: row.navn,
       kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
       sogn: mapKode4NavnTema('sogn', row.sognekode, row.sognenavn, baseUrl)
-    };
+    });
     return result;
   };
   const normalizedFieldSchema = (fieldName) => {
@@ -227,11 +233,12 @@ const mrAfstemningsområdeRepresentation = (() => {
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
       geo_ændret: normalizedFieldSchema('geo_ændret'),
+      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       kommune: commonSchemaDefinitions.KommuneRef,
       sogn: commonSchemaDefinitions.SogneRef
     },
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'nummer',
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'nummer',
       'kommune', 'sogn']
   });
   return {fields, mapper, schema};
@@ -240,11 +247,8 @@ const mrAfstemningsområdeRepresentation = (() => {
 const storkredsJsonRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.storkreds, ['geom_json']);
   const mapper = baseUrl => row => {
-    const result = {
+    const result = Object.assign(mapMetaFields(row), {
       href: makeHref(baseUrl, 'storkreds', [row.nummer]),
-      ændret: row.ændret,
-      geo_version: row.geo_version,
-      geo_ændret: row.geo_ændret,
       nummer: numToStr(row.nummer),
       navn: row.navn,
       region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
@@ -253,7 +257,7 @@ const storkredsJsonRepresentation = (() => {
         bogstav: row.valglandsdelsbogstav,
         navn: row.valglandsdelsnavn
       }
-    };
+    });
     return result;
   };
   const normalizedFieldSchema = (fieldName) => {
@@ -266,12 +270,13 @@ const storkredsJsonRepresentation = (() => {
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
       geo_ændret: normalizedFieldSchema('geo_ændret'),
+      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       navn: normalizedFieldSchema('navn'),
       region: Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som storkredsen ligger i.'}),
       valglandsdel: Object.assign({}, commonSchemaDefinitions.ValglandsdelsRef, {description: 'Den valglandsdel, som storkredsen tilhører'}),
     },
-    docOrder: ['href', 'ændret', 'geo_version', 'geo_ændret', 'nummer', 'navn',
+    docOrder: ['href', 'ændret', 'geo_version', 'geo_ændret','bbox', 'nummer', 'navn',
       'region', 'valglandsdel']
   });
   return {fields, mapper, schema};
@@ -280,15 +285,12 @@ const storkredsJsonRepresentation = (() => {
 const supplerendebynavnRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.supplerendebynavn, ['geom_json']);
   const mapper = baseUrl => row => {
-    const result = {
+    const result = Object.assign(mapMetaFields(row), {
       href: makeHrefFromPath(baseUrl, 'supplerendebynavne2', [row.dagi_id]),
       dagi_id: numberToString(row.dagi_id),
-      ændret: row.ændret,
-      geo_version: row.geo_version,
-      geo_ændret: row.geo_ændret,
       navn: row.navn,
       kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
-    };
+    });
     return result;
   };
   const normalizedFieldSchema = (fieldName) => {
@@ -302,10 +304,11 @@ const supplerendebynavnRepresentation = (() => {
       ændret: normalizedFieldSchema('ændret'),
       geo_version: normalizedFieldSchema('geo_version'),
       geo_ændret: normalizedFieldSchema('geo_ændret'),
+      bbox: normalizedFieldSchema('bbox'),
       navn: normalizedFieldSchema('navn'),
       kommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'})
     },
-    docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'navn',
+    docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'navn',
       'kommune']
   });
   return {fields, mapper, schema};
@@ -341,9 +344,16 @@ function schemaForFlatFields(model, excludedFieldNames) {
       geo_version: {
         description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
         type: 'integer'
-      }
+      },
+      bbox: {
+        description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
+        $ref: '#/definitions/NullableBbox'
+      },
+
     },
-    docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version']
+    docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version', 'bbox']
   };
 
   model.fields.filter(function (additionalField) {
@@ -382,7 +392,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
         result.ændret = row.ændret;
         result.geo_version = row.geo_version;
         result.geo_ændret = row.geo_ændret;
-
+        result.bbox = commonMappers.mapBbox(row.bbox);
         result.href = makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function (keyName) {
           return result[keyName];
         }));

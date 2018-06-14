@@ -14,6 +14,11 @@ exports.geojsonColumn = (srid, sridAlias, geomColumn) => {
   return `ST_AsGeoJSON(ST_Transform(${geomColumn || 'geom'}, ${sridAlias}::integer), ${decimals})`;
 };
 
+exports.bboxColumn = (srid, sridAlias, bboxColumn) => {
+  const decimals = sridToDecimals[srid];
+  return `ST_AsGeoJSON(ST_Transform(${bboxColumn || 'bbox'}, ${sridAlias}::integer), ${decimals})`;
+};
+
 exports.adgangsadresseGeojsonColumn = (srid, sridAlias, params) => {
   const geomColumn = params.geometri === 'vejpunkt' ? 'vejpunkt_geom' : 'geom';
   const decimals = sridToDecimals[srid];

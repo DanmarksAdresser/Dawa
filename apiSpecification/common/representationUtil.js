@@ -96,6 +96,10 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
           };
         }
         result.properties = propertiesMapper(row);
+        if(result.properties.bbox) {
+          result.bbox = result.properties.bbox;
+          delete result.properties.bbox;
+        }
         return result;
       };
     }

@@ -18,6 +18,7 @@ CREATE TABLE ${temaModel.table}(
   geo_version integer NOT NULL,
   geo_ændret timestamptz NOT NULL,
   geom geometry(MultiPolygon, 25832),
+  bbox geometry(polygon, 25832),
   tsv tsvector,
   ${primaryKeySql}
 );`

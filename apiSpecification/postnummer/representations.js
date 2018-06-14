@@ -52,9 +52,12 @@ exports.json = {
         items: {
           '$ref': '#/definitions/KommuneRef'
         }
+      },
+      bbox: {
+        '$ref': '#/definitions/NullableBbox'
       }
     },
-    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'kommuner']
+    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'kommuner', 'bbox']
   }),
   fields: _.filter(_.where(fields, { selectable: true }), function(field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -68,6 +71,7 @@ exports.json = {
         stormodtageradresser: row.stormodtageradresser ? _.map(row.stormodtageradresser, function(adgangsadresseid) {
           return commonMappers.mapAdgangsadresseRef(adgangsadresseid, baseUrl);
         }) : null,
+        bbox: commonMappers.mapBbox(row.bbox),
         kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : []
       };
     };
