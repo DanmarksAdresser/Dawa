@@ -12,7 +12,7 @@ const tableSchema = require('../psql/tableModel');
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
 const logger = require('../logger').forCategory('dagiImport');
 
-const { updateSubdividedTable, updateGeometricFields } = require('../importUtil/geometryImport');
+const { updateSubdividedTable, updateGeometricFields, computeVisualCenters } = require('../importUtil/geometryImport');
 
 const postProcess = {
   opstillingskreds: (client, table) => go(function*() {
@@ -131,6 +131,7 @@ const makeStoreTemaWfsMultiGeomFn = featureMappings =>
     return storeTemaWfsMultiGeom(client, temaDef, featureMapping, dataDir, filePrefix, targetTable);
   };
 
+
 const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn) => go(function*(){
   for (let temaName of temaNames) {
     const temaModel = temaModels.modelMap[temaName];
@@ -151,7 +152,7 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     // Opdater meta-felter (oprettet, ændret, geo_version, geo_ændret)
     yield updateGeometricFields(client, txid, tableModel);
 
-
+    yield computeVisualCenters(client, txid, tableModel);
 
     yield tableDiffNg.applyChanges(client, txid, tableModel);
 

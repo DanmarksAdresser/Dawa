@@ -164,6 +164,11 @@ const ejerlav = {
   }, {
     name: 'geom',
     distinctClause: geomDistinctClause
+  }, {
+    name: 'bbox',
+    derive: table => `st_envelope(${table}.geom)`
+  }, {
+    name: 'visueltcenter'
   }]
 };
 
@@ -437,6 +442,11 @@ const jordstykker = {
   }, {
     name: 'geom',
     distinctClause: geomDistinctClause
+  }, {
+    name: 'bbox',
+    derive: table => `st_envelope(${table}.geom)`
+  }, {
+    name: 'visueltcenter'
   }]
 };
 

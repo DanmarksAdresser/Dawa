@@ -14,7 +14,9 @@ CREATE TABLE jordstykker(
   geo_version integer NOT NULL DEFAULT 1,
   geo_ændret timestamptz NOT NULL DEFAULT now(),
   primary key(ejerlavkode, matrikelnr),
-  geom geometry(Polygon, 25832)
+  geom geometry(Polygon, 25832),
+  bbox geometry(Polygon, 25832),
+  visueltcenter geometry(Point, 25832)
 );
 
 CREATE INDEX ON jordstykker(matrikelnr);

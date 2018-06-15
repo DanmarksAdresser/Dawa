@@ -18,7 +18,7 @@ const defaultSchema = (type, nullable) => {
 };
 
 const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
-const kodeNavnDeriveTsv = (table => `to_tsvector('adresser', ${table}.kode || ' ' || ${table}.navn)`);
+const kodeNavnDeriveTsv = (table => `to_tsvector('adresser', processForIndexing(${table}.kode || ' ' || ${table}.navn))`);
 
 exports.modelList = [{
   singular: 'region',
@@ -635,6 +635,8 @@ exports.toTableModel = temaModel => {
       {
         name: 'bbox',
         derive: table => `st_envelope(${table}.geom)`
+      }, {
+        name: 'visueltcenter'
       }]
   }
 };

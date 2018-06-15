@@ -3,9 +3,6 @@
 const fs = require('fs');
 const JSONStream = require('JSONStream');
 const { go } = require('ts-csp');
-const polylabel = require('@mapbox/polylabel');
-const geojsonArea = require('@mapbox/geojson-area');
-const _ = require('underscore');
 
 const { streamToTablePipeline} = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
@@ -14,6 +11,7 @@ const tableModel = require('../psql/tableModel');
 const stederTableModel = tableModel.tables.steder;
 const stednavneTableModel = tableModel.tables.stednavne;
 const { recomputeMaterialization, materialize } = require('../importUtil/materialize');
+const { computeVisualCenter } = require('../importUtil/geometryImport');
 
 const {
   refreshSubdividedTable,
@@ -27,17 +25,7 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   const mapFn = geojsonFeature => {
     const raw = geojsonFeature.properties;
     const geometry = geojsonFeature.geometry;
-    let visueltCenter = null;
-    if(geometry.type === 'Polygon') {
-      const coordinates = geometry.coordinates;
-      visueltCenter = polylabel(coordinates, 0.1);
-    }
-    else if (geometry.type === 'MultiPolygon') {
-      const polygons = geometry.coordinates.map(polyCoords => ({type: 'Polygon', coordinates: polyCoords}));
-      const areas = polygons.map(polygon => [polygon, geojsonArea.geometry(polygon)]);
-      const largestPolygon = _.max(areas, ([polygon, area]) => area)[0];
-      visueltCenter = polylabel(largestPolygon.coordinates, 0.1);
-    }
+    const visueltCenter = computeVisualCenter(geometry);
     return {
       id: raw.ID_LOKALID,
       hovedtype: raw.FEAT_TYPE,

@@ -14,7 +14,8 @@ const logger = require('../logger').forCategory('matrikelImport');
 const {streamArrayToTable} = require('../importUtil/importUtil');
 const tableSchema = require('../psql/tableModel');
 const {
-  updateGeometricFields
+  updateGeometricFields,
+  computeVisualCenters,
 } = require('../importUtil/geometryImport');
 
 
@@ -122,6 +123,8 @@ const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() 
   yield tableDiffNg.computeDifferencesView(client, txid, 'desired_ejerlav', 'actual_ejerlav', ejerlavTableModel, [...ejerlavColumns, 'geom']);
   yield updateGeometricFields(client, txid, jordstykkeTableModel);
   yield updateGeometricFields(client, txid, ejerlavTableModel);
+  yield computeVisualCenters(client, txid, jordstykkeTableModel);
+  yield computeVisualCenters(client, txid, ejerlavTableModel);
   yield tableDiffNg.applyChanges(client, txid, jordstykkeTableModel);
   yield tableDiffNg.applyChanges(client, txid, ejerlavTableModel);
   yield client.query('drop table desired_jordstykker; drop table desired_ejerlav; drop table actual_ejerlav; drop table actual_jordstykker; analyze jordstykker; analyze jordstykker_changes;');

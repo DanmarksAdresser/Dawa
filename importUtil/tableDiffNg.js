@@ -221,6 +221,8 @@ const initChangeTable = (client, txid, tableModel) => go(function* () {
   const changeTableName = `${tableModel.table}_changes`;
   yield client.query(`INSERT INTO ${changeTableName}(txid, operation, ${columnList}) 
   (SELECT ${txid}, 'insert', ${columnList} FROM ${tableModel.table})`);
+  yield client.query(`ANALYZE ${changeTableName}`);
+  yield deriveColumnsForChange(client, txid, tableModel);
 });
 
 
