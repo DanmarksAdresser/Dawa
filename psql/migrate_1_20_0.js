@@ -8,6 +8,7 @@ const temaModels = require('../dagiImport/temaModels');
 
 const { reloadDatabaseCode } = require('./initialization');
 const {withImportTransaction} = require('../importUtil/importUtil');
+const { deriveColumn } = require('../importUtil/tableModelUtil');
 const { initVisualCenters } = require('../importUtil/geometryImport');
 const tableSchema = require('./tableModel');
 
@@ -60,9 +61,14 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       ALTER TABLE ${model.table}_changes ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE ${model.table} ADD COLUMN visueltcenter geometry(point, 25832);
       ALTER TABLE ${model.table}_changes ADD COLUMN visueltcenter geometry(point, 25832)`);
-        yield initVisualCenters(client, txid, temaModels.toTableModel(model), true);
+        const tableModel =  temaModels.toTableModel(model);
+        yield initVisualCenters(client, txid,tableModel, true);
+        if(model.searchable) {
+          yield deriveColumn(client, tableModel.table, tableModel, 'tsv');
+        }
       }
     }));
+
     yield client.query('analyze');
   })).done();
 });

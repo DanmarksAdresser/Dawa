@@ -43,7 +43,7 @@ ALTER TEXT SEARCH CONFIGURATION adresser_query
   WITH adresser_unaccent_${options.version}, simple;
 `);
     for(let tableModel of Object.values(schemaModel.tables)) {
-      const tsvColumn = _.findWhere(tableModel.colums, {name: 'tsv'});
+      const tsvColumn = _.findWhere(tableModel.columns, {name: 'tsv'});
       if(tsvColumn) {
         yield deriveColumn(client, tableModel.table, tableModel, 'tsv');
       }
