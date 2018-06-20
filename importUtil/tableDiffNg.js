@@ -12,6 +12,16 @@ const columnsDistinctClause = (tableA, tableB, columns) =>
   column.distinctClause(`${tableA}.${column.name}`, `${tableB}.${column.name}`)
   : `(${tableA}.${column.name} IS DISTINCT FROM ${tableB}.${column.name})`).join(' OR ') + ')';
 
+const applyCurrentTableToChangeTable = (client, tableModel, columnsToApply) => {
+
+  return client.query(`WITH rowsToUpdate AS (SELECT ${selectList('t', tableModel.primaryKey)}, ${selectList('t', columnsToApply)},txid,changeid
+  FROM ${tableModel.table} t JOIN LATERAL (select txid, changeid FROM ${tableModel.table}_changes c WHERE
+  ${columnsEqualClause('t', 'c', tableModel.primaryKey)} 
+   ORDER BY txid DESC NULLS LAST, changeid DESC NULLS LAST limit 1) c ON true)
+UPDATE ${tableModel.table}_changes c  SET ${columnsToApply.map(column => `${column} = u.${column}`).join(',')} FROM rowsToUpdate u
+WHERE ${columnsEqualClause('c', 'u', tableModel.primaryKey)} AND u.txid = c.txid AND u.changeid IS NOT DISTINCT FROM c.changeid;`);
+};
+
 const computeInsertsView =
   (client, txid, srcTable, dstTable, tableModel, columnNames) => {
 
@@ -498,5 +508,6 @@ module.exports = {
   getChangeTableSql,
   assignSequenceNumbersToDependentTables,
   initializeChangeTable,
-  validateHistoryImpl
+  validateHistoryImpl,
+  applyCurrentTableToChangeTable
 };

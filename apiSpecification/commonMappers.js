@@ -134,7 +134,5 @@ exports.parseDarStatus = darstatustekst => {
   }
 }
 
-exports.mapBbox = bboxText => {
-  const coordinates = bboxText ? JSON.parse(bboxText).coordinates : null;
-  return coordinates ? [...coordinates[0][0], ...coordinates[0][2]] : null;
-};
+exports.mapBbox = row => row.bbox_xmin ? [row.bbox_xmin, row.bbox_ymin, row.bbox_xmax, row.bbox_ymax] : null;
+exports.mapVisueltCenter = row => row.visueltcenter_x ? [row.visueltcenter_x, row.visueltcenter_y] : null;

@@ -1,7 +1,7 @@
 "use strict";
 
 const _ = require('underscore');
-
+const commonMappers = require('../commonMappers');
 /*
  * Computes the list of fieldMap that should be included in the CSV representation for the given type
  */
@@ -96,9 +96,12 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
           };
         }
         result.properties = propertiesMapper(row);
-        if(result.properties.bbox) {
-          result.bbox = result.properties.bbox;
-          delete result.properties.bbox;
+        if(result.properties.bbox_xmin) {
+          result.bbox = commonMappers.mapBbox(result.properties);
+          delete result.properties.bbox_xmin;
+          delete result.properties.bbox_ymin;
+          delete result.properties.bbox_xmax;
+          delete result.properties.bbox_ymax;
         }
         return result;
       };

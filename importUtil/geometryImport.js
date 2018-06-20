@@ -2,11 +2,30 @@
 const _ = require('underscore');
 const { go } = require('ts-csp');
 const polylabel = require('@mapbox/polylabel');
-const geojsonArea = require('@mapbox/geojson-area');
 const format = require('pg-format');
-const { initChangeTable } = require('./tableDiffNg');
+const { initChangeTable, applyCurrentTableToChangeTable } = require('./tableDiffNg');
 
 const {columnsEqualClause} = require('../darImport/sqlUtil');
+
+const linestringArea = (coordinates) => {
+  let numPoints = coordinates.length;
+  let area = 0;  // Accumulates area in the loop
+  let j = numPoints-1;  // The last vertex is the 'previous' one to the first
+
+  for (let i=0; i<numPoints; i++)
+  { area -= (coordinates[j][0]+coordinates[i][0]) * (coordinates[j][1]-coordinates[i][1]);
+    j = i;  //j is previous vertex to i
+  }
+  return area/2;
+};
+
+const polygonArea = (coordinates) => {
+  let area = 0;
+  for(let linestringCoords of coordinates) {
+    area += linestringArea(linestringCoords);
+  }
+  return area;
+}
 
 const updateSubdividedTable =
   (client, txid, baseTable, divTable, keyColumnNames, allowNonPolygons) => go(function* () {
@@ -38,7 +57,7 @@ const computeVisualCenter = geojsonGeometry => {
   }
   else if (geojsonGeometry.type === 'MultiPolygon') {
     const polygons = geojsonGeometry.coordinates.map(polyCoords => ({type: 'Polygon', coordinates: polyCoords}));
-    const areas = polygons.map(polygon => [polygon, geojsonArea.geometry(polygon)]);
+    const areas = polygons.map(polygon => [polygon, polygonArea(polygon.coordinates)]);
     const largestPolygon = _.max(areas, ([polygon, area]) => area)[0];
     const visualCenter = polylabel(largestPolygon.coordinates, 1);
     return visualCenter;
@@ -68,9 +87,10 @@ const computeVisualCenters = (client, txid, tableModel) => go(function* () {
   }
 });
 
-/* Warning: Erases history */
-const initVisualCenters = (client, txid, tableModel) => go(function*() {
-  yield client.query(`DELETE FROM ${tableModel.table}_changes`);
+const initBboxAndVisualCenters = (client, txid, tableModel, clearHistory) => go(function*() {
+  if(clearHistory) {
+    yield client.query(`DELETE FROM ${tableModel.table}_changes`);
+  }
   const allPrimaryKeys = yield client.queryRows(`SELECT ${tableModel.primaryKey.join(',')}
     FROM ${tableModel.table} WHERE geom IS NOT NULL`);
   for(let key of allPrimaryKeys) {
@@ -83,11 +103,16 @@ const initVisualCenters = (client, txid, tableModel) => go(function*() {
       const visualCenter = computeVisualCenter(geojson);
       const visualCenterGeojson = {type: 'Point', coordinates: visualCenter};
       if(visualCenter) {
-        yield client.query(`UPDATE ${tableModel.table} SET visueltcenter = ST_SetSRID(ST_GeomFromGeoJSON($1), 25832) WHERE ${whereClause}`, [JSON.stringify(visualCenterGeojson)]);
+        yield client.query(`UPDATE ${tableModel.table} SET visueltcenter = ST_SetSRID(ST_GeomFromGeoJSON($1), 25832),bbox=st_envelope(geom) WHERE ${whereClause}`, [JSON.stringify(visualCenterGeojson)]);
       }
     }
   }
-  yield initChangeTable(client, txid, tableModel);
+  if(clearHistory) {
+    yield initChangeTable(client, txid, tableModel);
+  }
+  else {
+    yield applyCurrentTableToChangeTable(client, tableModel, ['bbox', 'visueltcenter']);
+  }
 });
 
 
@@ -95,7 +120,7 @@ module.exports = {
   updateSubdividedTable,
   updateGeometricFields,
   refreshSubdividedTable,
-  initVisualCenters,
+  initVisualCenters: initBboxAndVisualCenters,
   computeVisualCenter,
   computeVisualCenters
 };

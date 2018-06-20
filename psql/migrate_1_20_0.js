@@ -9,6 +9,7 @@ const temaModels = require('../dagiImport/temaModels');
 const { reloadDatabaseCode } = require('./initialization');
 const {withImportTransaction} = require('../importUtil/importUtil');
 const { initVisualCenters } = require('../importUtil/geometryImport');
+const tableSchema = require('./tableModel');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
@@ -40,23 +41,26 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield client.query('ALTER TABLE ejerlav_changes alter column GEO_ændret DROP DEFAULT');
       yield client.query('ALTER TABLE ejerlav_changes alter column geo_version DROP DEFAULT');
 
+      yield reloadDatabaseCode(client, 'psql/schema');
+
+
+
       yield client.query(`ALTER TABLE ejerlav ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE ejerlav_changes ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE ejerlav ADD COLUMN visueltcenter geometry(point, 25832);
       ALTER TABLE ejerlav_changes ADD COLUMN visueltcenter geometry(point, 25832)`);
-
+      yield initVisualCenters(client, txid, tableSchema.tables.ejerlav, false);
       yield client.query(`ALTER TABLE jordstykker ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE jordstykker_changes ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE jordstykker ADD COLUMN visueltcenter geometry(point, 25832);
       ALTER TABLE jordstykker_changes ADD COLUMN visueltcenter geometry(point, 25832)`);
-
-      yield reloadDatabaseCode(client, 'psql/schema');
+      yield initVisualCenters(client, txid, tableSchema.tables.jordstykker,true);
       for(let model of temaModels.modelList) {
         yield client.query(`ALTER TABLE ${model.table} ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE ${model.table}_changes ADD COLUMN bbox geometry(polygon, 25832);
       ALTER TABLE ${model.table} ADD COLUMN visueltcenter geometry(point, 25832);
       ALTER TABLE ${model.table}_changes ADD COLUMN visueltcenter geometry(point, 25832)`);
-        yield initVisualCenters(client, txid, temaModels.toTableModel(model));
+        yield initVisualCenters(client, txid, temaModels.toTableModel(model), true);
       }
     }));
     yield client.query('analyze');

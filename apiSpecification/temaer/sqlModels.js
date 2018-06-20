@@ -241,17 +241,11 @@ const baseQueries = {
 };
 
 temaModels.modelList.filter(model => model.published).forEach(model => {
-  const commonColumns = {
+  const commonColumns = Object.assign({
     geom_json: {
       select: function (sqlParts, sqlModel, params) {
         const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
         return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 't.geom');
-      }
-    },
-    bbox: {
-      select: function (sqlParts, sqlModel, params) {
-        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-        return postgisSqlUtil.bboxColumn(params.srid || 4326, sridAlias, 't.bbox');
       }
     },
     geo_version: {
@@ -263,8 +257,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     geo_ændret: {
       select: selectIsoTimestampUtc('t.geo_ændret')
     }
-
-  };
+  }, postgisSqlUtil.bboxVisualCenterColumns('t'));
   if(model.searchable) {
     commonColumns.tsv = {
       column: 't.tsv'

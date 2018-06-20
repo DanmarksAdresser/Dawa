@@ -9,6 +9,50 @@ const sridToDecimals = {
   "25832": 2
 };
 
+const dbapi = require('../../../dbapi');
+
+exports.bboxVisualCenterColumns = (tableAlias) => {
+  const prefix = tableAlias ? `${tableAlias}.` : '';
+  return {
+    bbox_xmin: {
+      select: function (sqlParts, sqlModel, params) {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return exports.selectSnappedPoint(params.srid || 4326, sridAlias, `${prefix}bbox`, 'ST_XMin');
+      }
+    },
+    bbox_ymin: {
+      select: function (sqlParts, sqlModel, params) {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return exports.selectSnappedPoint(params.srid || 4326, sridAlias, `${prefix}bbox`, 'ST_YMin');
+      }
+    },
+    bbox_xmax: {
+      select: function (sqlParts, sqlModel, params) {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return exports.selectSnappedPoint(params.srid || 4326, sridAlias, `${prefix}bbox`, 'ST_XMax');
+      }
+    },
+    bbox_ymax: {
+      select: function (sqlParts, sqlModel, params) {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return exports.selectSnappedPoint(params.srid || 4326, sridAlias, `${prefix}bbox`, 'ST_YMax');
+      }
+    },
+    visueltcenter_x: {
+      select: (sqlParts, sqlModel, params) => {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return exports.selectX(params.srid || 4326, sridAlias, `${prefix}visueltcenter`);
+      }
+    },
+    visueltcenter_y: {
+      select: (sqlParts, sqlModel, params) => {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return exports.selectY(params.srid || 4326, sridAlias, `${prefix}visueltcenter`);
+      }
+    }
+  }
+};
+
 exports.geojsonColumn = (srid, sridAlias, geomColumn) => {
   const decimals = sridToDecimals[srid];
   return `ST_AsGeoJSON(ST_Transform(${geomColumn || 'geom'}, ${sridAlias}::integer), ${decimals})`;
@@ -51,4 +95,9 @@ exports.selectX = (srid, sridAlias, geomColumn) => {
 exports.selectY = (srid, sridAlias, geomColumn) => {
   const precision = sridToPrecision[srid];
   return `ST_Y(ST_SnapToGrid(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${precision}))`;
+};
+
+exports.selectSnappedPoint = (srid, sridAlias, geomColumn, postgisFn) => {
+  const precision = sridToPrecision[srid];
+  return `${postgisFn}(ST_SnapToGrid(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${precision}))`;
 };

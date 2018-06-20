@@ -301,8 +301,7 @@ const steder = {
     {name: 'bebyggelseskode'},
     {name: 'indbyggerantal'},
     {
-      name: 'visueltcenter',
-      derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
+      name: 'visueltcenter'
     },
     {
       name: 'geom',

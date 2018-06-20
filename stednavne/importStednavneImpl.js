@@ -51,6 +51,7 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
    st_setsrid(st_geomfromgeojson(visueltcenter), 25832), 
    st_setsrid(ST_GeomFromGeoJSON(geomjson), 25832)
    FROM fetch_stednavne_raw WHERE brugsprioritet = 'primær')`);
+  client.query('update fetch_steder set visueltcenter = ST_ClosestPoint(fetch_steder.geom, ST_Centroid(fetch_steder.geom)) where visueltcenter is null');
 
   yield client.query('CREATE TEMP TABLE fetch_stednavne AS select * from stednavne WHERE false');
   yield client.query(`INSERT INTO fetch_stednavne(${stednavneColumns.join(',')}) (

@@ -32,6 +32,7 @@ module.exports = _.mapObject(flats, (flat, flatName) => {
       return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, `${sqlSpec.table}.geom`);
     }
   };
+  Object.assign(columns, postgisSqlUtil.bboxVisualCenterColumns());
 
   columns.ændret = {
     column: `${sqlSpec.table}.ændret`

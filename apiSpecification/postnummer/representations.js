@@ -54,10 +54,15 @@ exports.json = {
         }
       },
       bbox: {
+        description: 'Bounding box for postnummeret',
         '$ref': '#/definitions/NullableBbox'
+      },
+      visueltcenter: {
+        description: 'Det visuelle center for postnummeret. Kan f.eks. anvendes til placering af labels på et kort.',
+        '$ref': '#/definitions/NullableVisueltCenter'
       }
     },
-    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'kommuner', 'bbox']
+    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'bbox', 'visueltcenter', 'kommuner']
   }),
   fields: _.filter(_.where(fields, { selectable: true }), function(field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -71,7 +76,8 @@ exports.json = {
         stormodtageradresser: row.stormodtageradresser ? _.map(row.stormodtageradresser, function(adgangsadresseid) {
           return commonMappers.mapAdgangsadresseRef(adgangsadresseid, baseUrl);
         }) : null,
-        bbox: commonMappers.mapBbox(row.bbox),
+        bbox: commonMappers.mapBbox(row),
+        visueltcenter: commonMappers.mapVisueltCenter(row),
         kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : []
       };
     };

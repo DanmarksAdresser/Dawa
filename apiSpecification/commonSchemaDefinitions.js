@@ -8,6 +8,12 @@ const nullableType = schemaUtil.nullableType;
 const nullable = schemaUtil.nullable;
 
 const definitions = {
+  VisueltCenter: {
+    type: 'array',
+    items: {
+      type: 'number'
+    }
+  },
   Bbox: {
     type: 'array',
     minItems: 4,

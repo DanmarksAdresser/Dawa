@@ -10,12 +10,9 @@ const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 const normalGeomQuery = "(select geom from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
 const landpostnummerGeomQuery = "(select geom from landpostnumre where landpostnumre.nr = postnumre.nr limit 1)";
 
-const normalBboxQuery = "(select bbox from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
-const landpostnummerBboxQuery = "(select bbox from landpostnumre where landpostnumre.nr = postnumre.nr limit 1)";
 
 const geomQueryFunc = params =>  params.landpostnumre ? landpostnummerGeomQuery : normalGeomQuery;
-const bboxQueryFunc = params =>  params.landpostnumre ? landpostnummerBboxQuery : normalBboxQuery;
-const columns = {
+const columns = Object.assign({
   kommunekode: {
     select: null,
     where: function(sqlParts, parameterArray) {
@@ -38,12 +35,6 @@ const columns = {
   stormodtageradresser: {
     select: '(select json_agg(adgangsadresseid) from stormodtagere where stormodtagere.nr = postnumre.nr)'
   },
-  bbox: {
-    select: function (sqlParts, sqlModel, params) {
-      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.bboxColumn(params.srid || 4326, sridAlias,bboxQueryFunc(params));
-    }
-  },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
@@ -59,16 +50,23 @@ const columns = {
   tsv: {
     column: 'tsv'
   }
-};
+}, postgisSqlUtil.bboxVisualCenterColumns());
 
-const baseQuery = function () {
-  return {
+const baseQuery = function (fieldNames, params) {
+  const query = {
     select: [],
     from: ['postnumre'],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
   };
+  if(params.landpostnumre) {
+    query.from.push('LEFT JOIN LATERAL (select bbox, visueltcenter from landpostnumre where postnumre.nr = landpostnumre.nr) g ON true');
+  }
+  else{
+    query.from.push('LEFT JOIN LATERAL (select bbox, visueltcenter from dagi_postnumre where postnumre.nr = dagi_postnumre.nr) g ON true');
+  }
+  return query;
 };
 
 

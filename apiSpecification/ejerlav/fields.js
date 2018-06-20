@@ -16,9 +16,25 @@ var fields = [
   {
     name: 'geom_json',
     selectable: true
-  }
-
-];
+  },
+  {
+    name: 'bbox_xmin'
+  },
+  {
+    name: 'bbox_ymin'
+  },
+  {
+    name: 'bbox_xmax'
+  },
+  {
+    name: 'bbox_ymax'
+  },
+  {
+    name: 'visueltcenter_x'
+  },
+  {
+    name: 'visueltcenter_y'
+  }];
 
 fieldsUtil.applySelectability(fields, sqlModel);
 fieldsUtil.normalize(fields);

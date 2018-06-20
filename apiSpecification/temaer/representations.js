@@ -30,6 +30,33 @@ var nameOnlyAutocomplete = {
   }
 };
 
+const commonGeoProps = {
+  'ændret': {
+    description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
+    ' geometrien (se felterne geo_ændret og geo_version).',
+    $ref: '#/definitions/DateTimeUtc'
+  },
+  'geo_ændret': {
+    description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
+    $ref: '#/definitions/DateTimeUtc'
+  },
+  geo_version: {
+    description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
+    type: 'integer'
+  },
+  bbox: {
+    description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
+    $ref: '#/definitions/NullableBbox'
+  },
+  visueltcenter: {
+    description: 'Geometriens visuelle center. Kan eksempelvis anvendes til placering af labels.',
+    $ref: '#/definitions/NullableVisueltCenter'
+  }
+};
+
+
 var autocompleteTekst = {
   valglandsdel: nameOnlyAutocomplete,
   storkreds: nameOnlyAutocomplete,
@@ -54,7 +81,8 @@ const mapMetaFields = row => {
     ændret: row.ændret,
     geo_version: row.geo_version,
     geo_ændret: row.geo_ændret,
-    bbox: commonMappers.mapBbox(row.bbox)
+    bbox: commonMappers.mapBbox(row),
+    visueltcenter: commonMappers.mapVisueltCenter(row)
   };
 }
 
@@ -88,14 +116,10 @@ const opstillingskredsJsonRepresentation = (() => {
   };
   const schema = globalSchemaObject({
     title: 'Opstillingskreds',
-    properties: {
+    properties: Object.assign({
       dagi_id: normalizedFieldSchema('dagi_id'),
       href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Opstillingskredsens URL'}),
       navn: normalizedFieldSchema('navn'),
-      ændret: normalizedFieldSchema('ændret'),
-      geo_version: normalizedFieldSchema('geo_version'),
-      geo_ændret: normalizedFieldSchema('geo_ændret'),
-      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       kode: normalizedFieldSchema('kode'),
       kredskommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Opstillingskredsens kredskommune.'}),
@@ -109,8 +133,8 @@ const opstillingskredsJsonRepresentation = (() => {
         commonSchemaDefinitions.KommuneRef
 
       }
-    },
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'nummer', 'kode',
+    }, commonGeoProps),
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'nummer', 'kode',
       'kredskommune', 'region', 'storkreds', 'valglandsdel', 'kommuner']
   });
   return {fields, mapper, schema};
@@ -157,14 +181,10 @@ const afstemningsområdeJsonRepresentation = (() => {
   };
   const schema = globalSchemaObject({
     title: 'Afstemningsområde',
-    properties: {
+    properties: Object.assign({
       dagi_id: normalizedFieldSchema('dagi_id'),
       href: commonSchemaDefinitions.Href,
       navn: normalizedFieldSchema('navn'),
-      ændret: normalizedFieldSchema('ændret'),
-      geo_version: normalizedFieldSchema('geo_version'),
-      geo_ændret: normalizedFieldSchema('geo_ændret'),
-      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       afstemningssted: schemaObject({
         properties: {
@@ -197,8 +217,8 @@ const afstemningsområdeJsonRepresentation = (() => {
       opstillingskreds: commonSchemaDefinitions.OpstillingskredsRef,
       storkreds: commonSchemaDefinitions.StorkredsRef,
       valglandsdel: commonSchemaDefinitions.ValglandsdelsRef,
-    },
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'nummer',
+    }, commonGeoProps),
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'nummer',
       'afstemningssted',
       'kommune', 'region', 'opstillingskreds', 'storkreds', 'valglandsdel']
   });
@@ -226,19 +246,15 @@ const mrAfstemningsområdeRepresentation = (() => {
   };
   const schema = globalSchemaObject({
     title: 'Menighedsrådsafstemningsområde',
-    properties: {
+    properties: Object.assign({
       dagi_id: normalizedFieldSchema('dagi_id'),
       href: commonSchemaDefinitions.Href,
       navn: normalizedFieldSchema('navn'),
-      ændret: normalizedFieldSchema('ændret'),
-      geo_version: normalizedFieldSchema('geo_version'),
-      geo_ændret: normalizedFieldSchema('geo_ændret'),
-      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       kommune: commonSchemaDefinitions.KommuneRef,
       sogn: commonSchemaDefinitions.SogneRef
-    },
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'nummer',
+    }, commonGeoProps),
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'nummer',
       'kommune', 'sogn']
   });
   return {fields, mapper, schema};
@@ -265,18 +281,14 @@ const storkredsJsonRepresentation = (() => {
   };
   const schema = globalSchemaObject({
     title: 'Storkreds',
-    properties: {
+    properties: Object.assign({
       href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
-      ændret: normalizedFieldSchema('ændret'),
-      geo_version: normalizedFieldSchema('geo_version'),
-      geo_ændret: normalizedFieldSchema('geo_ændret'),
-      bbox: normalizedFieldSchema('bbox'),
       nummer: normalizedFieldSchema('nummer'),
       navn: normalizedFieldSchema('navn'),
       region: Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som storkredsen ligger i.'}),
       valglandsdel: Object.assign({}, commonSchemaDefinitions.ValglandsdelsRef, {description: 'Den valglandsdel, som storkredsen tilhører'}),
-    },
-    docOrder: ['href', 'ændret', 'geo_version', 'geo_ændret','bbox', 'nummer', 'navn',
+    }, commonGeoProps),
+    docOrder: ['href', 'ændret', 'geo_version', 'geo_ændret','bbox', 'visueltcenter','nummer', 'navn',
       'region', 'valglandsdel']
   });
   return {fields, mapper, schema};
@@ -298,17 +310,13 @@ const supplerendebynavnRepresentation = (() => {
   };
   const schema = globalSchemaObject({
     title: 'Supplerende Bynavn',
-    properties: {
+    properties: Object.assign({
       href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
       dagi_id: normalizedFieldSchema('dagi_id'),
-      ændret: normalizedFieldSchema('ændret'),
-      geo_version: normalizedFieldSchema('geo_version'),
-      geo_ændret: normalizedFieldSchema('geo_ændret'),
-      bbox: normalizedFieldSchema('bbox'),
       navn: normalizedFieldSchema('navn'),
       kommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'})
-    },
-    docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'navn',
+    }, commonGeoProps),
+    docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'navn',
       'kommune']
   });
   return {fields, mapper, schema};
@@ -323,37 +331,17 @@ const jsonRepresentations = {
   supplerendebynavn: supplerendebynavnRepresentation
 };
 
-
 function schemaForFlatFields(model, excludedFieldNames) {
   var result = {
     title: model.singular,
-    properties: {
+    properties: Object.assign({
       'href': {
         description: model.singularSpecific + 's unikke URL.',
         $ref: '#/definitions/Href'
       },
-      'ændret': {
-        description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
-        ' geometrien (se felterne geo_ændret og geo_version).',
-        $ref: '#/definitions/DateTimeUtc'
-      },
-      'geo_ændret': {
-        description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
-        $ref: '#/definitions/DateTimeUtc'
-      },
-      geo_version: {
-        description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
-        type: 'integer'
-      },
-      bbox: {
-        description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
-        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
-        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
-        $ref: '#/definitions/NullableBbox'
-      },
 
-    },
-    docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version', 'bbox']
+    }, commonGeoProps),
+    docOrder: ['href', 'ændret', 'geo_ændret', 'geo_version', 'bbox', 'visueltcenter']
   };
 
   model.fields.filter(function (additionalField) {
@@ -381,18 +369,19 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     return schemaForFlatFields(model, []);
   }
 
+
   function dagiTemaJsonMapper() {
     return function (baseUrl) {
       return function (row) {
-        var result = {};
+        const result = mapMetaFields(row);
         model.fields.forEach(function (fieldSpec) {
           result[fieldSpec.name] = fieldSpec.formatter(row[fieldSpec.name]);
         });
 
+
         result.ændret = row.ændret;
         result.geo_version = row.geo_version;
         result.geo_ændret = row.geo_ændret;
-        result.bbox = commonMappers.mapBbox(row.bbox);
         result.href = makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function (keyName) {
           return result[keyName];
         }));

@@ -11,7 +11,6 @@ const representationUtil = require('../common/representationUtil');
 
 const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 
-
 const makeHref = commonMappers.makeHref;
 
 const commonSchemaProperties = flat => ({
@@ -30,7 +29,15 @@ const commonSchemaProperties = flat => ({
   geo_ændret: {
     description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
     type: 'string'
-  }
+  },
+  bbox: {
+    description: 'Bounding box for geometrien',
+    $ref: '#/definitions/Bbox'
+  },
+  visueltcenter: {
+    description: 'Koordinater for geometriens visuelle center. Kan eksempelvis benyttes til placering af label på et kort.',
+    $ref: '#/definitions/VisueltCenter'
+  },
 });
 
 const jsonSchema = (flat, fields) => {
@@ -81,10 +88,12 @@ var jordstykkeJsonSchema = function () {
   return globalSchemaObject(schema);
 };
 
+const fieldsExcludedFromFlat = ['geom_json'];
+const fieldsExcludedFromJson = ['geom_json'];
 const customRepresentations = {
   jordstykke: {
     json: {
-      fields: fieldsMap.jordstykke.filter(field => field.name !== 'geom_json'),
+      fields: representationUtil.fieldsWithoutNames(fieldsMap.jordstykke, fieldsExcludedFromJson),
       schema: jordstykkeJsonSchema(),
       mapper: function (baseUrl) {
         return function (value) {
@@ -93,6 +102,8 @@ const customRepresentations = {
           result.geo_version = value.geo_version;
           result.geo_ændret = value.geo_ændret;
           result.matrikelnr = value.matrikelnr;
+          result.bbox = commonMappers.mapBbox(value);
+          result.visueltcenter = commonMappers.mapVisueltCenter(value);
           result.href = makeHref(baseUrl, 'jordstykke', [value.ejerlavkode, value.matrikelnr]);
           result.ejerlav = commonMappers.mapEjerlavRef(value.ejerlavkode, value.ejerlavnavn, baseUrl);
           result.kommune = commonMappers.mapKode4NavnTemaNoName('kommune', value.kommunekode, baseUrl);
@@ -112,7 +123,7 @@ const customRepresentations = {
 
 module.exports = _.mapObject(flats, (flat) => {
   const fields = fieldsMap[flat.singular];
-  const flatFields = fields.filter(field => field.name !== 'geom_json');
+  const flatFields = representationUtil.fieldsWithoutNames(fieldsMap.jordstykke, fieldsExcludedFromFlat);
   const flatRepresentation = representationUtil.defaultFlatRepresentation(flatFields);
   const schema = jsonSchema(flat, flat.fields);
   const defaultJsonRep = {

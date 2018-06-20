@@ -86,7 +86,7 @@ util.inherits(exports.InvalidParametersError, Error);
 
 exports.assembleSqlModel = function(columnSpec, parameterImpls, baseQuery) {
   const createQuery = (fieldNames, params) => {
-      const sqlParts = baseQuery();
+      const sqlParts = baseQuery(fieldNames, params);
       applySelect(sqlParts,columnSpec, fieldNames,params);
       parameterImpls.forEach(function(parameterImpl) {
         parameterImpl(sqlParts, params);

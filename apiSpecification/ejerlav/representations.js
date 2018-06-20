@@ -16,7 +16,9 @@ const normalizedFieldSchema = function(fieldName) {
 const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 const makeHref = commonMappers.makeHref;
 
-exports.flat = representationUtil.defaultFlatRepresentation(representationUtil.fieldsWithoutNames(fields, ['geom_json']));
+const fieldsNotIncluded = ['geom_json'];
+
+exports.flat = representationUtil.defaultFlatRepresentation(representationUtil.fieldsWithoutNames(fields, fieldsNotIncluded));
 
 const autocompleteFieldNames = ['navn', 'kode'];
 const autocompleteFields = _.filter(fields, function(field) {
@@ -61,9 +63,17 @@ exports.json = {
         $ref: '#/definitions/Href'
        },
       'kode': normalizedFieldSchema('kode'),
-      'navn' : normalizedFieldSchema('navn')
+      'navn' : normalizedFieldSchema('navn'),
+      bbox: {
+        description: 'Ejerlavets bounding box.',
+        $ref: '#/definitions/NullableBbox'
+      },
+      visueltcenter: {
+        description: 'Ejerlavets visuelle center.',
+        $ref: '#/definitions/VisueltCenter'
+      }
     },
-    docOrder: ['href', 'kode', 'navn']
+    docOrder: ['href', 'kode', 'navn', 'bbox', 'visueltcenter']
   }),
   fields: _.where(fields, {'selectable' : true}),
   mapper: function(baseUrl) {
@@ -71,7 +81,9 @@ exports.json = {
       return {
         href: makeHref(baseUrl, 'ejerlav', [row.kode]),
         kode: row.kode,
-        navn: row.navn
+        navn: row.navn,
+        bbox: commonMappers.mapBbox(row),
+        visueltcenter: commonMappers.mapVisueltCenter(row)
       };
     };
   }

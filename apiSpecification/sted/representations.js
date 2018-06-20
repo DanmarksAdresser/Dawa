@@ -7,12 +7,12 @@ const _ = require('underscore');
 const representationUtil = require('../common/representationUtil');
 const fields = require('./fields');
 const registry = require('../registry');
-
-const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
-const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const {nullableType, schemaObject} = require('../schemaUtil');
 const { mapKommuneRefArray, makeHref } = require('../commonMappers');
+
+const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
+const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 
 var schema = require('../parameterSchema');
 
@@ -70,11 +70,8 @@ exports.json = {
         description: 'Yderligere egenskaber for stedet, som er specifikke for den pågældende hovedtype'
       },
       visueltcenter: {
-        type: nullableType('array'),
         description: 'Koordinater for stedets visuelle center. Kan eksempelvis benyttes til at placere stedets navn på et kort.',
-        items: {
-          type: 'number'
-        }
+        $ref: '#/definitions/NullableVisueltCenter'
       },
       'kommuner': {
         description: 'De kommuner hvis areal overlapper stedets areal.',

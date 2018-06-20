@@ -8,7 +8,7 @@ const assembleSqlModel = sqlUtil.assembleSqlModel;
 const dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
-const columns = {
+const columns = Object.assign({
   kode: {
     column: 'ejerlav.kode'
   },
@@ -24,7 +24,7 @@ const columns = {
       return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'ejerlav.geom');
     }
   },
-};
+}, postgisSqlUtil.bboxVisualCenterColumns());
 
 const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),

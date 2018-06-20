@@ -27,7 +27,7 @@ var wfsServices = {
   zone: {
     wfsVersion: '1.0.0',
     loginRequired: false,
-    defaultUrl: 'http://geoservice.plansystem.dk/wfs?',
+    defaultUrl: 'https://geoserver.plandata.dk/geoserver/wfs?',
     featureNames: {
       zone: "pdk:theme_pdk_zonekort_v"
     }
