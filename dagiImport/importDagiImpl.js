@@ -31,7 +31,7 @@ const postProcess = {
     // ensure byzone and sommerhusområde do not overlap
     yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference(geom, (select geom from ${table} where zone = 1))) WHERE zone = 3`);
     // // landzone is everything not byzone and sommerhusområde
-    yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference((select ST_Union(geom) FROM regioner) , (select ST_Union(geom) from ${table} where zone IN (1, 3)))) WHERE zone = 2`);
+    yield client.query(`delete from ${table} where zone = 2; INSERT INTO ${table} (zone, geom)  VALUES (2,ST_Multi(ST_Difference((select ST_Union(geom) FROM regioner) , (select ST_Union(geom) from ${table} where zone IN (1, 3)))))`);
   })
 };
 
