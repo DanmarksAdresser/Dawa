@@ -50,9 +50,6 @@ module.exports = [
     multi: true
   },
   {
-    name: 'visueltcenter'
-  },
-  {
     name: 'visueltcenter_x'
   },
   {

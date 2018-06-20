@@ -8,7 +8,7 @@ const representationUtil = require('../common/representationUtil');
 const fields = require('./fields');
 const registry = require('../registry');
 
-const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
+const fieldsExcludedFromFlat = ['sted_geom_json', 'visueltcenter'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const {nullableType} = require('../schemaUtil');
@@ -20,7 +20,7 @@ const stedJsonRepresentation = stedRepresentations.json;
 
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
-const fieldsExcludedFromJson = ['geom_json', 'visueltcenter'];
+const fieldsExcludedFromJson = ['sted_geom_json', 'visueltcenter'];
 
 exports.json = {
   schema: globalSchemaObject({
@@ -67,7 +67,7 @@ exports.json = {
   }
 };
 
-const geojsonField = _.findWhere(fields, {name: 'geom_json'});
+const geojsonField = _.findWhere(fields, {name: 'sted_geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
 exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
 

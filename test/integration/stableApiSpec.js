@@ -12,6 +12,50 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
+    stednavn: {
+      geojson: {
+        flad: [{
+          params: {
+            stedid: '19e4392f-c7b1-5d41-0000-d380220a2006',
+            navn: 'Test stednavn punkt'
+          },
+          value: {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                12.57114905,
+                55.59056756
+              ]
+            },
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "properties": {
+              "sted_id": "19e4392f-c7b1-5d41-0000-d380220a2006",
+              "sted_hovedtype": "Bygning",
+              "sted_undertype": "hal",
+              "sted_indbyggerantal": null,
+              "sted_bebyggelseskode": null,
+              "sted_ændret": "2018-06-20T13:18:49.863Z",
+              "sted_geo_ændret": "2018-06-20T13:18:49.863Z",
+              "sted_geo_version": 1,
+              "sted_primærtnavn": "Test stednavn punkt",
+              "sted_primærnavnestatus": "officielt",
+              "sted_visueltcenter_x": 12.57114905,
+              "sted_visueltcenter_y": 55.59056756,
+              "sted_brofast": false,
+              "navn": "Test stednavn punkt",
+              "brugsprioritet": "primær",
+              "navnestatus": "officielt"
+            }
+          }
+        }]
+      }
+    },
     ejerlav: {
       json: {
         nestet: [{

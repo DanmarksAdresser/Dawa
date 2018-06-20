@@ -78,8 +78,8 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
       return function (row) {
         var result = {};
         result.type = 'Feature';
-        if (row.geom_json) {
-          result.geometry = JSON.parse(row.geom_json);
+        if (row[geomJsonField.name]) {
+          result.geometry = JSON.parse(row[geomJsonField.name]);
           if(params.format === 'geojson') {
             result.geometry.coordinates = removeZCoordinate(result.geometry.coordinates);
           }

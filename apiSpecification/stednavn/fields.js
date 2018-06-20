@@ -15,7 +15,7 @@ module.exports = [
   },
   {
     name: 'navnestatus'
-  }
+  },
 ];
 
 fieldsUtil.applySelectability(module.exports, sqlModel);
