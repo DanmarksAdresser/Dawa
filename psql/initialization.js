@@ -72,7 +72,6 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'cpr_postnr', init: false},
   {name: 'dar1_transaction', init: false},
   {name: 'dar1_changelog', init: false},
-  {name: 'dar1_postnumre_view', type: 'view'},
   {name: 'dar1_vejstykker_view', type: 'view'},
   {name: 'dar1_adgangsadresser_view', type: 'view'},
   {name: 'dar1_enhedsadresser_view', type: 'view'},

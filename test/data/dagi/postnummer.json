@@ -13,7 +13,7 @@
   },
   {
     "dagi_id": 101108,
-    "nr": 8000,
+    "nr": 1050,
     "navn": "Postdistrikt test landafgrænsning",
     "geom": "SRID=25832;MULTIPOLYGON(((725025 6166300,725040 6166300,725040 6166310,725025 6166310,725025 6166300)))"
   }
