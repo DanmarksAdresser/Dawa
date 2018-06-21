@@ -239,6 +239,7 @@ function importDaemon(baseUrl, pollIntervalMs, notificationWsUrl, pretend, noDae
       }
       catch (e) {
         logger.error('Error importing from DAR1.0', {error: e});
+        throw e;
       }
       if(noDaemon) {
         break;
