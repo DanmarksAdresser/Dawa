@@ -92,12 +92,14 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
   });
   yield streamEjerlavToTable(client, ejerlav, 'desired_ejerlav');
   yield streamJordstykkerToTable(client, jordstykker, 'desired_jordstykker');
-  yield client.query(`INSERT INTO actual_jordstykker(${jordstykkeColumns.join(', ')}, ændret, geo_ændret, geo_version, geom) 
-  (SELECT ${jordstykkeColumns.join(', ')}, ændret, geo_ændret, geo_version, geom FROM jordstykker WHERE ejerlavkode = $1)`,
+  const allJordstykkerColumns = jordstykkeTableModel.columns.map(column => column.name);
+  const allEjerlavColumns = ejerlavTableModel.columns.map(column => column.name);
+  yield client.query(`INSERT INTO actual_jordstykker(${allJordstykkerColumns.join(', ')}) 
+  (SELECT ${allJordstykkerColumns.join(', ')} FROM jordstykker WHERE ejerlavkode = $1)`,
     [ejerlavkode]);
 
-  yield client.query(`INSERT INTO actual_ejerlav(${ejerlavColumns.join(', ')}, ændret, geo_ændret, geo_version, geom) 
-  (SELECT ${ejerlavColumns.join(', ')}, ændret, geo_ændret, geo_version, geom FROM ejerlav WHERE kode = $1)`,
+  yield client.query(`INSERT INTO actual_ejerlav(${allEjerlavColumns.join(', ')}) 
+  (SELECT ${allEjerlavColumns.join(', ')} FROM ejerlav WHERE kode = $1)`,
     [ejerlavkode]);
 
   yield setLastUpdated(client, ejerlavkode, ctimeMillis);
