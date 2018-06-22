@@ -1044,6 +1044,36 @@ describe('Postnummersøgning', function(){
     });
   });
 
+  it("bbox", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='postnumre/3450';
+    options.qs= {};
+    options.qs.format= 'geojson';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var postnummer= JSON.parse(response.body);
+      let xmin= postnummer.bbox[0];
+      let ymin= postnummer.bbox[1];
+      let xmax= postnummer.bbox[2];
+      let ymax= postnummer.bbox[3];
+      let coors= postnummer.geometry.coordinates[0][0];
+      assert(coors.length>1, "Der er burde være mindst 1: "+coors.length);
+      for (let i= 0; i < coors.length; i++) {        
+        assert(coors[i][0]>xmin, "bbox xmin(" + xmin + " er >= end koordinat("+coors[i][0] + ")");
+        assert(coors[i][1]>ymin, "bbox ymin(" + ymin + " er >= end koordinat("+coors[i][1] + ")");
+        assert(coors[i][0]<xmax, "bbox xmax(" + xmax + " er <= end koordinat("+coors[i][2] + ")");
+        assert(coors[i][1]<ymax, "bbox ymax(" + xmax + " er <= end koordinat("+coors[i][3] + ")");
+      }
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
   it("autocomplete navn", function(done){
     var options= {};
     options.baseUrl= host;
