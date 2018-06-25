@@ -226,7 +226,7 @@ function doFuzzyQuery(client, entityName, params) {
 
 function removePrefixZeroes(str) {
   if(str) {
-    return str.replace(/^0+([^0])+]/, '$1');
+    return str.replace(/^0+([^0]+)/, '$1');
   }
   return str;
 }
@@ -238,8 +238,14 @@ function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText
 
     // We consider leading zeroes in husnr and etage to be insignificant
     result.address.husnr = removePrefixZeroes(result.address.husnr);
-    if(result.etage) {
+    if(result.address.etage) {
       result.address.etage = removePrefixZeroes(result.address.etage);
+    }
+    if(result.address.dør) {
+      if(address.dør && !(address.dør.indexOf('-') === 0) && result.address.dør.indexOf('-') === 0) {
+        result.address.dør = result.address.dør.substring(1);
+      }
+      result.address.dør = removePrefixZeroes(result.address.dør);
     }
     return result;
   });
@@ -380,7 +386,6 @@ function createSqlModel(entityName) {
           let parsedAddress = parseResult.address;
           return computeDifferences(parsedAddress, addressTextToUniqueMap[usedAddress]);
         });
-
 
         var addressTextToDifferenceSum = _.mapObject(addressTextToDifferences, (differences) => {
           return Object.keys(differences).reduce(function(memo, value) {
