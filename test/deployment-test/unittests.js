@@ -1055,6 +1055,7 @@ describe('Postnummersøgning', function(){
     rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var postnummer= JSON.parse(response.body);
+      assert(postnummer.bbox.length===4, "bbox.length!=4");
       let xmin= postnummer.bbox[0];
       let ymin= postnummer.bbox[1];
       let xmax= postnummer.bbox[2];
