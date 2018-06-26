@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require('underscore');
 const {assert, expect} = require('chai');
 const q = require('q');
 
@@ -540,9 +541,9 @@ describe('Stable API', () => {
               "km10": "10km_613_58"
             },
             "sogn": {
-              "kode": "0099",
-              "navn": "Sogn test",
-              "href": "http://dawa/sogne/99"
+              "kode": "7776",
+              "navn": "Bolbro",
+              "href": "http://dawa/sogne/7776"
             },
             "region": null,
             "retskreds": {
@@ -565,9 +566,9 @@ describe('Stable API', () => {
             "bebyggelser": [],
             "brofast": true,
             "afstemningsområde": {
-              "href": "http://dawa/afstemningsomraader/461/2",
-              "navn": "Test afstemningsområde",
-              "nummer": "2"
+              "href": "http://dawa/afstemningsomraader/461/12",
+              "navn": "Csv-Skolen",
+              "nummer": "12"
             }
           }
         }]
@@ -641,14 +642,14 @@ describe('Stable API', () => {
               "jordstykke_ejerlavnavn": null,
               "højde": 31.3,
               "kvh": "04610855__18",
-              "sognekode": "0099",
-              "sognenavn": "Sogn test",
+              "sognekode": "7776",
+              "sognenavn": "Bolbro",
               "politikredskode": "0099",
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
-              "afstemningsområdenummer": "2",
-              "afstemningsområdenavn": "Test afstemningsområde",
+              "afstemningsområdenummer": "12",
+              "afstemningsområdenavn": "Csv-Skolen",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
@@ -724,14 +725,14 @@ describe('Stable API', () => {
               "jordstykke_ejerlavnavn": "Borup, Osted",
               "højde": 46.4,
               "kvh": "03500347__1B",
-              "sognekode": "0099",
-              "sognenavn": "Sogn test",
+              "sognekode": "7171",
+              "sognenavn": "Osted",
               "politikredskode": "0099",
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
-              "afstemningsområdenummer": "2",
-              "afstemningsområdenavn": "Test afstemningsområde",
+              "afstemningsområdenummer": "12",
+              "afstemningsområdenavn": "Osted",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
@@ -850,9 +851,9 @@ describe('Stable API', () => {
                 "km10": "10km_613_58"
               },
               "sogn": {
-                "kode": "0099",
-                "navn": "Sogn test",
-                "href": "http://dawa/sogne/99"
+                "kode": "7776",
+                "navn": "Bolbro",
+                "href": "http://dawa/sogne/7776"
               },
               "region": null,
               "retskreds": {
@@ -866,9 +867,9 @@ describe('Stable API', () => {
                 "href": "http://dawa/politikredse/99"
               },
               "afstemningsområde": {
-                "href": "http://dawa/afstemningsomraader/461/2",
-                "navn": "Test afstemningsområde",
-                "nummer": "2"
+                "href": "http://dawa/afstemningsomraader/461/12",
+                "navn": "Csv-Skolen",
+                "nummer": "12"
               },
               "opstillingskreds": {
                 "kode": "0099",
@@ -959,14 +960,14 @@ describe('Stable API', () => {
               "højde": 31.3,
               "kvhx": "04610855__18__1__tv",
               "kvh": "04610855__18",
-              "sognekode": "0099",
-              "sognenavn": "Sogn test",
+              "sognekode": "7776",
+              "sognenavn": "Bolbro",
               "politikredskode": "0099",
               "politikredsnavn": "Politikreds test",
               "retskredskode": "0099",
               "retskredsnavn": "retskreds test",
-              "afstemningsområdenummer": "2",
-              "afstemningsområdenavn": "Test afstemningsområde",
+              "afstemningsområdenummer": "12",
+              "afstemningsområdenavn": "Csv-Skolen",
               "opstillingskredskode": "0099",
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
@@ -1091,35 +1092,53 @@ describe('Stable API', () => {
   const propertiesToIgnoreMap = {
     afstemningsområde: {
       json: {
-        flad: ['geo_ændret', 'ændret'],
-        nestet: ['geo_ændret', 'ændret']
+        flad: { 'geo_ændret': true, 'ændret': true },
+        nestet: { 'geo_ændret': true, 'ændret': true }
       }
     },
     opstillingskreds: {
       json: {
-        flad: ['geo_ændret', 'ændret'],
-        nestet: ['geo_ændret', 'ændret']
+        flad: { 'geo_ændret': true, 'ændret': true },
+        nestet: { 'geo_ændret': true, 'ændret': true }
       }
     },
     storkreds: {
       json: {
-        flad: ['geo_ændret', 'ændret'],
-        nestet: ['geo_ændret', 'ændret']
+        flad: { 'geo_ændret': true, 'ændret': true },
+        nestet: { 'geo_ændret': true, 'ændret': true }
       }
     },
     valglandsdel: {
       json: {
-        flad: ['geo_ændret', 'ændret'],
-        nestet: ['geo_ændret', 'ændret']
+        flad: { 'geo_ændret': true, 'ændret': true },
+        nestet: { 'geo_ændret': true, 'ændret': true }
       }
     },
     supplerendebynavn: {
       json: {
-        flad: ['geo_ændret', 'ændret'],
-        nestet: ['geo_ændret', 'ændret']
+        flad: { 'geo_ændret': true, 'ændret': true },
+        nestet: { 'geo_ændret': true, 'ændret': true }
+      }
+    },
+    stednavn: {
+      geojson: {
+        flad: {properties: { 'sted_geo_ændret': true, 'sted_ændret': true }}
       }
     }
   };
+
+  const removeIgnoredProperties = (object, testValue, propertiesToIgnore) => {
+    for (let property of Object.keys(propertiesToIgnore)) {
+      assert(object.hasOwnProperty(property));
+      if(_.isObject(propertiesToIgnore[property])) {
+        removeIgnoredProperties(object[property], testValue[property], propertiesToIgnore[property]);
+      }
+      else {
+        delete object[property];
+        delete testValue[property];
+      }
+    }
+  }
 
   testdb.withTransactionEach('test', (clientFn) => {
     for (let entityName of Object.keys(expectedResults)) {
@@ -1141,11 +1160,7 @@ describe('Stable API', () => {
               });
               if (propertiesToIgnoreMap[entityName] && propertiesToIgnoreMap[entityName][format] && propertiesToIgnoreMap[entityName][format][struktur]) {
                 const propertiesToIgnore = propertiesToIgnoreMap[entityName][format][struktur];
-                for (let property of propertiesToIgnore) {
-                  assert(jsonResult.hasOwnProperty(property));
-                  delete jsonResult[property];
-                  delete test.value[property];
-                }
+                removeIgnoredProperties(jsonResult, test.value, propertiesToIgnore);
               }
               expect(jsonResult).to.deep.equal(test.value);
             }

@@ -283,7 +283,7 @@ var expectedResultsMap = {
     "href": BASE_URL + "/regioner/0099"
   }],
   sogn: [{
-    "kode": "0099",
+    "kode": "7210",
     "navn": "Sogn test",
     "ændret": ANY_TIMESTAMP_UTC,
     "geo_version": 1,
