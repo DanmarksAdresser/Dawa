@@ -82,7 +82,24 @@ var adresseTests = [
       kategori: 'B',
       id: '0a3f509d-747c-32b8-e044-0003ba298018'
     }
+  },
+  {
+    it: 'Foranstillede 0 ignoreres i dørbetegnelse',
+    betegnelse: 'Tofthøjvej 20, 0121, 4130 Viby Sjælland',
+    result: {
+      id: '0a3f50ab-bd7c-32b8-e044-0003ba298018',
+      kategori: 'A'
+    }
+  },
+  {
+    it: 'Foranstillede - ignoreres i dørbetegnelse',
+    betegnelse: 'Tofthøjvej 20, -0121, 4130 Viby Sjælland',
+    result: {
+      id: '0a3f50ab-bd7c-32b8-e044-0003ba298018',
+      kategori: 'A'
+    }
   }
+
 ];
 
 var adgangsadresseTests = [{

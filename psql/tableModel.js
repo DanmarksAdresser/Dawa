@@ -666,6 +666,14 @@ exports.materializations = Object.assign({
       {
         table: 'adgangsadresser_mat',
         columns: ['adgangsadresseid']
+      },{
+        table: 'dar1_Husnummer_current',
+        columns: ['adgangsadresseid']
+      },
+      {
+        table: 'dar1_DARSogneinddeling_current',
+        columns: ['sognekode'],
+        references: ['sognekode']
       }
     ]
   },

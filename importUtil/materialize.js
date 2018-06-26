@@ -181,7 +181,7 @@ const tilknytningTableNames =
 
 const dar10HistoryTableNames = Object.values(dar10TableModels.historyTableModels).map(model => model.table);
 const dar10currentTableTableNames = Object.values(dar10TableModels.currentTableModels).map(model => model.table);
-const dawaBaseTableNames = ['vejstykker', 'vejpunkter', 'navngivenvej', 'postnumre', 'ejerlav',
+const dawaBaseTableNames = ['vejstykker', 'vejpunkter', 'navngivenvej', 'postnumre', 'jordstykker', 'ejerlav',
   'adgangsadresser',
   'enhedsadresser',
   'vejstykkerpostnumremat', 'navngivenvej_postnummer'];
@@ -192,8 +192,8 @@ const orderedTableNames = [...dar10HistoryTableNames,
   ...dawaBaseTableNames,
   ...tilknytningTableNames];
 
-// no replication of navngivenvej_postnummer, but an additional replication of stednavntilknytninger and jordstykker
-assert(orderedTableNames.length === Object.keys(replikeringDataModel).length-1);
+// no replication of navngivenvej_postnummer, but an additional replication of stednavntilknytninger
+assert(orderedTableNames.length === Object.keys(replikeringDataModel).length);
 
 const orderedTableModels = orderedTableNames.map(tableName => {
   assert(schemaModel.tables[tableName], 'table model for ' + tableName);

@@ -256,7 +256,7 @@ var sampleParameters = {
       }
     },
     sognekode: {
-      values: ['099'],
+      values: ['7210'],
       verifier: function(adr, kode) {
         return adr.sogn.kode === kode4String(kode);
       }
@@ -431,7 +431,7 @@ var sampleParameters = {
       }
     },
     sognekode: {
-      values: ['099'],
+      values: ['7210'],
       verifier: function(adr, kode) {
         return adr.adgangsadresse.sogn.kode === kode4String(kode);
       }

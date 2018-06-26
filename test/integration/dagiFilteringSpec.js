@@ -39,7 +39,6 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function () {
     geom: nonTemaGeom
   }];
   const sampleTemas = {
-    sogn: kodeNavnSampleTemas,
     retskreds: kodeNavnSampleTemas,
     politikreds: kodeNavnSampleTemas,
     opstillingskreds: kodeNavnSampleTemas.map(tema => Object.assign({}, tema, {nummer: tema.kode, valgkredsnummer: 1, storkredsnummer: 1})),
@@ -53,7 +52,6 @@ describe('Filtrering af adresser ud fra DAGI tema kode', function () {
   };
 
   const sampleParams = {
-    sogn: {sognekode: "10"},
     retskreds: {retskredskode: "10"},
     politikreds: {politikredskode: "10"},
     opstillingskreds: {opstillingskredskode: "10"},
