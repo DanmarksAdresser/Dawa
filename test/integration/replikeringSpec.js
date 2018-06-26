@@ -1,5 +1,6 @@
 "use strict";
 
+const _ = require('underscore');
 const {assert} = require('chai');
 const {go} = require('ts-csp');
 const testdb = require('../helpers/testdb2');
@@ -50,24 +51,25 @@ describe('Replikering', () => {
     }));
     it('Giver korrekt udtræk hvis sekvensnummer ikke angives', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), ejerlavUdtraekResource, {}, {});
-      assert.deepEqual(result, [{kode: 2, navn: 'foobar'}]);
+      assert.strictEqual(result.length, 1);
+      assert.deepEqual(_.pick(result[0], 'kode', 'navn'), {kode: 2, navn: 'foobar'});
     }));
     it('Giver korrekt udtræk hvis sekvensnummer angives', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), ejerlavUdtraekResource, {}, {sekvensnummer: "3"});
-      assert.deepEqual(result,
+      assert.deepEqual(result.map(row => _.pick(row, 'kode', 'navn')),
         [{kode: 1, navn: 'bar'},
           {kode: 2, navn: 'foobar'}]);
     }));
     it('Giver korrekte hændelser hvis sekvensnumre ikke angives', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), ejerlavEventsResource, {}, {});
       assert.strictEqual(result.length, 4);
-      assert.deepEqual(result.filter(event => event.data.kode === 2).map(event => event.data),
+      assert.deepEqual(result.filter(event => event.data.kode === 2).map(event => _.pick(event.data, 'kode', 'navn')),
         [{kode: 2, navn: 'foobar'}]);
       assert.deepEqual(result.map(event => event.data).filter(data => data.kode === 1).map(data => data.navn),
         ["foo", "bar", "bar"]);
       assert.deepEqual(result.filter(event => event.data.kode === 1).map(event => event.operation),
         ['insert', 'update', 'delete']);
-      assert.deepEqual(result.filter(event => event.data.kode === 2).map(event => event.data),
+      assert.deepEqual(result.filter(event => event.data.kode === 2).map(event =>_.pick( event.data, 'kode', 'navn')),
         [{kode: 2, navn: 'foobar'}]);
     }));
 

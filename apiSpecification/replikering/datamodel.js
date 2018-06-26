@@ -287,7 +287,23 @@ module.exports = {
         name: 'navn',
         type: 'string',
         description: 'Det matrikulære ”ejerlav”s navn. Eksempel: ”Eskebjerg By, Bregninge”.'
-      }]
+      },
+      {
+        name: 'geo_version',
+        type: 'integer',
+        description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.'
+      },
+      {
+        name: 'geo_ændret',
+        type: 'timestamp',
+        description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.'
+      },
+      {
+        name: 'ændret',
+        type: 'timestamp',
+        description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører geometrien (se felterne geo_ændret og geo_version).'
+      }
+      ]
   },
   jordstykke: {
     key: ['ejerlavkode', 'matrikelnr'],
