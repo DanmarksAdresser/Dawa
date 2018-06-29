@@ -214,6 +214,8 @@ var fields = [
   adgangsadresseField('zone'),
   adgangsadresseField('afstemningsområdenummer'),
   adgangsadresseField('afstemningsområdenavn'),
+  adgangsadresseField('menighedsrådsafstemningsområdenummer'),
+  adgangsadresseField('menighedsrådsafstemningsområdenavn'),
   adgangsadresseField('brofast'),
   adgangsadresseField('supplerendebynavn_dagi_id'),
   adgangsadresseField('navngivenvej_id')

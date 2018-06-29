@@ -55,6 +55,8 @@ CREATE OR REPLACE VIEW adresser AS
     T.opstillingskredskode,
     T.opstillingskredsnavn,
     T.zone,
+    T.menighedsrådsafstemningsområdenummer,
+    T.menighedsrådsafstemningsområdenavn,
     A.ejerlavkode,
     A.ejerlavnavn,
     A.matrikelnr,

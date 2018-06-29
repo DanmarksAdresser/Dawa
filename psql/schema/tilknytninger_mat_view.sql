@@ -20,7 +20,9 @@ CREATE VIEW tilknytninger_mat_view AS (
     v.navn    AS valglandsdelsnavn,
     stort.storkredsnummer,
     stor.navn AS storkredsnavn,
-    zt.zone
+    zt.zone,
+    mr.mrafstemningsområdenummer as menighedsrådsafstemningsområdenummer,
+    mr.navn as menighedsrådsafstemningsområdenavn
   FROM adgangsadresser_mat a
     JOIN dar1_husnummer_current hn ON a.id = hn.id
     LEFT JOIN dar1_darsogneinddeling_current s ON hn.darsogneinddeling_id = s.id
@@ -40,4 +42,5 @@ CREATE VIEW tilknytninger_mat_view AS (
     LEFT JOIN storkredstilknytninger stort ON a.id = stort.adgangsadresseid
     LEFT JOIN storkredse stor ON stort.storkredsnummer = stor.nummer
     LEFT JOIN zonetilknytninger zt ON a.id = zt.adgangsadresseid
+LEFT JOIN dar1_darmenighedsrådsafstemningsområde_current mr ON hn.darmenighedsrådsafstemningsområde_id = mr.id
 );

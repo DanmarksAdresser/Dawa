@@ -41,7 +41,7 @@ const computeDirtyPart = (client, txid, tablemodels, materialization, srcTable, 
     const matKeySelect = tableModel.primaryKey.map(col => `t.${col}`).join(', ');
     const dirtySelects = materialization.dependents.map(dependent => {
       const dependentTableModel = tablemodels[dependent.table];
-      assert(dependentTableModel);
+      assert(dependentTableModel, `dependent table ${dependent.table} exists for materialization ${materialization.table}`);
       const references = dependent.references || dependentTableModel.primaryKey;
       assert.isObject(dependentTableModel);
       assert.isArray(references);

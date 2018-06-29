@@ -654,7 +654,10 @@ describe('Stable API', () => {
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
               "brofast": true,
-              "navngivenvej_id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
+              "navngivenvej_id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9",
+              "menighedsrådsafstemningsområdenavn": "Bolbro",
+              "menighedsrådsafstemningsområdenummer": 3
+
             }
           }
         }, {
@@ -737,7 +740,9 @@ describe('Stable API', () => {
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
               "brofast": true,
-              "navngivenvej_id": "14328bc4-4870-40f6-9d07-7ed985389998"
+              "navngivenvej_id": "14328bc4-4870-40f6-9d07-7ed985389998",
+              "menighedsrådsafstemningsområdenavn": "Osted",
+              "menighedsrådsafstemningsområdenummer": 4
             }
           }
         }]
@@ -972,7 +977,9 @@ describe('Stable API', () => {
               "opstillingskredsnavn": "Opstillingskreds test",
               "zone": "Sommerhusområde",
               "brofast": true,
-              "navngivenvej_id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9"
+              "navngivenvej_id": "a8121066-1db3-4e0e-a7e8-75d54d8723e9",
+              "menighedsrådsafstemningsområdenavn": "Bolbro",
+              "menighedsrådsafstemningsområdenummer": 3
             }
           }
         }]

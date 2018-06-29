@@ -549,6 +549,8 @@ const tilknytninger_mat = {
     {name: 'storkredsnummer'},
     {name: 'storkredsnavn'},
     {name: 'zone'},
+    {name: 'menighedsrådsafstemningsområdenummer'} ,
+    {name: 'menighedsrådsafstemningsområdenavn'}
   ]
 };
 
@@ -674,6 +676,11 @@ exports.materializations = Object.assign({
         table: 'dar1_DARSogneinddeling_current',
         columns: ['sognekode'],
         references: ['sognekode']
+      },
+      {
+        table: 'dar1_DARMenighedsrådsafstemningsområde_current',
+        columns: ['menighedsrådsafstemningsområdenummer'],
+        references: ['mrafstemningsområdenummer']
       }
     ]
   },
