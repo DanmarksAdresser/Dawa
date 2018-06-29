@@ -5,15 +5,15 @@ CREATE VIEW dar1_adgangsadresser_view AS
     hn.id,
     k.kommunekode,
     nvk.vejkode,
-    hn.husnummertekst                                               AS husnr,
-    s.navn                                                          AS supplerendebynavn,
+    hn.husnummertekst                AS husnr,
+    s.navn                           AS supplerendebynavn,
     p.postnr,
     dar1_status_til_dawa_status(hn.status)
-                                                                    AS objekttype,
+                                     AS objekttype,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_husnummer_history hn2
      WHERE hn.id = hn2.id)
-                                                                    AS oprettet,
+                                     AS oprettet,
     GREATEST((SELECT max(lower(ap2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
               FROM dar1_adressepunkt_history ap2
               WHERE ap2.id = hn.adgangspunkt_id AND lower(ap2.virkning) <= (SELECT virkning
@@ -22,40 +22,34 @@ CREATE VIEW dar1_adgangsadresser_view AS
               FROM dar1_husnummer_history hn2
               WHERE hn.id = hn2.id AND lower(hn2.virkning) <= (SELECT virkning
                                                                FROM dar1_meta)))
-                                                                    AS aendret,
-    hn.adgangspunkt_id                                              AS adgangspunktid,
+                                     AS aendret,
+    hn.adgangspunkt_id               AS adgangspunktid,
     hn.vejpunkt_id,
-    coalesce(ST_X(ap.position),
-             aa_old.etrs89oest)                                     AS etrs89oest,
-    coalesce(ST_Y(ap.position),
-             aa_old.etrs89nord)                                     AS etrs89nord,
-    coalesce(ap.oprindelse_nøjagtighedsklasse,
-             aa_old.noejagtighed)                                   AS noejagtighed,
-    coalesce(CASE ap.oprindelse_kilde
-             WHEN 'Grundkort'
-               THEN 1
-             WHEN 'Matrikelkort'
-               THEN 2
-             WHEN 'Ekstern'
-               THEN 4
-             WHEN 'Adressemyn'
-               THEN 5 END,
-             aa_old.adgangspunktkilde)                              AS adgangspunktkilde,
-    coalesce(ap.oprindelse_tekniskstandard,
-             aa_old.tekniskstandard)                                AS tekniskstandard,
-    coalesce(((atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
-               400 / (2 * pi())) :: NUMERIC(5, 2) + 300) % 200 + 100,
-             aa_old.tekstretning)                                   AS tekstretning,
-    coalesce(ap.oprindelse_registrering AT TIME ZONE
-             'Europe/Copenhagen', aa_old.adressepunktaendringsdato) AS adressepunktaendringsdato,
-    nv.id                                                           AS navngivenvej_id,
-    nvk.id                                                          AS navngivenvejkommunedel_id,
-    s.id                                                            AS supplerendebynavn_id,
-    k.id                                                            AS darkommuneinddeling_id,
-    ap.id                                                           AS adressepunkt_id,
-    p.id                                                            AS postnummer_id,
-    s.supplerendebynavn1                                            AS supplerendebynavn_dagi_id,
-    ap.position                                                     AS geom
+    ST_X(ap.position)                AS etrs89oest,
+    ST_Y(ap.position)                AS etrs89nord,
+    ap.oprindelse_nøjagtighedsklasse AS noejagtighed,
+    CASE ap.oprindelse_kilde
+    WHEN 'Grundkort'
+      THEN 1
+    WHEN 'Matrikelkort'
+      THEN 2
+    WHEN 'Ekstern'
+      THEN 4
+    WHEN 'Adressemyn'
+      THEN 5 END                     AS adgangspunktkilde,
+    ap.oprindelse_tekniskstandard as tekniskstandard,
+    200 - (atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
+           400 / (2 * pi()))         AS tekstretning,
+    ap.oprindelse_registrering AT TIME ZONE
+    'Europe/Copenhagen'              AS adressepunktaendringsdato,
+    nv.id                            AS navngivenvej_id,
+    nvk.id                           AS navngivenvejkommunedel_id,
+    s.id                             AS supplerendebynavn_id,
+    k.id                             AS darkommuneinddeling_id,
+    ap.id                            AS adressepunkt_id,
+    p.id                             AS postnummer_id,
+    s.supplerendebynavn1             AS supplerendebynavn_dagi_id,
+    ap.position                      AS geom
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k
       ON hn.darkommune_id = k.id
@@ -63,12 +57,11 @@ CREATE VIEW dar1_adgangsadresser_view AS
       ON hn.navngivenvej_id = nv.id
     JOIN dar1_navngivenvejkommunedel_current nvk
       ON nv.id = nvk.navngivenvej_id AND
-         k.kommunekode = nvk.kommune and nvk.status in(2,3)
+         k.kommunekode = nvk.kommune AND nvk.status IN (2, 3)
     LEFT JOIN dar1_supplerendebynavn_current s
       ON hn.supplerendebynavn_id = s.id
     JOIN dar1_postnummer_current p
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_adressepunkt_current ap
       ON hn.adgangspunkt_id = ap.id
-    LEFT JOIN adgangsadresser aa_old ON hn.id = aa_old.id
   WHERE hn.status IN (2, 3) AND hn.husnummertekst IS NOT NULL;
