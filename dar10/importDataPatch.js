@@ -7,9 +7,8 @@ const {runImporter} = require('../importUtil/runImporter');
 const importDarImpl = require('./importDarImpl');
 const proddb = require('../psql/proddb');
 const { withImportTransaction } = require('../importUtil/importUtil');
-const {makeChangesNonPublic} = require('../importUtil/materialize');
-const tableSchema = require('../psql/tableModel');
-
+const initialization = require('../psql/initialization');
+const path = require('path');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -48,6 +47,7 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
         THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
         ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
         END`);
+      yield initialization.reloadDatabaseCode( client, path.join(__dirname, '../psql/schema');
       yield importDarImpl.importIncremental(client, txid, options.dataDir, false);
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
