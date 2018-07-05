@@ -24,10 +24,31 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
 
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+      yield client.query(`UPDATE dar1_husnummer set husnummerretning = CASE WHEN ST_X(husnummerretning) >= 0 
+        THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
+        ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
+        END`);
+      yield client.query(`UPDATE dar1_husnummer_changes set husnummerretning = CASE WHEN ST_X(husnummerretning) >= 0 
+        THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
+        ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
+        END`);
+      yield client.query(`UPDATE dar1_husnummer_history set husnummerretning = CASE WHEN ST_X(husnummerretning) >= 0 
+        THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
+        ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
+        END`);
+      yield client.query(`UPDATE dar1_husnummer_history_changes set husnummerretning = CASE WHEN ST_X(husnummerretning) >= 0 
+        THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
+        ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
+        END`);
+      yield client.query(`UPDATE dar1_husnummer_current set husnummerretning = CASE WHEN ST_X(husnummerretning) >= 0 
+        THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
+        ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
+        END`);
+      yield client.query(`UPDATE dar1_husnummer_current_changes set husnummerretning = CASE WHEN ST_X(husnummerretning) >= 0 
+        THEN ST_SetSRID(ST_MakePoint(ST_X(husnummerretning), -ST_Y(husnummerretning)), 25832)
+        ELSE ST_SetSRID(ST_MakePoint(-ST_X(husnummerretning), ST_Y(husnummerretning)), 25832)
+        END`);
       yield importDarImpl.importIncremental(client, txid, options.dataDir, false);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.dar1_Husnummer);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.dar1_Husnummer_history);
-      yield makeChangesNonPublic(client, txid, tableSchema.tables.dar1_Husnummer_current);
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
   }));
