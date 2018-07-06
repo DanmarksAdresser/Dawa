@@ -9,6 +9,7 @@ const proddb = require('../psql/proddb');
 const { withImportTransaction } = require('../importUtil/importUtil');
 const initialization = require('../psql/initialization');
 const path = require('path');
+const { makeChangesNonPublic } = require('../importUtil/materialize');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
@@ -55,6 +56,9 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
         END`);
       yield initialization.reloadDatabaseCode( client, path.join(__dirname, '../psql/schema'));
       yield importDarImpl.importIncremental(client, txid, options.dataDir, true);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.dar1_Husnummer);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.dar1_Husnummer_history);
+      yield makeChangesNonPublic(client, txid, tableSchema.tables.dar1_Husnummer_current);
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
   }));
