@@ -54,7 +54,7 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
         ELSE husnummerretning
         END`);
       yield initialization.reloadDatabaseCode( client, path.join(__dirname, '../psql/schema'));
-      yield importDarImpl.importIncremental(client, txid, options.dataDir, false);
+      yield importDarImpl.importIncremental(client, txid, options.dataDir, true);
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
   }));
