@@ -10,6 +10,7 @@ const { withImportTransaction } = require('../importUtil/importUtil');
 const initialization = require('../psql/initialization');
 const path = require('path');
 const { makeChangesNonPublic } = require('../importUtil/materialize');
+const tableSchema = require('../psql/tableModel');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
