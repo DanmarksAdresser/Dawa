@@ -65,7 +65,7 @@ module.exports = {
     name: 'geometri',
     type: 'string',
     schema: {
-      enum: ['vejnavnelinje', 'vejnavneområde']
+      enum: ['vejnavnelinje', 'vejnavneområde', 'begge']
     },
     defaultValue: 'vejnavnelinje'
   }
