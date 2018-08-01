@@ -541,6 +541,7 @@ const tilknytninger_mat = {
     {name: 'retskredskode'},
     {name: 'retskredsnavn'},
     {name: 'afstemningsområdenummer'},
+    {name: 'afstemningsområde_dagi_id'},
     {name: 'afstemningsområdenavn'},
     {name: 'opstillingskredskode'},
     {name: 'opstillingskredsnavn'},
@@ -681,7 +682,13 @@ exports.materializations = Object.assign({
         table: 'dar1_DARMenighedsrådsafstemningsområde_current',
         columns: ['menighedsrådsafstemningsområdenummer'],
         references: ['mrafstemningsområdenummer']
+      },
+      {
+        table: 'dar1_DARAfstemningsområde_current',
+        columns: ['afstemningsområde_dagi_id'],
+        references: ['afstemningsområde']
       }
+
     ]
   },
   supplerendebynavne: {

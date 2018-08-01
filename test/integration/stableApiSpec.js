@@ -117,11 +117,12 @@ describe('Stable API', () => {
       json: {
         nestet: [{
           params: {
-            dagi_id: '101000'
+            kommunekode: '99',
+            nummer: '20'
           },
           value: {
-            "href": "http://dawa/afstemningsomraader/99/2",
-            "dagi_id": "101000",
+            "href": "http://dawa/afstemningsomraader/99/20",
+            "dagi_id": "704390",
             "ændret": "2018-05-02T06:50:28.217Z",
             "geo_version": 1,
             "geo_ændret": "2018-05-02T06:50:28.217Z",
@@ -135,10 +136,10 @@ describe('Stable API', () => {
               12.57121565,
               55.59060158
             ],
-            "nummer": "2",
-            "navn": "Test afstemningsområde",
+            "nummer": "20",
+            "navn": "Dåstrup",
             "afstemningssted": {
-              "navn": "Test afstemningsstednavn",
+              "navn": "Dåstrup Skole, HALLEN",
               "adgangsadresse": {
                 "href": "http://dawa/adgangsadresser/0a3f5089-86cc-32b8-e044-0003ba298018",
                 "id": "0a3f5089-86cc-32b8-e044-0003ba298018",
@@ -174,13 +175,14 @@ describe('Stable API', () => {
         }],
         flad: [{
           params: {
-            dagi_id: '101000'
+            kommunekode: '99',
+            nummer: '20'
           },
           value: {
-            "dagi_id": "101000",
-            "nummer": "2",
-            "navn": "Test afstemningsområde",
-            "afstemningsstednavn": "Test afstemningsstednavn",
+            "dagi_id": "704390",
+            "nummer": "20",
+            "navn": "Dåstrup",
+            "afstemningsstednavn": "Dåstrup Skole, HALLEN",
             "afstemningsstedadresseid": "0a3f5089-86cc-32b8-e044-0003ba298018",
             "afstemningsstedadressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
             "kommunekode": "0099",

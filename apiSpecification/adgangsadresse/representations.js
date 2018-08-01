@@ -294,6 +294,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         docOrder: ['href', 'kode', 'navn']
       }),
       'afstemningsområde': schemaObject({
+        nullable: true,
         properties: {
           href: {
             description: 'Afstemningsområdets URL',
@@ -466,7 +467,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       adr.retskreds = commonMappers.mapKode4NavnTema('retskreds', rs.retskredskode, rs.retskredsnavn, baseUrl);
       adr.politikreds = commonMappers.mapKode4NavnTema('politikreds', rs.politikredskode, rs.politikredsnavn, baseUrl);
       adr.opstillingskreds = commonMappers.mapKode4NavnTema('opstillingskreds', rs.opstillingskredskode, rs.opstillingskredsnavn, baseUrl);
-      adr.afstemningsområde = rs.afstemningsområdenummer ? {
+      adr.afstemningsområde = rs.afstemningsområdenavn ? {
         href: makeHref(baseUrl, 'afstemningsområde', [rs.kommunekode, rs.afstemningsområdenummer]),
         nummer: "" + rs.afstemningsområdenummer,
         navn: rs.afstemningsområdenavn
