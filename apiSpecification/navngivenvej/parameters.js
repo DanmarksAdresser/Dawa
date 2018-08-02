@@ -45,6 +45,15 @@ module.exports = {
       multi: true
     }
   ]),
+  distance: normalizeParameters([{
+    name: 'afstand',
+    type: 'float',
+    defaultValue: 0,
+    schema: {
+      type: 'number',
+      minimum: 0
+    }
+  }]),
   regex: normalizeParameters([{
     name: 'regex',
     type: 'string',

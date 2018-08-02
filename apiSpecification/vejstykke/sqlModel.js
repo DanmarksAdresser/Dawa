@@ -115,9 +115,9 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
+  sqlParameterImpl.autocomplete(columns, ['navn']),
   sqlParameterImpl.geomWithin('vejstykker.geom'),
   sqlParameterImpl.reverseGeocoding('vejstykker.geom'),
-  sqlParameterImpl.autocomplete(columns, ['navn']),
   distanceParameterImpl,
   regexParameterImpl,
   fuzzySearchParameterImpl,

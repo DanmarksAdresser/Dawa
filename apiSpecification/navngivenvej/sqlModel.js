@@ -12,6 +12,9 @@ const assembleSqlModel = sqlUtil.assembleSqlModel;
 const selectIsoTimestamp = sqlUtil.selectIsoDateUtc;
 
 var columns = {
+  id: {
+    column: 'nv.id'
+  },
   oprettet: {
     select: selectIsoTimestamp('oprettet')
   },
@@ -79,7 +82,7 @@ var columns = {
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       const geomColumn =
-        params.geometri === 'begge' ? 'COALESCE(beliggenhed_vejnavnelinje, beliggenhed_vejnavneområde)' :
+        params.geometri === 'begge' ? 'geom' :
           (params.geometri === 'vejnavnelinje' ? 'beliggenhed_vejnavnelinje' : 'beliggenhed_vejnavneområde');
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
@@ -103,11 +106,30 @@ function fuzzySearchParameterImpl(sqlParts, params) {
   }
 }
 
+const distanceParameterImpl = (sqlParts, params) => {
+  // This is implemented with a JOIN
+  // when using a subquery, PostgreSQL fails to utilize the spatial index
+  // Probably a bug in PostgreSQL
+  if (params.afstand !== undefined) {
+    const idAlias = dbapi.addSqlParameter(sqlParts, params.neighborid);
+    const afstandAlias = dbapi.addSqlParameter(sqlParts, params.afstand);
+    sqlParts.from.push(`, (select id, geom from navngivenvej) n2`);
+    dbapi.addWhereClause(sqlParts, `\
+n2.id = ${idAlias} \
+AND ST_DWithin(nv.geom, n2.geom, ${afstandAlias})
+AND NOT (nv.id = ${idAlias})`);
+
+  }
+};
+
+
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
+  sqlParameterImpl.geomWithin('nv.geom'),
+  distanceParameterImpl,
   regexParameterImpl,
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)

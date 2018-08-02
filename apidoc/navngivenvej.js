@@ -1,6 +1,7 @@
 const {
   formatAndPagingParams,
-  strukturParameter
+  strukturParameter,
+  SRIDParameter
 } = require('./common');
 
 const navngivenVejIdParameter =
@@ -56,7 +57,25 @@ const commonFilterParams= [
     name: 'fuzzy',
     doc: 'Aktiver fuzzy søgning'
   },
+];
 
+const cirkelPolygonParameters = [  {
+  name: 'polygon',
+  doc: 'Find de navngivne veje, som overlapper med det angivne polygon. ' +
+  'Polygonet specificeres som et array af koordinater på samme måde som' +
+  ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+  ' Bemærk at polygoner skal' +
+  ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+  ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+  ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+  ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+  examples: []
+},
+  {
+    name: 'cirkel',
+    doc: 'Find de navngivne veje, som overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+    examples: []
+  },
 ];
 
 module.exports = [
@@ -68,7 +87,9 @@ module.exports = [
       qParam,
       ...commonFilterParams,
       navngivenVejGeometriParameter,
+      ...cirkelPolygonParameters,
       strukturParameter,
+      SRIDParameter,
       ...formatAndPagingParams],
     examples: []
   },
@@ -85,13 +106,31 @@ module.exports = [
   {
     entity: 'navngivenvej',
     path: '/navngivneveje/{id}',
-    subtext: 'Opslag på enkelt vejstykke ud fra id.',
+    subtext: 'Opslag på enkelt navngiven vej ud fra id.',
     parameters: [
       navngivenVejIdParameter,
       navngivenVejGeometriParameter,
+      SRIDParameter,
       strukturParameter
     ],
     nomulti: true,
     examples: []
-  }
+  },
+  {
+    entity: 'navngivenvej',
+    path: '/navngivneveje/{id}/naboer',
+    subtext: 'Find navngivne veje i nærheden af en navngven vej',
+    parameters: [navngivenVejIdParameter,
+      {
+        name: 'afstand',
+        doc: 'Angiver maksimal afstand i meter. Default er 0, som finder de navngivne veje, som støder helt op til den navngivne vej.'
+      },
+      ...formatAndPagingParams,
+      strukturParameter,
+      SRIDParameter],
+    examples: [{
+      description: 'Find alle navngivne veje, som støder op til den navngivne vej med id 65eb3979-821b-41fd-a8ef-da0de69edbc0',
+      path: ['/navngivneveje/65eb3979-821b-41fd-a8ef-da0de69edbc0/naboer']
+    }]
+  },
 ];

@@ -235,6 +235,11 @@ const navngivenvej = {
       distinctClause: geomDistinctClause
     },
     {
+      name: 'geom',
+      distinctClause: geomDistinctClause,
+      public: false
+    },
+    {
       name: 'tsv',
       public: false,
       derive: (table) => {

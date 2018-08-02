@@ -17,6 +17,7 @@ CREATE TABLE navngivenvej(
   beliggenhed_vejnavnelinje geometry(Geometry,25832),
   beliggenhed_vejnavneområde geometry(Geometry,25832),
   beliggenhed_vejtilslutningspunkter  geometry(Geometry,25832),
+  geom geometry(Geometry,25832),
   tsv tsvector
 );
 
@@ -26,3 +27,4 @@ CREATE INDEX ON navngivenvej(darstatus);
 CREATE INDEX ON navngivenvej using gin(tsv);
 CREATE INDEX ON navngivenvej using gist(beliggenhed_vejnavnelinje);
 CREATE INDEX ON navngivenvej using gist(beliggenhed_vejnavneområde);
+CREATE INDEX ON navngivenvej using gist(geom);
