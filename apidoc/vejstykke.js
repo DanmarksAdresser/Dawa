@@ -23,13 +23,17 @@ const vejstykkerIdParameters = [
     examples: ['0052']
   }
 ];
-const vejstykkerParameters = [{
-  name: 'q',
-  doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
-  'Wildcard * er tilladt i slutningen af hvert ord. ' +
-  'Der skelnes ikke mellem store og små bogstaver.',
-  examples: ['tværvej']
-},
+const vejstykkerParameters = [
+  {
+    name: 'id',
+    doc: 'Vejstykkes unikke UUID.'
+  },{
+    name: 'q',
+    doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejstykket. ' +
+    'Wildcard * er tilladt i slutningen af hvert ord. ' +
+    'Der skelnes ikke mellem store og små bogstaver.',
+    examples: ['tværvej']
+  },
   {
     name: 'fuzzy',
     doc: 'Aktiver fuzzy søgning'

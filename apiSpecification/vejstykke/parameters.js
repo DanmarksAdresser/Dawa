@@ -20,6 +20,11 @@ module.exports =  {
   ]),
   propertyFilter: normalizeParameters([
     {
+      name: 'id',
+      type: 'string',
+      schema: schema.uuid
+    },
+    {
       name: 'navngivenvej_id',
       type: 'string',
       schema: schema.uuid

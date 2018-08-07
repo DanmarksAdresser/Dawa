@@ -47,6 +47,14 @@ var sampleParameters = {
     kommunekode: {
       values: ['420', '0461'],
       verifier: (vej, kommunekode) => _.some(vej.vejstykker, vejstykke => parseInt(vejstykke.kommunekode) === parseInt(kommunekode))
+    },
+    administrerendekommunekode: {
+      values: ['0510', '510'],
+      verifier: (vej,kommunekode) => parseInt(vej.administrerendekommune.kode) ===parseInt(kommunekode)
+    },
+    vejstykkeid: {
+      values: ['5cabd697-4eae-11e8-93fd-066cff24d637'],
+      verifier: (vej,id) =>  _.some(vej.vejstykker, vejstykke => vejstykke.id === id)
     }
   },
   vejstykke: {
@@ -56,7 +64,10 @@ var sampleParameters = {
         return vejstykke.kode === kode4String(kode);
       }
     },
-
+    id: {
+      values: ['5cabd697-4eae-11e8-93fd-066cff24d637'],
+      verifier: (vejstykke,id) => vejstykke.id === id
+    },
     navngivenvej_id: {
       values: ['67980870-86f6-4b2f-9334-c1f9b3a409de'],
       verifier: (vejstykke, navngivenvej_id) =>

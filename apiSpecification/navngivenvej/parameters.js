@@ -43,6 +43,18 @@ module.exports = {
       type: 'integer',
       schema: schema.kode4,
       multi: true
+    },
+    {
+      name: 'administrerendekommunekode',
+      type: 'integer',
+      schema: schema.kode4,
+      multi: true
+    },
+    {
+      name: 'vejstykkeid',
+      type: 'string',
+      schema: schema.uuid,
+      multi: true
     }
   ]),
   distance: normalizeParameters([{

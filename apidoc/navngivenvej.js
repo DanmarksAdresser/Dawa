@@ -50,6 +50,10 @@ const commonFilterParams= [
     doc: 'Find de navngivne veje, som ligger i kommunen med den angivne kommunekode.'
   },
   {
+    name: 'administrerendekommunekode',
+    doc: 'Find de navngivne veje, som administreres af kommunen med den angivne kommunekode.'
+  },
+  {
     name: 'regex',
     doc: 'Find de navngivne veje, som matcher det angivne regulære udtryk.'
   },
@@ -57,6 +61,10 @@ const commonFilterParams= [
     name: 'fuzzy',
     doc: 'Aktiver fuzzy søgning'
   },
+  {
+    name: 'vejstykkeid',
+    doc: 'Find den navngivne vej som vejstykket med den angivne id er en del af'
+  }
 ];
 
 const cirkelPolygonParameters = [  {

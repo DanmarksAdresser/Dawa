@@ -25,7 +25,7 @@ var columns = {
     select: selectIsoTimestamp('beliggenhed_oprindelse_registrering')
   },
   vejstykker: {
-    select: `(SELECT json_agg(CAST((v.kommunekode, v.kode) AS VejstykkeRef))
+    select: `(SELECT json_agg(json_build_object('kommunekode', v.kommunekode, 'kode', v.kode, 'id', v.navngivenvejkommunedel_id))
     FROM vejstykker v
     WHERE v.navngivenvej_id = nv.id)`
   },
@@ -56,6 +56,28 @@ var columns = {
         multi: true
       }], {});
       propertyFilterFn(subquery, {kommunekode: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+  },
+  vejstykkeid: {
+    select: null,
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['vejstykker'],
+        whereClauses: ['navngivenvej_id = nv.id'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'navngivenvejkommunedel_id',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {navngivenvejkommunedel_id: parameterArray});
       const subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }

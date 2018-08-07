@@ -11,6 +11,9 @@ var selectIsoTimestamp = sqlUtil.selectIsoDate;
 
 
 var columns = {
+  id: {
+    column: 'vejstykker.navngivenvejkommunedel_id'
+  },
   kode: {
     column: 'vejstykker.kode'
   },

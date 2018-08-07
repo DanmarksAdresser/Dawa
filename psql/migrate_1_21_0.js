@@ -31,6 +31,8 @@ SET geom = COALESCE(beliggenhed_vejnavnelinje,
 UPDATE navngivenvej_changes
 SET geom = COALESCE(beliggenhed_vejnavnelinje,
                     beliggenhed_vejnavneområde);
+                    
+CREATE INDEX ON navngivenvej(administrerendekommune);                    
 
 DELETE FROM tilknytninger_mat_changes;
 ALTER TABLE tilknytninger_mat ADD COLUMN  afstemningsområde_dagi_id INTEGER;
@@ -45,8 +47,18 @@ ALTER TABLE tilknytninger_mat_changes ADD COLUMN  menighedsrådsafstemningsområ
       yield client.query(`
 UPDATE tilknytninger_mat t
 SET afstemningsområde_dagi_id = v.afstemningsområde_dagi_id,
+afstemningsområdenummer = v.afstemningsområdenummer,
+afstemningsområdenavn = v.afstemningsområdenavn,
 menighedsrådsafstemningsområdenummer = v.menighedsrådsafstemningsområdenummer,
-menighedsrådsafstemningsområdenavn = v.menighedsrådsafstemningsområdenavn 
+menighedsrådsafstemningsområdenavn = v.menighedsrådsafstemningsområdenavn,
+sognekode = v.sognekode, 
+sognenavn = v.sognenavn,
+opstillingskredskode = v.opstillingskredskode,
+opstillingskredsnavn = v.opstillingskredsnavn,
+storkredsnummer = v.storkredsnummer,
+storkredsnavn = v.storkredsnavn,
+valglandsdelsbogstav = v.valglandsdelsbogstav,
+valglandsdelsnavn = v.valglandsdelsnavn
 FROM tilknytninger_mat_view v WHERE v.adgangsadresseid = t.adgangsadresseid; 
 `);
     }));
