@@ -4,13 +4,8 @@ const {go} = require('ts-csp');
 const cliParameterParsing = require('../bbr/common/cliParameterParsing');
 const proddb = require('./proddb');
 
-const temaModels = require('../dagiImport/temaModels');
-
 const {reloadDatabaseCode} = require('./initialization');
 const {withImportTransaction} = require('../importUtil/importUtil');
-const {deriveColumn} = require('../importUtil/tableModelUtil');
-const {initVisualCenters} = require('../importUtil/geometryImport');
-const tableSchema = require('./tableModel');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til test database', 'string']
