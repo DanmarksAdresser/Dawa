@@ -18,7 +18,6 @@ module.exports = [
   require('./replikering-page'),
   require('./replikering-old-page'),
   require('./retskreds-page'),
-  require('./senesteSekvensnummer-page'),
   require('./sogn-page'),
   require('./stednavn-page'),
   require('./stednavn2-page'),

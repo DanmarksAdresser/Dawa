@@ -1,7 +1,7 @@
 module.exports = {
-  entity: 'replikering-legacy',
-  heading: 'Replikering (Legacy)',
-  lead: `Gammel version af API'er til etablering af lokal kopi af adressedata.
+  entity: 'replikering-forældet',
+  heading: 'Replikering (Forældet)',
+  lead: `Forældet API'er til etablering af lokal kopi af adressedata.
   For en beskrivelse af hvordan dette gamle API fungerer, se <a href="/dok/guide/replikering-old">guiden til det gamle API</a>.
   For en beskrivelse af det nye replikerings-API, se <a href"/dok/guide/replikering"/>guiden til det nye API</a>.`,
   sections: [

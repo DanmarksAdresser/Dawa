@@ -45,7 +45,7 @@ const replikeringDoc = (entityName, idParams, eventExamples) => {
   const udtraekParameterDoc = {
     entity: entityName,
     path: '/replikering/' + nameAndKey.plural,
-    subtext: `DEPRECATED. Anvend det det <a href="/dok/api/replikering#udtraek">nye API</a> i stedet.
+    subtext: `FORÆLDET. Anvend det det <a href="/dok/api/replikering#udtraek">nye API</a> i stedet.
 Udtraek for ${nameAndKey.plural}.`,
     parameters: [{
       name: 'sekvensnummer',
@@ -60,7 +60,7 @@ Udtraek for ${nameAndKey.plural}.`,
   const eventParameterDocs = {
     entity: entityName,
     path: '/replikering/' + nameAndKey.plural + '/haendelser',
-    subtext: `DEPRECATED. Anvend det det <a href="/dok/api/replikering#haendelser">nye API</a> i stedet. 
+    subtext: `FORÆLDET. Anvend det det <a href="/dok/api/replikering#haendelser">nye API</a> i stedet. 
 Hændelser for ${nameAndKey.plural}.`,
     parameters: [
       ...txidIntervalDoc,
