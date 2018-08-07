@@ -16,6 +16,7 @@ module.exports = [
   require('./postnummer-page'),
   require('./region-page'),
   require('./replikering-page'),
+  require('./replikering-old-page'),
   require('./retskreds-page'),
   require('./senesteSekvensnummer-page'),
   require('./sogn-page'),
@@ -28,7 +29,5 @@ module.exports = [
   require('./supplerendebynavn2-page'),
   require('./valglandsdel-page'),
   require('./vejnavn-page'),
-  require('./vejstykke-page'),
-  require('./vejstykkepostnummerrelation-page'),
-  require('./zone-page')
+  require('./vejstykke-page')
 ];

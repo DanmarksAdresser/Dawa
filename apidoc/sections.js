@@ -29,5 +29,5 @@ module.exports = [{
     headingClass: 'h2-icon',
     lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af de data som DAWA udstiller.
  <a href="/dok/guide/replikering">Replikerings-guiden</a> anviser hvordan API'et benyttes.`,
-    entities: ['replikering','senesteSekvensnummer', 'zone']
+    entities: ['replikering', 'replikering-legacy']
   }];

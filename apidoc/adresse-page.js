@@ -58,18 +58,6 @@ module.exports = {
       anchor: 'historik',
       heading: 'Adresse historik',
       path: '/historik/adresser'
-    },
-    {
-      type: 'endpoint',
-      anchor: 'udtræk',
-      heading: 'Adresse - udtræk',
-      path: '/replikering/adresser'
-    },
-    {
-      type: 'endpoint',
-      anchor: 'hændelser',
-      heading: 'Adresse - hændelser',
-      path: '/replikering/adresser/haendelser'
     }
   ]
 };
