@@ -19,8 +19,9 @@ exports.query = resourcesUtil.queryResourceSpec(
     geometri: parameters.geometri,
     search: commonParameters.search,
     fuzzy: commonParameters.fuzzy,
-    geomWithin: commonParameters.geomWithin
-  },
+    geomWithin: commonParameters.geomWithin,
+    reverseGeocodingOptional: commonParameters.reverseGeocodingOptional
+},
   representations,
   sqlModel
 );

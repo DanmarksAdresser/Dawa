@@ -151,6 +151,7 @@ var parameterImpls = [
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   sqlParameterImpl.geomWithin('nv.geom'),
+  sqlParameterImpl.reverseGeocoding('nv.geom'),
   distanceParameterImpl,
   regexParameterImpl,
   fuzzySearchParameterImpl,

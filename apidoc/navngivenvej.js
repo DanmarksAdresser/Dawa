@@ -86,6 +86,16 @@ const cirkelPolygonParameters = [  {
   },
 ];
 
+const reverseParams = [{
+  name: 'x',
+  doc: `Reverse geocoding. Find den navngivne vej som ligger nærmsest det angivne koordinat.
+ Der benyttes det koordinatsystem, som er angivet i srid-parameteren (Default WGS84).`
+}, {
+  name: 'y',
+  doc: `Reverse geocoding. Find den navngivne vej som ligger nærmsest det angivne koordinat.' +
+  'Der benyttes det koordinatsystem, som er angivet i srid-parameteren (Default WGS84).`
+}];
+
 module.exports = [
   {
     entity: 'navngivenvej',
@@ -96,6 +106,7 @@ module.exports = [
       ...commonFilterParams,
       navngivenVejGeometriParameter,
       ...cirkelPolygonParameters,
+      ...reverseParams,
       strukturParameter,
       SRIDParameter,
       ...formatAndPagingParams],
