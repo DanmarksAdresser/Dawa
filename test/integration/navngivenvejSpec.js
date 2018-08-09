@@ -44,6 +44,16 @@ describe('NavngivenVej API', () => {
       assert.isNotNull(result.geometry);
     }));
 
+    it(`Hvis jeg henter en navngivenvej med område i stedet for linje, 
+    og anvender geometri=begge parameteren, 
+    så får jeg en polygon tilbage i geometri-feltet`, () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), getByKeyResource, {id: ID_OMRÅDE}, {
+        format: 'geojson',
+        geometri: 'vejnavneområde'
+      });
+      assert.isNotNull(result.geometry);
+    }));
+
     it(`Kan søge efter navngiven vej`, () => go(function* () {
       const result = yield helpers.getJson(clientFn(), queryResource, {}, {
         q: 'engvangsv*'

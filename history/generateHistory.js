@@ -2,7 +2,7 @@
 
 const _ = require('underscore');
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const {runImporter} = require('../importUtil/runImporter');
 const generateHistoryImpl = require('./generateCombinedHistoryImpl');
 const logger = require('../logger').forCategory('generateHistoryDar1');
 const proddb = require('../psql/proddb');
@@ -13,13 +13,13 @@ const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
+runImporter('generateHistory', optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE_CONCURRENT', function (client) {
+  return proddb.withTransaction('READ_WRITE_CONCURRENT', function (client) {
     client.allowParallelQueries = true;
     return go(function*() {
       try {
@@ -31,5 +31,5 @@ cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options)
         throw err;
       }
     });
-  }).done();
+  });
 });

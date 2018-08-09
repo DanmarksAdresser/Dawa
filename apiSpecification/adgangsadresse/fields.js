@@ -170,6 +170,8 @@ var fields = [
   {
     name: 'opstillingskredsnavn'
   },
+  { name: 'menighedsrådsafstemningsområdenummer'},
+  { name: 'menighedsrådsafstemningsområdenavn'},
   {
     name: 'zone',
     formatter: util.zoneKodeFormatter

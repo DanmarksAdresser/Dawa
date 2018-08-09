@@ -1,26 +1,29 @@
 DROP VIEW IF EXISTS tilknytninger_mat_view;
 CREATE VIEW tilknytninger_mat_view AS (
   SELECT
-    a.id      AS adgangsadresseid,
-    k.kode    AS kommunekode,
-    k.navn    AS kommunenavn,
-    reg.kode  AS regionskode,
-    reg.navn  AS regionsnavn,
+    a.id                         AS adgangsadresseid,
+    k.kode                       AS kommunekode,
+    k.navn                       AS kommunenavn,
+    reg.kode                     AS regionskode,
+    reg.navn                     AS regionsnavn,
     s.sognekode,
-    s.navn    AS sognenavn,
+    s.navn                       AS sognenavn,
     pt.politikredskode,
-    p.navn    AS politikredsnavn,
+    p.navn                       AS politikredsnavn,
     rt.retskredskode,
-    r.navn    AS retskredsnavn,
-    ao.afstemningsområdenummer AS afstemningsområdenummer,
-    ao.navn   AS afstemningsområdenavn,
-    ot.opstillingskredskode,
-    o.navn    AS opstillingskredsnavn,
-    vt.valglandsdelsbogstav,
-    v.navn    AS valglandsdelsnavn,
-    stort.storkredsnummer,
-    stor.navn AS storkredsnavn,
-    zt.zone
+    r.navn                       AS retskredsnavn,
+    ao.afstemningsområdenummer   AS afstemningsområdenummer,
+    ao.afstemningsområde         AS afstemningsområde_dagi_id,
+    aom.navn                     AS afstemningsområdenavn,
+    o.kode                       AS opstillingskredskode,
+    o.navn                       AS opstillingskredsnavn,
+    v.bogstav                    AS valglandsdelsbogstav,
+    v.navn                       AS valglandsdelsnavn,
+    stor.nummer                  AS storkredsnummer,
+    stor.navn                    AS storkredsnavn,
+    zt.zone,
+    mr.mrafstemningsområdenummer AS menighedsrådsafstemningsområdenummer,
+    mr.navn                      AS menighedsrådsafstemningsområdenavn
   FROM adgangsadresser_mat a
     JOIN dar1_husnummer_current hn ON a.id = hn.id
     LEFT JOIN dar1_darsogneinddeling_current s ON hn.darsogneinddeling_id = s.id
@@ -32,12 +35,11 @@ CREATE VIEW tilknytninger_mat_view AS (
     LEFT JOIN retskredse r ON rt.retskredskode = r.kode
     LEFT JOIN kommuner k ON a.kommunekode = k.kode
     LEFT JOIN regioner reg ON k.regionskode = reg.kode
-    LEFT JOIN afstemningsomraadetilknytninger aot ON a.id = aot.adgangsadresseid
-    LEFT JOIN opstillingskredstilknytninger ot ON a.id = ot.adgangsadresseid
-    LEFT JOIN opstillingskredse o ON ot.opstillingskredskode = o.kode
-    LEFT JOIN valglandsdelstilknytninger vt ON a.id = vt.adgangsadresseid
-    LEFT JOIN valglandsdele v ON vt.valglandsdelsbogstav = v.bogstav
-    LEFT JOIN storkredstilknytninger stort ON a.id = stort.adgangsadresseid
-    LEFT JOIN storkredse stor ON stort.storkredsnummer = stor.nummer
+    LEFT JOIN afstemningsomraader aom ON ao.afstemningsområde = aom.dagi_id
+    LEFT JOIN opstillingskredse o ON aom.opstillingskreds_dagi_id = o.dagi_id
+    LEFT JOIN storkredse stor ON o.storkredsnummer = stor.nummer
+    LEFT JOIN valglandsdele v ON stor.valglandsdelsbogstav = v.bogstav
     LEFT JOIN zonetilknytninger zt ON a.id = zt.adgangsadresseid
+    LEFT JOIN dar1_darmenighedsrådsafstemningsområde_current mr
+      ON hn.darmenighedsrådsafstemningsområde_id = mr.id
 );

@@ -43,8 +43,29 @@ module.exports = {
       type: 'integer',
       schema: schema.kode4,
       multi: true
+    },
+    {
+      name: 'administrerendekommunekode',
+      type: 'integer',
+      schema: schema.kode4,
+      multi: true
+    },
+    {
+      name: 'vejstykkeid',
+      type: 'string',
+      schema: schema.uuid,
+      multi: true
     }
   ]),
+  distance: normalizeParameters([{
+    name: 'afstand',
+    type: 'float',
+    defaultValue: 0,
+    schema: {
+      type: 'number',
+      minimum: 0
+    }
+  }]),
   regex: normalizeParameters([{
     name: 'regex',
     type: 'string',
@@ -65,7 +86,7 @@ module.exports = {
     name: 'geometri',
     type: 'string',
     schema: {
-      enum: ['vejnavnelinje', 'vejnavneområde']
+      enum: ['vejnavnelinje', 'vejnavneområde', 'begge']
     },
     defaultValue: 'vejnavnelinje'
   }

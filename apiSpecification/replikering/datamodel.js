@@ -558,6 +558,12 @@ module.exports = {
     key: ['kommunekode', 'kode'],
     attributes: [
       {
+        name: 'id',
+        type: 'string',
+        description: 'Vejstykkets unikke ID (UUID).',
+        schema: definitions.UUID
+      },
+      {
         name: 'kommunekode',
         type: 'string',
         description: 'Kommunekoden. 4 cifre.',

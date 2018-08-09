@@ -47,6 +47,8 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     T.opstillingskredskode,
     T.opstillingskredsnavn,
     T.zone,
+    T.menighedsrådsafstemningsområdenummer,
+    T.menighedsrådsafstemningsområdenavn,
     A.ejerlavkode,
     A.ejerlavnavn,
     A.matrikelnr,

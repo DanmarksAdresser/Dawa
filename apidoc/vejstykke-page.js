@@ -44,18 +44,6 @@ Det er p.t. ikke muligt at få information om hvilke vejstykker der er en del af
       lead: `API'et udstiller for hvert vejstykke følgende informationer:`,
       entity: 'vejstykke',
       qualifier: 'json'
-    },
-    {
-      type: 'endpoint',
-      anchor: 'udtræk',
-      heading: 'Replikering - udtræk',
-      path: '/replikering/vejstykker'
-    },
-    {
-      type: 'endpoint',
-      anchor: 'hændelser',
-      heading: 'Replikering - hændelser',
-      path: '/replikering/vejstykker/haendelser'
     }
   ]
 };

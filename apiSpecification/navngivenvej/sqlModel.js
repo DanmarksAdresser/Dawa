@@ -12,6 +12,9 @@ const assembleSqlModel = sqlUtil.assembleSqlModel;
 const selectIsoTimestamp = sqlUtil.selectIsoDateUtc;
 
 var columns = {
+  id: {
+    column: 'nv.id'
+  },
   oprettet: {
     select: selectIsoTimestamp('oprettet')
   },
@@ -22,7 +25,7 @@ var columns = {
     select: selectIsoTimestamp('beliggenhed_oprindelse_registrering')
   },
   vejstykker: {
-    select: `(SELECT json_agg(CAST((v.kommunekode, v.kode) AS VejstykkeRef))
+    select: `(SELECT json_agg(json_build_object('kommunekode', v.kommunekode, 'kode', v.kode, 'id', v.navngivenvejkommunedel_id))
     FROM vejstykker v
     WHERE v.navngivenvej_id = nv.id)`
   },
@@ -37,7 +40,7 @@ var columns = {
   },
   kommunekode: {
     select: null,
-    where: function(sqlParts, parameterArray) {
+    where: function (sqlParts, parameterArray) {
       // this is a bit hackish, we add the parameters from
       // the parent query to the subquery to get
       // correct parameter indices for the subquery
@@ -53,6 +56,28 @@ var columns = {
         multi: true
       }], {});
       propertyFilterFn(subquery, {kommunekode: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+  },
+  vejstykkeid: {
+    select: null,
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['vejstykker'],
+        whereClauses: ['navngivenvej_id = nv.id'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'navngivenvejkommunedel_id',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {navngivenvejkommunedel_id: parameterArray});
       const subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
@@ -78,40 +103,62 @@ var columns = {
   },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
-      const geomColumn = params.geometri === 'vejnavnelinje' ? 'beliggenhed_vejnavnelinje' : 'beliggenhed_vejnavneområde';
+      const geomColumn =
+        params.geometri === 'begge' ? 'geom' :
+          (params.geometri === 'vejnavnelinje' ? 'beliggenhed_vejnavnelinje' : 'beliggenhed_vejnavneområde');
       const srid = params.srid || 4326;
       const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
-      return geojsonColumn(srid, sridAlias,geomColumn);
+      return geojsonColumn(srid, sridAlias, geomColumn);
     }
   },
 };
 
 const regexParameterImpl = (sqlParts, params) => {
-  if(params.regex) {
+  if (params.regex) {
     const regexAlias = dbapi.addSqlParameter(sqlParts, params.regex);
     dbapi.addWhereClause(sqlParts, `navn ~ ${regexAlias}`);
   }
 };
 
 function fuzzySearchParameterImpl(sqlParts, params) {
-  if(params.fuzzyq) {
+  if (params.fuzzyq) {
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     sqlParts.whereClauses.push("nv.navn IN (select distinct ON (navn, dist) navn from (SELECT navn, navn <-> " + fuzzyqAlias + " as dist from navngivenvej ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)");
     sqlParts.orderClauses.push("levenshtein(lower(navn), lower(" + fuzzyqAlias + "), 2, 1, 3)");
   }
 }
 
+const distanceParameterImpl = (sqlParts, params) => {
+  // This is implemented with a JOIN
+  // when using a subquery, PostgreSQL fails to utilize the spatial index
+  // Probably a bug in PostgreSQL
+  if (params.afstand !== undefined) {
+    const idAlias = dbapi.addSqlParameter(sqlParts, params.neighborid);
+    const afstandAlias = dbapi.addSqlParameter(sqlParts, params.afstand);
+    sqlParts.from.push(`, (select id, geom from navngivenvej) n2`);
+    dbapi.addWhereClause(sqlParts, `\
+n2.id = ${idAlias} \
+AND ST_DWithin(nv.geom, n2.geom, ${afstandAlias})
+AND NOT (nv.id = ${idAlias})`);
+
+  }
+};
+
+
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
+  sqlParameterImpl.geomWithin('nv.geom'),
+  sqlParameterImpl.reverseGeocoding('nv.geom'),
+  distanceParameterImpl,
   regexParameterImpl,
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
-var baseQuery = function() {
+var baseQuery = function () {
   return {
     select: [],
     from: ['navngivenvej nv'],

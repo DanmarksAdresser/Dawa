@@ -41,7 +41,7 @@ describe('Import af DAR 1.0 udtræk', function () {
 
       // check we actually imported some rows
       const queryResult = (yield client.queryp('select * from dar1_husnummer')).rows;
-      expect(queryResult).to.have.length(3586);
+      expect(queryResult).to.have.length(7165);
 
       // check metadata has been updated
       const meta = yield importDarImpl.internal.getMeta(client);

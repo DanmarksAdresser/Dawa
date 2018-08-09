@@ -235,6 +235,11 @@ const navngivenvej = {
       distinctClause: geomDistinctClause
     },
     {
+      name: 'geom',
+      distinctClause: geomDistinctClause,
+      public: false
+    },
+    {
       name: 'tsv',
       public: false,
       derive: (table) => {
@@ -541,6 +546,7 @@ const tilknytninger_mat = {
     {name: 'retskredskode'},
     {name: 'retskredsnavn'},
     {name: 'afstemningsområdenummer'},
+    {name: 'afstemningsområde_dagi_id'},
     {name: 'afstemningsområdenavn'},
     {name: 'opstillingskredskode'},
     {name: 'opstillingskredsnavn'},
@@ -549,6 +555,8 @@ const tilknytninger_mat = {
     {name: 'storkredsnummer'},
     {name: 'storkredsnavn'},
     {name: 'zone'},
+    {name: 'menighedsrådsafstemningsområdenummer'} ,
+    {name: 'menighedsrådsafstemningsområdenavn'}
   ]
 };
 
@@ -674,7 +682,18 @@ exports.materializations = Object.assign({
         table: 'dar1_DARSogneinddeling_current',
         columns: ['sognekode'],
         references: ['sognekode']
+      },
+      {
+        table: 'dar1_DARMenighedsrådsafstemningsområde_current',
+        columns: ['menighedsrådsafstemningsområdenummer'],
+        references: ['mrafstemningsområdenummer']
+      },
+      {
+        table: 'dar1_DARAfstemningsområde_current',
+        columns: ['afstemningsområde_dagi_id'],
+        references: ['afstemningsområde']
       }
+
     ]
   },
   supplerendebynavne: {

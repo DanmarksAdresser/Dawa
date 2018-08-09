@@ -21,7 +21,7 @@ CREATE VIEW dar1_navngivenvej_view AS
     vejnavnebeliggenhed_oprindelse_tekniskstandard as beliggenhed_oprindelse_tekniskstandard,
     vejnavnebeliggenhed_vejnavnelinje as beliggenhed_vejnavnelinje,
     vejnavnebeliggenhed_vejnavneområde as beliggenhed_vejnavneområde,
-    vejnavnebeliggenhed_vejtilslutningspunkter as beliggenhed_vejtilslutningspunkter
-
+    vejnavnebeliggenhed_vejtilslutningspunkter as beliggenhed_vejtilslutningspunkter,
+    COALESCE(vejnavnebeliggenhed_vejnavnelinje, vejnavnebeliggenhed_vejnavneområde) AS geom
   FROM dar1_navngivenvej_current n
   WHERE n.status IN (2,3);

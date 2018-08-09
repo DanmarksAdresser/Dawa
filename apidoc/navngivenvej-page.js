@@ -16,6 +16,12 @@ module.exports = {
       path: '/navngivneveje/{id}'
     },
     {
+      type: 'endpoint',
+      heading: 'Navngiven vejs naboer',
+      anchor: 'naboer',
+      path: '/navngivneveje/{id}/naboer'
+    },
+    {
       type: 'datadescription',
       heading: 'Beskrivelse af navngiven vej',
       anchor: 'databeskrivelse',

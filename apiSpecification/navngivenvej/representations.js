@@ -69,7 +69,8 @@ exports.json = {
               $ref: '#/definitions/Href'
             },
             kommunekode: normalizedVejstykkeFieldSchema('kommunekode'),
-            kode: normalizedVejstykkeFieldSchema('kode')
+            kode: normalizedVejstykkeFieldSchema('kode'),
+            id: normalizedVejstykkeFieldSchema('id')
           },
           docOrder: ['href', 'kommunekode', 'kode']
         }

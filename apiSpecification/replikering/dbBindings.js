@@ -231,6 +231,9 @@ const unnormalizedBindings = {
     table: 'vejstykker',
     legacyResource: true,
     attributes: {
+      id: {
+        column: 'navngivenvejkommunedel_id'
+      },
       kommunekode: {
         formatter: kode4String,
         parameterType: 'integer',

@@ -54,8 +54,10 @@ INSERT INTO dar1_adressepunkt_prepared (id, status, virkning)
 const prepareDar1Kommune = client =>
   mergeValidTime(client, 'dar1_darkommuneinddeling_history', 'dar1_kommune_prepared', ['id'], ['id', 'kommunekode']);
 
-const prepareDar1NavngivenVej = client =>
-  mergeValidTime(client, 'dar1_navngivenvej_history', 'dar1_navngivenvej_prepared', ['id'], ['id', 'vejnavn', 'vejadresseringsnavn']);
+const prepareDar1NavngivenVej = client => go(function*() {
+  yield mergeValidTime(client, 'dar1_navngivenvej_history', 'dar1_navngivenvej_prepared', ['id'], ['id', 'vejnavn', 'vejadresseringsnavn']);
+  yield client.query('delete from dar1_navngivenvej_prepared where vejnavn is null');
+});
 
 const prepareDar1NavngivenVejKommunedel = client => go(function*() {
   yield mergeValidTime(client, 'dar1_navngivenvejkommunedel_history', 'dar1_navngivenvejkommunedel_prepared', ['id'], ['id', 'navngivenvej_id', 'kommune', 'vejkode']);

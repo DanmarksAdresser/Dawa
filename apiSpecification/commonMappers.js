@@ -33,11 +33,15 @@ exports.mapVejstykkeRef = (dbJson, baseUrl) => {
   if(dbJson) {
     const kommunekode = kode4String(dbJson.kommunekode);
     const kode = kode4String(dbJson.kode);
-    return {
+    const result =  {
       href: exports.makeHref(baseUrl, 'vejstykke', [kommunekode, kode]),
       kommunekode: kommunekode,
       kode: kode
     };
+    if(dbJson.id) {
+      result.id = dbJson.id;
+    }
+    return result;
   }
   return null;
 };

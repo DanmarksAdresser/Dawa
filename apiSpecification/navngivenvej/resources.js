@@ -19,8 +19,9 @@ exports.query = resourcesUtil.queryResourceSpec(
     geometri: parameters.geometri,
     search: commonParameters.search,
     fuzzy: commonParameters.fuzzy,
-
-  },
+    geomWithin: commonParameters.geomWithin,
+    reverseGeocodingOptional: commonParameters.reverseGeocodingOptional
+},
   representations,
   sqlModel
 );
@@ -46,6 +47,27 @@ exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   representations,
   sqlModel
 );
+
+exports.neighbors = {
+  path: `/${nameAndKey.plural}/:id/naboer`,
+  pathParameters: parameters.id,
+  queryParameters: resourcesUtil.flattenParameters({
+    paging: commonParameters.paging,
+    format: commonParameters.format,
+    crs: commonParameters.crs,
+    struktur: commonParameters.struktur,
+    distance: parameters.distance
+  }),
+  representations: representations,
+  sqlModel: sqlModel,
+  singleResult: false,
+  chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
+  processParameters: (params) => {
+    params.neighborid=params.id;
+    delete params.id;
+    resourcesUtil.applyDefaultPagingForQuery(params)
+  }
+};
 
 
 Object.keys(exports).forEach(key => {
