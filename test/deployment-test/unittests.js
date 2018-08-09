@@ -809,7 +809,6 @@ describe('Unik vejstykke', function(){
 
 describe('Navngiven vej', function(){
 
- 
   it("navn", function(done){
     var options= {};
     options.baseUrl= host;
@@ -823,6 +822,121 @@ describe('Navngiven vej', function(){
       var navngivneveje= JSON.parse(response.body);
       assert(navngivneveje.length>=1, "Der er burde være en: "+navngivneveje.length);
       assert(navngivneveje[0].vejstykker.length>=5, "Der er burde være mindst 5 vejstykker: "+navngivneveje[0].vejstykker.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+
+  it("cirkel", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/navngivneveje';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.cirkel= "12.510814300000002,55.69837060000,50";
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var navngivneveje= JSON.parse(response.body);
+      assert(navngivneveje.length === 2, "Ikke to navngivneveje");
+      console.log(navngivneveje[0].navn);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("polygon", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/navngivneveje';
+    options.qs= {};
+    options.qs.cache= 'no-cache'; 
+    options.qs.polygon= '[[[8.91172755486213, 56.59274886518194],[8.948437235894998, 56.57437007272818],[8.876752381627279, 56.579839531262145],[8.91172755486213, 56.59274886518194]]]';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var navngivneveje= JSON.parse(response.body);
+      assert(navngivneveje.length > 2, "Ikke flere end to navngivneveje");
+      console.log(navngivneveje[0].navn);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+   
+  it("reverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/navngivneveje';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.x= 12.510814300000002;
+    options.qs.y= 55.69837060000;
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var navngivneveje= JSON.parse(response.body);
+      assert(navngivneveje.length > 0, "ingen nærmeste navngiven vej");
+      console.log(navngivneveje[0].navn);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("naboer", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/navngivneveje/d05d536a-febb-49f1-bcb8-8a2849e31fe2/naboer';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var navngivneveje= JSON.parse(response.body);
+      assert(navngivneveje.length === 3, "Der burde være tre naboveje");
+      console.log(navngivneveje[0].navn);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("gemometri=begge", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/navngivneveje';
+    options.qs= {};
+    options.qs.kommunekode= 217;
+    options.qs.format= "geojson";
+    options.qs.geometri= "begge";
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var navngivneveje= JSON.parse(response.body);
+      assert(navngivneveje.features.length > 0, "Der burde være navngivne veje");
+      let vejnavneområde= false
+        , vejnavnelinje= false;
+      for (var i= 0; i<navngivneveje.features.length; i++) {
+        let nv= navngivneveje.features[i];
+        if (nv.properties.beliggenhed_geometritype === "vejnavneområde" && nv.geometry.type === 'Polygon') {
+          vejnavneområde= true;
+        }
+        if (nv.properties.beliggenhed_geometritype === "vejnavnelinje" && nv.geometry.type === 'MultiLineString') {
+          vejnavnelinje= true;
+        }
+      }
+      assert(vejnavneområde && vejnavnelinje, "Der var ikke både vejnavneområde og vejnavnelinje");
       done();
     })
     .catch((err) => {
