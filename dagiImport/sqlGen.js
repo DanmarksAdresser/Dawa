@@ -79,7 +79,7 @@ const generateZoneTilknytningView = () => {
         FROM adgangsadresser_mat a
         LEFT JOIN LATERAL (
         SELECT zone
-        FROM zoner related 
+        FROM zoner_divided related 
         WHERE ST_Covers(related.geom, a.geom) 
         ORDER BY zone
         LIMIT 1) related ON true);`
