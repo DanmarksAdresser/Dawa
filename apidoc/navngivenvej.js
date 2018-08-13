@@ -110,7 +110,28 @@ module.exports = [
       strukturParameter,
       SRIDParameter,
       ...formatAndPagingParams],
-    examples: []
+    examples: [
+      {
+        description: 'Find navngivne veje som matcher teksten "Rante mester vej" med fuzzy søgning aktiveret',
+        query: [{name: 'q', value: 'Rante mester vej'}, {name: 'fuzzy', value: ''}]
+      },
+      {
+        description: 'Find alle navngivne veje i Københavns kommune',
+        query: [{name: 'kommunekode', value: '0101'}]
+      },
+      {
+        description: 'Returner den navngivne vej nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',
+        query: [{name: 'x', value: '12.5851471984198'},
+          {name: 'y', value: '55.6832383751223'}]
+      },
+      {
+        description: 'Returner  den navngivne vej nærmest punktet angivet af ETRS89/UTM32 koordinatet (725369.59, 6176652.55)',
+        query: [
+          {name: 'x', value: '725369.59'},
+          {name: 'y', value: '6176652.55'},
+          {name: 'srid', value: '25832'}]
+      }
+    ]
   },
   {
     entity: 'navngivenvej',
@@ -120,7 +141,12 @@ module.exports = [
       autocompleteQParam,
       ...commonFilterParams,
       ...formatAndPagingParams],
-    examples: []
+    examples: [
+      {
+        description: 'Autocomplete af navngivne veje med teksten "Rantem" med fuzzy søgning aktiveret.',
+        query: [{name: 'q', value: 'Rantem'}, {name: 'fuzzy', value: ''}]
+      }
+    ]
   },
   {
     entity: 'navngivenvej',
@@ -133,7 +159,12 @@ module.exports = [
       strukturParameter
     ],
     nomulti: true,
-    examples: []
+    examples: [
+      {
+        description: 'Hent den navngivne vej med id "46a834bd-559e-4e69-919d-a534e0a97fcf"',
+        path: '/navngivneveje/46a834bd-559e-4e69-919d-a534e0a97fcf'
+      }
+    ]
   },
   {
     entity: 'navngivenvej',

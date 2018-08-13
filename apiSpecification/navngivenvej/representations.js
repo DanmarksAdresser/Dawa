@@ -100,7 +100,7 @@ exports.json = {
           }),
           geometritype: {
             type: 'string',
-            description: 'Anvender typen af geometri for den navngivne vej: "vejnavnelinje" eller "vejn'
+            description: 'Angiver typen af geometri for den navngivne vej: "vejnavnelinje" eller "vejnavneområde".'
           },
           vejtilslutningspunkter: {
             type: ['null', 'object'],
