@@ -339,7 +339,7 @@ exports.modelList = [{
   }
   ],
   tilknytningKey: ['zone'],
-  useNearestForAdgangsadresseMapping: true
+  customTilknytningView: true
 }, {
   singular: 'valglandsdel',
   singularSpecific: 'valglandsdelen',

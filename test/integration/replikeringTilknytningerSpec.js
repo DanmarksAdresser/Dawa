@@ -102,10 +102,12 @@ const expectedKeys = {
   retskreds: [['0099'], ['0100']]
 };
 
-const loadAdresse = (client, adgangsadresse) => go(function* () {
+const loadAdresser = (client, adgangsadresser) => go(function* () {
   yield withImportTransaction(client, 'test', txid => go(function* () {
-    const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
-    yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser, sqlObject);
+    for(let adgangsadresse of adgangsadresser) {
+      const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
+      yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser, sqlObject);
+    }
     yield doDawaChanges(client, txid);
     yield materializeDawa(client, txid);
   }));
@@ -113,15 +115,6 @@ const loadAdresse = (client, adgangsadresse) => go(function* () {
 
 describe('Replikering af tilknytninger', function () {
   testdb.withTransactionEach('empty', function (clientFn) {
-
-    // insert the two adresses
-    adgangsadresser.forEach(function (adgangsadresse) {
-      beforeEach(function () {
-        const client = clientFn();
-        return loadAdresse(client, adgangsadresse);
-      });
-    });
-
 
     _.each(temaObjects, function (temaObject, temaName) {
       const temaModel = temaModels.modelMap[temaName];
@@ -160,6 +153,8 @@ describe('Replikering af tilknytninger', function () {
         yield withImportTransaction(client, 'test', txid =>
           importSingleTema(client, txid, temaModel,
             temaData, 1000000));
+
+        yield loadAdresser(client, adgangsadresser);
 
         let jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});
         checkResult(temaModel, jsonResult, expectedKeys[temaName]);
