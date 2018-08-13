@@ -95,6 +95,10 @@ class DawaClient {
           finally {
             const afterQueryTs = Date.now();
             logMessage.queryTime = afterQueryTs - afterQueueTs;
+            if(logMessage.queryTime > 1000) {
+              logMessage.sql = sql;
+              logMessage.params = params;
+            }
           }
           result.rows = result.rows || [];
           return result;
