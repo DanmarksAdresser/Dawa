@@ -73,11 +73,23 @@ ${tilknytningChangeTable}`
 
 const generateAllTemaTables = () => temaModels.modelList.reduce((memo, temaModel) => memo + '\n' + generateTemaTableSql(temaModel), '');
 
+const generateZoneTilknytningView = () => {
+  return`DROP VIEW IF EXISTS zonetilknytninger_view;
+  CREATE VIEW zonetilknytninger_view AS (SELECT a.id AS adgangsadresseid,  coalesce(zone, 2) as zone
+        FROM adgangsadresser_mat a
+        LEFT JOIN LATERAL (
+        SELECT zone
+        FROM zoner_divided related 
+        WHERE ST_Covers(related.geom, a.geom) 
+        ORDER BY zone
+        LIMIT 1) related ON true);`
+
+};
 
 const generateTilknytningMatViews = () =>  {
   let sql ='';
   for (let temaModel of temaModels.modelList) {
-    if(!temaModel.withoutTilknytninger) {
+    if(!temaModel.withoutTilknytninger && !temaModel.customTilknytningView) {
       const tilknytningModel = {
         relatedTable: `${temaModel.table}_divided`,
         relationTable: temaModel.tilknytningTable,
@@ -90,6 +102,8 @@ const generateTilknytningMatViews = () =>  {
       sql += generateTilknytningMatView(tilknytningModel);
     }
   }
+  sql += generateZoneTilknytningView();
+
   return sql;
 };
 

@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS dar1_transaction CASCADE;
 
-DROP TABLE IF EXISTS dar1_meta;
+DROP TABLE IF EXISTS dar1_meta CASCADE;
 
 CREATE TABLE dar1_meta(
   last_event_id INTEGER, -- Last event id which has been fetched and stored

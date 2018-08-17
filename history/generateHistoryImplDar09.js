@@ -135,7 +135,7 @@ delete from timedPostnrChanges where ts is null;
 delete from vask_postnumre;
 insert into vask_postnumre(nr,navn,virkning)
   (select c1.nr, c1.navn,
-    tstzrange(ts, (select ts from timedPostnrChanges c2 where c1.nr = c2.nr and c1.ts < c2.ts order by ts desc limit 1), '[)')
+    tstzrange(ts, (select ts from timedPostnrChanges c2 where c1.nr = c2.nr and c1.ts < c2.ts order by ts asc limit 1), '[)')
   FROM timedPostnrChanges c1
   WHERE operation <> 'delete');
 DROP TABLE timedPostnrChanges;

@@ -26,13 +26,7 @@ const postProcess = {
     yield streamArrayToTable(client, additionalFields, 'additional', ['nummer', 'valglandsdelsbogstav', 'regionskode']);
     yield client.query(`UPDATE ${table} t SET valglandsdelsbogstav = a.valglandsdelsbogstav, regionskode = a.regionskode 
     FROM additional a WHERE t.nummer = a.nummer; DROP TABLE additional`);
-}),
-  zone: (client, table) => go(function*() {
-    // ensure byzone and sommerhusområde do not overlap
-    yield client.query(`UPDATE ${table} SET geom = ST_Multi(ST_Difference(geom, (select geom from ${table} where zone = 1))) WHERE zone = 3`);
-    // // landzone is everything not byzone and sommerhusområde
-    yield client.query(`delete from ${table} where zone = 2; INSERT INTO ${table} (zone, geom)  VALUES (2,ST_Multi(ST_Difference((select ST_Union(geom) FROM regioner) , (select ST_Union(geom) from ${table} where zone IN (1, 3)))))`);
-  })
+})
 };
 
 const getTemaFileNameWfs = (temaDef, dataDir, filePrefix) => {
