@@ -77,14 +77,25 @@ describe('Adressevalidering', function(){
 describe('Adressesøgning', function(){
 
   it('rødkild*, 46, 2400', function(done){
-    request(encodeURI(host+'/adresser?q=rødkild*&husnr=46&postnr=2400&cache=no-cache'), function (error, response, body) {  	
-    	assert.equal(error,null);
-    	assert.equal(response.statusCode,200);
-	    var adresser= JSON.parse(body);
-	    assert.equal(adresser.length,1);
-	    done();
-	  })
-	})
+    request(encodeURI(host+'/adresser?q=rødkild*&husnr=46&postnr=2400&cache=no-cache'), function (error, response, body) {    
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var adresser= JSON.parse(body);
+      assert.equal(adresser.length,1);
+      done();
+    })
+  })
+
+  it('Konsul Beÿers Allé 2, 4300', function(done){
+    request(encodeURI(host+'/adresser?q=Konsul Beÿers Allé 20, 4300&cache=no-cache'), function (error, response, body) {    
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var adresser= JSON.parse(body);
+      assert(adresser.length>=1);
+      console.log(adresser[0].adressebetegnelse);
+      done();
+    })
+  })
 
   it('vejnavn=Rødkildevej', function(done){
     request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {    
@@ -2358,7 +2369,7 @@ describe('Adressevask', function(){
     })
   })
 
-   it("Rådhusstrædet 4, 3650 Ølstykke", function(done){
+  it("Rådhusstrædet 4, 3650 Ølstykke", function(done){
     var options= {};
     options.baseUrl= host;
     options.url='/datavask/adresser';
@@ -2461,6 +2472,26 @@ describe('Adressevask', function(){
       done();
     })
   })
+
+  it("Ravsted Skolegade 5, 6372 Bylderup-Bov", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/datavask/adresser';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.betegnelse= 'Ravsted Skolegade 5, 6372 Bylderup-Bov';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var resultat= JSON.parse(response.body);
+      assert(resultat.kategori==='A', 'Adressevaskresultat ikke kategori A');
+      assert(resultat.resultater[0].aktueladresse.adresseringsvejnavn==='Ravsted Skolegade', 'Det fundne vejnavn er ikke Rådhusstrædet');
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
   
 }); 
 
