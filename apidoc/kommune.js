@@ -30,7 +30,15 @@ const kommuneParameters = [{
     doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',
     examples: ['Aarhus', 'København']
   },
-  kommuneIdParameter];
+  kommuneIdParameter,
+  {
+    name: 'regionskode',
+    doc: 'Koden på den region, som kommunen er beliggende i'
+  },
+  {
+    name: 'udenforkommuneinddeling',
+    doc: 'Anvend udenforkommuneinddeling=false for at begrænse søgningen til ægte kommuner.'
+  }];
 
 module.exports = [
   {
