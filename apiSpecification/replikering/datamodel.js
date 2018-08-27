@@ -431,7 +431,7 @@ module.exports = {
         name: 'administrerendekommune',
         type: 'string',
         nullable: true,
-        description: '?',
+        description: 'Kommunekoden for den kommune, som administrerer den navngivne vej.',
       }, {
         name: 'beskrivelse',
         type: 'string',
@@ -441,36 +441,42 @@ module.exports = {
         name: 'retskrivningskontrol',
         type: 'string',
         nullable: true,
-        description: '?',
+        description: 'Styrelsen for Dataforsyning og Effektivisering har fem hverdage til at kontrollere retskrivningen af et nyt vejnavn. retskrivningskontrol angiver hvor i processen vejnavnet er. retskrivningskontrol kan antage følgende værdier: Udløbet, Afvist, Godkendt og Ikke Kontrolleret.',
       }, {
         name: 'udtaltvejnavn',
         type: 'string',
         nullable: true,
-        description: '?',
+        description: `Vejnavnet skrevet fuldt ud, således som det udtales. Udtaltvejnavn anvendes
+         for at gøre det nemmere at finde frem til et bestemt vejnavn, også i de tilfælde hvor der
+          ingår forkortelser som ikke udtales som sådanne fx som Gl. Kongevej, der udtales Gammel
+           Kongevej.`,
       },
       {
         name: 'beliggenhed_oprindelse_kilde',
         type: 'string',
         nullable: true,
-        description: '?'
+        description: 'Kode som angiver hvilken part eller system, der er kilde til stedfæstelsen. Kilde er en kodeliste som klassificerer de forskellige typer af kilder til stedfæstelsen. fx med værdierne GeoDKgrundkort, Matrikelkort, Ekstern indberetning, Ejer/administrator/Lsp, Adressemyndigheden.'
       },
       {
         name: 'beliggenhed_oprindelse_nøjagtighedsklasse',
         type: 'string',
         nullable: true,
-        description: '?'
+        description: 'Nøjagtighedsklasse: A: Manuelt sat, følger ikke GeoDanmark. B: Maskinelt sat, ud fra GeoDanmark. C: Manuelt sat, kommer til at følge GeoDanmark.'
       },
       {
         name: 'beliggenhed_oprindelse_registrering',
         type: 'timestamp',
         nullable: true,
-        description: '?'
+        description: 'Tidsstempel som angiver seneste opdatering af stedfæstelsen i DAR.\n' +
+        'Registreringstidspunktet angiver hvornår den pågældende stedfæstelse senest er ajourført. Oplysningen giver brugerne mulighed for at vurdere om stedfæstelsen er opdateret i forhold til andre relevante objekter.'
       },
       {
         name: 'beliggenhed_oprindelse_tekniskstandard',
         type: 'string',
         nullable: true,
-        description: '?'
+        description: 'Kode som angiver den tekniske standard, der er anvendt ved stedfæstelsen.\n' +
+
+        'N0: Vejnavnebeliggenheden kan være et vejnavneområde, som omslutter vejens adresser, eller en vejmidte som kommer fra GeoDanmark eller er konstrueret i DAR.'
       }
     ]
   },

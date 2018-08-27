@@ -182,6 +182,18 @@ var sampleParameters = {
       verifier: function(kommune, navn) {
         return kommune.navn === navn;
       }
+    },
+    udenforkommuneinddeling: {
+      values: ['true', 'false'],
+      verifier: (kommune,udenforkommuneinddeling) => {
+        return '' + kommune.udenforkommuneinddeling === udenforkommuneinddeling
+      }
+    },
+    regionskode: {
+      values: ['1084'],
+      verifier: (kommune,regionskode) => {
+        return regionskode === kommune.regionskode
+      }
     }
   },
   adgangsadresse: {

@@ -23,10 +23,11 @@ exports.kommune = {
       name: 'regionskode',
       parseFn: parseInteger
     },
+    udenforkommuneinddeling: {
+      name: 'udenforKommuneinddeling',
+      parseFn: value => value !== 'false'
+    },
     navn: 'navn'
-  },
-  filterFn: function(wfsFeature) {
-    return wfsFeature.Kommuneinddeling[0].udenforKommuneinddeling[0] === 'false';
   }
 };
 

@@ -5,7 +5,8 @@ const {kode4String, zoneKodeFormatter, numberToString} = require('../apiSpecific
 
 const defaultSqlType = {
   string: 'text',
-  integer: 'integer'
+  integer: 'integer',
+  boolean: 'boolean'
 };
 
 const defaultSchema = (type, nullable) => {
@@ -94,6 +95,11 @@ exports.modelList = [{
       schema: commonSchemaDefinitions.NullableKode4,
       description: 'Regionskode for den region kommunen er beliggende i. 4 cifre.',
       formatter: kode4String
+    }, {
+      name: 'udenforkommuneinddeling',
+      type: 'boolean',
+      nullable: false,
+      description: 'Falsk angiver at kommunen er en ægte kommune med en folkevalgt forsamling. Sand angiver at området/kommunen hører under Forsvarministeriet.'
     }],
   tilknytningKey: ['kommunekode'],
   useNearestForAdgangsadresseMapping: true
