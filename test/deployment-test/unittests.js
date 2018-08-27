@@ -25,7 +25,7 @@ describe('Autocomplete', function(){
   it('Autocomplete med callback', function(done){
 
     function cb(response) {  
-      console.log(response[0].tekst); 
+      //console.log(response[0].tekst); 
       return response.length;
     }
 
@@ -92,7 +92,7 @@ describe('Adressesøgning', function(){
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
       assert(adresser.length>=1);
-      console.log(adresser[0].adressebetegnelse);
+      //console.log(adresser[0].adressebetegnelse);
       done();
     })
   })
@@ -700,7 +700,7 @@ describe('Vejnavnesøgning', function(){
     request(encodeURI(host+"/vejnavne?navn=Tove Maës Vej&cache=no-cache"), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
-      console.log(body);
+      //console.log(body);
       var vejnavne= JSON.parse(body);
       assert.equal(vejnavne.length,1);   
       done();
@@ -853,7 +853,7 @@ describe('Navngiven vej', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var navngivneveje= JSON.parse(response.body);
       assert(navngivneveje.length === 2, "Ikke to navngivneveje");
-      console.log(navngivneveje[0].navn);
+      //console.log(navngivneveje[0].navn);
       done();
     })
     .catch((err) => {
@@ -873,7 +873,7 @@ describe('Navngiven vej', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var navngivneveje= JSON.parse(response.body);
       assert(navngivneveje.length > 2, "Ikke flere end to navngivneveje");
-      console.log(navngivneveje[0].navn);
+      //console.log(navngivneveje[0].navn);
       done();
     })
     .catch((err) => {
@@ -895,7 +895,7 @@ describe('Navngiven vej', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var navngivneveje= JSON.parse(response.body);
       assert(navngivneveje.length > 0, "ingen nærmeste navngiven vej");
-      console.log(navngivneveje[0].navn);
+      //console.log(navngivneveje[0].navn);
       done();
     })
     .catch((err) => {
@@ -914,7 +914,7 @@ describe('Navngiven vej', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var navngivneveje= JSON.parse(response.body);
       assert(navngivneveje.length === 3, "Der burde være tre naboveje");
-      console.log(navngivneveje[0].navn);
+      //console.log(navngivneveje[0].navn);
       done();
     })
     .catch((err) => {
@@ -990,9 +990,9 @@ describe('Supplerende bynavne 2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var supplerendebynavne= JSON.parse(response.body);
       assert(supplerendebynavne.length>=1, "Der er burde være mindst 1: "+supplerendebynavne.length);
-      supplerendebynavne.forEach(function(element) {
-        console.log(element.primærtnavn);
-      });
+      // supplerendebynavne.forEach(function(element) {
+      //   console.log(element.primærtnavn);
+      // });
       done();
     })
     .catch((err) => {
@@ -1013,9 +1013,9 @@ describe('Supplerende bynavne 2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var supplerendebynavne= JSON.parse(response.body);
       assert(supplerendebynavne.length>=1, "Der er burde være mindst 1: "+supplerendebynavne.length);
-      supplerendebynavne.forEach(function(element) {
-        console.log(element.primærtnavn);
-      });
+      // supplerendebynavne.forEach(function(element) {
+      //   console.log(element.primærtnavn);
+      // });
 
       done();
     })
@@ -1055,9 +1055,9 @@ describe('Supplerende bynavne 2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var supplerendebynavne= JSON.parse(response.body);
       assert(supplerendebynavne.length>=1, "Der er burde være mindst 1: "+supplerendebynavne.length);
-      supplerendebynavne.forEach(function(element) {
-        console.log(element.primærtnavn);
-      });
+      // supplerendebynavne.forEach(function(element) {
+      //   console.log(element.primærtnavn);
+      // });
       done();
     })
     .catch((err) => {
@@ -1221,7 +1221,7 @@ describe('Postnummersøgning', function(){
 
 
   it("Landpostnumre", function(done){
-    const minøst = (accumulator, currentValue) => {console.log('value: ' + currentValue[0]); if (accumulator>currentValue[0]) accumulator= currentValue[0]; return accumulator}; 
+    const minøst = (accumulator, currentValue) => {/*console.log('value: ' + currentValue[0]); */ if (accumulator>currentValue[0]) accumulator= currentValue[0]; return accumulator}; 
 
     var optpostnumre= {};
     optpostnumre.baseUrl= host;
@@ -1253,7 +1253,7 @@ describe('Postnummersøgning', function(){
       var landpostnumre= JSON.parse(responses[1].body);
       var postnumreminøst= postnumre.features[0].geometry.coordinates[0][0].reduce(minøst, 15.0);
       var landpostnumreminøst= landpostnumre.features[0].geometry.coordinates[0][0].reduce(minøst, 15.0);
-      console.log('postnumreminøst: %d, landpostnumreminøst: %d',postnumreminøst,landpostnumreminøst);
+      //console.log('postnumreminøst: %d, landpostnumreminøst: %d',postnumreminøst,landpostnumreminøst);
       assert(postnumreminøst<landpostnumreminøst, 'landpostnumre ligger i havet');
       done();
     }).catch(reason => { 
@@ -1277,6 +1277,24 @@ describe('Kommunesøgning', function(){
       //console.log(util.inspect(bynavne[0]));
       //console.log(bynavn);
       assert(bynavn.search('Alle')!=-1,"Navn indeholder ikke Alle")
+      done();
+    })
+  })
+
+  it("Christiansø", function(done){
+    request(encodeURI(host+"/kommuner?navn=Christiansø&cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var kommuner= JSON.parse(body);
+      assert(kommuner.length === 1, 'Christiansø er ikke fundet');
+      var navn= kommuner[0].navn;
+      let udenforkommuneinddeling= kommuner[0].udenforkommuneinddeling;
+
+      //console.log(util.inspect(bynavne[0]));
+      //console.log(bynavn);
+
+      assert(udenforkommuneinddeling,"Christiansø er ikke udenfor kommuneinddeling")
+      assert(navn === 'Christiansø',"Navn er ikke Christiansø")
       done();
     })
   })
@@ -1929,7 +1947,7 @@ describe('Adgangsadressesøgning', function(){
       assert.equal(responses[1].statusCode,200);
       var vej= JSON.parse(responses[0].body);
       var adgang= JSON.parse(responses[1].body);
-      console.log('vej.length: %d, adgang.length: %d',vej.length,adgang.length);
+      //console.log('vej.length: %d, adgang.length: %d',vej.length,adgang.length);
       assert(vej.length===0, 'adgangsadresse fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===1, 'adgangsadresse ikke fundet ud fra adgangspunkt og cirkel')
       assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
@@ -2823,8 +2841,8 @@ describe('Korttjenester', function(){
     options.resolveWithFullResponse= true;
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      //console.log(util.inspect(response.headers));
-      assert(response.headers["content-type"]==="text/xml; subtype=gml/3.2", "content-type !== text/xml; subtype=gml/3.2");
+      console.log(response.headers["content-type"]);
+      assert(response.headers["content-type"]==="application/gml+xml; version=3.2", "content-type !== application/gml+xml; version=3.2");
       done();
     })
     .catch((err) => {
@@ -3103,11 +3121,11 @@ describe('OIS', function(){
       assert(responses.every(callok), "Http status code != 200");
 
       var eejerskaber= JSON.parse(responses[0].body);      
-      console.log(util.inspect(eejerskaber));           
+      //console.log(util.inspect(eejerskaber));           
       assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
 
       var bejerskaber= JSON.parse(responses[1].body);      
-      console.log(util.inspect(bejerskaber));                  
+      //console.log(util.inspect(bejerskaber));                  
       assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
 
       function grund(element, index, array) {          
@@ -3619,11 +3637,11 @@ describe('BBR Light', function(){
       assert(responses.every(callok), "Http status code != 200");
 
       var eejerskaber= JSON.parse(responses[0].body);      
-      console.log(util.inspect(eejerskaber));           
+      //console.log(util.inspect(eejerskaber));           
       assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
 
       var bejerskaber= JSON.parse(responses[1].body);      
-      console.log(util.inspect(bejerskaber));                  
+      //console.log(util.inspect(bejerskaber));                  
       assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
 
       function grund(element, index, array) {          
@@ -3944,9 +3962,9 @@ describe('Stednavne', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
-      stednavne.forEach(function(element) {
-        console.log(element.navn);
-      });
+      // stednavne.forEach(function(element) {
+      //   console.log(element.navn);
+      // });
       done();
     })
     .catch((err) => {
@@ -3967,9 +3985,9 @@ describe('Stednavne', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
-      stednavne.forEach(function(element) {
-        console.log(element.navn);
-      });
+      // stednavne.forEach(function(element) {
+      //   console.log(element.navn);
+      // });
 
       done();
     })
@@ -4030,9 +4048,9 @@ describe('Stednavne', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
-      stednavne.forEach(function(element) {
-        console.log(element.navn);
-      });
+      // stednavne.forEach(function(element) {
+      //   console.log(element.navn);
+      // });
       done();
     })
     .catch((err) => {
@@ -4120,9 +4138,9 @@ describe('Stednavne2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
-      stednavne.forEach(function(element) {
-        console.log(element.navn);
-      });
+      // stednavne.forEach(function(element) {
+      //   console.log(element.navn);
+      // });
       done();
     })
     .catch((err) => {
@@ -4143,9 +4161,9 @@ describe('Stednavne2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
-      stednavne.forEach(function(element) {
-        console.log(element.navn);
-      });
+      // stednavne.forEach(function(element) {
+      //   console.log(element.navn);
+      // });
 
       done();
     })
@@ -4206,9 +4224,9 @@ describe('Stednavne2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length>=3, "Der er burde være mindst 3: "+stednavne.length);
-      stednavne.forEach(function(element) {
-        console.log(element.navn);
-      });
+      // stednavne.forEach(function(element) {
+      //   console.log(element.navn);
+      // });
       done();
     })
     .catch((err) => {
@@ -4365,9 +4383,9 @@ describe('Steder', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var steder= JSON.parse(response.body);
       assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
-      steder.forEach(function(element) {
-        console.log(element.primærtnavn);
-      });
+      // steder.forEach(function(element) {
+      //   console.log(element.primærtnavn);
+      // });
       done();
     })
     .catch((err) => {
@@ -4388,9 +4406,9 @@ describe('Steder', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var steder= JSON.parse(response.body);
       assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
-      steder.forEach(function(element) {
-        console.log(element.primærtnavn);
-      });
+      // steder.forEach(function(element) {
+      //   console.log(element.primærtnavn);
+      // });
 
       done();
     })
@@ -4451,9 +4469,9 @@ describe('Steder', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var steder= JSON.parse(response.body);
       assert(steder.length>=3, "Der er burde være mindst 3: "+steder.length);
-      steder.forEach(function(element) {
-        console.log(element.primærtnavn);
-      });
+      // steder.forEach(function(element) {
+      //   console.log(element.primærtnavn);
+      // });
       done();
     })
     .catch((err) => {
