@@ -87,7 +87,10 @@ const createSqlModel = (model, binding, filterParams) => {
 for(let entityName of Object.keys(datamodels)) {
   const datamodel = datamodels[entityName];
   const binding = dbBindings[entityName];
-  const filterParams = parameters.keyParameters[entityName] || [];
+  const filterParams = [
+    ...(parameters.keyParameters[entityName] || []),
+    ...(binding.additionalParameters || [])
+  ];
   const sqlModel = createSqlModel(datamodel, binding, filterParams);
   exports[entityName] = sqlModel;
   registry.add(`${entityName}_hændelse`, 'sqlModel', undefined, sqlModel);

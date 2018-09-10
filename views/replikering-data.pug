@@ -14,5 +14,25 @@ block main
     p !{section.lead}
     each entity in section.entities
       h3 #{entity}
+      if replikeringBindings[entity].additionalParameters
+        h4 Parametre
+        p Ved udtræk og hændelser er det muligt at angive følgende parametre:
+        table.table.table-hover
+          thead
+            th Navn
+            th Beskrivelse
+          tbody
+            each parameterName in replikeringModels[entity].key
+              tr
+                td
+                  code=parameterName
+                td Returner kun rækker eller hændelser hvor feltet <code>#{parameterName}</code> har den angivne værdi.
+            each parameter in replikeringBindings[entity].additionalParameters
+              tr
+                td
+                  code=parameter.name
+                td Returner kun rækker eller hændelser hvor feltet <code>#{parameter.name}</code> har den angivne værdi.
+
+      h4 Data
       +documentSchema3(replikeringSchemas[entity])
 

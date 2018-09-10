@@ -129,3 +129,9 @@ describe('Transaktioner inspektion', () => {
       assert.notDeepEqual(response, {});
     }));
 });
+
+describe('Opslag på replikerings-API', () => {
+  testdb.withTransactionEach('test', (clientFn) => {
+
+  });
+});

@@ -155,7 +155,11 @@ const historyReplikeringBindings = Object.entries(dar10TableModels.historyTableM
   };
   memo[entityName] = {
     table,
-    attributes: Object.assign({}, virkningBindings, replikeringBindingOverrides[entityName] || {})
+    attributes: Object.assign({}, virkningBindings, replikeringBindingOverrides[entityName] || {}),
+    additionalParameters: [{
+      name: 'id',
+      type: 'string'
+    }]
   };
   return memo;
 }, {});
@@ -170,7 +174,7 @@ const currentReplikeringModels = Object.entries(dar10TableModels.currentTableMod
     return {
       name: column.name,
       type,
-      description: 'Iikke tilgængelig',
+      description: 'Ikke tilgængelig',
       nullable: column.nullable
     };
   });

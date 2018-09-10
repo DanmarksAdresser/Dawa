@@ -11,6 +11,7 @@ var _ = require('underscore');
 var schemaUtil = require('./apiSpecification/schemaUtil');
 const replikeringModels = require('./apiSpecification/replikering/datamodel');
 const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/normalizedFieldSchemas');
+const replikeringBindings = require('./apiSpecification/replikering/dbBindings');
 const replikeringDataSections = require('./apidoc/replikering-data-page');
 
 require('./apiSpecification/allSpecs');
@@ -43,6 +44,8 @@ var autocompleteSchemas = _.reduce(registry.entriesWhere({
   return memo;
 }, {});
 
+
+
 function pugDocumentationParams(req) {
   return {
     url: paths.baseUrl(req),
@@ -54,7 +57,8 @@ function pugDocumentationParams(req) {
     packageJson,
     replikeringModels,
     replikeringSchemas,
-    replikeringDataSections
+    replikeringDataSections,
+    replikeringBindings
   };
 }
 

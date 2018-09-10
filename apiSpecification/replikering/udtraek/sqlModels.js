@@ -21,10 +21,10 @@ const validateParams = (client, params) => go(function*() {
   }
 });
 
-const createSqlModel = (model, binding, keyParameters) => {
+const createSqlModel = (model, binding, filterParameters) => {
   const allAttrNames = model.attributes.map(attr => attr.name);
   const tableName = binding.table;
-  const propertyFilter = sqlParameterImpl.simplePropertyFilter(keyParameters, binding.attributes);
+  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParameters, binding.attributes);
   const selectClause = _.pluck(model.attributes, 'name').map(attName => {
     const bindingAttr = binding.attributes[attName];
     const columnName = binding.attributes[attName].column;
@@ -33,14 +33,35 @@ const createSqlModel = (model, binding, keyParameters) => {
   }).join(', ');
   const primaryAttrNames = model.key;
   const primaryColumnNames = primaryAttrNames.map(attrName => binding.attributes[attrName].column);
-  const createBaseQuery = (sequenceNumber) => {
+  const createBaseQuery = (sequenceNumber, txid, params) => {
+    const rowkeyNestedSelectQueryParts = {
+      select: ['distinct ' + primaryColumnNames.join(',')],
+      from: [`${tableName}_changes`],
+      whereClauses: [],
+      groupBy: '',
+      orderClauses: [],
+      sqlParams: []
+    };
+    propertyFilter(rowkeyNestedSelectQueryParts, params);
+    const rowkeyNestedSelectQuery = dbapi.createQuery(rowkeyNestedSelectQueryParts);
+    const sqlParams = rowkeyNestedSelectQuery.params;
+    const hasFilterParams = sqlParams.length > 0;
     let subselect =
       `SELECT *, row_number()
   OVER (PARTITION BY ${primaryColumnNames.join(', ')}
     ORDER BY txid desc nulls last, changeid desc NULLS LAST) as row_num
-FROM ${tableName}_changes`;
+FROM ${tableName}_changes c`;
+    if(hasFilterParams) {
+      subselect += ` NATURAL JOIN (${rowkeyNestedSelectQuery.sql}) t`
+    }
+    subselect += ' WHERE true';
     if(sequenceNumber) {
-      subselect += ` WHERE (changeid IS NULL OR changeid <= $1)`
+      sqlParams.push(sequenceNumber);
+      subselect += ` AND (changeid IS NULL OR changeid <= $${sqlParams.length})`
+    }
+    if(txid) {
+      sqlParams.push(txid);
+      subselect += ` AND (txid IS NULL OR txid <= $${sqlParams.length})`
     }
     const baseQuery = {
       select: [selectClause],
@@ -48,11 +69,8 @@ FROM ${tableName}_changes`;
       whereClauses: ['row_num = 1 ', `operation <> 'delete'`],
       groupBy: '',
       orderClauses: [],
-      sqlParams: []
+      sqlParams
     };
-    if(sequenceNumber) {
-      baseQuery.sqlParams.push(sequenceNumber);
-    }
     return baseQuery;
   }
   return {
@@ -61,7 +79,7 @@ FROM ${tableName}_changes`;
     },
     validateParams: validateParams,
     processStream: (client, fieldNames, params, channel, options) => {
-      const sqlParts = createBaseQuery(params.sekvensnummer);
+      const sqlParts = createBaseQuery(params.sekvensnummer, params.txid, params);
       propertyFilter(sqlParts, params);
       const query = dbapi.createQuery(sqlParts);
       return cursorChannel(client, query.sql, query.params, channel, options);
@@ -73,7 +91,7 @@ for(let entityName of Object.keys(datamodels)) {
   const datamodel = datamodels[entityName];
   const binding = dbBindings[entityName];
   const keyParameters = keyParametersMap[entityName] || [];
-  const sqlModel = createSqlModel(datamodel, binding, keyParameters);
+  const sqlModel = createSqlModel(datamodel, binding, [keyParameters, ...binding.additionalParameters || []]);
   exports[entityName] = sqlModel;
   registry.add(`${entityName}udtraek`, 'sqlModel', undefined, sqlModel);
 }

@@ -20,6 +20,7 @@ _.each(Object.keys(datamodel), function(entityName) {
     pathParameters: [],
     queryParameters: resourcesUtil.flattenParameters({
       keyParameters: parameters.keyParameters[entityName] || [],
+      additionalParameters: binding.additionalParameters || [],
       sekvensnummer: parameters.sekvensnummer,
       tidspunkt: parameters.tidspunkt,
       txid: commonReplikeringParams.txid,
