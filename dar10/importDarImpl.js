@@ -16,7 +16,6 @@ const tableModels = require('../psql/tableModel');
 const materialize = require('../importUtil/materialize');
 const {recomputeMaterializedDawa, materializeDawa} = materialize;
 const { mergeValidTime } = require('../history/common');
-const importDar09Impl = require('../darImport/importDarImpl');
 const logger = require('../logger').forCategory('darImport');
 
 const ALL_DAR_ENTITIES = [
@@ -63,6 +62,27 @@ function setInitialMeta(client) {
 function ndjsonFileName(entityName) {
   return entityName.replace(new RegExp('å', 'g'), 'aa') + '.ndjson';
 }
+
+const updatePostnumreKommunekoderMat = client => go(function*() {
+  yield client.query(`DELETE FROM postnumre_kommunekoder_mat;
+   insert into postnumre_kommunekoder_mat(postnr, kommunekode) (SELECT DISTINCT postnr, kommunekode FROM adgangsadresser where postnr is not null and kommunekode is not null)`);
+});
+
+const updateSupplerendeBynavne = client => go(function*() {
+  const tsvCol = _.findWhere(tableModels.tables.supplerendebynavne_mat.columns, {name: 'tsv'});
+  yield client.query(`DELETE FROM supplerendebynavne_mat;
+  INSERT INTO supplerendebynavne_mat(navn, tsv)
+  (SELECT DISTINCT ON(navn) navn, ${tsvCol.derive('v')}
+  FROM supplerendebynavne_mat_view v)`);
+  yield client.query('DELETE FROM supplerendebynavn_kommune_mat;' +
+    'INSERT INTO supplerendebynavn_kommune_mat(supplerendebynavn, kommunekode)' +
+    '(SELECT supplerendebynavn, kommunekode from supplerendebynavn_kommune_mat_view)');
+  yield client.query('DELETE FROM supplerendebynavn_postnr_mat;' +
+    'INSERT INTO supplerendebynavn_postnr_mat(supplerendebynavn, postnr)' +
+    '(SELECT supplerendebynavn, postnr from supplerendebynavn_postnr_mat_view)');
+});
+
+
 
 /**
  * Get maximum event id across all DAR1 tables
@@ -163,8 +183,8 @@ const initDawa = (client, txid) => go(function* () {
  */
 const updateDawa = (client, txid) => go(function* () {
   yield rematerializeDawa(client,txid);
-  yield importDar09Impl.updateSupplerendeBynavne(client);
-  yield importDar09Impl.updatePostnumreKommunekoderMat(client);
+  yield updateSupplerendeBynavne(client);
+  yield updatePostnumreKommunekoderMat(client);
 
 });
 

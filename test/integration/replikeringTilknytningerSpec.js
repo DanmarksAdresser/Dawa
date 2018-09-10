@@ -10,7 +10,7 @@ const {go} = require('ts-csp');
 const {withImportTransaction} = require('../../importUtil/importUtil');
 const tableDiffNg = require('../../importUtil/tableDiffNg');
 const schemaModel = require('../../psql/tableModel');
-const {internal: {doDawaChanges, materializeDawa}} = require('../../darImport/importDarImpl');
+const { materializeDawa } = require('../../importUtil/materialize');
 
 const registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
@@ -110,7 +110,7 @@ const loadAdresser = (client, adgangsadresser) => go(function* () {
       const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
       yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser, sqlObject);
     }
-    yield doDawaChanges(client, txid);
+    yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser);
     yield materializeDawa(client, txid);
   }));
 });
