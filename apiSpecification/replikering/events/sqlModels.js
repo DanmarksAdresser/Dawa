@@ -1,7 +1,7 @@
 "use strict";
 
 const _ = require('underscore');
-const { go } = require('ts-csp');
+const {go} = require('ts-csp');
 const cursorChannel = require('../../../util/cursor-channel');
 
 const dbapi = require('../../../dbapi');
@@ -9,12 +9,13 @@ const sqlParameterImpl = require('../../common/sql/sqlParameterImpl');
 const sqlUtil = require('../../common/sql/sqlUtil');
 const parameters = require('./parameters');
 const querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
+const commonParameters = require('../commonParameters');
 const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
 const registry = require('../../registry');
 
 
-const validateSekvensnummerParams = (client, params) => go(function*() {
+const validateSekvensnummerParams = (client, params) => go(function* () {
   const senesteHaendelse = yield querySenesteSekvensnummer(client);
   if (params.sekvensnummertil && senesteHaendelse.sekvensnummer < params.sekvensnummertil) {
     throw new sqlUtil.InvalidParametersError("Hændelse med sekvensnummer " + params.sekvensnummertil + " findes ikke. Seneste sekvensnummer: " + senesteHaendelse.sekvensnummer);
@@ -33,7 +34,7 @@ const baseQuery = (model, binding) => {
     select: ['i.txid, i.operation as operation', sqlUtil.selectIsoDateUtc('t.ts') + ' as tidspunkt', 'changeid as sekvensnummer',
       ...selectAttributesClauses],
     from: [`transactions t JOIN ${tableName}_changes i ON t.txid = i.txid`],
-    whereClauses: ['public'],
+    whereClauses: ['public and changeid is not null'],
     orderClauses: ['changeid'],
     sqlParams: []
   };
@@ -43,7 +44,8 @@ const baseQuery = (model, binding) => {
 
 const createSqlModel = (model, binding, filterParams) => {
   const allAttrNames = model.attributes.map(attr => attr.name);
-  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParams, binding.attributes);
+  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParams, Object.assign({}, binding.attributes,
+    {txid: {column: 'i.txid'}}));
   return {
     allSelectableFieldNames: function () {
       return ['operation', 'tidspunkt', 'sekvensnummer', ...allAttrNames]
@@ -68,7 +70,7 @@ const createSqlModel = (model, binding, filterParams) => {
         const timeToAlias = dbapi.addSqlParameter(sqlParts, params.tidspunkttil);
         dbapi.addWhereClause(sqlParts, 't.ts <=' + timeToAlias);
       }
-      if(params.txidfra) {
+      if (params.txidfra) {
         const fromAlias = dbapi.addSqlParameter(sqlParts, params.txidfra);
         dbapi.addWhereClause(sqlParts, 'i.txid >= ' + fromAlias);
       }
@@ -84,10 +86,11 @@ const createSqlModel = (model, binding, filterParams) => {
   }
 };
 
-for(let entityName of Object.keys(datamodels)) {
+for (let entityName of Object.keys(datamodels)) {
   const datamodel = datamodels[entityName];
   const binding = dbBindings[entityName];
   const filterParams = [
+    ...commonParameters.txid,
     ...(parameters.keyParameters[entityName] || []),
     ...(binding.additionalParameters || [])
   ];
