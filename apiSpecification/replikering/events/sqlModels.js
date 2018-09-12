@@ -13,6 +13,7 @@ const commonParameters = require('../commonParameters');
 const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
 const registry = require('../../registry');
+const tableSchema = require('../../../psql/tableModel');
 
 
 const validateSekvensnummerParams = (client, params) => go(function* () {
@@ -24,6 +25,7 @@ const validateSekvensnummerParams = (client, params) => go(function* () {
 
 const baseQuery = (model, binding) => {
   const tableName = binding.table;
+  const tableModel = tableSchema.tables[tableName];
   const selectAttributesClauses = _.pluck(model.attributes, 'name').map(attName => {
     const bindingAttr = binding.attributes[attName];
     const columnName = binding.attributes[attName].column;
@@ -31,10 +33,10 @@ const baseQuery = (model, binding) => {
     return `${transformed} AS ${attName}`;
   });
   const query = {
-    select: ['i.txid, i.operation as operation', sqlUtil.selectIsoDateUtc('t.ts') + ' as tidspunkt', 'changeid as sekvensnummer',
+    select: ['i.txid, i.operation as operation', sqlUtil.selectIsoDateUtc('t.time') + ' as tidspunkt', 'changeid as sekvensnummer',
       ...selectAttributesClauses],
-    from: [`transactions t JOIN ${tableName}_changes i ON t.txid = i.txid`],
-    whereClauses: ['public and changeid is not null'],
+    from: [`transaction_history t JOIN ${tableName}_changes i ON t.sequence_number = i.changeid`],
+    whereClauses: [`entity = '${tableModel.entity}' and public`],
     orderClauses: ['changeid'],
     sqlParams: []
   };
@@ -55,20 +57,20 @@ const createSqlModel = (model, binding, filterParams) => {
       const sqlParts = baseQuery(model, binding);
       if (params.sekvensnummerfra) {
         const fromAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummerfra);
-        dbapi.addWhereClause(sqlParts, 'changeid >= ' + fromAlias);
+        dbapi.addWhereClause(sqlParts, 'sequence_number >= ' + fromAlias);
       }
       if (params.sekvensnummertil) {
         const toAlias = dbapi.addSqlParameter(sqlParts, params.sekvensnummertil);
-        dbapi.addWhereClause(sqlParts, 'changeid <= ' + toAlias);
+        dbapi.addWhereClause(sqlParts, 'sequence_number <= ' + toAlias);
       }
       if (params.tidspunktfra) {
         const timeFromAlias = dbapi.addSqlParameter(sqlParts, params.tidspunktfra);
-        dbapi.addWhereClause(sqlParts, 't.ts >=' + timeFromAlias);
+        dbapi.addWhereClause(sqlParts, 't.time >=' + timeFromAlias);
       }
 
       if (params.tidspunkttil) {
         const timeToAlias = dbapi.addSqlParameter(sqlParts, params.tidspunkttil);
-        dbapi.addWhereClause(sqlParts, 't.ts <=' + timeToAlias);
+        dbapi.addWhereClause(sqlParts, 't.time <=' + timeToAlias);
       }
       if (params.txidfra) {
         const fromAlias = dbapi.addSqlParameter(sqlParts, params.txidfra);
