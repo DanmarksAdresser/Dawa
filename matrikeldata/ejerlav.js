@@ -19,6 +19,10 @@ const jordstykkeMapping = {
       name: 'landsejerlavskode',
       parseFn: parseInteger
     },
+    ejerlavnavn: {
+      name: 'ejerlavsnavn',
+      parseFn: _.identity
+    },
     matrikelnr: {
       name: 'matrikelnummer',
       parseFn: _.identity

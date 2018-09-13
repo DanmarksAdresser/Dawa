@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS jordstykker CASCADE;
 
 CREATE TABLE jordstykker(
   ejerlavkode integer not null,
+  ejerlavnavn text,
   matrikelnr text not null,
   kommunekode smallint,
   sognekode smallint,
@@ -16,7 +17,8 @@ CREATE TABLE jordstykker(
   primary key(ejerlavkode, matrikelnr),
   geom geometry(Polygon, 25832),
   bbox geometry(Polygon, 25832),
-  visueltcenter geometry(Point, 25832)
+  visueltcenter geometry(Point, 25832),
+  tsv tsvector
 );
 
 CREATE INDEX ON jordstykker(matrikelnr);
@@ -27,6 +29,7 @@ CREATE INDEX ON jordstykker(esrejendomsnr);
 CREATE INDEX ON jordstykker(udvidet_esrejendomsnr);
 CREATE INDEX ON jordstykker(sfeejendomsnr);
 CREATE INDEX ON jordstykker USING GIST(geom);
+CREATE INDEX ON jordstykker USING GIN(tsv);
 
 DROP TABLE IF EXISTS jordstykker_changes CASCADE;
 CREATE TABLE jordstykker_changes AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, jordstykker.* FROM jordstykker WHERE false);

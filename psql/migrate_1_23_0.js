@@ -32,7 +32,20 @@ create index on dar1_NavngivenVejPostnummerRelation_history_changes(id);
 create index on dar1_NavngivenVejSupplerendeBynavnRelation_history_changes(id);
 create index on dar1_Postnummer_history_changes(id);
 create index on dar1_ReserveretVejnavn_history_changes(id);
-create index on dar1_SupplerendeBynavn_history_changes(id);`);
+create index on dar1_SupplerendeBynavn_history_changes(id);
+
+create index on enhedsadresser_changes(changeid) where public;
+create index on adgangsadresser_changes(changeid) where public;
+ALTER TABLE jordstykker ADD COLUMN ejerlavnavn text;
+ALTER TABLE jordstykker ADD COLUMN tsv tsvector;
+ALTER TABLE jordstykker_changes ADD COLUMN ejerlavnavn text;
+ALTER TABLE jordstykker_changes ADD COLUMN tsv tsvector;
+CREATE INDEX ON jordstykker USING GIN(tsv);
+UPDATE jordstykker SET ejerlavnavn = e.navn FROM ejerlav e WHERE ejerlavkode = e.kode;
+UPDATE jordstykker_changes SET ejerlavnavn = e.navn FROM ejerlav e WHERE ejerlavkode = e.kode;
+UPDATE jordstykker SET tsv = to_tsvector('adresser', processForIndexing(matrikelnr || ' ' || coalesce(ejerlavnavn, '')));
+UPDATE jordstykker_changes SET tsv = to_tsvector('adresser', processForIndexing(matrikelnr || ' ' || coalesce(ejerlavnavn, '')));`
+      );
     }));
   })).done();
 });

@@ -1,5 +1,6 @@
 const {
   formatAndPagingParams,
+  pagingParameters,
   reverseGeocodingParameters,
   strukturParameter
 } = require('./common');
@@ -12,7 +13,7 @@ const {
   replikeringDoc
 } = require('./replikeringCommon');
 
-const jordstykkeParameters = [
+const commonParameters = [
   {
     name: 'ejerlavkode',
     doc: 'Find jordstykker tilhørende ejerlav med den angivne kode.',
@@ -50,8 +51,20 @@ const jordstykkeParameters = [
   {
     name: 'sfeejendomsnr',
     doc: 'Find de jordstykker som er tilknyttet det angivne SFE ejendomsnummer.'
-  },
-  {
+  }
+];
+
+const searchParameter = {
+  name: 'q',
+  doc: 'Tekstsøgning efter jordstykker. Der søges i matrikelnr, ejerlavnavn og ejerlavkode.'
+};
+const autocompleteSearchParameter = {
+  name: 'q',
+  doc: 'Autocomplete-tekst efter jordstykker. Der søges i matrikelnr, ejerlavnavn og ejerlavkode.'
+};
+
+const reverseParameters = [
+   {
     name: 'x',
     doc: 'Find jordstykket for det angivne punkt. Både x- og y-parameter skal angives. Hvis ETRS89/UTM32 anvendes angives øst-værdien. Hvis WGS84/geografisk anvendes angives bredde-værdien.'
   },
@@ -96,7 +109,7 @@ module.exports = [
     entity: 'jordstykke',
     path: '/jordstykker',
     subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
-    parameters: jordstykkeParameters.concat(formatAndPagingParams).concat(dagiSridCirkelPolygonParameters('jordstykker')).concat([strukturParameter]),
+    parameters: [searchParameter, ...commonParameters, ...reverseParameters, ...formatAndPagingParams, ...dagiSridCirkelPolygonParameters('jordstykker'), strukturParameter],
     examples: [{description: 'Hent alle jordstykker', query: []},
       {
         description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
@@ -117,6 +130,14 @@ module.exports = [
       description: 'Hent jordstykket med ejerlavkode <em>100453</em> og matriklenr <em>8bd</em>',
       path: ['/jordstykker/100453/8bd']
     }]
+  },
+  {
+    entity: 'jordstykke',
+    path: '/jordstykker/autocomplete',
+    subtext: 'Autocomplete af jordstykker.',
+    parameters: [autocompleteSearchParameter, ...commonParameters, ...dagiSridCirkelPolygonParameters('jordstykker'), ...pagingParameters],
+    nomulti: true,
+    examples: []
   },
   {
     entity: 'jordstykke',

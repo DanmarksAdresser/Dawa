@@ -3,7 +3,7 @@
 require('./adgangsadresse/resources');
 require('./adresse/resources');
 require('./datavask/resources');
-require('./flats/resources');
+require('./jordstykke/resources');
 require('./history/resources');
 require('./postnummer/resources');
 require('./temaer/resources');

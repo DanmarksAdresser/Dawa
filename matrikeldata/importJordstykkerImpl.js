@@ -19,7 +19,7 @@ const {
 } = require('../importUtil/geometryImport');
 
 
-const jordstykkeColumns = ['ejerlavkode', 'matrikelnr', 'kommunekode', 'sognekode', 'regionskode', 'retskredskode', 'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr'];
+const jordstykkeColumns = ['ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'kommunekode', 'sognekode', 'regionskode', 'retskredskode', 'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr'];
 const jordstykkeTableModel = tableSchema.tables.jordstykker;
 const ejerlavColumns = ['kode', 'navn'];
 const ejerlavTableModel = tableSchema.tables.ejerlav;

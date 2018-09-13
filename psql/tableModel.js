@@ -422,6 +422,8 @@ const jordstykker = {
   columns: [{
     name: 'ejerlavkode'
   }, {
+      name: 'ejerlavnavn'
+  }, {
     name: 'matrikelnr'
   }, {
     name: 'ændret'
@@ -451,6 +453,9 @@ const jordstykker = {
     derive: table => `st_envelope(${table}.geom)`
   }, {
     name: 'visueltcenter'
+  }, {
+    name: 'tsv',
+    derive: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table.ejerlavkode}))`
   }]
 };
 
