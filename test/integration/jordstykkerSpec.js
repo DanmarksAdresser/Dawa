@@ -26,4 +26,21 @@ describe('Jordstykke API', () => {
     expect(jordstykke.ejerlav.kode).to.equal(60851);
     expect(jordstykke.matrikelnr).to.equal("4b");
   }));
+
+  it('Kan lave søgning i jordstykker', () => go(function*() {
+    const results = yield request.get({url: 'http://localhost:3002/jordstykker?q=1a borup', json: true});
+    expect(results.length).to.equal(1);
+    const jordstykke = results[0];
+    expect(jordstykke.ejerlav.kode).to.equal(60851);
+    expect(jordstykke.matrikelnr).to.equal("1a");
+
+  }));
+  it('Kan lave autocomplete af jordstykke', () => go(function*() {
+    const results = yield request.get({url: 'http://localhost:3002/jordstykker/autocomplete?q=1a bor', json: true});
+    expect(results.length).to.equal(1);
+    expect(results[0].tekst).to.equal("1a Borup, Osted (60851)");
+    const jordstykke = results[0].jordstykke;
+    expect(jordstykke.ejerlav.kode).to.equal(60851);
+    expect(jordstykke.matrikelnr).to.equal("1a");
+  }));
 });

@@ -43,6 +43,24 @@ const formatAdresse = (data, stormodtager, multiline, medsupplerendebynavn) => {
   }
 };
 
+const autocompleteJordstykke = (input) =>{
+  $(input).autocomplete({
+    source: function( request, response ) {
+      $.ajax( {
+        url: "/jordstykker/autocomplete",
+        data: {
+          q: request.term
+        },
+        success: function( responseData ) {
+          const mappedResponse = responseData.map(entry => entry.tekst);
+          response( mappedResponse );
+        }
+      } );
+    },
+    minLength: 2
+  });
+};
+
 function searchPostnr(input) {
   $.ajax({
     cache: true,
@@ -266,6 +284,12 @@ function inverseGeocoding() {
   // http://leafletjs.com/reference.html#map-fitbounds
 
   map.on('click', onMapClick);
+}
+
+export function initMatrikelkortetSide() {
+  $(() => {
+    autocompleteJordstykke($('#jordstykke-autocomplete'));
+  });
 }
 
 export function initForside() {

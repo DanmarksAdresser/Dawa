@@ -34,6 +34,12 @@ block main
     pre
       a(href='//dawa.aws.dk/jordstykker?format=geojson&per_side=10') https://dawa.aws.dk/jordstykker?format=geojson&per_side=10
     | For mere information om formatvalg se #[a(href='/dok/api/generelt#dataformater') dataformater].
+  p
+    | DAWA understøtter autocomplete af jordstykker:
+  form
+    div.form-group.row
+      label.col-sm-3.col-lg-2.col-form-label(for='jordstykke-autocomplete') Jordstykke
+      input.form-control.col-sm-6(type='text', autocomplete='off', placeholder='matrikelnr, ejerlav', id='jordstykke-autocomplete')
 
   h3 Tilknytning til adresser
   p Jordstykkers tilknytning til adgangsadresser beregnes ud fra adgangsadressens adgangspunkt og
@@ -49,3 +55,7 @@ block main
     |  information om replikering, se #[a(href='/dok/guide/replikering') replikeringsguiden].
   p Jordstykker er aktuelt ikke udstillet på replikerings-API'et. Den eneste mulighed for at etablere
     |  og vedligeholde en lokal kopi af jordstykker er at hente alle jordstykkerne jævnligt.
+
+block append scripts
+  script(type='text/javascript').
+    dawa.initMatrikelkortetSide();

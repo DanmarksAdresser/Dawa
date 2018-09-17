@@ -455,7 +455,7 @@ const jordstykker = {
     name: 'visueltcenter'
   }, {
     name: 'tsv',
-    derive: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table.ejerlavkode}))`
+    derive: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table}.ejerlavkode))`
   }]
 };
 

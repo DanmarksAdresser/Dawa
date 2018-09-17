@@ -91,7 +91,7 @@ exports.autocomplete = {
     result.udvidet_esrejendomsnr = row.udvidet_esrejendomsnr ? ('' + row.udvidet_esrejendomsnr) : null;
     result.sfeejendomsnr = row.sfeejendomsnr ? ('' + row.sfeejendomsnr) : null;
     return {
-      tekst: `${result.matrikelnr}, ${result.ejerlav.navn} (${result.ejerlav.kode})`,
+      tekst: `${result.matrikelnr} ${result.ejerlav.navn} (${result.ejerlav.kode})`,
       jordstykke: result
     }
   }};
