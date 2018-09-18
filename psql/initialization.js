@@ -26,7 +26,7 @@ const createChangeTables = (client)=> go(function*() {
     'ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser',
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
-  'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser'];
+  'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -123,6 +123,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'stedtilknytninger', init: false},
   {name: 'steder_divided', init: false},
   {name: 'sted_kommune', init: false},
+  {name: 'bygninger', init: false},
   {name: 'ikke_brofaste_adresser_view', type: 'view'},
   {name: 'tilknytninger_mat_view', type: 'view'},
   {name: 'ois_importlog', init: false},

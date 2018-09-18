@@ -292,6 +292,27 @@ const stednavne = {
   ]
 };
 
+const bygninger = {
+  table: 'bygninger',
+  entity: 'bygning',
+  primaryKey: ['id'],
+  columns: [
+    {name: 'id'},
+    {name: 'bygningstype'},
+    {name: 'målemetode'},
+    {name: 'målested'},
+    {name: 'bbrbygning_id'},
+    {name: 'ændret'},
+    {name: 'geo_ændret'},
+    {name: 'geo_version'},
+    {name: 'visueltcenter'},
+    {
+      name: 'geom',
+      distinctClause: geomDistinctClause
+    }
+  ]
+};
+
 const steder = {
   table: 'steder',
   entity: 'sted',
@@ -604,6 +625,7 @@ exports.tables = Object.assign({
     steder,
     stednavne,
     stedtilknytninger,
+    bygninger,
     jordstykker,
     jordstykker_adgadr,
     tilknytninger_mat,
