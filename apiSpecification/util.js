@@ -16,7 +16,9 @@ exports.numberToString = (num) => {
     return null;
   }
   return num.toString();
-}
+};
+
+exports.stringToNumber = str => str ? parseInt(str, 10) : null
 
 exports.maybeNull = function(val) {
   if(val === undefined) {

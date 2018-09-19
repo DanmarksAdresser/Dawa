@@ -25,6 +25,12 @@ module.exports = [{
   entities: ['sted', 'stednavn', 'stednavn2', 'stednavntype', 'bebyggelse']
 },
   {
+    name: 'Bygningspolygoner',
+    headingClass: 'h2-icon',
+    lead: "API'et udstiller geometrierne for danmarks bygninger.",
+    entities: ['bygning']
+  },
+  {
     name: 'Replikering',
     headingClass: 'h2-icon',
     lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af de data som DAWA udstiller.

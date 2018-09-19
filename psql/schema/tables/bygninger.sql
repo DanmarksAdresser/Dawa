@@ -15,4 +15,7 @@ CREATE  TABLE bygninger (
 );
 
 CREATE INDEX ON bygninger(bbrbygning_id);
+CREATE INDEX ON bygninger(bygningstype);
+CREATE INDEX ON bygninger(målemetode);
+CREATE INDEX ON bygninger(målested);
 CREATE INDEX ON bygninger USING GIST(geom);

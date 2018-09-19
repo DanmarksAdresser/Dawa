@@ -10,6 +10,7 @@ const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
 const bygningerTableModel = tableModel.tables.bygninger;
 const { computeVisualCenter } = require('../importUtil/geometryImport');
+const { recomputeMaterialization } = require('../importUtil/materialize');
 
 const {
   updateGeometricFields
@@ -51,6 +52,7 @@ const importBygningerFromStream = (client, txid, stream) => go(function*() {
   yield updateGeometricFields(client, txid, bygningerTableModel);
   yield tableDiffNg.applyChanges(client, txid, bygningerTableModel);
   yield client.query('drop table fetch_bygninger_raw; drop table fetch_bygninger');
+  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stedtilknytninger);
 });
 
 const importBygninger = (client,txid,  filePath) => go(function*() {

@@ -13,6 +13,70 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
+    bygning: {
+      geojson: {
+        flad: [{
+          params: {
+            id: 1071735134
+          },
+          value: {
+            "type": "Feature",
+            "geometry": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [
+                    10.38813116,
+                    55.39980439
+                  ],
+                  [
+                    10.38810894,
+                    55.39973383
+                  ],
+                  [
+                    10.38842207,
+                    55.39968813
+                  ],
+                  [
+                    10.38846273,
+                    55.39976235
+                  ],
+                  [
+                    10.38813116,
+                    55.39980439
+                  ]
+                ]
+              ]
+            },
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "properties": {
+              "ændret": "2018-09-19T07:35:32.596Z",
+              "geo_ændret": "2018-09-19T07:35:32.596Z",
+              "geo_version": 1,
+              "visueltcenter_x": 10.38834483,
+              "visueltcenter_y": 55.39973843,
+              "id": "1071735134",
+              "bbrbygning_id": "2c7cacc9-b5cf-44c8-8079-c2657da1aca6",
+              "bygningstype": "Bygning",
+              "målemetode": "TK/FOT-Tag",
+              "målested": "Tag"
+            },
+            "bbox": [
+              10.38810747,
+              55.3996877,
+              10.38846407,
+              55.39980462
+            ]
+          }
+        }]
+      }
+    },
+
     stednavn: {
       geojson: {
         flad: [{

@@ -18,6 +18,7 @@ const { generateAllTemaTables, generateTilknytningMatViews } = require('../dagiI
 const { generateTilknytningMatView } = require('../importUtil/tilknytningUtil');
 const stednavnTilknytningModels = require('../stednavne/stednavnTilknytningModels');
 const jordstykkeTilknytningModel = require('../matrikeldata/jordstykkeTilknytningModel');
+const bygningTilknytningModel = require('../bygninger/bygningTilknytningModel');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
@@ -26,7 +27,7 @@ const createChangeTables = (client)=> go(function*() {
     'ejerlav', 'postnumre', 'vejstykker', 'adgangsadresser', 'enhedsadresser',
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
-  'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger'];
+  'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -124,6 +125,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'steder_divided', init: false},
   {name: 'sted_kommune', init: false},
   {name: 'bygninger', init: false},
+  {name: 'bygningtilknytninger', init: false},
   {name: 'ikke_brofaste_adresser_view', type: 'view'},
   {name: 'tilknytninger_mat_view', type: 'view'},
   {name: 'ois_importlog', init: false},
@@ -201,6 +203,7 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
       yield client.query(generateTilknytningMatView(model));
     }
     yield client.query(generateTilknytningMatView(jordstykkeTilknytningModel));
+    yield client.query(generateTilknytningMatView(bygningTilknytningModel));
   })();
 };
 

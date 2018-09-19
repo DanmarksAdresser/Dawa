@@ -29,5 +29,6 @@ module.exports = [
   ...require('./vejnavn'),
   ...require('./vejstykke'),
   ...require('./vejstykkepostnummerrelation'),
-  ...require('./zone')
+  ...require('./zone'),
+  ...require('./bygning')
 ];

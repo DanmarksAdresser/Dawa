@@ -307,11 +307,27 @@ const bygninger = {
     {name: 'geo_version'},
     {name: 'visueltcenter'},
     {
+      name: 'bbox',
+      derive: table => `st_envelope(${table}.geom)`
+    },
+    {
       name: 'geom',
       distinctClause: geomDistinctClause
     }
   ]
 };
+
+const bygningtilknytninger = {
+  table: 'bygningtilknytninger',
+  entity: 'bygningtilknytning',
+  primaryKey: ['bygningid', 'adgangsadresseid'],
+  columns: [{
+    name: 'bygningid'
+  }, {
+    name: 'adgangsadresseid'
+  }]
+};
+
 
 const steder = {
   table: 'steder',
@@ -626,6 +642,7 @@ exports.tables = Object.assign({
     stednavne,
     stedtilknytninger,
     bygninger,
+    bygningtilknytninger,
     jordstykker,
     jordstykker_adgadr,
     tilknytninger_mat,
@@ -687,6 +704,16 @@ exports.materializations = Object.assign({
   stedtilknytninger: {
     table: 'stedtilknytninger',
     view: 'stedtilknytninger_view',
+    dependents: [
+      {
+        table: 'adgangsadresser_mat',
+        columns: ['adgangsadresseid']
+      }
+    ]
+  },
+  bygningtilknytninger: {
+    table: 'bygningtilknytninger',
+    view: 'bygningtilknytninger_view',
     dependents: [
       {
         table: 'adgangsadresser_mat',

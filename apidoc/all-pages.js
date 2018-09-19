@@ -4,6 +4,7 @@ module.exports = [
   require('./afstemningsområde-page'),
   require('./autocomplete-page'),
   require('./bebyggelse-page'),
+  require('./bygning-page'),
   require('./ejerlav-page'),
   require("./jordstykke-page"),
   require('./kommune-page'),
