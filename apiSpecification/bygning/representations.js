@@ -11,13 +11,15 @@ const registry = require('../registry');
 const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
-const commonMappers = require('../commonMappers');
-const { stringToNumber } = require('../util');
-// const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const { schemaObject } = require('../schemaUtil');
 
-// var normalizedFieldSchema = function (fieldName) {
-//   return normalizedFieldSchemas.normalizedSchemaField('bygning', fieldName);
-// };
+const {makeHref, makeHrefFromPath, mapVisueltCenter, mapBbox} = require('../commonMappers');
+const { stringToNumber } = require('../util');
+const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+const normalizedFieldSchema = function (fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('bygning', fieldName);
+};
 
 
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
@@ -29,10 +31,28 @@ exports.json = {
   schema: globalSchemaObject({
     title: 'bygning',
     properties: {
-      id: {
-        description: 'Bygningens unikke ID. Heltal.',
-        type: 'integer'
+      href: {
+        description: 'Bygningens unikke URL',
+        $ref: '#/definitions/Href'
       },
+      id: normalizedFieldSchema('id'),
+      bygningstype: normalizedFieldSchema('bygningstype'),
+      målested: normalizedFieldSchema('målested'),
+      målemetode: normalizedFieldSchema('målemetode'),
+      bbrbygning: schemaObject({
+        nullable: true,
+        properties: {
+          href: {
+            description: 'BBR bygningens URL.',
+            $ref: '#/definitions/Href'
+          },
+          id: {
+            description: 'Bygningens ID i BBR',
+            $ref: '#/definitions/UUID'
+          }
+        },
+        docOrder: ['href', 'id']
+      }),
       visueltcenter: {
         description: 'Koordinater for bygningens visuelle center. Kan eksempelvis benyttes til en label for bygningen på et kort.',
         $ref: '#/definitions/NullableVisueltCenter'
@@ -57,19 +77,27 @@ exports.json = {
         type: 'integer'
       }
     },
-    docOrder: ['id', 'ændret', 'geo_ændret', 'geo_version', 'bbox', 'visueltcenter']
+    docOrder: ['href', 'id', 'bygningstype', 'målested', 'målemetode', 'bbrbygning', 'ændret', 'geo_ændret', 'geo_version', 'bbox', 'visueltcenter']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
   }),
   mapper: (baseUrl) => row => {
     const result = {};
+    result.href = makeHref(baseUrl, 'bygning', [row.id]);
     result.id = stringToNumber(row.id);
+    result.bygningstype = row.bygningstype;
+    result.målemetode = row.målemetode;
+    result.målested = row.målested;
+    result.bbrbygning = row.bbrbygning_id ? {
+      id: row.bbrbygning_id,
+      href: makeHrefFromPath(baseUrl, '/bbrlight/bygninger', [row.bbrbygning_id])
+    } : null;
     result.ændret = row.ændret;
     result.geo_version = row.geo_version;
     result.geo_ændret = row.geo_ændret;
-    result.bbox = commonMappers.mapBbox(row);
-    result.visueltcenter = commonMappers.mapVisueltCenter(row);
+    result.bbox = mapBbox(row);
+    result.visueltcenter = mapVisueltCenter(row);
     return result;
   }
 };

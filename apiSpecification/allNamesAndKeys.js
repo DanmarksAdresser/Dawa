@@ -17,3 +17,4 @@ require('./stednavntype/nameAndKey');
 require('./stednavntilknytning/nameAndKey');
 require('./jordstykke/nameAndKey');
 require('./jordstykketilknytning/nameAndKey');
+require('./bygning/nameAndKey');

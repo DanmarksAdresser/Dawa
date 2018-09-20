@@ -1,4 +1,4 @@
-const {kode4String, d: timestampFormatter, numberToString} = require('../util');
+const {kode4String, d: timestampFormatter, numberToString, stringToNumber} = require('../util');
 const {formatHusnr} = require('../husnrUtil');
 const datamodels = require("./datamodel");
 const {selectIsoDate: selectLocalDateTime, selectIsoDateUtc: selectIsoTimestampUtc} = require('../common/sql/sqlUtil');
@@ -139,6 +139,19 @@ const unnormalizedBindings = {
     table: 'ejerlav',
     legacyResource: true,
     attributes: {}
+  },
+  bygning: {
+    table: 'bygninger',
+    attributes: {
+      id: {
+        formatter: stringToNumber,
+      },
+      geometri: {
+        column: 'geom',
+        selectTransform: col => `ST_AsGeoJSON(${col})`,
+        formatter: JSON.parse
+      }
+    }
   },
   jordstykke: {
     table: 'jordstykker',

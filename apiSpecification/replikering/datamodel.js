@@ -305,6 +305,41 @@ module.exports = {
       }
       ]
   },
+  bygning: {
+    key: ['id'],
+    attributes: [
+      {
+        name: 'id',
+        type: 'integer',
+        description: 'Bygningspolygonets unikke ID. Heltal.'
+      },
+      {
+        name: 'bygningstype',
+        type: 'string',
+        description: 'Angiver bygningens type, eksempelvis "Bygning", "Drivhus", "Tank/Silo".'
+      },
+      {
+        name: 'målemetode',
+        type: 'string',
+        description: 'Angiver målemetoden for bygningspolygonet. Mulige værdier: "Ikke tildelt", "TK/FOT-Tag", "Terræn", "Ukendt", "Under terræn".'
+      },
+      {
+        name: 'målested',
+        type: 'string',
+        description: 'Angiver målestedet for bygningspolygonet. Mulige værdier: "Tag", "Væg", "Tag og Væg", "Ukendt", "Ikke Tildelt".'
+      },
+      {
+        name: 'bbrbygning_id',
+        type: 'uuid',
+        description: 'Angiver bygningens ID i Bygnings- og Boligregisteret (BBR). UUID.'
+      },
+      {
+        name: 'geometri',
+        type: 'geometry',
+        description: 'Bygningens geometri. Leveres som GeoJSON polygon.'
+      }
+    ]
+  },
   jordstykke: {
     key: ['ejerlavkode', 'matrikelnr'],
     attributes: [
