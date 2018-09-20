@@ -1198,6 +1198,11 @@ describe('Stable API', () => {
       geojson: {
         flad: {properties: { 'sted_geo_ændret': true, 'sted_ændret': true }}
       }
+    },
+    bygning: {
+      geojson: {
+        flad: {properties: { 'geo_ændret': true, 'ændret': true }}
+      }
     }
   };
 

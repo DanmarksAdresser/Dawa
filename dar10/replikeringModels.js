@@ -21,13 +21,33 @@ const replikeringTypeOverrides = {
     husnummertekst: 'string',
     husnummerretning: 'point2d'
   },
+  DARKommuneinddeling: {
+    kommunekode: 'string'
+  },
+  DARSogneinddeling: {
+    sogneinddeling: 'string'
+  },
+  DARMenighedsrådsafstemningsområde: {
+    mrafstemningsområde: 'string'
+  },
+  DARAfstemningsområde: {
+    afstemningsområde: 'string'
+  },
   Adressepunkt: {
     position: 'point2d'
   },
   NavngivenVej: {
+    administreresafkommune: 'string',
     vejnavnebeliggenhed_vejnavnelinje: 'geometry',
     vejnavnebeliggenhed_vejnavneområde: 'geometry',
     vejnavnebeliggenhed_vejtilslutningspunkter: 'geometry'
+  },
+  NavngivenVejKommunedel: {
+    kommune: 'string',
+    vejkode: 'string'
+  },
+  SupplerendeBynavn: {
+    supplerendebynavn1: 'string'
   }
 };
 

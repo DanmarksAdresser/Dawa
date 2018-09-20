@@ -89,7 +89,8 @@ const attrVerifiers = {
   uuid: val => /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(val),
   timestamp: val => typeof(val) === 'string',
   localdatetime: val => typeof(val) === 'string',
-  point2d: val => Array.isArray(val) && val.length === 2 && typeof(val[0]) === 'number' && typeof(val[1]) === 'number',
+  point2d: val => typeof val === "object" && Array.isArray(val.coordinates) && val.type === 'Point'
+    && val.coordinates.length === 2 && typeof(val.coordinates[0]) === 'number' && typeof(val.coordinates[1]) === 'number',
   geometry: val => typeof(val) === 'object'
 };
 
@@ -102,9 +103,7 @@ const verifyAttr = (attr, val) => {
   assert(verifier(val), `Value ${val} is of type ${attr.type}`);
 };
 
-const entitiesWithoutData = [
-  ...Object.keys(replikeringModel).filter(entityName => entityName.startsWith('dar')),
-  'navngivenvej'];
+const entitiesWithoutData = ['dar_reserveretvejnavn_historik', 'dar_reserveretvejnavn_aktuel'];
 describe('Replikerede entiteter', () => {
   for(let entity of Object.keys(replikeringModel)) {
     it(`Kan hente udtræk for ${entity}`, () => go(function*() {

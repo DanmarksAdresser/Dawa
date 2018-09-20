@@ -177,6 +177,7 @@ const recomputeMaterializedDawa = (client, txid) => go(function* () {
 const tilknytningTableNames =
   [...temaModels.modelList.filter(model => !model.withoutTilknytninger).map(model => model.tilknytningTable),
     'jordstykker_adgadr',
+    'bygningtilknytninger',
     'stedtilknytninger'];
 
 const dar10HistoryTableNames = Object.values(dar10TableModels.historyTableModels).map(model => model.table);

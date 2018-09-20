@@ -340,6 +340,21 @@ module.exports = {
       }
     ]
   },
+  bygningtilknytning: {
+    key: ['bygningid', 'adgangsadresseid'],
+    attributes: [
+      {
+        name: 'bygningid',
+        type: 'integer',
+        description: 'Bygningspolygonets unikke ID. Heltal.'
+      },
+      {
+        name: 'adgangsadresseid',
+        type: 'uuid',
+        description: 'Adgangsadressens id.',
+      }
+    ]
+  },
   jordstykke: {
     key: ['ejerlavkode', 'matrikelnr'],
     attributes: [

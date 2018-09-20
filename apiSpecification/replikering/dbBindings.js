@@ -153,6 +153,14 @@ const unnormalizedBindings = {
       }
     }
   },
+  bygningtilknytning: {
+    table: 'bygningtilknytninger',
+    attributes: {
+      bygningid: {
+        formatter: stringToNumber,
+      },
+    }
+  },
   jordstykke: {
     table: 'jordstykker',
     attributes: {
@@ -201,7 +209,7 @@ const unnormalizedBindings = {
         formatter: timestampFormatter,
         selectTransform: selectLocalDateTime
       },
-      administreresafkommune: {
+      administrerendekommune: {
         formatter: kode4String
       }
     }

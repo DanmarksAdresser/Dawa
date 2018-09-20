@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS bygningtilknytninger CASCADE;
 CREATE TABLE bygningtilknytninger(
-  bygningid uuid NOT NULL,
+  bygningid bigint NOT NULL,
   adgangsadresseid uuid NOT NULL,
   PRIMARY KEY(bygningid, adgangsadresseid)
 );
