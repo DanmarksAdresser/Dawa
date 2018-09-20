@@ -22,9 +22,11 @@ const replikeringTypeOverrides = {
     husnummerretning: 'point2d'
   },
   DARKommuneinddeling: {
-    kommunekode: 'string'
+    kommunekode: 'string',
+    kommuneinddeling: 'string'
   },
   DARSogneinddeling: {
+    sognekode: 'string',
     sogneinddeling: 'string'
   },
   DARMenighedsrådsafstemningsområde: {
@@ -99,7 +101,9 @@ const replikeringBindingOverrides = {
     kommunekode: {
       formatter: kode4String
     },
-    kommuneinddeling: numberToString
+    kommuneinddeling: {
+      formatter: numberToString
+    }
   },
   SupplerendeBynavn: {
     supplerendebynavn1: {
@@ -109,6 +113,9 @@ const replikeringBindingOverrides = {
   DARSogneinddeling: {
     sogneinddeling: {
       formatter: numberToString
+    },
+    sognekode: {
+      formatter: kode4String
     }
   },
   DARMenighedsrådsafstemningsområde: {
