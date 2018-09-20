@@ -27,6 +27,28 @@ function multiVerifier(verifierFn) {
 }
 
 var sampleParameters = {
+  bygning: {
+    id: {
+      values: ['1005266425'],
+      verifier: (bygning, id) => bygning.id === parseInt(id)
+    },
+    bygningstype: {
+      values: ["Tank/Silo"],
+      verifier: (bygning, type) => bygning.bygningstype === type
+    },
+    målemetode: {
+      values: ["TK/FOT-Tag"],
+      verifier: (bygning, metode) => bygning.målemetode === metode
+    },
+    målested: {
+      values: ["Tag"],
+      verifier: (bygning, sted) => bygning.målested === sted
+    },
+    bbrbygning_id: {
+      values: ['3b587385-73e0-4980-b6d6-2955e421bfb3'],
+      verifier: (bygning, id) => bygning.bbrbygning.id === id
+    }
+  },
   navngivenvej: {
     id: {
       values: ['6cb22adb-a6d6-4889-a440-4811ded6db34'],
