@@ -91,7 +91,7 @@ exports.json = {
     result.målested = row.målested;
     result.bbrbygning = row.bbrbygning_id ? {
       id: row.bbrbygning_id,
-      href: makeHrefFromPath(baseUrl, '/bbrlight/bygninger', [row.bbrbygning_id])
+      href: makeHrefFromPath(baseUrl, 'bbrlight/bygninger', [row.bbrbygning_id])
     } : null;
     result.ændret = row.ændret;
     result.geo_version = row.geo_version;
