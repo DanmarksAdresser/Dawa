@@ -30,7 +30,7 @@ var sampleParameters = {
   bygning: {
     id: {
       values: ['1005266425'],
-      verifier: (bygning, id) => bygning.id === parseInt(id)
+      verifier: (bygning, id) => bygning.id === id
     },
     bygningstype: {
       values: ["Tank/Silo"],

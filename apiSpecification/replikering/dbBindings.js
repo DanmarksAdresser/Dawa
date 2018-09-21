@@ -143,9 +143,6 @@ const unnormalizedBindings = {
   bygning: {
     table: 'bygninger',
     attributes: {
-      id: {
-        formatter: stringToNumber,
-      },
       geometri: {
         column: 'geom',
         selectTransform: col => `ST_AsGeoJSON(${col})`,

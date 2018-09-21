@@ -117,8 +117,8 @@ const sqlTypes = {
   },
   Husnummer: {
     husnummertekst: 'husnr',
-    husnummerretning: 'geometry(Point,25832)'
-
+    husnummerretning: 'geometry(Point,25832)',
+    fk_geodk_bygning_geodanmarkbygning: 'bigint'
   },
   NavngivenVej: {
     administreresafkommune: 'smallint',
@@ -181,7 +181,10 @@ const sqlIndices = {
     ['navngivenvej_id'],
     ['postnummer_id'],
     ['supplerendebynavn_id'],
-    ['vejpunkt_id']
+    ['vejpunkt_id'],
+    ['fk_geodk_bygning_geodanmarkbygning', 'id'],
+    ['id', 'fk_geodk_bygning_geodanmarkbygning']
+
   ],
   NavngivenVejKommunedel: [
     ['navngivenvej_id'],

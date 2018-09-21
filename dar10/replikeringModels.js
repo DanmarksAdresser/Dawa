@@ -13,7 +13,8 @@ const defaultReplikeringType = {
   integer: 'integer',
   smallint: 'integer',
   text: 'string',
-  float4: 'real'
+  float4: 'real',
+  bigint: 'string'
 };
 
 const replikeringTypeOverrides = {

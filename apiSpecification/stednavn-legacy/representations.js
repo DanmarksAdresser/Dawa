@@ -91,7 +91,7 @@ exports.json = {
         memo[prop] = row[prop];
         return memo;
       }, {});
-    result.href = makeHref(baseUrl, 'stednavn', [row.id]);
+    result.href = makeHref(baseUrl, 'stednavn-legacy', [row.id]);
     result.egenskaber = {};
     if(result.hovedtype === 'Bebyggelse') {
       result.egenskaber.bebyggelseskode = row.bebyggelseskode;

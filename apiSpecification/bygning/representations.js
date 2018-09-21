@@ -14,7 +14,7 @@ const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const { schemaObject } = require('../schemaUtil');
 
 const {makeHref, makeHrefFromPath, mapVisueltCenter, mapBbox} = require('../commonMappers');
-const { stringToNumber } = require('../util');
+const { adressebetegnelse } = require('../util');
 const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
 const normalizedFieldSchema = function (fieldName) {
@@ -53,6 +53,28 @@ exports.json = {
         },
         docOrder: ['href', 'id']
       }),
+      adgangsadresser: {
+        type: 'array',
+        items: schemaObject({
+          properties: {
+            id: {
+              description: 'Adgangsadressens unikke ID (UUID).',
+              type: 'string',
+              $ref: '#/definitions/UUID'
+            },
+            href: {
+              description: 'Adgangsadressens unikke URL.',
+              type: 'string',
+              $ref: '#/definitions/Href'
+            },
+            adressebetegnelse: {
+              description: 'Adressebetegnelsen for adgangsadressen',
+              type: 'string'
+            }
+          },
+          docOrder: ['id', 'href', 'adressebetegnelse']
+        })
+      },
       visueltcenter: {
         description: 'Koordinater for bygningens visuelle center. Kan eksempelvis benyttes til en label for bygningen på et kort.',
         $ref: '#/definitions/NullableVisueltCenter'
@@ -77,7 +99,7 @@ exports.json = {
         type: 'integer'
       }
     },
-    docOrder: ['href', 'id', 'bygningstype', 'målested', 'målemetode', 'bbrbygning', 'ændret', 'geo_ændret', 'geo_version', 'bbox', 'visueltcenter']
+    docOrder: ['href', 'id', 'bygningstype', 'målested', 'målemetode','adgangsadresser', 'bbrbygning', 'ændret', 'geo_ændret', 'geo_version', 'bbox', 'visueltcenter']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -85,7 +107,7 @@ exports.json = {
   mapper: (baseUrl) => row => {
     const result = {};
     result.href = makeHref(baseUrl, 'bygning', [row.id]);
-    result.id = stringToNumber(row.id);
+    result.id = row.id;
     result.bygningstype = row.bygningstype;
     result.målemetode = row.målemetode;
     result.målested = row.målested;
@@ -98,6 +120,11 @@ exports.json = {
     result.geo_ændret = row.geo_ændret;
     result.bbox = mapBbox(row);
     result.visueltcenter = mapVisueltCenter(row);
+    result.adgangsadresser = (row.adgangsadresser || []).map(adg => ({
+      id: adg.id,
+      href: makeHref(baseUrl, 'adgangsadresse', [adg.id]),
+      adressebetegnelse: adressebetegnelse(adg)
+    }));
     return result;
   }
 };

@@ -1,6 +1,5 @@
 const fieldsUtil = require('../common/fieldsUtil');
 const sqlModel = require('./sqlModel');
-const { stringToNumber } = require('../util');
 
 module.exports = [
   {
@@ -37,8 +36,7 @@ module.exports = [
     name: 'visueltcenter_y'
   },
   {
-    name: 'id',
-    format: stringToNumber
+    name: 'id'
   }, {
     name: 'bbrbygning_id'
   }, {
@@ -48,6 +46,10 @@ module.exports = [
   }, {
     name: 'målested'
   },
+  {
+    name: 'adgangsadresser',
+    multi: true
+  }
 ];
 
 fieldsUtil.applySelectability(module.exports, sqlModel);

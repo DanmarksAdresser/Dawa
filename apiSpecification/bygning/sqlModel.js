@@ -30,6 +30,9 @@ const columns = {
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return postgisSqlUtil.selectY(params.srid || 4326, sridAlias, 'visueltcenter');
     }
+  },
+  adgangsadresser: {
+    select: `(select json_agg(json_build_object('id', a.id, 'vejnavn', a.vejnavn, 'husnr', formatHusnr(a.husnr), 'supplerendebynavn', a.supplerendebynavn, 'postnr', a.postnr, 'postnrnavn', a.postnrnavn)) from dar1_husnummer_current hn join adgangsadresser_mat a on hn.id = a.id where hn.fk_geodk_bygning_geodanmarkbygning = bygninger.id)`
   }
 };
 

@@ -310,7 +310,7 @@ module.exports = {
     attributes: [
       {
         name: 'id',
-        type: 'integer',
+        type: 'string',
         description: 'Bygningspolygonets unikke ID. Heltal.'
       },
       {
