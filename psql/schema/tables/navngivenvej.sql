@@ -17,6 +17,8 @@ CREATE TABLE navngivenvej(
   beliggenhed_vejnavnelinje geometry(Geometry,25832),
   beliggenhed_vejnavneområde geometry(Geometry,25832),
   beliggenhed_vejtilslutningspunkter  geometry(Geometry,25832),
+  visueltcenter geometry(point, 25832),
+  bbox geometry(Polygon, 25832),
   geom geometry(Geometry,25832),
   tsv tsvector
 );

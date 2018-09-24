@@ -27,14 +27,17 @@ const vejstykker = {
     derive: (table) => {
       return `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`;
     }
-  }, {
-    name: 'geom',
-    public: false
-  }, {
-    name: 'navngivenvej_id'
-  }, {
-    name: 'navngivenvejkommunedel_id'
-  }]
+
+  },
+    {
+      name: 'geom',
+      public: false
+    },
+    {
+      name: 'navngivenvej_id'
+    }, {
+      name: 'navngivenvejkommunedel_id'
+    }]
 };
 
 const enhedsadresser = {
@@ -235,6 +238,14 @@ const navngivenvej = {
       distinctClause: geomDistinctClause
     },
     {
+      name: 'bbox',
+      derive: table => `st_envelope(${table}.geom)`
+    },
+    {
+      name: 'visueltcenter',
+      derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
+    },
+    {
       name: 'geom',
       distinctClause: geomDistinctClause,
       public: false
@@ -344,6 +355,10 @@ const steder = {
     {name: 'indbyggerantal'},
     {
       name: 'visueltcenter'
+    },
+    {
+      name: 'bbox',
+      derive: table => `CASE WHEN st_geometrytype(st_envelope(${table}.geom)) = 'ST_Polygon' THEN st_envelope(${table}.geom) ELSE null END`
     },
     {
       name: 'geom',

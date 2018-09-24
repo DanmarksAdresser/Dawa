@@ -4,7 +4,9 @@ var _ = require('underscore');
 
 var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
-var commonMappers = require('../commonMappers');
+const  { makeHref, mapBbox, mapVisueltCenter,
+  formatDarStatus, mapKode4NavnTema,
+  mapVejstykkeRef} = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
@@ -21,7 +23,6 @@ var normalizedVejstykkeFieldSchema = function(fieldName) {
 
 var d = util.d;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHref = commonMappers.makeHref;
 var schemaObject = schemaUtil.schemaObject;
 const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnavneområde', 'beliggenhed_vejtilslutningspunkter', 'geom_json'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
@@ -109,12 +110,24 @@ exports.json = {
               type: {},
               coordinates: {}
             }
-          }
+          },
         },
         docOrder: ['oprindelse', 'geometritype', 'vejtilslutningspunkter']
-      })
+      }),
+      visueltcenter: {
+        description: 'Koordinater for den navngivne vejs visuelle center. Kan eksempelvis benyttes til at placere en label eller lignende på et kort.' +
+        ' på et kort. Det visuelle center beregnes som det punkt på den navngivne vejs geometri der er tættest på geometriens geometriske center.',
+        $ref: '#/definitions/NullableVisueltCenter'
+      },
+      bbox: {
+        description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
+        $ref: '#/definitions/NullableBbox'
+      },
+
     },
-    docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'beliggenhed']
+    docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'beliggenhed', 'visueltcenter', 'bbox']
   }),
   fields: _.where(fields, {'selectable' : true}),
   mapper: function(baseUrl) {
@@ -122,18 +135,20 @@ exports.json = {
       return {
         id: row.id,
         href: makeHref(baseUrl, 'navngivenvej', [row.id]),
-        darstatus: commonMappers.formatDarStatus(row.darstatus),
+        darstatus: formatDarStatus(row.darstatus),
         navn: row.navn,
         adresseringsnavn: row.adresseringsnavn,
-        administrerendekommune: commonMappers.mapKode4NavnTema('kommune', row.administrerendekommunekode, row.administrerendekommunenavn, baseUrl),
+        administrerendekommune: mapKode4NavnTema('kommune', row.administrerendekommunekode, row.administrerendekommunenavn, baseUrl),
         retskrivningskontrol: row.retskrivningskontrol,
         udtaltvejnavn: row.udtaltvejnavn,
+        visueltcenter: mapVisueltCenter(row),
+        bbox: mapBbox(row),
         historik: {
           oprettet: d(row.oprettet),
           ændret: d(row.ændret)
         },
         vejstykker:
-          (row.vejstykker || []).map(vejstykke => commonMappers.mapVejstykkeRef(vejstykke, baseUrl)),
+          (row.vejstykker || []).map(vejstykke => mapVejstykkeRef(vejstykke, baseUrl)),
         beliggenhed: {
           oprindelse: {
             kilde: row.beliggenhed_oprindelse_kilde,
@@ -185,7 +200,7 @@ exports.autocomplete = {
         navngivenvej: {
           href: makeHref(baseUrl, 'navngivenvej', [row.id]),
           id: row.id,
-          darstatus: commonMappers.formatDarStatus(row.darstatus),
+          darstatus: formatDarStatus(row.darstatus),
           navn: row.navn,
           adresseringsnavn: row.adresseringsnavn
         }

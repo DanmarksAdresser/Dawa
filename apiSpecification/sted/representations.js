@@ -9,7 +9,7 @@ const fields = require('./fields');
 const registry = require('../registry');
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const {nullableType, schemaObject} = require('../schemaUtil');
-const { mapKommuneRefArray, makeHref } = require('../commonMappers');
+const { mapKommuneRefArray, makeHref, mapBbox } = require('../commonMappers');
 
 const fieldsExcludedFromFlat = ['geom_json', 'visueltcenter'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
@@ -69,6 +69,12 @@ exports.json = {
       egenskaber: {
         description: 'Yderligere egenskaber for stedet, som er specifikke for den pågældende hovedtype'
       },
+      bbox: {
+        description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
+        $ref: '#/definitions/NullableBbox'
+      },
       visueltcenter: {
         description: 'Koordinater for stedets visuelle center. Kan eksempelvis benyttes til at placere stedets navn på et kort.',
         $ref: '#/definitions/NullableVisueltCenter'
@@ -95,7 +101,7 @@ exports.json = {
       }
 
     },
-    docOrder: ['id', 'href', 'primærtnavn', 'primærnavnestatus', 'sekundærenavne','hovedtype', 'undertype', 'egenskaber', 'visueltcenter', 'kommuner',
+    docOrder: ['id', 'href', 'primærtnavn', 'primærnavnestatus', 'sekundærenavne','hovedtype', 'undertype', 'egenskaber', 'bbox', 'visueltcenter', 'kommuner',
       'ændret', 'geo_ændret', 'geo_version']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
@@ -115,6 +121,7 @@ exports.json = {
     }
 
     result.visueltcenter = row.visueltcenter_x ? [row.visueltcenter_x, row.visueltcenter_y] : null;
+    result.bbox = mapBbox(row);
     result.kommuner = row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : [];
     result.sekundærenavne = row.sekundærenavne ? row.sekundærenavne : [];
     if(result.undertype === 'ø') {

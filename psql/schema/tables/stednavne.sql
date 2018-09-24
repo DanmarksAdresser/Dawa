@@ -9,6 +9,7 @@ CREATE TABLE steder(
   bebyggelseskode integer,
   indbyggerantal integer,
   visueltcenter geometry(point, 25832),
+  bbox geometry(Polygon, 25832),
   geom geometry(geometry, 25832)
 );
 

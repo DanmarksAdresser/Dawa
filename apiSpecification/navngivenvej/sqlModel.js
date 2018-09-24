@@ -6,12 +6,12 @@ var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var parameters = require('./parameters');
 const registry = require('../registry');
 var sqlUtil = require('../common/sql/sqlUtil');
-const {geojsonColumn} = require('../common/sql/postgisSqlUtil');
+const {geojsonColumn, bboxVisualCenterColumns} = require('../common/sql/postgisSqlUtil');
 
 const assembleSqlModel = sqlUtil.assembleSqlModel;
 const selectIsoTimestamp = sqlUtil.selectIsoDateUtc;
 
-var columns = {
+const columns = {
   id: {
     column: 'nv.id'
   },
@@ -112,6 +112,8 @@ var columns = {
     }
   },
 };
+
+Object.assign(columns, bboxVisualCenterColumns('nv'));
 
 const regexParameterImpl = (sqlParts, params) => {
   if (params.regex) {

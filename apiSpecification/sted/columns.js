@@ -33,24 +33,6 @@ module.exports = {
       return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias);
     }
   },
-  visueltcenter: {
-    select: function (sqlParts, sqlModel, params) {
-      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'visueltcenter');
-    }
-  },
-  visueltcenter_x: {
-    select: (sqlParts, sqlModel, params) => {
-      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.selectX(params.srid || 4326, sridAlias, 'visueltcenter');
-    }
-  },
-  visueltcenter_y: {
-    select: (sqlParts, sqlModel, params) => {
-      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.selectY(params.srid || 4326, sridAlias, 'visueltcenter');
-    }
-  },
   kommunekode: {
     select: null,
       where: function (sqlParts, parameterArray) {
@@ -93,4 +75,6 @@ module.exports = {
      ON sk.kommunekode = k.kode
      WHERE sk.stedid = steder.id)`
   }
-}
+};
+
+Object.assign(module.exports, postgisSqlUtil.bboxVisualCenterColumns('steder'));

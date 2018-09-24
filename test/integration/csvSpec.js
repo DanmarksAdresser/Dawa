@@ -45,7 +45,14 @@ describe('CSV udtræk', function () {
       'beliggenhed_oprindelse_nøjagtighedsklasse',
       'beliggenhed_oprindelse_registrering',
       'beliggenhed_oprindelse_tekniskstandard',
-      'beliggenhed_geometritype'
+      'beliggenhed_geometritype',
+      "bbox_xmin",
+      "bbox_ymin",
+      "bbox_xmax",
+      "bbox_ymax",
+      "visueltcenter_x",
+      "visueltcenter_y"
+
     ]
   };
 

@@ -47,6 +47,24 @@ var fields = [
     name: 'beliggenhed_geometritype'
   },
   {
+    name: 'bbox_xmin'
+  },
+  {
+    name: 'bbox_ymin'
+  },
+  {
+    name: 'bbox_xmax'
+  },
+  {
+    name: 'bbox_ymax'
+  },
+  {
+    name: 'visueltcenter_x'
+  },
+  {
+    name: 'visueltcenter_y'
+  },
+  {
     name: 'geom_json'
   }
 ];

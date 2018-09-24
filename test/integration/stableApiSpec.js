@@ -32,15 +32,16 @@ describe('Stable API', () => {
                 },
                 "adgangsadresser": [
                   {
-                    "adressebetegnelse": "Nørregade 44B, 5000 Odense C",
-                    "href": "http://dawa/adgangsadresser/0a3f5089-9120-32b8-e044-0003ba298018",
-                    "id": "0a3f5089-9120-32b8-e044-0003ba298018"
-                  },
-                  {
                     "adressebetegnelse": "Nørregade 44, 5000 Odense C",
                     "href": "http://dawa/adgangsadresser/0a3f5089-911f-32b8-e044-0003ba298018",
                     "id": "0a3f5089-911f-32b8-e044-0003ba298018"
+                  },
+                  {
+                    "adressebetegnelse": "Nørregade 44B, 5000 Odense C",
+                    "href": "http://dawa/adgangsadresser/0a3f5089-9120-32b8-e044-0003ba298018",
+                    "id": "0a3f5089-9120-32b8-e044-0003ba298018"
                   }
+
                 ],
                 "ændret": "2018-09-20T10:11:22.611Z",
                 "geo_version": 1,
@@ -155,6 +156,10 @@ describe('Stable API', () => {
             "sted_geo_version": 1,
             "sted_primærtnavn": "Test stednavn punkt",
             "sted_primærnavnestatus": "officielt",
+            "sted_bbox_xmax": null,
+            "sted_bbox_xmin": null,
+            "sted_bbox_ymax": null,
+            "sted_bbox_ymin": null,
             "sted_visueltcenter_x": 12.57114905,
             "sted_visueltcenter_y": 55.59056756,
             "sted_brofast": false,
@@ -1162,10 +1167,20 @@ describe('Stable API', () => {
             },
             "geometritype": "vejnavnelinje",
             vejtilslutningspunkter: null
-          }
+          },
+          "bbox": [
+            10.09803611,
+            55.37158289,
+            10.09861676,
+            55.37233702
+          ],
+          "visueltcenter": [
+            10.09839859,
+            55.37194497
+          ]
         }
       }],
-        flad
+      flad
     :
       [{
         params: {
@@ -1186,7 +1201,13 @@ describe('Stable API', () => {
           "beliggenhed_oprindelse_nøjagtighedsklasse": "B",
           "beliggenhed_oprindelse_registrering": "2018-05-03T15:57:30.356Z",
           "beliggenhed_oprindelse_tekniskstandard": "N0",
-          "beliggenhed_geometritype": "vejnavnelinje"
+          "beliggenhed_geometritype": "vejnavnelinje",
+          "bbox_xmax": 10.09861676,
+          "bbox_xmin": 10.09803611,
+          "bbox_ymax": 55.37233702,
+          "bbox_ymin": 55.37158289,
+          "visueltcenter_x": 10.09839859,
+          "visueltcenter_y": 55.37194497
         }
       }]
     }
@@ -1207,6 +1228,12 @@ describe('Stable API', () => {
               [10.09861386, 55.37222733], [10.09861081, 55.37225404],
               [10.09859725, 55.37229425], [10.09858836, 55.37233225]]]
           },
+          "bbox": [
+            10.09803611,
+            55.37158289,
+            10.09861676,
+            55.37233702
+          ],
           "crs": {
             "type": "name",
             "properties": {
@@ -1228,7 +1255,10 @@ describe('Stable API', () => {
             "beliggenhed_oprindelse_nøjagtighedsklasse": "B",
             "beliggenhed_oprindelse_registrering": "2018-05-03T15:57:30.356Z",
             "beliggenhed_oprindelse_tekniskstandard": "N0",
-            "beliggenhed_geometritype": "vejnavnelinje"
+            "beliggenhed_geometritype": "vejnavnelinje",
+            "visueltcenter_x": 10.09839859,
+            "visueltcenter_y": 55.37194497
+
           }
         }
 

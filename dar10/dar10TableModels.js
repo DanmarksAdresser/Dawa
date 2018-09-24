@@ -199,7 +199,7 @@ const adgangsadresserMaterialization = {
 const vejstykkerMaterialization = {
   table: 'vejstykker',
   view: 'dar1_vejstykker_view',
-  excludedColumns: ['oprettet', 'aendret', 'geom'],
+  excludedColumns: ['oprettet', 'aendret', 'geom', 'bbox', 'visueltcenter'],
   dependents: [
     {
       table: 'dar1_NavngivenVej_current',

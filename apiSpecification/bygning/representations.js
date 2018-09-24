@@ -125,6 +125,7 @@ exports.json = {
       href: makeHref(baseUrl, 'adgangsadresse', [adg.id]),
       adressebetegnelse: adressebetegnelse(adg)
     }));
+    result.adgangsadresser.sort((a, b) => a.id < b.id ? -1 : 1);
     return result;
   }
 };

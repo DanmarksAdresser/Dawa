@@ -50,6 +50,18 @@ module.exports = [
     multi: true
   },
   {
+    name: 'bbox_xmin'
+  },
+  {
+    name: 'bbox_ymin'
+  },
+  {
+    name: 'bbox_xmax'
+  },
+  {
+    name: 'bbox_ymax'
+  },
+  {
     name: 'visueltcenter_x'
   },
   {
