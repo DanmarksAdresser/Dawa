@@ -339,6 +339,16 @@ const bygningtilknytninger = {
   }]
 };
 
+const bygning_kommune = {
+  table: 'bygning_kommune',
+  primaryKey: ['bygningid', 'kommunekode'],
+  columns: [{
+    name: 'bygningid'
+  }, {
+    name: 'kommunekode'
+  }]
+};
+
 
 const steder = {
   table: 'steder',
@@ -658,6 +668,7 @@ exports.tables = Object.assign({
     stedtilknytninger,
     bygninger,
     bygningtilknytninger,
+    bygning_kommune,
     jordstykker,
     jordstykker_adgadr,
     tilknytninger_mat,
@@ -733,6 +744,20 @@ exports.materializations = Object.assign({
       {
         table: 'adgangsadresser_mat',
         columns: ['adgangsadresseid']
+      }
+    ]
+  },
+  bygning_kommune: {
+    table: 'bygning_kommune',
+    view: 'bygning_kommune_view',
+    dependents: [
+      {
+        table: 'bygninger',
+        columns: ['bygningid']
+      },
+      {
+        table: 'kommuner',
+        columns: ['kommunekode']
       }
     ]
   },

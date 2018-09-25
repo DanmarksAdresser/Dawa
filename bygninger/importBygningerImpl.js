@@ -53,6 +53,7 @@ const importBygningerFromStream = (client, txid, stream) => go(function*() {
   yield tableDiffNg.applyChanges(client, txid, bygningerTableModel);
   yield client.query('drop table fetch_bygninger_raw; drop table fetch_bygninger');
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.bygningtilknytninger);
+  yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.bygning_kommune);
 });
 
 const importBygninger = (client,txid,  filePath) => go(function*() {
