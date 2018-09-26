@@ -5,6 +5,7 @@ const temaModels = require('../dagiImport/temaModels');
 const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
 const dar10TableModels = require('../dar10/dar10TableModels');
 
+const deriveNullableBbox = table => `CASE WHEN st_geometrytype(st_envelope(${table}.geom)) = 'ST_Polygon' THEN st_envelope(${table}.geom) ELSE null END`;
 const vejstykker = {
   entity: 'vejstykke',
   table: 'vejstykker',
@@ -239,7 +240,7 @@ const navngivenvej = {
     },
     {
       name: 'bbox',
-      derive: table => `st_envelope(${table}.geom)`
+      derive: deriveNullableBbox
     },
     {
       name: 'visueltcenter',
@@ -368,7 +369,7 @@ const steder = {
     },
     {
       name: 'bbox',
-      derive: table => `CASE WHEN st_geometrytype(st_envelope(${table}.geom)) = 'ST_Polygon' THEN st_envelope(${table}.geom) ELSE null END`
+      derive: deriveNullableBbox
     },
     {
       name: 'geom',

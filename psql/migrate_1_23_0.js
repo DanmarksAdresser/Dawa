@@ -19,7 +19,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
   });
   proddb.withTransaction('READ_WRITE', (client) => go(function* () {
     yield withImportTransaction(client, 'migrate_1_23_0', txid => go(function* () {
-      yield client.query(`
+      const sql = `
 create index on dar1_Adresse_history_changes(id);
 create index on dar1_Adressepunkt_history_changes(id);
 create index on dar1_DARAfstemningsområde_history_changes(id);
@@ -106,10 +106,10 @@ create index on bygning_kommune_changes(changeid) WHERE public;
 create index on bygning_kommune_changes(bygningid, kommunekode, txid DESC NULLS LAST, changeid DESC NULLS LAST);
 
 ALTER TABLE navngivenvej ADD COLUMN bbox geometry(Polygon, 25832);
-UPDATE navngivenvej SET bbox = st_envelope(geom);
+UPDATE navngivenvej SET bbox = CASE WHEN st_geometrytype(st_envelope(geom)) = 'ST_Polygon' THEN st_envelope(geom) ELSE null END;
 
 ALTER TABLE navngivenvej_changes ADD COLUMN bbox geometry(Polygon, 25832);
-UPDATE navngivenvej_changes SET bbox = st_envelope(geom);
+UPDATE navngivenvej_changes SET bbox = CASE WHEN st_geometrytype(st_envelope(geom)) = 'ST_Polygon' THEN st_envelope(geom) ELSE null END;
 
 ALTER TABLE navngivenvej ADD COLUMN visueltcenter geometry(point, 25832);
 UPDATE navngivenvej set visueltcenter = ST_ClosestPoint(geom, ST_Centroid(geom));
@@ -122,7 +122,10 @@ update steder set bbox = CASE WHEN st_geometrytype(st_envelope(geom)) = 'ST_Poly
 ALTER TABLE steder_changes ADD COLUMN bbox geometry(Polygon, 25832);
 update steder_changes set bbox = CASE WHEN st_geometrytype(st_envelope(geom)) = 'ST_Polygon' THEN st_envelope(geom) ELSE null END;
 `
-      );
+      ;
+      for(let stmt of sql.split(';')) {
+        yield client.query(stmt);
+      }
     }));
     yield reloadDatabaseCode(client, 'psql/schema');
   })).done();
