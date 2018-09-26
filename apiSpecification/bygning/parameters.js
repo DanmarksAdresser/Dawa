@@ -32,6 +32,10 @@ module.exports = {
       {
         name: 'målested',
         type: 'string'
+      },
+      {
+        name: 'kommunekode',
+        type: 'integer'
       }
     ])
 };

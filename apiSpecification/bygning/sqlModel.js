@@ -33,6 +33,30 @@ const columns = {
   },
   adgangsadresser: {
     select: `(select json_agg(json_build_object('id', a.id, 'vejnavn', a.vejnavn, 'husnr', formatHusnr(a.husnr), 'supplerendebynavn', a.supplerendebynavn, 'postnr', a.postnr, 'postnrnavn', a.postnrnavn)) from dar1_husnummer_current hn join adgangsadresser_mat a on hn.id = a.id where hn.fk_geodk_bygning_geodanmarkbygning = bygninger.id)`
+  },
+  kommunekode: {
+    where: (sqlParts, parameterArray) => {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['bygning_kommune bk'],
+        whereClauses: [`bygninger.id = bk.bygningid`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'kommunekode',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {kommunekode: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+  },
+  kommuner: {
+    select: `(select json_agg(json_build_object('kode', bk.kommunekode, 'navn', k.navn)) from bygning_kommune bk join kommuner k on bk.kommunekode = k.kode where bk.bygningid = bygninger.id)`
   }
 };
 

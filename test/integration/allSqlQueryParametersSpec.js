@@ -47,6 +47,10 @@ var sampleParameters = {
     bbrbygning_id: {
       values: ['3b587385-73e0-4980-b6d6-2955e421bfb3'],
       verifier: (bygning, id) => bygning.bbrbygning.id === id
+    },
+    kommunekode: {
+      values: ['99'],
+      verifier: (bygning, kommunekode) => bygning.kommuner.filter(kommune => parseInt(kommune.kode) === parseInt(kommunekode)).length === 1
     }
   },
   navngivenvej: {

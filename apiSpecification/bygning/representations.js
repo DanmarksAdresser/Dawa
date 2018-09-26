@@ -125,7 +125,9 @@ exports.json = {
       href: makeHref(baseUrl, 'adgangsadresse', [adg.id]),
       adressebetegnelse: adressebetegnelse(adg)
     }));
+    result.kommuner = (row.kommuner || []).map(k => Object.assign({}, k, {href: makeHref(baseUrl, 'kommune', [k.kode])}));
     result.adgangsadresser.sort((a, b) => a.id < b.id ? -1 : 1);
+    result.kommuner.sort((a, b)=> parseInt(b.kode) - parseInt(a.kode));
     return result;
   }
 };

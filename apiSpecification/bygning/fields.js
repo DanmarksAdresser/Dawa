@@ -49,6 +49,10 @@ module.exports = [
   {
     name: 'adgangsadresser',
     multi: true
+  },
+  {
+    name: 'kommuner',
+    multi: true
   }
 ];
 

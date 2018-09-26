@@ -121,6 +121,17 @@ ALTER TABLE steder ADD COLUMN bbox geometry(Polygon, 25832);
 update steder set bbox = CASE WHEN st_geometrytype(st_envelope(geom)) = 'ST_Polygon' THEN st_envelope(geom) ELSE null END;
 ALTER TABLE steder_changes ADD COLUMN bbox geometry(Polygon, 25832);
 update steder_changes set bbox = CASE WHEN st_geometrytype(st_envelope(geom)) = 'ST_Polygon' THEN st_envelope(geom) ELSE null END;
+
+DROP VIEW IF EXISTS dar1_husnummer_current_view CASCADE;
+ALTER TABLE dar1_husnummer alter fk_geodk_bygning_geodanmarkbygning type bigint using fk_geodk_bygning_geodanmarkbygning::bigint; 
+ALTER TABLE dar1_husnummer_changes alter fk_geodk_bygning_geodanmarkbygning type bigint using fk_geodk_bygning_geodanmarkbygning::bigint; 
+ALTER TABLE dar1_husnummer_current alter fk_geodk_bygning_geodanmarkbygning type bigint using fk_geodk_bygning_geodanmarkbygning::bigint; 
+ALTER TABLE dar1_husnummer_current_changes alter fk_geodk_bygning_geodanmarkbygning type bigint using fk_geodk_bygning_geodanmarkbygning::bigint; 
+ALTER TABLE dar1_husnummer_history alter fk_geodk_bygning_geodanmarkbygning type bigint using fk_geodk_bygning_geodanmarkbygning::bigint; 
+ALTER TABLE dar1_husnummer_history_changes alter fk_geodk_bygning_geodanmarkbygning type bigint using fk_geodk_bygning_geodanmarkbygning::bigint; 
+
+CREATE INDEX ON dar1_husnummer_current(fk_geodk_bygning_geodanmarkbygning, id);
+CREATE INDEX ON dar1_husnummer_current(id, fk_geodk_bygning_geodanmarkbygning);
 `
       ;
       for(let stmt of sql.split(';')) {
