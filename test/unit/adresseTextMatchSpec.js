@@ -241,6 +241,30 @@ describe('adresseTextMatch', () => {
     expect(result.address).to.deep.equal(expectedResult);
   });
 
+  it('Will correctly parse "Brøddegade 14, 14, Gudhjem, 3760 Gudhjem" against "Brøddegade 14, 1. 4, Gudhjem, 3760 Gudhjem"', () => {
+    const uvasket = 'Brøddegade 14, 14, Gudhjem, 3760 Gudhjem';
+    const vasket = {
+      vejnavn: 'Brøddegade',
+      husnr: '14',
+      etage: '1',
+      dør: '4',
+      supplerendebynavn: 'Gudhjem',
+      postnr: '3760',
+      postnrnavn: 'Gudhjem'
+    };
+    const expectedResult = {
+      vejnavn: 'Brøddegade',
+      husnr: '14',
+      etage: '14',
+      dør: '',
+      supplerendebynavn: 'Gudhjem',
+      postnr: '3760',
+      postnrnavn: 'Gudhjem'
+    };
+    const result = adresseTextMatch(uvasket, vasket);
+    expect(result.address).to.deep.equal(expectedResult);
+  });
+
   it('Will not parse foobar, but will give a result anyway', () => {
     var uvasket = 'foobar';
     var vasket = {

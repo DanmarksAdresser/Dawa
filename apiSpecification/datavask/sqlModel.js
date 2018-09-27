@@ -374,6 +374,7 @@ function createSqlModel(entityName) {
         const uniqueComparator = objectComparator(['vejnavn', 'husnr', 'etage', 'dør', 'supplerendebynavn', 'postnr', 'postnrnavn']);
         uniques.sort(uniqueComparator);
         uniques = _.uniq(uniques, true, (a) => util.adressebetegnelse(a, entityName === 'adgangsadresse'));
+
         // maps address text of found adresses to the structured version of the adress
         var addressTextToUniqueMap = _.indexBy(uniques, (unique) => util.adressebetegnelse(unique, entityName === 'adgangsadresse'));
 
@@ -491,6 +492,7 @@ LIMIT 1`;
         let idToBestMatchingAddressTextMap = _.mapObject(idToAddressTextsMap, addressTexts => {
           return _.find(orderedAddressTexts, addressText => _.contains(addressTexts, addressText));
         });
+
 
         idToBestMatchingAddressTextMap = _.reduce(idToBestMatchingAddressTextMap, (memo, value, key) => {
           if(value) {
