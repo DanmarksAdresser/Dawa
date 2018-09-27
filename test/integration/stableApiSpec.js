@@ -43,9 +43,8 @@ describe('Stable API', () => {
                   }
 
                 ],
-                "ændret": "2018-09-20T10:11:22.611Z",
-                "geo_version": 1,
-                "geo_ændret": "2018-09-20T10:11:22.611Z",
+                "kommuner": [],
+                "ændret": "2015-02-24T08:21:15.000Z",
                 "bbox": [
                   10.38810747,
                   55.3996877,
@@ -101,9 +100,7 @@ describe('Stable API', () => {
           }
         },
         "properties": {
-          "ændret": "2018-09-19T07:35:32.596Z",
-          "geo_ændret": "2018-09-19T07:35:32.596Z",
-          "geo_version": 1,
+          "ændret": "2015-02-24T08:21:15.000Z",
           "visueltcenter_x": 10.38834483,
           "visueltcenter_y": 55.39973843,
           "id": "1071735134",
@@ -1302,14 +1299,6 @@ describe('Stable API', () => {
     stednavn: {
       geojson: {
         flad: {properties: {'sted_geo_ændret': true, 'sted_ændret': true}}
-      }
-    },
-    bygning: {
-      geojson: {
-        flad: {properties: {'geo_ændret': true, 'ændret': true}}
-      },
-      json: {
-        nestet: {'geo_ændret': true, 'ændret': true}
       }
     }
   };

@@ -6,9 +6,7 @@ CREATE  TABLE bygninger (
   målemetode    TEXT,
   målested      TEXT,
   bbrbygning_id UUID,
-  ændret timestamptz NOT NULL DEFAULT now(),
-  geo_version integer NOT NULL DEFAULT 1,
-  geo_ændret timestamptz NOT NULL DEFAULT now(),
+  ændret timestamptz,
   geom geometry(PolygonZ, 25832),
   bbox geometry(Polygon, 25832),
   visueltcenter geometry(Point, 25832)

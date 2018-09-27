@@ -7,14 +7,6 @@ module.exports = [
     selectable: true
   },
   {
-    name: 'geo_ændret',
-    selectable: true
-  },
-  {
-    name: 'geo_version',
-    selectable: true
-  },
-  {
     name: 'geom_json'
   },
   {

@@ -315,8 +315,6 @@ const bygninger = {
     {name: 'målested'},
     {name: 'bbrbygning_id'},
     {name: 'ændret'},
-    {name: 'geo_ændret'},
-    {name: 'geo_version'},
     {name: 'visueltcenter'},
     {
       name: 'bbox',

@@ -12,13 +12,8 @@ const bygningerTableModel = tableModel.tables.bygninger;
 const { computeVisualCenter } = require('../importUtil/geometryImport');
 const { recomputeMaterialization } = require('../importUtil/materialize');
 
-const {
-  updateGeometricFields
-} = require('../importUtil/geometryImport');
-
-
 const importBygningerFromStream = (client, txid, stream) => go(function*() {
-  yield client.query('create temp table fetch_bygninger_raw(id bigint, bygningstype text, målemetode text, målested text, bbrbygning_id uuid, visueltcenter text, geomjson text)');
+  yield client.query('create temp table fetch_bygninger_raw(id bigint, bygningstype text, ændret timestamptz, målemetode text, målested text, bbrbygning_id uuid, visueltcenter text, geomjson text)');
   const jsonTransformer = JSONStream.parse('features.*');
   const mapFn = geojsonFeature => {
     const raw = geojsonFeature.properties;
@@ -27,6 +22,7 @@ const importBygningerFromStream = (client, txid, stream) => go(function*() {
     return {
       id: raw.ID_LOKALID,
       bygningstype: raw.BYGNINGSTYPE,
+      ændret: raw.REGISTRERINGFRA,
       målested: raw.MAALESTEDBYGNING,
       målemetode: raw.METODE3D,
       bbrbygning_id: raw.BYGNINGUUID,
@@ -34,13 +30,13 @@ const importBygningerFromStream = (client, txid, stream) => go(function*() {
       geomjson: geojsonFeature.geometry ? JSON.stringify(geojsonFeature.geometry) : null
     };
   };
-  const rawColumns = ['id', 'bygningstype', 'målested', 'målemetode', 'bbrbygning_id', 'visueltcenter', 'geomjson'];
+  const rawColumns = ['id', 'bygningstype', 'ændret', 'målested', 'målemetode', 'bbrbygning_id', 'visueltcenter', 'geomjson'];
 
   yield promisingStreamCombiner([stream, jsonTransformer, ...streamToTablePipeline(client, 'fetch_bygninger_raw', rawColumns, mapFn)]);
 
   yield client.query('CREATE TEMP TABLE fetch_bygninger AS select * from bygninger WHERE false');
-  yield client.query(`INSERT INTO fetch_bygninger(id, bygningstype, målested, målemetode, bbrbygning_id, visueltcenter, geom)
-  (select id, bygningstype, målested, målemetode,bbrbygning_id, 
+  yield client.query(`INSERT INTO fetch_bygninger(id, bygningstype, ændret, målested, målemetode, bbrbygning_id, visueltcenter, geom)
+  (select id, bygningstype, ændret, målested, målemetode,bbrbygning_id, 
    st_setsrid(st_geomfromgeojson(visueltcenter), 25832), 
    st_setsrid(ST_GeomFromGeoJSON(geomjson), 25832)
    FROM fetch_bygninger_raw)`);
@@ -49,7 +45,6 @@ const importBygningerFromStream = (client, txid, stream) => go(function*() {
   yield tableDiffNg.computeDifferences(client, txid, `fetch_bygninger`, bygningerTableModel);
 
   yield client.query('analyze bygninger; analyze bygninger_changes');
-  yield updateGeometricFields(client, txid, bygningerTableModel);
   yield tableDiffNg.applyChanges(client, txid, bygningerTableModel);
   yield client.query('drop table fetch_bygninger_raw; drop table fetch_bygninger');
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.bygningtilknytninger);

@@ -13,7 +13,7 @@ const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedF
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
 const { schemaObject } = require('../schemaUtil');
 
-const {makeHref, makeHrefFromPath, mapVisueltCenter, mapBbox} = require('../commonMappers');
+const {makeHref, makeHrefFromPath, mapVisueltCenter, mapBbox, mapKommuneRef} = require('../commonMappers');
 const { adressebetegnelse } = require('../util');
 const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
@@ -75,6 +75,13 @@ exports.json = {
           docOrder: ['id', 'href', 'adressebetegnelse']
         })
       },
+      kommuner: {
+        type: 'array',
+        description: 'De kommuner, som bygningen ligger i. De bygninger ligger kun i én kommune, men bygninger kan overlappe kommunegrænser.',
+        items: {
+          $ref: '#/definitions/KommuneRef'
+        }
+      },
       visueltcenter: {
         description: 'Koordinater for bygningens visuelle center. Kan eksempelvis benyttes til en label for bygningen på et kort.',
         $ref: '#/definitions/NullableVisueltCenter'
@@ -89,17 +96,9 @@ exports.json = {
         description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
         ' geometrien (se felterne geo_ændret og geo_version).',
         $ref: '#/definitions/DateTimeUtc'
-      },
-      'geo_ændret': {
-        description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
-        $ref: '#/definitions/DateTimeUtc'
-      },
-      geo_version: {
-        description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
-        type: 'integer'
       }
     },
-    docOrder: ['href', 'id', 'bygningstype', 'målested', 'målemetode','adgangsadresser', 'bbrbygning', 'ændret', 'geo_ændret', 'geo_version', 'bbox', 'visueltcenter']
+    docOrder: ['href', 'id', 'bygningstype', 'målested', 'målemetode','adgangsadresser', 'kommuner', 'bbrbygning', 'ændret', 'bbox', 'visueltcenter']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -116,8 +115,6 @@ exports.json = {
       href: makeHrefFromPath(baseUrl, 'bbrlight/bygninger', [row.bbrbygning_id])
     } : null;
     result.ændret = row.ændret;
-    result.geo_version = row.geo_version;
-    result.geo_ændret = row.geo_ændret;
     result.bbox = mapBbox(row);
     result.visueltcenter = mapVisueltCenter(row);
     result.adgangsadresser = (row.adgangsadresser || []).map(adg => ({
@@ -125,7 +122,7 @@ exports.json = {
       href: makeHref(baseUrl, 'adgangsadresse', [adg.id]),
       adressebetegnelse: adressebetegnelse(adg)
     }));
-    result.kommuner = (row.kommuner || []).map(k => Object.assign({}, k, {href: makeHref(baseUrl, 'kommune', [k.kode])}));
+    result.kommuner = (row.kommuner || []).map(k => mapKommuneRef(k, baseUrl));
     result.adgangsadresser.sort((a, b) => a.id < b.id ? -1 : 1);
     result.kommuner.sort((a, b)=> parseInt(b.kode) - parseInt(a.kode));
     return result;

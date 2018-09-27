@@ -30,6 +30,10 @@ const commonBygningParameters = [
     name: 'bbrbygning_id',
     doc: 'Find bygningpolygon ud fra bygningens ID i BBR registeret. '
   },
+  {
+    name: 'kommunekode',
+    doc: 'Find bygninger i den angivne kommune.'
+  },
   ...dagiSridCirkelPolygonParameters('bygning'),
   strukturParameter,
   ...formatAndPagingParams,
