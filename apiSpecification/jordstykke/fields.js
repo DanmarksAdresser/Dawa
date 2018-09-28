@@ -43,16 +43,24 @@ module.exports = [
   }, {
     name: 'kommunekode',
     formatter: kode4String
-  }, {
+  },
+  { name: 'kommunenavn'}
+  , {
     name: 'sognekode',
     formatter: kode4String
-  }, {
+  },
+  { name: 'sognenavn'}
+  , {
     name: 'regionskode',
     formatter: kode4String
-  }, {
+  },
+  { name: 'regionsnavn'},
+  {
     name: 'retskredskode',
     formatter: kode4String
-  }, {
+  },
+  { name: 'retskredsnavn'},
+  {
     name: 'udvidet_esrejendomsnr'
   }, {
     name: 'esrejendomsnr'

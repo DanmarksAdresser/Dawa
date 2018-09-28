@@ -13,6 +13,92 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
+    jordstykke: {
+      json: {
+        flad: [{
+          params: {
+            ejerlavkode: '60851',
+            matrikelnr: '1b'
+          },
+          value: {
+            "ændret": "2018-09-28T09:48:57.130Z",
+            "geo_ændret": "2018-09-28T09:48:57.130Z",
+            "geo_version": 1,
+            "bbox_xmin": 11.93749607,
+            "bbox_ymin": 55.54309091,
+            "bbox_xmax": 11.938419,
+            "bbox_ymax": 55.54359738,
+            "visueltcenter_x": 11.93797518,
+            "visueltcenter_y": 55.54333993,
+            "ejerlavkode": 60851,
+            "matrikelnr": "1b",
+            "kommunekode": "0350",
+            "kommunenavn": "Lejre",
+            "sognekode": "7171",
+            "sognenavn": null,
+            "regionskode": "1085",
+            "regionsnavn": null,
+            "retskredskode": "1118",
+            "retskredsnavn": null,
+            "udvidet_esrejendomsnr": "3500009629",
+            "esrejendomsnr": "9629",
+            "sfeejendomsnr": "2226230",
+            "ejerlavnavn": "Borup, Osted"
+          }
+        }],
+        nestet: [{
+          params: {
+            ejerlavkode: '60851',
+            matrikelnr: '1b'
+          },
+          value: {
+            "matrikelnr": "1b",
+            "bbox": [
+              11.93749607,
+              55.54309091,
+              11.938419,
+              55.54359738
+            ],
+            "visueltcenter": [
+              11.93797518,
+              55.54333993
+            ],
+            "href": "http://dawa/jordstykker/60851/1b",
+            "ejerlav": {
+              "kode": 60851,
+              "navn": "Borup, Osted",
+              "href": "http://dawa/ejerlav/60851"
+            },
+            "kommune": {
+              "href": "http://dawa/kommuner/350",
+              "kode": "0350",
+              "navn": "Lejre"
+            },
+            "esrejendomsnr": "9629",
+            "udvidet_esrejendomsnr": "3500009629",
+            "sfeejendomsnr": "2226230",
+            "ændret": "2018-09-28T09:48:57.130Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-09-28T09:48:57.130Z",
+            "region": {
+              "href": "http://dawa/regioner/1085",
+              "kode": "1085",
+              "navn": null
+            },
+            "sogn": {
+              "href": "http://dawa/sogne/7171",
+              "kode": "7171",
+              "navn": null
+            },
+            "retskreds": {
+              "href": "http://dawa/retskredse/1118",
+              "kode": "1118",
+              "navn": null
+            }
+          }
+        }]
+      }
+    },
       bygning: {
         json: {
           nestet: [
@@ -1266,6 +1352,12 @@ describe('Stable API', () => {
   ;
 
   const propertiesToIgnoreMap = {
+    jordstykke: {
+      json: {
+        flad: {'geo_ændret': true, 'ændret': true},
+        nestet: {'geo_ændret': true, 'ændret': true}
+      }
+    },
     afstemningsområde: {
       json: {
         flad: {'geo_ændret': true, 'ændret': true},

@@ -30,7 +30,11 @@ const parameterImpls = [
 
 const baseQuery = () => ({
   select: [],
-  from: [`jordstykker`],
+  from: [`jordstykker 
+  natural left join (select kode as kommunekode, navn as kommunenavn from kommuner) k
+  natural left join (select kode as regionskode, navn as regionsnavn from regioner) r
+  natural left join (select kode as sognekode, navn as sognenavn from sogne) s
+  natural left join (select kode as retskredskode, navn as retskredsnavn from retskredse) rk`],
   whereClauses: [],
   orderClauses: [],
   sqlParams: []

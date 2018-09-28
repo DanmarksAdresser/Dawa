@@ -46,7 +46,7 @@ const autocompleteSchemaProperties = {
   sfeejendomsnr: normalizedFieldSchema('sfeejendomsnr'),
   kommune: {
     description: 'Kommunen som jordstykket er beliggende i.',
-    $ref: '#/definitions/NullableKommuneRefNoName'
+    $ref: '#/definitions/NullableKommuneRef'
   },
   visueltcenter: {
     description: 'Koordinater for jordstykkets visuelle center. Kan eksempelvis benyttes til at placere jodstykkets matrikelnr på et kort.',
@@ -86,7 +86,7 @@ exports.autocomplete = {
     result.visueltcenter = commonMappers.mapVisueltCenter(row);
     result.href = makeHref(baseUrl, 'jordstykke', [row.ejerlavkode, row.matrikelnr]);
     result.ejerlav = commonMappers.mapEjerlavRef(row.ejerlavkode, row.ejerlavnavn, baseUrl);
-    result.kommune = commonMappers.mapKode4NavnTemaNoName('kommune', row.kommunekode, baseUrl);
+    result.kommune = commonMappers.mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl);
     result.esrejendomsnr = row.esrejendomsnr ? ('' + row.esrejendomsnr) : null;
     result.udvidet_esrejendomsnr = row.udvidet_esrejendomsnr ? ('' + row.udvidet_esrejendomsnr) : null;
     result.sfeejendomsnr = row.sfeejendomsnr ? ('' + row.sfeejendomsnr) : null;
@@ -102,15 +102,15 @@ exports.autocomplete = {
     properties: Object.assign({}, autocompleteSchemaProperties, {
       region: {
         description: 'Regionen som jordstykket er beliggende i.',
-        $ref: '#/definitions/NullableRegionsRefNoName'
+        $ref: '#/definitions/NullableRegionsRef'
       },
       sogn: {
         description: 'Sognet som jordstykket er beliggende i.',
-        $ref: '#/definitions/NullableSogneRefNoName'
+        $ref: '#/definitions/NullableSogneRef'
       },
       retskreds: {
         description: 'Retskredsen, som er tilknyttet jordstykket, angiver hvilken ret den matrikulære registreringsmeddelse er sendt til. Efter 2008 sendes alle registreringsmeddelser til tinglysningsretten i Hobro, som i Matriklen har retskredskode 1180. I denne forbindelse anvender Matriklen et andet retskredsbegreb end DAGI, hvor retskredskoden 1180 ikke eksisterer.',
-        $ref: '#/definitions/NullableRetskredsRefNoName'
+        $ref: '#/definitions/NullableRetskredsRef'
       },
       'ændret': {
         description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
@@ -136,9 +136,9 @@ exports.autocomplete = {
     result.ændret = row.ændret;
     result.geo_version = row.geo_version;
     result.geo_ændret = row.geo_ændret;
-    result.region = commonMappers.mapKode4NavnTemaNoName('region', row.regionskode, baseUrl);
-    result.sogn = commonMappers.mapKode4NavnTemaNoName('sogn', row.sognekode, baseUrl);
-    result.retskreds = commonMappers.mapKode4NavnTemaNoName('retskreds', row.retskredskode, baseUrl);
+    result.region = commonMappers.mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl);
+    result.sogn = commonMappers.mapKode4NavnTema('sogn', row.sognekode, row.sognenavn, baseUrl);
+    result.retskreds = commonMappers.mapKode4NavnTema('retskreds', row.retskredskode, row.retskredsnavn, baseUrl);
     return result;
   }
 };
