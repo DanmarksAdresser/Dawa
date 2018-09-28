@@ -4,15 +4,16 @@ const fs = require('fs');
 const JSONStream = require('JSONStream');
 const { go } = require('ts-csp');
 
-const { streamToTablePipeline} = require('../importUtil/importUtil');
+const { streamToTablePipeline, countChanges} = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
 const bygningerTableModel = tableModel.tables.bygninger;
 const { computeVisualCenter } = require('../importUtil/geometryImport');
 const { recomputeMaterialization } = require('../importUtil/materialize');
+const logger = require('../logger').forCategory('importBygninger');
 
-const importBygningerFromStream = (client, txid, stream) => go(function*() {
+const importBygningerFromStream = (client, txid, stream, maxChanges) => go(function*() {
   yield client.query('create temp table fetch_bygninger_raw(id bigint, bygningstype text, ændret timestamptz, målemetode text, målested text, bbrbygning_id uuid, visueltcenter text, geomjson text)');
   const jsonTransformer = JSONStream.parse('features.*');
   const mapFn = geojsonFeature => {
@@ -48,13 +49,22 @@ const importBygningerFromStream = (client, txid, stream) => go(function*() {
   yield tableDiffNg.applyChanges(client, txid, bygningerTableModel);
   yield client.query('drop table fetch_bygninger_raw; drop table fetch_bygninger');
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.bygningtilknytninger);
+  const changes = yield countChanges(client, txid, tableModel.tables.bygningtilknytninger);
+  if(changes > maxChanges) {
+    logger.error("Too Many Changes", {
+      changes,
+      maxChanges
+    });
+    throw new Error("Too Many Changes");
+  }
+
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.bygning_kommune);
 });
 
-const importBygninger = (client,txid,  filePath) => go(function*() {
+const importBygninger = (client,txid,  filePath, maxChanges) => go(function*() {
   const stream = fs.createReadStream(filePath, {encoding: 'utf8'});
 
-  yield importBygningerFromStream(client, txid, stream);
+  yield importBygningerFromStream(client, txid, stream, maxChanges);
 });
 
 module.exports = {

@@ -6,7 +6,7 @@ const path = require('path');
 const {go} = require('ts-csp');
 const temaModels = require('./temaModels');
 const {parseTemaGml, parseTemaGml2} = require('./temaParsing');
-const {streamArrayToTable, streamCsvToTable} = require('../importUtil/importUtil');
+const {streamArrayToTable, streamCsvToTable, countChanges} = require('../importUtil/importUtil');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableSchema = require('../psql/tableModel');
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize');
@@ -156,6 +156,7 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     // Vi gemmer ikke historik på temaer.
     yield client.query(`DELETE FROM ${tableModel.table}_changes`);
   }
+
   const hasTilknytninger = temaNames.map(temaName => temaModels.modelMap[temaName])
     .filter(temaModel => !temaModel.withoutTilknytninger)
     .length > 0;
@@ -164,7 +165,7 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     for(let temaName of temaNames) {
       const temaModel = temaModels.modelMap[temaName];
       if(maxChanges) {
-        const changes = (yield client.queryRows(`SELECT COUNT(*)::INTEGER as c FROM ${temaModel.tilknytningTable}_changes WHERE txid = ${txid}`))[0].c;
+        const changes = yield countChanges(client, txid, tableSchema.tables[temaModel.tilknytningTable]);
         if(changes > maxChanges) {
           logger.error("Too Many Changes", {
             temaName,

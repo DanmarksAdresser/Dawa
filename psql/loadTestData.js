@@ -47,7 +47,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
         yield loadStormodtagereImpl(client, txid, 'data/stormodtagere.csv');
         // yield updateEjerlavImpl(client, txid, 'data/ejerlav.csv');
         const temaNames = _.without(temaModels.modelList.map(tema => tema.singular), 'landpostnummer');
-        yield importTemaerJson(client, txid, temaNames, 'test/data/dagi', '', 1000000);
+        yield importTemaerJson(client, txid, temaNames, 'test/data/dagi', '', 10000);
         yield importLandpostnummer(client, txid);
       }));
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
@@ -64,9 +64,9 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
         yield importJordstykkerImpl.importJordstykkerImpl(client, txid, 'test/data/matrikelkort', true);
       }));
       yield importOisImpl.importOis(client, 'test/data/ois');
-      yield withImportTransaction(client, 'loadTestData', txid => importStednavneImpl.importStednavne(client, txid, 'test/data/Stednavn.json'));
+      yield withImportTransaction(client, 'loadTestData', txid => importStednavneImpl.importStednavne(client, txid, 'test/data/Stednavn.json', 10000));
       yield withImportTransaction(client, 'loadTestData', txid => importBrofasthedImpl(client, txid, 'test/data/brofasthed.csv'));
-      yield withImportTransaction(client, 'loadTestData', txid => importBygningerImpl.importBygninger(client, txid, 'test/data/bygninger.json'));
+      yield withImportTransaction(client, 'loadTestData', txid => importBygningerImpl.importBygninger(client, txid, 'test/data/bygninger.json', 10000));
       yield client.query('analyze');
     })();
   }).done();

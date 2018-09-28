@@ -185,6 +185,10 @@ const withMigrationTransaction = (client, description, fn) => withTransaction(cl
 
 const withImportTransaction = (client, description, fn) => withTransaction(client, description, true, fn);
 
+
+const countChanges = (client, txid, tableModel) => go(function*() {
+  return   (yield client.queryRows(`select count(*)::integer as c from ${tableModel.table}_changes where txid = $1`, [txid]))[0].c;
+});
 module.exports = {
   copyStream,
   copyStreamStringifier,
@@ -196,5 +200,6 @@ module.exports = {
   streamArray,
   streamToTablePipeline,
   withImportTransaction,
-  withMigrationTransaction
+  withMigrationTransaction,
+  countChanges
 };

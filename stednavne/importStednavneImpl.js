@@ -4,7 +4,7 @@ const fs = require('fs');
 const JSONStream = require('JSONStream');
 const { go } = require('ts-csp');
 
-const { streamToTablePipeline} = require('../importUtil/importUtil');
+const { streamToTablePipeline, countChanges} = require('../importUtil/importUtil');
 const promisingStreamCombiner = require('../promisingStreamCombiner');
 const tableDiffNg = require('../importUtil/tableDiffNg');
 const tableModel = require('../psql/tableModel');
@@ -12,6 +12,7 @@ const stederTableModel = tableModel.tables.steder;
 const stednavneTableModel = tableModel.tables.stednavne;
 const { recomputeMaterialization, materialize } = require('../importUtil/materialize');
 const { computeVisualCenter } = require('../importUtil/geometryImport');
+const logger = require('../logger').forCategory('importStednavne');
 
 const {
   refreshSubdividedTable,
@@ -19,7 +20,7 @@ const {
 } = require('../importUtil/geometryImport');
 
 
-const importStednavneFromStream = (client, txid, stream) => go(function*() {
+const importStednavneFromStream = (client, txid, stream, maxChanges) => go(function*() {
   yield client.query('create temp table fetch_stednavne_raw(id uuid, hovedtype text, undertype text, navn text, navnestatus text, brugsprioritet text, indbyggerantal integer, bebyggelseskode integer, visueltcenter text, geomjson text)');
   const jsonTransformer = JSONStream.parse('features.*');
   const mapFn = geojsonFeature => {
@@ -67,15 +68,23 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield refreshSubdividedTable(client, 'steder', 'steder_divided', ['id'], true);
   yield client.query('drop table fetch_stednavne_raw; drop table fetch_stednavne; drop table fetch_steder; analyze steder_divided');
   yield recomputeMaterialization(client, txid, tableModel.tables, tableModel.materializations.stedtilknytninger);
+  const changes = yield countChanges(client, txid, tableModel.tables.stedtilknytninger);
+  if(changes > maxChanges) {
+    logger.error("Too Many Changes", {
+      changes,
+      maxChanges
+    });
+    throw new Error("Too Many Changes");
+  }
   yield materialize(client, txid, tableModel.tables, tableModel.materializations.ikke_brofaste_adresser);
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY sted_kommune');
   yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY stednavntyper');
 });
 
-const importStednavne = (client,txid,  filePath) => go(function*() {
+const importStednavne = (client,txid,  filePath, maxChanges) => go(function*() {
   const stream = fs.createReadStream(filePath, {encoding: 'utf8'});
 
-  yield importStednavneFromStream(client, txid, stream);
+  yield importStednavneFromStream(client, txid, stream, maxChanges);
 });
 
 module.exports = {

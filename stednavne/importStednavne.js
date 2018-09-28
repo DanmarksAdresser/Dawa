@@ -10,7 +10,8 @@ const proddb = require('../psql/proddb');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  file: [false, 'Fil med bebyggelser', 'string']
+  file: [false, 'Fil med stednavne', 'string'],
+  maxChanges: [false, 'Maximalt antal ændringer der udføres på adressetilknytninger', 'number', 10000]
 };
 
 runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options) {
@@ -20,6 +21,6 @@ runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options
   });
 
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
-    yield withImportTransaction(client, 'importStednavne', txid => importStednavneImpl.importStednavne(client, txid, options.file));
+    yield withImportTransaction(client, 'importStednavne', txid => importStednavneImpl.importStednavne(client, txid, options.file, options.maxChanges));
   }));
 });
