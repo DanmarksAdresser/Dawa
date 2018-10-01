@@ -164,7 +164,6 @@ exports.json = {
       vejpunkt: schemaObject({
         description:
 `
-<p>BETA. Vejpunkter udstilles på forsøgsbasis. Betaperioden udløber når DAR 1.0 går i produktion i foråret 2018.</p>
 <p>Et geografisk punkt på færdselsnettet som repræsenterer startpunktet \
 af den rute, der fører til et bestemt adgangspunkt.</p>
 <p>Beskrivelse:</p>\
