@@ -34,9 +34,15 @@ module.exports = [
   }, {
     name: 'bygningstype',
   }, {
-    name: 'målemetode'
+    name: 'metode3d'
   }, {
     name: 'målested'
+  },
+  {
+    name: 'synlig'
+  },
+  {
+    name: 'overlap'
   },
   {
     name: 'adgangsadresser',

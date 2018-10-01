@@ -26,7 +26,7 @@ module.exports = {
         type: 'string'
       },
       {
-        name: 'målemetode',
+        name: 'metode3d',
         type: 'string'
       },
       {

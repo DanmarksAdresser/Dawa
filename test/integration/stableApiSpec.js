@@ -110,7 +110,9 @@ describe('Stable API', () => {
                 "href": "http://dawa/bygninger/1071735134",
                 "id": "1071735134",
                 "bygningstype": "Bygning",
-                "målemetode": "TK/FOT-Tag",
+                "metode3d": "Tag",
+                "synlig": true,
+                "overlap": false,
                 "målested": "Tag",
                 "bbrbygning": {
                   "id": "2c7cacc9-b5cf-44c8-8079-c2657da1aca6",
@@ -192,7 +194,9 @@ describe('Stable API', () => {
           "id": "1071735134",
           "bbrbygning_id": "2c7cacc9-b5cf-44c8-8079-c2657da1aca6",
           "bygningstype": "Bygning",
-          "målemetode": "TK/FOT-Tag",
+          "metode3d": "Tag",
+          "synlig": true,
+          "overlap": false,
           "målested": "Tag"
         },
         "bbox": [

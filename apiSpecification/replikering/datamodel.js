@@ -319,9 +319,12 @@ module.exports = {
         description: 'Angiver bygningens type, eksempelvis "Bygning", "Drivhus", "Tank/Silo".'
       },
       {
-        name: 'målemetode',
+        name: 'metode3d',
         type: 'string',
-        description: 'Angiver målemetoden for bygningspolygonet. Mulige værdier: "Ikke tildelt", "TK/FOT-Tag", "Terræn", "Ukendt", "Under terræn".'
+        description: `Angiver hvor Z-koordinaten er registreret. Fotogrammetrisk anvendes altid "Tag". 
+        Dog kan "3D-Tag" anvendes, hvis det eksplicit er aftalt i forbindelse med 3D-bygningsmodellering.
+        Anvendelse af ”Under terræn” muliggør registrering af en underjordisk bygning.
+        Mulige værdier: 3D-Tag, Tag, Terræn, Under terræn, Ikke tildelt, Ukendt.`
       },
       {
         name: 'målested',
@@ -332,6 +335,24 @@ module.exports = {
         name: 'bbrbygning_id',
         type: 'uuid',
         description: 'Angiver bygningens ID i Bygnings- og Boligregisteret (BBR). UUID.'
+      },
+      {
+        name: 'synlig',
+        type: 'boolean',
+        description: `Angiver, om en Bygning er synlig i et ortofoto. At den ikke er synlig skyldes, 
+        at et andet GeoDanmark objekt skjuler den helt eller delvist eller at den ligger helt eller 
+        delvist under jorden.
+        "false"= Bygning er helt eller delvist usynlig i et ortofoto.
+        "true"= Bygning er synlig i et ortofoto.
+`
+      },
+      {
+        name: 'overlap',
+        type: 'boolean',
+        description: `Angiver, om en Bygning overlappes helt eller delvist af en anden Bygning.
+        "false"= Bygning er ikke helt eller delvist overlappet af en anden Bygning.
+        "true"= Bygning er helt eller delvist overlappet af en anden Bygning.
+`
       },
       {
         name: 'geometri',

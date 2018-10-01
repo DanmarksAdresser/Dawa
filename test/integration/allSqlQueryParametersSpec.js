@@ -36,9 +36,9 @@ var sampleParameters = {
       values: ["Tank/Silo"],
       verifier: (bygning, type) => bygning.bygningstype === type
     },
-    målemetode: {
-      values: ["TK/FOT-Tag"],
-      verifier: (bygning, metode) => bygning.målemetode === metode
+    metode3d: {
+      values: ["Tag"],
+      verifier: (bygning, metode) => bygning.metode3d === metode
     },
     målested: {
       values: ["Tag"],

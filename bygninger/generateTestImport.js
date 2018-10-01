@@ -11,9 +11,9 @@ const promisingStreamCombiner = require('../promisingStreamCombiner');
 const csvParse = require('csv-parse');
 
 const optionSpec = {
-  src: [false, 'Folder med NDJSON-filer', 'string'],
-  dst: [false, 'Whether this is an initial import', 'string', 'test/data/dar10'],
-  subset: [false, 'File containing ids of adresses', 'string', 'test/data_subsets/bygninger_subset.csv']
+  src: [false, 'fil med Bygninger i geojson-format', 'string'],
+  dst: [false, 'Output-fil med bygninger', 'string', 'test/data/bygninger.json'],
+  subset: [false, 'File containing ids of buildings', 'string', 'test/data_subsets/bygninger_subset.csv']
 };
 
 const FILE_HEAD = `\

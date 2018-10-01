@@ -311,9 +311,11 @@ const bygninger = {
   columns: [
     {name: 'id'},
     {name: 'bygningstype'},
-    {name: 'målemetode'},
+    {name: 'metode3d'},
     {name: 'målested'},
     {name: 'bbrbygning_id'},
+    {name: 'synlig'},
+    {name: 'overlap'},
     {name: 'ændret'},
     {name: 'visueltcenter'},
     {

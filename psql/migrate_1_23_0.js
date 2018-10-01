@@ -51,9 +51,11 @@ DROP TABLE if exists bygninger CASCADE;
 CREATE  TABLE bygninger (
   id            BIGINT primary key,
   bygningstype  TEXT,
-  målemetode    TEXT,
+  metode3d    TEXT,
   målested      TEXT,
   bbrbygning_id UUID,
+  synlig boolean,
+  overlap boolean,
   ændret timestamptz NOT NULL DEFAULT now(),
   geo_version integer NOT NULL DEFAULT 1,
   geo_ændret timestamptz NOT NULL DEFAULT now(),
@@ -64,7 +66,7 @@ CREATE  TABLE bygninger (
 
 CREATE INDEX ON bygninger(bbrbygning_id);
 CREATE INDEX ON bygninger(bygningstype);
-CREATE INDEX ON bygninger(målemetode);
+CREATE INDEX ON bygninger(metode3d);
 CREATE INDEX ON bygninger(målested);
 CREATE INDEX ON bygninger USING GIST(geom);
 

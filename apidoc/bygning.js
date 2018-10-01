@@ -19,8 +19,8 @@ const commonBygningParameters = [
     doc: 'Find bygninger med den angivne bygningstype, eksempelvis "Bygning" eller "Tank/Silo"'
   },
   {
-    name: 'målemetode',
-    doc: 'Find bygninger med den angivne målemetodek eksempelvis "TK/FOT-Tag"'
+    name: 'metode3d',
+    doc: 'Find bygninger med den angivne metode eksempelvis "Tag"'
   },
   {
     name: 'målested',

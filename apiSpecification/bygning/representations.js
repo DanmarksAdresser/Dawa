@@ -38,7 +38,7 @@ exports.json = {
       id: normalizedFieldSchema('id'),
       bygningstype: normalizedFieldSchema('bygningstype'),
       målested: normalizedFieldSchema('målested'),
-      målemetode: normalizedFieldSchema('målemetode'),
+      metode3d: normalizedFieldSchema('metode3d'),
       bbrbygning: schemaObject({
         nullable: true,
         properties: {
@@ -53,6 +53,8 @@ exports.json = {
         },
         docOrder: ['href', 'id']
       }),
+      synlig: normalizedFieldSchema('synlig'),
+      overlap: normalizedFieldSchema('overlap'),
       adgangsadresser: {
         type: 'array',
         items: schemaObject({
@@ -98,7 +100,7 @@ exports.json = {
         $ref: '#/definitions/DateTimeUtc'
       }
     },
-    docOrder: ['href', 'id', 'bygningstype', 'målested', 'målemetode','adgangsadresser', 'kommuner', 'bbrbygning', 'ændret', 'bbox', 'visueltcenter']
+    docOrder: ['href', 'id', 'bygningstype', 'målested', 'metode3d','adgangsadresser', 'kommuner', 'bbrbygning', 'synlig', 'overlap', 'ændret', 'bbox', 'visueltcenter']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -108,8 +110,10 @@ exports.json = {
     result.href = makeHref(baseUrl, 'bygning', [row.id]);
     result.id = row.id;
     result.bygningstype = row.bygningstype;
-    result.målemetode = row.målemetode;
+    result.metode3d = row.metode3d;
     result.målested = row.målested;
+    result.synlig = row.synlig;
+    result.overlap = row.overlap;
     result.bbrbygning = row.bbrbygning_id ? {
       id: row.bbrbygning_id,
       href: makeHrefFromPath(baseUrl, 'bbrlight/bygninger', [row.bbrbygning_id])
