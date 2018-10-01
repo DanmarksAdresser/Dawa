@@ -6,6 +6,12 @@ const uuid = require('uuid');
 const { takeWithTimeout } = require('../util/cspUtil');
 const logger = require('../logger').forCategory('distSchedulerClient');
 
+
+class QuerySlotTimeout extends Error {
+  constructor() {
+    super('Timeout waiting for query slot');
+  }
+}
 const create = (messagingInstance, options) => {
   options = options || {};
   const timeout = options.timeout || 15000;
@@ -60,7 +66,7 @@ const create = (messagingInstance, options) => {
       yield takeWithTimeout(
         chosenTimeout,
         readySignal,
-        () => new Error('Timeout waiting for query slot'));
+        () => new QuerySlotTimeout());
       return yield this.delegateAbort(taskFn());
     });
 
@@ -82,5 +88,6 @@ const create = (messagingInstance, options) => {
 };
 
 module.exports = {
-  create
+  create,
+  QuerySlotTimeout
 };

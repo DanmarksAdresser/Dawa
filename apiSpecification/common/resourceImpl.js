@@ -16,6 +16,8 @@ const sqlUtil = require('./sql/sqlUtil');
 
 const {pipeToStream, pipe} = require('../../util/cspUtil');
 
+const {QuerySlotTimeout} = require('../../dist-scheduler/dist-scheduler-client');
+
 function jsonStringifyPretty(object) {
   return JSON.stringify(object, undefined, 2);
 }
@@ -424,12 +426,23 @@ exports.createExpressHandler = function (responseHandler) {
         req.destroy();
       }
       requestContext.responseEnd = Date.now();
-      const requestOutcome = requestContext.error ?
-        (requestContext.error instanceof Abort ? 'ABORTED' : 'FAILED') :
-        'COMPLETED';
+      let requestOutcome = null;
+      if(!requestContext.error) {
+        requestOutcome = 'COMPLETED';
+      }
+      else if(requestContext.error instanceof Abort) {
+        requestOutcome = 'ABORTED';
+      }
+      else if(requestContext.error instanceof QuerySlotTimeout) {
+        requestOutcome = 'REJECTED';
+      }
+      else {
+        requestOutcome = 'FAILED';
+      }
       requestContext.outcome = requestOutcome;
       const logLevels = {
-        ABORTED: 'warn',
+        ABORTED: 'info',
+        REJECTED: 'info',
         FAILED: 'error',
         COMPLETED: 'info'
       };
