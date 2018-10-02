@@ -4607,52 +4607,104 @@ describe('Brofast', function(){
 
 });
 
-// describe('HAProxy', function(){
+describe('Bygninger', function(){
 
-//    it("http status code 429 og body har korrekt format", Q.async(function*() {
+  it("id", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/bygninger';
+    options.qs= {};
+    options.qs.id= 1069948949;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
 
-//     var optjson = {};
-//     optjson.baseUrl = host;
-//     console.log('url: '+host)
-//     optjson.url = 'adgangsadresser';
-//     var pool= new http.Agent();
-//     pool.maxSockets= 100;
-//     optjson.pool=  pool;
-//     optjson.qs = {};
-//     optjson.qs.cache = 'no-cache';
-//     optjson.qs.vejnavn = 'Kalvebodvej';
-//     //optjson.qs.husnr = '166';
-//     optjson.qs.postnr = '2791';
-//     optjson.resolveWithFullResponse = true;
-//     optjson.simple = false;
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length>=1, "Der er burde være en: "+bygninger.length);
 
-//     var requests = [];
-//     for (var i = 0; i < 15; i++) {
-//       //optjson.qs.husnr = i.toString();
-//       requests.push(rp(optjson));
-//     }
+      assert(bygninger[0].adgangsadresser.length > 3, "Der bør være mere end tre adgangsadresser tilknyttet bygningen, men der er "+bygninger[0].adgangsadresser.length)
 
-//     var antal = 0;
-//     //console.log('Længden af requests: %d', requests.length);
+      var bbroptions= {};
+      bbroptions.url=bygninger[0].bbrbygning.href;
+      bbroptions.qs= {};
+      bbroptions.qs.cache= 'no-cache';
+      bbroptions.resolveWithFullResponse= true;
+      rp(bbroptions).then((response) => {
+        assert(response.statusCode===200, "Http status code != 200");
+        var bbrbygning= JSON.parse(response.body);
+        assert(bygninger[0].bbrbygning.id === bbrbygning.Bygning_id, "id skal være den samme i bygning og bbrbygning");
+        done();
+      })
 
-//     // Med denne løsning vil testen fejle, hvis der er et request der fejler (dvs. slet ikke giver et response). 
-//     // Det tænker jeg er helt OK.
-//     // Alternativt kan benyttes Q.allSettled, hvor man så får et array hvor man kan se om hver enkelt promise blev
-//     // resolved eller rejected.
-//     var responses = yield Promise.all(requests);
-//     responses.forEach(function (response, index) {
-//       console.log(response.statusCode);
-//       console.log(response.body);
-//       if (response.statusCode === 429) {
-//         antal++;
-//         var message = JSON.parse(response.body);
-//         assert(message.type && message.title && message.details, "429 message skal indeholde type, title og details");
-//         console.log('type: %s, title: %s, details: %s', message.type, message.title, message.details);
-//       }
-//     });
-//     //console.log('antal: %d',antal)
-//     assert(antal > 0, 'Der burde være mindst et kald, som returnerede http statuskode 429');
-//   }));
-  
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
 
-// });
+
+  it("cirkel", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/bygninger';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.cirkel= "12.510814300000002,55.69837060000,50";
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length > 2, "Ikke to bygninger, men "+bygninger.length);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+  it("polygon", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/bygninger';
+    options.qs= {};
+    options.qs.cache= 'no-cache'; 
+    options.qs.polygon= '[[[8.91172755486213, 56.59274886518194],[8.948437235894998, 56.57437007272818],[8.876752381627279, 56.579839531262145],[8.91172755486213, 56.59274886518194]]]';
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length > 2, "Ikke flere end to bygninger, men bygninger.length");
+      //console.log(navngivneveje[0].navn);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+   
+  it("reverse", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/bygninger';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.x= 12.510814300000002;
+    options.qs.y= 55.69837060000;
+    options.resolveWithFullResponse= true;
+    var jsonrequest= rp(options).then((response) => {
+      assert(response.statusCode===200, "Http status code != 200");
+      var bygninger= JSON.parse(response.body);
+      assert(bygninger.length > 0, "ingen bygning");
+      //console.log(bygninger[0].navn);
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  });
+
+});
+
+
