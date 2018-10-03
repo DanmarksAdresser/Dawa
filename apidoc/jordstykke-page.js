@@ -16,6 +16,13 @@ module.exports = {
       path: '/jordstykker/{ejerlavkode}/{matrikelnr}'
     },
     {
+      type: 'endpoint',
+      heading: 'Jordstykke autocomplete',
+      anchor: 'autocomplete',
+      path: '/jordstykker/autocomplete'
+    },
+
+    {
       type: 'datadescription',
       heading: 'Beskrivelse af jordstykkedata',
       anchor: 'databeskrivelse',
