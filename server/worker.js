@@ -23,7 +23,7 @@ config.setOptions(options);
 
 const errorMessages = require('../haproxy/errorMessages');
 const proddb = require('../psql/proddb');
-const { requestLimiter } = require('../psql/requestLimiter');
+const { databaseQueryLimiter, databaseConnectionLimiter } = require('../psql/requestLimiter');
 const databasePools = require('../psql/databasePools');
 
 const dawaPgApi      = require('../dawaPgApi');
@@ -39,7 +39,8 @@ const dboptions = {
   statementTimeoutMillis: config.getOption('pg.statementTimeoutMillis'),
   connString: config.getOption('pgConnectionUrl'),
   pooled: true,
-  requestLimiter
+  databaseQueryLimiter,
+  databaseConnectionLimiter
 };
 proddb.init(dboptions);
 databasePools.create('prod', dboptions);

@@ -1,61 +1,94 @@
 "use strict";
-const fairScheduler = require('./fair-scheduler');
 
-const {go, Channel} = require('ts-csp');
+const assert = require('assert');
+const {go, Channel, OperationType} = require('ts-csp');
 const logger = require('../logger').forCategory('distScheduler');
 
 const DEFAULT_TIMEOUT = 12000;
 
-const create = (messagingInstance, options) => {
-  const timeout = options.timeout || DEFAULT_TIMEOUT;
-  const scheduler = fairScheduler(options);
-  const enqueueChannel = new Channel();
-  const status = () => (
-    {
-      scheduler: scheduler.status(),
-      options: {
-        messagingTimeout: timeout
-      }
-    });
-  messagingInstance.subscribe('DIST_SCHEDULER_ENQUEUE', enqueueChannel);
-  const process = go(function*() {
-    /* eslint no-constant-condition: 0 */
+const runDistScheduler = (distScheduler) => go(function*() {
+  try {
+    distScheduler.messagingInstance.subscribe(`${distScheduler.messageTypePrefix}_ENQUEUE`, distScheduler.enqueueChannel);
     while (true) {
-      const {payload: {clientId, taskId}, workerId} = yield this.takeOrAbort(enqueueChannel);
-      const taskFn = () => go(function*() {
-        const before = Date.now();
-        if(!messagingInstance.workerExists(workerId)) {
-          logger.error('Could not schedule task: Worker is gone');
-          return {
-            cost: 0,
-            result: null
-          };
-        }
-        messagingInstance.send('DIST_SCHEDULER_READY', workerId, {taskId, clientId});
-        try {
-          yield messagingInstance.receiveOnce(
-            'DIST_SCHEDULER_COMPLETE',
+      const { ch, value } = yield this.selectOrAbort([
+        { ch: distScheduler.enqueueChannel, op: OperationType.TAKE },
+        { ch: distScheduler.completeChannel, op: OperationType.TAKE },
+        { ch: distScheduler.timeoutChannel, op: OperationType.TAKE }
+      ]);
+      if(ch === distScheduler.enqueueChannel) {
+        const {payload: {clientId, taskId}, workerId} = value;
+        if(!distScheduler.scheduler.exceedsQueueLimit(clientId)) {
+          distScheduler.taskMap[taskId] = {clientId, workerId};
+          distScheduler.scheduler.scheduleTask(clientId, taskId);
+          const receivePromise = distScheduler.messagingInstance.receiveOnce(
+            `${distScheduler.messageTypePrefix}_COMPLETE`,
             workerId,
-            msg => msg.taskId === taskId, timeout);
-          return {
-            cost: Date.now() - before,
-            result: null
-          };
+            msg => msg.taskId === taskId, distScheduler.timeout);
+          go(function*(){
+            try {
+              yield receivePromise;
+              distScheduler.completeChannel.putSync(taskId);
+            }
+            catch(err) {
+              logger.error('Did not receive response from worker for task ' + taskId, err);
+              distScheduler.timeoutChannel.putSync(taskId);
+            }
+          });
         }
-        catch (err) {
-          logger.error('Did not receive response from worker', err);
-          return {
-            cost: Date.now() - before,
-            result: null
-          };
+        else {
+          distScheduler.messagingInstance.send(`${distScheduler.messageTypePrefix}_REJECT`, workerId, {taskId, clientId});
         }
-      });
-      scheduler.schedule(clientId, taskFn);
+      }
+      else if (ch === distScheduler.completeChannel) {
+        const taskId = value;
+        delete distScheduler.taskMap[taskId];
+        distScheduler.scheduler.completeTask(taskId, Date.now());
+        assert(!distScheduler.scheduler.containsTask(taskId));
+      }
+      else {
+        const taskId = value;
+        delete distScheduler.taskMap[taskId];
+        distScheduler.scheduler.completeTask(taskId, Date.now());
+        assert(!distScheduler.scheduler.containsTask(taskId));
+      }
+      while(distScheduler.scheduler.canRunTask()) {
+        const taskId = distScheduler.scheduler.runTask(Date.now());
+        assert(distScheduler.scheduler.containsTask(taskId));
+        const {clientId, workerId} = distScheduler.taskMap[taskId];
+        distScheduler.messagingInstance.send(`${distScheduler.messageTypePrefix}_READY`, workerId, {taskId, clientId});
+      }
     }
-  });
-  return {process, scheduler, status};
-};
+  }
+  catch(e) {
+    logger.error(e);
+  }
+});
 
+class DistScheduler {
+  constructor(scheduler, messagingInstance, messageTypePrefix, options) {
+    this.scheduler = scheduler;
+    this.messagingInstance = messagingInstance;
+    this.messageTypePrefix = messageTypePrefix;
+    this.timeout = options.timeout || DEFAULT_TIMEOUT;
+
+    // Channel receiving enqueues
+    this.enqueueChannel = new Channel();
+    // Channel receiving task IDs on completed tasks
+    this.completeChannel = new Channel();
+    // Channel receiving task IDs of timeouted tasks
+    this.timeoutChannel = new Channel();
+    // map from taskId to {workerId,clientId}
+    this.taskMap = {};
+
+    this.process =runDistScheduler(this);
+  }
+  status() {
+    return {
+      queueStatus: this.scheduler.status(),
+      timeout: this.timeout
+    }
+  }
+}
 module.exports = {
-  create
+  DistScheduler
 };

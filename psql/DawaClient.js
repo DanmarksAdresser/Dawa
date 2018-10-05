@@ -16,7 +16,7 @@ class DawaClient {
     this.client = client;
     options = options || {};
     this.clientId = options.clientId;
-    this.requestLimiter = options.requestLimiter || ((clientId, fn) => fn());
+    this.requestLimiter = options.databaseQueryLimiter || ((clientId, fn) => fn());
     this.logger = options.logger || (() => null);
     this.released = false;
     this.batchedQueries = [];

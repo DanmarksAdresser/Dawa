@@ -6,11 +6,12 @@ const logger = require('../logger').forCategory('messaging-worker');
 
 
 const setup = (process) => {
-  const send = (type, message) =>
+  const send = (type, message) => {
     process.send({
       '@@MESSAGE_TYPE': type,
       payload: message
     });
+  };
 
 
   const receivers = [];

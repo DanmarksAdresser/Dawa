@@ -35,7 +35,7 @@
     "moment": "2.22.2",
     "moment-timezone": "0.5.17",
     "moving-average": "^1.0.0",
-    "node-expat": "^2.3.15",
+    "node-expat": "^2.3.17",
     "npm": "^6.4.1",
     "pg": "^7.4.1",
     "pg-connection-string": "^2.0.0",

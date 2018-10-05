@@ -68,7 +68,7 @@ describe('Messaging', () => {
       failed = false;
     }
     catch(e) {
-      assert.strictEqual(e.message, 'Timeout waiting for message from worker');
+      assert.strictEqual(e.message, 'Timeout waiting for message from worker of type MSG_TYPE');
     }
     assert(failed);
   }));

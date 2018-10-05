@@ -6,11 +6,16 @@ const { go, Signal } = require('ts-csp');
 const { sleep } = require('../../util/cspUtil');
 const messagingMaster = require('../../messaging/messaging-master');
 const messagingWorker = require('../../messaging/messaging-worker');
-const distSchedulerMaster = require('../../dist-scheduler/dist-scheduler-master');
+const {DistScheduler} = require('../../dist-scheduler/dist-scheduler-master');
 const distSchedulerClient = require('../../dist-scheduler/dist-scheduler-client');
 const { FakeClusterMaster } = require('../helpers/fake-cluster');
+const { QueryScheduler } = require('../../dist-scheduler/queryScheduler');
 
-
+class TimeoutError extends Error {
+  constructor() {
+    super("Timeout waiting for query slot");
+  }
+}
 describe('Distributed scheduler', () => {
   /* eslint no-unused-vars: 0 */
   let master, client1, client2;
@@ -28,11 +33,11 @@ describe('Distributed scheduler', () => {
     const processWorker2 = cluster.fakeFork();
     const messagingInstanceWorker1 = messagingWorker.setup(processWorker1);
     const messagingInstanceWorker2 = messagingWorker.setup(processWorker2);
-    master = distSchedulerMaster.create(messagingInstanceMaster, OPTIONS);
-    client1 = distSchedulerClient.create(messagingInstanceWorker1, {
+    master = new DistScheduler(new QueryScheduler(OPTIONS), messagingInstanceMaster, "DIST_SCHEDULER", OPTIONS);
+    client1 = distSchedulerClient.create(messagingInstanceWorker1, "DIST_SCHEDULER", TimeoutError, {
       timeout: 100
     });
-    client2 = distSchedulerClient.create(messagingInstanceWorker2, {
+    client2 = distSchedulerClient.create(messagingInstanceWorker2, "DIST_SCHEDULER", TimeoutError, {
       timeout: 100
     });
   });

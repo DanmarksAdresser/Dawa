@@ -73,7 +73,7 @@ const setup = (cluster) => {
     return takeWithTimeout(
       timeout,
       signal,
-      () => new Error('Timeout waiting for message from worker',
+      () => new Error('Timeout waiting for message from worker of type ' + type,
         {type, workerId, timeout}));
   };
 
@@ -88,8 +88,10 @@ const setup = (cluster) => {
       let foundSubscription = false;
       for (let subscription of subscriptions) {
         if (subscription.type === type &&
-          (subscription.workerId === null || subscription.workerId === message.workerId)) {
+          (subscription.workerId === null || subscription.workerId === message.workerId) &&
+          (!subscription.predicate || subscription.predicate(message.payload))) {
           foundSubscription = true;
+
           if (subscription.workerId === null) {
             subscription.dst.putSync({
               workerId: message.workerId,
@@ -111,7 +113,7 @@ const setup = (cluster) => {
         }
       }
       if (!foundSubscription) {
-        logger.warn('Lost message', message);
+        logger.error('Lost message', message);
       }
     }
   });

@@ -2,7 +2,7 @@
 
 const config = require('../server/config');
 
-const schedulerOpts = {
+const querySchedulerOpts = {
   slots: config.getOption('scheduler.slots'),
   prioritySlots: config.getOption('scheduler.prioritySlots'),
   slotsPerSource: config.getOption('scheduler.slotsPerSource'),
@@ -12,12 +12,22 @@ const schedulerOpts = {
   timeout: config.getOption('scheduler.timeoutMillis')
 };
 
+const connectionSchedulerOpts = {
+  slots: 150,
+  slotsPerSource: 10,
+  timeout: 1000 * 60 * 60
+};
 
 
 const messagingInstance = require('../messaging/messaging-master-instance').instance;
 
-const instance = require('./dist-scheduler-master').create(messagingInstance, schedulerOpts);
+const { QueryScheduler } = require('./queryScheduler');
+const { ConnectionScheduler } = require('./connectionScheduler');
+const { DistScheduler } = require('./dist-scheduler-master');
 
+const queryScheduler = new DistScheduler(new QueryScheduler(querySchedulerOpts), messagingInstance, 'DIST_SCHEDULER', querySchedulerOpts);
+const connectionScheduler = new DistScheduler(new ConnectionScheduler(connectionSchedulerOpts), messagingInstance, 'CONNECTION_SCHEDULER', connectionSchedulerOpts);
 module.exports = {
-  instance
+  queryScheduler,
+  connectionScheduler
 };

@@ -16,7 +16,7 @@ const sqlUtil = require('./sql/sqlUtil');
 
 const {pipeToStream, pipe} = require('../../util/cspUtil');
 
-const {QuerySlotTimeout} = require('../../dist-scheduler/dist-scheduler-client');
+const {QuerySlotTimeout, ConnectionSlotTimeout} = require('../../psql/requestLimiter');
 
 function jsonStringifyPretty(object) {
   return JSON.stringify(object, undefined, 2);
@@ -433,8 +433,12 @@ exports.createExpressHandler = function (responseHandler) {
       else if(requestContext.error instanceof Abort) {
         requestOutcome = 'ABORTED';
       }
-      else if(requestContext.error instanceof QuerySlotTimeout) {
+      else if(requestContext.error instanceof QuerySlotTimeout ||
+      requestContext.error instanceof ConnectionSlotTimeout) {
         requestOutcome = 'REJECTED';
+        const error = requestContext.error;
+        delete requestContext.error;
+        requestContext.rejectReason = error.message;
       }
       else {
         requestOutcome = 'FAILED';

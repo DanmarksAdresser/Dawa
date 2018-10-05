@@ -75,7 +75,7 @@ exports.create = function(name, options) {
       initialPriorityOffset: -1000,
       prioritySlots: 1
     });
-    pool.requestLimiter = (clientIp, fn) => q.async(function*() {
+    pool.databaseQueryLimiter = (clientIp, fn) => q.async(function*() {
       const scheduleResult = yield scheduler.schedule(clientIp, q.async(function*() {
         const before = Date.now();
         const result = yield fn();
@@ -254,7 +254,7 @@ function acquirePooledConnection(pool, options, callback) {
   pool.acquire(function(err, client) {
     if(err)  return callback(err);
     client.poolCount++;
-    callback(null, denodeifyClient(client, pool.requestLimiter), function(err) {
+    callback(null, denodeifyClient(client, pool.databaseQueryLimiter), function(err) {
       if(err) {
         logger.info('Destroying Postgres client', { error: err });
         pool.destroy(client);
