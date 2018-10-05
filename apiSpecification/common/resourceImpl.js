@@ -9,7 +9,7 @@ var parameterParsing = require('../../parameterParsing');
 const databasePools = require('../../psql/databasePools');
 var serializers = require('./serializers');
 const {comp, map} = require('transducers-js');
-const {Channel, Signal, Abort, OperationType, CLOSED, go, parallel} = require('ts-csp');
+const {Channel, Signal, OperationType, CLOSED, go, parallel} = require('ts-csp');
 const dbLogger = require('../../logger').forCategory('Database');
 const requestLogger = require('../../logger').forCategory('RequestLog');
 const sqlUtil = require('./sql/sqlUtil');
@@ -384,8 +384,12 @@ exports.createExpressHandler = function (responseHandler) {
       }
       // Create a signal which is raised when the client aborts the HTTP connection
       const clientDisconnectedSignal = new Signal();
-      req.once('aborted', err => clientDisconnectedSignal.raise("Client closed connection"));
-
+      if(!req.socket || req.socket.destroyed) {
+        clientDisconnectedSignal.raise("Client closed connection");
+      }
+      else {
+        req.once('aborted', err => clientDisconnectedSignal.raise("Client closed connection"));
+      }
       const baseUrl = paths.baseUrl(req);
 
       const dbStatContext = {clientIp: requestContext.clientIp};
@@ -430,8 +434,9 @@ exports.createExpressHandler = function (responseHandler) {
       if(!requestContext.error) {
         requestOutcome = 'COMPLETED';
       }
-      else if(requestContext.error instanceof Abort) {
+      else if(requestContext.error && clientDisconnectedSignal.isRaised()) {
         requestOutcome = 'ABORTED';
+        delete requestContext.error;
       }
       else if(requestContext.error instanceof QuerySlotTimeout ||
       requestContext.error instanceof ConnectionSlotTimeout) {

@@ -60,6 +60,7 @@ const create = (messagingInstance, messageTypePrefix, TimeoutErrorClass, options
       }
     }
   });
+
   const schedule = (clientId, taskFn, overriddenTimeout) =>  {
     if(!clientId) {
       return taskFn();
