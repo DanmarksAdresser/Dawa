@@ -116,7 +116,13 @@ const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
   const errorSignal = new Signal();
   let wantMoreDataSignal = new Signal();
   stream.on('drain', () => wantMoreDataSignal.raise());
-  stream.once('error', (err) => errorSignal.raise(err));
+  if(!stream.socket || stream.socket.destroyed) {
+    errorSignal.raise(new Error('Client closed connection'));
+  }
+  else {
+    stream.once('error', (err) => errorSignal.raise(err));
+    stream.once('close', (err) => errorSignal.raise(err));
+  }
   return go(function*() {
     while(true) {/* eslint no-constant-condition: 0 */
       const takeResult = yield this.selectOrAbort([

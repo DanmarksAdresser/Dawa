@@ -50,6 +50,28 @@ AND ST_DWithin(geom, (select geom from steder where id = ${stedIdAlias}), ${sted
       }
     }
   },
+  esrejendomsnr: {
+    select: 'esrejendomsnr',
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['jordstykker_adgadr jt NATURAL JOIN jordstykker'],
+        whereClauses: [`a_id  = jt.adgangsadresse_id`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'esrejendomsnr',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {esrejendomsnr: parameterArray});
+      var subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+  },
   bebyggelsesid: {
     select: null,
     where: function (sqlParts, parameterArray) {

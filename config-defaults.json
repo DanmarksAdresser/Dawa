@@ -56,7 +56,7 @@
     "name": "scheduler.timeoutMillis",
     "description": "Hvor lang tid scheduleren venter på beskeder",
     "type": "number",
-    "default": 15000
+    "default": 30000
   },
   {
     "name": "scheduler.slots",

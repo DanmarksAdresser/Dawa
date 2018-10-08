@@ -5,7 +5,9 @@ var fs = require('fs');
 var q = require('q');
 var uuid = require('uuid');
 
-const { instance: distSchedulerInstance } = require('../dist-scheduler/dist-scheduler-master-instance');
+const {   queryScheduler,
+  connectionScheduler
+} = require('../dist-scheduler/dist-scheduler-master-instance');
 
 var packageJson = JSON.parse(fs.readFileSync(__dirname + '/../package.json'));
 
@@ -64,7 +66,8 @@ exports.isaliveMaster = function() {
   var workerStatusesPromise = exports.getWorkerStatuses();
   return q.all([workerStatusesPromise]).spread(function(workerStatuses) {
       result.workers = workerStatuses;
-      result.distScheduler = distSchedulerInstance.status();
+      result.queryScheduler = queryScheduler.status();
+      result.connectionScheduler = connectionScheduler.status();
       return result;
     });
 

@@ -63,6 +63,7 @@ const rawConnectionPool = (options) => {
 };
 
 const withRawPooledConnection = (pool, connectionFn) => go(function*() {
+
   const client = yield pool.acquire();
   try {
     return yield this.delegateAbort(connectionFn(client));
@@ -84,7 +85,8 @@ const withPooledDawaClient = (pool, options, clientFn) =>
 const createDatabasePool = _options => {
   const connectionOptions = pgConnectionString.parse(_options.connString);
   const options =  Object.assign({}, _options, connectionOptions);
-  const requestLimiter = options.requestLimiter || ((clientId, fn) => fn());
+  const queryLimiter = options.databaseQueryLimiter || ((clientId, fn) => fn());
+  const connectionLimiter = options.databaseConnectionLimiter || ((clientId, fn) => fn());
   let pool = null;
   const setupProcess =  go(function*() {
     /* eslint no-constant-condition: 0 */
@@ -124,7 +126,10 @@ const createDatabasePool = _options => {
   });
 
   const withConnection = (connectionOptions, fn) => {
-    const combinedOptions = Object.assign({}, { requestLimiter: this.requestLimiter},
+    const combinedOptions = Object.assign({}, {
+      databaseQueryLimiter: queryLimiter,
+        databaseConnectionLimiter: connectionLimiter
+      },
       options, connectionOptions);
     if(options.pooled === false || combinedOptions.pooled === false) {
       return withUnpooledDawaClient(combinedOptions, fn);
@@ -132,7 +137,8 @@ const createDatabasePool = _options => {
     else {
       return go(function*() {
         yield setupProcess;
-        return yield this.delegateAbort(withPooledDawaClient(pool, combinedOptions, fn));
+        return yield this.delegateAbort(combinedOptions.databaseConnectionLimiter(combinedOptions.clientId,() =>
+          withPooledDawaClient(pool, combinedOptions, fn)));
       });
     }
   };
@@ -143,7 +149,7 @@ const createDatabasePool = _options => {
   };
 
   const getPoolStatus = () => {
-    const requestLimiterStatus = requestLimiter.status ? requestLimiter.status() : 'Request limiting disabled';
+    const requestLimiterStatus = queryLimiter.status ? queryLimiter.status() : 'Request limiting disabled';
     const poolStatus = pool === null ? 'Pooling disabled' : {
         size: pool.size,
         available: pool.available,
@@ -154,7 +160,7 @@ const createDatabasePool = _options => {
       };
     return {
       pool: poolStatus,
-      requestLimiter: requestLimiterStatus
+      databaseQueryLimiter: requestLimiterStatus
     };
   };
   return {
