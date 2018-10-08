@@ -2073,8 +2073,42 @@ describe('Adgangsadressesøgning', function(){
     }).catch(reason => { 
       done(reason);
     });
-
   });
+
+  it('esrejendomsnr', function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adgangsadresser/22729a66-96b1-44d0-e044-0003ba298018';
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+
+      assert(response.statusCode===200, "Http status code != 200");
+
+      var aadresse= JSON.parse(response.body);
+
+      var esroptions= {};
+      esroptions.baseUrl= host;
+      esroptions.url='/adgangsadresser';
+      esroptions.qs= {};
+      esroptions.qs.esrejendomsnr= aadresse.jordstykke.esrejendomsnr;
+      esroptions.qs.cache= 'no-cache';
+      esroptions.resolveWithFullResponse= true;
+      rp(esroptions).then((response) => {
+        assert(response.statusCode===200, "Http status code != 200");
+        var aadresser= JSON.parse(response.body);
+        let found= aadresser.find(function (element) {return aadresse.id === element.id;});
+        assert(found, "esrejendomsnr søgning fungerer ikke");
+        done();
+      })
+
+    })
+    .catch((err) => {
+      done(err);
+    });
+  })
+
 });
 
 
