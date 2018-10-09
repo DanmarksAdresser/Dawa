@@ -1,3 +1,5 @@
+const bbrOrder = ['enhed', 'bygning', 'tekniskanlaeg','ejerskab', 'grund', 'matrikelreference', 'opgang', 'etage', 'bygningspunkt', 'kommune'];
+
 module.exports = [{
   name: 'Adresser',
   headingClass: 'h2-icon h2-adresser',
@@ -17,7 +19,7 @@ module.exports = [{
   name: 'BBR',
   headingClass: 'h2-icon h2-bbr',
   lead: 'For en generel introduktion til BBR, se <a href="/dok/bbr">her<a/>.',
-  entities: ['BBR grund', 'BBR bygning', 'BBR enhed', 'BBR etage', 'BBR tekniskanlaeg', 'BBR ejerskab', 'BBR kommune', 'BBR opgang', 'BBR bygningspunkt', 'BBR matrikelreference'],
+  entities: bbrOrder.map(entityName => `BBR ${entityName}`)
 }, {
   name: 'Stednavne',
   headingClass: 'h2-icon h2-sted',

@@ -96,7 +96,7 @@ const oisAdditionalParameterDoc = {
 
 const oisFilterParameterDoc = {
   grund: {
-    subtext: `Find grunde fra OIS. ${oisReferenceText}`,
+    subtext: `Find grunde fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -129,7 +129,7 @@ const oisFilterParameterDoc = {
     ]
   },
   bygning: {
-    subtext: `Find bygninger fra OIS. ${oisReferenceText}`,
+    subtext: `Find bygninger fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -162,7 +162,7 @@ const oisFilterParameterDoc = {
     ]
   },
   tekniskanlaeg: {
-    subtext: `Find tekniske anlæg fra OIS. ${oisReferenceText}`,
+    subtext: `Find tekniske anlæg fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -201,7 +201,7 @@ const oisFilterParameterDoc = {
 
   },
   enhed: {
-    subtext: `Find enheder fra OIS. ${oisReferenceText}`,
+    subtext: `Find enheder fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -241,7 +241,7 @@ const oisFilterParameterDoc = {
 
   },
   etage: {
-    subtext: `Find etager fra OIS. ${oisReferenceText}`,
+    subtext: `Find etager fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -261,7 +261,7 @@ const oisFilterParameterDoc = {
 
   },
   ejerskab: {
-    subtext: `Find ejerskaber fra OIS. ${oisReferenceText}`,
+    subtext: `Find ejerskaber fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -307,7 +307,7 @@ const oisFilterParameterDoc = {
 
   },
   kommune: {
-    subtext: `Find kommuner fra OIS (BBR). ${oisReferenceText}`,
+    subtext: `Find kommuner BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -328,7 +328,7 @@ const oisFilterParameterDoc = {
     ]
   },
   opgang: {
-    subtext: `Find opgange fra OIS. ${oisReferenceText}`,
+    subtext: `Find opgange fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -354,7 +354,7 @@ const oisFilterParameterDoc = {
 
   },
   bygningspunkt: {
-    subtext: `Find bygningspunkter fra OIS. ${oisReferenceText}`,
+    subtext: `Find bygningspunkter fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'id',
@@ -364,7 +364,7 @@ const oisFilterParameterDoc = {
     examples: []
   },
   matrikelreference: {
-    subtext: `Find matrikelreferencer fra OIS. ${oisReferenceText}`,
+    subtext: `Find matrikelreferencer fra BBR. ${oisReferenceText}`,
     parameters: [
       {
         name: 'grundid',
@@ -399,7 +399,7 @@ for(let variant of ['full', 'public']) {
   Object.keys(oisApiModel).forEach(apiModelName => {
     const strukturParam = {
       name: 'struktur',
-      doc: 'Angiver hvilken svarstruktur der ønskes. "mini" angiver, OIS-entiten uden relatede entiteter. "nestet" angiver, at evt. relaterede' +
+      doc: 'Angiver hvilken svarstruktur der ønskes. "mini" angiver, BBR-entiten uden relatede entiteter. "nestet" angiver, at evt. relaterede' +
       'entiter skal medtages. "flad" angiver, at relaterede entiter skal medtages, men i en flad struktur.' +
       ' "nestet" er default for JSON format, "flad" er default for GeoJSON og CSV.'
     };
