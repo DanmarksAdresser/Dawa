@@ -22,6 +22,12 @@ module.exports = {
       path: '/politikredse/autocomplete'
     },
     {
+      type: 'endpoint',
+      heading: 'Politikreds reverse geocoding',
+      anchor: 'reverse',
+      path: '/politikredse/reverse'
+    },
+    {
       type: 'datadescription',
       heading: 'Beskrivelse af politikredse',
       anchor: 'databeskrivelse',

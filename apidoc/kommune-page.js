@@ -22,6 +22,12 @@ module.exports = {
       path: '/kommuner/autocomplete'
     },
     {
+      type: 'endpoint',
+      heading: 'Kommune reverse geocoding',
+      anchor: 'reverse',
+      path: '/kommuner/reverse'
+    },
+    {
       type: 'datadescription',
       heading: 'Beskrivelse af kommunedata',
       anchor: 'databeskrivelse',

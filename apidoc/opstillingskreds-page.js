@@ -22,6 +22,12 @@ module.exports = {
       path: '/opstillingskredse/autocomplete'
     },
     {
+      type: 'endpoint',
+      heading: 'Opstillingskreds reverse geocoding',
+      anchor: 'reverse',
+      path: '/opstillingskredse/reverse'
+    },
+    {
       type: 'datadescription',
       heading: 'Beskrivelse af opstillingskredse',
       anchor: 'databeskrivelse',
