@@ -7,7 +7,7 @@ module.exports = [{
   name: 'DAGI',
   headingClass: 'h2-icon h2-dagi',
   lead: 'For en generel introduktion til DAGI, se <a href="/dok/dagi">her<a/>.',
-  entities: ['afstemningsområde', 'kommune', 'menighedsrådsafstemningsområde','opstillingskreds', 'politikreds', 'postnummer', 'region', 'retskreds', 'sogn', 'storkreds', 'valglandsdel']
+  entities: ['afstemningsområde', 'kommune', 'menighedsrådsafstemningsområde','opstillingskreds', 'politikreds', 'postnummer', 'region', 'retskreds', 'sogn', 'storkreds', 'supplerendebynavn2', 'valglandsdel']
 }, {
   name: 'Matrikelkortet',
   headingClass: 'h2-icon h2-matrikel',

@@ -1,6 +1,6 @@
-module.exports = {
+ module.exports = {
   entity: 'stednavn',
-  heading: 'Stednavne',
+  heading: 'Stednavne (forældet)',
   lead: `API'et udstiller Danmarks stednavne samt tilhørende funktionalitet.`,
   body: `<p>Stednavne omfatter bl.a. bebyggelser (byer og bydele), bygninger som eksempelvis skoler og idrætsanlæg,
 samt landskaber som skove, strande og øer.</p>`,
