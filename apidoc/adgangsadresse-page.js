@@ -57,18 +57,6 @@ module.exports = {
       anchor: 'historik',
       heading: 'Adgangsadresse historik',
       path: '/historik/adgangsadresser'
-    },
-    {
-      type: 'endpoint',
-      anchor: 'udtræk',
-      heading: 'Adgangsadresse - udtræk',
-      path: '/replikering/adgangsadresser'
-    },
-    {
-      type: 'endpoint',
-      anchor: 'hændelser',
-      heading: 'Adgangsadresse - hændelser',
-      path: '/replikering/adgangsadresser/haendelser'
     }
   ]
 };
