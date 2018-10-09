@@ -42,10 +42,12 @@ const columns = Object.assign({
     }
   },
   kommuner: {
-    select: "(select json_agg((kommunekode, kommuner.navn)::kommuneref order by kommunekode)" +
-      " from postnumre_kommunekoder_mat" +
-      " left join kommuner on postnumre_kommunekoder_mat.kommunekode = kommuner.kode" +
-      " where  postnr = nr)"
+    select: `CASE WHEN not stormodtager THEN (select json_agg((kommunekode, kommuner.navn)::kommuneref order by kommunekode)
+       from postnumre_kommunekoder_mat
+       left join kommuner on postnumre_kommunekoder_mat.kommunekode = kommuner.kode
+       where  postnr = nr) ELSE
+    (select json_agg((kode, navn)::kommuneref order by kode)
+    from (select distinct kommunekode as kode, k.navn from adgangsadresser_mat a join stormodtagere s on s.adgangsadresseid = a.id  join kommuner k on a.kommunekode = k.kode where s.nr = postnumre.nr) komm) END`
   },
   tsv: {
     column: 'tsv'

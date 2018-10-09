@@ -75,4 +75,8 @@ describe("PostnumreApi", function() {
     assert.deepEqual(afgrænset.geometry.coordinates, [[[[725030,6166300],[725025,6166300],[725025,6166310],[725030,6166310],[725030,6166300]]]]);
   }));
 
+  it('Stormodtagerpostnummer har kommune', () => go(function*(){
+    const postnummer = yield request.get({url: 'http://localhost:3002/postnumre/0800', json: true});
+    assert.strictEqual(postnummer.kommuner.length, 1);
+  }));
 });
