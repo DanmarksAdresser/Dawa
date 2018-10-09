@@ -13,8 +13,8 @@ const navngivenVejIdParameter =
 
 const navngivenVejGeometriParameter = {
   name: 'geometri',
-  doc: `Angiver hvilken geometri der returneres for GeoJSON format. Mulige værdier: "vejnavnelinje", "vejnavneområde". Default værdi
-   er "vejnavnelinje"`
+  doc: `Angiver hvilken geometri der returneres for GeoJSON format. Mulige værdier: "vejnavnelinje", "vejnavneområde", "begge". Default værdi
+   er "vejnavnelinje".`
 };
 
 const qParam = {
