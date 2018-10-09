@@ -249,9 +249,9 @@ var sampleParameters = {
 
     },
     husnr: {
-      values: ['130A'],
+      values: ['130A', '130a'],
       verifier: function(adr, husnr) {
-        return adr.husnr === husnr;
+        return adr.husnr === husnr.toUpperCase();
       }
     },
     husnrfra: {

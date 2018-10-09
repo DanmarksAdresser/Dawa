@@ -157,6 +157,7 @@ function parseParameterType(valString, type) {
   }
 
   if(type === 'husnr') {
+    valString = valString.toUpperCase();
     if(!/^\d{1,3}[A-Z]?$/.test(valString)) {
       throw 'Ugyldigt husnr: ' + valString;
     }
