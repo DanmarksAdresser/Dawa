@@ -91,7 +91,7 @@ const oisAdditionalParameterDoc = {
       name: 'y',
       doc: 'Find bygningspunktet nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
       'i det koordinatsystem som er angivet ved srid-parameteren.'
-    }]
+    }],
 };
 
 const oisFilterParameterDoc = {
@@ -361,7 +361,12 @@ const oisFilterParameterDoc = {
         doc: 'Find bygningspunktet med det angivne ID (BygPkt_id)'
       }
     ],
-    examples: []
+    examples: [
+      {
+        description: 'Find bygningspunkter nær det angivne punkt',
+        query: [{name: 'x', value: '14.997367'},{name: 'y', value: '55.001385'}]
+      }
+    ]
   },
   matrikelreference: {
     subtext: `Find matrikelreferencer fra BBR. ${oisReferenceText}`,
@@ -384,7 +389,10 @@ const oisFilterParameterDoc = {
         ' med ejerlavkode parameteren.'
       }
     ],
-    examples: []
+    examples: [{
+      description: 'Find matrikelreferencer ejerlavkode "10051" og matrikelnr "15v"',
+      query: [{name: 'ejerlavkode', value: '10051'}, {name: 'matrikelnr', value: '15v'}]
+    }]
   }
 };
 
