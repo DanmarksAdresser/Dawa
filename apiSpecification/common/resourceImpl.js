@@ -66,8 +66,7 @@ function queryParameterFormatErrorResponse(details) {
 function internalServerErrorResponse(details) {
   var msg = {
     type: "InternalServerError",
-    title: "Something unexpected happened inside the server.",
-    details: details
+    title: "Something unexpected happened inside the server."
   };
   logger.error('http', "Internal server error", details);
   return jsonResponse(500, msg);
@@ -250,7 +249,7 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
         return objectNotFoundResponse(pathParams);
       }
       else if (rows.length > 1) {
-        return internalServerErrorResponse("Unexpected number of results from query");
+        return internalServerErrorResponse(new Error("Unexpected number of results from query"));
       }
       const value = rows[0];
       execute = (client, channel) => go(function* () {

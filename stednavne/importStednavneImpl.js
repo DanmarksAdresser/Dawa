@@ -55,8 +55,13 @@ const importStednavneFromStream = (client, txid, stream, maxChanges) => go(funct
   client.query('update fetch_steder set visueltcenter = ST_ClosestPoint(fetch_steder.geom, ST_Centroid(fetch_steder.geom)) where visueltcenter is null');
 
   yield client.query('CREATE TEMP TABLE fetch_stednavne AS select * from stednavne WHERE false');
+
+  // Mere end ét primært navn ikke tilladt, vi tager det første i alfabetisk orden hvis der leveres flere
   yield client.query(`INSERT INTO fetch_stednavne(${stednavneColumns.join(',')}) (
-  SELECT distinct on (id, brugsprioritet,navn) id, navn, navnestatus, brugsprioritet FROM fetch_stednavne_raw)`);
+  SELECT distinct on (id) id, navn, navnestatus, brugsprioritet FROM fetch_stednavne_raw where brugsprioritet='primær' order by id,navn)`);
+  // Identiske sekundære navne ikke tilladt
+  yield client.query(`INSERT INTO fetch_stednavne(${stednavneColumns.join(',')}) (
+  SELECT distinct on (id,navn) id, navn, navnestatus, brugsprioritet FROM fetch_stednavne_raw where brugsprioritet='sekundær')`);
 
   yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel, stednavneColumns);
   yield tableDiffNg.applyChanges(client, txid, stednavneTableModel);
