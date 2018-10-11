@@ -78,6 +78,15 @@ describe('Replikering', () => {
       assert.strictEqual(result.length, 2);
       assert.deepEqual(result.map(event => event.sekvensnummer), [3, 4]);
     }));
+    it('Giver fejl 400 hvis ugyldigt datoformat anvendes', () => go(function*() {
+      let result = yield helpers.getResponse(clientFn(), ejerlavEventsResource, {}, {tidspunktfra: '2015-01-01'});
+      assert.strictEqual(result.status, 400);
+      result = yield helpers.getResponse(clientFn(), ejerlavEventsResource, {}, {tidspunkttil: '2015-01-01'});
+      assert.strictEqual(result.status, 400);
+      result = yield helpers.getResponse(clientFn(), ejerlavEventsResource, {}, {tidspunkttil: '2015-01-01T10:03:01Z'});
+      assert.strictEqual(result.status, 200);
+    }));
+
   });
 });
 

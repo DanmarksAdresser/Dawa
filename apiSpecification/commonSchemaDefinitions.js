@@ -52,6 +52,10 @@ const definitions = {
     type: 'string',
     pattern: '^[\\d]{4}-[\\d]{2}-[\\d]{2}T[\\d]{2}:[\\d]{2}:[\\d]{2}\\.[\\d]{3}Z$'
   },
+  DateTimeParameter: {
+    pattern: '^[\\d]{4}-[\\d]{2}-[\\d]{2}(T|[ ])[\\d]{2}:[\\d]{2}:[\\d]{2}(\\.[\\d]{3})?([zZ]|([+\\-]\\d{1,2}))$',
+    type: 'string'
+  },
   'Integer': {
     postgresql: 'INTEGER',
     type: 'integer'

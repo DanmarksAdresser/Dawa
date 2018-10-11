@@ -2,7 +2,7 @@
 
 const normalizeParameters = require('../../common/parametersUtil').normalizeParameters;
 const { keyParameters } = require('../commonParameters');
-
+const commonSchemaDefinitions = require('../../commonSchemaDefinitions');
 exports.keyParameters = keyParameters;
 // sequence number filtering is supported for all events
 exports.sekvensnummer = normalizeParameters([
@@ -20,10 +20,12 @@ exports.sekvensnummer = normalizeParameters([
 exports.tidspunkt = normalizeParameters([
   {
     name: 'tidspunktfra',
-    type: 'string'
+    type: 'string',
+    schema: commonSchemaDefinitions.DateTimeParameter
   }, {
     name: 'tidspunkttil',
-    type: 'string'
+    type: 'string',
+    schema: commonSchemaDefinitions.DateTimeParameter
   }
 ]);
 
