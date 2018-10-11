@@ -103,6 +103,13 @@ function objectNotFoundResponse(details) {
   });
 }
 
+const tooManyRequestsResponse = () => {
+  return jsonResponse(429, {
+    type: 'TooManyRequestsError',
+    title: 'Too many requests was made by this client. Try again later.'
+  })
+};
+
 function sendInternalServerError(res, details) {
   var msg = {
     type: "InternalServerError",
@@ -426,12 +433,22 @@ exports.createExpressHandler = function (responseHandler) {
       }
       catch (error) {
         requestContext.error = error;
-        req.destroy();
+        if((error instanceof ConnectionSlotTimeout || error instanceof QuerySlotTimeout) && !res.headersSent) {
+          yield serveResponse(null, req, res, tooManyRequestsResponse(), initialDataSignal);
+        }
+        else {
+          req.destroy();
+        }
       }
       requestContext.responseEnd = Date.now();
       let requestOutcome = null;
       if(!requestContext.error) {
-        requestOutcome = 'COMPLETED';
+        if(res.statusCode === 429) {
+          requestOutcome = 'REJECTED';
+        }
+        else{
+          requestOutcome = 'COMPLETED';
+        }
       }
       else if(requestContext.error && clientDisconnectedSignal.isRaised()) {
         requestOutcome = 'ABORTED';
