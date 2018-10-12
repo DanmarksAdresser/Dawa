@@ -433,8 +433,17 @@ exports.createExpressHandler = function (responseHandler) {
       }
       catch (error) {
         requestContext.error = error;
-        if((error instanceof ConnectionSlotTimeout || error instanceof QuerySlotTimeout) && !res.headersSent) {
-          yield serveResponse(null, req, res, tooManyRequestsResponse(), initialDataSignal);
+        if(!res.headersSent) {
+          if(error instanceof ConnectionSlotTimeout || error instanceof QuerySlotTimeout) {
+            const response = tooManyRequestsResponse();
+            yield serveResponse(null, req, res, response, initialDataSignal);
+            requestContext.status = response.status;
+          }
+          else {
+            const response = internalServerErrorResponse(error);
+            yield serveResponse(null, req, res, response, initialDataSignal);
+            requestContext.status = response.status;
+          }
         }
         else {
           req.destroy();
