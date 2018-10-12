@@ -91,7 +91,7 @@ for(let entityName of Object.keys(datamodels)) {
   const datamodel = datamodels[entityName];
   const binding = dbBindings[entityName];
   const keyParameters = keyParametersMap[entityName] || [];
-  const sqlModel = createSqlModel(datamodel, binding, [keyParameters, ...binding.additionalParameters || []]);
+  const sqlModel = createSqlModel(datamodel, binding, [...keyParameters, ...binding.additionalParameters || []]);
   exports[entityName] = sqlModel;
   registry.add(`${entityName}udtraek`, 'sqlModel', undefined, sqlModel);
 }
