@@ -28,6 +28,13 @@ const ejerlavEventsResource = registry.findWhere({
   qualifier: 'hændelser'
 });
 describe('Replikering', () => {
+  testdb.withTransactionEach('test', clientFn => {
+    it('Kan lave opslag på udtræks-API ud fra ID', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), ejerlavUdtraekResource, {}, {kode: "60851"});
+      assert.strictEqual(result.length, 1);
+      assert.strictEqual(result[0].kode, 60851);
+    }));
+  });
   testdb.withTransactionEach('empty', (clientFn) => {
     beforeEach(() => go(function*() {
       const client = clientFn();
