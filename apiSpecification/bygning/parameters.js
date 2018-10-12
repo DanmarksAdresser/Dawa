@@ -3,7 +3,7 @@
 const registry = require('../registry');
 
 const normalizeParameters = require('../common/parametersUtil').normalizeParameters;
-
+const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 module.exports = {
   id: normalizeParameters([
     {
@@ -19,7 +19,8 @@ module.exports = {
       },
       {
         name: 'bbrbygning_id',
-        type: 'string'
+        type: 'string',
+        schema: commonSchemaDefinitions.UUID
       },
       {
         name: 'bygningstype',
@@ -36,6 +37,11 @@ module.exports = {
       {
         name: 'kommunekode',
         type: 'integer'
+      },
+      {
+        name: 'adgangsadresseid',
+        type: 'string',
+        schema: commonSchemaDefinitions.UUID
       }
     ])
 };

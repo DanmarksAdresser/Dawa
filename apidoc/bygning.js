@@ -31,6 +31,10 @@ const commonBygningParameters = [
     doc: 'Find bygningpolygon ud fra bygningens ID i BBR registeret. '
   },
   {
+    name: 'adgangsadresseid',
+    doc: 'Find de bygninger, hvor bygningens geometri indholder adgangsadressens adgangspunkt.'
+  },
+  {
     name: 'kommunekode',
     doc: 'Find bygninger i den angivne kommune.'
   },

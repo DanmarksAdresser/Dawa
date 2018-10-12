@@ -34,6 +34,27 @@ const columns = {
   adgangsadresser: {
     select: `(select json_agg(json_build_object('id', a.id, 'vejnavn', a.vejnavn, 'husnr', formatHusnr(a.husnr), 'supplerendebynavn', a.supplerendebynavn, 'postnr', a.postnr, 'postnrnavn', a.postnrnavn)) from dar1_husnummer_current hn join adgangsadresser_mat a on hn.id = a.id where hn.fk_geodk_bygning_geodanmarkbygning = bygninger.id)`
   },
+  adgangsadresseid: {
+    where: (sqlParts, parameterArray) => {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['bygningtilknytninger bt'],
+        whereClauses: [`bygninger.id = bt.bygningid`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'adgangsadresseid',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {adgangsadresseid: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+  },
   kommunekode: {
     where: (sqlParts, parameterArray) => {
       // this is a bit hackish, we add the parameters from

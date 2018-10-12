@@ -51,6 +51,10 @@ var sampleParameters = {
     kommunekode: {
       values: ['99'],
       verifier: (bygning, kommunekode) => bygning.kommuner.filter(kommune => parseInt(kommune.kode) === parseInt(kommunekode)).length === 1
+    },
+    adgangsadresseid: {
+      values: ['0a3f5081-29c8-32b8-e044-0003ba298018'],
+      verifier: (bygning, adgangsadresseid) => bygning.adgangsadresser.filter(adr => adr.id === adgangsadresseid).length === 1
     }
   },
   navngivenvej: {
