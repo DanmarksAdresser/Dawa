@@ -433,7 +433,7 @@ exports.createExpressHandler = function (responseHandler) {
       }
       catch (error) {
         requestContext.error = error;
-        if(!res.headersSent) {
+        if(!clientDisconnectedSignal.isRaised() && !res.headersSent) {
           if(error instanceof ConnectionSlotTimeout || error instanceof QuerySlotTimeout) {
             const response = tooManyRequestsResponse();
             yield serveResponse(null, req, res, response, initialDataSignal);
