@@ -210,10 +210,11 @@ function parseTokens(uvasketText, vasketText, tokens, rules) {
 
   tokens.forEach((token, index) => {
     const tokenEndsInNumber = /^\d$/.test(token.charAt(token.length - 1));
+    const nextTokenBeginsWithNumber = tokens.length > index+1 && tokens[index+1].length > 0 && /^\d$/.test(tokens[index+1].charAt(0));
     const mustEndWithWhitespace = rules[index].mustEndAtWhitespace ||
       index === rules.length - 1 ||
       rules[index+1].mustBeginAtWhitespace ||
-      tokenEndsInNumber;
+      (tokenEndsInNumber && nextTokenBeginsWithNumber);
     var parseResult = consume(charlist, token.length, mustEndWithWhitespace);
     var betweenResult = consumeBetween(parseResult[0]);
 

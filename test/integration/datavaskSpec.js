@@ -98,9 +98,14 @@ var adresseTests = [
       id: '0a3f50ab-bd7c-32b8-e044-0003ba298018',
       kategori: 'A'
     }
-  }
-
-];
+  }, {
+    it: 'Kan håndtere etage og dør uden mellemrum',
+    betegnelse: 'Østergade 43, 2tv, 5000 Odense C',
+    result: {
+      kategori: 'A',
+      id: 'ccc160cf-668c-45e7-af22-f80d5b0f9e26'
+    }
+  }];
 
 var adgangsadresseTests = [{
   it: 'Kan finde en adgangsadresse, som matcher præcist',
