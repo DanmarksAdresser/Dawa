@@ -140,7 +140,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'wms_vejpunkter', type: 'view'},
   {name: 'wms_vejpunktlinjer', init: false},
   {name: 'wfs_adgangsadresser', type: 'view'},
-  {name: 'wfs_adresser', type: 'view'}
+  {name: 'wfs_adresser', type: 'view'},
+  {name: 'wms_navngivneveje', type: 'view'}
 ]);
 
 exports.forAllTableSpecs = function(client, func){
