@@ -173,6 +173,10 @@ const additionalFieldsMap = {
     },
     {
       name: 'kommunenavn'
+    },
+    {
+      name: 'postnumre',
+      multi: true
     }
   ]
 };

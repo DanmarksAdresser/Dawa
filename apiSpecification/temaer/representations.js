@@ -302,6 +302,7 @@ const supplerendebynavnRepresentation = (() => {
       dagi_id: numberToString(row.dagi_id),
       navn: row.navn,
       kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
+      postnumre: commonMappers.mapPostnummerRefArray(row.postnumre, baseUrl)
     });
     return result;
   };
@@ -314,10 +315,17 @@ const supplerendebynavnRepresentation = (() => {
       href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
       dagi_id: normalizedFieldSchema('dagi_id'),
       navn: normalizedFieldSchema('navn'),
-      kommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'})
+      kommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'}),
+      postnumre: {
+        description: 'De postnumre, der forefindes i det supplerende bynavn.',
+        type: 'array',
+        items: {
+          $ref: '#/definitions/PostnummerRef'
+        }
+      }
     }, commonGeoProps),
     docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'navn',
-      'kommune']
+      'kommune', 'postnumre']
   });
   return {fields, mapper, schema};
 })();

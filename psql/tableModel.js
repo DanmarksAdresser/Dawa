@@ -583,6 +583,15 @@ const supplerendebynavn_kommune_mat = {
   ]
 };
 
+const supplerendebynavn2_postnr = {
+  table: 'supplerendebynavn2_postnr',
+  primaryKey: ['supplerendebynavn_dagi_id', 'postnr'],
+  columns: [
+    { name: 'supplerendebynavn_dagi_id' },
+    { name: 'postnr' }
+  ]
+};
+
 const dagiTables = temaModels.modelList.reduce((memo, temaModel) => {
   memo[temaModel.table] = temaModels.toTableModel(temaModel);
   if(!temaModel.withoutTilknytninger) {
@@ -658,6 +667,7 @@ exports.tables = Object.assign({
     supplerendebynavne_mat,
     supplerendebynavn_postnr_mat,
     supplerendebynavn_kommune_mat,
+    supplerendebynavn2_postnr,
     vejpunkter,
     navngivenvej,
     navngivenvej_postnummer,
@@ -674,7 +684,7 @@ exports.tables = Object.assign({
     jordstykker_adgadr,
     tilknytninger_mat,
     brofasthed,
-    ikke_brofaste_adresser
+    ikke_brofaste_adresser,
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
@@ -804,22 +814,17 @@ exports.materializations = Object.assign({
   supplerendebynavn_postnr: {
     table: 'supplerendebynavn_postnr',
     view: 'supplerendebynavn_postnr_view',
-    dependents: [
-      {
-        table: 'adgangsadresser',
-        columns: ['adgangsadresseid']
-      }
-    ]
+    dependents: []
   },
   supplerendebynavn_kommune: {
     table: 'supplerendebynavn_kommune',
     view: 'supplerendebynavn_kommune_view',
-    dependents: [
-      {
-        table: 'adgangsadresser',
-        columns: ['adgangsadresseid']
-      }
-    ]
+    dependents: []
+  },
+  supplerendebynavn2_postnr: {
+    table: 'supplerendebynavn2_postnr',
+    view: 'supplerendebynavn2_postnr_view',
+    dependents: []
   },
   ikke_brofaste_adresser: {
     table: 'ikke_brofaste_adresser',

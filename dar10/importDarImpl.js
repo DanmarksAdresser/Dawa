@@ -68,7 +68,7 @@ const updatePostnumreKommunekoderMat = client => go(function*() {
    insert into postnumre_kommunekoder_mat(postnr, kommunekode) (SELECT DISTINCT postnr, kommunekode FROM adgangsadresser where postnr is not null and kommunekode is not null)`);
 });
 
-const updateSupplerendeBynavne = client => go(function*() {
+const updateSupplerendeBynavne = (client, txid) => go(function*() {
   const tsvCol = _.findWhere(tableModels.tables.supplerendebynavne_mat.columns, {name: 'tsv'});
   yield client.query(`DELETE FROM supplerendebynavne_mat;
   INSERT INTO supplerendebynavne_mat(navn, tsv)
@@ -80,6 +80,7 @@ const updateSupplerendeBynavne = client => go(function*() {
   yield client.query('DELETE FROM supplerendebynavn_postnr_mat;' +
     'INSERT INTO supplerendebynavn_postnr_mat(supplerendebynavn, postnr)' +
     '(SELECT supplerendebynavn, postnr from supplerendebynavn_postnr_mat_view)');
+  yield materialize.recomputeMaterialization(client, txid, tableModels.tables, tableModels.materializations.supplerendebynavn2_postnr);
 });
 
 
@@ -183,7 +184,7 @@ const initDawa = (client, txid) => go(function* () {
  */
 const updateDawa = (client, txid) => go(function* () {
   yield rematerializeDawa(client,txid);
-  yield updateSupplerendeBynavne(client);
+  yield updateSupplerendeBynavne(client, txid);
   yield updatePostnumreKommunekoderMat(client);
 
 });

@@ -90,6 +90,7 @@ exports.mapKommuneRefArray = function(array, baseUrl) {
 
 
 exports.mapPostnummerRefArray = function(array, baseUrl) {
+  array = array || [];
   return _.map(array.filter(function(postnr) { return notNull(postnr.nr); }), function(postnummer) { return exports.mapPostnummerRef(postnummer, baseUrl); });
 };
 

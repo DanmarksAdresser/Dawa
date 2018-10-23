@@ -640,7 +640,8 @@ describe('Stable API', () => {
             "href": "http://dawa/kommuner/101",
             "kode": "0101",
             "navn": "København"
-          }
+          },
+          "postnumre": []
         }
       }],
         flad

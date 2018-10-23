@@ -173,7 +173,15 @@ from (select distinct k.kode, k.navn
     },
     kommunenavn: {
       column: 'k.navn'
-    }
+    },
+    postnumre: {
+      select: `(select json_agg(json_build_object('nr', p.nr, 'navn', p.navn))
+      from supplerendebynavn2_postnr sp
+        join postnumre p on sp.postnr = p.nr 
+      where
+      t.dagi_id = sp.supplerendebynavn_dagi_id)`
+    },
+
   }
 };
 
