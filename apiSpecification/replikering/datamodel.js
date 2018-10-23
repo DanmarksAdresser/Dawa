@@ -577,7 +577,7 @@ module.exports = {
         }]
     },
   stedtilknytning: {
-    key: ['adgangsadresseid', 'stedid'],
+    key: ['stedid', 'adgangsadresseid'],
     attributes: [{
       name: 'stedid',
       type: 'uuid',
