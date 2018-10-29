@@ -42,15 +42,10 @@ describe('Autocomplete', function(){
 
 describe('Adressevalidering', function(){
 
-  it('Alleshavevej,11,4593 er ok', function(done){
-    request(encodeURI(host+'/adresser?vejnavn=Alleshavevej&husnr=11&postnr=4593&cache=no-cache'), function (error, response, body) {    	
-    	assert.equal(error,null);
-    	assert.equal(response.statusCode,200);
-	    var adresser= JSON.parse(body);
-	    assert.equal(adresser.length,1);
-	    done();
-	  })
-	});
+  it('Alleshavevej,11,4593 er ok', async () => {
+    const result = await rp({url: encodeURI(host+'/adresser?vejnavn=Alleshavevej&husnr=11&postnr=4593&cache=no-cache'), json: true});
+    assert.strictEqual(result.length,1);
+  });
 
   it('Lilledal,23,3450,1,tv er ok', function(done){
     request(encodeURI(host+'/adresser?vejnavn=Lilledal&husnr=23&postnr=3450&etage=1&dør=tv&cache=no-cache'), function (error, response, body) {  	
@@ -178,7 +173,7 @@ describe('Adresseopslag', function(){
     })
   })
 
-  it("korrekt indhold", function(done){
+  it("korrekt indhold", async () => {
 
     var options= {};
     options.baseUrl= host;
@@ -186,240 +181,193 @@ describe('Adresseopslag', function(){
     options.qs= {};
     options.qs.cache= 'no-cache';
     options.qs.id= '0a3f50a0-73ca-32b8-e044-0003ba298018';
-    options.resolveWithFullResponse= true;
-    rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")"); 
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Flere forekomster. Antal: " + adresser.length);
-      var adresse= adresser[0];
-      assert(adresse.id==="0a3f50a0-73ca-32b8-e044-0003ba298018", 'Id forskellig: ' + adresse.id);
-      assert(adresse.status===1, 'Status forskellig:' + adresse.status);
-      assert(adresse.kvhx==="01016100__46_______", 'kvhx forskellig: ' + adresse.kvhx);
-      assert(adresse.historik.oprettet==="2000-02-05T20:25:16.000", 'oprettet forskellig:' + adresse.historik.oprettet);
-      assert(adresse.historik.ændret==="2000-02-05T20:25:16.000", 'ændret forskellig: ' + adresse.historik.ændret);
-      assert(adresse.etage===null, 'etage forskellig: ' + adresse.etage);
-      assert(adresse.dør===null, 'dør forskellig: ' + adresse.dør);
-      assert(adresse.adgangsadresse.vejstykke.navn==="Rødkildevej", 'adresse.vejstykke.navn: ' + adresse.adgangsadresse.vejstykke.navn);
-      assert(adresse.adgangsadresse.vejstykke.kode==="6100", 'adresse.vejstykke.kodeforskellig: ' + adresse.adgangsadresse.vejstykke.kode);
-      assert(adresse.adgangsadresse.vejstykke.adresseringsnavn==="Rødkildevej", 'adresse.vejstykke.adresseringsnavn forskellig: ' + adresse.adgangsadresse.vejstykke.adresseringsnavn);
-      assert(adresse.adgangsadresse.husnr==="46", 'adresse.husnr: ' + adresse.adgangsadresse.husnr);
-      assert(adresse.adgangsadresse.navngivenvej.id==="d05d536a-febb-49f1-bcb8-8a2849e31fe2", 'adresse.navngivenvej.id forskellig: ' + adresse.adgangsadresse.navngivenvej.id);
-      assert(adresse.adgangsadresse.supplerendebynavn===null, 'adresse.supplerendebynavn forskellig: ' + adresse.adgangsadresse.supplerendebynavn);
-      assert(adresse.adgangsadresse.supplerendebynavn2===null, 'adresse.supplerendebynavn2 forskellig: ' + adresse.adgangsadresse.supplerendebynavn2);
-      assert(adresse.adgangsadresse.postnummer.nr==="2400", 'adresse.postnummer.nr forskellig: ' + adresse.adgangsadresse.postnummer.nr);
-      assert(adresse.adgangsadresse.postnummer.navn==="København NV", 'adresse.postnummer.navn forskellig: ' + adresse.adgangsadresse.postnummer.navn);
-      assert(adresse.adgangsadresse.stormodtagerpostnummer===null, 'adresse.stormodtagerpostnummer forskellig: ' + adresse.adgangsadresse.stormodtagerpostnummer);
-      assert(adresse.adgangsadresse.kommune.kode==="0101", 'adresse.kommune.nr forskellig: ' + adresse.adgangsadresse.kommune.kode);
-      assert(adresse.adgangsadresse.kommune.navn==="København", 'adresse.kommune.navn forskellig: ' + adresse.adgangsadresse.kommune.navn);
-      assert(adresse.adgangsadresse.ejerlav.kode==2000175, 'adresse.ejerlav.nr forskellig: ' + adresse.adgangsadresse.ejerlav.kode);
-      assert(adresse.adgangsadresse.ejerlav.navn==="Utterslev, København", 'adresse.ejerlav.navn forskellig: ' + adresse.adgangsadresse.ejerlav.navn);
-      assert(adresse.adgangsadresse.sogn.kode==="7060", 'adresse.sogn.nr forskellig: ' + adresse.adgangsadresse.sogn.kode);
-      assert(adresse.adgangsadresse.sogn.navn==="Grøndal", 'adresse.sogn.navn i json og csv format forskellig. json: ' + adresse.adgangsadresse.sogn.navn);
-      assert(adresse.adgangsadresse.region.kode==="1084", 'adresse.region.n forskellig: ' + adresse.adgangsadresse.region.kode);
-      assert(adresse.adgangsadresse.region.navn==="Region Hovedstaden", 'adresse.region.navn forskellig: ' + adresse.adgangsadresse.region.navn);
-      assert(adresse.adgangsadresse.retskreds.kode==="1102", 'adresse.retskreds.nr forskellig: ' + adresse.adgangsadresse.retskreds.kode);
-      assert(adresse.adgangsadresse.retskreds.navn==="Retten på Frederiksberg", 'adresse.retskreds.navn forskellig: ' + adresse.adgangsadresse.retskreds.navn);
-      assert(adresse.adgangsadresse.politikreds.kode==="1470", 'adresse.politikreds.nr forskellig: ' + adresse.adgangsadresse.politikreds.kode);
-      assert(adresse.adgangsadresse.politikreds.navn==="Københavns Politi", 'adresse.politikreds.navn forskellig: ' + adresse.adgangsadresse.politikreds.navn);
-      assert(adresse.adgangsadresse.opstillingskreds.kode==="0007", 'adresse.opstillingskreds.nr forskellig: ' + adresse.adgangsadresse.opstillingskreds.kode);
-      assert(adresse.adgangsadresse.opstillingskreds.navn==="Brønshøj", 'adresse.opstillingskreds.navn forskellig: ' + adresse.adgangsadresse.opstillingskreds.navn);
-      assert(adresse.adgangsadresse.esrejendomsnr==="242358", 'adresse.esrejendomsnr forskellig: ' + adresse.adgangsadresse.esrejendomsnr);
-      assert(adresse.adgangsadresse.matrikelnr==="663", 'adresse.matrikelnr forskellig: ' + adresse.adgangsadresse.matrikelnr);
-      
-      assert(adresse.adgangsadresse.adgangspunkt.koordinater[0]==12.51085725, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[0]);
-      assert(adresse.adgangsadresse.adgangspunkt.koordinater[1]==55.69839738, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[1]);
-      assert(adresse.adgangsadresse.adgangspunkt.nøjagtighed==="A", 'punkt.nøjagtighed forskellig: ' + adresse.adgangsadresse.adgangspunkt.nøjagtighed);
-      assert(adresse.adgangsadresse.adgangspunkt.kilde==5, 'punkt.kilde forskellig: ' + adresse.adgangsadresse.adgangspunkt.kilde);
-      assert(adresse.adgangsadresse.adgangspunkt.tekniskstandard==="TD", 'punkt.tekniskstandard forskellig: ' + adresse.adgangsadresse.adgangspunkt.tekniskstandard);
-      assert(adresse.adgangsadresse.adgangspunkt.tekstretning==200, 'punkt.tekstretning forskellig: ' + adresse.adgangsadresse.adgangspunkt.tekstretning);
-      assert(adresse.adgangsadresse.adgangspunkt.ændret==="2002-04-05T00:00:00.000", 'punkt.adressepunktændringsdato forskellig: ' + adresse.adgangsadresse.adgangspunkt.ændret);
-      assert(adresse.adgangsadresse.vejpunkt.koordinater[0]==12.51066198, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.vejpunkt.koordinater[0]);
-      assert(adresse.adgangsadresse.vejpunkt.koordinater[1]==55.69846171, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.vejpunkt.koordinater[1]);
-      assert(adresse.adgangsadresse.vejpunkt.nøjagtighed==="B", 'punkt.nøjagtighed forskellig: ' + adresse.adgangsadresse.vejpunkt.nøjagtighed);
-      assert(adresse.adgangsadresse.vejpunkt.kilde=='Ekstern', 'punkt.kilde forskellig: ' + adresse.adgangsadresse.vejpunkt.kilde);
-      assert(adresse.adgangsadresse.vejpunkt.tekniskstandard==="V0", 'punkt.tekniskstandard forskellig: ' + adresse.adgangsadresse.vejpunkt.tekniskstandard);
-      assert(adresse.adgangsadresse.jordstykke.ejerlav.kode==2000175, 'jordstykke.ejerlav.kode forskellig: ' + adresse.adgangsadresse.jordstykke.ejerlav.kode);
-      assert(adresse.adgangsadresse.jordstykke.matrikelnr==="663", 'jordstykke.matrikelnr forskellig: ' + adresse.adgangsadresse.jordstykke.matrikelnr);
-      assert(adresse.adgangsadresse.jordstykke.esrejendomsnr==="242358", 'jordstykke.esrejendomsnr forskellig: ' + adresse.adgangsadresse.jordstykke.esrejendomsnr);
-      assert(adresse.adgangsadresse.zone==="Byzone", 'Zone forskellig: ' + adresse.adgangsadresse.zone);
-      assert(adresse.adgangsadresse.adgangspunkt.højde==24.1, 'Højde forskellig: ' + adresse.adgangsadresse.adgangspunkt.højde);
-      assert(adresse.adgangsadresse.brofast===true, 'Brofast forskellig: ' + adresse.adgangsadresse.brofast);
-      
-      var vejopt= {};
-      vejopt.url=adresse.adgangsadresse.vejstykke.href;
-      vejopt.qs= {};
-      vejopt.qs.cache= 'no-cache';
-      vejopt.resolveWithFullResponse= true;
-      var vejrequest= rp(vejopt);
+    options.json = true;
+    const adresser = await rp(options);
+    assert(adresser.length===1, "Flere forekomster. Antal: " + adresser.length);
+    const adresse= adresser[0];
+    assert(adresse.id==="0a3f50a0-73ca-32b8-e044-0003ba298018", 'Id forskellig: ' + adresse.id);
+    assert(adresse.status===1, 'Status forskellig:' + adresse.status);
+    assert(adresse.kvhx==="01016100__46_______", 'kvhx forskellig: ' + adresse.kvhx);
+    assert(adresse.historik.oprettet==="2000-02-05T20:25:16.000", 'oprettet forskellig:' + adresse.historik.oprettet);
+    assert(adresse.historik.ændret==="2000-02-05T20:25:16.000", 'ændret forskellig: ' + adresse.historik.ændret);
+    assert(adresse.etage===null, 'etage forskellig: ' + adresse.etage);
+    assert(adresse.dør===null, 'dør forskellig: ' + adresse.dør);
+    assert(adresse.adgangsadresse.vejstykke.navn==="Rødkildevej", 'adresse.vejstykke.navn: ' + adresse.adgangsadresse.vejstykke.navn);
+    assert(adresse.adgangsadresse.vejstykke.kode==="6100", 'adresse.vejstykke.kodeforskellig: ' + adresse.adgangsadresse.vejstykke.kode);
+    assert(adresse.adgangsadresse.vejstykke.adresseringsnavn==="Rødkildevej", 'adresse.vejstykke.adresseringsnavn forskellig: ' + adresse.adgangsadresse.vejstykke.adresseringsnavn);
+    assert(adresse.adgangsadresse.husnr==="46", 'adresse.husnr: ' + adresse.adgangsadresse.husnr);
+    assert(adresse.adgangsadresse.navngivenvej.id==="d05d536a-febb-49f1-bcb8-8a2849e31fe2", 'adresse.navngivenvej.id forskellig: ' + adresse.adgangsadresse.navngivenvej.id);
+    assert(adresse.adgangsadresse.supplerendebynavn===null, 'adresse.supplerendebynavn forskellig: ' + adresse.adgangsadresse.supplerendebynavn);
+    assert(adresse.adgangsadresse.supplerendebynavn2===null, 'adresse.supplerendebynavn2 forskellig: ' + adresse.adgangsadresse.supplerendebynavn2);
+    assert(adresse.adgangsadresse.postnummer.nr==="2400", 'adresse.postnummer.nr forskellig: ' + adresse.adgangsadresse.postnummer.nr);
+    assert(adresse.adgangsadresse.postnummer.navn==="København NV", 'adresse.postnummer.navn forskellig: ' + adresse.adgangsadresse.postnummer.navn);
+    assert(adresse.adgangsadresse.stormodtagerpostnummer===null, 'adresse.stormodtagerpostnummer forskellig: ' + adresse.adgangsadresse.stormodtagerpostnummer);
+    assert(adresse.adgangsadresse.kommune.kode==="0101", 'adresse.kommune.nr forskellig: ' + adresse.adgangsadresse.kommune.kode);
+    assert(adresse.adgangsadresse.kommune.navn==="København", 'adresse.kommune.navn forskellig: ' + adresse.adgangsadresse.kommune.navn);
+    assert(adresse.adgangsadresse.ejerlav.kode==2000175, 'adresse.ejerlav.nr forskellig: ' + adresse.adgangsadresse.ejerlav.kode);
+    assert(adresse.adgangsadresse.ejerlav.navn==="Utterslev, København", 'adresse.ejerlav.navn forskellig: ' + adresse.adgangsadresse.ejerlav.navn);
+    assert(adresse.adgangsadresse.sogn.kode==="7060", 'adresse.sogn.nr forskellig: ' + adresse.adgangsadresse.sogn.kode);
+    assert(adresse.adgangsadresse.sogn.navn==="Grøndal", 'adresse.sogn.navn i json og csv format forskellig. json: ' + adresse.adgangsadresse.sogn.navn);
+    assert(adresse.adgangsadresse.region.kode==="1084", 'adresse.region.n forskellig: ' + adresse.adgangsadresse.region.kode);
+    assert(adresse.adgangsadresse.region.navn==="Region Hovedstaden", 'adresse.region.navn forskellig: ' + adresse.adgangsadresse.region.navn);
+    assert(adresse.adgangsadresse.retskreds.kode==="1102", 'adresse.retskreds.nr forskellig: ' + adresse.adgangsadresse.retskreds.kode);
+    assert(adresse.adgangsadresse.retskreds.navn==="Retten på Frederiksberg", 'adresse.retskreds.navn forskellig: ' + adresse.adgangsadresse.retskreds.navn);
+    assert(adresse.adgangsadresse.politikreds.kode==="1470", 'adresse.politikreds.nr forskellig: ' + adresse.adgangsadresse.politikreds.kode);
+    assert(adresse.adgangsadresse.politikreds.navn==="Københavns Politi", 'adresse.politikreds.navn forskellig: ' + adresse.adgangsadresse.politikreds.navn);
+    assert(adresse.adgangsadresse.opstillingskreds.kode==="0007", 'adresse.opstillingskreds.nr forskellig: ' + adresse.adgangsadresse.opstillingskreds.kode);
+    assert(adresse.adgangsadresse.opstillingskreds.navn==="Brønshøj", 'adresse.opstillingskreds.navn forskellig: ' + adresse.adgangsadresse.opstillingskreds.navn);
+    assert(adresse.adgangsadresse.esrejendomsnr==="242358", 'adresse.esrejendomsnr forskellig: ' + adresse.adgangsadresse.esrejendomsnr);
+    assert(adresse.adgangsadresse.matrikelnr==="663", 'adresse.matrikelnr forskellig: ' + adresse.adgangsadresse.matrikelnr);
 
-      var postopt= {};
-      postopt.url=adresse.adgangsadresse.postnummer.href;
-      postopt.qs= {};
-      postopt.qs.cache= 'no-cache';
-      postopt.resolveWithFullResponse= true;
-      var postrequest= rp(postopt);
+    assert(adresse.adgangsadresse.adgangspunkt.koordinater[0]==12.51085725, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[0]);
+    assert(adresse.adgangsadresse.adgangspunkt.koordinater[1]==55.69839738, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.adgangspunkt.koordinater[1]);
+    assert(adresse.adgangsadresse.adgangspunkt.nøjagtighed==="A", 'punkt.nøjagtighed forskellig: ' + adresse.adgangsadresse.adgangspunkt.nøjagtighed);
+    assert(adresse.adgangsadresse.adgangspunkt.kilde==5, 'punkt.kilde forskellig: ' + adresse.adgangsadresse.adgangspunkt.kilde);
+    assert(adresse.adgangsadresse.adgangspunkt.tekniskstandard==="TD", 'punkt.tekniskstandard forskellig: ' + adresse.adgangsadresse.adgangspunkt.tekniskstandard);
+    assert(adresse.adgangsadresse.adgangspunkt.tekstretning==200, 'punkt.tekstretning forskellig: ' + adresse.adgangsadresse.adgangspunkt.tekstretning);
+    assert(adresse.adgangsadresse.adgangspunkt.ændret==="2002-04-05T00:00:00.000", 'punkt.adressepunktændringsdato forskellig: ' + adresse.adgangsadresse.adgangspunkt.ændret);
+    assert(adresse.adgangsadresse.vejpunkt.koordinater[0]==12.51066198, 'punkt.koordinater[0] forskellig: ' + adresse.adgangsadresse.vejpunkt.koordinater[0]);
+    assert(adresse.adgangsadresse.vejpunkt.koordinater[1]==55.69846171, 'punkt.koordinater[1] forskellig: ' + adresse.adgangsadresse.vejpunkt.koordinater[1]);
+    assert(adresse.adgangsadresse.vejpunkt.nøjagtighed==="B", 'punkt.nøjagtighed forskellig: ' + adresse.adgangsadresse.vejpunkt.nøjagtighed);
+    assert(adresse.adgangsadresse.vejpunkt.kilde=='Ekstern', 'punkt.kilde forskellig: ' + adresse.adgangsadresse.vejpunkt.kilde);
+    assert(adresse.adgangsadresse.vejpunkt.tekniskstandard==="V0", 'punkt.tekniskstandard forskellig: ' + adresse.adgangsadresse.vejpunkt.tekniskstandard);
+    assert(adresse.adgangsadresse.jordstykke.ejerlav.kode==2000175, 'jordstykke.ejerlav.kode forskellig: ' + adresse.adgangsadresse.jordstykke.ejerlav.kode);
+    assert(adresse.adgangsadresse.jordstykke.matrikelnr==="663", 'jordstykke.matrikelnr forskellig: ' + adresse.adgangsadresse.jordstykke.matrikelnr);
+    assert(adresse.adgangsadresse.jordstykke.esrejendomsnr==="242358", 'jordstykke.esrejendomsnr forskellig: ' + adresse.adgangsadresse.jordstykke.esrejendomsnr);
+    assert(adresse.adgangsadresse.zone==="Byzone", 'Zone forskellig: ' + adresse.adgangsadresse.zone);
+    assert(adresse.adgangsadresse.adgangspunkt.højde==24.1, 'Højde forskellig: ' + adresse.adgangsadresse.adgangspunkt.højde);
+    assert(adresse.adgangsadresse.brofast===true, 'Brofast forskellig: ' + adresse.adgangsadresse.brofast);
 
-      var komopt= {};
-      komopt.url=adresse.adgangsadresse.kommune.href;
-      komopt.qs= {};
-      komopt.qs.cache= 'no-cache';
-      komopt.resolveWithFullResponse= true;
-      var komrequest= rp(komopt);
+    const vejopt= {};
+    vejopt.url=adresse.adgangsadresse.vejstykke.href;
+    vejopt.qs= {};
+    vejopt.qs.cache= 'no-cache';
+    vejopt.json= true;
+    const vejrequest= rp(vejopt);
 
-      var sognopt= {};
-      sognopt.url=adresse.adgangsadresse.sogn.href;
-      sognopt.qs= {};
-      sognopt.qs.cache= 'no-cache';
-      sognopt.resolveWithFullResponse= true;
-      var sognrequest= rp(sognopt);
+    const postopt= {};
+    postopt.url=adresse.adgangsadresse.postnummer.href;
+    postopt.qs= {};
+    postopt.qs.cache= 'no-cache';
+    postopt.json= true;
+    const postrequest= rp(postopt);
 
-      var regionopt= {};
-      regionopt.url=adresse.adgangsadresse.region.href;
-      regionopt.qs= {};
-      regionopt.qs.cache= 'no-cache';
-      regionopt.resolveWithFullResponse= true;
-      var regionrequest= rp(regionopt);
+    const komopt= {};
+    komopt.url=adresse.adgangsadresse.kommune.href;
+    komopt.qs= {};
+    komopt.qs.cache= 'no-cache';
+    komopt.json= true;
+    const komrequest= rp(komopt);
 
-      var retsopt= {};
-      retsopt.url=adresse.adgangsadresse.retskreds.href;
-      retsopt.qs= {};
-      retsopt.qs.cache= 'no-cache';
-      retsopt.resolveWithFullResponse= true;
-      var retsrequest= rp(retsopt);
+    const sognopt= {};
+    sognopt.url=adresse.adgangsadresse.sogn.href;
+    sognopt.qs= {};
+    sognopt.qs.cache= 'no-cache';
+    sognopt.json= true;
+    const sognrequest= rp(sognopt);
 
-      var polopt= {};
-      polopt.url=adresse.adgangsadresse.politikreds.href;
-      polopt.qs= {};
-      polopt.qs.cache= 'no-cache';
-      polopt.resolveWithFullResponse= true;
-      var polrequest= rp(polopt);
+    const regionopt= {};
+    regionopt.url=adresse.adgangsadresse.region.href;
+    regionopt.qs= {};
+    regionopt.qs.cache= 'no-cache';
+    regionopt.json= true;
+    const regionrequest= rp(regionopt);
 
-      var opsopt= {};
-      opsopt.url=adresse.adgangsadresse.opstillingskreds.href;
-      opsopt.qs= {};
-      opsopt.qs.cache= 'no-cache';
-      opsopt.resolveWithFullResponse= true;
-      var opsrequest= rp(opsopt);
+    const retsopt= {};
+    retsopt.url=adresse.adgangsadresse.retskreds.href;
+    retsopt.qs= {};
+    retsopt.qs.cache= 'no-cache';
+    retsopt.json= true;
+    const retsrequest= rp(retsopt);
 
-      var afsopt= {};
-      afsopt.url=adresse.adgangsadresse.afstemningsområde.href;
-      afsopt.qs= {};
-      afsopt.qs.cache= 'no-cache';
-      afsopt.resolveWithFullResponse= true;
-      var afsrequest= rp(afsopt);
+    const polopt= {};
+    polopt.url=adresse.adgangsadresse.politikreds.href;
+    polopt.qs= {};
+    polopt.qs.cache= 'no-cache';
+    polopt.json= true;
+    const polrequest= rp(polopt);
 
-      var jordopt= {};
-      jordopt.url=adresse.adgangsadresse.jordstykke.href;
-      jordopt.qs= {};
-      jordopt.qs.cache= 'no-cache';
-      jordopt.resolveWithFullResponse= true;
-      var jordrequest= rp(jordopt);
+    const opsopt= {};
+    opsopt.url=adresse.adgangsadresse.opstillingskreds.href;
+    opsopt.qs= {};
+    opsopt.qs.cache= 'no-cache';
+    opsopt.json= true;
+    const opsrequest= rp(opsopt);
 
-      var ngvej= {};
-      ngvej.url=adresse.adgangsadresse.navngivenvej.href;
-      ngvej.qs= {};
-      ngvej.qs.cache= 'no-cache';
-      ngvej.resolveWithFullResponse= true;
-      var ngvejrequest= rp(ngvej);
+    const afsopt= {};
+    afsopt.url=adresse.adgangsadresse.afstemningsområde.href;
+    afsopt.qs= {};
+    afsopt.qs.cache= 'no-cache';
+    afsopt.json= true;
+    const afsrequest= rp(afsopt);
 
-      Promise.all([vejrequest, postrequest, komrequest, sognrequest, regionrequest, retsrequest, polrequest, opsrequest, afsrequest, jordrequest, ngvejrequest]).then((responses) => {
-        for (let i= 0; i<responses.length; i++) {
-          assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")");
-          //console.log(responses[i].body);
-          let obj= JSON.parse(responses[i].body); 
-          switch (i) {
-          case 0:
-            assert(adresse.adgangsadresse.vejstykke.kode===obj.kode,"Uoverenstemmelse i vejstykke")
-            break;
-          case 1:
-            assert(adresse.adgangsadresse.postnummer.nr===obj.nr,"Uoverenstemmelse i postnummer")
-            break;
-          case 2:
-            assert(adresse.adgangsadresse.kommune.kode===obj.kode,"Uoverenstemmelse i kommune")
-            break;
-          case 3:
-            assert(adresse.adgangsadresse.sogn.kode===obj.kode,"Uoverenstemmelse i sogn")
-            break;
-          case 4:
-            assert(adresse.adgangsadresse.region.kode===obj.kode,"Uoverenstemmelse i region")
-            break;
-          case 5:
-            assert(adresse.adgangsadresse.retskreds.kode===obj.kode,"Uoverenstemmelse i retskreds")
-            break;
-          case 6:
-            assert(adresse.adgangsadresse.politikreds.kode===obj.kode,"Uoverenstemmelse i politikreds")
-            break;
-          case 7:
-            assert(adresse.adgangsadresse.opstillingskreds.kode===obj.kode,"Uoverenstemmelse i opstillingskreds")
-            break;
-          case 8:
-            assert(adresse.adgangsadresse.afstemningsområde.kode===obj.kode,"Uoverenstemmelse i afstemningsområde")
-            break;
-          case 9:
-            assert(adresse.adgangsadresse.jordstykke.matrikelnr===obj.matrikelnr,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.jordstykke.matrikelnr + ", " + obj.matrikelnr + ")");
-            break;
-          case 10:
-            assert(adresse.adgangsadresse.navngivenvej.id===obj.id,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.navngivenvej.id + ", " + obj.id + ")");
-            break;
-          }
-        }
-      })
-      .then(() => {
+    const jordopt= {};
+    jordopt.url=adresse.adgangsadresse.jordstykke.href;
+    jordopt.qs= {};
+    jordopt.qs.cache= 'no-cache';
+    jordopt.json= true;
+    const jordrequest= rp(jordopt);
 
-        function findBebyggelse(navn,type) {
-          return function findBebyggelse(bebyggelse) { 
-            return bebyggelse.navn === navn && bebyggelse.type === type;
-          }
-        }
-
-        let bydel= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Grøndal','bydel'));
-        let by= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('København', 'by'));
+    // at most 10 concurrent requests to avoid triggering 429 responses
+    const [vejresponse, postresponse, komresponse, sognresponse,
+      regionresponse, retsresponse, polresponse, opsresponse, afsresponse,
+      jordresponse] =
+      await Promise.all([vejrequest, postrequest, komrequest, sognrequest, regionrequest,
+        retsrequest, polrequest, opsrequest, afsrequest, jordrequest]);
 
 
-        assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 2");
+    const ngvej= {};
+    ngvej.url=adresse.adgangsadresse.navngivenvej.href;
+    ngvej.qs= {};
+    ngvej.qs.cache= 'no-cache';
+    ngvej.json= true;
+    const ngvejrequest= rp(ngvej);
 
-        assert(bydel, 'Mangler bydel Grøndal');
-        assert(by, 'Mangler by København');
+    const ngvejresponse = await ngvejrequest;
 
-        var bydelopt= {};
-        bydelopt.url= bydel.href;
-        bydelopt.qs= {};
-        bydelopt.qs.cache= 'no-cache';
-        bydelopt.resolveWithFullResponse= true;
-        var bydelrequest= rp(bydelopt);
+    assert(adresse.adgangsadresse.vejstykke.kode===vejresponse.kode,"Uoverenstemmelse i vejstykke");
+    assert(adresse.adgangsadresse.postnummer.nr===postresponse.nr,"Uoverenstemmelse i postnummer");
+    assert(adresse.adgangsadresse.kommune.kode===komresponse.kode,"Uoverenstemmelse i kommune");
+    assert(adresse.adgangsadresse.sogn.kode===sognresponse.kode,"Uoverenstemmelse i sogn");
+    assert(adresse.adgangsadresse.region.kode===regionresponse.kode,"Uoverenstemmelse i region");
+    assert(adresse.adgangsadresse.retskreds.kode===retsresponse.kode,"Uoverenstemmelse i retskreds");
+    assert(adresse.adgangsadresse.politikreds.kode===polresponse.kode,"Uoverenstemmelse i politikreds");
+    assert(adresse.adgangsadresse.opstillingskreds.kode===opsresponse.kode,"Uoverenstemmelse i opstillingskreds")
+    assert(adresse.adgangsadresse.afstemningsområde.kode===afsresponse.kode,"Uoverenstemmelse i afstemningsområde")
+    assert(adresse.adgangsadresse.jordstykke.matrikelnr===jordresponse.matrikelnr,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.jordstykke.matrikelnr + ", " + jordresponse.matrikelnr + ")");
+    assert(adresse.adgangsadresse.navngivenvej.id===ngvejresponse.id,"Uoverenstemmelse i jordstykke (" + adresse.adgangsadresse.navngivenvej.id + ", " + ngvejresponse.id + ")");
 
-        var byopt= {};
-        byopt.url= by.href;
-        byopt.qs= {};
-        byopt.qs.cache= 'no-cache';
-        byopt.resolveWithFullResponse= true;
-        var byrequest= rp(byopt);
+    function findBebyggelse(navn,type) {
+      return function findBebyggelse(bebyggelse) {
+        return bebyggelse.navn === navn && bebyggelse.type === type;
+      }
+    }
 
-        Promise.all([bydelrequest, byrequest]).then((responses) => {
-          for (let i= 0; i<responses.length; i++) {
-            assert(response.statusCode===200, "Http status code != 200 (" + response.statusCode + ")");
-            //console.log(responses[i].body);
-            let obj= JSON.parse(responses[i].body); 
-            switch (i) {
-            case 0:
-              assert(bydel.navn===obj.navn,"Uoverenstemmelse i bydel")
-              break;
-            case 1:
-              assert(by.navn===obj.navn,"Uoverenstemmelse i by")
-              break;
-            }
-          }
-          done();
-        })        
-        .catch((err) => {
-          done(err);
-        });
-      })
-    })
-    .catch((err) => {
-      done(err);
-    });
+    const bydel= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('Grøndal','bydel'));
+    const by= adresse.adgangsadresse.bebyggelser.find(findBebyggelse('København', 'by'));
 
+    assert(adresse.adgangsadresse.bebyggelser.length === 2, "Antal bebyggelsestyper != 2");
+
+    assert(bydel, 'Mangler bydel Grøndal');
+    assert(by, 'Mangler by København');
+
+    const bydelopt= {};
+    bydelopt.url= bydel.href;
+    bydelopt.qs= {};
+    bydelopt.qs.cache= 'no-cache';
+    bydelopt.json= true;
+    const bydelrequest= rp(bydelopt);
+
+    const byopt= {};
+    byopt.url= by.href;
+    byopt.qs= {};
+    byopt.qs.cache= 'no-cache';
+    byopt.json= true;
+    const byrequest= rp(byopt);
+
+    const [bydelResponse, byResponse] = await  Promise.all([bydelrequest, byrequest]);
+    assert(bydel.navn===bydelResponse.navn,"Uoverenstemmelse i bydel")
+    assert(by.navn===byResponse.navn,"Uoverenstemmelse i by")
   });
 
   it("Samme indhold json og csv format", function(done){
