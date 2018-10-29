@@ -4,6 +4,7 @@ module.exports = [
   ...require("./afstemningsområde"),
   ...require('./autocomplete'),
   ...require('./bebyggelse'),
+  ...require('./darhistorik'),
   ...require('./ejerlav'),
   ...require('./jordstykke'),
   ...require('./kommune'),

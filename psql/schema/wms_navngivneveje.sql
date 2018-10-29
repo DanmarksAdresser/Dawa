@@ -6,7 +6,7 @@ CREATE VIEW wms_vejnavneomraader AS (
     navn,
     beliggenhed_vejnavneområde as geom
   FROM navngivenvej
-  WHERE beliggenhed_vejnavnelinje IS NOT NULL
+  WHERE beliggenhed_vejnavneområde IS NOT NULL
 );
 
 DROP VIEW IF EXISTS wms_vejnavnelinjer CASCADE;

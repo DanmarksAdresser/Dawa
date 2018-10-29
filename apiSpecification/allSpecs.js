@@ -29,3 +29,4 @@ require('./sted/resources');
 require('./bebyggelse/resources');
 require('./stednavntype/resources');
 require('./bygning/resources');
+require('./history2/resources');

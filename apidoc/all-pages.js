@@ -5,6 +5,7 @@ module.exports = [
   require('./autocomplete-page'),
   require('./bebyggelse-page'),
   require('./bygning-page'),
+  require('./darhistorik-page'),
   require('./ejerlav-page'),
   require("./jordstykke-page"),
   require('./kommune-page'),

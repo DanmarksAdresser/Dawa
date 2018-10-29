@@ -77,7 +77,7 @@ var stream = function(client, sqlParts, cb) {
 module.exports =  {
   addSqlParameter: addSqlParameter,
   addWhereClause: addWhereClause,
-  createQuery: createQuery,
+  createQuery,
   streamingQueryUsingCursor: streamingQueryUsingCursor,
   query: query,
   queryRaw: queryRaw,

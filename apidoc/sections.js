@@ -1,4 +1,4 @@
-const bbrOrder = ['enhed', 'bygning', 'tekniskanlaeg','ejerskab', 'grund', 'matrikelreference', 'opgang', 'etage', 'bygningspunkt', 'kommune'];
+const bbrOrder = ['enhed', 'bygning', 'tekniskanlaeg', 'ejerskab', 'grund', 'matrikelreference', 'opgang', 'etage', 'bygningspunkt', 'kommune'];
 
 module.exports = [{
   name: 'Adresser',
@@ -9,7 +9,7 @@ module.exports = [{
   name: 'DAGI',
   headingClass: 'h2-icon h2-dagi',
   lead: 'For en generel introduktion til DAGI, se <a href="/dok/dagi">her<a/>.',
-  entities: ['afstemningsområde', 'kommune', 'menighedsrådsafstemningsområde','opstillingskreds', 'politikreds', 'postnummer', 'region', 'retskreds', 'sogn', 'storkreds', 'supplerendebynavn2', 'valglandsdel']
+  entities: ['afstemningsområde', 'kommune', 'menighedsrådsafstemningsområde', 'opstillingskreds', 'politikreds', 'postnummer', 'region', 'retskreds', 'sogn', 'storkreds', 'supplerendebynavn2', 'valglandsdel']
 }, {
   name: 'Matrikelkortet',
   headingClass: 'h2-icon h2-matrikel',
@@ -38,4 +38,10 @@ module.exports = [{
     lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af de data som DAWA udstiller.
  <a href="/dok/guide/replikering">Replikerings-guiden</a> anviser hvordan API'et benyttes.`,
     entities: ['replikering', 'replikering-forældet']
+  },
+  {
+    name: `Experimentielle API'er`,
+    headingClass: 'h2-icon',
+    lead: `Experimentielle API'er.`,
+    entities: ['darhistorik']
   }];
