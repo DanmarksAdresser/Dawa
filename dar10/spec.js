@@ -206,6 +206,12 @@ const sqlIndices = {
   SupplerendeBynavn: [['supplerendebynavn1']],
 };
 
+const historyIndices = {
+  NavngivenVejKommunedel: [
+    ['navngivenvej_id']
+  ]
+};
+
 module.exports = {
   entities: Object.keys(schemas),
   schemas: schemas,
@@ -213,7 +219,8 @@ module.exports = {
   fieldTransforms: fieldTransforms,
   sqlTypes: sqlTypes,
   sqlIndices: sqlIndices,
-  sqlIndicesHistory: sqlIndicesHistory
+  sqlIndicesHistory: sqlIndicesHistory,
+  historyIndices
 };
 
 

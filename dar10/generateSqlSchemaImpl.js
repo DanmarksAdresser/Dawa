@@ -33,6 +33,10 @@ const getAdditionalCurrentIndices = entityName => {
   const indicesSpec = spec.sqlIndices[entityName] || [];
   return indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_current(${indexSpec.join(',')});`).join('\n')
 };
+const getAdditionalHistoryIndices = entityName => {
+  const indicesSpec = spec.historyIndices[entityName] || [];
+  return indicesSpec.map(indexSpec => `CREATE INDEX ON dar1_${entityName}_history(${indexSpec.join(',')});`).join('\n')
+};
 const entityNames = Object.keys(schemas);
 
 const ddlStatements = entityNames.map(entityName => {
@@ -49,6 +53,7 @@ const ddlStatements = entityNames.map(entityName => {
     `${getTableSql(historyTableModel)};
     ${getDomainKeyIndex(historyTableModel)};
     ${getVirkningIndices(historyTableModel)};
+    ${getAdditionalHistoryIndices(entityName)};
     ${getChangeTableSql(historyTableModel)};
     `;
 

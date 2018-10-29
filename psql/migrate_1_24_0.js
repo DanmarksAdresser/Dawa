@@ -25,12 +25,11 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     yield withImportTransaction(client, 'migrate_1_24_0', txid => go(function* () {
       yield client.query(fs.readFileSync('psql/schema/tables/supplerendebynavn2_postnr.sql', {encoding: 'utf8'}));
       yield createChangeTable(client, tableSchema.tables.supplerendebynavn2_postnr);
-      // const sql = ``
-      // ;
-      //
-      // for(let stmt of sql.split(';')) {
-      //   yield client.query(stmt);
-      // }
+      const sql = `CREATE INDEX ON dar1_navngivenvejkommunedel_history(navngivenvej_id)`;
+
+      for(let stmt of sql.split(';')) {
+        yield client.query(stmt);
+      }
     }));
     yield reloadDatabaseCode(client, 'psql/schema');
     yield withImportTransaction(client, 'migrate_1_24_0', txid => go(function* () {
