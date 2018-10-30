@@ -4,12 +4,14 @@ var _ = require('underscore');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
 var registry = require('../registry');
+const parameterSchema = require('../parameterSchema');
 
 var kodeAndNavn = {
   id: normalizeParameters([
     {
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     }
   ]),
   propertyFilter: normalizeParameters([
@@ -20,7 +22,8 @@ var kodeAndNavn = {
     {
       name: 'kode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     }
   ])
 };
@@ -34,7 +37,8 @@ module.exports.kommune = {
   id: normalizeParameters([
     {
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     }
   ]),
   propertyFilter: normalizeParameters([
@@ -45,12 +49,15 @@ module.exports.kommune = {
     {
       name: 'kode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
+
     },
     {
       name: 'regionskode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'udenforkommuneinddeling',
@@ -63,7 +70,8 @@ module.exports.landpostnummer = {
   id: normalizeParameters([
     {
       name: 'nr',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     }
   ]),
   propertyFilter: normalizeParameters([
@@ -74,7 +82,8 @@ module.exports.landpostnummer = {
     {
       name: 'nr',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     }
   ])
 };
@@ -84,7 +93,8 @@ module.exports.opstillingskreds = {
   id: normalizeParameters([
     {
       name: 'kode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     }
   ]),
   propertyFilter: normalizeParameters([
@@ -101,7 +111,8 @@ module.exports.opstillingskreds = {
     {
       name: 'kode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'navn',
@@ -110,12 +121,14 @@ module.exports.opstillingskreds = {
     {
       name: 'kredskommunekode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'regionskode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'storkredsnummer',
@@ -128,7 +141,8 @@ module.exports.opstillingskreds = {
     },
     {
       name: 'kommunekode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     }
   ])
 };
@@ -175,7 +189,8 @@ module.exports.afstemningsområde = {
   id: normalizeParameters([
     {
       name: 'kommunekode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     },
     {
       name: 'nummer',
@@ -191,12 +206,14 @@ module.exports.afstemningsområde = {
     },
     {
       name: 'kommunekode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     },
     {
       name: 'regionskode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'opstillingskredsnummer',
@@ -219,7 +236,8 @@ module.exports.menighedsrådsafstemningsområde = {
   id: normalizeParameters([
     {
       name: 'kommunekode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     },
     {
       name: 'nummer',
@@ -235,7 +253,8 @@ module.exports.menighedsrådsafstemningsområde = {
     {
       name: 'kommunekode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'nummer',
@@ -245,7 +264,8 @@ module.exports.menighedsrådsafstemningsområde = {
     {
       name: 'sognekode',
       type: 'integer',
-      multi: true
+      multi: true,
+      schema: parameterSchema.kode4
     },
     {
       name: 'navn',
@@ -269,7 +289,8 @@ module.exports.supplerendebynavn = {
     },
     {
       name: 'kommunekode',
-      type: 'integer'
+      type: 'integer',
+      schema: parameterSchema.kode4
     },
     {
       name: 'navn',

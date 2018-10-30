@@ -60,10 +60,11 @@ var valuesNeverExpectedToBeSeen = {
   },
   navngivneveje: {
     beskrivelse: true,
-    vejstykker: {
-      href: true,
-      kommunekode: true,
-      kode: true
+    beliggenhed: {
+      vejtilslutningspunkter: {
+        type: true,
+        coordinates: true
+      }
     }
   }
 };

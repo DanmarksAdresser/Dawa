@@ -137,27 +137,32 @@ exports.propertyFilter = normalizeParameters([
   {
     name: 'regionskode',
     type: 'integer',
-    multi: true
+    multi: true,
+    schema: schema.kode4
   },
   {
     name: 'opstillingskredskode',
     type: 'integer',
-    multi: true
+    multi: true,
+    schema: schema.kode4
   },
   {
     name: 'politikredskode',
     type: 'integer',
-    multi: true
+    multi: true,
+    schema: schema.kode4
   },
   {
     name: 'sognekode',
     type: 'integer',
-    multi: true
+    multi: true,
+    schema: schema.kode4
   },
   {
     name: 'retskredskode',
     type: 'integer',
-    multi: true
+    multi: true,
+    schema: schema.kode4
   },
   {
     name: 'zone',

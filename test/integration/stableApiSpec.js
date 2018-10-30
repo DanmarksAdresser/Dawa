@@ -734,7 +734,7 @@ describe('Stable API', () => {
           "matrikelnr": null,
           "historik": {
             "oprettet": "2000-02-05T06:08:50.000",
-            "ændret": "2018-05-03T18:58:34.000"
+            "ændret": "2018-07-04T18:00:00.000"
           },
           "adgangspunkt": {
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
@@ -823,7 +823,7 @@ describe('Stable API', () => {
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
             "status": 1,
             "oprettet": "2000-02-05T06:08:50.000",
-            "ændret": "2018-05-03T18:58:34.000",
+            "ændret": "2018-07-04T18:00:00.000",
             "vejkode": "0855",
             "vejnavn": "Brammingevej",
             "vejpunkt_id": "16147a6a-af45-11e7-847e-066cff24d637",
@@ -909,7 +909,7 @@ describe('Stable API', () => {
             "id": "0a3f5081-c394-32b8-e044-0003ba298018",
             "status": 1,
             "oprettet": "2000-02-05T21:40:29.000",
-            "ændret": "2018-05-03T18:58:34.000",
+            "ændret": "2018-07-04T18:00:00.000",
             "vejkode": "0347",
             "vejnavn": "Jonstrupvej",
             "adresseringsvejnavn": "Jonstrupvej",
@@ -1053,7 +1053,7 @@ describe('Stable API', () => {
             "matrikelnr": null,
             "historik": {
               "oprettet": "2000-02-05T06:08:50.000",
-              "ændret": "2018-05-03T18:58:34.000"
+              "ændret": "2018-07-04T18:00:00.000"
             },
             "adgangspunkt": {
               "id": "0a3f5089-0408-32b8-e044-0003ba298018",
@@ -1184,7 +1184,7 @@ describe('Stable API', () => {
             "adgangsadresseid": "0a3f5089-0408-32b8-e044-0003ba298018",
             "adgangsadresse_status": 1,
             "adgangsadresse_oprettet": "2000-02-05T06:08:50.000",
-            "adgangsadresse_ændret": "2018-05-03T18:58:34.000",
+            "adgangsadresse_ændret": "2018-07-04T18:00:00.000",
             "regionskode": null,
             "regionsnavn": null,
             "jordstykke_ejerlavnavn": null,
@@ -1249,7 +1249,7 @@ describe('Stable API', () => {
           "beliggenhed": {
             "oprindelse": {
               "kilde": "Ekstern",
-              "tekniskstandard": "N0",
+              "tekniskstandard": "NO",
               "registrering": "2018-05-03T15:57:30.356Z",
               "nøjagtighedsklasse": "B"
             },
@@ -1288,7 +1288,7 @@ describe('Stable API', () => {
           "beliggenhed_oprindelse_kilde": "Ekstern",
           "beliggenhed_oprindelse_nøjagtighedsklasse": "B",
           "beliggenhed_oprindelse_registrering": "2018-05-03T15:57:30.356Z",
-          "beliggenhed_oprindelse_tekniskstandard": "N0",
+          "beliggenhed_oprindelse_tekniskstandard": "NO",
           "beliggenhed_geometritype": "vejnavnelinje",
           "bbox_xmax": 10.09861676,
           "bbox_xmin": 10.09803611,
@@ -1342,7 +1342,7 @@ describe('Stable API', () => {
             "beliggenhed_oprindelse_kilde": "Ekstern",
             "beliggenhed_oprindelse_nøjagtighedsklasse": "B",
             "beliggenhed_oprindelse_registrering": "2018-05-03T15:57:30.356Z",
-            "beliggenhed_oprindelse_tekniskstandard": "N0",
+            "beliggenhed_oprindelse_tekniskstandard": "NO",
             "beliggenhed_geometritype": "vejnavnelinje",
             "visueltcenter_x": 10.09839859,
             "visueltcenter_y": 55.37194497

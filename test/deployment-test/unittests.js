@@ -4529,44 +4529,30 @@ describe('Steder', function(){
 
 describe('Brofast', function(){
 
-  it("ø", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='steder';
-    options.qs= {};
-    options.qs.hovedtype= "Landskabsform";
-    options.qs.undertype= "ø";
-    options.qs.primærtnavn="Sejerø";
-    options.qs.cache= 'no-cache';
-    options.resolveWithFullResponse= true;
-    rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var steder= JSON.parse(response.body);
-      assert(steder.length===1, "Der er burde være 1: "+steder.length);
-      assert(steder[0].egenskaber.brofast===false, "Sejerø burde ikke være brofast: "+steder[0].egenskaber.brofast);
-      done();
-    })
-    .catch((err) => {
-      done(err);
-    });
+  it("ø", async () => {
+    var options = {};
+    options.baseUrl = host;
+    options.url = 'steder';
+    options.qs = {};
+    options.qs.hovedtype = "Landskabsform";
+    options.qs.undertype = "ø";
+    options.qs.primærtnavn = "Sejerø";
+    options.qs.cache = 'no-cache';
+    options.json = true;
+    const steder = await rp(options);
+    assert(steder.length === 1, "Der er burde være 1: " + steder.length);
+    assert(steder[0].egenskaber.brofast === false, "Sejerø burde ikke være brofast: " + steder[0].egenskaber.brofast);
   });
 
-  it("adgangsadresse", function(done){
+  it("adgangsadresse", async () => {
     var options= {};
     options.baseUrl= host;
     options.url='/adgangsadresser/0a3f5082-88a1-32b8-e044-0003ba298018';
     options.qs= {};
     options.qs.cache= 'no-cache';
-    options.resolveWithFullResponse= true;
-    rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adgangsadresse= JSON.parse(response.body);
-      assert(adgangsadresse.brofast===false, "En adgangsadresse på Sejerø burde ikke være brofast: "+adgangsadresse.brofast);
-      done();
-    })
-    .catch((err) => {
-      done(err);
-    });
+    options.json= true;
+    const adgangsadresse = await rp(options);
+    assert(adgangsadresse.brofast===false, "En adgangsadresse på Sejerø burde ikke være brofast: "+adgangsadresse.brofast);
   });
 
   it("adresse", function(done){
