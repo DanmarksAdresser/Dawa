@@ -211,7 +211,8 @@ const importLandpostnummer = (client, txid) =>  {
     navn,
     st_multi(ST_CollectionExtract(st_intersection(dkgeom, geom), 3)) as geom
   FROM dagi_postnumre
-    JOIN dkgeom on true)`)
+    JOIN dkgeom on true);
+    update desired set geom=null where st_isempty(geom)`);
   };
   return importTemaer(client, txid, ['landpostnummer'], null, null, 10000000, storeTemaFn);
 };

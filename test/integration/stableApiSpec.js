@@ -617,31 +617,37 @@ describe('Stable API', () => {
     json: {
       nestet: [{
         params: {
-          dagi_id: "100116"
+          dagi_id: "665614"
         },
         value: {
-          "href": "http://dawa/supplerendebynavne2/100116",
-          "dagi_id": "100116",
-          "ændret": "2018-05-02T06:50:28.217Z",
+          "ændret": "2018-10-30T09:44:46.588Z",
           "geo_version": 1,
-          "geo_ændret": "2018-05-02T06:50:28.217Z",
+          "geo_ændret": "2018-10-30T09:44:46.588Z",
           "bbox": [
-            12.5711324,
-            55.59055443,
-            12.57129891,
-            55.59064873
+            12.27501501,
+            55.64787833,
+            12.27504823,
+            55.64789712
           ],
           "visueltcenter": [
-            12.57121565,
-            55.59060158
+            12.27503162,
+            55.64788773
           ],
-          "navn": "Supplerende bynavn test",
+          "href": "http://dawa/supplerendebynavne2/665614",
+          "dagi_id": "665614",
+          "navn": "Høje Taastrup",
           "kommune": {
-            "href": "http://dawa/kommuner/101",
-            "kode": "0101",
-            "navn": "København"
+            "href": "http://dawa/kommuner/169",
+            "kode": "0169",
+            "navn": "Høje-Taastrup"
           },
-          "postnumre": []
+          "postnumre": [
+            {
+              "href": "http://dawa/postnumre/2630",
+              "nr": "2630",
+              "navn": "Taastrup"
+            }
+          ]
         }
       }],
         flad
