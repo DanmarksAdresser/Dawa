@@ -65,6 +65,9 @@ module.exports = {
       sqlParameterImpl.simplePropertyFilter(parameters.id, columns)(query, params);
       const {sql, params: sqlParams} = dbapi.createQuery(query);
       const queryResult = yield client.queryRows(sql, sqlParams);
+      if(queryResult.length === 0) {
+        return queryResult;
+      }
       for (let spec of specs) {
         const excludedColumns = ['rowkey', 'virkningstart', 'virkningslut', ...(spec.excluded || [])];
         const model = replikeringDatamodels[spec.entity];
