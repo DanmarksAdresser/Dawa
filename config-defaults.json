@@ -95,6 +95,24 @@
     "default": 5000
   },
   {
+    "name": "connectionScheduler.slots",
+    "description": "Maksimale antal åbne databaseforbindelser",
+    "type": "number",
+    "default": 200
+  },
+  {
+    "name": "connectionScheduler.slotsPerSource",
+    "description": "Maksimalt antal forbindelser pr. klient-IP",
+    "type": "number",
+    "default": 10
+  },
+  {
+    "name": "connectionScheduler.timeout",
+    "description": "Maksimal ventetid for release af connection",
+    "type": "number",
+    "default": 7200000
+  },
+  {
     "name": "socketTimeoutMillis",
     "description": "Socket timeout",
     "type": "number",

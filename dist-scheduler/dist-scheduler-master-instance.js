@@ -12,10 +12,11 @@ const querySchedulerOpts = {
   timeout: config.getOption('scheduler.timeoutMillis')
 };
 
+
 const connectionSchedulerOpts = {
-  slots: 150,
-  slotsPerSource: 10,
-  timeout: 1000 * 60 * 60
+  slots: config.getOption('connectionScheduler.slots'),
+  slotsPerSource: config.getOption('connectionScheduler.slotsPerSource'),
+  timeout: config.getOption('connectionScheduler.timeout'),
 };
 
 
