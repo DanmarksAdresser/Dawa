@@ -33,7 +33,7 @@ module.exports = {
               <li> en del af en bygning, fx en etage eller en bolig- eller erhvervs¬enhed i en bygning</li> 
             </ul>  
             <p>Forskellen på en adresse og en adgangsadresse er at adressen rummer eventuel etage- og/eller dørbetegnelse. Det gør adgangsadressen ikke.</p>
-            <p>p Web API'et udstiller for hver adresse følgende informationer:</p>
+            <p>Web API'et udstiller for hver adresse følgende informationer:</p>
             `,
       entity: 'adresse',
       qualifier: 'json'
