@@ -28,8 +28,7 @@ const additionalColumnsMap = {
       column: 't.afstemningsstedadresse'
     },
     afstemningsstedadressebetegnelse: {
-      select: `(select adressebetegnelse(vejnavn, husnr, null::text, null::text, supplerendebynavn, postnr::text, postnrnavn ) from
-      adgangsadresser_mat where adgangsadresser_mat.id = t.afstemningsstedadresse)`
+      select: `adressebetegnelse(vejnavn, husnr, null::text, null::text, supplerendebynavn, postnr::text, postnrnavn )`
     },
     kommunekode: {
       column: 'k.kode',
@@ -60,6 +59,18 @@ const additionalColumnsMap = {
     },
     valglandsdelsnavn: {
       column: 'v.navn'
+    },
+    afstemningssted_adgangspunkt_x: {
+      select: (sqlParts, sqlModel, params) => {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return postgisSqlUtil.selectX(params.srid || 4326, sridAlias, 'adgangspunkt_geom');
+      }
+    },
+    afstemningssted_adgangspunkt_y: {
+      select: (sqlParts, sqlModel, params) => {
+        const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+        return postgisSqlUtil.selectY(params.srid || 4326, sridAlias, 'adgangspunkt_geom');
+      }
     }
   },
   opstillingskreds: {
@@ -194,7 +205,9 @@ const baseQueries = {
       join regioner r on k.regionskode = r.kode
       join opstillingskredse o on t.opstillingskreds_dagi_id = o.dagi_id
       join storkredse s on o.storkredsnummer = s.nummer
-      join valglandsdele v on s.valglandsdelsbogstav = v.bogstav`],
+      join valglandsdele v on s.valglandsdelsbogstav = v.bogstav
+      natural left join (select id as afstemningsstedadresse, geom as adgangspunkt_geom,
+      vejnavn, husnr, supplerendebynavn, postnr, postnrnavn from adgangsadresser_mat) a`],
       whereClauses: [],
       orderClauses: [],
       sqlParams: []

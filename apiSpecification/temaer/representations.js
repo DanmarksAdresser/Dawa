@@ -153,7 +153,8 @@ const afstemningsområdeJsonRepresentation = (() => {
         adgangsadresse: {
           href: makeHref(baseUrl, 'adgangsadresse', [row.afstemningsstedadresseid]),
           id: row.afstemningsstedadresseid,
-          adressebetegnelse: row.afstemningsstedadressebetegnelse
+          adressebetegnelse: row.afstemningsstedadressebetegnelse,
+          koordinater: [row.afstemningssted_adgangspunkt_x, row.afstemningssted_adgangspunkt_y]
         }
       },
       kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
@@ -205,9 +206,15 @@ const afstemningsområdeJsonRepresentation = (() => {
               adressebetegnelse: {
                 type: 'string',
                 description: 'Adressebetegnelse for adgangsadressen.'
+              },
+              koordinater: {
+                type: 'array',
+                items: {
+                  type: 'number'
+                }
               }
             },
-            docOrder: ['href', 'id', 'adressebetegnelse']
+            docOrder: ['href', 'id', 'adressebetegnelse', 'koordinater']
           })
         },
         docOrder: ['navn', 'adgangsadresse']

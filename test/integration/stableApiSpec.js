@@ -347,7 +347,11 @@ describe('Stable API', () => {
             "adgangsadresse": {
               "href": "http://dawa/adgangsadresser/0a3f5089-86cc-32b8-e044-0003ba298018",
               "id": "0a3f5089-86cc-32b8-e044-0003ba298018",
-              "adressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V"
+              "adressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
+              "koordinater": [
+                10.34422438,
+                55.39575418
+              ]
             }
           },
           "kommune": {
@@ -390,6 +394,8 @@ describe('Stable API', () => {
             "afstemningsstednavn": "Dåstrup Skole, HALLEN",
             "afstemningsstedadresseid": "0a3f5089-86cc-32b8-e044-0003ba298018",
             "afstemningsstedadressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
+            "afstemningssted_adgangspunkt_x": 10.34422438,
+            "afstemningssted_adgangspunkt_y": 55.39575418,
             "kommunekode": "0099",
             "kommunenavn": "Kommune test",
             "regionskode": "1084",
@@ -479,7 +485,11 @@ describe('Stable API', () => {
                 "adgangsadresse": {
                   "href": "http://dawa/adgangsadresser/0a3f5089-86cc-32b8-e044-0003ba298018",
                   "id": "0a3f5089-86cc-32b8-e044-0003ba298018",
-                  "adressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V"
+                  "adressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
+                  "koordinater": [
+                    10.34422438,
+                    55.39575418
+                  ]
                 }
               },
               "kommune": {

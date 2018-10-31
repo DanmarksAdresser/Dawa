@@ -28,6 +28,12 @@ const additionalFieldsMap = {
       name: 'afstemningsstedadressebetegnelse'
     },
     {
+      name: 'afstemningssted_adgangspunkt_x'
+    },
+    {
+      name: 'afstemningssted_adgangspunkt_y'
+    },
+    {
       name: 'kommunekode',
       formatter: kode4String
     },
