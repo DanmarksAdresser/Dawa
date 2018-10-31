@@ -377,50 +377,147 @@ describe('Stable API', () => {
           }
         }
       }],
-        flad
-    :
-      [{
-        params: {
-          kommunekode: '99',
-          nummer: '20'
-        },
-        value: {
-          "dagi_id": "704390",
-          "nummer": "20",
-          "navn": "Dåstrup",
-          "afstemningsstednavn": "Dåstrup Skole, HALLEN",
-          "afstemningsstedadresseid": "0a3f5089-86cc-32b8-e044-0003ba298018",
-          "afstemningsstedadressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
-          "kommunekode": "0099",
-          "kommunenavn": "Kommune test",
-          "regionskode": "1084",
-          "regionsnavn": "Region test",
-          "opstillingskredsnummer": "99",
-          "opstillingskredsnavn": "Opstillingskreds test",
-          "storkredsnummer": "1",
-          "storkredsnavn": "Storkreds test",
-          "valglandsdelsbogstav": "A",
-          "valglandsdelsnavn": "Valglandsdel test",
-          "ændret": "2018-05-02T06:50:28.217Z",
-          "geo_ændret": "2018-05-02T06:50:28.217Z",
-          "bbox_xmax": 12.57129891,
-          "bbox_xmin": 12.5711324,
-          "bbox_ymax": 55.59064873,
-          "bbox_ymin": 55.59055443,
-          "visueltcenter_x": 12.57121565,
-          "visueltcenter_y": 55.59060158,
-          "geo_version": 1
-        }
-      }]
+      flad:
+        [{
+          params: {
+            kommunekode: '99',
+            nummer: '20'
+          },
+          value: {
+            "dagi_id": "704390",
+            "nummer": "20",
+            "navn": "Dåstrup",
+            "afstemningsstednavn": "Dåstrup Skole, HALLEN",
+            "afstemningsstedadresseid": "0a3f5089-86cc-32b8-e044-0003ba298018",
+            "afstemningsstedadressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V",
+            "kommunekode": "0099",
+            "kommunenavn": "Kommune test",
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
+            "opstillingskredsnummer": "99",
+            "opstillingskredsnavn": "Opstillingskreds test",
+            "storkredsnummer": "1",
+            "storkredsnavn": "Storkreds test",
+            "valglandsdelsbogstav": "A",
+            "valglandsdelsnavn": "Valglandsdel test",
+            "ændret": "2018-05-02T06:50:28.217Z",
+            "geo_ændret": "2018-05-02T06:50:28.217Z",
+            "bbox_xmax": 12.57129891,
+            "bbox_xmin": 12.5711324,
+            "bbox_ymax": 55.59064873,
+            "bbox_ymin": 55.59055443,
+            "visueltcenter_x": 12.57121565,
+            "visueltcenter_y": 55.59060158,
+            "geo_version": 1
+          }
+        }]
+    },
+    geojson: {
+      nestet: [
+        {
+          params: {
+            kommunekode: '99',
+            nummer: '20'
+          },
+          value: {
+            "type": "Feature",
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": [
+                [
+                  [
+                    [
+                      12.5711324,
+                      55.59055905
+                    ],
+                    [
+                      12.57129076,
+                      55.59055443
+                    ],
+                    [
+                      12.57129891,
+                      55.59064411
+                    ],
+                    [
+                      12.57114055,
+                      55.59064873
+                    ],
+                    [
+                      12.5711324,
+                      55.59055905
+                    ]
+                  ]
+                ]
+              ]
+            },
+            "crs": {
+              "type": "name",
+              "properties": {
+                "name": "EPSG:4326"
+              }
+            },
+            "properties": {
+              "ændret": "2018-10-30T09:44:46.588Z",
+              "geo_version": 1,
+              "geo_ændret": "2018-10-30T09:44:46.588Z",
+              "bbox": [
+                12.5711324,
+                55.59055443,
+                12.57129891,
+                55.59064873
+              ],
+              "visueltcenter": [
+                12.57121565,
+                55.59060158
+              ],
+              "href": "http://dawa/afstemningsomraader/99/20",
+              "dagi_id": "704390",
+              "nummer": "20",
+              "navn": "Dåstrup",
+              "afstemningssted": {
+                "navn": "Dåstrup Skole, HALLEN",
+                "adgangsadresse": {
+                  "href": "http://dawa/adgangsadresser/0a3f5089-86cc-32b8-e044-0003ba298018",
+                  "id": "0a3f5089-86cc-32b8-e044-0003ba298018",
+                  "adressebetegnelse": "Møllemarksvej 27C, Bolbro, 5200 Odense V"
+                }
+              },
+              "kommune": {
+                "href": "http://dawa/kommuner/99",
+                "kode": "0099",
+                "navn": "Kommune test"
+              },
+              "region": {
+                "href": "http://dawa/regioner/1084",
+                "kode": "1084",
+                "navn": "Region test"
+              },
+              "opstillingskreds": {
+                "href": "http://dawa/opstillingskredse/99",
+                "nummer": "99",
+                "navn": "Opstillingskreds test"
+              },
+              "storkreds": {
+                "href": "http://dawa/storkredse/1",
+                "nummer": "1",
+                "navn": "Storkreds test"
+              },
+              "valglandsdel": {
+                "href": "http://dawa/valglandsdele/A",
+                "bogstav": "A",
+                "navn": "Valglandsdel test"
+              }
+            }
+          }
+        }]
     }
-  }
-,
-  opstillingskreds: {
-    json: {
-      nestet: [{
-        params: {
-          nummer: '99'
-        },
+  }   ,
+    opstillingskreds: {
+      json: {
+        nestet: [{
+            params: {
+              nummer: '99'
+            },
         value: {
           "href": "http://dawa/opstillingskredse/99",
           "dagi_id": "100104",
@@ -1373,6 +1470,13 @@ describe('Stable API', () => {
       json: {
         flad: {'geo_ændret': true, 'ændret': true},
         nestet: {'geo_ændret': true, 'ændret': true}
+      },
+      geojson: {
+        nestet: {
+          properties: {
+            'geo_ændret': true, 'ændret': true
+          }
+        }
       }
     },
     opstillingskreds: {
