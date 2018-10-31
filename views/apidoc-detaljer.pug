@@ -5,7 +5,7 @@ include includes/renderSidebar
 mixin renderSections(sections, nesting)
   each section in sections
     #{'h' + nesting}(id=section.anchor) #{section.heading}
-    div.lead !{section.lead}
+    div !{section.lead}
     if section.type === 'endpoint'
       +documentResource2(docUtil.getDocForPath(section.path))
     if section.type === 'datadescription'
