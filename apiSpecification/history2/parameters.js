@@ -39,12 +39,16 @@ module.exports = {
         if(!entity) {
           return;
         }
-        const specs = specMap[entity];
-        if(!specs) {
+        const entities = specMap[entity].entities;
+        if(!entities) {
           return;
         }
         const requestedAttributes = attributeParam.split(',');
-        const allSpecifiedAttributes = getAllAttributeNames(specs);
+        const derivedAttrNames = _.pluck(specMap[entity].derivedFields, 'fieldName');
+        const allSpecifiedAttributes = getAllAttributeNames(entities);
+        for(let attr of derivedAttrNames) {
+          allSpecifiedAttributes.add(attr);
+        }
         for(let attr of requestedAttributes) {
           if(!allSpecifiedAttributes.has(attr)) {
             throw `Attributten ${attr} er ikke en gyldig attribut for ${params.entitet}`;

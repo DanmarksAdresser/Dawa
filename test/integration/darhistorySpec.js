@@ -54,6 +54,22 @@ describe('darhistory', () => {
         assert(change.ændringer.length > 0);
       }
     }));
+    it('Leverer adressebetegnelsesfelt for husnummer', () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), resource, {}, {
+        id: '0a3f5089-a6c1-32b8-e044-0003ba298018',
+        entitet: 'husnummer',
+        attributter: 'adressebetegnelse'
+      });
+      assert.strictEqual(result.aktuelværdi.adressebetegnelse, 'Rugårdsvej 2, Villestofte, 5210 Odense NV');
+    }));
+    it('Leverer adressebetegnelsesfelt for adresse', () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), resource, {}, {
+        id: '01ffcb65-c425-4cee-9145-bef6570f34bb',
+        entitet: 'adresse',
+        attributter: 'adressebetegnelse'
+      });
+      assert.strictEqual(result.aktuelværdi.adressebetegnelse, 'Ridehusgade 49, 2. th, 5000 Odense C');
+    }));
   });
 });
 

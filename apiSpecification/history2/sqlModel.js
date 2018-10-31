@@ -54,25 +54,25 @@ module.exports = {
   allSelectableFields: [],
   processQuery: function (client, fieldNames, params) {
     return client.withReservedSlot(() => go(function* () {
-      const entity = params.entitet;
-      const specs = specMap[entity];
+      const baseEntity = params.entitet;
+      const entities = specMap[baseEntity].entities;
       const columns = {
         id: {
-          column: `${specs[0].alias}.id`
+          column: `${entities[0].alias}.id`
         }
       };
-      const query = baseQuery(specs);
+      const query = baseQuery(entities);
       sqlParameterImpl.simplePropertyFilter(parameters.id, columns)(query, params);
       const {sql, params: sqlParams} = dbapi.createQuery(query);
       const queryResult = yield client.queryRows(sql, sqlParams);
       if(queryResult.length === 0) {
         return queryResult;
       }
-      for (let spec of specs) {
-        const excludedColumns = ['rowkey', 'virkningstart', 'virkningslut', ...(spec.excluded || [])];
-        const model = replikeringDatamodels[spec.entity];
-        const binding = replikeringBindings[spec.entity];
-        const alias = spec.alias;
+      for (let entitySpec of entities) {
+        const excludedColumns = ['rowkey', 'virkningstart', 'virkningslut', ...(entitySpec.excluded || [])];
+        const model = replikeringDatamodels[entitySpec.entity];
+        const binding = replikeringBindings[entitySpec.entity];
+        const alias = entitySpec.alias;
         _.pluck(model.attributes, 'name')
           .filter(attName => !excludedColumns.includes(attName))
           .forEach(attName => {

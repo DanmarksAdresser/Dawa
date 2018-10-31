@@ -1,10 +1,16 @@
 const _ = require('underscore');
 
+const specMap = require('./spec');
 module.exports = {
   json: {
     fields: [],
     mapper: (baseUrl, params) => row => {
       const rows = row.queryResult;
+      for(let {fieldName, derive} of specMap[params.entitet].derivedFields) {
+        for(let row of rows) {
+          row[fieldName] = derive(row);
+        }
+      }
       let fieldNames = _.without(Object.keys(rows[0]), 'ændringstidspunkt');
       if(params.attributter) {
         fieldNames = params.attributter.split(',');
