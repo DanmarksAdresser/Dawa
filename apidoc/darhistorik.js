@@ -33,8 +33,24 @@ const examples = [
       name: 'entitet',
       value: 'navngivenvej'
     }]
+  },
+  {
+    description: 'Modtag historik for attributterne "adressebetegnelse" og "navngivenvej_vejnavn" for adressen med ID "0a3f50a0-7b75-32b8-e044-0003ba298018"',
+    query: [
+      {
+        name: 'entitet',
+        value: 'adresse'
+      },
+      {
+        name: 'id',
+        value: '0a3f50a0-7b75-32b8-e044-0003ba298018'
+      },
+      {
+        name: 'attributter',
+        value: 'adressebetegnelse,navngivenvej_vejnavn'
+      }
+    ]
   }];
-
 module.exports = [
   {
     entity: 'darhistorik',

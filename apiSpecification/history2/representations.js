@@ -43,8 +43,8 @@ module.exports = {
       return {
         oprettettidspunkt: createdTime,
         initielværdi: initialValue,
-        aktuelværdi: actualValue,
-        historik: changeDescriptions
+        historik: changeDescriptions,
+        aktuelværdi: actualValue
       };
     }
   }
