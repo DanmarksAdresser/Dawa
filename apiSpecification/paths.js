@@ -49,5 +49,5 @@ exports.baseUrl = function (req) {
 // Returns the URL to an object based on the name of the entity and the key(s). For example, a
 // vejstykke with kommunekode 101 and vejkode 202 would result in URL /vejstykker/101/202
 exports.getByKey = function(baseUrl, entityName, keyArray) {
-  return baseUrl +'/' + encodeURIComponent(map[entityName].plural) + '/' + _.map(keyArray, encodeURIComponent).join('/');
+  return baseUrl +'/' + encodeURIComponent(map[entityName].path || map[entityName].plural) + '/' + _.map(keyArray, encodeURIComponent).join('/');
 };

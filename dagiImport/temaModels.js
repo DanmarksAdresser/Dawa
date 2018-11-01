@@ -417,10 +417,10 @@ exports.modelList = [{
   {
     singular: 'afstemningsområde',
     singularSpecific: 'afstemningsområdet',
-    plural: 'afstemningsomraader',
+    plural: 'afstemningsområder',
     prefix: 'aftemningsområde',
     primaryKey: ['kommunekode', 'nummer'],
-    path: '/afstemningsomraader',
+    path: 'afstemningsomraader',
     published: true,
     searchable: true,
     table: 'afstemningsomraader',
@@ -490,7 +490,7 @@ exports.modelList = [{
     primaryKey: ['kommunekode', 'nummer'],
     published: true,
     searchable: true,
-    path: '/menighedsraadsafstemningsomraader',
+    path: 'menighedsraadsafstemningsomraader',
     table: 'menighedsraadsafstemningsomraader',
     fields: [
       {
@@ -552,7 +552,7 @@ exports.modelList = [{
     prefix: 'supplerendebynavn',
     primaryKey: ['dagi_id'],
     published: true,
-    path: '/supplerendebynavne2',
+    path: 'supplerendebynavne2',
     searchable: true,
     table: 'dagi_supplerendebynavne',
     fields: [

@@ -126,7 +126,7 @@ const dagiAutocompleteDoc = (tema, examples) => {
 };
 
 const dagiReverseDoc = (tema) => {
-  const basePath = tema.path || `/${tema.plural}`;
+  const basePath = tema.path ? `/${tema.path}` : `/${tema.plural}`;
   return {
     entity: tema.singular,
     path: `${basePath}/reverse`,
