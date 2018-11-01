@@ -334,7 +334,8 @@ module.exports = {
       {
         name: 'bbrbygning_id',
         type: 'uuid',
-        description: 'Angiver bygningens ID i Bygnings- og Boligregisteret (BBR). UUID.'
+        description: 'Angiver bygningens ID i Bygnings- og Boligregisteret (BBR). UUID.',
+        nullable: true
       },
       {
         name: 'synlig',
