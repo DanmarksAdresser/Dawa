@@ -438,8 +438,63 @@ module.exports = {
         name: 'geometri',
         type: 'geometry',
         description: 'Jordstykkets geometri. Leveres som GeoJSON polygon.'
+      },
+      {
+        name: 'featureid',
+        description: 'Jordstykkets featureid, en unik identifikator som anvendes i matrikelkortet.',
+        type: 'integer'
+      },
+      {
+        name: 'fælleslod',
+        description: 'angivelse om jordstykket indgår i flere faste ejendomme.',
+        type: 'boolean'
+      },
+      {
+        name: 'moderjordstykke',
+        description: 'featureid for det jordstykke som jordstykket er udstykket fra.',
+        type: 'integer',
+        nullable: true
+      },
+      {
+        name: 'registreretareal',
+        description: 'det i matriklen registrerede sande areal på jordstykket – ikke nødvendigvis identisk med det geometriske areal - angivet som heltal i kvadratmeter',
+        type: 'integer'
+      },
+      {
+        name: 'arealberegningsmetode',
+        description: `angivelse af beregningsmåden for det registrerede areal for jordstykket – følgende koder benyttes:
+        <ul>
+        <li>o – arealet er beregnet efter opmåling</li>
+        <li>s – arealet er beregnet efter konstruktion i større målforhold, dvs. større end det analoge matrikelkort</li>
+        <li>k – arealet er beregnet på grundlag af kort</li></ul>`,
+        type: 'string'
+      },
+      {
+        name: 'vejareal',
+        description: 'det i matriklen registrerede sande areal af vejudlæg på jordstykket angivet som heltal i kvadratmeter',
+        type: 'integer'
+      },
+      {
+        name: 'vejarealberegningsmetode',
+        description: `angivelse af beregningsmåden for det registrerede areal af vej på jordstykket – følgende koder benyttes:
+        <ul>
+        <li>b – vejareal på jordstykket er beregnet (og kan være 0)</li>
+        <li>e – der er konstateret vej på jordstykket, men areal er ikke beregnet</li>
+        <li>u – det er ukendt, om der findes vej på jordstykket</li>
+        </ul>`,
+        type: 'string'
+      },
+      {
+        name: 'vandarealberegningsmetode',
+        description: `
+        angivelse af beregningsmåden for det registrerede areal af vand på jordstykket – følgende koder benyttes:
+        <ul>
+        <li> incl – vandareal på jordstykket et inkluderet i det registrerede areal for jordstykket</li>
+        <li> excl – vandareal på jordstykket er ikke inkluderet i det registrerede areal for jordstykket</li>
+        <li>ukendt – vandareal er ikke oplyst</li> 
+        </ul>`,
+        type: 'string'
       }
-
     ]
 
   },

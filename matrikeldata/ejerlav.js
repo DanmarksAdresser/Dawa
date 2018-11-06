@@ -27,7 +27,7 @@ const jordstykkeMapping = {
       name: 'matrikelnummer',
       parseFn: _.identity
     },
-    featureID: {
+    featureid: {
       name: 'featureID',
       parseFn: parseInteger
     },
@@ -78,6 +78,34 @@ const jordstykkeMapping = {
       name: 'sfe_Ejendomsnummer',
       path: ['harSamletFastEjendom', 'SFESamletFastEjendom'],
       parseFn: parseInteger
+    },
+    moderjordstykke: {
+      name: 'moderjordstykke',
+      parseFn: val => val === '0' ? null : parseInteger(val)
+    },
+    registreretareal: {
+      name: 'registreretAreal',
+      parseFn: parseInteger
+    },
+    arealberegningsmetode: {
+      name: 'arealBeregn',
+      parseFn: _.identity
+    },
+    vejareal: {
+      name: 'vejAreal',
+      parseFn: parseInteger
+    },
+    vejarealberegningsmetode: {
+      name: 'vejArealBeregn',
+      parseFn: _.identity
+    },
+    vandarealberegningsmetode: {
+      name: 'vandArealBeregn',
+      parseFn: _.identity
+    },
+    fælleslod: {
+      name: 'faelleslod',
+      parseFn: val => val === 'ja'
     }
   },
   filterFn: function () {

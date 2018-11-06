@@ -14,7 +14,7 @@ describe('Import af matrikel', function () {
     return ejerlav.parseEjerlav(gml).then(({ejerlav, jordstykker}) => {
       jordstykker.forEach(function (jordstykke) {
         expect(_.isNumber(jordstykke.ejerlavkode)).to.be.true;
-        expect(_.isNumber(jordstykke.featureID)).to.be.true;
+        expect(_.isNumber(jordstykke.featureid)).to.be.true;
         expect(_.isString(jordstykke.matrikelnr)).to.be.true;
         expect(_.isString(jordstykke.geom)).to.be.true;
       });

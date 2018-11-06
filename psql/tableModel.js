@@ -519,6 +519,22 @@ const jordstykker = {
   }, {
     name: 'tsv',
     derive: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table}.ejerlavkode))`
+  }, {
+    name: 'featureid'
+  }, {
+    name: 'moderjordstykke'
+  }, {
+    name: 'registreretareal'
+  }, {
+    name: 'arealberegningsmetode'
+  }, {
+    name: 'vejareal'
+  }, {
+    name: 'vejarealberegningsmetode'
+  }, {
+    name: 'vandarealberegningsmetode'
+  }, {
+    name: 'fælleslod'
   }]
 };
 

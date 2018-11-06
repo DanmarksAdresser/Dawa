@@ -29,7 +29,7 @@ exports.normalizedSchemaField = function(datamodelName, fieldName) {
   const model = allReplikeringModels[datamodelName];
   assert(model);
   const field = _.findWhere(model.attributes, {name: fieldName});
-  assert(field);
+  assert(field, `${datamodelName} has field ${fieldName}`);
   const schema = Object.assign({}, field.schema);
   schema.description = field.description;
   return schema;

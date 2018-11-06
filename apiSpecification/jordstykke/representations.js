@@ -124,21 +124,33 @@ exports.autocomplete = {
       geo_version: {
         description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
         type: 'integer'
-      }
+      },
+
+      featureid: normalizedFieldSchema('featureid'),
+      fælleslod: normalizedFieldSchema('fælleslod'),
+      moderjordstykke: normalizedFieldSchema('moderjordstykke'),
+      registreretareal:  normalizedFieldSchema('registreretareal'),
+      arealberegningsmetode: normalizedFieldSchema('arealberegningsmetode'),
+      vejareal: normalizedFieldSchema('vejareal'),
+      vejarealberegningsmetode: normalizedFieldSchema('vejarealberegningsmetode'),
+      vandarealberegningsmetode: normalizedFieldSchema('vandarealberegningsmetode')
     }),
-    docOrder: [...autocompletePropertiesDocOrder, 'region', 'sogn', 'retskreds', 'ændret', 'geo_ændret', 'geo_version']
+    docOrder: [...autocompletePropertiesDocOrder, 'region', 'sogn', 'retskreds', 'ændret', 'geo_ændret',
+      'geo_version', 'featureid', 'fælleslod', 'moderjordstykke', 'registreretareal', 'arealberegningsmetode', 'vejareal',
+      'vejarealberegningsmetode', 'vandarealberegningsmetode']
   }),
   fields: _.filter(_.where(fields, {selectable: true}), function (field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
   }),
   mapper: (baseUrl) => row => {
     const result = exports.autocomplete.mapper(baseUrl)(row).jordstykke;
-    result.ændret = row.ændret;
-    result.geo_version = row.geo_version;
-    result.geo_ændret = row.geo_ændret;
+    Object.assign(result, _.pick(row, 'ændret', 'geo_version', 'geo_ændret',
+      'featureid', 'fælleslod','moderjordstykke', 'registreretareal', 'arealberegningsmetode',
+      'vejareal', 'vejarealberegningsmetode', 'vandarealberegningsmetode'));
     result.region = commonMappers.mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl);
     result.sogn = commonMappers.mapKode4NavnTema('sogn', row.sognekode, row.sognenavn, baseUrl);
     result.retskreds = commonMappers.mapKode4NavnTema('retskreds', row.retskredskode, row.retskredsnavn, baseUrl);
+
     return result;
   }
 };

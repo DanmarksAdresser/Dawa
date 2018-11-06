@@ -82,7 +82,15 @@ describe('Stable API', () => {
             "udvidet_esrejendomsnr": "3500009629",
             "esrejendomsnr": "9629",
             "sfeejendomsnr": "2226230",
-            "ejerlavnavn": "Borup, Osted"
+            "ejerlavnavn": "Borup, Osted",
+            "arealberegningsmetode": "o",
+            "featureid": 876260,
+            "fælleslod": false,
+            "moderjordstykke": null,
+            "registreretareal": 1643,
+            "vandarealberegningsmetode": "ukendt",
+            "vejarealberegningsmetode": "b",
+            "vejareal": 0
           }
         }],
         nestet: [{
@@ -119,6 +127,14 @@ describe('Stable API', () => {
             "ændret": "2018-09-28T09:48:57.130Z",
             "geo_version": 1,
             "geo_ændret": "2018-09-28T09:48:57.130Z",
+            "arealberegningsmetode": "o",
+            "featureid": 876260,
+            "fælleslod": false,
+            "moderjordstykke": null,
+            "registreretareal": 1643,
+            "vandarealberegningsmetode": "ukendt",
+            "vejarealberegningsmetode": "b",
+            "vejareal": 0,
             "region": {
               "href": "http://dawa/regioner/1085",
               "kode": "1085",

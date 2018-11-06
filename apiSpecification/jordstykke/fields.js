@@ -69,6 +69,30 @@ module.exports = [
   },
   {
     name: 'ejerlavnavn'
+  },
+  {
+    name: 'featureid'
+  },
+  {
+    name: 'fælleslod'
+  },
+  {
+    name: 'moderjordstykke'
+  },
+  {
+    name: 'registreretareal'
+  },
+  {
+    name: 'arealberegningsmetode'
+  },
+  {
+    name: 'vejareal'
+  },
+  {
+    name: 'vejarealberegningsmetode'
+  },
+  {
+    name: 'vandarealberegningsmetode'
   }
 ];
 
