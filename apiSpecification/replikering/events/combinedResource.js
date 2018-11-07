@@ -4,7 +4,6 @@ const { go } = require('ts-csp');
 const resourceImpl = require('../../common/resourceImpl');
 const resources = require('./resources');
 const registry = require('../../registry');
-const replikeringModels = require('../datamodel');
 const commonReplikeringParameters = require('../commonParameters');
 
 const parameters = commonReplikeringParameters.entitet;
