@@ -95,7 +95,7 @@ const storeTemaWfs = (client, temaModel, featureMapping, dataDir, filePrefix, ta
     yield client.query(` ALTER TABLE ${fetchTableName} ALTER COLUMN geom TYPE geometry(Polygon)`)
   }
   yield streamArrayToTable(client, temaRows, fetchTableName, fetchColumnNames);
-  yield client.query(`CREATE TEMP TABLE ${targetTable} AS (select ${additionalFieldNames.join(', ')}, ST_Multi(ST_Union(ST_MakeValid(geom))) AS geom FROM ${fetchTableName} GROUP BY ${additionalFieldNames.join(', ')})`);
+  yield client.query(`CREATE TEMP TABLE ${targetTable} AS (select ${additionalFieldNames.join(', ')}, ST_Multi(ST_Union(st_collectionextract(ST_MakeValid(geom), 3))) AS geom FROM ${fetchTableName} GROUP BY ${additionalFieldNames.join(', ')})`);
   yield client.query(`DROP TABLE ${fetchTableName}`);
 });
 
