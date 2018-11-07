@@ -11,7 +11,11 @@ const combinedUdtraekHandler = (client, baseUrl, pathParams, queryParams) => go(
   if (errResponse) {
     return errResponse;
   }
-  const entityName = validatedParams.entitet;
+  let entityName = validatedParams.entitet;
+  // workaround spelling error maintainging backwards compatibility
+  if(entityName === 'aftemningsområdetilknytning') {
+    entityName = 'afstemningsområdetilknytning';
+  }
   const resource = resources[entityName];
   const delegateHandler = resourceImpl.resourceResponseHandler(resource);
   return yield this.delegateAbort(delegateHandler(client, baseUrl, pathParams, queryParams));

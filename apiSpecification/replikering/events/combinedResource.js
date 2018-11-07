@@ -7,21 +7,18 @@ const registry = require('../../registry');
 const replikeringModels = require('../datamodel');
 const commonReplikeringParameters = require('../commonParameters');
 
-const parameters = [{
-  name: 'entitet',
-  type: 'string',
-  schema: {
-    enum: Object.keys(replikeringModels)
-  },
-  required: true
-}];
+const parameters = commonReplikeringParameters.entitet;
 
 const combinedEventHandler = (client, baseUrl, pathParams, queryParams) => go(function*() {
   const [errResponse, validatedParams] = resourceImpl.parseQueryParams(parameters, queryParams);
   if(errResponse) {
     return errResponse;
   }
-  const entityName = validatedParams.entitet;
+  let entityName = validatedParams.entitet;
+  // workaround spelling error maintainging backwards compatibility
+  if(entityName === 'aftemningsområdetilknytning') {
+    entityName = 'afstemningsområdetilknytning';
+  }
   const resource = resources[entityName];
   const delegateHandler = resourceImpl.resourceResponseHandler(resource);
   return yield this.delegateAbort(delegateHandler(client, baseUrl, pathParams, queryParams));

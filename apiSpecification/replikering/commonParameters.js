@@ -19,7 +19,8 @@ exports.entitet = [{
   name: 'entitet',
   type: 'string',
   schema: {
-    enum: Object.keys(replikeringModels)
+    // workaround spelling error maintainging backwards compatibility
+    enum: [...Object.keys(replikeringModels), 'aftemningsområdetilknytning']
   },
   required: true
 

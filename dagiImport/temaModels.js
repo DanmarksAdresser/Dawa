@@ -418,7 +418,7 @@ exports.modelList = [{
     singular: 'afstemningsområde',
     singularSpecific: 'afstemningsområdet',
     plural: 'afstemningsområder',
-    prefix: 'aftemningsområde',
+    prefix: 'afstemningsområde',
     primaryKey: ['kommunekode', 'nummer'],
     path: 'afstemningsomraader',
     published: true,
@@ -437,7 +437,7 @@ exports.modelList = [{
         name: 'nummer',
         type: 'string',
         sqlType: 'SMALLINT',
-        description: 'Aftemningsområdets nummer. Heltal.',
+        description: 'Afstemningsområdets nummer. Heltal.',
         formatter: nummer => {
           return '' + nummer;
         }
