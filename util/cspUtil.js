@@ -69,11 +69,11 @@ const pipeFromStream = (stream, dst, batchSize) => {
   const errorSignal = new Signal();
   stream.on('error', error => errorSignal.raise(error));
   const endSignal = new Signal();
-  stream.on('end', endSignal.raise());
+  stream.on('end', () => endSignal.raise());
   batchSize = batchSize || 1;
   return go(function*() {
     let values = [];
-    const batchComplete = new Signal();
+    let batchComplete = new Signal();
     const dataListener = (data) => {
       values.push(data);
       if(values.length >= batchSize) {
@@ -101,6 +101,8 @@ const pipeFromStream = (stream, dst, batchSize) => {
         }
         const valuesCopy = values;
         values = [];
+        batchComplete = new Signal();
+        stream.resume();
         yield this.selectOrAbort([
           { ch: dst, op: OperationType.PUT_MANY, values: valuesCopy }
         ]);
@@ -116,8 +118,10 @@ const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
   const errorSignal = new Signal();
   let wantMoreDataSignal = new Signal();
   stream.on('drain', () => wantMoreDataSignal.raise());
-  if(!stream.socket || stream.socket.destroyed) {
-    errorSignal.raise(new Error('Client closed connection'));
+  if(typeof stream.socket !=='undefined') {
+    if(!stream.socket || stream.socket.destroyed) {
+      errorSignal.raise(new Error('Client closed connection'));
+    }
   }
   else {
     stream.once('error', (err) => errorSignal.raise(err));
@@ -133,7 +137,7 @@ const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
         initialDataSignal.raise();
       }
       if(takeResult.ch === errorSignal) {
-        throw new Error('stream emitted an error');
+        throw new Error('stream emitted an error: ' + errorSignal.value());
       }
       const values = takeResult.values;
       const closed = values[values.length - 1] === CLOSED;

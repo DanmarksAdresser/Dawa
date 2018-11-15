@@ -7,13 +7,18 @@ const  { go } = require('ts-csp');
 
 const testConnString = process.env.pgConnectionUrl;
 const emptyConnString = process.env.pgEmptyDbUrl;
-
+const replikeringTestConnString = process.env.pgReplikeringDbUrl;
 databasePools.create('test', {
   connString: testConnString,
   logger: defaultScriptLogger
 });
 databasePools.create('empty', {
   connString: emptyConnString,
+  logger: defaultScriptLogger
+});
+
+databasePools.create('replikeringtest', {
+  connString: replikeringTestConnString,
   logger: defaultScriptLogger
 });
 
