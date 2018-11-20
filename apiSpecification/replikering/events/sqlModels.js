@@ -37,7 +37,7 @@ const baseQuery = (model, binding) => {
       ...selectAttributesClauses],
     from: [`transaction_history t JOIN ${tableName}_changes i ON t.sequence_number = i.changeid`],
     whereClauses: [`entity = '${tableModel.entity}' and public`],
-    orderClauses: ['changeid'],
+    orderClauses: [],
     sqlParams: []
   };
   return query;
@@ -83,7 +83,9 @@ const createSqlModel = (model, binding, filterParams) => {
       }
       if(params.txidfra || params.txidtil || params.txid) {
         dbapi.addWhereClause(sqlParts, 'i.txid = t.txid');
+        sqlParts.orderClauses.push('txid');
       }
+      sqlParts.orderClauses.push('changeid');
       propertyFilter(sqlParts, params);
       const query = dbapi.createQuery(sqlParts);
       return cursorChannel(client, query.sql, query.params, channel, options);
