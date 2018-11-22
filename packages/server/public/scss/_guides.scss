@@ -1,0 +1,90 @@
+.col.main-right.guides {
+	min-height: calc(100vh - 156px) !important;
+	.row {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 40px 30px 30px 30px;
+	}
+	h1 {
+		display: block;
+		padding: 0px 0 20px 10px;
+		font-size: 32px;
+		color: $dark;
+		font-weight: 300;
+		width: 100%;
+	}
+	h1:before {
+		display: inline-block;
+		content: "";
+		position: relative;
+		background: url(/img/ic_guides.svg) center center no-repeat;
+		width: 50px;
+		height: 50px;
+		background-size: 50px 50px;
+		margin-bottom: -8px;
+		margin-right: 10px;
+	}
+	.card {
+		width: 100%;
+		border: 1px solid $divider-light;
+		background: $white;
+		margin-bottom: 10px;
+		box-shadow: 0 0px 0px rgba(0,0,0,0);
+		.card-header {
+			margin: 0 !important;
+			background: transparent;
+			padding-bottom: 5px;
+			padding-top: 23px;
+			border: 0;
+			font-size: 24px;
+			font-weight: 300;
+		}
+		.card-body {
+			padding-top: 0px;
+			padding-bottom: 14px;
+			padding-right: 60px;
+			p {
+				font-size: 14px;
+				font-weight: 300;
+			}
+			a {
+				position: absolute;
+				display: block;
+				width: calc(100% + 2px);
+				height: calc(100% + 2px);
+				left: -1px;
+				top: -1px;
+				background: transparent;
+				border: 2px solid transparent;
+			}
+			a:hover {
+				border: 2px solid $primary;
+			}
+		}
+	}
+	.card:hover {
+		box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+	}
+	.card:after {
+		position: absolute;
+		display: block;
+		content: "";
+		right: 30px;
+		width: 21px;
+		height: 14px;
+		background: url(/img/ic_arrow.svg) center center no-repeat;
+		background-size: 21px 14px;
+		top: calc(50% - 7px);
+		transition: 0.2s ease-in-out;
+	}
+	.card:hover:after {
+		right: 20px;
+	}
+}
+
+
+@media only screen and (max-width: 658px)  {
+  .col.main-left.guides {
+    display: none;
+  }
+}

@@ -1,0 +1,164 @@
+mixin documentResource(specs, path)
+    - var spec = specs[path]
+    p!= spec.subtext
+    pre= 'GET ' + url + path
+    if spec.parameters.length >= 1
+      h4 Parametre
+      p
+        table.table.table-hover
+            thead
+                th Navn
+                th Beskrivelse
+            tbody
+                each parameter in spec.parameters
+                    tr
+                        td= parameter.name
+                        td!= parameter.doc+(parameter.multi === true ? ' (<a href="/generelt#flervaerdisoegning">Flerværdisøgning</a> mulig).' : '')+(parameter.nullable === true ? ' <a href="/generelt#nullsoegning">Søgning efter ingen værdi</a> mulig.' : '')
+    if spec.examples.length > 0
+      h4 Eksempler
+      each example in spec.examples
+          p!= example.description
+          pre
+              a(href=docUtil.addBaseUrlAndParameters(url, example.path || path, example.query))
+                =    docUtil.addBaseUrlAndParametersForDisplay(url, example.path || path, example.query)
+
+mixin documentResource2(spec)
+  p!= spec.subtext
+  div.card
+    div.card-body
+      code= 'GET ' + url + spec.path
+  if spec.parameters.length >= 1
+    h4 Parametre
+    p
+      table.table.table-hover
+        thead
+          th Navn
+          th Beskrivelse
+        tbody
+          each parameter in spec.parameters
+            tr
+              td
+                code=parameter.name
+              td!= parameter.doc+(parameter.multi === true ? ' (<a href="/generelt#flervaerdisoegning">Flerværdisøgning</a> mulig).' : '')+(parameter.nullable === true ? ' <a href="/generelt#nullsoegning">Søgning efter ingen værdi</a> mulig.' : '')
+  if spec.examples.length > 0
+    h4 Eksempler
+    each example in spec.examples
+      p!= example.description
+      pre
+        a(href=docUtil.addBaseUrlAndParameters(url, example.path || spec.path, example.query))
+          =    docUtil.addBaseUrlAndParametersForDisplay(url, example.path || spec.path, example.query)
+
+mixin parameterDocQuery(apiSpec, docSpec)
+    pre= 'GET ' + url + '/' + apiSpec.model.plural
+    h4 Parametre
+    p
+        table.table.table-hover
+            thead
+                th Navn
+                th Beskrivelse
+            tbody
+                each parameter in docSpec.parameters
+                    tr
+                        td= parameter.name
+                        td!= parameter.doc
+    if docSpec.examples.length > 0
+      h4 Eksempler
+      each example in docSpec.examples.query
+          p!= example.description
+          pre
+              a(href=docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query))
+                = docUtil.computeQueryUrl(url, apiSpec.model.plural, example.query)
+
+mixin autocompleteDoc(autocompleteSchema, plural, examples)
+    p Autocomplete på #{plural}. Der kan anvendes de samme parametre som ved søgning, men bemærk at <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>.
+    pre GET #{url}/#{plural}/autocomplete
+
+    div.page-header
+    if examples > 0
+      h4 Eksempler
+      each example in examples
+          p!= example.description
+          pre
+              a(href=docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query))
+                = docUtil.computeQueryUrl(url, plural+'/autocomplete', example.query)
+
+    div.page-header
+    h4 Autocomplete return data
+    p Autocomplete for #{plural} returnerer følgende JSON struktur:
+    +documentSchema(autocompleteSchema)
+
+
+mixin parameterDocGet(apiSpec, docSpec)
+    pre= 'GET ' + docUtil.computeGetUrlTemplate(url, apiSpec)
+    h4 Parametre
+    p
+        table.table.table-hover
+            thead
+                th Navn
+                th Beskrivelse
+            tbody
+                each parameter in docUtil.computeGetParameters(apiSpec, docSpec)
+                    tr
+                        td= parameter.name
+                        td!= parameter.doc
+    if docSpec.examples.length > 0
+      h4 Eksempler
+      each example in docSpec.examples.get
+        p!= example.description
+        pre
+          a(href=docUtil.computeGetUrl(url, apiSpec, example.path))
+            = docUtil.computeGetUrl(url, apiSpec, example.path)
+
+mixin documentProperties(props, indent, idPrefix)
+  each property in props
+    tr
+      - for (var x = 0; x < indent; x++)
+        td
+      td(colspan=5-indent,id=idPrefix + '_' + property.name)
+        = property.name
+      td= property.type || 'string'
+      td= property.required ? 'nej' : 'ja'
+      td!= property.description
+    if property.type === 'array'
+      +documentProperties(property.items, indent+1, idPrefix + '_' + property.name)
+    if property.type === 'object'
+      +documentProperties(property.properties, indent+1, idPrefix + '_' + property.name)
+
+mixin documentSchema3(schema)
+  table.table.table-hover
+    thead
+      th(colspan="5") Navn
+      th Type
+      th Optionelt
+      th Beskrivelse
+    tbody
+      +documentProperties(docUtil.extractDocumentationForObject(schema), 0, '')
+
+
+mixin documentSchema(schema, idPrefix)
+  table.table.table-hover
+    thead
+      th(colspan="5") Navn
+      th Type
+      th Optionelt
+      th Beskrivelse
+    tbody
+      +documentProperties(docUtil.extractDocumentationForObject(schema), 0, idPrefix || '')
+
+mixin documentSchema2(entity, qualifier)
+  table.table.table-hover
+    thead
+      th(colspan="5") Navn
+      th Type
+      th Optionelt
+      th Beskrivelse
+    tbody
+      +documentProperties(docUtil.extractDocumentationForResourceResponse(entity, qualifier), 0, idPrefix || '')
+
+
+mixin documentOisQueryResource(name, variant)
+  +documentResource(parameterDoc, docUtil.getOisQueryResourcePath(name, variant))
+mixin documentOisGetByKeyResource(name)
+  if docUtil.getOisGetByKeyResourcePath(name, variant)
+    h3 OIS #{name} enkeltopslag
+    +documentResource(parameterDoc, docUtil.getOisGetByKeyResourcePath(name, variant))

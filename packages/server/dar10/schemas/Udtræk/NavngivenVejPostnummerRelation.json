@@ -1,0 +1,74 @@
+{
+  "description": "NavngivenVejPostnummerRelation schema",
+  "type": "object",
+  "properties": {
+    "eventopret": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "eventopdater": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "rowkey": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+    },
+    "registreringfra": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "registreringtil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "virkningfra": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "virkningtil": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "navngivenvej_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+    },
+    "postnummer_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+    }
+  },
+  "required": [
+    "eventopret",
+    "eventopdater",
+    "rowkey",
+    "id",
+    "registreringfra",
+    "registreringtil",
+    "virkningfra",
+    "virkningtil",
+    "status",
+    "navngivenvej_id",
+    "postnummer_id"
+  ]
+}

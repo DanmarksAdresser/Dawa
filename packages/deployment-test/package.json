@@ -1,0 +1,15 @@
+{
+  "name": "@dawadk/deployment-test",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "csv": "^0.4.6",
+    "q": "^1.4.1",
+    "request": "^2.61.0",
+    "request-promise": "^1.0.2",
+    "mocha": "^5.2.0"
+  },
+  "scripts": {
+    "deploymenttest": "mocha"
+  }
+}

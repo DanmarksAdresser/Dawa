@@ -1,0 +1,18 @@
+extends sidebar-auto
+include includes/parameterDocMixins
+include includes/api-oversigt
+
+block main
+  h1 API dokumentation
+  p.
+    Denne side indeholder en liste over samtlige API'er som udstilles af DAWA.
+
+
+  div.stacked-link-container
+    div.stacked-link
+      h4.stacked-link-header Generelt om API'et
+      div.stacked-link-body
+        p Det anbefales at læse generel information om DAWA API'et igennem før DAWA API'et tages i brug.
+        a.btn.btn-primary(href="/dok/api/generelt")
+
+  +renderApiOversigt(docUtil.getSections())

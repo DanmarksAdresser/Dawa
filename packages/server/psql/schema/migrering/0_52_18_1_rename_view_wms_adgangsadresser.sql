@@ -1,0 +1,1 @@
+ALTER VIEW wms_adgangsadresser RENAME TO wms_housenumber_inspire;

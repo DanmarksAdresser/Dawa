@@ -1,0 +1,38 @@
+{
+  "name": "Stednavn",
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:25832"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          865774.59,
+          6122368.7
+        ]
+      },
+      "properties": {
+        "OBJECTID": "173207",
+        "ID_LOKALID": "1233766a-103b-6b98-e053-d480220a5a3f",
+        "NAVN": "Skærvebakken",
+        "NAVNESTATUS": "uofficielt",
+        "BRUGSPRIORITET": "primær",
+        "FEAT_TYPE": "Test",
+        "UNDER_TYPE": "benbrud",
+        "LAENGDE": null,
+        "AREAL": "10.15",
+        "INDB_ANTAL": null,
+        "BEBYGGELSESKODE": null,
+        "DANMARKSSTATISTIK": null,
+        "REGISTRERINGFRA": "2015-03-26T16:48:13",
+        "VIRKNINGFRA": "2015-03-26T16:48:13"
+      }
+    }
+  ]
+}

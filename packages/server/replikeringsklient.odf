@@ -1,0 +1,75 @@
+<text:h text:style-name="Heading_20_1" text:outline-level="1"><text:bookmark-start text:name="replikeringsklient" />Replikeringsklient<text:bookmark-end text:name="replikeringsklient" /></text:h>
+<text:p text:style-name="First_20_paragraph">Projektet omfatter
+udviklingen af replikerings-klient, som kan aftage data fra DAWAs
+replikerings-API og gemme dem i en PostgreSQL-database.</text:p>
+<text:p text:style-name="Text_20_body">Leverancen består dels af et
+softwarebibliotek, som kan integreres i NodeJS-baserede programmer, og
+dels af et kommandolinjeværktøj.</text:p>
+<text:p text:style-name="Text_20_body">Klienten er generisk. Den kan
+replikere alle eksisterende DAWA-entiteter, men vil også kunne replikere
+nye entiter uden at replikerings-klienten skal modificeres.</text:p>
+<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark-start text:name="formål" />Formål<text:bookmark-end text:name="formål" /></text:h>
+<text:list text:style-name="L1">
+  <text:list-item>
+    <text:p text:style-name="P1">At gøre det nemmere for anvendere at
+    etablere en lokal kopi af data.</text:p>
+  </text:list-item>
+  <text:list-item>
+    <text:p text:style-name="P1">At gøre os nogle praktiske erfaringer
+    med replikerings-API’et og skabe en bedre forståelse af hvordan det
+    anvendes.</text:p>
+  </text:list-item>
+  <text:list-item>
+    <text:p text:style-name="P1">At skabe fundamentet for, at anvendere
+    kan køre en lokal kopi af DAWA.</text:p>
+  </text:list-item>
+</text:list>
+<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark-start text:name="omfang" />Omfang<text:bookmark-end text:name="omfang" /></text:h>
+<text:p text:style-name="First_20_paragraph">Følgende er omfattet: -
+Klienten kan hente og indlæse et udtræk - Klienten holder styr på
+transaktions-ID’er. - Klienten vedligeholder for hver entitet en primær
+tabel og en hændelsestabel, der beskriver de lokale ændringer klienten
+udfører. - Klienten kan lave en inkrementiel opdatering baseret på
+hændelser. - Klienten kan lave en inkrementiel opdatering baseret på et
+totaludtræk. - Klienten kan håndtere store transaktioner uden at gemme
+hele transaktionen i hukommelsen. - Klienten kan håndtere flere
+kildesystemer som anvender forskellige transaktions-ID’er - Klienten
+inkluderer et værktøj til at danne SQL til oprettelse af
+databasetabeller. Det er op til anvenderen at udføre SQL’en mod
+databasen.</text:p>
+<text:p text:style-name="Text_20_body">Følgende funktionalitet er
+<text:span text:style-name="T1">ikke</text:span> omfattet: - Håndtering
+af database-schemaer. Klienten kan ikke oprette eller migrere tabeller i
+databasen. Det er op til anvenderen at sikre at tabeller findes i
+databasen. - Support for andre databaser end postgres. -
+Brugergrænseflade af nogen art. - Automatisk kontrol af om
+database-schemaet opfylder klientens krav. - Automatisk polling efter
+nye data eller schedulering af kørsler.</text:p>
+<text:h text:style-name="Heading_20_2" text:outline-level="2"><text:bookmark-start text:name="detaljer" />Detaljer<text:bookmark-end text:name="detaljer" /></text:h>
+<text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="konfiguration" />Konfiguration<text:bookmark-end text:name="konfiguration" /></text:h>
+<text:p text:style-name="First_20_paragraph">Klientens opførsel skal
+være konfigurerbar. Følgende skal kunne læses fra konfigurationen: -
+Hvilke kildesystemer der replikeres fra. - Hvilke entiteter der
+replikeres fra hvert kildesystem. - Hvilke attributter på hver entitet,
+der replikeres. - Hvilken tabel hver entitet mappes til. - Hvordan
+attribut-navne på entiter mapper til kolonnenavne i tabeller. - Hvordan
+attribut-værdier i JSON mappes til og fra database-værdier i
+SQL-format.</text:p>
+<text:p text:style-name="Text_20_body">Klienten skal verificere, at
+konfigurationen er kompatibel med datamodellen for
+replikerings-API’et.</text:p>
+<text:p text:style-name="Text_20_body">Softwarebiblioteket og
+kommandolinjeværktøjet anvender samme konfigurationsformat
+(JSON).</text:p>
+<text:h text:style-name="Heading_20_3" text:outline-level="3"><text:bookmark-start text:name="hændelsestabeller-og-metadata" />Hændelsestabeller
+og
+metadata<text:bookmark-end text:name="hændelsestabeller-og-metadata" /></text:h>
+<text:p text:style-name="First_20_paragraph">Klienten vedligeholder en
+primærtabel, men indlæsning foregår ved hjælp af hændelsestabel
+tilknyttet hver primærtabel. Klienten tildeler hver transaktion et
+<text:span text:style-name="T1">lokalt</text:span> transaktions-id, som
+fremgår af hændelsestabellerne.</text:p>
+<text:p text:style-name="Text_20_body">Kommandolinjeklienten gemmer
+desuden følgende metadata om transaktioner: - transaktions-id. -
+transaktions-tidspunkt. - Hvilke remote transaktioner der er
+indlæs</text:p>

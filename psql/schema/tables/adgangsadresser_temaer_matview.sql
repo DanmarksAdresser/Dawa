@@ -1,1 +1,0 @@
-DROP TABLE IF EXISTS adgangsadresser_temaer_matview CASCADE;

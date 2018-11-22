@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS navngivenvej_history_update() CASCADE;

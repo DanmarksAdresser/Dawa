@@ -1,0 +1,27 @@
+mixin renderDatavaskDemo()
+  form
+    fieldset.form-group
+      legend Datavask af adresse
+      div.row
+        label.col-sm-3.col-lg-2.col-form-label(for='vask-adresse-input') Adressetekst:
+
+        div.col-sm-6(style={position: 'relative'})
+          input.form-control#vask-adresse-input(type='text', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+        div.col-sm-3
+          button.form-control.btn.btn-primary#vask-adresse-btn(type='button') Vask adresse
+      div.row
+        div.col-sm-3.col-lg-2.col-form-label Vasket adresse:
+        div.col-sm-6.col-form-label
+          span#datavask-adresse-result
+    fieldset.form-group
+      legend Datavask af adgangsadresse
+      div.row
+        label.col-sm-3.col-lg-2.col-form-label(for='vask-adgangsadresse-input') Adressetekst:
+        div.col-sm-6(style={position: 'relative'})
+          input.form-control#vask-adgangsadresse-input(type='text', autocomplete='off', placeholder='vejnavn husnr, postnummer')
+        div.col-sm-3
+          button.form-control.btn.btn-primary#vask-adgangsadresse-btn(type='button') Vask adresse
+      div.row
+        div.col-sm-3.col-lg-2.col-form-label Vasket adgangsadresse:
+        div.col-sm-6.col-form-label
+          span#datavask-adgangsadresse-result

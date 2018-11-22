@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="AWS Suitens Vis">
+    <meta name="author" content="Finn Jordal">
+
+    <title>DAWA</title>
+
+    <style>
+        html, body, {
+            height: 100%;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        p, h1, h2, h3 {
+            padding-right: 30px;
+            padding-left: 30px;
+          font-family: Arial, Helvetica;
+        }
+    </style>
+
+  </head>
+
+  <body>
+    <h1>Maximum på antal samtidige requests til DAWA overskredet</h1>
+    <p>I <a href='http://dawa.aws.dk'>DAWA</a> er der sat en grænse på, hvor mange samtidige request til servicen der må foretages. Grænsen er på 10 samtidige requests.</p>
+    <p>Baggrunden for at sætte denne grænse er, at forhindre en enkelt anvenders brug af servicen påvirker andre anvendere. F.eks. i form af lange svartider eller fejl i kald af servicen. </p>
+    <p>Hvis du har problemer med denne grænse, vil vi opfordrer dig til at tilpasse din kode til denne begrænsning. Hvis dette ikke kan lade sig, kan du kontakte os på awssuiten@sdfe.dk.</p>
+
+  </body>
+</html>

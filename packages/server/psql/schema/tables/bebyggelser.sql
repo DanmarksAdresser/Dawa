@@ -1,0 +1,2 @@
+DROP TYPE IF EXISTS bebyggelsestype CASCADE;
+DROP TABLE IF EXISTS bebyggelser;

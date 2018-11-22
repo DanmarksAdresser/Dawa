@@ -1,0 +1,39 @@
+extends layout
+
+block content
+  div.container-fluid
+    div.row.guides
+      div.col.main-left.guides
+        include left-intro
+      div.col.main-right.guides
+        div.row
+          h1 Guides
+          div.card
+            h4.card-header Introduktion
+            div.card-body
+              p.
+                Introduktion til DAWA
+              a.btn.btn-primary(href="/dok/guide/introduktion")
+          div.card
+            h4.card-header Autocomplete
+            div.card-body
+              p.
+                Anvend DAWAs autocomplete-komponent på en webside.
+              a.btn.btn-primary(href="/dok/guide/autocomplete")
+          div.card
+            h4.card-header Replikering
+            div.card-body
+              p.
+                Etabler en lokal, opdateret kopi af adressedata.
+              a.btn.btn-primary(href="/dok/guide/replikering")
+          div.card
+            h4.card-header Datavask
+            div.card-body
+              p.
+                Valider adresser og korriger mindre fejl.
+              a.btn.btn-primary(href="/dok/guide/datavask")
+          
+
+
+
+

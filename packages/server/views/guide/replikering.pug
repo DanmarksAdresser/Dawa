@@ -1,0 +1,119 @@
+extends ../sidebar-auto
+block main
+  h1 Etablering af adressekopiregister
+  p.lead Etablering af lokal kopi af Danmarks adresser
+  p.lead
+    | Leder du efter den gamle replikerings-guide, hvor der benyttes sekvensnumre?
+    | Den kan stadig tilgås <a href="/dok/guide/replikering-old">her</a>.
+  section
+    h2.anchor-header#introduktion Introduktion
+    p
+      | DAWA udstiller en lang række data i et format, der gør det nemt at etablere en lokal kopi
+      | af data. En lokal kopi kan etableres ved at hente et <em>udtræk</em>. Herefter kan den lokale
+      | kopi vedligeholdes ved at hente de <em>hændelser</em>, som er indtruffet siden udtrækket blev
+      | dannet.
+    p
+      | DAWA indlæser data i <em>transaktioner</em>. Hver transaktion tilknyttes et unikt, fortløbende
+      | nummer kaldet transaktions-ID'et for transaktionen. DAWA udfører transaktionerne atomisk,
+      | dvs. at enten er en transaktionen med i et udtræk eller intet er med. Dette sikrer at data er
+      | konsistente, eksempelvis at en adgangsadresse og dens tilknytninger oprettes og slettes i den samme transaktion.
+    p
+      |  Udtræk og hændelser er tilknyttet en transaktion. Udtrækket for en given transaktion er et
+      | "snapshot" af hvordan data så ud umiddelbart efter denne transaktion, dvs. uden de ændringer som
+      | efterfølgende transaktioner har medført. Hændelser er tilknyttet den transaktion, som foretog
+      | den ændring, som hændelsen afspejler.
+    p
+      | Når klientsystemer etablerer en lokal kopi kan transaktionerne anvendes til at sikre, at den
+      | lokale kopi også er konsistent. Dette gøres ved at sikre, at alle de udtræk klienten henter er
+      | er tilknyttet samme transaktions-ID. Klienten gemmer udtrækkene samt transaktions-ID. Den lokale
+      | kopi indeholder således de data, som DAWA indeholdte umiddelbart efter transaktionens udførelse.
+    p
+      | Når DAWA herefter udfører yderligere transaktioner har klienten brug for at opdatere den lokale kopi.
+      | DAWA udstiller metadata omkring de udførte transaktioner. Klienten kan derfor hente en liste over
+      | transaktioner, som er gennemført af DAWA siden klienten etablerede den lokale kopi. Klienten kan
+      | opdatere den lokale kopi ved at hente og udføre de hændelser, som er indtruffet i de efterfølgende transaktioner.
+    p
+      | Hver hændelse i DAWA er ligeledes tilknyttet et fortløbende sekvensnummer. Tidligere versioner af DAWA
+      | udstillede ikke transaktions-ID'er - i stedet anvendes sekvensnumre. Vi anbefaler, at nye
+      | klienter anvender transaktions-ID'er og ikke sekvensnumre.
+    p
+      | DAWA udstiller data i et <em>normaliseret</em> format. Det betyder, at data i videst mulige
+      | omfang ikke er gentaget. For eksempel indeholder adgangsadresser ikke et vejnavn, da vejnavnet
+      | er indeholdt i vejstykket.
+    h2 Etablering af lokal kopi
+    p
+      | Etablering af et udtræk består overordnet set af nedenstående trin.
+    h3 Hent seneste transaktion
+    p
+      | Det er ønskværdigt, at udtrækkene for de forskellige entiteter er konsistente.
+      | Dette sikres ved at anvende samme transaktions-ID for de forskellige udtræk.
+      | Det mest hensigtsmæssige er at anvende transaktions-ID for den senest udførte transaktion:
+      pre <code>GET https://dawa.aws.dk/replikering/senestetransaktion</code>.
+      | Svaret indeholder transaktions-ID (<code>txid</code>) for den seneste transaktion som DAWA
+      | har udført.
+    h3 Hent udtræk
+    p
+      | Hent et udtræk for hver entitet der ønskes en lokal kopi for. <code>txid</code>-parameteren
+      | anvendes, således det sikres at udtrækkene er konsistente med hinanden. For basale adressedata
+      | er det nødvendigt at hente adgangsadresser, adresser, vejstykker og postnumre:
+      pre
+        | <code>GET https://dawa.aws.dk/replikering/udtraek?entitet=adgangsadresse&txid=123123
+        |GET https://dawa.aws.dk/replikering/udtraek?entitet=adresse&txid=123123
+        |GET https://dawa.aws.dk/replikering/udtraek?entitet=vejstykke&txid=123123
+        |GET https://dawa.aws.dk/replikering/udtraek?entitet=postnummer&txid=123123</code>
+      | Typisk anvendes enten CSV eller NDJSON format til udtræk. Mange databaser (bl.a. <a href="https://www.postgresql.org/docs/current/static/sql-copy.html">PostgreSQL</a> og SQL Server)
+      | understøtter at CSV-format indlæses direkte i en databasetabel.
+      | Se <a href="/dok/api/replikering#udtraek">API dokumentationen</a> for detaljer.
+    h3 Gem udtræk og transaktions-ID
+    p
+      | Udtræk og transaktions-ID gemmes lokalt. Det er vigtigt også at gemme transaktions-ID, da dette anvendes
+      | når den lokale kopi efterfølgende skal opdateres.
+    p
+      | Hvordan udtræk helt gemmes afhænger af hvilken database der anvendes. Replikerings-API'et
+      | udstiller en normaliseret datamodel, som er velegnet til at at gemme i en SQL-database, hvor
+      | der anvendes en tabel pr. entitet.
+    h2 Opdatering af lokal kopi
+    p
+      | En lokal kopi kan opdateres ved hjælp af DAWAs hændelses-API. Hændelses-API'et udstiller
+      | information om hvilke ændringer af data der er udført er blevet.
+      | En ændring er enten en oprettelse (insert), en opdatering (update)
+      | eller en sletning (delete).
+    p
+      | Alle hændelser er tilknyttet et transaktions-ID, og kan fremsøges ud fra dette.
+      | Forud for opdateringen af den lokale kopi har klienten gemt transaktions-ID for de udtræk
+      | klienten har indlæst. For at opdatere den lokale kopi skal klienten altså hente og udføre alle hændelser
+      | med et større transaktions-ID.
+    p
+      | Klienten starter med at hente seneste metadata for seneste transaktion:
+      pre <code>GET https://dawa.aws.dk/replikering/senestetransaktion</code>
+      | Af svaret fremgår transaktions-ID for den senest udførte transaktion. Det kan f.eks være, at klientens
+      | tidligere har indlæst alle hændelser frem til transaktions-ID 123123, og seneste transaktion har
+      | transaktions-ID 123125. Klienten mangler således at indlæse transaktionen med Id 123124 og
+      | transaktions-ID 123125.
+    p
+      | Klienten kan vælge at indlæse begge transaktioner på én gang, eller klienten kan vælge at indlæse
+      | hver transaktion enkeltvis. I eksempelt her indlæser vi transaktionerne enkeltvist. Først hentes metadata
+      | for den næste transaktion der skal indlæses, som har transaktions-ID 123124:
+      pre <code>GET https://dawa.aws.dk/replikering/transaktioner?txid=123124</code>
+      | Det fremgår af svaret hvilke entiteter der er ændret i transaktionen. Klienten skal hente hændelserne
+      | for alle de entiteter, som klienten vedligeholder en lokal kopi af. Hvis det f.eks. er entiteterne
+      | "adgangsadresse" og "adresse" der har tilknyttede hændelser hentes hændelserne for disse:
+      pre
+        | <code>GET https://dawa.aws.dk/replikering/haendelser?entitet=adgangsadresse&txid=123124
+        | GET https://dawa.aws.dk/replikering/haendelser?entitet=adresse&txid=123124</code>
+      | Se <a href="/dok/api/replikering#haendelser">API-dokumentationen</a> for detaljer om hændelses-API'et.
+    p
+      | Herefter udføres de ændringer som hændelserne angiver på den lokale kopi. Hvis der anvendes
+      | en transaktionel database vil det være hensigtsmæssigt at gøre det i én transaktion,
+      | så data altid er indbyrdes konsistente.
+    h2 Detaljer
+    h3 Referentiel integritet
+    p
+      | DAWA garanterer ikke <em>referentiel integritet</em>. F.eks. er det muligt at der kan være
+      | oprettet adresser med en vejkode og kommunekode, som endnu ikke refererer til et vejstykke.
+    h3 Opdateringsfrekvens
+    p
+      | Adressedata opdateres i <em>nær-realtid</em>. Hændelserne udstilles typisk 1-2 minutter efter
+      | at ændringen er udført i DAR. Relaterede data, så som stednavne, DAGI-tilknytninger, matrikelkortet og BBR
+      | opdateres én gang i døgnet.
+

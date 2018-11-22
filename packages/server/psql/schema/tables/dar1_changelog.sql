@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS dar1_changelog;

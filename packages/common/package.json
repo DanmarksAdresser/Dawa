@@ -1,0 +1,28 @@
+{
+  "name": "@dawadk/common",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "cli": "^1.0.1",
+    "commander": "^2.19.0",
+    "generic-pool": "^3.4.2",
+    "pg": "^7.4.1",
+    "pg-connection-string": "^2.0.0",
+    "pg-copy-streams": "^1.2.0",
+    "pg-format": "^1.0.4",
+    "pg-parse-float": "^0.0.1",
+    "ts-csp": "0.9.0",
+    "winston": "^3.0.0-rc5",
+    "winston-daily-rotate-file": "^3.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^5.9.0",
+    "mocha": "^5.2.0"
+  },
+  "scripts": {
+    "test": "mocha",
+    "lint": "eslint src test"
+  }
+}
