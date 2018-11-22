@@ -1,0 +1,13 @@
+mixin renderApiOversigt(sections)
+  each section in sections
+    h2(class=section.headingClass) #{section.name}
+    p.lead !{section.lead}
+    each entity in section.entities
+      - const page = docUtil.getPageForEntity(entity)
+      h3 <a href="/dok/api/#{entity}">#{page.heading}</a>
+      ul.ul-dawa
+        each section in page.sections
+          if section.type == 'endpoint' || section.type === 'datadescription'
+            li <a href="/dok/api/#{entity}##{section.anchor}">#{section.heading}</a>
+
+

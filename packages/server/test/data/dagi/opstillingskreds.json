@@ -1,0 +1,22 @@
+[
+  {
+    "dagi_id": 100103,
+    "nummer": 1,
+    "kode": 1,
+    "navn": "Opstillingskreds",
+    "valgkredsnummer": 1,
+    "storkredsnummer": 1,
+    "kredskommunekode": 99,
+    "geom": null
+  },
+  {
+    "dagi_id": 100104,
+    "nummer": 99,
+    "kode": 99,
+    "navn": "Opstillingskreds test",
+    "valgkredsnummer": 2,
+    "storkredsnummer": 1,
+    "kredskommunekode": 99,
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))', 25832))"
+  }
+]

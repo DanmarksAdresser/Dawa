@@ -1,0 +1,712 @@
+[
+  {
+    "dagi_id": 100002,
+    "kode": 165,
+    "udenforkommuneinddeling": false,
+    "navn": "Albertslund",
+    "geom": null
+  },
+  {
+    "dagi_id": 100003,
+    "kode": 201,
+    "udenforkommuneinddeling": false,
+    "navn": "Allerød",
+    "geom": null
+  },
+  {
+    "dagi_id": 100099,
+    "kode": 411,
+    "udenforkommuneinddeling": true,
+    "navn": "Ertholmene",
+    "geom": null
+  },
+  {
+    "dagi_id": 100004,
+    "kode": 420,
+    "udenforkommuneinddeling": false,
+    "navn": "Assens",
+    "geom": null
+  },
+  {
+    "dagi_id": 100005,
+    "kode": 151,
+    "udenforkommuneinddeling": false,
+    "navn": "Ballerup",
+    "geom": null
+  },
+  {
+    "dagi_id": 100006,
+    "kode": 530,
+    "udenforkommuneinddeling": false,
+    "navn": "Billund",
+    "geom": null
+  },
+  {
+    "dagi_id": 100007,
+    "kode": 400,
+    "udenforkommuneinddeling": false,
+    "navn": "Bornholm",
+    "geom": null
+  },
+  {
+    "dagi_id": 100008,
+    "kode": 153,
+    "udenforkommuneinddeling": false,
+    "navn": "Brøndby",
+    "geom": null
+  },
+  {
+    "dagi_id": 100009,
+    "kode": 810,
+    "udenforkommuneinddeling": false,
+    "navn": "Brønderslev",
+    "geom": null
+  },
+  {
+    "dagi_id": 100010,
+    "kode": 155,
+    "udenforkommuneinddeling": false,
+    "navn": "Dragør",
+    "regionskode": 1084,
+    "geom": null
+  },
+  {
+    "dagi_id": 100011,
+    "kode": 240,
+    "udenforkommuneinddeling": false,
+    "navn": "Egedal",
+    "geom": null
+  },
+  {
+    "dagi_id": 100012,
+    "kode": 561,
+    "udenforkommuneinddeling": false,
+    "navn": "Esbjerg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100013,
+    "kode": 563,
+    "udenforkommuneinddeling": false,
+    "navn": "Fanø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100014,
+    "kode": 710,
+    "udenforkommuneinddeling": false,
+    "navn": "Favrskov",
+    "geom": null
+  },
+  {
+    "dagi_id": 100015,
+    "kode": 320,
+    "udenforkommuneinddeling": false,
+    "navn": "Faxe",
+    "geom": null
+  },
+  {
+    "dagi_id": 100016,
+    "kode": 210,
+    "udenforkommuneinddeling": false,
+    "navn": "Fredensborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100017,
+    "kode": 607,
+    "udenforkommuneinddeling": false,
+    "navn": "Fredericia",
+    "geom": null
+  },
+  {
+    "dagi_id": 100018,
+    "kode": 147,
+    "udenforkommuneinddeling": false,
+    "navn": "Frederiksberg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100019,
+    "kode": 813,
+    "udenforkommuneinddeling": false,
+    "navn": "Frederikshavn",
+    "geom": null
+  },
+  {
+    "dagi_id": 100020,
+    "kode": 250,
+    "udenforkommuneinddeling": false,
+    "navn": "Frederikssund",
+    "geom": null
+  },
+  {
+    "dagi_id": 100021,
+    "kode": 190,
+    "udenforkommuneinddeling": false,
+    "navn": "Furesø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100022,
+    "kode": 430,
+    "udenforkommuneinddeling": false,
+    "navn": "Faaborg-Midtfyn",
+    "geom": null
+  },
+  {
+    "dagi_id": 100023,
+    "kode": 157,
+    "udenforkommuneinddeling": false,
+    "navn": "Gentofte",
+    "geom": null
+  },
+  {
+    "dagi_id": 100024,
+    "kode": 159,
+    "udenforkommuneinddeling": false,
+    "navn": "Gladsaxe",
+    "geom": null
+  },
+  {
+    "dagi_id": 100025,
+    "kode": 161,
+    "udenforkommuneinddeling": false,
+    "navn": "Glostrup",
+    "geom": null
+  },
+  {
+    "dagi_id": 100026,
+    "kode": 253,
+    "udenforkommuneinddeling": false,
+    "navn": "Greve",
+    "geom": null
+  },
+  {
+    "dagi_id": 100027,
+    "kode": 270,
+    "udenforkommuneinddeling": false,
+    "navn": "Gribskov",
+    "geom": null
+  },
+  {
+    "dagi_id": 100028,
+    "kode": 376,
+    "udenforkommuneinddeling": false,
+    "navn": "Guldborgsund",
+    "geom": null
+  },
+  {
+    "dagi_id": 100029,
+    "kode": 510,
+    "udenforkommuneinddeling": false,
+    "navn": "Haderslev",
+    "geom": null
+  },
+  {
+    "dagi_id": 100030,
+    "kode": 260,
+    "udenforkommuneinddeling": false,
+    "navn": "Halsnæs",
+    "geom": null
+  },
+  {
+    "dagi_id": 100031,
+    "kode": 766,
+    "udenforkommuneinddeling": false,
+    "navn": "Hedensted",
+    "geom": null
+  },
+  {
+    "dagi_id": 100032,
+    "kode": 217,
+    "udenforkommuneinddeling": false,
+    "navn": "Helsingør",
+    "geom": null
+  },
+  {
+    "dagi_id": 100033,
+    "kode": 163,
+    "udenforkommuneinddeling": false,
+    "navn": "Herlev",
+    "geom": null
+  },
+  {
+    "dagi_id": 100034,
+    "kode": 657,
+    "udenforkommuneinddeling": false,
+    "navn": "Herning",
+    "geom": null
+  },
+  {
+    "dagi_id": 100035,
+    "kode": 219,
+    "udenforkommuneinddeling": false,
+    "navn": "Hillerød",
+    "geom": null
+  },
+  {
+    "dagi_id": 100036,
+    "kode": 860,
+    "udenforkommuneinddeling": false,
+    "navn": "Hjørring",
+    "geom": null
+  },
+  {
+    "dagi_id": 100037,
+    "kode": 316,
+    "udenforkommuneinddeling": false,
+    "navn": "Holbæk",
+    "geom": null
+  },
+  {
+    "dagi_id": 100038,
+    "kode": 661,
+    "udenforkommuneinddeling": false,
+    "navn": "Holstebro",
+    "geom": null
+  },
+  {
+    "dagi_id": 100039,
+    "kode": 615,
+    "udenforkommuneinddeling": false,
+    "navn": "Horsens",
+    "geom": null
+  },
+  {
+    "dagi_id": 100040,
+    "kode": 167,
+    "udenforkommuneinddeling": false,
+    "navn": "Hvidovre",
+    "geom": null
+  },
+  {
+    "dagi_id": 100041,
+    "kode": 169,
+    "udenforkommuneinddeling": false,
+    "navn": "Høje-Taastrup",
+    "geom": null
+  },
+  {
+    "dagi_id": 100042,
+    "kode": 223,
+    "udenforkommuneinddeling": false,
+    "navn": "Hørsholm",
+    "geom": null
+  },
+  {
+    "dagi_id": 100043,
+    "kode": 756,
+    "udenforkommuneinddeling": false,
+    "navn": "Ikast-Brande",
+    "geom": null
+  },
+  {
+    "dagi_id": 100044,
+    "kode": 183,
+    "udenforkommuneinddeling": false,
+    "navn": "Ishøj",
+    "geom": null
+  },
+  {
+    "dagi_id": 100045,
+    "kode": 849,
+    "udenforkommuneinddeling": false,
+    "navn": "Jammerbugt",
+    "geom": null
+  },
+  {
+    "dagi_id": 100046,
+    "kode": 326,
+    "udenforkommuneinddeling": false,
+    "navn": "Kalundborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100047,
+    "kode": 440,
+    "udenforkommuneinddeling": false,
+    "navn": "Kerteminde",
+    "geom": null
+  },
+  {
+    "dagi_id": 100048,
+    "kode": 621,
+    "udenforkommuneinddeling": false,
+    "navn": "Kolding",
+    "geom": null
+  },
+  {
+    "dagi_id": 100049,
+    "kode": 101,
+    "udenforkommuneinddeling": false,
+    "navn": "København",
+    "geom": null
+  },
+  {
+    "dagi_id": 100050,
+    "kode": 259,
+    "udenforkommuneinddeling": false,
+    "navn": "Køge",
+    "geom": null
+  },
+  {
+    "dagi_id": 100051,
+    "kode": 482,
+    "udenforkommuneinddeling": false,
+    "navn": "Langeland",
+    "geom": null
+  },
+  {
+    "dagi_id": 100052,
+    "kode": 350,
+    "udenforkommuneinddeling": false,
+    "navn": "Lejre",
+    "geom": null
+  },
+  {
+    "dagi_id": 100053,
+    "kode": 665,
+    "udenforkommuneinddeling": false,
+    "navn": "Lemvig",
+    "geom": null
+  },
+  {
+    "dagi_id": 100054,
+    "kode": 360,
+    "udenforkommuneinddeling": false,
+    "navn": "Lolland",
+    "geom": null
+  },
+  {
+    "dagi_id": 100055,
+    "kode": 173,
+    "udenforkommuneinddeling": false,
+    "navn": "Lyngby-Taarbæk",
+    "geom": null
+  },
+  {
+    "dagi_id": 100056,
+    "kode": 825,
+    "udenforkommuneinddeling": false,
+    "navn": "Læsø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100057,
+    "kode": 846,
+    "udenforkommuneinddeling": false,
+    "navn": "Mariagerfjord",
+    "geom": null
+  },
+  {
+    "dagi_id": 100058,
+    "kode": 410,
+    "udenforkommuneinddeling": false,
+    "navn": "Middelfart",
+    "geom": null
+  },
+  {
+    "dagi_id": 100059,
+    "kode": 773,
+    "udenforkommuneinddeling": false,
+    "navn": "Morsø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100060,
+    "kode": 707,
+    "udenforkommuneinddeling": false,
+    "navn": "Norddjurs",
+    "geom": null
+  },
+  {
+    "dagi_id": 100061,
+    "kode": 480,
+    "udenforkommuneinddeling": false,
+    "navn": "Nordfyns",
+    "geom": null
+  },
+  {
+    "dagi_id": 100062,
+    "kode": 450,
+    "udenforkommuneinddeling": false,
+    "navn": "Nyborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100063,
+    "kode": 370,
+    "udenforkommuneinddeling": false,
+    "navn": "Næstved",
+    "geom": null
+  },
+  {
+    "dagi_id": 100064,
+    "kode": 727,
+    "udenforkommuneinddeling": false,
+    "navn": "Odder",
+    "geom": null
+  },
+  {
+    "dagi_id": 100065,
+    "kode": 461,
+    "udenforkommuneinddeling": false,
+    "navn": "Odense",
+    "geom": null
+  },
+  {
+    "dagi_id": 100066,
+    "kode": 306,
+    "udenforkommuneinddeling": false,
+    "navn": "Odsherred",
+    "geom": null
+  },
+  {
+    "dagi_id": 100067,
+    "kode": 730,
+    "udenforkommuneinddeling": false,
+    "navn": "Randers",
+    "geom": null
+  },
+  {
+    "dagi_id": 100068,
+    "kode": 840,
+    "udenforkommuneinddeling": false,
+    "navn": "Rebild",
+    "geom": null
+  },
+  {
+    "dagi_id": 100069,
+    "kode": 760,
+    "udenforkommuneinddeling": false,
+    "navn": "Ringkøbing-Skjern",
+    "geom": null
+  },
+  {
+    "dagi_id": 100070,
+    "kode": 329,
+    "udenforkommuneinddeling": false,
+    "navn": "Ringsted",
+    "geom": null
+  },
+  {
+    "dagi_id": 100071,
+    "kode": 265,
+    "udenforkommuneinddeling": false,
+    "navn": "Roskilde",
+    "geom": null
+  },
+  {
+    "dagi_id": 100072,
+    "kode": 230,
+    "udenforkommuneinddeling": false,
+    "navn": "Rudersdal",
+    "geom": null
+  },
+  {
+    "dagi_id": 100073,
+    "kode": 175,
+    "udenforkommuneinddeling": false,
+    "navn": "Rødovre",
+    "geom": null
+  },
+  {
+    "dagi_id": 100074,
+    "kode": 741,
+    "udenforkommuneinddeling": false,
+    "navn": "Samsø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100075,
+    "kode": 740,
+    "udenforkommuneinddeling": false,
+    "navn": "Silkeborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100076,
+    "kode": 746,
+    "udenforkommuneinddeling": false,
+    "navn": "Skanderborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100077,
+    "kode": 779,
+    "udenforkommuneinddeling": false,
+    "navn": "Skive",
+    "geom": null
+  },
+  {
+    "dagi_id": 100078,
+    "kode": 330,
+    "udenforkommuneinddeling": false,
+    "navn": "Slagelse",
+    "geom": null
+  },
+  {
+    "dagi_id": 100079,
+    "kode": 269,
+    "udenforkommuneinddeling": false,
+    "navn": "Solrød",
+    "geom": null
+  },
+  {
+    "dagi_id": 100080,
+    "kode": 340,
+    "udenforkommuneinddeling": false,
+    "navn": "Sorø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100081,
+    "kode": 336,
+    "udenforkommuneinddeling": false,
+    "navn": "Stevns",
+    "geom": null
+  },
+  {
+    "dagi_id": 100082,
+    "kode": 671,
+    "udenforkommuneinddeling": false,
+    "navn": "Struer",
+    "geom": null
+  },
+  {
+    "dagi_id": 100083,
+    "kode": 479,
+    "udenforkommuneinddeling": false,
+    "navn": "Svendborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100084,
+    "kode": 706,
+    "udenforkommuneinddeling": false,
+    "navn": "Syddjurs",
+    "geom": null
+  },
+  {
+    "dagi_id": 100085,
+    "kode": 540,
+    "udenforkommuneinddeling": false,
+    "navn": "Sønderborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100086,
+    "kode": 787,
+    "udenforkommuneinddeling": false,
+    "navn": "Thisted",
+    "geom": null
+  },
+  {
+    "dagi_id": 100087,
+    "kode": 550,
+    "udenforkommuneinddeling": false,
+    "navn": "Tønder",
+    "geom": null
+  },
+  {
+    "dagi_id": 100088,
+    "kode": 185,
+    "udenforkommuneinddeling": false,
+    "navn": "Tårnby",
+    "geom": null
+  },
+  {
+    "dagi_id": 100089,
+    "kode": 187,
+    "udenforkommuneinddeling": false,
+    "navn": "Vallensbæk",
+    "geom": null
+  },
+  {
+    "dagi_id": 100090,
+    "kode": 573,
+    "udenforkommuneinddeling": false,
+    "navn": "Varde",
+    "geom": null
+  },
+  {
+    "dagi_id": 100091,
+    "kode": 575,
+    "udenforkommuneinddeling": false,
+    "navn": "Vejen",
+    "geom": null
+  },
+  {
+    "dagi_id": 100092,
+    "kode": 630,
+    "udenforkommuneinddeling": false,
+    "navn": "Vejle",
+    "geom": null
+  },
+  {
+    "dagi_id": 100093,
+    "kode": 820,
+    "udenforkommuneinddeling": false,
+    "navn": "Vesthimmerland",
+    "geom": null
+  },
+  {
+    "dagi_id": 100094,
+    "kode": 791,
+    "udenforkommuneinddeling": false,
+    "navn": "Viborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100095,
+    "kode": 390,
+    "udenforkommuneinddeling": false,
+    "navn": "Vordingborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100096,
+    "kode": 492,
+    "udenforkommuneinddeling": false,
+    "navn": "Ærø",
+    "geom": null
+  },
+  {
+    "dagi_id": 100097,
+    "kode": 580,
+    "udenforkommuneinddeling": false,
+    "navn": "Aabenraa",
+    "geom": null
+  },
+  {
+    "dagi_id": 100098,
+    "kode": 851,
+    "udenforkommuneinddeling": false,
+    "navn": "Aalborg",
+    "geom": null
+  },
+  {
+    "dagi_id": 100099,
+    "kode": 751,
+    "udenforkommuneinddeling": false,
+    "navn": "Aarhus",
+    "geom": null
+  },
+  {
+    "dagi_id": 100100,
+    "kode": 999,
+    "udenforkommuneinddeling": false,
+    "navn": "Testkommune",
+    "regionskode": 1,
+    "geom": "SRID=25832;MULTIPOLYGON(((60 60,62 60,62 62,60 62,60 60)))"
+  },
+  {
+    "dagi_id": 100101,
+    "kode": 99,
+    "udenforkommuneinddeling": false,
+    "navn": "Kommune test",
+    "regionskode": 1084,
+    "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+  }
+]

@@ -1,5 +1,0 @@
-{
-  "type": "Afvist",
-  "title": "Maximum på antal samtidige requests til DAWA overskredet",
-  "details": "I DAWA er der sat en grænse på, hvor mange samtidige request til servicen der må foretages. Grænsen er på 10 samtidige requests. Baggrunden for at sætte denne grænse er, at forhindre en enkelt anvenders brug af servicen påvirker andre anvendere. F.eks. i form af lange svartider eller fejl i kald af servicen. Hvis du har problemer med denne grænse, vil vi opfordrer dig til at tilpasse din kode til denne begrænsning. Hvis dette ikke kan lade sig gøre, kan du kontakte os på awssuiten@sdfe.dk."
-}

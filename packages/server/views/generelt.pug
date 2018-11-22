@@ -1,0 +1,153 @@
+extends sidebar-auto
+
+block main
+    h1 Generelt om Web API'et
+    p.lead Nyttig viden om DAWA-API'et som gælder på tværs af ressourcer.
+    h3.anchor-header#baseadresse Baseadresse
+
+    p Som DAWA's baseadresse kan enten anvendes http://dawa.aws.dk eller https://dawa.aws.dk.
+
+    h3.anchor-header#dataformater Dataformater
+    p Alle typer data kan returneres i følgende formater:
+      ul
+        li json. Default.
+          PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej">#{url}/adresser?postnr=8830&vejnavn=Bakkevej</a>
+        li jsonp.
+          PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&callback=cbFun</a>
+        li ndjson.
+          PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&ndjson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&ndjson</a>
+        li csv.
+          PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=csv">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=csv</a>
+    p Derudover understøttes  også GeoJSON for de entiteter hvor det giver mening:
+      PRE <a href="/kommuner/0101?format=geojson">#{url}/kommuner/0101?format=geojson</a>
+      PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
+    p Vejstykker og adgangsadresser supporterer endvidere GeoJSON med højdeangivelse (z-koordinatet). Hvis man ønsker dette anvendes format=geojsonz:
+      PRE <a href="/vejstykker?navn=Borgergade&format=geojsonz">#{url}/vejstykker?navn=Borgergade&format=geojsonz</a>
+    p Shapefile-formatet er meget populært i GIS-kredse. Vi ville gerne have supporteret det, men DAWA's streaming af nær realtids opdaterede data passer ikke godt sammen med Shapefile-formatet. Du kan selv generer Shapefiler vha. DAWA's GeoJSON data og dit GIS-program eller ogr2ogr programmet. Du kan se eksempler på hvordan i <a href='http://digitaliser.dk/news/2558547'>AWS-gruppen på Digitaliser.dk</a>.
+
+    h3.anchor-header#tidsformat Tidsformat
+    p Tidspunkter returneres i to forskellige formater, som begge er specificeret i <a href='http://tools.ietf.org/html/rfc3339'>Date and Time on the Internet: Timestamps</a>. Det drejer sig om <a href='http://tools.ietf.org/html/rfc3339#page-4'>Coordinated Universal Time (UTC)</a> og <a href='http://tools.ietf.org/html/rfc3339#page-5'>Unqualified Local Time</a>. Vi havde foretrukket ét format, nemlig UTC, men da det ikke er alle vore datakilder, som kan leverer dette, har vi været nød til anvende to. UTC har formen: 2000-02-05T12:00:00.000Z. Unqualified Local Time har formen: 2009-02-11T09:56:50.000.
+
+    h3.anchor-header#tekstsoegning Tekstsøgning
+    p Det er muligt at foretage en tekstsøgning i mange af de datatyper, som DAWA udstiller. Til dette anvendes query-parameteren <em>q</em>. For tekstsøgning gælder følgende:
+    ul
+      li Der er ingen forskel på store og små bogstaver
+      li Der foretages såkaldt <a href="http://en.wikipedia.org/wiki/Stemming">Stemming</a> af ordene i en fritekstsøgning
+      li Hvis der angives flere ord i en søgning skal alle ordene matche.
+      li Accenter normaliseres, der er ingen forskel på é og e.
+      li æ, ø og å normaliseres, der er ingen forskel på å og Aa.
+      li Det er muligt at tilføje et <em>wildcard</em> '*' i slutningen af hvert ord. Wildcard matcher alle endelser.
+      li Tegn, som ikke er bogstaver eller et wildcard i slutningen af et ord fortolkes som mellemrum.
+      li Tekstsøgning kan kombineres med andre søgeparametre. Se mulighederne under dokumentationen for de enkelte APIer.
+      li Ved anvendelse af tekstsøgning returneres maximalt 1000 instanser.
+    h4 Eksempler
+    p Find de adresser som matcher <em>Lilledal 1</em>
+    pre
+      a(href='#{url}/adresser?q=Lilledal 1') #{url}/adresser?q=Lilledal 1
+    p Find alle vejnavne, som starter med <em>vibor</em>
+    pre
+      a(href='#{url}/vejnavne?q=vibor*') #{url}/vejnavne?q=vibor*
+    p Find alle vejnavne i Aarhus kommune (kommunekode 751), som starter med <em>vibor</em>
+    pre
+      a(href='#{url}/vejnavne?q=vibor*&kommunekode=751') #{url}/vejnavne?q=vibo*r&kommunekode=751
+
+    h3.anchor-header#autocomplete Autocomplete
+    p DAWA udstiller API'er til autocomplete af adresser, adgangsadresser, veje, postnumre, supplerende bynavne samt kommuner.
+    p Autocomplete har samme egenskaber som tekstsøgninger beskrevet ovenfor, med følgende forskelle:
+    ul
+      li Der tilføjes automatisk et wildcard til det sidste ord i søgningen, med mindre det sidste tegn i søgestrengen er et mellemrum
+      li Autocomplete returnerer en liste af simple forslag. Hvert forslag indeholder et 'tekst' felt, som beskriver forslaget, samt et objekt med oplysninger der identificerer forslaget.
+      li Der returneres som udgangspunkt 20 resultater. Ønskes et andet antal anvendes per_side parameteren.
+      li Der understøttes kun formaterne <em>json</em>, <em>jsonp</em> og <em>ndjson</em>. CSV er ikke understøttet.
+    h4 Eksempler
+    p Find de adresser som matcher <em>Lilledal 1</em>
+    pre
+      a(href='#{url}/adresser/autocomplete?q=Lilledal 1') #{url}/adresser/autocomplete?q=Lilledal 1
+    p Find alle vejnavne, som matcher <em>vibor</em>
+    pre
+      a(href='#{url}/vejnavne/autocomplete?q=vibor') #{url}/vejnavne/autocomplete?q=vibor
+    p Find alle vejnavne i Aarhus kommune (kommunekode 751), som matcher <em>vibor</em>
+    pre
+      a(href='#{url}/vejnavne/autocomplete?q=vibor&kommunekode=751') #{url}/vejnavne/autocomplete?q=vibor&kommunekode=751
+
+    h3.anchor-header#versionering  Versionering
+    p DAWA ændres med tiden pga. nye ønsker, fejlrettelser, nye data, ændring af de bagvedliggende data osv. Vi ønsker af flere grunde ikke at have flere versioner af DAWA i  drift samtidigt. Vi ønsker heller ikke, at de klientprogrammer, som anvender DAWA, holder op med at fungere, når DAWA opdateres. For at undgå for mange forskellige versioner af DAWA og undgå at klientprogrammer fejler, når DAWA opdateres, overholder vi følgende verioneringsprincipper:
+    ul
+      li Det er tilladt at tilføje noget til API'et. Nye ressourcer, nye data, nye søgeparametre mm.
+      li Det er ikke tilladt at fjerne noget fra API'et.
+    p Hvis en opdatering af DAWA ikke kan overholde ovenstående principper etableres en ny version, som i en periode driftes samtidig med den tidligere version. Nedlæggelse af aktuel version med information om skift til ny version varsles 1 år før.
+
+    p Det er vigtigt, at de klientprogrammer, som anvender DAWA, er robuste over for de ændringer af API'et, som er tilladt i forhold til ovenstående principper. Det, der ofte skaber de største problemer, er nye dataelementer i en datastruktur. Her er det vigtigt at vælge de teknikker, som kan håndtere dette. Klientprogrammer skal kunne håndterer nye name/value par i JSON. Nye kolonner i CSV. Hvis Klientprogrammerne er robuste over for det, vil de fejlfrit kunne fungere når DAWA opdateres indenfor en version.
+
+    h3.anchor-header#kompression  Kompression
+    p Hvis den anvendte netværksforbindelse er langsom (lille båndbredde) og den datamængde der ønskes fra DAWA er stor, kan klientapplikationen anmode om at svaret (response) komprimeres. Dette gøres ved at indsætte følgende http header i requestet.
+    p
+      pre Accept-Encoding: gzip, deflate
+    p Herved reduceres størrelsen af et typisk response med ca. 90%.
+
+    h3.anchor-header#cors Cross Origin Resource Sharing
+    p Alle GET svar fra DAWA indeholder en CORS header der tillader cross-site requests:
+    pre Access-Control-Allow-Origin: *
+    p Dette muliggør cross-site requests direkte til DAWA.
+
+    h3.anchor-header#caching Caching
+    p Som udgangspunkt caches svar fra DAWA i 24 timer, dvs. at de data der returneres fra DAWA kan være op til 24 timer gamle. Ønskes der helt friske data tilføjes query parameteren <em>cache=no-cache</em>.
+
+    h3.anchor-header#paginering  Paginering
+    p Det er ikke altid formålstjenligt at hele resultet returneres på en gang. Til tider er fordelagtigt at opdele resultatet i mindre bidder. Det kaldes paginering - opdeling i sider. Det gøres ved at angive en sidestørrelse (per_side) samt et sidenummer (side) i requestet. Nedenstående Grøndal sogn request returnerer side 3 med en sidestørrelse på 24 adresser per side.
+    p
+      pre
+        a(href='#{url}/adresser?sogn=7060&side=3&per_side=24') #{url}/adresser?sogn=7060&side=3&per_side=24
+
+    p Af tekniske årsager er det ikke muligt at understøtte paginering i det fulde adressesæt. P.t. er det muligt at paginere i de første 400.000 adresser. Denne grænse kan blive reduceret yderligere.
+    p Såfremt man ønsker at få adressesættet delt op i flere mindre dele og hente hver enkelt del i en separat HTTP forespørgsel, så anbefales det, at hente listen af sogne først, og dernæst hente adresserne for hvert sogn.
+
+    h3.anchor-header#fejlhaandtering  Fejlhåndtering
+    p Følger <a href="http://www.mnot.net/blog/2013/05/15/http_problem">Problem Details for HTTP APIs</a>
+    p Eksempel på returneret fejlbeskrivelse:
+    <pre>{<br>  "type": "ResourceNotFoundError",<br>  "title": "The resource was not found",<br>  "details": {<br>    "id": "0254b942-f3ac-4969-a963-d2c4ed9ab943"<br>  }<br>}
+    </pre>
+
+    h3.anchor-header#formatering  Formatering
+    p Web API'ets svar i JSON er formateret. Hvis formatering af f.eks. performancegrunde ikke ønskes, så kan parameteren <em>noformat</em> anvendes, som vist i eksemplet nedenfor:
+    p
+      pre
+        a(href='#{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat') #{url}/adresser?sogn=7060&vejnavn=Hvidkildevej&noformat
+
+
+    h3.anchor-header#flervaerdisoegning  Flerværdisøgning
+
+    p En række parametre understøtter flerværdisøgning, hvor søgeværdierne er adskilt vha. pipe ('|').
+      | Se hvilke parametre som understøtter flerværdisøgning i dokumentationen for de specifikke API'er.<br>
+      | Hvis man f.eks. ønsker alle adresser med husnummmer 177  i både Københavns og
+      | Frederiksberg kommune gøres det på følgende måde:
+
+    p
+      pre
+        a(href='#{url}/adresser?kommunekode=0101|0147&husnr=177') #{url}/adresser?kommunekode=0101|0147&husnr=177
+
+    h3.anchor-header#nullsoegning Søgning efter <i>ingen værdi</i>
+
+    p En række parametre understøtter søgning med match på <i>ingen værdi</i>.
+      | Se hvilke parametre som understøtter søgning efter ingen værdi i dokumentationen for de specifikke API'er.<br>
+      | Søgning angives som en normal query
+      | parameter, men med den tomme streng som værdi.<br>
+      | Hvis man f.eks. ønsker alle adresser på Gammel Kongevej 177 der <i>ikke</i> har angivet en etage gøres det
+      | følgende måde:
+
+    p
+      pre
+        a(href='#{url}/adresser?vejnavn=Gammel%20Kongevej&husnr=177&etage=') #{url}/adresser?vejnavn=Gammel%20Kongevej&husnr=177&etage=
+
+    h3.anchor-header#maxrequests Maksimalt antal samtidige requests</i>
+
+    p Der er en grænse på hvor mange samtidige requests til DAWA, der må foretages fra en enkel IP adresse. Grænsen er på 10 samtidige requests. Baggrunden for at sætte denne grænse er, at forhindre en enkelt anvenders brug af DAWA påvirker andre anvendere. F.eks. i form af lange svartider eller fejl i kald af servicen.
+    p Hvis grænsen på 10 samtidige requests overskrides returneres responses med HTTP statuskoden 429 Too Many Requests.
+
+    h3.anchor-header#kodeeksempler Kodeeksempler
+    p At se på kodeeksempler er en god måde at finde ud af hvordan DAWA anvendes. Du kan finde en række kodeeksempler på
+      | <a href='https://github.com/DanmarksAdresser'> https://github.com/DanmarksAdresser</a>:
+    ul
+      li <em>C# og .NET</em>. Kodeeksemplet viser hvorledes man i C# programmere enkle opslag i DAWA, samt hvordan man vha. af streaming kan modtage en større datamængde uden at modtage det som et samlet hele. Du kan finde <a href='https://github.com/DanmarksAdresser/DawaDotnetClient'>C# kodeeksemplet i vort GitHub repositorie</a>.
+      li <em>JavaScript og jQuery</em>. Kodeeksemplet er en lille mobil web applikation, <a href='http://dail.aws.dk'>Danmarks adresser i lommen</a>, som viser hvorledes DAWA kan kaldes fra JavaScript ved brug af jQuery. Du kan finde <a href='https://github.com/DanmarksAdresser/DanmarksAdresserILommen'>JavaScript kodeeksemplet i vort GitHub repositorie</a>.
+    p Vi planlægger at tilføje kodeeksempler i andre sprog og platforme. Hvis du vil bidrage med et kodeeksempel i dit favorit programmeringssprog, er du meget velkommen.

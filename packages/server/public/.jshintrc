@@ -1,0 +1,7 @@
+{
+  "extends": "../.jshintrc",
+  "browser": true,
+  "devel": true,
+  "node": true,
+  "jquery":true
+}

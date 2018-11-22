@@ -1,1 +1,0 @@
-DROP FUNCTION IF EXISTS vask_adgangsadresser_update_tsv() CASCADE;

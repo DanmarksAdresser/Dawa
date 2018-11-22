@@ -3,8 +3,7 @@
 ## Misc
 ######################
 
-node_modules/*
-performanceTest/*.csv
+node_modules/
 .Rhistory
 *.pem
 

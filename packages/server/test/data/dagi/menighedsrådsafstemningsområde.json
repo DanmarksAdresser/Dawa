@@ -1,0 +1,9 @@
+[{
+  "dagi_id": 100102,
+  "kommunekode": 99,
+  "nummer": 1,
+  "navn": "MRAfstemningsområde Test",
+  "sognekode": 7210,
+  "afstemningsstednavn": "Afstemningssted test",
+  "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+}]

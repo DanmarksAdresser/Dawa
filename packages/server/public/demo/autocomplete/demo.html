@@ -1,0 +1,122 @@
+<!doctype html>
+<html>
+<head>
+    <title>DAWA autocomplete - demo</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="dawa-autocomplete2.css">
+    <script src="/lib/core.min.js"></script>
+    <script src="/lib/fetch.min.js"></script>
+    <script src="/js/autocomplete/dawa-autocomplete2.min.js"></script>
+    <style>
+        body {
+            font-family: "Helvetica Neue",Arial,sans-serif;
+        }
+    </style>
+</head>
+<body>
+<h3>Default options</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-default">
+</div>
+
+<h3>adgangsadresserOnly=true</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-adgangsadresser-only">
+</div>
+<h3>minLength=3</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-minlength-3">
+</div>
+<h3>kommunekode=101</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-kommunekode-101">
+</div>
+<h3>multiline=true</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-multiline">
+</div>
+<h3>supplerendebynavn=false</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-supplerendebynavn-false">
+</div>
+<h3>stormodtagerpostnumre=false</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-stormodtagerpostnumre-false">
+</div>
+<h3>Forudfylde adresse med adresseid</h3>
+<div class="dawa-autocomplete-container">
+    <input id="autocomplete-address-id">
+</div>
+
+</body>
+<script>
+//  const BASE_URL = 'https://dawa.aws.dk';
+  const BASE_URL = '';
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-default"), {
+    baseUrl:BASE_URL,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-adgangsadresser-only"), {
+    baseUrl:BASE_URL,
+    adgangsadresserOnly: true,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-minlength-3"), {
+    baseUrl:BASE_URL,
+    minLength: 3,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-kommunekode-101"), {
+    baseUrl:BASE_URL,
+    params: {
+      kommunekode: 101
+    },
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    }
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-multiline"), {
+    baseUrl:BASE_URL,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    },
+    multiline: true
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-supplerendebynavn-false"), {
+    baseUrl:BASE_URL,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    },
+    supplerendebynavn: false
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-address-id"), {
+    baseUrl:BASE_URL,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    },
+    id: 'f5a68d45-935b-48d6-8d11-6363327ca1ae'
+  });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-stormodtagerpostnumre-false"), {
+    baseUrl:BASE_URL,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    },
+    stormodtagerpostnumre: false
+  });
+</script>
+</html>

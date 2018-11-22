@@ -1,0 +1,61 @@
+extends ../sidebar-auto
+block main
+  h1 Etablering af adressekopiregister
+  p.lead
+    | DETTE ER ENFORÆLDET GUIDE: Det anbefales at benytte det moderniserede replikerings-API, som
+    | er beskrevet <a href="/dok/guide/replikering">her</a>.
+  p.lead Etablering af lokal kopi af Danmarks adresser
+  section
+    h2.anchor-header#introduktion Introduktion
+    p DAWA udstiller adresser, adgangsadresse, vejstykker, postnumre og ejerlav i et format, som er velegnet til etablering og vedligehold af en lokal kopi af Danmarks adresser.
+    p I DAWA tilknyttes alle ændringer af adresser et unikt, fortløbende <em>sekvensnummer</em>. Et sekvensnummer svarer dermed til en unik hændelse (oprettelse, ændring eller nedlæggelse) på et objekt.
+    p Når et klientsystem skal vedligeholde et kopiregister anvendes sekvensnummeret til at holde styr på hvilke adresseændringer klientsystemet har udført i den lokale kopi og hvilke ændringer klientsystemet mangler at udføre.
+    p API'erne til replikering udstiller <em>normaliserede</em> adresser. Hvis kopien gemmes i en SQL database vil det være hensigtsmæssigt at have én tabel til hver type.
+    p Udtræk leveres i JSON eller i det kompakte CSV-format (se <a href="#{url}/dok/api/generelt#dataformater">dataformater</a>). Hændelserne leveres i JSON format.
+    h2.anchor-header#etablering Etablering af lokalt kopiregister
+    p Fremgangsmåden for etablering af lokalt kopiregister er som følgende:
+      ul
+        li Klienten henter det aktuelle sekvensnummer:
+          pre GET <a href="/replikering/senestesekvensnummer">/replikering/senestesekvensnummer</a>
+        li Klienten henter dataudtræk for sekvensnummeret:
+          pre GET <a href="/replikering/postnumre?sekvensnummer=990">/replikering/postnumre?sekvensnummer=990</a>
+          pre GET <a href="/replikering/vejstykker?sekvensnummer=990">/replikering/vejstykker?sekvensnummer=990</a>
+          pre GET <a href="/replikering/adgangsadresser?sekvensnummer=990">/replikering/adgangsadresser?sekvensnummer=990</a>
+          pre GET <a href="/replikering/adresser?sekvensnummer=990">/replikering/adresser?sekvensnummer=990</a>
+          pre GET <a href="/replikering/ejerlav?sekvensnummer=990">/replikering/ejerlav?sekvensnummer=990</a>
+        li Klienten indlæser data i databasen, og har nu etableret et lokalt kopiregister.
+    p For efterfølgende at kunnd indlæse opdateringer skal sekvensnummeret for udtrækket også gemmes i databasen.
+    h2.anchor-header#vedligeholdelse Vedligeholdelse af lokalt kopiregister
+    p Fremgangsmåden for vedligeholdelse af lokalt kopiregister er som følgende:
+      ul
+        li Klienten undersøger, om der er sket ændringer ved at <em>polle</em> seneste sekvensnummer:
+          pre GET <a href="/replikering/senestesekvensnummer">/replikering/senestesekvensnummer</a>
+        li Hvis klienten konstanterer, at der er sket adresseændringer hentes hændelserne:
+          pre GET <a href="/replikering/postnumre/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/postnumre/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+          pre GET <a href="/replikering/vejstykker/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/vejstykker/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+          pre GET <a href="/replikering/adgangsadresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adgangsadresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+          pre GET <a href="/replikering/adresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/adresser/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+          pre GET <a href="/replikering/ejerlav/haendelser?sekvensnummerfra=990&sekvensnummertil=1000">/replikering/ejerlav/haendelser?sekvensnummerfra=990&sekvensnummertil=1000</a>
+        li Klienten opdaterer den lokale kopi på baggrund af hændelserne. Anvendes der en SQL-database hvor der anvendes en tabel pr. datatype vil hver hændelse resultere i ét INSERT, UPDATE eller DELETE statement.
+        li Med jævne mellemrum (f.eks. dagligt eller ugentligt) bør klienten hente nye udtræk og verificere, at den lokale kopi er opdateret korrekt.
+    div.page-header
+      h3.anchor-header#detaljer Detaljer
+    p DAWA garanterer ikke <em>referentiel integritet</em>. F.eks. er det muligt at der kan være oprettet adresser med en vejkode og kommunekode, som endnu ikke refererer til et vejstykke. Klientsystemet bør håndtere dette.
+    p Hændelser udstilles i <em>nær realtid</em>. Kildesystemet der ligger til grund for hændelserne er Danmarks Adresseregister (DAR). Klientsystemer skal være opmærksom på, at adressers postnumre og supplerende bynavne p.t. kun opdateres en gang i døgnet.
+    p Hvis man ønsker at vedligeholde en lokal kopi af en <em>delmængde</em> af adresserne (f.eks. en kommune) skal man være opmærksom på, at det er noget mere kompliceret at vedligeholde en lokal kopi, da det i princippet er muligt for en adresse at flytte fra en kommune til en anden. Hvis der anvendes en SQL-database kan det overvejes at replikere alle adresserne og anvende et <em>View</em>, som evt. kan være et <a href="http://en.wikipedia.org/wiki/Materialized_view">Materialized View</a>.
+      section
+        div.page-header
+          h3.anchor-header#udtraek Udtræk
+        p.
+          Udtræk leveres i JSON- eller CSV-format (se <a href="#{url}/dok/api/generelt#dataformater">dataformater</a>). Der henvises til <a href="/dok/api">API oversigten</a> for detaljerede
+          beskrivelser af de enkelte replikerede datatyper.
+        p En list af datakilder og beskrives af deres feltnavne, kan også findes i JSON format på <a href="#{url}/replikeringdok/schema.json">/replikeringdok/schema.json</a>.
+      section
+        div.page-header
+          h3.anchor-header#haendelser Hændelser
+        p Hændelser leveres i JSON, og et hændelsesobjekt har følgende felter:
+          ul
+            li operation: Har værdien 'insert', 'update' eller 'delete', alt efter om objektet er oprettet, opdateret eller slettet.
+            li tidspunkt: Hvornår hændelsen blev indlæst i DAWA. Helt præcist, det tidspunkt hvor transaktionen startede.
+            li sekvensnummer: Hændelsens unikke sekvensnummer. Heltal. Sekvensnumre tildeles hændelser sekventielt i den rækkefølge som hændelserne indlæses i.
+            li data: Objektets attributter. Feltnavnene stemmer overens med udtræksformatet.
