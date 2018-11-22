@@ -1,6 +1,6 @@
 "use strict";
 
-var cli = require('cli');
+const commander = require('commander');
 var fs = require('fs');
 var q = require('q');
 var _ = require('underscore');
@@ -75,30 +75,37 @@ exports.addLogOptionsParameter = function(optionSpec) {
   optionSpec.logConfiguration = [false, 'Konfigurationsfil med logkonfiguration', 'string'];
 };
 
+const coercions = {
+  string: str => str,
+  boolean: val  => !(val === 'false' || val === false),
+  number: parseFloat
+}
+
 exports.main = function(optionSpec, requiredParams, mainFunc) {
   q.longStackSupport = true;
   optionSpec = _.clone(optionSpec);
   exports.addConfigurationFileParameter(optionSpec);
   exports.addLogOptionsParameter(optionSpec);
-  cli.parse(optionSpec);
+  const options = Object.entries(optionSpec).reduce((acc, [key, value]) => {
+    return commander.option(`--${key}`, value[1], coercions[value[2]]);
+  }, commander).parse(process.argv);
+
+  exports.addFileAndEnvironmentOptions(optionSpec, options);
+  exports.checkRequiredOptions(options, requiredParams);
+  let logOptions;
+  if (options.logConfiguration) {
+    const logOptionsStr = fs.readFileSync(options.logConfiguration);
+    logOptions = JSON.parse(logOptionsStr);
+  }
+  else {
+    logOptions = {};
+  }
+  logger.initialize(logOptions);
+
+  options.logOptions = logOptions;
 
 
-  cli.main(function(args, options) {
-    var logOptions;
-    if (options.logConfiguration) {
-      var logOptionsStr = fs.readFileSync(options.logConfiguration);
-      logOptions = JSON.parse(logOptionsStr);
-    }
-    else {
-      logOptions = {};
-    }
-    logger.initialize(logOptions);
-
-    options.logOptions = logOptions;
-    exports.addFileAndEnvironmentOptions(optionSpec, options);
-    exports.checkRequiredOptions(options, requiredParams);
-    mainFunc(args, options);
-  });
+  mainFunc(options.args, options);
 };
 
 exports.mainMandatory = function(optionSpec, mainFunc) {
