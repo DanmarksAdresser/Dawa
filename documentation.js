@@ -78,7 +78,7 @@ const setupApidocDetails = (page ) => {
 function setupLegacySchemaPage(uriPath) {
   app.get(uriPath, function (req, res) {
     res.setHeader("Content-Type", "application/json; charset=utf-8");
-    res.sendFile(path.resolve('apidoc/schema.json'));
+    res.sendFile(path.resolve(__dirname, 'apidoc/schema.json'));
   });
 }
 
