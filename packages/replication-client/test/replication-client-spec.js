@@ -5,7 +5,7 @@ const generateConfig = require('../src/generate-config');
 const replikeringModels = require('@dawadk/server/apiSpecification/replikering/datamodel');
 const databaseSchemaUtil = require('../src/database-schema-util');
 const replikeringImpl = require('../src/replication-client-impl');
-const {withReplikeringTransaction} = require('../src/transactions');
+const {withReplicationTransaction} = require('../src/transactions');
 const Promise = require("bluebird");
 const {ReplicationHttpClient} = require('../src/replication-http-client');
 
@@ -123,22 +123,27 @@ class FakeClient {
   }
 }
 
+const initializeSchema = (client) => go(function*() {
+  const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, testReplicationConfig);
+  for (let stmt of stmts) {
+    yield client.query(stmt);
+  }
+});
+
+const initializeData = client => withReplicationTransaction(client, testReplicationConfig.replication_schema, txid => go(function* () {
+    yield replikeringImpl.initialize(client, 1, txid, testReplicationModels, testReplicationConfig, new FakeClient(testClientData));
+  }));
 describe('replikerings-klient', () => {
   testdb.withTransactionAll('replikeringtest', (clientFn) => {
     it('Can initialize the database schema ', () => go(function* () {
-      const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, testReplicationConfig);
-      for (let stmt of stmts) {
-        yield clientFn().query(stmt);
-      }
+      yield initializeSchema(clientFn());
     }));
     it('Can initialize database', () => go(function* () {
-      yield withReplikeringTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
-        yield replikeringImpl.initialize(clientFn(), 1, txid, testReplicationModels, testReplicationConfig, new FakeClient(testClientData));
-        const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
-        assert.strictEqual(result.length, 2);
-        assert.deepEqual(result[0], {id: 1, value: 'one'});
-        assert.deepEqual(result[1], {id: 2, value: 'two'});
-      }));
+      yield initializeData(clientFn());
+      const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
+      assert.strictEqual(result.length, 2);
+      assert.deepEqual(result[0], {id: 1, value: 'one'});
+      assert.deepEqual(result[1], {id: 2, value: 'two'});
     }));
 
     it('Has updated source_transactions table', () => go(function*() {
@@ -151,7 +156,7 @@ describe('replikerings-klient', () => {
     }));
 
     it('Can update incrementally', () => go(function*() {
-      yield withReplikeringTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
+      yield withReplicationTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
         yield replikeringImpl.updateIncrementally(clientFn(), txid, testReplicationModels, testReplicationConfig, new FakeClient(testClientData));
         const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
         assert.strictEqual(result.length, 2);
@@ -159,6 +164,23 @@ describe('replikerings-klient', () => {
         assert.deepEqual(result[1], {id: 3, value: 'three'});
       }));
     }));
+  });
+});
+
+describe('Replikerings-klient updateUsingDownload', () => {
+  testdb.withTransactionEach('replikeringtest', (clientFn) => {
+    it('Can update using download', () => go(function*() {
+      yield initializeSchema(clientFn());
+      yield initializeData(clientFn());
+      yield withReplicationTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
+        yield replikeringImpl.updateUsingDownload(clientFn(), 3, txid, testReplicationModels, testReplicationConfig, new FakeClient(testClientData));
+      }));
+      const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
+      assert.strictEqual(result.length, 2);
+      assert.deepEqual(result[0], {id: 2, value: 'two updated'});
+      assert.deepEqual(result[1], {id: 3, value: 'three'});
+    }));
+
   });
 });
 
@@ -171,7 +193,7 @@ describe('replikerings-klient-integration', () => {
       }
     }));
     it('Can initialize database from test server', () => go(function* () {
-      yield withReplikeringTransaction(clientFn(), testDarConfig.replication_schema, txid => go(function* () {
+      yield withReplicationTransaction(clientFn(), testDarConfig.replication_schema, txid => go(function* () {
         yield replikeringImpl.initialize(clientFn(), 3216533, txid, replikeringModels, testDarConfig, new ReplicationHttpClient(testDarConfig.replication_url));
       }));
     }));

@@ -26,11 +26,11 @@ const computeInsertsView =
     const idColumns = tableModel.primaryKey;
     const selectIds = selectList(null, idColumns);
     const selectClause = makeSelectClause('t', tableModel, columnNames);
-    const changesColumnList = ['txid', 'changeid', 'operation', 'public', columnNames];
+    const changesColumnList = ['txid', 'operation', 'public', columnNames];
     const sql =
       `WITH ids AS 
     (SELECT ${selectIds} FROM ${srcTable} EXCEPT SELECT ${selectIds} FROM ${dstTable})
-      INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) (SELECT ${txid}, NULL, 'insert', true, ${selectClause} FROM ${srcTable} t NATURAL JOIN ids)`;
+      INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) (SELECT ${txid}, 'insert', true, ${selectClause} FROM ${srcTable} t NATURAL JOIN ids)`;
     return client.query(sql);
   };
 
@@ -138,12 +138,12 @@ const computeUpdates = (client, txid, sourceTableOrView, tableModel, nonPreserve
 
 const computeDeletesView = (client, txid, srcTable, dstTable, tableModel) => {
   const selectIds = selectList(null, tableModel.primaryKey);
-  const changesColumnList = ['txid', 'changeid', 'operation', 'public', ...allColumnNames(tableModel)];
+  const changesColumnList = ['txid', 'operation', 'public', ...allColumnNames(tableModel)];
   const selectColumns = selectList('t', allColumnNames(tableModel));
   const sql =
     `WITH ids AS 
     (SELECT ${selectIds} FROM ${dstTable} EXCEPT SELECT ${selectIds} FROM ${srcTable})
-      INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) (SELECT ${txid}, NULL, 'delete', true, ${selectColumns} FROM ${dstTable} t NATURAL JOIN ids)`;
+      INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) (SELECT ${txid}, 'delete', true, ${selectColumns} FROM ${dstTable} t NATURAL JOIN ids)`;
   return client.query(sql);
 };
 
@@ -316,24 +316,24 @@ const clearHistory = (client, txid, tableModel) => go(function* () {
   const selectFields = selectList(null, allColumnNames(tableModel));
   const changeTableName = `${tableModel.table}_changes`;
   yield client.query(`DELETE FROM ${changeTableName}`);
-  const sql = `INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${selectFields}) 
-  (SELECT ${txid}, null, 'insert', false, ${selectFields} FROM ${tableModel.table})`;
+  const sql = `INSERT INTO ${changeTableName}(txid, operation, public, ${selectFields}) 
+  (SELECT ${txid}, 'insert', false, ${selectFields} FROM ${tableModel.table})`;
   yield client.query(sql);
 });
 
 const initializeChangeTable = (client, txid, tableModel) => {
   const selectFields = selectList(null, tableModel.columns.map(column => column.name));
   const changeTableName = `${tableModel.table}_changes`;
-  return client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${selectFields}) 
-  (SELECT ${txid}, null, 'insert', false, ${selectFields} FROM ${tableModel.table})`);
+  return client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${selectFields}) 
+  (SELECT ${txid}, 'insert', false, ${selectFields} FROM ${tableModel.table})`);
 };
 
 const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, columns) => go(function* () {
   columns = columns || nonDerivedColumnNames(tableModel);
   const selectFields = selectList(null, columns);
   const changeTableName = `${tableModel.table}_changes`;
-  const sql = `INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${selectFields}) 
-  (SELECT ${txid}, null, 'insert', false, ${selectFields} FROM ${sourceTableOrView})`;
+  const sql = `INSERT INTO ${changeTableName}(txid, operation, public, ${selectFields}) 
+  (SELECT ${txid}, 'insert', false, ${selectFields} FROM ${sourceTableOrView})`;
   yield client.query(sql);
   yield client.query(`ANALYZE ${changeTableName}`);
   yield deriveColumnsForChange(client, txid, tableModel);
@@ -353,8 +353,8 @@ const insert = (client, txid, tableModel, row) => go(function* () {
   const nonDerivedColumns = nonDerivedColumnNames(tableModel);
   const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
   const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${nonDerivedColumns.join(', ')}) 
-  (SELECT $1, null, 'insert', false, ${nonDerivedParamExpr})`, params);
+  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${nonDerivedColumns.join(', ')}) 
+  (SELECT $1, 'insert', false, ${nonDerivedParamExpr})`, params);
 });
 
 /**
@@ -369,8 +369,8 @@ const update = (client, txid, tableModel, row) => go(function* () {
   const nonDerivedColumns = nonDerivedColumnNames(tableModel);
   const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
   const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${nonDerivedColumns.join(', ')}) 
-  (SELECT $1, null, 'update', false, ${nonDerivedParamExpr})`, params);
+  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${nonDerivedColumns.join(', ')}) 
+  (SELECT $1, 'update', false, ${nonDerivedParamExpr})`, params);
 });
 
 const del = (client, txid, tableModel, row) => go(function* () {
@@ -378,8 +378,8 @@ const del = (client, txid, tableModel, row) => go(function* () {
   const nonDerivedColumns = nonDerivedColumnNames(tableModel);
   const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
   const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, changeid, operation, public, ${nonDerivedColumns.join(', ')}) 
-  (SELECT $1, null, 'delete', false, ${nonDerivedParamExpr})`, params);
+  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${nonDerivedColumns.join(', ')}) 
+  (SELECT $1, 'delete', false, ${nonDerivedParamExpr})`, params);
 });
 
 /**

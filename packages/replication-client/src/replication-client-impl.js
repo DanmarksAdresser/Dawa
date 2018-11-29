@@ -7,7 +7,7 @@ const cspUtil = require('@dawadk/common/src/csp-util');
 const defaultBindings = require('./default-bindings');
 const {csvStringify} = require('@dawadk/common/src/csv-stringify');
 const tableDiff = require('@dawadk/import-util/src/table-diff');
-
+const { computeDifferences } = require('./table-diff');
 /**
  * Create a process which streams CSV from ch to the specified table
  */
@@ -77,14 +77,19 @@ const toTableModel = (replikeringModel, entityConf, bindingConf) => {
   };
 };
 
-const initializeEntity = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
-                          entityConf, bindingConf, batchSize, httpClientImpl) => go(function* () {
+const downloadEntity = (client, remoteTxid, replicationModel, entityConf, bindingConf, batchSize, httpClientImpl, targetTable) => go(function*() {
   const downloadCh = new Channel(0);
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.downloadStream(entityConf.name, remoteTxid, downloadCh);
   const copyProcess = copyToTable(client, downloadCh, map(createMapper(replicationModel, entityConf)),
-    bindingConf.table, entityConf.attributes, batchSize);
+    targetTable, entityConf.attributes, batchSize);
   yield parallel(requestProcess, copyProcess);
+});
+
+const initializeEntity = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
+                          entityConf, bindingConf, batchSize, httpClientImpl) => go(function* () {
+
+   yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, batchSize, httpClientImpl, bindingConf.table);
   yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
 });
@@ -157,8 +162,33 @@ const updateIncrementally = (client, localTxid, replicationModels, replicationCo
   }
 });
 
+const updateEntityUsingDownload = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
+                          entityConf, bindingConf, batchSize, httpClientImpl) => go(function* () {
+
+  const tmpTableName = `download_${bindingConf.table}`;
+  yield client.query(`CREATE TEMP TABLE ${tmpTableName} (LIKE ${bindingConf.table})`);
+  yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, batchSize, httpClientImpl, tmpTableName);
+  const tableModel = toTableModel(replicationModel, entityConf, bindingConf);
+  yield computeDifferences(client, localTxid, tmpTableName, tableModel);
+  // apply changes
+  yield tableDiff.applyChanges(client, localTxid, tableModel);
+
+  yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
+    VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
+});
+
+const updateUsingDownload = (client, remoteTxId, localTxid, replicationModels, replicationConfig, httpClientImpl)=> go(function*() {
+  for (let entityConf of replicationConfig.entities) {
+    const bindingConf = replicationConfig.bindings[entityConf.name];
+    yield updateEntityUsingDownload(client, remoteTxId, localTxid, replicationModels[entityConf.name], replicationConfig.replication_schema,
+      entityConf, bindingConf, 200, httpClientImpl);
+  }
+
+});
+
 module.exports = {
   initializeEntity,
   initialize,
-  updateIncrementally
+  updateIncrementally,
+  updateUsingDownload
 };

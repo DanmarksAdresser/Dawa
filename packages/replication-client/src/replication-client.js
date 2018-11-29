@@ -6,7 +6,7 @@ const { parseCommands } = require('@dawadk/common/src/cli/commander-wrapper');
 const databasePools  = require('@dawadk/common/src/postgres/database-pools');
 const fs = require('fs');
 const impl = require('./replication-client-impl');
-const { withReplikeringTransaction } = require('./transactions');
+const { withReplicationTransaction } = require('./transactions');
 const { ReplicationHttpClient } = require('./replication-http-client');
 const generateConfig = require('./generate-config');
 const validateConfig = require('./validate-config');
@@ -29,7 +29,10 @@ const commands = [{
   parameters: parameterSpec
 }, {
   name: 'update',
-  parameters: parameterSpec
+  parameters: [parameterSpec, {
+    name: 'use-download',
+    type: 'boolean'
+  }]
 }, {
   name: 'gen-config',
   parameters: []
@@ -95,7 +98,7 @@ else {
     });
 
     const pool = databasePools.get("pool");
-    yield pool.withTransaction({}, 'READ_WRITE', client => withReplikeringTransaction(client, replicationConfig.replication_schema, txid => go(function*() {
+    yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, txid => go(function*() {
       const lastTransaction = yield httpClient.lastTransaction();
       const datamodel = yield httpClient.datamodel();
       const remoteTxid = lastTransaction.txid;
@@ -103,7 +106,12 @@ else {
         yield impl.initialize(client, remoteTxid, txid, datamodel, replicationConfig, httpClient);
       }
       else if(command === 'update') {
-        yield impl.updateIncrementally(client, txid, datamodel, replicationConfig, httpClient);
+        if(options.useDownload) {
+          yield impl.updateUsingDownload(client, txid, datamodel, replicationConfig, httpClient);
+        }
+        else {
+          yield impl.updateIncrementally(client, txid, datamodel, replicationConfig, httpClient);
+        }
       }
     })));
   }).asPromise().done();
