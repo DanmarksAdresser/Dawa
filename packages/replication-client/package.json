@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "main": "src/replication-client-impl.js",
   "license": "MIT",
+  "bin": {
+    "dawa-replication-client": "src/replication-client.js"
+  },
   "dependencies": {
     "@dawadk/common": "1.0.0"
   },
   "scripts": {
+    "lint": "eslint .",
     "test": "mocha"
   }
 }

@@ -1,7 +1,7 @@
 const { assert } = require('chai');
 const {go} = require('ts-csp');
 const testdb = require('@dawadk/test-util/src/testdb');
-const prodDarConfig = require('../src/dar-config');
+const generateConfig = require('../src/generate-config');
 const replikeringModels = require('@dawadk/server/apiSpecification/replikering/datamodel');
 const databaseSchemaUtil = require('../src/database-schema-util');
 const replikeringImpl = require('../src/replication-client-impl');
@@ -9,7 +9,7 @@ const {withReplikeringTransaction} = require('../src/transactions');
 const Promise = require("bluebird");
 const {ReplicationHttpClient} = require('../src/replication-http-client');
 
-const testDarConfig = Object.assign({}, prodDarConfig, {replication_url: "http://localhost:3002/replikering"});
+const testDarConfig = generateConfig("http://localhost:3002/replikering", "replication", replikeringModels);
 
 const testReplicationConfig = {
   replication_url: 'REPL_URL',

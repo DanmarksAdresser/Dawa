@@ -1,0 +1,45 @@
+{
+  "title": "Replication client configuration file",
+  "type": "object",
+  "properties": {
+    "replication_url": {
+      "type": "string"
+    },
+    "replication_schema": {
+      "type": "string"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["name", "attributes"],
+        "additionalProperties": false
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "table": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["replication_url", "replication_schema", "entities", "bindings"],
+  "additionalProperties": false
+}

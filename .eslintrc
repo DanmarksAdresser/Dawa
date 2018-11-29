@@ -1,11 +1,6 @@
 {
   "root": true,
   "extends": "eslint:recommended",
-  "ecmaFeatures": {
-    "arrowFunctions": true,
-    "generators": true,
-    "templateStrings": true
-  },
   "env": {
     "node": true,
     "es6": true,

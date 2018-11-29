@@ -108,6 +108,10 @@ const updateEntity = (client, remoteTxid, localTxid, replicationModel, replicati
   const copyProcess = copyToTable(client, eventCh, map(createEventMapper(localTxid, replicationModel, entityConf)),
     tmpEventTableName, ['txid', 'operation', ...entityConf.attributes], batchSize);
   yield parallel(requestProcess, copyProcess);
+  const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;
+  if(count === 0) {
+    return;
+  }
   // remove any operation that has been replaced by a new operation in the same local transaction
   yield client.query(`
 WITH row_numbered AS (
@@ -122,6 +126,7 @@ SELECT operation, ${entityConf.attributes.join(',')}
  INSERT INTO ${bindingConf.table}_changes(txid, operation, ${entityConf.attributes.join(',')})
  (select $1, operation, ${entityConf.attributes.join(',')} from last_operation)`, [localTxid]);
 
+  yield client.query(`drop table ${tmpEventTableName}`);
   // we treat updates as  inserts if the object doesn't exist.
   yield client.query(`update ${bindingConf.table}_changes  c set operation = 'insert'
   WHERE c.txid = $1 and c.operation = 'update' and not exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);

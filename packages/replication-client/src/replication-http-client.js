@@ -1,5 +1,6 @@
 "use strict";
-const request = require('request-promise');
+const requestPromise = require('request-promise');
+const request = require('request');
 const split2 = require('split2');
 const cspUtil = require('@dawadk/common/src/csp-util');
 
@@ -36,6 +37,12 @@ const getSenesteTransaktionUrl = baseUrl => {
   return url.toString();
 };
 
+const getDatamodelUrl = baseUrl => {
+  const url = new URI(baseUrl);
+  url.segment('datamodel');
+  return url.toString();
+};
+
 class ReplicationHttpClient {
   constructor(baseUrl, batchSize) {
     this.baseUrl = baseUrl;
@@ -44,7 +51,12 @@ class ReplicationHttpClient {
 
   lastTransaction() {
     const url = getSenesteTransaktionUrl(this.baseUrl);
-    return request({url, json: true});
+    return requestPromise({url, json: true});
+  }
+
+  datamodel() {
+    const url = getDatamodelUrl(this.baseUrl);
+    return requestPromise({url, json: true});
   }
 
   downloadStream(entityName, remoteTxid, dstChan) {

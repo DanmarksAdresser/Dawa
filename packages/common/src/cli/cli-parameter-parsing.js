@@ -86,10 +86,22 @@ exports.main = function(optionSpec, requiredParams, mainFunc) {
   optionSpec = _.clone(optionSpec);
   exports.addConfigurationFileParameter(optionSpec);
   exports.addLogOptionsParameter(optionSpec);
-  const options = Object.entries(optionSpec).reduce((acc, [key, value]) => {
-    return commander.option(`--${key}`, value[1], coercions[value[2]]);
+  const program = Object.entries(optionSpec).reduce((acc, [key, value]) => {
+    const argumentString = optionSpec[key][2] === 'boolean' ? `--${key}` : `--${key} <value>`;
+    return commander.option(argumentString, value[1], coercions[value[2]]);
   }, commander).parse(process.argv);
 
+  for(let optionKey of Object.keys(optionSpec)) {
+    if(typeof program[optionKey] === 'undefined') {
+      if(typeof optionSpec[optionKey][3] !== 'undefined') {
+        program[optionKey] = optionSpec[optionKey][3];
+      }
+    }
+  }
+  const options = Object.keys(optionSpec).reduce((acc, key) => {
+    acc[key] = program[key];
+    return acc;
+  }, {});
   exports.addFileAndEnvironmentOptions(optionSpec, options);
   exports.checkRequiredOptions(options, requiredParams);
   let logOptions;
