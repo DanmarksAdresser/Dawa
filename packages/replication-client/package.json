@@ -7,7 +7,11 @@
     "dawa-replication-client": "src/replication-client.js"
   },
   "dependencies": {
-    "@dawadk/common": "1.0.0"
+    "@dawadk/common": "1.0.0",
+    "@dawadk/import-util": "1.0.0"
+  },
+  "devDependencies": {
+    "@dawadk/test-util": "1.0.0"
   },
   "scripts": {
     "lint": "eslint .",
