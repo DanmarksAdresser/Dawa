@@ -138,5 +138,6 @@ const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() 
 });
 
 module.exports = {
-  importJordstykkerImpl
+  importJordstykkerImpl,
+  streamEjerlav
 };
