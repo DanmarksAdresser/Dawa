@@ -35,7 +35,7 @@
     "csv-parse": "^2.4.0",
     "csv-stringify": "^3.0.0",
     "dawa-autocomplete2": "^0.13.1",
-    "event-stream": "~3.3.4",
+    "event-stream": "3.3.5",
     "express": "^4.16.3",
     "express-basic-auth": "^1.1.5",
     "express-ws": "^4.0.0",

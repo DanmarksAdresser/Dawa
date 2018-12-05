@@ -2945,13 +2945,12 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
 
-event-stream@~3.3.0, event-stream@~3.3.4:
-  version "3.3.6"
-  resolved "https://registry.yarnpkg.com/event-stream/-/event-stream-3.3.6.tgz#cac1230890e07e73ec9cacd038f60a5b66173eef"
-  integrity sha512-dGXNg4F/FgVzlApjzItL+7naHutA3fDqbV/zAZqDDlXTjiMnQmZKu+prImWKszeBM5UQeGvAl3u1wBiKeDh61g==
+event-stream@3.3.5, event-stream@~3.3.0:
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/event-stream/-/event-stream-3.3.5.tgz#e5dd8989543630d94c6cf4d657120341fa31636b"
+  integrity sha512-vyibDcu5JL20Me1fP734QBH/kenBGLZap2n0+XXM7mvuUPzJ20Ydqj1aKcIeMdri1p+PU+4yAKugjN8KCVst+g==
   dependencies:
     duplexer "^0.1.1"
-    flatmap-stream "^0.1.0"
     from "^0.1.7"
     map-stream "0.0.7"
     pause-stream "^0.0.11"
@@ -3275,11 +3274,6 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     rimraf "~2.6.2"
     write "^0.2.1"
-
-flatmap-stream@^0.1.0:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/flatmap-stream/-/flatmap-stream-0.1.2.tgz#b1da359a93f24f6d96e46f948552d997e3c2863d"
-  integrity sha512-ucyr6WkLXjyMuHPtOUq4l+nSAxgWi7v4QO508eQ9resnGj+lSup26oIsUI5aH8k4Qfpjsxa8dDf9UCKkS2KHzQ==
 
 flush-write-stream@^1.0.0:
   version "1.0.3"
