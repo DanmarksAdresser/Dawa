@@ -28,7 +28,7 @@ const createChangeTables = (client)=> go(function*() {
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
-  'supplerendebynavn2_postnr'];
+  'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }

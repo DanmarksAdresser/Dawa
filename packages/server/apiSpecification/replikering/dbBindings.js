@@ -177,6 +177,9 @@ const unnormalizedBindings = {
         column: 'geom',
         selectTransform: col => `ST_AsGeoJSON(${col})`,
         formatter: JSON.parse
+      },
+      featureid: {
+        formatter: numberToString
       }
     },
   },

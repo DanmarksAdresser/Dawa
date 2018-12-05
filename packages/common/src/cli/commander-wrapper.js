@@ -102,6 +102,7 @@ const parseCommands = (commandSpecs, args) => {
     });
   }
   program.parse(args);
+  result.program = program;
   return result;
 };
 

@@ -442,7 +442,7 @@ module.exports = {
       {
         name: 'featureid',
         description: 'Jordstykkets featureid, en unik identifikator som anvendes i matrikelkortet.',
-        type: 'integer'
+        type: 'string'
       },
       {
         name: 'fælleslod',

@@ -40,20 +40,6 @@ CREATE INDEX ON jordstykker (featureid);
 CREATE INDEX ON jordstykker USING GIST (geom);
 CREATE INDEX ON jordstykker USING GIN (tsv);
 
-DROP TABLE IF EXISTS jordstykker_changes CASCADE;
-CREATE TABLE jordstykker_changes AS (SELECT
-                                       NULL :: INTEGER        AS txid,
-                                       NULL :: INTEGER        AS changeid,
-                                       NULL :: OPERATION_TYPE AS operation,
-                                       NULL :: BOOLEAN        AS public,
-                                       jordstykker.*
-                                     FROM jordstykker
-                                     WHERE FALSE);
-CREATE INDEX ON jordstykker_changes (ejerlavkode, matrikelnr, changeid DESC NULLS LAST);
-CREATE INDEX ON jordstykker_changes (ejerlavkode, matrikelnr);
-CREATE INDEX ON jordstykker_changes (changeid DESC NULLS LAST);
-CREATE INDEX ON jordstykker_changes (txid);
-
 
 DROP TABLE IF EXISTS jordstykker_adgadr CASCADE;
 CREATE TABLE jordstykker_adgadr (
@@ -65,23 +51,6 @@ CREATE TABLE jordstykker_adgadr (
 
 CREATE UNIQUE INDEX ON jordstykker_adgadr (adgangsadresse_id);
 
-DROP TABLE IF EXISTS jordstykker_adgadr_history CASCADE;
-
-DROP TABLE IF EXISTS jordstykker_adgadr_changes CASCADE;
-CREATE TABLE jordstykker_adgadr_changes AS (SELECT
-                                              NULL :: INTEGER        AS txid,
-                                              NULL :: INTEGER        AS changeid,
-                                              NULL :: OPERATION_TYPE AS operation,
-                                              NULL :: BOOLEAN        AS public,
-                                              adgangsadresse_id,
-                                              ejerlavkode,
-                                              matrikelnr
-                                            FROM jordstykker_adgadr
-                                            WHERE FALSE);
-CREATE INDEX ON jordstykker_adgadr_changes (adgangsadresse_id, ejerlavkode, matrikelnr, changeid DESC NULLS LAST);
-CREATE INDEX ON jordstykker_adgadr_changes (ejerlavkode, matrikelnr);
-CREATE INDEX ON jordstykker_adgadr_changes (changeid DESC NULLS LAST);
-CREATE INDEX ON jordstykker_adgadr_changes (txid);
 
 CREATE VIEW jordstykker_adgadr_view AS (
   (SELECT DISTINCT

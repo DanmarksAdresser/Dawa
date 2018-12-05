@@ -4,12 +4,11 @@
 const {go} = require('ts-csp');
 const {parseCommands} = require('@dawadk/common/src/cli/commander-wrapper');
 const databasePools = require('@dawadk/common/src/postgres/database-pools');
-const fs = require('fs');
 const impl = require('./replication-client-impl');
 const {withReplicationTransaction} = require('./transactions');
 const {ReplicationHttpClient} = require('./replication-http-client');
 const generateConfig = require('./generate-config');
-const {validateAgainstSchema, validateAgainstModel} = require('./validate-config');
+const {getValidatedConfig} = require('./validate-config');
 const {generateDDLStatements} = require('./database-schema-util');
 const replicationConfigParam = {
   name: 'replication-config',
@@ -41,35 +40,11 @@ const commands = [{
   parameters: [replicationConfigParam]
 }];
 
-const {command, options} = parseCommands(commands, process.argv);
-
-const getValidatedConfig = (filePath) => go(function* () {
-  let fileText;
-  try {
-    fileText = fs.readFileSync(filePath, {encoding: 'utf-8'});
-  }
-  catch (e) {
-    return [null, new Error(`Could not read file: ${filePath}: ${e.message}`)];
-  }
-  let parsedConfig;
-  try {
-    parsedConfig = JSON.parse(fileText);
-  }
-  catch (e) {
-    return [null, new Error(`Configuration file is not valid json: ${e.message}`)];
-  }
-  const [schemaValid, schemaErrorText] = validateAgainstSchema(parsedConfig);
-  if (!schemaValid) {
-    return [null, new Error(`Configuration file is not valid: ${schemaErrorText}`)];
-  }
-  const httpClient = new ReplicationHttpClient(parsedConfig.replication_url, 200);
-  const datamodel = yield httpClient.datamodel();
-  const [valid, errorText] = validateAgainstModel(datamodel, parsedConfig);
-  if (!valid) {
-    return [null, new Error(`Configuration file does not match datamodel: ${errorText}`)];
-  }
-  return [parsedConfig, null];
-});
+const {command, options, program} = parseCommands(commands, process.argv);
+if(!command) {
+  program.outputHelp();
+  process.exit(0);
+}
 
 const runCommand = (command, options) => go(function* () {
   if (command === 'gen-config') {
@@ -120,7 +95,7 @@ const runCommand = (command, options) => go(function* () {
 });
 
 go(function* () {
-  try {
+   try {
     yield runCommand(command, options);
   }
   catch (e) {

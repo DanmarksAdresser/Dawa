@@ -1,0 +1,124 @@
+extends ../sidebar-auto
+block main
+  h1 Replikerings-klient
+  p.lead Referenceklient til replikerings-API'et
+  section
+    h2.anchor-header#introduktion Introduktion
+    p
+      | DAWA tilbyder en implementation af en referenceklient til replikerings-API'et.
+      | Klienten understøtter p.t. kun PostgreSQL som database, og kan ikke indlæse data i andre databaser.
+
+    h2 Forudsætninger
+    p
+      | For at indlæse data skal følgende være på plads:
+    ul
+      li Der skal installeres en Postgres-database. Hvis der skal indlæses geometriske felter, så skal PostGIS udvidelsen være installeret.
+      li NodeJS skal installeres, da replikerings-klienten benytter NodeJS som runtime.
+      li Replikeringsklienten skal installeres.
+      li Der skal laves en konfigurations-fil, som beskriver hvilke data der skal replikeres.
+      li Der skal oprettes de nødvendige tabeller i databasen.
+
+    h2 Replikerings-processen
+    p
+      | Se <a href="/dok/guide/replikering">replikerings-guiden</a> for en overordnet beskrivelse af hvordan
+      | replikerings-API'et fungerer. Herunder beskrives nogle forhold, som er specifikke for klient-implementationen.
+    p
+      | Replikerings-klienten indlæser nye data i transaktioner. Der startes en transaktion, hvori alle lokale tabeller
+      | opdateres til en bestemt transaktions-ID.  Replikerings-klienten tildeler også en lokal transaktions-ID til hver lokal transaktion.
+      | Der er således to transaktions-sekvenser i spil: En remote sekvens (dem som udstilles af DAWA) og en lokal sekvens (dem som dannes af replikerings-klienten).
+    p
+      |
+
+    h3 Installation af postgres
+    p
+      | Installation af Postgres og oprettelse af databasebruger med adgang til databasen er udenfor scope af denne guide. Vi henviser til
+      | <a href="https://www.postgresql.org/download/">postgresql.org</a>.
+      | Mac-brugere kommer nemmest igang med <a href="https://postgresapp.com/">Postgres.app</a>.
+    h3 Installation af NodeJS og replikerings-klient
+    p
+      | NodeJS kan installeres fra <a href="https://nodejs.org/en/">nodejs.org</a>.
+      | Herefter kan replikerings-klienten installeres ved hjælp af NPM:
+    pre
+      code npm install -g @dawadk/replication-client
+    p
+      | Det kan verificeres, at replikerings-klienten er installeret korrekt ved at prøve at køre den fra
+      | en terminal:
+    pre
+      code dawa-replication-client --help
+    h3 Konfiguration af klient
+    p
+      | Den nemmeste metode er at lade klienten danne en konfiguration, der så efterfølgende tilpasses efter behov.
+      | Følgende kommando genererer en konfigurationsfil og gemmer den i my-config.json:
+    pre
+      code dawa-replication-client gen-config > my-config.json
+    p
+      | Konfigurationen dannes ud fra den <a href="https://dawa.aws.dk/replikering/datamodel">datamodel</a>, som udstilles på replikerings-API'et.
+      | Der anvendes JSON til format af konfigurationsfilen. Konfigurationen består af et JSON-objekt
+      | med følgende felter:
+    ul
+      li <code>replication_url</code>: API URL til replikerings-API'et, dvs. <code>https://dawa.aws.dk/replikering</code>.
+      li <code>replication_schema</code>: Database-schema, som replikerings-klienten kan gemme metadata i. Default <code>dawa_replication</code>
+      li <code>entities</code>: En liste af de entiteter, som skal replikeres, samt hvilke attributter.
+      li <code>bindings</code>: Information om hvordan entiteterne skal gemmes i databasen. P.t. understøttes kun tabelnavne.
+    p
+      | Et minimalt eksempel på en konfiguration, som replikerer navngivne vejes status, vejnavn og vejadresseringsnavn fra DAR kunne se således ud:
+    pre
+      code.
+        {
+          "replication_url": "https://dawa.aws.dk/replikering",
+          "replication_schema": "dawa_replication",
+          "entities": [
+            {
+              "name": "dar_navngivenvej_aktuel",
+              "attributes": [
+                "id",
+                "status",
+                "vejadresseringsnavn",
+                "vejnavn"
+              ]
+            }
+          ],
+          "bindings": {
+            "dar_navngivenvej_aktuel": {
+              "table": "dar_navngivenvej_aktuel"
+            }
+          }
+        }
+    p
+      | Den nemmeste metode til at lave en konfiguration er at tage udgangspunkt i den automatisk generede konfiguration, og så
+      | slette de entiteter og attributter, som der ikke er brug for.
+    h3 Indlæsning af database-schema
+    p
+      | Klienten kan generere et database-schema ud fra en konfigurations-fil. Følgende kommando genererer et database-schema ud fra
+      | konfiguraitonsfilen my-config.json og gemmer schemaet i filen schema.dll:
+    pre
+      code dawa-replication-client gen-schema --replication-config my-config.json > schema.dll
+    p
+      | Schemaet består af to tabeller som replikerings-klienten gemmer metadata i, samt tabeller til de entiter, som replikeres.
+    p
+      | Tabellen <code>transactions</code> indeholder
+      | en række for hver lokal transaktion. Hver række indeholder et <code>txid</code> og et tidsstempel.
+    p
+      | Tabellen <code>source_transactions</code> registrerer hvilke remote <code>txid</code> der er indlæst i den
+      | lokale database.
+    p
+      | For hver entitet skaber klienten to tabeller. Den ene tabel indeholder entitetens aktuelle data. Den anden tabel
+      | indeholder en beskrivelse af hvilke ændringer der er udført.
+    h2 Initialisering af data
+    p
+      | Når konfigurationsfil og database-schema er på plads kan data indlæses med <code>initialize</code> kommandoen.
+      | En af parametrene er en URI der beskriver hvordan applikationen forbinder til databasen. URI'en har følgende form:
+    pre
+      code postgresql://<user>:<password>@<hostname>:<port>/<database>
+    p
+      | Database-URI og konfigurationsfil skal angives ved initialisering af databasen:
+    pre
+      code dawa-replication-client initialize --database=<database-URI> --replication-config <config-file>
+    p
+      | Programmet vil gå i gang med at downloade de entiteter der er angivet i konfigurations-filen og gemme den i den lokale database.
+    h2 Opdatering af data
+    p
+      | Klienten kan lave en inkrementiel opdatering af data. Her anvendes blot kommandoen "update" i stedet:
+    pre
+      code
+        dawa-replication-client update --database=<database-URI> --replication-config <config-file>

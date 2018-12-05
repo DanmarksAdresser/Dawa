@@ -94,7 +94,7 @@ setupPugPage('/dok/api/generelt', 'generelt.pug');
 setupPugPage('/dok/guides', 'guides.pug');
 setupPugPage('/dok/release-noter', 'release-noter.pug');
 setupPugPage('/dok/bbr-intern', 'bbr-intern.pug');
-for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old', 'replikering-old']) {
+for(let guide of ['introduktion', 'autocomplete', 'datavask', 'replikering', 'autocomplete-old', 'replikering-old', 'replikeringsklient']) {
   setupPugPage(`/dok/guide/${guide}`, `guide/${guide}.pug`);
 }
 setupPugPage('/dok/faq', 'faq.pug');

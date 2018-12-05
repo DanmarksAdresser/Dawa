@@ -1,5 +1,6 @@
-const defaultBindings = require('./default-bindings');
 const _ = require('underscore');
+const defaultBindings = require('./default-bindings');
+
 const generateDDLStatements = (replicationModel, config) => {
   const sqls = [];
   const schema = config.replication_schema;
@@ -24,8 +25,9 @@ const generateDDLStatements = (replicationModel, config) => {
 
     const fieldDecl = entity.attributes.map(attributeName => {
       const replicationAttribute = _.findWhere(model.attributes, {name: attributeName});
-      const replikeringBinding = defaultBindings[replicationAttribute.type];
-      return `${attributeName} ${replikeringBinding.sqlType}`
+      const defaultBinding = defaultBindings[replicationAttribute.type];
+      const replikeringBinding = Object.assign({}, defaultBinding, binding.attributes[attributeName]);
+      return `${replikeringBinding.columnName} ${replikeringBinding.sqlType}`
     }).join(',\n');
 
     sqls.push(

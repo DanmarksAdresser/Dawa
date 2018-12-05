@@ -8,9 +8,10 @@ const replikeringImpl = require('../src/replication-client-impl');
 const {withReplicationTransaction} = require('../src/transactions');
 const Promise = require("bluebird");
 const {ReplicationHttpClient} = require('../src/replication-http-client');
+const _ = require('underscore');
 
 const testDarConfig = generateConfig("http://localhost:3002/replikering", "replication", replikeringModels);
-
+const { normalize } = require('../src/validate-config');
 const testReplicationConfig = {
   replication_url: 'REPL_URL',
   replication_schema: 'replication',
@@ -25,6 +26,9 @@ const testReplicationConfig = {
 
   }
 };
+
+normalize(testDarConfig);
+normalize(testReplicationConfig);
 
 const testReplicationModels = {
   test_entity: {
@@ -123,23 +127,23 @@ class FakeClient {
   }
 }
 
-const initializeSchema = (client) => go(function*() {
-  const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, testReplicationConfig);
+const initializeSchema = (client, config) => go(function*() {
+  const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, config);
   for (let stmt of stmts) {
     yield client.query(stmt);
   }
 });
 
-const initializeData = client => withReplicationTransaction(client, testReplicationConfig.replication_schema, txid => go(function* () {
-    yield replikeringImpl.initialize(client, 1, txid, testReplicationModels, testReplicationConfig, new FakeClient(testClientData));
+const initializeData = (client, config) => withReplicationTransaction(client, config.replication_schema, txid => go(function* () {
+    yield replikeringImpl.initialize(client, 1, txid, testReplicationModels, config, new FakeClient(testClientData));
   }));
 describe('replikerings-klient', () => {
   testdb.withTransactionAll('replikeringtest', (clientFn) => {
     it('Can initialize the database schema ', () => go(function* () {
-      yield initializeSchema(clientFn());
+      yield initializeSchema(clientFn(), testReplicationConfig);
     }));
     it('Can initialize database', () => go(function* () {
-      yield initializeData(clientFn());
+      yield initializeData(clientFn(), testReplicationConfig);
       const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
       assert.strictEqual(result.length, 2);
       assert.deepEqual(result[0], {id: 1, value: 'one'});
@@ -167,11 +171,11 @@ describe('replikerings-klient', () => {
   });
 });
 
-describe('Replikerings-klient updateUsingDownload', () => {
+describe('Replikerings-klient', () => {
   testdb.withTransactionEach('replikeringtest', (clientFn) => {
     it('Can update using download', () => go(function*() {
-      yield initializeSchema(clientFn());
-      yield initializeData(clientFn());
+      yield initializeSchema(clientFn(), testReplicationConfig);
+      yield initializeData(clientFn(), testReplicationConfig);
       yield withReplicationTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
         yield replikeringImpl.updateUsingDownload(clientFn(), 3, txid, testReplicationModels, testReplicationConfig, new FakeClient(testClientData));
       }));
@@ -181,6 +185,20 @@ describe('Replikerings-klient updateUsingDownload', () => {
       assert.deepEqual(result[1], {id: 3, value: 'three'});
     }));
 
+    it('Can use column name mappings', () => go(function*() {
+      const config = _.clone(testReplicationConfig);
+      console.dir(config);
+      config.bindings.test_entity.attributes.value = { columnName: 'my_value'};
+      yield initializeSchema(clientFn(), config);
+      yield initializeData(clientFn(), config);
+      yield withReplicationTransaction(clientFn(), config.replication_schema, txid => go(function* () {
+        yield replikeringImpl.updateIncrementally(clientFn(), txid, testReplicationModels, config, new FakeClient(testClientData));
+      }));
+      const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
+      assert.strictEqual(result.length, 2);
+      assert.deepEqual(result[0], {id: 2, my_value: 'two updated'});
+      assert.deepEqual(result[1], {id: 3, my_value: 'three'});
+    }));
   });
 });
 
