@@ -22,6 +22,8 @@
   },
   "dependencies": {
     "@dawadk/common": "^1.0.2",
+    "@dawadk/import-util": "^1.0.3",
+    "@dawadk/validate-history": "^1.0.3",
     "@mapbox/polylabel": "^1.0.2",
     "JSONStream": "1.3.2",
     "ajv": "^6.5.0",
