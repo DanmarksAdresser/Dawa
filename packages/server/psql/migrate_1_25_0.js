@@ -116,7 +116,7 @@ ALTER TABLE jordstykker_changes ADD COLUMN fælleslod boolean;
         'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
         'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
         'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
-        'supplerendebynavn2_postnr', 'jorstykker_adgadr']) {
+        'supplerendebynavn2_postnr', 'jordstykker_adgadr']) {
         yield client.query(`CREATE INDEX ON ${table}_changes(txid,changeid) where public`);
       }
       yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
