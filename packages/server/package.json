@@ -118,7 +118,7 @@
     "copy-autocomplete-demo": "ncp public/demo/autocomplete dist/demo/autocomplete",
     "copy-autocomplete-demo-css": "ncp ../../node_modules/dawa-autocomplete2/dist/dawa-autocomplete2.css dist/demo/autocomplete/dawa-autocomplete2.css",
     "sass": "node-sass --output-style compressed public/scss/dawa.scss --output dist/css --include-path ../../node_modules",
-    "prepare": "run-s clean prepare-dist rollup sass copy-images copy-libs copy-autocomplete-js copy-autocomplete-css copy-autocomplete-demo copy-autocomplete-demo-css",
+    "preinstall": "run-s clean prepare-dist rollup sass copy-images copy-libs copy-autocomplete-js copy-autocomplete-css copy-autocomplete-demo copy-autocomplete-demo-css",
     "start": "node server.js",
     "lint": "eslint .",
     "test": "mocha"
