@@ -187,7 +187,6 @@ describe('Replikerings-klient', () => {
 
     it('Can use column name mappings', () => go(function*() {
       const config = _.clone(testReplicationConfig);
-      console.dir(config);
       config.bindings.test_entity.attributes.value = { columnName: 'my_value'};
       yield initializeSchema(clientFn(), config);
       yield initializeData(clientFn(), config);

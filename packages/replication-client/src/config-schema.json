@@ -34,7 +34,16 @@
         "properties": {
           "table": {
             "type": "string"
-          }
+          },
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "columnName": {
+                "type": "string"
+              }
+            }
+          },
+          "additionalProperties": false
         },
         "additionalProperties": false
       }

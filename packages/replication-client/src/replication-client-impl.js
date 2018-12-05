@@ -158,7 +158,6 @@ SELECT operation, ${columnNames.join(',')}
 });
 
 const updateIncrementally = (client, localTxid, replicationModels, replicationConfig, httpClientImpl) => go(function* () {
-  console.dir(replicationConfig);
   for (let entityConf of replicationConfig.entities) {
     const lastTransaction = yield httpClientImpl.lastTransaction();
     const bindingConf = replicationConfig.bindings[entityConf.name];

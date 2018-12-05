@@ -2,6 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const Ajv = require('ajv');
 const _ = require('underscore');
+const { go } = require('ts-csp');
+const { ReplicationHttpClient } = require('./replication-http-client');
 
 const ajv = new Ajv();
 const schema = JSON.parse(fs.readFileSync(path.join(__dirname, 'config-schema.json')));
