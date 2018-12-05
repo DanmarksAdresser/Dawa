@@ -1,7 +1,7 @@
 {
   "name": "@dawadk/import-util",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "license": "MIT",
   "dependencies": {
     "@dawadk/common": "^1.0.2",
