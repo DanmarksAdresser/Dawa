@@ -7,7 +7,7 @@ const _ = require('underscore');
 const {runImporter} = require('@dawadk/common/src/cli/run-importer');
 const importDarImpl = require('./importDarImpl');
 const proddb = require('../psql/proddb');
-const { withImportTransaction } = require('../importUtil/importUtil');
+const { withImportTransaction } = require('../importUtil/transaction-util');
 const {makeAllChangesNonPublic} = require('@dawadk/import-util/src/materialize');
 
 
