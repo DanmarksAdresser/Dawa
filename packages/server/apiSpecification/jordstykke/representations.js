@@ -15,6 +15,7 @@ const schemaObject = require('../schemaUtil').schemaObject;
 const commonMappers = require('../commonMappers');
 const {makeHref} = require('../commonMappers');
 const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const { numberToString } = require('../util');
 
 var normalizedFieldSchema = function (fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('jordstykke', fieldName);
@@ -145,8 +146,9 @@ exports.autocomplete = {
   mapper: (baseUrl) => row => {
     const result = exports.autocomplete.mapper(baseUrl)(row).jordstykke;
     Object.assign(result, _.pick(row, 'ændret', 'geo_version', 'geo_ændret',
-      'featureid', 'fælleslod','moderjordstykke', 'registreretareal', 'arealberegningsmetode',
+    'fælleslod','moderjordstykke', 'registreretareal', 'arealberegningsmetode',
       'vejareal', 'vejarealberegningsmetode', 'vandarealberegningsmetode'));
+    result.featureid = numberToString(row.featureid);
     result.region = commonMappers.mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl);
     result.sogn = commonMappers.mapKode4NavnTema('sogn', row.sognekode, row.sognenavn, baseUrl);
     result.retskreds = commonMappers.mapKode4NavnTema('retskreds', row.retskredskode, row.retskredsnavn, baseUrl);
