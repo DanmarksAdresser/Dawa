@@ -8,7 +8,7 @@
     "lodash.get": "^4.4.2"
   },
   "devDependencies": {
-    "eslint": "^5.9.0",
+    "eslint": "4.19.1",
     "mocha": "^5.2.0"
   },
   "scripts": {

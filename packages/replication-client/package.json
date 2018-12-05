@@ -1,6 +1,7 @@
 {
   "name": "@dawadk/replication-client",
   "version": "1.0.2",
+  "private": true,
   "main": "src/replication-client-impl.js",
   "license": "MIT",
   "bin": {
