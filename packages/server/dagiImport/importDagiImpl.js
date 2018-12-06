@@ -6,27 +6,27 @@ const path = require('path');
 const {go} = require('ts-csp');
 const temaModels = require('./temaModels');
 const {parseTemaGml, parseTemaGml2} = require('./temaParsing');
-const {streamArrayToTable, streamCsvToTable } = require('@dawadk/import-util/src/postgres-streaming');
+const {streamArrayToTable, streamCsvToTable} = require('@dawadk/import-util/src/postgres-streaming');
 const tableDiffNg = require('@dawadk/import-util/src/table-diff');
 const tableSchema = require('../psql/tableModel');
 const {recomputeTemaTilknytninger} = require('../importUtil/materialize-dawa');
 const logger = require('@dawadk/common/src/logger').forCategory('dagiImport');
 
-const { updateSubdividedTable, updateGeometricFields, computeVisualCenters } = require('../importUtil/geometryImport');
+const {updateSubdividedTable, updateGeometricFields, computeVisualCenters} = require('../importUtil/geometryImport');
 
 const postProcess = {
-  opstillingskreds: (client, table) => go(function*() {
+  opstillingskreds: (client, table) => go(function* () {
     yield client.query(`CREATE TEMP TABLE kredskommuner AS (select nummer, kredskommunekode FROM ${table} WHERE false)`);
-    yield streamCsvToTable(client, 'data/opstillingskredse.csv', 'kredskommuner', ['nummer', 'kredskommunekode']);
+    yield streamCsvToTable(client, path.join(__dirname, '../data/opstillingskredse.csv'), 'kredskommuner', ['nummer', 'kredskommunekode']);
     yield client.query(`UPDATE ${table} t SET kredskommunekode = k.kredskommunekode FROM kredskommuner k WHERE t.nummer = k.nummer; DROP TABLE kredskommuner`);
   }),
-  storkreds: (client, table) => go(function*() {
-    const additionalFields = JSON.parse(fs.readFileSync('data/storkredse.json', {encoding: 'utf-8'}));
+  storkreds: (client, table) => go(function* () {
+    const additionalFields = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/storkredse.json'), {encoding: 'utf-8'}));
     yield client.query(`CREATE TEMP TABLE additional AS (select nummer, valglandsdelsbogstav, regionskode FROM ${table} where false)`);
     yield streamArrayToTable(client, additionalFields, 'additional', ['nummer', 'valglandsdelsbogstav', 'regionskode']);
     yield client.query(`UPDATE ${table} t SET valglandsdelsbogstav = a.valglandsdelsbogstav, regionskode = a.regionskode 
     FROM additional a WHERE t.nummer = a.nummer; DROP TABLE additional`);
-})
+  })
 };
 
 const getTemaFileNameWfs = (temaDef, dataDir, filePrefix) => {
@@ -48,7 +48,7 @@ const readTema = (temaDef, mapping, filePath) => go(function* () {
   return yield parseTemaGml(body, mapping);
 });
 
-const readTema2 = (temaDef, mapping, filePath) => go(function*() {
+const readTema2 = (temaDef, mapping, filePath) => go(function* () {
   const body = fs.readFileSync(filePath);
   return yield parseTemaGml2(body, mapping);
 });
@@ -57,7 +57,7 @@ const computeTemaDifferences = (client, txid, srcTable, tableModel, fetchColumnN
   return tableDiffNg.computeDifferences(client, txid, srcTable, tableModel, fetchColumnNames);
 };
 
-const storeTemaWfsMultiGeom = (client, temaModel, featureMapping, dataDir, filePrefix, targetTable) => go(function*() {
+const storeTemaWfsMultiGeom = (client, temaModel, featureMapping, dataDir, filePrefix, targetTable) => go(function* () {
   const temaName = temaModel.singular;
   if (!featureMapping) {
     throw new Error('No feature mapping for ' + temaName);
@@ -75,7 +75,7 @@ const storeTemaWfsMultiGeom = (client, temaModel, featureMapping, dataDir, fileP
   yield client.query(`alter table ${targetTable} alter column geom type geometry(multipolygon, 25832) using st_multi(st_force2d(st_geomfromgml(geom, 25832)))`);
 });
 
-const storeTemaWfs = (client, temaModel, featureMapping, dataDir, filePrefix, targetTable) => go(function*() {
+const storeTemaWfs = (client, temaModel, featureMapping, dataDir, filePrefix, targetTable) => go(function* () {
   const temaName = temaModel.singular;
   if (!featureMapping) {
     throw new Error('No feature mapping for ' + temaName);
@@ -99,7 +99,7 @@ const storeTemaWfs = (client, temaModel, featureMapping, dataDir, filePrefix, ta
   yield client.query(`DROP TABLE ${fetchTableName}`);
 });
 
-const streamTemaToTable = (client, temaModel, temaRows, targetTable) => go(function*(){
+const streamTemaToTable = (client, temaModel, temaRows, targetTable) => go(function* () {
   const additionalFields = temaModel.fields;
   const additionalFieldNames = additionalFields.map(field => field.name);
   const fetchColumnNames = [...additionalFieldNames, 'geom'];
@@ -107,7 +107,7 @@ const streamTemaToTable = (client, temaModel, temaRows, targetTable) => go(funct
   yield streamArrayToTable(client, temaRows, targetTable, fetchColumnNames);
 });
 
-const storeTemaJson = (client, temaDef, dataDir, filePrefix, targetTable) => go(function*() {
+const storeTemaJson = (client, temaDef, dataDir, filePrefix, targetTable) => go(function* () {
   const temaFilePath = getTemaFileNameJson(temaDef, dataDir, filePrefix);
   const temaRows = JSON.parse(fs.readFileSync(temaFilePath, {encoding: 'utf8'}));
   yield streamTemaToTable(client, temaDef, temaRows, targetTable);
@@ -126,7 +126,7 @@ const makeStoreTemaWfsMultiGeomFn = featureMappings =>
   };
 
 
-const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn) => go(function*(){
+const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn) => go(function* () {
   for (let temaName of temaNames) {
     const temaModel = temaModels.modelMap[temaName];
     const tableModel = tableSchema.tables[temaModel.table];
@@ -134,7 +134,7 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
     const additionalFieldNames = additionalFields.map(field => field.name);
     const fetchColumnNames = [...additionalFieldNames, 'geom'];
     yield storeTemaFn(client, temaModel, dataDir, filePrefix, 'desired');
-    if(postProcess[temaName]) {
+    if (postProcess[temaName]) {
       yield postProcess[temaName](client, 'desired');
     }
 
@@ -160,13 +160,13 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
   const hasTilknytninger = temaNames.map(temaName => temaModels.modelMap[temaName])
     .filter(temaModel => !temaModel.withoutTilknytninger)
     .length > 0;
-  if(hasTilknytninger) {
+  if (hasTilknytninger) {
     yield recomputeTemaTilknytninger(client, txid, temaNames.map(temaName => temaModels.modelMap[temaName]));
-    for(let temaName of temaNames) {
+    for (let temaName of temaNames) {
       const temaModel = temaModels.modelMap[temaName];
-      if(maxChanges) {
+      if (maxChanges) {
         const changes = yield tableDiffNg.countChanges(client, txid, tableSchema.tables[temaModel.tilknytningTable]);
-        if(changes > maxChanges) {
+        if (changes > maxChanges) {
           logger.error("Too Many Changes", {
             temaName,
             changes,
@@ -190,17 +190,45 @@ const importTemaerWfsMulti = (client, txid, temaNames, featureMappings, dataDir,
   yield importTemaer(client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaFn);
 });
 
-const importTemaerJson = (client, txid, temaNames, dataDir, filePrefix, maxChanges) => go(function*() {
+const importTemaerJson = (client, txid, temaNames, dataDir, filePrefix, maxChanges) => go(function* () {
   yield importTemaer(client, txid, temaNames, dataDir, filePrefix, maxChanges, storeTemaJson);
 });
 
-const importSingleTema = (client, txid, temaModel, temaData, maxChanges) => go(function*() {
+const importSingleTema = (client, txid, temaModel, temaData, maxChanges) => go(function* () {
   const storeTemaFn = (client, temaDef, dataDir, filePrefix, targetTable) =>
     streamTemaToTable(client, temaDef, temaData, targetTable);
   yield importTemaer(client, txid, [temaModel.singular], null, null, maxChanges, storeTemaFn);
 });
 
-const importLandpostnummer = (client, txid) =>  {
+const importStorkreds = (client, txid) => {
+  const storeTemaFn = (client, temaDef, dataDir, filePrefix, targetTable) => {
+    return client.query(`
+  CREATE TEMP TABLE ${targetTable} AS (
+  WITH geoms AS (SELECT storkredsnummer as nummer, ST_Union(geom) AS geom
+                  FROM opstillingskredse group by storkredsnummer)
+  SELECT
+    s.nummer, s.navn, s.regionskode, s.valglandsdelsbogstav, g.geom from 
+    storkredse s join geoms g on s.nummer = g.nummer)`);
+  };
+  return importTemaer(client, txid, ['storkreds'], null, null, 10000000, storeTemaFn);
+};
+
+const importValglandsdel = (client, txid) => {
+  const storeTemaFn = (client, temaDef, dataDir, filePrefix, targetTable) => {
+    return client.query(`
+  CREATE TEMP TABLE ${targetTable} AS (
+  WITH geoms AS (SELECT valglandsdelsbogstav as bogstav, ST_Union(geom) AS geom
+                  FROM storkredse group by valglandsdelsbogstav)
+  SELECT
+    v.bogstav, v.navn, g.geom from 
+    valglandsdele v join geoms g on v.bogstav = g.bogstav)`);
+  };
+  return importTemaer(client, txid, ['valglandsdel'], null, null, 10000000, storeTemaFn);
+
+};
+
+
+const importLandpostnummer = (client, txid) => {
   const storeTemaFn = (client, temaDef, dataDir, filePrefix, targetTable) => {
     return client.query(`
   CREATE TEMP TABLE ${targetTable} AS (
@@ -222,5 +250,7 @@ module.exports = {
   importTemaerWfsMulti,
   importTemaerJson,
   importSingleTema,
-  importLandpostnummer: importLandpostnummer
+  importLandpostnummer,
+  importStorkreds,
+  importValglandsdel
 };

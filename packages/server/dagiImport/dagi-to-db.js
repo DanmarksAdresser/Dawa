@@ -8,7 +8,7 @@ const { withImportTransaction } = require('../importUtil/transaction-util');
 
 const logger = require('@dawadk/common/src/logger').forCategory('dagiToDb');
 
-const { importTemaerWfs,importTemaerWfsMulti,importLandpostnummer } = require('./importDagiImpl');
+const { importTemaerWfs,importTemaerWfsMulti,importLandpostnummer, importStorkreds, importValglandsdel } = require('./importDagiImpl');
 const featureMappingsNew = require('./featureMappingsNew');
 const featureMappingsDatafordeler = require('./featureMappingsDatafordeler');
 const featureMappingsZone = require('./featureMappingsZone');
@@ -57,6 +57,10 @@ runImporter('dagi-to-db', optionSpec, _.without(_.keys(optionSpec), 'temaer'), f
           }
           if(temaNames.includes('postnummer')) {
             yield importLandpostnummer(client, txid);
+          }
+          if(temaNames.includes('opstillingskreds')) {
+            yield importStorkreds(client, txid);
+            yield importValglandsdel(client, txid);
           }
         }));
       }));
