@@ -29,14 +29,14 @@ module.exports = {
         type: 'localdatetime',
         nullable: true,
         description: 'Dato og tid for adgangsadressens oprettelse,' +
-        ' som registreret i BBR. Eksempel: 2001-12-23T00:00:00.'
+        ' som registreret i DAR. Eksempel: 2001-12-23T00:00:00.'
       },
       {
         name: 'ændret',
         type: 'localdatetime',
         nullable: true,
         description: 'Dato og tid hvor der sidst er ændret i adgangsadressen,' +
-        ' som registreret i BBR. Eksempel: 2002-04-08T00:00:00.',
+        ' som registreret i DAR. Eksempel: 2002-04-08T00:00:00.',
       },
       {
         name: 'ikrafttrædelsesdato',
@@ -163,7 +163,7 @@ module.exports = {
         name: 'adressepunktændringsdato',
         type: 'localdatetime',
         nullable: true,
-        description: 'Dato for sidste ændring i adressepunktet, som registreret af BBR.' +
+        description: 'Dato for sidste ændring i adressepunktet, som registreret af DAR.' +
         ' Eksempel: ”1998-11-17T00:00:00”'
       }, {
         name: 'esdhreference',
@@ -227,11 +227,11 @@ module.exports = {
       }, {
         name: 'oprettet',
         type: 'localdatetime',
-        description: 'Dato og tid for adressens oprettelse, som registreret hos BBR. Eksempel: 2001-12-23T00:00:00.'
+        description: 'Dato og tid for adressens oprettelse, som registreret hos DAR. Eksempel: 2001-12-23T00:00:00.'
       }, {
         name: 'ændret',
         type: 'localdatetime',
-        description: 'Dato og tid hvor der sidst er ændret i adgangsadressen, som registreret hos BBR. Eksempel: 2002-04-08T00:00:00.'
+        description: 'Dato og tid hvor der sidst er ændret i adgangsadressen, som registreret hos DAR. Eksempel: 2002-04-08T00:00:00.'
       }, {
         name: 'ikrafttrædelsesdato',
         type: 'localdatetime',

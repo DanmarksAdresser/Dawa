@@ -18,7 +18,7 @@ const geometriParam = {
 const parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'status',
-    doc: 'Adressens status, som modtaget fra BBR. "1" angiver en endelig adresse og "3" angiver en foreløbig adresse". ' +
+    doc: 'Find adresser med den angivne status. "1" angiver en endelig adresse og "3" angiver en foreløbig adresse". ' +
     'Adresser med status "2" eller "4" er ikke med i DAWA.'
   },
   {
