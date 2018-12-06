@@ -181,6 +181,16 @@ module.exports.storkreds = {
       name: 'nummer',
       type: 'integer',
       multi: true
+    },
+    {
+      name: 'valglandsdelsbogstav',
+      multi: true
+    },
+    {
+      name: 'regionskode',
+      type: 'integer',
+      multi: true,
+      schema: parameterSchema.kode4
     }
   ])
 };

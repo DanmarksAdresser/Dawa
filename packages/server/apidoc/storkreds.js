@@ -24,7 +24,15 @@ const nummerParameter = {
 const storkredsParameters = [
   nummerParameter,
   dagiNavnParameter(temaModel),
-  dagiQParameter()
+  dagiQParameter(),
+  {
+    name: 'valglandsdelsbogstav',
+    doc: 'Find storkredsene i den angivne valglandsdel.'
+  },
+  {
+    name: 'regionskode',
+    doc: 'Find storkredsene i regionen med den angivne regionskode.'
+  }
 ];
 
 const examples = {
