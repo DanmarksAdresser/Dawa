@@ -19,7 +19,7 @@ exports.normalizedField = function(datamodelName, fieldName) {
 };
 
 const temaReplikeringModels = temaModels.modelList.reduce((memo, temaModel) => {
-  memo [temaModel.singular] = temaModels.toReplikeringModel(temaModel);
+  memo [temaModel.entity || temaModel.singular] = temaModels.toReplikeringModel(temaModel);
   return memo;
 }, {});
 
