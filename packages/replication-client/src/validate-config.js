@@ -4,10 +4,9 @@ const Ajv = require('ajv');
 const _ = require('underscore');
 const { go } = require('ts-csp');
 const { ReplicationHttpClient } = require('./replication-http-client');
-
+const { pgMetadata } = require('./pg-metadata');
 const ajv = new Ajv();
 const schema = JSON.parse(fs.readFileSync(path.join(__dirname, 'config-schema.json')));
-
 const validateAgainstSchema = (config) => {
   const result = ajv.validate(schema, config);
   if(!result) {
@@ -67,7 +66,31 @@ const normalize = config => {
       }
     }
   }
+  return config;
 };
+
+const validateAgainstDatabase = (client, config) => go(function*() {
+  const database = (yield client.queryRows('select current_database() as database'))[0].database;
+  const metadata = (yield pgMetadata(client, {database}))[database];
+  for(let [entity, binding] of Object.entries(config.bindings)) {
+    const schema = 'public';
+    if(!metadata[schema]) {
+      return [false, `Database missing schema ${schema}`];
+    }
+    const table = binding.table;
+    const metadataTable = metadata[schema][table];
+    if(!metadataTable) {
+      return [false, `Database missing table ${schema}.${table} for entity ${entity}`];
+    }
+    for(let [attrName, attrBinding] of Object.entries(binding.attributes)) {
+      const columnName = attrBinding.columnName;
+      if(!metadataTable[columnName]) {
+        return [false, `Database missing column ${columnName} for attribute ${attrName} of table ${schema}.${table} for entity ${entity}`];
+      }
+    }
+  }
+  return [true, null];
+});
 
 const getValidatedConfig = (filePath) => go(function* () {
   let fileText;
@@ -98,10 +121,10 @@ const getValidatedConfig = (filePath) => go(function* () {
   return [parsedConfig, null];
 });
 
-
 module.exports = {
   validateAgainstSchema,
   validateAgainstModel,
   normalize,
-  getValidatedConfig
+  getValidatedConfig,
+  validateAgainstDatabase
 };

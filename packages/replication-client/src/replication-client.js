@@ -8,7 +8,7 @@ const impl = require('./replication-client-impl');
 const {withReplicationTransaction} = require('./transactions');
 const {ReplicationHttpClient} = require('./replication-http-client');
 const generateConfig = require('./generate-config');
-const {getValidatedConfig} = require('./validate-config');
+const {getValidatedConfig, validateAgainstDatabase} = require('./validate-config');
 const {generateDDLStatements} = require('./database-schema-util');
 const replicationConfigParam = {
   name: 'replication-config',
@@ -38,6 +38,9 @@ const commands = [{
 }, {
   name: 'gen-schema',
   parameters: [replicationConfigParam]
+}, {
+  name: 'validate-config',
+  parameters: parameterSpec
 }];
 
 const {command, options, program} = parseCommands(commands, process.argv);
@@ -75,22 +78,36 @@ const runCommand = (command, options) => go(function* () {
     });
 
     const pool = databasePools.get("pool");
-    yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, txid => go(function* () {
-      const lastTransaction = yield httpClient.lastTransaction();
-      const datamodel = yield httpClient.datamodel();
-      const remoteTxid = lastTransaction.txid;
-      if (command === 'initialize') {
-        yield impl.initialize(client, remoteTxid, txid, datamodel, replicationConfig, httpClient);
-      }
-      else if (command === 'update') {
-        if (options.useDownload) {
-          yield impl.updateUsingDownload(client, txid, datamodel, replicationConfig, httpClient);
+    if(command === 'validate-config') {
+      yield pool.withTransaction({}, 'READ_ONLY', client => go(function*() {
+        const [valid, errorText] = yield validateAgainstDatabase(client, replicationConfig);
+        if(!valid) {
+          console.log(`Configuration invalid: ${errorText}`);
+          process.exit(1);
         }
         else {
-          yield impl.updateIncrementally(client, txid, datamodel, replicationConfig, httpClient);
+          console.log('Configuration is valid');
         }
-      }
-    })));
+      }));
+    }
+    else {
+      yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, txid => go(function* () {
+        const lastTransaction = yield httpClient.lastTransaction();
+        const datamodel = yield httpClient.datamodel();
+        const remoteTxid = lastTransaction.txid;
+        if (command === 'initialize') {
+          yield impl.initialize(client, remoteTxid, txid, datamodel, replicationConfig, httpClient);
+        }
+        else if (command === 'update') {
+          if (options.useDownload) {
+            yield impl.updateUsingDownload(client, txid, datamodel, replicationConfig, httpClient);
+          }
+          else {
+            yield impl.updateIncrementally(client, txid, datamodel, replicationConfig, httpClient);
+          }
+        }
+      })));
+    }
   }
 });
 
