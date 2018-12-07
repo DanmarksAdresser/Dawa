@@ -174,6 +174,16 @@ exports.propertyFilter = normalizeParameters([
     type: 'integer',
     multi: true,
     renameTo: 'zone'
+  },
+  {
+    name: 'adgangspunktid',
+    type: 'string',
+    schema: schema.uuid
+  },
+  {
+    name: 'vejpunkt_id',
+    type: 'string',
+    schema: schema.uuid
   }
   ]);
 

@@ -1,5 +1,5 @@
 const _ = require('underscore');
-
+const moment = require('moment');
 const specMap = require('./spec');
 module.exports = {
   json: {
@@ -36,15 +36,18 @@ module.exports = {
       }
       changeDescriptions = changeDescriptions.filter(change=> change.ændringer.length > 0);
       const initialValue = _.pick(rows[0], ...fieldNames);
-      delete initialValue.ændringstidspunkt;
-      const actualValue = _.pick(rows[rows.length - 1], ...fieldNames);
-      delete actualValue.ændringstidspunkt;
+      const reverseRows = rows.slice().reverse();
+      const now = moment();
+      const currentRow = reverseRows.find(({ændringstidspunkt}) => moment(ændringstidspunkt).isBefore(now));
+      const currentValue = currentRow ? _.pick(currentRow, ...fieldNames) : null;
+      const futureValue = moment(rows[rows.length -1].ændringstidspunkt).isAfter(now) ? _.pick(rows[rows.length - 1], ...fieldNames): null;
       const createdTime = rows[0].ændringstidspunkt;
       return {
         oprettettidspunkt: createdTime,
         initielværdi: initialValue,
         historik: changeDescriptions,
-        aktuelværdi: actualValue
+        aktuelværdi: currentValue,
+        fremtidigværdi: futureValue
       };
     }
   }

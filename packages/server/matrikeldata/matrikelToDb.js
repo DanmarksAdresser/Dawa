@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 "use strict";
-console.log(__dirname);
 const { go } = require('ts-csp');
 const q = require('q');
 const _ = require('underscore');

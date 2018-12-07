@@ -119,6 +119,8 @@ ALTER TABLE jordstykker_changes ADD COLUMN fælleslod boolean;
         'supplerendebynavn2_postnr', 'jordstykker_adgadr']) {
         yield client.query(`CREATE INDEX ON ${table}_changes(txid,changeid) where public`);
       }
+      yield client.query('CREATE INDEX ON adgangsadresser_mat(adgangspunktid)');
+      yield client.query('CREATE INDEX ON adresser_mat(adgangspunktid)');
       yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
       yield populateJordstykkeFields(client, txid, options.srcDir);
     }));

@@ -377,6 +377,14 @@ var sampleParameters = {
       verifier: function(adr, type) {
         return adr.bebyggelser.filter(bebyggelse => bebyggelse.type === type).length >= 1;
       }
+    },
+    adgangspunktid: {
+      values: ['0a3f507b-b90e-32b8-e044-0003ba298018'],
+      verifier: (adr, id) =>  adr.adgangspunkt.id === id
+    },
+    vejpunkt_id: {
+      values: ['122cbb96-af45-11e7-847e-066cff24d637'],
+      verifier: (adr, id) =>  adr.vejpunkt.id === id
     }
   },
   adresse: {
@@ -553,6 +561,14 @@ var sampleParameters = {
       verifier: function(adr, type) {
         return adr.adgangsadresse.bebyggelser.filter(bebyggelse => bebyggelse.type === type).length >= 1;
       }
+    },
+    adgangspunktid: {
+      values: ['0a3f507b-b90e-32b8-e044-0003ba298018'],
+      verifier: (adr, id) =>  adr.adgangsadresse.adgangspunkt.id === id
+    },
+    vejpunkt_id: {
+      values: ['122cbb96-af45-11e7-847e-066cff24d637'],
+      verifier: (adr, id) =>  adr.adgangsadresse.vejpunkt.id === id
     }
   },
   adresse_history: {

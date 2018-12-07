@@ -145,6 +145,14 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'bebyggelsestype',
     doc: 'Find de adresser som ligger en bebyggelse af den angivne type. Mulige værdier: "by", "bydel", "spredtBebyggelse", "sommerhusområde", "sommerhusområdedel", "industriområde", "kolonihave", "storby".'
+  },
+  {
+    name: 'adgangspunktid',
+    doc: 'Find adressen med det angivne adgangspunkt ID'
+  },
+  {
+    name: 'vejpunkt_id',
+    doc: 'Find adressen med det angivne vejpunkt ID'
   }
 ];
 
