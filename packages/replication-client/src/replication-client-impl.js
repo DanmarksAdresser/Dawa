@@ -7,7 +7,9 @@ const cspUtil = require('@dawadk/common/src/csp-util');
 const defaultBindings = require('./default-bindings');
 const {csvStringify} = require('@dawadk/common/src/csv-stringify');
 const tableDiff = require('@dawadk/import-util/src/table-diff');
-const { computeDifferences } = require('./table-diff');
+const {computeDifferences} = require('./table-diff');
+const log = require('./log');
+
 /**
  * Create a process which streams CSV from ch to the specified table
  */
@@ -23,13 +25,12 @@ const createTempChangeTable = (client, replication_schema, bindingConf, tableNam
 
 
 const createMapper = (replikeringModel, entityConf, bindingConf) => obj => {
-  const result = entityConf.attributes.reduce((acc, attrName) => {
+  return entityConf.attributes.reduce((acc, attrName) => {
     const replikeringAttrModel = _.findWhere(replikeringModel.attributes, {name: attrName});
-    const binding =Object.assign({}, defaultBindings[replikeringAttrModel.type], bindingConf.attributes[attrName]);
+    const binding = Object.assign({}, defaultBindings[replikeringAttrModel.type], bindingConf.attributes[attrName]);
     acc[binding.columnName] = binding.toCsv ? binding.toCsv(obj[attrName]) : obj[attrName];
     return acc;
   }, {});
-  return result;
 };
 
 const copyToTable = (client, src, xform, table, columnNames, batchSize) => {
@@ -53,13 +54,10 @@ const copyToTable = (client, src, xform, table, columnNames, batchSize) => {
 
 const createEventMapper = (txid, replikeringModel, entityConf, bindingConf) => {
   const mapDataFn = createMapper(replikeringModel, entityConf, bindingConf);
-  return event => {
-    const result = Object.assign(mapDataFn(event.data), {
-      txid: event.txid,
-      operation: event.operation
-    });
-    return result;
-  }
+  return event => Object.assign(mapDataFn(event.data), {
+    txid: event.txid,
+    operation: event.operation
+  });
 };
 
 const toTableModel = (replikeringModel, entityConf, bindingConf) => {
@@ -79,7 +77,8 @@ const toTableModel = (replikeringModel, entityConf, bindingConf) => {
   };
 };
 
-const downloadEntity = (client, remoteTxid, replicationModel, entityConf, bindingConf, batchSize, httpClientImpl, targetTable) => go(function*() {
+const downloadEntity = (client, remoteTxid, replicationModel, entityConf,
+                        bindingConf, batchSize, httpClientImpl, targetTable) => go(function* () {
   const downloadCh = new Channel(0);
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.downloadStream(entityConf.name, remoteTxid, downloadCh);
@@ -90,23 +89,16 @@ const downloadEntity = (client, remoteTxid, replicationModel, entityConf, bindin
 });
 
 const initializeEntity = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
-                          entityConf, bindingConf, batchSize, httpClientImpl) => go(function* () {
-
-   yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, batchSize, httpClientImpl, bindingConf.table);
+                          entityConf, bindingConf, httpClientImpl, options) => go(function* () {
+  log('info', `Initializing entity ${entityConf.name}`);
+  yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, options.batchSize, httpClientImpl, bindingConf.table);
   yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
 });
 
-const initialize = (client, remoteTxId, localTxid, replikeringModels, replikeringConfig, httpClientImpl) => go(function* () {
-  for (let entityConf of replikeringConfig.entities) {
-    const bindingConf = replikeringConfig.bindings[entityConf.name];
-    yield initializeEntity(client, remoteTxId, localTxid, replikeringModels[entityConf.name], replikeringConfig.replication_schema,
-      entityConf, bindingConf, 200, httpClientImpl);
-  }
-});
-
-const updateEntity = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
-                      entityConf, bindingConf, batchSize, httpClientImpl) => go(function* () {
+const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
+                                   entityConf, bindingConf, httpClientImpl, options) => go(function* () {
+  log('info', `Incrementally updating entity ${entityConf.name}`);
   const lastRemoteTxid = (yield client.queryRows(`select max(source_txid) as txid from ${replicationSchema}.source_transactions where entity=$1`, [entityConf.name]))[0].txid;
   const eventCh = new Channel(0);
   const tmpEventTableName = `tmp_${bindingConf.table}_changes`;
@@ -115,10 +107,10 @@ const updateEntity = (client, remoteTxid, localTxid, replicationModel, replicati
   const requestProcess = httpClientImpl.eventStream(entityConf.name, lastRemoteTxid + 1, remoteTxid, eventCh);
   const columnNames = _.pluck(bindingConf.attributes, "columnName");
   const copyProcess = copyToTable(client, eventCh, map(createEventMapper(localTxid, replicationModel, entityConf, bindingConf)),
-    tmpEventTableName, ['txid', 'operation', ...columnNames], batchSize);
+    tmpEventTableName, ['txid', 'operation', ...columnNames], options.batchSize);
   yield parallel(requestProcess, copyProcess);
   const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;
-  if(count === 0) {
+  if (count === 0) {
     return;
   }
   // remove any operation that has been replaced by a new operation in the same local transaction
@@ -157,21 +149,12 @@ SELECT operation, ${columnNames.join(',')}
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'event']);
 });
 
-const updateIncrementally = (client, localTxid, replicationModels, replicationConfig, httpClientImpl) => go(function* () {
-  for (let entityConf of replicationConfig.entities) {
-    const lastTransaction = yield httpClientImpl.lastTransaction();
-    const bindingConf = replicationConfig.bindings[entityConf.name];
-    yield updateEntity(client, lastTransaction.txid, localTxid, replicationModels[entityConf.name],
-      replicationConfig.replication_schema, entityConf, bindingConf, 200, httpClientImpl);
-  }
-});
-
 const updateEntityUsingDownload = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
-                          entityConf, bindingConf, batchSize, httpClientImpl) => go(function* () {
-
+                                   entityConf, bindingConf, httpClientImpl, options) => go(function* () {
+  log('info', `Updating entity using download ${entityConf.name}`);
   const tmpTableName = `download_${bindingConf.table}`;
   yield client.query(`CREATE TEMP TABLE ${tmpTableName} (LIKE ${bindingConf.table})`);
-  yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, batchSize, httpClientImpl, tmpTableName);
+  yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, options.batchSize, httpClientImpl, tmpTableName);
   const tableModel = toTableModel(replicationModel, entityConf, bindingConf);
   yield computeDifferences(client, localTxid, tmpTableName, tableModel);
   // apply changes
@@ -181,18 +164,66 @@ const updateEntityUsingDownload = (client, remoteTxid, localTxid, replicationMod
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
 });
 
-const updateUsingDownload = (client, remoteTxId, localTxid, replicationModels, replicationConfig, httpClientImpl)=> go(function*() {
+const updateEntity = (client,
+                      remoteTxid,
+                      localTxid,
+                      replicationModel,
+                      replicationSchema,
+                      entityConf,
+                      bindingConf,
+                      pgModel,
+                      httpClient,
+                      options) => go(function* () {
+  const table = bindingConf.table;
+  const hasChangeTable = !!pgModel.public[`${table}_changes`];
+  const forceDownload = options.forceDownload;
+  const hasContent = (yield client.queryRows(`select EXISTS(SELECT * from ${table}) as has_content`))[0].has_content;
+  if (!hasContent) {
+    return yield initializeEntity(client, remoteTxid, localTxid, replicationModel, replicationSchema,
+      entityConf, bindingConf, httpClient,
+      {
+        useChangeTable: hasChangeTable,
+        batchSize: options.batchSize
+      });
+  }
+  else if (!forceDownload) {
+    return yield updateEntityIncrementally(client, remoteTxid, localTxid, replicationModel,
+      replicationSchema, entityConf, bindingConf, httpClient, {
+        useChangeTable: hasChangeTable,
+        batchSize: options.batchSize
+      });
+  }
+  else {
+    return yield updateEntityUsingDownload(client, remoteTxid, localTxid, replicationModel,
+      replicationSchema, entityConf, bindingConf, httpClient, {
+        useChangeTable: hasChangeTable,
+        batchSize: options.batchSize
+      });
+  }
+});
+
+
+const update = (client, localTxid, replicationModels, replicationConfig, pgModel, httpClient, options) => go(function* () {
+  options = Object.assign({batchSize: 200, forceDownload: false}, options);
+  const remoteTxid = options.remoteTxid ?
+    options.remoteTxid :
+    (yield httpClient.lastTransaction()).txid;
   for (let entityConf of replicationConfig.entities) {
     const bindingConf = replicationConfig.bindings[entityConf.name];
-    yield updateEntityUsingDownload(client, remoteTxId, localTxid, replicationModels[entityConf.name], replicationConfig.replication_schema,
-      entityConf, bindingConf, 200, httpClientImpl);
+    yield updateEntity(
+      client,
+      remoteTxid,
+      localTxid,
+      replicationModels[entityConf.name],
+      replicationConfig.replication_schema,
+      entityConf,
+      bindingConf,
+      pgModel,
+      httpClient,
+      options);
   }
-
 });
 
 module.exports = {
-  initializeEntity,
-  initialize,
-  updateIncrementally,
-  updateUsingDownload
+  update
 };

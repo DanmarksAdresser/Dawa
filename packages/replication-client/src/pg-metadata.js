@@ -1,6 +1,7 @@
 /*
 This code is adapted from https://github.com/ironSource/node-pg-metadata, and
 is subject to the following copyright:
+
 The MIT License (MIT)
 
 Copyright (c) 2014 ironSource
@@ -128,10 +129,11 @@ const createQuery = (opts) => {
   return {sql, params};
 };
 
-const pgMetadata = (client, options) => go(function* () {
-  const {sql, params} = createQuery(options);
+const pgMetadata = (client) => go(function* () {
+  const database = (yield client.queryRows('select current_database() as database'))[0].database;
+  const {sql, params} = createQuery({database});
   const result = yield  client.query(sql, params);
-  return createMetadataObject(result.rows);
+  return createMetadataObject(result.rows)[database];
 });
 
 module.exports = {

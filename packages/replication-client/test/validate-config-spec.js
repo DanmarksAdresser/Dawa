@@ -1,9 +1,9 @@
-const _ = require('underscore');
 const { go } = require('ts-csp');
 const {assert} = require('chai');
 const {validateAgainstModel, normalize, validateAgainstDatabase} = require('../src/validate-config');
 const testdb = require('@dawadk/test-util/src/testdb');
 const databaseSchemaUtil = require('../src/database-schema-util');
+const { pgMetadata } = require('../src/pg-metadata');
 
 const validConf = () => normalize({
   replication_url: "url",
@@ -42,21 +42,21 @@ describe('Replication client config validation', () => {
     assert(valid);
   });
   it('Rejects if replication_url is missing', () => {
-    const conf = validConf()
+    const conf = validConf();
     delete conf.replication_url;
     const [valid, errorText] = validateAgainstModel(replicationModel, conf);
     assert.isFalse(valid);
     assert(errorText);
   });
   it('Rejects if entity is not present in model', () => {
-    const conf = validConf()
+    const conf = validConf();
     conf.entities[0].name='entity2';
     const [valid, errorText] = validateAgainstModel(replicationModel, conf);
     assert.isFalse(valid);
     assert(errorText);
   });
   it('Rejects if attribute is not present in model', () => {
-    const conf = validConf()
+    const conf = validConf();
     conf.entities[0].attributes[0]='nonexistingattr';
     const [valid, errorText] = validateAgainstModel(replicationModel, conf);
     assert.isFalse(valid);
@@ -72,18 +72,18 @@ describe('Replication client config validation', () => {
           yield clientFn().query(stmt);
         }
       });
-
       it('Validates generated schema', () => go(function* () {
         yield loadSchema();
-        const [valid] = yield validateAgainstDatabase(clientFn(), validConf());
+        const metadata = yield pgMetadata(clientFn());
+        const [valid] = validateAgainstDatabase(validConf(), metadata);
         assert(valid);
       }));
-
       it('Rejects if table not found', () => go(function*() {
         yield loadSchema();
         const conf = validConf();
         conf.bindings.entity.table = 'differenttable';
-        const [valid, errorText] = yield validateAgainstDatabase(clientFn(), conf);
+        const metadata = yield pgMetadata(clientFn());
+        const [valid, errorText] = validateAgainstDatabase(conf, metadata);
         assert.isFalse(valid);
         assert.strictEqual(errorText, "Database missing table public.differenttable for entity entity");
       }));
@@ -91,7 +91,8 @@ describe('Replication client config validation', () => {
         yield loadSchema();
         const conf = validConf();
         conf.bindings.entity.attributes.foo.columnName = 'foospecified';
-        const [valid, errorText] = yield validateAgainstDatabase(clientFn(), conf);
+        const metadata = yield pgMetadata(clientFn());
+        const [valid, errorText] = validateAgainstDatabase(conf, metadata);
         assert.isFalse(valid);
         assert.strictEqual(errorText, "Database missing column foospecified for attribute foo of table public.entity_table for entity entity");
       }));

@@ -4,7 +4,6 @@ const Ajv = require('ajv');
 const _ = require('underscore');
 const { go } = require('ts-csp');
 const { ReplicationHttpClient } = require('./replication-http-client');
-const { pgMetadata } = require('./pg-metadata');
 const ajv = new Ajv();
 const schema = JSON.parse(fs.readFileSync(path.join(__dirname, 'config-schema.json')));
 const validateAgainstSchema = (config) => {
@@ -69,9 +68,7 @@ const normalize = config => {
   return config;
 };
 
-const validateAgainstDatabase = (client, config) => go(function*() {
-  const database = (yield client.queryRows('select current_database() as database'))[0].database;
-  const metadata = (yield pgMetadata(client, {database}))[database];
+const validateAgainstDatabase = (config, metadata) => {
   for(let [entity, binding] of Object.entries(config.bindings)) {
     const schema = 'public';
     if(!metadata[schema]) {
@@ -90,7 +87,7 @@ const validateAgainstDatabase = (client, config) => go(function*() {
     }
   }
   return [true, null];
-});
+};
 
 const getValidatedConfig = (filePath) => go(function* () {
   let fileText;

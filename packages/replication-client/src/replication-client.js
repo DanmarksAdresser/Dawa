@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-/* eslint no-console: 0 */
 const {go} = require('ts-csp');
 const {parseCommands} = require('@dawadk/common/src/cli/commander-wrapper');
 const databasePools = require('@dawadk/common/src/postgres/database-pools');
@@ -10,6 +9,8 @@ const {ReplicationHttpClient} = require('./replication-http-client');
 const generateConfig = require('./generate-config');
 const {getValidatedConfig, validateAgainstDatabase} = require('./validate-config');
 const {generateDDLStatements} = require('./database-schema-util');
+const { pgMetadata } = require('./pg-metadata');
+const log = require('./log');
 const replicationConfigParam = {
   name: 'replication-config',
   type: 'string',
@@ -24,12 +25,9 @@ const parameterSpec = [
   }];
 
 const commands = [{
-  name: 'initialize',
-  parameters: parameterSpec
-}, {
-  name: 'update',
-  parameters: [parameterSpec, {
-    name: 'use-download',
+  name: 'replicate',
+  parameters: [...parameterSpec, {
+    name: 'force-download',
     type: 'boolean'
   }]
 }, {
@@ -50,6 +48,7 @@ if(!command) {
 }
 
 const runCommand = (command, options) => go(function* () {
+  /* eslint no-console: 0 */
   if (command === 'gen-config') {
     const replicationUrl = "https://dawa.aws.dk/replikering";
     const replicationSchema = "dawa_replication";
@@ -78,34 +77,25 @@ const runCommand = (command, options) => go(function* () {
     });
 
     const pool = databasePools.get("pool");
+    const pgModel =
+      yield pool.withTransaction({}, 'READ_ONLY', client => pgMetadata(client));
+
+
     if(command === 'validate-config') {
-      yield pool.withTransaction({}, 'READ_ONLY', client => go(function*() {
-        const [valid, errorText] = yield validateAgainstDatabase(client, replicationConfig);
-        if(!valid) {
-          console.log(`Configuration invalid: ${errorText}`);
-          process.exit(1);
-        }
-        else {
-          console.log('Configuration is valid');
-        }
-      }));
+      log('info', 'Validating configuration against database schema...');
+      const [valid, errorText] = validateAgainstDatabase(replicationConfig, pgModel);
+      if(!valid) {
+        log('error', `Configuration invalid: ${errorText}`);
+        process.exit(1);
+      }
+      else {
+        log('info', 'Configuration is valid');
+      }
     }
     else {
       yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, txid => go(function* () {
-        const lastTransaction = yield httpClient.lastTransaction();
         const datamodel = yield httpClient.datamodel();
-        const remoteTxid = lastTransaction.txid;
-        if (command === 'initialize') {
-          yield impl.initialize(client, remoteTxid, txid, datamodel, replicationConfig, httpClient);
-        }
-        else if (command === 'update') {
-          if (options.useDownload) {
-            yield impl.updateUsingDownload(client, txid, datamodel, replicationConfig, httpClient);
-          }
-          else {
-            yield impl.updateIncrementally(client, txid, datamodel, replicationConfig, httpClient);
-          }
-        }
+        yield impl.update(client, txid, datamodel, replicationConfig, pgModel, httpClient, {forceDownload: options.forceDownload});
       })));
     }
   }
@@ -116,7 +106,7 @@ go(function* () {
     yield runCommand(command, options);
   }
   catch (e) {
-    console.error(e.message);
+     log('error', e.message);
     process.exit(1);
   }
 });

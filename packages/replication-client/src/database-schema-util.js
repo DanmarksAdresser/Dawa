@@ -29,11 +29,13 @@ const generateDDLStatements = (replicationModel, config) => {
       const replikeringBinding = Object.assign({}, defaultBinding, binding.attributes[attributeName]);
       return `${replikeringBinding.columnName} ${replikeringBinding.sqlType}`
     }).join(',\n');
-
+    const keyColumnNames = model.key.map(key => binding.attributes[key].columnName);
+    const primaryKeyClause = `PRIMARY KEY(${keyColumnNames.join(', ')})`;
     sqls.push(
 `\
 create table ${binding.table}(
-${fieldDecl}
+${fieldDecl},
+${primaryKeyClause}
 )`
     );
 
