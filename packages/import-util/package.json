@@ -8,7 +8,16 @@
   },
   "dependencies": {
     "@dawadk/common": "^1.0.6",
-    "lodash.get": "^4.4.2"
+    "bluebird": "^3.5.3",
+    "csv-parse": "^2.4.0",
+    "csv-stringify": "^3.0.0",
+    "event-stream": "^4.0.1",
+    "lodash.get": "^4.4.2",
+    "q": "^1.5.1",
+    "split2": "^3.0.0",
+    "through2": "^3.0.0",
+    "ts-csp": "^0.9.0",
+    "underscore": "^1.9.1"
   },
   "devDependencies": {
     "eslint": "4.19.1",

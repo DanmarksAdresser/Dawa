@@ -1,28 +1,22 @@
 "use strict";
 
-var cli = require('cli');
 const { go } = require('ts-csp');
-var _        = require('underscore');
+const path = require('path');
+const cliParameterParsing = require('@dawadk/common/src/cli/cli-parameter-parsing');
+const initialization = require('./initialization');
+const proddb = require('./proddb');
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
-var initialization = require('./initialization');
-var proddb = require('./proddb');
-
-var optionSpec = {
+const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
 };
 
-cli.parse(optionSpec, []);
 
-cli.main(function (args, options) {
-  cliParameterParsing.addEnvironmentOptions(optionSpec, options);
-  process.env.pgConnectionUrl = options.pgConnectionUrl;
-  cliParameterParsing.checkRequiredOptions(options, _.keys(optionSpec));
+cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  var scriptDir = __dirname + '/schema';
+  const scriptDir = path.join(__dirname, 'schema');
   proddb.withTransaction('READ_WRITE',  client => go(function*() {
     yield initialization.loadSchemas(client, scriptDir);
     yield initialization.disableTriggersAndInitializeTables(client);

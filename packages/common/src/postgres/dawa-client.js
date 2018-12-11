@@ -1,7 +1,7 @@
 const Promise = require('bluebird');
 const copyFrom = require('pg-copy-streams').from;
 const { go, Abort } = require('ts-csp');
-const { processify } = require('@dawadk/common/src/csp-util');
+const { processify } = require('../csp-util');
 
 const transactionStatements = {
   READ_ONLY: ['BEGIN READ ONLY', 'ROLLBACK'],
