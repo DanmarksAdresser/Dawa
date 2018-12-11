@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/replication-client",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "private": true,
   "main": "src/replication-client-impl.js",
   "license": "MIT",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@dawadk/common": "^1.0.2",
-    "@dawadk/import-util": "^1.0.3"
+    "@dawadk/import-util": "^1.0.4"
   },
   "devDependencies": {
     "@dawadk/test-util": "^1.0.1"
