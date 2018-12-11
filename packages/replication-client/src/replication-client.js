@@ -11,6 +11,7 @@ const {getValidatedConfig, validateAgainstDatabase} = require('./validate-config
 const {generateDDLStatements} = require('./database-schema-util');
 const { pgMetadata } = require('./pg-metadata');
 const log = require('./log');
+const fs = require('fs');
 const replicationConfigParam = {
   name: 'replication-config',
   description: 'Path to configuration file',
@@ -34,7 +35,12 @@ const commands = [{
   }]
 }, {
   name: 'gen-config',
-  parameters: []
+  parameters: [{
+    name: 'file',
+    description: 'Output file for configuration',
+    type: 'string',
+    required: true
+  }]
 }, {
   name: 'gen-schema',
   parameters: [replicationConfigParam, {
@@ -45,6 +51,11 @@ const commands = [{
     name: 'drop-before-create',
     description: 'Drop tables and types before recreating them',
     type: 'boolean'
+  }, {
+    name: 'file',
+    description: 'Output file for schema',
+    type: 'string',
+    required: true
   }]
 }, {
   name: 'validate-config',
@@ -58,13 +69,13 @@ if(!command) {
 }
 
 const runCommand = (command, options) => go(function* () {
-  /* eslint no-console: 0 */
   if (command === 'gen-config') {
     const replicationUrl = "https://dawa.aws.dk/replikering";
     const replicationSchema = "dawa_replication";
     const httpClient = new ReplicationHttpClient(replicationUrl, 200);
     const replicationModel = yield httpClient.datamodel();
-    console.log(JSON.stringify((generateConfig(replicationUrl, replicationSchema, replicationModel)), null, 2));
+    const jsonText = JSON.stringify((generateConfig(replicationUrl, replicationSchema, replicationModel)), null, 2);
+    fs.writeFileSync(options.file, jsonText, {encoding: 'utf-8'});
   }
   else if (command === 'gen-schema') {
     const [replicationConfig, err] = yield getValidatedConfig(options.replicationConfig);
@@ -73,10 +84,11 @@ const runCommand = (command, options) => go(function* () {
     }
     const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, 200);
     const replicationModel = yield httpClient.datamodel();
-    console.log(generateDDLStatements(replicationModel, replicationConfig, {
+    const ddl = generateDDLStatements(replicationModel, replicationConfig, {
       withChangeTables: options.withChangeTables,
       dropBeforeCreate: options.dropBeforeCreate
-    }).join(';\n'));
+    }).join(';\n');
+    fs.writeFileSync(options.file, ddl, {encoding: 'utf-8'});
   }
   else {
     const [replicationConfig, err] = yield getValidatedConfig(options.replicationConfig);

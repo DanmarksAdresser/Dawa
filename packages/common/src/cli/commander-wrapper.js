@@ -47,9 +47,12 @@ const addDefaults = (optionSpecs, options) => {
   });
 };
 
+const toCamelCase = str => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase() );
+
 const checkRequiredOptions = (optionSpecs, options) => {
   optionSpecs.forEach(({name, required}) => {
-    if(required && !existy(options[name])) {
+    const optionName = toCamelCase(name);
+    if(required && !existy(options[optionName])) {
       /* eslint no-console : 0 */
       console.error(`Missing required argument --${name}`);
       process.exit(1);
@@ -93,7 +96,10 @@ const parseCommands = (commandSpecs, args) => {
   for(let command of commandSpecs) {
     const cmd = program.command(command.name);
     for(let {name, description, type} of command.parameters) {
-      const argumentString = type === 'boolean' ? `--${name}` : `--${name} <value>`;
+      let argumentString = `--${name}`;
+      if(type !== 'boolean'){
+        argumentString += ` [value]`
+      }
       cmd.option(argumentString, description, parsers[type]);
     }
     cmd.action((parseResult) => {
@@ -103,6 +109,14 @@ const parseCommands = (commandSpecs, args) => {
   }
   program.parse(args);
   result.program = program;
+  if(!result.command) {
+    if(!result.command) {
+      program.outputHelp();
+      process.exit(1);
+    }
+  }
+  const command = _.findWhere(commandSpecs, {name: result.command});
+  checkRequiredOptions(command.parameters, result.options);
   return result;
 };
 
