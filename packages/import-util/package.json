@@ -1,6 +1,5 @@
 {
   "name": "@dawadk/import-util",
-  "private": true,
   "version": "1.0.4",
   "license": "MIT",
   "dependencies": {

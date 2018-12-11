@@ -1,7 +1,6 @@
 {
   "name": "@dawadk/common",
   "version": "1.0.2",
-  "private": true,
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.1",
