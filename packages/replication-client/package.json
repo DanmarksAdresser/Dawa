@@ -1,14 +1,14 @@
 {
   "name": "@dawadk/replication-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "main": "src/replication-client-impl.js",
   "license": "MIT",
   "bin": {
     "dawa-replication-client": "src/replication-client.js"
   },
   "dependencies": {
-    "@dawadk/common": "^1.0.2",
-    "@dawadk/import-util": "^1.0.4"
+    "@dawadk/common": "^1.0.3",
+    "@dawadk/import-util": "^1.0.5"
   },
   "devDependencies": {
     "@dawadk/test-util": "^1.0.1"
