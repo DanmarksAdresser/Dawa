@@ -3,6 +3,7 @@
   "version": "1.1.1",
   "main": "src/replication-client-impl.js",
   "license": "MIT",
+  "private": false,
   "bin": {
     "dawa-replication-client": "src/replication-client.js"
   },

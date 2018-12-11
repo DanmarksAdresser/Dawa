@@ -2,6 +2,7 @@
   "name": "@dawadk/import-util",
   "version": "1.0.5",
   "license": "MIT",
+  "private": false,
   "dependencies": {
     "@dawadk/common": "^1.0.3",
     "lodash.get": "^4.4.2"
