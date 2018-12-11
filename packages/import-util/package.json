@@ -1,13 +1,13 @@
 {
   "name": "@dawadk/import-util",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@dawadk/common": "^1.0.5",
+    "@dawadk/common": "^1.0.6",
     "lodash.get": "^4.4.2"
   },
   "devDependencies": {
