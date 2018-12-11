@@ -12,7 +12,15 @@
   },
   "dependencies": {
     "@dawadk/common": "^1.0.6",
-    "@dawadk/import-util": "^1.0.8"
+    "@dawadk/import-util": "^1.0.8",
+    "ajv": "^6.6.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "split2": "^3.0.0",
+    "terraformer-wkt-parser": "^1.2.0",
+    "transducers-js": "^0.4.174",
+    "underscore": "^1.9.1",
+    "urijs": "^1.19.1"
   },
   "devDependencies": {
     "@dawadk/test-util": "^1.0.1"

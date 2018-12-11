@@ -103,14 +103,12 @@ const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationMod
   const eventCh = new Channel(0);
   const tmpEventTableName = `tmp_${bindingConf.table}_changes`;
   yield createTempChangeTable(client, replicationSchema, bindingConf, tmpEventTableName);
-  console.log('created temp change table');
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.eventStream(entityConf.name, lastRemoteTxid + 1, remoteTxid, eventCh);
   const columnNames = _.pluck(bindingConf.attributes, "columnName");
   const copyProcess = copyToTable(client, eventCh, map(createEventMapper(localTxid, replicationModel, entityConf, bindingConf)),
     tmpEventTableName, ['txid', 'operation', ...columnNames], options.batchSize);
   yield parallel(requestProcess, copyProcess);
-  console.log('streamed to table');
   const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;
   if (count === 0) {
     return;
