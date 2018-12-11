@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/server",
-  "version": "1.25.13",
+  "version": "1.25.14",
   "private": true,
   "author": "Styrelsen for Dataforsyning og Effektivisering (SDFE)",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
@@ -21,9 +21,9 @@
     "dawa-import-road-centers": "./vejmidter/importVejmidter.js"
   },
   "dependencies": {
-    "@dawadk/common": "^1.0.6",
-    "@dawadk/import-util": "^1.0.8",
-    "@dawadk/validate-history": "^1.0.8",
+    "@dawadk/common": "^1.0.7",
+    "@dawadk/import-util": "^1.0.9",
+    "@dawadk/validate-history": "^1.0.9",
     "@mapbox/polylabel": "^1.0.2",
     "JSONStream": "1.3.2",
     "ajv": "^6.5.0",
