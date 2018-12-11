@@ -4,6 +4,9 @@
   "main": "src/replication-client-impl.js",
   "license": "MIT",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "dawa-replication-client": "src/replication-client.js"
   },
