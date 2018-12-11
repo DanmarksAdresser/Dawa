@@ -103,12 +103,14 @@ const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationMod
   const eventCh = new Channel(0);
   const tmpEventTableName = `tmp_${bindingConf.table}_changes`;
   yield createTempChangeTable(client, replicationSchema, bindingConf, tmpEventTableName);
+  console.log('created temp change table');
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.eventStream(entityConf.name, lastRemoteTxid + 1, remoteTxid, eventCh);
   const columnNames = _.pluck(bindingConf.attributes, "columnName");
   const copyProcess = copyToTable(client, eventCh, map(createEventMapper(localTxid, replicationModel, entityConf, bindingConf)),
     tmpEventTableName, ['txid', 'operation', ...columnNames], options.batchSize);
   yield parallel(requestProcess, copyProcess);
+  console.log('streamed to table');
   const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;
   if (count === 0) {
     return;
@@ -123,30 +125,38 @@ WITH row_numbered AS (
       last_operation AS(
 SELECT operation, ${columnNames.join(',')}
   FROM row_numbered t
- WHERE t.rk = 1)
- INSERT INTO ${bindingConf.table}_changes(txid, operation, ${columnNames.join(',')})
+ WHERE t.rk = 1),
+ _ as (delete from ${tmpEventTableName})
+ INSERT INTO ${tmpEventTableName}(txid, operation, ${columnNames.join(',')})
  (select $1, operation, ${columnNames.join(',')} from last_operation)`, [localTxid]);
 
-  yield client.query(`drop table ${tmpEventTableName}`);
   // we treat updates as  inserts if the object doesn't exist.
-  yield client.query(`update ${bindingConf.table}_changes  c set operation = 'insert'
+  yield client.query(`update ${tmpEventTableName}  c set operation = 'insert'
   WHERE c.txid = $1 and c.operation = 'update' and not exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);
 
   // we treat inserts as updates if the object exist.
-  yield client.query(`update ${bindingConf.table}_changes  c set operation = 'update'
+  yield client.query(`update ${tmpEventTableName}  c set operation = 'update'
   WHERE c.txid = $1 and c.operation = 'insert' and exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);
 
   // we ignore deletes on nonexisting objects
-  yield client.query(`delete from ${bindingConf.table}_changes c
+  yield client.query(`delete from ${tmpEventTableName} c
   WHERE c.txid = $1 and c.operation = 'delete' and 
   not exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);
 
   // apply changes
-  yield tableDiff.applyChanges(client, localTxid, toTableModel(replicationModel, entityConf, bindingConf));
+  yield tableDiff.applyChanges(client, localTxid, toTableModel(replicationModel, entityConf, bindingConf), tmpEventTableName);
 
   // record new remote txid
   yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'event']);
+
+  // Store changes in change table
+  if(options.useChangeTable) {
+    client.query(`INSERT INTO ${tmpEventTableName}(txid, operation, ${columnNames.join(',')})
+    (select txid, operation, ${columnNames.join(',')} from ${tmpEventTableName})`);
+  }
+  yield client.query(`drop table ${tmpEventTableName}`);
+
 });
 
 const updateEntityUsingDownload = (client, remoteTxid, localTxid, replicationModel, replicationSchema,

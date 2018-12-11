@@ -13,6 +13,7 @@ const { pgMetadata } = require('./pg-metadata');
 const log = require('./log');
 const replicationConfigParam = {
   name: 'replication-config',
+  description: 'Path to configuration file',
   type: 'string',
   required: true
 };
@@ -20,6 +21,7 @@ const replicationConfigParam = {
 const parameterSpec = [
   replicationConfigParam, {
     name: 'database',
+    description: 'URI describing how to connect to the database, e.g. "postgres://someuser:somepassword@localhost:5432/somedatabase"',
     type: 'string',
     required: true
   }];
@@ -35,7 +37,15 @@ const commands = [{
   parameters: []
 }, {
   name: 'gen-schema',
-  parameters: [replicationConfigParam]
+  parameters: [replicationConfigParam, {
+    name: 'with-change-tables',
+    description: 'Generate change tables',
+    type: 'boolean'
+  }, {
+    name: 'drop-before-create',
+    description: 'Drop tables and types before recreating them',
+    type: 'boolean'
+  }]
 }, {
   name: 'validate-config',
   parameters: parameterSpec
@@ -63,7 +73,10 @@ const runCommand = (command, options) => go(function* () {
     }
     const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, 200);
     const replicationModel = yield httpClient.datamodel();
-    console.log(generateDDLStatements(replicationModel, replicationConfig).join(';\n'));
+    console.log(generateDDLStatements(replicationModel, replicationConfig, {
+      withChangeTables: options.withChangeTables,
+      dropBeforeCreate: options.dropBeforeCreate
+    }).join(';\n'));
   }
   else {
     const [replicationConfig, err] = yield getValidatedConfig(options.replicationConfig);

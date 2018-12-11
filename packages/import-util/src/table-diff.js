@@ -184,27 +184,31 @@ const computeDifferencesSubset = (client, txid, srcTableOrView, dirtyTable, tabl
   yield computeDeletesSubset(client, txid, srcTableOrView, dirtyTable, tableModel);
 });
 
-const applyInserts = (client, txid, tableModel) => go(function* () {
+const applyInserts = (client, txid, tableModel, changeTable) => go(function* () {
+  changeTable = changeTable || `${tableModel.table}_changes`;
   const columnList = selectList(null, allColumnNames(tableModel));
-  yield client.query(`INSERT INTO ${tableModel.table}(${columnList}) (SELECT ${columnList} FROM ${tableModel.table}_changes WHERE txid = ${txid} and operation = 'insert')`);
+  yield client.query(`INSERT INTO ${tableModel.table}(${columnList}) (SELECT ${columnList} FROM ${changeTable} WHERE txid = ${txid} and operation = 'insert')`);
 });
 
-const applyDeletes = (client, txid, tableModel) => go(function* () {
-  yield client.query(`DELETE FROM ${tableModel.table} t USING ${tableModel.table}_changes c WHERE c.txid = ${txid} AND operation='delete' AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
+const applyDeletes = (client, txid, tableModel, changeTable) => go(function* () {
+  changeTable = changeTable || `${tableModel.table}_changes`;
+  yield client.query(`DELETE FROM ${tableModel.table} t USING ${changeTable} c WHERE c.txid = ${txid} AND operation='delete' AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
 });
 
-const applyUpdates = (client, txid, tableModel) => go(function* () {
+const applyUpdates = (client, txid, tableModel, changeTable) => go(function* () {
+  changeTable = changeTable || `${tableModel.table}_changes`;
   const columnsToUpdate = nonPrimaryColumnNames(tableModel);
   if (columnsToUpdate.length > 0) {
     const updateClause = columnsToUpdate.map(column => `${column} = c.${column}`).join(', ');
-    yield client.query(`UPDATE ${tableModel.table} t SET ${updateClause} FROM ${tableModel.table}_changes c WHERE c.txid = ${txid} AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
+    yield client.query(`UPDATE ${tableModel.table} t SET ${updateClause} FROM ${changeTable} c WHERE c.txid = ${txid} AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
   }
 });
 
-const applyChanges = (client, txid, tableModel) => go(function* () {
-  yield applyDeletes(client, txid, tableModel);
-  yield applyUpdates(client, txid, tableModel);
-  yield applyInserts(client, txid, tableModel);
+const applyChanges = (client, txid, tableModel, changeTable) => go(function* () {
+  changeTable = changeTable || `${tableModel.table}_changes`;
+  yield applyDeletes(client, txid, tableModel, changeTable);
+  yield applyUpdates(client, txid, tableModel, changeTable);
+  yield applyInserts(client, txid, tableModel, changeTable);
 });
 
 const getChangeTableSql = tableModel => {

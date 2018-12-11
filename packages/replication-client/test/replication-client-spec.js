@@ -129,7 +129,7 @@ class FakeClient {
 }
 
 const initializeSchema = (client, config) => go(function* () {
-  const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, config);
+  const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, config, {withChangeTables: true});
   for (let stmt of stmts) {
     yield client.query(stmt);
   }
@@ -217,7 +217,7 @@ describe('Replikerings-klient', () => {
 describe('replikerings-klient-integration', () => {
   testdb.withTransactionAll('replikeringtest', (clientFn) => {
     it('Can initialize the database schema ', () => go(function* () {
-      const stmts = databaseSchemaUtil.generateDDLStatements(replikeringModels, testDarConfig);
+      const stmts = databaseSchemaUtil.generateDDLStatements(replikeringModels, testDarConfig, {withChangeTables: true});
       for (let stmt of stmts) {
         yield clientFn().query(stmt);
       }

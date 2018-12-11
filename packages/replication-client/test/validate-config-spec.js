@@ -67,7 +67,7 @@ describe('Replication client config validation', () => {
     testdb.withTransactionAll('replikeringtest', (clientFn) => {
 
       const loadSchema = () => go(function*() {
-        const stmts = databaseSchemaUtil.generateDDLStatements(replicationModel, validConf());
+        const stmts = databaseSchemaUtil.generateDDLStatements(replicationModel, validConf(), {withChangeTables: true, dropBeforeCreate: true});
         for (let stmt of stmts) {
           yield clientFn().query(stmt);
         }
