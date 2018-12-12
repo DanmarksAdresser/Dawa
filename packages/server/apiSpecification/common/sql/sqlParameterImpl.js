@@ -12,7 +12,7 @@ const util = require('../../util');
 var notNull = util.notNull;
 
 function removeSpecialSearchChars(q) {
-  return q.replace(/[^a-zA-Z0-9ÆæØøÅåéÉëËüÜäÄöÖÿŸ\*]/g, ' ');
+  return q.replace(/[^a-zA-Z0-9æÆøØåÅäÄèÈéÉëËüÜöÖóÓÿŸ\*]/g, ' ');
 }
 function toPgSearchQuery(q) {
   // remove all special chars
