@@ -1690,6 +1690,52 @@ it("autocomplete nr", function(done){
 
 });
 
+describe('Storkredssøgning', function(){
+
+  it('valglandsdele', function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/storkredse';
+    options.qs= {};
+    options.qs.valglandsdelsbogstav= 'A';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+
+      assert(response.statusCode===200, "Http status code != 200");
+
+      var storkredse= JSON.parse(response.body);
+      assert(storkredse.length === 4, "Antallet af storkredse i valglandsdel A er ikke 4");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    })
+  })
+
+  it('regionskode', function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/storkredse';
+    options.qs= {};
+    options.qs.regionskode= '1085';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+
+      assert(response.statusCode===200, "Http status code != 200");
+
+      var storkredse= JSON.parse(response.body);
+      assert(storkredse.length === 1, "Antallet af storkredse i Regions Sjælland A er ikke 1");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    })
+  })
+
+});
+
 describe('Opstillingskredssøgning', function(){
 
   it("q=nør*", function(done){
@@ -1706,7 +1752,7 @@ describe('Opstillingskredssøgning', function(){
     })
   })
 
-it("autocomplete nr", function(done){
+  it("autocomplete nr", function(done){
     var options= {};
     options.baseUrl= host;
     options.url= 'opstillingskredse/autocomplete';
@@ -2057,6 +2103,47 @@ describe('Adgangsadressesøgning', function(){
     });
   })
 
+  it('adgangspunktid', function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adgangsadresser';
+    options.qs= {};
+    options.qs.adgangspunktid= '0a3f507a-ea2d-32b8-e044-0003ba298018';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+
+      assert(response.statusCode===200, "Http status code != 200");
+
+      var aadresser= JSON.parse(response.body);
+      assert(aadresser[0].id === '0a3f507a-ea2d-32b8-e044-0003ba298018', "Forkert adgansadresse");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  })
+
+  it('vejpunkt_id', function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url='/adgangsadresser';
+    options.qs= {};
+    options.qs.vejpunkt_id= '11f21a59-af45-11e7-847e-066cff24d637';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    rp(options).then((response) => {
+
+      assert(response.statusCode===200, "Http status code != 200");
+
+      var aadresser= JSON.parse(response.body);
+      assert(aadresser[0].id === '0a3f507a-ea2d-32b8-e044-0003ba298018', "Forkert adgansadresse");
+      done();
+    })
+    .catch((err) => {
+      done(err);
+    });
+  })
 });
 
 
