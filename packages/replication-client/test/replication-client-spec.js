@@ -10,7 +10,7 @@ const Promise = require("bluebird");
 const {ReplicationHttpClient} = require('../src/replication-http-client');
 const _ = require('underscore');
 
-const testDarConfig = generateConfig("http://localhost:3002/replikering", "replication", replikeringModels);
+const testDarConfig = generateConfig("http://localhost:3002/replikering", "replication", replikeringModels, {});
 const {normalize} = require('../src/validate-config');
 const {pgMetadata} = require('../src/pg-metadata');
 const testReplicationConfig = {
@@ -227,6 +227,6 @@ describe('replikerings-klient-integration', () => {
         const httpClient = new ReplicationHttpClient(testDarConfig.replication_url);
         yield update(clientFn(), txid, replikeringModels, testDarConfig,yield pgMetadata(clientFn()), httpClient );
       }));
-    }));
+    })).timeout(60000);
   });
 });

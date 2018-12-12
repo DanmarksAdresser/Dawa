@@ -29,6 +29,11 @@ const parsers = {
   integer: parseInt
 };
 
+const multiValuedParser = type => value => {
+  const singleValueParser = parsers[type];
+  return value.split(',').map(singleValueParser);
+};
+
 const addOptionsFromEnvironment = (optionSpecs, options) => {
   optionSpecs.forEach(({name, type}) => {
     if(_.isUndefined(options[name] || options[name] === null)) {
@@ -39,10 +44,9 @@ const addOptionsFromEnvironment = (optionSpecs, options) => {
 
 const addDefaults = (optionSpecs, options) => {
   optionSpecs.forEach(({name, defaultValue}) => {
-    if(_.isUndefined(options[name] || options[name] === null)) {
-      if(existy(defaultValue)) {
-        options[name] = defaultValue;
-      }
+    const optionName = toCamelCase(name);
+    if(!existy(options[optionName]) && existy(defaultValue)) {
+      options[optionName] = defaultValue;
     }
   });
 };
@@ -64,9 +68,10 @@ const parseProgramArguments = (optionSpecs) => {
   optionSpecs = _.clone(optionSpecs);
   optionSpecs.push(configOption);
   optionSpecs.push(logConfigOption);
-  const program = optionSpecs.reduce((acc, {name, type, description}) => {
+  const program = optionSpecs.reduce((acc, {name, type, description, multiValued}) => {
     const argumentString = type === 'boolean' ? `--${name}` : `--${name} <value>`;
-    return commander.option(argumentString, description, parsers[type]);
+    const parser = multiValued ? multiValuedParser(type) : parsers[type];
+    return commander.option(argumentString, description, parser);
   }, commander).parse(process.argv);
   const options = Object.keys(optionSpecs).reduce((acc, {name}) => {
     acc[name] = program[name];
@@ -95,12 +100,13 @@ const parseCommands = (commandSpecs, args) => {
   const program = commander;
   for(let command of commandSpecs) {
     const cmd = program.command(command.name);
-    for(let {name, description, type} of command.parameters) {
+    for(let {name, description, type, multiValued} of command.parameters) {
       let argumentString = `--${name}`;
       if(type !== 'boolean'){
         argumentString += ` [value]`
       }
-      cmd.option(argumentString, description, parsers[type]);
+      const parser = multiValued ? multiValuedParser(type) : parsers[type];
+      cmd.option(argumentString, description, parser);
     }
     cmd.action((parseResult) => {
       result.command = command.name;
@@ -116,6 +122,7 @@ const parseCommands = (commandSpecs, args) => {
     }
   }
   const command = _.findWhere(commandSpecs, {name: result.command});
+  addDefaults(command.parameters, result.options);
   checkRequiredOptions(command.parameters, result.options);
   return result;
 };

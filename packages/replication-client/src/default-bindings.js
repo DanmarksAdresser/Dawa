@@ -40,6 +40,11 @@ const defaultBindings = {
     sqlType: 'geometry(geometry, 25832)',
     distinctClause: geomDistinctClause,
     toCsv: geojsonToCsv
+  },
+  geometry3d: {
+    sqlType: 'geometry(geometryz, 25832)',
+    distinctClause: geomDistinctClause,
+    toCsv: geojsonToCsv
   }
 };
 
