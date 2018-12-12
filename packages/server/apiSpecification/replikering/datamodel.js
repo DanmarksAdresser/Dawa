@@ -357,7 +357,7 @@ module.exports = {
       },
       {
         name: 'geometri',
-        type: 'geometry',
+        type: 'geometry3d',
         description: 'Bygningens geometri. Leveres som GeoJSON polygon.'
       }
     ]

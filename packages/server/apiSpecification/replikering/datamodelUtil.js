@@ -9,5 +9,6 @@ exports.defaultSchemas = {
   timestamp: {type: 'string'},
   localdatetime: {type: 'string'},
   point2d: {type: 'object'},
-  geometry: {type: 'object'}
+  geometry: {type: 'object'},
+  geometry3d: {type: 'object'}
 };
