@@ -53,7 +53,7 @@ block main
       | Den nemmeste metode er at lade klienten danne en konfiguration, der så efterfølgende tilpasses efter behov.
       | Følgende kommando genererer en konfigurationsfil og gemmer den i my-config.json:
     pre
-      code dawa-replication-client gen-config > my-config.json
+      code dawa-replication-client gen-config --file my-config.json
     p
       | Konfigurationen dannes ud fra den <a href="https://dawa.aws.dk/replikering/datamodel">datamodel</a>, som udstilles på replikerings-API'et.
       | Konfigurationen er i JSON-format, og består af et JSON-objekt
@@ -95,7 +95,7 @@ block main
       | Klienten kan generere et database-schema ud fra en konfigurations-fil. Følgende kommando genererer et database-schema ud fra
       | konfiguraitonsfilen my-config.json og gemmer schemaet i filen schema.dll:
     pre
-      code dawa-replication-client gen-schema --replication-config my-config.json > schema.sql
+      code dawa-replication-client gen-schema --replication-config my-config.json --file schema.sql
     p
       | Schemaet består af to tabeller som replikerings-klienten gemmer metadata i, samt tabeller til de entiter, som replikeres.
     p
