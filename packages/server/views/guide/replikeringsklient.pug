@@ -47,13 +47,16 @@ block main
       code dawa-replication-client --help
     h3 Konfiguration af klient
     p
+      | Klienten skal have en konfiguration for at replikere data. Konfigurationen indeholder oplysninger om hvilke entiteter og attributter
+      | der skal replikeres. Derudover indeholder konfigurationen information om hvilke tabeller data skal gemmes i.
+    p
       | Den nemmeste metode er at lade klienten danne en konfiguration, der så efterfølgende tilpasses efter behov.
       | Følgende kommando genererer en konfigurationsfil og gemmer den i my-config.json:
     pre
       code dawa-replication-client gen-config > my-config.json
     p
       | Konfigurationen dannes ud fra den <a href="https://dawa.aws.dk/replikering/datamodel">datamodel</a>, som udstilles på replikerings-API'et.
-      | Der anvendes JSON til format af konfigurationsfilen. Konfigurationen består af et JSON-objekt
+      | Konfigurationen er i JSON-format, og består af et JSON-objekt
       | med følgende felter:
     ul
       li <code>replication_url</code>: API URL til replikerings-API'et, dvs. <code>https://dawa.aws.dk/replikering</code>.
@@ -92,7 +95,7 @@ block main
       | Klienten kan generere et database-schema ud fra en konfigurations-fil. Følgende kommando genererer et database-schema ud fra
       | konfiguraitonsfilen my-config.json og gemmer schemaet i filen schema.dll:
     pre
-      code dawa-replication-client gen-schema --replication-config my-config.json > schema.dll
+      code dawa-replication-client gen-schema --replication-config my-config.json > schema.sql
     p
       | Schemaet består af to tabeller som replikerings-klienten gemmer metadata i, samt tabeller til de entiter, som replikeres.
     p
@@ -102,23 +105,44 @@ block main
       | Tabellen <code>source_transactions</code> registrerer hvilke remote <code>txid</code> der er indlæst i den
       | lokale database.
     p
-      | For hver entitet skaber klienten to tabeller. Den ene tabel indeholder entitetens aktuelle data. Den anden tabel
-      | indeholder en beskrivelse af hvilke ændringer der er udført.
-    h2 Initialisering af data
+      | Tabellerne med entiteter indeholder en kolonne for hver attribut. Som udgangspukt er kolonnens navn det samme som attributtens navn.
+
+    h2 Replikering af data
     p
-      | Når konfigurationsfil og database-schema er på plads kan data indlæses med <code>initialize</code> kommandoen.
+      | Når konfigurationsfil og database-schema er på plads kan data indlæses med <code>replicate</code> kommandoen.
       | En af parametrene er en URI der beskriver hvordan applikationen forbinder til databasen. URI'en har følgende form:
     pre
-      code postgresql://<user>:<password>@<hostname>:<port>/<database>
+      code postgresql://&lt;user&gt;:&lt;password&gt;@&lt;hostname&gt;:&lt;port&gt;/&lt;database&gt;
     p
       | Database-URI og konfigurationsfil skal angives ved initialisering af databasen:
     pre
-      code dawa-replication-client initialize --database=<database-URI> --replication-config <config-file>
+      code dawa-replication-client replicate --database=&lt;database-URI&gt; --replication-config &lt;config-file&gt;
     p
       | Programmet vil gå i gang med at downloade de entiteter der er angivet i konfigurations-filen og gemme den i den lokale database.
-    h2 Opdatering af data
     p
-      | Klienten kan lave en inkrementiel opdatering af data. Her anvendes blot kommandoen "update" i stedet:
+      | Er der allerede data i tabellerne vil <code>replicate</code> kommandoen i stedet foretage en inkrementiel opdatering baseret på hændelser.
+      | I denne situation hentes kun de ændringer, som er sket siden <code>replicate</code> kommandoen sidst blev udført:
     pre
-      code
-        dawa-replication-client update --database=<database-URI> --replication-config <config-file>
+      code dawa-replication-client replicate --database=&lt;database-URI&gt; --replication-config &lt;config-file&gt;
+    p
+      | Replikerings-klienten afgør for hver enkelt entitet om der skal indlæses et fuldt udtræk eller om der skal
+      | foretages en inkrementiel opdatering. Hvis der tilføjes en ny entitet til konfigurationen og køres replicate, vil klienten
+      | indlæse et udtræk af den nye entitet og foretage en inkrementiel opdatering af de andre entiteter.
+    p
+      | I særlige tilfælde kan det være ønskværdigt at lave et fuldt udtræk,
+      | selvom der allerede er hentet data tidligere. Dette gøres med --force-download parameteren:
+    pre
+      code dawa-replication-client replicate --database=&lt;database-URI&gt; --replication-config &lt;config-file&gt; --force-download
+    h2 Ændringstabeller
+    p
+      | Replikeringsklienten understøtter mulighed for, at hændelser kan gemmes i en lokal ændringstabel.
+      | Det sker automatisk, hvis disse tabeller er oprettet. Navnet på hændelsestabellen skal være navnet på primærtabellen
+      | efterfulgt af "_changes", f.eks. <code>adgangsadresse_changes</code>.
+    p
+      | Ændringstabellen indeholder de samme kolonner som primærtabellen. Herudover indeholder ændringstabellen kolonnen <code>txid</code>, som er den lokale
+      | transaktions-id, og kolonnen <code>operation</code>, som har værdierne <code>'insert'</code>, <code>'update'</code> eller <code>'delete'</code>.
+    p
+      | Formålet med ændringstabellerne kan eksempelvis være at vedligeholde afledte tabeller, hvori der indgår data fra DAWA.
+    p
+      | Replikerings-klienten kan selv generere ændringstabellerne. Dette gøres ved at køre <code>gen-schema</code>
+      | kommandoen med parameteren <code>--with-change-tables</code>.
