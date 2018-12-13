@@ -54,14 +54,13 @@ const addDefaults = (optionSpecs, options) => {
 const toCamelCase = str => str.replace(/-([a-z])/g, (g) => g[1].toUpperCase() );
 
 const checkRequiredOptions = (optionSpecs, options) => {
-  optionSpecs.forEach(({name, required}) => {
+  for(let {name, required} of optionSpecs) {
     const optionName = toCamelCase(name);
     if(required && !existy(options[optionName])) {
-      /* eslint no-console : 0 */
-      console.error(`Missing required argument --${name}`);
-      process.exit(1);
+      return [false, name];
     }
-  });
+  }
+  return [true];
 };
 
 const parseProgramArguments = (optionSpecs) => {
@@ -95,11 +94,13 @@ const parseProgramArguments = (optionSpecs) => {
   return options;
 };
 
-const parseCommands = (commandSpecs, args) => {
+const parseCommands = (commandSpecs, args, version) => {
+  /* eslint no-console: 0 */
   const result = {};
   const program = commander;
+  program.version(version, '-v, --version');
   for(let command of commandSpecs) {
-    const cmd = program.command(command.name);
+    const cmd = program.command(command.name).description(command.description);
     for(let {name, description, type, multiValued} of command.parameters) {
       let argumentString = `--${name}`;
       if(type !== 'boolean'){
@@ -111,19 +112,20 @@ const parseCommands = (commandSpecs, args) => {
     cmd.action((parseResult) => {
       result.command = command.name;
       result.options = parseResult.opts();
+      const [hasRequiredOptions ,missingOption] = checkRequiredOptions(command.parameters, result.options);
+      if(!hasRequiredOptions) {
+        console.error(`Error: Missing required option --${missingOption}`);
+        parseResult.help();
+      }
+      const commandSpec = _.findWhere(commandSpecs, {name: result.command});
+      addDefaults(commandSpec.parameters, result.options);
     });
   }
+  program.on('command:*', function () {
+    console.error('Invalid command: %s\nSee --help for a list of available commands.', program.args.join(' '));
+    process.exit(1);
+  });
   program.parse(args);
-  result.program = program;
-  if(!result.command) {
-    if(!result.command) {
-      program.outputHelp();
-      process.exit(1);
-    }
-  }
-  const command = _.findWhere(commandSpecs, {name: result.command});
-  addDefaults(command.parameters, result.options);
-  checkRequiredOptions(command.parameters, result.options);
   return result;
 };
 

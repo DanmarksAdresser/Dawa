@@ -12,6 +12,7 @@ const {generateDDLStatements} = require('./database-schema-util');
 const {pgMetadata} = require('./pg-metadata');
 const log = require('./log');
 const fs = require('fs');
+const path = require('path');
 const replicationConfigParam = {
   name: 'replication-config',
   description: 'Path to configuration file',
@@ -37,6 +38,7 @@ const parameterSpec = [
 const commands = [
     {
       name: 'replicate',
+      description: 'Replicate data to local database',
       parameters: [...parameterSpec, {
         name: 'force-download',
         type: 'boolean'
@@ -44,6 +46,7 @@ const commands = [
     },
     {
       name: 'gen-config',
+      description: 'Generate a configuration for the client',
       parameters: [{
         name: 'url',
         description: 'URL of replication API, default "https://dawa.aws.dk/replikering"',
@@ -62,6 +65,7 @@ const commands = [
     },
     {
       name: 'gen-schema',
+      description: 'Generate a database schema',
       parameters:
         [replicationConfigParam, {
           name: 'with-change-tables',
@@ -81,17 +85,15 @@ const commands = [
     ,
     {
       name: 'validate-config',
+      description: 'Validate a configuration file.',
       parameters:
       parameterSpec
     }
   ]
 ;
+const version = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version;
 
-const {command, options, program} = parseCommands(commands, process.argv);
-if (!command) {
-  program.outputHelp();
-  process.exit(0);
-}
+const {command, options} = parseCommands(commands, process.argv, version);
 
 const runCommand = (command, options) => go(function* () {
   if (command === 'gen-config') {
