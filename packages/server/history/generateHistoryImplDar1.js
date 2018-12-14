@@ -112,7 +112,17 @@ const mergeAdgangspunkt = (client) => go(function*(){
   yield client.query('drop table adgangspunkt_unmerged');
 });
 
+const removeIncomplete = client => go(function*() {
+  yield client.query(`DELETE FROM adgangspunkt_merged WHERE vejnavn IS NULL OR husnr IS NULL or postnr IS NULL or postnrnavn IS NULL`);
+});
+
+const removeFuture = client => go(function*() {
+  yield client.query(`DELETE FROM adgangspunkt_merged WHERE lower(virkning) > now()`);
+});
+
 const generateAdgangsadresser = (client, adgangsadresserDestTable, dar10CutoffDate) => go(function*() {
+  yield removeIncomplete(client);
+  yield removeFuture(client);
   yield cutoffBefore(client, 'adgangspunkt_merged', dar10CutoffDate);
   const query = `INSERT INTO ${adgangsadresserDestTable}
   (id, hn_statuskode, ap_statuskode, husnr, postnr, postnrnavn, supplerendebynavn, kommunekode, vejkode, vejnavn, adresseringsvejnavn, virkning) 
