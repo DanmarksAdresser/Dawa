@@ -107,8 +107,9 @@ const attrVerifiers = {
   localdatetime: val => typeof(val) === 'string',
   point2d: val => typeof val === "object" && Array.isArray(val.coordinates) && val.type === 'Point'
     && val.coordinates.length === 2 && typeof(val.coordinates[0]) === 'number' && typeof(val.coordinates[1]) === 'number',
-  geometry: val => typeof(val) === 'object'
-};
+  geometry: val => typeof(val) === 'object',
+  geometry3d: val => typeof(val) === 'object'
+  };
 
 const verifyAttr = (attr, val) => {
   if(val === null) {
