@@ -55,6 +55,9 @@ module.exports = [
       name: 'id',
       doc: 'Returner adresse eller adgangsadresse med den angivne ID. type-parameteren afgør, om der søges' +
       ' efter adgangsadresser eller adresser. Der returneres en tom array hvis (adgangs)adressen ikke findes.'
+    }, {
+      name: 'gældende',
+      doc: 'Returner kun gældende adresser, ikke foreløbige.'
     }].concat(formatAndPagingParams),
     examples: [
       {

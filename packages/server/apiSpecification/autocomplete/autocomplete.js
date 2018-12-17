@@ -1,12 +1,12 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const husnrUtil = require('../husnrUtil');
-var registry = require('../registry');
-var resourcesUtil = require('../common/resourcesUtil');
-var schema = require('../parameterSchema');
+const registry = require('../registry');
+const resourcesUtil = require('../common/resourcesUtil');
+const schema = require('../parameterSchema');
 const adresseTextMatch = require('../adresseTextMatch');
 const levenshtein = require('../levenshtein');
 const commonParameters = require('../common/commonParameters');
@@ -18,7 +18,7 @@ require('../vejnavn/resources');
 require('../adgangsadresse/resources');
 require('../adresse/resources');
 
-var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
+const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 
 const formatHusnr = husnrUtil.formatHusnr;
 
@@ -288,6 +288,11 @@ var nonDelegatedParameters = [
   },
   {
     name: 'multilinje',
+    type: 'boolean',
+    defaultValue: "false"
+  },
+  {
+    name: 'gældende',
     type: 'boolean',
     defaultValue: "false"
   }
@@ -636,7 +641,6 @@ function prepareQuery(params) {
       regularSearchQuery = insertString(q, caretpos, '*');
     }
   }
-
   return Object.assign(
     {
       search: regularSearchQuery,
@@ -644,6 +648,7 @@ function prepareQuery(params) {
       per_side: 200,
       side: 1
     },
+    params.gældende ? {status: 1} : {},
     delegatedParameterValues
   );
 }
