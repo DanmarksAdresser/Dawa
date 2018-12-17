@@ -101,6 +101,11 @@ const columns = {
       return geojsonColumn(params.srid || 4326, sridAlias, 'nv.beliggenhed_vejtilslutningspunkter');
     }
   },
+  postnumre: {
+    select: `(SELECT json_agg(json_build_object('nr', p.postnr, 'navn', p.navn))
+    FROM dar1_navngivenvejpostnummerrelation_current np join dar1_postnummer_current p on np.postnummer_id = p.id
+    WHERE nv.id = np.navngivenvej_id)`
+  },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       const geomColumn =

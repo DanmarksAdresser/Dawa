@@ -65,6 +65,10 @@ var fields = [
     name: 'visueltcenter_y'
   },
   {
+    name: 'postnumre',
+    multi: true
+  },
+  {
     name: 'geom_json'
   }
 ];

@@ -1414,6 +1414,13 @@ describe('Stable API', () => {
               "id": "5ca9d513-4eae-11e8-93fd-066cff24d637"
             }
           ],
+          postnumre: [
+            {
+              "href": "http://dawa/postnumre/5492",
+              "navn": "Vissenbjerg",
+              "nr": "5492"
+            }
+          ],
           "beliggenhed": {
             "oprindelse": {
               "kilde": "Ekstern",

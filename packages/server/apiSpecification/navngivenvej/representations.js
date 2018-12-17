@@ -6,7 +6,7 @@ var representationUtil = require('../common/representationUtil');
 var fields = require('./fields');
 const  { makeHref, mapBbox, mapVisueltCenter,
   formatDarStatus, mapKode4NavnTema,
-  mapVejstykkeRef} = require('../commonMappers');
+  mapVejstykkeRef, mapPostnummerRefArray} = require('../commonMappers');
 var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 var schemaUtil = require('../schemaUtil');
 var util = require('../util');
@@ -76,6 +76,13 @@ exports.json = {
           docOrder: ['href', 'kommunekode', 'kode']
         }
       },
+      postnumre: {
+        description: 'De postnumre, som den navngivne vej ligger i',
+        type: 'array',
+        items: {
+          $ref: '#/definitions/PostnummerRef'
+        }
+      },
       beliggenhed: schemaObject({
         description: 'Information om vejens beliggenhed',
         properties: {
@@ -127,7 +134,7 @@ exports.json = {
       },
 
     },
-    docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'beliggenhed', 'visueltcenter', 'bbox']
+    docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'historik', 'administrerendekommune', 'retskrivningskontrol', 'udtaltvejnavn', 'vejstykker', 'postnumre', 'beliggenhed', 'visueltcenter', 'bbox']
   }),
   fields: _.where(fields, {'selectable' : true}),
   mapper: function(baseUrl) {
@@ -149,6 +156,7 @@ exports.json = {
         },
         vejstykker:
           (row.vejstykker || []).map(vejstykke => mapVejstykkeRef(vejstykke, baseUrl)),
+        postnumre: mapPostnummerRefArray(row.postnumre, baseUrl),
         beliggenhed: {
           oprindelse: {
             kilde: row.beliggenhed_oprindelse_kilde,
