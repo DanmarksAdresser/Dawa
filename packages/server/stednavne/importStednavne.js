@@ -12,7 +12,7 @@ const proddb = require('../psql/proddb');
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   file: [false, 'Fil med stednavne', 'string'],
-  maxChanges: [false, 'Maximalt antal ændringer der udføres på adressetilknytninger', 'number', 10000]
+  maxChanges: [false, 'Maximalt antal ændringer der udføres på adressetilknytninger', 'number', 50000]
 };
 
 runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options) {
