@@ -93,7 +93,9 @@ exports.json = {
         docOrder: ['href', 'id', 'darstatus']
       }),
       'postnumre': {
-        description: 'Postnummrene som vejstykket er beliggende i.',
+        description: `De postnumre som optræder i adresser på vejstykket. 
+        Da det er adresserne der udgør datagrundlaget vil vejstykker uden adresser ikke have nogle postnumre.
+        <a href="/dok/api/navngivenvej">Navngivenvej</a> har postnummertilknytninger, som er beregnet ud fra vejgeometrien.`,
         type: 'array',
         items: {
           $ref: '#/definitions/PostnummerRef'
