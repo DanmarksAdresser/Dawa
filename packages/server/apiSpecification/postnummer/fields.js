@@ -1,15 +1,18 @@
 "use strict";
 
-var fieldsUtil = require('../common/fieldsUtil');
-var sqlModel = require('./sqlModel');
+const fieldsUtil = require('../common/fieldsUtil');
+const sqlModel = require('./sqlModel');
 
-var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
-var normalizedField = function(fieldName) {
+const normalizedField = function(fieldName) {
   return normalizedFieldSchemas.normalizedField('postnummer', fieldName);
 };
 
-var fields = [
+const { numberToString } = require('../util');
+
+
+const fields = [
   normalizedField('nr'),
   normalizedField('navn'),
   {
@@ -45,6 +48,19 @@ var fields = [
   },
   {
     name: 'visueltcenter_y'
+  },
+  {
+    name: 'ændret'
+  },
+  {
+    name: 'geo_ændret'
+  },
+  {
+    name: 'geo_version'
+  },
+  {
+    name: 'dagi_id',
+    formatter: numberToString
   }];
 
 fieldsUtil.applySelectability(fields, sqlModel);

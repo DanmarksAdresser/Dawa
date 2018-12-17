@@ -1,34 +1,34 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var representationUtil = require('../common/representationUtil');
-var fields = require('./fields');
-var commonMappers = require('../commonMappers');
-var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-var schemaUtil = require('../schemaUtil');
+const representationUtil = require('../common/representationUtil');
+const fields = require('./fields');
+const commonMappers = require('../commonMappers');
+const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+const schemaUtil = require('../schemaUtil');
 
-var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 
-var normalizedFieldSchema = function(fieldName) {
+const normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('postnummer', fieldName);
 };
 
-var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHref = commonMappers.makeHref;
-var mapPostnummerRef = commonMappers.mapPostnummerRef;
-var mapKommuneRefArray = commonMappers.mapKommuneRefArray;
+const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
+const makeHref = commonMappers.makeHref;
+const mapPostnummerRef = commonMappers.mapPostnummerRef;
+const mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 
-var nullableType = schemaUtil.nullableType;
-var kode4String = require('../util').kode4String;
+const nullableType = schemaUtil.nullableType;
+const { numberToString, kode4String} = require('../util');
 
-var fieldsExcludedFromFlat = ['geom_json', 'stormodtageradresser'];
-var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat).concat('stormodtager');
+const fieldsExcludedFromFlat = ['geom_json', 'stormodtageradresser'];
+const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat).concat('stormodtager');
 
 
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
-var fieldsExcludedFromJson = ['geom_json'];
+const fieldsExcludedFromJson = ['geom_json'];
 exports.json = {
   schema: globalSchemaObject({
     'title': 'postnummer',
@@ -60,9 +60,26 @@ exports.json = {
       visueltcenter: {
         description: 'Det visuelle center for postnummeret. Kan f.eks. anvendes til placering af labels på et kort.',
         '$ref': '#/definitions/NullableVisueltCenter'
+      },
+      'ændret': {
+        description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
+        ' geometrien (se felterne geo_ændret og geo_version).',
+        $ref: '#/definitions/NullableDateTimeUtc'
+      },
+      'geo_ændret': {
+        description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
+        $ref: '#/definitions/NullableDateTimeUtc'
+      },
+      geo_version: {
+        description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
+        type: ['integer', 'null']
+      },
+      dagi_id: {
+        description: 'Postnummerets unikke ID i DAGI. Heltal som string.',
+        type: ['string', 'null']
       }
     },
-    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'bbox', 'visueltcenter', 'kommuner']
+    'docOrder': ['href','nr', 'navn', 'stormodtageradresser', 'bbox', 'visueltcenter', 'kommuner', 'ændret', 'geo_ændret', 'geo_version', 'dagi_id']
   }),
   fields: _.filter(_.where(fields, { selectable: true }), function(field) {
     return !_.contains(fieldsExcludedFromJson, field.name);
@@ -78,13 +95,17 @@ exports.json = {
         }) : null,
         bbox: commonMappers.mapBbox(row),
         visueltcenter: commonMappers.mapVisueltCenter(row),
-        kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : []
+        kommuner: row.kommuner ? mapKommuneRefArray(row.kommuner,baseUrl) : [],
+        ændret: row.ændret,
+        geo_ændret: row.geo_ændret,
+        geo_version: row.geo_version,
+        dagi_id: numberToString(row.dagi_id)
       };
     };
   }
 };
 
-var autocompleteFieldNames = ['nr', 'navn'];
+const autocompleteFieldNames = ['nr', 'navn'];
 exports.autocomplete = {
   schema: globalSchemaObject( {
     properties: {
@@ -116,5 +137,5 @@ const geojsonField = _.findWhere(fields, {name: 'geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
 exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
 
-var registry = require('../registry');
+const registry = require('../registry');
 registry.addMultiple('postnummer', 'representation', module.exports);

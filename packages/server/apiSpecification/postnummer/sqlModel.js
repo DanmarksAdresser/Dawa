@@ -7,11 +7,6 @@ const assembleSqlModel = require('../common/sql/sqlUtil').assembleSqlModel;
 const dbapi = require('../../dbapi');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
 
-const normalGeomQuery = "(select geom from dagi_postnumre where dagi_postnumre.nr = postnumre.nr limit 1)";
-const landpostnummerGeomQuery = "(select geom from landpostnumre where landpostnumre.nr = postnumre.nr limit 1)";
-
-
-const geomQueryFunc = params =>  params.landpostnumre ? landpostnummerGeomQuery : normalGeomQuery;
 const columns = Object.assign({
   kommunekode: {
     select: null,
@@ -38,7 +33,7 @@ const columns = Object.assign({
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
       const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
-      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias,geomQueryFunc(params));
+      return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'geom');
     }
   },
   kommuner: {
@@ -55,19 +50,15 @@ const columns = Object.assign({
 }, postgisSqlUtil.bboxVisualCenterColumns());
 
 const baseQuery = function (fieldNames, params) {
+  const dagiPostnummerTable = params.landpostnumre ? 'landpostnumre' : 'dagi_postnumre';
   const query = {
     select: [],
-    from: ['postnumre'],
+    from: [`postnumre natural left join (select nr, ændret, geo_ændret, geo_version, visueltcenter, bbox, geom from ${dagiPostnummerTable}) dp
+    natural left join (select nr, dagi_id from dagi_postnumre) dp2`],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
   };
-  if(params.landpostnumre) {
-    query.from.push('LEFT JOIN LATERAL (select bbox, visueltcenter from landpostnumre where postnumre.nr = landpostnumre.nr) g ON true');
-  }
-  else{
-    query.from.push('LEFT JOIN LATERAL (select bbox, visueltcenter from dagi_postnumre where postnumre.nr = dagi_postnumre.nr) g ON true');
-  }
   return query;
 };
 
@@ -75,8 +66,8 @@ const baseQuery = function (fieldNames, params) {
 const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.postnummerStormodtagerFilter(),
-  sqlParameterImpl.geomWithin(geomQueryFunc),
-  sqlParameterImpl.reverseGeocodingWithin(geomQueryFunc),
+  sqlParameterImpl.geomWithin('geom'),
+  sqlParameterImpl.reverseGeocodingWithin('geom'),
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key, true)
