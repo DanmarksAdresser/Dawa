@@ -197,6 +197,16 @@ from (select distinct k.kode, k.navn
 };
 
 const baseQueries = {
+  kommune: () => {
+    return {
+      select: [],
+      from: [`kommuner t 
+      natural left join (select r.kode as regionskode, r.navn as regionsnavn from regioner r) r`],
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    }
+  },
   afstemningsområde: () => {
     return {
       select: [],

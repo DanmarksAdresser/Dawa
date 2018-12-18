@@ -7,7 +7,7 @@ var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const {normalizedSchemaField} = require('../replikering/normalizedFieldSchemas');
 const commonMappers = require('../commonMappers');
 const commonSchemaDefinitions = require('../commonSchemaDefinitions');
-const {schemaObject} = require('../schemaUtil');
+const {schemaObject, nullable} = require('../schemaUtil');
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 const {
   makeHrefFromPath,
@@ -85,6 +85,39 @@ const mapMetaFields = row => {
     visueltcenter: commonMappers.mapVisueltCenter(row)
   };
 }
+
+const kommuneJsonRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.kommune, ['geom_json']);
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('kommune', fieldName);
+  };
+  const mapper = baseUrl => row => {
+    const result = Object.assign(mapMetaFields(row), {
+      href: makeHref(baseUrl, 'kommune', [row.kode]),
+      dagi_id: numberToString(row.dagi_id),
+      kode: kode4String(row.kode),
+      navn: row.navn,
+      udenforkommuneinddeling: row.udenforkommuneinddeling,
+      regionskode: kode4String(row.regionskode),
+      region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
+    });
+    return result;
+  };
+  const schema = globalSchemaObject({
+    title: 'Kommune',
+    properties: Object.assign({
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Kommunens URL'}),
+      kode: normalizedFieldSchema('kode'),
+      navn: normalizedFieldSchema('navn'),
+      regionskode: normalizedFieldSchema('regionskode'),
+      udenforkommuneinddeling: normalizedFieldSchema('udenforkommuneinddeling'),
+      region: nullable(Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som kommunen ligger i.'})),
+    }, commonGeoProps),
+    docOrder: ['dagi_id', 'href', 'kode', 'navn', 'udenforkommuneinddeling', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'region', 'regionskode']
+  });
+  return {fields, mapper, schema};
+})();
 
 const opstillingskredsJsonRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.opstillingskreds, ['geom_json']);
@@ -339,6 +372,7 @@ const supplerendebynavnRepresentation = (() => {
 
 
 const jsonRepresentations = {
+  kommune: kommuneJsonRepresentation,
   opstillingskreds: opstillingskredsJsonRepresentation,
   afstemningsområde: afstemningsområdeJsonRepresentation,
   storkreds: storkredsJsonRepresentation,

@@ -6,6 +6,29 @@ const sqlModels = require('./sqlModels');
 const { kode4String, numberToString } = require('../util');
 
 const additionalFieldsMap = {
+  kommune: [
+    {
+      name: 'dagi_id',
+      formatter: numberToString
+    },
+    {
+      name: 'kode',
+      formatter: kode4String
+    },
+    {
+      name: 'navn'
+    },
+    {
+      name: 'regionskode',
+      formatter: kode4String
+    },
+    {
+      name: 'udenforkommuneinddeling'
+    },
+    {
+      name: 'regionsnavn'
+    }
+  ],
   afstemningsområde: [
     {
       name: 'dagi_id',

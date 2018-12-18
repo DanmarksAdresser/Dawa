@@ -13,6 +13,41 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
+    kommune: {
+      json: {
+        nestet: [{
+          params: {
+            kode: 99
+          },
+          value: {
+            "ændret": "2018-12-11T15:17:45.067Z",
+            "geo_version": 1,
+            "geo_ændret": "2018-12-11T15:17:45.067Z",
+            "bbox": [
+              12.5711324,
+              55.59055443,
+              12.57129891,
+              55.59064873
+            ],
+            "visueltcenter": [
+              12.57121565,
+              55.59060158
+            ],
+            "href": "http://dawa/kommuner/99",
+            "dagi_id": "100101",
+            "kode": "0099",
+            "navn": "Kommune test",
+            "udenforkommuneinddeling": false,
+            "regionskode": "1084",
+            "region": {
+              "href": "http://dawa/regioner/1084",
+              "kode": "1084",
+              "navn": "Region test"
+            }
+          }
+        }]
+      }
+    },
     menighedsrådsafstemningsområde: {
       json: {
         nestet: [{
@@ -1532,6 +1567,11 @@ describe('Stable API', () => {
   ;
 
   const propertiesToIgnoreMap = {
+    kommune: {
+      json: {
+        nestet: {'geo_ændret': true, 'ændret': true}
+      }
+    },
     jordstykke: {
       json: {
         flad: {'geo_ændret': true, 'ændret': true},
