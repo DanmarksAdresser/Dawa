@@ -23,8 +23,14 @@ block main
       PRE <a href="/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson">#{url}/adresser?postnr=8830&vejnavn=Bakkevej&format=geojson</a>
     p Vejstykker og adgangsadresser supporterer endvidere GeoJSON med højdeangivelse (z-koordinatet). Hvis man ønsker dette anvendes format=geojsonz:
       PRE <a href="/vejstykker?navn=Borgergade&format=geojsonz">#{url}/vejstykker?navn=Borgergade&format=geojsonz</a>
-    p Shapefile-formatet er meget populært i GIS-kredse. Vi ville gerne have supporteret det, men DAWA's streaming af nær realtids opdaterede data passer ikke godt sammen med Shapefile-formatet. Du kan selv generer Shapefiler vha. DAWA's GeoJSON data og dit GIS-program eller ogr2ogr programmet. Du kan se eksempler på hvordan i <a href='http://digitaliser.dk/news/2558547'>AWS-gruppen på Digitaliser.dk</a>.
-
+    h3.anchor-header#fladognestede Svar-strukturer
+    p DAWA giver mulighed for at vælge om der ønskes en flad eller en nestet svarstruktur. Default er nestet for JSON og flad for GeoJSON. Struktur parameteren anvendes til at angive valget.
+    p For at hente JSON i en flad struktur anvendes <code>struktur=flad</code>:
+      pre <a href="/kommuner/0101?struktur=flad">#{url}/kommuner/0101?struktur=flad</a>
+    p For at hente GeoJSON med en nestet properties struktur anvendes <code>struktur=nestet</code>:
+      pre <a href="/kommuner/0101?struktur=nestet&format=geojson">#{url}/kommuner/0101?struktur=nestet&format=geojson</a>
+    p Nogle ressourcer understøtter også en særlig mini-struktur, som indeholder de vigtigste felter. Det gælder eksempelvis adgangsadresser:
+      pre <a href="/adgangsadresser?struktur=mini&per_side=10">#{url}/adgangsadresser?struktur=mini&per_side=10</a>
     h3.anchor-header#tidsformat Tidsformat
     p Tidspunkter returneres i to forskellige formater, som begge er specificeret i <a href='http://tools.ietf.org/html/rfc3339'>Date and Time on the Internet: Timestamps</a>. Det drejer sig om <a href='http://tools.ietf.org/html/rfc3339#page-4'>Coordinated Universal Time (UTC)</a> og <a href='http://tools.ietf.org/html/rfc3339#page-5'>Unqualified Local Time</a>. Vi havde foretrukket ét format, nemlig UTC, men da det ikke er alle vore datakilder, som kan leverer dette, har vi været nød til anvende to. UTC har formen: 2000-02-05T12:00:00.000Z. Unqualified Local Time har formen: 2009-02-11T09:56:50.000.
 

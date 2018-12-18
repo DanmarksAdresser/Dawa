@@ -2,7 +2,7 @@
 
 const expect = require('chai').expect;
 
-const notificationsImpl = require('../../dar10/notificationsImpl');
+const notificationsImpl = require('../src/notificationsImpl');
 const q = require('q');
 const request = require('request-promise');
 const WebSocket = require('ws');

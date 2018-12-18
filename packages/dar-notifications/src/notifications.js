@@ -1,6 +1,6 @@
 "use strict";
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
+const cliParameterParsing = require('@dawadk/common/src/cli/cli-parameter-parsing');
 const _ = require('underscore');
 
 const logger = require('@dawadk/common/src/logger').forCategory("notifications");
