@@ -3,6 +3,7 @@
 const normalizeParameters = require('../../common/parametersUtil').normalizeParameters;
 const { keyParameters } = require('../commonParameters');
 const commonSchemaDefinitions = require('../../commonSchemaDefinitions');
+const moment = require('moment');
 exports.keyParameters = keyParameters;
 // sequence number filtering is supported for all events
 exports.sekvensnummer = normalizeParameters([
@@ -21,11 +22,23 @@ exports.tidspunkt = normalizeParameters([
   {
     name: 'tidspunktfra',
     type: 'string',
-    schema: commonSchemaDefinitions.DateTimeParameter
+    schema: commonSchemaDefinitions.DateTimeParameter,
+    validateFun: param => {
+      const valid = moment(param).isValid();
+      if(!valid) {
+        throw `Ugyldigt tidspunkt: ${param} for parameter tidspunktfra`;
+      }
+    }
   }, {
     name: 'tidspunkttil',
     type: 'string',
-    schema: commonSchemaDefinitions.DateTimeParameter
+    schema: commonSchemaDefinitions.DateTimeParameter,
+    validateFun: param => {
+      const valid = moment(param).isValid();
+      if(!valid) {
+        throw `Ugyldigt tidspunkt: ${param} for parameter tidspunkttil`;
+      }
+    }
   }
 ]);
 
