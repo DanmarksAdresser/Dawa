@@ -10,6 +10,7 @@ const generateConfig = require('./generate-config');
 const {getValidatedConfig, validateAgainstDatabase} = require('./validate-config');
 const {generateDDLStatements} = require('./database-schema-util');
 const {pgMetadata} = require('./pg-metadata');
+const pgConnectionString = require("pg-connection-string");
 const log = require('./log');
 const fs = require('fs');
 const path = require('path');
@@ -125,10 +126,22 @@ const runCommand = (command, options) => go(function* () {
       throw err;
     }
     const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, 200);
-    yield databasePools.create("pool", {
-      connString: options['database'],
-      pooled: false
-    });
+    const {host, port, user, database, password}  = pgConnectionString(options.database);
+    log('info', `Connecting to database using host=${host ? host : ''}, port=${port ? port : ''}, database=${database}, user=${user}, password=${password ? '<hidden>' : '(none)'}`);
+
+    try {
+      const { setupProcess} = yield databasePools.create("pool", {
+        connString: options['database'],
+        pooled: false,
+        noRetry: true
+      });
+
+      yield setupProcess;
+    }
+    catch(e) {
+      log('error', `Failed to connect to database: ${e.message}`);
+      process.exit(1);
+    }
 
     const pool = databasePools.get("pool");
     const pgModel =
