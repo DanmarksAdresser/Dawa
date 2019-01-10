@@ -10,12 +10,12 @@ const {go} = require('ts-csp');
 const {withImportTransaction} = require('../../importUtil/transaction-util');
 const tableDiffNg = require('@dawadk/import-util/src/table-diff');
 const schemaModel = require('../../psql/tableModel');
-const { materializeDawa } = require('../../importUtil/materialize-dawa');
 
 const registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
-const Husnr = require('@dawadk/common/src/postgres/types').Husnr;
+const dagiAssociationsProcessor = require('../../components/processors/dagi-associations');
+const {execute} = require('../../components/processors/processor-util');
 const testdb = require('@dawadk/test-util/src/testdb');
 const temaModels = require('../../dagiImport/temaModels');
 const {importSingleTema} = require('../../dagiImport/importDagiImpl');
@@ -30,46 +30,14 @@ const adgangsadresser = [
     "status": 1,
     "kommunekode": 1,
     "vejkode": 1,
-    "husnr": new Husnr(1, null),
-    "supplerendebynavn": null,
-    "postnr": null,
-    "oprettet": "2013-05-22T14:56:22.237",
-    "ændret": "2015-05-22T15:50:49.437",
-    "ikrafttrædelsesdato": "2015-05-22T00:00:00.000",
-    "ejerlavkode": null,
-    "matrikelnr": null,
-    "esrejendomsnr": null,
-    "adgangspunktid": "00000000-0000-0000-0000-000000000000",
-    "etrs89koordinat_øst": 540000.00,
-    "etrs89koordinat_nord": 6200000.00,
-    "nøjagtighed": "B",
-    "kilde": 4,
-    "tekniskstandard": "TD",
-    "tekstretning": 100.00,
-    "adressepunktændringsdato": "2015-05-22T23:59:00.000"
+    "geom": "SRID=25832;POINT(540000 6200000)"
   },
   {
     "id": "038edf0e-001b-4d9d-a1c7-b71cb354680f",
     "status": 1,
     "kommunekode": 1,
     "vejkode": 1,
-    "husnr": new Husnr(1, null),
-    "supplerendebynavn": null,
-    "postnr": null,
-    "oprettet": "2013-05-22T14:56:22.237",
-    "ændret": "2015-05-22T15:50:49.437",
-    "ikrafttrædelsesdato": "2015-05-22T00:00:00.000",
-    "ejerlavkode": null,
-    "matrikelnr": null,
-    "esrejendomsnr": null,
-    "adgangspunktid": "00000000-0000-0000-0000-000000000000",
-    "etrs89koordinat_øst": 560000.00,
-    "etrs89koordinat_nord": 6200000.00,
-    "nøjagtighed": "B",
-    "kilde": 4,
-    "tekniskstandard": "TD",
-    "tekstretning": 100.00,
-    "adressepunktændringsdato": "2015-05-22T23:59:00.000"
+    "geom": "SRID=25832;POINT(560000 6200000)"
   }
 ];
 
@@ -104,14 +72,13 @@ const expectedKeys = {
   retskreds: [['0099'], ['0100']]
 };
 
-const loadAdresser = (client, adgangsadresser) => go(function* () {
+const loadAdresser = (client, adgangsadresser_mats) => go(function* () {
   yield withImportTransaction(client, 'test', txid => go(function* () {
-    for(let adgangsadresse of adgangsadresser) {
-      const sqlObject = helpers.toSqlModel('adgangsadresse', adgangsadresse);
-      yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser, sqlObject);
+    for(let adgangsadresse of adgangsadresser_mats) {
+      yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser_mat, adgangsadresse);
     }
-    yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser);
-    yield materializeDawa(client, txid);
+    yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser_mat);
+    yield execute(client, txid, [dagiAssociationsProcessor]);
   }));
 });
 
@@ -155,7 +122,6 @@ describe('Replikering af tilknytninger', function () {
         yield withImportTransaction(client, 'test', txid =>
           importSingleTema(client, txid, temaModel,
             temaData, 1000000));
-
         yield loadAdresser(client, adgangsadresser);
 
         let jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});

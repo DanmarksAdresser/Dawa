@@ -1,53 +1,94 @@
 DROP VIEW IF EXISTS adgangsadresser_mat_view CASCADE;
+
 CREATE VIEW adgangsadresser_mat_view AS
   SELECT
-    A.id ,
-    A.kommunekode,
-    A.vejkode,
-    A.husnr,
-    A.supplerendebynavn,
-    A.supplerendebynavn_dagi_id,
-    A.postnr,
+    hn.id,
+    k.kommunekode,
+    nvk.vejkode,
+    hn.husnummertekst                AS husnr,
+    sb.navn                           AS supplerendebynavn,
+    p.postnr,
+    dar1_status_til_dawa_status(hn.status)
+                                     AS objekttype,
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
+     FROM dar1_husnummer_history hn2
+     WHERE hn.id = hn2.id)
+                                     AS oprettet,
+    GREATEST((SELECT max(lower(ap2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
+              FROM dar1_adressepunkt_history ap2
+              WHERE ap2.id = hn.adgangspunkt_id AND lower(ap2.virkning) <= (SELECT virkning
+                                                                            FROM dar1_meta)),
+             (SELECT max(lower(hn2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
+              FROM dar1_husnummer_history hn2
+              WHERE hn.id = hn2.id AND lower(hn2.virkning) <= (SELECT virkning
+                                                               FROM dar1_meta)))
+                                     AS aendret,
+    hn.adgangspunkt_id               AS adgangspunktid,
+    hn.vejpunkt_id,
+    ST_X(ap.position)                AS etrs89oest,
+    ST_Y(ap.position)                AS etrs89nord,
+    ap.oprindelse_nøjagtighedsklasse AS noejagtighed,
+    CASE ap.oprindelse_kilde
+    WHEN 'Grundkort'
+      THEN 1
+    WHEN 'Matrikelkort'
+      THEN 2
+    WHEN 'Ekstern'
+      THEN 4
+    WHEN 'Adressemyn'
+      THEN 5 END                     AS adgangspunktkilde,
+    ap.oprindelse_tekniskstandard    AS tekniskstandard,
+    200 - (atan2(ST_Y(hn.husnummerretning), ST_X(hn.husnummerretning)) *
+           400 / (2 * pi()))         AS tekstretning,
+    ap.oprindelse_registrering AT TIME ZONE
+    'Europe/Copenhagen'              AS adressepunktaendringsdato,
+    nv.id                            AS navngivenvej_id,
+    nvk.id                           AS navngivenvejkommunedel_id,
+
+    sb.id                             AS supplerendebynavn_id,
+    k.id                             AS darkommuneinddeling_id,
+    ap.id                            AS adressepunkt_id,
+    p.id                             AS postnummer_id,
+    p.navn AS postnrnavn,
+    nv.vejnavn,
+    nv.vejadresseringsnavn as adresseringsvejnavn,
+    S.nr AS stormodtagerpostnr,
+    S.navn AS stormodtagerpostnrnavn,
+    sb.supplerendebynavn1             AS supplerendebynavn_dagi_id,
+    ap.position                      AS geom,
+    vp.position AS vejpunkt_geom,
+    vp.oprindelse_kilde AS vejpunkt_kilde,
+    vp.oprindelse_nøjagtighedsklasse AS vejpunkt_noejagtighedsklasse,
+    vp.oprindelse_tekniskstandard AS vejpunkt_tekniskstandard,
     A.ejerlavkode,
     A.matrikelnr,
     A.esrejendomsnr,
-    A.objekttype,
-    A.oprettet,
     A.ikraftfra,
-    A.aendret,
-    A.adgangspunktid,
-    A.etrs89oest,
-    A.etrs89nord,
-    A.noejagtighed,
-    A.adgangspunktkilde,
-    A.husnummerkilde,
     A.placering,
-    A.tekniskstandard,
-    A.tekstretning,
-    A.adressepunktaendringsdato,
-    A.esdhReference,
-    A.journalnummer,
+    A.husnummerkilde,
     A.hoejde,
-    A.navngivenvej_id,
-    A.navngivenvejkommunedel_id,
-    A.supplerendebynavn_id,
-    A.darkommuneinddeling_id,
-    A.adressepunkt_id,
-    A.postnummer_id,
-    P.navn AS postnrnavn,
-    V.vejnavn,
-    V.adresseringsnavn as adresseringsvejnavn ,
-    E.navn as ejerlavnavn,
-    S.nr AS stormodtagerpostnr,
-    S.navn AS stormodtagerpostnrnavn,
-    vp.id AS vejpunkt_id,
-    vp.kilde AS vejpunkt_kilde,
-    vp.tekniskstandard AS vejpunkt_tekniskstandard,
-    vp.noejagtighedsklasse AS vejpunkt_noejagtighedsklasse,
-    vp.geom AS vejpunkt_geom
-  FROM adgangsadresser A
+    E.navn as ejerlavnavn
+
+  FROM dar1_husnummer_current hn
+    JOIN dar1_darkommuneinddeling_current k
+      ON hn.darkommune_id = k.id
+    JOIN dar1_navngivenvej_current nv
+      ON hn.navngivenvej_id = nv.id
+    JOIN dar1_navngivenvejkommunedel_current nvk
+      ON nv.id = nvk.navngivenvej_id AND
+         k.kommunekode = nvk.kommune AND nvk.status IN (2, 3)
+    JOIN dar1_postnummer_current p
+      ON hn.postnummer_id = p.id
+    LEFT JOIN dar1_supplerendebynavn_current sb
+      ON hn.supplerendebynavn_id = sb.id
+    LEFT JOIN dar1_adressepunkt_current ap
+      ON hn.adgangspunkt_id = ap.id
+    LEFT JOIN dar1_darsogneinddeling_current ds ON hn.darsogneinddeling_id = ds.id
+    LEFT JOIN dar1_darafstemningsområde_current ao ON hn.darafstemningsområde_id = ao.id
+    LEFT JOIN dar1_darmenighedsrådsafstemningsområde_current mr
+      ON hn.darmenighedsrådsafstemningsområde_id = mr.id
+    LEFT JOIN dar1_adressepunkt_current vp ON hn.vejpunkt_id = vp.id
+    LEFT JOIN stormodtagere AS S ON hn.id = S.adgangsadresseid
+    LEFT JOIN adgangsadresser A ON hn.id = A.id
     LEFT JOIN Ejerlav E ON A.ejerlavkode = E.kode
-    LEFT JOIN vejstykker        AS V   ON (A.kommunekode = V.kommunekode AND A.vejkode = V.kode)
-    LEFT JOIN Postnumre       AS P   ON (A.postnr = P.nr)
-  LEFT JOIN stormodtagere AS S ON A.id = S.adgangsadresseid
-LEFT JOIN vejpunkter vp ON vp.id = A.vejpunkt_id;
+  WHERE hn.status IN (2, 3) AND hn.husnummertekst IS NOT NULL;

@@ -6,7 +6,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
     k.kommunekode,
     nvk.vejkode,
     hn.husnummertekst                AS husnr,
-    s.navn                           AS supplerendebynavn,
+    sb.navn                           AS supplerendebynavn,
     p.postnr,
     dar1_status_til_dawa_status(hn.status)
                                      AS objekttype,
@@ -44,11 +44,11 @@ CREATE VIEW dar1_adgangsadresser_view AS
     'Europe/Copenhagen'              AS adressepunktaendringsdato,
     nv.id                            AS navngivenvej_id,
     nvk.id                           AS navngivenvejkommunedel_id,
-    s.id                             AS supplerendebynavn_id,
+    sb.id                             AS supplerendebynavn_id,
     k.id                             AS darkommuneinddeling_id,
     ap.id                            AS adressepunkt_id,
     p.id                             AS postnummer_id,
-    s.supplerendebynavn1             AS supplerendebynavn_dagi_id,
+    sb.supplerendebynavn1             AS supplerendebynavn_dagi_id,
     ap.position                      AS geom
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k
@@ -58,8 +58,8 @@ CREATE VIEW dar1_adgangsadresser_view AS
     JOIN dar1_navngivenvejkommunedel_current nvk
       ON nv.id = nvk.navngivenvej_id AND
          k.kommunekode = nvk.kommune AND nvk.status IN (2, 3)
-    LEFT JOIN dar1_supplerendebynavn_current s
-      ON hn.supplerendebynavn_id = s.id
+    LEFT JOIN dar1_supplerendebynavn_current sb
+      ON hn.supplerendebynavn_id = sb.id
     JOIN dar1_postnummer_current p
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_adressepunkt_current ap

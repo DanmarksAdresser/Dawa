@@ -8,6 +8,7 @@ CREATE VIEW dar1_vejpunkter_view AS
     ap.oprindelse_tekniskstandard as tekniskstandard,
     ap.position as geom
   FROM dar1_adressepunkt_current ap
-    JOIN adgangsadresser hn ON ap.id = hn.vejpunkt_id;
+    JOIN dar1_husnummer_current hn ON ap.id = hn.vejpunkt_id
+    WHERE  hn.status IN (2, 3);
 
 DROP VIEW IF EXISTS dar1_vejpunkter_dirty_view CASCADE;

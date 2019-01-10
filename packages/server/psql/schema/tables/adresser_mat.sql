@@ -9,8 +9,6 @@ CREATE TABLE adresser_mat(
   etage VARCHAR(3),
   doer VARCHAR(4),
   kilde smallint,
-  esdhReference text,
-  journalnummer text,
   a_objekttype smallint,
   a_oprettet timestamp,
   a_aendret timestamp,

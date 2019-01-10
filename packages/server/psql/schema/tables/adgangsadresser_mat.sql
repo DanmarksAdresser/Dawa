@@ -24,8 +24,6 @@ CREATE TABLE adgangsadresser_mat(
   tekniskstandard CHAR(2) NULL,
   tekstretning numeric(5,2) NULL,
   adressepunktaendringsdato timestamp NULL,
-  esdhReference text,
-  journalnummer text,
   geom  geometry(point, 25832),
   tsv tsvector,
   hoejde double precision NULL,

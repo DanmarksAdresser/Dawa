@@ -6,8 +6,9 @@ const { go } = require('ts-csp');
 const _ = require('underscore');
 
 const darApiClient = require('../../dar10/darApiClient');
-const importDarImpl = require('../../dar10/importDarImpl');
-const importFromApiImpl = require('../../dar10/importFromApiImpl');
+const { internal: {getRecords, splitInTransactions, fetchAndImport, getCurrentEventIds}, importChangeset}  =
+  require('../../dar10/importFromApiImpl');
+const { setInitialMeta, setVirkningTime } = require('../../dar10/import-dar-util');
 const testdb = require('@dawadk/test-util/src/testdb');
 const { withImportTransaction } = require('../../importUtil/transaction-util');
 const moment = require('moment');
@@ -43,7 +44,7 @@ describe('Import from DAR 1.0 API', () => {
 
   testdb.withTransactionEach('empty', (clientFn) => {
     it('Can fetch current event ids from an empty database', q.async(function*() {
-      const eventIds = yield importFromApiImpl.internal.getCurrentEventIds(clientFn());
+      const eventIds = yield getCurrentEventIds(clientFn());
       expect(eventIds).to.deep.equal({ Adresse: 0,
         Adressepunkt: 0,
         'DARAfstemningsområde': 0,
@@ -90,15 +91,13 @@ describe('Import from DAR 1.0 API', () => {
         }]
       };
       const client = clientFn();
-      yield importDarImpl.internal.setInitialMeta(client);
-      yield importDarImpl.withDar1Transaction(client, 'api', () => go(function*() {
-        yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
-          yield importDarImpl.importChangeset(client, txid, JSON.parse(JSON.stringify(changeset)));
-        }));
+      yield setInitialMeta(client);
+      yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
+        yield importChangeset(client, txid, JSON.parse(JSON.stringify(changeset)));
       }));
 
 
-      const eventIds = yield importFromApiImpl.internal.getCurrentEventIds(clientFn());
+      const eventIds = yield getCurrentEventIds(clientFn());
 
       expect(eventIds.Postnummer).to.equal(3);
     }));
@@ -115,7 +114,7 @@ describe('Import from DAR 1.0 API', () => {
           registreringfra: "2016-04-22T00:00:00Z"
         }]
       };
-      const transactions = importFromApiImpl.internal.splitInTransactions(changeset);
+      const transactions = splitInTransactions(changeset);
       expect(transactions).to.deep.equal([{
         Postnummer: [changeset.Postnummer[0]]
       }, {
@@ -128,8 +127,52 @@ describe('Import from DAR 1.0 API', () => {
       const fakeData = {Postnummer: [{eventid: 1}, {eventid: 2}, {eventid: 3},
       {eventid: 4}, { eventid: 5}]};
       const darClient = fakeDarClient(fakeData, 2);
-      const result = yield importFromApiImpl.internal.getRecords(darClient, 1, 5, 'Postnummer');
+      const result = yield getRecords(darClient, 1, 5, 'Postnummer');
       expect(result).to.deep.equal(fakeData.Postnummer);
+    }));
+
+    it('Will advance virkning time if there is no transactions', () => go(function*() {
+      const fakeData = {
+        Postnummer: [{
+          "eventid": 1,
+          "rowkey": 69,
+          "id": "873e4c91-c2d3-4674-a491-2f0e30bac7eb",
+          "registreringfra": "2016-04-21T00:00:00Z",
+          "registreringtil": null,
+          "virkningfra": "2017-04-21T00:00:00Z",
+          "virkningtil": null,
+          "status": "3",
+          "navn": "Viby Sjælland",
+          "postnr": "4130",
+          "postnummerinddeling": "250767"
+        }]
+      };
+
+      const darClient = fakeDarClient(fakeData, 10);
+      const client = clientFn();
+      yield setVirkningTime(client,"2016-04-21T00:00:00Z");
+      yield fetchAndImport(
+        client,
+        darClient,
+        {
+          Postnummer: 5
+        },
+        "2016-04-21T00:00:00Z",
+        50, true);
+      const initialHistoryRecords = (yield client.queryp('select * from dar1_postnummer_history')).rows;
+      expect(initialHistoryRecords).to.have.length(1);
+      const initialCurrentRecords = (yield client.queryp('select * from dar1_postnummer_current')).rows;
+      expect(initialCurrentRecords).to.have.length(0);
+      yield fetchAndImport(
+        client,
+        darClient,
+        {
+          Postnummer: 5
+        },
+        "2017-05-21T00:00:00Z",
+        50, true);
+      const updatedCurrentRecords = (yield client.queryp('select * from dar1_postnummer_current')).rows;
+      expect(updatedCurrentRecords).to.have.length(1);
     }));
 
     it('Will fetch and import rows in multiple  transactions', q.async(function*() {
@@ -175,8 +218,8 @@ describe('Import from DAR 1.0 API', () => {
       };
       const darClient = fakeDarClient(fakeData, 10);
       const client = clientFn();
-      yield importDarImpl.internal.setInitialMeta(client);
-      yield importFromApiImpl.internal.fetchAndImport(
+      yield setInitialMeta(client);
+      yield fetchAndImport(
         client,
         darClient,
         {

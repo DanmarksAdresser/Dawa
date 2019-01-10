@@ -5,18 +5,16 @@ const {go} = require('ts-csp');
 const _ = require('underscore');
 
 const {runImporter} = require('@dawadk/common/src/cli/run-importer');
-const importDarImpl = require('./importDarImpl');
 const proddb = require('../psql/proddb');
 const { withImportTransaction } = require('../importUtil/transaction-util');
 const {makeAllChangesNonPublic} = require('@dawadk/import-util/src/materialize');
 
-
+const { importDownload, importDownloadIncrementally } = require('./importDarImpl');
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   dataDir: [false, 'Folder med NDJSON-filer', 'string'],
-  skipDawa: [false, 'Skip DAWA updates', 'boolean', false],
-  clear: [false, 'Ryd gamle DAR 1.0 data', 'boolean', false],
-  noEvents: [false, 'Undlad at danne hændelser for ændringer','boolean', false]
+  noEvents: [false, 'Undlad at danne hændelser for ændringer','boolean', false],
+  refreshDerived: [false, 'Genberegn afledte tabeller', 'boolean', false]
 };
 
 runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, options) {
@@ -27,12 +25,11 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
 
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
-      if (options.clear) {
-        yield importDarImpl.clearDar(client);
-        yield importDarImpl.importInitial(client, txid, options.dataDir, options.skipDawa);
+      if(options.refreshDerived) {
+        yield importDownload(client, txid, options.dataDir);
       }
       else {
-        yield importDarImpl.importIncremental(client, txid, options.dataDir, options.skipDawa);
+        yield importDownloadIncrementally(client, txid, options.dataDir);
       }
       if(options.noEvents) {
         yield makeAllChangesNonPublic(client, txid);

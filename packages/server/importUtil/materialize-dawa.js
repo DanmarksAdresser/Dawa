@@ -4,7 +4,6 @@ const schemaModel = require('../psql/tableModel');
 const temaModels = require('../dagiImport/temaModels');
 const dar10TableModels = require('../dar10/dar10TableModels');
 const replikeringDataModel = require('../apiSpecification/replikering/datamodel');
-
 const {
   materialize,
   recomputeMaterialization,
@@ -14,7 +13,9 @@ const {
 const { assignSequenceNumbersToDependentTables } = require('@dawadk/import-util/src/table-diff');
 
 const materializeDawa = (client, txid) => go(function* () {
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adgangsadresser);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adgangsadresser_mat);
+  yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.enhedsadresser);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.adresser_mat);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.jordstykker_adgadr);
   yield materialize(client, txid, schemaModel.tables, schemaModel.materializations.stedtilknytninger);

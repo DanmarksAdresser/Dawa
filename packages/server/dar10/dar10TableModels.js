@@ -1,7 +1,6 @@
 "use strict";
 
 const assert = require('assert');
-const { go } = require('ts-csp');
 
 const _ = require('underscore');
 
@@ -101,9 +100,9 @@ exports.rawTableModels = entityNames.reduce((memo, entityName) => {
     };
   });
   const allColumns = [...standardColumns, ...nonStandardColumns];
-  if(distinctClauses[entityName]) {
-    for(let column of allColumns) {
-      if(distinctClauses[entityName][column.name]) {
+  if (distinctClauses[entityName]) {
+    for (let column of allColumns) {
+      if (distinctClauses[entityName][column.name]) {
         column.distinctClause = distinctClauses[entityName][column.name];
       }
     }
@@ -163,7 +162,8 @@ exports.currentTableMaterializations = entityNames.reduce((memo, entityName) => 
 const adgangsadresserMaterialization = {
   table: 'adgangsadresser',
   view: 'dar1_adgangsadresser_view',
-  excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'hoejde', 'ikraftfra', 'placering', 'husnummerkilde', 'esdhreference', 'journalnummer'],
+  excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'hoejde', 'ikraftfra', 'placering',
+    'husnummerkilde', 'esdhreference', 'journalnummer'],
   dependents: [
     {
       table: 'dar1_Husnummer_current',
@@ -244,12 +244,13 @@ const navngivenvejPostnummerMaterialization = {
 const navngivenvejkommunedelPostnummerMaterialization = {
   table: 'navngivenvejkommunedel_postnr_mat',
   view: 'navngivenvejkommunedel_postnr_mat_view',
-  computeDirty: (client, txid) => go(function*() {
-    yield client.query(`INSERT INTO navngivenvejkommunedel_postnr_mat_dirty(navngivenvejkommunedel_id, postnummer_id)
-    (SELECT navngivenvejkommunedel_id, postnummer_id FROM adgangsadresser_changes where txid = ${txid}
-      UNION SELECT nvp.navngivenvejkommunedel_id, nvp.postnummer_id
-       FROM navngivenvejkommunedel_postnr_mat nvp JOIN adgangsadresser_changes a ON a.txid = ${txid} AND nvp.adgangsadresseid = a.id)`);
-  })
+  dependents: [{
+    table: 'dar1_Husnummer_current',
+    columns: ['adgangsadresseid']
+  }, {
+    table: 'dar1_NavngivenVejKommunedel_current',
+    columns: ['navngivenvejkommunedel_id']
+  }]
 };
 
 const vejstykkePostnummerMaterialization = {

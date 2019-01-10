@@ -11,8 +11,6 @@ CREATE VIEW adresser_mat_view AS
     e.etage,
     e.doer,
     e.kilde,
-    e.esdhReference,
-    e.journalnummer,
     a.objekttype AS a_objekttype,
     a.oprettet   AS a_oprettet,
     a.aendret    AS a_aendret,

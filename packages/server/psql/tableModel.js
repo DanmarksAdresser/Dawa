@@ -409,12 +409,14 @@ const vejstykkerpostnumremat = {
 
 const postnrTsVector = (nr, navn) => `to_tsvector('adresser', coalesce(to_char(${nr}, '0000'), '') || ' ' || coalesce(${navn}, ''))`;
 
+const adgangansadresserMatFieldsNotCopiedFromAdgangsadresser = ['esdhreference', 'journalnummer'];
+
 const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
   `(${postnrTsVector(nr, navn)}::text || ' ' || ${postnrTsVector(stormodtagernr, stormodtagernavn)}::text)::tsvector`
 const adgangsadresser_mat = {
   table: 'adgangsadresser_mat',
   primaryKey: ['id'],
-  columns: [...adgangsadresser.columns,
+  columns: [...adgangsadresser.columns.filter(col => !adgangansadresserMatFieldsNotCopiedFromAdgangsadresser.includes(col.name)),
     {name: 'ejerlavnavn'},
     {
       name: 'tsv',
@@ -441,13 +443,14 @@ const adgangsadresser_mat = {
     {name: 'vejpunkt_geom'}]
 };
 
-const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'esdhreference', 'journalnummer'];
+const adresseMatFieldsNotCopiedFromEnhedsadresser = ['esdhreference', 'journalnummer'];
+const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra'];
 
 const adresser_mat = {
   table: 'adresser_mat',
   primaryKey: ['id'],
   columns: [
-    ...enhedsadresser.columns,
+    ...enhedsadresser.columns.filter(col => !adresseMatFieldsNotCopiedFromEnhedsadresser.includes(col.name)),
     ...adgangsadresser_mat.columns.filter(col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(col.name)),
     {name: 'a_objekttype'},
     {name: 'a_oprettet'},
@@ -711,25 +714,46 @@ exports.materializations = Object.assign({
   adgangsadresser_mat: {
     table: 'adgangsadresser_mat',
     view: 'adgangsadresser_mat_view',
-    dependents: [{
-      table: 'adgangsadresser',
-      columns: ['id']
-    }, {
-      table: 'ejerlav',
-      columns: ['ejerlavkode']
-    }, {
-      table: 'postnumre',
-      columns: ['postnr']
-    }, {
-      table: 'vejstykker',
-      columns: ['kommunekode', 'vejkode']
-    }, {
-      table: 'stormodtagere',
-      columns: ['id']
-    }, {
-      table: 'vejpunkter',
-      columns: ['vejpunkt_id']
-    }]
+    dependents: [
+      {
+        table: 'dar1_Husnummer_current',
+        columns: ['id']
+      },
+      {
+        table: 'dar1_DARKommuneinddeling_current',
+        columns: ['darkommuneinddeling_id']
+      },
+      {
+        table: 'dar1_NavngivenVej_current',
+        columns: ['navngivenvej_id']
+      },
+      {
+        table: 'dar1_NavngivenVejKommunedel_current',
+        columns: ['navngivenvejkommunedel_id']
+      },
+      {
+        table: 'dar1_Postnummer_current',
+        columns: ['postnummer_id']
+      },
+      {
+        table: 'dar1_Adressepunkt_current',
+        columns: ['adressepunkt_id']
+      },
+      {
+        table: 'dar1_SupplerendeBynavn_current',
+        columns: ['supplerendebynavn_id']
+      },
+      {
+        table: 'adgangsadresser',
+        columns: ['id']
+      }, {
+        table: 'ejerlav',
+        columns: ['ejerlavkode']
+      }, {
+        table: 'stormodtagere',
+        columns: ['id']
+      }
+    ]
   },
   adresser_mat: {
     table: 'adresser_mat',
@@ -858,3 +882,7 @@ exports.materializations = Object.assign({
   }
 
 }, dagiMaterializations);
+
+for(let dawaMaterialization of Object.values(dar10TableModels.dawaMaterializations)) {
+  exports.materializations[dawaMaterialization.table] = dawaMaterialization;
+}
