@@ -187,6 +187,9 @@ var fields = [
     name: 'vejpunkt_tekniskstandard'
   },
   {
+    name: 'vejpunkt_ændret'
+  },
+  {
     name: 'adgangspunkt_geom_json'
   },
   {

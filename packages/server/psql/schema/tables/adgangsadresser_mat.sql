@@ -1,66 +1,67 @@
 DROP TABLE IF EXISTS adgangsadresser_mat CASCADE;
-CREATE TABLE adgangsadresser_mat(
-  id uuid NOT NULL PRIMARY KEY,
-  kommunekode INTEGER NOT NULL,
-  vejkode INTEGER NOT NULL,
-  husnr husnr,
-  supplerendebynavn text NULL,
-  supplerendebynavn_dagi_id integer,
-  postnr INTEGER NULL,
-  ejerlavkode INTEGER,
-  matrikelnr text NULL,
-  esrejendomsnr integer NULL,
-  objekttype smallint,
-  oprettet timestamp,
-  ikraftfra timestamp,
-  aendret timestamp,
-  adgangspunktid uuid,
-  etrs89oest double precision NULL,
-  etrs89nord double precision NULL,
-  noejagtighed CHAR(1) NULL,
-  adgangspunktkilde smallint NULL,
-  husnummerkilde smallint,
-  placering smallint,
-  tekniskstandard CHAR(2) NULL,
-  tekstretning numeric(5,2) NULL,
-  adressepunktaendringsdato timestamp NULL,
-  geom  geometry(point, 25832),
-  tsv tsvector,
-  hoejde double precision NULL,
-  navngivenvej_id uuid,
-  navngivenvejkommunedel_id uuid,
-  supplerendebynavn_id uuid,
-  darkommuneinddeling_id uuid,
-  adressepunkt_id uuid,
-  postnummer_id uuid,
-  postnrnavn text,
-  vejnavn text,
-  adresseringsvejnavn text,
-  ejerlavnavn text,
-  stormodtagerpostnr smallint,
-  stormodtagerpostnrnavn text,
-  vejpunkt_id uuid,
-  vejpunkt_kilde text,
-  vejpunkt_noejagtighedsklasse text,
-  vejpunkt_tekniskstandard text,
-  vejpunkt_geom geometry(Point,25832)
+CREATE TABLE adgangsadresser_mat (
+  id                           UUID             NOT NULL PRIMARY KEY,
+  kommunekode                  INTEGER          NOT NULL,
+  vejkode                      INTEGER          NOT NULL,
+  husnr                        HUSNR,
+  supplerendebynavn            TEXT             NULL,
+  supplerendebynavn_dagi_id    INTEGER,
+  postnr                       INTEGER          NULL,
+  ejerlavkode                  INTEGER,
+  matrikelnr                   TEXT             NULL,
+  esrejendomsnr                INTEGER          NULL,
+  objekttype                   SMALLINT,
+  oprettet                     TIMESTAMP,
+  ikraftfra                    TIMESTAMP,
+  aendret                      TIMESTAMP,
+  adgangspunktid               UUID,
+  etrs89oest                   DOUBLE PRECISION NULL,
+  etrs89nord                   DOUBLE PRECISION NULL,
+  noejagtighed                 CHAR(1)          NULL,
+  adgangspunktkilde            SMALLINT         NULL,
+  husnummerkilde               SMALLINT,
+  placering                    SMALLINT,
+  tekniskstandard              CHAR(2)          NULL,
+  tekstretning                 NUMERIC(5, 2)    NULL,
+  adressepunktaendringsdato    TIMESTAMP        NULL,
+  geom                         GEOMETRY(point, 25832),
+  tsv                          TSVECTOR,
+  hoejde                       DOUBLE PRECISION NULL,
+  navngivenvej_id              UUID,
+  navngivenvejkommunedel_id    UUID,
+  supplerendebynavn_id         UUID,
+  darkommuneinddeling_id       UUID,
+  adressepunkt_id              UUID,
+  postnummer_id                UUID,
+  postnrnavn                   TEXT,
+  vejnavn                      TEXT,
+  adresseringsvejnavn          TEXT,
+  ejerlavnavn                  TEXT,
+  stormodtagerpostnr           SMALLINT,
+  stormodtagerpostnrnavn       TEXT,
+  vejpunkt_id                  UUID,
+  vejpunkt_kilde               TEXT,
+  vejpunkt_noejagtighedsklasse TEXT,
+  vejpunkt_tekniskstandard     TEXT,
+  vejpunkt_ændret              TIMESTAMP,
+  vejpunkt_geom                GEOMETRY(Point, 25832)
 );
 
 CREATE INDEX ON adgangsadresser_mat USING GIST (geom);
-CREATE INDEX ON adgangsadresser_mat(ejerlavkode, id);
-CREATE INDEX ON adgangsadresser_mat(kommunekode, vejkode, postnr);
-CREATE INDEX ON adgangsadresser_mat(postnr, kommunekode);
-CREATE INDEX ON adgangsadresser_mat(postnr, id);
-CREATE INDEX ON adgangsadresser_mat(supplerendebynavn, kommunekode, postnr);
-CREATE INDEX ON adgangsadresser_mat(matrikelnr);
-CREATE INDEX ON adgangsadresser_mat(husnr, id);
-CREATE INDEX ON adgangsadresser_mat(esrejendomsnr);
-CREATE INDEX ON adgangsadresser_mat(objekttype);
-CREATE INDEX ON adgangsadresser_mat USING gin(tsv);
-CREATE INDEX ON adgangsadresser_mat(noejagtighed, id);
-CREATE INDEX ON adgangsadresser_mat(navngivenvej_id, postnr);
-CREATE INDEX ON adgangsadresser_mat(vejnavn, postnr);
-CREATE INDEX ON adgangsadresser_mat(vejkode,postnr);
-CREATE INDEX ON adgangsadresser_mat(vejpunkt_id);
+CREATE INDEX ON adgangsadresser_mat (ejerlavkode, id);
+CREATE INDEX ON adgangsadresser_mat (kommunekode, vejkode, postnr);
+CREATE INDEX ON adgangsadresser_mat (postnr, kommunekode);
+CREATE INDEX ON adgangsadresser_mat (postnr, id);
+CREATE INDEX ON adgangsadresser_mat (supplerendebynavn, kommunekode, postnr);
+CREATE INDEX ON adgangsadresser_mat (matrikelnr);
+CREATE INDEX ON adgangsadresser_mat (husnr, id);
+CREATE INDEX ON adgangsadresser_mat (esrejendomsnr);
+CREATE INDEX ON adgangsadresser_mat (objekttype);
+CREATE INDEX ON adgangsadresser_mat USING GIN (tsv);
+CREATE INDEX ON adgangsadresser_mat (noejagtighed, id);
+CREATE INDEX ON adgangsadresser_mat (navngivenvej_id, postnr);
+CREATE INDEX ON adgangsadresser_mat (vejnavn, postnr);
+CREATE INDEX ON adgangsadresser_mat (vejkode, postnr);
+CREATE INDEX ON adgangsadresser_mat (vejpunkt_id);
 CREATE INDEX ON adgangsadresser_mat USING GIST (vejpunkt_geom);
-CREATE INDEX ON adgangsadresser_mat(supplerendebynavn_dagi_id);
+CREATE INDEX ON adgangsadresser_mat (supplerendebynavn_dagi_id);

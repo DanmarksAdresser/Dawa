@@ -51,6 +51,7 @@ CREATE TABLE adresser_mat(
   vejpunkt_kilde text,
   vejpunkt_noejagtighedsklasse text,
   vejpunkt_tekniskstandard text,
+  vejpunkt_ændret timestamp,
   vejpunkt_geom geometry(Point,25832)
 );
 

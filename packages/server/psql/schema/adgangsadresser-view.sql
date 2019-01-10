@@ -63,6 +63,7 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     A.vejpunkt_kilde,
     A.vejpunkt_noejagtighedsklasse,
     A.vejpunkt_tekniskstandard,
+    A.vejpunkt_ændret,
     A.vejpunkt_geom,
     A.navngivenvej_id,
     (NOT EXISTS(SELECT * FROM ikke_brofaste_adresser iba where A.id = iba.adgangsadresseid)) as brofast,

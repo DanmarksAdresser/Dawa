@@ -46,7 +46,7 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id', 'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id', 'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -247,9 +247,13 @@ vej, som adgangspunktets adresser refererer til.</p>`,
 <p>A : Absolut placeret</p>
 <p>B : Beregnet placering</p>`,
             type: 'string'
+          },
+          ændret: {
+           type: 'string',
+            description: 'Dato og tid hvor der sidst er ændret i vejpunktet i DAR. Angives i dansk tidszone. Eksempel: 2002-04-08T14:38:00.',
           }
         },
-        docOrder: ['id', 'koordinater', 'kilde', 'tekniskstandard', 'nøjagtighed']
+        docOrder: ['id', 'koordinater', 'kilde', 'tekniskstandard', 'nøjagtighed', 'ændret']
       }),
       'DDKN': schemaObject({
         nullable: true,
@@ -449,7 +453,8 @@ vej, som adgangspunktets adresser refererer til.</p>`,
           kilde: maybeNull(rs.vejpunkt_kilde),
           nøjagtighed: maybeNull(rs.vejpunkt_nøjagtighed),
           tekniskstandard: maybeNull(rs.vejpunkt_tekniskstandard),
-          koordinater: vejpunkt_coordinater
+          koordinater: vejpunkt_coordinater,
+          ændret:        d(rs.vejpunkt_ændret)
         }
       }
       else {

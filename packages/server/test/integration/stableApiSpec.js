@@ -960,7 +960,8 @@ describe('Stable API', () => {
               55.39500953
             ],
             "nøjagtighed": "B",
-            "tekniskstandard": "V0"
+            "tekniskstandard": "V0",
+            "ændret": "2018-05-03T14:08:02.125"
           },
           "DDKN": {
             "m100": "100m_61395_5843",
@@ -1033,6 +1034,7 @@ describe('Stable API', () => {
             "vejpunkt_kilde": "Ekstern",
             "vejpunkt_nøjagtighed": "B",
             "vejpunkt_tekniskstandard": "V0",
+            "vejpunkt_ændret": "2018-05-03T14:08:02.125",
             "vejpunkt_x": 10.33144075,
             "vejpunkt_y": 55.39500953,
             "adresseringsvejnavn": "Brammingevej",
@@ -1120,6 +1122,7 @@ describe('Stable API', () => {
             "vejpunkt_kilde": "Ekstern",
             "vejpunkt_nøjagtighed": "B",
             "vejpunkt_tekniskstandard": "V0",
+            "vejpunkt_ændret": "2018-05-03T14:08:02.125",
             "vejpunkt_x": 11.93571617,
             "vejpunkt_y": 55.53903448,
             "husnr": "1B",
@@ -1279,7 +1282,8 @@ describe('Stable API', () => {
                 55.39500953
               ],
               "nøjagtighed": "B",
-              "tekniskstandard": "V0"
+              "tekniskstandard": "V0",
+              "ændret": "2018-05-03T14:08:02.125"
             },
             "DDKN": {
               "m100": "100m_61395_5843",
@@ -1353,6 +1357,7 @@ describe('Stable API', () => {
             "vejpunkt_kilde": "Ekstern",
             "vejpunkt_nøjagtighed": "B",
             "vejpunkt_tekniskstandard": "V0",
+            "vejpunkt_ændret": "2018-05-03T14:08:02.125",
             "vejpunkt_x": 10.33144075,
             "vejpunkt_y": 55.39500953,
             "adresseringsvejnavn": "Brammingevej",

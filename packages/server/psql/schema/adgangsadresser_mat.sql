@@ -60,6 +60,7 @@ CREATE VIEW adgangsadresser_mat_view AS
     vp.oprindelse_kilde AS vejpunkt_kilde,
     vp.oprindelse_nøjagtighedsklasse AS vejpunkt_noejagtighedsklasse,
     vp.oprindelse_tekniskstandard AS vejpunkt_tekniskstandard,
+    vp.oprindelse_registrering AT TIME ZONE 'Europe/Copenhagen' as vejpunkt_ændret,
     A.ejerlavkode,
     A.matrikelnr,
     A.esrejendomsnr,

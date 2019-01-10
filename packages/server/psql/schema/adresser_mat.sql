@@ -52,6 +52,7 @@ CREATE VIEW adresser_mat_view AS
     a.vejpunkt_kilde,
     a.vejpunkt_tekniskstandard,
     a.vejpunkt_noejagtighedsklasse,
+    a.vejpunkt_ændret,
     a.vejpunkt_geom
 
   FROM enhedsadresser e

@@ -440,6 +440,7 @@ const adgangsadresser_mat = {
     {name: 'vejpunkt_kilde'},
     {name: 'vejpunkt_noejagtighedsklasse'},
     {name: 'vejpunkt_tekniskstandard'},
+    {name: 'vejpunkt_ændret'},
     {name: 'vejpunkt_geom'}]
 };
 

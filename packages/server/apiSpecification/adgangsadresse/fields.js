@@ -187,7 +187,10 @@ var fields = [
     name: 'brofast'
   },
   normalizedField('supplerendebynavn_dagi_id'),
-  normalizedField('navngivenvej_id')
+  normalizedField('navngivenvej_id'),
+  {
+    name: 'vejpunkt_ændret'
+  },
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);
