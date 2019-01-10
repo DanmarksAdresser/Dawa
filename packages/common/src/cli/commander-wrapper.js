@@ -126,6 +126,10 @@ const parseCommands = (commandSpecs, args, version) => {
     process.exit(1);
   });
   program.parse(args);
+  if(!result.command) {
+    program.help();
+    process.exit(1);
+  }
   return result;
 };
 

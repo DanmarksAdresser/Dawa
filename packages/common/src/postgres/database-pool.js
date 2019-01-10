@@ -116,6 +116,9 @@ const createDatabasePool = _options => {
         break;
       }
       catch (e) {
+        if(_options.noRetry) {
+          throw e;
+        }
         logger.error('failed to initialize pool, retrying in 5s', e);
         yield Promise.delay(5000);
       }
