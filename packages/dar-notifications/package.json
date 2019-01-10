@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/dar-notifications",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Webservice til modtagelse og udstille hændelser fra DAR",
   "main": "index.js",
   "license": "MIT",
@@ -8,17 +8,17 @@
     "dawa-dar-notifications": "./src/notifications.js"
   },
   "dependencies": {
-    "@dawadk/common": "^1.0.9",
+    "@dawadk/common": "^1.0.10",
     "q": "^1.5.1",
     "underscore": "1.9.1",
     "ws": "^5.2.0",
     "ws-heartbeats": "^1.0.0"
   },
   "devDependencies": {
-    "request-promise": "4.2.2",
     "chai": "4.1.2",
     "eslint": "^4.19.1",
-    "mocha": "^5.2.0"
+    "mocha": "^5.2.0",
+    "request-promise": "4.2.2"
   },
   "scripts": {
     "lint": "eslint src test",
