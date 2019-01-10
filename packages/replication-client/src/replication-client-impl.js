@@ -6,6 +6,7 @@ const {copyStream} = require('@dawadk/import-util/src/postgres-streaming');
 const cspUtil = require('@dawadk/common/src/csp-util');
 const defaultBindings = require('./default-bindings');
 const {csvStringify} = require('@dawadk/common/src/csv-stringify');
+const { selectList, columnsEqualClause } = require('@dawadk/common/src/postgres/sql-util');
 const tableDiff = require('@dawadk/import-util/src/table-diff');
 const {computeDifferences} = require('./table-diff');
 const log = require('./log');
@@ -96,6 +97,15 @@ const initializeEntity = (client, remoteTxid, localTxid, replicationModel, repli
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
 });
 
+const logChanges = (client, txid, entityName, table) => go(function*() {
+  const counts = yield client.queryRows(`SELECT operation, count(*)::integer as cnt FROM ${table} where txid=$1 group by operation`,[txid]);
+  const countMap = counts.reduce((acc, row) => {
+    acc[row.operation] = row.cnt;
+    return acc;
+  }, {});
+  log('info', `Updated ${entityName} inserts=${countMap.insert || 0}, updates=${countMap.update || 0}, deletes=${countMap.delete || 0}`);
+});
+
 const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationModel, replicationSchema,
                                    entityConf, bindingConf, httpClientImpl, options) => go(function* () {
   log('info', `Incrementally updating entity ${entityConf.name}`);
@@ -106,18 +116,20 @@ const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationMod
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.eventStream(entityConf.name, lastRemoteTxid + 1, remoteTxid, eventCh);
   const columnNames = _.pluck(bindingConf.attributes, "columnName");
+  const keyColumnNames = replicationModel.key.map(keyName => bindingConf.attributes[keyName].columnName);
   const copyProcess = copyToTable(client, eventCh, map(createEventMapper(localTxid, replicationModel, entityConf, bindingConf)),
     tmpEventTableName, ['txid', 'operation', ...columnNames], options.batchSize);
   yield parallel(requestProcess, copyProcess);
   const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;
   if (count === 0) {
+    log('info', `No new records for ${entityConf.name}`);
     return;
   }
   // remove any operation that has been replaced by a new operation in the same local transaction
   yield client.query(`
 WITH row_numbered AS (
     SELECT *, 
-           ROW_NUMBER() OVER(PARTITION BY t.id 
+           ROW_NUMBER() OVER(PARTITION BY ${selectList('t', keyColumnNames)}
                                  ORDER BY t.txid DESC) AS rk
       FROM ${tmpEventTableName} t),
       last_operation AS(
@@ -130,20 +142,21 @@ SELECT operation, ${columnNames.join(',')}
 
   // we treat updates as  inserts if the object doesn't exist.
   yield client.query(`update ${tmpEventTableName}  c set operation = 'insert'
-  WHERE c.txid = $1 and c.operation = 'update' and not exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);
+  WHERE c.txid = $1 and c.operation = 'update' and not exists(select * from ${bindingConf.table} t where  ${columnsEqualClause('t', 'c', keyColumnNames)})`, [localTxid]);
 
   // we treat inserts as updates if the object exist.
   yield client.query(`update ${tmpEventTableName}  c set operation = 'update'
-  WHERE c.txid = $1 and c.operation = 'insert' and exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);
+  WHERE c.txid = $1 and c.operation = 'insert' and exists(select * from ${bindingConf.table} t where   ${columnsEqualClause('t', 'c', keyColumnNames)})`, [localTxid]);
 
   // we ignore deletes on nonexisting objects
   yield client.query(`delete from ${tmpEventTableName} c
   WHERE c.txid = $1 and c.operation = 'delete' and 
-  not exists(select * from ${bindingConf.table} t where  t.id = c.id)`, [localTxid]);
+  not exists(select * from ${bindingConf.table} t where  ${columnsEqualClause('t', 'c', keyColumnNames)})`, [localTxid]);
 
   // apply changes
   yield tableDiff.applyChanges(client, localTxid, toTableModel(replicationModel, entityConf, bindingConf), tmpEventTableName);
 
+  yield logChanges(client, localTxid, entityConf.name, tmpEventTableName);
   // record new remote txid
   yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'event']);

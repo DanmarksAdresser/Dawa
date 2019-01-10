@@ -130,13 +130,11 @@ const runCommand = (command, options) => go(function* () {
     log('info', `Connecting to database using host=${host ? host : ''}, port=${port ? port : ''}, database=${database}, user=${user}, password=${password ? '<hidden>' : '(none)'}`);
 
     try {
-      const { setupProcess} = yield databasePools.create("pool", {
+      yield databasePools.create("pool", {
         connString: options['database'],
         pooled: false,
         noRetry: true
       });
-
-      yield setupProcess;
     }
     catch(e) {
       log('error', `Failed to connect to database: ${e.message}`);
