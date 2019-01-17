@@ -21,6 +21,21 @@ Options:
   validate-config [options]  Validate a configuration file.
 ```
 
+You can get help on a specific command by using the <code>-h</code> option:
+
+```
+ahj$ dawa-replication-client gen-config -h
+Usage: gen-config [options]
+
+Generate a configuration for the client.
+
+Options:
+  --url [value]       URL of replication API, default "https://dawa.aws.dk/replikering"
+  --file [value]      Output file for configuration
+  --entities [value]  Comma-separated list of entities to include
+  -h, --help          output usage information 
+```
+
 Check out the [guide](https://dawa.aws.dk/dok/guide/replikeringsklient) for information on how to use the client.
 
 ## Contributing
