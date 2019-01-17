@@ -9,7 +9,7 @@ const {ReplicationHttpClient} = require('./replication-http-client');
 const generateConfig = require('./generate-config');
 const {getValidatedConfig, validateAgainstDatabase} = require('./validate-config');
 const {generateDDLStatements} = require('./database-schema-util');
-const {pgMetadata} = require('./pg-metadata');
+const { pgMetadata } = require('./pg-metadata');
 const pgConnectionString = require("pg-connection-string");
 const log = require('./log');
 const fs = require('fs');
@@ -42,7 +42,8 @@ const commands = [
       description: 'Replicate data to local database',
       parameters: [...parameterSpec, {
         name: 'force-download',
-        type: 'boolean'
+        type: 'boolean',
+        description: 'Download a complete copy of all entities instead of relying on events to perform the update.'
       }]
     },
     {

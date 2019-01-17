@@ -354,10 +354,10 @@ const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, colu
  */
 const insert = (client, txid, tableModel, row) => go(function* () {
   const changeTableName = `${tableModel.table}_changes`;
-  const columnNames = allColumnNames(tableModel);
-  const params = [txid, ...columnNames.map(column => row[column] || null)];
-  const nonDerivedParamExpr = columnNames.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${columnNames.join(', ')}) 
+  const columns = allColumnNames(tableModel);
+  const params = [txid, ...columns.map(column => row[column] || null)];
+  const nonDerivedParamExpr = columns.map((column, index) => `$${index + 2}`).join(',');
+  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${columns.join(', ')}) 
   (SELECT $1, 'insert', false, ${nonDerivedParamExpr})`, params);
 });
 

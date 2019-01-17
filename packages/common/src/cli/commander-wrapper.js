@@ -110,12 +110,18 @@ const parseCommands = (commandSpecs, args, version) => {
       cmd.option(argumentString, description, parser);
     }
     cmd.action((parseResult) => {
+      if(!parseResult.opts) {
+        console.error('Invalid parameter: %s', parseResult);
+        process.exit(1);
+
+      }
       result.command = command.name;
       result.options = parseResult.opts();
       const [hasRequiredOptions ,missingOption] = checkRequiredOptions(command.parameters, result.options);
       if(!hasRequiredOptions) {
         console.error(`Error: Missing required option --${missingOption}`);
         parseResult.help();
+        process.exit(1);
       }
       const commandSpec = _.findWhere(commandSpecs, {name: result.command});
       addDefaults(commandSpec.parameters, result.options);

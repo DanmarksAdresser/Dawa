@@ -95,6 +95,8 @@ const initializeEntity = (client, remoteTxid, localTxid, replicationModel, repli
   yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, options.batchSize, httpClientImpl, bindingConf.table);
   yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
+  const count = (yield client.queryRows(`select count(*)::integer as cnt from ${bindingConf.table}`))[0].cnt;
+  log('info', `Initialized ${entityConf.name} rows=${count}`);
 });
 
 const logChanges = (client, txid, entityName, table) => go(function*() {

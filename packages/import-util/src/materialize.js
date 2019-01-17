@@ -121,11 +121,14 @@ const materialize = (client, txid, tableModels, materialization) => go(function*
   yield dropTempDirtyTable(client, tableModel);
 });
 
-const materializeFromScratch = (client, txid, tablemodels, materialization) => go(function* () {
+/**
+ * clear contents and history of materialized table and rematerialize it
+ */
+const clearAndMaterialize = (client, txid, tablemodels, materialization) => go(function* () {
   const model = tablemodels[materialization.table];
+  yield client.query(`DELETE FROM ${materialization.table}; DELETE FROM ${materialization.table}_changes`);
   yield initializeFromScratch(client, txid, materialization.view, model);
   yield client.query(`ANALYZE ${materialization.table}`);
-
 });
 
 const recomputeMaterialization = (client, txid, tableModels, materialization) => go(function* () {
@@ -151,7 +154,7 @@ module.exports = {
   computeUpdates,
   computeChanges,
   materialize,
-  materializeFromScratch,
+  clearAndMaterialize,
   recomputeMaterialization,
   dropTempDirtyTable,
   makeChangesNonPublic

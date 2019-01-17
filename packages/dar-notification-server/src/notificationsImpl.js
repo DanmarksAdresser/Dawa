@@ -70,7 +70,7 @@ exports.createNotificationApp = (options) => {
     });
   });
 
-  app.post('//notify', (req, res) => handleNotification(DEFAULT_ENV, req, res));
+  app.post('/notify', (req, res) => handleNotification(DEFAULT_ENV, req, res));
 
   app.post('/:env/notify', (req, res) => handleNotification(req.params.env, req, res));
 

@@ -35,31 +35,35 @@ const fromMaterializations = (description, materializations) => {
 };
 
 const execute = (client, txid, components) => go(function*() {
+  const context = {};
   for(let component of components) {
     if(component.execute) {
-      yield component.execute(client, txid);
+      yield component.execute(client, txid, context);
     }
     else if (component.executeIncrementally) {
-      yield component.executeIncrementally(client, txid);
+      yield component.executeIncrementally(client, txid, context);
     }
     else {
       throw new Error("No method to execute component");
     }
   }
+  return context;
 });
 
 const executeIncrementally = (client, txid, components) => go(function*() {
+  const context = {};
   for(let component of components) {
     if(component.executeIncrementally) {
-      yield component.executeIncrementally(client, txid);
+      yield component.executeIncrementally(client, txid, context);
     }
     else if (component.execute) {
-      yield component.execute(client, txid);
+      yield component.execute(client, txid, context);
     }
     else {
       throw new Error("No method to execute component");
     }
   }
+  return context;
 });
 
 module.exports = {

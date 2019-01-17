@@ -10,7 +10,5 @@ module.exports = fromMaterializations('Materialized tables for API',
     tableSchema.materializations.navngivenvej,
     tableSchema.materializations.vejstykker,
     tableSchema.materializations.postnumre,
-    tableSchema.materializations.navngivenvej_postnummer,
-    tableSchema.materializations.navngivenvejkommunedel_postnr_mat,
-    tableSchema.materializations.vejstykkerpostnumremat
+    tableSchema.materializations.navngivenvej_postnummer
   ]);

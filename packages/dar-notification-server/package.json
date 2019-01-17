@@ -1,7 +1,8 @@
 {
-  "name": "@dawadk/dar-notifications",
+  "name": "@dawadk/dar-notification-server",
   "version": "1.0.1",
   "description": "Webservice til modtagelse og udstille hændelser fra DAR",
+  "private": true,
   "main": "index.js",
   "license": "MIT",
   "bin": {
@@ -23,5 +24,6 @@
   "scripts": {
     "lint": "eslint src test",
     "test": "mocha"
-  }
+  },
+  "gitHead": "c479141f79583028504ac8b50e51a2313fe8a5f9"
 }

@@ -29,5 +29,6 @@
   "scripts": {
     "test": "mocha",
     "lint": "eslint src test"
-  }
+  },
+  "gitHead": "c479141f79583028504ac8b50e51a2313fe8a5f9"
 }

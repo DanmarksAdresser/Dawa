@@ -123,7 +123,6 @@ describe('Replikering af tilknytninger', function () {
           importSingleTema(client, txid, temaModel,
             temaData, 1000000));
         yield loadAdresser(client, adgangsadresser);
-
         let jsonResult = yield helpers.getJson(client, udtraekResource, {}, {});
         checkResult(temaModel, jsonResult, expectedKeys[temaName]);
         yield withImportTransaction(client, 'test', txid =>
