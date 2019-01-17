@@ -100,9 +100,27 @@ const withTransactionAll = function(dbname, transactionFn) {
   return withTransactionX(dbname, transactionFn, before, after);
 };
 
+/**
+ * Simulate multi-transaction tests and make them run in a single tx.
+ * @param dbname
+ * @param dbFn
+ */
+function withPoolAll(dbname, dbFn) {
+  withTransactionAll(dbname, clientFn => {
+    const pool = {
+      withTransaction: (mode, transactionFn) =>
+        transactionFn(clientFn())
+    };
+    dbFn(pool);
+  });
+}
+
+
+
 module.exports = {
   withTransaction,
   withTransactionX,
   withTransactionEach,
-  withTransactionAll
+  withTransactionAll,
+  withPoolAll
 };

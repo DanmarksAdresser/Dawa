@@ -406,4 +406,4 @@ describe('Import from DAR 1.0 API', () => {
   });
 });
 
-module.exports = {SAMPLE_CHANGESET};
+module.exports = {SAMPLE_CHANGESET, fakeDarClient};

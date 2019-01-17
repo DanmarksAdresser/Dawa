@@ -17,11 +17,11 @@ const { executeIncrementally } = require('../components/processors/processor-uti
 const { withImportTransaction } = require('../importUtil/transaction-util');
 const moment = require('moment');
 
-const importIncrementally = (darClient, remoteEventIds) => go(function*()  {
+const importIncrementally = (pool, darClient, remoteEventIds) => go(function*()  {
   const importer = createDarApiImporter({darClient, remoteEventIds});
   const components = [importer, ...incrementalProcessors];
   const beforeMillis = Date.now();
-  yield proddb.withTransaction('READ_WRITE',
+  yield pool.withTransaction('READ_WRITE',
     (client) => withImportTransaction(client, "importDarApi",
       txid => go(function*() {
         const resultContext = yield executeIncrementally(client, txid, components)
@@ -53,7 +53,7 @@ const getRemoteEventIds = darClient => go(function* () {
   }, {});
 });
 
-const importNotifications = (darClient, notifications, mustUpdateAll) => go(function* () {
+const importNotifications = (pool, darClient, notifications, mustUpdateAll) => go(function* () {
   if (mustUpdateAll) {
     const notificationMaxEventIds = notifications.map(notification => _.max(_.pluck(notification, 'eventid')))
     const maxEventId = _.max(notificationMaxEventIds);
@@ -61,7 +61,7 @@ const importNotifications = (darClient, notifications, mustUpdateAll) => go(func
       acc[entity] = maxEventId;
       return acc;
     }, {});
-    return yield importIncrementally(darClient, remoteEventIds);
+    return yield importIncrementally(pool, darClient, remoteEventIds);
   }
   else {
     const remoteEventIds = notifications.reduce((acc, events) => {
@@ -70,18 +70,28 @@ const importNotifications = (darClient, notifications, mustUpdateAll) => go(func
       }
       return acc;
     }, {});
-    yield importIncrementally(darClient, remoteEventIds);
+    yield importIncrementally(pool, darClient, remoteEventIds);
   }
 });
 
-const runImportLoop = (darClient, notificationWsUrl) => go(function* () {
+const takeAvailable = (ch => go(function*() {
+  const result = [];
+  const value = yield this.takeOrAbort(ch);
+  result.push(value);
+  while(result[result.length - 1] !== CLOSED && ch.canTakeSync()) {
+    result.push(ch.takeSync());
+  }
+  return result;
+}));
+
+const runImportLoop = (pool, darClient, notificationWsUrl) => go(function* () {
   if (!notificationWsUrl) {
     logger.info("Running DAR 1.0 import daemon without WebSocket listener");
   }
 
   //start by performing a local update using the status API
   const initialRemoteEventIds = yield getRemoteEventIds(darClient);
-  yield importIncrementally(darClient, initialRemoteEventIds);
+  yield importIncrementally(pool, darClient, initialRemoteEventIds);
 
   if(!notificationWsUrl) {
     return;
@@ -95,24 +105,19 @@ const runImportLoop = (darClient, notificationWsUrl) => go(function* () {
   try {
     while(true) {
       logger.info("Waiting for DAR notifications");
-      const notifications = [];
-      let value = yield this.takeOrAbort(notificationChan);
-      while(value !== CLOSED && notificationChan.canTakeSync()) {
-        const [notification, error] = value;
+      const values  = yield this.delegateAbort(takeAvailable(notificationChan));
+      if(values[values.length - 1] === CLOSED) {
+        throw new Error("Websocket connection was closed");
+      }
+      const notifications = values.map(([notification, error]) => {
         if(error) {
           throw error;
         }
-        notifications.push(notification);
-        value = notificationChan.takeSync();
-      }
-      if(notifications.length > 0) {
-        logger.info("Received DAR notifications");
-        yield importNotifications(darClient, notifications, mustUpdateAll);
-        mustUpdateAll = false;
-      }
-      if(value === CLOSED) {
-        throw new Error("Websocket connection was closed");
-      }
+        return notification;
+      });
+      logger.info("Received DAR notifications");
+      yield importNotifications(pool, darClient, notifications, mustUpdateAll);
+      mustUpdateAll = false;
     }
   }
   finally {
@@ -133,7 +138,7 @@ const importDaemon = (baseUrl, pollIntervalMs, notificationWsUrl,
   do {
     {
       try {
-        yield runImportLoop(darClient, notificationWsUrl);
+        yield runImportLoop(proddb, darClient, notificationWsUrl);
       }
       catch(err) {
         logger.error("Error during DAR import", err);
@@ -144,5 +149,8 @@ const importDaemon = (baseUrl, pollIntervalMs, notificationWsUrl,
 });
 
 module.exports = {
-  importDaemon
+  importDaemon,
+  internal: {
+    runImportLoop
+  }
 };
