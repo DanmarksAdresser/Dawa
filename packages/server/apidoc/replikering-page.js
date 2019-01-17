@@ -4,7 +4,7 @@ module.exports = {
   lead: `Replikerings-API'et gør det muligt at etablere og vedligeholde en lokal kopi af data fra DAWA. 
 Se <a href="/dok/guide/replikering">replikerings-guiden</a> for information om hvordan replikerings-API'et anvendes.
 Se <a href="/dok/api/replikering-data">databeskrivelser</a> for information hvilke data der udstilles
-på replikerings-API'et. DAWA tilbyder endvidere <a href="/dok/guide/replikeringsklient">reference-implementation</a> af en replikeringsklient.`,
+på replikerings-API'et. DAWA tilbyder endvidere en <a href="/dok/guide/replikeringsklient">reference-implementation</a> af en replikeringsklient.`,
   sections: [
     {
       type: 'endpoint',
