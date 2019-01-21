@@ -6,7 +6,7 @@ const { withPoolAll } = require('@dawadk/test-util/src/testdb');
 const notificationsServerImpl = require('@dawadk/dar-notification-server/src/notificationsImpl');
 const { go, Abort } = require('ts-csp');
 const request = require('request-promise');
-const { internal: {runImportLoop}} = require('../../dar10/importFromApiImpl');
+const {importDaemon} = require('../../dar10/importFromApiImpl');
 
 function fakeDarClient(rowsMap, batchSize) {
   return {
@@ -57,11 +57,17 @@ describe('DAR API import integration ', () => {
         }]
       }, 10);
 
-      const importProcess = runImportLoop(pool, darClient, 'http://localhost:4001/prod/listen');
+      const importProcess = importDaemon(pool, darClient,
+        {
+          pretend: false,
+          noDaemon: false,
+          pollIntervalMs: 5000,
+          notificationUrl: 'http://localhost:4001/prod/listen' }
+      );
 
       // we need a long delay to simulate import using status page
       yield Promise.delay(5000);
-      
+
       // simulate notification received from DAR
       const notification = [
         {

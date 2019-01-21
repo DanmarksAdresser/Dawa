@@ -2,10 +2,11 @@
 "use strict";
 
 const _ = require('underscore');
+const { go } = require('ts-csp');
 
 const { runImporter } = require('@dawadk/common/src/cli/run-importer');
 const proddb = require('../psql/proddb');
-const { Signal } = require("ts-csp");
+const darApiClient = require('./darApiClient');
 
 const importFromApiImpl = require('./importFromApiImpl');
 
@@ -15,23 +16,24 @@ const optionSpec = {
   notificationUrl: [false, 'WS URI til notifikationer', 'string'],
   pollInterval: [false, 'Millisekunder mellem API poll for nye records', 'number', 5000],
   pretend: [false, 'Rul transaktion tilbage (ingen ændringer)', 'boolean', false],
-  noDaemon: [false, 'Kør kun én import', 'boolean', false],
-  importFuture: [false, 'Anvend virkningstid 14 dage i fremtiden i stedet for aktuel tid', 'boolean', false]
+  noDaemon: [false, 'Kør kun én import', 'boolean', false]
 };
 
-runImporter("importDar10Daemon", optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), function(args, options) {
+runImporter("importDar10Daemon", optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), (args, options) => go(function*()  {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  const abortSignal = new Signal();
-  return importFromApiImpl.importDaemon(options.darApiUri,
-    options.pollInterval,
-    options.notificationUrl,
-    options.pretend,
-    options.noDaemon,
-    options.importFuture,
-    abortSignal);
-});
+  const darClient = darApiClient.createClient(options.darApiUri);
+
+  const importProcess = importFromApiImpl.importDaemon(proddb, darClient,
+    {
+      pretend: options.pretend,
+      noDaemon: options.noDaemon,
+      pollIntervalMs: options.pollInterval,
+      notificationUrl: options.notificationUrl }
+    );
+  yield importProcess;
+}));
 
 

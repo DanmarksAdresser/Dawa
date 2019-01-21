@@ -94,6 +94,7 @@ const getRows = (darClient, localEventIds, remoteEventIds, entities) => go(funct
     });
     result[entity] = normalizedResult;
   }
+
   return result;
 });
 
