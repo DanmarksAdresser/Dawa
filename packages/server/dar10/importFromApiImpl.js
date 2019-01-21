@@ -134,7 +134,7 @@ const importDaemon = (pool, darClient,
   }
 
   if(noDaemon) {
-    yield importUsingStatus(pool, darClient);
+    yield yield this.delegateAbort(importUsingStatus(pool, darClient));
   }
   else {
     while(true){
