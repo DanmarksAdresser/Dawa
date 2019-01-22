@@ -26,7 +26,8 @@ for(let variant of ['public', 'full']) {
       format: commonParameters.format,
       paging: commonParameters.paging
     }, {
-      propertyFilter: parametersMap[variant][oisModelName].propertyFilter
+      propertyFilter: parametersMap[variant][oisModelName].propertyFilter,
+      medtagOphørte: parametersMap[variant][oisModelName].medtagOphørte
     });
     if(apiModel.geojson) {
       queryParameters.geomWithin =commonParameters.geomWithin;
@@ -55,7 +56,8 @@ for(let variant of ['public', 'full']) {
             {format: commonParameters.format},
             {
               crs: commonParameters.crs,
-              struktur: commonParameters.struktur
+              struktur: commonParameters.struktur,
+              medtagOphørte: parametersMap[variant][oisModelName].medtagOphørte
             })),
         representations: representations,
         sqlModel: sqlModel,

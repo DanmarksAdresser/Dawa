@@ -396,6 +396,11 @@ const oisFilterParameterDoc = {
   }
 };
 
+const medtagOphørteParam = {
+  name: 'medtagophørte',
+  doc: 'Returner også ophørte OIS entiteter (entiter med ophoert_ts forskellig fra NULL)'
+}
+
 const oisPaths = {
   'public': '/bbrlight',
   full: '/ois'
@@ -420,6 +425,7 @@ for(let variant of ['full', 'public']) {
     const allFilterParameterNames = oisParameters[variant][apiModelName].propertyFilter.map(param => param.name);
     parameterDoc.parameters = parameterDoc.parameters.filter(param => allFilterParameterNames.includes(param.name));
     parameterDoc.parameters = parameterDoc.parameters.concat(oisAdditionalParameterDoc[apiModelName] || []);
+    parameterDoc.parameters.push(medtagOphørteParam);
     parameterDoc.parameters.push(strukturParam);
     parameterDoc.parameters = parameterDoc.parameters.concat(formatAndPagingParams);
     result.push(parameterDoc);
@@ -429,7 +435,7 @@ for(let variant of ['full', 'public']) {
         name: 'id',
         doc: `ID (${oisModels[apiModelName].key[0]})`
       };
-      const parameters = [pathParameter].concat(formatParameters).concat(strukturParam);
+      const parameters = [pathParameter, medtagOphørteParam].concat(formatParameters).concat(strukturParam);
       const subtext = `Enkeltopslag af ${apiModelName}`;
       result.push({
         entity: apiModelName,
