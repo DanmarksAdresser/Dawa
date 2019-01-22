@@ -77,12 +77,18 @@ const filterParams = (variant, oisApiModelName) => {
   }).filter(t => t !== null);
 };
 
+const medtagOphørte = [{
+  name: 'medtagophørte',
+  type: 'boolean'
+}];
+
 for(let variant of ['public', 'full']) {
   exports[variant] = {};
   for(let oisApiModelName of Object.keys(filtersMap)) {
     exports[variant][oisApiModelName] = {
       propertyFilter: normalizeParameters(filterParams(variant, oisApiModelName)),
-      id: normalizeParameters(keyParams(variant, oisApiModelName))
+      id: normalizeParameters(keyParams(variant, oisApiModelName)),
+      medtagOphørte: normalizeParameters(medtagOphørte)
     };
     registry.addMultiple(`ois_${oisApiModelName}_${variant}`, 'parameterGroup', module.exports[variant][oisApiModelName]);
   }

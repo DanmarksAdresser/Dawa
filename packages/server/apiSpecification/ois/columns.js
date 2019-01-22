@@ -44,7 +44,9 @@ module.exports = _.mapObject(oisApiModels, (apiModel, modelName) => {
       const tableName = oisCommon.dawaTableName(relation.relationName);
       const whereClauses = relation.clauses.map(clause => `${clause[0]} = ${clause[1]}`).join(' AND');
       memo[plural] = {
-        select: () => `(SELECT json_agg(${relation.alias}) FROM ${tableName} ${relation.alias} WHERE ophoert_ts IS NULL AND ${whereClauses})`
+        select: (sqlParts, sqlModel, params) => {
+          return `(SELECT json_agg(${relation.alias}) FROM ${tableName} ${relation.alias} WHERE ${params.medtagophørte ? '' :  ' ophoert_ts IS NULL AND '} ${whereClauses})`;
+        }
       }
       return memo;
     }, {});
