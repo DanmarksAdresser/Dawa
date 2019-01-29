@@ -1,9 +1,12 @@
 const tableSchema = require('../../psql/tableModel');
-const { fromMaterializations } = require('./processor-util');
+const {fromMaterializations} = require('../common');
 const temaModels = require('../../dagiImport/temaModels');
 
-const materializations =   temaModels.modelList
-  .filter(model => !model.withoutTilknytninger)
-  .map(model =>  tableSchema.materializations[model.tilknytningTable]);
 
-module.exports = fromMaterializations("DAGI tilknytninger", materializations);
+module.exports = temaModels.modelList
+  .filter(model => !model.withoutTilknytninger)
+  .map(model => {
+    const materialization = tableSchema.materializations[model.tilknytningTable];
+    return fromMaterializations(`${model.singular}-tilknytning`, `Relation mellem adresse og ${model.name}`, [materialization]);
+
+  });

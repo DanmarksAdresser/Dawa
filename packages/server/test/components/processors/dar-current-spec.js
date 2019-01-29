@@ -10,13 +10,14 @@ const {go} = require('ts-csp');
 const {withImportTransaction} = require('../../../importUtil/transaction-util');
 const { getMeta, setInitialMeta } = require('../../../dar10/import-dar-util')
 const { internal: { importChangeset } } = require('../../../components/importers/dar-api');
-const darHistoryProcessor = require('../../../components/processors/dar-history');
-const darCurrentProcessor = require('../../../components/processors/dar-current');
+const darHistoryProcessors = require('../../../components/processors/dar-history');
+const darCurrentProcessors = require('../../../components/processors/dar-current');
+const { execute } = require('../../../components/execute');
+const { EXECUTION_STRATEGY } = require('../../../components/common');
 
 const simulateImport = (client, txid, changeset) => go(function*() {
   yield importChangeset(client, txid, JSON.parse(JSON.stringify(changeset)));
-  yield darHistoryProcessor.executeIncrementally(client, txid);
-  yield darCurrentProcessor.executeIncrementally(client, txid);
+  yield execute(client, txid, [...darHistoryProcessors, ...darCurrentProcessors], EXECUTION_STRATEGY.preferIncremental);
 });
 
 describe('Beregning af DAR aktuelle entiteter', function () {

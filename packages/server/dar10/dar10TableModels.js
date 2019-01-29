@@ -162,7 +162,7 @@ exports.currentTableMaterializations = entityNames.reduce((memo, entityName) => 
 const adgangsadresserMaterialization = {
   table: 'adgangsadresser',
   view: 'dar1_adgangsadresser_view',
-  excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'hoejde', 'ikraftfra', 'placering',
+  excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'placering',
     'husnummerkilde', 'esdhreference', 'journalnummer'],
   dependents: [
     {
@@ -192,6 +192,10 @@ const adgangsadresserMaterialization = {
     {
       table: 'dar1_SupplerendeBynavn_current',
       columns: ['supplerendebynavn_id']
+    },
+    {
+      table: 'hoejder',
+      columns: ['id']
     }
   ]
 };

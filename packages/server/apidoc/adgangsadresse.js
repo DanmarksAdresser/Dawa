@@ -9,7 +9,8 @@ const {
 const {
   strukturParameterAdresse,
   geometriParam,
-  parametersForBothAdresseAndAdgangsAdresse
+  parametersForBothAdresseAndAdgangsAdresse,
+  medtagUgyldigeNedlagte
 } = require('./adresseCommon');
 
 const {
@@ -61,7 +62,7 @@ module.exports = [
     subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet. Med mindre der er behov' +
     ' for felter  som kun er med i den fulde adressestruktur anbefaler vi at, man tilføjer parameteren <code>struktur=mini</code>,' +
     ' da dette vil resultere i bedre performance.',
-    parameters: [...adgangsadresseParameters, geometriParam, ...formatAndPagingParams, strukturParameterAdresse],
+    parameters: [...adgangsadresseParameters, geometriParam, ...formatAndPagingParams, strukturParameterAdresse, ...medtagUgyldigeNedlagte],
     examples: [{
       description: 'Find de adgangsadresser som ligger på Rødkildevej og har husnummeret 46.',
       query: [{name: 'vejnavn', encodeValue: false, value: 'Rødkildevej'},
@@ -121,7 +122,7 @@ module.exports = [
     entity: 'adgangsadresse',
     path: '/adgangsadresser/{id}',
     subtext: 'Modtag adresse med id.',
-    parameters: [adgangsadresseIdParameter, strukturParameterAdresse, geometriParam],
+    parameters: [adgangsadresseIdParameter, strukturParameterAdresse, geometriParam, ...medtagUgyldigeNedlagte],
     nomulti: true,
     examples: [{
       description: 'Returner adressen med id 0a3f507a-b2e6-32b8-e044-0003ba298018',
@@ -133,7 +134,7 @@ module.exports = [
     path: '/adgangsadresser/autocomplete',
     subtext: autocompleteSubtext('adgangsadresser'),
     parameters:
-      overwriteWithAutocompleteQParameter(adgangsadresseParameters).concat(formatAndPagingParams),
+      [...overwriteWithAutocompleteQParameter(adgangsadresseParameters), ...formatAndPagingParams],
     examples: [
       {
         description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
@@ -152,7 +153,7 @@ module.exports = [
     'ETRS89/UTM32 med <em>srid=<a href="http://spatialreference.org/ref/epsg/25832/">25832</a></em> eller ' +
     'WGS84/geografisk med <em>srid=<a href="http://spatialreference.org/ref/epsg/4326/">4326</a></em>.  Default er WGS84.',
     parameters:
-      [...reverseGeocodingParameters, strukturParameterAdresse, geometriParam],
+      [...reverseGeocodingParameters, strukturParameterAdresse, geometriParam, ...medtagUgyldigeNedlagte],
     examples:
       [{
         description: 'Returner adgangsadressen nærmest punktet angivet af WGS84/geografisk koordinatet (12.5851471984198, 55.6832383751223)',

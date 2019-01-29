@@ -10,19 +10,18 @@ const notificationClient = require('@dawadk/dar-notification-client/src/notifica
 
 
 const { createDarApiImporter }= require('../components/importers/dar-api');
-const incrementalProcessors = require('../components/processors/incremental-processors');
-const { executeIncrementally } = require('../components/processors/processor-util');
+const { execute } = require('../components/execute');
+const { EXECUTION_STRATEGY } = require('../components/common');
 const { withImportTransaction } = require('../importUtil/transaction-util');
 const moment = require('moment');
 
 const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(function*()  {
   const importer = createDarApiImporter({darClient, remoteEventIds});
-  const components = [importer, ...incrementalProcessors];
   const beforeMillis = Date.now();
   yield pool.withTransaction('READ_WRITE',
     (client) => withImportTransaction(client, "importDarApi",
       txid => go(function*() {
-        const resultContext = yield executeIncrementally(client, txid, components);
+        const resultContext = yield execute(client, txid, [importer], EXECUTION_STRATEGY.skipNonIncremental);
         const afterMillis = Date.now();
         const darTxTimestampMillis = resultContext['dar-api']['remote-tx-timestamp'] ?
           moment(resultContext['dar-api']['remote-tx-timestamp']).valueOf() :

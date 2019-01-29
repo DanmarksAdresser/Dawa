@@ -177,7 +177,6 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
       }
     }
   }
-  yield client.query(`DELETE FROM tilknytninger_mat_changes`);
 });
 
 const importTemaerWfs = (client, txid, temaNames, featureMappings, dataDir, filePrefix, maxChanges) => go(function* () {

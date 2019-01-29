@@ -19,7 +19,6 @@ CREATE TABLE adgangsadresser_mat (
   etrs89nord                   DOUBLE PRECISION NULL,
   noejagtighed                 CHAR(1)          NULL,
   adgangspunktkilde            SMALLINT         NULL,
-  husnummerkilde               SMALLINT,
   placering                    SMALLINT,
   tekniskstandard              CHAR(2)          NULL,
   tekstretning                 NUMERIC(5, 2)    NULL,

@@ -6,7 +6,7 @@ const dar10TableModels = require('../../dar10/dar10TableModels');
 const materialize = require('@dawadk/import-util/src/materialize');
 const tableModels = require('../../psql/tableModel');
 const { ALL_DAR_ENTITIES } = require('../../dar10/import-dar-util');
-
+const { getExecutionMode, EXECUTION_MODE} = require('../common');
 /**
  * Cannot just use materialize, because some dirty rows originate from change in current time.
  */
@@ -27,27 +27,15 @@ const materializeCurrent = (client, txid, entityName) => go(function* () {
   yield materialize.dropTempDirtyTable(client, tableModel);
 });
 
-function getChangedEntitiesDueToVirkningTime(client) {
-  const entities = Object.keys(dar10TableModels.rawTableModels);
-  return go(function* () {
-    const sql = 'SELECT ' + entities.map(entity => {
-      const table = dar10TableModels.rawTableModels[entity].table;
-      return `(SELECT count(*) FROM ${table}, 
+const hasChangedEntitiesDueToVirkningTime = (client, entityName) => go(function*() {
+  const table = dar10TableModels.rawTableModels[entityName].table;
+  return (yield client.queryRows(`SELECT count(*) > 0 as has_changed FROM ${table}, 
         (SELECT virkning as current_virkning FROM dar1_meta) cv,
-        (select prev_virkning from dar1_meta) as pv
+        (select prev_virkning from dar1_meta) pv
         WHERE (lower(virkning) > prev_virkning AND lower(virkning) <= current_virkning) or 
               (upper(virkning) > prev_virkning AND upper(virkning) <= current_virkning)
-              ) > 0 as "${entity}"`;
-    }).join(',');
-    const queryResult = (yield client.queryRows(sql))[0];
-    return Object.keys(queryResult).reduce((memo, entityName) => {
-      if (queryResult[entityName]) {
-        memo.push(entityName);
-      }
-      return memo;
-    }, []);
-  });
-}
+            `))[0].has_changed;
+});
 
 const rematerializeEntity = (client, txid, entityName) => go(function*() {
   const materialization = dar10TableModels.currentTableMaterializations[entityName];
@@ -74,16 +62,23 @@ const materializeIncrementally =
     }
   });
 
-
-module.exports = {
-  description: "DAR aktuelle entiteter",
-  execute: (client, txid) => go(function*() {
-    for (let entityName of ALL_DAR_ENTITIES) {
+module.exports = ALL_DAR_ENTITIES.map(entityName => ({
+  id: `DAR-${entityName}-Current`,
+  description: `Aktuelle ${entityName}`,
+  requires: [`dar1_${entityName}_history`],
+  produces: [`dar1_${entityName}_current`],
+  execute: (client, txid, strategy, context) => go(function*() {
+    const darMetaChanged = context['DAR-meta-changed'];
+    if(context.changes[`dar1_${entityName}_history`].total > 0 || (darMetaChanged && hasChangedEntitiesDueToVirkningTime(client, entityName)));
+    const executionMode = getExecutionMode(strategy, true);
+    if(executionMode === EXECUTION_MODE.skip) {
+      return;
+    }
+    else if(executionMode === EXECUTION_MODE.incremental) {
+      yield materializeIncrementally(client, txid, [entityName],[entityName]);
+    }
+    else {
       yield rematerializeEntity(client, txid, entityName);
     }
   }),
-  executeIncrementally: (client, txid) => go(function*() {
-    const entitiesChangedDueToVirkningTime = yield getChangedEntitiesDueToVirkningTime(client);
-    yield materializeIncrementally(client, txid, ALL_DAR_ENTITIES,entitiesChangedDueToVirkningTime);
-  })
-};
+}));

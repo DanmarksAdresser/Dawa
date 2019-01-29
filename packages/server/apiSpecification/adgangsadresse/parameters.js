@@ -203,6 +203,11 @@ exports.includeInvalid = [{
   type: 'boolean'
 }];
 
+exports.includeDeleted = [{
+  name: 'medtagnedlagte',
+  type: 'boolean'
+}];
+
 exports.geometri = [
   {
     name: 'geometri',

@@ -33,6 +33,7 @@ module.exports = [
         propertyFilter: parameters.propertyFilter,
         husnrinterval: parameters.husnrinterval,
         includeInvalid: parameters.includeInvalid,
+        includeDeleted: parameters.includeDeleted,
         search: commonParameters.search,
         crs: commonParameters.crs,
         struktur: commonParameters.struktur,
@@ -61,6 +62,7 @@ module.exports = [
     parameters.id,
     {
       includeInvalid: parameters.includeInvalid,
+      includeDeleted: parameters.includeDeleted,
       crs: commonParameters.crs,
       struktur: commonParameters.struktur,
       geometri: parameters.geometri

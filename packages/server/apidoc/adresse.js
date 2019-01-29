@@ -8,7 +8,8 @@ const {
 const {
   geometriParam,
   parametersForBothAdresseAndAdgangsAdresse,
-  strukturParameterAdresse
+  strukturParameterAdresse,
+  medtagUgyldigeNedlagte
 } = require('./adresseCommon');
 
 const {
@@ -76,7 +77,7 @@ module.exports = [
     subtext: 'Søg efter adresser. Returnerer de adresser som opfylder kriteriet. Med mindre der er behov' +
     ' for felter  som kun er med i den fulde adressestol.ruktur anbefaler vi at, man tilføjer parameteren <code>struktur=mini</code>,' +
     ' da dette vil resultere i bedre performance.',
-    parameters: [...adresseParameters, geometriParam, ...formatAndPagingParams, strukturParameterAdresse],
+    parameters: [...adresseParameters, geometriParam, ...formatAndPagingParams, strukturParameterAdresse, ...medtagUgyldigeNedlagte],
     examples: [{
       description: 'Find de adresser som ligger på Rødkildevej og har husnummeret 46.',
       query: [
@@ -135,7 +136,7 @@ module.exports = [
     entity: 'adresse',
     path: '/adresser/{id}',
     subtext: 'Modtag adresse med id.',
-    parameters: [adresseIdParameter, strukturParameterAdresse, geometriParam],
+    parameters: [adresseIdParameter, strukturParameterAdresse, geometriParam, ...medtagUgyldigeNedlagte],
     nomulti: true,
     examples: [{
       description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',

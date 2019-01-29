@@ -1,4 +1,7 @@
 const tableSchema = require('../../psql/tableModel');
-const { fromMaterializations } = require('./processor-util');
+const { fromMaterializations } = require('../common');
 
-module.exports = fromMaterializations("Ikke brofaste adresser", [tableSchema.materializations.ikke_brofaste_adresser]);
+module.exports = fromMaterializations(
+  "Land-Connected-Addresses",
+  "Ikke brofaste adresser",
+  [tableSchema.materializations.ikke_brofaste_adresser]);

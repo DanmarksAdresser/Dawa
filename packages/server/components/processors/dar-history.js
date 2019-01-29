@@ -36,21 +36,24 @@ const initialize = (client, txid, entityName) => go(function* () {
     yield tableDiffNg.initializeChangeTable(client, txid, historyTableModel);
 });
 
-const execute = (client, txid) => go(function*() {
-  for (let entityName of ALL_DAR_ENTITIES) {
-    const historyTableModel = dar10TableModels.historyTableModels[entityName];
-    if((yield client.queryRows(`select * from ${historyTableModel.table} limit 1`)).length > 0) {
-      yield materializeIncrementally(client, txid, entityName);
-    }
-    else {
-      yield initialize(client, txid, entityName);
-    }
+const execute = (client, txid, entityName) => go(function* () {
+  const historyTableModel = dar10TableModels.historyTableModels[entityName];
+  if ((yield client.queryRows(`select * from ${historyTableModel.table} limit 1`)).length > 0) {
+    yield materializeIncrementally(client, txid, entityName);
+  }
+  else {
+    yield initialize(client, txid, entityName);
   }
 });
 
-module.exports = {
-  description: "DAR Historik",
-  executeIncrementally: (client, txid) => go(function* () {
-    yield execute(client, txid);
-  })
-};
+module.exports = ALL_DAR_ENTITIES.map(entityName => {
+  return  {
+    id: `DAR-History-${entityName}`,
+    description: `DAR Historik for ${entityName}`,
+    execute: (client, txid) => go(function* () {
+      yield execute(client, txid, entityName);
+    }),
+    requires: [`dar1_${entityName}`],
+    produces: [`dar1_${entityName}_history`]
+  }
+});

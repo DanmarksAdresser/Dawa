@@ -71,10 +71,10 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 
 var parameterImpls = [
   sqlParameterImpl.includeInvalidAdgangsadresser,
+  sqlParameterImpl.includeDeletedAdgangsAdresses,
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.adgangsadresseGeoFilter,
-  // sqlParameterImpl.dagiFilter(),
   searchAdgangsadresse(columns),
   autocompleteAdgangsadresse(columns),
   fuzzySearchParameterImpl,

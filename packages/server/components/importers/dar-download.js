@@ -94,7 +94,8 @@ const importIncremental = (client, txid, dataDir) => go(function*() {
 
 
 module.exports = options => {
-  const execute = (client, txid) => go(function*() {
+  const execute = (client, txid, strategy, context) => go(function*() {
+    context['DAR-meta-changed'] = true;
     if(yield alreadyImported(client)) {
       yield importIncremental(client, txid, options.dataDir);
     }
@@ -103,7 +104,10 @@ module.exports = options => {
     }
   });
   return {
+    id: 'DAR-Download',
     description: 'DAR Download importer',
-    execute
+    execute,
+    produces: ALL_DAR_ENTITIES.map(entity => `dar1_${entity}`),
+    requires: []
   };
 };

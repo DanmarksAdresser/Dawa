@@ -11,7 +11,7 @@ require('../../apiSpecification/allSpecs');
 const allPages = require('../../apidoc/all-pages');
 
 describe('Parameter documentation.', function() {
-  var undocumented = ['format', 'callback', 'srid', 'noformat', 'ndjson', 'medtagugyldige'];
+  var undocumented = ['format', 'callback', 'srid', 'noformat', 'ndjson'];
 
   var resources = registry.where({
     type: 'resource'

@@ -14,8 +14,8 @@ const schemaModel = require('../../psql/tableModel');
 const registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 
-const dagiAssociationsProcessor = require('../../components/processors/dagi-associations');
-const {execute} = require('../../components/processors/processor-util');
+const dagiAssociationsProcessors = require('../../components/processors/dagi-associations');
+const { EXECUTION_STRATEGY } = require('../../components/common');
 const testdb = require('@dawadk/test-util/src/testdb');
 const temaModels = require('../../dagiImport/temaModels');
 const {importSingleTema} = require('../../dagiImport/importDagiImpl');
@@ -78,7 +78,10 @@ const loadAdresser = (client, adgangsadresser_mats) => go(function* () {
       yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser_mat, adgangsadresse);
     }
     yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser_mat);
-    yield execute(client, txid, [dagiAssociationsProcessor]);
+    const context = { changes: {adgangsadresser_mat: {total: adgangsadresser_mats.length}}};
+    for(let processor of dagiAssociationsProcessors) {
+      yield processor.execute(client, txid, EXECUTION_STRATEGY.nonIncremental, context);
+    }
   }));
 });
 

@@ -195,11 +195,16 @@ const fetchAndImport =
   });
 
 const createDarApiImporter = options => ({
+  id: 'DAR-API',
   description: 'DAR API importer',
-  executeIncrementally: (client, txid, context) => go(function* () {
+  execute: (client, txid, executionMode, context) => go(function* () {
     const {darClient, remoteEventIds, overriddenVirkningTime} = options;
+    context['DAR-meta-changed'] = true;
     yield fetchAndImport(client, txid, context, darClient, remoteEventIds, overriddenVirkningTime);
-  })
+  }),
+  produces: ALL_DAR_ENTITIES.map(entity => `dar1_${entity}`),
+  requires: [],
+  pure: false
 });
 
 module.exports = {

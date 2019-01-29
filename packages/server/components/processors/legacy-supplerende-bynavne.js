@@ -5,6 +5,7 @@ const tableModels = require('../../psql/tableModel');
 const materialize = require('@dawadk/import-util/src/materialize');
 
 module.exports = {
+  id: 'Legacy-Supplerende-Bynavn',
   description: 'Legacy supplerende bynavn API opslagstabeller',
   execute:  (client, txid) => go(function*() {
     const tsvCol = _.findWhere(tableModels.tables.supplerendebynavne_mat.columns, {name: 'tsv'});
@@ -19,5 +20,8 @@ module.exports = {
       'INSERT INTO supplerendebynavn_postnr_mat(supplerendebynavn, postnr)' +
       '(SELECT supplerendebynavn, postnr from supplerendebynavn_postnr_mat_view)');
     yield materialize.recomputeMaterialization(client, txid, tableModels.tables, tableModels.materializations.supplerendebynavn2_postnr);
-  })
+  }),
+  requires: ['adgangsadresser'],
+  // only tables with change tables should be present in produces
+  produces: []
 };

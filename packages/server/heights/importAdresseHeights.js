@@ -10,10 +10,7 @@ const { withImportTransaction} = require('../importUtil/transaction-util');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  file: [false, 'Fil med vejmidter', 'string'],
-  initial: [false,
-    'Sættes til true hvis dette er initiel import. Springer historik-dannelse over.',
-    'boolean', false]
+  file: [false, 'Fil med vejmidter', 'string']
 };
 
 runImporter('højdeudtræk', optionSpec, _.keys(optionSpec), function (args, options) {
@@ -24,5 +21,5 @@ runImporter('højdeudtræk', optionSpec, _.keys(optionSpec), function (args, opt
 
   return proddb.withTransaction('READ_WRITE', client =>
     withImportTransaction(client, "importHeights", (txid) =>
-      importAdresseHeightsImpl.importHeights(client,txid, options.file, options.initial)));
+      importAdresseHeightsImpl.importHeights(client,txid, options.file)));
 });

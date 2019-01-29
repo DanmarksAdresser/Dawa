@@ -143,6 +143,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 // WARNING: order matters!
 var parameterImpls = [
   sqlParameterImpl.includeInvalidAdgangsadresser,
+  sqlParameterImpl.includeDeletedAdresses,
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.adgangsadresseGeoFilter,

@@ -12,7 +12,6 @@ var loadCsvTestdata = require('./loadCsvTestdata');
 var loadStormodtagereImpl = require('./loadStormodtagereImpl');
 var proddb = require('./proddb');
 const {importTemaerJson, importLandpostnummer} = require('../dagiImport/importDagiImpl');
-// var updateEjerlavImpl = require('./updateEjerlavImpl');
 const importDar10Impl = require('../dar10/importDarImpl');
 const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
 const importOisImpl = require('../ois/importOisImpl');

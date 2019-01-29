@@ -359,3 +359,15 @@ exports.includeInvalidAdgangsadresser = function (sqlParts, params) {
     dbapi.addWhereClause(sqlParts, `postnr IS NOT NULL AND husnr IS NOT NULL AND vejnavn IS NOT NULL and vejnavn <> ''`);
   }
 };
+
+exports.includeDeletedAdgangsAdresses = (sqlParts, params) => {
+  if (!params.medtagnedlagte) {
+    dbapi.addWhereClause(sqlParts, 'a_objekttype in (1,3)')
+  }
+};
+
+exports.includeDeletedAdresses = (sqlParts, params) => {
+  if (!params.medtagnedlagte) {
+    dbapi.addWhereClause(sqlParts, 'e_objekttype in (1,3)')
+  }
+};

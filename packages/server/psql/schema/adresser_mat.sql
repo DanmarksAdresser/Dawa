@@ -3,21 +3,28 @@ DROP VIEW IF EXISTS adresser_mat_view CASCADE;
 CREATE VIEW adresser_mat_view AS
   SELECT
     e.id,
-    e.adgangsadresseid,
-    e.objekttype,
-    e.oprettet,
-    e.ikraftfra,
-    e.aendret,
-    e.etage,
-    e.doer,
-    e.kilde,
-    a.objekttype AS a_objekttype,
-    a.oprettet   AS a_oprettet,
-    a.aendret    AS a_aendret,
-    a.ikraftfra  AS a_ikraftfra,
+    e.husnummer_id                          AS adgangsadresseid,
+    dar1_status_til_dawa_status(e.status)   AS objekttype,
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
+     FROM dar1_adresse_history adr2
+     WHERE e.id = adr2.id AND e.status = 2) AS ikraftfra,
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
+     FROM dar1_adresse_history adr2
+     WHERE e.id = adr2.id)                  AS oprettet,
+    (SELECT MAX(lower(virkning)) AT TIME ZONE 'Europe/Copenhagen'
+     FROM dar1_adresse_history h
+     WHERE h.id = e.id AND lower(virkning) <= (SELECT virkning
+                                               FROM dar1_meta))
+                                            AS aendret,
+    lower(e.etagebetegnelse)                AS etage,
+    lower(e.dørbetegnelse)                  AS doer,
+    a.objekttype                            AS a_objekttype,
+    a.oprettet                              AS a_oprettet,
+    a.aendret                               AS a_aendret,
+    a.ikraftfra                             AS a_ikraftfra,
     a.kommunekode,
     a.vejkode,
-    a.husnr         husnr,
+    a.husnr                                    husnr,
     a.supplerendebynavn,
     a.supplerendebynavn_dagi_id,
     a.postnr,
@@ -29,7 +36,6 @@ CREATE VIEW adresser_mat_view AS
     a.etrs89nord,
     a.noejagtighed,
     a.adgangspunktkilde,
-    a.husnummerkilde,
     a.placering,
     a.tekniskstandard,
     a.tekstretning,
@@ -55,5 +61,5 @@ CREATE VIEW adresser_mat_view AS
     a.vejpunkt_ændret,
     a.vejpunkt_geom
 
-  FROM enhedsadresser e
-    JOIN adgangsadresser_mat a ON e.adgangsadresseid = a.id;
+  FROM dar1_adresse_current e
+    JOIN adgangsadresser_mat a ON e.husnummer_id = a.id;

@@ -15,6 +15,17 @@ const geometriParam = {
   doc: 'Hvis GeoJSON formatet anvendes, angiver parameteren om det er adgangspunktet eller vejpunktet der anvendes. Mulige værdier: "adgangspunkt" eller "vejpunkt"'
 };
 
+const medtagUgyldigeNedlagte = [
+  {
+    name: 'medtagugyldige',
+    doc: 'Medtag ugyldige adresser i svaret (adresser uden vejnavn, postnummer eller husnummer).'
+  },
+  {
+    name: 'medtagnedlagte',
+    doc: 'Medtag nedlagte eller henlagte adresser i svaret.'
+  }
+]
+
 const parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'status',
@@ -159,6 +170,7 @@ const parametersForBothAdresseAndAdgangsAdresse = [
 module.exports = {
   strukturParameterAdresse,
   geometriParam,
-  parametersForBothAdresseAndAdgangsAdresse
+  parametersForBothAdresseAndAdgangsAdresse,
+  medtagUgyldigeNedlagte
 };
 

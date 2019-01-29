@@ -49,6 +49,7 @@ CREATE VIEW dar1_adgangsadresser_view AS
     ap.id                            AS adressepunkt_id,
     p.id                             AS postnummer_id,
     sb.supplerendebynavn1             AS supplerendebynavn_dagi_id,
+    h.hoejde,
     ap.position                      AS geom
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k
@@ -68,4 +69,5 @@ CREATE VIEW dar1_adgangsadresser_view AS
     LEFT JOIN dar1_darafstemningsområde_current ao ON hn.darafstemningsområde_id = ao.id
     LEFT JOIN dar1_darmenighedsrådsafstemningsområde_current mr
       ON hn.darmenighedsrådsafstemningsområde_id = mr.id
+    LEFT JOIN hoejder h ON hn.id = h.husnummerid
   WHERE hn.status IN (2, 3) AND hn.husnummertekst IS NOT NULL;

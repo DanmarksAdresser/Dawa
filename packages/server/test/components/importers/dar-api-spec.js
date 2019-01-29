@@ -18,6 +18,7 @@ const {setInitialMeta, setVirkningTime, ALL_DAR_ENTITIES, getMeta} = require('..
 const testdb = require('@dawadk/test-util/src/testdb');
 const {withImportTransaction} = require('../../../importUtil/transaction-util');
 const darApiClient = require('../../../dar10/darApiClient');
+const { EXECUTION_STRATEGY } = require('../../../components/common');
 
 function fakeDarClient(rowsMap, batchSize) {
   return {
@@ -387,7 +388,7 @@ describe('Import from DAR 1.0 API', () => {
             darClient,
             remoteEventIds: {Postnummer: 5}
           })
-          .executeIncrementally(client, txid, context);
+          .execute(client, txid, EXECUTION_STRATEGY.preferIncremental, context);
       }));
       assert.isDefined(context['dar-api']);
       assert.isDefined(context['dar-api']['remote-tx-timestamp']);

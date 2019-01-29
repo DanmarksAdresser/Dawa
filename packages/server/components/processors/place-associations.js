@@ -1,4 +1,4 @@
 const tableSchema = require('../../psql/tableModel');
-const { fromMaterializations } = require('./processor-util');
+const { fromMaterializations } = require('../common');
 
-module.exports = fromMaterializations("Stedtilknytninger", [tableSchema.materializations.stedtilknytninger]);
+module.exports = fromMaterializations('Place-Relations',"Stedtilknytninger", [tableSchema.materializations.stedtilknytninger]);

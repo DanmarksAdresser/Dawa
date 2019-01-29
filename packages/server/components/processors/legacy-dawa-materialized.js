@@ -1,7 +1,8 @@
 const tableSchema = require('../../psql/tableModel');
-const { fromMaterializations } = require('./processor-util');
+const {fromMaterializations} = require('../common');
 
-module.exports = fromMaterializations('Legacy materialized tables only required for replication API',
-  [
-    tableSchema.materializations.vejpunkter
-  ]);
+module.exports = [tableSchema.materializations.vejpunkter]
+  .map(materialization =>
+    fromMaterializations(materialization.table,
+      `Legacy replikerings-tabel ${materialization.table}`,
+      [materialization]));

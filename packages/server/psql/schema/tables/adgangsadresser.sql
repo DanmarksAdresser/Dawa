@@ -26,10 +26,6 @@ CREATE TABLE  adgangsadresser (
   esdhReference text,
   journalnummer text,
   hoejde double precision NULL,
-  -- the coordinates we used when we looked up the height
-  z_x double precision null,
-  z_y double precision null,
-  disableheightlookup timestamptz,
   navngivenvej_id uuid,
   navngivenvejkommunedel_id uuid,
   supplerendebynavn_id uuid,
@@ -51,11 +47,6 @@ CREATE INDEX ON adgangsadresser(adressepunkt_id);
 CREATE INDEX ON adgangsadresser(vejpunkt_id);
 CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);
 
--- Index for lookup of adgangsadresser where we need to fetch the height
-CREATE INDEX ON adgangsadresser (id)
-  WHERE etrs89oest IS NOT NULL AND etrs89nord IS NOT NULL AND
-        (z_x IS NULL OR z_y IS NULL OR z_x :: NUMERIC(11, 3) <> etrs89oest :: NUMERIC(11, 3) OR
-         z_y :: NUMERIC(11, 3) <> etrs89nord :: NUMERIC(11, 3));
 
 
 DROP TABLE IF EXISTS adgangsadresser_history CASCADE;

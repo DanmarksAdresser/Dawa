@@ -28,7 +28,7 @@ const createChangeTables = (client)=> go(function*() {
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
-  'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr'];
+  'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater', 'hoejde_importer_afventer'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -50,6 +50,7 @@ function normaliseTableSpec(specs){
 
 // Note, the sequence of the tables matter!
 exports.tableSpecs = normaliseTableSpec([
+  {name: 'hoejder', init: false},
   {name: 'brofasthed', init: false},
   {name: 'ikke_brofaste_adresser', init: false},
   {name: 'tx_log', init: false},
@@ -99,6 +100,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar_vejstykker_view', type: 'view'},
   {name: 'dar_adgangsadresser_view', type: 'view'},
   {name: 'dar_enhedsadresser_view', type: 'view'},
+  {name: 'hoejder', init: false},
   {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql', init: false},

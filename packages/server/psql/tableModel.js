@@ -409,7 +409,7 @@ const vejstykkerpostnumremat = {
 
 const postnrTsVector = (nr, navn) => `to_tsvector('adresser', coalesce(to_char(${nr}, '0000'), '') || ' ' || coalesce(${navn}, ''))`;
 
-const adgangansadresserMatFieldsNotCopiedFromAdgangsadresser = ['esdhreference', 'journalnummer'];
+const adgangansadresserMatFieldsNotCopiedFromAdgangsadresser = ['esdhreference', 'journalnummer', 'husnummerkilde'];
 
 const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
   `(${postnrTsVector(nr, navn)}::text || ' ' || ${postnrTsVector(stormodtagernr, stormodtagernavn)}::text)::tsvector`
@@ -444,7 +444,7 @@ const adgangsadresser_mat = {
     {name: 'vejpunkt_geom'}]
 };
 
-const adresseMatFieldsNotCopiedFromEnhedsadresser = ['esdhreference', 'journalnummer'];
+const adresseMatFieldsNotCopiedFromEnhedsadresser = ['esdhreference', 'journalnummer', 'kilde'];
 const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra'];
 
 const adresser_mat = {
@@ -673,6 +673,32 @@ const ikke_brofaste_adresser = {
     { name: 'stedid'}
   ]
 };
+
+const hoejder = {
+  table: 'hoejder',
+  primaryKey: ['husnummerid'],
+  columns: [
+    {name: 'husnummerid'},
+    {name: 'hoejde'}]
+};
+
+const hoejde_importer_resultater = {
+  table: 'hoejde_importer_resultater',
+  primaryKey: ['husnummerid'],
+  columns: [
+    {name: 'husnummerid'},
+    {name: 'hoejde'},
+    {name: 'position'}]
+};
+
+const hoejde_importer_afventer= {
+  table: 'hoejde_importer_afventer',
+  primaryKey: ['husnummerid'],
+  columns: [
+    {name: 'husnummerid'},
+    {name: 'adgangspunktid'}]
+};
+
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
@@ -705,6 +731,9 @@ exports.tables = Object.assign({
     tilknytninger_mat,
     brofasthed,
     ikke_brofaste_adresser,
+    hoejder,
+    hoejde_importer_resultater,
+    hoejde_importer_afventer
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
@@ -752,6 +781,9 @@ exports.materializations = Object.assign({
         columns: ['ejerlavkode']
       }, {
         table: 'stormodtagere',
+        columns: ['id']
+      }, {
+      table: 'hoejder',
         columns: ['id']
       }
     ]
@@ -880,6 +912,39 @@ exports.materializations = Object.assign({
         columns: ['stedid']
       }
     ]
+  },
+  hoejder: {
+    table: 'hoejder',
+    view: 'hoejder_view',
+    dependents: [
+      {
+        table: 'dar1_Husnummer_current',
+        columns: ['husnummerid']
+      },
+      {
+        table: 'hoejde_importer_resultater',
+        columns: ['husnummerid']
+      }
+    ]
+  },
+  hoejde_importer_afventer: {
+    table: 'hoejde_importer_afventer',
+    view: 'hoejde_importer_afventer_view',
+    dependents: [
+      {
+        table: 'dar1_Husnummer_current',
+        columns: ['husnummerid']
+      },
+      {
+        table: 'dar1_Adressepunkt_current',
+        columns: ['adgangspunktid']
+      },
+      {
+        table: 'hoejde_importer_resultater',
+        columns: ['husnummerid']
+      }
+    ],
+    excludedColumns: ['disableuntil']
   }
 
 }, dagiMaterializations);

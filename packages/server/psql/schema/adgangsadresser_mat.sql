@@ -14,6 +14,9 @@ CREATE VIEW adgangsadresser_mat_view AS
      FROM dar1_husnummer_history hn2
      WHERE hn.id = hn2.id)
                                      AS oprettet,
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
+     FROM dar1_husnummer_history hn2
+     WHERE hn.id = hn2.id and hn2.status = 2) as ikraftfra,
     GREATEST((SELECT max(lower(ap2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
               FROM dar1_adressepunkt_history ap2
               WHERE ap2.id = hn.adgangspunkt_id AND lower(ap2.virkning) <= (SELECT virkning
@@ -64,10 +67,8 @@ CREATE VIEW adgangsadresser_mat_view AS
     A.ejerlavkode,
     A.matrikelnr,
     A.esrejendomsnr,
-    A.ikraftfra,
     A.placering,
-    A.husnummerkilde,
-    A.hoejde,
+    H.hoejde,
     E.navn as ejerlavnavn
 
   FROM dar1_husnummer_current hn
@@ -92,4 +93,4 @@ CREATE VIEW adgangsadresser_mat_view AS
     LEFT JOIN stormodtagere AS S ON hn.id = S.adgangsadresseid
     LEFT JOIN adgangsadresser A ON hn.id = A.id
     LEFT JOIN Ejerlav E ON A.ejerlavkode = E.kode
-  WHERE hn.status IN (2, 3) AND hn.husnummertekst IS NOT NULL;
+    LEFT JOIN hoejder H ON hn.id = H.husnummerid;

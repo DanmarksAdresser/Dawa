@@ -1,10 +1,10 @@
 const tableSchema = require('../../psql/tableModel');
-const { fromMaterializations } = require('./processor-util');
+const { fromMaterializations } = require('../common');
 
-module.exports = fromMaterializations('Non-incremental materialized tables for API',
-  [tableSchema.materializations.navngivenvejkommunedel_postnr_mat,
-    tableSchema.materializations.vejstykkerpostnumremat
-  ]);
-
-// A bit hackish, but these must execute non-incrementally.
-delete module.exports.executeIncrementally;
+module.exports = [tableSchema.materializations.navngivenvejkommunedel_postnr_mat,
+  tableSchema.materializations.vejstykkerpostnumremat
+].map(materialization => fromMaterializations(
+  materialization.table,
+  `Opslagstabel ${materialization.table}`,
+  [materialization]
+));

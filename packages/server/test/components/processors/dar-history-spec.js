@@ -5,11 +5,12 @@ const testdb = require('@dawadk/test-util/src/testdb');
 const {go} = require('ts-csp');
 const {withImportTransaction} = require('../../../importUtil/transaction-util');
 const { internal: { importChangeset } } = require('../../../components/importers/dar-api');
-const darHistoryProcessor = require('../../../components/processors/dar-history');
-
+const darHistoryProcessors = require('../../../components/processors/dar-history');
+const EXECUTION_STRATEGY = require('../../../components/common');
+const { execute } = require('../../../components/execute');
 const simulateImport = (client, txid, changeset) => go(function*() {
   yield importChangeset(client, txid, JSON.parse(JSON.stringify(changeset)));
-  yield darHistoryProcessor.executeIncrementally(client, txid);
+  yield execute(client, txid, darHistoryProcessors, EXECUTION_STRATEGY.preferIncremental);
 });
 
 describe('Beregning af DAR historiske entiteter', function () {
