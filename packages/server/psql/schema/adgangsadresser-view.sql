@@ -9,6 +9,7 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     A.oprettet AS a_oprettet,
     A.ikraftfra as a_ikraftfra,
     A.aendret  AS a_aendret,
+    A.nedlagt AS a_nedlagt,
     A.etrs89oest::double precision AS oest,
     A.etrs89nord::double precision AS nord,
     A.hoejde,

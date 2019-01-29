@@ -16,7 +16,10 @@ CREATE VIEW adgangsadresser_mat_view AS
                                      AS oprettet,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_husnummer_history hn2
-     WHERE hn.id = hn2.id and hn2.status = 2) as ikraftfra,
+     WHERE hn.id = hn2.id and hn2.status = 3) as ikraftfra,
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
+     FROM dar1_husnummer_history hn2
+     WHERE hn.id = hn2.id and hn2.status  in (4,5)) as nedlagt,
     GREATEST((SELECT max(lower(ap2.virkning)) AT TIME ZONE 'Europe/Copenhagen'
               FROM dar1_adressepunkt_history ap2
               WHERE ap2.id = hn.adgangspunkt_id AND lower(ap2.virkning) <= (SELECT virkning
@@ -78,7 +81,7 @@ CREATE VIEW adgangsadresser_mat_view AS
       ON hn.navngivenvej_id = nv.id
     JOIN dar1_navngivenvejkommunedel_current nvk
       ON nv.id = nvk.navngivenvej_id AND
-         k.kommunekode = nvk.kommune AND nvk.status IN (2, 3)
+         k.kommunekode = nvk.kommune
     JOIN dar1_postnummer_current p
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_supplerendebynavn_current sb

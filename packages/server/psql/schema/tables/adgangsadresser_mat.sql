@@ -14,6 +14,7 @@ CREATE TABLE adgangsadresser_mat (
   oprettet                     TIMESTAMP,
   ikraftfra                    TIMESTAMP,
   aendret                      TIMESTAMP,
+  nedlagt                      TIMESTAMP,
   adgangspunktid               UUID,
   etrs89oest                   DOUBLE PRECISION NULL,
   etrs89nord                   DOUBLE PRECISION NULL,

@@ -1,9 +1,11 @@
-DROP TABLE IF EXISTS navngivenvej CASCADE;
-CREATE TABLE navngivenvej(
+DROP TABLE IF EXISTS navngivenvej_mat CASCADE;
+CREATE TABLE navngivenvej_mat(
   id uuid primary key,
   darstatus smallint not null,
   oprettet timestamptz not null,
   ændret timestamptz not null,
+  ikrafttrædelse timestamptz,
+  nedlagt timestamptz,
   navn text not null,
   adresseringsnavn text not null,
   administrerendekommune smallint,
@@ -19,12 +21,14 @@ CREATE TABLE navngivenvej(
   beliggenhed_vejtilslutningspunkter  geometry(Geometry,25832),
   visueltcenter geometry(point, 25832),
   bbox geometry(Polygon, 25832),
-  geom geometry(Geometry,25832)
+  geom geometry(Geometry,25832),
+  tsv tsvector
 );
 
-CREATE INDEX ON navngivenvej(navn);
-CREATE INDEX ON navngivenvej(adresseringsnavn);
-CREATE INDEX ON navngivenvej(darstatus);
-CREATE INDEX ON navngivenvej using gist(beliggenhed_vejnavnelinje);
-CREATE INDEX ON navngivenvej using gist(beliggenhed_vejnavneområde);
-CREATE INDEX ON navngivenvej using gist(geom);
+CREATE INDEX ON navngivenvej_mat(navn);
+CREATE INDEX ON navngivenvej_mat(adresseringsnavn);
+CREATE INDEX ON navngivenvej_mat(darstatus);
+CREATE INDEX ON navngivenvej_mat using gin(tsv);
+CREATE INDEX ON navngivenvej_mat using gist(beliggenhed_vejnavnelinje);
+CREATE INDEX ON navngivenvej_mat using gist(beliggenhed_vejnavneområde);
+CREATE INDEX ON navngivenvej_mat using gist(geom);

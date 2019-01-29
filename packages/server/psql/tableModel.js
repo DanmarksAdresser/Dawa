@@ -250,6 +250,54 @@ const navngivenvej = {
       name: 'geom',
       distinctClause: geomDistinctClause,
       public: false
+    }
+  ]
+};
+
+const navngivenvej_mat = {
+  table: 'navngivenvej_mat',
+  primaryKey: ['id'],
+  columns: [
+    {name: 'id'},
+    {name: 'darstatus'},
+    {name: 'oprettet'},
+    {name: 'ændret'},
+    {name: 'ikrafttrædelse'},
+    {name: 'nedlagt'},
+    {name: 'navn'},
+    {name: 'adresseringsnavn'},
+    {name: 'administrerendekommune'},
+    {name: 'beskrivelse'},
+    {name: 'retskrivningskontrol'},
+    {name: 'udtaltvejnavn'},
+    {name: 'beliggenhed_oprindelse_kilde'},
+    {name: 'beliggenhed_oprindelse_nøjagtighedsklasse'},
+    {name: 'beliggenhed_oprindelse_registrering'},
+    {name: 'beliggenhed_oprindelse_tekniskstandard'},
+    {
+      name: 'beliggenhed_vejnavnelinje',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'beliggenhed_vejnavneområde',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'beliggenhed_vejtilslutningspunkter',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'bbox',
+      derive: deriveNullableBbox
+    },
+    {
+      name: 'visueltcenter',
+      derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
+    },
+    {
+      name: 'geom',
+      distinctClause: geomDistinctClause,
+      public: false
     },
     {
       name: 'tsv',
@@ -441,11 +489,12 @@ const adgangsadresser_mat = {
     {name: 'vejpunkt_noejagtighedsklasse'},
     {name: 'vejpunkt_tekniskstandard'},
     {name: 'vejpunkt_ændret'},
-    {name: 'vejpunkt_geom'}]
+    {name: 'vejpunkt_geom'},
+    {name: "nedlagt"}]
 };
 
 const adresseMatFieldsNotCopiedFromEnhedsadresser = ['esdhreference', 'journalnummer', 'kilde'];
-const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra'];
+const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'nedlagt'];
 
 const adresser_mat = {
   table: 'adresser_mat',
@@ -457,6 +506,8 @@ const adresser_mat = {
     {name: 'a_oprettet'},
     {name: 'a_aendret'},
     {name: 'a_ikraftfra'},
+    {name: 'a_nedlagt'},
+    {name: 'nedlagt'},
     {name: 'geom', public: false},
     {
       name: 'tsv',
@@ -716,6 +767,7 @@ exports.tables = Object.assign({
     supplerendebynavn2_postnr,
     vejpunkter,
     navngivenvej,
+    navngivenvej_mat,
     navngivenvej_postnummer,
     navngivenvejkommunedel_postnr_mat,
     vejstykker,
@@ -740,7 +792,32 @@ exports.tables = Object.assign({
   dar10CurrentTables);
 
 exports.materializations = Object.assign({
-
+  navngivenvej_mat: {
+    table: 'navngivenvej_mat',
+    view: 'navngivenvej_mat_view',
+    dependents: [{
+      table: 'dar1_NavngivenVej_current',
+      columns: ['id']
+    }, {
+      table: 'dar1_NavngivenVej_history',
+      columns: ['id'],
+      references: ['id']
+    }]
+  },
+  navngivenvej: {
+    table: 'navngivenvej',
+    view: 'dar1_navngivenvej_view',
+    dependents: [
+      {
+        table: 'dar1_NavngivenVej_current',
+        columns: ['id']
+      },
+      {
+        table: 'dar1_NavngivenVej_history',
+        columns: ['id'],
+        references: ['id']
+      }]
+  },
   adgangsadresser_mat: {
     table: 'adgangsadresser_mat',
     view: 'adgangsadresser_mat_view',

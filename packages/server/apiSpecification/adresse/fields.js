@@ -33,6 +33,14 @@ var fields = [
   normalizedField('oprettet'),
   normalizedField('ændret'),
   {
+    name: 'ikrafttrædelse',
+    formatter: d
+  },
+  {
+    name: 'nedlagt',
+    formatter: d
+  },
+  {
     name: 'vejkode',
     formatter: kode4String
   },
@@ -126,6 +134,14 @@ var fields = [
   },
   {
     name: 'adgangsadresse_ændret',
+    formatter: d
+  },
+  {
+    name: 'adgangsadresse_ikrafttrædelse',
+    formatter: d
+  },
+  {
+    name: 'adgangsadresse_nedlagt',
     formatter: d
   },
   {

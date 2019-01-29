@@ -191,6 +191,12 @@ var fields = [
   {
     name: 'vejpunkt_ændret'
   },
+  {
+    name: 'ikrafttrædelse'
+  },
+  {
+    name: 'nedlagt'
+  }
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

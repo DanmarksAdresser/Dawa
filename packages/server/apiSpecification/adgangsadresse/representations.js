@@ -46,7 +46,11 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
   };
 });
 
-const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id', 'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret'];
+const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde',
+  'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y',
+  'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
+  'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn',
+  'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -135,13 +139,21 @@ exports.json = {
       }),
       'matrikelnr': normalizedFieldSchema('matrikelnr'),
       'esrejendomsnr': normalizedFieldSchema('esrejendomsnr'),
-      'historik' : schemaObject({
+      'historik': schemaObject({
         'description': 'Væsentlige tidspunkter for adgangsadressen',
         properties: {
           'oprettet': normalizedFieldSchema('oprettet'),
-          'ændret': normalizedFieldSchema('ændret')
+          'ændret': normalizedFieldSchema('ændret'),
+          ikrafttrædelse: {
+            description: 'Tidspunkt for adgangsadressens ikrafttrædelse, dvs. det tidspunkt hvor adgangsadressen har status "gældende". Kan være i fremtiden.'
+          },
+          nedlagt: {
+            description: 'Tidspunkt for adgangsadressens nedlæggelse eller henlæggelse, dvs. det tidspunkt' +
+            ' hvor adgangsadressen har status "nedlagt" eller "henlagt". Kan være i fremtiden.'
+          },
+
         },
-        docOrder: ['oprettet', 'ændret']
+        docOrder: ['oprettet', 'ændret', 'ikrafttrædelse', 'nedlagt']
 
       }),
       'adgangspunkt': schemaObject({
@@ -433,7 +445,9 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       adr.matrikelnr = maybeNull(rs.matrikelnr);
       adr.historik = {
         oprettet: d(rs.oprettet),
-        ændret: d(rs.ændret)
+        ændret: d(rs.ændret),
+        ikrafttrædelse: d(rs.ikrafttrædelse),
+        nedlagt: d(rs.nedlagt)
       };
       adr.adgangspunkt = {
         // af legacy årsager returnerer vi kun x,y koordinater

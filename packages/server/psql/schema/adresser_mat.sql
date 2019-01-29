@@ -7,10 +7,13 @@ CREATE VIEW adresser_mat_view AS
     dar1_status_til_dawa_status(e.status)   AS objekttype,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_adresse_history adr2
-     WHERE e.id = adr2.id AND e.status = 2) AS ikraftfra,
+     WHERE e.id = adr2.id)                  AS oprettet,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_adresse_history adr2
-     WHERE e.id = adr2.id)                  AS oprettet,
+     WHERE e.id = adr2.id AND e.status = 3) AS ikraftfra,
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
+     FROM dar1_adresse_history adr2
+     WHERE e.id = adr2.id AND e.status IN (4,5)) AS nedlagt,
     (SELECT MAX(lower(virkning)) AT TIME ZONE 'Europe/Copenhagen'
      FROM dar1_adresse_history h
      WHERE h.id = e.id AND lower(virkning) <= (SELECT virkning
@@ -22,6 +25,7 @@ CREATE VIEW adresser_mat_view AS
     a.oprettet                              AS a_oprettet,
     a.aendret                               AS a_aendret,
     a.ikraftfra                             AS a_ikraftfra,
+    a.nedlagt                               AS a_nedlagt,
     a.kommunekode,
     a.vejkode,
     a.husnr                                    husnr,

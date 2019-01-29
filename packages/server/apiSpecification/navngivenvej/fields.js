@@ -65,6 +65,12 @@ var fields = [
     name: 'visueltcenter_y'
   },
   {
+    name: 'ikrafttrædelse'
+  },
+  {
+    name: 'nedlagt'
+  },
+  {
     name: 'postnumre',
     multi: true
   },

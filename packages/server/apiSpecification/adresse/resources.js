@@ -52,6 +52,7 @@ module.exports = [
     propertyFilter: parameters.propertyFilter,
     husnrinterval: parameters.husnrinterval,
     includeInvalid: parameters.includeInvalid,
+    includeDeleted: parameters.includeDeleted,
     geomWithin: commonParameters.geomWithin,
     autocomplete: commonParameters.autocomplete,
     crs: commonParameters.crs,

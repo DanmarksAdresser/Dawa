@@ -280,17 +280,6 @@ const vejstykkePostnummerMaterialization = {
   ]
 };
 
-const navngivenvejMaterialiation = {
-  table: 'navngivenvej',
-  view: 'dar1_navngivenvej_view',
-  dependents: [
-    {
-      table: 'dar1_NavngivenVej_current',
-      columns: ['id']
-    }
-  ]
-};
-
 const vejpunktMaterialization = {
   table: 'vejpunkter',
   view: 'dar1_vejpunkter_view',
@@ -329,14 +318,7 @@ exports.dawaMaterializations = {
   adresse: enhedsadresserMaterialization,
   navngivenvej_postnummer: navngivenvejPostnummerMaterialization,
   vejstykke_postnummer: vejstykkePostnummerMaterialization,
-  navngivenvej: navngivenvejMaterialiation,
   vejpunkt: vejpunktMaterialization,
   navngivenvejkommunedel_postnummer: navngivenvejkommunedelPostnummerMaterialization,
   postnummer: postnumreMaterialization
 };
-
-exports.dawaMaterializationOrder =
-  ['vejstykke', 'postnummer', 'adgangsadresse', 'adresse', 'navngivenvej_postnummer', 'navngivenvej',
-    'vejpunkt', 'navngivenvejkommunedel_postnummer', 'vejstykke_postnummer'];
-
-assert(Object.keys(exports.dawaMaterializations).length === exports.dawaMaterializationOrder.length);

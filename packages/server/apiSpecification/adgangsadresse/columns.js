@@ -171,6 +171,9 @@ AND ST_DWithin(geom, (select geom from steder where id = ${stedIdAlias}), ${sted
   ikrafttrædelse: {
     select: selectIsoTimestamp('a_ikraftfra')
   },
+  nedlagt: {
+    select: selectIsoTimestamp('a_nedlagt')
+  },
   vejpunkt_nøjagtighed: {
     column: 'vejpunkt_noejagtighedsklasse'
   },

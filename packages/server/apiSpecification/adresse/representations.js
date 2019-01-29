@@ -49,7 +49,11 @@ exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs)
 // this should probably be refactored, so we explicitly control the order of fields, but for now we
 // just move kvh to the end.
 
-const FIELDS_AT_END = ['kvh', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde', 'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id', 'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret'];
+const FIELDS_AT_END = ['kvh', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kilde',
+  'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer',
+  'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
+  'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret',
+  'ikrafttrædelse', 'nedlagt', 'adgangsadresse_ikrafttrædelse', 'adgangsadresse_nedlagt'];
 
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
@@ -88,9 +92,16 @@ exports.json = {
         description: 'Væsentlige tidspunkter for adressen',
         properties: {
           oprettet: normalizedFieldSchema('oprettet'),
-          ændret: normalizedFieldSchema('ændret')
+          ændret: normalizedFieldSchema('ændret'),
+          ikrafttrædelse: {
+            description: 'Tidspunkt for adressens ikrafttrædelse, dvs. det tidspunkt hvor adressen har status "gældende". Kan være i fremtiden.'
+          },
+          nedlagt: {
+            description: 'Tidspunkt for adressens nedlæggelse eller henlæggelse, dvs. det tidspunkt' +
+            ' hvor adressen har status "nedlagt" eller "henlagt". Kan være i fremtiden.'
+          },
         },
-        docOrder: ['oprettet', 'ændret']
+        docOrder: ['oprettet', 'ændret', 'ikrafttrædelse', 'nedlagt']
       }),
       adgangsadresse: {
         description: 'Adressens adgangsadresse',
@@ -110,7 +121,9 @@ exports.json = {
       adr.href = makeHref(baseUrl, 'adresse', [rs.id]);
       adr.historik = {
         oprettet: d(rs.oprettet),
-        ændret: d(rs.ændret)
+        ændret: d(rs.ændret),
+        ikrafttrædelse: d(rs.ikrafttrædelse),
+        nedlagt: d(rs.nedlagt)
       };
       adr.etage = maybeNull(rs.etage);
       adr.dør = maybeNull(rs.dør);
@@ -122,7 +135,9 @@ exports.json = {
         id: rs.adgangsadresseid,
         status: rs.adgangsadresse_status,
         oprettet: rs.adgangsadresse_oprettet,
-        ændret: rs.adgangsadresse_ændret
+        ændret: rs.adgangsadresse_ændret,
+        ikrafttrædelse: rs.adgangsadresse_ikrafttrædelse,
+        nedlagt: rs.adgangsadresse_nedlagt
       });
       adr.adgangsadresse = adgangsadresseMapper(adgangsadresseUnmapped);
       return adr;

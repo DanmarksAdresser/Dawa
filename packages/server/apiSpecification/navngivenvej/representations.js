@@ -51,9 +51,15 @@ exports.json = {
         'description': 'Væsentlige tidspunkter for vejstykket',
         properties: {
           'oprettet': normalizedFieldSchema('oprettet'),
-          'ændret': normalizedFieldSchema('ændret')
+          'ændret': normalizedFieldSchema('ændret'),
+          'ikrafttrædelse': {
+            description: 'Tidspunktet for den navngivne vejs ikrafttrædelse (darstatus 3). Kan være fremtidig.'
+          },
+          nedlagt: {
+            description: 'Tidspunktet for den navngivne vejs nedlæggelse eller henlæggelse (darstatus 4 og 5). Kan være fremtidig.'
+          }
         },
-        docOrder: ['oprettet', 'ændret']
+        docOrder: ['oprettet', 'ændret', 'ikrafttrædelse', 'nedlagt']
 
       }),
       administrerendekommune: commonSchemaDefinitions.KommuneRef,
@@ -152,7 +158,9 @@ exports.json = {
         bbox: mapBbox(row),
         historik: {
           oprettet: d(row.oprettet),
-          ændret: d(row.ændret)
+          ændret: d(row.ændret),
+          ikrafttrædelse: d(row.ikrafttrædelse),
+          nedlagt: d(row.nedlagt)
         },
         vejstykker:
           (row.vejstykker || []).map(vejstykke => mapVejstykkeRef(vejstykke, baseUrl)),

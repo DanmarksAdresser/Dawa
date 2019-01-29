@@ -21,6 +21,12 @@ const columns = {
   ændret: {
     select: selectIsoTimestamp('ændret')
   },
+  ikrafttrædelse: {
+    select: selectIsoTimestamp('ikrafttrædelse')
+  },
+  nedlagt: {
+    select: selectIsoTimestamp('nedlagt')
+  },
   beliggenhed_oprindelse_registrering: {
     select: selectIsoTimestamp('beliggenhed_oprindelse_registrering')
   },
@@ -155,6 +161,7 @@ AND NOT (nv.id = ${idAlias})`);
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+  sqlParameterImpl.includeDeletedNavngivenVej,
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   sqlParameterImpl.geomWithin('nv.geom'),
@@ -168,7 +175,7 @@ var parameterImpls = [
 var baseQuery = function () {
   return {
     select: [],
-    from: ['navngivenvej nv'],
+    from: ['navngivenvej_mat nv'],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []

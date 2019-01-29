@@ -937,7 +937,9 @@ describe('Stable API', () => {
           "matrikelnr": null,
           "historik": {
             "oprettet": "2000-02-05T06:08:50.000",
-            "ændret": "2018-07-04T18:00:00.000"
+            "ændret": "2018-07-04T18:00:00.000",
+            "nedlagt": null,
+            "ikrafttrædelse": "2000-02-05T06:08:50.000"
           },
           "adgangspunkt": {
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
@@ -1028,6 +1030,8 @@ describe('Stable API', () => {
             "status": 1,
             "oprettet": "2000-02-05T06:08:50.000",
             "ændret": "2018-07-04T18:00:00.000",
+            "ikrafttrædelse": "2000-02-05T06:08:50.000",
+            "nedlagt": null,
             "vejkode": "0855",
             "vejnavn": "Brammingevej",
             "vejpunkt_id": "16147a6a-af45-11e7-847e-066cff24d637",
@@ -1115,6 +1119,8 @@ describe('Stable API', () => {
             "status": 1,
             "oprettet": "2000-02-05T21:40:29.000",
             "ændret": "2018-07-04T18:00:00.000",
+            "ikrafttrædelse": "2000-02-05T21:40:29.000",
+            "nedlagt": null,
             "vejkode": "0347",
             "vejnavn": "Jonstrupvej",
             "adresseringsvejnavn": "Jonstrupvej",
@@ -1217,7 +1223,9 @@ describe('Stable API', () => {
           "href": "http://dawa/adresser/0a3f50b3-a112-32b8-e044-0003ba298018",
           "historik": {
             "oprettet": "2000-02-05T06:08:50.000",
-            "ændret": "2000-02-05T06:08:50.000"
+            "ændret": "2000-02-05T06:08:50.000",
+            "nedlagt": null,
+            "ikrafttrædelse": "2000-02-05T06:08:50.000"
           },
           "etage": "1",
           "dør": "tv",
@@ -1259,7 +1267,9 @@ describe('Stable API', () => {
             "matrikelnr": null,
             "historik": {
               "oprettet": "2000-02-05T06:08:50.000",
-              "ændret": "2018-07-04T18:00:00.000"
+              "ændret": "2018-07-04T18:00:00.000",
+              "nedlagt": null,
+              "ikrafttrædelse": "2000-02-05T06:08:50.000"
             },
             "adgangspunkt": {
               "id": "0a3f5089-0408-32b8-e044-0003ba298018",
@@ -1351,6 +1361,8 @@ describe('Stable API', () => {
             "status": 1,
             "oprettet": "2000-02-05T06:08:50.000",
             "ændret": "2000-02-05T06:08:50.000",
+            "nedlagt": null,
+            "ikrafttrædelse": "2000-02-05T06:08:50.000",
             "vejkode": "0855",
             "vejnavn": "Brammingevej",
             "vejpunkt_id": "16147a6a-af45-11e7-847e-066cff24d637",
@@ -1393,6 +1405,8 @@ describe('Stable API', () => {
             "adgangsadresse_status": 1,
             "adgangsadresse_oprettet": "2000-02-05T06:08:50.000",
             "adgangsadresse_ændret": "2018-07-04T18:00:00.000",
+            "adgangsadresse_nedlagt": null,
+            "adgangsadresse_ikrafttrædelse": "2000-02-05T06:08:50.000",
             "regionskode": null,
             "regionsnavn": null,
             "jordstykke_ejerlavnavn": null,
@@ -1444,7 +1458,9 @@ describe('Stable API', () => {
           "udtaltvejnavn": "Gl. Assensvej",
           "historik": {
             "oprettet": "1900-01-01T12:00:00.000Z",
-            "ændret": "1900-01-01T12:00:00.000Z"
+            "ændret": "1900-01-01T12:00:00.000Z",
+            "ikrafttrædelse": "1900-01-01T12:00:00.000Z",
+            "nedlagt": null
           },
           "vejstykker": [
             {
@@ -1494,6 +1510,8 @@ describe('Stable API', () => {
           "darstatus": "gældende",
           "oprettet": "1900-01-01T12:00:00.000Z",
           "ændret": "1900-01-01T12:00:00.000Z",
+          "ikrafttrædelse": "1900-01-01T12:00:00.000Z",
+          "nedlagt": null,
           "navn": "Gl. Assensvej",
           "adresseringsnavn": "Gl. Assensvej",
           "administrerendekommunekode": "0420",
@@ -1548,6 +1566,8 @@ describe('Stable API', () => {
             "darstatus": "gældende",
             "oprettet": "1900-01-01T12:00:00.000Z",
             "ændret": "1900-01-01T12:00:00.000Z",
+            "ikrafttrædelse": "1900-01-01T12:00:00.000Z",
+            "nedlagt": null,
             "navn": "Gl. Assensvej",
             "adresseringsnavn": "Gl. Assensvej",
             "administrerendekommunekode": "0420",

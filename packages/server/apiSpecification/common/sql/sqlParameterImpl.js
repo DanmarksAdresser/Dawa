@@ -360,6 +360,12 @@ exports.includeInvalidAdgangsadresser = function (sqlParts, params) {
   }
 };
 
+exports.includeDeletedNavngivenVej = (sqlParts, params) => {
+  if (!params.medtagnedlagte) {
+    dbapi.addWhereClause(sqlParts, 'nv.darstatus in (2,3)')
+  }
+};
+
 exports.includeDeletedAdgangsAdresses = (sqlParts, params) => {
   if (!params.medtagnedlagte) {
     dbapi.addWhereClause(sqlParts, 'a_objekttype in (1,3)')

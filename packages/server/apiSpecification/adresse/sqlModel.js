@@ -28,6 +28,9 @@ var columns = {
   ikrafttrædelse: {
     select: selectIsoTimestamp('e_ikraftfra')
   },
+  nedlagt: {
+    select: selectIsoTimestamp('e_nedlagt')
+  },
   adgangsadresseid: {
     column: 'a_id'
   },
@@ -63,6 +66,9 @@ var columns = {
   },
   adgangsadresse_ikrafttrædelse: {
     select: selectIsoTimestamp('a_ikraftfra')
+  },
+  adgangsadresse_nedlagt: {
+    select: selectIsoTimestamp('a_nedlagt')
   },
   stedid: adgangsadresseColumns.stedid,
   bebyggelsesid: adgangsadresseColumns.bebyggelsesid,

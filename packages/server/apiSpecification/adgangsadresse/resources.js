@@ -51,6 +51,7 @@ module.exports = [
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     includeInvalid: parameters.includeInvalid,
+    includeDeleted: parameters.includeDeleted,
     crs: commonParameters.crs,
     husnrinterval: parameters.husnrinterval,
     geomWithin: commonParameters.geomWithin,

@@ -1,11 +1,18 @@
-DROP VIEW IF EXISTS dar1_navngivenvej_view CASCADE;
-CREATE VIEW dar1_navngivenvej_view AS
+DROP VIEW IF EXISTS navngivenvej_mat_view CASCADE;
+CREATE VIEW navngivenvej_mat_view AS
   SELECT
     n.id,
     n.status                                                                        AS darstatus,
     (SELECT min(lower(virkning))
      FROM dar1_navngivenvej_history nh
      WHERE nh.id = n.id)                                                            AS oprettet,
+    (SELECT min(lower(virkning))
+     FROM dar1_navngivenvej_history nh
+     WHERE nh.id = n.id AND status =
+                            3)                                                      AS ikrafttrædelse,
+    (SELECT min(lower(virkning))
+     FROM dar1_navngivenvej_history nh
+     WHERE nh.id = n.id AND status IN (4, 5))                                       AS nedlagt,
     (SELECT MAX(lower(virkning))
      FROM dar1_navngivenvej_history nh
      WHERE nh.id = n.id AND lower(virkning) <= (SELECT virkning
@@ -25,5 +32,4 @@ CREATE VIEW dar1_navngivenvej_view AS
     vejnavnebeliggenhed_vejnavneområde                                              AS beliggenhed_vejnavneområde,
     vejnavnebeliggenhed_vejtilslutningspunkter                                      AS beliggenhed_vejtilslutningspunkter,
     COALESCE(vejnavnebeliggenhed_vejnavnelinje, vejnavnebeliggenhed_vejnavneområde) AS geom
-  FROM dar1_navngivenvej_current n
-  WHERE n.status IN (2, 3);
+  FROM dar1_navngivenvej_current n;

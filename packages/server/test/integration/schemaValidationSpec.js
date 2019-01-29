@@ -36,11 +36,7 @@ var valuesNeverExpectedToBeSeen = {
       navn: true
     },
     matrikelnr: true,
-    esrejendomsnr: true,
-    historik: {
-      oprettet: true,
-      ændret: true
-    }
+    esrejendomsnr: true
   },
   adresser: {
     matrikelnr: true,
@@ -52,10 +48,6 @@ var valuesNeverExpectedToBeSeen = {
       },
       matrikelnr: true,
       esrejendomsnr: true
-    },
-    historik: {
-      oprettet: true,
-      ændret: true
     }
   },
   navngivneveje: {
@@ -65,6 +57,9 @@ var valuesNeverExpectedToBeSeen = {
         type: true,
         coordinates: true
       }
+    },
+    historik: {
+      nedlagt: true
     }
   }
 };
@@ -151,7 +146,7 @@ describe('Validering af JSON-formatteret output', function() {
       var schema = jsonRepresentation.schema;
       var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
       return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
-        const rows = yield sqlModel.processQuery(client, _.pluck(jsonRepresentation.fields, 'name'), {});
+        const rows = yield sqlModel.processQuery(client, _.pluck(jsonRepresentation.fields, 'name'), {medtagnedlagte: true});
         rows.forEach(function (row) {
           var json = mapper(row);
           recordVisitedValues(json, schema, valuesSeen);
