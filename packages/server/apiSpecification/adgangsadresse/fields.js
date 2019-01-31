@@ -26,6 +26,9 @@ var fields = [
     selectable: false
   },
   normalizedField('status'),
+  {
+    name: 'darstatus'
+  },
   normalizedField('oprettet'),
   normalizedField('ændret'),
   normalizedField('vejkode'),

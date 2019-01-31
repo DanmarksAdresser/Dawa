@@ -53,7 +53,7 @@ const FIELDS_AT_END = ['kvh', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpun
   'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y', 'afstemningsområdenummer',
   'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
   'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret',
-  'ikrafttrædelse', 'nedlagt', 'adgangsadresse_ikrafttrædelse', 'adgangsadresse_nedlagt'];
+  'ikrafttrædelse', 'nedlagt', 'adgangsadresse_ikrafttrædelse', 'adgangsadresse_nedlagt', 'adgangsadresse_darstatus', 'darstatus'];
 
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
@@ -82,6 +82,10 @@ exports.json = {
         type: 'string'
       },
       status: normalizedFieldSchema('status'),
+      darstatus: {
+        description: 'Aadressens status angivet ved statuskode i DAR. 2=Føreløbig, 3=Gældende, 4=Nedlagt, 5=Henlagt',
+        type: 'integer'
+      },
       etage: normalizedFieldSchema('etage'),
       dør: normalizedFieldSchema('dør'),
       adressebetegnelse: {
@@ -108,7 +112,7 @@ exports.json = {
         $ref: '#/definitions/Adgangsadresse'
       }
     },
-    docOrder: ['href','id', 'kvhx', 'status', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
+    docOrder: ['href','id', 'kvhx', 'status', 'darstatus', 'etage', 'dør', 'adressebetegnelse', 'historik', 'adgangsadresse'],
     definitions: adresseDefinitions
   }),
   mapper: function(baseUrl, params, singleResult) {
@@ -118,6 +122,7 @@ exports.json = {
       adr.id = rs.id;
       adr.kvhx = kvhxFormat(rs);
       adr.status = rs.status;
+      adr.darstatus = rs.darstatus;
       adr.href = makeHref(baseUrl, 'adresse', [rs.id]);
       adr.historik = {
         oprettet: d(rs.oprettet),
@@ -134,6 +139,7 @@ exports.json = {
       _.extend(adgangsadresseUnmapped,{
         id: rs.adgangsadresseid,
         status: rs.adgangsadresse_status,
+        darstatus: rs.adgangsadresse_darstatus,
         oprettet: rs.adgangsadresse_oprettet,
         ændret: rs.adgangsadresse_ændret,
         ikrafttrædelse: rs.adgangsadresse_ikrafttrædelse,

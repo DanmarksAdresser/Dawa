@@ -29,7 +29,7 @@ const createChangeTables = (client)=> go(function*() {
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
   'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
-    'hoejde_importer_afventer', 'navngivenvej_mat'];
+    'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter'];
   for(let table of tableNames) {
     yield createChangeTable(client, tableModel.tables[table]);
   }
@@ -68,7 +68,9 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'vejpunkter', init: false},
   {name: 'ejerlav', init: false},
   {name: 'ejerlav_ts'},
+  {name: 'vejmidter', init: false},
   {name: 'navngivenvej_mat', init: false},
+  {name: 'navngivenvejkommunedel_mat', init: false},
   {name: 'adgangsadresser_mat', init: false },
   {name: 'adresser_mat', init: false },
   {name: 'navngivenvejkommunedel_postnr_mat', init: false},
@@ -79,7 +81,6 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar1_changelog', init: false},
   {name: 'dar1_postnumre_view', type: 'view'},
   {name: 'dar1_vejstykker_view', type: 'view'},
-  {name: 'dar1_adgangsadresser_view', type: 'view'},
   {name: 'dar1_enhedsadresser_view', type: 'view'},
   {name: 'dar1_navngivenvej_postnummer_view', type: 'view'},
   {name: 'dar1_vejstykkerpostnumremat_view', type: 'view'},

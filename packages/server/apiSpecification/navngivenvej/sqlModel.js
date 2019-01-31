@@ -31,8 +31,8 @@ const columns = {
     select: selectIsoTimestamp('beliggenhed_oprindelse_registrering')
   },
   vejstykker: {
-    select: `(SELECT json_agg(json_build_object('kommunekode', v.kommunekode, 'kode', v.kode, 'id', v.navngivenvejkommunedel_id))
-    FROM vejstykker v
+    select: `(SELECT json_agg(json_build_object('kommunekode', v.kommunekode, 'kode', v.kode, 'id', v.id))
+    FROM navngivenvejkommunedel_mat v
     WHERE v.navngivenvej_id = nv.id)`
   },
   administrerendekommunekode: {

@@ -6,13 +6,20 @@ var sqlUtil = require('../common/sql/sqlUtil');
 
 var selectIsoTimestamp = sqlUtil.selectIsoDate;
 const postgisUtil = require('../common/sql/postgisSqlUtil');
-
+const {bbrStatusTilDar} = require('../util');
 module.exports = {
   id: {
     column: 'a_id'
   },
   status: {
-    column: 'a_objekttype'
+    select: 'dar1_status_til_dawa_status(a_status)',
+    where: (sqlParts, bbrStatus) => {
+      const alias = dbapi.addSqlParameter(sqlParts, bbrStatusTilDar(bbrStatus));
+      dbapi.addWhereClause(sqlParts, `a_status = ${alias}`);
+    }
+  },
+  darstatus: {
+    column: 'a_status'
   },
   husnr: sqlUtil.husnrColumn,
   etrs89koordinat_øst: {
@@ -50,27 +57,17 @@ AND ST_DWithin(geom, (select geom from steder where id = ${stedIdAlias}), ${sted
       }
     }
   },
+  ejerlavkode: {
+    column: 'jordstykke_ejerlavkode'
+  },
+  matrikelnr: {
+    column: 'jordstykke_matrikelnr'
+  },
+  ejerlavnavn: {
+    column: 'jordstykke_ejerlavnavn'
+  },
   esrejendomsnr: {
-    select: 'esrejendomsnr',
-    where: function (sqlParts, parameterArray) {
-      // this is a bit hackish, we add the parameters from
-      // the parent query to the subquery to get
-      // correct parameter indices for the subquery
-      const subquery = {
-        select: ["*"],
-        from: ['jordstykker_adgadr jt NATURAL JOIN jordstykker'],
-        whereClauses: [`a_id  = jt.adgangsadresse_id`],
-        orderClauses: [],
-        sqlParams: sqlParts.sqlParams
-      };
-      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
-        name: 'esrejendomsnr',
-        multi: true
-      }], {});
-      propertyFilterFn(subquery, {esrejendomsnr: parameterArray});
-      var subquerySql = dbapi.createQuery(subquery).sql;
-      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
-    }
+    column: 'jordstykke_esrejendomsnr'
   },
   bebyggelsesid: {
     select: null,

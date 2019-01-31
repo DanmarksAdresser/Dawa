@@ -48,8 +48,7 @@ const createHeightImporter = ({ filePath }) => {
     description: 'Height CSV importer',
     execute,
     requires: [],
-    produces: ['hoejde_importer_resultater', 'hoejde_importer_afventer'],
-    pure: false
+    produces: ['hoejde_importer_resultater', 'hoejde_importer_afventer']
   };
 };
 

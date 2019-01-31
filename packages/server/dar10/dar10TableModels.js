@@ -1,7 +1,5 @@
 "use strict";
 
-const assert = require('assert');
-
 const _ = require('underscore');
 
 const spec = require('./spec');
@@ -159,73 +157,6 @@ exports.currentTableMaterializations = entityNames.reduce((memo, entityName) => 
   return memo;
 }, {});
 
-const adgangsadresserMaterialization = {
-  table: 'adgangsadresser',
-  view: 'dar1_adgangsadresser_view',
-  excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'placering',
-    'husnummerkilde', 'esdhreference', 'journalnummer'],
-  dependents: [
-    {
-      table: 'dar1_Husnummer_current',
-      columns: ['id']
-    },
-    {
-      table: 'dar1_DARKommuneinddeling_current',
-      columns: ['darkommuneinddeling_id']
-    },
-    {
-      table: 'dar1_NavngivenVej_current',
-      columns: ['navngivenvej_id']
-    },
-    {
-      table: 'dar1_NavngivenVejKommunedel_current',
-      columns: ['navngivenvejkommunedel_id']
-    },
-    {
-      table: 'dar1_Postnummer_current',
-      columns: ['postnummer_id']
-    },
-    {
-      table: 'dar1_Adressepunkt_current',
-      columns: ['adressepunkt_id']
-    },
-    {
-      table: 'dar1_SupplerendeBynavn_current',
-      columns: ['supplerendebynavn_id']
-    },
-    {
-      table: 'hoejder',
-      columns: ['id']
-    }
-  ]
-};
-
-const vejstykkerMaterialization = {
-  table: 'vejstykker',
-  view: 'dar1_vejstykker_view',
-  excludedColumns: ['oprettet', 'aendret', 'geom', 'bbox', 'visueltcenter'],
-  dependents: [
-    {
-      table: 'dar1_NavngivenVej_current',
-      columns: ['navngivenvej_id']
-    },
-    {
-      table: 'dar1_NavngivenVejKommunedel_current',
-      columns: ['navngivenvejkommunedel_id']
-    }
-  ]
-};
-
-const enhedsadresserMaterialization = {
-  table: 'enhedsadresser',
-  view: 'dar1_enhedsadresser_view',
-  excludedColumns: ['ikraftfra', 'esdhreference', 'journalnummer', 'kilde'],
-  dependents: [{
-    table: 'dar1_Adresse_current',
-    columns: ['id']
-  }]
-};
-
 const navngivenvejPostnummerMaterialization = {
   table: 'navngivenvej_postnummer',
   view: 'dar1_navngivenvej_postnummer_view',
@@ -313,9 +244,6 @@ const postnumreMaterialization = {
 };
 
 exports.dawaMaterializations = {
-  vejstykke: vejstykkerMaterialization,
-  adgangsadresse: adgangsadresserMaterialization,
-  adresse: enhedsadresserMaterialization,
   navngivenvej_postnummer: navngivenvejPostnummerMaterialization,
   vejstykke_postnummer: vejstykkePostnummerMaterialization,
   vejpunkt: vejpunktMaterialization,

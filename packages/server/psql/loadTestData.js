@@ -41,6 +41,10 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     return q.async(function* () {
       // load schemas
       yield initialization.loadSchemas(client, scriptDir);
+      yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
+        yield loadCsvTestdata(client, txid, path.join(__dirname, '../test/data'));
+      }));
+      // CSV test data
       // run init functions
       yield initialization.disableTriggersAndInitializeTables(client);
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
@@ -56,7 +60,6 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
         yield importHeightsImpl.importHeights(client, txid, path.join(__dirname, '../test/data/hoejder.csv'));
       }));
-      yield loadCsvTestdata(client, path.join(__dirname, '../test/data'));
       client.allowParallelQueries = true;
       yield generateHistoryImpl.generateHistory(client, '2018-05-04T00:00:00.000Z');
       client.allowParallelQueries = false;

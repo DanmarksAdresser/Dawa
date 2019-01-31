@@ -2,7 +2,7 @@ DROP VIEW IF EXISTS adresser CASCADE;
 CREATE OR REPLACE VIEW adresser AS
   SELECT
     A.id as e_id,
-    A.objekttype as e_objekttype,
+    A.status as e_status,
     A.oprettet as e_oprettet,
     A.ikraftfra as e_ikraftfra,
     A.aendret as e_aendret,
@@ -11,7 +11,7 @@ CREATE OR REPLACE VIEW adresser AS
     A.doer,
     A.adgangspunktkilde as kilde,
     A.adgangsadresseid as a_id,
-    A.objekttype as a_objekttype,
+    A.status as a_status,
     A.husnr,
     A.supplerendebynavn,
     A.supplerendebynavn_dagi_id,
@@ -59,10 +59,6 @@ CREATE OR REPLACE VIEW adresser AS
     T.zone,
     T.menighedsrådsafstemningsområdenummer,
     T.menighedsrådsafstemningsområdenavn,
-    A.ejerlavkode,
-    A.ejerlavnavn,
-    A.matrikelnr,
-    A.esrejendomsnr,
     JA.ejerlavkode as jordstykke_ejerlavkode,
     JA.matrikelnr as jordstykke_matrikelnr,
     JS_E.navn as jordstykke_ejerlavnavn,

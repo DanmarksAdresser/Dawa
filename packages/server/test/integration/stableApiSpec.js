@@ -882,6 +882,7 @@ describe('Stable API', () => {
         value: {
           "id": "0a3f5089-0408-32b8-e044-0003ba298018",
           "status": 1,
+          "darstatus": 3,
           "vejkode": "0855",
           "vejnavn": "Brammingevej",
           "adresseringsvejnavn": "Brammingevej",
@@ -905,6 +906,7 @@ describe('Stable API', () => {
           "id": "0a3f5089-0408-32b8-e044-0003ba298018",
           "kvh": "04610855__18",
           "status": 1,
+          "darstatus": 3,
           "vejstykke": {
             "href": "http://dawa/vejstykker/461/855",
             "navn": "Brammingevej",
@@ -1028,6 +1030,7 @@ describe('Stable API', () => {
           "properties": {
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
             "status": 1,
+            "darstatus": 3,
             "oprettet": "2000-02-05T06:08:50.000",
             "ændret": "2018-07-04T18:00:00.000",
             "ikrafttrædelse": "2000-02-05T06:08:50.000",
@@ -1117,6 +1120,7 @@ describe('Stable API', () => {
           "properties": {
             "id": "0a3f5081-c394-32b8-e044-0003ba298018",
             "status": 1,
+            "darstatus": 3,
             "oprettet": "2000-02-05T21:40:29.000",
             "ændret": "2018-07-04T18:00:00.000",
             "ikrafttrædelse": "2000-02-05T21:40:29.000",
@@ -1140,10 +1144,10 @@ describe('Stable API', () => {
             "stormodtagerpostnrnavn": null,
             "kommunekode": "0350",
             "kommunenavn": "Lejre",
-            "ejerlavkode": null,
-            "ejerlavnavn": null,
-            "matrikelnr": null,
-            "esrejendomsnr": null,
+            "ejerlavkode": 60851,
+            "ejerlavnavn": "Borup, Osted",
+            "matrikelnr": "1a",
+            "esrejendomsnr": "8571",
             "adgangspunktid": "0a3f5081-c394-32b8-e044-0003ba298018",
             "etrs89koordinat_øst": 685289.88,
             "etrs89koordinat_nord": 6158701.41,
@@ -1195,6 +1199,7 @@ describe('Stable API', () => {
         value: {
           "id": "0a3f50b3-a112-32b8-e044-0003ba298018",
           "status": 1,
+          "darstatus": 3,
           "vejkode": "0855",
           "vejnavn": "Brammingevej",
           "adresseringsvejnavn": "Brammingevej",
@@ -1220,6 +1225,7 @@ describe('Stable API', () => {
           "id": "0a3f50b3-a112-32b8-e044-0003ba298018",
           "kvhx": "04610855__18__1__tv",
           "status": 1,
+          "darstatus": 3,
           "href": "http://dawa/adresser/0a3f50b3-a112-32b8-e044-0003ba298018",
           "historik": {
             "oprettet": "2000-02-05T06:08:50.000",
@@ -1235,6 +1241,7 @@ describe('Stable API', () => {
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
             "kvh": "04610855__18",
             "status": 1,
+            "darstatus": 3,
             "vejstykke": {
               "href": "http://dawa/vejstykker/461/855",
               "navn": "Brammingevej",
@@ -1359,6 +1366,7 @@ describe('Stable API', () => {
           "properties": {
             "id": "0a3f50b3-a112-32b8-e044-0003ba298018",
             "status": 1,
+            "darstatus": 3,
             "oprettet": "2000-02-05T06:08:50.000",
             "ændret": "2000-02-05T06:08:50.000",
             "nedlagt": null,
@@ -1403,6 +1411,7 @@ describe('Stable API', () => {
             "adressepunktændringsdato": "2009-02-11T23:59:00.000",
             "adgangsadresseid": "0a3f5089-0408-32b8-e044-0003ba298018",
             "adgangsadresse_status": 1,
+            "adgangsadresse_darstatus": 3,
             "adgangsadresse_oprettet": "2000-02-05T06:08:50.000",
             "adgangsadresse_ændret": "2018-07-04T18:00:00.000",
             "adgangsadresse_nedlagt": null,

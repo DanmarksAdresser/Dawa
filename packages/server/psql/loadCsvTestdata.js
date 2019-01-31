@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 
 const {go} = require('ts-csp');
+const { initializeChangeTable } = require('@dawadk/import-util/src/table-diff');
+const tableSchema  = require('./tableModel');
 
 
 function getColumnsFromCsv(file) {
@@ -17,7 +19,7 @@ function copyCsvToTable(client, table, csvFile, columns) {
 }
 
 
-module.exports = (client, dataDir) => go(function* () {
+module.exports = (client, txid, dataDir) => go(function* () {
 
   for (let table of ['dar_adgangspunkt', 'dar_husnummer', 'dar_adresse', 'dar_vejnavn', 'dar_postnr',
     'dar_supplerendebynavn', 'cpr_vej', 'cpr_postnr']) {
@@ -25,18 +27,9 @@ module.exports = (client, dataDir) => go(function* () {
     const columns = getColumnsFromCsv(file);
     yield copyCsvToTable(client, table, file, columns);
   }
-  yield client.queryp(`CREATE TEMP TABLE vejstykker_geom (
-  kommunekode integer NOT NULL,
-  kode integer NOT NULL,
-  geom  geometry(MULTILINESTRINGZ, 25832),
-  PRIMARY KEY(kommunekode, kode)
-);`);
   yield copyCsvToTable(client,
-    'vejstykker_geom',
+    'vejmidter',
     path.resolve(path.join(dataDir, 'vejstykker_geom.csv')),
     ['kommunekode', 'kode', 'geom']);
-  yield client.queryp(
-    `UPDATE vejstykker v SET geom = g.geom FROM vejstykker_geom g
-         WHERE v.kommunekode = g.kommunekode AND v.kode = g.kode`);
-
+  yield initializeChangeTable(client, txid, tableSchema.tables.vejmidter);
 });

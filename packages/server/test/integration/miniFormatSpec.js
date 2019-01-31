@@ -32,6 +32,7 @@ describe('Mini-format', () => {
       expect(result[0]).to.deep.equal({
         "id": "0a3f5081-c2b5-32b8-e044-0003ba298018",
         "status": 1,
+        "darstatus": 3,
         "vejkode": "0298",
         "vejnavn": "Hovedvejen",
         "adresseringsvejnavn": "Hovedvejen",
@@ -53,6 +54,7 @@ describe('Mini-format', () => {
       expect(result[0]).to.deep.equal({
         "id": "0a3f50ab-a7fe-32b8-e044-0003ba298018",
         "status": 1,
+        "darstatus": 3,
         "vejkode": "0298",
         "vejnavn": "Hovedvejen",
         "adresseringsvejnavn": "Hovedvejen",
@@ -79,6 +81,7 @@ describe('Mini-format', () => {
       expect(result[0]).to.deep.equal({
         "id": "0a3f5081-c2b5-32b8-e044-0003ba298018",
         "status": "1",
+        "darstatus": "3",
         "vejkode": "0298",
         "vejnavn": "Hovedvejen",
         "adresseringsvejnavn": "Hovedvejen",
@@ -102,6 +105,7 @@ describe('Mini-format', () => {
       expect(result[0]).to.deep.equal({
         "id": "0a3f50ab-a7fe-32b8-e044-0003ba298018",
         "status": "1",
+        "darstatus": "3",
         "vejkode": "0298",
         "vejnavn": "Hovedvejen",
         "adresseringsvejnavn": "Hovedvejen",
@@ -138,6 +142,7 @@ describe('Mini-format', () => {
         "properties": {
           "id": "0a3f5081-c2b5-32b8-e044-0003ba298018",
           "status": 1,
+          "darstatus": 3,
           "vejkode": "0298",
           "vejnavn": "Hovedvejen",
           "adresseringsvejnavn": "Hovedvejen",
@@ -170,6 +175,7 @@ describe('Mini-format', () => {
         "properties": {
           "id": "0a3f50ab-a7fe-32b8-e044-0003ba298018",
           "status": 1,
+          "darstatus": 3,
           "vejkode": "0298",
           "vejnavn": "Hovedvejen",
           "adresseringsvejnavn": "Hovedvejen",

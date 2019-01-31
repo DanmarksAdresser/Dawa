@@ -8,8 +8,7 @@ CREATE VIEW adgangsadresser_mat_view AS
     hn.husnummertekst                AS husnr,
     sb.navn                           AS supplerendebynavn,
     p.postnr,
-    dar1_status_til_dawa_status(hn.status)
-                                     AS objekttype,
+    hn.status,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_husnummer_history hn2
      WHERE hn.id = hn2.id)
@@ -67,12 +66,7 @@ CREATE VIEW adgangsadresser_mat_view AS
     vp.oprindelse_nøjagtighedsklasse AS vejpunkt_noejagtighedsklasse,
     vp.oprindelse_tekniskstandard AS vejpunkt_tekniskstandard,
     vp.oprindelse_registrering AT TIME ZONE 'Europe/Copenhagen' as vejpunkt_ændret,
-    A.ejerlavkode,
-    A.matrikelnr,
-    A.esrejendomsnr,
-    A.placering,
-    H.hoejde,
-    E.navn as ejerlavnavn
+    H.hoejde
 
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k
@@ -94,6 +88,4 @@ CREATE VIEW adgangsadresser_mat_view AS
       ON hn.darmenighedsrådsafstemningsområde_id = mr.id
     LEFT JOIN dar1_adressepunkt_current vp ON hn.vejpunkt_id = vp.id
     LEFT JOIN stormodtagere AS S ON hn.id = S.adgangsadresseid
-    LEFT JOIN adgangsadresser A ON hn.id = A.id
-    LEFT JOIN Ejerlav E ON A.ejerlavkode = E.kode
     LEFT JOIN hoejder H ON hn.id = H.husnummerid;

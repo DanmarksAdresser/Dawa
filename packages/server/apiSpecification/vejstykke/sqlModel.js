@@ -12,7 +12,7 @@ var selectIsoTimestamp = sqlUtil.selectIsoDate;
 
 var columns = {
   id: {
-    column: 'vejstykker.navngivenvejkommunedel_id'
+    column: 'vejstykker.id'
   },
   kode: {
     column: 'vejstykker.kode'
@@ -24,7 +24,7 @@ var columns = {
     select: selectIsoTimestamp('vejstykker.oprettet')
   },
   ændret: {
-    select: selectIsoTimestamp('vejstykker.aendret')
+    select: 'null::text'
   },
   kommunenavn: {
     select: "k.navn",
@@ -89,7 +89,7 @@ const distanceParameterImpl = (sqlParts, params) => {
     const kommunekodeAlias = dbapi.addSqlParameter(sqlParts, params.neighborkommunekode);
     const vejkodeAlias = dbapi.addSqlParameter(sqlParts, params.neighborkode);
     const afstandAlias = dbapi.addSqlParameter(sqlParts, params.afstand);
-    sqlParts.from.push(`, vejstykker v2`);
+    sqlParts.from.push(`, navngivenvejkommunedel_mat v2`);
     dbapi.addWhereClause(sqlParts, `\
 v2.kommunekode = ${kommunekodeAlias} \
 AND v2.kode = ${vejkodeAlias} \
@@ -130,7 +130,7 @@ var parameterImpls = [
 var baseQuery = function() {
   return {
     select: [],
-    from: [`vejstykker
+    from: [`navngivenvejkommunedel_mat vejstykker
       LEFT JOIN kommuner k ON (vejstykker.kommunekode = k.kode)
       LEFT JOIN navngivenvej nv ON vejstykker.navngivenvej_id = nv.id`],
     whereClauses: [],

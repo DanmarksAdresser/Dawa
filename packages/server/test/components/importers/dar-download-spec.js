@@ -53,6 +53,10 @@ describe('Import af DAR 1.0 udtræk', function () {
         const count = (yield client.queryRows(`SELECT COUNT(*)::integer as c FROM ${table} `))[0].c;
         expect(count).to.be.greaterThan(1);
       }
+      for(let table of ['vejstykker', 'navngivenvej', 'adgangsadresser', 'enhedsadresser']) {
+        const count = (yield client.queryRows(`SELECT COUNT(*)::integer as c FROM ${table} `))[0].c;
+        expect(count).to.be.greaterThan(1);
+      }
     }));
 
     it('Kan finde højeste eventid i udtræk', q.async(function* () {

@@ -1,7 +1,14 @@
--- Init function
-DROP FUNCTION IF EXISTS enhedsadresser_init() CASCADE;
--- Trigger which maintains the tsv column
-DROP FUNCTION IF EXISTS enhedsadresser_tsv_update() CASCADE;
-
--- Triggers which maintains the tsv column when adgangs changes
-DROP FUNCTION IF EXISTS enhedsadresser_tsv_update_on_adgangsadresse() CASCADE;
+DROP VIEW IF EXISTS dar1_enhedsadresser_view CASCADE;
+DROP VIEW IF EXISTS enhedsadresser_view;
+CREATE VIEW enhedsadresser_view AS
+  SELECT
+    id,
+    adgangsadresseid,
+    dar1_status_til_dawa_status(status) AS objekttype,
+    oprettet,
+    aendret,
+    ikraftfra,
+    etage,
+    doer
+  FROM adresser_mat
+  WHERE status IN (2, 3);

@@ -65,6 +65,16 @@ exports.adressebetegnelse = function(adresseFields, adgangOnly) {
   return adresse;
 };
 
+exports.bbrStatusTilDar = (bbrStatus) => {
+  switch(bbrStatus) {
+    case 1: return 3;
+    case 2: return 4;
+    case 3: return 2;
+    case 4: return 5;
+    default: return null;
+  }
+};
+
 exports.d = function(date) {
   if(typeof date === 'string') {
     return date;

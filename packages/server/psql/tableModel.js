@@ -6,38 +6,93 @@ const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equal
 const dar10TableModels = require('../dar10/dar10TableModels');
 
 const deriveNullableBbox = table => `CASE WHEN st_geometrytype(st_envelope(${table}.geom)) = 'ST_Polygon' THEN st_envelope(${table}.geom) ELSE null END`;
+
 const vejstykker = {
   entity: 'vejstykke',
   table: 'vejstykker',
   primaryKey: ['kommunekode', 'kode'],
-  columns: [{
-    name: 'kommunekode'
-  }, {
-    name: 'kode'
-  }, {
-    name: 'oprettet'
-  }, {
-    name: 'aendret'
-  }, {
-    name: 'vejnavn'
-  }, {
-    name: 'adresseringsnavn'
-  }, {
-    name: 'tsv',
-    public: false,
-    derive: (table) => {
-      return `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`;
-    }
-
-  },
+  columns: [
     {
-      name: 'geom',
-      public: false
+      name: 'kommunekode'
+    },
+    {
+      name: 'kode'
+    },
+    {
+      name: 'oprettet'
+    },
+    {
+      name: 'aendret'
+    },
+    {
+      name: 'vejnavn'
+    },
+    {
+      name: 'adresseringsnavn'
     },
     {
       name: 'navngivenvej_id'
     }, {
       name: 'navngivenvejkommunedel_id'
+    }]
+};
+
+const vejmidter = {
+  table: 'vejmidter',
+  primaryKey: ['kommunekode', 'kode'],
+  columns: [
+    {
+      name: 'kommunekode'
+    },
+    {
+      name: 'kode'
+    },
+    {
+      name: 'geom',
+      distinctClause: geomDistinctClause
+    }
+    ]
+
+};
+
+const navngivenvejkommunedel_mat = {
+  table: 'navngivenvejkommunedel_mat',
+  primaryKey: ['id'],
+  columns: [
+    {
+      name: 'id'
+    },
+    {
+      name: 'darstatus'
+    },
+    {
+      name: 'kommunekode'
+    },
+    {
+      name: 'kode'
+    },
+    {
+      name: 'oprettet'
+    },
+    {
+      name: 'vejnavn'
+    },
+    {
+      name: 'adresseringsnavn'
+    },
+    {
+      name: 'tsv',
+      derive: (table) => {
+        return `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`;
+      }
+
+    },
+    {
+      name: 'geom',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'navngivenvej_id'
     }]
 };
 
@@ -225,32 +280,7 @@ const navngivenvej = {
     {name: 'beliggenhed_oprindelse_kilde'},
     {name: 'beliggenhed_oprindelse_nøjagtighedsklasse'},
     {name: 'beliggenhed_oprindelse_registrering'},
-    {name: 'beliggenhed_oprindelse_tekniskstandard'},
-    {
-      name: 'beliggenhed_vejnavnelinje',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'beliggenhed_vejnavneområde',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'beliggenhed_vejtilslutningspunkter',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'bbox',
-      derive: deriveNullableBbox
-    },
-    {
-      name: 'visueltcenter',
-      derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
-    },
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause,
-      public: false
-    }
+    {name: 'beliggenhed_oprindelse_tekniskstandard'}
   ]
 };
 
@@ -457,7 +487,9 @@ const vejstykkerpostnumremat = {
 
 const postnrTsVector = (nr, navn) => `to_tsvector('adresser', coalesce(to_char(${nr}, '0000'), '') || ' ' || coalesce(${navn}, ''))`;
 
-const adgangansadresserMatFieldsNotCopiedFromAdgangsadresser = ['esdhreference', 'journalnummer', 'husnummerkilde'];
+const adgangansadresserMatFieldsNotCopiedFromAdgangsadresser = [
+  'esdhreference', 'journalnummer', 'husnummerkilde', 'objekttype', 'ejerlavkode', 'matrikelnr',
+  'placering', 'esrejendomsnr'];
 
 const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
   `(${postnrTsVector(nr, navn)}::text || ' ' || ${postnrTsVector(stormodtagernr, stormodtagernavn)}::text)::tsvector`
@@ -465,7 +497,7 @@ const adgangsadresser_mat = {
   table: 'adgangsadresser_mat',
   primaryKey: ['id'],
   columns: [...adgangsadresser.columns.filter(col => !adgangansadresserMatFieldsNotCopiedFromAdgangsadresser.includes(col.name)),
-    {name: 'ejerlavnavn'},
+    {name: 'status'},
     {
       name: 'tsv',
       public: false,
@@ -493,8 +525,8 @@ const adgangsadresser_mat = {
     {name: "nedlagt"}]
 };
 
-const adresseMatFieldsNotCopiedFromEnhedsadresser = ['esdhreference', 'journalnummer', 'kilde'];
-const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'objekttype', 'oprettet', 'aendret', 'ikraftfra', 'nedlagt'];
+const adresseMatFieldsNotCopiedFromEnhedsadresser = ['esdhreference', 'journalnummer', 'kilde', 'objekttype'];
+const adresseMatFieldsNotCopiedFromAdgangsadresserMat = ['id', 'tsv', 'geom', 'status', 'oprettet', 'aendret', 'ikraftfra', 'nedlagt'];
 
 const adresser_mat = {
   table: 'adresser_mat',
@@ -502,7 +534,8 @@ const adresser_mat = {
   columns: [
     ...enhedsadresser.columns.filter(col => !adresseMatFieldsNotCopiedFromEnhedsadresser.includes(col.name)),
     ...adgangsadresser_mat.columns.filter(col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(col.name)),
-    {name: 'a_objekttype'},
+    {name: 'status'},
+    {name: 'a_status'},
     {name: 'a_oprettet'},
     {name: 'a_aendret'},
     {name: 'a_ikraftfra'},
@@ -768,8 +801,10 @@ exports.tables = Object.assign({
     vejpunkter,
     navngivenvej,
     navngivenvej_mat,
+    navngivenvejkommunedel_mat,
     navngivenvej_postnummer,
     navngivenvejkommunedel_postnr_mat,
+    vejmidter,
     vejstykker,
     vejstykkerpostnumremat,
     steder,
@@ -804,18 +839,29 @@ exports.materializations = Object.assign({
       references: ['id']
     }]
   },
-  navngivenvej: {
-    table: 'navngivenvej',
-    view: 'dar1_navngivenvej_view',
-    dependents: [
+  navngivenvejkommunedel_mat: {
+    table: 'navngivenvejkommunedel_mat',
+    view: 'navngivenvejkommunedel_mat_view',
+    dependents: [{
+      table: 'dar1_NavngivenVej_current',
+      columns: ['navngivenvej_id']
+    },
       {
-        table: 'dar1_NavngivenVej_current',
-        columns: ['id']
-      },
-      {
-        table: 'dar1_NavngivenVej_history',
+        table: 'dar1_NavngivenVejKommunedel_history',
         columns: ['id'],
         references: ['id']
+      }, {
+        table: 'dar1_NavngivenVejKommunedel_current',
+        columns: ['id']
+      }]
+  },
+  navngivenvej: {
+    table: 'navngivenvej',
+    view: 'navngivenvej_view',
+    dependents: [
+      {
+        table: 'navngivenvej_mat',
+        columns: ['id']
       }]
   },
   adgangsadresser_mat: {
@@ -849,13 +895,6 @@ exports.materializations = Object.assign({
       {
         table: 'dar1_SupplerendeBynavn_current',
         columns: ['supplerendebynavn_id']
-      },
-      {
-        table: 'adgangsadresser',
-        columns: ['id']
-      }, {
-        table: 'ejerlav',
-        columns: ['ejerlavkode']
       }, {
         table: 'stormodtagere',
         columns: ['id']
@@ -865,16 +904,41 @@ exports.materializations = Object.assign({
       }
     ]
   },
+  adgangsadresser: {
+    table: 'adgangsadresser',
+    view: 'adgangsadresser_view',
+    excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'placering',
+      'husnummerkilde', 'esdhreference', 'journalnummer'],
+    dependents: [
+      {
+        table: 'adgangsadresser_mat',
+        columns: ['id']
+      }]
+  },
   adresser_mat: {
     table: 'adresser_mat',
     view: 'adresser_mat_view',
     dependents: [{
-      table: 'enhedsadresser',
+      table: 'dar1_Adresse_current',
       columns: ['id']
+    }, {
+      table: 'dar1_Adresse_history',
+      columns: ['id'],
+      references: ['id']
     }, {
       table: 'adgangsadresser_mat',
       columns: ['adgangsadresseid']
     }]
+  },
+  enhedsadresser: {
+    table: 'enhedsadresser',
+    view: 'enhedsadresser_view',
+    dependents: [ {
+      table: 'adresser_mat',
+      columns: ['id']
+    }],
+    excludedColumns: ['esdhreference', 'journalnummer', 'kilde'],
+
   },
   jordstykker_adgadr: {
     table: 'jordstykker_adgadr',
@@ -1022,8 +1086,18 @@ exports.materializations = Object.assign({
       }
     ],
     excludedColumns: ['disableuntil']
+  },
+  vejstykker:  {
+    table: 'vejstykker',
+    view: 'vejstykker_view',
+    excludedColumns: ['aendret'],
+    dependents: [
+      {
+        table: 'navngivenvejkommunedel_mat',
+        columns: ['navngivenvejkommunedel_id']
+      }
+    ]
   }
-
 }, dagiMaterializations);
 
 for(let dawaMaterialization of Object.values(dar10TableModels.dawaMaterializations)) {

@@ -50,11 +50,11 @@ const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kild
   'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y',
   'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
   'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn',
-  'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt'];
+  'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt', 'darstatus'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
-const miniFieldNamesWithoutCoords = ['id', 'status', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
+const miniFieldNamesWithoutCoords = ['id', 'status', 'darstatus', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
 
 const miniFieldNames = miniFieldNamesWithoutCoords.concat(['x', 'y']);
 
@@ -75,6 +75,10 @@ exports.json = {
       },
       'id'     : normalizedFieldSchema('id'),
       status: normalizedFieldSchema('status'),
+      darstatus: {
+        description: 'Adgangsadressens status angivet ved statuskode i DAR. 2=Føreløbig, 3=Gældende, 4=Nedlagt, 5=Henlagt',
+        type: 'integer'
+      },
       'vejstykke'    : {
         description: 'Vejstykket som adressen er knyttet til.',
         $ref: '#/definitions/VejstykkeKodeOgNavn'
@@ -393,7 +397,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         type: 'string'
       }
     },
-    docOrder: ['href','id', 'kvh', 'status', 'vejstykke', 'husnr','navngivenvej','supplerendebynavn', 'supplerendebynavn2',
+    docOrder: ['href','id', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr','navngivenvej','supplerendebynavn', 'supplerendebynavn2',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
       'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
@@ -405,6 +409,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       adr.id = rs.id;
       adr.kvh = kvhFormat(rs);
       adr.status = rs.status;
+      adr.darstatus = rs.darstatus;
       adr.vejstykke = {
         href: makeHref(baseUrl, 'vejstykke', [rs.kommunekode, rs.vejkode]),
         navn: maybeNull(rs.vejnavn),

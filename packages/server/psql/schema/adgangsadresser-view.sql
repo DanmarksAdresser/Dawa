@@ -2,7 +2,7 @@ DROP VIEW IF EXISTS AdgangsadresserView CASCADE;
 CREATE OR REPLACE VIEW AdgangsadresserView AS
   SELECT
     A.id as a_id,
-    A.objekttype as a_objekttype,
+    A.status as a_status,
     A.husnr,
     A.supplerendebynavn,
     A.supplerendebynavn_dagi_id,
@@ -50,10 +50,6 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     T.zone,
     T.menighedsrådsafstemningsområdenummer,
     T.menighedsrådsafstemningsområdenavn,
-    A.ejerlavkode,
-    A.ejerlavnavn,
-    A.matrikelnr,
-    A.esrejendomsnr,
     JA.ejerlavkode as jordstykke_ejerlavkode,
     JA.matrikelnr as jordstykke_matrikelnr,
     JS_E.navn as jordstykke_ejerlavnavn,

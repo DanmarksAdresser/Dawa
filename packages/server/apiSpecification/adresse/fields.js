@@ -30,6 +30,9 @@ var fields = [
     selectable: false
   },
   normalizedField('status'),
+  {
+    name: 'darstatus'
+  },
   normalizedField('oprettet'),
   normalizedField('ændret'),
   {
@@ -127,6 +130,9 @@ var fields = [
   normalizedField('adgangsadresseid'),
   {
     name: 'adgangsadresse_status'
+  },
+  {
+    name: 'adgangsadresse_darstatus'
   },
   {
     name: 'adgangsadresse_oprettet',

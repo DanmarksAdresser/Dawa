@@ -17,7 +17,14 @@ var columns = {
     column: 'e_id'
   },
   status: {
-    column: 'e_objekttype'
+    select: 'dar1_status_til_dawa_status(e_status)',
+    where: (sqlParts, bbrStatus) => {
+      const alias = dbapi.addSqlParameter(sqlParts, util.bbrStatusTilDar(bbrStatus));
+      dbapi.addWhereClause(sqlParts,`e_status = ${alias}`);
+    }
+  },
+  darstatus: {
+    column: 'e_status'
   },
   oprettet: {
     select: selectIsoTimestamp('e_oprettet')
@@ -81,10 +88,18 @@ var columns = {
   adgangspunkt_geom_json: adgangsadresseColumns.adgangspunkt_geom_json,
   vejpunkt_geom_json: adgangsadresseColumns.vejpunkt_geom_json,
   geom_json: adgangsadresseColumns.geom_json,
+  ejerlavkode: adgangsadresseColumns.ejerlavkode,
+  ejerlavnavn: adgangsadresseColumns.ejerlavnavn,
+  matrikelnr: adgangsadresseColumns.matrikelnr,
+  esrejendomsnr: adgangsadresseColumns.esrejendomsnr,
   zone: adgangsadresseColumns.zone,
   adgangsadresse_status: {
-    column: 'a_objekttype'
+    select: 'dar1_status_til_dawa_status(a_status)'
+  },
+  adgangsadresse_darstatus: {
+    column: 'a_status'
   }
+
 };
 
 var baseQuery = function () {

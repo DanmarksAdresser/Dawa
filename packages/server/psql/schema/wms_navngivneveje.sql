@@ -5,7 +5,7 @@ CREATE VIEW wms_vejnavneomraader AS (
     darstatus,
     navn,
     beliggenhed_vejnavneområde as geom
-  FROM navngivenvej
+  FROM navngivenvej_mat
   WHERE beliggenhed_vejnavneområde IS NOT NULL
 );
 
@@ -16,7 +16,7 @@ CREATE VIEW wms_vejnavnelinjer AS (
     darstatus,
     navn,
     beliggenhed_vejnavnelinje as geom
-  FROM navngivenvej
+  FROM navngivenvej_mat
   WHERE beliggenhed_vejnavnelinje IS NOT NULL
 );
 
@@ -27,6 +27,6 @@ CREATE VIEW wms_vejtilslutningspunkter AS (
     darstatus,
     navn,
     beliggenhed_vejtilslutningspunkter as geom
-  FROM navngivenvej
+  FROM navngivenvej_mat
   WHERE beliggenhed_vejtilslutningspunkter IS NOT NULL
 );

@@ -6,25 +6,23 @@ const _ = require('underscore');
 const { runImporter } = require('@dawadk/common/src/cli/run-importer');
 const importVejmidterImpl = require('./importVejmidterImpl');
 const proddb = require('../psql/proddb');
+const { withImportTransaction} = require('../importUtil/transaction-util');
 const logger = require('@dawadk/common/src/logger').forCategory('Vejmidter');
 const { go } = require('ts-csp');
 
 const optionSpec = {
   pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
   file: [false, 'Fil med vejmidter', 'string'],
-  initial: [false,
-    'Sættes til true hvis dette er initiel import. Springer historik-dannelse over.',
-    'boolean', false]
 };
 
-runImporter('vejmidter', optionSpec, _.keys(optionSpec), function (args, options) {
+runImporter('vejmidter', optionSpec, _.keys(optionSpec),  (args, options) => go(function*() {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
   });
 
-  return proddb.withTransaction('READ_WRITE', client => go(function*() {
-      yield importVejmidterImpl.importVejmidter(client, options.file, 'vejstykker', options.initial);
-      logger.info('Successfully imported vejmidter');
-  }));
-});
+  yield proddb.withTransaction('READ_WRITE', client =>
+    withImportTransaction(client, "importVejmidter", (txid) =>
+      importVejmidterImpl.importVejmidter(client,txid, options.file)));
+  logger.info('Successfully imported vejmidter');
+}));

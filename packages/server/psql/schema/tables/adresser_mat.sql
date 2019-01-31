@@ -1,15 +1,15 @@
-DROP TABLE IF EXISTS adresser_mat;
+DROP TABLE IF EXISTS adresser_mat CASCADE;
 CREATE TABLE adresser_mat(
   id UUID PRIMARY KEY,
   adgangsadresseid UUID NOT NULL,
-  objekttype smallint,
+  status smallint,
   oprettet timestamp,
   ikraftfra timestamp,
   aendret timestamp,
   nedlagt timestamp,
   etage VARCHAR(3),
   doer VARCHAR(4),
-  a_objekttype smallint,
+  a_status smallint,
   a_oprettet timestamp,
   a_aendret timestamp,
   a_ikraftfra timestamp,
@@ -20,9 +20,6 @@ CREATE TABLE adresser_mat(
   supplerendebynavn text NULL,
   supplerendebynavn_dagi_id integer,
   postnr INTEGER NULL,
-  ejerlavkode INTEGER,
-  matrikelnr text NULL,
-  esrejendomsnr integer NULL,
   adgangspunktid uuid,
   etrs89oest double precision NULL,
   etrs89nord double precision NULL,
@@ -44,7 +41,6 @@ CREATE TABLE adresser_mat(
   postnrnavn text,
   vejnavn text,
   adresseringsvejnavn text,
-  ejerlavnavn text,
   stormodtagerpostnr smallint,
   stormodtagerpostnrnavn text,
   vejpunkt_id uuid,
@@ -56,22 +52,18 @@ CREATE TABLE adresser_mat(
 );
 
 CREATE INDEX ON adresser_mat USING GIST (geom);
-CREATE INDEX ON adresser_mat(ejerlavkode, id);
 CREATE INDEX ON adresser_mat(kommunekode, vejkode, postnr);
 CREATE INDEX ON adresser_mat(postnr, kommunekode);
 CREATE INDEX ON adresser_mat(postnr, id);
 CREATE INDEX ON adresser_mat(supplerendebynavn, kommunekode, postnr);
-CREATE INDEX ON adresser_mat(matrikelnr);
 CREATE INDEX ON adresser_mat(husnr, id);
-CREATE INDEX ON adresser_mat(esrejendomsnr);
-CREATE INDEX ON adresser_mat(objekttype);
 CREATE INDEX ON adresser_mat USING gin(tsv);
 CREATE INDEX ON adresser_mat(noejagtighed, id);
 CREATE INDEX ON adresser_mat(navngivenvej_id, postnr);
 CREATE INDEX ON adresser_mat(adgangsadresseid);
 CREATE INDEX ON adresser_mat(etage, id);
 CREATE INDEX ON adresser_mat(doer, id);
-CREATE INDEX ON adresser_mat(objekttype);
+CREATE INDEX ON adresser_mat(status);
 CREATE INDEX ON adresser_mat(vejnavn, postnr);
 CREATE INDEX ON adresser_mat(vejkode,postnr);
 CREATE INDEX ON adresser_mat(vejpunkt_id);

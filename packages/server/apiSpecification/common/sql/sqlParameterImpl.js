@@ -368,12 +368,12 @@ exports.includeDeletedNavngivenVej = (sqlParts, params) => {
 
 exports.includeDeletedAdgangsAdresses = (sqlParts, params) => {
   if (!params.medtagnedlagte) {
-    dbapi.addWhereClause(sqlParts, 'a_objekttype in (1,3)')
+    dbapi.addWhereClause(sqlParts, 'a_status in (2,3)')
   }
 };
 
 exports.includeDeletedAdresses = (sqlParts, params) => {
   if (!params.medtagnedlagte) {
-    dbapi.addWhereClause(sqlParts, 'e_objekttype in (1,3)')
+    dbapi.addWhereClause(sqlParts, 'e_status in (2,3)')
   }
 };

@@ -1,68 +1,14 @@
 "use strict";
 
-const es = require('event-stream');
-const fs = require('fs');
-const JSONStream = require('JSONStream');
 const { go } = require('ts-csp');
 
-const geojsonUtil = require('../geojsonUtil');
-const importUtil = require('@dawadk/import-util/src/postgres-streaming');
-const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
-const sqlCommon = require('../psql/common');
-const sqlUtil = require('@dawadk/common/src/postgres/sql-util')
+const { createVejmidteImporter } = require('../components/importers/vejmidter');
+const { EXECUTION_STRATEGY } = require('../components/common');
+const { execute } = require('../components/execute');
 
-const ID_COLUMNS = ['kommunekode', 'kode'];
-const NON_ID_COLUMNS = ['geom'];
-const COLUMNS = ID_COLUMNS.concat(NON_ID_COLUMNS);
-
-
-function parseInteger(str) {
-  if(str !== null && str !== undefined && str != ''){
-    return parseInt(str, 10);
-  }
-  return null;
-}
-const streamToTempTable = (client, filePath, tableName) => go(function*() {
-  yield client.queryp(`CREATE TEMP TABLE ${tableName} (
-    kommunekode smallint NOT NULL,
-    kode smallint NOT NULL,
-    geom geometry(LineStringZ, 25832) NOT NULL
-    )`);
-  const src = fs.createReadStream(filePath, {encoding: 'utf8'});
-  const jsonTransformer = JSONStream.parse('features.*');
-  const mapper = es.mapSync(geojsonFeature => {
-    const properties = geojsonFeature.properties;
-    return {
-      kommunekode: parseInteger(properties.KOMMUNEKODE),
-      kode: parseInteger(properties.VEJKODE),
-      geom: geojsonUtil.toPostgresqlGeometry(geojsonFeature.geometry, true)
-    }
-  });
-  const stringifier = importUtil.copyStreamStringifier(COLUMNS);
-  const copyStream = importUtil.copyStream(client, tableName, COLUMNS);
-  yield promisingStreamCombiner([src, jsonTransformer, mapper, stringifier, copyStream]);
-});
-
-const importVejmidter = (client, filePath, table, initial) => go(function*() {
-  const linestringsTable = 'vejstykker_linestrings';
-  const desiredTable = 'desired_' + table;
-  yield streamToTempTable(client, filePath, linestringsTable);
-  yield client.queryp(`CREATE TEMP TABLE ${desiredTable} AS( 
-    select kommunekode, kode, st_collect(geom) AS geom 
-    FROM ${linestringsTable} 
-    GROUP BY kommunekode, kode)`);
-  yield client.queryp(`INSERT INTO ${desiredTable}(kommunekode, kode) (SELECT kommunekode, kode FROM vejstykker WHERE NOT EXISTS
-  (SELECT kommunekode, kode FROM ${desiredTable} WHERE ${sqlUtil.columnsEqualClause(desiredTable, 'vejstykker', ['kommunekode', 'kode'])}))`);
-  yield importUtil.dropTable(client, linestringsTable);
-  // we disable triggers because we do not want to generate history entries
-  yield sqlCommon.disableTriggersQ(client);
-  yield client.queryp(`UPDATE ${table}
-      SET ${NON_ID_COLUMNS.map(column => column + ' = ' + desiredTable + '.' + column).join(', ')}
-       FROM ${desiredTable} 
-      WHERE ${sqlUtil.columnsEqualClause(desiredTable, table, ID_COLUMNS)}`);
-  // initialize history table
-  yield sqlCommon.enableTriggersQ(client);
-  yield importUtil.dropTable(client, desiredTable);
+const importVejmidter = (client, txid, filePath) => go(function*() {
+  const importer = createVejmidteImporter({filePath});
+  return yield execute(client, txid, [importer], EXECUTION_STRATEGY.preferIncremental, {});
 });
 
 module.exports = {

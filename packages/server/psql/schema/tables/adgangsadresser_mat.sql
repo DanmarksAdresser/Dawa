@@ -7,10 +7,7 @@ CREATE TABLE adgangsadresser_mat (
   supplerendebynavn            TEXT             NULL,
   supplerendebynavn_dagi_id    INTEGER,
   postnr                       INTEGER          NULL,
-  ejerlavkode                  INTEGER,
-  matrikelnr                   TEXT             NULL,
-  esrejendomsnr                INTEGER          NULL,
-  objekttype                   SMALLINT,
+  status                       SMALLINT,
   oprettet                     TIMESTAMP,
   ikraftfra                    TIMESTAMP,
   aendret                      TIMESTAMP,
@@ -20,7 +17,6 @@ CREATE TABLE adgangsadresser_mat (
   etrs89nord                   DOUBLE PRECISION NULL,
   noejagtighed                 CHAR(1)          NULL,
   adgangspunktkilde            SMALLINT         NULL,
-  placering                    SMALLINT,
   tekniskstandard              CHAR(2)          NULL,
   tekstretning                 NUMERIC(5, 2)    NULL,
   adressepunktaendringsdato    TIMESTAMP        NULL,
@@ -36,7 +32,6 @@ CREATE TABLE adgangsadresser_mat (
   postnrnavn                   TEXT,
   vejnavn                      TEXT,
   adresseringsvejnavn          TEXT,
-  ejerlavnavn                  TEXT,
   stormodtagerpostnr           SMALLINT,
   stormodtagerpostnrnavn       TEXT,
   vejpunkt_id                  UUID,
@@ -48,15 +43,12 @@ CREATE TABLE adgangsadresser_mat (
 );
 
 CREATE INDEX ON adgangsadresser_mat USING GIST (geom);
-CREATE INDEX ON adgangsadresser_mat (ejerlavkode, id);
 CREATE INDEX ON adgangsadresser_mat (kommunekode, vejkode, postnr);
 CREATE INDEX ON adgangsadresser_mat (postnr, kommunekode);
 CREATE INDEX ON adgangsadresser_mat (postnr, id);
 CREATE INDEX ON adgangsadresser_mat (supplerendebynavn, kommunekode, postnr);
-CREATE INDEX ON adgangsadresser_mat (matrikelnr);
 CREATE INDEX ON adgangsadresser_mat (husnr, id);
-CREATE INDEX ON adgangsadresser_mat (esrejendomsnr);
-CREATE INDEX ON adgangsadresser_mat (objekttype);
+CREATE INDEX ON adgangsadresser_mat (status);
 CREATE INDEX ON adgangsadresser_mat USING GIN (tsv);
 CREATE INDEX ON adgangsadresser_mat (noejagtighed, id);
 CREATE INDEX ON adgangsadresser_mat (navngivenvej_id, postnr);
@@ -65,3 +57,7 @@ CREATE INDEX ON adgangsadresser_mat (vejkode, postnr);
 CREATE INDEX ON adgangsadresser_mat (vejpunkt_id);
 CREATE INDEX ON adgangsadresser_mat USING GIST (vejpunkt_geom);
 CREATE INDEX ON adgangsadresser_mat (supplerendebynavn_dagi_id);
+CREATE INDEX ON adgangsadresser_mat (adressepunkt_id);
+CREATE INDEX ON adgangsadresser_mat (darkommuneinddeling_id);
+CREATE INDEX ON adgangsadresser_mat (navngivenvejkommunedel_id, postnummer_id, id);
+CREATE INDEX ON adgangsadresser_mat (supplerendebynavn_id);
