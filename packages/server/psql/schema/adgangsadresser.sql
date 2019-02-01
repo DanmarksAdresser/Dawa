@@ -3,7 +3,7 @@ DROP VIEW IF EXISTS adgangsadresser_view;
 CREATE VIEW adgangsadresser_view AS
   SELECT
     id,
-    kommunekode,
+    A.kommunekode,
     vejkode,
     husnr,
     supplerendebynavn,
@@ -28,7 +28,15 @@ CREATE VIEW adgangsadresser_view AS
     supplerendebynavn_dagi_id,
     hoejde,
     etrs89oest,
-    etrs89nord
+    etrs89nord,
+    JA.ejerlavkode,
+    JS_E.navn as ejerlavnavn,
+    JA.matrikelnr,
+    esrejendomsnr::integer as esrejendomsnr
 
-  FROM adgangsadresser_mat
+  FROM adgangsadresser_mat A
+    LEFT JOIN jordstykker_adgadr JA ON JA.adgangsadresse_id = A.id
+    LEFT JOIN jordstykker J ON JA.ejerlavkode = J.ejerlavkode AND JA.matrikelnr = J.matrikelnr
+    LEFT JOIN Ejerlav JS_E ON JA.ejerlavkode = JS_E.kode
+
   WHERE status IN (2, 3) AND husnr IS NOT NULL;

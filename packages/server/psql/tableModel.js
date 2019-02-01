@@ -907,12 +907,22 @@ exports.materializations = Object.assign({
   adgangsadresser: {
     table: 'adgangsadresser',
     view: 'adgangsadresser_view',
-    excludedColumns: ['ejerlavkode', 'matrikelnr', 'esrejendomsnr', 'ikraftfra', 'placering',
+    excludedColumns: ['placering',
       'husnummerkilde', 'esdhreference', 'journalnummer'],
     dependents: [
       {
         table: 'adgangsadresser_mat',
         columns: ['id']
+      }, {
+      table: 'jordstykker_adgadr',
+        columns: ['id'],
+        references: ['adgangsadresse_id']
+      }, {
+      table: 'jordstykker',
+        columns: ['ejerlavkode', 'matrikelnr']
+      }, {
+      table: 'ejerlav',
+        columns: ['ejerlavkode']
       }]
   },
   adresser_mat: {
