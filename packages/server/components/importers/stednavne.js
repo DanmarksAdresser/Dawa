@@ -90,6 +90,8 @@ const createStednavneImporterFromStream = ({stream}) => {
 
 const createStednavneImporter = ({filePath}) => {
   return {
+    id: 'Place-importer',
+    description: 'Stednavneimporter',
     requires: [],
     produces: ['steder', 'stednavne'],
     execute: (client, txid) => importStednavne(client, txid, filePath)

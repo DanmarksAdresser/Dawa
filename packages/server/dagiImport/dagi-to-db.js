@@ -8,12 +8,12 @@ const { withImportTransaction } = require('../importUtil/transaction-util');
 
 const logger = require('@dawadk/common/src/logger').forCategory('dagiToDb');
 
-const { importTemaerWfs,importTemaerWfsMulti,importLandpostnummer, importStorkreds, importValglandsdel } = require('./importDagiImpl');
 const featureMappingsNew = require('./featureMappingsNew');
 const featureMappingsDatafordeler = require('./featureMappingsDatafordeler');
 const featureMappingsZone = require('./featureMappingsZone');
 const proddb = require('../psql/proddb');
 const {makeAllChangesNonPublic} = require('@dawadk/import-util/src/materialize');
+const importDagiImpl = require('./importDagiImpl');
 
 const featureMappingsMap = {
   newDagi: featureMappingsNew,
@@ -46,21 +46,10 @@ runImporter('dagi-to-db', optionSpec, _.without(_.keys(optionSpec), 'temaer'), f
       }
       yield proddb.withTransaction('READ_WRITE', client => go(function*() {
         yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
-          if(options.service === 'datafordeler') {
-            yield importTemaerWfsMulti(client, txid, temaNames, featureMappings, options.dataDir, options.filePrefix, options.maxChanges);
-          }
-          else{
-            yield importTemaerWfs(client, txid, temaNames, featureMappings, options.dataDir, options.filePrefix, options.maxChanges);
-          }
+          const source = options.service === 'datafordeler' ? 'wfsMulti' : 'wfs';
+          yield importDagiImpl(client, txid, temaNames, featureMappings, options.dataDir, options.fild1Prefix, source, options.maxChanges);
           if(options.init) {
             yield makeAllChangesNonPublic(client, txid);
-          }
-          if(temaNames.includes('postnummer')) {
-            yield importLandpostnummer(client, txid);
-          }
-          if(temaNames.includes('opstillingskreds')) {
-            yield importStorkreds(client, txid);
-            yield importValglandsdel(client, txid);
           }
         }));
       }));

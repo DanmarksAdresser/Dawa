@@ -1013,8 +1013,17 @@ exports.materializations = Object.assign({
         table: 'dar1_DARAfstemningsområde_current',
         columns: ['afstemningsområde_dagi_id'],
         references: ['afstemningsområde']
-      }
-
+      }],
+    nonIncrementalDependents: [
+      'politikredstilknytninger', 'politikredse',
+      'retskredstilknytninger', 'retskredse',
+      'kommuner',
+      'regioner',
+      'afstemningsomraader',
+      'opstillingskredse',
+      'storkredse',
+      'valglandsdele',
+      'zonetilknytninger'
     ]
   },
   supplerendebynavn2_postnr: {

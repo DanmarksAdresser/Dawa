@@ -137,6 +137,8 @@ const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() 
 
 const createMatrikelImporter = ({srcDir, refresh}) => {
   return {
+    id: 'Cadastre-importer',
+    description: 'Matrikelkort-importer',
     requires: [],
     produces: ['ejerlav', 'jordstykker'],
     execute: (client, txid) => importJordstykkerImpl(client, txid, srcDir, refresh)

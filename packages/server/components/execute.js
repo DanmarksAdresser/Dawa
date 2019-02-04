@@ -100,7 +100,6 @@ const execute = (client, txid, rootComponents, strategy) => go(function*() {
     context.changes[table] = yield getChanges(client, txid, table);
   }
   for(let componentId of executionOrder) {
-    console.log(`executing component ${componentId}`);
     const component = componentIdMap[componentId];
     yield component.execute(client, txid, strategy, context);
     for(let table of component.produces) {

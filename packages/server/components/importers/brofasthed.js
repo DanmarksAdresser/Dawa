@@ -14,6 +14,8 @@ const importBrofasthed = (client, txid, filePath) => go(function*() {
 
 const createBrofasthedImporter = ({filePath}) => {
   return {
+    id: 'Land-connectedness-importer',
+    description: 'Brofasthed importer',
     requires: [],
     produces: ['brofasthed'],
     execute: (client, txid) => importBrofasthed(client, txid, filePath)

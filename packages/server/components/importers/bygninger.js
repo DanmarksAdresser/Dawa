@@ -58,6 +58,8 @@ const importBygninger = (client,txid,  filePath, maxChanges) => go(function*() {
 
 const createBygningImporter = ({filePath}) => {
   return {
+    id: 'Building-importer',
+    description: 'Bygningspolygon importer',
     requires: [],
     produces: ['bygninger'],
     execute: (client, txid) => importBygninger(client, txid, filePath)

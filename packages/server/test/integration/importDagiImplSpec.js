@@ -14,7 +14,7 @@ describe('Import af DAGI temaer', () => {
     it('Import afvises hvis der er for mange ændringer', () => go(function* () {
       const client = clientFn();
       const doImport =
-        maxChanges => withImportTransaction(client, 'dagiToDb', (txid) => importDagiImpl.importTemaerWfsMulti(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', maxChanges));
+        maxChanges => withImportTransaction(client, 'dagiToDb', (txid) => importDagiImpl(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', 'wfsMulti', maxChanges));
       try {
         yield doImport(1);
         throw new Error('Did not fail');
@@ -30,7 +30,7 @@ describe('Import af DAGI temaer', () => {
     it('Kan importere afstemningsområde', () => go(function*(){
       const client = clientFn();
       yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
-        yield importDagiImpl.importTemaerWfsMulti(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', 1000000);
+        yield importDagiImpl(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '','wfsMulti', 1000000);
         const temaRow = (yield client.queryRows('select dagi_id, nummer, navn, afstemningsstednavn, afstemningsstedadresse, kommunekode, opstillingskreds_dagi_id, ændret, geo_ændret, geo_version, st_asgeojson(geom) as geom_json from afstemningsomraader'))[0];
         assert(temaRow);
         assert.strictEqual(temaRow.dagi_id, 707412);
@@ -51,7 +51,7 @@ describe('Import af DAGI temaer', () => {
     it('Kan opdatere afstemningsområde navn', () => go(function*(){
       const client = clientFn();
       yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
-        yield importDagiImpl.importTemaerWfsMulti(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/updated'), '', 1000000);
+        yield importDagiImpl(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/updated'), '', 'wfsMulti', 1000000);
         const temaRow = (yield client.queryRows('select navn, geo_version, st_asgeojson(geom) as geom_json from afstemningsomraader'))[0];
         assert(temaRow);
         assert.strictEqual(temaRow.navn, 'GlejbjergÆndret');
@@ -62,7 +62,7 @@ describe('Import af DAGI temaer', () => {
     it('Kan opdatere afstemningsområde geometri', () => go(function*(){
       const client = clientFn();
       yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
-        yield importDagiImpl.importTemaerWfsMulti(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/updatedGeom'), '', 1000000);
+        yield importDagiImpl(client, txid, ['afstemningsområde'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/updatedGeom'), '', 'wfsMulti', 1000000);
         const temaRow = (yield client.queryRows('select navn, geo_version, st_asgeojson(geom) as geom_json from afstemningsomraader'))[0];
         assert(temaRow);
         assert.strictEqual(temaRow.navn, 'GlejbjergÆndret');
@@ -74,7 +74,7 @@ describe('Import af DAGI temaer', () => {
     it('Kan importere opstillingskreds', () => go(function*() {
       const client = clientFn();
       yield withImportTransaction(client, 'dagiToDb', (txid) => go(function* () {
-        yield importDagiImpl.importTemaerWfsMulti(client, txid, ['opstillingskreds'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', 1000000);
+        yield importDagiImpl(client, txid, ['opstillingskreds'], featureMappingsDatafordeler, path.join(__dirname, 'importDagiImplSpec/initial'), '', 'wfsMulti', 1000000);
         const temaRow = (yield client.queryRows('select dagi_id, nummer, navn, kode, valgkredsnummer, storkredsnummer, kredskommunekode, ændret, geo_ændret, geo_version, st_asgeojson(geom) as geom_json from opstillingskredse'))[0];
         assert(temaRow);
         assert.strictEqual(temaRow.dagi_id, 403577);
