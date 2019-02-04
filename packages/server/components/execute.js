@@ -71,7 +71,7 @@ const getExecutionOrder = (rootComponents, components) => {
 };
 
 const getChanges = (client, txid, tableName) => go(function*() {
-  const changes = yield client.queryRows(`select operation, count(*) as ops from ${tableName}_changes where txid = $1 group by operation`, [txid]);
+  const changes = yield client.queryRows(`select operation, count(*)::integer as ops from ${tableName}_changes where txid = $1 group by operation`, [txid]);
   return changes.reduce((acc, change) => {
     acc[change.operation] = change.ops;
     acc.total += change.ops;

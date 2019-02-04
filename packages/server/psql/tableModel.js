@@ -979,21 +979,14 @@ exports.materializations = Object.assign({
         table: 'adgangsadresser_mat',
         columns: ['adgangsadresseid']
       }
-    ]
+    ],
+    nonIncrementalDependents: ['bygninger']
   },
   bygning_kommune: {
     table: 'bygning_kommune',
     view: 'bygning_kommune_view',
-    dependents: [
-      {
-        table: 'bygninger',
-        columns: ['bygningid']
-      },
-      {
-        table: 'kommuner',
-        columns: ['kommunekode']
-      }
-    ]
+    dependents: [],
+    nonIncrementalDependents: ['bygninger', 'kommuner']
   },
   tilknytninger_mat: {
     table: 'tilknytninger_mat',

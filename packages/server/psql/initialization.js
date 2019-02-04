@@ -141,7 +141,6 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'supplerendebynavn_kommune_mat'},
   {name: 'supplerendebynavn_postnr_mat'},
   {name: 'supplerendebynavn2_postnr'},
-  {name: 'supplerendebynavn2_postnr_view', type: 'view'},
   {name: 'gt_pk_metadata'},
   {name: 'wms_housenumber_inspire', type: 'view'},
   {name: 'wms_adgangsadresser', type: 'view'},
