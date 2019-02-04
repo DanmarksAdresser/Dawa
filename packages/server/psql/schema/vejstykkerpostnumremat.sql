@@ -1,6 +1,7 @@
 DROP VIEW IF EXISTS dar1_vejstykkerpostnumremat_view CASCADE;
+DROP VIEW IF EXISTS vejstykkerpostnumremat_view CASCADE;
 
-CREATE VIEW dar1_vejstykkerpostnumremat_view AS
+CREATE VIEW vejstykkerpostnumremat_view AS
   SELECT
     navngivenvejkommunedel_id,
     postnummer_id,

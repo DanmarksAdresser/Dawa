@@ -3,7 +3,36 @@ const {go} = require('ts-csp');
 const toposort = require('toposort');
 const { allProcessors } = require("./processors/all-processors");
 
-const getExecutionOrder = components => {
+const getTablesInScope = (rootComponents, allComponents) => {
+  const tablesInScope = new Set();
+  for(let component of rootComponents) {
+    for(let table of component.produces) {
+      tablesInScope.add(table);
+    }
+  }
+  /* eslint no-constant-condition: 0 */
+  while(true) {
+    const prevSize = tablesInScope.size;
+    for(let component of allComponents) {
+      for(let table of component.requires) {
+        if(tablesInScope.has(table)) {
+          for(let table of component.produces) {
+            tablesInScope.add(table);
+          }
+        }
+      }
+    }
+    const newSize = tablesInScope.size;
+    if(prevSize === newSize) {
+      break;
+    }
+  }
+  return Array.from(tablesInScope);
+};
+
+const getExecutionOrder = (rootComponents, components) => {
+  const tablesInScope = getTablesInScope(rootComponents, components);
+
   // map of table names to producing component
   const tableToProducingComponentMap = components.reduce((acc, component) => {
     for (let table of component.produces) {
@@ -12,7 +41,14 @@ const getExecutionOrder = components => {
     return acc;
   }, {});
 
-  const componentIdToDependenciesIds = components.reduce((acc, component) => {
+  const componentsInScopeSet = tablesInScope.reduce((acc, table) => {
+    acc.add(tableToProducingComponentMap[table]);
+    return acc;
+  }, new Set());
+  const componentsInScope = Array.from(componentsInScopeSet);
+  const componentIdsInScope = new Set(_.pluck(componentsInScope, 'id'));
+
+  const componentIdToDependenciesIds = componentsInScope.reduce((acc, component) => {
     const dependencies = new Set();
     for (let tableName of component.requires) {
       if(tableToProducingComponentMap[tableName]) {
@@ -24,11 +60,14 @@ const getExecutionOrder = components => {
   }, {});
   const graph = Object.entries(componentIdToDependenciesIds).reduce((acc, [componentId, depIds]) => {
     for (let depId of depIds) {
-      acc.push([depId, componentId]);
+      if(componentIdsInScope.has(depId) && componentIdsInScope.has(componentId)) {
+        acc.push([depId, componentId]);
+      }
     }
     return acc;
   }, []);
   return toposort(graph);
+
 };
 
 const getChanges = (client, txid, tableName) => go(function*() {
@@ -41,17 +80,15 @@ const getChanges = (client, txid, tableName) => go(function*() {
 
 });
 
-const execute = (client, txid, rootComponents, executionMode, executionModeOverrides) => go(function*() {
-  executionModeOverrides = executionModeOverrides || {};
+const execute = (client, txid, rootComponents, strategy) => go(function*() {
   const allComponents = new Set(rootComponents);
   for(let component of allProcessors) {
     allComponents.add(component);
   }
-  for(let component of rootComponents) {
-    allComponents.add(component);
-  }
+
   const componentIdMap = _.indexBy(Array.from(allComponents), 'id');
-  const executionOrder = getExecutionOrder(Array.from(allComponents));
+
+  const executionOrder = getExecutionOrder(rootComponents, Array.from(allComponents));
   const context = { changes: {}};
   const initiallyRequiredTables = new Set();
   for(let component of rootComponents) {
@@ -64,7 +101,7 @@ const execute = (client, txid, rootComponents, executionMode, executionModeOverr
   }
   for(let componentId of executionOrder) {
     const component = componentIdMap[componentId];
-    yield component.execute(client, txid, executionModeOverrides[componentId] || executionMode, context);
+    yield component.execute(client, txid, strategy, context);
     for(let table of component.produces) {
       context.changes[table] = yield getChanges(client, txid, table);
     }

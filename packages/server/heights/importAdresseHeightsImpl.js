@@ -13,7 +13,7 @@ const { execute } = require('../components/execute');
 
 const importFromApi = (client, txid, apiClient) => go(function*() {
   const importer = createApiImporter({apiClient});
-  return yield execute(client, txid, [importer], EXECUTION_STRATEGY.skipNonIncremental, {});
+  return yield execute(client, txid, [importer], EXECUTION_STRATEGY.quick, {});
 });
 const importFromApiDaemon = (apiUrl, login, password) => go(function*() {
   const apiClient = hoejdeClient(apiUrl, login, password);
@@ -30,7 +30,7 @@ const importFromApiDaemon = (apiUrl, login, password) => go(function*() {
 
 const importHeights = (client, txid, filePath) => go(function*() {
   const importer = createHeightImporter({filePath});
-  return yield execute(client, txid, [importer], EXECUTION_STRATEGY.preferIncremental, {});
+  return yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow, {});
 });
 
 

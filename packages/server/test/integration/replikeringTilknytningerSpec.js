@@ -80,7 +80,7 @@ const loadAdresser = (client, adgangsadresser_mats) => go(function* () {
     yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser_mat);
     const context = { changes: {adgangsadresser_mat: {total: adgangsadresser_mats.length}}};
     for(let processor of dagiAssociationsProcessors) {
-      yield processor.execute(client, txid, EXECUTION_STRATEGY.nonIncremental, context);
+      yield processor.execute(client, txid, EXECUTION_STRATEGY.slow, context);
     }
   }));
 });

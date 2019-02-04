@@ -6,7 +6,7 @@ const dar10TableModels = require('../../dar10/dar10TableModels');
 const materialize = require('@dawadk/import-util/src/materialize');
 const tableModels = require('../../psql/tableModel');
 const { ALL_DAR_ENTITIES } = require('../../dar10/import-dar-util');
-const { getExecutionMode, EXECUTION_MODE} = require('../common');
+const { EXECUTION_STRATEGY} = require('../common');
 /**
  * Cannot just use materialize, because some dirty rows originate from change in current time.
  */
@@ -70,11 +70,7 @@ module.exports = ALL_DAR_ENTITIES.map(entityName => ({
   execute: (client, txid, strategy, context) => go(function*() {
     const darMetaChanged = context['DAR-meta-changed'];
     if(context.changes[`dar1_${entityName}_history`].total > 0 || (darMetaChanged && hasChangedEntitiesDueToVirkningTime(client, entityName)));
-    const executionMode = getExecutionMode(strategy, true);
-    if(executionMode === EXECUTION_MODE.skip) {
-      return;
-    }
-    else if(executionMode === EXECUTION_MODE.incremental) {
+    if(strategy === EXECUTION_STRATEGY.quick) {
       yield materializeIncrementally(client, txid, [entityName],[entityName]);
     }
     else {

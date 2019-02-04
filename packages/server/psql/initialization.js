@@ -2,6 +2,7 @@
 
 /*eslint no-console: 0*/
 
+const { assert } = require('chai');
 const { go } = require('ts-csp');
 var fs = require('fs');
 var path = require('path');
@@ -29,8 +30,11 @@ const createChangeTables = (client)=> go(function*() {
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
   'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
-    'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter'];
+    'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter', 'supplerendebynavne_mat',
+  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat'];
   for(let table of tableNames) {
+    const model = tableModel.tables[table];
+    assert(model);
     yield createChangeTable(client, tableModel.tables[table]);
   }
 });
@@ -60,8 +64,8 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'transaction_history', init: false},
   {name: 'bbr_events'},
   {name: 'vejstykker', init: false},
-  {name: 'postnumre'},
-  {name: 'stormodtagere'},
+  {name: 'postnumre', init: false},
+  {name: 'stormodtagere', init: false},
   {name: 'adgangsadresser', init: false },
   {name: 'enhedsadresser', init: false },
   {name: 'navngivenvej', init: false},
@@ -79,11 +83,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'cpr_postnr', init: false},
   {name: 'dar1_transaction', init: false},
   {name: 'dar1_changelog', init: false},
-  {name: 'dar1_postnumre_view', type: 'view'},
-  {name: 'dar1_vejstykker_view', type: 'view'},
-  {name: 'dar1_enhedsadresser_view', type: 'view'},
   {name: 'dar1_navngivenvej_postnummer_view', type: 'view'},
-  {name: 'dar1_vejstykkerpostnumremat_view', type: 'view'},
   {name: 'dar1_vejpunkter_view', type: 'view'},
   {name: 'dar_transaction', init: false},
   {name: 'dar_lastfetched', init: false },
@@ -103,12 +103,10 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'dar_adgangsadresser_view', type: 'view'},
   {name: 'dar_enhedsadresser_view', type: 'view'},
   {name: 'hoejder', init: false},
-  {name: 'vejstykkerpostnr',           scriptFile: 'vejstykker-postnr-view.sql', type: 'view'},
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
-  {name: 'vejstykkerpostnumremat',     scriptFile: 'vejstykker-postnumre-view.sql', init: false},
+  {name: 'vejstykkerpostnumremat', init: false},
   {name: 'navngivenvej_postnummer', init: false},
   {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql', init: false},
-  {name: 'supplerendebynavne',         scriptFile: 'supplerendebynavne-view.sql', init: false},
   {name: 'gridded_temaer_matview',     scriptFile: 'gridded-temaer-matview.sql', init:false},
   {name: 'tilknytninger_mat', init: false},
   {name: 'adgangsadresser_temaer_matview', init: false },
@@ -139,6 +137,9 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'bebyggelser_view', type: 'view'},
   {name: 'adgangsadresserview',        scriptFile: 'adgangsadresser-view.sql',   type: 'view'},
   {name: 'adresser',                   scriptFile: 'adresse-view.sql',           type: 'view'},
+  {name: 'supplerendebynavne_mat', init: false},
+  {name: 'supplerendebynavn_kommune_mat', init: false},
+  {name: 'supplerendebynavn_postnr_mat', init: false},
   {name: 'supplerendebynavn2_postnr', init: false},
   {name: 'supplerendebynavn2_postnr_view', type: 'view'},
   {name: 'gt_pk_metadata', init: false},

@@ -8,37 +8,15 @@ const {
 } = require('@dawadk/import-util/src/materialize');
 
 const EXECUTION_STRATEGY = {
-  requireIncremental: {}, // Execute incrementally, fail if not supported
-  preferIncremental: {}, // execute incrementally, run non-incremental as non-incremental
-  nonIncremental: {}, // run non-incrementally, but do not run unless changed input tables
-  nonIncrementalAll: {},// Run non-incrementally, do not rely on dirty-checking
-  skipNonIncremental: {}, // run incremental, skip non-incremental
-  skip: {} // skip component, used only in overrides
+  quick: 'QUICK', // Execute all in scope incrementally, skip non-incremental dependencies
+  slow: 'SLOW', // Prefer incremental, recompute non-incremental in scope
+  verify: 'VERIFY', // Recompute all in scope
 };
 
 const EXECUTION_MODE = {
   incremental: {},
   nonincremental: {},
-  skip: {},
-  error: {}
-};
-
-const getExecutionMode = (strategy, incrementalSupported) => {
-  if(strategy === EXECUTION_STRATEGY.skip) {
-    return EXECUTION_MODE.skip;
-  }
-  if(strategy === EXECUTION_STRATEGY.requireIncremental && !incrementalSupported) {
-    return EXECUTION_MODE.error;
-  }
-  if(incrementalSupported && [EXECUTION_STRATEGY.requireIncremental,
-      EXECUTION_STRATEGY.preferIncremental,
-      EXECUTION_STRATEGY.skipNonIncremental].includes(strategy)) {
-    return EXECUTION_MODE.incremental;
-  }
-  if(strategy === EXECUTION_STRATEGY.skipNonIncremental) {
-    return EXECUTION_MODE.skip;
-  }
-  return EXECUTION_MODE.nonincremental;
+  skip: {}
 };
 
 const fromMaterializations = (id, description, materializations) => {
@@ -49,6 +27,9 @@ const fromMaterializations = (id, description, materializations) => {
     for (let dependent of materialization.dependents) {
       requires.add(dependent.table);
     }
+    for( let dependentTable of materialization.nonIncrementalDependents || []) {
+      requires.add(dependentTable);
+    }
   }
   return {
     id,
@@ -58,19 +39,27 @@ const fromMaterializations = (id, description, materializations) => {
     requires: Array.from(requires),
     execute: (client, txid, strategy, context) => go(function* () {
       const changes = context.changes;
-      const hasModifiedDependency = _.some(Array.from(requires), table => changes[table] && changes[table].total > 0);
-      if(strategy !== EXECUTION_STRATEGY.nonIncrementalAll && !hasModifiedDependency) {
-        return;
-      }
-      const executionMode = getExecutionMode(strategy, true);
-      if(executionMode === EXECUTION_MODE.skip) {
-        return;
-      }
       for (let materialization of materializations) {
-        if(executionMode === EXECUTION_MODE.incremental) {
-          yield materialize(client, txid, tableSchema.tables, materialization);
+        const materializationRequires = materialization.dependents.map(dependent => dependent.table);
+        const hasNonincrementalDependency = (materialization.nonIncrementalDependents || []).length > 0;
+        const hasModifiedDependency = _.some(materializationRequires, table => changes[table] && changes[table].total > 0);
+        if(strategy === EXECUTION_STRATEGY.quick) {
+          if(hasModifiedDependency) {
+            yield materialize(client, txid, tableSchema.tables, materialization);
+          }
+          else {
+            return;
+          }
         }
-        else {
+        else if (strategy === EXECUTION_STRATEGY.slow) {
+          if(hasNonincrementalDependency) {
+            yield recomputeMaterialization(client, txid, tableSchema.tables, materialization);
+          }
+          else {
+            yield materialize(client, txid, tableSchema.tables, materialization);
+          }
+        }
+        else {// EXECUTION_STRATEGY.verify
           yield recomputeMaterialization(client, txid, tableSchema.tables, materialization);
         }
       }
@@ -81,6 +70,5 @@ const fromMaterializations = (id, description, materializations) => {
 module.exports = {
   EXECUTION_STRATEGY,
   EXECUTION_MODE,
-  fromMaterializations,
-  getExecutionMode
+  fromMaterializations
 };

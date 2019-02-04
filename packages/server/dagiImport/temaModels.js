@@ -668,7 +668,8 @@ exports.toTilknytningMaterialization = temaModel => {
         table: 'adgangsadresser_mat',
         columns: ['adgangsadresseid']
       }
-    ]
+    ],
+    nonIncrementalDependents: [temaModel.table]
   }
 };
 

@@ -9,11 +9,11 @@ const doImport = (client, txid, dataDir, strategy) => {
   return execute(client, txid, [importer], strategy);
 }
 const importDownload = (client, txid, dataDir) => {
-  return doImport(client, txid, dataDir, EXECUTION_STRATEGY.nonIncremental);
+  return doImport(client, txid, dataDir, EXECUTION_STRATEGY.slow);
 };
 
 const importDownloadIncrementally = (client, txid, dataDir) => {
-  return doImport(client, txid, dataDir, EXECUTION_STRATEGY.preferIncremental);
+  return doImport(client, txid, dataDir, EXECUTION_STRATEGY.quick);
 };
 
 module.exports = {

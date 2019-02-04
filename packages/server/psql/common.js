@@ -57,17 +57,6 @@ exports.psqlScriptQ = function(client, scriptDir, scriptfile) {
   return client.queryp(script, []);
 };
 
-exports.reindex = function(client) {
-  return exports.disableTriggersQ(client)
-    .then(function() {
-    return exports.psqlScriptQ(client, __dirname, 'reindex-search.sql');
-
-  })
-    .then(function() {
-      exports.enableTriggersQ(client);
-    });
-};
-
 exports.disableHistoryTrigger = function(client, tableName) {
   return client.queryp('ALTER TABLE ' + tableName + ' DISABLE TRIGGER ' + tableName + '_history_update');
 };

@@ -645,9 +645,6 @@ const supplerendebynavne_mat = {
       name: 'navn'
     },
     {
-      name: 'adgangsadresseid'
-    },
-    {
       name: 'tsv',
       derive: table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
     }]
@@ -662,10 +659,6 @@ const supplerendebynavn_postnr_mat = {
     },
     {
       name: 'postnr'
-    },
-    {
-      name: 'adgangsadresseid',
-      public: false
     }
   ]
 };
@@ -679,10 +672,6 @@ const supplerendebynavn_kommune_mat = {
     },
     {
       name: 'kommunekode'
-    },
-    {
-      name: 'adgangsadresseid',
-      public: false
     }
   ]
 };
@@ -693,6 +682,15 @@ const supplerendebynavn2_postnr = {
   columns: [
     { name: 'supplerendebynavn_dagi_id' },
     { name: 'postnr' }
+  ]
+};
+
+const postnumre_kommunekoder_mat = {
+  table: 'postnumre_kommunekoder_mat',
+  primaryKey: ['postnr', 'kommunekode'],
+  columns: [
+    { name: 'postnr'},
+    { name: 'kommunekode'}
   ]
 };
 
@@ -820,7 +818,8 @@ exports.tables = Object.assign({
     ikke_brofaste_adresser,
     hoejder,
     hoejde_importer_resultater,
-    hoejde_importer_afventer
+    hoejde_importer_afventer,
+    postnumre_kommunekoder_mat
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
@@ -1025,30 +1024,11 @@ exports.materializations = Object.assign({
 
     ]
   },
-  supplerendebynavne: {
-    table: 'supplerendebynavne',
-    view: 'supplerendebynavne_view',
-    dependents: [
-      {
-        table: 'adgangsadresser',
-        columns: ['adgangsadresseid']
-      }
-    ]
-  },
-  supplerendebynavn_postnr: {
-    table: 'supplerendebynavn_postnr',
-    view: 'supplerendebynavn_postnr_view',
-    dependents: []
-  },
-  supplerendebynavn_kommune: {
-    table: 'supplerendebynavn_kommune',
-    view: 'supplerendebynavn_kommune_view',
-    dependents: []
-  },
   supplerendebynavn2_postnr: {
     table: 'supplerendebynavn2_postnr',
     view: 'supplerendebynavn2_postnr_view',
-    dependents: []
+    dependents: [],
+    nonIncrementalDependents: ['dar1_Husnummer_current, dar1_SupplerendeBynavn_current', 'dar1_Postnummer_current']
   },
   ikke_brofaste_adresser: {
     table: 'ikke_brofaste_adresser',
@@ -1107,9 +1087,96 @@ exports.materializations = Object.assign({
         columns: ['navngivenvejkommunedel_id']
       }
     ]
+  },
+  postnumre: {
+    table: 'postnumre',
+    view: 'postnumre_view',
+    dependents: [
+      {
+        table: 'dar1_Postnummer_current',
+        columns: ['nr'],
+        references: ['postnr']
+      },
+      {
+        table: 'stormodtagere',
+        columns: ['nr'],
+        references: ['nr']
+      }
+    ]
+  },
+  postnumre_kommunekoder_mat: {
+    table: 'postnumre_kommunekoder_mat',
+    view: 'postnumre_kommunekoder_mat_view',
+    dependents: [],
+    nonIncrementalDependents: [
+      'dar1_DARKommuneinddeling_current', 'dar1_Husnummer_current', 'dar1_Postnummer_current'
+    ]
+  },
+  supplerendebynavne_mat: {
+    table: 'supplerendebynavne_mat',
+    view: 'supplerendebynavne_mat_view',
+    dependents: [],
+    nonIncrementalDependents: [
+      'adgangsadresser'
+    ]
+  },
+  supplerendebynavn_kommune_mat: {
+    table: 'supplerendebynavn_kommune_mat',
+    view: 'supplerendebynavn_kommune_mat_view',
+    dependents: [],
+    nonIncrementalDependents: [
+      'adgangsadresser'
+    ]
+  },
+  supplerendebynavn_postnr_mat: {
+    table: 'supplerendebynavn_postnr_mat',
+    view: 'supplerendebynavn_postnr_mat_view',
+    dependents: [],
+    nonIncrementalDependents: [
+      'adgangsadresser'
+    ]
+  },
+  vejstykkerpostnumremat: {
+    table: 'vejstykkerpostnumremat',
+    view: 'vejstykkerpostnumremat_view',
+    dependents: [
+      {
+        table: 'navngivenvejkommunedel_postnr_mat',
+        columns: ['navngivenvejkommunedel_id', 'postnummer_id']
+      },
+      {
+        table: 'dar1_NavngivenVej_current',
+        columns: ['navngivenvej_id']
+      },
+      {
+        table: 'dar1_NavngivenVejKommunedel_current',
+        columns: ['navngivenvejkommunedel_id']
+      },
+      {
+        table: 'dar1_Postnummer_current',
+        columns: ['postnummer_id']
+      }
+    ]
   }
+
 }, dagiMaterializations);
 
 for(let dawaMaterialization of Object.values(dar10TableModels.dawaMaterializations)) {
   exports.materializations[dawaMaterialization.table] = dawaMaterialization;
 }
+
+/*
+    const tsvCol = _.findWhere(tableModels.tables.supplerendebynavne_mat.columns, {name: 'tsv'});
+    yield client.query(`DELETE FROM supplerendebynavne_mat;
+  INSERT INTO supplerendebynavne_mat(navn, tsv)
+  (SELECT DISTINCT ON(navn) navn, ${tsvCol.derive('v')}
+  FROM supplerendebynavne_mat_view v)`);
+    yield client.query('DELETE FROM supplerendebynavn_kommune_mat;' +
+      'INSERT INTO supplerendebynavn_kommune_mat(supplerendebynavn, kommunekode)' +
+      '(SELECT supplerendebynavn, kommunekode from supplerendebynavn_kommune_mat_view)');
+    yield client.query('DELETE FROM supplerendebynavn_postnr_mat;' +
+      'INSERT INTO supplerendebynavn_postnr_mat(supplerendebynavn, postnr)' +
+      '(SELECT supplerendebynavn, postnr from supplerendebynavn_postnr_mat_view)');
+    yield materialize.recomputeMaterialization(client, txid, tableModels.tables, tableModels.materializations.supplerendebynavn2_postnr);
+
+ */
