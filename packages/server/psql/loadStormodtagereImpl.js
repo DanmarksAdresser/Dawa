@@ -7,5 +7,5 @@ const { EXECUTION_STRATEGY } = require('../components/common');
 module.exports = (client, txid, inputFile) => go(function*() {
   const importer = createStormodtagerImporter({filePath: inputFile});
 
-  yield execute(client, txid, [importer], EXECUTION_STRATEGY.quick);
+  yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow);
 });
