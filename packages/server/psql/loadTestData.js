@@ -45,8 +45,6 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
         yield loadCsvTestdata(client, txid, path.join(__dirname, '../test/data'));
       }));
       // CSV test data
-      // run init functions
-      yield initialization.disableTriggersAndInitializeTables(client);
       yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
         yield loadStormodtagereImpl(client, txid, path.join(__dirname, '../data/stormodtagere.csv'));
         // yield updateEjerlavImpl(client, txid, 'data/ejerlav.csv');

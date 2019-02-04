@@ -1,2 +1,0 @@
-CREATE INDEX ON temaer(((fields->>'ejerlavkode')::INTEGER), (fields->>'matrikelnr')) WHERE (fields->>'ejerlavkode')::integer is not null;
-CREATE INDEX ON temaer((fields->>'matrikelnr')) WHERE (fields->>'matrikelnr') IS NOT NULL;

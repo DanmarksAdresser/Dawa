@@ -1,1 +1,0 @@
-ALTER TABLE temaer ADD COLUMN slettet TIMESTAMPTZ;

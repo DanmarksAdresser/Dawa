@@ -19,6 +19,5 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
   const scriptDir = path.join(__dirname, 'schema');
   proddb.withTransaction('READ_WRITE',  client => go(function*() {
     yield initialization.loadSchemas(client, scriptDir);
-    yield initialization.disableTriggersAndInitializeTables(client);
   })).done();
 });

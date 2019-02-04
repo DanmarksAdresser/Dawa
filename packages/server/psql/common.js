@@ -2,8 +2,6 @@
 
 var fs = require('fs');
 
-var qUtil = require('../q-util');
-
 function exitOnErr(err){
   if (err){
     /*eslint no-console: 0 */
@@ -13,32 +11,6 @@ function exitOnErr(err){
 }
 
 exports.exitOnErr = exitOnErr;
-
-exports.disableTriggersQ = function(client) {
-  return client.queryp("SET SESSION_REPLICATION_ROLE ='replica'",[]);
-};
-
-exports.disableTriggers = function(client){
-  return function(done) {
-    return exports.disableTriggersQ(client).nodeify(done);
-  };
-};
-
-exports.enableTriggersQ = function(client) {
-  return client.queryp("SET SESSION_REPLICATION_ROLE ='origin'",[]);
-};
-
-exports.enableTriggers = function(client){
-  return function(done) {
-    return exports.enableTriggersQ(client).nodeify(done);
-  };
-};
-
-exports.withoutTriggers = function(client, fn) {
-  return exports.disableTriggersQ(client).then(fn).then(function() {
-    return exports.enableTriggersQ(client);
-  });
-};
 
 exports.execSQL = function(sql, client, echo, done){
   return client.queryp(sql, []).nodeify(done);
@@ -55,28 +27,6 @@ exports.psqlScriptQ = function(client, scriptDir, scriptfile) {
     encoding: 'utf8'
   });
   return client.queryp(script, []);
-};
-
-exports.disableHistoryTrigger = function(client, tableName) {
-  return client.queryp('ALTER TABLE ' + tableName + ' DISABLE TRIGGER ' + tableName + '_history_update');
-};
-
-exports.enableHistoryTrigger = function(client, tableName) {
-  return client.queryp('ALTER TABLE ' + tableName + ' ENABLE TRIGGER ' + tableName + '_history_update');
-};
-
-exports.withoutHistoryTriggers = function(client, tableNames, fn) {
-  return qUtil.mapSerial(tableNames, function(tableName) {
-    return exports.disableHistoryTrigger(client, tableName);
-  })
-    .then(function() {
-      return fn();
-    })
-    .then(function() {
-      return qUtil.mapSerial(tableNames, function(tableName) {
-        return exports.enableHistoryTrigger(client, tableName);
-      });
-    });
 };
 
 exports.psqlScript = psqlScript;
