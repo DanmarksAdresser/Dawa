@@ -957,9 +957,8 @@ exports.materializations = Object.assign({
         table: 'adgangsadresser_mat',
         columns: ['adgangsadresse_id']
       }
-      // also depends on jordstykker, but we don't have history on these and
-      // therefore don't support incremental updates of these, so they are updated separately.
-    ]
+    ],
+    nonIncrementalDependents: ['jordstykker']
   },
   stedtilknytninger: {
     table: 'stedtilknytninger',
