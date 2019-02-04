@@ -10,7 +10,7 @@ const { execute } = require('../components/execute');
 const importBygninger = (client,txid,  filePath, maxChanges) => go(function*() {
   const importer = createBygningImporter({filePath});
   const context = yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow);
-  const changes = context.changes.bygninger.total;
+  const changes = context.changes.bygningtilknytninger.total;
   if(changes > maxChanges) {
     logger.error("Too Many Changes", {
       changes,
