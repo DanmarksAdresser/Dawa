@@ -24,4 +24,4 @@ runImporter('bygninger', optionSpec, _.keys(optionSpec), function (args, options
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importBygninger', txid => importBygninerImpl.importBygninger(client, txid, options.file, options.maxChanges));
   }));
-});
+}, 60 * 60);

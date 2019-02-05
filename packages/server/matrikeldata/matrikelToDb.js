@@ -16,8 +16,6 @@ const optionSpec = {
   refresh: [false, 'Genindlæs alle jordstykker', 'boolean', false]
 };
 
-q.longStackSupport = true;
-
 runImporter('matrikelkortet', optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
@@ -30,4 +28,4 @@ runImporter('matrikelkortet', optionSpec, _.keys(optionSpec), function (args, op
           importJordstykkerImpl.importJordstykkerImpl(
             client, txid, options.sourceDir, options.refresh));
   }));
-});
+}, 60 * 60 * 3);

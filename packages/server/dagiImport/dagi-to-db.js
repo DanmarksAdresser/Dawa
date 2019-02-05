@@ -62,4 +62,4 @@ runImporter('dagi-to-db', optionSpec, _.without(_.keys(optionSpec), 'temaer'), f
       throw err;
     }
   });
-});
+}, 60 * 60 * 2);

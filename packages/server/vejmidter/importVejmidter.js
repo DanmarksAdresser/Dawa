@@ -25,4 +25,4 @@ runImporter('vejmidter', optionSpec, _.keys(optionSpec),  (args, options) => go(
     withImportTransaction(client, "importVejmidter", (txid) =>
       importVejmidterImpl.importVejmidter(client,txid, options.file)));
   logger.info('Successfully imported vejmidter');
-}));
+}), 60 * 60);

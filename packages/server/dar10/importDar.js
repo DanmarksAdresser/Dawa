@@ -37,4 +37,4 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
   }));
-});
+}, 60 * 60 * 3);

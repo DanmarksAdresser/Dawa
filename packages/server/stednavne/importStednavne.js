@@ -24,4 +24,4 @@ runImporter('stednavne', optionSpec, _.keys(optionSpec), function (args, options
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importStednavne', txid => importStednavneImpl.importStednavne(client, txid, options.file, options.maxChanges));
   }));
-});
+}, 60 * 60);
