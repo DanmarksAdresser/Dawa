@@ -8,7 +8,10 @@ const proddb = require('./proddb');
 
 const {withImportTransaction} = require('../importUtil/transaction-util');
 const {reloadDatabaseCode} = require('./initialization');
-const { clearAndMaterialize } = require('@dawadk/import-util/src/materialize');
+const {
+  clearAndMaterialize, materializeWithoutEvents,
+  recomputeMaterialization
+} = require('@dawadk/import-util/src/materialize');
 const tableSchema = require('./tableModel');
 
 const optionSpec = {
@@ -21,7 +24,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     pooled: false
   });
   proddb.withTransaction('READ_WRITE', (client) => go(function* () {
-    return yield withImportTransaction(client, 'migrate_1_26_0', txid => go(function* () {
+    yield withImportTransaction(client, 'migrate_1_26_0', txid => go(function* () {
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/hoejder.sql')));
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/navngivenvejkommunedel_mat')));
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/adgangsadresser_mat')));
@@ -63,6 +66,13 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield client.query('ALTER TABLE navngivenvej DROP COLUMN bbox');
       yield client.query('ALTER TABLE navngivenvej DROP COLUMN geom');
       yield client.query('ALTER TABLE navngivenvej DROP COLUMN tsv');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN beliggenhed_vejnavnelinje');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN beliggenhed_vejnavneområde');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN beliggenhed_vejtilslutningspunkter');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN visueltcenter');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN bbox');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN geom');
+      yield client.query('ALTER TABLE navngivenvej_changes DROP COLUMN tsv');
       yield client.query('DROP INDEX navngivenvej_administrerendekommune_idx');
       yield client.query('DROP INDEX navngivenvej_adresseringsnavn_idx');
       yield client.query('DROP INDEX navngivenvej_darstatus_idx');
@@ -72,6 +82,20 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.hoejde_importer_afventer);
       yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.adgangsadresser_mat);
       yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.adresser_mat);
+      yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.supplerendebynavne_mat);
+      yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.supplerendebynavn_kommune_mat);
+      yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.supplerendebynavn_postnr_mat);
+      yield materializeWithoutEvents(client, tableSchema.tables, tableSchema.materializations.adgangsadresser, ['ikraftfra', 'ejerlavkode', 'matrikelnr', 'esrejendomsnr']);
+      yield materializeWithoutEvents(client, tableSchema.tables, tableSchema.materializations.vejstykker, ['oprettet']);
+      yield materializeWithoutEvents(client, tableSchema.tables, tableSchema.materializations.enhedsadresser, ['ikraftfra']);
+      yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/wms_vejpunktlinjer')));
+    }));
+    yield withImportTransaction(client, 'migrate_1_26_0', txid => go(function* () {
+      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.adgangsadresser);
+      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.enhedsadresser);
+      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.vejstykker);
+      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.navngivenvej);
+      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.supplerendebynavn2_postnr);
     }));
   })).done();
 });

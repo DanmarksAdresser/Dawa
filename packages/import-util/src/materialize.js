@@ -4,10 +4,10 @@ const {assert} = require('chai');
 const {go} = require('ts-csp');
 const _ = require('underscore');
 
-const {selectList} = require('@dawadk/common/src/postgres/sql-util');
+const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 const {
   computeInsertsSubset, computeUpdatesSubset, computeDeletesSubset, applyChanges,
-  initializeFromScratch, computeDifferences
+  initializeFromScratch, computeDifferences, applyCurrentTableToChangeTable
 } = require('@dawadk/import-util/src/table-diff');
 
 
@@ -146,6 +146,20 @@ const recomputeMaterialization = (client, txid, tableModels, materialization) =>
 const makeChangesNonPublic = (client, txid, tableModel) =>
   client.query(`UPDATE ${tableModel.table}_changes SET public=false WHERE txid = $1`, [txid]);
 
+/**
+ * updates columns of materialization *without* producing any events.
+ * The most recent event for each present row is updated.
+ * Does not produce any inserts or deletes. Does not handle derived rows.
+ */
+const materializeWithoutEvents = (client, tableModels, materialization, columnNames) => go(function*() {
+  const tableModel = tableModels[materialization.table];
+  yield client.query(`UPDATE ${materialization.table} t
+  SET ${columnNames.map(col => `${col} = v.${col}`).join(', ')} 
+  FROM ${materialization.view} v 
+  WHERE ${columnsEqualClause('t', 'v', tableModel.primaryKey)}`);
+  yield applyCurrentTableToChangeTable(client, tableModel, columnNames);
+});
+
 module.exports = {
   computeDirty,
   createChangeTable,
@@ -157,5 +171,6 @@ module.exports = {
   clearAndMaterialize,
   recomputeMaterialization,
   dropTempDirtyTable,
-  makeChangesNonPublic
+  makeChangesNonPublic,
+  materializeWithoutEvents
 };

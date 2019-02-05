@@ -3,14 +3,12 @@
 const {go} = require('ts-csp');
 const _ = require('underscore');
 
-const {allColumnNames, nonPrimaryColumnNames, publicColumnNames, publicNonKeyColumnNames,
+const {allColumnNames, nonPrimaryColumnNames, publicNonKeyColumnNames,
   deriveColumnsForChange, makeSelectClause, derivedColumnNames,
   nonDerivedColumnNames, assignSequenceNumbers, columnsDistinctClause} = require('./table-model-util');
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 
-
 const applyCurrentTableToChangeTable = (client, tableModel, columnsToApply) => {
-
   return client.query(`WITH rowsToUpdate AS (SELECT ${selectList('t', tableModel.primaryKey)}, ${selectList('t', columnsToApply)},txid,changeid
   FROM ${tableModel.table} t JOIN LATERAL (select txid, changeid FROM ${tableModel.table}_changes c WHERE
   ${columnsEqualClause('t', 'c', tableModel.primaryKey)} 
@@ -236,86 +234,6 @@ const initChangeTable = (client, txid, tableModel) => go(function* () {
   yield deriveColumnsForChange(client, txid, tableModel);
 });
 
-
-const migrateInserts = (client, txid, tableModel) => {
-  const selectFields = selectList(null, publicColumnNames(tableModel));
-  const changeTableName = `${tableModel.table}_changes`;
-  const historyTableName = `${tableModel.table}_history`;
-  const sql = `WITH inserts AS (SELECT
-  txid,
-                   valid_from,
-                   ${selectFields}
-                 FROM ${historyTableName} h
-                 left join transaction_history th on h.valid_from = th.sequence_number
-                  WHERE valid_from IS NULL OR NOT EXISTS
-                 (SELECT *
-                  FROM ${historyTableName} h2
-                  WHERE h2.valid_to = h.valid_from))
-INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectFields})
-  (SELECT
-     COALESCE(txid, 1),
-     valid_from,
-     'insert',
-     TRUE,
-     ${selectFields}
-   FROM inserts)`;
-  return client.query(sql);
-};
-
-const migrateUpdates = (client, txid, tableModel) => {
-  const selectFields = selectList(null, publicColumnNames(tableModel));
-  const changeTableName = `${tableModel.table}_changes`;
-  const historyTableName = `${tableModel.table}_history`;
-  const sql = `WITH updates AS
-(SELECT
-   txid,
-   valid_from,
-   ${selectFields}
- FROM ${historyTableName} h
- join transaction_history th on h.valid_from = th.sequence_number
- WHERE valid_from IS NOT NULL AND EXISTS
- (SELECT *
-  FROM ${historyTableName} h2
-  WHERE h2.valid_to = h.valid_from))
-INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectFields})
-  (SELECT
-     COALESCE(txid, 1),
-     valid_from,
-     'update',
-     TRUE,
-     ${selectFields}
-   FROM updates)`;
-  return client.query(sql);
-};
-
-const migrateDeletes = (client, txid, tableModel) => {
-  const selectFields = selectList(null, publicColumnNames(tableModel));
-  const changeTableName = `${tableModel.table}_changes`;
-  const historyTableName = `${tableModel.table}_history`;
-  const sql = `WITH deletes AS ( select txid, valid_to, ${selectFields}
-FROM ${historyTableName} h
-join transaction_history th on h.valid_to = th.sequence_number
-WHERE valid_to IS NOT NULL AND NOT EXISTS
-(SELECT *
- FROM ${historyTableName} h2
- WHERE h2.valid_from = h.valid_to))
-INSERT INTO ${changeTableName} (txid, changeid, operation, public, ${selectFields})
-  (SELECT
-     COALESCE(txid, 1),
-     valid_to,
-     'delete',
-     TRUE,
-     ${selectFields}
-   FROM deletes)`;
-  return client.query(sql);
-};
-
-const migrateHistoryToChangeTable = (client, txid, tableModel) => go(function* () {
-  yield migrateInserts(client, txid, tableModel);
-  yield migrateUpdates(client, txid, tableModel);
-  yield migrateDeletes(client, txid, tableModel);
-});
-
 const clearHistory = (client, txid, tableModel) => go(function* () {
   const selectFields = selectList(null, allColumnNames(tableModel));
   const changeTableName = `${tableModel.table}_changes`;
@@ -424,7 +342,6 @@ module.exports = {
   applyUpdates,
   applyDeletes,
   applyChanges,
-  migrateHistoryToChangeTable,
   createChangeTable,
   initChangeTable,
   initializeFromScratch,
