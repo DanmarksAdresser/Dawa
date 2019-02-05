@@ -51,6 +51,14 @@ const commonParameters = [
   {
     name: 'sfeejendomsnr',
     doc: 'Find de jordstykker som er tilknyttet det angivne SFE ejendomsnummer.'
+  },
+  {
+    name: 'featureid',
+    doc: 'Find jordstykker med den angivne featureid'
+  },
+  {
+    name: 'moderjordstykke',
+    doc: 'Find jordstykker, hvor moderjordstykket er jordstykket med det angivne featureid'
   }
 ];
 

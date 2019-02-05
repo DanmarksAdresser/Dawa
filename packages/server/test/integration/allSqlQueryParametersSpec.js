@@ -620,6 +620,14 @@ var sampleParameters = {
     }
   },
   jordstykke: {
+    featureid: {
+      values: ['876283'],
+      verifier: (jordstykke, featureid) => jordstykke.featureid === featureid
+    },
+    moderjordstykke: {
+      values: ['2631574'],
+      verifier: (jordstykke, moderjordstykke) => jordstykke.moderjordstykke === parseInt(moderjordstykke)
+    },
     ejerlavkode: {
       values: ['60851', '060851'],
       verifier: (jordstykke, ejerlavkode) => jordstykke.ejerlav.kode === parseInt(ejerlavkode, 10)

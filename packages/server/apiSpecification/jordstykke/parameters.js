@@ -52,6 +52,14 @@ module.exports = {
       {
         name: 'sfeejendomsnr',
         type: 'string'
+      },
+      {
+        name: 'featureid',
+        type: 'integer'
+      },
+      {
+        name: 'moderjordstykke',
+        type: 'integer'
       }
     ])
 };
