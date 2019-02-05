@@ -32,7 +32,7 @@ module.exports = {
       heading: 'Beskrivelse af storkredse',
       anchor: 'databeskrivelse',
       lead: `API'et udstiller for hver storkreds følgende informationer:`,
-      entity: 'sogn',
+      entity: 'storkreds',
       qualifier: 'json'
     }
   ]
