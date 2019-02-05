@@ -42,7 +42,7 @@ module.exports = {
         name: 'ikrafttrædelsesdato',
         type: 'localdatetime',
         nullable: true,
-        description: 'Adgangsadressens ikrafttrædelsesdato'
+        description: 'Adgangsadressens ikrafttrædelsesdato, dvs. det tidspunkt hvor adressen første gang fik status "gældende". Kan være fremtidig.'
       }, {
         name: 'kommunekode',
         type: 'string',
@@ -85,7 +85,7 @@ module.exports = {
         deprecated: true,
         nullable: true,
         schema: definitions.NullableUpTo7,
-        description: 'DEPRECATED. Feltet opdateres ikke længere. Benyt "jordstykke" i stedet. Angiver ejerlavkoden registreret i BBR.' +
+        description: 'Ejerlavkode for det jordstykke, som adressen er placeret på.' +
         ' Repræsenteret ved indtil 7 cifre. Eksempel: ”170354” for ejerlavet ”Eskebjerg By, Bregninge”.'
       }, {
         name: 'matrikelnr',
@@ -93,16 +93,15 @@ module.exports = {
         deprecated: true,
         nullable: true,
         schema: definitions.Nullablematrikelnr,
-        description: 'DEPRECATED. Feltet opdateres ikke længere. Benyt "jordstykke" i stedet. Angiver matrikelnummeret for jordstykket, som det var registreret i BBR.' +
+        description: 'Matrikelnummer for det jordstykke, som adressen er placeret på.' +
         ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”.'
       }, {
         name: 'esrejendomsnr',
         type: 'string',
         nullable: true,
         schema: definitions.Nullableesrejendomsnr,
-        description: 'DEPRECATED. Feltet opdateres ikke længere. Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
-        ' ESR, som det matrikelnummer som adressen ligger på, er en del af.' +
-        ' Stammer fra BBR.' +
+        description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret,' +
+        ' ESR, som det jordstykke som adressen ligger på, er en del af.' +
         ' Repræsenteret ved op til syv cifre. Eksempel ”13606”.'
       }, {
         name: 'etrs89koordinat_øst',
@@ -231,12 +230,12 @@ module.exports = {
       }, {
         name: 'ændret',
         type: 'localdatetime',
-        description: 'Dato og tid hvor der sidst er ændret i adgangsadressen, som registreret hos DAR. Eksempel: 2002-04-08T00:00:00.'
+        description: 'Dato og tid hvor der sidst er ændret i adressen, som registreret hos DAR. Eksempel: 2002-04-08T00:00:00.'
       }, {
         name: 'ikrafttrædelsesdato',
         type: 'localdatetime',
         nullable: true,
-        description: 'Adressens ikrafttrædelsesdato.',
+        description: 'Adressens ikrafttrædelsesdato, dvs. det tidspunkt hvor adressen først er registreret som "gældende" i DAR. Kan være fremtidig.',
       }, {
         name: 'adgangsadresseid',
         type: 'uuid',
@@ -713,15 +712,14 @@ module.exports = {
       {
         name: 'oprettet',
         type: 'localdatetime',
-        deprecated: true,
         nullable: true,
-        description: 'DEPRECATED. Feltet opdateres ikke længere. Oprettelsestidspunktet for vejstykket som registreret i BBR'
+        description: 'Oprettelsestidspunktet for vejstykket, som registreret i DAR.'
       }, {
         name: 'ændret',
         type: 'localdatetime',
         deprecated: true,
         nullable: true,
-        description: 'DEPRECATED. Feltet opdateres ikke længere. Tidspunkt for seneste ændring af vejstykket, som registreret i BBR'
+        description: 'DEPRECATED. Feltet opdateres ikke længere.'
       }, {
         name: 'navn',
         type: 'string',

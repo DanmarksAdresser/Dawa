@@ -75,7 +75,6 @@ const createSqlModel = (model, binding, filterParams) => {
       if (params.txidfra) {
         const fromAlias = dbapi.addSqlParameter(sqlParts, params.txidfra);
         dbapi.addWhereClause(sqlParts, 'i.txid >= ' + fromAlias);
-        dbapi.addWhereClause(sqlParts, 'i.txid >= ' + fromAlias);
       }
       if (params.txidtil) {
         const toAlias = dbapi.addSqlParameter(sqlParts, params.txidtil);

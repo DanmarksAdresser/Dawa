@@ -12,5 +12,3 @@ CREATE TABLE IF NOT EXISTS enhedsadresser (
   esdhreference text,
   journalnummer text
 );
-CREATE INDEX ON enhedsadresser(adgangsadresseid);
-DROP TABLE IF EXISTS enhedsadresser_history CASCADE;

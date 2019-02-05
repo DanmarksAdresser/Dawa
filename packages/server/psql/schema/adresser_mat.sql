@@ -46,7 +46,6 @@ CREATE VIEW adresser_mat_view AS
     a.navngivenvejkommunedel_id,
     a.supplerendebynavn_id,
     a.darkommuneinddeling_id,
-    a.adressepunkt_id,
     a.postnummer_id,
     a.postnrnavn,
     a.vejnavn,

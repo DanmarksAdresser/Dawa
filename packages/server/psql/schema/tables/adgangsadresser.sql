@@ -30,23 +30,7 @@ CREATE TABLE  adgangsadresser (
   navngivenvejkommunedel_id uuid,
   supplerendebynavn_id uuid,
   darkommuneinddeling_id uuid,
-  adressepunkt_id uuid,
   postnummer_id uuid,
   supplerendebynavn_dagi_id integer,
   vejpunkt_id UUID
 );
-
-CREATE INDEX ON Adgangsadresser(ejerlavkode, id);
-CREATE INDEX ON Adgangsadresser(kommunekode, vejkode, postnr);
-CREATE INDEX ON adgangsadresser(postnr, kommunekode);
-CREATE INDEX ON adgangsadresser(navngivenvej_id);
-CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id);
-CREATE INDEX ON adgangsadresser(supplerendebynavn_id);
-CREATE INDEX ON adgangsadresser(darkommuneinddeling_id);
-CREATE INDEX ON adgangsadresser(adressepunkt_id);
-CREATE INDEX ON adgangsadresser(vejpunkt_id);
-CREATE INDEX ON adgangsadresser(navngivenvejkommunedel_id, postnummer_id, id);
-
-
-
-DROP TABLE IF EXISTS adgangsadresser_history CASCADE;

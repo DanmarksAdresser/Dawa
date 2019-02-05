@@ -191,8 +191,6 @@ const adgangsadresser = {
   }, {
     name: 'darkommuneinddeling_id'
   }, {
-    name: 'adressepunkt_id'
-  }, {
     name: 'vejpunkt_id'
   }, {
     name: 'postnummer_id'
@@ -889,7 +887,7 @@ exports.materializations = Object.assign({
       },
       {
         table: 'dar1_Adressepunkt_current',
-        columns: ['adressepunkt_id']
+        columns: ['adgangspunktid']
       },
       {
         table: 'dar1_SupplerendeBynavn_current',

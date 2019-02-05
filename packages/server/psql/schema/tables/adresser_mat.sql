@@ -36,7 +36,6 @@ CREATE TABLE adresser_mat(
   navngivenvejkommunedel_id uuid,
   supplerendebynavn_id uuid,
   darkommuneinddeling_id uuid,
-  adressepunkt_id uuid,
   postnummer_id uuid,
   postnrnavn text,
   vejnavn text,
@@ -67,5 +66,6 @@ CREATE INDEX ON adresser_mat(status);
 CREATE INDEX ON adresser_mat(vejnavn, postnr);
 CREATE INDEX ON adresser_mat(vejkode,postnr);
 CREATE INDEX ON adresser_mat(vejpunkt_id);
+CREATE INDEX ON adresser_mat(adgangspunktid);
 CREATE INDEX ON adresser_mat USING GIST (vejpunkt_geom);
 CREATE INDEX ON adresser_mat(supplerendebynavn_dagi_id);

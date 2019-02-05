@@ -1,6 +1,6 @@
 "use strict";
 
-var cliParameterParsing = require('../bbr/common/cliParameterParsing');
+var cliParameterParsing = require('@dawadk/common/src/cli/cli-parameter-parsing');
 var initialization = require('./initialization');
 var proddb = require('./proddb');
 

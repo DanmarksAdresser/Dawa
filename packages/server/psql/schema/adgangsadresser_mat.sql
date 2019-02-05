@@ -52,7 +52,6 @@ CREATE VIEW adgangsadresser_mat_view AS
 
     sb.id                             AS supplerendebynavn_id,
     k.id                             AS darkommuneinddeling_id,
-    ap.id                            AS adressepunkt_id,
     p.id                             AS postnummer_id,
     p.navn AS postnrnavn,
     nv.vejnavn,
@@ -75,7 +74,7 @@ CREATE VIEW adgangsadresser_mat_view AS
       ON hn.navngivenvej_id = nv.id
     JOIN dar1_navngivenvejkommunedel_current nvk
       ON nv.id = nvk.navngivenvej_id AND
-         k.kommunekode = nvk.kommune
+         k.kommunekode = nvk.kommune AND nvk.status IN (2,3)
     JOIN dar1_postnummer_current p
       ON hn.postnummer_id = p.id
     LEFT JOIN dar1_supplerendebynavn_current sb

@@ -148,7 +148,7 @@ const distanceParameterImpl = (sqlParts, params) => {
   if (params.afstand !== undefined) {
     const idAlias = dbapi.addSqlParameter(sqlParts, params.neighborid);
     const afstandAlias = dbapi.addSqlParameter(sqlParts, params.afstand);
-    sqlParts.from.push(`, (select id, geom from navngivenvej) n2`);
+    sqlParts.from.push(`, (select id, geom from navngivenvej_mat) n2`);
     dbapi.addWhereClause(sqlParts, `\
 n2.id = ${idAlias} \
 AND ST_DWithin(nv.geom, n2.geom, ${afstandAlias})

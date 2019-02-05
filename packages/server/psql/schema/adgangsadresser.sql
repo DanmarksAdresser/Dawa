@@ -23,7 +23,6 @@ CREATE VIEW adgangsadresser_view AS
     navngivenvejkommunedel_id,
     supplerendebynavn_id,
     darkommuneinddeling_id,
-    adressepunkt_id,
     postnummer_id,
     supplerendebynavn_dagi_id,
     hoejde,
