@@ -45,6 +45,14 @@ const defaultParameterTypes = {
 };
 
 const unnormalizedBindings = {
+  højde: {
+    table: 'hoejder',
+    attributes: {
+      højde: {
+        column: 'hoejde'
+      }
+    }
+  },
   adgangsadresse: {
     path: '/replikering/adgangsadresser',
     table: 'adgangsadresser',

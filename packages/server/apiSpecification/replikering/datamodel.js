@@ -7,6 +7,21 @@ const darReplikeringModels = require('../../dar10/replikeringModels');
 
 const { defaultSchemas } = require('./datamodelUtil');
 module.exports = {
+  højde: {
+    key: ['husnummerid'],
+    attributes: [
+      {
+        name: 'husnummerid',
+        type: 'uuid',
+        description: 'Husnummeret (adgangsadressen), hvis adgangspunkt som rækken angiver højden på'
+      },
+      {
+        name: 'højde',
+        type: 'real',
+        description: 'Adgangspunktets højde i meter over havoverfladen. Beregnet ud fra Danmarks Højdemodel.'
+      }
+    ]
+  },
   adgangsadresse: {
     key: ['id'],
     attributes: [
