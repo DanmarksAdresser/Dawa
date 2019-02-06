@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 "use strict";
 const { go } = require('ts-csp');
-const q = require('q');
 const _ = require('underscore');
 
 const {runImporter} = require('@dawadk/common/src/cli/run-importer');
