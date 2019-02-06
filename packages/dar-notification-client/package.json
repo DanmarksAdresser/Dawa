@@ -1,16 +1,16 @@
 {
   "name": "@dawadk/dar-notification-client",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "WebSocket klient til at tilgå dar-notification-server",
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@dawadk/common": "^1.0.11",
+    "@dawadk/common": "^1.0.12",
     "ws": "^5.2.0",
     "ws-heartbeats": "^1.0.0"
   },
   "devDependencies": {
-    "@dawadk/dar-notification-server": "^1.0.2",
+    "@dawadk/dar-notification-server": "^1.0.3",
     "chai": "4.1.2",
     "eslint": "^4.19.1",
     "mocha": "^5.2.0"
