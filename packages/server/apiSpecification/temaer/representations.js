@@ -133,16 +133,8 @@ const opstillingskredsJsonRepresentation = (() => {
       navn: row.navn,
       kredskommune: mapKode4NavnTema('kommune', row.kredskommunekode, row.kredskommunenavn, baseUrl),
       region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
-      storkreds: {
-        href: makeHref(baseUrl, 'storkreds', [row.storkredsnummer]),
-        nummer: numToStr(row.storkredsnummer),
-        navn: row.storkredsnavn
-      },
-      valglandsdel: {
-        href: makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
-        bogstav: row.valglandsdelsbogstav,
-        navn: row.valglandsdelsnavn
-      },
+      storkreds: commonMappers.mapStorkredsRef(row, baseUrl),
+      valglandsdel: commonMappers.mapValglandsdelRef(row, baseUrl),
       kommuner: mapKommuneRefArray(row.kommuner, baseUrl)
     });
     return result;
@@ -197,16 +189,8 @@ const afstemningsområdeJsonRepresentation = (() => {
         nummer: numToStr(row.opstillingskredsnummer),
         navn: row.opstillingskredsnavn
       },
-      storkreds: {
-        href: makeHref(baseUrl, 'storkreds', [row.storkredsnummer]),
-        nummer: numToStr(row.storkredsnummer),
-        navn: row.storkredsnavn
-      },
-      valglandsdel: {
-        href: makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
-        bogstav: row.valglandsdelsbogstav,
-        navn: row.valglandsdelsnavn
-      }
+      storkreds: commonMappers.mapStorkredsRef(row, baseUrl),
+      valglandsdel: commonMappers.mapValglandsdelRef(row, baseUrl)
     });
     return result;
   };
@@ -308,11 +292,7 @@ const storkredsJsonRepresentation = (() => {
       nummer: numToStr(row.nummer),
       navn: row.navn,
       region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
-      valglandsdel: {
-        href: makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
-        bogstav: row.valglandsdelsbogstav,
-        navn: row.valglandsdelsnavn
-      }
+      valglandsdel: commonMappers.mapValglandsdelRef(row ,baseUrl)
     });
     return result;
   };

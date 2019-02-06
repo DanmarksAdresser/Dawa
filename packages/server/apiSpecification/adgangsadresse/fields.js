@@ -199,6 +199,19 @@ var fields = [
   },
   {
     name: 'nedlagt'
+  },
+  {
+    name: 'storkredsnummer',
+    formatter: util.numberToString
+  },
+  {
+    name: 'storkredsnavn'
+  },
+  {
+    name: 'valglandsdelsbogstav'
+  },
+  {
+    name: 'valglandsdelsnavn'
   }
 ];
 

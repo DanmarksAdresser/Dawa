@@ -141,10 +141,25 @@ exports.propertyFilter = normalizeParameters([
     schema: schema.kode4
   },
   {
+    name: 'afstemningsområdenummer',
+    type: 'integer',
+    multi: true
+  },
+  {
     name: 'opstillingskredskode',
     type: 'integer',
     multi: true,
     schema: schema.kode4
+  },
+  {
+    name: 'storkredsnummer',
+    type: 'integer',
+    multi: true
+  },
+  {
+    name: 'valglandsdelsbogstav',
+    type: 'string',
+    multi: true
   },
   {
     name: 'politikredskode',

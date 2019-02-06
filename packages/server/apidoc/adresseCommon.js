@@ -119,9 +119,21 @@ const parametersForBothAdresseAndAdgangsAdresse = [
     nullable: true
   },
   {
+    name: 'afstemningsområdenummer',
+    doc: 'Find de adresser som ligger i et afstemningsområde med det angivne nummer. Kombineres som regel med kommunekodeparameteren.'
+  },
+  {
     name: 'opstillingskredskode',
     doc: 'Find de adresser som ligger indenfor opstillingskredsen angivet ved opstillingskredskoden.',
     nullable: true
+  },
+  {
+    name: 'storkredsnummer',
+    doc: 'Find de adresser som ligger storkredsen med det angivne nummer.'
+  },
+  {
+    name: 'valglandsdelsbogstav',
+    doc: 'Find de adresser som ligger i den angivne valglandsdel.'
   },
   {
     name: 'retskredskode',

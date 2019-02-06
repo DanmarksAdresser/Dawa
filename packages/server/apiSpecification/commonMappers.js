@@ -1,11 +1,9 @@
 "use strict";
 
-var util = require('./util');
 var paths = require('./paths');
 var _ = require('underscore');
 
-var kode4String = util.kode4String;
-var notNull= util.notNull;
+const { numberToString, kode4String, notNull } = require('./util');
 /*
  * Utility functions
  */
@@ -104,6 +102,33 @@ exports.mapPostnummerRef = function(dbJson, baseUrl) {
   }
   return null;
 };
+
+exports.mapStorkredsRef = (row, baseUrl) => {
+  if(row.storkredsnummer) {
+    return {
+      href: exports.makeHref(baseUrl, 'storkreds', [row.storkredsnummer]),
+      nummer: numberToString(row.storkredsnummer),
+      navn: row.storkredsnavn
+    }
+  }
+  else {
+    return null;
+  }
+};
+
+exports.mapValglandsdelRef = (row, baseUrl) => {
+  if(row.valglandsdelsbogstav) {
+    return {
+        href: exports.makeHref(baseUrl, 'valglandsdel', [row.valglandsdelsbogstav]),
+        bogstav: row.valglandsdelsbogstav,
+        navn: row.valglandsdelsnavn
+    }
+  }
+  else {
+    return null;
+  }
+};
+
 
 exports.formatDarStatus = darstatuskode => {
   switch(darstatuskode) {

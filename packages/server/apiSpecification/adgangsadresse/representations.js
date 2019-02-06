@@ -50,7 +50,8 @@ const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kild
   'vejpunkt_nøjagtighed', 'vejpunkt_tekniskstandard', 'vejpunkt_x', 'vejpunkt_y',
   'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
   'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn',
-  'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt', 'darstatus'];
+  'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt', 'darstatus', 'storkredsnummer', 'storkredsnavn',
+  'valglandsdelsbogstav', 'valglandsdelsnavn'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -349,6 +350,45 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         },
         docOrder: ['href', 'kode', 'navn']
       }),
+      storkreds: schemaObject({
+        nullable: true,
+        description: 'Den storkreds, som adressen er beliggende i.',
+        properties: {
+          href: {
+            description: 'Storkredsens unikke URL',
+            type: 'string'
+          },
+          nummer: {
+            description: 'Storkredsens nummer. ',
+            type: 'string'
+          },
+          navn: {
+            description: 'Storkredsens navn.',
+            type: 'string'
+          }
+        },
+        docOrder: ['href', 'nummer', 'navn']
+      }),
+      valglandsdel: schemaObject({
+        nullable: true,
+        description: 'Den valglandsdel, som adressen er beliggende i.',
+        properties: {
+          href: {
+            description: 'Valglandsdelens unikke URL',
+            type: 'string'
+          },
+          bogstav: {
+            description: 'Valglandsdelens bogstav: A, B eller C.',
+            type: 'string'
+          },
+          navn: {
+            description: 'Valglandsdelens navn.',
+            type: 'string'
+          }
+        },
+        docOrder: ['href', 'bogstav', 'navn']
+      }),
+
       zone: {
         description: 'Hvilken zone adressen ligger i. "Byzone", "Sommerhusområde" eller "Landzone". Beregnes udfra adgangspunktet og zoneinddelingerne fra PlansystemDK.',
         enum: [null, 'Byzone', 'Sommerhusområde', 'Landzone']
@@ -400,7 +440,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
     docOrder: ['href','id', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr','navngivenvej','supplerendebynavn', 'supplerendebynavn2',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
       'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
-      'opstillingskreds', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
+      'opstillingskreds', 'storkreds', 'valglandsdel', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
   }),
   mapper: function (baseUrl){
     return function(rs) {
@@ -494,7 +534,9 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         href: makeHref(baseUrl, 'afstemningsområde', [rs.kommunekode, rs.afstemningsområdenummer]),
         nummer: "" + rs.afstemningsområdenummer,
         navn: rs.afstemningsområdenavn
-        } : null,
+        } : null;
+      adr.storkreds = commonMappers.mapStorkredsRef(rs, baseUrl);
+      adr.valglandsdel = commonMappers.mapValglandsdelRef(rs, baseUrl);
       adr.zone = rs.zone ? util.zoneKodeFormatter(rs.zone) : null;
       if(rs.jordstykke_matrikelnr) {
         const jordstykke = {};

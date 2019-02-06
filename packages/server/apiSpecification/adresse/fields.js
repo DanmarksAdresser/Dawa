@@ -243,8 +243,11 @@ var fields = [
   adgangsadresseField('menighedsrådsafstemningsområdenavn'),
   adgangsadresseField('brofast'),
   adgangsadresseField('supplerendebynavn_dagi_id'),
-  adgangsadresseField('navngivenvej_id')
-
+  adgangsadresseField('navngivenvej_id'),
+  adgangsadresseField('storkredsnummer'),
+  adgangsadresseField('storkredsnavn'),
+  adgangsadresseField('valglandsdelsbogstav'),
+  adgangsadresseField('valglandsdelsnavn')
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

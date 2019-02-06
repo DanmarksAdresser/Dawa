@@ -332,6 +332,20 @@ var sampleParameters = {
         return adr.opstillingskreds.kode === kode4String(kode);
       }
     },
+    afstemningsområdenummer: {
+      values: ['12'],
+      verifier: (adr, nummer) => {
+        return adr.kommune.kode === "0350" ? adr.afstemningsområde.nummer === nummer : true
+      }
+    },
+    storkredsnummer: {
+      values: ['1'],
+      verifier: (adr, storkredsnummer) => adr.storkreds.nummer === storkredsnummer
+    },
+    valglandsdelsbogstav: {
+      values: ['A'],
+      verifier: (adr, bogstav) => adr.valglandsdel.bogstav === bogstav
+    },
     zone: {
       values: ['Byzone'],
       verifier: function(adr, zone) {
@@ -355,6 +369,10 @@ var sampleParameters = {
       verifier: function(adr, matrikelnr) {
         return adr.jordstykke && adr.jordstykke.matrikelnr === matrikelnr;
       }
+    },
+    esrejendomsnr: {
+      values: ['9408'],
+      verifier: (adr, esr) => adr.esrejendomsnr === esr
     },
     stednavnid: {
       // note, verification only works for bebyggelser
@@ -515,6 +533,20 @@ var sampleParameters = {
         return adr.adgangsadresse.opstillingskreds.kode === kode4String(kode);
       }
     },
+    afstemningsområdenummer: {
+      values: ['12'],
+      verifier: (adr, nummer) => {
+        return adr.adgangsadresse.kommune.kode === "0350" ? adr.adgangsadresse.afstemningsområde.nummer === nummer : true
+      }
+    },
+    storkredsnummer: {
+      values: ['1'],
+      verifier: (adr, storkredsnummer) => adr.adgangsadresse.storkreds.nummer === storkredsnummer
+    },
+    valglandsdelsbogstav: {
+      values: ['A'],
+      verifier: (adr, bogstav) => adr.adgangsadresse.valglandsdel.bogstav === bogstav
+    },
     zone: {
       values: ['Byzone'],
       verifier: function(adr, zone) {
@@ -539,6 +571,10 @@ var sampleParameters = {
       verifier: function(adr, matrikelnr) {
         return adr.adgangsadresse.jordstykke && adr.adgangsadresse.jordstykke.matrikelnr === matrikelnr;
       }
+    },
+    esrejendomsnr: {
+      values: ['9408'],
+      verifier: (adr, esr) => adr.adgangsadresse.esrejendomsnr === esr
     },
     stednavnid: {
       // note, verification only works for bebyggelser
@@ -942,8 +978,6 @@ _.keys(sampleParameters).forEach(function(specName) {
   });
 
   var untestedParams = {
-    adgangsadresse: ['esrejendomsnr'],
-    adresse: ['esrejendomsnr']
   };
   var allParameters = propertyFilterParameters.concat(additionalParameters[specName] || []);
   describe('Query for ' + specName, function() {
