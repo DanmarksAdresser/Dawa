@@ -755,6 +755,7 @@ const ikke_brofaste_adresser = {
 };
 
 const hoejder = {
+  entity: 'højde',
   table: 'hoejder',
   primaryKey: ['husnummerid'],
   columns: [
