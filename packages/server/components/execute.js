@@ -46,6 +46,7 @@ const getExecutionOrder = (rootComponents, components) => {
     return acc;
   }, new Set());
   const componentsInScope = Array.from(componentsInScopeSet);
+
   const componentIdsInScope = new Set(_.pluck(componentsInScope, 'id'));
 
   const componentIdToDependenciesIds = componentsInScope.reduce((acc, component) => {
@@ -110,5 +111,6 @@ const execute = (client, txid, rootComponents, strategy) => go(function*() {
 });
 
 module.exports = {
-  execute
+  execute,
+  getExecutionOrder
 };
