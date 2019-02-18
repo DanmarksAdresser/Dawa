@@ -1,5 +1,5 @@
 const _ = require('underscore');
-const { go } = require('ts-csp');
+const {go} = require('ts-csp');
 const tableSchema = require('../psql/tableModel');
 const {
   materialize,
@@ -27,7 +27,7 @@ const fromMaterializations = (id, description, materializations) => {
     for (let dependent of materialization.dependents) {
       requires.add(dependent.table);
     }
-    for( let dependentTable of materialization.nonIncrementalDependents || []) {
+    for (let dependentTable of materialization.nonIncrementalDependents || []) {
       requires.add(dependentTable);
     }
   }
@@ -43,8 +43,8 @@ const fromMaterializations = (id, description, materializations) => {
         const materializationRequires = materialization.dependents.map(dependent => dependent.table);
         const hasNonincrementalDependency = (materialization.nonIncrementalDependents || []).length > 0;
         const hasModifiedDependency = _.some(materializationRequires, table => changes[table] && changes[table].total > 0);
-        if(strategy === EXECUTION_STRATEGY.quick) {
-          if(hasModifiedDependency) {
+        if (strategy === EXECUTION_STRATEGY.quick) {
+          if (hasModifiedDependency && !hasNonincrementalDependency) {
             yield materialize(client, txid, tableSchema.tables, materialization);
           }
           else {
@@ -52,7 +52,7 @@ const fromMaterializations = (id, description, materializations) => {
           }
         }
         else if (strategy === EXECUTION_STRATEGY.slow) {
-          if(hasNonincrementalDependency) {
+          if (hasNonincrementalDependency) {
             yield recomputeMaterialization(client, txid, tableSchema.tables, materialization);
           }
           else {

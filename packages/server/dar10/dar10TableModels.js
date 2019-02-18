@@ -176,18 +176,6 @@ const navngivenvejPostnummerMaterialization = {
   ]
 };
 
-const navngivenvejkommunedelPostnummerMaterialization = {
-  table: 'navngivenvejkommunedel_postnr_mat',
-  view: 'navngivenvejkommunedel_postnr_mat_view',
-  dependents: [{
-    table: 'dar1_Husnummer_current',
-    columns: ['adgangsadresseid']
-  }, {
-    table: 'dar1_NavngivenVejKommunedel_current',
-    columns: ['navngivenvejkommunedel_id']
-  }]
-};
-
 const vejpunktMaterialization = {
   table: 'vejpunkter',
   view: 'dar1_vejpunkter_view',
@@ -205,6 +193,5 @@ const vejpunktMaterialization = {
 
 exports.dawaMaterializations = {
   navngivenvej_postnummer: navngivenvejPostnummerMaterialization,
-  vejpunkt: vejpunktMaterialization,
-  navngivenvejkommunedel_postnummer: navngivenvejkommunedelPostnummerMaterialization
+  vejpunkt: vejpunktMaterialization
 };

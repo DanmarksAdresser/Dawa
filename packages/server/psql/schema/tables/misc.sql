@@ -62,6 +62,23 @@ ENUM (
   'SupplerendeBynavn'
 );
 
+CREATE OR REPLACE FUNCTION dar1_status_til_dawa_status(INTEGER)
+  RETURNS INTEGER AS
+$$
+SELECT CASE $1
+       WHEN 2
+         THEN 3 -- foreløbig
+       WHEN 3
+         THEN 1 -- gældende
+       WHEN 4
+         THEN 2 -- nedlagt
+       WHEN 5
+         THEN 4 -- henlagt
+       ELSE
+         0
+       END;
+$$ LANGUAGE SQL IMMUTABLE RETURNS NULL ON NULL INPUT;
+
 DROP TYPE IF EXISTS operation_type CASCADE;
 DROP TABLE IF EXISTS transaction_history CASCADE;
 create type operation_type as enum('insert', 'update', 'delete');

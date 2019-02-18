@@ -1137,27 +1137,26 @@ exports.materializations = Object.assign({
       'adgangsadresser'
     ]
   },
+  navngivenvejkommunedel_postnr_mat: {
+    table: 'navngivenvejkommunedel_postnr_mat',
+    view: 'navngivenvejkommunedel_postnr_mat_view',
+    nonIncrementalDependents: [
+      'dar1_Husnummer_current',
+      'dar1_NavngivenVejKommunedel_current',
+      'dar1_DARKommuneinddeling_current'
+    ],
+    dependents: []
+  },
   vejstykkerpostnumremat: {
     table: 'vejstykkerpostnumremat',
     view: 'vejstykkerpostnumremat_view',
-    dependents: [
-      {
-        table: 'navngivenvejkommunedel_postnr_mat',
-        columns: ['navngivenvejkommunedel_id', 'postnummer_id']
-      },
-      {
-        table: 'dar1_NavngivenVej_current',
-        columns: ['navngivenvej_id']
-      },
-      {
-        table: 'dar1_NavngivenVejKommunedel_current',
-        columns: ['navngivenvejkommunedel_id']
-      },
-      {
-        table: 'dar1_Postnummer_current',
-        columns: ['postnummer_id']
-      }
-    ]
+    nonIncrementalDependents: [
+      'navngivenvejkommunedel_postnr_mat',
+      'dar1_NavngivenVej_current',
+      'dar1_NavngivenVejKommunedel_current',
+      'dar1_Postnummer_current'
+    ],
+    dependents: []
   }
 
 }, dagiMaterializations);

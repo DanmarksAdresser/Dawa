@@ -2,36 +2,41 @@
 
 const _ = require('underscore');
 const Promise = require('bluebird');
-const {go, Channel, CLOSED, Abort } = require('ts-csp');
+const {go, Channel, CLOSED, Abort} = require('ts-csp');
 
 const logger = require('@dawadk/common/src/logger').forCategory('darImport');
 
 const notificationClient = require('@dawadk/dar-notification-client/src/notification-client');
 
 
-const { createDarApiImporter }= require('../components/importers/dar-api');
-const { execute } = require('../components/execute');
-const { EXECUTION_STRATEGY } = require('../components/common');
-const { withImportTransaction } = require('../importUtil/transaction-util');
+const {createDarApiImporter} = require('../components/importers/dar-api');
+const {execute} = require('../components/execute');
+const {EXECUTION_STRATEGY} = require('../components/common');
+const {withImportTransaction} = require('../importUtil/transaction-util');
 const moment = require('moment');
 
-const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(function*()  {
+const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(function* () {
   const importer = createDarApiImporter({darClient, remoteEventIds});
   const beforeMillis = Date.now();
   yield pool.withTransaction('READ_WRITE',
     (client) => withImportTransaction(client, "importDarApi",
-      txid => go(function*() {
-        const resultContext = yield execute(client, txid, [importer], EXECUTION_STRATEGY.skipNonIncremental);
+      txid => go(function* () {
+        const resultContext = yield execute(client, txid, [importer], EXECUTION_STRATEGY.quick);
         const afterMillis = Date.now();
         const darTxTimestampMillis = resultContext['dar-api']['remote-tx-timestamp'] ?
           moment(resultContext['dar-api']['remote-tx-timestamp']).valueOf() :
           null;
         const totalRowCount = resultContext['dar-api']['total-row-count'];
-        if(pretend) {
+        if (pretend) {
           throw new Abort('Rolling back transaction due to pretend parameter');
         }
         else {
-          logger.info('Imported transaction',{txid, delay: (afterMillis - darTxTimestampMillis), duration: (afterMillis - beforeMillis), totalRowCount})
+          logger.info('Imported transaction', {
+            txid,
+            delay: (afterMillis - darTxTimestampMillis),
+            duration: (afterMillis - beforeMillis),
+            totalRowCount
+          })
         }
       })
     ));
@@ -76,17 +81,17 @@ const importNotifications = (pool, darClient, notifications, mustUpdateAll) => g
   }
 });
 
-const takeAvailable = (ch => go(function*() {
+const takeAvailable = (ch => go(function* () {
   const result = [];
   const value = yield this.takeOrAbort(ch);
   result.push(value);
-  while(result[result.length - 1] !== CLOSED && ch.canTakeSync()) {
+  while (result[result.length - 1] !== CLOSED && ch.canTakeSync()) {
     result.push(ch.takeSync());
   }
   return result;
 }));
 
-const importUsingStatus = (pool, darClient, pretend) => go(function*() {
+const importUsingStatus = (pool, darClient, pretend) => go(function* () {
   const initialRemoteEventIds = yield getRemoteEventIds(darClient);
   yield importIncrementally(pool, darClient, initialRemoteEventIds, pretend);
 });
@@ -94,7 +99,7 @@ const importUsingStatus = (pool, darClient, pretend) => go(function*() {
 const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(function* () {
   //start by performing a local update using the status API
   yield importUsingStatus(pool, darClient, pretend);
-  if(!notificationWsUrl) {
+  if (!notificationWsUrl) {
     return;
   }
   const notificationChan = new Channel(100);
@@ -104,14 +109,14 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(func
   // This is necessary, because we may have missed some notifications initially.
   let mustUpdateAll = true;
   try {
-    while(true) {
+    while (true) {
       logger.info("Waiting for DAR notifications");
-      const values  = yield this.delegateAbort(takeAvailable(notificationChan));
-      if(values[values.length - 1] === CLOSED) {
+      const values = yield this.delegateAbort(takeAvailable(notificationChan));
+      if (values[values.length - 1] === CLOSED) {
         throw new Error("Websocket connection was closed");
       }
       const notifications = values.map(([notification, error]) => {
-        if(error) {
+        if (error) {
           throw error;
         }
         return notification;
@@ -132,17 +137,17 @@ const importDaemon = (pool, darClient,
     logger.info("Running DAR 1.0 import daemon without WebSocket listener");
   }
 
-  if(noDaemon) {
-    yield yield this.delegateAbort(importUsingStatus(pool, darClient));
+  if (noDaemon) {
+    yield this.delegateAbort(importUsingStatus(pool, darClient));
   }
   else {
-    while(true){
+    while (true) {
       {
         try {
           yield this.delegateAbort(runImportLoop(pool, darClient, notificationUrl, {pretend}));
         }
-        catch(err) {
-          if(err instanceof Abort) {
+        catch (err) {
+          if (err instanceof Abort) {
             throw err;
           }
           logger.error("Error during DAR import", err);
