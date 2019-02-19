@@ -15,7 +15,7 @@ CREATE TABLE adresser_mat(
   a_ikraftfra timestamp,
   a_nedlagt TIMESTAMP,
   kommunekode INTEGER NOT NULL,
-  vejkode INTEGER NOT NULL,
+  vejkode INTEGER,
   husnr husnr,
   supplerendebynavn text NULL,
   supplerendebynavn_dagi_id integer,

@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS adgangsadresser_mat CASCADE;
 CREATE TABLE adgangsadresser_mat (
   id                           UUID             NOT NULL PRIMARY KEY,
   kommunekode                  INTEGER          NOT NULL,
-  vejkode                      INTEGER          NOT NULL,
+  vejkode                      INTEGER,
   husnr                        HUSNR,
   supplerendebynavn            TEXT             NULL,
   supplerendebynavn_dagi_id    INTEGER,
