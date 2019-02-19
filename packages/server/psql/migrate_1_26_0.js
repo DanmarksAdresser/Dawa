@@ -118,16 +118,10 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/wms_vejpunktlinjer.sql'), {encoding: 'utf8'}));
     }));
     yield withImportTransaction(client, 'migrate_1_26_0', txid => go(function* () {
-      const processorIds = ['adgangsadresser_mat', 'postnumre_kommunekoder_mat', 'supplerendebynavn2_postnr'];
+      const processorIds = ['adgangsadresser_mat', 'postnumre_kommunekoder_mat', 'supplerendebynavn2_postnr', 'vejstykker', 'navngivenvej', 'adgangsadresser', 'enhedsadresser'];
       const rootComponents = allProcessors.filter(component => processorIds.includes(component.id));
       assert(rootComponents.length === processorIds.length);
       yield execute(client, txid, rootComponents, EXECUTION_STRATEGY.verify);
-      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.adgangsadresser);
-      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.enhedsadresser);
-      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.vejstykker);
-      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.navngivenvej);
-      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.supplerendebynavn2_postnr);
-      yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.postnumre_kommunekoder_mat);
     }));
   })).done();
 });
