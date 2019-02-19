@@ -70,9 +70,9 @@ CREATE VIEW adgangsadresser_mat_view AS
   FROM dar1_husnummer_current hn
     JOIN dar1_darkommuneinddeling_current k
       ON hn.darkommune_id = k.id
-    JOIN dar1_navngivenvej_current nv
+    LEFT JOIN dar1_navngivenvej_current nv
       ON hn.navngivenvej_id = nv.id
-    JOIN dar1_navngivenvejkommunedel_current nvk
+    LEFT JOIN dar1_navngivenvejkommunedel_current nvk
       ON nv.id = nvk.navngivenvej_id AND
          k.kommunekode = nvk.kommune AND nvk.status IN (2,3)
     JOIN dar1_postnummer_current p

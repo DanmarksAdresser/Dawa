@@ -158,6 +158,123 @@ FROM jordstykker j
   JOIN kommunetilknytninger  kt
     ON ja.adgangsadresse_id = kt.adgangsadresseid
 WHERE j.kommunekode = kt.kommunekode`
+  },
+  {
+    key: 'InkonsistentAfstemningsomraade',
+    description: 'Husnumre, hvor DARs beregning af afstemningsområde afviger fra vores geografiske beregning',
+    query: `
+    SELECT
+  hn.id,
+  hn.status,
+  ap.id as adgangspunkt_id,
+  dar_ao.id as dar_afstemningsområde_id,
+  st_astext(ap.position) as position,
+  dar_ao.afstemningsområde as dar_dagi_id,
+  dar_ao.navn as dar_navn,
+  dawa_ao.dagi_id as dawa_dagi_id,
+  dawa_ao.navn as dawa_navn,
+  st_distance(ap.position, dawa_ao.geom) AS dagi_afstand,
+  st_distance(ap.position, dar_ao_geo.geom) AS dar_afstand
+
+FROM dar1_husnummer_current hn
+  LEFT JOIN dar1_adressepunkt_current ap ON hn.adgangspunkt_id = ap.id
+  LEFT JOIN afstemningsomraadetilknytninger at ON at.adgangsadresseid = hn.id
+  LEFT JOIN dar1_darafstemningsområde_current dar_ao ON hn.darafstemningsområde_id = dar_ao.id
+  LEFT JOIN afstemningsomraader dawa_ao
+    ON at.kommunekode = dawa_ao.kommunekode AND at.afstemningsområdenummer = dawa_ao.nummer
+  LEFT JOIN afstemningsomraader dar_ao_geo ON dar_ao.afstemningsområde = dar_ao_geo.dagi_id
+WHERE hn.navngivenvej_id IS NOT NULL AND dar_ao.afstemningsområde IS DISTINCT FROM dawa_ao.dagi_id
+  AND hn.status IN (2,3)
+ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC;`
+  },
+  {
+    key: 'InkonsistentMRAfstemningsområde',
+    description: 'Husnumre, hvor DARs beregning af menighedsrådsafstemningsområde afviger',
+    query: `SELECT
+  hn.id,
+  hn.status,
+  ap.id as adgangspunkt_id,
+  dar_ao.id as dar_mrafstemningsområde_id,
+  st_astext(ap.position) as position,
+  dar_ao.mrafstemningsområde as dar_dagi_id,
+  dar_ao.navn as dar_navn,
+  dawa_ao.dagi_id as dawa_dagi_id,
+  dawa_ao.navn as dawa_navn,
+  st_distance(ap.position, dawa_ao.geom) AS dagi_afstand,
+  st_distance(ap.position, dar_ao_geo.geom) AS dar_afstand
+
+FROM dar1_husnummer_current hn
+  LEFT JOIN dar1_adressepunkt_current ap ON hn.adgangspunkt_id = ap.id
+  LEFT JOIN menighedsraadsafstemningsomraadetilknytninger at ON at.adgangsadresseid = hn.id
+  LEFT JOIN dar1_darmenighedsrådsafstemningsområde_current dar_ao ON hn.darmenighedsrådsafstemningsområde_id = dar_ao.id
+  LEFT JOIN menighedsraadsafstemningsomraader dawa_ao
+    ON at.kommunekode = dawa_ao.kommunekode AND at.menighedsrådsafstemningsområdenummer = dawa_ao.nummer
+  LEFT JOIN menighedsraadsafstemningsomraader dar_ao_geo ON dar_ao.mrafstemningsområde = dar_ao_geo.dagi_id
+WHERE hn.navngivenvej_id IS NOT NULL AND dar_ao.mrafstemningsområde IS DISTINCT FROM dawa_ao.dagi_id
+  AND hn.status IN (2,3)
+ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC`
+  },
+  {
+    key: 'InkonsistentSogn',
+    description: 'Husnumre, hvor DARs beregning af sognetilknytning afviger',
+    query: `SELECT
+  hn.id,
+  hn.status,
+  ap.id as adgangspunkt_id,
+  dar_ao.id as dar_sogneinddeling_id,
+  st_astext(ap.position) as position,
+  dar_ao.sogneinddeling as dar_dagi_id,
+  dar_ao.navn as dar_navn,
+  dawa_ao.dagi_id as dawa_dagi_id,
+  dawa_ao.navn as dawa_navn,
+  st_distance(ap.position, dawa_ao.geom) AS dagi_afstand,
+  st_distance(ap.position, dar_ao_geo.geom) AS dar_afstand
+
+FROM dar1_husnummer_current hn
+  LEFT JOIN dar1_adressepunkt_current ap ON hn.adgangspunkt_id = ap.id
+  LEFT JOIN sognetilknytninger at ON at.adgangsadresseid = hn.id
+  LEFT JOIN dar1_darsogneinddeling_current dar_ao ON hn.darsogneinddeling_id = dar_ao.id
+  LEFT JOIN sogne dawa_ao
+    ON at.sognekode = dawa_ao.kode
+  LEFT JOIN sogne dar_ao_geo ON dar_ao.sogneinddeling = dar_ao_geo.dagi_id
+WHERE hn.navngivenvej_id IS NOT NULL AND dar_ao.sogneinddeling IS DISTINCT FROM dawa_ao.dagi_id
+  AND hn.status IN (2,3)
+ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC`
+  },
+  {
+    key: 'InkonsistentKommune',
+    description: 'Husnumre, hvor DARs beregning af kommune afviger',
+    query: `SELECT
+  hn.id,
+  hn.status,
+  ap.id as adgangspunkt_id,
+  dar_ao.id as dar_kommuneinddeling_id,
+  st_astext(ap.position) as position,
+  dar_ao.kommuneinddeling as dar_dagi_id,
+  dar_ao.navn as dar_navn,
+  dawa_ao.dagi_id as dawa_dagi_id,
+  dawa_ao.navn as dawa_navn,
+  st_distance(ap.position, dawa_ao.geom) AS dagi_afstand,
+  st_distance(ap.position, dar_ao_geo.geom) AS dar_afstand
+
+FROM dar1_husnummer_current hn
+  LEFT JOIN dar1_adressepunkt_current ap ON hn.adgangspunkt_id = ap.id
+  LEFT JOIN kommunetilknytninger at ON at.adgangsadresseid = hn.id
+  LEFT JOIN dar1_darkommuneinddeling_current dar_ao ON hn.darkommune_id = dar_ao.id
+  LEFT JOIN kommuner dawa_ao
+    ON at.kommunekode = dawa_ao.kode
+  LEFT JOIN kommuner dar_ao_geo ON dar_ao.kommuneinddeling = dar_ao_geo.dagi_id
+WHERE hn.navngivenvej_id IS NOT NULL AND dar_ao.kommuneinddeling IS DISTINCT FROM dawa_ao.dagi_id
+  AND hn.status IN (2,3)
+ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC;`
+  },
+  {
+    key: 'HusnummerManglendeAdgangspunkt',
+    description: 'Husnumre, hvor vi ikke har modtaget et adgangspunkt fra DAR',
+    query: `select hn.id, hn.status, hn.adgangspunkt_id 
+    from dar1_husnummer_current hn 
+    left join dar1_adressepunkt_current ap on hn.adgangspunkt_id = ap.id 
+    where ap.id is null  and adgangspunkt_id is not null`
   }
 ];
 

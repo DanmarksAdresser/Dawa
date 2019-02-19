@@ -38,4 +38,4 @@ CREATE VIEW adgangsadresser_view AS
     LEFT JOIN jordstykker J ON JA.ejerlavkode = J.ejerlavkode AND JA.matrikelnr = J.matrikelnr
     LEFT JOIN Ejerlav JS_E ON JA.ejerlavkode = JS_E.kode
 
-  WHERE status IN (2, 3) AND husnr IS NOT NULL;
+  WHERE status IN (2, 3) AND husnr IS NOT NULL and vejkode IS NOT NULL;

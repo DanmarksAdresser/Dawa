@@ -47,7 +47,7 @@ runImporter('dagi-to-db', optionSpec, _.without(_.keys(optionSpec), 'temaer'), f
       yield proddb.withTransaction('READ_WRITE', client => go(function*() {
         yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
           const source = options.service === 'datafordeler' ? 'wfsMulti' : 'wfs';
-          yield importDagiImpl(client, txid, temaNames, featureMappings, options.dataDir, options.fild1Prefix, source, options.maxChanges);
+          yield importDagiImpl(client, txid, temaNames, featureMappings, options.dataDir, options.filePrefix, source, options.maxChanges);
           if(options.init) {
             yield makeAllChangesNonPublic(client, txid);
           }

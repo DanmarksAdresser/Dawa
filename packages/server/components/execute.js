@@ -2,6 +2,7 @@ const _ = require('underscore');
 const {go} = require('ts-csp');
 const toposort = require('toposort');
 const { allProcessors } = require("./processors/all-processors");
+const logger = require('@dawadk/common/src/logger').forCategory('importerExecutor');
 
 const getTablesInScope = (rootComponents, allComponents) => {
   const tablesInScope = new Set();
@@ -102,9 +103,14 @@ const execute = (client, txid, rootComponents, strategy) => go(function*() {
   }
   for(let componentId of executionOrder) {
     const component = componentIdMap[componentId];
+    const before = Date.now();
     yield component.execute(client, txid, strategy, context);
+    const after = Date.now();
+    logger.info('Executed component', {componentId, duration: after-before});
+
     for(let table of component.produces) {
       context.changes[table] = yield getChanges(client, txid, table);
+      logger.info('Table changes', {tableName: table, changes: context.changes[table]});
     }
   }
   return context;
