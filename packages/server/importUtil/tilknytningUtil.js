@@ -24,7 +24,8 @@ const generateTilknytningMatView = (tilknytningModel) => {
         JOIN LATERAL (
         SELECT ${relatedKey.join(', ')} 
         FROM ${relatedTable} related 
-        ORDER BY a.geom <-> related.geom LIMIT 1) related ON true);`;
+        ORDER BY a.geom <-> related.geom LIMIT 1) related ON true
+        WHERE geom IS NOT NULL);`;
   }
   else if (forceUnique) {
     sql += `CREATE VIEW ${viewName} AS (SELECT ${selectKeyClause}
