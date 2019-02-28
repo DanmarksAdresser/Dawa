@@ -38,6 +38,20 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
         yield client.query(`create index on ${currentTableModel.table}_changes(txid,changeid) where public`);
         yield client.query(`create index on ${historyTableModel.table}_changes(txid,changeid) where public`);
       }
+      for(let table of ['kommunetilknytninger',
+        'regionstilknytninger',
+        'postnummertilknytninger',
+        'afstemningsomraadetilknytninger',
+        'sognetilknytninger',
+        'opstillingskredstilknytninger',
+        'storkredstilknytninger',
+        'valglandsdelstilknytninger',
+        'politikredstilknytninger',
+        'retskredstilknytninger',
+        'menighedsraadsafstemningsomraadetilknytninger',
+        'zonetilknytninger']) {
+        yield client.query(`create index on ${table}_changes(txid,changeid) where public`);
+      }
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/hoejder.sql'), {encoding: 'utf8'}));
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/navngivenvejkommunedel_mat.sql'), {encoding: 'utf8'}));
       yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/adgangsadresser_mat.sql'), {encoding: 'utf8'}));
