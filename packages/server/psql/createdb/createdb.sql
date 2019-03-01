@@ -6,7 +6,7 @@ ALTER DATABASE DB_NAME SET join_collapse_limit=20;
 ALTER DATABASE DB_NAME SET from_collapse_limit=20;
 
 \c DB_NAME ;
-CREATE EXTENSION postgis;
-CREATE EXTENSION postgis_topology;
-CREATE EXTENSION fuzzystrmatch;
-CREATE EXTENSION "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS postgis_topology;
+CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

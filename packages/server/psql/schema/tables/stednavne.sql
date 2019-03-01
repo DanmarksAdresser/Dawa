@@ -10,7 +10,8 @@ CREATE TABLE steder(
   indbyggerantal integer,
   visueltcenter geometry(point, 25832),
   bbox geometry(Polygon, 25832),
-  geom geometry(geometry, 25832)
+  geom geometry(geometry, 25832),
+  geom_blobref text
 );
 
 CREATE INDEX ON steder(hovedtype, undertype);

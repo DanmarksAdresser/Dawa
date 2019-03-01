@@ -2,37 +2,39 @@
 "use strict";
 
 const {go} = require('ts-csp');
-const _ = require('underscore');
 
-const {runImporter} = require('@dawadk/common/src/cli/run-importer');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const proddb = require('../psql/proddb');
 const { withImportTransaction } = require('../importUtil/transaction-util');
-const {makeAllChangesNonPublic} = require('@dawadk/import-util/src/materialize');
 
 const { importDownload, importDownloadIncrementally } = require('./importDarImpl');
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  dataDir: [false, 'Folder med NDJSON-filer', 'string'],
-  noEvents: [false, 'Undlad at danne hændelser for ændringer','boolean', false],
-  refreshDerived: [false, 'Genberegn afledte tabeller', 'boolean', false]
-};
-
-runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, options) {
+const schema = {
+  data_dir: {
+    doc: 'Directory with NDJSON files to import',
+    format: 'String',
+    cli: true,
+    required: true
+  },
+  refresh_derived: {
+    doc: 'Genberegn afledte tabeller',
+    format: 'Boolean',
+    default: false,
+    cli: true
+  }
+}
+runConfiguredImporter('importDar10', schema, function (config) {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
 
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
-      if(options.refreshDerived) {
-        yield importDownload(client, txid, options.dataDir);
+      if(config.refresh_derived) {
+        yield importDownload(client, txid, config.get('data_dir'));
       }
       else {
-        yield importDownloadIncrementally(client, txid, options.dataDir);
-      }
-      if(options.noEvents) {
-        yield makeAllChangesNonPublic(client, txid);
+        yield importDownloadIncrementally(client, txid, config.get('data_dir'));
       }
     }));
     yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');

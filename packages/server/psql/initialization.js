@@ -31,7 +31,7 @@ const createChangeTables = (client)=> go(function*() {
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
   'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
     'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter', 'supplerendebynavne_mat',
-  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat'];
+  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'steder_geom'];
   for(let table of tableNames) {
     const model = tableModel.tables[table];
     assert(model);
@@ -55,6 +55,7 @@ function normaliseTableSpec(specs){
 
 // Note, the sequence of the tables matter!
 exports.tableSpecs = normaliseTableSpec([
+  {name: 'blobref'},
   {name: 'hoejder'},
   {name: 'brofasthed'},
   {name: 'ikke_brofaste_adresser'},
@@ -123,6 +124,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'bebyggelser_adgadr'},
   {name: 'bebyggelser_divided'},
   {name: 'stednavne'},
+  {name: 'steder_geom'},
   {name: 'stednavntyper'},
   {name: 'stedtilknytninger'},
   {name: 'steder_divided'},
@@ -201,7 +203,13 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
 
 exports.loadSchemas = function(client, scriptDir){
   return q.async(function*() {
-    yield exports.loadTables(client, scriptDir);
-    yield exports.reloadDatabaseCode(client, scriptDir);
   })();
 };
+
+const scriptDir = path.join(__dirname, 'schema');
+
+
+exports.initializeSchema = (client) => go(function*() {
+  yield exports.loadTables(client, scriptDir);
+  yield exports.reloadDatabaseCode(client, scriptDir);
+});

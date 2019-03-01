@@ -18,7 +18,7 @@
   },
   {
     "name": "pg.pool.max",
-    "description": "Max antal samtidige PostgreSQL queries",
+    "description": "Max antal samtidige PostgreSQL connections per proces",
     "type": "number",
     "default": 150
   },

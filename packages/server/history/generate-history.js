@@ -1,26 +1,21 @@
 #!/usr/bin/env node
 "use strict";
 
-const _ = require('underscore');
-
-const {runImporter} = require('@dawadk/common/src/cli/run-importer');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const generateHistoryImpl = require('./generateCombinedHistoryImpl');
 const logger = require('@dawadk/common/src/logger').forCategory('generateHistoryDar1');
 const proddb = require('../psql/proddb');
 const { go } = require('ts-csp');
 
 
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
-};
-
-runImporter('generateHistory', optionSpec, _.keys(optionSpec), function (args, options) {
+const schema = {};
+runConfiguredImporter('generateHistory', schema, config => go(function*() {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
 
-  return proddb.withTransaction('READ_WRITE_CONCURRENT', function (client) {
+  yield proddb.withTransaction('READ_WRITE_CONCURRENT', function (client) {
     client.allowParallelQueries = true;
     return go(function*() {
       try {
@@ -33,4 +28,4 @@ runImporter('generateHistory', optionSpec, _.keys(optionSpec), function (args, o
       }
     });
   });
-});
+}));

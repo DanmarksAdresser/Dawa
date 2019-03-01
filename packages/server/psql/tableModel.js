@@ -449,10 +449,28 @@ const steder = {
     },
     {
       name: 'geom',
-      distinctClause: geomDistinctClause
+      distinctClause: geomDistinctClause,
+    },
+    { name: 'geom_blobref',
+      offloads: 'geom'
     }
   ]
-}
+};
+
+const steder_geom = {
+  table: 'steder_geom',
+  entity: 'stedgeometri',
+  primaryKey: ['id'],
+  columns: [
+    { name: 'id' },
+    { name: 'geom',
+      distinctClause: geomDistinctClause
+    },
+    {
+      name: 'geom_blobref'
+    }
+  ]
+};
 
 const stedtilknytninger = {
   table: 'stedtilknytninger',
@@ -805,6 +823,7 @@ exports.tables = Object.assign({
     vejstykker,
     vejstykkerpostnumremat,
     steder,
+    steder_geom,
     stednavne,
     stedtilknytninger,
     bygninger,
@@ -969,6 +988,16 @@ exports.materializations = Object.assign({
       }
     ],
     nonIncrementalDependents: ['steder']
+  },
+  steder_geom: {
+    table: 'steder_geom',
+    view: 'steder_geom_view',
+    dependents: [
+      {
+        table: 'steder',
+        columns: ['id']
+      }
+    ]
   },
   bygningtilknytninger: {
     table: 'bygningtilknytninger',

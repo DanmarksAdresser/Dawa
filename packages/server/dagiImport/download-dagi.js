@@ -11,20 +11,9 @@ var async = require('async');
 var xml2js = require('xml2js');
 var logger = require('@dawadk/common/src/logger');
 
-const { runImporter } = require('@dawadk/common/src/cli/run-importer');
+const runConfigured  = require('@dawadk/common/src/cli/run-configured');
 
 var wfsServices = {
-  newDagi: {
-    defaultUrl: 'http://kortforsyningen.kms.dk/DAGI_SINGLEGEOM_GML2_v2?',
-    loginRequired: true,
-    loginParam: 'login',
-    defaultLogin: 'dawa',
-    wfsVersion: '1.0.0',
-    featureNames: {
-      storkreds: 'Storkreds',
-      valglandsdel: 'Valglandsdel',
-    }
-  },
   zone: {
     wfsVersion: '1.0.0',
     loginRequired: false,
@@ -48,38 +37,76 @@ var wfsServices = {
       retskreds: 'Retskreds',
       sogn: 'Sogneinddeling',
       afstemningsområde: 'Afstemningsomraade',
-      // storkreds: 'Storkreds',
       danmark: 'Danmark',
       menighedsrådsafstemningsområde: 'Menighedsraadsafstemningsomraade',
-      // valglandsdel: 'Valglandsdel',
       samlepostnummer: 'Samlepostnummer',
       supplerendebynavn: 'SupplerendeBynavn'
     }
   }
 };
-var optionSpec = {
-  targetDir: [false, 'Folder hvor DAGI-temaerne gemmes', 'string', '.'],
-  filePrefix: [false, 'Prefix, som tilføjes filerne med de gemte DAGI-temaer', 'string', ''],
-  dagiUrl: [false, 'URL til webservice hvor DAGI temaerne hentes fra', 'string'],
-  dagiLogin: [false, 'Brugernavn til webservicen hvor DAGI temaerne hentes fra', 'string'],
-  dagiPassword: [false, 'Password til webservicen hvor DAGI temaerne hentes fra', 'string'],
-  retries: [false, 'Antal forsøg på kald til WFS service før der gives op', 'number', 5],
-  temaer: [false, 'Inkluderede DAGI temaer, adskilt af komma','string'],
-  service: [false, 'Angiver, om der anvendes ny eller gammel service (zone, oldDagi eller newDagi)', 'string']
+const schema = {
+  target_dir: {
+    doc: 'Directory where files are saved to',
+    format: 'String',
+    default: '.',
+    cli: true
+  },
+  file_prefix: {
+    doc: 'Prefix added to the files saved',
+    format: 'String',
+    default: '',
+    cli: true
+  },
+  service: {
+    doc: 'Specifies which WFS to download from (either datafordeler or zone)',
+    format: 'String',
+    cli: true
+  },
+  service_url: {
+    doc: 'URL to WFS service to download from',
+    format: 'String',
+    cli: true,
+    default: null
+  },
+  service_login: {
+    doc: 'Username for logging into service',
+    format: 'String',
+    cli: true,
+    default: null
+  },
+  service_password: {
+    doc: 'Password for logging into service',
+    format: 'String',
+    sensitive: true,
+    cli: true,
+    default: null
+  },
+  retries: {
+    doc: 'Number of retries when calling WFS service',
+    format: 'nat',
+    default: 5,
+    cli: true
+  },
+  themes: {
+    doc: 'Which themes to download from service in comma-separated list (defaults to all supported)',
+    format: 'String',
+    default: null,
+    cli: true
+  }
+
 };
 
-runImporter('download-dagi', optionSpec, ['service'], function (args, options) {
-  process.env.pgConnectionUrl = options.pgConnectionUrl;
+runConfigured(schema, [], config => go(function*() {
 
-  var serviceSpec = wfsServices[options.service];
+  var serviceSpec = wfsServices[config.get('service')];
 
   if(!serviceSpec) {
     throw new Error('ugyldig service parameter');
   }
 
-  var dagiUrl = options.dagiUrl || serviceSpec.defaultUrl;
-  var dagiLogin = options.dagiLogin || serviceSpec.defaultLogin;
-  var dagiPassword = options.dagiPassword;
+  var dagiUrl = config.get('service_url') || serviceSpec.defaultUrl;
+  var dagiLogin = config.get('service_login') || serviceSpec.defaultLogin;
+  var dagiPassword = config.get('service_password');
 
   if(serviceSpec.loginRequired && !dagiPassword) {
     throw new Error("Intet kodeord angivet");
@@ -87,9 +114,9 @@ runImporter('download-dagi', optionSpec, ['service'], function (args, options) {
 
   var featureNames = serviceSpec.featureNames;
 
-  var featuresToDownload = options.temaer ? options.temaer.split(',') : _.keys(serviceSpec.featureNames);
+  var featuresToDownload = config.get('themes') ? config.get('themes').split(',') : _.keys(serviceSpec.featureNames);
 
-  var directory = path.resolve(options.targetDir);
+  var directory = path.resolve(config.get('target_dir'));
 
   function saveDagiTema(temaNavn, callback) {
     logger.info("downloadDagi", "Downloader DAGI tema " + temaNavn);
@@ -131,19 +158,17 @@ runImporter('download-dagi', optionSpec, ['service'], function (args, options) {
         });
       });
     }
-    async.retry(options.retries, getDagiTema, function(err, temaXml) {
+    async.retry(config.get('retries'), getDagiTema, function(err, temaXml) {
       if(err) {
         return callback(err);
       }
-      var filename = options.filePrefix + temaNavn;
+      var filename = config.get('file_prefix') + temaNavn;
       fs.writeFile(path.join(directory, filename), temaXml, callback);
     });
   }
 
-  return go(function*() {
-    for(let temaNavn of featuresToDownload) {
-      yield q.nfcall(saveDagiTema, temaNavn);
+  for(let temaNavn of featuresToDownload) {
+    yield q.nfcall(saveDagiTema, temaNavn);
 
-    }
-  });
-});
+  }
+}));

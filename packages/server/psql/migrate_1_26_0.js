@@ -11,8 +11,7 @@ const {withImportTransaction} = require('../importUtil/transaction-util');
 const {reloadDatabaseCode} = require('./initialization');
 const {createChangeTable} = require('@dawadk/import-util/src/table-diff');
 const {
-  clearAndMaterialize, materializeWithoutEvents,
-  recomputeMaterialization
+  clearAndMaterialize, materializeWithoutEvents
 } = require('@dawadk/import-util/src/materialize');
 const tableSchema = require('./tableModel');
 

@@ -1,3 +1,5 @@
 --exit
---timeout=10000
+--timeout 10000
+--bail
 --recursive
+--require ./test/setup/setup-config

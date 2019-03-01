@@ -8,6 +8,8 @@ const {allColumnNames, nonPrimaryColumnNames, publicNonKeyColumnNames,
   nonDerivedColumnNames, assignSequenceNumbers, columnsDistinctClause} = require('./table-model-util');
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 
+const { offloadToS3 } = require('./s3-offload');
+
 const applyCurrentTableToChangeTable = (client, tableModel, columnsToApply) => {
   return client.query(`WITH rowsToUpdate AS (SELECT ${selectList('t', tableModel.primaryKey)}, ${selectList('t', columnsToApply)},txid,changeid
   FROM ${tableModel.table} t JOIN LATERAL (select txid, changeid FROM ${tableModel.table}_changes c WHERE
@@ -207,6 +209,7 @@ const applyChanges = (client, txid, tableModel, changeTable) => go(function* () 
   yield applyDeletes(client, txid, tableModel, changeTable);
   yield applyUpdates(client, txid, tableModel, changeTable);
   yield applyInserts(client, txid, tableModel, changeTable);
+  yield offloadToS3(client, txid, tableModel);
 });
 
 const getChangeTableSql = tableModel => {

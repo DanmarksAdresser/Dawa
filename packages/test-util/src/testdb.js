@@ -1,31 +1,36 @@
 "use strict";
 
+const config = require('@dawadk/common/src/config/holder').getConfig();
 const databasePools = require('@dawadk/common/src/postgres/database-pools');
 
 const  { go } = require('ts-csp');
 
-const testConnString = process.env.pgConnectionUrl;
-const emptyConnString = process.env.pgEmptyDbUrl;
-const replikeringTestConnString = process.env.pgReplikeringDbUrl;
-
 const logger = require('@dawadk/common/src/logger').forCategory('sql');
+const makeConnectionString = require('@dawadk/common/src/postgres/make-connection-string');
 
 const defaultScriptLogger = logMessage => {
     if(logMessage.error) {
         logger.error('SQL query error', logMessage);
     }
 };
+const user = config.get('test.database_user');
+const password = config.get('test.database_password');
+const host = config.get('test.database_host');
+const port = config.get('test.database_port');
+
+const makeTestConnectionString = db => makeConnectionString(user, password, host, port, db);
+
 databasePools.create('test', {
-  connString: testConnString,
+  connString: makeTestConnectionString(config.get('test.data_db')),
   logger: defaultScriptLogger
 });
 databasePools.create('empty', {
-  connString: emptyConnString,
+  connString: makeTestConnectionString(config.get('test.schema_db')),
   logger: defaultScriptLogger
 });
 
 databasePools.create('replikeringtest', {
-  connString: replikeringTestConnString,
+  connString: makeTestConnectionString(config.get('test.empty_db')),
   logger: defaultScriptLogger
 });
 

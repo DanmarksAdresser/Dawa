@@ -1,30 +1,37 @@
 #!/usr/bin/env node
 "use strict";
 const { go } = require('ts-csp');
-const _ = require('underscore');
 
-const {runImporter} = require('@dawadk/common/src/cli/run-importer');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const proddb = require('../psql/proddb');
 const { withImportTransaction} = require('../importUtil/transaction-util');
 const importJordstykkerImpl = require('./importJordstykkerImpl');
 
-const optionSpec = {
-  sourceDir: [false, 'Directory hvor matrikel-filerne ligger', 'string', '.'],
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  init: [false, 'Initialiserende indlæsning - KUN FØRSTE GANG', 'boolean', false],
-  refresh: [false, 'Genindlæs alle jordstykker', 'boolean', false]
-};
+const schema = {
+  data_dir: {
+    doc: 'Directory where files are located',
+    format: 'String',
+    default: '.',
+    cli: true
+  },
+  refresh: {
+    doc: 'Import all files regardless of whether timestamps indicate any change',
+    format: 'Boolean',
+    default: false,
+    cli: true
+  }
+}
 
-runImporter('matrikelkortet', optionSpec, _.keys(optionSpec), function (args, options) {
+runConfiguredImporter('matrikelkortet', schema, config => go(function*() {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
 
-  return proddb.withTransaction('READ_WRITE', client => go(function*() {
+  yield proddb.withTransaction('READ_WRITE', client => go(function* () {
     yield withImportTransaction(client, 'importJordstykker',
-        txid =>
-          importJordstykkerImpl.importJordstykkerImpl(
-            client, txid, options.sourceDir, options.refresh));
+      txid =>
+        importJordstykkerImpl.importJordstykkerImpl(
+          client, txid, config.get('data_dir'), config.get('refresh')));
   }));
-}, 60 * 60 * 3);
+}));

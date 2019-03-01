@@ -1,2 +1,4 @@
 --exit
+--bail
 --recursive
+--require ./test/setup/setup-config

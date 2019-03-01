@@ -1,0 +1,14 @@
+{
+  s3_offload: {
+    s3: {
+      region: null,
+      access_key_id: null,
+      secret_access_key: null,
+      endpoint: 'http://localhost:4569',
+      force_path_style: true
+    },
+    threshold: 4096,
+    path: 'dawa/test/',
+    bucket: 'dawa'
+  }
+}

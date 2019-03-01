@@ -1,6 +1,7 @@
 "use strict";
 
-const moment = require('moment');
+const moment = require('moment-timezone');
+
 const _ = require('underscore');
 
 const intervalMath = require('../intervalMath');

@@ -4,7 +4,6 @@ const child_process = require('child_process');
 
 const serverDir = path.dirname(require.resolve("@dawadk/server/package.json"));
 const serverScript = path.join(serverDir, 'server.js');
-
 module.exports = () => new Promise((resolve) => {
   const server_process = child_process.fork(serverScript, [
     '--pgConnectionUrl=postgres://localhost/dawatest',

@@ -1,38 +1,58 @@
 #!/usr/bin/env node
 "use strict";
 
-const _ = require('underscore');
 const { go, Abort } = require('ts-csp');
 
-const { runImporter } = require('@dawadk/common/src/cli/run-importer');
+const runConfiguredImporter  = require('@dawadk/import-util/src/run-configured-importer');
 const proddb = require('../psql/proddb');
 const darApiClient = require('./darApiClient');
 const logger = require('@dawadk/common/src/logger').forCategory('darImport');
 
 const importFromApiImpl = require('./importFromApiImpl');
 
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  darApiUri: [false, 'URI til DAR endpoint', 'string', 'https://sg.danmarksadresseregister.dk/AWSDeltaService'],
-  notificationUrl: [false, 'WS URI til notifikationer', 'string', 'https://dar-notifications.aws.dk/prod/listen'],
-  pollInterval: [false, 'Millisekunder mellem API poll for nye records', 'number', 5000],
-  pretend: [false, 'Rul transaktion tilbage (ingen ændringer)', 'boolean', false],
-  noDaemon: [false, 'Kør kun én import', 'boolean', false]
+const schema = {
+  dar_api_uri: {
+    doc: 'URI til DAR endpoint',
+    format: 'String',
+    default: 'https://sg.danmarksadresseregister.dk/AWSDeltaService'
+  },
+  notification_url: {
+    doc: 'WS URI hvor importeren modtager notifikationer',
+    format: 'String',
+    default: 'https://dar-notifications.aws.dk/prod/listen'
+  },
+  poll_interval: {
+    doc: 'Millisekunder mellem API poll for nye records',
+    format: 'nat',
+    default: 5000
+  },
+  no_daemon: {
+    doc: 'Kør kun én import',
+    format: 'Boolean',
+    default: false,
+    cli: true
+  },
+  pretend: {
+    doc: 'Rul transaktion tilbage (ingen ændringer)',
+    format: 'Boolean',
+    default: false,
+    cli: true
+  }
 };
 
-runImporter("importDar10Daemon", optionSpec, _.without(_.keys(optionSpec), 'notificationUrl'), (args, options) => go(function*()  {
+runConfiguredImporter("importDar10Daemon", schema, (config) => go(function*()  {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
-  const darClient = darApiClient.createClient(options.darApiUri);
+  const darClient = darApiClient.createClient(config.get('dar_api_uri'));
 
   const importProcess = importFromApiImpl.importDaemon(proddb, darClient,
     {
-      pretend: options.pretend,
-      noDaemon: options.noDaemon,
-      pollIntervalMs: options.pollInterval,
-      notificationUrl: options.notificationUrl }
+      pretend: config.get('pretend'),
+      noDaemon: config.get('no_daemon'),
+      pollIntervalMs: config.get('poll_interval'),
+      notificationUrl: config.get('notification_url') }
     );
   process.on('SIGTERM', () => {
     logger.info('Received SIGTERM, aborting');
