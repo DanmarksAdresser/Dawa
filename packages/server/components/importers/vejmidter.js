@@ -5,7 +5,7 @@ const fs = require('fs');
 const JSONStream = require('JSONStream');
 const { go } = require('ts-csp');
 
-const geojsonUtil = require('../geojsonUtil');
+const geojsonUtil = require('../../geojsonUtil');
 const importUtil = require('@dawadk/import-util/src/postgres-streaming');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
 const {computeDifferences, applyChanges } = require('@dawadk/import-util/src/table-diff');
