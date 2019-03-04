@@ -403,6 +403,10 @@ var sampleParameters = {
     vejpunkt_id: {
       values: ['122cbb96-af45-11e7-847e-066cff24d637'],
       verifier: (adr, id) =>  adr.vejpunkt.id === id
+    },
+    navngivenvej_id: {
+      values: ['bd2de070-3147-4f6f-9b20-ad5b266192a4'],
+      verifier: (adr, id) => adr.navngivenvej.id === id
     }
   },
   adresse: {
@@ -605,6 +609,10 @@ var sampleParameters = {
     vejpunkt_id: {
       values: ['122cbb96-af45-11e7-847e-066cff24d637'],
       verifier: (adr, id) =>  adr.adgangsadresse.vejpunkt.id === id
+    },
+    navngivenvej_id: {
+      values: ['bd2de070-3147-4f6f-9b20-ad5b266192a4'],
+      verifier: (adr, id) => adr.adgangsadresse.navngivenvej.id === id
     }
   },
   adresse_history: {

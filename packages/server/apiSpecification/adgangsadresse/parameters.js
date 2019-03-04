@@ -199,8 +199,14 @@ exports.propertyFilter = normalizeParameters([
     name: 'vejpunkt_id',
     type: 'string',
     schema: schema.uuid
+  },
+  {
+    name: 'navngivenvej_id',
+    type: 'string',
+    schema: schema.uuid
   }
-  ]);
+
+]);
 
 exports.husnrinterval = normalizeParameters([
   {
