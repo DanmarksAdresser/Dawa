@@ -17,7 +17,7 @@ const optionSpec = {
   components: [false, 'Komma-separeret liste af ID-er for componenter som skal genberegnes', 'string']
 };
 
-runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, options) {
+runImporter('recompute', optionSpec, _.keys(optionSpec), function (args, options) {
   proddb.init({
     connString: options.pgConnectionUrl,
     pooled: false
@@ -29,6 +29,5 @@ runImporter('importDar10', optionSpec, _.keys(optionSpec), function (args, optio
       const rootComponents = allProcessors.filter(component => componentIds.includes(component.id));
       yield execute(client, txid, rootComponents, EXECUTION_STRATEGY.verify);
     }));
-    yield client.query('REFRESH MATERIALIZED VIEW CONCURRENTLY wms_vejpunktlinjer');
   }));
 }, 60 * 60 * 3);

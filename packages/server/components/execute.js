@@ -3,6 +3,7 @@ const {go} = require('ts-csp');
 const toposort = require('toposort');
 const { allProcessors } = require("./processors/all-processors");
 const logger = require('@dawadk/common/src/logger').forCategory('importerExecutor');
+const {withImportTransaction} = require('../importUtil/transaction-util');
 
 const getTablesInScope = (rootComponents, allComponents) => {
   const tablesInScope = new Set();
@@ -68,7 +69,14 @@ const getExecutionOrder = (rootComponents, components) => {
     }
     return acc;
   }, []);
-  return toposort(graph);
+  const order = toposort(graph);
+
+  for(let component of rootComponents) {
+    if(!order.includes(component.id)) {
+      order.push(component.id);
+    }
+  }
+  return order;
 
 };
 
@@ -116,7 +124,29 @@ const execute = (client, txid, rootComponents, strategy) => go(function*() {
   return context;
 });
 
+/**
+ * Execute, but roll back transaction to savepoint
+ * before execution if the execution results in zero changes to tables.
+ */
+const executeRollbackable = (client, importerName, rootComponents, strategy) => go(function*() {
+  yield client.query('SAVEPOINT before_import');
+  const contextResult = yield withImportTransaction(client, importerName, txid => go(function*() {
+    const contextResult = yield execute(client, txid, rootComponents, strategy);
+    contextResult.txid = txid;
+    return contextResult;
+  }));
+  const hasModified = Object.values(contextResult.changes).some(changeDesc => changeDesc.total > 0);
+  contextResult.rollback = !hasModified;
+  if(!hasModified) {
+    logger.info('Rolling back import', {importer: importerName});
+    yield client.query('ROLLBACK TO before_import');
+  }
+  yield client.query('RELEASE SAVEPOINT before_import');
+  return contextResult;
+});
+
 module.exports = {
   execute,
-  getExecutionOrder
+  getExecutionOrder,
+  executeRollbackable
 };

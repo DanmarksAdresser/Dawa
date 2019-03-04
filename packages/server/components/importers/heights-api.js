@@ -60,7 +60,7 @@ const importFromApi = (client, txid, apiClient) => go(function*() {
     return true;
   }
   else {
-
+    logger.info('No heights to import');
     return false;
   }
 

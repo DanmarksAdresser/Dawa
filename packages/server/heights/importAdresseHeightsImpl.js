@@ -2,26 +2,24 @@
 
 const { go } = require('ts-csp');
 
-const { withImportTransaction } = require('../importUtil/transaction-util');
 const proddb = require('../psql/proddb');
 
 const { createHeightImporter } = require('../components/importers/heights-csv');
 const { createApiImporter, hoejdeClient } = require('../components/importers/heights-api');
 const { EXECUTION_STRATEGY } = require('../components/common');
-const { execute } = require('../components/execute');
+const { execute, executeRollbackable } = require('../components/execute');
 
 
-const importFromApi = (client, txid, apiClient) => go(function*() {
+const importFromApi = (client, apiClient) => go(function*() {
   const importer = createApiImporter({apiClient});
-  return yield execute(client, txid, [importer], EXECUTION_STRATEGY.quick, {});
+  return yield executeRollbackable(client, 'importHøjderApi', [importer], EXECUTION_STRATEGY.quick, {});
 });
 const importFromApiDaemon = (apiUrl, login, password) => go(function*() {
   const apiClient = hoejdeClient(apiUrl, login, password);
   /*eslint no-constant-condition: 0 */
   while (true) {
     const context = yield proddb.withTransaction('READ_WRITE', client =>
-      withImportTransaction(client, 'importHøjderApi', (txid) =>
-        importFromApi(client, txid, apiClient)));
+        importFromApi(client, apiClient));
     if(context.changes.hoejde_importer_resultater.total === 0) {
       break;
     }

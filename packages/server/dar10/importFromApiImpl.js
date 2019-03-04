@@ -10,38 +10,35 @@ const notificationClient = require('@dawadk/dar-notification-client/src/notifica
 
 
 const {createDarApiImporter} = require('../components/importers/dar-api');
-const {execute} = require('../components/execute');
+const {executeRollbackable} = require('../components/execute');
 const {EXECUTION_STRATEGY} = require('../components/common');
-const {withImportTransaction} = require('../importUtil/transaction-util');
 const moment = require('moment');
 
 const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(function* () {
   const importer = createDarApiImporter({darClient, remoteEventIds});
   const beforeMillis = Date.now();
-  yield pool.withTransaction('READ_WRITE',
-    (client) => withImportTransaction(client, "importDarApi",
-      txid => go(function* () {
-        const resultContext = yield execute(client, txid, [importer], EXECUTION_STRATEGY.quick);
-        const afterMillis = Date.now();
-        const darTxTimestampMillis = resultContext['dar-api']['remote-tx-timestamp'] ?
-          moment(resultContext['dar-api']['remote-tx-timestamp']).valueOf() :
-          null;
-        const totalRowCount = resultContext['dar-api']['total-row-count'];
-        if (pretend) {
-          throw new Abort('Rolling back transaction due to pretend parameter');
-        }
-        else {
-          logger.info('Imported transaction', {
-            txid,
-            delay: (afterMillis - darTxTimestampMillis),
-            duration: (afterMillis - beforeMillis),
-            totalRowCount
-          })
-        }
-      })
-    ));
-
-
+  yield pool.withTransaction('READ_WRITE', client => go(function*() {
+    const resultContext = yield executeRollbackable(client, 'importDarApi', [importer], EXECUTION_STRATEGY.quick);
+    const afterMillis = Date.now();
+    const darTxTimestampMillis = resultContext['dar-api']['remote-tx-timestamp'] ?
+      moment(resultContext['dar-api']['remote-tx-timestamp']).valueOf() :
+      null;
+    const totalRowCount = resultContext['dar-api']['total-row-count'];
+    if (pretend) {
+      throw new Abort('Rolling back transaction due to pretend parameter');
+    }
+    else if (!resultContext.rollback) {
+      logger.info('Imported Transaction', {
+        txid: resultContext.txid,
+        delay: (afterMillis - darTxTimestampMillis),
+        duration: (afterMillis - beforeMillis),
+        totalRowCount
+      });
+    }
+    else {
+      logger.info('Rolling back import - nothing to import');
+    }
+  }));
 });
 
 const {
