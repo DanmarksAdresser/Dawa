@@ -37,7 +37,7 @@ module.exports = {
         name: 'status',
         type: 'integer',
         schema: definitions.Status,
-        description: 'Adgangsadressens status. 1 indikerer en gældende adresse, 3 indikerer en foreløbig adresse.',
+        description: 'Adgangsadressens status. Heltal. Mulige værdier er 1: gældende, 2: nedlagt, 3: foreløbig, 4: henlagt.',
       },
       {
         name: 'oprettet',
@@ -237,7 +237,7 @@ module.exports = {
         name: 'status',
         type: 'integer',
         schema: definitions.Status,
-        description: 'Adressens status. 1 indikerer en gældende adresse, 3 indikerer en foreløbig adresse.'
+        description: 'Adressens status. Heltal. Mulige værdier er 1: gældende, 2: nedlagt, 3: foreløbig, 4: henlagt.'
       }, {
         name: 'oprettet',
         type: 'localdatetime',

@@ -43,7 +43,7 @@ const formatParameters = [
 
 const strukturParameter = {
   name: 'struktur',
-  doc: 'Struktur parameteren angiver om der ønskes en flad eller en næstet svarstruktur. Default er nestet for JSON, og flad for GeoJSON.'
+  doc: 'Struktur parameteren angiver om der ønskes en flad eller en nestet svarstruktur. Default er nestet for JSON, og flad for GeoJSON.'
 };
 
 const pagingParameters = [{

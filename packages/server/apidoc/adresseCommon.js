@@ -176,6 +176,10 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   {
     name: 'vejpunkt_id',
     doc: 'Find adressen med det angivne vejpunkt ID'
+  },
+  {
+    name: 'navngivenvej_id',
+    doc: 'Find adresser på den navngivne vej med det angivne ID'
   }
 ];
 
