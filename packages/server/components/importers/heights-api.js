@@ -70,7 +70,12 @@ const createApiImporter = ({ apiClient }) => {
   return {
     id: 'Heights-API',
     description: 'Højdeimporter - API opslag',
-    execute: (client, txid) => importFromApi(client, txid, apiClient),
+    execute: (client, txid, strategy, context) => go(function*() {
+      const somethingToImport = yield importFromApi(client, txid, apiClient)
+      if(somethingToImport) {
+        context['prevent-rollback'] = true;
+      }
+      }),
     produces: ['hoejde_importer_resultater', 'hoejde_importer_afventer'],
     requires: []
   };
