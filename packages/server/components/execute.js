@@ -136,8 +136,8 @@ const executeRollbackable = (client, importerName, rootComponents, strategy) => 
     return contextResult;
   }));
   const hasModified = Object.values(contextResult.changes).some(changeDesc => changeDesc.total > 0);
-  contextResult.rollback = !hasModified;
-  if(!hasModified) {
+  contextResult.rollback = !hasModified && !contextResult['prevent-rollback'];
+  if(contextResult.rollback) {
     logger.info('Rolling back import', {importer: importerName});
     yield client.query('ROLLBACK TO before_import');
   }

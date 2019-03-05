@@ -1,5 +1,11 @@
+const Promise = require('bluebird');
 const path = require('path');
 const fs = require('fs');
+
+Promise.config({
+  longStackTraces: true
+});
+
 const configHolder = require('@dawadk/common/src/config/holder');
 const testConfigSchemas = configHolder.mergeConfigSchemas([
   require('@dawadk/common/src/config/base-schema'),

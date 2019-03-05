@@ -18,7 +18,12 @@ create table hoejde_importer_resultater(
 DROP table IF EXISTS hoejde_importer_afventer CASCADE;
 create table hoejde_importer_afventer(
   husnummerid uuid primary key,
-  adgangspunktid uuid,
+  adgangspunktid uuid
+);
+
+DROP TABLE IF EXISTS hoejde_importer_disabled CASCADE;
+create table hoejde_importer_disabled(
+                                       husnummerid uuid primary key,
   -- disable height lookup until this timestamp
-  disableuntil timestamptz
+                                       disableuntil timestamptz
 );

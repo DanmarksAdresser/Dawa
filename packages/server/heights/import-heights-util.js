@@ -6,7 +6,7 @@ function roundHeight(height) {
   return Math.round(height * 10) / 10;
 }
 
-const createHeightTable = (client, tableName) => client.queryp(
+const createHeightTable = (client, tableName) => client.query(
   `CREATE TEMP TABLE ${tableName} (
     id uuid NOT NULL PRIMARY KEY,
     x double precision not null,

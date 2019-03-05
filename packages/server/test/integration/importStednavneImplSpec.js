@@ -7,7 +7,6 @@ const _ = require('underscore');
 
 const helpers = require('./helpers');
 const importStednavneImpl = require('../../stednavne/importStednavneImpl');
-const {withImportTransaction} = require('../../importUtil/transaction-util');
 const testdb = require('@dawadk/test-util/src/testdb');
 const registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
@@ -17,11 +16,9 @@ describe('Import af stednavne', () => {
   testdb.withTransactionAll('empty', clientFn => {
     it('Kan importere en initiel stednavnefil', () => go(function* () {
       const client = clientFn();
-      yield withImportTransaction(client, 'importStednavne',
-        txid => importStednavneImpl.importStednavne(
-          client,
-          txid,
-          path.join(__dirname, 'stednavnedata', 'udtraek1.json')));
+      yield importStednavneImpl.importStednavne(
+        client,
+        path.join(__dirname, 'stednavnedata', 'udtraek1.json'));
       const stednavne = (yield client.queryRows('select stedid, navn, navnestatus, brugsprioritet from stednavne'));
       const steder = yield client.queryRows('select id, geo_version, hovedtype, undertype, st_asgeojson(geom) as geom from steder');
       assert.strictEqual(stednavne.length, 1);
@@ -51,11 +48,9 @@ describe('Import af stednavne', () => {
 
     it('Kan opdatere stednavn', () => go(function* () {
       const client = clientFn();
-      yield withImportTransaction(client, 'importStednavne',
-        txid => importStednavneImpl.importStednavne(
-          client,
-          txid,
-          path.join(__dirname, 'stednavnedata', 'udtraek2.json')));
+      yield importStednavneImpl.importStednavne(
+        client,
+        path.join(__dirname, 'stednavnedata', 'udtraek2.json'));
       const stednavne = (yield client.queryRows('select stedid, navn, navnestatus, brugsprioritet from stednavne'));
       const steder = yield client.queryRows('select id, geo_version, hovedtype, undertype, st_asgeojson(geom) as geom from steder');
       assert.strictEqual(stednavne.length, 1);

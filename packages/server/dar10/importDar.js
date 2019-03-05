@@ -11,13 +11,13 @@ const { importDownload, importDownloadIncrementally } = require('./importDarImpl
 const schema = {
   data_dir: {
     doc: 'Directory with NDJSON files to import',
-    format: 'String',
+    format: 'string',
     cli: true,
     required: true
   },
   refresh_derived: {
     doc: 'Genberegn afledte tabeller',
-    format: 'Boolean',
+    format: 'boolean',
     default: false,
     cli: true
   }

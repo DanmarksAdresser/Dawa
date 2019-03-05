@@ -2,11 +2,11 @@ module.exports = {
   logging: {
     directory: {
       default: '.',
-      format: 'String'
+      format: 'string'
     },
     file_name_suffix: {
       default: '.log',
-      format: 'String'
+      format: 'string'
     },
     max_size: {
       default: 1024 * 1024 * 1024,
@@ -18,12 +18,12 @@ module.exports = {
     },
     default_level: {
       default: 'info',
-      format: 'String'
+      format: 'string'
     }
   },
   config_files: {
     default: '',
-    format: 'String',
+    format: 'string',
     env: 'CONFIG_FILES',
     cli: true,
     doc: 'Comma-separated list of configuration files to load'

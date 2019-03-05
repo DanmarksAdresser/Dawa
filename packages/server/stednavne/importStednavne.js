@@ -2,7 +2,6 @@
 "use strict";
 
 const {go} = require('ts-csp');
-const { withImportTransaction} = require('../importUtil/transaction-util');
 const importStednavneImpl = require('./importStednavneImpl');
 const proddb = require('../psql/proddb');
 const s3ConvictSchema = require('@dawadk/import-util/src/config/schemas/s3-offload-schema');
@@ -10,8 +9,9 @@ const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-im
 const configHolder = require('@dawadk/common/src/config/holder');
 const convictSchema = configHolder.mergeConfigSchemas([{
   file: {
-    format: '*',
+    format: 'string',
     doc: 'Fil med stednavne',
+    required: true,
     cli: true
   },
   max_changes: {
@@ -22,15 +22,15 @@ const convictSchema = configHolder.mergeConfigSchemas([{
   }
 }, s3ConvictSchema]);
 
-runConfiguredImporter('stednavne', convictSchema, config => go(function*() {
+runConfiguredImporter('stednavne', convictSchema, config => go(function* () {
   proddb.init({
     connString: config.get('database_url'),
     pooled: false
   });
 
-  yield proddb.withTransaction('READ_WRITE', client => go(function*() {
-    yield withImportTransaction(client, 'importStednavne', txid => importStednavneImpl.importStednavne(client, txid,
-      config.get('file'), config.get('max_changes')));
-  }));
+  yield proddb.withTransaction('READ_WRITE', client =>
+    importStednavneImpl.importStednavne(client,
+      config.get('file'),
+      config.get('max_changes')));
 }));
 

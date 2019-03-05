@@ -3,35 +3,42 @@ module.exports = {
     s3: {
       region: {
         default: 'eu-west-1',
-        format: 'String',
+        format: 'string',
         doc: 'AWS region'
       },
       access_key_id: {
-        format: 'String',
-        doc: 'AWS Access key ID'
+        format: 'string',
+        doc: 'AWS Access key ID',
+        default: null
       },
       secret_access_key: {
-        format: 'String',
+        format: 'string',
         sensitive: true,
-        doc: 'AWS secret access key'
+        doc: 'AWS secret access key',
+        default: null
       },
       endpoint: {
-        format: 'String',
+        format: 'string',
         default: null,
         doc: 'AWS endpoint. I prod sættes AWS endpoint ud fra region, så i prod skal endpoint være null.'
       },
       force_path_style: {
         format: 'boolean',
-        doc: 'Anvend "path style" for S3 stier. skal være false i prod - anvendes kun til test.'
+        doc: 'Anvend "path style" for S3 stier. skal være false i prod - anvendes kun til test.',
+        default: false
       }
     },
     bucket: {
-      format: 'String',
-      doc: 'S3 bucket'
+      format: 'string',
+      doc: 'S3 bucket',
+      required: true,
+      default: null
     },
     path: {
-      format: 'String',
-      doc: 'Stien i S3 hvor LOBs gemmes'
+      format: 'string',
+      doc: 'Stien i S3 hvor LOBs gemmes',
+      required: true,
+      default: null
     },
     threshold: {
       format: 'nat',

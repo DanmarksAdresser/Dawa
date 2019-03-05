@@ -19,8 +19,7 @@ describe('importFromApi', () => {
     it('Can import a height from API', () => go(function* () {
       const previousHeight = yield clientFn().queryRows('select hoejde from hoejder where husnummerid = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]);
       assert.strictEqual(previousHeight.length, 0);
-      yield withImportTransaction(clientFn(), 'importHeightsApiTest', txid =>
-        importFromApi(clientFn(), txid, successMockClient));
+      yield importFromApi(clientFn(), successMockClient);
       const after = (yield clientFn().queryRows('select hoejde from hoejder where husnummerid = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
       expect(after.hoejde).to.equal(4.2);
       const importResult = (yield clientFn().queryRows(
@@ -42,9 +41,8 @@ describe('importFromApi', () => {
     it('If importing height fails, we will mark the point to not be queried again for 1 day', () => go(function*() {
       const previousHeight = yield clientFn().queryRows('select hoejde from hoejder where husnummerid = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]);
       assert.strictEqual(previousHeight.length, 0);
-      yield withImportTransaction(clientFn(), 'importHeightsApiTest', txid =>
-        importFromApi(clientFn(), txid, failMockClient));
-      const pendingResult = (yield clientFn().queryRows('select * from hoejde_importer_afventer where husnummerid = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
+      yield importFromApi(clientFn(), failMockClient);
+      const pendingResult = (yield clientFn().queryRows('select * from hoejde_importer_disabled where husnummerid = $1', [FIRST_ADDRESS_WITHOUT_HEIGHT]))[0];
       expect(pendingResult.disableuntil).to.be.a('string');
     }));
   });

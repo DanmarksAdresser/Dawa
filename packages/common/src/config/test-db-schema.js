@@ -1,16 +1,16 @@
 module.exports = {
   test: {
     database_user: {
-      format: 'String',
+      format: 'string',
       default: null
     },
     database_password: {
-      format: 'String',
+      format: 'string',
       default: null,
       sensitive: true
     },
     database_host: {
-      format: 'String',
+      format: 'string',
       default: 'localhost'
     },
     database_port: {
@@ -18,15 +18,15 @@ module.exports = {
       default: 5432
     },
     data_db: {
-      format: 'String',
+      format: 'string',
       default: 'dawatest'
     },
     schema_db: {
-      format: 'String',
+      format: 'string',
       default: 'dawaschema'
     },
     empty_db: {
-      format: 'String',
+      format: 'string',
       default: 'dawaempty'
     }
   }

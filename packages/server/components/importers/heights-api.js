@@ -32,13 +32,14 @@ function hoejdeClient(apiUrl, login, password) {
 }
 
 const importFromApi = (client, txid, apiClient) => go(function*() {
-  const rows = (yield client.query(`
-        SELECT husnummerid, adgangspunktid, st_x(position) as x, st_y(position) as y
+  const rows = yield client.queryRows(`
+        SELECT H.husnummerid, adgangspunktid, st_x(position) as x, st_y(position) as y
         FROM hoejde_importer_afventer h JOIN dar1_adressepunkt_current ap on h.adgangspunktid = ap.id 
+        LEFT JOIN hoejde_importer_disabled d ON h.husnummerid = d.husnummerid
         WHERE (disableuntil IS NULL OR disableuntil < NOW())
-        ORDER BY husnummerid
+        ORDER BY h.husnummerid
         LIMIT 1
-        `)).rows;
+        `);
   if (rows.length === 1) {
     const row = rows[0];
     const {husnummerid, x, y} = row;
@@ -54,8 +55,10 @@ const importFromApi = (client, txid, apiClient) => go(function*() {
     }
     catch (e) {
       logger.error('Failed to import height from API', e);
-      yield client.query(`UPDATE hoejde_importer_afventer
-          SET disableuntil = NOW() + INTERVAL '1 day' WHERE husnummerid = $1`, [husnummerid]);
+      yield client.query(
+`INSERT INTO hoejde_importer_disabled(husnummerid, disableuntil) 
+VALUES ($1, NOW() + INTERVAL '1 day') ON CONFLICT (husnummerid) DO UPDATE set disableuntil = NOW() + INTERVAL '1 day'`,
+        [husnummerid]);
     }
     return true;
   }
@@ -70,7 +73,15 @@ const createApiImporter = ({ apiClient }) => {
   return {
     id: 'Heights-API',
     description: 'Højdeimporter - API opslag',
-    execute: (client, txid) => importFromApi(client, txid, apiClient),
+    execute: (client, txid, strategy, context) => go(function*() {
+      const somethingToImport = yield importFromApi(client, txid, apiClient);
+      if(somethingToImport) {
+        // We need to prevent rollback because the table hoejde_importer_disabled
+        // does not have a change table, and therefore changes to it is
+        // not tracked by the component execution engine
+        context['prevent-rollback'] = true;
+      }
+    }),
     produces: ['hoejde_importer_resultater', 'hoejde_importer_afventer'],
     requires: []
   };

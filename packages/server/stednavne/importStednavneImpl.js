@@ -4,7 +4,7 @@ const { go } = require('ts-csp');
 
 const logger = require('@dawadk/common/src/logger').forCategory('importStednavne');
 const { EXECUTION_STRATEGY } = require("../components/common");
-const { execute} = require('../components/execute');
+const { executeRollbackable} = require('../components/execute');
 const { createStednavneImporter, createStednavneImporterFromStream } = require('../components/importers/stednavne');
 
 const verifyChanges = (context, maxChanges) => {
@@ -18,16 +18,20 @@ const verifyChanges = (context, maxChanges) => {
   }
 };
 
-const importStednavneFromStream = (client, txid, stream, maxChanges) => go(function*() {
+const doImport = (client, importer, maxChanges) => go(function*() {
+  const context = yield executeRollbackable(client, 'importStednavne', [importer], EXECUTION_STRATEGY.slow);
+  if(!context.rollback) {
+    verifyChanges(context, maxChanges);
+  }
+});
+const importStednavneFromStream = (client, stream, maxChanges) => go(function*() {
   const importer = createStednavneImporterFromStream({stream});
-  const context = yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow);
-  verifyChanges(context, maxChanges);
+  yield doImport(client, importer, maxChanges);
 });
 
-const importStednavne = (client,txid,  filePath, maxChanges) => go(function*() {
+const importStednavne = (client,  filePath, maxChanges) => go(function*() {
   const importer = createStednavneImporter({filePath});
-  const context = yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow);
-  verifyChanges(context, maxChanges);
+  yield doImport(client, importer, maxChanges);
 });
 
 module.exports = {

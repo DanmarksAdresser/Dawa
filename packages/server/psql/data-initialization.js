@@ -37,7 +37,7 @@ const initializeData = client => go(function*() {
     yield importJordstykkerImpl.importJordstykkerImpl(client, txid, path.join(__dirname, '../test/data/matrikelkort'), true);
   }));
   yield importOisImpl.importOis(client, path.join(__dirname, '../test/data/ois'));
-  yield withImportTransaction(client, 'loadTestData', txid => importStednavneImpl.importStednavne(client, txid, path.join(__dirname, '../test/data/Stednavn.json'), 10000));
+  yield importStednavneImpl.importStednavne(client, path.join(__dirname, '../test/data/Stednavn.json'), 10000);
   yield withImportTransaction(client, 'loadTestData', txid => importBrofasthedImpl(client, txid, path.join(__dirname, '../test/data/brofasthed.csv')));
   yield withImportTransaction(client, 'loadTestData', txid => importBygningerImpl.importBygninger(client, txid, path.join(__dirname, '../test/data/bygninger.json'), 10000));
   yield client.query('analyze');

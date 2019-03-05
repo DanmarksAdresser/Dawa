@@ -17,7 +17,7 @@ module.exports = {
         default: false
       },
       directory: {
-        format: 'String',
+        format: 'string',
         doc: 'The directory where files are stored - generate a tmp dir if null',
         default: null
       },
