@@ -1,31 +1,49 @@
 #!/usr/bin/env node
 "use strict";
 
-var _ = require('underscore');
-
-const cliParameterParsing = require('@dawadk/common/src/cli/cli-parameter-parsing');
-var importOisImpl = require('./importOisImpl');
-var proddb = require('../psql/proddb');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
+const importOisImpl = require('./importOisImpl');
+const proddb = require('../psql/proddb');
 const { go } = require('ts-csp');
 
 require('sax').MAX_BUFFER_LENGTH = 512 * 1024;
 
-var optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  dataDir: [false, 'Folder med CSV-filer', 'string'],
-  fileName: [false, 'Indlæs én fil', 'string'],
-  clean: [false, 'Clear database before importing', 'boolean', false],
-  entities: [false, 'Importer/slet kun udvalgte entiteter', 'string']
+
+const schema = {
+  data_dir: {
+    doc: 'Directory containing OIS CSV files',
+    format: 'string',
+    default: null,
+    required: true,
+    cli: true
+  },
+  file_name: {
+    doc: 'Import only one file',
+    format: 'string',
+    default: null,
+    cli: true
+  },
+  clean: {
+    doc: 'Clean database before importing',
+    format: 'boolean',
+    default: false,
+    cli: true
+  },
+  entities: {
+    doc: 'Import only select entities - comma-separated list',
+    format: 'string',
+    default: null,
+    cli: true
+  }
 };
 
-cliParameterParsing.main(optionSpec, _.without(_.keys(optionSpec), 'fileName', 'entities'),
-  function (args, options) {
-    proddb.init({
-      connString: options.pgConnectionUrl,
-      pooled: false
-    });
-    proddb.withTransaction('READ_WRITE_CONCURRENT',  (client) => go(function*() {
-      yield importOisImpl.importOis(client, options.dataDir, options.fileName, options.clean,
-        options.entities ? options.entities.split(',') : null);
-    })).done();
+runConfiguredImporter('ois', schema, config => go(function*() {
+  proddb.init({
+    connString: config.get('database_url'),
+    pooled: false
   });
+  yield     proddb.withTransaction('READ_WRITE_CONCURRENT',  (client) => go(function*() {
+    yield importOisImpl.importOis(client, config.get('data_dir'), config.get('file_name'), config.get('clean'),
+      config.get('entities') ? config.get('entities').split(',') : null);
+  }));
+}));

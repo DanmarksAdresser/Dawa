@@ -7,28 +7,33 @@
 // This script will re-load all large-mail-recievers into a given
 // database.
 //
-const _         = require('underscore');
-
-const cliParameterParsing = require('@dawadk/common/src/cli/cli-parameter-parsing');
+const { go } = require('ts-csp');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const loadStormodtagereImpl = require('./loadStormodtagereImpl');
 const proddb = require('./proddb');
 const { withImportTransaction } = require('../importUtil/transaction-util');
 
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string']
+const schema = {
+  file: {
+    doc: 'stormodtager-fil, som skal importeres',
+    format: 'string',
+    default: null,
+    cli: true,
+    required: true
+  }
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function(args, options) {
-  const inputFile = args[0];
-
+runConfiguredImporter('stormodtagere', schema, config => go(function*() {
+  const inputFile = config.get('file');
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString:config.get('database_url'),
     pooled: false
   });
 
-  proddb.withTransaction('READ_WRITE', function(client){
+  yield proddb.withTransaction('READ_WRITE', function(client){
     return withImportTransaction(client, 'updateStormodtagere', (txid) => {
       return loadStormodtagereImpl(client, txid, inputFile);
     })
-  }).done();
-});
+  });
+}));
+

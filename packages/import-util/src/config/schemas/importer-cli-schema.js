@@ -4,7 +4,8 @@ module.exports = {
     format: '*',
     cli: true,
     sensitive: true,
-    required: true
+    required: true,
+    default: null
   },
   importer_timeout: {
     doc: 'Terminer importer efter angivne antal sekunder. 0 deaktiverer.',

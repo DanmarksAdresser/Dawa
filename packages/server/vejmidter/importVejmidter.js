@@ -1,28 +1,31 @@
 #!/usr/bin/env node
 "use strict";
 
-const _ = require('underscore');
-
-const { runImporter } = require('@dawadk/common/src/cli/run-importer');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const importVejmidterImpl = require('./importVejmidterImpl');
 const proddb = require('../psql/proddb');
 const { withImportTransaction} = require('../importUtil/transaction-util');
 const logger = require('@dawadk/common/src/logger').forCategory('Vejmidter');
 const { go } = require('ts-csp');
 
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  file: [false, 'Fil med vejmidter', 'string'],
+const schema = {
+  file: {
+    doc: 'File containing road centers',
+    format: 'string',
+    default: null,
+    required: true,
+    cli: true
+  }
 };
 
-runImporter('vejmidter', optionSpec, _.keys(optionSpec),  (args, options) => go(function*() {
+runConfiguredImporter('vejmidter', schema, config => go(function*() {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
 
   yield proddb.withTransaction('READ_WRITE', client =>
     withImportTransaction(client, "importVejmidter", (txid) =>
-      importVejmidterImpl.importVejmidter(client,txid, options.file)));
+      importVejmidterImpl.importVejmidter(client,txid, config.get("file"))));
   logger.info('Successfully imported vejmidter');
-}), 60 * 60);
+}));

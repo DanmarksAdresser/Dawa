@@ -1,23 +1,38 @@
 "use strict";
 
-const _ = require('underscore');
-
-const { runImporter } = require('@dawadk/common/src/cli/run-importer');
+const { go } = require('ts-csp');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const importAdresseHeightsImpl = require('./importAdresseHeightsImpl');
 const proddb = require('../psql/proddb');
 
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  url: [false, 'API URL', 'string', 'http://services.kortforsyningen.dk/?servicename=RestGeokeys_v2&method=hoejde'],
-  login: [false, 'Login til kortforsyningen', 'string', 'dawa'],
-  password: [false, 'Password til kortforsyningen', 'string']
-};
+const schema = {
+  url: {
+    format: 'string',
+    doc: 'API URL',
+    default: 'http://services.kortforsyningen.dk/?servicename=RestGeokeys_v2&method=hoejde',
+    cli: true
+  },
+  login: {
+    format: 'string',
+    doc: 'Login til kortforsyningen',
+    default: 'dawa',
+    cli: true
+  },
+  password: {
+    format: 'string',
+    sensitive: true,
+    doc: 'Password til kortforsyningen',
+    cli: true,
+    default: null,
+    required: true
+  }
+}
 
-runImporter("højder", optionSpec, _.keys(optionSpec), function (args, options) {
+runConfiguredImporter("højder", schema, config => go(function* () {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
 
-  return importAdresseHeightsImpl.importFromApiDaemon(options.url, options.login, options.password);
-});
+  yield importAdresseHeightsImpl.importFromApiDaemon(config.get('url'), config.get('login'), config.get('password'));
+}));
