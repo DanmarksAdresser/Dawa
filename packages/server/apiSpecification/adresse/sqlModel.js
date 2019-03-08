@@ -147,7 +147,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     sqlParts.with.push(`adgadr_ids AS (SELECT id
-       FROM adgangsadresser adg
+       FROM adgangsadresser_mat adg
        JOIN (select kommunekode, vejkode, postnr
        FROM vejstykkerpostnumremat vp
        ORDER BY tekst <-> ${fuzzyqAlias} limit 15) as vp
