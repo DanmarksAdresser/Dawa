@@ -101,7 +101,8 @@ const runCommand = (command, options) => go(function* () {
   if (command === 'gen-config') {
     const replicationUrl = options.url;
     const replicationSchema = "dawa_replication";
-    const httpClient = new ReplicationHttpClient(replicationUrl, 200);
+    const version = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), {encoding: 'utf-8'})).version;
+    const httpClient = new ReplicationHttpClient(replicationUrl, {batchSize: 200, userAgent: `DAWAReplicationClient,version=${version}`});
     const replicationModel = yield httpClient.datamodel();
     const jsonText = JSON.stringify((generateConfig(replicationUrl, replicationSchema, replicationModel, {
       entities: options.entities
