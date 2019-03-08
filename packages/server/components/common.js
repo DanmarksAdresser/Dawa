@@ -44,7 +44,7 @@ const fromMaterializations = (id, description, materializations) => {
         const hasNonincrementalDependency = (materialization.nonIncrementalDependents || []).length > 0;
         const hasModifiedDependency = _.some(materializationRequires, table => changes[table] && changes[table].total > 0);
         if (strategy === EXECUTION_STRATEGY.quick) {
-          if (hasModifiedDependency && !hasNonincrementalDependency) {
+          if (hasModifiedDependency) {
             yield materialize(client, txid, tableSchema.tables, materialization);
           }
           else {
