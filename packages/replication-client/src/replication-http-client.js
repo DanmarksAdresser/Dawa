@@ -7,8 +7,8 @@ const cspUtil = require('@dawadk/common/src/csp-util');
 const URI = require('urijs');
 
 
-const ndjsonStream = (url, dstChan, batchSize) => {
-  const stream = request(url).pipe(split2(JSON.parse));
+const ndjsonStream = (url, dstChan, batchSize, headers) => {
+  const stream = request({url, headers}).pipe(split2(JSON.parse));
   return cspUtil.pipeFromStream(stream, dstChan, batchSize);
 };
 
@@ -44,28 +44,30 @@ const getDatamodelUrl = baseUrl => {
 };
 
 class ReplicationHttpClient {
-  constructor(baseUrl, batchSize) {
+  constructor(baseUrl, {batchSize, userAgent}) {
     this.baseUrl = baseUrl;
-    this.batchSize = batchSize;
+    this.batchSize = batchSize || 200;
+    this.headers = {'User-Agent': userAgent}
   }
+
 
   lastTransaction() {
     const url = getSenesteTransaktionUrl(this.baseUrl);
-    return requestPromise({url, json: true});
+    return requestPromise({url, headers: this.headers, json: true});
   }
 
   datamodel() {
     const url = getDatamodelUrl(this.baseUrl);
-    return requestPromise({url, json: true});
+    return requestPromise({url, headers: this.headers, json: true});
   }
 
   downloadStream(entityName, remoteTxid, dstChan) {
     const url = getUdtraekUrl(this.baseUrl, entityName, remoteTxid);
-    return ndjsonStream(url, dstChan, this.batchSize);
+    return ndjsonStream(url, dstChan, this.batchSize, this.headers);
   }
   eventStream(entityName, txidFrom, txidTo, dstChan) {
     const url = getEventUrl(this.baseUrl, entityName, txidFrom, txidTo);
-    return ndjsonStream(url, dstChan, this.batchSize);
+    return ndjsonStream(url, dstChan, this.batchSize, this.headers);
   }
 }
 

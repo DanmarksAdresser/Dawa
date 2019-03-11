@@ -165,7 +165,7 @@ SELECT operation, ${columnNames.join(',')}
 
   // Store changes in change table
   if(options.useChangeTable) {
-    client.query(`INSERT INTO ${tmpEventTableName}(txid, operation, ${columnNames.join(',')})
+    client.query(`INSERT INTO ${`${bindingConf.table}_changes`}(txid, operation, ${columnNames.join(',')})
     (select txid, operation, ${columnNames.join(',')} from ${tmpEventTableName})`);
   }
   yield client.query(`drop table ${tmpEventTableName}`);
@@ -179,12 +179,17 @@ const updateEntityUsingDownload = (client, remoteTxid, localTxid, replicationMod
   yield client.query(`CREATE TEMP TABLE ${tmpTableName} (LIKE ${bindingConf.table})`);
   yield downloadEntity(client, remoteTxid, replicationModel, entityConf, bindingConf, options.batchSize, httpClientImpl, tmpTableName);
   const tableModel = toTableModel(replicationModel, entityConf, bindingConf);
+  if(!options.useChangeTable) {
+    yield createTempChangeTable(client, replicationSchema, bindingConf, `${tableModel.table}_changes`);
+  }
   yield computeDifferences(client, localTxid, tmpTableName, tableModel);
-  // apply changes
   yield tableDiff.applyChanges(client, localTxid, tableModel);
 
   yield client.query(`INSERT INTO ${replicationSchema}.source_transactions(source_txid,local_txid, entity, type)
     VALUES ($1,$2,$3,$4)`, [remoteTxid, localTxid, entityConf.name, 'download']);
+  if(!options.useChangeTable) {
+    yield client.query(` DROP TABLE ${tableModel.table}_changes`);
+  }
 });
 
 const updateEntity = (client,
