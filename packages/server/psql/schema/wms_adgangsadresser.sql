@@ -9,4 +9,4 @@ CREATE OR REPLACE VIEW wms_adgangsadresser AS
     90                                  AS "tekstretninggrader",
     dar1_status_til_dawa_status(status) AS status,
     geom
-  FROM adgangsadresser_mat;
+  FROM adgangsadresser_mat where status in (2,3);

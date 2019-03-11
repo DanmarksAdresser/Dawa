@@ -6,4 +6,5 @@ CREATE OR REPLACE VIEW wms_vejpunkter AS
     formatHusnr(husnr)                  AS husnr,
     dar1_status_til_dawa_status(status) AS status,
     vejpunkt_geom                       AS geom
-  FROM adgangsadresser_mat;
+  FROM adgangsadresser_mat
+WHERE  status IN (2, 3)

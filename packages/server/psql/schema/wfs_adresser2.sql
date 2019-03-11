@@ -42,4 +42,5 @@ CREATE OR REPLACE VIEW wfs_adresser2 AS
     vejpunkt_noejagtighedsklasse AS "vejpunkt_nøjagtighed",
     vejpunkt_tekniskstandard,
     geom
-  FROM Adresser;
+  FROM Adresser
+  where e_status IN (2, 3);;

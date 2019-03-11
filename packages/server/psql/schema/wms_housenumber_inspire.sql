@@ -8,4 +8,4 @@ CREATE OR REPLACE VIEW wms_housenumber_inspire AS
         husnr)                                                                  AS "StreetBuildingIdentifier",
     round((COALESCE(tekstretning, 200) * 0.9 + 360 + 90)) :: INTEGER % 180 - 90 AS "Angle360",
     geom
-  FROM adgangsadresser_mat;
+  FROM adgangsadresser_mat where status in (2,3);

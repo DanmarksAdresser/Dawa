@@ -35,4 +35,4 @@ CREATE OR REPLACE VIEW wfs_adgangsadresser AS
     vejpunkt_noejagtighedsklasse        AS "vejpunkt_nøjagtighed",
     vejpunkt_tekniskstandard,
     geom
-  FROM adgangsadresserview;
+  FROM adgangsadresserview where a_status IN (2,3);
