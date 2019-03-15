@@ -13,6 +13,9 @@
     "lint": "lerna run lint",
     "mocha": "lerna run test",
     "initialize-db": "node packages/server/psql/initialize-databases.js",
-    "test": "run-s initialize-db lint mocha"
+    "test": "run-s initialize-db lint mocha",
+    "test-s3rver": "node packages/import-util/src/start-s3rver-cli",
+    "test-dawa-server": "dawa-server --config_files=packages/server/server/default-test-config.json5,local-conf/test-server-conf.json5",
+    "test-server": "run-p test-s3rver test-dawa-server"
   }
 }

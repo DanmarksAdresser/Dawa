@@ -13,7 +13,6 @@ const allProcessors = [
   ...require('./legacy-dawa-materialized'),
   require('./legacy-supplerende-bynavne'),
   require('./place-associations'),
-  require('./place-geoms'),
   require('./hoejder'),
   require('./hoejde_importer_afventer')
 ];

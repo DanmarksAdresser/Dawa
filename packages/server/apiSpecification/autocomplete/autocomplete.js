@@ -10,7 +10,7 @@ const schema = require('../parameterSchema');
 const adresseTextMatch = require('../adresseTextMatch');
 const levenshtein = require('../levenshtein');
 const commonParameters = require('../common/commonParameters');
-const config = require('../../server/config');
+const config = require('@dawadk/common/src/config/holder').getConfig();
 
 const { go } = require('ts-csp');
 
@@ -761,7 +761,7 @@ const sqlModel = {
           return [result];
         }
       }
-    }), config.getOption('autocomplete.querySlotTimeout'));
+    }), config.get('autocomplete.query_slot_timeout'));
   }
 };
 

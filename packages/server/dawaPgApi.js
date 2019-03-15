@@ -8,7 +8,7 @@ var express          = require('express');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 const basicAuth = require('express-basic-auth');
-const config = require('./server/config');
+const conf = require('@dawadk/common/src/config/holder').getConfig();
 
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
 
@@ -78,11 +78,13 @@ exports.setupRoutes = function () {
   app.use(preventHeadMiddleware);
   app.use(corsMiddleware);
   app.use(cachingMiddleware);
-  const oisEnabled = config.getOption('ois.enabled');
-  const oisProtected = !config.getOption('ois.unprotected');
-  const replicationEnabled = !config.getOption("replication.disabled");
+  const oisEnabled = conf.get('ois.enabled');
+  const oisProtected = conf.get('ois.protected');
+  const replicationEnabled = conf.get("replication.enabled");
   const oisUsers = {};
-  oisUsers[config.getOption('ois.login')] = config.getOption('ois.password');
+  if(oisProtected) {
+    oisUsers[conf.get('ois.login')] = conf.get('ois.password');
+  }
 
   const oisBasicAuthMiddleware = basicAuth({
     users: oisUsers,

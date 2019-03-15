@@ -1,10 +1,8 @@
 "use strict";
 
-const _ = require('underscore');
-
 const { go } = require('ts-csp');
 const cursorChannel = require('@dawadk/common/src/postgres/cursor-channel');
-
+const { getColumnName,makeSelectClause } = require('../bindings/util');
 const querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
 const dbapi = require('../../../dbapi');
 const registry = require('../../registry');
@@ -13,7 +11,6 @@ const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
 const { keyParameters: keyParametersMap  } = require('../commonParameters');
 const sqlParameterImpl = require('../../../apiSpecification/common/sql/sqlParameterImpl');
-
 const validateParams = (client, params) => go(function*() {
   const senesteHaendelse = yield querySenesteSekvensnummer(client);
   if (params.sekvensnummer && senesteHaendelse.sekvensnummer < params.sekvensnummer) {
@@ -25,14 +22,9 @@ const createSqlModel = (model, binding, filterParameters) => {
   const allAttrNames = model.attributes.map(attr => attr.name);
   const tableName = binding.table;
   const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParameters, binding.attributes);
-  const selectClause = _.pluck(model.attributes, 'name').map(attName => {
-    const bindingAttr = binding.attributes[attName];
-    const columnName = binding.attributes[attName].column;
-    const transformed = bindingAttr.selectTransform(columnName);
-    return `${transformed} AS ${attName}`;
-  }).join(', ');
+  const selectClause = makeSelectClause(binding.attributes);
   const primaryAttrNames = model.key;
-  const primaryColumnNames = primaryAttrNames.map(attrName => binding.attributes[attrName].column);
+  const primaryColumnNames = primaryAttrNames.map(attrName => getColumnName(attrName,binding));
   const createBaseQuery = (sequenceNumber, txid, params) => {
     const rowkeyNestedSelectQueryParts = {
       select: ['distinct ' + primaryColumnNames.join(',')],

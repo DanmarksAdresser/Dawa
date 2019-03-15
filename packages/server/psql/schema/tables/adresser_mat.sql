@@ -69,3 +69,4 @@ CREATE INDEX ON adresser_mat(vejpunkt_id);
 CREATE INDEX ON adresser_mat(adgangspunktid);
 CREATE INDEX ON adresser_mat USING GIST (vejpunkt_geom);
 CREATE INDEX ON adresser_mat(supplerendebynavn_dagi_id);
+CREATE INDEX ON adresser_mat(vejnavn, id);

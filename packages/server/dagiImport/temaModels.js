@@ -2,7 +2,7 @@ const _ = require('underscore');
 
 const commonSchemaDefinitions = require('../apiSpecification/commonSchemaDefinitions');
 const {kode4String, zoneKodeFormatter, numberToString} = require('../apiSpecification/util');
-
+const bindingTypes = require('../apiSpecification/replikering/bindings/binding-types');
 const defaultSqlType = {
   string: 'text',
   integer: 'integer',
@@ -743,20 +743,18 @@ exports.toReplikeringTilknytningModel = temaModel => {
 };
 
 exports.toReplikeringTilknytningDbBinding = temaModel => {
-  return {
+  const result = {
     path: `/replikering/${temaModel.tilknytningPlural}`,
     table: temaModel.tilknytningTable,
     legacyResource: true,
-    attributes: temaModel.tilknytningFields.reduce((memo, tilknytningField) => {
-      const attr = {};
-      if (tilknytningField.formatter) {
-        attr.formatter = tilknytningField.formatter;
-      }
-      if (tilknytningField.selectTransform) {
-        attr.selectTransform = tilknytningField.selectTransform;
-      }
-      memo[tilknytningField.name] = attr;
-      return memo;
-    }, {})
-  }
+    attributes: [
+      bindingTypes.column({attrName: 'adgangsadresseid'}),
+      ...temaModel.tilknytningFields.map((tilknytningField) => {
+        return bindingTypes.legacy({
+          attrName: tilknytningField.name,
+          formatter: tilknytningField.formatter
+        });
+      })]
+  };
+  return result;
 };

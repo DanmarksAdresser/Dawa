@@ -646,6 +646,16 @@ module.exports = {
           ' der er tilknyttet en organisation der modtager en større mængde post.'
         }]
     },
+  sted: {
+    key: ['id'],
+    attributes: [
+      {
+        name: 'id',
+        type: 'uuid',
+        description: 'stedets ID'
+      }
+    ]
+  },
   stedtilknytning: {
     key: ['stedid', 'adgangsadresseid'],
     attributes: [{

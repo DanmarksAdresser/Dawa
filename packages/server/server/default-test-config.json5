@@ -1,0 +1,20 @@
+{
+  port: 3002,
+  master_port: 3003,
+  s3_offload: {
+    s3: {
+      endpoint: 'http://localhost:4569',
+      force_path_style: true
+    },
+    key_prefix: 'test',
+    bucket: 'dawa'
+  },
+  ois: {
+    enabled: true,
+    protected: false
+  },
+  database_url: 'dawatest',
+  replication: {
+    enabled: true
+  }
+}

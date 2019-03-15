@@ -2,10 +2,7 @@
 
 const assert = require('assert');
 const dar10TableModels = require('./dar10TableModels');
-const {formatHusnr} = require('../apiSpecification/husnrUtil');
-const {kode4String, numberToString} = require('../apiSpecification/util');
-const { selectIsoDateUtc: selectIsoTimestampUtc} = require('../apiSpecification/common/sql/sqlUtil');
-
+const types = require('../apiSpecification/replikering/bindings/binding-types');
 
 const defaultReplikeringType = {
   uuid: 'uuid',
@@ -55,80 +52,40 @@ const replikeringTypeOverrides = {
 };
 
 const replikeringBindingOverrides = {
-  Adressepunkt: {
-    position: {
-      selectTransform: col => `ST_AsGeoJSON(${col})`,
-      formatter: JSON.parse
-
-    }
-  },
-  Husnummer: {
-    husnummertekst: {
-      formatter: formatHusnr
-    },
-    husnummerretning: {
-      selectTransform: col => `ST_AsGeoJSON(${col})`,
-      formatter: JSON.parse
-    }
-  },
-  NavngivenVej: {
-    vejnavnebeliggenhed_vejnavnelinje: {
-      selectTransform: col => `ST_AsGeoJSON(${col})`,
-      formatter: JSON.parse
-    }
-    ,
-    vejnavnebeliggenhed_vejnavneområde: {
-      selectTransform: col => `ST_AsGeoJSON(${col})`,
-      formatter: JSON.parse
-    }
-    ,
-    vejnavnebeliggenhed_vejtilslutningspunkter: {
-      selectTransform: col => `ST_AsGeoJSON(${col})`,
-      formatter: JSON.parse
-    },
-    administreresafkommune: {
-      formatter: kode4String
-    }
-  },
-  NavngivenVejKommunedel: {
-    kommune: {
-      formatter: kode4String
-    },
-    vejkode: {
-      formatter: kode4String
-    }
-  },
-  DARKommuneinddeling: {
-    kommunekode: {
-      formatter: kode4String
-    },
-    kommuneinddeling: {
-      formatter: numberToString
-    }
-  },
-  SupplerendeBynavn: {
-    supplerendebynavn1: {
-      formatter: numberToString
-    }
-  },
-  DARSogneinddeling: {
-    sogneinddeling: {
-      formatter: numberToString
-    },
-    sognekode: {
-      formatter: kode4String
-    }
-  },
-  DARMenighedsrådsafstemningsområde: {
-    mrafstemningsområde: {
-      formatter: numberToString
-    }
-  },
-  DARAfstemningsområde: {
-    afstemningsområde: {
-      formatter: numberToString
-    }
-  }
+  Adressepunkt: [
+    types.geometry({attrName: 'position'})
+  ],
+  Husnummer: [
+    types.husnr({attrName: 'husnummertekst'}),
+    types.geometry({attrName: 'husnummerretning'})
+  ],
+  NavngivenVej: [
+    types.geometry({attrName: 'vejnavnebeliggenhed_vejnavnelinje'}),
+    types.geometry({attrName: 'vejnavnebeliggenhed_vejnavneområde'}),
+    types.geometry({attrName: 'vejnavnebeliggenhed_vejtilslutningspunkter'}),
+    types.kode4({attrName: 'administreresafkommune'})
+  ],
+  NavngivenVejKommunedel: [
+    types.kode4({attrName: 'kommune'}),
+    types.kode4({attrName: 'vejkode'})
+  ],
+  DARKommuneinddeling: [
+    types.kode4({attrName: 'kommunekode'}),
+    types.kode4({attrName: 'kommuneinddeling'})
+  ],
+  SupplerendeBynavn: [
+    types.numberToString({attrName: 'supplerendebynavn1'})
+  ],
+  DARSogneinddeling: [
+    types.numberToString({attrName: 'sogneinddeling'}),
+    types.kode4({attrName: 'sognekode'})
+  ],
+  DARMenighedsrådsafstemningsområde: [
+    types.numberToString({attrName: 'mrafstemningsområde'})
+  ],
+  DARAfstemningsområde: [
+    types.numberToString({attrName: 'afstemningsområde'})
+  ]
 };
 
 const historyReplikeringModels = Object.entries(dar10TableModels.historyTableModels).reduce((memo, [entityName, tableModel]) => {
@@ -173,17 +130,10 @@ const historyReplikeringModels = Object.entries(dar10TableModels.historyTableMod
 
 const historyReplikeringBindings = Object.entries(dar10TableModels.historyTableModels).reduce((memo, [entityName, tableModel]) => {
   const table = tableModel.table;
-  const virkningBindings = {
-    virkningstart: {
-      selectTransform: col => selectIsoTimestampUtc(`lower(virkning)`)
-    },
-    virkningslut: {
-      selectTransform: col => selectIsoTimestampUtc('upper(virkning)')
-    }
-  };
+  const virkningBinding = types.timestampInterval({attrName:'virkning'});
   memo[entityName] = {
     table,
-    attributes: Object.assign({}, virkningBindings, replikeringBindingOverrides[entityName] || {}),
+    attributes: [ virkningBinding, ...(replikeringBindingOverrides[entityName] || [])],
     additionalParameters: [{
       name: 'id',
       type: 'string'
@@ -217,7 +167,7 @@ const currentReplikeringBindings = Object.entries(dar10TableModels.currentTableM
   const table = tableModel.table;
   memo[entityName] = {
     table,
-    attributes: replikeringBindingOverrides[entityName] || {}
+    attributes: replikeringBindingOverrides[entityName] || []
   };
   return memo;
 }, {});

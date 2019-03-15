@@ -1,5 +1,6 @@
 const replikeringModels = require('./datamodel');
 const bindings = require('./dbBindings');
+const {getParameterSpec} = require('./bindings/util');
 
 exports.sekvensnummer = [
   {
@@ -29,13 +30,7 @@ exports.entitet = [{
 exports.keyParameters = Object.keys(replikeringModels).reduce((memo, datamodelName) => {
   const model = replikeringModels[datamodelName];
   const binding = bindings[datamodelName];
-  memo[datamodelName] = model.key.map(keyAttrName => {
-    const bindingAttr = binding.attributes[keyAttrName];
-    return {
-      name: keyAttrName,
-      type: bindingAttr.parameterType,
-      schema: bindingAttr.parameterSchema
-    };
-  });
+  memo[datamodelName] = model.key.map(keyAttrName =>
+    getParameterSpec(keyAttrName, model, binding));
   return memo;
 }, {});

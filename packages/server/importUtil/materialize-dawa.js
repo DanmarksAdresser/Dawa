@@ -16,7 +16,7 @@ const dawaBaseTableNames = ['vejstykker', 'vejpunkter', 'navngivenvej', 'postnum
   'hoejder',
   'adgangsadresser',
   'enhedsadresser',
-  'vejstykkerpostnumremat', 'navngivenvej_postnummer'];
+  'vejstykkerpostnumremat', 'navngivenvej_postnummer', 'steder'];
 
 
 const orderedTableNames = [...dar10HistoryTableNames,
@@ -24,7 +24,6 @@ const orderedTableNames = [...dar10HistoryTableNames,
   ...dawaBaseTableNames,
   ...tilknytningTableNames];
 
-// no replication of navngivenvej_postnummer, but an additional replication of stednavntilknytninger
 assert(orderedTableNames.length === Object.keys(replikeringDataModel).length);
 
 const orderedTableModels = orderedTableNames.map(tableName => {

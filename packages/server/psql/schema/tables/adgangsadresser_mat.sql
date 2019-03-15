@@ -60,3 +60,4 @@ CREATE INDEX ON adgangsadresser_mat (adgangspunktid);
 CREATE INDEX ON adgangsadresser_mat (darkommuneinddeling_id);
 CREATE INDEX ON adgangsadresser_mat (navngivenvejkommunedel_id, postnummer_id, id);
 CREATE INDEX ON adgangsadresser_mat (supplerendebynavn_id);
+CREATE INDEX ON adgangsadresser_mat(vejnavn,id);

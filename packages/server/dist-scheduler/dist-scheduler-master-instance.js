@@ -1,22 +1,22 @@
 "use strict";
 
-const config = require('../server/config');
+const config = require('@dawadk/common/src/config/holder').getConfig();
 
 const querySchedulerOpts = {
-  slots: config.getOption('scheduler.slots'),
-  prioritySlots: config.getOption('scheduler.prioritySlots'),
-  slotsPerSource: config.getOption('scheduler.slotsPerSource'),
-  cleanupInterval: config.getOption('scheduler.cleanupIntervalMillis'),
-  initialPriorityOffset: config.getOption('scheduler.initialPriorityOffsetMillis'),
-  requiredPriorityOffset: config.getOption('scheduler.requiredPriorityOffsetMillis'),
-  timeout: config.getOption('scheduler.timeoutMillis')
+  slots: config.get('query_scheduler.slots'),
+  prioritySlots: config.get('query_scheduler.priority_slots'),
+  slotsPerSource: config.get('query_scheduler.slots_per_source'),
+  cleanupInterval: config.get('query_scheduler.cleanup_interval_millis'),
+  initialPriorityOffset: config.get('query_scheduler.initial_priority_offset_millis'),
+  requiredPriorityOffset: config.get('query_scheduler.required_priority_offset_millis'),
+  timeout: config.get('query_scheduler.timeout_millis')
 };
 
 
 const connectionSchedulerOpts = {
-  slots: config.getOption('connectionScheduler.slots'),
-  slotsPerSource: config.getOption('connectionScheduler.slotsPerSource'),
-  timeout: config.getOption('connectionScheduler.timeout'),
+  slots: config.get('connection_scheduler.slots'),
+  slotsPerSource: config.get('connection_scheduler.slots_per_source'),
+  timeout: config.get('connection_scheduler.timeout'),
 };
 
 

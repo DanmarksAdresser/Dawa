@@ -8,10 +8,10 @@ const representationUtil = require('../../common/representationUtil');
 
 const datamodels = require('../datamodel');
 const bindings = require('../dbBindings');
+const { createRowFormatter } = require('../bindings/util');
 
 for(let datamodelName of Object.keys(datamodels)) {
   const fields = fieldsMap[datamodelName];
-  const datamodel = datamodels[datamodelName];
   const binding = bindings[datamodelName];
   const schema = globalSchemaObject({
     title: datamodelName + "hændelse",
@@ -45,14 +45,8 @@ for(let datamodelName of Object.keys(datamodels)) {
       tidspunkt: row.tidspunkt,
       sekvensnummer: row.sekvensnummer
     };
-    result.data = datamodel.attributes.reduce((memo, attribute) => {
-      const formatFn = binding.attributes[attribute.name].formatter;
-      memo[attribute.name] = formatFn(row[attribute.name]);
-      if(memo[attribute.name] === undefined) {
-        memo[attribute.name] = null;
-      }
-      return memo;
-    }, {});
+    const dataMapper = createRowFormatter(binding);
+    result.data = dataMapper(row);
     return result;
   };
   exports[datamodelName] = {

@@ -1,13 +1,14 @@
 const {go} = require('ts-csp');
-const _ = require('underscore');
 const specMap = require('./spec');
 const config = require('../../server/config');
 const dbapi = require('../../dbapi');
 const parameters = require('./parameters');
 const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
-
-const replikeringDatamodels = require('../replikering/datamodel');
+const sqlSelect  = require('../replikering/bindings/sql-select');
 const replikeringBindings = require('../replikering/dbBindings');
+
+const { getAllProvidedAttributes, createRowFormatter } = require('../replikering/bindings/util');
+
 const baseQuery = specs => {
   const sqlParts = {
     select: [],
@@ -17,18 +18,16 @@ const baseQuery = specs => {
     sqlParams: []
   };
   const addToSelect = (spec) => {
-    const excludedColumns = ['rowkey', 'virkningstart', 'virkningslut', ...(spec.excluded || [])];
-    const model = replikeringDatamodels[spec.entity];
+    const excludedAttrs = ['rowkey', 'virkningstart', 'virkningslut', ...(spec.excluded || [])];
     const binding = replikeringBindings[spec.entity];
     const alias = spec.alias;
-    return _.pluck(model.attributes, 'name')
-      .filter(attName => !excludedColumns.includes(attName))
-      .map(attName => {
-        const bindingAttr = binding.attributes[attName];
-        const columnName = `${alias}.${binding.attributes[attName].column}`;
-        const transformed = bindingAttr.selectTransform(columnName);
-        return `${transformed} AS ${alias}_${attName}`;
-      }).join(', ');
+    const selects = binding.attributes
+      .map(attrBinding => sqlSelect(attrBinding, alias))
+      .reduce((acc, select) => acc.concat(select), [])
+      .filter(([select, as]) => !excludedAttrs.includes(as))
+      .map(([select, as]) => [select, `${alias}_${as}`])
+      .map(([select, as]) => `${select} AS ${as}`);
+    sqlParts.select = sqlParts.select.concat(selects);
   };
   const addJoin = spec => {
     const binding = replikeringBindings[spec.entity];
@@ -70,22 +69,23 @@ module.exports = {
       }
       for (let entitySpec of entities) {
         const excludedColumns = ['rowkey', 'virkningstart', 'virkningslut', ...(entitySpec.excluded || [])];
-        const model = replikeringDatamodels[entitySpec.entity];
         const binding = replikeringBindings[entitySpec.entity];
         const alias = entitySpec.alias;
-        _.pluck(model.attributes, 'name')
-          .filter(attName => !excludedColumns.includes(attName))
-          .forEach(attName => {
-            const bindingAttr = binding.attributes[attName];
-            if (bindingAttr.formatter) {
-              for (let row of queryResult) {
-                row[`${alias}_${attName}`] = bindingAttr.formatter(row[`${alias}_${attName}`]);
-              }
-            }
-            const columnName = `${alias}.${binding.attributes[attName].column}`;
-            const transformed = bindingAttr.selectTransform(columnName);
-            return `${transformed} AS ${alias}_${attName}`;
-          });
+        const attributesToFormat =
+          getAllProvidedAttributes(binding.attributes)
+            .filter(attrName => !excludedColumns.includes(attrName));
+        queryResult.forEach(row => {
+          const unaliasedRowFormatter = createRowFormatter(binding);
+          const unaliasedRow = attributesToFormat
+            .reduce((acc, attrName) => {
+              acc[attrName] = row[`${alias}_${attrName}`];
+              return acc;
+            }, {});
+          const formattedRow = unaliasedRowFormatter(unaliasedRow);
+          for(let attrName of attributesToFormat) {
+            row[`${alias}_${attrName}`] = formattedRow[attrName];
+          }
+        });
       }
       return [{queryResult}];
     }), config.getOption('autocomplete.querySlotTimeout'));

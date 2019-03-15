@@ -1,327 +1,183 @@
-const {kode4String, d: timestampFormatter, numberToString, stringToNumber} = require('../util');
-const {formatHusnr} = require('../husnrUtil');
 const datamodels = require("./datamodel");
-const {selectIsoDate: selectLocalDateTime, selectIsoDateUtc: selectIsoTimestampUtc} = require('../common/sql/sqlUtil');
 const temaModels = require('../../dagiImport/temaModels');
 const darReplikeringModels = require('../../dar10/replikeringModels');
-const {formatDarStatus } = require('../../apiSpecification/commonMappers');
-const parameterSchema = require('../../apiSpecification/parameterSchema');
-const { defaultSchemas } = require('./datamodelUtil');
-const normalizeAttr = (attrName, bindingAttr, modelAttr) =>
-  Object.assign(
-    {
-      column: attrName,
-      formatter: v => v,
-      selectTransform: col => col,
-      parameterType: defaultParameterTypes[modelAttr.type],
-      parameterSchema: defaultSchemas[modelAttr.type]
-    },
-    bindingAttr || {});
+const types = require('./bindings/binding-types');
+const getProvidedAttributes = require('./bindings/get-provided-attributes');
 
-const normalize = (datamodels, unnormalizedBindings) =>
-  Object.keys(datamodels).reduce((memo, entityName) => {
-    const datamodel = datamodels[entityName];
+const addDefaultBindings = (attributes, bindings) => {
+  const providedAttributeNames = bindings.reduce((acc, binding) => {
+    for(let attr of getProvidedAttributes(binding)) {
+      acc.push(attr);
+    }
+    return acc;
+  }, []);
+  for(let attribute of attributes) {
+    if(!providedAttributeNames.includes(attribute.name)) {
+      bindings.push(types.column({attrName: attribute.name}));
+    }
+  }
+};
+
+const normalize = (datamodels, unnormalizedBindings) => {
+  for(let [entityName, datamodel] of Object.entries(datamodels)) {
     const binding = unnormalizedBindings[entityName];
     if (!binding) {
       throw new Error('No db replication binding for ' + entityName);
     }
-    const normalizedAttributes = datamodel.attributes.reduce((memo, modelAttr) => {
-      memo[modelAttr.name] = normalizeAttr(modelAttr.name, binding.attributes[modelAttr.name], modelAttr);
-      return memo;
-    }, {});
-    const normalizedBinding = Object.assign({}, binding, {attributes: normalizedAttributes});
-    memo[entityName] = normalizedBinding;
-    return memo;
-  }, {});
-
-const defaultParameterTypes = {
-  integer: 'integer',
-  real: 'number',
-  boolean: 'boolean',
-  string: 'string',
-  uuid: 'string',
-  timestamp: 'string',
-  localdatetime: 'string'
+    addDefaultBindings(datamodel.attributes, binding.attributes);
+  }
+  return unnormalizedBindings;
 };
 
 const unnormalizedBindings = {
   højde: {
     table: 'hoejder',
-    attributes: {
-      højde: {
-        column: 'hoejde'
-      }
-    }
+    attributes: [
+      types.column({attrName: 'højde', column: 'hoejde'})
+    ]
   },
   adgangsadresse: {
     path: '/replikering/adgangsadresser',
     table: 'adgangsadresser',
     legacyResource: true,
-    attributes: {
-      status: {
-        column: 'objekttype'
-      },
-      kilde: {
-        column: 'adgangspunktkilde'
-      },
-      oprettet: {
-        formatter: timestampFormatter,
-        selectTransform: selectLocalDateTime
-      },
-      ændret: {
-        column: 'aendret',
-        selectTransform: selectLocalDateTime,
-        formatter: timestampFormatter
-      },
-      ikrafttrædelsesdato: {
-        column: 'ikraftfra',
-        selectTransform: selectLocalDateTime,
-        formatter: timestampFormatter
-      },
-      kommunekode: {
-        formatter: kode4String
-      },
-      vejkode: {
-        formatter: kode4String
-      },
-      husnr: {
-        formatter: formatHusnr
-      },
-      postnr: {
-        formatter: kode4String
-      },
-      etrs89koordinat_øst: {
-        column: 'etrs89oest'
-      },
-      etrs89koordinat_nord: {
-        column: 'etrs89nord',
-      },
-      esrejendomsnr: {
-        formatter: numberToString
-      },
-      nøjagtighed: {
-        column: 'noejagtighed'
-      },
-      adressepunktændringsdato: {
-        formatter: timestampFormatter,
-        column: 'adressepunktaendringsdato',
-        selectTransform: selectLocalDateTime
-      },
-      højde: {
-        column: 'hoejde'
-      },
-      supplerendebynavn_dagi_id: {
-        formatter: numberToString
-      }
-    }
+    attributes: [
+      types.column({attrName: 'status', column: 'objekttype'}),
+      types.column({attrName: 'kilde', column: 'adgangspunktkilde'}),
+      types.localTimestamp({attrName: 'oprettet'}),
+      types.localTimestamp({attrName: 'ændret',column: 'aendret'}),
+      types.localTimestamp({attrName: 'ikrafttrædelsesdato', column: 'ikraftfra'}),
+      types.kode4({attrName: 'kommunekode'}),
+      types.kode4({attrName: 'vejkode'}),
+      types.husnr({attrName: 'husnr'}),
+      types.kode4({attrName: 'postnr'}),
+      types.column({attrName: 'etrs89koordinat_øst', column: 'etrs89oest'}),
+      types.column({attrName: 'etrs89koordinat_nord', column: 'etrs89nord'}),
+      types.numberToString({attrName: 'esrejendomsnr'}),
+      types.column({attrName: 'nøjagtighed', column: 'noejagtighed'}),
+      types.localTimestamp({attrName: 'adressepunktændringsdato', column: 'adressepunktaendringsdato'}),
+      types.column({attrName: 'højde', column: 'hoejde'}),
+      types.numberToString({attrName: 'supplerendebynavn_dagi_id'})
+    ]
   },
   adresse: {
     path: '/replikering/adresser',
     table: 'enhedsadresser',
     legacyResource: true,
-    attributes: {
-      status: {
-        column: 'objekttype'
-      },
-      oprettet: {
-        formatter: timestampFormatter,
-        selectTransform: selectLocalDateTime
-      },
-      ændret: {
-        column: 'aendret',
-        formatter: timestampFormatter,
-        selectTransform: selectLocalDateTime
-      },
-      dør: {
-        column: 'doer'
-      },
-      ikrafttrædelsesdato: {
-        formatter: timestampFormatter,
-        column: 'ikraftfra',
-        selectTransform: selectLocalDateTime
-      },
-    }
+    attributes: [
+      types.column({attrName: 'status', column: 'objekttype'}),
+      types.localTimestamp({attrName: 'oprettet'}),
+      types.localTimestamp({attrName: 'ændret',column: 'aendret'}),
+      types.localTimestamp({attrName: 'ikrafttrædelsesdato', column: 'ikraftfra'}),
+      types.column({attrName: 'dør', column: 'doer'})
+    ]
   },
   ejerlav: {
     path: '/replikering/ejerlav',
     table: 'ejerlav',
     legacyResource: true,
-    attributes: {}
+    attributes: []
   },
   bygning: {
     table: 'bygninger',
-    attributes: {
-      geometri: {
-        column: 'geom',
-        selectTransform: col => `ST_AsGeoJSON(${col})`,
-        formatter: JSON.parse
-      }
-    }
+    attributes: [
+      types.geometry({attrName: 'geometri', column: 'geom'})
+    ]
   },
   bygningtilknytning: {
     table: 'bygningtilknytninger',
-    attributes: {
-      bygningid: {
-        formatter: stringToNumber,
-      },
-    }
+    attributes: [
+      types.stringToNumber({attrName: 'bygningid'})
+    ]
   },
   jordstykke: {
     table: 'jordstykker',
-    attributes: {
-      kommunekode: {
-        formatter: kode4String,
-      },
-      regionskode: {
-        formatter: kode4String,
-      },
-      sognekode: {
-        formatter: kode4String,
-      },
-      retskredskode: {
-        formatter: kode4String,
-      },
-      geometri: {
-        column: 'geom',
-        selectTransform: col => `ST_AsGeoJSON(${col})`,
-        formatter: JSON.parse
-      },
-      featureid: {
-        formatter: numberToString
-      }
-    },
+    attributes: [
+      types.kode4({attrName: 'kommunekode'}),
+      types.kode4({attrName: 'regionskode'}),
+      types.kode4({attrName: 'sognekode'}),
+      types.kode4({attrName: 'retskredskode'}),
+      types.geometry({attrName: 'geometri', column: 'geom'}),
+      types.numberToString({attrName: 'featureid'})
+    ]
   },
   jordstykketilknytning: {
     path: '/replikering/jordstykketilknytninger',
     table: 'jordstykker_adgadr',
     legacyResource: true,
-    attributes: {
-      adgangsadresseid: {
-        column: 'adgangsadresse_id'
-      }
-    }
+    attributes: [
+      types.column({attrName: 'adgangsadresseid', column: 'adgangsadresse_id'})
+    ]
   },
   navngivenvej: {
     path: '/replikering/navngivneveje',
     table: 'navngivenvej',
     legacyResource: false,
-    attributes: {
-      darstatus: {
-        formatter: formatDarStatus
-      },
-      oprettet: {
-        formatter: timestampFormatter,
-        selectTransform: selectIsoTimestampUtc
-      },
-      ændret: {
-        formatter: timestampFormatter,
-        selectTransform: selectLocalDateTime
-      },
-      administrerendekommune: {
-        formatter: kode4String
-      }
-    }
+    attributes: [
+      types.darStatus({attrName: 'darstatus'}),
+      types.timestamp({attrName: 'oprettet'}),
+      types.timestamp({attrName: 'ændret'}),
+      types.kode4({attrName: 'administrerendekommune'})
+    ],
   },
   stedtilknytning: {
     path: '/replikering/stedtilknytninger',
     table: 'stedtilknytninger',
     legacyResource: false,
-    attributes: {
-    }
+    attributes: []
   },
   stednavntilknytning: {
     path: '/replikering/stednavntilknytninger',
     table: 'stedtilknytninger',
     legacyResource: true,
-    attributes: {
-      stednavn_id: {
-        column: 'stedid'
-      },
-      adgangsadresse_id: {
-        column: 'adgangsadresseid'
-      }
-    }
+    attributes: [
+      types.column({attrName: 'stednavn_id', column: 'stedid'}),
+      types.column({attrName: 'adgangsadresse_id', column: 'adgangsadresseid'})
+    ],
+  },
+  sted: {
+    table: 'steder',
+    attributes: [
+      types.offloadedGeometry({attrName: 'geometri', column: 'geom'})
+    ]
   },
   vejpunkt: {
     table: 'vejpunkter',
-    attributes: {
-      nøjagtighedsklasse: {
-        column: 'noejagtighedsklasse'
-      },
-      position: {
-        column: 'geom',
-        selectTransform: col => `ST_AsGeoJSON(${col})`,
-        formatter: JSON.parse
-      }
-    }
+    attributes: [
+      types.column({attrName: 'nøjagtighedsklasse', column: 'noejagtighedsklasse'}),
+      types.geometry({attrName: 'position', column: 'geom'})
+    ],
   },
   vejstykke: {
     path: '/replikering/vejstykker',
     table: 'vejstykker',
     legacyResource: true,
-    attributes: {
-      id: {
-        column: 'navngivenvejkommunedel_id'
-      },
-      kommunekode: {
-        formatter: kode4String,
-        parameterType: 'integer',
-        parameterSchema: parameterSchema.kode4
-      },
-      kode: {
-        formatter: kode4String,
-        parameterType: 'integer',
-        parameterSchema: parameterSchema.kode4
-      },
-      navn: {
-        column: 'vejnavn'
-
-      },
-      oprettet: {
-        formatter: timestampFormatter,
-        selectTransform: selectLocalDateTime
-      },
-      ændret: {
-        column: 'aendret',
-        formatter: timestampFormatter,
-        selectTransform: selectLocalDateTime
-      },
-    }
+    attributes: [
+      types.column({attrName: 'id', column: 'navngivenvejkommunedel_id'}),
+      types.kode4({attrName: 'kommunekode'}),
+      types.kode4({attrName: 'kode'}),
+      types.column({attrName: 'navn', column: 'vejnavn'}),
+      types.localTimestamp({attrName: 'oprettet'}),
+      types.localTimestamp({attrName: 'ændret', column: 'aendret'})
+    ]
   },
   vejstykkepostnummerrelation: {
     path: '/replikering/vejstykkepostnummerrelationer',
     table: 'vejstykkerpostnumremat',
     legacyResource: true,
-    attributes: {
-      kommunekode: {
-        formatter: kode4String,
-        parameterType: 'integer',
-        parameterSchema: parameterSchema.kode4
-      },
-      vejkode: {
-        formatter: kode4String,
-        parameterType: 'integer',
-        parameterSchema: parameterSchema.kode4
-      },
-      postnr: {
-        formatter: kode4String,
-        parameterType: 'integer',
-        parameterSchema: parameterSchema.kode4
-      }
-    }
+    attributes: [
+      types.kode4({attrName: 'kommunekode'}),
+      types.kode4({attrName: 'vejkode'}),
+      types.kode4({attrName: 'postnr'})
+    ]
   },
   postnummer: {
     path: '/replikering/postnumre',
     table: 'postnumre',
     legacyResource: true,
-    attributes: {
-      nr: {
-        formatter: kode4String,
-        type: 'integer',
-        schema: parameterSchema.postnr
-      }
-    }
-  },
+    attributes: [
+      types.kode4({attrName: 'nr'})
+    ]
+  }
 };
 
 for(let [entityName, binding] of Object.entries( darReplikeringModels.currentReplikeringBindings)) {

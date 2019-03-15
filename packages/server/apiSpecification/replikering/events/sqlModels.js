@@ -1,6 +1,5 @@
 "use strict";
 
-const _ = require('underscore');
 const {go} = require('ts-csp');
 const cursorChannel = require('@dawadk/common/src/postgres/cursor-channel');
 
@@ -14,6 +13,7 @@ const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
 const registry = require('../../registry');
 const tableSchema = require('../../../psql/tableModel');
+const { makeSelectClause } =  require('../bindings/util');
 
 
 const validateSekvensnummerParams = (client, params) => go(function* () {
@@ -23,18 +23,14 @@ const validateSekvensnummerParams = (client, params) => go(function* () {
   }
 });
 
+
 const baseQuery = (model, binding) => {
   const tableName = binding.table;
   const tableModel = tableSchema.tables[tableName];
-  const selectAttributesClauses = _.pluck(model.attributes, 'name').map(attName => {
-    const bindingAttr = binding.attributes[attName];
-    const columnName = binding.attributes[attName].column;
-    const transformed = bindingAttr.selectTransform(columnName);
-    return `${transformed} AS ${attName}`;
-  });
+  const selectAttributesClause = makeSelectClause(binding.attributes);
   const query = {
     select: ['i.txid, i.operation as operation', sqlUtil.selectIsoDateUtc('t.time') + ' as tidspunkt', 'changeid as sekvensnummer',
-      ...selectAttributesClauses],
+      selectAttributesClause],
     from: [`transaction_history t JOIN ${tableName}_changes i ON t.sequence_number = i.changeid`],
     whereClauses: [`entity = '${tableModel.entity}' and public`],
     orderClauses: [],

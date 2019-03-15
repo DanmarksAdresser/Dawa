@@ -1,22 +1,6 @@
 module.exports = {
   s3_offload: {
     s3: {
-      region: {
-        default: 'eu-west-1',
-        format: 'string',
-        doc: 'AWS region'
-      },
-      access_key_id: {
-        format: 'string',
-        doc: 'AWS Access key ID',
-        default: null
-      },
-      secret_access_key: {
-        format: 'string',
-        sensitive: true,
-        doc: 'AWS secret access key',
-        default: null
-      },
       endpoint: {
         format: 'string',
         default: null,
@@ -34,16 +18,16 @@ module.exports = {
       required: true,
       default: null
     },
-    path: {
+    key_prefix: {
       format: 'string',
-      doc: 'Stien i S3 hvor LOBs gemmes',
+      doc: 'Præfix som tilføjes blob-ID. Bør inkludere miljøets navn, e.g. p2.',
       required: true,
       default: null
     },
-    threshold: {
-      format: 'nat',
-      default: 4096,
-      doc: 'Angiver grænsen for hvor store LOBs skal være før de offloades til S3.'
-    },
+    path: {
+      format: 'string',
+      doc: 'Stien i S3 hvor LOBs gemmes. Skal være ens på alle miljøer.',
+      default: 'blob'
+    }
   }
 };

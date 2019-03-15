@@ -2,18 +2,17 @@
 
 const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
-
+const getProvidedAttributes = require("../bindings/get-provided-attributes");
 module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
-  const datamodel = datamodels[datamodelName];
   const binding = dbBindings[datamodelName];
-  memo[datamodelName] = datamodel.attributes.map(attr => {
-    const attrBinding = binding.attributes[attr.name];
-    return {
-      name: attr.name,
+  memo[datamodelName] = binding.attributes.reduce((acc, attrBinding) => {
+    for(let attrName of getProvidedAttributes(attrBinding)) {
+      acc.push({name: attrName,
       selectable: true,
-      multi: false,
-      formatter: attrBinding.formatter
-    };
-  });
+      multi: false
+      });
+    }
+    return acc;
+  }, []);
   return memo;
 }, {});

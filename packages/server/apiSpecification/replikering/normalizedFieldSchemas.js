@@ -8,14 +8,15 @@ const globalSchemaObject = require('../commonSchemaDefinitionsUtil').globalSchem
 const replikeringModels = require('./datamodel');
 const replikeringBindings = require('./dbBindings');
 const temaModels = require('../../dagiImport/temaModels');
-
+const { legacyFormatter } = require('./bindings/util');
 exports.normalizedField = function(datamodelName, fieldName) {
   const model = replikeringModels[datamodelName];
   assert(model);
   const field = _.findWhere(model.attributes, {name: fieldName});
   assert(field);
-  const binding = replikeringBindings[datamodelName].attributes[fieldName];
-  return Object.assign({}, field, {formatter: binding.formatter});
+  return Object.assign({}, field, {
+    formatter: legacyFormatter(fieldName, replikeringBindings[datamodelName])
+  });
 };
 
 const temaReplikeringModels = temaModels.modelList.reduce((memo, temaModel) => {

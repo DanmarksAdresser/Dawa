@@ -1,7 +1,7 @@
 "use strict";
 
 const {go, OperationType, Abort} = require('ts-csp');
-
+const { into } = require('transducers-js');
 const DEFAULT_FETCH_SIZE = 200;
 
 /**
@@ -21,9 +21,12 @@ module.exports = (client, sql, params, channel, options) => {
     try {
       /* eslint no-constant-condition: 0 */
       while (true) {
-        const rows = (yield this.delegateAbort(
+        let rows = (yield this.delegateAbort(
           client.query(`FETCH ${fetchSize} FROM c1`))).rows || [];
         if(rows.length > 0)  {
+          if(options.xform) {
+            rows = into([], options.xform, rows);
+          }
           yield this.selectOrAbort(
             [{ch: channel, op: OperationType.PUT_MANY, values: rows}]);
         }

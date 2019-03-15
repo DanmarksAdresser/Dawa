@@ -12,7 +12,8 @@ const verifyMaxChanges = (context, temaModel, maxChanges) => {
   if(changes > maxChanges) {
     logger.error("Too Many Changes", {
       changes,
-      maxChanges
+      maxChanges,
+      tema: temaModel.singular
     });
     throw new Error("Too Many Changes");
   }

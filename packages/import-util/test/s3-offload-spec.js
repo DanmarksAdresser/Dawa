@@ -53,8 +53,8 @@ describe('S3 offload', () => {
   it('Can upload to S3', () => go(function* () {
     const s3 = createS3();
     const bucket = configHolder.getConfig().get('s3_offload.bucket');
-    yield uploadToS3(s3, bucket, 'test-key', `{"foo": "bar"}`);
-    const result = yield getFromS3('test-key');
+    yield uploadToS3(s3, bucket,'test-path', 'test-key', `{"foo": "bar"}`);
+    const result = yield getFromS3('test-path/test-key');
     assert.deepStrictEqual(result, {foo: 'bar'});
   }));
 
@@ -78,7 +78,7 @@ describe('S3 offload', () => {
           assert.strictEqual(result.length, 1);
           assert.isNull(result[0].geom);
           const blobRef = result[0].geom_blobref;
-          const blobJson = yield getFromS3(blobRef);
+          const blobJson = yield getFromS3(`${configHolder.getConfig().get('s3_offload.path')}/${blobRef}`);
           assert.deepStrictEqual(blobJson, {
             "coordinates": [
               578947.37,

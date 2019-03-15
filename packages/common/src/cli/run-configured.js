@@ -11,14 +11,14 @@ module.exports = (convictSchema, configFiles, fn) => {
   };
 
   const cliSchema = Object.entries(convictSchema).reduce((acc, [key, value]) => {
-    if(value.cli) {
+    if (value.cli) {
       acc[key] = value;
     }
     return acc;
   }, {});
 
   const program = require('commander');
-  for(let key of Object.keys(cliSchema)) {
+  for (let key of Object.keys(cliSchema)) {
     const schema = convictSchema[key];
     const argumentString = schema.format === 'boolean' ? `--${key}` : `--${key} <value>`;
     const parser = parsers[schema.format];
@@ -28,7 +28,7 @@ module.exports = (convictSchema, configFiles, fn) => {
   program.parse(process.argv);
 
   const cliOptions = Object.keys(cliSchema).reduce((acc, name) => {
-    if(typeof program[name] !== 'undefined') {
+    if (typeof program[name] !== 'undefined') {
       acc[name] = program[name];
     }
     return acc;
@@ -37,5 +37,8 @@ module.exports = (convictSchema, configFiles, fn) => {
   configHolder.initialize(convictSchema, configFiles, cliOptions);
   const config = configHolder.getConfig();
   logger.initialize(config.get('logging'));
-  fn(config).asPromise().done();
+  const result = fn(config);
+  if (result && result.asPromise) {
+    result.asPromise().done();
+  }
 };
