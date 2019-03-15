@@ -27,7 +27,7 @@
     "urijs": "^1.19.1"
   },
   "devDependencies": {
-    "@dawadk/test-util": "^1.0.2"
+    "@dawadk/server": "^1.27.6"
   },
   "scripts": {
     "lint": "eslint .",
