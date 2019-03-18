@@ -653,6 +653,45 @@ module.exports = {
         name: 'id',
         type: 'uuid',
         description: 'stedets ID'
+      },
+      {
+        name: 'hovedtype',
+        type: 'string',
+        description: 'Stedets hovedtype.'
+      },
+      {
+        name: 'undertype',
+        type: 'string',
+        description: 'Stedets undertype'
+      },
+      {
+        name: 'bebyggelseskode',
+        type: 'integer',
+        nullable: true,
+        description: 'Unik 5-cifret kode der identificerer en by eller et sommerhusområde'
+      },
+      {
+        name: 'indbyggerantal',
+        type: 'integer',
+        nullable: true,
+        description: 'Antal indbyggere indenfor objektets udstrækning.'
+      },
+      {
+        name: 'visueltcenter',
+        type: 'geometry',
+        description: 'Stedets visuelle center.',
+      },
+      {
+        name: 'bbox',
+        type: 'geometry',
+        description: 'Bounding box for stedets geometri. Null hvis stedets geometri ikke har nogen fysisk udstrækning.',
+        nullable: true
+      },
+      {
+        name: 'geometri',
+        type: 'geometry',
+        description: 'Stedets geometri',
+        offloaded: true
       }
     ]
   },

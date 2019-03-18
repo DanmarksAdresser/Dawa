@@ -137,6 +137,8 @@ const unnormalizedBindings = {
   sted: {
     table: 'steder',
     attributes: [
+      types.geometry({attrName: 'visueltcenter'}),
+      types.geometry({attrName: 'bbox'}),
       types.offloadedGeometry({attrName: 'geometri', column: 'geom'})
     ]
   },
