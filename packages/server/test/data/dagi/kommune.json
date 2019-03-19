@@ -3,6 +3,8 @@
     "dagi_id": 100002,
     "kode": 165,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Albertslund",
     "geom": null
   },
@@ -10,6 +12,8 @@
     "dagi_id": 100003,
     "kode": 201,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Allerød",
     "geom": null
   },
@@ -17,6 +21,7 @@
     "dagi_id": 100099,
     "kode": 411,
     "udenforkommuneinddeling": true,
+    "regionskode": 1084,
     "navn": "Ertholmene",
     "geom": null
   },
@@ -24,6 +29,8 @@
     "dagi_id": 100004,
     "kode": 420,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Assens",
     "geom": null
   },
@@ -31,6 +38,8 @@
     "dagi_id": 100005,
     "kode": 151,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Ballerup",
     "geom": null
   },
@@ -38,6 +47,8 @@
     "dagi_id": 100006,
     "kode": 530,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Billund",
     "geom": null
   },
@@ -45,6 +56,8 @@
     "dagi_id": 100007,
     "kode": 400,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Bornholm",
     "geom": null
   },
@@ -52,6 +65,8 @@
     "dagi_id": 100008,
     "kode": 153,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Brøndby",
     "geom": null
   },
@@ -59,6 +74,8 @@
     "dagi_id": 100009,
     "kode": 810,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Brønderslev",
     "geom": null
   },
@@ -66,6 +83,8 @@
     "dagi_id": 100010,
     "kode": 155,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Dragør",
     "regionskode": 1084,
     "geom": null
@@ -74,6 +93,8 @@
     "dagi_id": 100011,
     "kode": 240,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Egedal",
     "geom": null
   },
@@ -81,6 +102,8 @@
     "dagi_id": 100012,
     "kode": 561,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Esbjerg",
     "geom": null
   },
@@ -88,6 +111,8 @@
     "dagi_id": 100013,
     "kode": 563,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Fanø",
     "geom": null
   },
@@ -95,6 +120,8 @@
     "dagi_id": 100014,
     "kode": 710,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Favrskov",
     "geom": null
   },
@@ -102,6 +129,8 @@
     "dagi_id": 100015,
     "kode": 320,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Faxe",
     "geom": null
   },
@@ -109,6 +138,8 @@
     "dagi_id": 100016,
     "kode": 210,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Fredensborg",
     "geom": null
   },
@@ -116,6 +147,8 @@
     "dagi_id": 100017,
     "kode": 607,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Fredericia",
     "geom": null
   },
@@ -123,6 +156,8 @@
     "dagi_id": 100018,
     "kode": 147,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Frederiksberg",
     "geom": null
   },
@@ -130,6 +165,8 @@
     "dagi_id": 100019,
     "kode": 813,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Frederikshavn",
     "geom": null
   },
@@ -137,6 +174,8 @@
     "dagi_id": 100020,
     "kode": 250,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Frederikssund",
     "geom": null
   },
@@ -144,6 +183,8 @@
     "dagi_id": 100021,
     "kode": 190,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Furesø",
     "geom": null
   },
@@ -151,6 +192,8 @@
     "dagi_id": 100022,
     "kode": 430,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Faaborg-Midtfyn",
     "geom": null
   },
@@ -158,6 +201,8 @@
     "dagi_id": 100023,
     "kode": 157,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Gentofte",
     "geom": null
   },
@@ -165,6 +210,8 @@
     "dagi_id": 100024,
     "kode": 159,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Gladsaxe",
     "geom": null
   },
@@ -172,6 +219,8 @@
     "dagi_id": 100025,
     "kode": 161,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Glostrup",
     "geom": null
   },
@@ -179,6 +228,8 @@
     "dagi_id": 100026,
     "kode": 253,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Greve",
     "geom": null
   },
@@ -186,6 +237,8 @@
     "dagi_id": 100027,
     "kode": 270,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Gribskov",
     "geom": null
   },
@@ -193,6 +246,8 @@
     "dagi_id": 100028,
     "kode": 376,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Guldborgsund",
     "geom": null
   },
@@ -200,6 +255,8 @@
     "dagi_id": 100029,
     "kode": 510,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Haderslev",
     "geom": null
   },
@@ -207,6 +264,8 @@
     "dagi_id": 100030,
     "kode": 260,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Halsnæs",
     "geom": null
   },
@@ -214,6 +273,8 @@
     "dagi_id": 100031,
     "kode": 766,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Hedensted",
     "geom": null
   },
@@ -221,6 +282,8 @@
     "dagi_id": 100032,
     "kode": 217,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Helsingør",
     "geom": null
   },
@@ -228,6 +291,8 @@
     "dagi_id": 100033,
     "kode": 163,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Herlev",
     "geom": null
   },
@@ -235,6 +300,8 @@
     "dagi_id": 100034,
     "kode": 657,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Herning",
     "geom": null
   },
@@ -242,6 +309,8 @@
     "dagi_id": 100035,
     "kode": 219,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Hillerød",
     "geom": null
   },
@@ -249,6 +318,8 @@
     "dagi_id": 100036,
     "kode": 860,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Hjørring",
     "geom": null
   },
@@ -256,6 +327,8 @@
     "dagi_id": 100037,
     "kode": 316,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Holbæk",
     "geom": null
   },
@@ -263,6 +336,8 @@
     "dagi_id": 100038,
     "kode": 661,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Holstebro",
     "geom": null
   },
@@ -270,6 +345,8 @@
     "dagi_id": 100039,
     "kode": 615,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Horsens",
     "geom": null
   },
@@ -277,6 +354,8 @@
     "dagi_id": 100040,
     "kode": 167,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Hvidovre",
     "geom": null
   },
@@ -284,6 +363,8 @@
     "dagi_id": 100041,
     "kode": 169,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Høje-Taastrup",
     "geom": null
   },
@@ -291,6 +372,8 @@
     "dagi_id": 100042,
     "kode": 223,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Hørsholm",
     "geom": null
   },
@@ -298,6 +381,8 @@
     "dagi_id": 100043,
     "kode": 756,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Ikast-Brande",
     "geom": null
   },
@@ -305,6 +390,8 @@
     "dagi_id": 100044,
     "kode": 183,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Ishøj",
     "geom": null
   },
@@ -312,6 +399,8 @@
     "dagi_id": 100045,
     "kode": 849,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Jammerbugt",
     "geom": null
   },
@@ -319,6 +408,8 @@
     "dagi_id": 100046,
     "kode": 326,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Kalundborg",
     "geom": null
   },
@@ -326,6 +417,8 @@
     "dagi_id": 100047,
     "kode": 440,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Kerteminde",
     "geom": null
   },
@@ -333,6 +426,8 @@
     "dagi_id": 100048,
     "kode": 621,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Kolding",
     "geom": null
   },
@@ -340,6 +435,8 @@
     "dagi_id": 100049,
     "kode": 101,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "København",
     "geom": null
   },
@@ -347,6 +444,8 @@
     "dagi_id": 100050,
     "kode": 259,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Køge",
     "geom": null
   },
@@ -354,6 +453,8 @@
     "dagi_id": 100051,
     "kode": 482,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Langeland",
     "geom": null
   },
@@ -361,6 +462,8 @@
     "dagi_id": 100052,
     "kode": 350,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Lejre",
     "geom": null
   },
@@ -368,6 +471,8 @@
     "dagi_id": 100053,
     "kode": 665,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Lemvig",
     "geom": null
   },
@@ -375,6 +480,8 @@
     "dagi_id": 100054,
     "kode": 360,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Lolland",
     "geom": null
   },
@@ -382,6 +489,8 @@
     "dagi_id": 100055,
     "kode": 173,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Lyngby-Taarbæk",
     "geom": null
   },
@@ -389,6 +498,8 @@
     "dagi_id": 100056,
     "kode": 825,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Læsø",
     "geom": null
   },
@@ -396,6 +507,8 @@
     "dagi_id": 100057,
     "kode": 846,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Mariagerfjord",
     "geom": null
   },
@@ -403,6 +516,8 @@
     "dagi_id": 100058,
     "kode": 410,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Middelfart",
     "geom": null
   },
@@ -410,6 +525,8 @@
     "dagi_id": 100059,
     "kode": 773,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Morsø",
     "geom": null
   },
@@ -417,6 +534,8 @@
     "dagi_id": 100060,
     "kode": 707,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Norddjurs",
     "geom": null
   },
@@ -424,6 +543,8 @@
     "dagi_id": 100061,
     "kode": 480,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Nordfyns",
     "geom": null
   },
@@ -431,6 +552,8 @@
     "dagi_id": 100062,
     "kode": 450,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Nyborg",
     "geom": null
   },
@@ -438,6 +561,8 @@
     "dagi_id": 100063,
     "kode": 370,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Næstved",
     "geom": null
   },
@@ -445,6 +570,8 @@
     "dagi_id": 100064,
     "kode": 727,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Odder",
     "geom": null
   },
@@ -452,6 +579,8 @@
     "dagi_id": 100065,
     "kode": 461,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Odense",
     "geom": null
   },
@@ -459,6 +588,8 @@
     "dagi_id": 100066,
     "kode": 306,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Odsherred",
     "geom": null
   },
@@ -466,6 +597,8 @@
     "dagi_id": 100067,
     "kode": 730,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Randers",
     "geom": null
   },
@@ -473,6 +606,8 @@
     "dagi_id": 100068,
     "kode": 840,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Rebild",
     "geom": null
   },
@@ -480,6 +615,8 @@
     "dagi_id": 100069,
     "kode": 760,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Ringkøbing-Skjern",
     "geom": null
   },
@@ -487,6 +624,8 @@
     "dagi_id": 100070,
     "kode": 329,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Ringsted",
     "geom": null
   },
@@ -494,6 +633,8 @@
     "dagi_id": 100071,
     "kode": 265,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Roskilde",
     "geom": null
   },
@@ -501,6 +642,8 @@
     "dagi_id": 100072,
     "kode": 230,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Rudersdal",
     "geom": null
   },
@@ -508,6 +651,8 @@
     "dagi_id": 100073,
     "kode": 175,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Rødovre",
     "geom": null
   },
@@ -515,6 +660,8 @@
     "dagi_id": 100074,
     "kode": 741,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Samsø",
     "geom": null
   },
@@ -522,6 +669,8 @@
     "dagi_id": 100075,
     "kode": 740,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Silkeborg",
     "geom": null
   },
@@ -529,6 +678,8 @@
     "dagi_id": 100076,
     "kode": 746,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Skanderborg",
     "geom": null
   },
@@ -536,6 +687,8 @@
     "dagi_id": 100077,
     "kode": 779,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Skive",
     "geom": null
   },
@@ -543,6 +696,8 @@
     "dagi_id": 100078,
     "kode": 330,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Slagelse",
     "geom": null
   },
@@ -550,6 +705,8 @@
     "dagi_id": 100079,
     "kode": 269,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Solrød",
     "geom": null
   },
@@ -557,6 +714,8 @@
     "dagi_id": 100080,
     "kode": 340,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Sorø",
     "geom": null
   },
@@ -564,6 +723,8 @@
     "dagi_id": 100081,
     "kode": 336,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Stevns",
     "geom": null
   },
@@ -571,6 +732,8 @@
     "dagi_id": 100082,
     "kode": 671,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Struer",
     "geom": null
   },
@@ -578,6 +741,8 @@
     "dagi_id": 100083,
     "kode": 479,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Svendborg",
     "geom": null
   },
@@ -585,6 +750,8 @@
     "dagi_id": 100084,
     "kode": 706,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Syddjurs",
     "geom": null
   },
@@ -592,6 +759,8 @@
     "dagi_id": 100085,
     "kode": 540,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Sønderborg",
     "geom": null
   },
@@ -599,6 +768,8 @@
     "dagi_id": 100086,
     "kode": 787,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Thisted",
     "geom": null
   },
@@ -606,6 +777,8 @@
     "dagi_id": 100087,
     "kode": 550,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Tønder",
     "geom": null
   },
@@ -613,6 +786,8 @@
     "dagi_id": 100088,
     "kode": 185,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Tårnby",
     "geom": null
   },
@@ -620,6 +795,8 @@
     "dagi_id": 100089,
     "kode": 187,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Vallensbæk",
     "geom": null
   },
@@ -627,6 +804,8 @@
     "dagi_id": 100090,
     "kode": 573,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Varde",
     "geom": null
   },
@@ -634,6 +813,8 @@
     "dagi_id": 100091,
     "kode": 575,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Vejen",
     "geom": null
   },
@@ -641,6 +822,8 @@
     "dagi_id": 100092,
     "kode": 630,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Vejle",
     "geom": null
   },
@@ -648,6 +831,8 @@
     "dagi_id": 100093,
     "kode": 820,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Vesthimmerland",
     "geom": null
   },
@@ -655,6 +840,8 @@
     "dagi_id": 100094,
     "kode": 791,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Viborg",
     "geom": null
   },
@@ -662,6 +849,8 @@
     "dagi_id": 100095,
     "kode": 390,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Vordingborg",
     "geom": null
   },
@@ -669,6 +858,8 @@
     "dagi_id": 100096,
     "kode": 492,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Ærø",
     "geom": null
   },
@@ -676,6 +867,8 @@
     "dagi_id": 100097,
     "kode": 580,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Aabenraa",
     "geom": null
   },
@@ -683,6 +876,8 @@
     "dagi_id": 100098,
     "kode": 851,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
+
     "navn": "Aalborg",
     "geom": null
   },
@@ -690,6 +885,7 @@
     "dagi_id": 100099,
     "kode": 751,
     "udenforkommuneinddeling": false,
+    "regionskode": 1084,
     "navn": "Aarhus",
     "geom": null
   },

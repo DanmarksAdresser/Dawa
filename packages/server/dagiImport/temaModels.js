@@ -12,8 +12,7 @@ const defaultSqlType = {
 const defaultSchema = (type, nullable) => {
   if (nullable) {
     return {type: [type, 'null']};
-  }
-  else {
+  } else {
     return {type};
   }
 };
@@ -227,7 +226,8 @@ exports.modelList = [{
       type: 'string',
       sqlType: 'SMALLINT',
       nullable: true,
-      description: 'Opstillingskredsens nummer.'
+      description: 'Opstillingskredsens nummer.',
+      formatter: numberToString
     },
     {
       name: 'kode',
@@ -249,14 +249,16 @@ exports.modelList = [{
       type: 'string',
       sqlType: 'SMALLINT',
       nullable: true,
-      description: 'Valgkredsnummer. Unikt indenfor storkredsen.'
+      description: 'Valgkredsnummer. Unikt indenfor storkredsen.',
+      formatter: numberToString
     },
     {
       name: 'storkredsnummer',
       type: 'string',
       sqlType: 'SMALLINT',
       nullable: true,
-      description: 'Nummeret på storkredsen, som opstillingskredsen tilhører.'
+      description: 'Nummeret på storkredsen, som opstillingskredsen tilhører.',
+      formatter: numberToString
     },
     {
       name: 'kredskommunekode',
@@ -475,7 +477,7 @@ exports.modelList = [{
         formatter: numberToString,
         description: 'DAGI id for opstillingskredsen, som afstemningsområdet tilhører'
       }
-      ],
+    ],
     tilknytningKey: ['kommunekode', 'afstemningsområdenummer'],
     tilknytningTable: 'afstemningsomraadetilknytninger',
     useNearestForAdgangsadresseMapping: true,
@@ -639,6 +641,10 @@ exports.toTableModel = temaModel => {
         distinctClause: geomDistinctClause
       },
       {
+        name: 'geom_blobref',
+        offloads: 'geom'
+      },
+      {
         name: 'bbox',
         derive: table => `st_envelope(${table}.geom)`
       }, {
@@ -675,7 +681,7 @@ exports.toTilknytningMaterialization = temaModel => {
 
 exports.toReplikeringModel = temaModel => {
   return {
-    key: [temaModel.primaryKey],
+    key: temaModel.primaryKey,
     attributes: [{
       name: 'ændret',
       type: 'string',
@@ -694,9 +700,13 @@ exports.toReplikeringModel = temaModel => {
       },
       description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.'
     }, {
+      name: 'visueltcenter',
+      type: 'geometry',
+      description: 'Geometriens visuelle center. Kan f.eks. bruges til at placere en label for geometrien på at kort.',
+      nullable: true
+    }, {
       name: 'bbox',
-
-      type: 'bbox',
+      type: 'geometry',
       schema: {
         minItems: 4,
         maxItems: 4,
@@ -704,9 +714,16 @@ exports.toReplikeringModel = temaModel => {
           type: 'number'
         }
       },
+      nullable: true,
       description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
         De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
         koordinaterne for bounding boxens nordøstlige hjørne.`
+    }, {
+      name: 'geometri',
+      type: 'geometry',
+      nullable: true,
+      offloaded: true,
+      description: `${temaModel.singularSpecific}s geometri.`
     },
       ...temaModel.fields.map(field => {
         return {
@@ -720,6 +737,22 @@ exports.toReplikeringModel = temaModel => {
   }
 
 };
+
+exports.toReplikeringBinding = temaModel => {
+  return {
+    table: temaModel.table || temaModel.plural,
+    attributes: [
+      bindingTypes.timestamp({attrName: 'ændret'}),
+      bindingTypes.timestamp({attrName: 'geo_ændret'}),
+      bindingTypes.column({attrName: 'geo_version'}),
+      bindingTypes.geometry({attrName: 'visueltcenter'}),
+      bindingTypes.geometry({attrName: 'bbox'}),
+      bindingTypes.offloadedGeometry({attrName: 'geometri', column: 'geom'}),
+      ...temaModel.fields.map(field => bindingTypes.legacy({attrName: field.name, formatter: field.formatter}))
+    ]
+  }
+};
+
 exports.toReplikeringTilknytningModel = temaModel => {
   const adgAdrAttr = {
     name: 'adgangsadresseid',

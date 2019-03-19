@@ -26,8 +26,6 @@ module.exports = (client, txid, temaNames, featureMappings,
   for(let tema of temaNames) {
 
     const temaModel = temaModels.modelMap[tema];
-    // Vi gemmer ikke historik på temaer.
-    yield client.query(`DELETE FROM ${temaModel.table}_changes`);
     verifyMaxChanges(context, temaModel, maxChanges);
   }
 });

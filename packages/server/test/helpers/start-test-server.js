@@ -18,6 +18,6 @@ module.exports = () => new Promise((resolve) => {
   server_process.on('message', msg => {
     setTimeout(() => {
       resolve(server_process);
-    }, 1000);
+    }, 2000);
   });
 });

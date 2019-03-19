@@ -191,6 +191,7 @@ for(let [entityName, binding] of Object.entries( darReplikeringModels.historyRep
 }
 
 for (let temaModel of temaModels.modelList) {
+  unnormalizedBindings[temaModel.entity || temaModel.singular] = temaModels.toReplikeringBinding(temaModel);
   unnormalizedBindings[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningDbBinding(temaModel);
 }
 

@@ -616,7 +616,7 @@ describe('Stable API', () => {
       json: {
         nestet: [{
             params: {
-              nummer: '99'
+              kode: '99'
             },
         value: {
           "href": "http://dawa/opstillingskredse/99",
@@ -670,7 +670,7 @@ describe('Stable API', () => {
     :
       [{
         params: {
-          nummer: '99'
+          kode: '99'
         },
         value: {
           "dagi_id": "100104",
@@ -977,7 +977,11 @@ describe('Stable API', () => {
             "navn": "Bolbro",
             "href": "http://dawa/sogne/7776"
           },
-          "region": null,
+          "region": {
+            "href": "http://dawa/regioner/1084",
+            "kode": "1084",
+            "navn": "Region test"
+          },
           "retskreds": {
             "kode": "0099",
             "navn": "retskreds test",
@@ -1082,8 +1086,8 @@ describe('Stable API', () => {
             "ddkn_m100": "100m_61395_5843",
             "ddkn_km1": "1km_6139_584",
             "ddkn_km10": "10km_613_58",
-            "regionskode": null,
-            "regionsnavn": null,
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
             "jordstykke_ejerlavkode": null,
             "jordstykke_matrikelnr": null,
             "jordstykke_esrejendomsnr": null,
@@ -1175,8 +1179,8 @@ describe('Stable API', () => {
             "ddkn_m100": "100m_61587_6852",
             "ddkn_km1": "1km_6158_685",
             "ddkn_km10": "10km_615_68",
-            "regionskode": null,
-            "regionsnavn": null,
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
             "jordstykke_ejerlavkode": 60851,
             "jordstykke_matrikelnr": "1a",
             "jordstykke_esrejendomsnr": "8571",
@@ -1330,7 +1334,11 @@ describe('Stable API', () => {
               "navn": "Bolbro",
               "href": "http://dawa/sogne/7776"
             },
-            "region": null,
+            "region": {
+              "href": "http://dawa/regioner/1084",
+              "kode": "1084",
+              "navn": "Region test"
+            },
             "retskreds": {
               "kode": "0099",
               "navn": "retskreds test",
@@ -1444,8 +1452,8 @@ describe('Stable API', () => {
             "adgangsadresse_ændret": "2018-07-04T18:00:00.000",
             "adgangsadresse_nedlagt": null,
             "adgangsadresse_ikrafttrædelse": "2000-02-05T06:08:50.000",
-            "regionskode": null,
-            "regionsnavn": null,
+            "regionskode": "1084",
+            "regionsnavn": "Region test",
             "jordstykke_ejerlavnavn": null,
             "jordstykke_ejerlavkode": null,
             "jordstykke_matrikelnr": null,

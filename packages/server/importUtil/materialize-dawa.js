@@ -4,6 +4,7 @@ const temaModels = require('../dagiImport/temaModels');
 const dar10TableModels = require('../dar10/dar10TableModels');
 const replikeringDataModel = require('../apiSpecification/replikering/datamodel');
 
+const temaTableNames = temaModels.modelList.map(model => model.table || model.plural);
 const tilknytningTableNames =
   [...temaModels.modelList.filter(model => !model.withoutTilknytninger).map(model => model.tilknytningTable),
     'jordstykker_adgadr',
@@ -22,9 +23,11 @@ const dawaBaseTableNames = ['vejstykker', 'vejpunkter', 'navngivenvej', 'postnum
 const orderedTableNames = [...dar10HistoryTableNames,
   ...dar10currentTableTableNames,
   ...dawaBaseTableNames,
+  ...temaTableNames,
   ...tilknytningTableNames];
 
-assert(orderedTableNames.length === Object.keys(replikeringDataModel).length);
+assert(orderedTableNames.length === Object.keys(replikeringDataModel).length,
+  `there was ${orderedTableNames.length} ordered tables, but ${Object.keys(replikeringDataModel).length}`);
 
 const orderedTableModels = orderedTableNames.map(tableName => {
   assert(schemaModel.tables[tableName], 'table model for ' + tableName);

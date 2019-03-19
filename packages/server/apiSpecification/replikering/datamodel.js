@@ -830,6 +830,7 @@ module.exports = {
 };
 
 for (let temaModel of temaModels.modelList) {
+  module.exports[temaModel.entity || temaModel.singular] = temaModels.toReplikeringModel(temaModel);
   if(!temaModel.withoutTilknytninger) {
     module.exports[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningModel(temaModel);
   }
