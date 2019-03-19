@@ -316,6 +316,33 @@ module.exports = {
         name: 'ændret',
         type: 'timestamp',
         description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører geometrien (se felterne geo_ændret og geo_version).'
+      },
+      {
+        name: 'visueltcenter',
+        type: 'geometry',
+        description: 'Ejerlavets visuelle center. Kan f.eks. bruges til at placere en label for ejerlavet på at kort.',
+        nullable: true
+      }, {
+        name: 'bbox',
+        type: 'geometry',
+        schema: {
+          minItems: 4,
+          maxItems: 4,
+          items: {
+            type: 'number'
+          }
+        },
+        nullable: true,
+        description: `Ejerlavets bounding box, dvs. det mindste rectangel som indeholder geometrien. 
+        Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne.`
+      }, {
+        name: 'geometri',
+        type: 'geometry',
+        nullable: true,
+        offloaded: true,
+        description: `Ejerlavets geometri.`
       }
       ]
   },

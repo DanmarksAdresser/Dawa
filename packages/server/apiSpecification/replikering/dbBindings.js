@@ -75,7 +75,11 @@ const unnormalizedBindings = {
     path: '/replikering/ejerlav',
     table: 'ejerlav',
     legacyResource: true,
-    attributes: []
+    attributes: [
+      types.geometry({attrName: 'visueltcenter'}),
+      types.geometry({attrName: 'bbox'}),
+      types.offloadedGeometry({attrName: 'geometri', column: 'geom'})
+    ]
   },
   bygning: {
     table: 'bygninger',

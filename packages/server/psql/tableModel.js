@@ -222,6 +222,9 @@ const ejerlav = {
     name: 'geom',
     distinctClause: geomDistinctClause
   }, {
+    name: 'geom_blobref',
+    offloads: 'geom'
+  }, {
     name: 'bbox',
     derive: table => `st_envelope(${table}.geom)`
   }, {
