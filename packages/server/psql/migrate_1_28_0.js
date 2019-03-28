@@ -6,15 +6,6 @@ const fs = require('fs');
 const runConfigured = require('@dawadk/common/src/cli/run-configured');
 const proddb = require('./proddb');
 const temaModels = require('../dagiImport/temaModels').modelList;
-const schema = {
-  database_url: {
-    doc: "URL for databaseforbindelse",
-    format: 'string',
-    default: null,
-    cli: true,
-    required: true
-  }
-};
 const configHolder = require('@dawadk/common/src/config/holder');
 const { createS3 } = require('@dawadk/import-util/src/s3-util');
 const {uploadToS3} = require('@dawadk/import-util/src/s3-offload');
@@ -22,6 +13,20 @@ const {initChangeTable} = require('@dawadk/import-util/src/table-diff');
 const { name } = require('@dawadk/import-util/src/table-diff-protocol');
 const { withImportTransaction } = require('../importUtil/transaction-util');
 const tableSchema = require('./tableModel');
+
+
+const schema = configHolder.mergeConfigSchemas([
+  {
+    database_url: {
+      doc: "URL for databaseforbindelse",
+      format: 'string',
+      default: null,
+      cli: true,
+      required: true
+    }
+  },
+  require('@dawadk/import-util/src/config/schemas/s3-offload-import-schema')
+]);
 
 const migrateS3Offloaded = (client, txid, tableModel) => go(function*() {
   const config = configHolder.getConfig();
@@ -42,8 +47,7 @@ const migrateS3Offloaded = (client, txid, tableModel) => go(function*() {
   // update blobref table, so we can look up a blobref
   yield client.query(`INSERT INTO blobref(blobid, txid, entity, columnName) 
 (SELECT geom_blobref, $1, $2, $3 
-FROM ${table} where txid = $1 
-                                 and geom_blobref is not null)`,
+FROM ${table} where geom_blobref is not null)`,
     [txid, tableModel.entity, 'geom']);
 
   // get the geometries from the db so we can upload them to S3. For now, we keep simple and do not
@@ -62,14 +66,14 @@ FROM ${table} where txid = $1
   yield initChangeTable(client, txid, tableModel);
 });
 
-runConfigured(schema, config => go(function*() {
+runConfigured(schema, [],config => go(function*() {
   proddb.init({
     connString: config.get('database_url'),
     pooled: false
   });
 
   yield proddb.withTransaction('READ_WRITE', client => go(function*() {
-    yield client.query(fs.readFileSync(require.resolve('./schema/tables/blobref.sql')));
+    yield client.query(fs.readFileSync(require.resolve('./schema/tables/blobref.sql'), {encoding: 'utf8'}));
     const offloadedTables = ['vejmidter', 'ejerlav', 'steder', ...temaModels.map(tema => tema.table)];
     for(let table of offloadedTables) {
       yield client.query(`
