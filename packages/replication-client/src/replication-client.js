@@ -1,5 +1,8 @@
 #!/usr/bin/env node
-
+const Promise = require('bluebird');
+Promise.config({
+  longStackTraces: true
+});
 const {go} = require('ts-csp');
 const {parseCommands} = require('@dawadk/common/src/cli/commander-wrapper');
 const databasePools = require('@dawadk/common/src/postgres/database-pools');

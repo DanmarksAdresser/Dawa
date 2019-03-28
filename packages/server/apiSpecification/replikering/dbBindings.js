@@ -166,6 +166,14 @@ const unnormalizedBindings = {
       types.localTimestamp({attrName: 'ændret', column: 'aendret'})
     ]
   },
+  vejmidte: {
+    table: 'vejmidter',
+    attributes: [
+      types.kode4({attrName: 'kommunekode'}),
+      types.kode4({attrName: 'vejkode', column: 'kode'}),
+      types.offloadedGeometry({attrName: 'geometri', column: 'geom'})
+    ]
+  },
   vejstykkepostnummerrelation: {
     path: '/replikering/vejstykkepostnummerrelationer',
     table: 'vejstykkerpostnumremat',
@@ -182,6 +190,16 @@ const unnormalizedBindings = {
     legacyResource: true,
     attributes: [
       types.kode4({attrName: 'nr'})
+    ]
+  },
+  brofasthed: {
+    table: 'brofasthed',
+    attributes: []
+  },
+  ikke_brofast_husnummer: {
+    table: 'ikke_brofaste_adresser',
+    attributes: [
+      types.column({attrName: 'husnummerid', column: 'adgangsadresseid'})
     ]
   }
 };

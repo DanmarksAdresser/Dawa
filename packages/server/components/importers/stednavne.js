@@ -12,11 +12,10 @@ const stederTableModel = tableModel.tables.steder;
 const stednavneTableModel = tableModel.tables.stednavne;
 
 const {
-  refreshSubdividedTable,
-  updateGeometricFields,
-  computeVisualCenter
+  refreshSubdividedTable
 } = require('../../importUtil/geometryImport');
 
+const { computeVisualCenter } = require('@dawadk/import-util/src/visual-center');
 
 const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield client.query('create temp table fetch_stednavne_raw(id uuid, hovedtype text, undertype text, navn text, navnestatus text, brugsprioritet text, indbyggerantal integer, bebyggelseskode integer, visueltcenter text, geomjson text)');
@@ -61,12 +60,11 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   yield client.query(`INSERT INTO fetch_stednavne(${stednavneColumns.join(',')}) (
   SELECT distinct on (id,navn) id, navn, navnestatus, brugsprioritet FROM fetch_stednavne_raw where brugsprioritet='sekundær')`);
 
-  yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel, stednavneColumns);
+  yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel);
   yield tableDiffNg.applyChanges(client, txid, stednavneTableModel);
 
-  yield tableDiffNg.computeDifferences(client, txid, `fetch_steder`, stederTableModel, stederColumns);
+  yield tableDiffNg.computeDifferences(client, txid, `fetch_steder`, stederTableModel);
   yield client.query('analyze stednavne; analyze stednavne_changes; analyze steder; analyze steder_changes');
-  yield updateGeometricFields(client, txid, stederTableModel);
   yield tableDiffNg.applyChanges(client, txid, stederTableModel);
   yield refreshSubdividedTable(client, 'steder', 'steder_divided', ['id'], true);
   yield client.query('drop table fetch_stednavne_raw; drop table fetch_stednavne; drop table fetch_steder; analyze steder_divided');

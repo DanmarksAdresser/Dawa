@@ -1,7 +1,6 @@
 "use strict";
 
 const { go } = require('ts-csp');
-const path = require('path');
 const cliParameterParsing = require('@dawadk/common/src/cli/cli-parameter-parsing');
 const initialization = require('./initialization');
 const proddb = require('./proddb');
@@ -16,8 +15,7 @@ cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, op
     connString: options.pgConnectionUrl,
     pooled: false
   });
-  const scriptDir = path.join(__dirname, 'schema');
   proddb.withTransaction('READ_WRITE',  client => go(function*() {
-    yield initialization.loadSchemas(client, scriptDir);
+    yield initialization.initializeSchema(client);
   })).done();
 });

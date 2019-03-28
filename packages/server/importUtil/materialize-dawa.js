@@ -13,11 +13,11 @@ const tilknytningTableNames =
 
 const dar10HistoryTableNames = Object.values(dar10TableModels.historyTableModels).map(model => model.table);
 const dar10currentTableTableNames = Object.values(dar10TableModels.currentTableModels).map(model => model.table);
-const dawaBaseTableNames = ['vejstykker', 'vejpunkter', 'navngivenvej', 'postnumre', 'jordstykker', 'bygninger', 'ejerlav',
+const dawaBaseTableNames = ['vejstykker', 'vejmidter', 'vejpunkter', 'navngivenvej', 'postnumre', 'jordstykker', 'bygninger', 'ejerlav',
   'hoejder',
   'adgangsadresser',
   'enhedsadresser',
-  'vejstykkerpostnumremat', 'navngivenvej_postnummer', 'steder'];
+  'vejstykkerpostnumremat', 'navngivenvej_postnummer', 'steder', 'brofasthed', 'ikke_brofaste_adresser'];
 
 
 const orderedTableNames = [...dar10HistoryTableNames,

@@ -13,9 +13,8 @@ const logger = require('@dawadk/common/src/logger').forCategory('matrikelImport'
 const {streamArrayToTable} = require('@dawadk/import-util/src/postgres-streaming');
 const tableSchema = require('../../psql/tableModel');
 const {
-  updateGeometricFields,
-  computeVisualCenters,
-} = require('../../importUtil/geometryImport');
+  name
+} = require('@dawadk/import-util/src/table-diff-protocol');
 
 
 const jordstykkeColumns = ['ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'kommunekode', 'sognekode',
@@ -95,8 +94,8 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
   });
   yield streamEjerlavToTable(client, ejerlav, 'desired_ejerlav');
   yield streamJordstykkerToTable(client, jordstykker, 'desired_jordstykker');
-  const allJordstykkerColumns = jordstykkeTableModel.columns.map(column => column.name);
-  const allEjerlavColumns = ejerlavTableModel.columns.map(column => column.name);
+  const allJordstykkerColumns = jordstykkeTableModel.columns.map(column => name(column));
+  const allEjerlavColumns = ejerlavTableModel.columns.map(column => name(column));
   yield client.query(`INSERT INTO actual_jordstykker(${allJordstykkerColumns.join(', ')}) 
   (SELECT ${allJordstykkerColumns.join(', ')} FROM jordstykker WHERE ejerlavkode = $1)`,
     [ejerlavkode]);
@@ -124,12 +123,8 @@ const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() 
   }
   yield client.query(`alter table desired_jordstykker alter column geom type geometry(polygon, 25832) using st_geomfromgml(geom, 25832)`);
   yield client.query(`alter table desired_ejerlav alter column geom type geometry(multipolygon, 25832) using st_multi(st_geomfromgml(geom, 25832))`);
-  yield tableDiffNg.computeDifferencesView(client, txid, 'desired_jordstykker', 'actual_jordstykker', jordstykkeTableModel, [...jordstykkeColumns, 'geom']);
-  yield tableDiffNg.computeDifferencesView(client, txid, 'desired_ejerlav', 'actual_ejerlav', ejerlavTableModel, [...ejerlavColumns, 'geom']);
-  yield updateGeometricFields(client, txid, jordstykkeTableModel);
-  yield updateGeometricFields(client, txid, ejerlavTableModel);
-  yield computeVisualCenters(client, txid, jordstykkeTableModel);
-  yield computeVisualCenters(client, txid, ejerlavTableModel);
+  yield tableDiffNg.computeDifferencesView(client, txid, 'desired_jordstykker', 'actual_jordstykker', jordstykkeTableModel);
+  yield tableDiffNg.computeDifferencesView(client, txid, 'desired_ejerlav', 'actual_ejerlav', ejerlavTableModel);
   yield tableDiffNg.applyChanges(client, txid, jordstykkeTableModel);
   yield tableDiffNg.applyChanges(client, txid, ejerlavTableModel);
   yield client.query('drop table desired_jordstykker; drop table desired_ejerlav; drop table actual_ejerlav; drop table actual_jordstykker; analyze jordstykker; analyze jordstykker_changes;');

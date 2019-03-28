@@ -3,11 +3,12 @@
 const { go } = require('ts-csp');
 const _ = require('underscore');
 const schemaModel = require('../psql/tableModel');
-const { columnsEqualClause } = require('@dawadk/common/src/postgres/sql-util')
+const { columnsEqualClause } = require('@dawadk/common/src/postgres/sql-util');
+const { name, distinctClause } = require('@dawadk/import-util/src/table-diff-protocol');
 const logger = require('@dawadk/common/src/logger').forCategory('inspect');
 
 const inspectInsertOrUpdate = (client, txid, tableModel, operation) => go(function*() {
-  const selectList = tableModel.columns.map(column => `${column.name}::text`).join(',');
+  const selectList = tableModel.columns.map(column => `${name(column)}::text`).join(',');
   const result =  yield client.queryRows(`select ${selectList} from ${tableModel.table}_changes
   WHERE txid = $1 and operation = $2 limit 100`, [txid, operation]);
   return result.map(row => {
@@ -20,8 +21,8 @@ const inspectInsertOrUpdate = (client, txid, tableModel, operation) => go(functi
 });
 
 const inspectUpdates = (client, txid, tableModel) => go(function*() {
-  const beforeSelectList = tableModel.columns.map(column => `c2.${column.name}::text as ${column.name}_before`).join(',');
-  const afterSelectList = tableModel.columns.map(column => `c1.${column.name}::text as ${column.name}_after`).join(',');
+  const beforeSelectList = tableModel.columns.map(column => `c2.${name(column)}::text as ${name(column)}_before`).join(',');
+  const afterSelectList = tableModel.columns.map(column => `c1.${name(column)}::text as ${name(column)}_after`).join(',');
   const sql = `select ${beforeSelectList}, ${afterSelectList} from ${tableModel.table}_changes c1
 left join lateral (
   select * from ${tableModel.table}_changes c2
@@ -37,10 +38,10 @@ where c1.txid = ${txid} and c1.operation = 'update' limit 100`;
     }, {});
     const mapRowToChanges = row => {
       return tableModel.columns.reduce((memo, column) => {
-        const before = row[`${column.name}_before`];
-        const after = row[`${column.name}_after`];
+        const before = row[`${name(column)}_before`];
+        const after = row[`${name(column)}_after`];
         if( before !== after) {
-          memo.push({column: column.name, before, after});
+          memo.push({column: name(column), before, after});
         }
         return memo;
       }, []);
@@ -54,10 +55,10 @@ where c1.txid = ${txid} and c1.operation = 'update' limit 100`;
 const inspectAggregated = (client, txid, tableModel) => go(function*() {
   logger.info('inspecting ' + tableModel.table);
   const clauses = tableModel.columns.map(column => {
-    const beforeCol = `c2.${column.name}`;
-    const afterCol = `c1.${column.name}`;
-    const distinctClause = column.distinctClause ? column.distinctClause(beforeCol, afterCol) : `${beforeCol} is distinct from ${afterCol}`;
-    return `count(case when ${distinctClause} then 1 else null end)::integer as ${column.name}`;
+    const beforeCol = `c2.${name(column)}`;
+    const afterCol = `c1.${name(column)}`;
+    const distinctClauseText = distinctClause(column, beforeCol, afterCol);
+    return `count(case when ${distinctClauseText} then 1 else null end)::integer as ${name(column)}`;
   });
   const updatesSql = `SELECT ${clauses.join(',')}, count(*)::integer as total FROM ${tableModel.table}_changes c1
   LEFT JOIN LATERAL (

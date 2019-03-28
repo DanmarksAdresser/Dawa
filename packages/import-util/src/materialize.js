@@ -2,12 +2,12 @@
 
 const {assert} = require('chai');
 const {go} = require('ts-csp');
-const _ = require('underscore');
 
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 const {
-  computeInsertsSubset, computeUpdatesSubset, computeDeletesSubset, applyChanges,
-  initializeFromScratch, computeDifferences, applyCurrentTableToChangeTable
+  applyChanges,
+  initializeFromScratch, computeDifferences, applyCurrentTableToChangeTable,
+  computeDifferencesSubset
 } = require('@dawadk/import-util/src/table-diff');
 
 
@@ -70,39 +70,13 @@ const createChangeTable = (client, srcTableName) => go(function* () {
     `CREATE TABLE ${changeTableName} as (SELECT null::integer as txid, null::integer as changeid, null::operation_type as operation, null::boolean as public, ${srcTableName}.* FROM ${srcTableName} WHERE false);
      ALTER TABLE ${changeTableName} ALTER COLUMN txid SET NOT NULL;
      ALTER TABLE ${changeTableName} ALTER COLUMN operation SET NOT NULL;
-     ALTER TABLE ${changeTableName} ALTER COLUMN public SET NOT NULL;
      CREATE INDEX ON ${changeTableName}(txid, operation);
      CREATE INDEX ON ${changeTableName}(changeid, public)`);
 });
 
-const computeMaterializedColumns = (tableModel, materialization) => {
-  const excludedColumns = materialization.excludedColumns || [];
-  const allColumns = tableModel.columns.map(col => col.name);
-  return _.difference(allColumns, excludedColumns);
-};
-
-const computeInserts = (client, txid, tableModels, materialization) => {
-  const tableModel = tableModels[materialization.table];
-  const includedColumns = computeMaterializedColumns(tableModel, materialization);
-  return computeInsertsSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel, includedColumns);
-};
-
-const computeDeletes = (client, txid, tableModels, materialization) => {
-  const tableModel = tableModels[materialization.table];
-  return computeDeletesSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel);
-};
-
-
-const computeUpdates = (client, txid, tableModels, materialization) => {
-  const tableModel = tableModels[materialization.table];
-  const includedColumns = computeMaterializedColumns(tableModel, materialization);
-  return computeUpdatesSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel, includedColumns);
-};
-
 const computeChanges = (client, txid, tableModels, materialization) => go(function* () {
-  yield computeInserts(client, txid, tableModels, materialization);
-  yield computeUpdates(client, txid, tableModels, materialization);
-  yield computeDeletes(client, txid, tableModels, materialization);
+  const tableModel = tableModels[materialization.table];
+  yield computeDifferencesSubset(client, txid, materialization.view, `${tableModel.table}_dirty`, tableModel);
 });
 
 
@@ -138,9 +112,7 @@ const clearAndMaterialize = (client, txid, tablemodels, materialization) => go(f
 const recomputeMaterialization = (client, txid, tableModels, materialization) => go(function* () {
   yield client.query(`create temp table desired as (SELECT * FROM ${materialization.view})`);
   yield client.query(`ANALYZE desired`);
-  const tableModel = tableModels[materialization.table];
-  const includedColumns = computeMaterializedColumns(tableModel, materialization);
-  yield computeDifferences(client, txid, 'desired', tableModels[materialization.table], includedColumns);
+  yield computeDifferences(client, txid, 'desired', tableModels[materialization.table]);
   yield client.query(`analyze ${materialization.table}_changes`);
   yield client.query('DROP TABLE desired');
   yield applyChanges(client, txid, tableModels[materialization.table]);
@@ -167,9 +139,6 @@ const materializeWithoutEvents = (client, tableModels, materialization, columnNa
 module.exports = {
   computeDirty,
   createChangeTable,
-  computeInserts,
-  computeDeletes,
-  computeUpdates,
   computeChanges,
   materialize,
   clearAndMaterialize,

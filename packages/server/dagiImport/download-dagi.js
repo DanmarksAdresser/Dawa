@@ -93,7 +93,6 @@ const schema = {
     default: null,
     cli: true
   }
-
 };
 
 runConfigured(schema, [], config => go(function*() {

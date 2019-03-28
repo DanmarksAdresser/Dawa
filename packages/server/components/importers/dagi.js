@@ -10,7 +10,7 @@ const {streamArrayToTable, streamCsvToTable} = require('@dawadk/import-util/src/
 const tableDiffNg = require('@dawadk/import-util/src/table-diff');
 const tableSchema = require('../../psql/tableModel');
 
-const {updateSubdividedTable, updateGeometricFields, computeVisualCenters} = require('../../importUtil/geometryImport');
+const {updateSubdividedTable } = require('../../importUtil/geometryImport');
 
 const postProcess = {
   opstillingskreds: (client, table) => go(function* () {
@@ -128,9 +128,6 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
   for (let temaName of temaNames) {
     const temaModel = temaModels.modelMap[temaName];
     const tableModel = tableSchema.tables[temaModel.table];
-    const additionalFields = temaModel.fields;
-    const additionalFieldNames = additionalFields.map(field => field.name);
-    const fetchColumnNames = [...additionalFieldNames, 'geom'];
     yield storeTemaFn(client, temaModel, dataDir, filePrefix, 'desired');
     if (postProcess[temaName]) {
       yield postProcess[temaName](client, 'desired');
@@ -138,13 +135,8 @@ const importTemaer = (client, txid, temaNames, dataDir, filePrefix, maxChanges, 
 
 
     // Beregn ændringer til temaet
-    yield computeTemaDifferences(client, txid, 'desired', tableModel, fetchColumnNames);
+    yield computeTemaDifferences(client, txid, 'desired', tableModel);
     yield client.query(`DROP TABLE desired`);
-
-    // Opdater meta-felter (oprettet, ændret, geo_version, geo_ændret)
-    yield updateGeometricFields(client, txid, tableModel);
-
-    yield computeVisualCenters(client, txid, tableModel);
 
     yield tableDiffNg.applyChanges(client, txid, tableModel);
 

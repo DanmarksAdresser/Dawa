@@ -2,10 +2,11 @@
 
 const _ = require('underscore');
 const temaModels = require('../dagiImport/temaModels');
-const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
 const dar10TableModels = require('../dar10/dar10TableModels');
-
-const deriveNullableBbox = table => `CASE WHEN st_geometrytype(st_envelope(${table}.geom)) = 'ST_Polygon' THEN st_envelope(${table}.geom) ELSE null END`;
+const { geomColumns, geomColumn, tsvColumn, visueltCenterComputed, visueltCenterDerived,
+  visueltCenterFromSource, bboxColumn, preservedColumn, offloadedGeomColumn,
+  offloadedGeomBlobrefColumn} = require('@dawadk/import-util/src/common-columns');
+const { name } = require('@dawadk/import-util/src/table-diff-protocol');
 
 const vejstykker = {
   entity: 'vejstykke',
@@ -21,9 +22,9 @@ const vejstykker = {
     {
       name: 'oprettet'
     },
-    {
+    preservedColumn({
       name: 'aendret'
-    },
+    }),
     {
       name: 'vejnavn'
     },
@@ -39,6 +40,7 @@ const vejstykker = {
 
 const vejmidter = {
   table: 'vejmidter',
+  entity: 'vejmidte',
   primaryKey: ['kommunekode', 'kode'],
   columns: [
     {
@@ -47,12 +49,9 @@ const vejmidter = {
     {
       name: 'kode'
     },
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause
-    }
-    ]
-
+    offloadedGeomColumn({}),
+    offloadedGeomBlobrefColumn({})
+  ]
 };
 
 const navngivenvejkommunedel_mat = {
@@ -80,17 +79,10 @@ const navngivenvejkommunedel_mat = {
     {
       name: 'adresseringsnavn'
     },
-    {
-      name: 'tsv',
-      derive: (table) => {
-        return `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`;
-      }
-
-    },
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause
-    },
+    tsvColumn({
+      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`
+    }),
+    geomColumn({}),
     {
       name: 'navngivenvej_id'
     }]
@@ -116,13 +108,13 @@ const enhedsadresser = {
     name: 'doer'
   }, {
     name: 'objekttype'
-  }, {
+  }, preservedColumn({
     name: 'kilde'
-  }, {
+  }), preservedColumn({
     name: 'esdhreference'
-  }, {
+  }), preservedColumn({
     name: 'journalnummer'
-  }]
+  })]
 };
 
 const adgangsadresser = {
@@ -163,9 +155,9 @@ const adgangsadresser = {
     name: 'noejagtighed'
   }, {
     name: 'adgangspunktkilde'
-  }, {
+  }, preservedColumn({
     name: 'placering'
-  }, {
+  }), {
     name: 'tekniskstandard'
   }, {
     name: 'tekstretning',
@@ -174,13 +166,13 @@ const adgangsadresser = {
     name: 'adressepunktaendringsdato'
   }, {
     name: 'objekttype'
-  }, {
+  }, preservedColumn({
     name: 'husnummerkilde'
-  }, {
+  }), preservedColumn({
     name: 'esdhreference'
-  }, {
+  }), preservedColumn({
     name: 'journalnummer'
-  }, {
+  }), {
     name: 'hoejde'
   }, {
     name: 'navngivenvej_id'
@@ -203,33 +195,20 @@ const ejerlav = {
   entity: 'ejerlav',
   table: 'ejerlav',
   primaryKey: ['kode'],
-  columns: [{
-    name: 'kode'
-  }, {
-    name: 'navn'
-  }, {
-    name: 'ændret'
-  }, {
-    name: 'geo_ændret'
-  }, {
-    name: 'geo_version'
-  }, {
-    name: 'tsv',
-    public: false,
-    derive: (table) =>
-      `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
-  }, {
-    name: 'geom',
-    distinctClause: geomDistinctClause
-  }, {
-    name: 'geom_blobref',
-    offloads: 'geom'
-  }, {
-    name: 'bbox',
-    derive: table => `st_envelope(${table}.geom)`
-  }, {
-    name: 'visueltcenter'
-  }]
+  columns: [
+    {
+      name: 'kode'
+    },
+    {
+      name: 'navn'
+    },
+    ...geomColumns({offloaded: true}),
+    visueltCenterComputed({}),
+    tsvColumn({
+      deriveFn:
+        table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+    })
+  ]
 };
 
 const postnumre = {
@@ -240,12 +219,11 @@ const postnumre = {
     name: 'nr'
   }, {
     name: 'navn'
-  }, {
-    name: 'tsv',
-    public: false,
-    derive: (table) =>
+  },
+  tsvColumn({
+    deriveFn: (table) =>
       `to_tsvector('adresser', processForIndexing(coalesce(to_char(${table}.nr, '0000'), '') || ' ' || coalesce(${table}.navn, '')))`
-  }, {
+  }), {
     name: 'stormodtager'
   }]
 };
@@ -305,38 +283,15 @@ const navngivenvej_mat = {
     {name: 'beliggenhed_oprindelse_nøjagtighedsklasse'},
     {name: 'beliggenhed_oprindelse_registrering'},
     {name: 'beliggenhed_oprindelse_tekniskstandard'},
-    {
-      name: 'beliggenhed_vejnavnelinje',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'beliggenhed_vejnavneområde',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'beliggenhed_vejtilslutningspunkter',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'bbox',
-      derive: deriveNullableBbox
-    },
-    {
-      name: 'visueltcenter',
-      derive: table => `ST_ClosestPoint(${table}.geom, ST_Centroid(${table}.geom))`
-    },
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause,
-      public: false
-    },
-    {
-      name: 'tsv',
-      public: false,
-      derive: (table) => {
-        return `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`;
-      }
-    }
+    geomColumn({name: 'beliggenhed_vejnavnelinje'}),
+    geomColumn({name: 'beliggenhed_vejnavneområde'}),
+    geomColumn({name: 'beliggenhed_vejtilslutningspunkter'}),
+    geomColumn({}),
+    bboxColumn({}),
+    visueltCenterDerived({}),
+    tsvColumn({
+      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+    })
   ]
 };
 
@@ -350,8 +305,7 @@ const navngivenvej_postnummer = {
     {name: 'postnummer_id'},
     {name: 'postnr'},
     {
-      name: 'tekst',
-      public: false
+      name: 'tekst'
     }
   ]
 };
@@ -376,10 +330,9 @@ const stednavne = {
     {name: 'navn'},
     {name: 'navnestatus'},
     {name: 'brugsprioritet'},
-    {
-      name: 'tsv',
-      derive: table => `to_tsvector('adresser', ${table}.navn)`
-    },
+    tsvColumn({
+      deriveFn: table => `to_tsvector('adresser', ${table}.navn)`
+    })
   ]
 };
 
@@ -389,22 +342,16 @@ const bygninger = {
   primaryKey: ['id'],
   columns: [
     {name: 'id'},
+    {name: 'ændret'},
     {name: 'bygningstype'},
     {name: 'metode3d'},
     {name: 'målested'},
     {name: 'bbrbygning_id'},
     {name: 'synlig'},
     {name: 'overlap'},
-    {name: 'ændret'},
-    {name: 'visueltcenter'},
-    {
-      name: 'bbox',
-      derive: table => `st_envelope(${table}.geom)`
-    },
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause
-    }
+    geomColumn({}),
+    bboxColumn({}),
+    visueltCenterFromSource()
   ]
 };
 
@@ -436,42 +383,12 @@ const steder = {
   primaryKey: ['id'],
   columns: [
     {name: 'id'},
-    {name: 'ændret'},
-    {name: 'geo_version'},
-    {name: 'geo_ændret'},
     {name: 'hovedtype'},
     {name: 'undertype'},
     {name: 'bebyggelseskode'},
     {name: 'indbyggerantal'},
-    {
-      name: 'visueltcenter'
-    },
-    {
-      name: 'bbox',
-      derive: deriveNullableBbox
-    },
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause,
-    },
-    { name: 'geom_blobref',
-      offloads: 'geom'
-    }
-  ]
-};
-
-const steder_geom = {
-  table: 'steder_geom',
-  entity: 'stedgeometri',
-  primaryKey: ['id'],
-  columns: [
-    { name: 'id' },
-    { name: 'geom',
-      distinctClause: geomDistinctClause
-    },
-    {
-      name: 'geom_blobref'
-    }
+    ...geomColumns({offloaded: true}),
+    visueltCenterFromSource()
   ]
 };
 
@@ -498,8 +415,7 @@ const vejstykkerpostnumremat = {
     {name: 'vejkode'},
     {name: 'postnr'},
     {
-      name: 'tekst',
-      public: false
+      name: 'tekst'
     }
   ]
 };
@@ -511,26 +427,20 @@ const adgangansadresserMatFieldsNotCopiedFromAdgangsadresser = [
   'placering', 'esrejendomsnr'];
 
 const postnrOrStormodtagerTsVector = (nr, navn, stormodtagernr, stormodtagernavn) =>
-  `(${postnrTsVector(nr, navn)}::text || ' ' || ${postnrTsVector(stormodtagernr, stormodtagernavn)}::text)::tsvector`
+  `(${postnrTsVector(nr, navn)}::text || ' ' || ${postnrTsVector(stormodtagernr, stormodtagernavn)}::text)::tsvector`;
 const adgangsadresser_mat = {
   table: 'adgangsadresser_mat',
   primaryKey: ['id'],
   columns: [...adgangsadresser.columns.filter(col => !adgangansadresserMatFieldsNotCopiedFromAdgangsadresser.includes(col.name)),
     {name: 'status'},
-    {
-      name: 'tsv',
-      public: false,
-      derive: table =>
+    tsvColumn({
+      deriveFn: table =>
         `setweight(to_tsvector('adresser', processforindexing(${table}.vejnavn || ' ' || formatHusnr(${table}.husnr))), 'A') ||
          setweight(to_tsvector('adresser', processforindexing(COALESCE(${table}.supplerendebynavn, ''))), 'C') || 
          setweight(${postnrOrStormodtagerTsVector(`${table}.postnr`, `${table}.postnrnavn`, `${table}.stormodtagerpostnr`, `${table}.stormodtagerpostnrnavn`)}, 'D')`
-    },
-    {
-      name: 'geom',
-      public: false,
-      derive: table =>
-        `ST_SetSRID(ST_MakePoint(${table}.etrs89oest, ${table}.etrs89nord), 25832)`
-    },
+
+    }),
+    geomColumn({}),
     {name: 'vejnavn'},
     {name: 'adresseringsvejnavn'},
     {name: 'postnrnavn'},
@@ -551,8 +461,8 @@ const adresser_mat = {
   table: 'adresser_mat',
   primaryKey: ['id'],
   columns: [
-    ...enhedsadresser.columns.filter(col => !adresseMatFieldsNotCopiedFromEnhedsadresser.includes(col.name)),
-    ...adgangsadresser_mat.columns.filter(col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(col.name)),
+    ...enhedsadresser.columns.filter(col => !adresseMatFieldsNotCopiedFromEnhedsadresser.includes(name(col))),
+    ...adgangsadresser_mat.columns.filter(col => !adresseMatFieldsNotCopiedFromAdgangsadresserMat.includes(name(col))),
     {name: 'status'},
     {name: 'a_status'},
     {name: 'a_oprettet'},
@@ -560,16 +470,15 @@ const adresser_mat = {
     {name: 'a_ikraftfra'},
     {name: 'a_nedlagt'},
     {name: 'nedlagt'},
-    {name: 'geom', public: false},
-    {
-      name: 'tsv',
-      public: false,
-      derive: table =>
+    geomColumn({}),
+    tsvColumn({
+      deriveFn: table =>
         `setweight(to_tsvector('adresser', processforindexing(${table}.vejnavn || ' ' || formatHusnr(${table}.husnr))), 'A') ||
          setweight(to_tsvector('adresser', processforindexing(COALESCE(etage, '') ||' ' || COALESCE(doer, ''))), 'B') || 
          setweight(to_tsvector('adresser', processforindexing(COALESCE(${table}.supplerendebynavn, ''))), 'C') || 
          setweight(${postnrOrStormodtagerTsVector(`${table}.postnr`, `${table}.postnrnavn`, `${table}.stormodtagerpostnr`, `${table}.stormodtagerpostnrnavn`)}, 'D')`
-    }]
+
+    })]
 };
 
 const vejpunkter = {
@@ -582,67 +491,56 @@ const vejpunkter = {
     {name: 'kilde'},
     {name: 'noejagtighedsklasse'},
     {name: 'tekniskstandard'},
-    {name: 'geom'}
+    geomColumn({})
   ]
 };
 const jordstykker = {
   table: 'jordstykker',
   entity: 'jordstykke',
   primaryKey: ['ejerlavkode', 'matrikelnr'],
-  columns: [{
-    name: 'ejerlavkode'
-  }, {
+  columns: [
+    {
+      name: 'ejerlavkode'
+    }, {
       name: 'ejerlavnavn'
-  }, {
-    name: 'matrikelnr'
-  }, {
-    name: 'ændret'
-  }, {
-    name: 'geo_ændret'
-  }, {
-    name: 'geo_version'
-  }, {
-    name: 'kommunekode'
-  }, {
-    name: 'sognekode'
-  }, {
-    name: 'regionskode'
-  }, {
-    name: 'retskredskode'
-  }, {
-    name: 'esrejendomsnr'
-  }, {
-    name: 'udvidet_esrejendomsnr'
-  }, {
-    name: 'sfeejendomsnr'
-  }, {
-    name: 'geom',
-    distinctClause: geomDistinctClause
-  }, {
-    name: 'bbox',
-    derive: table => `st_envelope(${table}.geom)`
-  }, {
-    name: 'visueltcenter'
-  }, {
-    name: 'tsv',
-    derive: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table}.ejerlavkode))`
-  }, {
-    name: 'featureid'
-  }, {
-    name: 'moderjordstykke'
-  }, {
-    name: 'registreretareal'
-  }, {
-    name: 'arealberegningsmetode'
-  }, {
-    name: 'vejareal'
-  }, {
-    name: 'vejarealberegningsmetode'
-  }, {
-    name: 'vandarealberegningsmetode'
-  }, {
-    name: 'fælleslod'
-  }]
+    }, {
+      name: 'matrikelnr'
+    }, {
+      name: 'kommunekode'
+    }, {
+      name: 'sognekode'
+    }, {
+      name: 'regionskode'
+    }, {
+      name: 'retskredskode'
+    }, {
+      name: 'esrejendomsnr'
+    }, {
+      name: 'udvidet_esrejendomsnr'
+    }, {
+      name: 'sfeejendomsnr'
+    },
+    ...geomColumns({offloaded: false}),
+    visueltCenterComputed({}),
+    tsvColumn({
+      deriveFn: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table}.ejerlavkode))`
+    }), {
+      name: 'featureid'
+    }, {
+      name: 'moderjordstykke'
+    }, {
+      name: 'registreretareal'
+    }, {
+      name: 'arealberegningsmetode'
+    }, {
+      name: 'vejareal'
+    }, {
+      name: 'vejarealberegningsmetode'
+    }, {
+      name: 'vandarealberegningsmetode'
+    }, {
+      name: 'fælleslod'
+    }]
 };
 
 const jordstykker_adgadr = {
@@ -663,10 +561,10 @@ const supplerendebynavne_mat = {
     {
       name: 'navn'
     },
-    {
-      name: 'tsv',
-      derive: table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
-    }]
+    tsvColumn({
+      deriveFn: table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+    })
+  ]
 };
 
 const supplerendebynavn_postnr_mat = {
@@ -768,7 +666,8 @@ const brofasthed = {
 };
 const ikke_brofaste_adresser = {
   table: 'ikke_brofaste_adresser',
-  primaryKey: ['adgangsadresseid', 'stedid'],
+  entity: 'ikke_brofast_husnummer',
+  primaryKey: ['adgangsadresseid'],
   columns: [
     { name: 'adgangsadresseid'},
     { name: 'stedid'}
@@ -826,7 +725,6 @@ exports.tables = Object.assign({
     vejstykker,
     vejstykkerpostnumremat,
     steder,
-    steder_geom,
     stednavne,
     stedtilknytninger,
     bygninger,
@@ -927,8 +825,6 @@ exports.materializations = Object.assign({
   adgangsadresser: {
     table: 'adgangsadresser',
     view: 'adgangsadresser_view',
-    excludedColumns: ['placering',
-      'husnummerkilde', 'esdhreference', 'journalnummer'],
     dependents: [
       {
         table: 'adgangsadresser_mat',
@@ -966,8 +862,7 @@ exports.materializations = Object.assign({
     dependents: [ {
       table: 'adresser_mat',
       columns: ['id']
-    }],
-    excludedColumns: ['esdhreference', 'journalnummer', 'kilde'],
+    }]
 
   },
   jordstykker_adgadr: {
@@ -1107,13 +1002,11 @@ exports.materializations = Object.assign({
         table: 'hoejde_importer_resultater',
         columns: ['husnummerid']
       }
-    ],
-    excludedColumns: ['disableuntil']
+    ]
   },
   vejstykker:  {
     table: 'vejstykker',
     view: 'vejstykker_view',
-    excludedColumns: ['aendret'],
     dependents: [
       {
         table: 'navngivenvejkommunedel_mat',

@@ -9,7 +9,7 @@ const promisingStreamCombiner = require('@dawadk/import-util/src/promising-strea
 const tableDiffNg = require('@dawadk/import-util/src/table-diff');
 const tableModel = require('../../psql/tableModel');
 const bygningerTableModel = tableModel.tables.bygninger;
-const { computeVisualCenter } = require('../../importUtil/geometryImport');
+const { computeVisualCenter } = require('@dawadk/import-util/src/visual-center');
 
 const importBygningerFromStream = (client, txid, stream, maxChanges) => go(function*() {
   yield client.query('create temp table fetch_bygninger_raw(id bigint, bygningstype text, ændret timestamptz, metode3d text, målested text, bbrbygning_id uuid, synlig boolean, overlap boolean, visueltcenter text, geomjson text)');

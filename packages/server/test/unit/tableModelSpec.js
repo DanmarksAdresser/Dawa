@@ -1,5 +1,6 @@
 "use strict";
 
+const { name } = require('@dawadk/import-util/src/table-diff-protocol');
 const assert = require('chai').assert;
 const tableSchema = require('../../psql/tableModel');
 for(let tableName of Object.keys(tableSchema.tables)) {
@@ -11,7 +12,7 @@ for(let tableName of Object.keys(tableSchema.tables)) {
     assert.isArray(table.columns);
     for(let column of table.columns) {
       assert.isObject(column);
-      assert.isString(column.name);
+      assert.isString(name(column));
     }
   });
 }

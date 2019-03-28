@@ -4,8 +4,8 @@ const {go} = require('ts-csp');
 const _ = require('underscore');
 
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
-
-const allColumnNames = tableModel => tableModel.columns.map(col => col.name);
+const { name, distinctClause } = require('./table-diff-protocol');
+const allColumnNames = tableModel => tableModel.columns.map(name);
 
 const derivedColumnNames = tableModel => tableModel.columns.filter(col => !!col.derive).map(col => col.name);
 
@@ -114,26 +114,10 @@ const deriveColumnsForChange = (client, txid, tableModel) => go(function*() {
   yield deriveColumns(client, `${tableModel.table}_changes`, tableModel, additionalWhereClauses);
 });
 
-const makeSelectClause = (table, tableModel, columnNames) => {
-  return columnNames.map(columnName => {
-    const columnSpec = _.findWhere(tableModel.columns, {name: columnName});
-    if (columnSpec.derive) {
-      return `${columnSpec.derive(table)} as ${columnName}`
-    }
-    else {
-      return columnName;
-    }
-  }).join(', ');
-};
-
-
 const nonDerivedColumnNames = tableModel => _.difference(allColumnNames(tableModel), derivedColumnNames(tableModel));
 
 const columnsDistinctClause = (tableA, tableB, columns) =>
-  '(' + columns.map(column => column.distinctClause ?
-  column.distinctClause(`${tableA}.${column.name}`, `${tableB}.${column.name}`)
-  : `(${tableA}.${column.name} IS DISTINCT FROM ${tableB}.${column.name})`).join(' OR ') + ')';
-
+  '(' + columns.map(column => distinctClause(column, `${tableA}.${name(column)}`, `${tableB}.${name(column)}`)).join(') OR (') + ')';
 
 module.exports = {
   allColumnNames,
@@ -149,6 +133,5 @@ module.exports = {
   assignSequenceNumbers,
   publicColumnNames,
   publicNonKeyColumnNames,
-  makeSelectClause,
   columnsDistinctClause
 };

@@ -9,9 +9,7 @@ const testdb = require('@dawadk/test-util/src/testdb');
 const {
   computeDirty,
   createChangeTable,
-  computeInserts,
-  computeDeletes,
-  computeUpdates
+  computeChanges
 } = require('../src/materialize');
 
 const {
@@ -244,7 +242,7 @@ describe('View materialization', () => {
            VALUES(${txid}, 'insert', true, '${insertedId}', 1, 2)`);
         yield applyInserts(client, txid, tableModel.prim);
         yield computeDirty(client, txid, tableModel, testMaterialization);
-        yield computeInserts(client, txid, tableModel, testMaterialization);
+        yield computeChanges(client, txid, tableModel, testMaterialization);
         const result = yield client.queryRows('select * from primary_mat_changes');
         assert.strictEqual(result.length, 1);
         assert.strictEqual(result[0].txid, txid);
@@ -259,7 +257,7 @@ describe('View materialization', () => {
            VALUES(${txid}, 'delete', true, '${deletedId}', 1, 2)`);
         yield applyDeletes(client, txid, tableModel.prim);
         yield computeDirty(client, txid, tableModel, testMaterialization);
-        yield computeDeletes(client, txid, tableModel, testMaterialization);
+        yield computeChanges(client, txid, tableModel, testMaterialization);
         const result = yield client.queryRows('select * from primary_mat_changes');
         assert.strictEqual(result.length, 1);
         assert.strictEqual(result[0].txid, txid);
@@ -274,27 +272,13 @@ describe('View materialization', () => {
            VALUES(${txid}, 'update', true, '${updatedId}', 1, 2, 'foo')`);
         yield applyUpdates(client, txid, tableModel.prim);
         yield computeDirty(client, txid, tableModel, testMaterialization);
-        yield computeUpdates(client, txid, tableModel, testMaterialization);
+        yield computeChanges(client, txid, tableModel, testMaterialization);
         const result = yield client.queryRows('select * from primary_mat_changes');
         assert.strictEqual(result.length, 1);
         assert.strictEqual(result[0].txid, txid);
         assert.strictEqual(result[0].operation, 'update');
         assert.strictEqual(result[0].id, updatedId);
         assert.strictEqual(result[0].prim_name, 'foo');
-        assert.strictEqual(result[0].public, true);
-      }));
-
-      it('If an update only changes nonpublic fields, the change is marked as nonpublic', () => go(function*() {
-        const client = clientFn();
-        yield client.query(
-          `INSERT INTO secondary_changes(txid, operation, public, id, name) 
-           VALUES(${txid}, 'update', true, 10, 'sec_name_updated')`);
-        yield applyUpdates(client, txid, tableModel.secondary);
-        yield computeDirty(client, txid, tableModel, testMaterialization);
-        yield computeUpdates(client, txid, tableModel, testMaterialization);
-        const result = yield client.queryRows('select * from primary_mat_changes');
-        assert.strictEqual(result[0].public, false);
-        assert.strictEqual(result[0].sec_name2, 'sec_name_updated');
       }));
     });
   });

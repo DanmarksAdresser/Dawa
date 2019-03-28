@@ -4,11 +4,11 @@ const { assert } = require('chai');
 const { go } = require('ts-csp');
 const testdb = require('@dawadk/test-util/src/testdb');
 
-const { computeInserts, computeUpdates, computeDeletes, computeDifferences, applyChanges }  = require('../src/table-diff');
+const { computeInserts, computeUpdates, computeDeletes, computeDifferences, applyChanges, makeSelectClause }  = require('../src/table-diff');
+const { tsvColumn, geomColumns, visueltCenterDerived, ændretColumn} = require('../src/common-columns');
+const { fromSource } = require('../src/table-diff-protocol');
 const { withImportTransaction } = require('../src/transaction');
 
-// TODO Refactor metadata into shared module
-const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
 const ejerlavTableModel =  {
     entity: 'ejerlav',
     table: 'ejerlav',
@@ -17,34 +17,63 @@ const ejerlavTableModel =  {
         name: 'kode'
     }, {
         name: 'navn'
-    }, {
-        name: 'ændret'
-    }, {
-        name: 'geo_ændret'
-    }, {
-        name: 'geo_version'
-    }, {
-        name: 'tsv',
-        public: false,
-        derive: (table) =>
-            `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
-    }, {
-        name: 'geom',
-        distinctClause: geomDistinctClause
-    }, {
-        name: 'bbox',
-        derive: table => `st_envelope(${table}.geom)`
-    }, {
-        name: 'visueltcenter'
-    }]
+    },
+    tsvColumn({
+      deriveFn:
+      table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+    }),
+      ...geomColumns({offloaded: true})
+      ,
+      visueltCenterDerived({})]
 };
+
+describe('makeSelectClause', () => {
+  it('fromSource default is true', () => {
+    assert(fromSource({}));
+  });
+  it('Makes correct select clauses for derived column', () => {
+    const tableModel = {
+      columns: [
+        tsvColumn({
+          deriveFn:
+            table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+        })
+      ]
+    };
+    const clause = makeSelectClause('tab', tableModel);
+    assert.strictEqual(clause, `to_tsvector('adresser', processForIndexing(coalesce(tab.navn, ''))) as tsv`);
+  });
+
+  it('Makes correct select clauses for named columns', () => {
+    const tableModel = {
+      columns: [{
+        name: 'kode'
+      }, {
+        name: 'navn'
+      }]
+    };
+    const clause = makeSelectClause('tab', tableModel);
+    assert.strictEqual(clause, 'tab.kode, tab.navn');
+  });
+
+  it('Does not create select clauses for columns not from source', () => {
+    const tableModel = {
+      columns: [
+        ændretColumn()
+      ]
+    };
+    const clause = makeSelectClause('tab', tableModel);
+    assert.strictEqual(clause, '');
+  });
+});
+
 describe('tableDiffNg', () => {
   testdb.withTransactionEach('empty', (clientFn) => {
     it('Can compute inserts by diffing two tables', () => go(function*() {
       const client = clientFn();
       yield client.query(`INSERT INTO ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (1, 'foo', now(), now(), 1)`);
-      yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
-      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) VALUES (2, 'bar', now(), now(), 1)`);
+      yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select kode,navn,geom from ejerlav)`);
+      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn) VALUES (2, 'bar')`);
       const txid = 1;
       yield computeInserts(client, txid, 'fetch_ejerlav', ejerlavTableModel);
       const result = yield client.queryRows('select * from ejerlav_changes');
@@ -57,10 +86,10 @@ describe('tableDiffNg', () => {
 
     it('Can compute updates by diffing two tables', () => go(function*() {
       const client = clientFn();
-      yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
+      yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select kode,navn,geom from ejerlav)`);
 
-      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (1, 'foo', now(), now(), 1)`);
-      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) VALUES (2, 'bar', now(), now(), 1)`);
+      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
+      yield client.query(`INSERT INTO fetch_ejerlav(kode, navn) VALUES (2, 'bar')`);
       yield withImportTransaction(client, 'test', [ejerlavTableModel], txid => go(function*() {
         yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
         yield applyChanges(client, txid, ejerlavTableModel);
@@ -81,7 +110,7 @@ describe('tableDiffNg', () => {
     it('Can compute deletes by diffing two tables', () => go(function*() {
       const client = clientFn();
       yield client.query(`INSERT INTO ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (1, 'foo', now(), now(), 1)`);
-      yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
+      yield client.query(`CREATE TEMP TABLE fetch_ejerlav AS (select kode,navn,geom from ejerlav)`);
       yield client.query(`INSERT INTO ejerlav(kode, navn, ændret, geo_ændret, geo_version) VALUES (2, 'bar', now(), now(), 1)`);
       const txid = 1;
       yield computeDeletes(client, txid, 'fetch_ejerlav', ejerlavTableModel);
@@ -95,13 +124,13 @@ describe('tableDiffNg', () => {
 
     it('Can compute all differences by diffing two tables', () => go(function*() {
       const client = clientFn();
-      yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
+      yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select kode, navn, geom from ejerlav)`);
       // unmodified
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (1, 'foo', now(), now(), 1)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
       // updated
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (2, 'bar', now(), now(), 1)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (2, 'bar')`);
       // deleted
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (3, 'foobar', now(), now(), 1)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (3, 'foobar')`);
       yield withImportTransaction(client, 'test', [ejerlavTableModel], txid => go(function*() {
         yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
         yield applyChanges(client, txid, ejerlavTableModel);
@@ -110,7 +139,7 @@ describe('tableDiffNg', () => {
       yield client.queryBatched(`DELETE FROM fetch_ejerlav WHERE kode = 3`);
       yield client.queryBatched(`UPDATE fetch_ejerlav SET navn = 'baz' WHERE kode = 2`);
       // inserted
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) VALUES (4, 'foobaz', now(), now(), 1)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) VALUES (4, 'foobaz')`);
       yield withImportTransaction(client, 'test', [ejerlavTableModel], txid => go(function*() {
         yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
         const result = yield client.queryRows(`select * from ejerlav_changes  where txid = ${txid} order by kode`);
@@ -128,8 +157,8 @@ describe('tableDiffNg', () => {
 
     it('Will correctly generate changeids for multiple transactions', () => go(function*() {
       const client = clientFn();
-      yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select * from ejerlav)`);
-      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn, ændret, geo_ændret, geo_version) values (1, 'foo', now(), now(), 1)`);
+      yield client.queryBatched(`CREATE TEMP TABLE fetch_ejerlav AS (select kode,navn,geom from ejerlav)`);
+      yield client.queryBatched(`INSERT INTO fetch_ejerlav(kode, navn) values (1, 'foo')`);
       yield withImportTransaction(client, 'test', [ejerlavTableModel], txid => go(function*() {
         yield computeDifferences(client, txid, 'fetch_ejerlav', ejerlavTableModel);
         yield applyChanges(client, txid, ejerlavTableModel);

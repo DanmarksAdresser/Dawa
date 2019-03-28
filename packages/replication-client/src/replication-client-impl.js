@@ -1,6 +1,5 @@
 const _ = require('underscore');
 const {go, Channel, parallel} = require('ts-csp');
-const {comp, map} = require('transducers-js');
 
 const {copyStream} = require('@dawadk/import-util/src/postgres-streaming');
 const cspUtil = require('@dawadk/common/src/csp-util');
@@ -8,8 +7,10 @@ const defaultBindings = require('./default-bindings');
 const {csvStringify} = require('@dawadk/common/src/csv-stringify');
 const { selectList, columnsEqualClause } = require('@dawadk/common/src/postgres/sql-util');
 const tableDiff = require('@dawadk/import-util/src/table-diff');
-const {computeDifferences} = require('./table-diff');
+const {computeDifferences} = tableDiff;
 const log = require('./log');
+const request = require('request-promise');
+const {geomColumn} = require('@dawadk/import-util/src/common-columns');
 
 /**
  * Create a process which streams CSV from ch to the specified table
@@ -25,16 +26,21 @@ const createTempChangeTable = (client, replication_schema, bindingConf, tableNam
   ${bindingConf.table}.* from ${bindingConf.table} where false)`);
 
 
-const createMapper = (replikeringModel, entityConf, bindingConf) => obj => {
-  return entityConf.attributes.reduce((acc, attrName) => {
+const createMapper = (replikeringModel, entityConf, bindingConf) => obj => go(function*() {
+  const result = {};
+  for(let attrName of entityConf.attributes) {
     const replikeringAttrModel = _.findWhere(replikeringModel.attributes, {name: attrName});
+    let attrValue = obj[attrName];
+    if( attrValue && attrValue.$url) {
+      attrValue = yield request.get({url: attrValue.$url, json: true, gzip: true});
+    }
     const binding = Object.assign({}, defaultBindings[replikeringAttrModel.type], bindingConf.attributes[attrName]);
-    acc[binding.columnName] = binding.toCsv ? binding.toCsv(obj[attrName]) : obj[attrName];
-    return acc;
-  }, {});
-};
+    result[binding.columnName] = binding.toCsv ? binding.toCsv(attrValue) : attrValue;
+  }
+  return result;
+});
 
-const copyToTable = (client, src, xform, table, columnNames, batchSize) => {
+const copyToTable = (client, src, asyncMapper, table, columnNames, batchSize) => {
   const csvOptions = {
     delimiter: ';',
     quote: '"',
@@ -47,17 +53,19 @@ const copyToTable = (client, src, xform, table, columnNames, batchSize) => {
     columns: columnNames
   };
   const csvStringifyXf = csvStringify(csvOptions);
-  const dbCh = new Channel(0, comp(xform, csvStringifyXf));
+  const dbCh = new Channel(batchSize*2, csvStringifyXf);
   const dbProcess = chanToDb(client, dbCh, table, columnNames, batchSize);
-  const pipeProcess = cspUtil.pipe(src, dbCh, batchSize);
+  const pipeProcess = cspUtil.pipeMapAsync(src, dbCh, batchSize, asyncMapper);
   return parallel(dbProcess, pipeProcess);
 };
 
 const createEventMapper = (txid, replikeringModel, entityConf, bindingConf) => {
   const mapDataFn = createMapper(replikeringModel, entityConf, bindingConf);
-  return event => Object.assign(mapDataFn(event.data), {
-    txid: event.txid,
-    operation: event.operation
+  return event => go(function*() {
+    return Object.assign(yield mapDataFn(event.data), {
+      txid: event.txid,
+      operation: event.operation
+    });
   });
 };
 
@@ -65,15 +73,20 @@ const toTableModel = (replikeringModel, entityConf, bindingConf) => {
   return {
     table: bindingConf.table,
     primaryKey: replikeringModel.key,
+    noPublic: true,
     columns: entityConf.attributes.map(attrName => {
       const replikeringAttrModel = _.findWhere(replikeringModel.attributes, {name: attrName});
       const defaultBinding = defaultBindings[replikeringAttrModel.type];
       const attrBinding = Object.assign({}, defaultBinding, bindingConf.attributes[attrName]);
-      const column = {name: attrBinding.columnName};
-      if (defaultBinding.distinctClause) {
-        column.distinctClause = defaultBinding.distinctClause;
+      const columnName = attrBinding.columnName;
+      if(['point2d', 'geometry', 'geometry3d'].includes(replikeringAttrModel.type)) {
+        return geomColumn({name: columnName})
       }
-      return column;
+      else {
+        return {
+          name: columnName
+        };
+      }
     })
   };
 };
@@ -84,7 +97,7 @@ const downloadEntity = (client, remoteTxid, replicationModel, entityConf,
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.downloadStream(entityConf.name, remoteTxid, downloadCh);
   const columnNames = _.pluck(bindingConf.attributes, 'columnName');
-  const copyProcess = copyToTable(client, downloadCh, map(createMapper(replicationModel, entityConf, bindingConf)),
+  const copyProcess = copyToTable(client, downloadCh, createMapper(replicationModel, entityConf, bindingConf),
     targetTable, columnNames, batchSize);
   yield parallel(requestProcess, copyProcess);
 });
@@ -119,7 +132,7 @@ const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationMod
   const requestProcess = httpClientImpl.eventStream(entityConf.name, lastRemoteTxid + 1, remoteTxid, eventCh);
   const columnNames = _.pluck(bindingConf.attributes, "columnName");
   const keyColumnNames = replicationModel.key.map(keyName => bindingConf.attributes[keyName].columnName);
-  const copyProcess = copyToTable(client, eventCh, map(createEventMapper(localTxid, replicationModel, entityConf, bindingConf)),
+  const copyProcess = copyToTable(client, eventCh, createEventMapper(localTxid, replicationModel, entityConf, bindingConf),
     tmpEventTableName, ['txid', 'operation', ...columnNames], options.batchSize);
   yield parallel(requestProcess, copyProcess);
   const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;

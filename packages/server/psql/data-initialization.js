@@ -14,10 +14,14 @@ const temaModels = require('../dagiImport/temaModels');
 const importBrofasthedImpl = require("../stednavne/importBrofasthedImpl");
 const importHeightsImpl = require('../heights/importAdresseHeightsImpl');
 const importBygningerImpl = require('../bygninger/importBygningerImpl');
+const importVejmidterImpl = require('../vejmidter/importVejmidterImpl');
 
 const initializeData = client => go(function*() {
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
     yield loadCsvTestdata(client, txid, path.join(__dirname, '../test/data'));
+  }));
+  yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
+    yield importVejmidterImpl.importVejmidter(client, txid, path.join(__dirname, '../test/data/VejmidtTest.json'));
   }));
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
     yield loadStormodtagereImpl(client, txid, path.join(__dirname, '../data/stormodtagere.csv'));

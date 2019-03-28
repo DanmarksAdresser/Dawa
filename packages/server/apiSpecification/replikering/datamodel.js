@@ -833,6 +833,28 @@ module.exports = {
       }
     ]
   },
+  vejmidte: {
+    key: ['kommunekode', 'vejkode'],
+    attributes: [
+      {
+        name: 'kommunekode',
+        type: 'string',
+        schema: definitions.Kode4,
+        description: 'Kommunekoden. 4 cifre.'
+      }, {
+        name: 'vejkode',
+        type: 'string',
+        schema: definitions.Kode4,
+        description: 'Vejkoden. 4 cifre.'
+      },
+      {
+        name: 'geometri',
+        type: 'geometry3d',
+        description: 'Vejmidtens geometri.',
+        offloaded: true
+      }
+    ]
+  },
   vejstykkepostnummerrelation: {
     key: ['kommunekode', 'vejkode', 'postnr'],
     attributes: [
@@ -853,7 +875,31 @@ module.exports = {
         description: 'Postnummeret. 4 cifre.'
       }]
   },
-
+  brofasthed: {
+    key: ['stedid'],
+    attributes: [
+      {
+        name: 'stedid',
+        type: 'uuid',
+        description: 'Øens unikke ID (UUID)'
+      },
+      {
+        name: 'brofast',
+        type: 'boolean',
+        description: 'Angiver, om øen er brofast.'
+      }
+    ]
+  },
+  ikke_brofast_husnummer: {
+    key: ['husnummerid'],
+    attributes: [
+      {
+        name: 'husnummerid',
+        type: 'uuid',
+        description: 'Det ikke brofaste husnummers UUID'
+      }
+    ]
+  }
 };
 
 for (let temaModel of temaModels.modelList) {

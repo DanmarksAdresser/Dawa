@@ -1,14 +1,28 @@
 "use strict";
 
+/**
+ * This file provides functionality to compare two SQL relations (tables or views) and compare the differences between the two,
+ * that is, the inserts, updates and deletes to perform to make them equal.
+ *
+ * This functionality is the very basis of the DAWA replication API as well as all the data processing happening during import of data.
+ *
+ * The functions computeDifferences and applyChanges are the key part of the API. There are generally used when importing files.
+ * Typically, the file is streamed to the database into a temporary table, which is then compared.
+ *
+ * The function computeDifferencesSubset computes changes on a subset of data. The subset must be stored
+ * in a "dirty" table containing primary keys of any rows that has potentially changed.
+ *
+ */
+const { assert } = require('chai');
 const {go} = require('ts-csp');
-const _ = require('underscore');
 
-const {allColumnNames, nonPrimaryColumnNames, publicNonKeyColumnNames,
-  deriveColumnsForChange, makeSelectClause, derivedColumnNames,
+const {allColumnNames, nonPrimaryColumnNames,
+  deriveColumnsForChange,
   nonDerivedColumnNames, assignSequenceNumbers, columnsDistinctClause} = require('./table-model-util');
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 
-const { offloadToS3 } = require('./s3-offload');
+const {name, derive, isPublic, preApplyChanges, postApplyChanges, fromSource, compare} =
+  require('@dawadk/import-util/src/table-diff-protocol');
 
 const applyCurrentTableToChangeTable = (client, tableModel, columnsToApply) => {
   return client.query(`WITH rowsToUpdate AS (SELECT ${selectList('t', tableModel.primaryKey)}, ${selectList('t', columnsToApply)},txid,changeid
@@ -19,18 +33,49 @@ UPDATE ${tableModel.table}_changes c  SET ${columnsToApply.map(column => `${colu
 WHERE ${columnsEqualClause('c', 'u', tableModel.primaryKey)} AND u.txid = c.txid AND u.changeid IS NOT DISTINCT FROM c.changeid;`);
 };
 
+/**
+ *
+ */
+const columnsForSelectClause = (tableModel) =>
+  tableModel.columns.filter(column => derive(column) || fromSource(column));
+
+
+/**
+ * Make a select clause that either selects or derives columns from source table
+ * @param alias
+ * @param tableModel
+ */
+const makeSelectClause = (table, tableModel) => {
+  return columnsForSelectClause(tableModel).map(column => {
+    if(derive(column)) {
+      return `${derive(column)(table)} as ${name(column)}`;
+    }
+    else {
+      return `${table}.${name(column)}`
+    }
+  }).join(', ');
+};
+
+/**
+ * generate insert statement inserting the rows specified by primary key in the table idTable.
+ */
+const insertSql = (txid, tableModel, srcTable, idTable) => {
+  const selectClause = makeSelectClause('t', tableModel);
+  const changesColumnList = ['txid', 'operation', columnsForSelectClause(tableModel).map(name)];
+  return `INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) 
+    (SELECT ${txid}, 'insert', ${selectClause} FROM ${srcTable} t NATURAL JOIN ${idTable})`
+};
+
 const computeInsertsView =
   (client, txid, srcTable, dstTable, tableModel, columnNames) => {
+  assert(columnNames === undefined);
 
-    columnNames = columnNames ? _.union(columnNames, derivedColumnNames(tableModel)) : allColumnNames(tableModel);
-    const idColumns = tableModel.primaryKey;
-    const selectIds = selectList(null, idColumns);
-    const selectClause = makeSelectClause('t', tableModel, columnNames);
-    const changesColumnList = ['txid', 'operation', 'public', columnNames];
+    const idColumnNames = tableModel.primaryKey;
+    const selectIds = selectList(null, idColumnNames);
     const sql =
       `WITH ids AS 
     (SELECT ${selectIds} FROM ${srcTable} EXCEPT SELECT ${selectIds} FROM ${dstTable})
-      INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) (SELECT ${txid}, 'insert', true, ${selectClause} FROM ${srcTable} t NATURAL JOIN ids)`;
+      ${insertSql(txid, tableModel, srcTable, 'ids')}`;
     return client.query(sql);
   };
 
@@ -41,91 +86,81 @@ const computeInserts = (client, txid, srcTable, tableModel, columnNames) =>
   computeInsertsView(client, txid, srcTable, tableModel.table, tableModel, columnNames);
 
 const computeInsertsSubset = (client, txid, sourceTableOrView, dirtyTable, tableModel, columnNames) => {
-  columnNames = columnNames ? _.union(columnNames, derivedColumnNames(tableModel)) : allColumnNames(tableModel);
-  const selectClause = makeSelectClause('v', tableModel, columnNames);
+  assert(columnNames === undefined);
   const idSelect = selectList(null, tableModel.primaryKey);
   const beforeSql = `SELECT ${idSelect} FROM ${tableModel.table} NATURAL JOIN ${dirtyTable}`;
   const afterSql = `SELECT ${idSelect} FROM ${sourceTableOrView} NATURAL JOIN ${dirtyTable}`;
   const insertIdsSql = `WITH before as (${beforeSql}), after AS (${afterSql}) SELECT ${idSelect} from after EXCEPT SELECT ${idSelect} FROM before`;
-  const sql = `WITH inserts AS (${insertIdsSql}) INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, columnNames)}) (SELECT $1, 'insert', true, ${selectClause} FROM ${sourceTableOrView} v NATURAL JOIN inserts)`;
-  return client.query(sql, [txid]);
+  const sql = `WITH ids AS (${insertIdsSql}) 
+    ${insertSql(txid, tableModel, sourceTableOrView, 'ids')}`;
+  return client.query(sql);
 
 };
 
-const makePublicClause = (client, tableModel) => {
-  const hasNonpublicFields = _.some(tableModel.columns, c => c.public === false);
-  if (!hasNonpublicFields) {
-    return 'true'
-  }
-  const publicColNames = publicNonKeyColumnNames(tableModel);
-  if (publicColNames.length === 0) {
-    return 'false';
-  }
-  const publicCols = publicColNames.map(colName => _.findWhere(tableModel.columns, {name: colName}));
-  return columnsDistinctClause('before', 'after', publicCols);
-};
+const setPublic = (client, txid, tableModel)=> go(function*() {
+  const publicColumns = tableModel.columns.filter(c => isPublic(c));
+  const publicClause = columnsDistinctClause('c', 't', publicColumns);
+  yield client.query(`
+      UPDATE ${tableModel.table}_changes set public = true where txid = ${txid} AND (operation = 'insert' OR operation = 'delete');
+      UPDATE ${tableModel.table}_changes c SET public = ${publicClause}
+      FROM ${tableModel.table} t
+      WHERE c.txid = ${txid} AND operation = 'update' AND ${columnsEqualClause('t', 'c', tableModel.primaryKey)}`);
+});
+
+const insertUpdatesSql = (txid, tableModel, afterTable, changedIds) => {
+  const columnsForInsert = columnsForSelectClause(tableModel);
+  return `INSERT INTO ${tableModel.table}_changes(txid, operation, ${selectList(null, columnsForInsert.map(name))}) 
+   (SELECT ${txid}, 'update', ${selectList(null, columnsForInsert.map(name))} FROM ${afterTable} NATURAL JOIN ${changedIds})`;
+}
+
 
 const computeUpdatesSubset = (client, txid, sourceTableOrView, dirtyTable, tableModel, nonPreservedColumns) => go(function* () {
-  nonPreservedColumns = nonPreservedColumns ? _.union(nonPreservedColumns, derivedColumnNames(tableModel)) : allColumnNames(tableModel);
-  const columnsFromSource = _.difference(nonPreservedColumns, derivedColumnNames(tableModel));
+  assert(nonPreservedColumns === undefined);
+  const columnsFromSource = tableModel.columns.filter(fromSource);
+  const comparedColumns = tableModel.columns.filter(compare);
+  const nonPrimaryComparedColumns = comparedColumns.filter(col => !tableModel.primaryKey.includes(name(col)));
+  if(nonPrimaryComparedColumns.length === 0) {
+    return;
+  }
   const idSelect = selectList(null, tableModel.primaryKey);
   const presentBeforeSql = `SELECT ${idSelect} FROM ${tableModel.table} NATURAL JOIN ${dirtyTable}`;
   const presentAfterSql = `SELECT ${idSelect} FROM ${sourceTableOrView} NATURAL JOIN ${dirtyTable}`;
   const possiblyChangedIds = `${presentBeforeSql} INTERSECT ${presentAfterSql}`;
-  const nonPrimaryColNames = nonPrimaryColumnNames(tableModel);
-
-  if (nonPrimaryColNames.length === 0) {
-    return;
-  }
-  const nonPrimaryCols = nonPrimaryColNames.map(colName => _.findWhere(tableModel.columns, {name: colName}));
-  const changedColumnClause = columnsDistinctClause('before', 'after', nonPrimaryCols);
-  const publicClause = makePublicClause(client, tableModel);
-  const preservedColumns = _.difference(allColumnNames(tableModel), nonPreservedColumns);
-  let rawAfterPreservedSelectClause = selectList('raw_after', columnsFromSource);
-  if (preservedColumns.length > 0) {
-    rawAfterPreservedSelectClause += ', ' + selectList('before', preservedColumns);
-  }
+  const changedColumnClause = columnsDistinctClause('before', 'after', nonPrimaryComparedColumns);
   const sql =
     `WITH possiblyChanged AS (${possiblyChangedIds}),
-     before AS (select ${selectList(tableModel.table, allColumnNames(tableModel))} FROM ${tableModel.table} NATURAL JOIN possiblyChanged),
-     raw_after AS (select ${selectList(sourceTableOrView, columnsFromSource)} FROM ${sourceTableOrView} NATURAL JOIN possiblyChanged),
-     raw_after_preserved AS (SELECT ${rawAfterPreservedSelectClause}
-                            FROM before JOIN raw_after ON ${columnsEqualClause('before', 'raw_after', tableModel.primaryKey)}),
-     after AS (SELECT ${makeSelectClause('raw_after_preserved', tableModel, allColumnNames(tableModel))}  FROM raw_after_preserved),
-     changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}, ${publicClause} as is_public 
+     before AS (select ${selectList(tableModel.table, comparedColumns.map(name))} FROM ${tableModel.table} NATURAL JOIN possiblyChanged),
+     raw_after AS (select ${selectList(sourceTableOrView, columnsFromSource.map(name))} FROM ${sourceTableOrView} NATURAL JOIN possiblyChanged),
+     after AS (SELECT ${makeSelectClause('raw_after', tableModel, comparedColumns)}  FROM raw_after),
+     changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}
   FROM before JOIN after ON ${columnsEqualClause('before', 'after', tableModel.primaryKey)}
   WHERE ${changedColumnClause})
-   INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, allColumnNames(tableModel))}) (SELECT ${txid}, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
+   ${insertUpdatesSql(txid, tableModel, 'after', 'changedIds')};
 `;
   yield client.query(sql);
 });
 
 const computeUpdatesView =
   (client, txid, sourceTableOrView, dstTable, tableModel, nonPreservedColumns) => go(function* () {
-    nonPreservedColumns = nonPreservedColumns ? _.union(nonPreservedColumns, derivedColumnNames(tableModel)) : allColumnNames(tableModel);
-    const columnsFromSource = _.difference(nonPreservedColumns, derivedColumnNames(tableModel));
-    const nonPrimaryColumnNamesList = nonPrimaryColumnNames(tableModel);
-    if (nonPrimaryColumnNamesList.length === 0) {
+    assert(nonPreservedColumns === undefined);
+
+    const comparedColumns = tableModel.columns
+      .filter(col => compare(col))
+      .filter(column => !tableModel.primaryKey.includes(name(column)));
+    const columnsFromSource = tableModel.columns.filter(fromSource);
+    const nonPrimaryColumns = tableModel.columns.filter(column => !tableModel.primaryKey.includes(name(column)));
+    if(nonPrimaryColumns.length === 0) {
       return;
     }
-    const nonPrimaryColumns = nonPrimaryColumnNamesList.map(columnName => _.findWhere(tableModel.columns, {name: columnName}));
-    const changedColumnClause = columnsDistinctClause('before', 'after', nonPrimaryColumns);
-    const publicClause = makePublicClause(client, tableModel);
-    const preservedColumns = _.difference(allColumnNames(tableModel), nonPreservedColumns);
-    let rawAfterPreservedSelectClause = selectList('raw_after', columnsFromSource);
-    if (preservedColumns.length > 0) {
-      rawAfterPreservedSelectClause += ', ' + selectList('before', preservedColumns);
-    }
+    const changedColumnClause = columnsDistinctClause('before', 'after', comparedColumns);
     const sql =
       `WITH 
-     raw_after AS (select ${selectList(sourceTableOrView, columnsFromSource)} FROM ${sourceTableOrView}),
-     raw_after_preserved AS (SELECT ${rawAfterPreservedSelectClause}
-                            FROM ${dstTable} before JOIN raw_after ON ${columnsEqualClause('before', 'raw_after', tableModel.primaryKey)}),
-     after AS (SELECT ${makeSelectClause('raw_after_preserved', tableModel, allColumnNames(tableModel))} FROM raw_after_preserved),
-     changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}, ${publicClause} as is_public 
+     raw_after AS (select ${columnsFromSource.map(col => name(col)).join(', ')} FROM ${sourceTableOrView}),
+     after AS (SELECT ${makeSelectClause('raw_after', tableModel)} FROM raw_after),
+     changedIds AS (SELECT ${selectList('before', tableModel.primaryKey)}
   FROM ${dstTable} before JOIN after ON ${columnsEqualClause('before', 'after', tableModel.primaryKey)}
-  ${nonPrimaryColumnNamesList.length > 0 ? `WHERE ${changedColumnClause}` : ''})
-   INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, allColumnNames(tableModel))}) (SELECT ${txid}, 'update', is_public, ${selectList(null, allColumnNames(tableModel))} FROM after NATURAL JOIN changedIds)
+  WHERE ${changedColumnClause})
+   ${insertUpdatesSql(txid, tableModel, 'after', 'changedIds')}
 `;
     yield client.query(sql);
   });
@@ -136,14 +171,22 @@ const computeUpdatesView =
 const computeUpdates = (client, txid, sourceTableOrView, tableModel, nonPreservedColumns) =>
   computeUpdatesView(client, txid, sourceTableOrView, tableModel.table, tableModel, nonPreservedColumns);
 
+
+const insertDeletesSql = (txid, tableModel, idTable) => {
+  const columns = columnsForSelectClause(tableModel);
+  const changesColumnList = ['txid', 'operation',columns.map(name)];
+  const selectColumns = selectList('t', columns.map(name));
+  return `INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) 
+            (SELECT ${txid}, 'delete', ${selectColumns} FROM ${tableModel.table} t NATURAL JOIN ${idTable})`
+};
+
 const computeDeletesView = (client, txid, srcTable, dstTable, tableModel) => {
   const selectIds = selectList(null, tableModel.primaryKey);
-  const changesColumnList = ['txid', 'operation', 'public', ...allColumnNames(tableModel)];
-  const selectColumns = selectList('t', allColumnNames(tableModel));
   const sql =
     `WITH ids AS 
     (SELECT ${selectIds} FROM ${dstTable} EXCEPT SELECT ${selectIds} FROM ${srcTable})
-      INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) (SELECT ${txid}, 'delete', true, ${selectColumns} FROM ${dstTable} t NATURAL JOIN ids)`;
+    ${insertDeletesSql(txid, tableModel, 'ids')}
+      `;
   return client.query(sql);
 };
 
@@ -157,9 +200,8 @@ const computeDeletesSubset = (client, txid, srcTableOrView, dirtyTable, tableMod
   const afterSql = `SELECT ${idSelect} FROM ${srcTableOrView} NATURAL JOIN ${dirtyTable}`;
   const deleteIdsSql = `WITH before as (${beforeSql}), after AS (${afterSql}) SELECT ${idSelect} from before EXCEPT SELECT ${idSelect} FROM after`;
 
-  const sql = `WITH deletes AS (${deleteIdsSql}) 
-  INSERT INTO ${tableModel.table}_changes(txid, operation, public, ${selectList(null, allColumnNames(tableModel))})
-  (SELECT ${txid}, 'delete', true, ${selectList('t', allColumnNames(tableModel))} FROM ${tableModel.table} t NATURAL JOIN deletes)`;
+  const sql = `WITH ids AS (${deleteIdsSql})
+      ${insertDeletesSql(txid, tableModel, 'ids')}`;
   return client.query(sql);
 };
 
@@ -169,19 +211,34 @@ const computeDifferencesView =
     yield computeInsertsView(client, txid, srcTable, dstTable, tableModel, columns);
     yield computeUpdatesView(client, txid, srcTable, dstTable, tableModel, columns);
     yield computeDeletesView(client, txid, srcTable, dstTable, tableModel);
+    for(let col of tableModel.columns) {
+      yield preApplyChanges(col, client, txid, tableModel);
+    }
+    if(!tableModel.noPublic) {
+      yield setPublic(client, txid, tableModel);
+    }
   });
 
+/**
+ * Compute the differences between a "source" table and the table specified by tableModel.
+ * The differences is stored in the change table, that is, the table specified by the tableModel suffixed by "_changes".
+ * Each column must specify how it participates in the comparison. This is done by implementing the multimethods defined
+ * in table-diff-protocol.
+ */
 const computeDifferences =
-  (client, txid, srcTable, tableModel, columns) => go(function* () {
-    yield computeInserts(client, txid, srcTable, tableModel, columns);
-    yield computeUpdates(client, txid, srcTable, tableModel, columns);
-    yield computeDeletes(client, txid, srcTable, tableModel);
-  });
+  (client, txid, srcTable, tableModel, columns) =>
+    computeDifferencesView(client, txid, srcTable, tableModel.table, tableModel, columns);
 
 const computeDifferencesSubset = (client, txid, srcTableOrView, dirtyTable, tableModel, columns) => go(function* () {
   yield computeInsertsSubset(client, txid, srcTableOrView, dirtyTable, tableModel, columns);
   yield computeUpdatesSubset(client, txid, srcTableOrView, dirtyTable, tableModel, columns);
   yield computeDeletesSubset(client, txid, srcTableOrView, dirtyTable, tableModel);
+  for(let col of tableModel.columns) {
+    yield preApplyChanges(col, client, txid, tableModel);
+  }
+  if(!tableModel.noPublic) {
+    yield setPublic(client, txid, tableModel);
+  }
 });
 
 const applyInserts = (client, txid, tableModel, changeTable) => go(function* () {
@@ -209,7 +266,9 @@ const applyChanges = (client, txid, tableModel, changeTable) => go(function* () 
   yield applyDeletes(client, txid, tableModel, changeTable);
   yield applyUpdates(client, txid, tableModel, changeTable);
   yield applyInserts(client, txid, tableModel, changeTable);
-  yield offloadToS3(client, txid, tableModel);
+  for(let col of tableModel.columns) {
+    yield postApplyChanges(col, client, txid, tableModel);
+  }
 });
 
 const getChangeTableSql = tableModel => {
@@ -356,5 +415,6 @@ module.exports = {
   assignSequenceNumbersToDependentTables,
   initializeChangeTable,
   applyCurrentTableToChangeTable,
-  countChanges
+  countChanges,
+  makeSelectClause
 };

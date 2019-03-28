@@ -339,7 +339,7 @@ describe('Stable API', () => {
             "sted_bbox_ymin": null,
             "sted_visueltcenter_x": 12.57114905,
             "sted_visueltcenter_y": 55.59056756,
-            "sted_brofast": false,
+            "sted_brofast": true,
             "navn": "Test stednavn punkt",
             "brugsprioritet": "primær",
             "navnestatus": "officielt"

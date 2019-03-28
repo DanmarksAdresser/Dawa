@@ -32,7 +32,7 @@ const importHeightsFromTable = (client, txid, table) => go(function*() {
   yield computeDifferencesSubset(client, txid,
     'hoejde_importer_resultater_view',
     'hoejde_importer_resultater_dirty',
-    schemaModel.tables.hoejde_importer_resultater, ["husnummerid", "position", "hoejde"]);
+    schemaModel.tables.hoejde_importer_resultater);
   yield applyChanges(client, txid, schemaModel.tables.hoejde_importer_resultater);
   yield client.query('DROP VIEW hoejde_importer_resultater_view');
   yield client.query('DROP table hoejde_importer_resultater_dirty');

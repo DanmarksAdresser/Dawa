@@ -3,6 +3,7 @@ const _ = require('underscore');
 const commonSchemaDefinitions = require('../apiSpecification/commonSchemaDefinitions');
 const {kode4String, zoneKodeFormatter, numberToString} = require('../apiSpecification/util');
 const bindingTypes = require('../apiSpecification/replikering/bindings/binding-types');
+const { geomColumns, tsvColumn, visueltCenterComputed} = require('@dawadk/import-util/src/common-columns');
 const defaultSqlType = {
   string: 'text',
   integer: 'integer',
@@ -17,7 +18,6 @@ const defaultSchema = (type, nullable) => {
   }
 };
 
-const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
 const kodeNavnDeriveTsv = (table => `to_tsvector('adresser', processForIndexing(${table}.kode || ' ' || ${table}.navn))`);
 
 exports.modelList = [{
@@ -623,33 +623,12 @@ exports.toTableModel = temaModel => {
     columns: [...temaModel.fields.map(additionalField => ({
       name: additionalField.name
     })),
-      {
-        name: 'ændret'
-      },
-      {
-        name: 'geo_ændret'
-      },
-      {
-        name: 'geo_version'
-      },
-      ...(temaModel.searchable ? [{
-        name: 'tsv',
-        derive: temaModel.deriveTsv
-      }] : []),
-      {
-        name: 'geom',
-        distinctClause: geomDistinctClause
-      },
-      {
-        name: 'geom_blobref',
-        offloads: 'geom'
-      },
-      {
-        name: 'bbox',
-        derive: table => `st_envelope(${table}.geom)`
-      }, {
-        name: 'visueltcenter'
-      }]
+      ...geomColumns({offloaded: true}),
+      ...(temaModel.searchable ? [tsvColumn({
+        deriveFn: temaModel.deriveTsv
+      })] : []),
+      visueltCenterComputed({})
+    ]
   }
 };
 

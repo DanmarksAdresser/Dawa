@@ -4,8 +4,6 @@ const fs = require('fs');
 const path = require('path');
 
 const {go} = require('ts-csp');
-const { initializeChangeTable } = require('@dawadk/import-util/src/table-diff');
-const tableSchema  = require('./tableModel');
 
 
 function getColumnsFromCsv(file) {
@@ -27,9 +25,4 @@ module.exports = (client, txid, dataDir) => go(function* () {
     const columns = getColumnsFromCsv(file);
     yield copyCsvToTable(client, table, file, columns);
   }
-  yield copyCsvToTable(client,
-    'vejmidter',
-    path.resolve(path.join(dataDir, 'vejstykker_geom.csv')),
-    ['kommunekode', 'kode', 'geom']);
-  yield initializeChangeTable(client, txid, tableSchema.tables.vejmidter);
 });

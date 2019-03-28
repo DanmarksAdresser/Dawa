@@ -200,11 +200,6 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
   })();
 };
 
-exports.loadSchemas = function(client, scriptDir){
-  return q.async(function*() {
-  })();
-};
-
 const scriptDir = path.join(__dirname, 'schema');
 
 

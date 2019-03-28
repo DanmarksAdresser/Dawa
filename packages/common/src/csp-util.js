@@ -217,7 +217,27 @@ const channelEvents = (eventEmitter, eventName, channel) => go(function*() {
   }
 );
 
+const pipeMapAsync = (src, dst, batchSize, asyncMapFn) => go(function*() {
+  while(true) {
+    const { values } = yield this.selectOrAbort(
+      [{ch: src, op: OperationType.TAKE_MANY, count: batchSize}]);
+    const closed = values[values.length -1] === CLOSED;
+    if(closed) {
+      values.pop();
+    }
+    const mappedValues = yield this.delegateAbort(mapAsync(values, asyncMapFn));
+    if(mappedValues.length > 0) {
+      yield dst.putMany(mappedValues);
+    }
+    if(closed) {
+      dst.close();
+      return;
+    }
+  }
+});
+
 module.exports = {
+  pipeMapAsync,
   mapAsync,
   reduceAsync,
   mapObjectAsync,
