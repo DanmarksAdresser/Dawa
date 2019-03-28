@@ -19,7 +19,7 @@
     "@dawadk/import-util": "^1.0.15",
     "ajv": "^6.6.1",
     "request": "^2.88.0",
-    "request-promise": "^4.2.2",
+    "request-promise": "^4.2.4",
     "split2": "^3.0.0",
     "terraformer-wkt-parser": "^1.2.0",
     "transducers-js": "^0.4.174",

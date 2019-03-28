@@ -19,7 +19,8 @@
     "chai": "4.1.2",
     "eslint": "^4.19.1",
     "mocha": "^5.2.0",
-    "request-promise": "4.2.2"
+    "request": "2.88.0",
+    "request-promise": "4.2.4"
   },
   "scripts": {
     "lint": "eslint src test",
