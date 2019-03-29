@@ -1,13 +1,12 @@
 "use strict";
-
+const { go } = require('ts-csp');
 var expect = require('chai').expect;
 var q = require('q');
 
 const {mergeValidTime, createHeadTailTempTable} = require('../../history/common');
 const generateHistory = require('../../history/generateCombinedHistoryImpl');
 var testdb = require('@dawadk/test-util/src/testdb');
-
-q.longStackSupport = true;
+const {withImportTransaction} = require('../../importUtil/transaction-util');
 
 describe('History generation', () => {
   describe('mergeValidTime', () => {
@@ -49,10 +48,12 @@ describe('History generation', () => {
 
   describe('Generate history', () => {
     testdb.withTransactionEach('empty', (clientFn) => {
-      it('Can generate a completely empty history', q.async(function*() {
-        var client = clientFn();
+      it('Can generate a completely empty history', () => go(function*() {
+        const client = clientFn();
         client.allowParallelQueries = true;
-        yield generateHistory.generateHistory(client, '2018-04-05T00:00:00.000Z');
+        yield withImportTransaction(clientFn(), 'test', txid => go(function*() {
+          yield generateHistory.generateHistory(client, txid,'2018-04-05T00:00:00.000Z');
+        }));
       }));
     });
   });

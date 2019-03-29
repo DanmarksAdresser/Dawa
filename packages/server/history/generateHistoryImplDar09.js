@@ -10,11 +10,11 @@ const dbapi = require('../dbapi');
 const extendStreetIntervals = require('./extendStreetIntervals');
 const extendVejnavnIntervals = require('./extendVejnavnIntervals');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
-const sqlUtil = require('@dawadk/common/src/postgres/sql-util')
+const sqlUtil = require('@dawadk/common/src/postgres/sql-util');
 
 const { TableInserter,
   mergeValidTime,
-  cutoffAfter, adrCols } = require('./common');
+  cutoffAfter, adgAdrCols, adrCols } = require('./common');
 
 util.inherits(ExtendStreetIntervalTransformer, Transform);
 function ExtendStreetIntervalTransformer(refify, unrefify) {
@@ -289,7 +289,7 @@ function generateAdgangsadresserHistory(client, adgangsadresseDestTable, dar10Cu
 `;
     yield client.query(`create temp table suppl_merged as (${query})`);
     yield cutoffAfter(client, 'suppl_merged', dar10CutoffDate);
-    yield client.query(`insert into ${adgangsadresseDestTable} (select * from suppl_merged)`);
+    yield client.query(`insert into ${adgangsadresseDestTable}(${adgAdrCols.join(',')}, hn_id, virkning) (select ${adgAdrCols.join(',')}, hn_id, virkning from suppl_merged)`);
   })();
 }
 

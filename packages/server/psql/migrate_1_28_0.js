@@ -9,10 +9,11 @@ const temaModels = require('../dagiImport/temaModels').modelList;
 const configHolder = require('@dawadk/common/src/config/holder');
 const { createS3 } = require('@dawadk/import-util/src/s3-util');
 const {uploadToS3} = require('@dawadk/import-util/src/s3-offload');
-const {initChangeTable} = require('@dawadk/import-util/src/table-diff');
+const {initChangeTable, createChangeTable} = require('@dawadk/import-util/src/table-diff');
 const { name } = require('@dawadk/import-util/src/table-diff-protocol');
 const { withImportTransaction } = require('../importUtil/transaction-util');
 const tableSchema = require('./tableModel');
+const { generateHistory } = require('../history/generateCombinedHistoryImpl');
 
 
 const schema = configHolder.mergeConfigSchemas([
@@ -74,6 +75,10 @@ runConfigured(schema, [],config => go(function*() {
 
   yield proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield client.query(fs.readFileSync(require.resolve('./schema/tables/blobref.sql'), {encoding: 'utf8'}));
+    yield client.query(fs.readFileSync(require.resolve('./schema/tables/vask_adgangsadresser.sql'), {encoding: 'utf8'}));
+    yield client.query(fs.readFileSync(require.resolve('./schema/tables/vask_adresser.sql'), {encoding: 'utf8'}));
+    yield createChangeTable(client, tableSchema.tables.vask_adgangsadresser);
+    yield createChangeTable(client, tableSchema.tables.vask_adresser);
     const offloadedTables = ['vejmidter', 'ejerlav', 'steder', ...temaModels.map(tema => tema.table)];
     for(let table of offloadedTables) {
       yield client.query(`
@@ -92,11 +97,14 @@ create table hoejde_importer_disabled(
 );
 ALTER TABLE ikke_brofaste_adresser DROP CONSTRAINT ikke_brofaste_adresser_pkey,
                          ADD PRIMARY KEY(adgangsadresseid);`);
-    yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
+    yield withImportTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
       for(let table of offloadedTables) {
         const tableModel = tableSchema.tables[table];
         yield migrateS3Offloaded(client, txid, tableModel);
       }
+    }));
+    yield withImportTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
+      yield generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
     }));
   }));
 }));

@@ -35,7 +35,9 @@ const initializeData = client => go(function*() {
     yield importHeightsImpl.importHeights(client, txid, path.join(__dirname, '../test/data/hoejder.csv'));
   }));
   client.allowParallelQueries = true;
-  yield generateHistoryImpl.generateHistory(client, '2018-05-04T00:00:00.000Z');
+  yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
+    yield generateHistoryImpl.generateHistory(client, txid, '2018-05-04T00:00:00.000Z');
+  }));
   client.allowParallelQueries = false;
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
     yield importJordstykkerImpl.importJordstykkerImpl(client, txid, path.join(__dirname, '../test/data/matrikelkort'), true);

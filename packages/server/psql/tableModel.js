@@ -700,6 +700,46 @@ const hoejde_importer_afventer= {
     {name: 'adgangspunktid'}]
 };
 
+const vask_adgangsadresser = {
+  table: 'vask_adgangsadresser',
+  primaryKey: ['rowkey'],
+  columns: [
+    { name: 'rowkey' },
+    { name: 'id' },
+    { name: 'ap_statuskode' },
+    { name: 'hn_statuskode' },
+    { name: 'kommunekode' },
+    { name: 'vejkode'},
+    { name: 'vejnavn' },
+    { name: 'adresseringsvejnavn' },
+    { name: 'husnr' },
+    { name: 'supplerendebynavn' },
+    { name: 'postnr' },
+    { name: 'postnrnavn' },
+    { name: 'virkning' }
+  ]
+};
+
+const vask_adresser = {
+  table: 'vask_adresser',
+  primaryKey: ['rowkey'],
+  columns: [
+    ...vask_adgangsadresser.columns,
+    {
+      name: 'adgangsadresseid'
+    },
+    {
+      name: 'statuskode'
+    },
+    {
+      name: 'etage'
+    },
+    {
+      name: 'doer'
+    }
+  ]
+};
+
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
@@ -738,7 +778,9 @@ exports.tables = Object.assign({
     hoejder,
     hoejde_importer_resultater,
     hoejde_importer_afventer,
-    postnumre_kommunekoder_mat
+    postnumre_kommunekoder_mat,
+    vask_adgangsadresser,
+    vask_adresser
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,

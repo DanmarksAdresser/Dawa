@@ -1,7 +1,8 @@
 DROP TABLE IF EXISTS vask_adresser;
-CREATE TABLE vask_adresser (
+CREATE TABLE vask_adresser
+(
+  rowkey              integer primary key,
   id                  UUID,
-  dar_id              INTEGER,
   adgangsadresseid    UUID,
   ap_statuskode       SMALLINT,
   hn_statuskode       SMALLINT,
@@ -17,7 +18,7 @@ CREATE TABLE vask_adresser (
   postnr              SMALLINT,
   postnrnavn          TEXT,
   virkning            TSTZRANGE,
-  EXCLUDE USING GIST (dar_id WITH =, virkning WITH &&)
+  EXCLUDE USING GIST (id WITH =, virkning WITH &&)
 );
 
 CREATE INDEX ON vask_adresser (id, lower(virkning));
