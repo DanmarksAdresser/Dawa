@@ -9,8 +9,13 @@ const configHolder = require('@dawadk/common/src/config/holder');
 const {columnsEqualClause, selectList} = require('@dawadk/common/src/postgres/sql-util');
 const { distinctClause, name } = require('./table-diff-protocol');
 const { createS3 } = require('./s3-util');
+const logger = require('@dawadk/common/src/logger').forCategory('s3Offload');
 
 const uploadToS3 = (s3, bucket, path, key, jsonText) => go(function*() {
+  logger.info('Uploading to s3', {
+    key,
+    length: jsonText.length
+  });
   const zipped = yield Promise.promisify(zlib.gzip, {context: zlib})(jsonText);
   return yield Promise.promisify(s3.upload, {context: s3})({
     Bucket: bucket,
