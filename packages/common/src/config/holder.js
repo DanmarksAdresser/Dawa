@@ -59,8 +59,17 @@ const schemaToDocstring = (schema) => {
       result += '\n';
   }
   return result;
-}
+};
 
+const documentConfigured = (schema, config) => {
+  const flat = flattenSchema(schema);
+  let result = '';
+  for(let key of Object.keys(flat).sort()) {
+    const value = flat[key];
+    result += `${key}: ${value.sensitive ? '<hidden>' : `${config.get(key)}`}\n`;
+  }
+  return result;
+};
 const getConfig = () => config;
 const initialize = (schema, configFiles, cmdLineOptions) => {
   if (convictConfig) {
@@ -92,7 +101,6 @@ const initialize = (schema, configFiles, cmdLineOptions) => {
   convictConfig.load(cmdLineOptions);
   convictConfig.validate();
   checkRequired(schema, convictConfig);
-
 };
 
 
@@ -110,6 +118,7 @@ module.exports = {
   mergeConfigSchemas,
   flattenSchema,
   checkRequired,
-  schemaToDocstring
+  schemaToDocstring,
+  documentConfigured
 };
 

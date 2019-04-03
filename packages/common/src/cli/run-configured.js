@@ -44,6 +44,10 @@ module.exports = (convictSchema, configFiles, fn) => {
 
   configHolder.initialize(convictSchema, configFiles, cliOptions);
   const config = configHolder.getConfig();
+  if(program.validate_options) {
+    console.log(configHolder.documentConfigured(convictSchema, config));
+    process.exit(0);
+  }
 
   logger.initialize(config.get('logging'));
   const result = fn(config);
