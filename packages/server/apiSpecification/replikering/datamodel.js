@@ -6,6 +6,85 @@ const schemaUtil = require('../../apiSpecification/schemaUtil');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 
 const { defaultSchemas } = require('./datamodelUtil');
+
+const commonVaskAttributes = [
+  {
+    name: 'rowkey',
+    type: 'integer',
+    description: 'Rækkens unikke ID'
+  },
+    {
+      name: 'id',
+      type: 'uuid',
+      description: 'Adressens ID.'
+    },
+    {
+      name: 'adgangspunkt_status',
+      type: 'integer',
+      nullable: true,
+      description: 'Adgangspunktets status'
+    },
+    {
+      name: 'husnummer_status',
+      type: 'integer',
+      description: 'Husnummerets status.'
+    },
+    {
+      name: 'kommunekode',
+      type: 'string',
+      schema: definitions.Kode4,
+      description: 'Kommunekoden. 4 cifre.',
+    },
+    {
+      name: 'vejkode',
+      type: 'string',
+      schema: definitions.Kode4,
+      description: 'Vejkoden. 4 cifre.',
+    },
+    {
+      name: 'vejnavn',
+      type: 'string',
+      description: 'Adressens vejnavn.'
+    },
+    {
+      name: 'adresseringsvejnavn',
+      type: 'string',
+      description: 'En evt. forkortet udgave af adressens vejnavn.'
+    },
+    {
+      name: 'husnr',
+      type: 'string',
+      description: 'Adressens husnummer. Tal samt evt. bogstav.'
+    },
+    {
+      name: 'supplerendebynavn',
+      type: 'string',
+      description: 'Et supplerende bynavn – typisk landsbyens navn – eller andet lokalt stednavn.',
+      nullable: true
+    },
+    {
+      name: 'postnr',
+      type: 'string',
+      description: 'Adressens postnummer.'
+    },
+    {
+      name: 'postnrnavn',
+      type: 'string',
+      description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn.'
+    },
+    {
+      name: 'virkningstart',
+      type: 'timestamp',
+      description: 'Startidspunktet for rækkens virkningstid.'
+    },
+    {
+      name: 'virkningslut',
+      type: 'timestamp',
+      description: 'Sluttidspunktet for rækkens virkningstid.',
+      nullable: true
+    }
+  ];
+
 module.exports = {
   højde: {
     key: ['husnummerid'],
@@ -898,6 +977,35 @@ module.exports = {
         type: 'uuid',
         description: 'Det ikke brofaste husnummers UUID'
       }
+    ]
+  },
+  vask_husnummer_historik: {
+    key: ['rowkey'],
+    attributes: [
+      ...commonVaskAttributes
+    ]
+  },
+  vask_adresse_historik: {
+    key: ['rowkey'],
+    attributes: [
+      {
+        name: 'husnummerid',
+        type: 'uuid',
+        description: 'Husnummerets ID.'
+      },
+      {
+        name: 'etage',
+        type: 'string',
+        description: 'Etageangivelsen, f.eks. st.',
+        nullable: true
+      },
+      {
+        name: 'dør',
+        type: 'string',
+        description: 'Dørangivelsen, f.eks. tv.',
+        nullable: true
+      },
+      ...commonVaskAttributes
     ]
   }
 };

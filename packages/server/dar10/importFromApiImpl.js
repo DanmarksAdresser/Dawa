@@ -1,5 +1,5 @@
 "use strict";
-
+const util = require('util');
 const _ = require('underscore');
 const Promise = require('bluebird');
 const {go, Channel, CLOSED, Abort} = require('ts-csp');
@@ -7,7 +7,7 @@ const {go, Channel, CLOSED, Abort} = require('ts-csp');
 const logger = require('@dawadk/common/src/logger').forCategory('darImport');
 
 const notificationClient = require('@dawadk/dar-notification-client/src/notification-client');
-
+const express = require('express');
 
 const {createDarApiImporter} = require('../components/importers/dar-api');
 const {executeRollbackable} = require('../components/execute');
@@ -105,7 +105,23 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(func
   // Indicates whether the client should update all entities when receiving af notification.
   // This is necessary, because we may have missed some notifications initially.
   let mustUpdateAll = true;
+  let isaliveServer = null;
   try {
+    const lastError = null;
+    var isaliveApp = express();
+    isaliveApp.get('/isalive', function(req, res) {
+      if(lastError === null) {
+        res.json({status: 'up', error: null});
+      }
+      else {
+        res.status(500).send({status: 'down', error: util.inspect(lastError)});
+      }
+    });
+
+    isaliveApp.set('json spaces', 2);
+
+    isaliveServer = isaliveApp.listen(3000);
+
     while (true) {
       logger.info("Waiting for DAR notifications");
       const values = yield this.delegateAbort(takeAvailable(notificationChan));
@@ -125,6 +141,7 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(func
   }
   finally {
     wsClientCloseFn();
+    isaliveServer.close();
   }
 });
 

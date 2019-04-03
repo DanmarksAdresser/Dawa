@@ -17,7 +17,8 @@ const dawaBaseTableNames = ['vejstykker', 'vejmidter', 'vejpunkter', 'navngivenv
   'hoejder',
   'adgangsadresser',
   'enhedsadresser',
-  'vejstykkerpostnumremat', 'navngivenvej_postnummer', 'steder', 'brofasthed', 'ikke_brofaste_adresser'];
+  'vejstykkerpostnumremat', 'navngivenvej_postnummer', 'steder', 'brofasthed', 'ikke_brofaste_adresser',
+  'vask_adgangsadresser', 'vask_adresser'];
 
 
 const orderedTableNames = [...dar10HistoryTableNames,

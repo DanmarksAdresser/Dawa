@@ -201,6 +201,32 @@ const unnormalizedBindings = {
     attributes: [
       types.column({attrName: 'husnummerid', column: 'adgangsadresseid'})
     ]
+  },
+  vask_husnummer_historik: {
+    table: 'vask_adgangsadresser',
+    attributes: [
+      types.timestampInterval({attrName: 'virkning'}),
+      types.column({attrName: 'husnummer_status', column: 'hn_statuskode'}),
+      types.column({attrName: 'adgangspunkt_status', column: 'ap_statuskode'}),
+      types.kode4({attrName: 'vejkode'}),
+      types.kode4({attrName: 'kommunekode'}),
+      types.husnr({attrName: 'husnr'}),
+      types.kode4({attrName: 'postnr'})
+    ]
+  },
+  vask_adresse_historik: {
+    table: 'vask_adresser',
+    attributes: [
+      types.timestampInterval({attrName: 'virkning'}),
+      types.column({attrName: 'husnummer_status', column: 'hn_statuskode'}),
+      types.column({attrName: 'adgangspunkt_status', column: 'ap_statuskode'}),
+      types.kode4({attrName: 'vejkode'}),
+      types.kode4({attrName: 'kommunekode'}),
+      types.husnr({attrName: 'husnr'}),
+      types.column({attrName: 'husnummerid', column: 'adgangsadresseid'}),
+      types.column({attrName: 'dør', column: 'doer'}),
+      types.kode4({attrName: 'postnr'})
+    ]
   }
 };
 

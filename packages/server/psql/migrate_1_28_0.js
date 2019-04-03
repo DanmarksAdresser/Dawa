@@ -79,6 +79,9 @@ runConfigured(schema, [],config => go(function*() {
     yield client.query(fs.readFileSync(require.resolve('./schema/tables/vask_adresser.sql'), {encoding: 'utf8'}));
     yield createChangeTable(client, tableSchema.tables.vask_adgangsadresser);
     yield createChangeTable(client, tableSchema.tables.vask_adresser);
+    yield withImportTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
+      yield generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
+    }));
     const offloadedTables = ['vejmidter', 'ejerlav', 'steder', ...temaModels.map(tema => tema.table)];
     for(let table of offloadedTables) {
       yield client.query(`
@@ -102,9 +105,6 @@ ALTER TABLE ikke_brofaste_adresser DROP CONSTRAINT ikke_brofaste_adresser_pkey,
         const tableModel = tableSchema.tables[table];
         yield migrateS3Offloaded(client, txid, tableModel);
       }
-    }));
-    yield withImportTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
-      yield generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
     }));
   }));
 }));
