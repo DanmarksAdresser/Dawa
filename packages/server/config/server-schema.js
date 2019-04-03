@@ -115,7 +115,7 @@ module.exports = mergeConfigSchemas([s3OffloadSchema,
     },
     ois: {
       enabled: {
-        doc: "whether OIS API is enabled (0=disabled, 1=enabled)",
+        doc: "whether OIS API is enabled",
         format: 'Boolean',
         default: false
       },
@@ -125,13 +125,15 @@ module.exports = mergeConfigSchemas([s3OffloadSchema,
         default: true
       },
       login: {
-        description: "OIS login (username)",
+        doc: "OIS login (username)",
         format: 'string',
         default: 'ois'
       },
-      password: "OIS password",
-      format: 'string',
-      sensitive: true
+      password: {
+        doc: "OIS password",
+        format: 'string',
+        sensitive: true
+      }
     },
     autocomplete: {
       query_slot_timeout: {

@@ -53,7 +53,7 @@ const schemaToDocstring = (schema) => {
   for(let key of Object.keys(flat).sort()) {
     const value = flat[key];
       result += `${key}: [${value.format}] ${value.doc}`;
-      if(value.default) {
+      if(value.default !== null && value.default !== undefined) {
         result += ` default: ${value.default}`;
       }
       result += '\n';
