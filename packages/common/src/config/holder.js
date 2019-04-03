@@ -43,10 +43,23 @@ const checkRequired = (schema, convictConfig) => {
   const flattened = flattenSchema(schema);
   for(let [key, schemaVal] of Object.entries(flattened)) {
     if(schemaVal.required) {
-      assert(convictConfig.has(key) && convictConfig.get(key) !== null && !convictConfig.get(key).format);
+      assert(convictConfig.has(key) && convictConfig.get(key) !== null && !convictConfig.get(key).format, `Missing configuration for ${key}`);
     }
   }
 };
+const schemaToDocstring = (schema) => {
+  const flat = flattenSchema(schema);
+  let result = '';
+  for(let key of Object.keys(flat).sort()) {
+    const value = flat[key];
+      result += `${key}: [${value.format}] ${value.doc}`;
+      if(value.default) {
+        result += ` default: ${value.default}`;
+      }
+      result += '\n';
+  }
+  return result;
+}
 
 const getConfig = () => config;
 const initialize = (schema, configFiles, cmdLineOptions) => {
@@ -96,6 +109,7 @@ module.exports = {
   withConfigOverride,
   mergeConfigSchemas,
   flattenSchema,
-  checkRequired
+  checkRequired,
+  schemaToDocstring
 };
 

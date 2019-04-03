@@ -24,8 +24,16 @@ module.exports = (convictSchema, configFiles, fn) => {
     const parser = parsers[schema.format];
     program.option(argumentString, schema.doc, parser);
   }
+  program.option('--list_options', 'List all available configuration options');
+  program.option('--validate_options', 'Print and validate configuration options');
 
   program.parse(process.argv);
+
+  if(program.list_options) {
+    /* eslint no-console: 0 */
+    console.log(configHolder.schemaToDocstring(convictSchema));
+    process.exit(0);
+  }
 
   const cliOptions = Object.keys(cliSchema).reduce((acc, name) => {
     if (typeof program[name] !== 'undefined') {
@@ -36,6 +44,7 @@ module.exports = (convictSchema, configFiles, fn) => {
 
   configHolder.initialize(convictSchema, configFiles, cliOptions);
   const config = configHolder.getConfig();
+
   logger.initialize(config.get('logging'));
   const result = fn(config);
   if (result && result.asPromise) {
