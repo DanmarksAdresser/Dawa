@@ -20,9 +20,32 @@ const {allColumnNames, nonPrimaryColumnNames,
   deriveColumnsForChange,
   nonDerivedColumnNames, assignSequenceNumbers, columnsDistinctClause} = require('./table-model-util');
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
+const { streamArrayToTable} = require('./postgres-streaming');
 
 const {name, derive, isPublic, preApplyChanges, postApplyChanges, fromSource, compare} =
   require('@dawadk/import-util/src/table-diff-protocol');
+
+const createSourceTable = (client, tableModel, sourceTableName) => {
+  const columnNames = tableModel.columns.filter(isPublic).map(name);
+  return client.query(`CREATE TEMP TABLE ${sourceTableName} AS (SELECT ${columnNames.join(', ')} FROM ${tableModel.table})`);
+};
+
+const createDirtyTable = (client, tableModel, dirtyTableName) => {
+  const columnNames = tableModel.columns.map(name).filter( columnName => tableModel.primaryKey.includes(columnName));
+  return client.query(`CREATE TEMP TABLE ${dirtyTableName} AS (SELECT ${columnNames.join(', ')} FROM ${tableModel.table})`);
+};
+
+const  createIncrementalDifferences = (client, txid, tableModel, puts, deletes) => go(function*() {
+  yield createSourceTable(client, tableModel, 'desired');
+  yield createDirtyTable(client, tableModel, 'dirty');
+  const publicColumnNames = tableModel.columns.filter(isPublic).map(name);;
+  yield streamArrayToTable(client, puts, 'desired', publicColumnNames);
+  yield streamArrayToTable(client, deletes, 'dirty', tableModel.primaryKey);
+  yield client.query(`INSERT INTO dirty(${tableModel.primaryKey.join(',')}) (SELECT ${tableModel.primaryKey.join(', ')} FROM desired)`);
+  yield computeDifferencesSubset(client, txid, 'desired', 'dirty', tableModel);
+  yield client.query('drop table desired');
+  yield client.query('drop table dirty');
+});
 
 const applyCurrentTableToChangeTable = (client, tableModel, columnsToApply) => {
   return client.query(`WITH rowsToUpdate AS (SELECT ${selectList('t', tableModel.primaryKey)}, ${selectList('t', columnsToApply)},txid,changeid
@@ -326,47 +349,6 @@ const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, colu
 });
 
 /**
- * Insert a single row into the change table. NOTE: does *not* derive columns
- * @param client
- * @param txid
- * @param tableModel
- * @param row
- */
-const insert = (client, txid, tableModel, row) => go(function* () {
-  const changeTableName = `${tableModel.table}_changes`;
-  const columns = allColumnNames(tableModel);
-  const params = [txid, ...columns.map(column => row[column] || null)];
-  const nonDerivedParamExpr = columns.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${columns.join(', ')}) 
-  (SELECT $1, 'insert', false, ${nonDerivedParamExpr})`, params);
-});
-
-/**
- * Insert a single update row into the change table. NOTE: does *not* derive columns
- * @param client
- * @param txid
- * @param tableModel
- * @param row
- */
-const update = (client, txid, tableModel, row) => go(function* () {
-  const changeTableName = `${tableModel.table}_changes`;
-  const nonDerivedColumns = nonDerivedColumnNames(tableModel);
-  const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
-  const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${nonDerivedColumns.join(', ')}) 
-  (SELECT $1, 'update', false, ${nonDerivedParamExpr})`, params);
-});
-
-const del = (client, txid, tableModel, row) => go(function* () {
-  const changeTableName = `${tableModel.table}_changes`;
-  const nonDerivedColumns = nonDerivedColumnNames(tableModel);
-  const params = [txid, ...nonDerivedColumns.map(column => row[column] || null)];
-  const nonDerivedParamExpr = nonDerivedColumns.map((column, index) => `$${index + 2}`).join(',');
-  yield client.query(`INSERT INTO ${changeTableName}(txid, operation, public, ${nonDerivedColumns.join(', ')}) 
-  (SELECT $1, 'delete', false, ${nonDerivedParamExpr})`, params);
-});
-
-/**
  * Assign sequence number to multiple changes in correct order, respecting any foreign key relationships.
  * Tables must be provided in order, such that any table only references tables before it.
  * Assumes that foreign keys are immutable, such that order of updates does not matter.
@@ -408,13 +390,11 @@ module.exports = {
   initChangeTable,
   initializeFromScratch,
   clearHistory,
-  insert,
-  update,
-  del,
   getChangeTableSql,
   assignSequenceNumbersToDependentTables,
   initializeChangeTable,
   applyCurrentTableToChangeTable,
   countChanges,
-  makeSelectClause
+  makeSelectClause,
+  createIncrementalDifferences
 };

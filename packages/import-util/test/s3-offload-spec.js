@@ -11,8 +11,8 @@ const testdb = require('@dawadk/test-util/src/testdb');
 const { withImportTransaction } = require('../src/transaction');
 const { startS3rver } = require('../src/start-s3rver');
 const configHolder = require('@dawadk/common/src/config/holder');
-const geomDistinctClause = (a, b) => `${a} IS DISTINCT FROM ${b} OR NOT ST_Equals(${a}, ${b})`;
 const tableDiff = require('../src/table-diff');
+const {offloadedGeomColumn, offloadedGeomBlobrefColumn} = require('../src/common-columns');
 
 const stederTableModel = {
   table: 'steder',
@@ -25,14 +25,8 @@ const stederTableModel = {
     {name: 'geo_ændret'},
     {name: 'hovedtype'},
     {name: 'undertype'},
-    {
-      name: 'geom',
-      distinctClause: geomDistinctClause,
-    },
-    {
-      name: 'geom_blobref',
-      offloads: 'geom'
-    }
+    offloadedGeomColumn({}),
+    offloadedGeomBlobrefColumn({})
   ]
 };
 
@@ -72,7 +66,8 @@ describe('S3 offload', () => {
       };
       yield withImportTransaction(clientFn(), 'test', [stederTableModel], txid => go(function*() {
         yield configHolder.withConfigOverride({'s3_offload.threshold': 1}, () => go(function*() {
-          yield tableDiff.insert(clientFn(), txid, stederTableModel, sted);
+          yield tableDiff.createIncrementalDifferences(clientFn(), txid, stederTableModel, [sted], []);
+
           yield tableDiff.applyChanges(clientFn(), txid, stederTableModel);
           const result = yield clientFn().queryRows('select * from steder_changes');
           assert.strictEqual(result.length, 1);

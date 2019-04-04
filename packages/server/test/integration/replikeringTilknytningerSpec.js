@@ -74,9 +74,7 @@ const expectedKeys = {
 
 const loadAdresser = (client, adgangsadresser_mats) => go(function* () {
   yield withImportTransaction(client, 'test', txid => go(function* () {
-    for(let adgangsadresse of adgangsadresser_mats) {
-      yield tableDiffNg.insert(client, txid, schemaModel.tables.adgangsadresser_mat, adgangsadresse);
-    }
+    yield tableDiffNg.createIncrementalDifferences(client, txid, schemaModel.tables.adgangsadresser_mat, adgangsadresser_mats, []);
     yield tableDiffNg.applyChanges(client, txid, schemaModel.tables.adgangsadresser_mat);
     const context = { changes: {adgangsadresser_mat: {total: adgangsadresser_mats.length}}};
     for(let processor of dagiAssociationsProcessors) {
