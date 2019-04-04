@@ -1,96 +1,108 @@
 "use strict";
 
+const { go } = require('ts-csp');
 const fs = require('fs');
 const path = require('path');
-const q = require('q');
-const _ = require('underscore');
 
-const cliParameterParsing = require('../bbr/common/cliParameterParsing');
-const promisingStreamCombiner = require('../promisingStreamCombiner');
+const runConfigured = require('@dawadk/common/src/cli/run-configured');
+const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
 const {readNdjson, writeNdjson} = require('../importUtil/ndjson');
 
 const csvParse = require('csv-parse');
 
-const optionSpec = {
-  src: [false, 'Folder med NDJSON-filer', 'string'],
-  dst: [false, 'Whether this is an initial import', 'string', 'test/data/dar10'],
-  adressesubset: [false, 'File containing ids of adresses', 'string', 'test/data_subsets/dar_adresse_subset.csv']
+const schema = {
+  dst: {
+    format: 'string',
+    doc: 'Where to place test data',
+    default: 'test/data/dar10',
+    cli: true
+  },
+  address_subset: {
+    format: 'string',
+    doc: 'CSV file containing ids of addresses to include in subset',
+    default: 'test/data_subsets/dar_adresse_subset.csv',
+    cli: true
+  },
+  src: {
+    format: 'string',
+    doc: 'Folder with NDJSON files',
+    cli: true,
+    default: null,
+    required: true
+  },
+
 };
 
-cliParameterParsing.main(optionSpec, _.keys(optionSpec), function (args, options) {
-  q.async(function*() {
+runConfigured(schema, [], config => go(function* () {
+  const addressIds = new Set();
 
-    const addressIds = new Set();
+  const csvParser = csvParse({
+    columns: true
+  });
 
-    const csvParser = csvParse({
-      columns: true
-    });
+  csvParser.on('data', (row) => addressIds.add(row.bkid));
+  yield promisingStreamCombiner([
+    fs.createReadStream(config.get('address_subset')),
+    csvParser
+  ]);
 
-    csvParser.on('data', (row) => addressIds.add(row.bkid));
-    yield promisingStreamCombiner([
-      fs.createReadStream(options.adressesubset),
-      csvParser
-    ]);
+  const addresses = yield readNdjson(path.join(config.get('src'), 'Adresse.ndjson'),
+    row => addressIds.has(row.id));
+  const husnummerIds = new Set(addresses.map(address => address.husnummer_id));
+  const husnumre = yield readNdjson(path.join(config.get('src'), 'Husnummer.ndjson'),
+    row => husnummerIds.has(row.id));
 
-    const addresses = yield readNdjson(path.join(options.src, 'Adresse.ndjson'),
-      row => addressIds.has(row.id));
-    const husnummerIds = new Set(addresses.map(address => address.husnummer_id));
-    const husnumre = yield readNdjson(path.join(options.src, 'Husnummer.ndjson'),
-      row => husnummerIds.has(row.id));
+  const adressepunktIds = new Set(husnumre.map(husnummer => husnummer.adgangspunkt_id)
+    .concat(husnumre.map(husnummer => husnummer.vejpunkt_id)));
 
-    const adressepunktIds = new Set(husnumre.map(husnummer=> husnummer.adgangspunkt_id)
-      .concat(husnumre.map(husnummer => husnummer.vejpunkt_id)));
+  const adressepunkter = yield readNdjson(path.join(config.get('src'), 'Adressepunkt.ndjson'),
+    row => adressepunktIds.has(row.id));
 
-    const adressepunkter = yield readNdjson(path.join(options.src, 'Adressepunkt.ndjson'),
-      row => adressepunktIds.has(row.id));
+  const kommuneIds = new Set(husnumre.map(husnummer => husnummer.darkommune_id));
+  const darKommuner = yield readNdjson(path.join(config.get('src'), 'DARKommuneinddeling.ndjson'),
+    row => kommuneIds.has(row.id));
+  const navngivenVejIds = new Set(husnumre.map(husnummer => husnummer.navngivenvej_id));
+  const navngivneVeje = yield readNdjson(path.join(config.get('src'), 'NavngivenVej.ndjson'),
+    row => navngivenVejIds.has(row.id));
+  const navngivenVejKommunedele = yield readNdjson(path.join(config.get('src'), 'NavngivenVejKommunedel.ndjson'),
+    row => navngivenVejIds.has(row.navngivenvej_id));
 
-    const kommuneIds = new Set(husnumre.map(husnummer => husnummer.darkommune_id));
-    const darKommuner = yield readNdjson(path.join(options.src, 'DARKommuneinddeling.ndjson'),
-      row => kommuneIds.has(row.id));
-    const navngivenVejIds = new Set(husnumre.map(husnummer => husnummer.navngivenvej_id));
-    const navngivneVeje = yield readNdjson(path.join(options.src, 'NavngivenVej.ndjson'),
-      row => navngivenVejIds.has(row.id));
-    const navngivenVejKommunedele = yield readNdjson(path.join(options.src, 'NavngivenVejKommunedel.ndjson'),
-      row => navngivenVejIds.has(row.navngivenvej_id));
+  const postnummerIds = new Set(husnumre.map(husnummer => husnummer.postnummer_id));
+  const postnumre = yield readNdjson(path.join(config.get('src'), 'Postnummer.ndjson'),
+    row => postnummerIds.has(row.id));
 
-    const postnummerIds = new Set(husnumre.map(husnummer => husnummer.postnummer_id));
-    const postnumre = yield readNdjson(path.join(options.src, 'Postnummer.ndjson'),
-      row => postnummerIds.has(row.id));
+  const supplerendeBynavnIds = new Set(husnumre.map(husnummer => husnummer.supplerendebynavn_id));
+  const supplerendeBynavne = yield readNdjson(path.join(config.get('src'), 'SupplerendeBynavn.ndjson'),
+    row => supplerendeBynavnIds.has(row.id));
 
-    const supplerendeBynavnIds = new Set(husnumre.map(husnummer => husnummer.supplerendebynavn_id));
-    const supplerendeBynavne = yield readNdjson(path.join(options.src, 'SupplerendeBynavn.ndjson'),
-      row => supplerendeBynavnIds.has(row.id));
+  const darAfstemningsområdeIds = new Set(husnumre.map(husnummer => husnummer.darafstemningsområde_id));
+  const darAfstemningsområder = yield readNdjson(path.join(config.get('src'), 'DARAfstemningsomraade.ndjson'),
+    row => darAfstemningsområdeIds.has(row.id));
 
-    const darAfstemningsområdeIds = new Set(husnumre.map(husnummer => husnummer.darafstemningsområde_id));
-    const darAfstemningsområder = yield readNdjson(path.join(options.src, 'DARAfstemningsomraade.ndjson'),
-      row => darAfstemningsområdeIds.has(row.id));
+  const sogneIds = new Set(husnumre.map(husnummer => husnummer.darsogneinddeling_id));
+  const sogne = yield readNdjson(path.join(config.get('src'), 'DARSogneinddeling.ndjson'),
+    row => sogneIds.has(row.id));
 
-    const sogneIds = new Set(husnumre.map(husnummer => husnummer.darsogneinddeling_id));
-    const sogne = yield readNdjson(path.join(options.src, 'DARSogneinddeling.ndjson'),
-      row => sogneIds.has(row.id));
+  const darMenighedsrådsafstemingsområdeIds = new Set(husnumre.map(husnummer => husnummer.darmenighedsrådsafstemningsområde_id));
+  const darMenighedsrådsafstemingsområder = yield readNdjson(path.join(config.get('src'), 'DARMenighedsraadsafstemningsomraade.ndjson'),
+    row => darMenighedsrådsafstemingsområdeIds.has(row.id));
 
-    const darMenighedsrådsafstemingsområdeIds = new Set(husnumre.map(husnummer => husnummer.darmenighedsrådsafstemningsområde_id));
-    const darMenighedsrådsafstemingsområder = yield readNdjson(path.join(options.src, 'DARMenighedsraadsafstemningsomraade.ndjson'),
-      row => darMenighedsrådsafstemingsområdeIds.has(row.id));
+  const navngivenVejPostnummerRelationer = yield readNdjson(path.join(config.get('src'), 'NavngivenVejPostnummerRelation.ndjson'),
+    row => navngivenVejIds.has(row.navngivenvej_id) || postnummerIds.has(row.postnummer_id));
 
-    const navngivenVejPostnummerRelationer = yield readNdjson(path.join(options.src, 'NavngivenVejPostnummerRelation.ndjson'),
-      row => navngivenVejIds.has(row.navngivenvej_id) || postnummerIds.has(row.postnummer_id));
-
-    const navngivenVejSupplerendebynavnRelationer = yield readNdjson(path.join(options.src, 'NavngivenVejSupplerendeBynavnRelation.ndjson'),
-      row => navngivenVejIds.has(row.navngivenvej_id) || supplerendeBynavnIds.has(row.supplerendebynavn_id));
-    writeNdjson(path.join(options.dst, 'AdressePunkt.ndjson'), adressepunkter);
-    writeNdjson(path.join(options.dst, 'Adresse.ndjson'), addresses);
-    writeNdjson(path.join(options.dst, 'Husnummer.ndjson'), husnumre);
-    writeNdjson(path.join(options.dst, 'DARKommuneinddeling.ndjson'), darKommuner);
-    writeNdjson(path.join(options.dst, 'NavngivenVej.ndjson'), navngivneVeje);
-    writeNdjson(path.join(options.dst, 'NavngivenVejKommunedel.ndjson'), navngivenVejKommunedele);
-    writeNdjson(path.join(options.dst, 'Postnummer.ndjson'), postnumre);
-    writeNdjson(path.join(options.dst, 'SupplerendeBynavn.ndjson'), supplerendeBynavne);
-    writeNdjson(path.join(options.dst, 'DARAfstemningsomraade.ndjson'), darAfstemningsområder);
-    writeNdjson(path.join(options.dst, 'DARMenighedsraadsafstemningsomraade.ndjson'), darMenighedsrådsafstemingsområder);
-    writeNdjson(path.join(options.dst, 'NavngivenVejPostnummerRelation.ndjson'), navngivenVejPostnummerRelationer);
-    writeNdjson(path.join(options.dst, 'NavngivenVejSupplerendeBynavnRelation.ndjson'), navngivenVejSupplerendebynavnRelationer);
-    writeNdjson(path.join(options.dst, 'DARSogneinddeling.ndjson'), sogne);
-
-  })().done();
-});
+  const navngivenVejSupplerendebynavnRelationer = yield readNdjson(path.join(config.get('src'), 'NavngivenVejSupplerendeBynavnRelation.ndjson'),
+    row => navngivenVejIds.has(row.navngivenvej_id) || supplerendeBynavnIds.has(row.supplerendebynavn_id));
+  writeNdjson(path.join(config.get('dst'), 'AdressePunkt.ndjson'), adressepunkter);
+  writeNdjson(path.join(config.get('dst'), 'Adresse.ndjson'), addresses);
+  writeNdjson(path.join(config.get('dst'), 'Husnummer.ndjson'), husnumre);
+  writeNdjson(path.join(config.get('dst'), 'DARKommuneinddeling.ndjson'), darKommuner);
+  writeNdjson(path.join(config.get('dst'), 'NavngivenVej.ndjson'), navngivneVeje);
+  writeNdjson(path.join(config.get('dst'), 'NavngivenVejKommunedel.ndjson'), navngivenVejKommunedele);
+  writeNdjson(path.join(config.get('dst'), 'Postnummer.ndjson'), postnumre);
+  writeNdjson(path.join(config.get('dst'), 'SupplerendeBynavn.ndjson'), supplerendeBynavne);
+  writeNdjson(path.join(config.get('dst'), 'DARAfstemningsomraade.ndjson'), darAfstemningsområder);
+  writeNdjson(path.join(config.get('dst'), 'DARMenighedsraadsafstemningsomraade.ndjson'), darMenighedsrådsafstemingsområder);
+  writeNdjson(path.join(config.get('dst'), 'NavngivenVejPostnummerRelation.ndjson'), navngivenVejPostnummerRelationer);
+  writeNdjson(path.join(config.get('dst'), 'NavngivenVejSupplerendeBynavnRelation.ndjson'), navngivenVejSupplerendebynavnRelationer);
+  writeNdjson(path.join(config.get('dst'), 'DARSogneinddeling.ndjson'), sogne);
+}));

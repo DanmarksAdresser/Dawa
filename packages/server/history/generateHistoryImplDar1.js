@@ -60,7 +60,8 @@ const prepareDar1NavngivenVej = client => go(function*() {
 });
 
 const prepareDar1NavngivenVejKommunedel = client => go(function*() {
-  yield mergeValidTime(client, 'dar1_navngivenvejkommunedel_history', 'dar1_navngivenvejkommunedel_prepared', ['id'], ['id', 'navngivenvej_id', 'kommune', 'vejkode']);
+  yield client.query('CREATE TEMP TABLE dar1_navngivenvejkommunedel_unmerged AS (SELECT * FROM dar1_navngivenvejkommunedel_history WHERE status = 3)')
+  yield mergeValidTime(client, 'dar1_navngivenvejkommunedel_unmerged', 'dar1_navngivenvejkommunedel_prepared', ['id'], ['id', 'navngivenvej_id', 'kommune', 'vejkode']);
 });
 
 const mergePostnr = client =>
@@ -83,7 +84,7 @@ const mergeKommune = client =>
     aa.virkning * k.virkning as virkning
     FROM supplerendebynavn_merged aa JOIN dar1_kommune_prepared k ON aa.darkommune_id = k.id AND aa.virkning && k.virkning)`);
 
-const mergeVejkode = client =>
+const mergeVejkode = client => go(function*() {
   client.query(`CREATE TEMP TABLE vejkode_merged AS (SELECT aa.id, hn_status, husnr, adgangspunkt_id,
     aa.navngivenvej_id, postnr, postnrnavn, supplerendebynavn, kommunekode, nvk.vejkode,
     aa.virkning * nvk.virkning as virkning
@@ -91,6 +92,15 @@ const mergeVejkode = client =>
      ON aa.navngivenvej_id = nvk.navngivenvej_id
       AND aa.kommunekode = nvk.kommune
       AND aa.virkning && nvk.virkning)`);
+  try {
+    yield client.query(`alter table vejkode_merged add constraint no_overlap EXCLUDE USING GIST(id WITH =, virkning WITH &&)`);
+  }
+  catch (e) {
+    console.error(e);
+    throw e;
+  }
+
+});
 
 const mergeVejnavn = client =>
   client.query(`CREATE TEMP TABLE vejnavn_merged AS (SELECT aa.id, hn_status, husnr, adgangspunkt_id,

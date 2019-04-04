@@ -13,7 +13,8 @@ CREATE TABLE vask_adgangsadresser
   supplerendebynavn   TEXT,
   postnr              SMALLINT,
   postnrnavn          TEXT,
-  virkning            TSTZRANGE
+  virkning            TSTZRANGE,
+  EXCLUDE USING GIST (id WITH =, virkning WITH &&)
 );
 
 CREATE INDEX ON vask_adgangsadresser (id, lower(virkning));
