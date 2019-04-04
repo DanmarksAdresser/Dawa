@@ -7,11 +7,9 @@ const proddb = require('../psql/proddb');
 const { withImportTransaction} = require('../importUtil/transaction-util');
 const logger = require('@dawadk/common/src/logger').forCategory('Vejmidter');
 const { go } = require('ts-csp');
-const s3ConvictSchema = require('@dawadk/import-util/src/config/schemas/s3-offload-import-schema');
-const configHolder = require('@dawadk/common/src/config/holder');
 
 
-const schema = configHolder.mergeConfigSchemas([{
+const schema = {
   file: {
     doc: 'File containing road centers',
     format: 'string',
@@ -19,7 +17,7 @@ const schema = configHolder.mergeConfigSchemas([{
     required: true,
     cli: true
   }
-}, s3ConvictSchema]);
+};
 
 runConfiguredImporter('vejmidter', schema, config => go(function*() {
   proddb.init({

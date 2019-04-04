@@ -4,10 +4,8 @@
 const {go} = require('ts-csp');
 const importStednavneImpl = require('./importStednavneImpl');
 const proddb = require('../psql/proddb');
-const s3ConvictSchema = require('@dawadk/import-util/src/config/schemas/s3-offload-import-schema');
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const configHolder = require('@dawadk/common/src/config/holder');
-const convictSchema = configHolder.mergeConfigSchemas([{
+const convictSchema = {
   file: {
     format: 'string',
     doc: 'Fil med stednavne',
@@ -20,7 +18,7 @@ const convictSchema = configHolder.mergeConfigSchemas([{
     default: 50000,
     cli: true
   }
-}, s3ConvictSchema]);
+};
 
 runConfiguredImporter('stednavne', convictSchema, config => go(function* () {
   proddb.init({

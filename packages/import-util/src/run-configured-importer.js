@@ -8,7 +8,10 @@ const runConfigured = require('@dawadk/common/src/cli/run-configured');
 const configHolder = require('@dawadk/common/src/config/holder');
 
 module.exports = (importerName, configSchema, importerFn) => {
-  const schema = configHolder.mergeConfigSchemas([require('./config/schemas/importer-cli-schema'), configSchema]);
+  const schema = configHolder.mergeConfigSchemas([
+    require('./config/schemas/importer-cli-schema'),
+    require('./config/schemas/s3-offload-import-schema'),
+    configSchema]);
   return runConfigured(schema, [], (config) => go(function*() {
     let timeoutProcess;
     if (config.get('importer_timeout')) {
