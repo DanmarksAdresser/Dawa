@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/replication-client",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "main": "src/replication-client-impl.js",
   "license": "MIT",
   "private": false,
@@ -27,7 +27,7 @@
     "urijs": "^1.19.1"
   },
   "devDependencies": {
-    "@dawadk/server": "^1.28.2"
+    "@dawadk/server": "^1.28.3"
   },
   "scripts": {
     "lint": "eslint .",
