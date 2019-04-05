@@ -79,6 +79,7 @@ runConfigured(schema, [],config => go(function*() {
     yield client.query(fs.readFileSync(require.resolve('./schema/tables/vask_adresser.sql'), {encoding: 'utf8'}));
     yield createChangeTable(client, tableSchema.tables.vask_adgangsadresser);
     yield createChangeTable(client, tableSchema.tables.vask_adresser);
+    yield client.query('alter table stedtilknytninger_changes alter public drop not null');
     yield withImportTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
       yield generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
     }));
