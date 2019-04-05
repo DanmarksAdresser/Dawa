@@ -10,6 +10,7 @@ const convictSchema = {
     format: 'string',
     doc: 'Fil med stednavne',
     required: true,
+    default: null,
     cli: true
   },
   max_changes: {

@@ -13,7 +13,8 @@ const schema = {
     doc: 'Directory with NDJSON files to import',
     format: 'string',
     cli: true,
-    required: true
+    required: true,
+    default: null
   },
   refresh_derived: {
     doc: 'Genberegn afledte tabeller',
