@@ -47,36 +47,38 @@ var wfsServices = {
 const schema = {
   target_dir: {
     doc: 'Directory where files are saved to',
-    format: 'String',
+    format: 'string',
     default: '.',
     cli: true
   },
   file_prefix: {
     doc: 'Prefix added to the files saved',
-    format: 'String',
+    format: 'string',
     default: '',
     cli: true
   },
   service: {
     doc: 'Specifies which WFS to download from (either datafordeler or zone)',
-    format: 'String',
-    cli: true
+    format: 'string',
+    cli: true,
+    default: null,
+    required: true
   },
   service_url: {
     doc: 'URL to WFS service to download from',
-    format: 'String',
+    format: 'string',
     cli: true,
     default: null
   },
   service_login: {
     doc: 'Username for logging into service',
-    format: 'String',
+    format: 'string',
     cli: true,
     default: null
   },
   service_password: {
     doc: 'Password for logging into service',
-    format: 'String',
+    format: 'string',
     sensitive: true,
     cli: true,
     default: null
@@ -89,7 +91,7 @@ const schema = {
   },
   themes: {
     doc: 'Which themes to download from service in comma-separated list (defaults to all supported)',
-    format: 'String',
+    format: 'string',
     default: null,
     cli: true
   }
