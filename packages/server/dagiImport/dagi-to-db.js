@@ -22,24 +22,26 @@ const featureMappingsMap = {
 const schema = {
   data_dir: {
     doc: 'Directory with DAGI theme files',
-    format: 'String',
+    format: 'string',
     default: '.',
     cli: true
   },
   file_prefix: {
     doc: 'Prefix for DAGI theme files',
-    format: 'String',
+    format: 'string',
     default: '',
     cli: true
   },
   service: {
     doc: 'WFS source: datafordeler or zone',
-    format: 'String',
+    format: 'string',
+    required: true,
+    default: null,
     cli: true
   },
   themes: {
     doc: 'DAGI themes to import separated by comma',
-    format: 'String',
+    format: 'string',
     default: null
   },
   max_changes: {
