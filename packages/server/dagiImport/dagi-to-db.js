@@ -42,17 +42,20 @@ const schema = {
   themes: {
     doc: 'DAGI themes to import separated by comma',
     format: 'string',
-    default: null
+    default: null,
+    cli: true
   },
   max_changes: {
     doc: 'Maximum number of changes to address associations allowed per theme',
     format: 'nat',
-    default: 10000
+    default: 10000,
+    cli: true
   },
   init: {
     doc: 'Initializing load - only set this on first import',
     format: 'Boolean',
-    default: false
+    default: false,
+    cli: true
   }
 };
 
