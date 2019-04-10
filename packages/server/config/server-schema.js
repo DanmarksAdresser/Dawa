@@ -132,7 +132,8 @@ module.exports = mergeConfigSchemas([s3OffloadSchema,
       password: {
         doc: "OIS password",
         format: 'string',
-        sensitive: true
+        sensitive: true,
+        default: null
       }
     },
     autocomplete: {
