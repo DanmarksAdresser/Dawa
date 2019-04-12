@@ -801,6 +801,26 @@ module.exports = {
       }
     ]
   },
+  stednavn: {
+    key: ['stedid', 'navn'],
+    attributes: [{
+      name: 'stedid',
+      type: 'uuid',
+      description: 'stedets ID.',
+    }, {
+      name: 'navn',
+      type: 'string',
+      description: 'Navnet på stedet.'
+    }, {
+      name: 'navnestatus',
+      type: 'string',
+      description: 'Stednavnets status. "suAutoriseret", "officielt" eller "uofficielt".'
+    }, {
+      name: 'brugsprioritet',
+      type: 'string',
+      description: 'Angiver, om stednavet er det primære navn. Mulige værdier: "primær", "sekundær".'
+    }]
+  },
   stedtilknytning: {
     key: ['stedid', 'adgangsadresseid'],
     attributes: [{

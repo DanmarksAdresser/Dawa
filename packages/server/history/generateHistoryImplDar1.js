@@ -92,13 +92,7 @@ const mergeVejkode = client => go(function*() {
      ON aa.navngivenvej_id = nvk.navngivenvej_id
       AND aa.kommunekode = nvk.kommune
       AND aa.virkning && nvk.virkning)`);
-  try {
-    yield client.query(`alter table vejkode_merged add constraint no_overlap EXCLUDE USING GIST(id WITH =, virkning WITH &&)`);
-  }
-  catch (e) {
-    console.error(e);
-    throw e;
-  }
+  yield client.query(`alter table vejkode_merged add constraint no_overlap EXCLUDE USING GIST(id WITH =, virkning WITH &&)`);
 
 });
 

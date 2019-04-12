@@ -146,6 +146,11 @@ const unnormalizedBindings = {
       types.offloadedGeometry({attrName: 'geometri', column: 'geom'})
     ]
   },
+  stednavn: {
+    table: 'stednavne',
+    attributes: [
+    ]
+  },
   vejpunkt: {
     table: 'vejpunkter',
     attributes: [
