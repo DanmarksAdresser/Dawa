@@ -3,11 +3,11 @@ import L from 'leaflet';
 import $ from 'jquery';
 import 'bootstrap/js/src/index';
 import 'jquery-ui-dist/jquery-ui.min';
-import {dawaAutocomplete} from 'dawa-autocomplete2';
 import {initToc} from './bootstrap-toc';
 
 const apiBase = '/';
 
+/* globals dawaAutocomplete */
 const formatAdresseMultiline = (data, medsupplerendebynavn) => {
   let adresse = data.vejnavn;
   if (data.husnr) {
@@ -299,20 +299,20 @@ export function initForside() {
       };
     }
 
-    dawaAutocomplete(document.getElementById("autocomplete-adresse"), {
+    dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-adresse"), {
       baseUrl: '',
       select: (data) => {
         $('#autocomplete-adresse-choice').text(data.tekst);
       }
     });
-    dawaAutocomplete(document.getElementById('autocomplete-adgangsadresse'), {
+    dawaAutocomplete.dawaAutocomplete(document.getElementById('autocomplete-adgangsadresse'), {
       adgangsadresserOnly: true,
       baseUrl: '',
       select: function (data) {
         $('#autocomplete-adgangsadresse-choice').text(data.tekst);
       }
     });
-    dawaAutocomplete(document.getElementById('autocomplete-adresse-kbh'), {
+    dawaAutocomplete.dawaAutocomplete(document.getElementById('autocomplete-adresse-kbh'), {
       params: {
         kommunekode: "101"
       },

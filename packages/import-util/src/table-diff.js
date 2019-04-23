@@ -38,7 +38,7 @@ const createDirtyTable = (client, tableModel, dirtyTableName) => {
 const  createIncrementalDifferences = (client, txid, tableModel, puts, deletes) => go(function*() {
   yield createSourceTable(client, tableModel, 'desired');
   yield createDirtyTable(client, tableModel, 'dirty');
-  const publicColumnNames = tableModel.columns.filter(isPublic).map(name);;
+  const publicColumnNames = tableModel.columns.filter(isPublic).map(name);
   yield streamArrayToTable(client, puts, 'desired', publicColumnNames);
   yield streamArrayToTable(client, deletes, 'dirty', tableModel.primaryKey);
   yield client.query(`INSERT INTO dirty(${tableModel.primaryKey.join(',')}) (SELECT ${tableModel.primaryKey.join(', ')} FROM desired)`);

@@ -4,8 +4,10 @@
     <title>DAWA autocomplete - demo</title>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link rel="stylesheet" href="dawa-autocomplete2.css">
-    <script src="https://cdn.aws.dk/assets/dawa-autocomplete2/1.0.0/dawa-autocomplete2.min.js"></script>
+    <link rel="stylesheet" href="css/dawa-autocomplete2.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/3.0.1/core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/3.0.0/fetch.js"></script>
+    <script src="dist/dawa-autocomplete2.js"></script>
     <style>
         body {
             font-family: "Helvetica Neue",Arial,sans-serif;
@@ -38,19 +40,19 @@
 <div class="dawa-autocomplete-container">
     <input id="autocomplete-supplerendebynavn-false">
 </div>
-<h3>stormodtagerpostnumre=false</h3>
+<h3>stormodtagerpostnumre=true</h3>
 <div class="dawa-autocomplete-container">
-    <input id="autocomplete-stormodtagerpostnumre-false">
+    <input id="autocomplete-stormodtagerpostnumre-true">
 </div>
-<h3>Forudfylde adresse med adresseid</h3>
+<h3>addressId</h3>
 <div class="dawa-autocomplete-container">
     <input id="autocomplete-address-id">
 </div>
 
 </body>
 <script>
-//  const BASE_URL = 'https://dawa.aws.dk';
-  const BASE_URL = '';
+//  const BASE_URL = 'http://localhost:3000';
+  const BASE_URL = 'https://dawa.aws.dk';
   dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-default"), {
     baseUrl:BASE_URL,
     select: function(selected) {
@@ -100,6 +102,14 @@
     },
     supplerendebynavn: false
   });
+  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-stormodtagerpostnumre-true"), {
+    baseUrl:BASE_URL,
+    select: function(selected) {
+      console.log('Selected address:');
+      console.dir(selected);
+    },
+    stormodtagerpostnumre: true
+  });
   dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-address-id"), {
     baseUrl:BASE_URL,
     select: function(selected) {
@@ -107,14 +117,6 @@
       console.dir(selected);
     },
     id: 'f5a68d45-935b-48d6-8d11-6363327ca1ae'
-  });
-  dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-stormodtagerpostnumre-false"), {
-    baseUrl:BASE_URL,
-    select: function(selected) {
-      console.log('Selected address:');
-      console.dir(selected);
-    },
-    stormodtagerpostnumre: false
   });
 </script>
 </html>
