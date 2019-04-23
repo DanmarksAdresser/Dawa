@@ -303,7 +303,8 @@ const getChangeTableSql = tableModel => {
   CREATE TABLE ${changeTableName} AS (SELECT NULL::integer as txid, NULL::integer as changeid, NULL::operation_type as operation, null::boolean as public, ${selectFields} FROM ${tableModel.table} WHERE false);
   CREATE INDEX ON ${changeTableName}(${selectKeyClause}, txid desc NULLS LAST, changeid desc NULLS LAST);
   CREATE INDEX ON ${changeTableName}(changeid) WHERE public;
-  CREATE INDEX ON ${changeTableName}(txid) ;`
+  CREATE INDEX ON ${changeTableName}(txid) ;
+  CREATE INDEX ON ${changeTableName}(txid, changeid) WHERE public`
 };
 
 const createChangeTable = (client, tableModel) => go(function* () {

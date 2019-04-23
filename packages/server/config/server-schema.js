@@ -1,6 +1,5 @@
 const {mergeConfigSchemas} = require('@dawadk/common/src/config/holder');
-const s3OffloadSchema = require('@dawadk/import-util/src/config/schemas/s3-offload-common-schema');
-module.exports = mergeConfigSchemas([s3OffloadSchema,
+module.exports = mergeConfigSchemas([
   {
     port: {
       format: 'nat',
@@ -142,6 +141,11 @@ module.exports = mergeConfigSchemas([s3OffloadSchema,
         format: 'nat',
         default: 2000
       }
+    },
+    blob_base_url: {
+      doc: 'Base-URL for blobs',
+      format: 'string',
+      default: 'https://cdn.aws.dk/blob'
     },
     replication: {
       enabled: {

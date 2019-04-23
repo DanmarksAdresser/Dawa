@@ -9,6 +9,7 @@
     key_prefix: 'test',
     bucket: 'dawa'
   },
+  blob_base_url: 'http://localhost:4569',
   ois: {
     enabled: true,
     protected: false
