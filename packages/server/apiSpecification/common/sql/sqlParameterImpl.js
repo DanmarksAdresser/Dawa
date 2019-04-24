@@ -241,7 +241,7 @@ function polygonTransformer(paramValue) {
     return "(" + _.map(points, mapPoint).join(", ") + ")";
   };
   var mapPolygon = function (poly) {
-    return "POLYGON(" + _.map(poly, mapPoints).join(" ") + ")";
+    return "POLYGON(" + _.map(poly, mapPoints).join(", ") + ")";
   };
   return mapPolygon(paramValue);
 }
