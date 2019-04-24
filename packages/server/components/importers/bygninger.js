@@ -34,13 +34,13 @@ const importBygningerFromStream = (client, txid, stream, maxChanges) => go(funct
   const rawColumns = ['id', 'bygningstype', 'ændret', 'målested', 'metode3d', 'bbrbygning_id', 'synlig', 'overlap', 'visueltcenter', 'geomjson'];
 
   yield promisingStreamCombiner([stream, jsonTransformer, ...streamToTablePipeline(client, 'fetch_bygninger_raw', rawColumns, mapFn)]);
-
   yield client.query('CREATE TEMP TABLE fetch_bygninger AS select * from bygninger WHERE false');
   yield client.query(`INSERT INTO fetch_bygninger(id, bygningstype, ændret, målested, metode3d, bbrbygning_id, synlig, overlap, visueltcenter, geom)
   (select id, bygningstype, ændret, målested, metode3d,bbrbygning_id, synlig, overlap,
    st_setsrid(st_geomfromgeojson(visueltcenter), 25832), 
    st_setsrid(ST_GeomFromGeoJSON(geomjson), 25832)
    FROM fetch_bygninger_raw)`);
+  client.query('update fetch_bygninger set geom = ST_RemoveRepeatedPoints(geom)');
   client.query('update fetch_bygninger set visueltcenter = ST_ClosestPoint(fetch_bygninger.geom, ST_Centroid(fetch_bygninger.geom)) where visueltcenter is null');
 
   yield tableDiffNg.computeDifferences(client, txid, `fetch_bygninger`, bygningerTableModel);
