@@ -36,7 +36,7 @@ const initializeData = client => go(function*() {
   }));
   client.allowParallelQueries = true;
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
-    yield generateHistoryImpl.generateHistory(client, txid, '2018-05-04T00:00:00.000Z');
+    yield generateHistoryImpl.generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
   }));
   client.allowParallelQueries = false;
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {

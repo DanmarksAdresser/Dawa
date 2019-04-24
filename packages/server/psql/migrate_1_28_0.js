@@ -11,7 +11,7 @@ const { createS3 } = require('@dawadk/import-util/src/s3-util');
 const {uploadToS3} = require('@dawadk/import-util/src/s3-offload');
 const {initChangeTable, createChangeTable} = require('@dawadk/import-util/src/table-diff');
 const { name } = require('@dawadk/import-util/src/table-diff-protocol');
-const { withImportTransaction } = require('../importUtil/transaction-util');
+const { withImportTransaction, withMigrationTransaction } = require('../importUtil/transaction-util');
 const tableSchema = require('./tableModel');
 const { generateHistory } = require('../history/generateCombinedHistoryImpl');
 
@@ -80,7 +80,8 @@ runConfigured(schema, [],config => go(function*() {
     yield createChangeTable(client, tableSchema.tables.vask_adgangsadresser);
     yield createChangeTable(client, tableSchema.tables.vask_adresser);
     yield client.query('alter table stedtilknytninger_changes alter public drop not null');
-    yield withImportTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
+    yield client.query('alter table navngivenvej_postnummer_changes alter public drop not null');
+    yield withMigrationTransaction(client, 'migrate_1_28_0', (txid) => go(function*() {
       yield generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
     }));
     const offloadedTables = ['vejmidter', 'ejerlav', 'steder', ...temaModels.map(tema => tema.table)];

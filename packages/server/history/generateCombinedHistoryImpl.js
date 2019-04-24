@@ -10,7 +10,7 @@ const { computeDifferences, applyChanges } = require('@dawadk/import-util/src/ta
 
 const generateHistory = (client, txid, dar1CutoffDate) => go(function*(){
   yield client.query(`CREATE TEMP TABLE vask_adgangsadresser_unmerged as (select ${adgAdrCols.join(',')}, null::integer as hn_id, virkning from vask_adgangsadresser where false)`);
-  yield client.query(`CREATE TEMP TABLE vask_adresser_unmerged as (select ${adrCols}, null::integer as dar_id, virkning from vask_adresser)`);
+  yield client.query(`CREATE TEMP TABLE vask_adresser_unmerged as (select ${adrCols}, null::integer as dar_id, virkning from vask_adresser where false)`);
   logger.info('Generating DAR 0.9 history');
   yield generateHistoryImplDar09.generateHistory(client, dar1CutoffDate, 'vask_adgangsadresser_unmerged', 'vask_adresser_unmerged');
   logger.info('Generating DAR 1.0 history');
