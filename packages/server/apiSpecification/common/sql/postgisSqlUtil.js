@@ -1,12 +1,12 @@
 "use strict";
 const sridToPrecision = {
   "4326":  0.00000001,
-  "25832": 0.01
+  "25832": 0.001
 };
 
 const sridToDecimals = {
   "4326": 8,
-  "25832": 2
+  "25832": 3
 };
 
 const dbapi = require('../../../dbapi');
