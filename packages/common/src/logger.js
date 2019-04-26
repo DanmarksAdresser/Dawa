@@ -35,7 +35,7 @@ exports.initialize = function(logOptions) {
   logOptions = logOptions || {};
   var filenamePrefix = cluster.isMaster ? 'master-' : process.pid + '-';
   var directory = logOptions.directory || '.';
-  var fileNameSuffix = logOptions.fileNameSuffix;
+  var fileNameSuffix = logOptions.file_name_suffix;
   if(fileNameSuffix) {
     winstonLogger =  createLogger({
       transports: [
@@ -47,7 +47,7 @@ exports.initialize = function(logOptions) {
         })]
     });
   }
-  defaultThreshold = levels[logOptions.defaultLevel || 'debug'];
+  defaultThreshold = levels[logOptions.default_level || 'debug'];
   if(logOptions.levels) {
     thresholds = _.reduce(logOptions.levels, function(memo, value, key) {
       if(!levels[value]) {

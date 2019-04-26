@@ -6,7 +6,7 @@ module.exports = {
       doc: 'Directory to log to'
     },
     file_name_suffix: {
-      default: '.log',
+      default: 'log',
       format: 'string',
       doc: 'File name suffix for log files'
     },
