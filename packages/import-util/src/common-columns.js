@@ -149,7 +149,7 @@ fromSource.method('preserved', () => false);
 isPublic.method('preserved', () => true);
 preApplyChanges.method('preserved', ({name}, client, txid, tableModel) =>
   client.query(`UPDATE ${tableModel.table}_changes new SET ${name} = old.${name}
-    FROM ${tableModel.table} old WHERE ${columnsEqualClause('old', 'new', tableModel.primaryKey)}
+    FROM ${tableModel.table} old WHERE txid = ${txid} AND ${columnsEqualClause('old', 'new', tableModel.primaryKey)}
                                  AND operation IN ('update', 'delete')`));
 
 const geomColumns = ({
