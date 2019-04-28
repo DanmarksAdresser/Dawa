@@ -12,6 +12,7 @@ const configSchema = configHolder.mergeConfigSchemas([
 ]);
 process.once('message', msg => {
   configHolder.initialize(configSchema, [], JSON.parse(msg));
+  logger.initialize(configHolder.getConfig().get('logging'));
   const config = configHolder.getConfig();
   const errorMessages = require('../haproxy/errorMessages');
   const proddb = require('../psql/proddb');
