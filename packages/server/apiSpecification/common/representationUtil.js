@@ -59,7 +59,13 @@ function removeZCoordinate(coordinates) {
     return coordinates;
   }
   if(Array.isArray(coordinates[0])) {
-    return coordinates.map(removeZCoordinate);
+    return coordinates.map(removeZCoordinate).filter((coords, index, arr) => {
+      if(index === arr.length -1) {
+        return true;
+      }
+      const nextCoords = arr[index+1];
+      return coords[0] !== nextCoords[0] || coords[1] !== nextCoords[1];
+    });
   }
   else if(coordinates.length === 3) {
     return coordinates.slice(0, 2);
@@ -67,6 +73,7 @@ function removeZCoordinate(coordinates) {
   return coordinates;
 }
 
+exports.removeZCoordinate = removeZCoordinate;
 
 
 
