@@ -3,13 +3,14 @@ const { go } = require('ts-csp');
 const format = require('pg-format');
 const { initChangeTable, applyCurrentTableToChangeTable } = require('@dawadk/import-util/src/table-diff');
 const { computeVisualCenter } = require('@dawadk/import-util/src/visual-center');
-const {columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
+const {columnsEqualClause, selectList} = require('@dawadk/common/src/postgres/sql-util');
 
 const updateSubdividedTable =
   (client, txid, baseTable, divTable, keyColumnNames, allowNonPolygons) => go(function* () {
     const forcePolygons = !allowNonPolygons;
     yield client.query(`DELETE FROM ${divTable} d USING ${baseTable}_changes t WHERE ${columnsEqualClause('d', 't', keyColumnNames)} AND txid = ${txid}`);
-    yield client.query(`INSERT INTO ${divTable} (SELECT ${keyColumnNames.join(', ')}, splitToGridRecursive(geom, 64, ${forcePolygons}) AS geom FROM ${baseTable}_changes WHERE operation <> 'delete' AND txid = ${txid})`);
+    yield client.query(`INSERT INTO ${divTable} (SELECT ${selectList('t', keyColumnNames)}, splitToGridRecursive(t.geom, 64, ${forcePolygons}) AS geom 
+        FROM ${baseTable}_changes c join ${baseTable} t ON ${columnsEqualClause('c', 't', keyColumnNames)} WHERE txid = ${txid})`);
   });
 
 const refreshSubdividedTable =
