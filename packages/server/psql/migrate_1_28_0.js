@@ -65,6 +65,7 @@ FROM ${table} where geom_blobref is not null)`,
   // Deleting local copies of the geometry is not done until AFTER applying changes to main table,
   // so that the geometry is copied correctly to main table.
   yield initChangeTable(client, txid, tableModel);
+  yield client.query(`update  ${table}_changes set geom = null where geom_blobref is not null`)
 });
 
 runConfigured(schema, [],config => go(function*() {

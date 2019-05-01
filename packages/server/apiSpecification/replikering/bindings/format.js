@@ -15,19 +15,17 @@ format.method('localTimestamp', ({attrName}, src, dst) => dst[attrName] = timest
 format.method('geometry', ({attrName}, src, dst) => dst[attrName]= src[attrName] ? JSON.parse(src[attrName]) : null);
 
 format.method('offloadedGeometry', ({attrName}, src, dst) => {
-    if(src[attrName]) {
-      dst[attrName] = JSON.parse(src[attrName]);
-    }
-    else if(src[`${attrName}_ref`]) {
-      dst[attrName] = {
-        $refid: src[`${attrName}_ref`],
-        $url: s3Url(src[`${attrName}_ref`])
-      };
-    }
-    else {
-      dst[attrName] = null;
-    }
-  });
+  if (src[`${attrName}_ref`]) {
+    dst[attrName] = {
+      $refid: src[`${attrName}_ref`],
+      $url: s3Url(src[`${attrName}_ref`])
+    };
+  } else if (src[attrName]) {
+    dst[attrName] = JSON.parse(src[attrName]);
+  } else {
+    dst[attrName] = null;
+  }
+});
 
 format.method('kode4', ({attrName}, src, dst) => {
   dst[attrName] = kode4String(src[attrName]);
