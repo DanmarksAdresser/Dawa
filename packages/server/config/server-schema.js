@@ -109,7 +109,7 @@ module.exports = mergeConfigSchemas([
       timeout: {
         doc: "Maksimal ventetid for release af connection",
         format: 'nat',
-        default: 30000
+        default: 7200000
       }
     },
     ois: {
