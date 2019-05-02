@@ -14,7 +14,9 @@ const { name } = require('@dawadk/import-util/src/table-diff-protocol');
 const { withImportTransaction, withMigrationTransaction } = require('../importUtil/transaction-util');
 const tableSchema = require('./tableModel');
 const { generateHistory } = require('../history/generateCombinedHistoryImpl');
-
+const {reloadDatabaseCode} = require('./initialization');
+const path = require('path');
+const { applyCurrentTableToChangeTable } = require('@dawadk/import-util/src/table-diff');
 
 const schema = configHolder.mergeConfigSchemas([
   {
@@ -109,5 +111,8 @@ ALTER TABLE ikke_brofaste_adresser DROP CONSTRAINT ikke_brofaste_adresser_pkey,
         yield migrateS3Offloaded(client, txid, tableModel);
       }
     }));
+    yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
+    yield client.query('UPDATE vejstykker t set oprettet = v.oprettet FROM vejstykker_view v WHERE v.kommunekode= t.kommunekode AND v.kode = t.kode');
+    yield applyCurrentTableToChangeTable(client, tableSchema.tables.vejstykker, ['oprettet']);
   }));
 }));
