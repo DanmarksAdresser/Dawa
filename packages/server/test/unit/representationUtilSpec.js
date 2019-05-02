@@ -1,5 +1,5 @@
 "use strict";
-const { assert } = require('chai');;
+const { assert } = require('chai');
 const { removeZCoordinate } = require('../../apiSpecification/common/representationUtil');
 describe('representationUtil', () => {
   it('Removes duplicate coordinates from GeoJSON polygons when converting to 2D', () => {
