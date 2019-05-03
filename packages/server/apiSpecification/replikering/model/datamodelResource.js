@@ -15,7 +15,8 @@ const externalModel = entities.reduce((memo, entityName) => {
         name: attr.name,
         type: attr.type,
         nullable: !!attr.nullable,
-        description: attr.description
+        description: attr.description,
+        offloaded: attr.offloaded || undefined
       }))
   });
   return memo;

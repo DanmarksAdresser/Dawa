@@ -109,6 +109,26 @@ block main
       | en transaktionel database vil det være hensigtsmæssigt at gøre det i én transaktion,
       | så data altid er indbyrdes konsistente.
     h2 Detaljer
+    h3 Maskinlæsbar model
+    p
+      | Replikerings-API'et udstiller en maskinlæsbar <a href="/replikering/datamodel">datamodel</a>.
+      | Denne datamodel kan benyttes i implementationen af replikerings-klienter. Den indeholder
+      | information om hvilke entiteter der findes, hvilke attributter de har, og hvad typerne
+      | er på attributterne.
+      | <a href="/dok/guide/replikeringsklient">Reference-implementationen</a> af en replikerings-klient
+      | er baseret på den maskinlæsbare datamodel.
+    h3 Store geometrier
+    p
+      | Visse entiteter indeholder store geometrier. Det kan være regioner, kommuner eller steder.
+      | Disse geometrier er ikke indlejrede i udtræk og hændelser. I stedet er der en URL der peger på geometrien.
+      | Det fremgår af <a href="/replikering/datamodel">datamodellen</a> hvilke geometri-attributter
+      | der potentielt kan have referencer i stedet for indlejrede geometrier.
+      | Disse attributter har angivet <code>"offloaded": true</code>.
+    p
+      | Hvis en attribut ikke er indlejret, så er værdien af attributten et objekt der har en <code>$url</code> property.
+      | Replikerings-klienten skal hente den URL der er angivet i $url for at få fat i geometrien.
+      | Bemærk, at attributter der har i datamodellen har angivet <code>"offloaded": true</code> kan indeholde
+      | både offloadede og ikke-offloadede rækker.
     h3 Referentiel integritet
     p
       | DAWA garanterer ikke <em>referentiel integritet</em>. F.eks. er det muligt at der kan være

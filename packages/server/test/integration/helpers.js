@@ -6,7 +6,6 @@ var _ = require('underscore');
 
 var csvParse = require('csv-parse');
 var resourceImpl = require('../../apiSpecification/common/resourceImpl');
-require('./setup-options');
 const replikeringBindings = require('../../apiSpecification/replikering/dbBindings');
 
 function getResponse(dbClient, resourceSpec, pathParams, queryParams) {
