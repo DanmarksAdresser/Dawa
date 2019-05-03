@@ -16,7 +16,7 @@ runConfiguredImporter('generateHistory', schema, config => go(function* () {
     pooled: false
   });
 
-  yield proddb.withTransaction('READ_WRITE_CONCURRENT', (client) =>
+  yield proddb.withTransaction('READ_WRITE', (client) =>
     withImportTransaction(client, 'generateHistory', txid => go(function* () {
       client.allowParallelQueries = true;
       yield generateHistoryImpl.generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
