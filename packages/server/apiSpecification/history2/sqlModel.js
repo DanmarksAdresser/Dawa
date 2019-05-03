@@ -1,6 +1,6 @@
 const {go} = require('ts-csp');
 const specMap = require('./spec');
-const config = require('../../server/config');
+const config = require('@dawadk/common/src/config/holder').getConfig();
 const dbapi = require('../../dbapi');
 const parameters = require('./parameters');
 const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
@@ -88,6 +88,6 @@ module.exports = {
         });
       }
       return [{queryResult}];
-    }), config.getOption('autocomplete.querySlotTimeout'));
+    }), config.get('autocomplete.query_slot_timeout'));
   }
 };
