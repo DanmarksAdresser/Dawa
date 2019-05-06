@@ -2,7 +2,7 @@
 
 const { go } = require('ts-csp');
 const cursorChannel = require('@dawadk/common/src/postgres/cursor-channel');
-const { getColumnName,makeSelectClause } = require('../bindings/util');
+const { getColumnName,makeSelectClause, getColumnSpec } = require('../bindings/util');
 const querySenesteSekvensnummer = require('../sekvensnummer/querySenesteSekvensnummer');
 const dbapi = require('../../../dbapi');
 const registry = require('../../registry');
@@ -21,7 +21,7 @@ const validateParams = (client, params) => go(function*() {
 const createSqlModel = (model, binding, filterParameters) => {
   const allAttrNames = model.attributes.map(attr => attr.name);
   const tableName = binding.table;
-  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParameters, binding.attributes);
+  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParameters, getColumnSpec(filterParameters, binding));
   const selectClause = makeSelectClause(binding.attributes);
   const primaryAttrNames = model.key;
   const primaryColumnNames = primaryAttrNames.map(attrName => getColumnName(attrName,binding));

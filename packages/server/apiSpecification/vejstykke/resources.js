@@ -18,7 +18,8 @@ exports.query = resourcesUtil.queryResourceSpec(
     crs: commonParameters.crs,
     struktur: commonParameters.struktur,
     fuzzy: commonParameters.fuzzy,
-    regex: parameters.regex
+    regex: parameters.regex,
+    includeDeleted: commonParameters.includeDeleted
   },
   representations,
   sqlModel
@@ -31,7 +32,8 @@ exports.autocomplete = resourcesUtil.autocompleteResourceSpec(
     geomWithin: commonParameters.geomWithin,
     crs: commonParameters.crs,
     fuzzy: commonParameters.fuzzy,
-    regex: parameters.regex
+    regex: parameters.regex,
+    includeDeleted: commonParameters.includeDeleted
   },
   representations.autocomplete,
   sqlModel
@@ -47,7 +49,8 @@ exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id,
   {
     crs: commonParameters.crs,
-    struktur: commonParameters.struktur
+    struktur: commonParameters.struktur,
+    includeDeleted: commonParameters.includeDeleted
   },
   representations,
   sqlModel

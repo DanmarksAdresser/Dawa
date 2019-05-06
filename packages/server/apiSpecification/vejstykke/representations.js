@@ -71,6 +71,10 @@ exports.json = {
       'id': normalizedFieldSchema('id'),
       'kode': normalizedFieldSchema('kode'),
       'navn' : normalizedFieldSchema('navn'),
+      'darstatus': {
+        type: 'integer',
+        description: 'Vejstykkets statuskode. 3=gældende, 4=nedlagt.'
+      },
       'adresseringsnavn': normalizedFieldSchema('adresseringsnavn'),
       'kommune': {
         description: 'Kommunen som vejstykket er beliggende i.',
@@ -110,13 +114,14 @@ exports.json = {
         docOrder: ['oprettet', 'ændret']
       })
     },
-    docOrder: ['id','href', 'kode', 'navn', 'adresseringsnavn', 'navngivenvej', 'kommune', 'postnumre', 'historik']
+    docOrder: ['id','href', 'darstatus', 'kode', 'navn', 'adresseringsnavn', 'navngivenvej', 'kommune', 'postnumre', 'historik']
   }),
   fields: representationUtil.fieldsWithoutNames(_.where(fields, {'selectable' : true}), ['geom_json']),
   mapper: function(baseUrl) {
     return function(row) {
       return {
         id: row.id,
+        darstatus: row.darstatus,
         href: makeHref(baseUrl, 'vejstykke', [row.kommunekode, row.kode]),
         kode: kode4String(row.kode),
         navn: row.navn,

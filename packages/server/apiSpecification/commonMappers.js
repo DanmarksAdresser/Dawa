@@ -39,6 +39,9 @@ exports.mapVejstykkeRef = (dbJson, baseUrl) => {
     if(dbJson.id) {
       result.id = dbJson.id;
     }
+    if(dbJson.darstatus) {
+      result.darstatus = dbJson.darstatus;
+    }
     return result;
   }
   return null;

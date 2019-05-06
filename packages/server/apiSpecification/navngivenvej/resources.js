@@ -20,8 +20,9 @@ exports.query = resourcesUtil.queryResourceSpec(
     search: commonParameters.search,
     fuzzy: commonParameters.fuzzy,
     geomWithin: commonParameters.geomWithin,
-    reverseGeocodingOptional: commonParameters.reverseGeocodingOptional
-},
+    reverseGeocodingOptional: commonParameters.reverseGeocodingOptional,
+    includeDeleted: commonParameters.includeDeleted,
+  },
   representations,
   sqlModel
 );
@@ -32,7 +33,8 @@ exports.autocomplete = resourcesUtil.autocompleteResourceSpec(
     autocomplete: commonParameters.autocomplete,
     crs: commonParameters.crs,
     fuzzy: commonParameters.fuzzy,
-    regex: parameters.regex
+    regex: parameters.regex,
+    includeDeleted: commonParameters.includeDeleted
   },
   representations.autocomplete,
   sqlModel
@@ -42,7 +44,8 @@ exports.getByKey = resourcesUtil.getByKeyResourceSpec(
   nameAndKey, parameters.id,{
     struktur: commonParameters.struktur,
     crs: commonParameters.crs,
-    geometri: parameters.geometri
+    geometri: parameters.geometri,
+    includeDeleted: commonParameters.includeDeleted
   },
   representations,
   sqlModel

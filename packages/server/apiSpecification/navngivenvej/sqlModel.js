@@ -31,9 +31,12 @@ const columns = {
     select: selectIsoTimestamp('beliggenhed_oprindelse_registrering')
   },
   vejstykker: {
-    select: `(SELECT json_agg(json_build_object('kommunekode', v.kommunekode, 'kode', v.kode, 'id', v.id))
+    select: ( sqlParts, columnSpec, params) => {
+      const notDiscontinuedClause = params.medtagnedlagte ? '' : ` AND v.darstatus IN (2,3)`;
+      return `(SELECT json_agg(json_build_object('kommunekode', v.kommunekode, 'kode', v.kode, 'id', v.id, 'darstatus', v.darstatus))
     FROM navngivenvejkommunedel_mat v
-    WHERE v.navngivenvej_id = nv.id)`
+    WHERE v.navngivenvej_id = nv.id ${notDiscontinuedClause})`;
+    }
   },
   administrerendekommunekode: {
     column: 'administrerendekommune'

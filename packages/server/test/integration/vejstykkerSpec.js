@@ -24,6 +24,17 @@ describe('Vejstykker', () => {
       expect(names.has('Nedermarken')).to.be.true;
     }));
 
+    it('Nedlagte vejstykker er ikke med i svar', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, [], {kommunekode: '169', kode: '1'});
+      assert.strictEqual(result.length, 0);
+    }));
+
+    it('Nedlagte vejstykker er med i svar hvis medtagnedlagte parameter angives', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, [], {kommunekode: '169', kode: '1', medtagnedlagte: ''});
+      assert.strictEqual(result.length, 1);
+      assert.strictEqual(result[0].darstatus, 4);
+    }));
+
     describe('/vejstykker/{kommunekode}/{kode}/naboer', () => {
       it('Kan finde naboer som støder direkte op til vejstykke', () => go(function*() {
         const result = yield helpers.getJson(clientFn(), naboResource, {kommunekode: '329', kode: '4317'}, {});

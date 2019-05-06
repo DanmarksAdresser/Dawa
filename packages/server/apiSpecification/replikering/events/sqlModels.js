@@ -13,7 +13,7 @@ const datamodels = require('../datamodel');
 const dbBindings = require('../dbBindings');
 const registry = require('../../registry');
 const tableSchema = require('../../../psql/tableModel');
-const { makeSelectClause } =  require('../bindings/util');
+const { makeSelectClause, getColumnSpec } =  require('../bindings/util');
 
 
 const validateSekvensnummerParams = (client, params) => go(function* () {
@@ -42,8 +42,13 @@ const baseQuery = (model, binding) => {
 
 const createSqlModel = (model, binding, filterParams) => {
   const allAttrNames = model.attributes.map(attr => attr.name);
-  const propertyFilter = sqlParameterImpl.simplePropertyFilter(filterParams, Object.assign({}, binding.attributes,
-    {txid: {column: 'i.txid'}}));
+  const columnSpec = Object.assign({},
+    getColumnSpec(filterParams, binding),
+    {txid: {column: 'i.txid'}});
+  const propertyFilter = sqlParameterImpl.simplePropertyFilter(
+    [...filterParams, ...commonParameters.txid],
+    columnSpec
+  );
   return {
     allSelectableFieldNames: function () {
       return ['operation', 'tidspunkt', 'sekvensnummer', ...allAttrNames]
@@ -93,7 +98,6 @@ for (let entityName of Object.keys(datamodels)) {
   const datamodel = datamodels[entityName];
   const binding = dbBindings[entityName];
   const filterParams = [
-    ...commonParameters.txid,
     ...(parameters.keyParameters[entityName] || []),
     ...(binding.additionalParameters || [])
   ];

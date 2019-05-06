@@ -1516,7 +1516,8 @@ describe('Stable API', () => {
               "href": "http://dawa/vejstykker/0420/0480",
               "kommunekode": "0420",
               "kode": "0480",
-              "id": "5ca9d513-4eae-11e8-93fd-066cff24d637"
+              "id": "5ca9d513-4eae-11e8-93fd-066cff24d637",
+              "darstatus": 3
             }
           ],
           postnumre: [

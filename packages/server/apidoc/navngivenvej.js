@@ -11,6 +11,11 @@ const navngivenVejIdParameter =
     examples: ['11ebfac2-37d2-7205-e044-0003ba298018']
   };
 
+const medtagNedlagteParameter = {
+  name: 'medtagnedlagte',
+  doc: 'Medtag nedlagte veje i svaret.'
+};
+
 const navngivenVejGeometriParameter = {
   name: 'geometri',
   doc: `Angiver hvilken geometri der returneres for GeoJSON format. Mulige værdier: "vejnavnelinje", "vejnavneområde", "begge". Default værdi
@@ -64,7 +69,8 @@ const commonFilterParams= [
   {
     name: 'vejstykkeid',
     doc: 'Find den navngivne vej som vejstykket med den angivne id er en del af'
-  }
+  },
+  medtagNedlagteParameter
 ];
 
 const cirkelPolygonParameters = [  {
@@ -156,7 +162,8 @@ module.exports = [
       navngivenVejIdParameter,
       navngivenVejGeometriParameter,
       SRIDParameter,
-      strukturParameter
+      strukturParameter,
+      medtagNedlagteParameter
     ],
     nomulti: true,
     examples: [

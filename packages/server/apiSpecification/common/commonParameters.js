@@ -231,3 +231,9 @@ exports.reverseGeocodingNearest = [{
   type: 'boolean',
   renameTo: 'reverseGeocodingNearest'
 }];
+
+exports.includeDeleted = [{
+  name: 'medtagnedlagte',
+  type: 'boolean'
+}];
+

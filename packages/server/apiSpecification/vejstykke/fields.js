@@ -37,7 +37,10 @@ var fields = [
   {
     name: 'navngivenvej_darstatus'
   },
-  normalizedField('id')
+  normalizedField('id'),
+  {
+    name: 'darstatus'
+  }
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

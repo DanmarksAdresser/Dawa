@@ -5,6 +5,7 @@ const { defaultSchemas } = require('../datamodelUtil');
 const parameterSchema = require('../../parameterSchema');
 const format = require('./format');
 const sqlSelect = require('./sql-select');
+const toColumn = require('./to-column');
 /**
  * Given an attribute name, and a *entity* binding, find the attribute binding that provides
  * the attribute specified by name.
@@ -105,6 +106,15 @@ const getAllProvidedAttributes = attributeBindings =>
     .map(getProvidedAttributes)
     .reduce((acc, attrs) => acc.concat(attrs), []);
 
+const getColumnSpec = (filterParameters, binding) => {
+  const columns = filterParameters.reduce((memo, filterParam) => {
+    const bindingAttr = binding.attributes.find(attr => getProvidedAttributes(attr).includes(filterParam.name));
+    const columnSpec = toColumn(bindingAttr);
+    memo[filterParam.name] = columnSpec;
+    return memo;
+  }, {});
+  return columns;
+};
 
 module.exports = {
   getParameterType,
@@ -115,5 +125,6 @@ module.exports = {
   getColumnName,
   createRowFormatter,
   makeSelectClause,
-  getAllProvidedAttributes
+  getAllProvidedAttributes,
+  getColumnSpec
 };

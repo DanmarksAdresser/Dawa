@@ -33,7 +33,7 @@ module.exports = [
         propertyFilter: parameters.propertyFilter,
         husnrinterval: parameters.husnrinterval,
         includeInvalid: parameters.includeInvalid,
-        includeDeleted: parameters.includeDeleted,
+        includeDeleted: commonParameters.includeDeleted,
         search: commonParameters.search,
         crs: commonParameters.crs,
         struktur: commonParameters.struktur,
@@ -52,7 +52,7 @@ module.exports = [
     propertyFilter: parameters.propertyFilter,
     husnrinterval: parameters.husnrinterval,
     includeInvalid: parameters.includeInvalid,
-    includeDeleted: parameters.includeDeleted,
+    includeDeleted: commonParameters.includeDeleted,
     geomWithin: commonParameters.geomWithin,
     autocomplete: commonParameters.autocomplete,
     crs: commonParameters.crs,
@@ -63,7 +63,7 @@ module.exports = [
     parameters.id,
     {
       includeInvalid: parameters.includeInvalid,
-      includeDeleted: parameters.includeDeleted,
+      includeDeleted: commonParameters.includeDeleted,
       crs: commonParameters.crs,
       struktur: commonParameters.struktur,
       geometri: parameters.geometri

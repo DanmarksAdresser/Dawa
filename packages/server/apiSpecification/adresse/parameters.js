@@ -34,7 +34,6 @@ exports.propertyFilter = normalizeParameters(adgangsadresseParameters.propertyFi
 
 exports.husnrinterval = adgangsadresseParameters.husnrinterval;
 exports.includeInvalid = adgangsadresseParameters.includeInvalid;
-exports.includeDeleted = adgangsadresseParameters.includeDeleted;
 exports.geometri = adgangsadresseParameters.geometri;
 
 registry.addMultiple('adresse', 'parameterGroup', module.exports);

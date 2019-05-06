@@ -77,9 +77,13 @@ exports.json = {
             },
             kommunekode: normalizedVejstykkeFieldSchema('kommunekode'),
             kode: normalizedVejstykkeFieldSchema('kode'),
-            id: normalizedVejstykkeFieldSchema('id')
+            id: normalizedVejstykkeFieldSchema('id'),
+            darstatus: {
+              type: 'integer',
+              description: 'Vejstykkets status. 3=gældende, 4=nedlagt'
+            }
           },
-          docOrder: ['href', 'kommunekode', 'kode']
+          docOrder: ['href', 'kommunekode', 'kode', 'darstatus']
         }
       },
       postnumre: {

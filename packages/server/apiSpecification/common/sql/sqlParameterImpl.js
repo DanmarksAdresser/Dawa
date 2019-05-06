@@ -362,7 +362,7 @@ exports.includeInvalidAdgangsadresser = function (sqlParts, params) {
 
 exports.includeDeletedNavngivenVej = (sqlParts, params) => {
   if (!params.medtagnedlagte) {
-    dbapi.addWhereClause(sqlParts, 'nv.darstatus in (2,3)')
+    dbapi.addWhereClause(sqlParts, 'nv.darstatus in (2,3)');
   }
 };
 
@@ -375,5 +375,11 @@ exports.includeDeletedAdgangsAdresses = (sqlParts, params) => {
 exports.includeDeletedAdresses = (sqlParts, params) => {
   if (!params.medtagnedlagte) {
     dbapi.addWhereClause(sqlParts, 'e_status in (2,3)')
+  }
+};
+
+exports.includeDeletedVejstykker = (sqlParts, params) => {
+  if (!params.medtagnedlagte) {
+    dbapi.addWhereClause(sqlParts, 'vejstykker.darstatus in (2,3)');
   }
 };

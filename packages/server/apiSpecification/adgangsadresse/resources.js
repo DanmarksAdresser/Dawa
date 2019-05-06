@@ -32,7 +32,7 @@ module.exports = [
         propertyFilter: parameters.propertyFilter,
         husnrinterval: parameters.husnrinterval,
         includeInvalid: parameters.includeInvalid,
-        includeDeleted: parameters.includeDeleted,
+        includeDeleted: commonParameters.includeDeleted,
         search: commonParameters.search,
         crs: commonParameters.crs,
         struktur: commonParameters.struktur,
@@ -51,7 +51,7 @@ module.exports = [
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     includeInvalid: parameters.includeInvalid,
-    includeDeleted: parameters.includeDeleted,
+    includeDeleted: commonParameters.includeDeleted,
     crs: commonParameters.crs,
     husnrinterval: parameters.husnrinterval,
     geomWithin: commonParameters.geomWithin,
@@ -65,7 +65,7 @@ module.exports = [
     sqlModel,
     {
       includeInvalid: parameters.includeInvalid,
-      includeDeleted: parameters.includeDeleted,
+      includeDeleted: commonParameters.includeDeleted,
       geometri: parameters.geometri
     }
   ),
@@ -73,7 +73,7 @@ module.exports = [
     parameters.id,
     {
       includeInvalid: parameters.includeInvalid,
-      includeDeleted: parameters.includeDeleted,
+      includeDeleted: commonParameters.includeDeleted,
       crs: commonParameters.crs,
       struktur: commonParameters.struktur,
       geometri: parameters.geometri

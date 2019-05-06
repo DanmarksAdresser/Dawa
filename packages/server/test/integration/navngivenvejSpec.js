@@ -82,5 +82,24 @@ describe('NavngivenVej API', () => {
       });
       assert.strictEqual(result[0].tekst, 'Engvangsvej');
     }));
+
+    it('Nedlagte vejstykker er ikke med hvis medtagnedlagte ikke er angivet', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource,
+        {},
+        {id: 'c0f08a1a-b9a4-465b-8372-d12babe7fbd6'});
+      assert.strictEqual(result.length, 1);
+      const vejstykker = result[0].vejstykker;
+      const nedlagt = vejstykker.find(vejstykke => vejstykke.darstatus === 4);
+      assert(!nedlagt);
+    }));
+    it('Nedlagte vejstykker er med hvis medtagnedlagte er angivet', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource,
+        {},
+        {id: 'c0f08a1a-b9a4-465b-8372-d12babe7fbd6', medtagnedlagte: ''});
+      assert.strictEqual(result.length, 1);
+      const vejstykker = result[0].vejstykker;
+      const nedlagt = vejstykker.find(vejstykke => vejstykke.darstatus === 4);
+      assert(nedlagt);
+    }));
   });
 });

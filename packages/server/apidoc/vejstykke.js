@@ -23,6 +23,12 @@ const vejstykkerIdParameters = [
     examples: ['0052']
   }
 ];
+
+const medtagNedlagteParam = {
+  name:'medtagnedlagte',
+    doc: 'Medtag nedlagte vejstykker i svaret.'
+};
+
 const vejstykkerParameters = [
   {
     name: 'id',
@@ -75,7 +81,8 @@ const vejstykkerParameters = [
     name: 'regex',
     doc: 'Find de vejstykker, som matcher det angivne regulære udtryk.',
     examples: []
-  }
+  },
+  medtagNedlagteParam
 ];
 
 const replikeringEventExamples = [
@@ -120,7 +127,7 @@ module.exports = [
     entity: 'vejstykke',
     path: '/vejstykker/{kommunekode}/{kode}',
     subtext: 'Opslag på enkelt vejstykke ud fra kommunekode og vejkode.',
-    parameters: vejstykkerIdParameters.concat([strukturParameter]),
+    parameters: [...vejstykkerIdParameters,strukturParameter, medtagNedlagteParam],
     nomulti: true,
     examples: [{
       description: 'Hent information om vejstykket med kommunekode <em>0101</em>, og vejkoden <em>316</em>',

@@ -14,6 +14,9 @@ var columns = {
   id: {
     column: 'vejstykker.id'
   },
+  darstatus: {
+    column: 'vejstykker.darstatus'
+  },
   kode: {
     column: 'vejstykker.kode'
   },
@@ -117,6 +120,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+  sqlParameterImpl.includeDeletedVejstykker,
   sqlParameterImpl.search(columns),
   sqlParameterImpl.autocomplete(columns, ['navn']),
   sqlParameterImpl.geomWithin('vejstykker.geom'),
