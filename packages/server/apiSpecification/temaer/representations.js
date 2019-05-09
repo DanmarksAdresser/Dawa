@@ -34,15 +34,15 @@ const commonGeoProps = {
   'ændret': {
     description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
     ' geometrien (se felterne geo_ændret og geo_version).',
-    $ref: '#/definitions/DateTimeUtc'
+    $ref: '#/definitions/NullableDateTimeUtc'
   },
   'geo_ændret': {
     description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
-    $ref: '#/definitions/DateTimeUtc'
+    $ref: '#/definitions/NullableDateTimeUtc'
   },
   geo_version: {
     description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
-    type: 'integer'
+    type: ['null', 'integer']
   },
   bbox: {
     description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
@@ -335,7 +335,7 @@ const supplerendebynavnRepresentation = (() => {
       href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
       dagi_id: normalizedFieldSchema('dagi_id'),
       navn: normalizedFieldSchema('navn'),
-      kommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'}),
+      kommune: Object.assign({}, commonSchemaDefinitions.NullableKommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'}),
       postnumre: {
         description: 'De postnumre, der forefindes i det supplerende bynavn.',
         type: 'array',

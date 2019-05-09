@@ -24,6 +24,11 @@ const examples = {
   autocomplete: []
 };
 
+const medtagnedlagteParam = {
+  name: 'medtagnedlagte',
+  doc: 'Medtag nedlagte supplerende bynavne. Bemærk, at nedlagte supplerende bynavne ikke har en geometri eller kommune tilknyttet.'
+};
+
 const filterParams = [
   {
     name: 'q',
@@ -54,6 +59,7 @@ const queryDoc = {
     ...dagiReverseParameters(model),
     ...formatAndPagingParams,
     ...dagiSridCirkelPolygonParameters(model.plural),
+    medtagnedlagteParam,
     strukturParameter
   ],
   examples: examples.query
@@ -68,6 +74,7 @@ const getByKeyDoc = {
       name: 'dagi_id',
       doc: 'Det supplerende bynavns unikke DAGI ID.'
     },
+    medtagnedlagteParam,
     ...formatParameters, strukturParameter],
   nomulti: true,
   examples: examples.get
@@ -77,7 +84,7 @@ const autocompleteDoc = {
   entity: 'supplerendebynavn',
   path: `/supplerendebynavne2/autocomplete`,
   subtext: autocompleteSubtext(model.plural),
-  parameters: [...overwriteWithAutocompleteQParameter(filterParams), ...formatAndPagingParams],
+  parameters: [...overwriteWithAutocompleteQParameter(filterParams), medtagnedlagteParam, ...formatAndPagingParams],
   examples: examples.autocomplete
 };
 

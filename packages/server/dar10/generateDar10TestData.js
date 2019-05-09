@@ -3,6 +3,7 @@
 const { go } = require('ts-csp');
 const fs = require('fs');
 const path = require('path');
+const _ = require('underscore');
 
 const runConfigured = require('@dawadk/common/src/cli/run-configured');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
@@ -30,7 +31,6 @@ const schema = {
     default: null,
     required: true
   },
-
 };
 
 runConfigured(schema, [], config => go(function* () {
@@ -92,17 +92,23 @@ runConfigured(schema, [], config => go(function* () {
 
   const navngivenVejSupplerendebynavnRelationer = yield readNdjson(path.join(config.get('src'), 'NavngivenVejSupplerendeBynavnRelation.ndjson'),
     row => navngivenVejIds.has(row.navngivenvej_id) || supplerendeBynavnIds.has(row.supplerendebynavn_id));
-  writeNdjson(path.join(config.get('dst'), 'AdressePunkt.ndjson'), adressepunkter);
-  writeNdjson(path.join(config.get('dst'), 'Adresse.ndjson'), addresses);
-  writeNdjson(path.join(config.get('dst'), 'Husnummer.ndjson'), husnumre);
-  writeNdjson(path.join(config.get('dst'), 'DARKommuneinddeling.ndjson'), darKommuner);
-  writeNdjson(path.join(config.get('dst'), 'NavngivenVej.ndjson'), navngivneVeje);
-  writeNdjson(path.join(config.get('dst'), 'NavngivenVejKommunedel.ndjson'), navngivenVejKommunedele);
-  writeNdjson(path.join(config.get('dst'), 'Postnummer.ndjson'), postnumre);
-  writeNdjson(path.join(config.get('dst'), 'SupplerendeBynavn.ndjson'), supplerendeBynavne);
-  writeNdjson(path.join(config.get('dst'), 'DARAfstemningsomraade.ndjson'), darAfstemningsområder);
-  writeNdjson(path.join(config.get('dst'), 'DARMenighedsraadsafstemningsomraade.ndjson'), darMenighedsrådsafstemingsområder);
-  writeNdjson(path.join(config.get('dst'), 'NavngivenVejPostnummerRelation.ndjson'), navngivenVejPostnummerRelationer);
-  writeNdjson(path.join(config.get('dst'), 'NavngivenVejSupplerendeBynavnRelation.ndjson'), navngivenVejSupplerendebynavnRelationer);
-  writeNdjson(path.join(config.get('dst'), 'DARSogneinddeling.ndjson'), sogne);
+
+  for (let [arr, filename] of [
+    [adressepunkter, 'AdressePunkt.ndjson'],
+    [addresses, 'Adresse.ndjson'],
+    [husnumre, 'Husnummer.ndjson'],
+    [darKommuner, 'DARKommuneinddeling.ndjson'],
+    [navngivneVeje, 'NavngivenVej.ndjson'],
+    [navngivenVejKommunedele, 'NavngivenVejKommunedel.ndjson'],
+    [postnumre, 'Postnummer.ndjson'],
+    [supplerendeBynavne, 'SupplerendeBynavn.ndjson'],
+    [darAfstemningsområder, 'DARAfstemningsomraade.ndjson'],
+    [darMenighedsrådsafstemingsområder, 'DARMenighedsraadsafstemningsomraade.ndjson'],
+    [navngivenVejPostnummerRelationer, 'NavngivenVejPostnummerRelation.ndjson'],
+    [navngivenVejSupplerendebynavnRelationer, 'NavngivenVejSupplerendeBynavnRelation.ndjson'],
+    [sogne, 'DARSogneinddeling.ndjson']
+  ]) {
+    const sorted = _.sortBy(arr, 'id');
+    writeNdjson(path.join(config.get('dst'), filename), sorted);
+  }
 }));

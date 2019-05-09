@@ -851,23 +851,22 @@ describe('Stable API', () => {
     :
       [{
         params: {
-          dagi_id: "100116"
+          dagi_id: "665614"
         },
         value: {
-          "dagi_id": "100116",
-          "navn": "Supplerende bynavn test",
-          "kommunekode": "0101",
-          "kommunenavn": "København",
-          "ændret": "2018-05-02T06:50:28.217Z",
-          "geo_ændret": "2018-05-02T06:50:28.217Z",
+          "dagi_id": "665614",
+          "navn": "Høje Taastrup",
+          "kommunekode": "0169",
+          "kommunenavn": "Høje-Taastrup",
+          "ændret": "2019-05-09T09:40:09.226Z",
+          "geo_ændret": "2019-05-09T09:40:09.226Z",
           "geo_version": 1,
-          "bbox_xmax": 12.57129891,
-          "bbox_xmin": 12.5711324,
-          "bbox_ymax": 55.59064873,
-          "bbox_ymin": 55.59055443,
-          "visueltcenter_x": 12.57121565,
-          "visueltcenter_y": 55.59060158,
-
+          "bbox_xmin": 12.27501501,
+          "bbox_ymin": 55.64787833,
+          "bbox_xmax": 12.27504823,
+          "bbox_ymax": 55.64789712,
+          "visueltcenter_x": 12.27503162,
+          "visueltcenter_y": 55.64788773
         }
       }]
     }

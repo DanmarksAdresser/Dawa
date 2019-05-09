@@ -10,6 +10,9 @@ const commonParameters = require('../common/commonParameters');
 const registry = require('../registry');
 const _ = require('underscore');
 
+const additionalParameters = {
+  supplerendebynavn: commonParameters.includeDeleted
+};
 
 temaModels.modelList.filter(model => model.published).forEach(model => {
   const nameAndKey = namesAndKeys[model.singular];
@@ -19,7 +22,8 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     propertyFilter: parameters[model.singular].propertyFilter,
     crs: commonParameters.crs,
     geomWithin: commonParameters.geomWithin,
-    struktur: commonParameters.struktur
+    struktur: commonParameters.struktur,
+    additionalParameters: additionalParameters[model.singular] || []
   };
   if (model.searchable) {
     queryParams.search = commonParameters.search
@@ -37,12 +41,14 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
   if (model.searchable) {
     resources.push(resourcesUtil.autocompleteResourcePathSpec(`${path}/autocomplete`, {
       propertyFilter: parameters[model.singular].propertyFilter,
-      autocomplete: commonParameters.autocomplete
+      autocomplete: commonParameters.autocomplete,
+      additionalParameters: additionalParameters[model.singular] || []
     }, representations.autocomplete, sqlModel));
   }
   const getByKeyParams = {
     crs: commonParameters.crs,
-    struktur: commonParameters.struktur
+    struktur: commonParameters.struktur,
+    additionalParameters: additionalParameters[model.singular] || []
   };
 
   resources = resources.concat([

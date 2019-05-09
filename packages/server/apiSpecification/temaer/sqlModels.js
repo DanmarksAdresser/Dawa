@@ -174,10 +174,10 @@ from (select distinct k.kode, k.navn
   },
   supplerendebynavn: {
     dagi_id: {
-      column: 't.dagi_id'
+      column: 'dar_sup.supplerendebynavn1'
     },
     navn: {
-      column: 't.navn'
+      column: 'dar_sup.navn'
     },
     kommunekode: {
       column: 't.kommunekode'
@@ -190,7 +190,7 @@ from (select distinct k.kode, k.navn
       from supplerendebynavn2_postnr sp
         join postnumre p on sp.postnr = p.nr 
       where
-      t.dagi_id = sp.supplerendebynavn_dagi_id)`
+      dar_sup.supplerendebynavn1 = sp.supplerendebynavn_dagi_id)`
     },
 
   }
@@ -262,13 +262,22 @@ const baseQueries = {
   supplerendebynavn: () => {
     return {
       select: [],
-      from: [`dagi_supplerendebynavne t
-      join kommuner k on t.kommunekode = k.kode`],
+      from: [`dar1_supplerendebynavn_current dar_sup 
+      LEFT JOIN dagi_supplerendebynavne t ON dar_sup.supplerendebynavn1 = t.dagi_id
+      LEFT JOIN kommuner k ON t.kommunekode = k.kode`],
       whereClauses: [],
       orderClauses: [],
       sqlParams: []
     }
   }
+};
+
+const additionalParameterImpls = {
+  supplerendebynavn: [(sqlParts, params) => {
+    if(!params.medtagnedlagte) {
+      dbapi.addWhereClause(sqlParts, 'dar_sup.status in (2,3)');
+    }
+  }]
 };
 
 temaModels.modelList.filter(model => model.published).forEach(model => {
@@ -311,6 +320,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
 
   const parameterImpls = [
     sqlParameterImpl.simplePropertyFilter(parameters[model.singular].propertyFilter, columns),
+      ...(additionalParameterImpls[model.singular] || []),
     sqlParameterImpl.reverseGeocodingWithin('t.geom'),
     sqlParameterImpl.geomWithin('t.geom'),
     sqlParameterImpl.search(columns, [], true),

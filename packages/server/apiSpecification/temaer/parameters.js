@@ -1,12 +1,11 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
-var registry = require('../registry');
+const normalizeParameters = require('../common/parametersUtil').normalizeParameters;
+const registry = require('../registry');
 const parameterSchema = require('../parameterSchema');
-
-var kodeAndNavn = {
+const kodeAndNavn = {
   id: normalizeParameters([
     {
       name: 'kode',
@@ -28,7 +27,7 @@ var kodeAndNavn = {
   ])
 };
 
-var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'retskreds', 'politikreds'];
+const kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function(dagiTemaNavn) {
   module.exports[dagiTemaNavn] = kodeAndNavn;
 });
