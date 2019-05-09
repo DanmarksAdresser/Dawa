@@ -1,0 +1,13 @@
+{
+  port: 3000,
+  master_port: 3001,
+  blob_base_url: 'http://localhost:4569',
+  ois: {
+    enabled: true,
+    protected: false
+  },
+  database_url: 'dawatest',
+  replication: {
+    enabled: true
+  }
+}

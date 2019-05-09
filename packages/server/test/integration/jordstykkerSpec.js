@@ -4,15 +4,17 @@ const { go } = require('ts-csp');
 const expect = require('chai').expect;
 const request = require("request-promise");
 const q = require('q');
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
 describe('Jordstykke API', () => {
   it('Query på både ejerlav og matrikelnr', q.async(function*() {
-    const result = yield request.get({url: 'http://localhost:3002/jordstykker?ejerlavkode=60851&matrikelnr=1a', json: true});
+    const result = yield request.get({url: `${baseUrl}/jordstykker?ejerlavkode=60851&matrikelnr=1a`, json: true});
     expect(result.length).to.equal(1);
   }));
 
   it('Kan hente jordstykke i GeoJSON-format', () => go(function*() {
-    const result = yield request.get({url: 'http://localhost:3002/jordstykker?ejerlavkode=60851&matrikelnr=1a&format=geojson', json: true});
+    const result = yield request.get({url: `${baseUrl}/jordstykker?ejerlavkode=60851&matrikelnr=1a&format=geojson`, json: true});
     expect(result.features.length).to.equal(1);
     const properties = result.features[0].properties;
     expect(properties.ejerlavkode).to.equal(60851);
@@ -20,7 +22,7 @@ describe('Jordstykke API', () => {
   }));
 
   it('Kan lave reverse geocoding af jordstykke', () => go(function*() {
-    const results = yield request.get({url: 'http://localhost:3002/jordstykker?srid=25832&x=685477.186430184&y=6159305.17270726', json: true});
+    const results = yield request.get({url: `${baseUrl}/jordstykker?srid=25832&x=685477.186430184&y=6159305.17270726`, json: true});
     expect(results.length).to.equal(1);
     const jordstykke = results[0];
     expect(jordstykke.ejerlav.kode).to.equal(60851);
@@ -28,7 +30,7 @@ describe('Jordstykke API', () => {
   }));
 
   it('Kan lave søgning i jordstykker', () => go(function*() {
-    const results = yield request.get({url: 'http://localhost:3002/jordstykker?q=1a borup', json: true});
+    const results = yield request.get({url: `${baseUrl}/jordstykker?q=1a borup`, json: true});
     expect(results.length).to.equal(1);
     const jordstykke = results[0];
     expect(jordstykke.ejerlav.kode).to.equal(60851);
@@ -36,7 +38,7 @@ describe('Jordstykke API', () => {
 
   }));
   it('Kan lave autocomplete af jordstykke', () => go(function*() {
-    const results = yield request.get({url: 'http://localhost:3002/jordstykker/autocomplete?q=1a bor', json: true});
+    const results = yield request.get({url: `${baseUrl}/jordstykker/autocomplete?q=1a bor`, json: true});
     expect(results.length).to.equal(1);
     expect(results[0].tekst).to.equal("1a Borup, Osted (60851)");
     const jordstykke = results[0].jordstykke;

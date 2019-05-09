@@ -7,7 +7,7 @@ const compression = require('compression');
 const http = require('http');
 const configHolder = require('@dawadk/common/src/config/holder');
 const configSchema = configHolder.mergeConfigSchemas([
-  require('../config/server-schema'),
+  require('../conf/schemas/server-schema'),
   require('@dawadk/common/src/config/base-schema')
 ]);
 process.once('message', msg => {

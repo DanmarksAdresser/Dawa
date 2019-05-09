@@ -11,6 +11,8 @@ var registry = require('../../apiSpecification/registry');
 var testdb = require('@dawadk/test-util/src/testdb');
 
 require('../../apiSpecification/allSpecs');
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
 describe('CSV udtræk', function () {
   describe('Alle søgninger kan leveres i CSV-format', function () {
@@ -21,7 +23,7 @@ describe('CSV udtræk', function () {
     resources.forEach(function (resource) {
       it('søgning i ' + resource.path + ' kan leveres i CSV-format', () => go(function* () {
         const response = yield request.get({
-          url: "http://localhost:3002" + resource.path + "?per_side=1&format=csv",
+          url: `${baseUrl}${resource.path}?per_side=1&format=csv`,
           resolveWithFullResponse: true
         });
         expect(response.headers['content-type']).to.equal("text/csv; charset=UTF-8");

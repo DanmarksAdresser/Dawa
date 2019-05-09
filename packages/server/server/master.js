@@ -7,7 +7,7 @@ const util = require('util');
 const logger = require('@dawadk/common/src/logger');
 const runConfigured = require('@dawadk/common/src/cli/run-configured');
 
-const configSchema = require('../config/server-schema');
+const configSchema = require('../conf/schemas/server-schema');
 
 function spawn(config){
   var worker = cluster.fork();

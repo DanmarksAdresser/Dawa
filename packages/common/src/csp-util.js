@@ -236,6 +236,17 @@ const pipeMapAsync = (src, dst, batchSize, asyncMapFn) => go(function*() {
   }
 });
 
+const waitUntil = (pred, timeout) => go(function*() {
+  const before = Date.now();
+  while(Date.now() <= before + timeout) {
+    const result = yield pred();
+    if(result) {
+      return result;
+    }
+  }
+  throw new Error('Timeout');
+});
+
 module.exports = {
   pipeMapAsync,
   mapAsync,
@@ -247,5 +258,6 @@ module.exports = {
   pipeFromStream,
   sleep,
   channelEvents,
-  takeWithTimeout
+  takeWithTimeout,
+  waitUntil
 };

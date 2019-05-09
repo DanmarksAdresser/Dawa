@@ -1,0 +1,14 @@
+{
+  s3_offload: {
+    s3: {
+      region: null,
+      access_key_id: 'S3RVER',
+      secret_access_key: 'S3RVER',
+      endpoint: 'http://s3rver:4569',
+      force_path_style: true
+    },
+    threshold: 4096,
+    key_prefix: 'test/',
+    bucket: 'dawa'
+  }
+}

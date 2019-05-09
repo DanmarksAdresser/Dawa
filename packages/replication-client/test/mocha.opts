@@ -3,4 +3,3 @@
 --bail
 --recursive
 --require ./test/setup/setup-config
---require ./test/setup/setup-s3rver

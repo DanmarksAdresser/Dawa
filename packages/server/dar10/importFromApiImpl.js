@@ -93,7 +93,7 @@ const importUsingStatus = (pool, darClient, pretend) => go(function* () {
   yield importIncrementally(pool, darClient, initialRemoteEventIds, pretend);
 });
 
-const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(function* () {
+const runImportLoop = (pool, darClient, notificationWsUrl, {pretend, isalivePort}) => go(function* () {
   //start by performing a local update using the status API
   yield importUsingStatus(pool, darClient, pretend);
   if (!notificationWsUrl) {
@@ -120,7 +120,7 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(func
 
     isaliveApp.set('json spaces', 2);
 
-    isaliveServer = isaliveApp.listen(3000);
+    isaliveServer = isaliveApp.listen(isalivePort);
 
     while (true) {
       logger.info("Waiting for DAR notifications");
@@ -146,7 +146,7 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend}) => go(func
 });
 
 const importDaemon = (pool, darClient,
-                      {pretend, noDaemon, pollIntervalMs, notificationUrl}) => go(function* () {
+                      {pretend, noDaemon, pollIntervalMs, notificationUrl, isalivePort}) => go(function* () {
   if (!notificationUrl) {
     logger.info("Running DAR 1.0 import daemon without WebSocket listener");
   }
@@ -158,7 +158,7 @@ const importDaemon = (pool, darClient,
     while (true) {
       {
         try {
-          yield this.delegateAbort(runImportLoop(pool, darClient, notificationUrl, {pretend}));
+          yield this.delegateAbort(runImportLoop(pool, darClient, notificationUrl, {pretend, isalivePort}));
         }
         catch (err) {
           if (err instanceof Abort) {

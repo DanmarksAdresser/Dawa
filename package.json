@@ -3,8 +3,31 @@
   "version": "1.24.6",
   "private": true,
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-es2015-rollup": "^3.0.0",
+    "bench-rest": "~1.2.4",
+    "chai": "4.1.2",
+    "eslint": "^4.19.1",
+    "gc-stats": "^1.2.0",
     "lerna": "^3.4.3",
-    "npm-run-all": "^4.1.3"
+    "mocha": "^5.2.0",
+    "ncp": "^2.0.0",
+    "node-sass": "^4.10.0",
+    "npm-run-all": "^4.1.3",
+    "request": "2.88.0",
+    "request-promise": "4.2.4",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.60.0",
+    "rollup-plugin-babel": "^3.0.4",
+    "rollup-plugin-commonjs": "^9.1.0",
+    "rollup-plugin-inject": "^2.0.0",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-watch": "^4.3.1",
+    "xp": "^1.0.1"
   },
   "workspaces": [
     "packages/*"
@@ -13,9 +36,10 @@
     "lint": "lerna run lint",
     "mocha": "lerna run test",
     "initialize-db": "node packages/server/psql/initialize-databases.js",
-    "test": "run-s initialize-db lint mocha",
+    "exec-tests": "run-s initialize-db lint mocha",
+    "test": "run-p start-servers exec-tests",
     "test-s3rver": "node packages/import-util/src/start-s3rver-cli",
     "test-dawa-server": "dawa-server --config_files=packages/server/server/default-test-config.json5,local-conf/test-server-conf.json5",
-    "test-server": "run-p test-s3rver test-dawa-server"
+    "start-servers": "run-p test-s3rver test-dawa-server"
   }
 }

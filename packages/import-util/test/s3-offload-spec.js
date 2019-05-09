@@ -9,7 +9,6 @@ const {
 const { createS3 } = require('../src/s3-util');
 const testdb = require('@dawadk/test-util/src/testdb');
 const { withImportTransaction } = require('../src/transaction');
-const { startS3rver } = require('../src/start-s3rver');
 const configHolder = require('@dawadk/common/src/config/holder');
 const tableDiff = require('../src/table-diff');
 const {offloadedGeomColumn, offloadedGeomBlobrefColumn} = require('../src/common-columns');
@@ -32,18 +31,13 @@ const stederTableModel = {
 
 const getFromS3 = key => go(function*() {
   const config = configHolder.getConfig();
-  const result = yield request.get({url: `http://${config.get('test.s3rver.hostname')}:${config.get('test.s3rver.port')}/${config.get('test.s3rver.bucket')}/${key}`, gzip: true, json: true, resolveWithFullResponse: true});
+  const result = yield request.get({url: `${config.get('s3_offload.s3.endpoint')}/${config.get('test.s3rver.bucket')}/${key}`, gzip: true, json: true, resolveWithFullResponse: true});
   assert.strictEqual(result.headers['content-encoding'], 'gzip');
   assert.strictEqual(result.headers['content-type'], 'application/json; charset=utf-8');
   return result.body;
 });
 
 describe('S3 offload', () => {
-  let s3rverInstance;
-  before(() => go(function* () {
-    s3rverInstance = yield  startS3rver();
-  }));
-
   it('Can upload to S3', () => go(function* () {
     const s3 = createS3();
     const bucket = configHolder.getConfig().get('s3_offload.bucket');
@@ -85,6 +79,4 @@ describe('S3 offload', () => {
       }));
     }));
   });
-
-  after((done) => s3rverInstance.close(done));
 });

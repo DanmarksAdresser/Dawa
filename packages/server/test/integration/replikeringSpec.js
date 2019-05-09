@@ -14,6 +14,7 @@ const {computeDifferences, applyChanges} = require('@dawadk/import-util/src/tabl
 const {withImportTransaction} = require('../../importUtil/transaction-util');
 const helpers = require('./helpers');
 const replikeringModel = require('../../apiSpecification/replikering/datamodel');
+const config = require('@dawadk/common/src/config/holder').getConfig();
 
 const ejerlavTableModel = tableModel.tables.ejerlav;
 const ejerlavUdtraekResource = registry.findWhere({
@@ -166,7 +167,7 @@ const entitiesWithoutData = ['dar_reserveretvejnavn_historik', 'dar_reserveretve
 describe('Replikerede entiteter', () => {
   for(let entity of Object.keys(replikeringModel)) {
     it(`Kan hente udtræk for ${entity}`, () => go(function*() {
-      const response = yield request.get({url:`http://localhost:3002/replikering/udtraek?entitet=${entity}`, json: true});
+      const response = yield request.get({url:`${config.get('test.dawa_base_url')}/replikering/udtraek?entitet=${entity}`, json: true});
       if(!entitiesWithoutData.includes(entity)) {
         assert(response.length > 0);
         const model = replikeringModel[entity];
@@ -184,14 +185,14 @@ describe('Replikerede entiteter', () => {
 describe('Validering af tidspunkt-parametre', () =>  {
   it('Validerer tidspunktfra', () => go(function*() {
     const response = yield request.get({
-      url:`http://localhost:3002/replikering/haendelser?entitet=navngivenvej&tidspunktfra=2018-19-01T00:00:00.000Z`,
+      url:`${config.get('test.dawa_base_url')}/replikering/haendelser?entitet=navngivenvej&tidspunktfra=2018-19-01T00:00:00.000Z`,
       simple: false, resolveWithFullResponse: true, json: true});
     assert.strictEqual(response.statusCode, 400);
     assert.strictEqual(response.body.details[0][1], "Ugyldigt tidspunkt: 2018-19-01T00:00:00.000Z for parameter tidspunktfra");
   }));
   it('Validerer tidspunkttil', () => go(function*() {
     const response = yield request.get({
-      url: `http://localhost:3002/replikering/haendelser?entitet=navngivenvej&tidspunkttil=2018-19-01T00:00:00.000Z`,
+      url: `${config.get('test.dawa_base_url')}/replikering/haendelser?entitet=navngivenvej&tidspunkttil=2018-19-01T00:00:00.000Z`,
       simple: false, resolveWithFullResponse: true, json: true});
     assert.strictEqual(response.statusCode, 400);
     assert.strictEqual(response.body.details[0][1], "Ugyldigt tidspunkt: 2018-19-01T00:00:00.000Z for parameter tidspunkttil");
@@ -200,7 +201,7 @@ describe('Validering af tidspunkt-parametre', () =>  {
 
 describe('Transaktioner inspektion', () => {
     it('Kan inspicere en transaktion', () => go(function*() {
-      const response = yield request.get({url:`http://localhost:3002/replikering/transaktioner/inspect?txid=4`, json: true});
+      const response = yield request.get({url:`${config.get('test.dawa_base_url')}/replikering/transaktioner/inspect?txid=4`, json: true});
       assert.notDeepEqual(response.body, {});
     }));
 });

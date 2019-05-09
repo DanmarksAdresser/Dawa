@@ -2,10 +2,12 @@
 
 var expect = require('chai').expect;
 var request = require("request-promise");
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
 describe('Ill-formed query parameters', function () {
   it('should result in QueryParameterFormatError', function (done) {
-    request.get('http://localhost:3002/adresser?postnr=12345',
+    request.get(`${baseUrl}/adresser?postnr=12345`,
                 function(err, response, body){
                   expect(response.statusCode).to.equal(400);
                   var error = JSON.parse(body);
@@ -22,7 +24,7 @@ describe('Ill-formed query parameters', function () {
 
 describe('Ill-formed UUID', function () {
   it('should result in ResourcePathFormatError', function (done) {
-    request.get('http://localhost:3002/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018',
+    request.get(`${baseUrl}/adresser/0a3f50c1-deb6-32b8-e04-0003ba298018`,
                 function(err, response, body){
                   expect(response.statusCode).to.equal(404);
                   var error = JSON.parse(body);
@@ -40,7 +42,7 @@ describe('Ill-formed UUID', function () {
 describe('When getting single addresses', function () {
   it('an unknown id will fail', function (done) {
     var uuid2 = '0a3f50ae-aaaa-bbbb-cccc-0003ba298019';
-    request.get('http://localhost:3002/adresser/'+uuid2,
+    request.get(`${baseUrl}/adresser/`+uuid2,
                 function(err, response, body){
                   expect(response.statusCode).to.equal(404);
                   var error = JSON.parse(body);

@@ -1,7 +1,7 @@
 const Promise = require('bluebird');
 const { go } = require('ts-csp');
 const tmp = require('tmp');
-
+const fs = require('fs');
 const S3rver = require('s3rver');
 const s3Util = require('../src/s3-util');
 const configHolder = require('@dawadk/common/src/config/holder');
@@ -11,6 +11,11 @@ const startS3rver = () => go(function*() {
   let s3Directory = config.get('test.s3rver.directory');
   if(!s3Directory) {
     s3Directory = yield Promise.promisify(tmp.dir, {context: tmp})();
+  }
+  else {
+    if(!fs.existsSync(s3Directory)) {
+      fs.mkdirSync(s3Directory, {recursive: true});
+    }
   }
   const s3InstanceOpts = new S3rver({
     port: config.get('test.s3rver.port'),

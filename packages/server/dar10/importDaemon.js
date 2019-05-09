@@ -37,6 +37,11 @@ const schema = {
     format: 'Boolean',
     default: false,
     cli: true
+  },
+  isalive_port: {
+    doc: 'Port til isalive server',
+    format: 'nat',
+    default: 3000
   }
 };
 
@@ -52,8 +57,9 @@ runConfiguredImporter("importDar10Daemon", schema, (config) => go(function*()  {
       pretend: config.get('pretend'),
       noDaemon: config.get('no_daemon'),
       pollIntervalMs: config.get('poll_interval'),
-      notificationUrl: config.get('notification_url') }
-    );
+      notificationUrl: config.get('notification_url'),
+      isalivePort: config.get('isalive_port')
+    });
   process.on('SIGTERM', () => {
     logger.info('Received SIGTERM, aborting');
     importProcess.abort.raise('Received SIGTERM, aborting');

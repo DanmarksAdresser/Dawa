@@ -26,11 +26,9 @@
     "underscore": "^1.9.1",
     "urijs": "^1.19.1"
   },
-  "devDependencies": {
-    "@dawadk/server": "^1.28.21"
-  },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha"
+    "test": "mocha",
+    "ci-test": "run-p lint test"
   }
 }

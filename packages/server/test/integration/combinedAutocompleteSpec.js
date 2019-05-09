@@ -9,12 +9,14 @@ require('../../apiSpecification/allSpecs');
 var autocomplete = require('../../apiSpecification/autocomplete/autocomplete').autocompleteResource;
 var helpers = require('./helpers');
 var testdb = require('@dawadk/test-util/src/testdb');
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
 
 describe('Combined Autocomplete', function () {
   it('Skal kunne autocomplete en adresse', function () {
     return request.get({
-      uri: 'http://localhost:3002/autocomplete?q=' + encodeURIComponent('Magtenbøllevej 102'),
+      uri: `${baseUrl}/autocomplete?q=` + encodeURIComponent('Magtenbøllevej 102'),
       json: true
     }).then(function (result) {
       expect(result).to.have.length(1);

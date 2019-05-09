@@ -2,7 +2,6 @@
 
 const databasePools = require('@dawadk/common/src/postgres/database-pools');
 const scriptDbLogger = require('./scriptDbLogger');
-
 let options;
 
 

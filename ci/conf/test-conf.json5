@@ -1,0 +1,15 @@
+{
+  test: {
+    database_host: 'db',
+    database_user: 'postgres',
+    dawa_base_url: 'http://dawa-server:3000',
+    master_base_url: 'http://dawa-server:3001'
+  },
+  replication: {
+    enabled: true
+  },
+  ois: {
+    enabled: true,
+    protected: false
+  }
+}

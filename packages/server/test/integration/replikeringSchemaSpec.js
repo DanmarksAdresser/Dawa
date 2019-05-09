@@ -2,6 +2,8 @@
 
 var expect = require('chai').expect;
 var request = require("request-promise");
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
 var schemas = [
   'postnumre', 'vejstykker', 'adgangsadresser', 'adresser',
@@ -72,13 +74,13 @@ var postnumre = {
 
 describe("Replikering schema.json", function() {
   it("Alle skema ekisterer", function() {
-    return request.get({url: "http://localhost:3002/replikeringdok/schema.json", json: true}).then(function(result) {
+    return request.get({url: `${baseUrl}/replikeringdok/schema.json`, json: true}).then(function(result) {
       expect(Object.keys(result)).to.deep.equal(schemas);
     });
   });
 
   it("Postnumre skema er korrekt", function() {
-    return request.get({url: "http://localhost:3002/replikeringdok/schema.json", json: true}).then(function(result) {
+    return request.get({url: `${baseUrl}/replikeringdok/schema.json`, json: true}).then(function(result) {
       expect(result.postnumre).to.deep.equal(postnumre);
     });
   });

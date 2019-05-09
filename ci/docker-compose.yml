@@ -1,0 +1,81 @@
+version: "3.7"
+services:
+  db:
+    build:
+      dockerfile: ../docker/postgres/Dockerfile
+      context: ..
+    ports:
+      - 5432:5432
+    networks:
+      - dawa-dev
+  s3rver:
+    build:
+      dockerfile: ../docker/node-base/Dockerfile
+      context: ..
+    volumes:
+      - type: bind
+        source: ./conf
+        target: /conf
+    expose:
+      - 4569
+    ports:
+      - 4569:4569
+    networks:
+      - dawa-dev
+    environment:
+      - CONFIG_FILES=/conf/s3-offload.json5,/conf/s3rver.json5
+    command: node packages/import-util/src/start-s3rver-cli
+  dawa-init-db:
+    depends_on:
+      - db
+      - s3rver
+    build:
+      dockerfile: ../docker/node-base/Dockerfile
+      context: ..
+    networks:
+      - dawa-dev
+    volumes:
+      - type: bind
+        source: ./conf
+        target: /conf
+    environment:
+      - CONFIG_FILES=/conf/s3-offload.json5,/conf/test-conf.json5
+    command: node packages/server/psql/initialize-databases
+  dawa-server:
+    depends_on:
+      - db
+      - s3rver
+    build:
+      dockerfile: ../docker/node-base/Dockerfile
+      context: ..
+    ports:
+      - 3000:3000 # service
+      - 3001:3001 # master isalive
+    networks:
+      - dawa-dev
+    volumes:
+      - type: bind
+        source: ./conf
+        target: /conf
+    environment:
+      - CONFIG_FILES=/conf/dawa-server.json5
+    command: node_modules/.bin/dawa-server
+  dawa-test:
+    depends_on:
+      - db
+      - s3rver
+      - dawa-server
+    build:
+      dockerfile: ../docker/node-base/Dockerfile
+      context: ..
+    networks:
+      - dawa-dev
+    volumes:
+      - type: bind
+        source: ./conf
+        target: /conf
+    environment:
+      - CONFIG_FILES=/conf/s3-offload.json5,/conf/test-conf.json5
+    command: /bin/bash -c 'yarn run lerna run ci-test --stream'
+networks:
+  dawa-dev:

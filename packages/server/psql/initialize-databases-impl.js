@@ -1,3 +1,4 @@
+const Promise = require('bluebird');
 const {go} = require('ts-csp');
 const { Client } = require('pg');
 const config = require('@dawadk/common/src/config/holder').getConfig();
@@ -5,20 +6,34 @@ const initialization = require('./initialization');
 const {createDatabasePool} = require('@dawadk/common/src/postgres/database-pool');
 const {initializeData} = require('./data-initialization');
 const makeConnectionString = (user, password, host, port, database) => `postgres://${user ? user : ''}${password ? `:${password}` : ''}${user ? '@' : ''}${host}:${port}/${database}`;
-
+const logger = require('@dawadk/common/src/logger').forCategory('initializeDatabases');
 module.exports = () => go(function* () {
   const user = config.get('test.database_user');
   const password = config.get('test.database_password');
   const host = config.get('test.database_host');
   const port = config.get('test.database_port');
 
-  const client = new Client({
-    user,
-    password,
-    port,
-    host
+  const client = yield go(function*() {
+    for(let i = 0; i < 30; ++i) {
+      try {
+        const client = new Client({
+          user,
+          password,
+          port,
+          host,
+          database: 'template1'
+        });
+        client.connect();
+        return client;
+      }
+      catch(e) {
+        logger.error("Failed to connect to db", e);
+      }
+      yield Promise.delay(1000);
+    }
+    throw new Error('Failed to connect to database after 30 retries');
+
   });
-  yield client.connect();
   try {
     for (let db of [config.get('test.data_db'), config.get('test.empty_db'), config.get('test.schema_db')]) {
       yield client.query(`DROP DATABASE IF EXISTS ${db}; `);

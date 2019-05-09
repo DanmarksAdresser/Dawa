@@ -8,8 +8,10 @@ const {update} = require('../src/replication-client-impl');
 const {withReplicationTransaction} = require('../src/transactions');
 const Promise = require("bluebird");
 const {ReplicationHttpClient} = require('../src/replication-http-client');
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
-const testDarConfig = generateConfig("http://localhost:3002/replikering", "replication", replikeringModels, {});
+const testDarConfig = generateConfig(`${baseUrl}/replikering`, "replication", replikeringModels, {});
 const {normalize} = require('../src/validate-config');
 const {pgMetadata} = require('../src/pg-metadata');
 const testReplicationConfig = {

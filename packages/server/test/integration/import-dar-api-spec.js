@@ -62,7 +62,9 @@ describe('DAR API import integration ', () => {
           pretend: false,
           noDaemon: false,
           pollIntervalMs: 5000,
-          notificationUrl: 'http://localhost:4001/prod/listen' }
+          notificationUrl: 'http://localhost:4001/prod/listen',
+          isalivePort: 3005
+        }
       );
 
       // we need a long delay to simulate import using status page

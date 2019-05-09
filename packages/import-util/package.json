@@ -26,13 +26,12 @@
     "ts-csp": "^0.9.0",
     "underscore": "^1.9.1"
   },
-  "devDependencies": {
-    "eslint": "4.19.1",
-    "mocha": "^5.2.0"
-  },
   "scripts": {
-    "test": "mocha",
-    "lint": "eslint src test"
+    "mocha": "mocha",
+    "lint": "eslint src test",
+    "ci-test": "run-p lint test",
+    "start-s3rver": "node ../import-util/src/start-s3rver-cli",
+    "test": "run-p -r start-s3rver mocha"
   },
   "gitHead": "c479141f79583028504ac8b50e51a2313fe8a5f9"
 }

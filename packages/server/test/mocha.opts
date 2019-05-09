@@ -1,6 +1,5 @@
 --exit
 --bail
---timeout=15000
+--timeout=30000
 --recursive
 --require ./test/setup/setup-config
---require ./test/setup/setup-servers

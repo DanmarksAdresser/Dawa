@@ -9,6 +9,8 @@ var parameterDoc = require('../../parameterDoc');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 const allPages = require('../../apidoc/all-pages');
+const config = require('@dawadk/common/src/config/holder').getConfig();
+const baseUrl = config.get('test.dawa_base_url');
 
 describe('Parameter documentation.', function() {
   var undocumented = ['format', 'callback', 'srid', 'noformat', 'ndjson'];
@@ -70,7 +72,7 @@ describe('Documentation page', function() {
     '/dok/faq', '/dok/om'].forEach(function(docPageName) {
     it(docPageName + ' should be retrievable', function() {
       request.get({
-        uri: "http://localhost:3002/"+ docPageName,
+        uri: `${baseUrl}/`+ docPageName,
         resolveWithFullResponse: true
       }).then(function(response) {
         expect(response.statusCode).to.deep.equal(200);
@@ -81,7 +83,7 @@ describe('Documentation page', function() {
   for(let page of allPages) {
     it(`Kan hente apidocs siden for ${page.entity}`, () => go(function*() {
       const response = yield request.get({
-        uri: `http://localhost:3002/dok/api/${encodeURIComponent(page.entity)}`,
+        uri: `${baseUrl}/dok/api/${encodeURIComponent(page.entity)}`,
         resolveWithFullResponse: true
       });
       assert.strictEqual(response.statusCode, 200);

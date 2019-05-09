@@ -24,13 +24,10 @@
     "winston": "^3.0.0",
     "winston-daily-rotate-file": "^3.2.1"
   },
-  "devDependencies": {
-    "eslint": "^4.19.1",
-    "mocha": "^5.2.0"
-  },
   "scripts": {
     "test": "mocha",
-    "lint": "eslint src test"
+    "lint": "eslint src test",
+    "ci-test": "run-s lint test"
   },
   "gitHead": "c479141f79583028504ac8b50e51a2313fe8a5f9"
 }

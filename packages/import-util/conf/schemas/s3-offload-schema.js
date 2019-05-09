@@ -10,6 +10,22 @@ module.exports = {
         format: 'boolean',
         doc: 'Anvend "path style" for S3 stier. skal være false i prod - anvendes kun til test.',
         default: false
+      },
+      region: {
+        default: 'eu-west-1',
+        format: 'string',
+        doc: 'AWS region'
+      },
+      access_key_id: {
+        format: 'string',
+        doc: 'AWS Access key ID',
+        default: null
+      },
+      secret_access_key: {
+        format: 'string',
+        sensitive: true,
+        doc: 'AWS secret access key',
+        default: null
       }
     },
     bucket: {
@@ -28,6 +44,11 @@ module.exports = {
       format: 'string',
       doc: 'Stien i S3 hvor LOBs gemmes. Skal være ens på alle miljøer.',
       default: 'blob'
+    },
+    threshold: {
+      format: 'nat',
+      default: 8192,
+      doc: 'Angiver grænsen for hvor store LOBs skal være før de offloades til S3.'
     }
   }
 };

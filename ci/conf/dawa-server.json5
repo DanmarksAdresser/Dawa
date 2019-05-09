@@ -1,0 +1,11 @@
+{
+  database_url: 'postgres://postgres@db/dawatest',
+  replication: {
+    enabled: true
+  },
+  ois: {
+    enabled: true,
+    protected: false
+  },
+  blob_base_url: 'http://s3rver:4569/dawa/blob'
+}
