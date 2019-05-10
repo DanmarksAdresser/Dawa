@@ -179,6 +179,9 @@ from (select distinct k.kode, k.navn
     navn: {
       column: 'dar_sup.navn'
     },
+    darstatus: {
+      column: 'dar_sup.status'
+    },
     kommunekode: {
       column: 't.kommunekode'
     },

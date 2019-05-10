@@ -197,6 +197,9 @@ const additionalFieldsMap = {
       name: 'navn'
     },
     {
+      name: 'darstatus'
+    },
+    {
       name: 'kommunekode',
       formatter: kode4String
     },

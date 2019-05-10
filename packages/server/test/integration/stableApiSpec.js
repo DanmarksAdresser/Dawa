@@ -833,6 +833,7 @@ describe('Stable API', () => {
           "href": "http://dawa/supplerendebynavne2/665614",
           "dagi_id": "665614",
           "navn": "Høje Taastrup",
+          "darstatus": 3,
           "kommune": {
             "href": "http://dawa/kommuner/169",
             "kode": "0169",
@@ -856,6 +857,7 @@ describe('Stable API', () => {
         value: {
           "dagi_id": "665614",
           "navn": "Høje Taastrup",
+          "darstatus": 3,
           "kommunekode": "0169",
           "kommunenavn": "Høje-Taastrup",
           "ændret": "2019-05-09T09:40:09.226Z",

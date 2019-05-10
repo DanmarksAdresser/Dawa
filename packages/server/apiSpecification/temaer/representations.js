@@ -321,6 +321,7 @@ const supplerendebynavnRepresentation = (() => {
       href: makeHrefFromPath(baseUrl, 'supplerendebynavne2', [row.dagi_id]),
       dagi_id: numberToString(row.dagi_id),
       navn: row.navn,
+      darstatus: row.darstatus,
       kommune: mapKode4NavnTema('kommune', row.kommunekode, row.kommunenavn, baseUrl),
       postnumre: commonMappers.mapPostnummerRefArray(row.postnumre, baseUrl)
     });
@@ -335,6 +336,10 @@ const supplerendebynavnRepresentation = (() => {
       href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
       dagi_id: normalizedFieldSchema('dagi_id'),
       navn: normalizedFieldSchema('navn'),
+      darstatus: {
+        type: 'integer',
+        description: 'Det supplerende bynavns status i DAR. 3=gældende, 4=nedlagt'
+      },
       kommune: Object.assign({}, commonSchemaDefinitions.NullableKommuneRef, {description: 'Den kommune, som det supplerende bynavn ligger i.'}),
       postnumre: {
         description: 'De postnumre, der forefindes i det supplerende bynavn.',
@@ -345,7 +350,7 @@ const supplerendebynavnRepresentation = (() => {
       }
     }, commonGeoProps),
     docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'navn',
-      'kommune', 'postnumre']
+      'darstatus', 'kommune', 'postnumre']
   });
   return {fields, mapper, schema};
 })();
