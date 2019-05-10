@@ -136,7 +136,7 @@ var baseQuery = function() {
     select: [],
     from: [`navngivenvejkommunedel_mat vejstykker
       LEFT JOIN kommuner k ON (vejstykker.kommunekode = k.kode)
-      LEFT JOIN navngivenvej nv ON vejstykker.navngivenvej_id = nv.id`],
+      LEFT JOIN navngivenvej_mat nv ON vejstykker.navngivenvej_id = nv.id`],
     whereClauses: [],
     orderClauses: [],
     sqlParams: []
