@@ -29,6 +29,17 @@ describe('Validation of reverse geocoding parameter', function() {
     expect(validationResult).to.have.length(1);
   });
 
+  it('Should invalidate polygon with insufficient coordinates', () => {
+    const invalid = {
+      polygon: [[[11.777615079114867,55.57305838952234],[11.777615079114867,55.57305838952234]]],
+      srid: 4326
+    };
+    const params = [...commonParameters.crs, ...commonParameters.geomWithin];
+    const paramMap = _.indexBy(params, 'name');
+    const validationResult = parameterParsing.validateParameters(invalid, paramMap);
+    expect(validationResult).to.have.length(1);
+  });
+
   it('Should invalidate a circle which has center outside the permitted bounding box', function() {
     var invalid = {
       cirkel: "10,10,1",

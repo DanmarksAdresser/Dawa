@@ -97,6 +97,31 @@ var GEOM_BOUNDS = {
   }
 };
 
+
+const validate2dPoint = (srid, pair) => {
+  if (! (_.isArray(pair) && pair.length === 2 && _.isNumber(pair[0]) && _.isNumber(pair[1]))) {
+    throw 'A point must consist of coordinate pairs of numbers: '+JSON.stringify(pair);
+  }
+  validateXParam(pair[0], srid);
+  validateYParam(pair[1], srid);
+
+};
+const validateLinearRing = (srid, linearRing) => {
+  if(!_.isArray(linearRing) || linearRing.length < 4) {
+    throw 'Every LinearRing in polygon coordinates must contain at least four coordinate pairs: '+JSON.stringify(linearRing);
+  }
+  // Ensure polygons consists of number-pairs
+  _.each(linearRing, function(pair){
+    validate2dPoint(srid, pair);
+  });
+  // Ensure closed polygons
+  const first = _.first(linearRing);
+  const last  = _.last (linearRing);
+  if (!(first[0] === last[0] && first[1] === last[1])) {
+    throw 'Polygon cannot be open, first and last element must be equal: '+JSON.stringify(linearRing);
+  }
+};
+
 exports.geomWithin = [
   {
     name: 'polygon',
@@ -107,27 +132,9 @@ exports.geomWithin = [
       if(!_.isArray(polygon) || polygon.length === 0) {
         throw 'Polygon must be an array of arrays of coordinate pairs: '+JSON.stringify(polygon);
       }
-      _.each(polygon, function(linearRing){
-        if(!_.isArray(linearRing) || linearRing.length < 2) {
-          throw 'Every LinearRing in polygon coordinates must contain at least two coordinate pairs: '+JSON.stringify(linearRing);
-        }
-        // Ensure polygons consists of number-pairs
-        _.each(linearRing, function(pair){
-          if (! (_.isArray(pair) && pair.length === 2 && _.isNumber(pair[0]) && _.isNumber(pair[1]))) {
-            throw 'Polygon must consist of coordinate pairs of numbers: '+JSON.stringify(linearRing);
-          }
-        });
-        _.each(linearRing, function(pair) {
-          validateXParam(pair[0], params.srid);
-          validateYParam(pair[1], params.srid);
-        });
-        // Ensure closed polygons
-        var first = _.first(linearRing);
-        var last  = _.last (linearRing);
-        if (! (first[0] === last[0] && first[1] === last[1])) {
-          throw 'Polygon cannot be open, first and last element must be equal: '+JSON.stringify(linearRing);
-        }
-      });
+      for(let linearRing of polygon) {
+        validateLinearRing(params.srid, linearRing);
+      }
     }
   },
   {
@@ -138,10 +145,10 @@ exports.geomWithin = [
       pattern: '^((\\+|\\-)?[0-9]+(\\.[0-9]*)?),((\\+|\\-)?[0-9]+(\\.[0-9]*)?),((\\+|\\-)?[0-9]+(\\.[0-9]*)?)$'
     },
     validateFun: function(param, params) {
-      var args = params.cirkel.split(',');
-      var x = parseFloat(args[0]);
-      var y = parseFloat(args[1]);
-      var diam = parseFloat(args[2]);
+      const args = params.cirkel.split(',');
+      const x = parseFloat(args[0]);
+      const y = parseFloat(args[1]);
+      const diam = parseFloat(args[2]);
       validateXParam(x, params.srid);
       validateYParam(y, params.srid);
       if(diam <= 0) {
@@ -152,8 +159,8 @@ exports.geomWithin = [
 ];
 
 function validateXParam(x, sridParam) {
-  var srid = "" + (sridParam || 4326);
-  var bounds = GEOM_BOUNDS[srid];
+  const srid = "" + (sridParam || 4326);
+  const bounds = GEOM_BOUNDS[srid];
   if(!bounds) {
     return;
   }
@@ -167,8 +174,8 @@ function validateXParam(x, sridParam) {
   }
 }
 function validateYParam(y, sridParam) {
-  var srid = "" + (sridParam || 4326);
-  var bounds = GEOM_BOUNDS[srid];
+  const srid = "" + (sridParam || 4326);
+  const bounds = GEOM_BOUNDS[srid];
   if(!bounds) {
     return;
   }
