@@ -1,5 +1,5 @@
 # Danmarks Adressers Web API - DAWA 
-[![Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoicE1tT2xCSTQ4ZzFxTmI4ZTQ2NVhZU0xXWmRIZzZYYzJCbUVwL09ZZTRTZTcwaGI0SUN0aEh1QmtPZW1NdWFkd0poR1dsNVVZR3poOTZYdFNkcmE4VEUwPSIsIml2UGFyYW1ldGVyU3BlYyI6InpwYlVhNmJqUitSQmtldkIiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)]
+![Build Status](https://codebuild.eu-west-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoicE1tT2xCSTQ4ZzFxTmI4ZTQ2NVhZU0xXWmRIZzZYYzJCbUVwL09ZZTRTZTcwaGI0SUN0aEh1QmtPZW1NdWFkd0poR1dsNVVZR3poOTZYdFNkcmE4VEUwPSIsIml2UGFyYW1ldGVyU3BlYyI6InpwYlVhNmJqUitSQmtldkIiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
 This is the code repository for [DAWA - Danmarks Adressers Web API](https://dawa.aws.dk).
 
