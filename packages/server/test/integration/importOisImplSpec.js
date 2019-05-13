@@ -1,8 +1,8 @@
 "use strict";
 
-const expect = require('chai').expect;
+const {assert, expect} = require('chai');
 const q = require('q');
-
+const { go } = require('ts-csp');
 const oisModels = require('../../ois/oisModels');
 const testdb = require('@dawadk/test-util/src/testdb');
 const importOisImpl = require('../../ois/importOisImpl');
@@ -135,7 +135,7 @@ const FIELDS_NOT_IN_TEST_DATA = {
   ]
 };
 
-describe('Import af OIS-filer', () => {
+describe.only('Import af OIS-filer', () => {
   testdb.withTransactionEach('test', clientFn => {
     it('Kan importere deltaudtræk', q.async(function*() {
       yield importOisImpl.importOis(clientFn(), 'test/data/ois/delta');
@@ -151,6 +151,16 @@ describe('Import af OIS-filer', () => {
         failed = true;
       }
       expect(failed).to.be.true;
+    }));
+
+    it('Fejler hvis der ikke er nye filer', () => go(function*() {
+      try {
+        yield importOisImpl.importOis(clientFn(), 'test/data/ois');
+        assert.fail('Import should have failed');
+      }
+      catch(err) {
+        assert(/No files to import/.test(err.message));
+      }
     }));
   });
   testdb.withTransactionAll('test', clientFn => {
