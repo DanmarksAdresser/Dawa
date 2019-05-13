@@ -177,11 +177,23 @@ const clean = (client,entityName) => go(function*() {
 function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst, entityNames) {
   return q.async(function*() {
     entityNames = entityNames ? entityNames : Object.keys(oisModels);
-    for (const entityName of entityNames) {
-      if(shouldCleanFirst) {
+    if(shouldCleanFirst) {
+      for(let entityName of entityNames) {
         yield clean(client, entityName);
       }
-      const fileDescriptors = yield findFilesToImportForEntity(client, entityName, dataDir);
+    }
+    const fileDescriptorsMap = {};
+    for(let entityName of entityNames) {
+      fileDescriptorsMap[entityName] = yield findFilesToImportForEntity(client, entityName, dataDir);
+    }
+    const filesToImportCount = entityNames.reduce((acc, entityName) => {
+      return acc + fileDescriptorsMap[entityName].length;
+    }, 0);
+    if(!filesToImportCount) {
+      throw new Error(`No files to import dataDir=${dataDir}`);
+    }
+    for (const entityName of entityNames) {
+      const fileDescriptors = fileDescriptorsMap[entityName];
       for (let fileDescriptor of fileDescriptors) {
         const fileName = fileDescriptor.fileName;
         if (singleFileNameOnly && fileName !== singleFileNameOnly) {
