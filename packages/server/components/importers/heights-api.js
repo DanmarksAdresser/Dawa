@@ -7,28 +7,28 @@ const importUtil = require('@dawadk/import-util/src/postgres-streaming');
 
 const { roundHeight, importHeightsFromTable, createHeightTable } = require('../../heights/import-heights-util');
 
-function hoejdeClient(apiUrl, login, password) {
-  return function (x, y) {
+function hoejdeClient(apiUrl, accessToken) {
+  return  (x, y) => go(function*() {
     const parsedUrl = url.parse(apiUrl, true);
-    parsedUrl.query.login = login;
-    parsedUrl.query.password = password;
     parsedUrl.query.geop = `${x},${y}`;
     delete parsedUrl.search;
     const formattedUrl = url.format(parsedUrl);
-    return request.get({
+    const result = yield request.get({
       url: formattedUrl,
-      json: true
-    }).then(result => {
-      if (result.hoejde === null || result.hoejde === undefined) {
-        logger.error('Got bad result from height service', {
-          result: result,
-          url: formattedUrl
-        });
-        throw new Error(result);
+      json: true,
+      headers: {
+        Token: accessToken
       }
-      return result.hoejde;
     });
-  }
+    if (result.hoejde === null || result.hoejde === undefined) {
+      logger.error('Got bad result from height service', {
+        result,
+        url: formattedUrl
+      });
+      throw new Error('Got bad result from height service');
+    }
+    return result.hoejde;
+  });
 }
 
 const importFromApi = (client, txid, apiClient) => go(function*() {

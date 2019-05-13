@@ -13,18 +13,11 @@ const schema = {
     default: 'http://services.kortforsyningen.dk/?servicename=RestGeokeys_v2&method=hoejde',
     cli: true
   },
-  login: {
+  access_token: {
     format: 'string',
-    doc: 'Login til kortforsyningen',
-    default: 'dawa',
-    cli: true
-  },
-  password: {
-    format: 'string',
-    sensitive: true,
-    doc: 'Password til kortforsyningen',
-    cli: true,
+    doc: 'Access token til kortforsyningen',
     default: null,
+    cli: true,
     required: true
   }
 }
@@ -35,5 +28,5 @@ runConfiguredImporter("højder", schema, config => go(function* () {
     pooled: false
   });
 
-  yield importAdresseHeightsImpl.importFromApiDaemon(config.get('url'), config.get('login'), config.get('password'));
+  yield importAdresseHeightsImpl.importFromApiDaemon(config.get('url'), config.get('access_token'));
 }));

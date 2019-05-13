@@ -14,8 +14,8 @@ const importFromApi = (client, apiClient) => go(function*() {
   const importer = createApiImporter({apiClient});
   return yield executeRollbackable(client, 'importHøjderApi', [importer], EXECUTION_STRATEGY.quick, {});
 });
-const importFromApiDaemon = (apiUrl, login, password) => go(function*() {
-  const apiClient = hoejdeClient(apiUrl, login, password);
+const importFromApiDaemon = (apiUrl, accessToken) => go(function*() {
+  const apiClient = hoejdeClient(apiUrl, accessToken);
   /*eslint no-constant-condition: 0 */
   while (true) {
     const context = yield proddb.withTransaction('READ_WRITE', client =>
