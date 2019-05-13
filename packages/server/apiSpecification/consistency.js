@@ -279,7 +279,7 @@ ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC;`
 ];
 
 module.exports = consistencyChecks.reduce(function (memo, check) {
-  var path = '/konsistens/' + check.key;
+  var path = `/konsistens/${ encodeURIComponent(check.key)}`;
   memo[path] = {
     path: path,
     expressHandler: function (req, res) {
