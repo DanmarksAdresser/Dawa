@@ -135,7 +135,7 @@ const FIELDS_NOT_IN_TEST_DATA = {
   ]
 };
 
-describe.only('Import af OIS-filer', () => {
+describe('Import af OIS-filer', () => {
   testdb.withTransactionEach('test', clientFn => {
     it('Kan importere deltaudtræk', q.async(function*() {
       yield importOisImpl.importOis(clientFn(), 'test/data/ois/delta');
