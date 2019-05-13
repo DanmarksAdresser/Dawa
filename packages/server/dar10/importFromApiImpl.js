@@ -183,7 +183,7 @@ const importDaemon = (pool, darClient,
       }
     }
     finally {
-      isaliveProcess.abortSignal.raise("Aborting");
+      isaliveProcess.abort.raise("Aborting");
     }
   }
 });
