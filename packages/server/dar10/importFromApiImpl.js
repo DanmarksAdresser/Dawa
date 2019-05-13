@@ -1,5 +1,4 @@
 "use strict";
-const util = require('util');
 const _ = require('underscore');
 const Promise = require('bluebird');
 const {go, Channel, CLOSED, Abort} = require('ts-csp');
@@ -93,9 +92,10 @@ const importUsingStatus = (pool, darClient, pretend) => go(function* () {
   yield importIncrementally(pool, darClient, initialRemoteEventIds, pretend);
 });
 
-const runImportLoop = (pool, darClient, notificationWsUrl, {pretend, isalivePort}) => go(function* () {
+const runImportLoop = (pool, darClient, notificationWsUrl, isaliveResponseChan, {pretend}) => go(function* () {
   //start by performing a local update using the status API
   yield importUsingStatus(pool, darClient, pretend);
+  isaliveResponseChan.putSync({status: 'up', hasReceivedEvent: false});
   if (!notificationWsUrl) {
     return;
   }
@@ -105,22 +105,7 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend, isalivePort
   // Indicates whether the client should update all entities when receiving af notification.
   // This is necessary, because we may have missed some notifications initially.
   let mustUpdateAll = true;
-  let isaliveServer = null;
   try {
-    const lastError = null;
-    var isaliveApp = express();
-    isaliveApp.get('/isalive', function(req, res) {
-      if(lastError === null) {
-        res.json({status: 'up', error: null});
-      }
-      else {
-        res.status(500).send({status: 'down', error: util.inspect(lastError)});
-      }
-    });
-
-    isaliveApp.set('json spaces', 2);
-
-    isaliveServer = isaliveApp.listen(isalivePort);
 
     while (true) {
       logger.info("Waiting for DAR notifications");
@@ -137,11 +122,34 @@ const runImportLoop = (pool, darClient, notificationWsUrl, {pretend, isalivePort
       logger.info("Received DAR notifications");
       yield importNotifications(pool, darClient, notifications, mustUpdateAll);
       mustUpdateAll = false;
+      isaliveResponseChan.putSync({status: 'up', hasImportedEvent: true});
     }
   }
   finally {
     wsClientCloseFn();
-    isaliveServer.close();
+  }
+});
+
+const createIsalive = (isaliveResponseChan, port) => go(function*() {
+  let response = {status: 'unknown'};
+  var isaliveApp = express();
+  isaliveApp.get('/isalive', function(req, res) {
+    if (response.status === 'down') {
+      res.status(500);
+    }
+    res.json(response);
+  });
+
+  isaliveApp.set('json spaces', 2);
+
+  const server = isaliveApp.listen(port);
+  try {
+    while(true) {
+      response = yield this.takeOrAbort(isaliveResponseChan);
+    }
+  }
+  finally {
+    server.close();
   }
 });
 
@@ -150,24 +158,32 @@ const importDaemon = (pool, darClient,
   if (!notificationUrl) {
     logger.info("Running DAR 1.0 import daemon without WebSocket listener");
   }
-
   if (noDaemon) {
     yield this.delegateAbort(importUsingStatus(pool, darClient));
   }
   else {
-    while (true) {
-      {
-        try {
-          yield this.delegateAbort(runImportLoop(pool, darClient, notificationUrl, {pretend, isalivePort}));
-        }
-        catch (err) {
-          if (err instanceof Abort) {
-            throw err;
+    const isaliveResponseChan = new Channel();
+    const isaliveProcess = createIsalive(isaliveResponseChan, isalivePort);
+    try {
+      while (true) {
+        {
+          try {
+            yield this.delegateAbort(runImportLoop(pool, darClient,
+              notificationUrl, isaliveResponseChan, {pretend}));
           }
-          logger.error("Error during DAR import", err);
+          catch (err) {
+            if (err instanceof Abort) {
+              throw err;
+            }
+            isaliveResponseChan.put({status: 'down', error: err.message});
+            logger.error("Error during DAR import", err);
+          }
+          yield Promise.delay(pollIntervalMs);
         }
-        yield Promise.delay(pollIntervalMs);
       }
+    }
+    finally {
+      isaliveProcess.abortSignal.raise("Aborting");
     }
   }
 });
