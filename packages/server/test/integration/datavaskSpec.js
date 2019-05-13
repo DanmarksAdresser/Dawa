@@ -1,7 +1,7 @@
 "use strict";
 
 var expect = require('chai').expect;
-const { go } = require('ts-csp');
+const {go} = require('ts-csp');
 
 require('../../apiSpecification/allSpecs');
 
@@ -105,6 +105,35 @@ var adresseTests = [
       kategori: 'A',
       id: 'ccc160cf-668c-45e7-af22-f80d5b0f9e26'
     }
+  }, {
+    it: 'Kan håndtere kld i stedet for kl',
+    betegnelse: 'Østre Stationsvej 24, kld., 5000 Odense C',
+    result: {
+      kategori: 'A',
+      id: '0a3f50b5-08d4-32b8-e044-0003ba298018'
+    }
+  }, {
+    it: 'Kan håndtere at etagebetegnelse efterfølges af  punktum og sAl',
+    betegnelse: 'Østergade 43, 2. sAl tv, 5000 Odense C',
+    result: {
+      kategori: 'A',
+      id: 'ccc160cf-668c-45e7-af22-f80d5b0f9e26'
+    }
+  }, {
+    it: 'Kan håndtere at etagebetegnelse efterfølges af sal uden punktum',
+    betegnelse: 'Østergade 43, 2 sal tv, 5000 Odense C',
+    result: {
+      kategori: 'A',
+      id: 'ccc160cf-668c-45e7-af22-f80d5b0f9e26'
+    }
+  }, {
+    it: 'Kan håndtere stueplan i stedet for st',
+    betegnelse: 'Stationsvej 37, stuePlan, 2791 Dragør',
+    result: {
+      kategori: 'A',
+      id: '0a3f50a3-92e7-32b8-e044-0003ba298018'
+    }
+
   }];
 
 var adgangsadresseTests = [{
@@ -136,33 +165,33 @@ var adgangsadresseTests = [{
     id: '0a3f507c-f9a0-32b8-e044-0003ba298018'
   }
 }, {
-    it: 'Kan matche på adresseringsvejnavn i stedet for vejnavn',
-    betegnelse: 'Borgm Christiansens 45, 2450 København SV',
-    result: {
-      kategori: 'B',
-      id: '0a3f507a-4bd5-32b8-e044-0003ba298018'
-    }
+  it: 'Kan matche på adresseringsvejnavn i stedet for vejnavn',
+  betegnelse: 'Borgm Christiansens 45, 2450 København SV',
+  result: {
+    kategori: 'B',
+    id: '0a3f507a-4bd5-32b8-e044-0003ba298018'
+  }
 }];
 
 describe('Adressevask', () => {
   testdb.withTransactionEach('test', function (clientFn) {
     adresseTests.forEach((test) => {
-      it(test.it, ()=> {
-        return go(function*() {
+      it(test.it, () => {
+        return go(function* () {
           var result = yield helpers.getJson(clientFn(), datavaskResources.adresse, {}, {betegnelse: test.betegnelse});
           expect(result.kategori).to.equal(test.result.kategori);
-          if(test.result.id) {
+          if (test.result.id) {
             expect(result.resultater[0].adresse.id).to.equal(test.result.id);
           }
         }).asPromise();
       });
     });
     adgangsadresseTests.forEach((test) => {
-      it(test.it, ()=> {
-        return go(function*() {
+      it(test.it, () => {
+        return go(function* () {
           var result = yield helpers.getJson(clientFn(), datavaskResources.adgangsadresse, {}, {betegnelse: test.betegnelse})
           expect(result.kategori).to.equal(test.result.kategori);
-          if(test.result.id) {
+          if (test.result.id) {
             expect(result.resultater[0].adresse.id).to.equal(test.result.id);
           }
         }).asPromise();

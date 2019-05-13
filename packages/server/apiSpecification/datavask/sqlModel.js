@@ -17,6 +17,19 @@ const { mapObjectAsync } = require('@dawadk/common/src/csp-util');
 
 var kode4String = util.kode4String;
 
+// Regex replacements applied to raw adressebetegnelse parameter
+const regexReplacements = [
+  // replace kld with kl
+  [/^(.+\d+\s*,?\s+)(kld)(.+)$/i, '$1kl$3'],
+  // replace stueplan with st
+  [/stueplan/i, 'st'],
+  // remove sal , e.g. 1. sal
+  [/(\d+\.?\s+)(sal)(.+)/i, '$1$3']
+];
+
+const processRegexes = betegnelse =>
+  regexReplacements.reduce((betegnelse, [regex, replacement]) =>
+    betegnelse.replace(regex, replacement), betegnelse);
 
 // We just let the database format the husnr
 columnsMap.adresse = _.clone(columnsMap.adresse);
@@ -343,7 +356,7 @@ function createSqlModel(entityName) {
     },
     processQuery: function (client, fieldNames, params) {
       return go(function*() {
-
+        params.betegnelse = processRegexes(params.betegnelse);
         params = _.clone(params);
         params.side = 1;
         params.per_side=100;
