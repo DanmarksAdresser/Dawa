@@ -242,6 +242,32 @@ WHERE hn.navngivenvej_id IS NOT NULL AND dar_ao.sogneinddeling IS DISTINCT FROM 
 ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC`
   },
   {
+    key: 'InkonsistentSupplerendeBynavn',
+    description: 'Husnumre, hvor DARs beregning af supplerende bynavn afviger',
+    query: `SELECT
+      hn.id,
+       hn.status,
+       ap.id as adgangspunkt_id,
+       dar_sb.id as dar_supplerendebynavn_id,
+      st_astext(ap.position) as position,
+       dar_sb.supplerendebynavn1 as dar_dagi_id,
+       dar_sb.navn as dar_navn,
+       dawa_sb.dagi_id as dawa_dagi_id,
+       dawa_sb.navn as dawa_navn,
+      st_distance(ap.position, dawa_sb.geom) AS dagi_afstand,
+      st_distance(ap.position, dar_sb_geo.geom) AS dar_afstand
+            FROM dar1_husnummer_current hn
+                   LEFT JOIN dar1_adressepunkt_current ap ON hn.adgangspunkt_id = ap.id
+                   LEFT JOIN supplerendebynavntilknytninger st ON st.adgangsadresseid = hn.id
+                   LEFT JOIN dar1_supplerendebynavn_current dar_sb ON hn.supplerendebynavn_id = dar_sb.id
+                   LEFT JOIN dagi_supplerendebynavne dawa_sb
+                             ON st.dagi_id = dawa_sb.dagi_id
+                   LEFT JOIN dagi_supplerendebynavne dar_sb_geo ON dar_sb.supplerendebynavn1 = dar_sb_geo.dagi_id
+            WHERE hn.navngivenvej_id IS NOT NULL AND dar_sb.supplerendebynavn1 IS DISTINCT FROM dawa_sb.dagi_id
+              AND hn.status IN (2,3)
+            ORDER BY st_distance(ap.position, dar_sb_geo.geom) DESC`
+  },
+  {
     key: 'InkonsistentKommune',
     description: 'Husnumre, hvor DARs beregning af kommune afviger',
     query: `SELECT
