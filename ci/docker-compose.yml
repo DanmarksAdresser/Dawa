@@ -9,9 +9,7 @@ services:
     networks:
       - dawa-dev
   s3rver:
-    build:
-      dockerfile: ./docker/node-base/Dockerfile
-      context: ..
+    image: dawa-base:latest
     volumes:
       - type: bind
         source: ./conf
@@ -29,9 +27,7 @@ services:
     depends_on:
       - db
       - s3rver
-    build:
-      dockerfile: ./docker/node-base/Dockerfile
-      context: ..
+    image: dawa-base:latest
     networks:
       - dawa-dev
     volumes:
@@ -45,8 +41,9 @@ services:
     depends_on:
       - db
       - s3rver
+    image: dawa:latest
     build:
-      dockerfile: ./docker/node-base/Dockerfile
+      dockerfile: ./docker/dawa-server/Dockerfile
       context: ..
     ports:
       - 3000:3000 # service
@@ -59,15 +56,12 @@ services:
         target: /conf
     environment:
       - CONFIG_FILES=/conf/dawa-server.json5
-    command: node_modules/.bin/dawa-server
   dawa-test:
     depends_on:
       - db
       - s3rver
       - dawa-server
-    build:
-      dockerfile: ./docker/node-base/Dockerfile
-      context: ..
+    image: dawa-base:latest
     networks:
       - dawa-dev
     volumes:

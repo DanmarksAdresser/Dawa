@@ -1,5 +1,9 @@
 version: 0.2
 phases:
+  pre_build:
+    $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
   build:
     commands:
       - bash ci/run-ci.sh
+  post_build:
+    - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
