@@ -2,10 +2,11 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - $(aws ecr get-login --no-include-email --region eu-west-1)
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
   build:
     commands:
       - bash ci/run-ci.sh
+      - docker tag dawa:latest 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
   post_build:
     commands:
-      - docker push 587758073017.dkr.ecr.eu-west-1.amazonaws.com/dawa:latest
+      - docker push 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
