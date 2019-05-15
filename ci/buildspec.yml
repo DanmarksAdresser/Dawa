@@ -7,6 +7,8 @@ phases:
     commands:
       - bash ci/run-ci.sh
       - docker tag dawa:latest 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
+      - docker tag dawa:latest 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:$CODEBUILD_SOURCE_VERSION
   post_build:
     commands:
       - docker push 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
+      - docker push 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:$CODEBUILD_SOURCE_VERSION
