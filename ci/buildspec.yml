@@ -1,7 +1,7 @@
 version: 0.2
 phases:
   pre_build:
-    $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+    - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
   build:
     commands:
       - bash ci/run-ci.sh
