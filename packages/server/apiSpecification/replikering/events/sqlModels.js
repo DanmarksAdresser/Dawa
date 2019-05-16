@@ -51,7 +51,7 @@ const createSqlModel = (model, binding, filterParams) => {
   );
   return {
     allSelectableFieldNames: function () {
-      return ['operation', 'tidspunkt', 'sekvensnummer', ...allAttrNames]
+      return ['txid', 'operation', 'tidspunkt', 'sekvensnummer', ...allAttrNames]
     },
     validateParams: validateSekvensnummerParams,
     processStream: (client, fieldNames, params, channel, options) => {

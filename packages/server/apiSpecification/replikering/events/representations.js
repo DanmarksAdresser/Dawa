@@ -55,6 +55,7 @@ for(let datamodelName of Object.keys(datamodels)) {
     json: {
       schema: schema,
       fields: defaultFlatRepresentation.fields,
+      outputFields: defaultFlatRepresentation.outputFields,
       mapper: function(baseUrl, params) {
         return jsonMapper;
       }
