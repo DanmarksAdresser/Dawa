@@ -232,7 +232,7 @@ describe('Opslag på replikerings-API', () => {
   });
 });
 
-describe.only('Ordning af CSV-felter', () => {
+describe('Ordning af CSV-felter', () => {
   it('felt-ordning i adgangsadresse udtræk er identisk med datamodellen', () => {
     const datamodel = replikeringModel.adgangsadresse;
     const expectedFieldOrder = datamodel.attributes.map(attr => attr.name);
