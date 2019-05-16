@@ -38,6 +38,9 @@ for(let datamodelName of Object.keys(datamodels)) {
     },
     docOrder: ['txid', 'sekvensnummer', 'tidspunkt', 'operation', 'data']
   });
+  const defaultFlatRepresentation = representationUtil.defaultFlatRepresentation(fields);
+
+  const dataMapper = createRowFormatter(binding);
   const jsonMapper = function(row) {
     const result = {
       txid: row.txid,
@@ -45,18 +48,29 @@ for(let datamodelName of Object.keys(datamodels)) {
       tidspunkt: row.tidspunkt,
       sekvensnummer: row.sekvensnummer
     };
-    const dataMapper = createRowFormatter(binding);
     result.data = dataMapper(row);
     return result;
   };
   exports[datamodelName] = {
     json: {
       schema: schema,
+      fields: defaultFlatRepresentation.fields,
       mapper: function(baseUrl, params) {
         return jsonMapper;
       }
     },
-    flat: representationUtil.defaultFlatRepresentation(fields)
+    flat: {
+      fields: defaultFlatRepresentation.fields,
+      outputFields: defaultFlatRepresentation.outputFields,
+      mapper: (baseUrl, params) =>  row => {
+        return Object.assign({}, {
+          txid: row.txid,
+          operation: row.operation,
+          tidspunkt: row.tidspunkt,
+          sekvensnummer: row.sekvensnummer
+        }, dataMapper(row));
+      }
+    }
   };
 }
 

@@ -1,18 +1,22 @@
 "use strict";
 
 const datamodels = require('../datamodel');
-const dbBindings = require('../dbBindings');
-const getProvidedAttributes = require("../bindings/get-provided-attributes");
 module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
-  const binding = dbBindings[datamodelName];
-  memo[datamodelName] = binding.attributes.reduce((acc, attrBinding) => {
-    for(let attrName of getProvidedAttributes(attrBinding)) {
-      acc.push({name: attrName,
-      selectable: true,
-      multi: false
-      });
-    }
-    return acc;
-  }, []);
+  const model = datamodels[datamodelName];
+
+  // The fields specific for this entity are retrieved from the SQL model,
+  // because there is a 1-1 correspondence between the internal and external model
+  // on the replication APIs.
+  const entityFields = model.attributes.map(field => ({
+    name: field.name,
+    selectable: true,
+    multi: false
+  }));
+
+  memo[datamodelName] = entityFields;
+  // if(datamodelName === 'adgangsadresse') {
+  //   console.dir(entityFields);
+  // }
   return memo;
+
 }, {});
