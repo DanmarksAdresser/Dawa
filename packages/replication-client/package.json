@@ -26,12 +26,6 @@
     "underscore": "^1.9.1",
     "urijs": "^1.19.1"
   },
-<<<<<<< HEAD
-=======
-  "devDependencies": {
-    "@dawadk/server": "^1.28.23"
-  },
->>>>>>> 1.28.x
   "scripts": {
     "lint": "eslint .",
     "test": "mocha",
