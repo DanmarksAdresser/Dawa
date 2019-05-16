@@ -23,6 +23,18 @@ const ejerlavUdtraekResource = registry.findWhere({
   qualifier: 'udtraek'
 });
 
+const adgangsadresseUdtraekResource = registry.findWhere({
+  entityName: 'adgangsadresse',
+  type: 'resource',
+  qualifier: 'udtraek'
+});
+
+const adgangsadresseEventsResource = registry.findWhere({
+  entityName: 'adgangsadresse',
+  type: 'resource',
+  qualifier: 'hændelser'
+});
+
 const ejerlavEventsResource = registry.findWhere({
   entityName: 'ejerlav',
   type: 'resource',
@@ -208,6 +220,29 @@ describe('Transaktioner inspektion', () => {
 
 describe('Opslag på replikerings-API', () => {
   testdb.withTransactionEach('test', (clientFn) => {
+    it('Husnummer er korrekt formateret i CSV-udtræk', () => go(function*() {
+      const response = yield helpers.getCsvFromHandler(clientFn(), replikeringUdtrækHandler.responseHandler, {}, {entitet: 'adgangsadresse', 'id': '0a3f507b-c0c9-32b8-e044-0003ba298018'});
+      assert.strictEqual(response.length, 1);
+      assert.strictEqual(response[0].husnr, '4B');
+    }));
+    it('Husnummer er korrekt formateret i CSV-hændelser', () => go(function*() {
+      const response = yield helpers.getCsvFromHandler(clientFn(), replikeringEventHandler.responseHandler, {}, {entitet: 'adgangsadresse', 'id': '0a3f507b-c0c9-32b8-e044-0003ba298018'});
+      assert.strictEqual(response[0].husnr, '4B');
+    }));
+  });
+});
 
+describe.only('Ordning af CSV-felter', () => {
+  it('felt-ordning i adgangsadresse udtræk er identisk med datamodellen', () => {
+    const datamodel = replikeringModel.adgangsadresse;
+    const expectedFieldOrder = datamodel.attributes.map(attr => attr.name);
+    const fieldOrder = adgangsadresseUdtraekResource.representations.flat.outputFields;
+    assert.deepStrictEqual(fieldOrder, expectedFieldOrder);
+  });
+  it('felt-ordning i adgangsadresse hændelser er identisk med datamodellen', () => {
+    const datamodel = replikeringModel.adgangsadresse;
+    const expectedFieldOrder = ['txid', 'sekvensnummer', 'tidspunkt', 'operation', ...datamodel.attributes.map(attr => attr.name)];
+    const fieldOrder = adgangsadresseEventsResource.representations.flat.outputFields;
+    assert.deepStrictEqual(fieldOrder, expectedFieldOrder);
   });
 });

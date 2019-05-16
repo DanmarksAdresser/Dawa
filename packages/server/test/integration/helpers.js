@@ -40,6 +40,13 @@ exports.getCsv = (dbClient, resourceSpec, pathParams, queryParams) => go(functio
   return yield q.nfcall(csvParse, str, {columns: true});
 });
 
+exports.getCsvFromHandler = (dbClient, handler, pathParams, queryParams) => go(function*() {
+  queryParams.format = 'csv';
+  const response = yield handler(dbClient, 'http://dawa', pathParams, queryParams);
+  const body =   yield resourceImpl.materializeBody(dbClient, response);
+  return yield q.nfcall(csvParse, body, {columns: true});
+});
+
 function jsFieldToCsv(field) {
   if (typeof field === 'string') {
     return field;
