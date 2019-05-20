@@ -1,2 +1,5 @@
 node_modules
 *.log
+s3rver-test-data
+.idea
+

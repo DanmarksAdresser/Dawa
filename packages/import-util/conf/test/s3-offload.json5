@@ -1,4 +1,9 @@
 {
+  test: {
+    s3rver: {
+      directory: './s3rver-test-data'
+    }
+  },
   s3_offload: {
     s3: {
       region: null,

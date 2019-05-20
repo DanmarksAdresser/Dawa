@@ -14,9 +14,6 @@ module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
   }));
 
   memo[datamodelName] = entityFields;
-  // if(datamodelName === 'adgangsadresse') {
-  //   console.dir(entityFields);
-  // }
   return memo;
 
 }, {});
