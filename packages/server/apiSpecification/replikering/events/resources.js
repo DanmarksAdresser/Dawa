@@ -12,6 +12,7 @@ var commonParameters = require('../../common/commonParameters');
 const datamodel = require('../datamodel');
 const bindings = require('../dbBindings');
 const commonReplikeringParams = require('../commonParameters');
+const {noCacheStrategy} = require('../../common/caching');
 
 _.each(Object.keys(datamodel), function(entityName) {
   const binding = bindings[entityName];
@@ -31,7 +32,8 @@ _.each(Object.keys(datamodel), function(entityName) {
     sqlModel: sqlModels[entityName],
     singleResult: false,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-    processParameters:  function() {}
+    processParameters:  function() {},
+    cacheStrategy: noCacheStrategy
   };
   if(binding.legacyResource) {
     registry.add(entityName, 'resource', 'hændelser', exports[entityName]);

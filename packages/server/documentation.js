@@ -13,6 +13,7 @@ const replikeringModels = require('./apiSpecification/replikering/datamodel');
 const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/normalizedFieldSchemas');
 const replikeringBindings = require('./apiSpecification/replikering/dbBindings');
 const replikeringDataSections = require('./apidoc/replikering-data-page');
+const {cachingMiddleware} = require('./middleware/caching');
 
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
@@ -25,6 +26,7 @@ var packageJson = JSON.parse(fs.readFileSync(__dirname + '/package.json'));
 var app = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'pug');
+app.use(cachingMiddleware);
 
 var jsonSchemas = _.reduce(registry.entriesWhere({
   type: 'representation',

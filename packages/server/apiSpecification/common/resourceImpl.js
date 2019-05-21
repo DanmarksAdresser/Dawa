@@ -15,13 +15,27 @@ const dbLogger = require('@dawadk/common/src/logger').forCategory('Database');
 const requestLogger = require('@dawadk/common/src/logger').forCategory('RequestLog');
 const sqlUtil = require('./sql/sqlUtil');
 
+const {defaultCacheStrategy} = require('./caching');
+
 const {pipeToStream, pipe} = require('@dawadk/common/src/csp-util');
 
 const {QuerySlotTimeout, ConnectionSlotTimeout} = require('../../psql/requestLimiter');
+const conf = require('@dawadk/common/src/config/holder').getConfig();
 
 function jsonStringifyPretty(object) {
   return JSON.stringify(object, undefined, 2);
 }
+
+const getMaxAgeForPath = path => {
+  const cacheConf = conf.get('caching');
+  const overrides = cacheConf.max_age_overrides;
+  for (let {regex, max_age} of overrides) {
+    if (new RegExp(regex).test(path)) {
+      return max_age;
+    }
+  }
+  return cacheConf.max_age;
+};
 
 /**
  * Parses multiple groups of parameters.
@@ -90,8 +104,7 @@ function postgresQueryErrorResponse(details) {
 function modelErrorResponse(err) {
   if (err instanceof sqlUtil.InvalidParametersError) {
     return queryParameterFormatErrorResponse(err.message);
-  }
-  else {
+  } else {
     return postgresQueryErrorResponse(err);
   }
 }
@@ -132,8 +145,7 @@ const getClientIp = req => {
   if (xForwardedFor) {
     const firstCommaIndex = xForwardedFor.indexOf(',');
     return firstCommaIndex !== -1 ? xForwardedFor.substring(0, firstCommaIndex) : xForwardedFor;
-  }
-  else {
+  } else {
     return req.ip;
   }
 };
@@ -145,7 +157,7 @@ const getRequestId = req => {
 const parseQueryParams = (parameterSpec, params) => {
   const parseResult = parseParameters(parameterSpec, params);
   if (parseResult.errors.length > 0) {
-      return [queryParameterFormatErrorResponse(parseResult.errors), null];
+    return [queryParameterFormatErrorResponse(parseResult.errors), null];
   }
   const validationErrors = validateParameters(parameterSpec, parseResult.params);
   if (validationErrors.length > 0) {
@@ -203,13 +215,12 @@ exports.internal = {
 
 exports.sendInternalServerError = sendInternalServerError;
 
-const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams) => {
-  return go(function* () {
+const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams) => go(function* () {
+  const preparedResponse = yield this.delegateAbort(go(function* () {
     const parseResult = parseAndProcessParameters(resourceSpec, pathParams, queryParams);
     if (parseResult.pathErrors) {
       return uriPathFormatErrorResponse(parseResult.pathErrors);
-    }
-    else if (parseResult.queryErrors) {
+    } else if (parseResult.queryErrors) {
       return queryParameterFormatErrorResponse(parseResult.queryErrors);
     }
     const params = parseResult.processedParams;
@@ -232,8 +243,7 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
     if (resourceSpec.sqlModel.validateParams) {
       try {
         yield resourceSpec.sqlModel.validateParams(client, params);
-      }
-      catch (err) {
+      } catch (err) {
         return modelErrorResponse(err);
       }
     }
@@ -255,8 +265,7 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
       const rows = yield this.delegateAbort(resourceSpec.sqlModel.processQuery(client, fieldNames, params));
       if (rows.length === 0) {
         return objectNotFoundResponse(pathParams);
-      }
-      else if (rows.length > 1) {
+      } else if (rows.length > 1) {
         return internalServerErrorResponse(new Error("Unexpected number of results from query"));
       }
       const value = rows[0];
@@ -264,29 +273,31 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
         yield channel.put(value);
         channel.close();
       });
-    }
-    else if (resourceSpec.disableStreaming) {
+    } else if (resourceSpec.disableStreaming) {
       execute = (client, channel) => go(function* () {
         const result = yield this.delegateAbort(resourceSpec.sqlModel.processQuery(client, fieldNames, params));
         yield channel.putMany(result);
         channel.close();
       });
-    }
-    else {
+    } else {
       execute = (client, channel) =>
         client.withTransaction(
           'READ_ONLY',
           () => resourceSpec.sqlModel.processStream(client, fieldNames, params, channel));
     }
-
     return {
       status: transducingSerializer.status,
       headers: transducingSerializer.headers,
       execute,
       xform
     };
+  }));
+  const cacheStrategy = resourceSpec.cacheStrategy || defaultCacheStrategy(getMaxAgeForPath(resourceSpec.path));
+  Object.assign(preparedResponse.headers, {
+    'Cache-Control': cacheStrategy(queryParams.cache, preparedResponse.status)
   });
-};
+  return preparedResponse;
+});
 
 exports.prepareResponse = prepareResponse;
 
@@ -391,10 +402,9 @@ exports.createExpressHandler = function (responseHandler) {
       }
       // Create a signal which is raised when the client aborts the HTTP connection
       const clientDisconnectedSignal = new Signal();
-      if(!req.socket || req.socket.destroyed) {
+      if (!req.socket || req.socket.destroyed) {
         clientDisconnectedSignal.raise("Client closed connection");
-      }
-      else {
+      } else {
         req.once('aborted', err => clientDisconnectedSignal.raise("Client closed connection"));
       }
       const baseUrl = paths.baseUrl(req);
@@ -431,47 +441,40 @@ exports.createExpressHandler = function (responseHandler) {
       clientDisconnectedSignal.connect(process.abort);
       try {
         yield process;
-      }
-      catch (error) {
+      } catch (error) {
         requestContext.error = error;
-        if(!clientDisconnectedSignal.isRaised() && !res.headersSent) {
-          if(error instanceof ConnectionSlotTimeout || error instanceof QuerySlotTimeout) {
+        if (!clientDisconnectedSignal.isRaised() && !res.headersSent) {
+          if (error instanceof ConnectionSlotTimeout || error instanceof QuerySlotTimeout) {
             const response = tooManyRequestsResponse();
             yield serveResponse(null, req, res, response, initialDataSignal);
             requestContext.status = response.status;
-          }
-          else {
+          } else {
             const response = internalServerErrorResponse(error);
             yield serveResponse(null, req, res, response, initialDataSignal);
             requestContext.status = response.status;
           }
-        }
-        else {
+        } else {
           req.destroy();
         }
       }
       requestContext.responseEnd = Date.now();
       let requestOutcome = null;
-      if(!requestContext.error) {
-        if(res.statusCode === 429) {
+      if (!requestContext.error) {
+        if (res.statusCode === 429) {
           requestOutcome = 'REJECTED';
-        }
-        else{
+        } else {
           requestOutcome = 'COMPLETED';
         }
-      }
-      else if(requestContext.error && clientDisconnectedSignal.isRaised()) {
+      } else if (requestContext.error && clientDisconnectedSignal.isRaised()) {
         requestOutcome = 'ABORTED';
         delete requestContext.error;
-      }
-      else if(requestContext.error instanceof QuerySlotTimeout ||
-      requestContext.error instanceof ConnectionSlotTimeout) {
+      } else if (requestContext.error instanceof QuerySlotTimeout ||
+        requestContext.error instanceof ConnectionSlotTimeout) {
         requestOutcome = 'REJECTED';
         const error = requestContext.error;
         delete requestContext.error;
         requestContext.rejectReason = error.message;
-      }
-      else {
+      } else {
         requestOutcome = 'FAILED';
       }
       requestContext.outcome = requestOutcome;

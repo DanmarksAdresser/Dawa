@@ -7,7 +7,6 @@
 var express          = require('express');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
-const basicAuth = require('express-basic-auth');
 const conf = require('@dawadk/common/src/config/holder').getConfig();
 
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
@@ -15,35 +14,9 @@ var resourceImpl = require('./apiSpecification/common/resourceImpl');
 var registry = require('./apiSpecification/registry');
 require('./apiSpecification/allSpecs');
 require('./apiSpecification/replikering/events/resources');
+const {oisMiddleWare } = require('./middleware/ois');
 
-var dayInSeconds = 24 * 60 * 60;
-var cacheMaxAge = process.env.cacheMaxAge || dayInSeconds;
 
-const isOisPath = req => (req.path.toLowerCase().indexOf('/ois') !== -1 && req.path.toLowerCase() !== '/oisdok');
-
-function cachingMiddleware(req, res, next) {
-  // this looks like a mess, but we cannot set the caching headers before we
-  // know the response code
-  var baseFunc = res.writeHead;
-  res.writeHead = function(statusCode, reasonPhrase, headers) {
-    var header;
-    if(statusCode >= 300 || req.query.cache === 'no-cache' || req.path.indexOf('/replikering') === 0 || isOisPath(req)) {
-      header = 'no-cache';
-    }
-    else {
-      header = 'max-age=' + cacheMaxAge;
-    }
-    res.setHeader('Cache-Control', header);
-    if(headers) {
-      headers['Cache-Control'] = header;
-    }
-    if(!headers && reasonPhrase) {
-      reasonPhrase['Cache-Control'] = header;
-    }
-    baseFunc.call(res, statusCode, reasonPhrase, headers);
-  };
-  next();
-}
 
 /**
  * We prevent HEAD requests. Expressjs executes the entire request (resultning in heavy load),
@@ -77,34 +50,8 @@ exports.setupRoutes = function () {
   app.use(bodyParser.json());
   app.use(preventHeadMiddleware);
   app.use(corsMiddleware);
-  app.use(cachingMiddleware);
-  const oisEnabled = conf.get('ois.enabled');
-  const oisProtected = conf.get('ois.protected');
+
   const replicationEnabled = conf.get("replication.enabled");
-  const oisUsers = {};
-  if(oisProtected) {
-    oisUsers[conf.get('ois.login')] = conf.get('ois.password');
-  }
-
-  const oisBasicAuthMiddleware = basicAuth({
-    users: oisUsers,
-    challenge: true,
-    realm: 'OIS login'
-  });
-  if(!oisEnabled || oisProtected) {
-    app.use((req, res, next) => {
-      if (isOisPath(req)) {
-        if(!oisEnabled) {
-          return res.status(403).send('OIS currently disabled for all users');
-        }
-        if(oisProtected) {
-          return oisBasicAuthMiddleware(req, res, next);
-        }
-      }
-      next();
-    });
-  }
-
   if(!replicationEnabled) {
     app.use((req, res, next) => {
       if ((req.path.toLowerCase().indexOf('/replikering/') !== -1)) {
@@ -113,6 +60,7 @@ exports.setupRoutes = function () {
       next();
     });
   }
+  app.use(oisMiddleWare());
 
   registry.where({
     type: 'resource'

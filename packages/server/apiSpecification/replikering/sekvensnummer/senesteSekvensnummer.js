@@ -5,6 +5,7 @@ const { go } = require('ts-csp');
 var querySenesteSekvensnummer = require('./querySenesteSekvensnummer');
 var _ = require('underscore');
 var commonParameters = require('../../common/commonParameters');
+const {noCacheStrategy} = require('../../common/caching');
 
 var representation = {
   fields: ['sekvensnummer', 'tidspunkt'],
@@ -35,7 +36,8 @@ var resource = {
       return null;
     }
   },
-  processParameters:  _.identity
+  processParameters:  _.identity,
+  cacheStrategy: noCacheStrategy
 };
 
 module.exports = resource;

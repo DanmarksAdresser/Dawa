@@ -5,6 +5,7 @@ var resourcesUtil = require('../../common/resourcesUtil');
 require('../../allNamesAndKeys');
 var registry = require('../../registry');
 var commonParameters = require('../../common/commonParameters');
+const {noCacheStrategy} = require('../../common/caching');
 
 
 module.exports = {
@@ -21,7 +22,8 @@ module.exports = {
     sqlModel: sqlModel.query,
     singleResult: false,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-    processParameters:  resourcesUtil.applyDefaultPagingForQuery
+    processParameters:  resourcesUtil.applyDefaultPagingForQuery,
+    cacheStrategy: noCacheStrategy
   },
   seneste: {
     path: '/replikering/senestetransaktion',
@@ -34,7 +36,8 @@ module.exports = {
     singleResult: true,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
     processParameters:  function(params) {
-    }
+    },
+    cacheStrategy: noCacheStrategy
   }
 };
 

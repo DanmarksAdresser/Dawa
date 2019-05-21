@@ -29,6 +29,20 @@ module.exports = mergeConfigSchemas([
       cli: true,
       required: true
     },
+    caching: {
+      max_age: {
+        doc: 'Default max-age for HTTP layer caching',
+        format: 'nat',
+        default: 24 * 60 * 60, // 1 day
+        required: true
+      },
+      max_age_overrides: {
+        doc: 'Array of overrides for max_age.',
+        format: '*',
+        default: [{regex: '/datavask', max_age: 2 * 24 * 60 * 60}],
+        required: true
+      }
+    },
     pg: {
       pool: {
         max: {

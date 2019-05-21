@@ -9,6 +9,7 @@ const commonReplikeringParameters = require("../commonParameters");
 const datamodels = require('../datamodel');
 const bindings = require('../dbBindings');
 const registry = require('../../registry');
+const {noCacheStrategy} = require('../../common/caching');
 
 require('../../allNamesAndKeys');
 
@@ -30,7 +31,8 @@ module.exports = Object.keys(datamodels).reduce((memo, datamodelName) => {
     singleResult: false,
     processParameters: function(params) {
     },
-    chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
+    chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
+    cacheStrategy: noCacheStrategy
   };
   if(binding.legacyResource) {
     registry.add(datamodelName, 'resource', 'udtraek', memo[datamodelName]);

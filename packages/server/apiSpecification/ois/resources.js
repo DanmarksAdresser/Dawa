@@ -8,7 +8,7 @@ const commonParameters = require('../common/commonParameters');
 const registry = require('../registry');
 const parametersMap = require('./parameters');
 const oisApiModels = require('./oisApiModels');
-
+const {noCacheStrategy} = require('../common/caching');
 const oisPaths = {
   'public': '/bbrlight',
   full: '/ois'
@@ -41,7 +41,8 @@ for(let variant of ['public', 'full']) {
       sqlModel: sqlModel,
       singleResult: false,
       chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-      processParameters: resourcesUtil.applyDefaultPagingForQuery
+      processParameters: resourcesUtil.applyDefaultPagingForQuery,
+      cacheStrategy: noCacheStrategy
     };
 
     registry.add(`ois_${oisModelName}_${variant}`, 'resource', 'query', queryResource);
@@ -63,7 +64,8 @@ for(let variant of ['public', 'full']) {
         sqlModel: sqlModel,
         singleResult: true,
         processParameters: () => null,
-        chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
+        chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
+        cacheStrategy: noCacheStrategy
       };
 
       registry.add(`ois_${oisModelName}_${variant}`, 'resource', 'getByKey', getByKeyResource);
