@@ -66,6 +66,8 @@ block main
       | Typisk anvendes enten CSV eller NDJSON format til udtræk. Mange databaser (bl.a. <a href="https://www.postgresql.org/docs/current/static/sql-copy.html">PostgreSQL</a> og SQL Server)
       | understøtter at CSV-format indlæses direkte i en databasetabel.
       | Se <a href="/dok/api/replikering#udtraek">API dokumentationen</a> for detaljer.
+    p
+      | Man skal altid benytte seneste transaktions-id når der hentes udtræk. Det giver ikke mening at hente gamle udtræk.
     h3 Gem udtræk og transaktions-ID
     p
       | Udtræk og transaktions-ID gemmes lokalt. Det er vigtigt også at gemme transaktions-ID, da dette anvendes
@@ -108,6 +110,13 @@ block main
       | Herefter udføres de ændringer som hændelserne angiver på den lokale kopi. Hvis der anvendes
       | en transaktionel database vil det være hensigtsmæssigt at gøre det i én transaktion,
       | så data altid er indbyrdes konsistente.
+    p
+      | Det anbefales, at man i replikerings-klienten implementerer support for, at lokale data også kan opdateres
+      | ved at lave et nyt, komplet udtræk, som kan benyttes hvis der af en eller anden grund opstår en
+      | fejl i den inkrementielle opdatering.
+    p
+      | DAWA stiller hændelser til rådighed i minimum et år. Forsøg på at hente hændelser som er ældre end et år
+      | kan resultere i en fejl 400.
     h2 Detaljer
     h3 Maskinlæsbar model
     p

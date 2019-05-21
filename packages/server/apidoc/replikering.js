@@ -48,7 +48,8 @@ af entiteter og hvilke data de forskellige entiter indeholder.`,
     entity: 'haendelse',
     subtext: `Modtag hændelser om ændringer til en given entitet. Entitet-parameteren (kræves) angiver
     hvilken entitet, der modtages hændelser for.  <a href="/dok/api/replikering-data">databeskrivelser</a> for en liste
-af entiteter og hvilke data de forskellige entiter indeholder.`,
+    af entiteter og hvilke data de forskellige entiter indeholder. DAWA stiller hændelser til rådighed i minimum et år efter hændelsen blev dannet. 
+    Forsøg på at hente hændelser ældre end et år kan resultere i en fejl 400.`,
     parameters: [
       {
         name: 'entitet',
