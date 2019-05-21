@@ -55,6 +55,12 @@ block main
     I svaret er det angivet, at den aktuelle adresse er "Girostrøget 1, Høje Taastrup, 2630 Taastrup".
     Under "variant" er der angivet hvilken variant af adressen som matchede bedst. I dette tilfælde
     er det varianten med firmapostnummer og uden supplerende bynavn.
+  h2 Nedlagte adresser
+  p.
+    Datavask-API'et søger også i nedlagte adresser. Et match på en nedlagt adresse kan også have kategori A eller B.
+    Det fremgår af <code>status</code>-feltet for den aktuelle adresse angivet i svaret, om den er
+    nedlagt eller henlagt (hhv. status 2 og 4). Hvis adressen er nedlagt
+    kan den ikke findes på opslags-API'et med mindre parameteren <code>medtagnedlagte</code> angives.
   h2 Demo
   +renderDatavaskDemo()
 
