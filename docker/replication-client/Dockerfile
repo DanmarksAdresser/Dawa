@@ -6,4 +6,4 @@ COPY ./packages/common ./packages/common
 COPY ./packages/import-util ./packages/import-util
 COPY ./packages/replication-client ./packages/replication-client
 RUN yarn install
-ENTRYPOINT node_modules/.bin/dawa-replication-client
+ENTRYPOINT ["node_modules/.bin/dawa-replication-client"]
