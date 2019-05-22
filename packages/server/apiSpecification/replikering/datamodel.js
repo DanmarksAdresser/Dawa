@@ -614,7 +614,19 @@ module.exports = {
         <li>ukendt – vandareal er ikke oplyst</li> 
         </ul>`,
         type: 'string'
-      }
+      },
+      {
+        name: 'visueltcenter',
+        type: 'geometry',
+        description: 'Jordstykkets visuelle center.',
+      },
+      {
+        name: 'bbox',
+        type: 'geometry',
+        description: 'Bounding box for jordstykkets geometri.',
+        nullable: true
+      },
+
     ]
 
   },

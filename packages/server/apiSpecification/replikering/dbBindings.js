@@ -100,6 +100,8 @@ const unnormalizedBindings = {
       types.kode4({attrName: 'regionskode'}),
       types.kode4({attrName: 'sognekode'}),
       types.kode4({attrName: 'retskredskode'}),
+      types.geometry({attrName: 'visueltcenter'}),
+      types.geometry({attrName: 'bbox'}),
       types.geometry({attrName: 'geometri', column: 'geom'}),
       types.numberToString({attrName: 'featureid'})
     ]
