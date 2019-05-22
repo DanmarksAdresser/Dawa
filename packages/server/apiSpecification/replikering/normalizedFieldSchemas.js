@@ -36,6 +36,9 @@ exports.schemas = Object.keys(replikeringModels).reduce((memo, modelName) => {
     property.description = attr.description;
     property.deprecated = attr.deprecated;
     memo[attr.name] = property;
+    if(attr.offloaded) {
+      property.description += ' (<a href="/dok/guide/replikering#store-geometrier">offloaded geometri</a>).';
+    }
     return memo;
   }, {});
   memo[modelName] = globalSchemaObject({
