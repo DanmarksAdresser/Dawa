@@ -46,7 +46,8 @@ const commands = [
       parameters: [...parameterSpec, {
         name: 'force-download',
         type: 'boolean',
-        description: 'Download a complete copy of all entities instead of relying on events to perform the update.'
+        description: `Download a complete copy of all entities instead of relying on events to perform the update.\
+ Used if new attributes has been added, or if data inconsistencies are suspected.`
       }]
     },
     {

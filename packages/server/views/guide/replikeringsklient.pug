@@ -130,7 +130,9 @@ block main
       | indlæse et udtræk af den nye entitet og foretage en inkrementiel opdatering af de andre entiteter.
     p
       | I særlige tilfælde kan det være ønskværdigt at lave et fuldt udtræk,
-      | selvom der allerede er hentet data tidligere. Dette gøres med --force-download parameteren:
+      | selvom der allerede er hentet data tidligere. Det kan f.eks. være hvis der er tilføjet nye attributter eller hvis
+      | der er mistanke om datainkonsistenser. Hvis <code>--force-download</code> parameteren angives vil klienten benytte et nyt, fuldt
+      | udtræk til at opdatere den lokale kopi:
     pre
       code dawa-replication-client replicate --database=&lt;database-URI&gt; --replication-config &lt;config-file&gt; --force-download
     h2 Ændringstabeller
