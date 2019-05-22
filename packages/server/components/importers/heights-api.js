@@ -20,7 +20,7 @@ function hoejdeClient(apiUrl, accessToken) {
         Token: accessToken
       }
     });
-    if (result.hoejde === null || result.hoejde === undefined) {
+    if (result.hoejde === null || result.hoejde === undefined || result.hoejde < -100) {
       logger.error('Got bad result from height service', {
         result,
         url: formattedUrl
