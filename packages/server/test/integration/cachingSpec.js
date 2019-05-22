@@ -6,7 +6,7 @@ const request = require("request-promise");
 const config = require('@dawadk/common/src/config/holder').getConfig();
 const baseUrl = config.get('test.dawa_base_url');
 
-describe.only("Caching", function () {
+describe("Caching", function () {
   it("2xx svar skal caches", () => go(function* () {
     const response = yield request.get({
       url: `${baseUrl}/adresser?per_side=1`,

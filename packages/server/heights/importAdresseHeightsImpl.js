@@ -5,15 +5,23 @@ const { go } = require('ts-csp');
 const proddb = require('../psql/proddb');
 
 const { createHeightImporter } = require('../components/importers/heights-csv');
-const { createApiImporter, hoejdeClient } = require('../components/importers/heights-api');
+const { createApiImporter, createApiReimporter, hoejdeClient } = require('../components/importers/heights-api');
 const { EXECUTION_STRATEGY } = require('../components/common');
 const { execute, executeRollbackable } = require('../components/execute');
 
 
 const importFromApi = (client, apiClient) => go(function*() {
   const importer = createApiImporter({apiClient});
-  return yield executeRollbackable(client, 'importHøjderApi', [importer], EXECUTION_STRATEGY.quick, {});
+  return yield executeRollbackable(client, 'importHøjderApi',
+    [importer], EXECUTION_STRATEGY.quick, {});
 });
+
+const reimportFromApi = (client, apiClient, husnummerid) => go(function*() {
+  const importer = createApiReimporter({apiClient, husnummerid});
+  return yield executeRollbackable(client, 'importHøjderApi',
+    [importer], EXECUTION_STRATEGY.quick, {});
+});
+
 const importFromApiDaemon = (apiUrl, accessToken) => go(function*() {
   const apiClient = hoejdeClient(apiUrl, accessToken);
   /*eslint no-constant-condition: 0 */
@@ -23,6 +31,14 @@ const importFromApiDaemon = (apiUrl, accessToken) => go(function*() {
     if(context.changes.hoejde_importer_resultater.total === 0) {
       break;
     }
+  }
+});
+
+const reimportHeights = (apiUrl, accessToken, husnummerIds) => go(function*() {
+  const apiClient = hoejdeClient(apiUrl, accessToken);
+  for(let husnummerid of husnummerIds) {
+    yield proddb.withTransaction('READ_WRITE', client =>
+      reimportFromApi(client, apiClient, husnummerid));
   }
 });
 
@@ -36,5 +52,6 @@ const importHeights = (client, txid, filePath) => go(function*() {
 module.exports = {
   importHeights,
   importFromApi,
-  importFromApiDaemon
+  importFromApiDaemon,
+  reimportHeights
 };
