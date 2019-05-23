@@ -15,7 +15,7 @@ const tags = exec('git tag --points-at HEAD')
   .map(tag => tag.trim())
   .filter(tag => tag !=='');
 for(let tag of tags) {
-  const match = tag.match(/@dawadk\/server-(.*)/);
+  const match = tag.match(/@dawadk\/server@(.*)/);
   if(match) {
     const ecrTag = match[1];
     // slashes not permitted in docker tags
