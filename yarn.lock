@@ -5897,10 +5897,10 @@ pg-connection-string@^2.0.0:
   resolved "https://registry.yarnpkg.com/pg-connection-string/-/pg-connection-string-2.0.0.tgz#3eefe5997e06d94821e4d502e42b6a1c73f8df82"
   integrity sha1-Pu/lmX4G2Ugh5NUC5CtqHHP434I=
 
-pg-copy-streams@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/pg-copy-streams/-/pg-copy-streams-1.2.0.tgz#7b3f9dee0b6c5fc2068f59c40fa218e0c1d74249"
-  integrity sha1-ez+d7gtsX8IGj1nED6IY4MHXQkk=
+pg-copy-streams@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/pg-copy-streams/-/pg-copy-streams-2.2.0.tgz#17846718c5cc206bc9ccef3bdf7c00a258eb00b1"
+  integrity sha512-w1gy/KAD49vaCCUfqcjh4fy1V4TF6fvtZ+EaRAU0QKtADMxihb+qYRgbWTDbi6Lh6v31CsWC0ru8vCDHofrRQQ==
 
 pg-format@^1.0.4:
   version "1.0.4"
@@ -5933,10 +5933,10 @@ pg-types@~2.0.0:
     postgres-date "~1.0.0"
     postgres-interval "^1.1.0"
 
-pg@^7.4.1:
-  version "7.9.0"
-  resolved "https://registry.yarnpkg.com/pg/-/pg-7.9.0.tgz#04f0024d810544463f47dbb5aada2486aa7dcc36"
-  integrity sha512-GkzteBFpsIoIBCSuomqik3IGvhqAtTr32jclR24RmUg170Jrn6ypwR97YalFHrsE1iaW8T0aAH13dmij8QUQ0g==
+pg@^7.11.0:
+  version "7.11.0"
+  resolved "https://registry.yarnpkg.com/pg/-/pg-7.11.0.tgz#a8b9ae9cf19199b7952b72957573d0a9c5e67c0c"
+  integrity sha512-YO4V7vCmEMGoF390LJaFaohWNKaA2ayoQOEZmiHVcAUF+YsRThpf/TaKCgSvsSE7cDm37Q/Cy3Gz41xiX/XjTw==
   dependencies:
     buffer-writer "2.0.0"
     packet-reader "1.0.0"
