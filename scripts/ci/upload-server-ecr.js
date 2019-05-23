@@ -10,7 +10,10 @@ exec(loginCmd);
 exec(`docker tag dawa:latest 587758073017.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/dawa:latest`);
 exec(`docker push 587758073017.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/dawa:latest`);
 
-const tags = exec('git tag --points-at HEAD').split('\n').map(tag => tag.trim());
+const tags = exec('git tag --points-at HEAD')
+  .split('\n')
+  .map(tag => tag.trim())
+  .filter(tag => tag !=='');
 for(let tag of tags) {
   const match = tag.match(/@dawadk\/server-(.*)/);
   if(match) {
@@ -22,7 +25,10 @@ for(let tag of tags) {
   }
 }
 
-const branchRefs = exec(`git branch --points-at HEAD --format="%(refname)"`).split('\n').map(tag => tag.trim());
+const branchRefs = exec(`git branch --points-at HEAD --format="%(refname)"`)
+  .split('\n')
+  .map(tag => tag.trim())
+  .filter(tag => tag !== '');
 for(let branchRef of branchRefs) {
   const match = branchRef.match(/refs\/heads\/(.*)/);
   if(match) {
