@@ -5,7 +5,7 @@ const fs = require('fs');
 const S3rver = require('s3rver');
 const s3Util = require('../src/s3-util');
 const configHolder = require('@dawadk/common/src/config/holder');
-
+const logger = require('@dawadk/common/src/logger').forCategory('s3rver');
 const startS3rver = () => go(function*() {
   const config = configHolder.getConfig();
   let s3Directory = config.get('test.s3rver.directory');
@@ -17,12 +17,14 @@ const startS3rver = () => go(function*() {
       fs.mkdirSync(s3Directory, {recursive: true});
     }
   }
-  const s3InstanceOpts = new S3rver({
+  const opts = {
     port: config.get('test.s3rver.port'),
     hostname: config.get('test.s3rver.hostname'),
     silent: config.get('test.s3rver.silent'),
     directory: s3Directory
-  });
+  };
+  logger.info('Starting s3rver', opts);
+  const s3InstanceOpts = new S3rver(opts);
 
   const instance = yield new Promise((resolve, reject) => {
     const instance = s3InstanceOpts.run((err) => {

@@ -12,14 +12,16 @@ const { createS3 } = require('./s3-util');
 const logger = require('@dawadk/common/src/logger').forCategory('s3Offload');
 
 const uploadToS3 = (s3, bucket, path, key, jsonText) => go(function*() {
+  const s3Key = (path ? (path + '/') : '') + key;
   logger.info('Uploading to s3', {
-    key,
+    s3Key,
+    bucket,
     length: jsonText.length
   });
   const zipped = yield Promise.promisify(zlib.gzip, {context: zlib})(jsonText);
   return yield Promise.promisify(s3.upload, {context: s3})({
     Bucket: bucket,
-    Key: (path ? (path + '/') : '') + key,
+    Key: s3Key,
     Body: zipped,
     ContentEncoding: 'gzip',
     ContentType: 'application/json; charset=utf-8'

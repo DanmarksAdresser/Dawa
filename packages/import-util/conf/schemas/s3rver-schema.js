@@ -9,7 +9,7 @@ module.exports = {
       hostname: {
         format: 'String',
         doc: 'host to bind to',
-        default: 'localhost'
+        default: '0.0.0.0'
       },
       silent: {
         format: 'Boolean',

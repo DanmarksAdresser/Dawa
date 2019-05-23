@@ -2,12 +2,12 @@
   test: {
     s3rver: {
       directory: '/data',
-      hostname: '0.0.0.0'
+      hostname: 's3rver'
     }
   },
   s3_offload: {
     s3: {
-      endpoint: 'http://localhost:4569'
+      endpoint: 'http://s3rver:4569'
     }
   }
 }
