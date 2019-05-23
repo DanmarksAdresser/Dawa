@@ -1,14 +1,16 @@
 version: 0.2
 phases:
-  pre_build:
+  install:
+    runtime-versions:
+      nodejs: 10
+      docker: 18
     commands:
-      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+      - cd scripts
+      - npm install
+      - cd ..
   build:
     commands:
-      - bash ci/run-ci.sh
-      - docker tag dawa:latest 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
-      - docker tag dawa:latest 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:$CODEBUILD_SOURCE_VERSION
+      - scripts/ci/run-ci.js
   post_build:
     commands:
-      - docker push 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:latest
-      - docker push 587758073017.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/dawa:$CODEBUILD_SOURCE_VERSION
+      - scripts/ci/upload-server-ecr.js
