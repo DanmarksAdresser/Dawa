@@ -1,13 +1,13 @@
 {
   "private": true,
   "name": "@dawadk/validate-history",
-  "version": "1.0.26",
+  "version": "1.0.27",
   "license": "MIT",
   "bin": {
     "dawa-validate-history": "src/validateHistory.js"
   },
   "dependencies": {
-    "@dawadk/common": "^1.1.5",
-    "@dawadk/import-util": "^2.0.10"
+    "@dawadk/common": "^1.1.6",
+    "@dawadk/import-util": "^2.0.11"
   }
 }
