@@ -7,8 +7,8 @@
   s3_offload: {
     s3: {
       region: null,
-      access_key_id: null,
-      secret_access_key: null,
+      access_key_id: "S3RVER",
+      secret_access_key: "S3RVER",
       endpoint: 'http://localhost:4569',
       force_path_style: true
     },

@@ -19,8 +19,8 @@ const PSQL_CSV_OPTIONS = {
   escape: '\\',
   header: true,
   encoding: 'utf8',
-  formatters: {
-    bool: value => value ? 'true' : 'false'
+  cast: {
+    boolean: value => value ? 'true' : 'false'
   }
 };
 
@@ -56,7 +56,7 @@ function copyStream(client, table, columnNames) {
 }
 
 function copyStreamStringifier(columns) {
-  return csvStringify(_.extend({columns: columns}, PSQL_CSV_OPTIONS));
+  return csvStringify(Object.assign({columns: columns}, PSQL_CSV_OPTIONS));
 }
 
 function dropTable(client, tableName) {

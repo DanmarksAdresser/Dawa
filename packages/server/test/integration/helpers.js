@@ -1,6 +1,6 @@
 "use strict";
 
-var q = require('q');
+const Promise = require('bluebird');
 const { go } = require('ts-csp');
 var _ = require('underscore');
 
@@ -37,14 +37,14 @@ exports.getJson = (dbClient, resourceSpec, pathParams, queryParams) => go(functi
 exports.getCsv = (dbClient, resourceSpec, pathParams, queryParams) => go(function*() {
   queryParams.format = 'csv';
   const str = yield exports.getStringResponse(dbClient, resourceSpec, pathParams, queryParams);
-  return yield q.nfcall(csvParse, str, {columns: true});
+  return yield Promise.promisify(csvParse)(str, {columns: true});
 });
 
 exports.getCsvFromHandler = (dbClient, handler, pathParams, queryParams) => go(function*() {
   queryParams.format = 'csv';
   const response = yield handler(dbClient, 'http://dawa', pathParams, queryParams);
   const body =   yield resourceImpl.materializeBody(dbClient, response);
-  return yield q.nfcall(csvParse, body, {columns: true});
+  return yield Promise.promisify(csvParse)(body, {columns: true});
 });
 
 function jsFieldToCsv(field) {
@@ -82,7 +82,3 @@ exports.toSqlModel = function(datamodelName, apiObject) {
 };
 
 exports.getResponse = getResponse;
-
-exports.ait = (text, generator) => {
-  it(text, q.async(generator));
-};

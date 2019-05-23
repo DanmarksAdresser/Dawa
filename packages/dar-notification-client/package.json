@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "@dawadk/common": "^1.1.5",
-    "ws": "^5.2.0",
+    "ws": "^7.0.0",
     "ws-heartbeats": "^1.0.0"
   },
   "scripts": {

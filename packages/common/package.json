@@ -7,10 +7,10 @@
     "access": "public"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
-    "commander": "^2.19.0",
+    "bluebird": "^3.5.4",
+    "commander": "^2.20.0",
     "generic-pool": "^3.4.2",
-    "lerna": "^3.4.3",
+    "lerna": "^3.14.1",
     "lodash.get": "^4.4.2",
     "object-assign-deep": "^0.4.0",
     "pg": "^7.11.0",
@@ -22,7 +22,7 @@
     "ts-csp": "0.9.0",
     "underscore": "^1.9.1",
     "winston": "^3.0.0",
-    "winston-daily-rotate-file": "^3.2.1"
+    "winston-daily-rotate-file": "^3.9.0"
   },
   "scripts": {
     "test": "mocha",
