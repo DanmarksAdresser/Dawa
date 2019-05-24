@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "csv": "^0.4.6",
-    "q": "^1.4.1"
+    "q": "^1.4.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
   },
   "scripts": {
     "deploymenttest": "mocha"
