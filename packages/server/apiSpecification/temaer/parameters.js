@@ -27,10 +27,38 @@ const kodeAndNavn = {
   ])
 };
 
-const kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'retskreds', 'politikreds'];
+const kodeAndNavnTemaer = ['sogn', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function(dagiTemaNavn) {
   module.exports[dagiTemaNavn] = kodeAndNavn;
 });
+
+module.exports.region = {
+  id: normalizeParameters([
+    {
+      name: 'kode',
+      type: 'integer',
+      schema: parameterSchema.kode4
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'navn',
+      multi: true
+    },
+    {
+      name: 'kode',
+      type: 'integer',
+      multi: true,
+      schema: parameterSchema.kode4
+    },
+    {
+      name: 'nuts2',
+      type: 'string',
+      multi: true
+    }
+  ])
+};
+
 
 module.exports.kommune = {
   id: normalizeParameters([
@@ -308,6 +336,30 @@ module.exports.supplerendebynavn = {
   ])
 };
 
+module.exports.landsdel = {
+  id: normalizeParameters([
+    {
+      name: 'nuts3',
+      type: 'string'
+    }
+  ]),
+  propertyFilter: normalizeParameters([
+    {
+      name: 'dagi_id',
+      type: 'integer',
+      multi: true
+    },
+    {
+      name: 'nuts3',
+      type: 'string',
+      multi: true
+    },
+    {
+      name: 'navn',
+      multi: true
+    }
+  ])
+};
 _.each(module.exports, function(parameterGroup, temaName) {
   registry.addMultiple(temaName, 'parameterGroup', parameterGroup);
 });

@@ -585,7 +585,43 @@ exports.modelList = [{
     tilknytningTable: 'supplerendebynavntilknytninger',
     useNearestForAdgangsadresseMapping: false,
     deriveTsv: table => `to_tsvector('adresser', ${table}.navn)`
+  },
+  {
+    singular: 'landsdel',
+    singularSpecific: 'landsdelen',
+    plural: 'landsdele',
+    prefix: 'landsdels',
+    primaryKey: ['nuts3'],
+    published: true,
+    searchable: true,
+    table: 'landsdele',
+    fields: [
+      {
+        name: 'nuts3',
+        type: 'string',
+        nullable: false,
+        description: 'NUTS3 kode'
+      },
+      {
+        name: 'dagi_id',
+        type: 'string',
+        nullable: false,
+        sqlType: 'INTEGER',
+        description: 'Unik ID',
+        formatter: numberToString
+      },
+      {
+        name: 'navn',
+        type: 'string',
+        nullable: false,
+        description: 'Det supplerende bynavns navn.'
+      }
 
+    ],
+    tilknytningKey: ['nuts3'],
+    tilknytningTable: 'landsdelstilknytninger',
+    useNearestForAdgangsadresseMapping: true,
+    deriveTsv: table => `to_tsvector('adresser', ${table}.navn)`
   }
 ];
 

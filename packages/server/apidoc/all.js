@@ -8,6 +8,7 @@ module.exports = [
   ...require('./ejerlav'),
   ...require('./jordstykke'),
   ...require('./kommune'),
+  ...require('./landsdel'),
   ...require('./menighedsrådsafstemningsområde'),
   ...require('./navngivenvej'),
   ...require('./ois'),

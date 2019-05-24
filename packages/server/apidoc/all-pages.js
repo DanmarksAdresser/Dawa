@@ -9,6 +9,7 @@ module.exports = [
   require('./ejerlav-page'),
   require("./jordstykke-page"),
   require('./kommune-page'),
+  require('./landsdel-page'),
   require('./menighedsrådsafstemningsområde-page'),
   require('./navngivenvej-page'),
   ... require('./ois-pages')('public'),

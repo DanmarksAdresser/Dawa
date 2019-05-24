@@ -86,13 +86,14 @@ const dagiReverseParameters = (temaModel) => {
 
 const getTemaModel = temaName => temaModels.modelMap[temaName];
 
-const dagiQueryDoc = (tema, examples) => {
+const dagiQueryDoc = (tema, examples, additionalFilterParameters) => {
   return {
     entity: tema.singular,
     path: `/${tema.plural}`,
     subtext: `Søg efter ${tema.plural}. Returnerer de ${tema.plural} der opfylder kriteriet.`,
     parameters: [
       ...dagiKodeNavnParameters(tema),
+      ...(additionalFilterParameters || []),
       ...dagiReverseParameters(tema),
       ...formatAndPagingParams,
       strukturParameter,
@@ -115,12 +116,14 @@ const dagiByKodeDoc = (tema, examples) => {
   };
 };
 
-const dagiAutocompleteDoc = (tema, examples) => {
+const dagiAutocompleteDoc = (tema, examples, additionalParameters) => {
   return {
     entity: tema.singular,
     path: `/${tema.plural}/autocomplete`,
     subtext: autocompleteSubtext(tema.plural),
-    parameters: overwriteWithAutocompleteQParameter(dagiKodeNavnParameters(tema)).concat(formatAndPagingParams),
+    parameters: overwriteWithAutocompleteQParameter(
+      [...dagiKodeNavnParameters(tema),
+        ...(additionalParameters || []), ...formatAndPagingParams]),
     examples: examples
   };
 };

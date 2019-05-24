@@ -9,6 +9,13 @@ const {
 
 const temaModel = getTemaModel('region');
 
+const additionalFilterParameters = [
+  {
+    name: 'nuts2',
+    doc: 'Find region med den angivne NUTS2 kode. For mere information om NUTS, se <a href="https://en.wikipedia.org/wiki/Nomenclature_of_Territorial_Units_for_Statistics">Wikipedia</a>.'
+  }
+]
+
 
 const examples = {
   query: [{
@@ -32,9 +39,9 @@ const examples = {
 };
 
 module.exports = [
-  dagiQueryDoc(temaModel, examples.query),
+  dagiQueryDoc(temaModel, examples.query, additionalFilterParameters),
   dagiByKodeDoc(temaModel, examples.get),
-  dagiAutocompleteDoc(temaModel, examples.autocomplete),
+  dagiAutocompleteDoc(temaModel, examples.autocomplete, additionalFilterParameters),
   dagiReverseDoc(temaModel),
   ...dagiReplikeringTilknytningDoc(temaModel)
 ];

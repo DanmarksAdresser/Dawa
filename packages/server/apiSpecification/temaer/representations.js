@@ -62,7 +62,8 @@ var autocompleteTekst = {
   storkreds: nameOnlyAutocomplete,
   menighedsrådsafstemningsområde: nameOnlyAutocomplete,
   afstemningsområde: nameOnlyAutocomplete,
-  supplerendebynavn: nameOnlyAutocomplete
+  supplerendebynavn: nameOnlyAutocomplete,
+  landsdel: nameOnlyAutocomplete
 };
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
@@ -333,7 +334,7 @@ const supplerendebynavnRepresentation = (() => {
   const schema = globalSchemaObject({
     title: 'Supplerende Bynavn',
     properties: Object.assign({
-      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Storkredsens URL'}),
+      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Det supplerende bynavns URL'}),
       dagi_id: normalizedFieldSchema('dagi_id'),
       navn: normalizedFieldSchema('navn'),
       darstatus: {
@@ -355,6 +356,34 @@ const supplerendebynavnRepresentation = (() => {
   return {fields, mapper, schema};
 })();
 
+const landsdelsRepresentation = (() => {
+  const fields = representationUtil.fieldsWithoutNames(fieldMap.landsdel, ['geom_json']);
+  const mapper = baseUrl => row => {
+    const result = Object.assign(mapMetaFields(row), {
+      href: makeHrefFromPath(baseUrl, 'landsdel', [row.dagi_id]),
+      dagi_id: numberToString(row.dagi_id),
+      navn: row.navn,
+      nuts3: row.nuts3
+    });
+    return result;
+  };
+  const normalizedFieldSchema = (fieldName) => {
+    return normalizedSchemaField('landsdel', fieldName);
+  };
+  const schema = globalSchemaObject({
+    title: 'Landsdel',
+    properties: Object.assign({
+      href: Object.assign({}, commonSchemaDefinitions.Href, {description: 'Landsdelens URL'}),
+      dagi_id: normalizedFieldSchema('dagi_id'),
+      navn: normalizedFieldSchema('navn'),
+      nuts3: normalizedFieldSchema('nuts3'),
+    }, commonGeoProps),
+    docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'navn',
+      'nuts3']
+  });
+  return {fields, mapper, schema};
+})();
+
 
 const jsonRepresentations = {
   kommune: kommuneJsonRepresentation,
@@ -362,7 +391,8 @@ const jsonRepresentations = {
   afstemningsområde: afstemningsområdeJsonRepresentation,
   storkreds: storkredsJsonRepresentation,
   menighedsrådsafstemningsområde: mrAfstemningsområdeRepresentation,
-  supplerendebynavn: supplerendebynavnRepresentation
+  supplerendebynavn: supplerendebynavnRepresentation,
+  landsdel: landsdelsRepresentation
 };
 
 function schemaForFlatFields(model, excludedFieldNames) {

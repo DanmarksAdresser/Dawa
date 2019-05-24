@@ -3,7 +3,7 @@
 const fieldsUtil = require('../common/fieldsUtil');
 const temaModels = require('../../dagiImport/temaModels');
 const sqlModels = require('./sqlModels');
-const { kode4String, numberToString } = require('../util');
+const {kode4String, numberToString} = require('../util');
 
 const additionalFieldsMap = {
   kommune: [
@@ -209,6 +209,18 @@ const additionalFieldsMap = {
     {
       name: 'postnumre',
       multi: true
+    }
+  ],
+  landsdel: [
+    {
+      name: 'dagi_id',
+      formatter: numberToString
+    },
+    {
+      name: 'navn'
+    },
+    {
+      name: 'nuts3'
     }
   ]
 };

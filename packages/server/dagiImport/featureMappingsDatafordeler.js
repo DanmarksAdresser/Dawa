@@ -44,7 +44,8 @@ exports.region = {
       name: 'regionskode',
       parseFn: parseInteger
     },
-    navn: 'navn'
+    navn: 'navn',
+    nuts2: 'NUTS2vaerdi'
   }
 };
 
@@ -228,6 +229,20 @@ exports.postnummer = {
       parseFn: parseInteger
     },
     navn: 'navn'
+  }
+};
+
+exports.landsdel = {
+  name: 'landsdel',
+  wfsName: 'Landsdel',
+  geometry: 'geometri',
+  fields: {
+    dagi_id: {
+      name: 'id.lokalId',
+      parseFn: parseInteger
+    },
+    navn: 'navn',
+    nuts3: 'NUTS3vaerdi'
   }
 };
 
