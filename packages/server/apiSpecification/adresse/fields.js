@@ -247,7 +247,9 @@ var fields = [
   adgangsadresseField('storkredsnummer'),
   adgangsadresseField('storkredsnavn'),
   adgangsadresseField('valglandsdelsbogstav'),
-  adgangsadresseField('valglandsdelsnavn')
+  adgangsadresseField('valglandsdelsnavn'),
+  adgangsadresseField('landsdelsnuts3'),
+  adgangsadresseField('landsdelsnavn')
 ];
 
 fieldsUtil.applySelectability(fields, sqlModel);

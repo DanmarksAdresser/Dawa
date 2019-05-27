@@ -22,7 +22,9 @@ CREATE TABLE tilknytninger_mat (
   storkredsnummer                      SMALLINT,
   storkredsnavn                        TEXT,
   menighedsrådsafstemningsområdenummer SMALLINT,
-  menighedsrådsafstemningsområdenavn   TEXT
+  menighedsrådsafstemningsområdenavn   TEXT,
+  landsdelsnuts3 TEXT,
+  landsdelsnavn TEXT
 );
 
 CREATE INDEX ON tilknytninger_mat (kommunekode, adgangsadresseid);
@@ -37,6 +39,7 @@ CREATE INDEX ON tilknytninger_mat (kommunekode, afstemningsområdenummer);
 CREATE INDEX ON tilknytninger_mat (afstemningsområdenummer);
 CREATE INDEX ON tilknytninger_mat (afstemningsområde_dagi_id);
 CREATE INDEX ON tilknytninger_mat (kommunekode, menighedsrådsafstemningsområdenummer, adgangsadresseid);
+CREATE INDEX ON tilknytninger_mat(landsdelsnuts3, adgangsadresseid);
 
 DROP TABLE IF EXISTS tilknytninger_mat_changes CASCADE;
 CREATE TABLE tilknytninger_mat_changes AS (SELECT

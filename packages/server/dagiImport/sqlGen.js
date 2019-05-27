@@ -87,21 +87,28 @@ const generateZoneTilknytningView = () => {
 
 };
 
+const generateTilknytningTable = (temaNavn) => {
+  const temaModel = temaModels.modelMap[temaNavn];
+  if (!temaModel.withoutTilknytninger && !temaModel.customTilknytningView) {
+    const tilknytningModel = {
+      relatedTable: `${temaModel.table}_divided`,
+      relationTable: temaModel.tilknytningTable,
+      relatedKey: temaModel.primaryKey,
+      relationKey: temaModel.tilknytningKey,
+      adgangsadresseIdColumn: 'adgangsadresseid',
+      useNearest: temaModel.useNearestForAdgangsadresseMapping,
+      forceUnique: true
+    };
+    return generateTilknytningMatView(tilknytningModel);
+  } else {
+    return '';
+  }
+};
+
 const generateTilknytningMatViews = () =>  {
   let sql ='';
   for (let temaModel of temaModels.modelList) {
-    if(!temaModel.withoutTilknytninger && !temaModel.customTilknytningView) {
-      const tilknytningModel = {
-        relatedTable: `${temaModel.table}_divided`,
-        relationTable: temaModel.tilknytningTable,
-        relatedKey: temaModel.primaryKey,
-        relationKey: temaModel.tilknytningKey,
-        adgangsadresseIdColumn: 'adgangsadresseid',
-        useNearest: temaModel.useNearestForAdgangsadresseMapping,
-        forceUnique: true
-      };
-      sql += generateTilknytningMatView(tilknytningModel);
-    }
+    sql += generateTilknytningTable(temaModel.singular);
   }
   sql += generateZoneTilknytningView();
 
@@ -111,9 +118,11 @@ const generateTilknytningMatViews = () =>  {
 const generateTemaTable = temaNavn => {
   const model = temaModels.modelMap[temaNavn];
   return generateTemaTableSql(model);
-}
+};
+
 module.exports = {
   generateAllTemaTables,
   generateTilknytningMatViews,
-  generateTemaTable
+  generateTemaTable,
+  generateTilknytningTable
 };

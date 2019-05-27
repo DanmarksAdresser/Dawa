@@ -54,7 +54,8 @@ const FIELDS_AT_END = ['kvh', 'højde', 'adgangspunktid', 'vejpunkt_id', 'vejpun
   'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
   'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret',
   'ikrafttrædelse', 'nedlagt', 'adgangsadresse_ikrafttrædelse', 'adgangsadresse_nedlagt', 'adgangsadresse_darstatus',
-  'darstatus', 'storkredsnummer', 'storkredsnavn', 'valglandsdelsbogstav', 'valglandsdelsnavn'];
+  'darstatus', 'storkredsnummer', 'storkredsnavn', 'valglandsdelsbogstav', 'valglandsdelsnavn',
+  'landsdelsnuts3', 'landsdelsnavn'];
 
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 

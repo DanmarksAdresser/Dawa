@@ -652,7 +652,9 @@ const tilknytninger_mat = {
     {name: 'storkredsnavn'},
     {name: 'zone'},
     {name: 'menighedsrådsafstemningsområdenummer'} ,
-    {name: 'menighedsrådsafstemningsområdenavn'}
+    {name: 'menighedsrådsafstemningsområdenavn'},
+    {name: 'landsdelsnuts3'},
+    {name: 'landsdelsnavn'}
   ]
 };
 
@@ -991,6 +993,8 @@ exports.materializations = Object.assign({
       'opstillingskredse',
       'storkredse',
       'valglandsdele',
+      'landsdelstilknytninger',
+      'landsdele',
       'zonetilknytninger'
     ]
   },

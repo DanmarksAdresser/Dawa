@@ -212,6 +212,12 @@ var fields = [
   },
   {
     name: 'valglandsdelsnavn'
+  },
+  {
+    name: 'landsdelsnuts3'
+  },
+  {
+    name: 'landsdelsnavn'
   }
 ];
 

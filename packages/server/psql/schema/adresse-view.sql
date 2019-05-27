@@ -60,6 +60,8 @@ CREATE OR REPLACE VIEW adresser AS
     T.storkredsnavn,
     T.valglandsdelsbogstav,
     T.valglandsdelsnavn,
+    T.landsdelsnuts3,
+    T.landsdelsnavn,
     T.zone,
     T.menighedsrådsafstemningsområdenummer,
     T.menighedsrådsafstemningsområdenavn,

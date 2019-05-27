@@ -263,6 +263,23 @@ const definitions = {
     },
     docOrder: ['href', 'kode', 'navn']
   }),
+  LandsdelsRef: schemaObject({
+    properties: {
+      href: {
+        description: 'Landsdelens unikke URL.',
+        type: 'string'
+      },
+      nuts3: {
+        description: 'Landsdelens NUTS3 kode.',
+        type: 'string'
+      },
+      navn: {
+        description: 'Landsdelens navn.',
+        type: 'string'
+      }
+    },
+    docOrder: ['href', 'nuts3', 'navn']
+  }),
   RegionsRefNoName: schemaObject({
     properties: {
       href: {

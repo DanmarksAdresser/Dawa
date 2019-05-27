@@ -58,6 +58,17 @@ exports.mapKode4NavnTema = function(temaNavn, kode, navn, baseUrl) {
   return null;
 };
 
+exports.mapLandsdelsRef = (nuts3, navn, baseUrl) => {
+  if(nuts3) {
+    return {
+      href: exports.makeHref(baseUrl, 'landsdel', [nuts3]),
+      nuts3,
+      navn
+    }
+  }
+  return null;
+};
+
 exports.mapKode4NavnTemaNoName = function(temaNavn, kode, baseUrl) {
   if (kode) {
     return {

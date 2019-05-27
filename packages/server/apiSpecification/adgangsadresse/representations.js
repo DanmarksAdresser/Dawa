@@ -51,7 +51,7 @@ const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kild
   'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
   'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn',
   'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt', 'darstatus', 'storkredsnummer', 'storkredsnavn',
-  'valglandsdelsbogstav', 'valglandsdelsnavn'];
+  'valglandsdelsbogstav', 'valglandsdelsnavn', 'landsdelsnuts3', 'landsdelsnavn'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 
@@ -286,6 +286,10 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         description: 'Sognet som adressen er beliggende i. Beregnes udfra adgangspunktet og sogneinddelingerne fra DAGI.',
         $ref: '#/definitions/NullableSogneRef'
       },
+      'landsdel': {
+        description: 'Den landsdel, som adressen er beliggende i. Beregnes ud fra adgangspunktet.',
+        $ref: '#/definitions/NullableLandsdelsRef'
+      },
       'region': {
         description: 'Regionen som adressen er beliggende i. Beregnes udfra adgangspunktet og regionsinddelingerne fra DAGI.',
         $ref: '#/definitions/NullableRegionsRef'
@@ -439,7 +443,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
     },
     docOrder: ['href','id', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr','navngivenvej','supplerendebynavn', 'supplerendebynavn2',
       'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn','region','retskreds','politikreds', 'afstemningsområde',
+      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn', 'landsdel','region','retskreds','politikreds', 'afstemningsområde',
       'opstillingskreds', 'storkreds', 'valglandsdel', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
   }),
   mapper: function (baseUrl){
@@ -527,6 +531,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       // DAGI temaer
       adr.sogn = commonMappers.mapKode4NavnTema('sogn', rs.sognekode, rs.sognenavn, baseUrl);
       adr.region = commonMappers.mapKode4NavnTema('region', rs.regionskode, rs.regionsnavn, baseUrl);
+      adr.landsdel = commonMappers.mapLandsdelsRef(rs.landsdelsnuts3, rs.landsdelsnavn, baseUrl);
       adr.retskreds = commonMappers.mapKode4NavnTema('retskreds', rs.retskredskode, rs.retskredsnavn, baseUrl);
       adr.politikreds = commonMappers.mapKode4NavnTema('politikreds', rs.politikredskode, rs.politikredsnavn, baseUrl);
       adr.opstillingskreds = commonMappers.mapKode4NavnTema('opstillingskreds', rs.opstillingskredskode, rs.opstillingskredsnavn, baseUrl);

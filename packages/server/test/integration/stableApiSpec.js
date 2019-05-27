@@ -11,7 +11,7 @@ const testdb = require('@dawadk/test-util/src/testdb');
 require('../../apiSpecification/allSpecs');
 
 // These tests are expected to fail whenever the API is changed or extended
-describe('Stable API', () => {
+describe.only('Stable API', () => {
   const expectedResults = {
       region: {
         json: {
@@ -1086,6 +1086,11 @@ describe('Stable API', () => {
             "kode": "1084",
             "navn": "Region test"
           },
+          "landsdel": {
+            "href": "http://dawa/landsdele/DK014",
+            "navn": "Landsdel test",
+            "nuts3": "DK014"
+          },
           "retskreds": {
             "kode": "0099",
             "navn": "retskreds test",
@@ -1216,7 +1221,9 @@ describe('Stable API', () => {
             "storkredsnavn": "Storkreds test",
             "storkredsnummer": "1",
             "valglandsdelsbogstav": "A",
-            "valglandsdelsnavn": "Valglandsdel test"
+            "valglandsdelsnavn": "Valglandsdel test",
+            "landsdelsnavn": "Landsdel test",
+            "landsdelsnuts3": "DK014"
           }
         }
       }, {
@@ -1309,7 +1316,9 @@ describe('Stable API', () => {
             "storkredsnavn": "Storkreds test",
             "storkredsnummer": "1",
             "valglandsdelsbogstav": "A",
-            "valglandsdelsnavn": "Valglandsdel test"
+            "valglandsdelsnavn": "Valglandsdel test",
+            "landsdelsnavn": "Landsdel test",
+            "landsdelsnuts3": "DK014"
           }
         }
       }]
@@ -1443,6 +1452,11 @@ describe('Stable API', () => {
               "kode": "1084",
               "navn": "Region test"
             },
+            "landsdel": {
+              "href": "http://dawa/landsdele/DK014",
+              "navn": "Landsdel test",
+              "nuts3": "DK014"
+            },
             "retskreds": {
               "kode": "0099",
               "navn": "retskreds test",
@@ -1558,6 +1572,8 @@ describe('Stable API', () => {
             "adgangsadresse_ikrafttrædelse": "2000-02-05T06:08:50.000",
             "regionskode": "1084",
             "regionsnavn": "Region test",
+            "landsdelsnavn": "Landsdel test",
+            "landsdelsnuts3": "DK014",
             "jordstykke_ejerlavnavn": null,
             "jordstykke_ejerlavkode": null,
             "jordstykke_matrikelnr": null,

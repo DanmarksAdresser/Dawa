@@ -37,6 +37,8 @@ CREATE OR REPLACE VIEW AdgangsadresserView AS
     T.kommunenavn,
     T.regionskode,
     T.regionsnavn,
+    T.landsdelsnuts3,
+    T.landsdelsnavn,
     t.sognekode,
     t.sognenavn,
     t.politikredskode,
