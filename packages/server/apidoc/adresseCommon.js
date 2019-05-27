@@ -114,6 +114,10 @@ const parametersForBothAdresseAndAdgangsAdresse = [
     nullable: true
   },
   {
+    name: 'landsdelsnuts3',
+    doc: 'Find adresser i landsdelen med den angivne NUTS3 kode.'
+  },
+  {
     name: 'sognekode',
     doc: 'Find de adresser som ligger indenfor sognet angivet ved sognkoden.',
     nullable: true

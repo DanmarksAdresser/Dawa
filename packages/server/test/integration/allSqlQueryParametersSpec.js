@@ -308,6 +308,10 @@ var sampleParameters = {
         return adr.region.kode === kode4String(kode);
       }
     },
+    landsdelsnuts3: {
+      values: ['DK014'],
+      verifier: (adr, nuts3) =>  adr.landsdel.nuts3 === nuts3
+    },
     sognekode: {
       values: ['7210'],
       verifier: function(adr, kode) {
@@ -512,6 +516,10 @@ var sampleParameters = {
       verifier: function(adr, kode) {
         return adr.adgangsadresse.region.kode === kode4String(kode);
       }
+    },
+    landsdelsnuts3: {
+      values: ['DK014'],
+      verifier: (adr, nuts3) =>  adr.adgangsadresse.landsdel.nuts3 === nuts3
     },
     sognekode: {
       values: ['7210'],

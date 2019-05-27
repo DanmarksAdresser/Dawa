@@ -204,8 +204,11 @@ exports.propertyFilter = normalizeParameters([
     name: 'navngivenvej_id',
     type: 'string',
     schema: schema.uuid
+  },
+  {
+    name: 'landsdelsnuts3',
+    type: 'string'
   }
-
 ]);
 
 exports.husnrinterval = normalizeParameters([
@@ -252,7 +255,6 @@ exports.stednavnafstand = [
       minimum: 0
     }
   },
-
-]
+];
 
 registry.addMultiple('adgangsadresse', 'parameterGroup', module.exports);
