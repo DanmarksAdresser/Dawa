@@ -13,8 +13,111 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
-    kommune: {
-      json: {
+      region: {
+        json: {
+          nestet: [{
+            params: {
+              kode: '1084'
+            },
+            value: {
+              "bbox": [
+                12.5711324,
+                55.59055443,
+                12.57129891,
+                55.59064873
+              ],
+              "dagi_id": "100001",
+              "geo_version": 1,
+              "geo_ændret": "2019-05-27T07:30:38.403Z",
+              "href": "http://dawa/regioner/1084",
+              "kode": "1084",
+              "navn": "Region test",
+              "nuts2": "DK02",
+              "visueltcenter": [
+                12.57121565,
+                55.59060158
+              ],
+              "ændret": "2019-05-27T07:30:38.403Z"
+            }
+          }],
+          flad: [{
+            params: {
+              kode: '1084'
+            },
+            value: {
+              "bbox_xmax": 12.57129891,
+              "bbox_xmin": 12.5711324,
+              "bbox_ymax": 55.59064873,
+              "bbox_ymin": 55.59055443,
+              "dagi_id": "100001",
+              "geo_version": 1,
+              "geo_ændret": "2019-05-27T07:30:38.403Z",
+              "kode": "1084",
+              "navn": "Region test",
+              "nuts2": "DK02",
+              "visueltcenter_x": 12.57121565,
+              "visueltcenter_y": 55.59060158,
+              "ændret": "2019-05-27T07:30:38.403Z"
+            }
+          }]
+        }
+      },
+      landsdel: {
+        json: {
+          nestet: [{
+            params: {
+              nuts3: 'DK014'
+            },
+            value: {
+              "bbox": [
+                12.5711324,
+                55.59055443,
+                12.57129891,
+                55.59064873
+              ],
+              "dagi_id": "200002",
+              "geo_version": 1,
+              "geo_ændret": "2019-05-27T07:30:38.403Z",
+              "href": "http://dawa/landsdel/200002",
+              "navn": "Landsdel test",
+              "nuts3": "DK014",
+              "visueltcenter": [
+                12.57121565,
+                55.59060158
+              ],
+              "ændret": "2019-05-27T07:30:38.403Z",
+              "region": {
+                "href": "http://dawa/regioner/1084",
+                "kode": "1084",
+                "navn": "Region test"
+              }
+            }
+          }],
+          flad: [{
+            params: {
+              nuts3: 'DK014'
+            },
+            value: {
+              "bbox_xmax": 12.57129891,
+              "bbox_xmin": 12.5711324,
+              "bbox_ymax": 55.59064873,
+              "bbox_ymin": 55.59055443,
+              "dagi_id": "200002",
+              "geo_version": 1,
+              "geo_ændret": "20190527T08:59:51.957Z",
+              "navn": "Landsdel test",
+              "nuts3": "DK014",
+              "regionskode": "1084",
+              "regionsnavn": "Region test",
+              "visueltcenter_x": 12.57121565,
+              "visueltcenter_y": 55.59060158,
+              "ændret": "20190527T08:59:51.957Z"
+            }
+          }]
+        }
+      },
+      kommune: {
+        json: {
         nestet: [{
           params: {
             kode: 99
@@ -1643,6 +1746,18 @@ describe('Stable API', () => {
   ;
 
   const propertiesToIgnoreMap = {
+    region: {
+      json: {
+        nestet: {'geo_ændret': true, 'ændret': true},
+        flad: {'geo_ændret': true, 'ændret': true}
+      }
+    },
+    landsdel: {
+      json: {
+        nestet: {'geo_ændret': true, 'ændret': true},
+        flad: {'geo_ændret': true, 'ændret': true}
+      }
+    },
     kommune: {
       json: {
         nestet: {'geo_ændret': true, 'ændret': true}

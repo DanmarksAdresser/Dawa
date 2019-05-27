@@ -221,6 +221,13 @@ const additionalFieldsMap = {
     },
     {
       name: 'nuts3'
+    },
+    {
+      name: 'regionskode',
+      formatter: kode4String
+    },
+    {
+      name: 'regionsnavn'
     }
   ]
 };

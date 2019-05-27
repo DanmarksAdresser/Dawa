@@ -196,6 +196,17 @@ from (select distinct k.kode, k.navn
       dar_sup.supplerendebynavn1 = sp.supplerendebynavn_dagi_id)`
     },
 
+  },
+  landsdel: {
+    dagi_id: {
+      column:'t.dagi_id'
+    },
+    navn: {
+      column: 't.navn'
+    },
+    regionsnavn: {
+      column: 'r.navn'
+    }
   }
 };
 
@@ -272,6 +283,15 @@ const baseQueries = {
       orderClauses: [],
       sqlParams: []
     }
+  },
+  landsdel: () => {
+    return {
+      select: [],
+      from: ['landsdele t left join regioner r on t.regionskode = r.kode'],
+      whereClauses: [],
+      orderClauses: [],
+      sqlParams: []
+    };
   }
 };
 

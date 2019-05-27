@@ -51,6 +51,11 @@ exports.modelList = [{
       type: 'string',
       nullable: false,
       description: 'Regionens navn'
+    }, {
+      name: 'nuts2',
+      type: 'string',
+      nullable: false,
+      description: 'Regionens NUTS2 kode. '
     }],
   tilknytningKey: ['regionskode'],
   useNearestForAdgangsadresseMapping: true,

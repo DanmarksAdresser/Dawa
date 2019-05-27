@@ -49,7 +49,7 @@ const multiContainingSecond = `SRID=25832;MULTIPOLYGON(${coordinatesContainingSe
 const temaObjects = {
   zone: [{"zone": 1}, {zone: 3}],
   politikreds: [{dagi_id: 1, "kode": 99, "navn": "Politikreds 1"}, {dagi_id: 2, kode: 100, navn: "Politikreds 2"}],
-  region: [{dagi_id: 3, "kode": 99, "navn": "Region 1"}, {dagi_id: 4, kode: 100, navn: "Region 2"}],
+  region: [{dagi_id: 3, "kode": 99, "navn": "Region 1", "nuts2": "DK01"}, {dagi_id: 4, kode: 100, navn: "Region 2", nuts2: "DK02"}],
   kommune: [
     {dagi_id: 5, "kode": 99, "navn": "Kommune 1", "regionskode": 99, "udenforkommuneinddeling": true},
     {dagi_id: 6, kode: 100, navn: "Kommune 2", regionskode: 100, "udenforkommuneinddeling": false}],

@@ -363,7 +363,8 @@ const landsdelsRepresentation = (() => {
       href: makeHrefFromPath(baseUrl, 'landsdel', [row.dagi_id]),
       dagi_id: numberToString(row.dagi_id),
       navn: row.navn,
-      nuts3: row.nuts3
+      nuts3: row.nuts3,
+      region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
     });
     return result;
   };
@@ -377,9 +378,12 @@ const landsdelsRepresentation = (() => {
       dagi_id: normalizedFieldSchema('dagi_id'),
       navn: normalizedFieldSchema('navn'),
       nuts3: normalizedFieldSchema('nuts3'),
+      region: nullable(Object.assign({},
+        commonSchemaDefinitions.RegionsRef,
+        {description: 'Den region, som landsdelen ligger i.'})),
     }, commonGeoProps),
     docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'navn',
-      'nuts3']
+      'nuts3', 'region']
   });
   return {fields, mapper, schema};
 })();
