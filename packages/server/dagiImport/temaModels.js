@@ -614,7 +614,16 @@ exports.modelList = [{
         name: 'navn',
         type: 'string',
         nullable: false,
-        description: 'Det supplerende bynavns navn.'
+        description: 'Det landsdelens navn.'
+      },
+      {
+        name: 'regionskode',
+        type: 'string',
+        sqlType: 'SMALLINT',
+        nullable: true,
+        schema: commonSchemaDefinitions.NullableKode4,
+        description: 'Regionskode for den region landsdelen er beliggende i. 4 cifre.',
+        formatter: kode4String
       }
 
     ],

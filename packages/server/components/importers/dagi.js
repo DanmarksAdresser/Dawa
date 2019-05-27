@@ -24,6 +24,13 @@ const postProcess = {
     yield streamArrayToTable(client, additionalFields, 'additional', ['nummer', 'valglandsdelsbogstav', 'regionskode']);
     yield client.query(`UPDATE ${table} t SET valglandsdelsbogstav = a.valglandsdelsbogstav, regionskode = a.regionskode 
     FROM additional a WHERE t.nummer = a.nummer; DROP TABLE additional`);
+  }),
+  landsdel: (client, table) => go(function*() {
+    const additionalFields = JSON.parse(fs.readFileSync(path.join(__dirname, '../../data/landsdele.json'), {encoding: 'utf-8'}));
+    yield client.query(`CREATE TEMP TABLE additional AS (select nuts3, regionskode FROM ${table} where false)`);
+    yield streamArrayToTable(client, additionalFields, 'additional', ['nuts3', 'regionskode']);
+    yield client.query(`UPDATE ${table} t SET  regionskode = a.regionskode 
+    FROM additional a WHERE t.nuts3 = a.nuts3; DROP TABLE additional`);
   })
 };
 
