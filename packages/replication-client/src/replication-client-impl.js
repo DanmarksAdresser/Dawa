@@ -126,7 +126,7 @@ const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationMod
   log('info', `Incrementally updating entity ${entityConf.name}`);
   const lastRemoteTxid = (yield client.queryRows(`select max(source_txid) as txid from ${replicationSchema}.source_transactions where entity=$1`, [entityConf.name]))[0].txid;
   const eventCh = new Channel(0);
-  const tmpEventTableName = `tmp_${bindingConf.table}_changes`;
+  const tmpEventTableName = `dawa_client_tmp_changes`;
   yield createTempChangeTable(client, replicationSchema, bindingConf, tmpEventTableName);
   // Produces a stream of parsed records to udtraekCh
   const requestProcess = httpClientImpl.eventStream(entityConf.name, lastRemoteTxid + 1, remoteTxid, eventCh);

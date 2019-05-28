@@ -6,5 +6,8 @@ const testConfigSchemas = configHolder.mergeConfigSchemas([
   require('@dawadk/import-util/conf/schemas/s3rver-schema')
 ]);
 
-const configFiles = [require.resolve('@dawadk/import-util/conf/test/s3-offload.json5')];
+const configFiles = [
+  require.resolve('@dawadk/import-util/conf/test/s3-offload.json5'),
+  require.resolve('../../conf/test/test-config.json5')
+];
 configHolder.initialize(testConfigSchemas, configFiles, {});
