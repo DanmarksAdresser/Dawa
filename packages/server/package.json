@@ -100,7 +100,7 @@
     "prepare-test": "run-p -r start-s3rver initialize-databases",
     "mocha": "mocha",
     "mocha-with-servers": "run-p -r start-servers mocha",
-    "test": "run-s prepare-test mocha-with-servers",
+    "test": "run-s lint prepare-test mocha-with-servers",
     "ci-test": "run-s lint mocha"
   },
   "repository": {
