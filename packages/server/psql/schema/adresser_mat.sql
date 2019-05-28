@@ -10,10 +10,10 @@ CREATE VIEW adresser_mat_view AS
      WHERE e.id = adr2.id)                        AS oprettet,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_adresse_history adr2
-     WHERE e.id = adr2.id AND e.status = 3)       AS ikraftfra,
+     WHERE e.id = adr2.id AND adr2.status = 3)       AS ikraftfra,
     (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_adresse_history adr2
-     WHERE e.id = adr2.id AND e.status IN (4, 5)) AS nedlagt,
+     WHERE e.id = adr2.id AND adr2.status IN (4, 5)) AS nedlagt,
     (SELECT MAX(lower(virkning)) AT TIME ZONE 'Europe/Copenhagen'
      FROM dar1_adresse_history h
      WHERE h.id = e.id AND lower(virkning) <= (SELECT virkning
