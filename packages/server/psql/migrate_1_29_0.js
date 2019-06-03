@@ -26,6 +26,7 @@ runConfigured(schema, [],config => go(function*() {
 
   yield proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield client.query('ALTER TABLE navngivenvej_postnummer_changes ALTER public DROP NOT NULL');
+    yield client.query('ALTER TABLE vejstykkerpostnumremat_changes ALTER public DROP NOT NULL');
     yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
   }));
 }));
