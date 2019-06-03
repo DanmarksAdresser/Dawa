@@ -2,7 +2,7 @@
 
 const {assert} = require('chai');
 const {go} = require('ts-csp');
-
+const logger = require('@dawadk/common/src/logger').forCategory('materialize');
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 const {
   applyChanges,
@@ -103,6 +103,7 @@ const materialize = (client, txid, tableModels, materialization) => go(function*
  * clear contents and history of materialized table and rematerialize it
  */
 const clearAndMaterialize = (client, txid, tablemodels, materialization) => go(function* () {
+  logger.info('Clearing materialization', {table: materialization.table});
   const model = tablemodels[materialization.table];
   yield client.query(`DELETE FROM ${materialization.table}; DELETE FROM ${materialization.table}_changes`);
   yield initializeFromScratch(client, txid, materialization.view, model);
@@ -110,6 +111,7 @@ const clearAndMaterialize = (client, txid, tablemodels, materialization) => go(f
 });
 
 const recomputeMaterialization = (client, txid, tableModels, materialization) => go(function* () {
+  logger.info('Recomputing materialization', {table: materialization.table});
   yield client.query(`create temp table desired as (SELECT * FROM ${materialization.view})`);
   yield client.query(`ANALYZE desired`);
   yield computeDifferences(client, txid, 'desired', tableModels[materialization.table]);
@@ -128,6 +130,7 @@ const makeChangesNonPublic = (client, txid, tableModel) =>
  * Does not produce any inserts or deletes. Does not handle derived rows.
  */
 const materializeWithoutEvents = (client, tableModels, materialization, columnNames) => go(function*() {
+  logger.info('Materializing without events', {table: materialization.table, columnNames});
   const tableModel = tableModels[materialization.table];
   yield client.query(`UPDATE ${materialization.table} t
   SET ${columnNames.map(col => `${col} = v.${col}`).join(', ')} 

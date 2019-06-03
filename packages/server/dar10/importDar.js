@@ -31,7 +31,7 @@ runConfiguredImporter('importDar10', schema, function (config) {
 
   return proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importDar', (txid) => go(function*() {
-      if(config.refresh_derived) {
+      if(config.get('refresh_derived')) {
         yield importDownload(client, txid, config.get('data_dir'));
       }
       else {
