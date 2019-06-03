@@ -11,7 +11,7 @@
     "babel-preset-es2015-rollup": "^3.0.0",
     "bench-rest": "~1.2.4",
     "chai": "4.2.0",
-    "eslint": "^5.16.0",
+    "eslint": "^4.19.1",
     "gc-stats": "^1.3.0",
     "lerna": "^3.14.1",
     "mocha": "^6.1.4",

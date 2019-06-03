@@ -20,3 +20,6 @@ during the importing process. There are two kinds of components:
  and only if a dependency has changes. The `slow` strategy runs all processors. 
  The `verify` stratey runs all processors by recomputing all tables. This is usually only necessary
  when correcting errors.
+ 
+ ## Transaction management
+ The `execute` automatically creates a transaction and transactionid, and perform a rollback if no tables are changed.
