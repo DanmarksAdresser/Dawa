@@ -1,22 +1,9 @@
 "use strict";
 
-const { assert } = require('chai');
 const {go} = require('ts-csp');
-const fs = require('fs');
 const runConfigured = require('@dawadk/common/src/cli/run-configured');
 const proddb = require('./proddb');
-const temaModels = require('../dagiImport/temaModels').modelList;
 const configHolder = require('@dawadk/common/src/config/holder');
-const { createS3 } = require('@dawadk/import-util/src/s3-util');
-const {uploadToS3} = require('@dawadk/import-util/src/s3-offload');
-const {initChangeTable, createChangeTable} = require('@dawadk/import-util/src/table-diff');
-const { name } = require('@dawadk/import-util/src/table-diff-protocol');
-const { withImportTransaction, withMigrationTransaction } = require('../importUtil/transaction-util');
-const tableSchema = require('./tableModel');
-const { generateHistory } = require('../history/generateCombinedHistoryImpl');
-const {reloadDatabaseCode} = require('./initialization');
-const path = require('path');
-const { applyCurrentTableToChangeTable } = require('@dawadk/import-util/src/table-diff');
 const { generateTemaTable, generateTilknytningTable } = require('../dagiImport/sqlGen');
 const schema = configHolder.mergeConfigSchemas([
   {

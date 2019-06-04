@@ -48,13 +48,14 @@ const initializeData = client => go(function*() {
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
     yield generateHistoryImpl.generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
   }));
+  logger.info('Importing OIS');
+  yield importOisImpl.importOis(client, path.join(__dirname, '../test/data/ois'));
   logger.info('Importing jordstykker');
   client.allowParallelQueries = false;
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
     yield importJordstykkerImpl.importJordstykkerImpl(client, txid, path.join(__dirname, '../test/data/matrikelkort'), true);
   }));
-  logger.info('Importing OIS');
-  yield importOisImpl.importOis(client, path.join(__dirname, '../test/data/ois'));
+  logger.info('Importing stednavne');
   yield importStednavneImpl.importStednavne(client, path.join(__dirname, '../test/data/Stednavn.json'), 10000);
   logger.info('Importing brofasthed');
   yield withImportTransaction(client, 'loadTestData', txid => importBrofasthedImpl(client, txid, path.join(__dirname, '../test/data/brofasthed.csv')));

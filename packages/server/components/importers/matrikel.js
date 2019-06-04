@@ -17,12 +17,12 @@ const {
 } = require('@dawadk/import-util/src/table-diff-protocol');
 
 
-const jordstykkeColumns = ['ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'kommunekode', 'sognekode',
+const jordstykkeColumns = ['ejerlavkode', 'matrikelnr', 'kommunekode', 'sognekode',
   'regionskode', 'retskredskode', 'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr',
   'featureid', 'moderjordstykke', 'registreretareal', 'arealberegningsmetode', 'vejareal', 'vejarealberegningsmetode', 'vandarealberegningsmetode', 'fælleslod'];
 
 
-const jordstykkeTableModel = tableSchema.tables.jordstykker;
+const matrikelJordstykkeTableModel = tableSchema.tables.matrikel_jordstykker;
 const ejerlavColumns = ['kode', 'navn'];
 const ejerlavTableModel = tableSchema.tables.ejerlav;
 
@@ -94,10 +94,10 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
   });
   yield streamEjerlavToTable(client, ejerlav, 'desired_ejerlav');
   yield streamJordstykkerToTable(client, jordstykker, 'desired_jordstykker');
-  const allJordstykkerColumns = jordstykkeTableModel.columns.map(column => name(column));
+  const allJordstykkerColumns = matrikelJordstykkeTableModel.columns.map(column => name(column));
   const allEjerlavColumns = ejerlavTableModel.columns.map(column => name(column));
   yield client.query(`INSERT INTO actual_jordstykker(${allJordstykkerColumns.join(', ')}) 
-  (SELECT ${allJordstykkerColumns.join(', ')} FROM jordstykker WHERE ejerlavkode = $1)`,
+  (SELECT ${allJordstykkerColumns.join(', ')} FROM matrikel_jordstykker WHERE ejerlavkode = $1)`,
     [ejerlavkode]);
 
   yield client.query(`INSERT INTO actual_ejerlav(${allEjerlavColumns.join(', ')}) 
@@ -109,11 +109,11 @@ const streamEjerlav = (client, srcDir, file, skipModificationCheck) => go(functi
 });
 
 const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() {
-  yield client.query(`CREATE TEMP TABLE desired_jordstykker AS (SELECT jordstykker.* FROM jordstykker WHERE false);
+  yield client.query(`CREATE TEMP TABLE desired_jordstykker AS (SELECT matrikel_jordstykker.* FROM matrikel_jordstykker WHERE false);
   ALTER TABLE desired_jordstykker ALTER geom TYPE text;
   CREATE TEMP TABLE desired_ejerlav AS (select ejerlav.* from ejerlav where false);
   ALTER TABLE desired_ejerlav ALTER geom TYPE text;`);
-  yield client.query(`CREATE TEMP TABLE actual_jordstykker AS (SELECT jordstykker.* FROM jordstykker WHERE false)`);
+  yield client.query(`CREATE TEMP TABLE actual_jordstykker AS (SELECT matrikel_jordstykker.* FROM matrikel_jordstykker WHERE false)`);
   yield client.query(`CREATE TEMP TABLE actual_ejerlav AS (SELECT ejerlav.* FROM ejerlav WHERE false)`);
   const files = fs.readdirSync(srcDir).filter(function (file) {
     return /^.+\.zip$/.test(file);
@@ -123,11 +123,11 @@ const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() 
   }
   yield client.query(`alter table desired_jordstykker alter column geom type geometry(polygon, 25832) using st_geomfromgml(geom, 25832)`);
   yield client.query(`alter table desired_ejerlav alter column geom type geometry(multipolygon, 25832) using st_multi(st_geomfromgml(geom, 25832))`);
-  yield tableDiffNg.computeDifferencesView(client, txid, 'desired_jordstykker', 'actual_jordstykker', jordstykkeTableModel);
+  yield tableDiffNg.computeDifferencesView(client, txid, 'desired_jordstykker', 'actual_jordstykker', matrikelJordstykkeTableModel);
   yield tableDiffNg.computeDifferencesView(client, txid, 'desired_ejerlav', 'actual_ejerlav', ejerlavTableModel);
-  yield tableDiffNg.applyChanges(client, txid, jordstykkeTableModel);
+  yield tableDiffNg.applyChanges(client, txid, matrikelJordstykkeTableModel);
   yield tableDiffNg.applyChanges(client, txid, ejerlavTableModel);
-  yield client.query('drop table desired_jordstykker; drop table desired_ejerlav; drop table actual_ejerlav; drop table actual_jordstykker; analyze jordstykker; analyze jordstykker_changes;');
+  yield client.query('drop table desired_jordstykker; drop table desired_ejerlav; drop table actual_ejerlav; drop table actual_jordstykker; analyze matrikel_jordstykker; analyze matrikel_jordstykker_changes;');
 });
 
 const createMatrikelImporter = ({srcDir, refresh}) => {
@@ -135,7 +135,7 @@ const createMatrikelImporter = ({srcDir, refresh}) => {
     id: 'Cadastre-importer',
     description: 'Matrikelkort-importer',
     requires: [],
-    produces: ['ejerlav', 'jordstykker'],
+    produces: ['ejerlav', 'matrikel_jordstykker'],
     execute: (client, txid) => importJordstykkerImpl(client, txid, srcDir, refresh)
   };
 };

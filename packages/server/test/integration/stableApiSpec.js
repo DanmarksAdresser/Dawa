@@ -195,20 +195,20 @@ describe('Stable API', () => {
         flad: [{
           params: {
             ejerlavkode: '60851',
-            matrikelnr: '1b'
+            matrikelnr: '2l'
           },
           value: {
-            "ændret": "2018-09-28T09:48:57.130Z",
-            "geo_ændret": "2018-09-28T09:48:57.130Z",
+            "ændret": "2019-06-03T11:05:05.529Z",
+            "geo_ændret": "2019-06-03T11:05:05.529Z",
             "geo_version": 1,
-            "bbox_xmin": 11.93749607,
-            "bbox_ymin": 55.54309091,
-            "bbox_xmax": 11.938419,
-            "bbox_ymax": 55.54359738,
-            "visueltcenter_x": 11.93797518,
-            "visueltcenter_y": 55.54333993,
+            "bbox_xmin": 11.92586691,
+            "bbox_ymin": 55.53834055,
+            "bbox_xmax": 11.92651545,
+            "bbox_ymax": 55.53872082,
+            "visueltcenter_x": 11.92622789,
+            "visueltcenter_y": 55.53850121,
             "ejerlavkode": 60851,
-            "matrikelnr": "1b",
+            "matrikelnr": "2l",
             "kommunekode": "0350",
             "kommunenavn": "Lejre",
             "sognekode": "7171",
@@ -217,38 +217,38 @@ describe('Stable API', () => {
             "regionsnavn": null,
             "retskredskode": "1118",
             "retskredsnavn": null,
-            "udvidet_esrejendomsnr": "3500009629",
-            "esrejendomsnr": "9629",
-            "sfeejendomsnr": "2226230",
+            "udvidet_esrejendomsnr": "3500009408",
+            "esrejendomsnr": "9408",
+            "sfeejendomsnr": "2226262",
             "ejerlavnavn": "Borup, Osted",
-            "arealberegningsmetode": "o",
-            "featureid": "876260",
+            "featureid": "876294",
             "fælleslod": false,
             "moderjordstykke": null,
-            "registreretareal": 1643,
-            "vandarealberegningsmetode": "ukendt",
-            "vejarealberegningsmetode": "b",
-            "vejareal": 0
+            "registreretareal": 869,
+            "arealberegningsmetode": "k",
+            "vejareal": 0,
+            "vejarealberegningsmetode": "u",
+            "vandarealberegningsmetode": "incl"
           }
         }],
         nestet: [{
           params: {
             ejerlavkode: '60851',
-            matrikelnr: '1b'
+            matrikelnr: '2l'
           },
           value: {
-            "matrikelnr": "1b",
+            "matrikelnr": "2l",
             "bbox": [
-              11.93749607,
-              55.54309091,
-              11.938419,
-              55.54359738
+              11.92586691,
+              55.53834055,
+              11.92651545,
+              55.53872082
             ],
             "visueltcenter": [
-              11.93797518,
-              55.54333993
+              11.92622789,
+              55.53850121
             ],
-            "href": "http://dawa/jordstykker/60851/1b",
+            "href": "http://dawa/jordstykker/60851/2l",
             "ejerlav": {
               "kode": 60851,
               "navn": "Borup, Osted",
@@ -259,20 +259,20 @@ describe('Stable API', () => {
               "kode": "0350",
               "navn": "Lejre"
             },
-            "esrejendomsnr": "9629",
-            "udvidet_esrejendomsnr": "3500009629",
-            "sfeejendomsnr": "2226230",
-            "ændret": "2018-09-28T09:48:57.130Z",
+            "esrejendomsnr": "9408",
+            "udvidet_esrejendomsnr": "3500009408",
+            "sfeejendomsnr": "2226262",
+            "ændret": "2019-06-03T11:05:05.529Z",
             "geo_version": 1,
-            "geo_ændret": "2018-09-28T09:48:57.130Z",
-            "arealberegningsmetode": "o",
-            "featureid": "876260",
+            "geo_ændret": "2019-06-03T11:05:05.529Z",
             "fælleslod": false,
             "moderjordstykke": null,
-            "registreretareal": 1643,
-            "vandarealberegningsmetode": "ukendt",
-            "vejarealberegningsmetode": "b",
+            "registreretareal": 869,
+            "arealberegningsmetode": "k",
             "vejareal": 0,
+            "vejarealberegningsmetode": "u",
+            "vandarealberegningsmetode": "incl",
+            "featureid": "876294",
             "region": {
               "href": "http://dawa/regioner/1085",
               "kode": "1085",
@@ -1276,7 +1276,7 @@ describe('Stable API', () => {
             "ejerlavkode": 60851,
             "ejerlavnavn": "Borup, Osted",
             "matrikelnr": "1a",
-            "esrejendomsnr": "8571",
+            "esrejendomsnr": null,
             "adgangspunktid": "0a3f5081-c394-32b8-e044-0003ba298018",
             "etrs89koordinat_øst": 685289.88,
             "etrs89koordinat_nord": 6158701.41,
@@ -1294,7 +1294,7 @@ describe('Stable API', () => {
             "regionsnavn": "Region test",
             "jordstykke_ejerlavkode": 60851,
             "jordstykke_matrikelnr": "1a",
-            "jordstykke_esrejendomsnr": "8571",
+            "jordstykke_esrejendomsnr": null,
             "jordstykke_ejerlavnavn": "Borup, Osted",
             "højde": 46.4,
             "kvh": "03500347__1B",

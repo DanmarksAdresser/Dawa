@@ -1,8 +1,8 @@
 DROP TABLE IF EXISTS jordstykker CASCADE;
 
-CREATE TABLE jordstykker (
+CREATE TABLE jordstykker
+(
   ejerlavkode               INTEGER     NOT NULL,
-  ejerlavnavn               TEXT,
   matrikelnr                TEXT        NOT NULL,
   kommunekode               SMALLINT,
   sognekode                 SMALLINT,
@@ -25,6 +25,7 @@ CREATE TABLE jordstykker (
   vejarealberegningsmetode  TEXT,
   vandarealberegningsmetode TEXT,
   fælleslod                 BOOLEAN,
+  ejerlavnavn               TEXT,
   tsv                       TSVECTOR,
   PRIMARY KEY (ejerlavkode, matrikelnr)
 );
@@ -42,7 +43,8 @@ CREATE INDEX ON jordstykker USING GIN (tsv);
 
 
 DROP TABLE IF EXISTS jordstykker_adgadr CASCADE;
-CREATE TABLE jordstykker_adgadr (
+CREATE TABLE jordstykker_adgadr
+(
   ejerlavkode       INTEGER NOT NULL,
   matrikelnr        TEXT    NOT NULL,
   adgangsadresse_id UUID    NOT NULL,
@@ -50,12 +52,3 @@ CREATE TABLE jordstykker_adgadr (
 );
 
 CREATE UNIQUE INDEX ON jordstykker_adgadr (adgangsadresse_id);
-
-
-CREATE VIEW jordstykker_adgadr_view AS (
-  (SELECT DISTINCT
-     j.ejerlavkode,
-     j.matrikelnr,
-     a.id AS adgangsadresse_id
-   FROM adgangsadresser_mat a
-     JOIN jordstykker j ON ST_Covers(j.geom, a.geom)));

@@ -689,11 +689,11 @@ var sampleParameters = {
       verifier: (jordstykke, matrikelnr) => jordstykke.matrikelnr === matrikelnr
     },
     esrejendomsnr: {
-      values: ['8571' ,'08571'],
+      values: ['9408' ,'09408'],
       verifier: (jordstykke, esrejendomsnr) => jordstykke.esrejendomsnr === parseInt(esrejendomsnr, 10).toString()
     },
     udvidet_esrejendomsnr: {
-      values: ['3500009633'],
+      values: ['3500009408'],
       verifier: (jordstykke, esrejendomsnr) => jordstykke.udvidet_esrejendomsnr === parseInt(esrejendomsnr, 10).toString()
     },
     sfeejendomsnr: {

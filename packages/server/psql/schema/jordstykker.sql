@@ -1,4 +1,28 @@
-DROP VIEW IF EXISTS jordstykker_adgadr_view CASCADE;
-CREATE VIEW jordstykker_adgadr_view AS (
-  (SELECT DISTINCT ON (adgangsadresse_id) j.ejerlavkode, j.matrikelnr, a.id as adgangsadresse_id FROM adgangsadresser_mat a
-    JOIN jordstykker j ON ST_Covers(j.geom, a.geom)));
+DROP VIEW IF EXISTS jordstykker_view CASCADE;
+CREATE VIEW jordstykker_view AS (
+  SELECT ejerlavkode,
+         e.navn       as ejerlavnavn,
+         matrikelnr,
+         kommunekode,
+         sognekode,
+         regionskode,
+         retskredskode,
+         (g.esrejdnr::integer)::text   AS esrejendomsnr,
+         to_char(kommunekode, 'FM000')  || to_char(g.esrejdnr::integer, 'FM0000000') AS udvidet_esrejendomsnr,
+         sfeejendomsnr,
+         j.geom,
+         featureid,
+         moderjordstykke,
+         registreretareal,
+         arealberegningsmetode,
+         vejareal,
+         vejarealberegningsmetode,
+         vandarealberegningsmetode,
+         fælleslod
+  FROM matrikel_jordstykker j
+         LEFT JOIN ejerlav e ON j.ejerlavkode = e.kode
+         LEFT JOIN ois_matrikelreference mr
+                   ON j.ejerlavkode = mr.landsejerlavkode AND j.matrikelnr = mr.matrnr AND
+                      mr.ophoert_ts is null
+         LEFT JOIN ois_grund g ON mr.grund_id = g.grund_id AND g.ophoert_ts is null
+);

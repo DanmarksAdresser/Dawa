@@ -29,7 +29,7 @@ const createChangeTables = (client)=> go(function*() {
     'adgangsadresser_mat', 'stormodtagere', 'adresser_mat', 'vejpunkter', 'navngivenvej',
     'navngivenvej_postnummer', 'vejstykkerpostnumremat', 'stednavne', 'steder', 'stedtilknytninger',
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
-  'supplerendebynavn2_postnr', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
+  'supplerendebynavn2_postnr', 'matrikel_jordstykker', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
     'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter', 'supplerendebynavne_mat',
   'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'vask_adgangsadresser', 'vask_adresser'];
   for(let table of tableNames) {
@@ -119,6 +119,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'vask_adgangsadresser_unikke'},
   {name: 'vask_adresser'},
   {name: 'vask_adresser_unikke'},
+  {name: 'matrikel_jordstykker' },
   {name: 'jordstykker' },
   {name: 'bebyggelser'},
   {name: 'bebyggelser_adgadr'},

@@ -3,10 +3,12 @@
 const _ = require('underscore');
 const temaModels = require('../dagiImport/temaModels');
 const dar10TableModels = require('../dar10/dar10TableModels');
-const { geomColumns, geomColumn, tsvColumn, visueltCenterComputed, visueltCenterDerived,
+const {
+  geomColumns, geomColumn, tsvColumn, visueltCenterComputed, visueltCenterDerived,
   visueltCenterFromSource, bboxColumn, preservedColumn, offloadedGeomColumn,
-  offloadedGeomBlobrefColumn} = require('@dawadk/import-util/src/common-columns');
-const { name } = require('@dawadk/import-util/src/table-diff-protocol');
+  offloadedGeomBlobrefColumn
+} = require('@dawadk/import-util/src/common-columns');
+const {name} = require('@dawadk/import-util/src/table-diff-protocol');
 
 const vejstykker = {
   entity: 'vejstykke',
@@ -161,7 +163,7 @@ const adgangsadresser = {
     name: 'tekniskstandard'
   }, {
     name: 'tekstretning',
-    distinctClause: (a,b) => `${a}::numeric(5,2) IS DISTINCT FROM ${b}::numeric(5,2)`
+    distinctClause: (a, b) => `${a}::numeric(5,2) IS DISTINCT FROM ${b}::numeric(5,2)`
   }, {
     name: 'adressepunktaendringsdato'
   }, {
@@ -220,12 +222,12 @@ const postnumre = {
   }, {
     name: 'navn'
   },
-  tsvColumn({
-    deriveFn: (table) =>
-      `to_tsvector('adresser', processForIndexing(coalesce(to_char(${table}.nr, '0000'), '') || ' ' || coalesce(${table}.navn, '')))`
-  }), {
-    name: 'stormodtager'
-  }]
+    tsvColumn({
+      deriveFn: (table) =>
+        `to_tsvector('adresser', processForIndexing(coalesce(to_char(${table}.nr, '0000'), '') || ' ' || coalesce(${table}.navn, '')))`
+    }), {
+      name: 'stormodtager'
+    }]
 };
 
 const stormodtagere = {
@@ -494,15 +496,14 @@ const vejpunkter = {
     geomColumn({})
   ]
 };
-const jordstykker = {
-  table: 'jordstykker',
-  entity: 'jordstykke',
+
+const matrikel_jordstykker = {
+  table: 'matrikel_jordstykker',
+  entity: 'matrikel_jordstykke',
   primaryKey: ['ejerlavkode', 'matrikelnr'],
   columns: [
     {
       name: 'ejerlavkode'
-    }, {
-      name: 'ejerlavnavn'
     }, {
       name: 'matrikelnr'
     }, {
@@ -520,11 +521,7 @@ const jordstykker = {
     }, {
       name: 'sfeejendomsnr'
     },
-    ...geomColumns({offloaded: false}),
-    visueltCenterComputed({}),
-    tsvColumn({
-      deriveFn: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table}.ejerlavkode))`
-    }), {
+    {
       name: 'featureid'
     }, {
       name: 'moderjordstykke'
@@ -540,7 +537,26 @@ const jordstykker = {
       name: 'vandarealberegningsmetode'
     }, {
       name: 'fælleslod'
-    }]
+    },
+    geomColumn({})
+  ]
+};
+
+const jordstykker = {
+  table: 'jordstykker',
+  entity: 'jordstykke',
+  primaryKey: ['ejerlavkode', 'matrikelnr'],
+  columns: [
+    {
+      name: 'ejerlavnavn'
+    },
+    ...matrikel_jordstykker.columns.filter((col) => name(col) !== 'geom'),
+    ...geomColumns({offloaded: false}),
+    visueltCenterComputed({}),
+    tsvColumn({
+      deriveFn: table => `to_tsvector('adresser', processForIndexing(${table}.matrikelnr || ' ' || coalesce(${table}.ejerlavnavn, '') || ' ' || ${table}.ejerlavkode))`
+    })
+  ]
 };
 
 const jordstykker_adgadr = {
@@ -597,8 +613,8 @@ const supplerendebynavn2_postnr = {
   table: 'supplerendebynavn2_postnr',
   primaryKey: ['supplerendebynavn_dagi_id', 'postnr'],
   columns: [
-    { name: 'supplerendebynavn_dagi_id' },
-    { name: 'postnr' }
+    {name: 'supplerendebynavn_dagi_id'},
+    {name: 'postnr'}
   ]
 };
 
@@ -606,14 +622,14 @@ const postnumre_kommunekoder_mat = {
   table: 'postnumre_kommunekoder_mat',
   primaryKey: ['postnr', 'kommunekode'],
   columns: [
-    { name: 'postnr'},
-    { name: 'kommunekode'}
+    {name: 'postnr'},
+    {name: 'kommunekode'}
   ]
 };
 
 const dagiTables = temaModels.modelList.reduce((memo, temaModel) => {
   memo[temaModel.table] = temaModels.toTableModel(temaModel);
-  if(!temaModel.withoutTilknytninger) {
+  if (!temaModel.withoutTilknytninger) {
     memo[temaModel.tilknytningTable] = temaModels.toTilknytningTableModel(temaModel);
   }
   return memo;
@@ -651,7 +667,7 @@ const tilknytninger_mat = {
     {name: 'storkredsnummer'},
     {name: 'storkredsnavn'},
     {name: 'zone'},
-    {name: 'menighedsrådsafstemningsområdenummer'} ,
+    {name: 'menighedsrådsafstemningsområdenummer'},
     {name: 'menighedsrådsafstemningsområdenavn'},
     {name: 'landsdelsnuts3'},
     {name: 'landsdelsnavn'}
@@ -662,8 +678,8 @@ const brofasthed = {
   table: 'brofasthed',
   primaryKey: ['stedid'],
   columns: [
-    { name: 'stedid'},
-    { name: 'brofast'}
+    {name: 'stedid'},
+    {name: 'brofast'}
   ]
 };
 const ikke_brofaste_adresser = {
@@ -671,8 +687,8 @@ const ikke_brofaste_adresser = {
   entity: 'ikke_brofast_husnummer',
   primaryKey: ['adgangsadresseid'],
   columns: [
-    { name: 'adgangsadresseid'},
-    { name: 'stedid'}
+    {name: 'adgangsadresseid'},
+    {name: 'stedid'}
   ]
 };
 
@@ -694,7 +710,7 @@ const hoejde_importer_resultater = {
     {name: 'position'}]
 };
 
-const hoejde_importer_afventer= {
+const hoejde_importer_afventer = {
   table: 'hoejde_importer_afventer',
   primaryKey: ['husnummerid'],
   columns: [
@@ -706,19 +722,19 @@ const vask_adgangsadresser = {
   table: 'vask_adgangsadresser',
   primaryKey: ['rowkey'],
   columns: [
-    { name: 'rowkey' },
-    { name: 'id' },
-    { name: 'ap_statuskode' },
-    { name: 'hn_statuskode' },
-    { name: 'kommunekode' },
-    { name: 'vejkode'},
-    { name: 'vejnavn' },
-    { name: 'adresseringsvejnavn' },
-    { name: 'husnr' },
-    { name: 'supplerendebynavn' },
-    { name: 'postnr' },
-    { name: 'postnrnavn' },
-    { name: 'virkning' }
+    {name: 'rowkey'},
+    {name: 'id'},
+    {name: 'ap_statuskode'},
+    {name: 'hn_statuskode'},
+    {name: 'kommunekode'},
+    {name: 'vejkode'},
+    {name: 'vejnavn'},
+    {name: 'adresseringsvejnavn'},
+    {name: 'husnr'},
+    {name: 'supplerendebynavn'},
+    {name: 'postnr'},
+    {name: 'postnrnavn'},
+    {name: 'virkning'}
   ]
 };
 
@@ -758,6 +774,7 @@ exports.tables = Object.assign({
     supplerendebynavn_kommune_mat,
     supplerendebynavn2_postnr,
     vejpunkter,
+    matrikel_jordstykker,
     navngivenvej,
     navngivenvej_mat,
     navngivenvejkommunedel_mat,
@@ -861,7 +878,7 @@ exports.materializations = Object.assign({
         table: 'stormodtagere',
         columns: ['id']
       }, {
-      table: 'hoejder',
+        table: 'hoejder',
         columns: ['id']
       }
     ]
@@ -874,14 +891,14 @@ exports.materializations = Object.assign({
         table: 'adgangsadresser_mat',
         columns: ['id']
       }, {
-      table: 'jordstykker_adgadr',
+        table: 'jordstykker_adgadr',
         columns: ['id'],
         references: ['adgangsadresse_id']
       }, {
-      table: 'jordstykker',
+        table: 'jordstykker',
         columns: ['ejerlavkode', 'matrikelnr']
       }, {
-      table: 'ejerlav',
+        table: 'ejerlav',
         columns: ['ejerlavkode']
       }]
   },
@@ -903,7 +920,7 @@ exports.materializations = Object.assign({
   enhedsadresser: {
     table: 'enhedsadresser',
     view: 'enhedsadresser_view',
-    dependents: [ {
+    dependents: [{
       table: 'adresser_mat',
       columns: ['id']
     }]
@@ -965,7 +982,7 @@ exports.materializations = Object.assign({
       {
         table: 'adgangsadresser_mat',
         columns: ['adgangsadresseid']
-      },{
+      }, {
         table: 'dar1_Husnummer_current',
         columns: ['adgangsadresseid']
       },
@@ -1050,7 +1067,7 @@ exports.materializations = Object.assign({
       }
     ]
   },
-  vejstykker:  {
+  vejstykker: {
     table: 'vejstykker',
     view: 'vejstykker_view',
     dependents: [
@@ -1128,10 +1145,20 @@ exports.materializations = Object.assign({
       'dar1_Postnummer_current'
     ],
     dependents: []
+  },
+  jordstykker: {
+    table: 'jordstykker',
+    view: 'jordstykker_view',
+    dependents: [
+      {
+        table: 'matrikel_jordstykker',
+        columns: ['ejerlavkode', 'matrikelnr']
+      }
+    ]
   }
 
 }, dagiMaterializations);
 
-for(let dawaMaterialization of Object.values(dar10TableModels.dawaMaterializations)) {
+for (let dawaMaterialization of Object.values(dar10TableModels.dawaMaterializations)) {
   exports.materializations[dawaMaterialization.table] = dawaMaterialization;
 }
