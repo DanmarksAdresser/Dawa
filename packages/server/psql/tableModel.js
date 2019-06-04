@@ -76,6 +76,9 @@ const navngivenvejkommunedel_mat = {
       name: 'oprettet'
     },
     {
+      name: 'nedlagt'
+    },
+    {
       name: 'vejnavn'
     },
     {

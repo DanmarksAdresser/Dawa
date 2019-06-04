@@ -40,6 +40,9 @@ var fields = [
   normalizedField('id'),
   {
     name: 'darstatus'
+  },
+  {
+    name: 'nedlagt'
   }
 ];
 

@@ -13,6 +13,49 @@ require('../../apiSpecification/allSpecs');
 // These tests are expected to fail whenever the API is changed or extended
 describe('Stable API', () => {
   const expectedResults = {
+    vejstykke: {
+      json: {
+        nestet: [{
+          params: {
+            kommunekode: '0169',
+            kode: '0001'
+          },
+          queryParams: {
+            medtagnedlagte: 'true'
+          },
+          value: {
+            "id": "66ddc463-f761-4582-a803-b663cd6756da",
+            "darstatus": 4,
+            "href": "http://dawa/vejstykker/169/1",
+            "kode": "0001",
+            "navn": "Holbækmotorvejen",
+            "adresseringsnavn": "Holbækmotorvejen",
+            "navngivenvej": {
+              "href": "http://dawa/navngivneveje/c0f08a1a-b9a4-465b-8372-d12babe7fbd6",
+              "id": "c0f08a1a-b9a4-465b-8372-d12babe7fbd6",
+              "darstatus": 3
+            },
+            "kommune": {
+              "href": "http://dawa/kommuner/0169",
+              "kode": "0169",
+              "navn": "Høje-Taastrup"
+            },
+            "postnumre": [
+              {
+                "href": "http://dawa/postnumre/2640",
+                "nr": "2640",
+                "navn": "Hedehusene"
+              }
+            ],
+            "historik": {
+              "oprettet": "2018-05-17T10:55:12.245",
+              "ændret": null,
+              "nedlagt": "2018-05-17T10:55:12.245"
+            }
+          }
+        }]
+      }
+    },
       region: {
         json: {
           nestet: [{
@@ -1861,10 +1904,8 @@ describe('Stable API', () => {
           const tests = strukturMap[struktur];
           it(`Return value for entity=${entityName},format=${format},struktur=${struktur}`, q.async(function* () {
             for (let test of tests) {
-              let jsonResult = yield helpers.getJson(clientFn(), resource, test.params, {
-                format: format,
-                struktur: struktur
-              });
+              const queryParams = Object.assign({}, {format, struktur}, test.queryParams || {});
+              const jsonResult = yield helpers.getJson(clientFn(), resource, test.params, queryParams);
               if (propertiesToIgnoreMap[entityName] && propertiesToIgnoreMap[entityName][format] && propertiesToIgnoreMap[entityName][format][struktur]) {
                 const propertiesToIgnore = propertiesToIgnoreMap[entityName][format][struktur];
                 removeIgnoredProperties(jsonResult, test.value, propertiesToIgnore);

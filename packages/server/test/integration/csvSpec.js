@@ -65,7 +65,7 @@ describe('CSV udtræk', function () {
       'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn', 'vejpunkt_ændret', 'ikrafttrædelse',
       'nedlagt', 'darstatus', 'storkredsnummer', 'storkredsnavn',
       'valglandsdelsbogstav', 'valglandsdelsnavn', 'landsdelsnuts3', 'landsdelsnavn'],
-    vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn', 'navngivenvej_id', 'navngivenvej_darstatus', 'id', 'darstatus'],
+    vejstykke: ['kode','kommunekode','oprettet','ændret','kommunenavn','navn','adresseringsnavn', 'navngivenvej_id', 'navngivenvej_darstatus', 'id', 'darstatus', 'nedlagt'],
     postnummer: ['nr','navn','stormodtager', 'bbox_xmin', 'bbox_ymin', 'bbox_xmax', 'bbox_ymax', 'visueltcenter_x', 'visueltcenter_y', "ændret",  "geo_ændret",  "geo_version",  "dagi_id"],
     kommune: ['dagi_id', 'kode','navn', 'regionskode', 'udenforkommuneinddeling', 'regionsnavn', 'ændret', 'geo_ændret', 'geo_version', 'bbox_xmin', 'bbox_ymin', 'bbox_xmax', 'bbox_ymax', 'visueltcenter_x', 'visueltcenter_y'],
     navngivenvej: ['id','darstatus', 'oprettet','ændret','navn','adresseringsnavn',

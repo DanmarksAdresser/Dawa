@@ -29,6 +29,9 @@ var columns = {
   ændret: {
     select: 'null::text'
   },
+  nedlagt: {
+    select: selectIsoTimestamp('vejstykker.nedlagt')
+  },
   kommunenavn: {
     select: "k.navn",
     where: null

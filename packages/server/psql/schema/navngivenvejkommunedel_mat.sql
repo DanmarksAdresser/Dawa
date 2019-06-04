@@ -8,10 +8,10 @@ CREATE VIEW navngivenvejkommunedel_mat_view AS
     COALESCE(vejadresseringsnavn, '') AS adresseringsnavn,
     navngivenvej_id,
     nvk.status                                                                        AS darstatus,
-    (SELECT min(lower(virkning))
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_navngivenvejkommunedel_history nh
      WHERE nh.id = nvk.id)                                                            AS oprettet,
-    (SELECT min(lower(virkning))
+    (SELECT min(lower(virkning) AT TIME ZONE 'Europe/Copenhagen')
      FROM dar1_navngivenvejkommunedel_history nh
      WHERE nh.id = nvk.id AND status IN (4, 5))                                       AS nedlagt,
     geom

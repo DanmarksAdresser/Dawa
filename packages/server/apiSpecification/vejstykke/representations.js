@@ -109,9 +109,13 @@ exports.json = {
         'description': 'Væsentlige tidspunkter for vejstykket',
         properties: {
           'oprettet': normalizedFieldSchema('oprettet'),
-          'ændret': normalizedFieldSchema('ændret')
+          'ændret': normalizedFieldSchema('ændret'),
+          'nedlagt': {
+            description: 'Tidspunktet for vejstykkets nedlæggelse som registreret i DAR',
+            type: ['string', 'null']
+          }
         },
-        docOrder: ['oprettet', 'ændret']
+        docOrder: ['oprettet', 'ændret', 'nedlagt']
       })
     },
     docOrder: ['id','href', 'darstatus', 'kode', 'navn', 'adresseringsnavn', 'navngivenvej', 'kommune', 'postnumre', 'historik']
@@ -135,7 +139,8 @@ exports.json = {
         postnumre: mapPostnummerRefArray(row.postnumre || [], baseUrl),
         historik: {
           oprettet: d(row.oprettet),
-          ændret: d(row.ændret)
+          ændret: d(row.ændret),
+          nedlagt: d(row.nedlagt)
         }
       };
     };
