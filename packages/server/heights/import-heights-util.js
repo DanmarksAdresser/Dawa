@@ -3,6 +3,9 @@ const {computeDifferencesSubset, applyChanges } = require('@dawadk/import-util/s
 const schemaModel = require('../psql/tableModel');
 
 function roundHeight(height) {
+  if(height === null) {
+    return null;
+  }
   return Math.round(height * 10) / 10;
 }
 
@@ -11,7 +14,7 @@ const createHeightTable = (client, tableName) => client.query(
     id uuid NOT NULL PRIMARY KEY,
     x double precision not null,
     y double precision not null,
-    z double precision NOT NULL)`
+    z double precision)`
 );
 
 const importHeightsFromTable = (client, txid, table) => go(function*() {
