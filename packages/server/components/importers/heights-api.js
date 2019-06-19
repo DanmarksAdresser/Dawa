@@ -20,6 +20,10 @@ function hoejdeClient(apiUrl, accessToken) {
         Token: accessToken
       }
     });
+    if(result.hoejde === -9999) {
+      // The API uses the value -9999 for heights outside the supported area
+      return null;
+    }
     if (result.hoejde === null || result.hoejde === undefined || result.hoejde < -100) {
       logger.error('Got bad result from height service', {
         result,
