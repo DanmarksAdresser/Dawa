@@ -69,7 +69,6 @@ var baseQuery = function () {
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 

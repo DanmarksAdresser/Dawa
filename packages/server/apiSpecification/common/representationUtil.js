@@ -2,6 +2,8 @@
 
 const _ = require('underscore');
 const commonMappers = require('../commonMappers');
+const { globalSchemaObject } = require('../commonSchemaDefinitionsUtil');
+
 /*
  * Computes the list of fieldMap that should be included in the CSV representation for the given type
  */
@@ -52,6 +54,58 @@ exports.defaultFlatRepresentation = function (fields) {
   };
 };
 
+exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatter, textFormatter) =>{
+  const miniFieldNamesSet = new Set(miniFieldNames);
+  const miniFields = allFields.filter(field => miniFieldNamesSet.has(field.name));
+  const outputFields = [...miniFields.map(field => field.name), 'href', 'tekst'];
+  return {
+    fields: miniFields,
+    outputFields,
+    schema: miniSchema,
+    mapper: function (baseUrl, params) {
+      const flatMapper = exports.defaultFlatMapper(miniFields);
+      return row => {
+        const result = flatMapper(row);
+        result.href = hrefFormatter(baseUrl, row);
+        result.tekst = textFormatter(row);
+        return result;
+      }
+    }
+  };
+} ;
+
+exports.autocompleteRepresentation = (miniRepresentation, dataPropertyName) => {
+  const miniSchema = {
+    type: 'object',
+    properties: JSON.parse(JSON.stringify(miniRepresentation.schema.properties))
+  };
+  const schema = {
+    properties: {
+      tekst: miniSchema.properties.tekst
+    },
+    docOrder: ['tekst', dataPropertyName]
+  };
+  delete miniSchema.properties.tekst;
+  schema.properties[dataPropertyName] = miniSchema;
+  schema.properties[dataPropertyName].docOrder =
+   _.without(schema.properties[dataPropertyName].docOrder, 'tekst');
+  return {
+    fields: miniRepresentation.fields,
+    schema: globalSchemaObject(schema),
+    mapper: (baseUrl, params) => {
+      const miniMapper = miniRepresentation.mapper(baseUrl, params);
+      return row => {
+        const miniResult = miniMapper(row);
+        const result = {
+          tekst: miniResult.tekst
+        };
+        delete miniResult.tekst;
+        result[dataPropertyName] = miniResult;
+        return result;
+      };
+    }
+  }
+};
 
 
 function removeZCoordinate(coordinates) {

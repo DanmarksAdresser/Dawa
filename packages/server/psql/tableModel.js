@@ -10,6 +10,19 @@ const {
 } = require('@dawadk/import-util/src/common-columns');
 const {name} = require('@dawadk/import-util/src/table-diff-protocol');
 
+const vejnavne_mat = {
+  table: 'vejnavne_mat',
+  primaryKey: ['navn'],
+  columns: [
+    {
+      name: 'navn'
+    },
+    tsvColumn({
+      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(${table}.navn))`
+    })
+  ]
+};
+
 const vejstykker = {
   entity: 'vejstykke',
   table: 'vejstykker',
@@ -85,7 +98,7 @@ const navngivenvejkommunedel_mat = {
       name: 'adresseringsnavn'
     },
     tsvColumn({
-      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '')))`
+      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '') || ' ' || (select navn from kommuner where kode = ${table}.kommunekode)))`
     }),
     geomColumn({}),
     {
@@ -211,7 +224,7 @@ const ejerlav = {
     visueltCenterComputed({}),
     tsvColumn({
       deriveFn:
-        table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+        table => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '') || ' ' || kode))`
     })
   ]
 };
@@ -336,7 +349,7 @@ const stednavne = {
     {name: 'navnestatus'},
     {name: 'brugsprioritet'},
     tsvColumn({
-      deriveFn: table => `to_tsvector('adresser', ${table}.navn)`
+      deriveFn: table => `to_tsvector('adresser', ${table}.navn || ' ' || (case when (select count(*) from sted_kommune where sted_kommune.stedid = ${table}.stedid) = 1 then (select navn from kommuner join sted_kommune on kommuner.kode = sted_kommune.kommunekode where sted_kommune.stedid = ${table}.stedid) else '' end))`
     })
   ]
 };
@@ -802,7 +815,8 @@ exports.tables = Object.assign({
     hoejde_importer_afventer,
     postnumre_kommunekoder_mat,
     vask_adgangsadresser,
-    vask_adresser
+    vask_adresser,
+    vejnavne_mat
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
@@ -836,6 +850,12 @@ exports.materializations = Object.assign({
         table: 'dar1_NavngivenVejKommunedel_current',
         columns: ['id']
       }]
+  },
+  vejnavne_mat: {
+    table: 'vejnavne_mat',
+    view: 'vejnavne_mat_view',
+    dependents: [],
+    nonIncrementalDependents: ['navngivenvejkommunedel_mat']
   },
   navngivenvej: {
     table: 'navngivenvej',

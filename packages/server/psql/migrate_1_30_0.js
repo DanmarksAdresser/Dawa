@@ -1,10 +1,12 @@
 "use strict";
-
+const fs = require('fs');
+const path = require('path');
 const {go} = require('ts-csp');
 const runConfigured = require('@dawadk/common/src/cli/run-configured');
 const proddb = require('./proddb');
 const configHolder = require('@dawadk/common/src/config/holder');
 const { generateTemaTable, generateTilknytningTable } = require('../dagiImport/sqlGen');
+const { reloadDatabaseCode } = require('./initialization');
 const schema = configHolder.mergeConfigSchemas([
   {
     database_url: {
@@ -29,5 +31,7 @@ runConfigured(schema, [],config => go(function*() {
   yield proddb.withTransaction('READ_WRITE', client => go(function* () {
     yield client.query(generateTemaTable('landsdel'));
     yield client.query(generateTilknytningTable('landsdel'));
+    yield client.query(fs.readFileSync(path.join(__dirname,'schema/tables/tilknytninger_mat.sql')));
+    yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
   }));
 }));

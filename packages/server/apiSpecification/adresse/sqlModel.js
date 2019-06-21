@@ -126,19 +126,9 @@ function addAdditionalAdresseOrdering(sqlParts, rawQuery) {
 var searchAdresse = function(columnSpec) {
   var searchFn = sqlParameterImpl.search(columnSpec);
   return function(sqlParts, params) {
-    if(notNull(params.search)) {
+    if(notNull(params.q)) {
       searchFn(sqlParts, params);
-      addAdditionalAdresseOrdering(sqlParts, params.search);
-    }
-  };
-};
-
-var autocompleteAdresse = function(columnSpec) {
-  var autocompleteFn = sqlParameterImpl.autocomplete(columnSpec);
-  return function(sqlParts, params) {
-    if(notNull(params.autocomplete)) {
-      autocompleteFn(sqlParts, params);
-      addAdditionalAdresseOrdering(sqlParts, params.autocomplete);
+      addAdditionalAdresseOrdering(sqlParts, params.q);
     }
   };
 };
@@ -169,7 +159,6 @@ var parameterImpls = [
   sqlParameterImpl.husnrInterval(),
   sqlParameterImpl.adgangsadresseGeoFilter,
   searchAdresse(columns),
-  autocompleteAdresse(columns),
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns,['id'])
 ];

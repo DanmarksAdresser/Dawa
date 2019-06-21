@@ -486,7 +486,7 @@ exports.modelList = [{
     tilknytningKey: ['kommunekode', 'afstemningsområdenummer'],
     tilknytningTable: 'afstemningsomraadetilknytninger',
     useNearestForAdgangsadresseMapping: true,
-    deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn)`
+    deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn || ' ' || ${table}.afstemningsstednavn)`
 
   },
   {
@@ -589,7 +589,7 @@ exports.modelList = [{
     tilknytningKey: ['dagi_id'],
     tilknytningTable: 'supplerendebynavntilknytninger',
     useNearestForAdgangsadresseMapping: false,
-    deriveTsv: table => `to_tsvector('adresser', ${table}.navn)`
+    deriveTsv: table => `to_tsvector('adresser', ${table}.navn || ' ' || (select navn from kommuner where kode = ${table}.kommunekode))`
   },
   {
     singular: 'landsdel',

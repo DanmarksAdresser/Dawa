@@ -3,7 +3,8 @@ const {
   formatParameters,
   autocompleteSubtext,
   overwriteWithAutocompleteQParameter,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 const {
   dagiReverseDoc,
@@ -50,6 +51,7 @@ const filterParams = [
        Wildcard * er tilladt i slutningen af hvert ord. 
        Der returneres højst 1000 resultater ved anvendelse af parameteren.`
   },
+  autocompleteParameter,
   {
     name: 'dagi_id',
     doc: 'Find opstillingskredsen med det angivne DAGI ID.'

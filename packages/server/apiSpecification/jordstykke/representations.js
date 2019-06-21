@@ -31,6 +31,10 @@ const autocompleteFieldNames = ['ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'kom
   'visueltcenter_x', 'visueltcenter_y',
   'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr'];
 
+const miniFields = ['ejerlavkode', 'matrikelnr', 'ejerlavnavn', 'kommunekode', 'featureid', 'visueltcenter_x', 'visueltcenter_y'];
+const miniTekstFormatter = row => `${row.matrikelnr} ${row.ejerlavnavn} (${row.ejerlavkode})`;
+const hrefFormatter = (baseUrl, row) => makeHref(baseUrl, 'jordstykke', [row.ejerlavkode, row.matrikelnr]);
+exports.mini = representationUtil.miniRepresentation(miniFields, fields, null, hrefFormatter, miniTekstFormatter);
 
 const autocompleteSchemaProperties = {
   href: {
@@ -61,7 +65,6 @@ const autocompleteSchemaProperties = {
   },
 };
 const autocompletePropertiesDocOrder = ['href','ejerlav', 'matrikelnr', 'udvidet_esrejendomsnr', 'esrejendomsnr', 'sfeejendomsnr', 'kommune', 'visueltcenter', 'bbox'];
-
 
 exports.autocomplete = {
   schema: globalSchemaObject({

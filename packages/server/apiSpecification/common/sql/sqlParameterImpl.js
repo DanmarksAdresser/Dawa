@@ -188,27 +188,16 @@ function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
 exports.search = function (columnSpec, orderFields) {
   orderFields = orderFields || [];
   return function (sqlParts, params) {
-    if (notNull(params.search)) {
-      var tsQuery = toPgSearchQuery(params.search);
+    if (notNull(params.q)) {
+      const tsQuery = params.autocomplete ?
+        toPgSuggestQuery(params.q) :
+        toPgSearchQuery(params.q);
       applyTsQuery(sqlParts, params, tsQuery, columnSpec);
       applyOrdering(sqlParts, columnSpec, params.transformedQuery, orderFields);
     }
   };
 };
 
-
-// The orderFields parameter specifies a list of fieldMap the result is ordered by,
-// if the rank is equal.
-exports.autocomplete = function (columnSpec, orderFields) {
-  orderFields = orderFields || [];
-  return function (sqlParts, params) {
-    if (notNull(params.autocomplete)) {
-      var tsQuery = toPgSuggestQuery(params.autocomplete);
-      applyTsQuery(sqlParts, params, tsQuery, columnSpec);
-      applyOrdering(sqlParts, columnSpec, params.transformedQuery, orderFields);
-    }
-  };
-};
 
 function toOffsetLimit(paging) {
   if (paging.side && paging.per_side) {

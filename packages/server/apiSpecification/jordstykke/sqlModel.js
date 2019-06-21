@@ -24,7 +24,6 @@ const parameterImpls = [
   sqlParameterImpl.reverseGeocoding('geom', true),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.search(columns, ['ejerlavkode', 'matrikelnr']),
-  sqlParameterImpl.autocomplete(columns, ['ejerlavkode', 'matrikelnr']),
   sqlParameterImpl.paging(columns, ['ejerlavkode', 'matrikelnr'])
 ];
 

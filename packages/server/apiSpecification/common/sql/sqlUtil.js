@@ -151,15 +151,14 @@ exports.applyFallback = function(sqlModel, fallbackParamsFn) {
 
 exports.applyFallbackToFuzzySearch = function(sqlModel) {
   return exports.applyFallback(sqlModel, function(params) {
-    var q = params.search || params.autocomplete;
+    var q = params.q;
     if(q && params.fuzzy) {
       q = q.replace('*', '');
       var unfuzzyParams = _.clone(params);
       delete unfuzzyParams.fuzzy;
 
       var fuzzyParams = _.clone(params);
-      delete fuzzyParams.search;
-      delete fuzzyParams.autocomplete;
+      delete fuzzyParams.q;
       fuzzyParams.fuzzyq = q;
       return [unfuzzyParams, fuzzyParams];
     }

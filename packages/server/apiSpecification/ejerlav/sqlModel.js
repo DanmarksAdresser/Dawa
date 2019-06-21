@@ -30,8 +30,7 @@ const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.reverseGeocodingWithin(),
   sqlParameterImpl.geomWithin(),
-  sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns, ['navn']),
+  sqlParameterImpl.search(columns, ['navn']),
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 

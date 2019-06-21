@@ -80,6 +80,10 @@ const reverseGeocodingParameters = [{
   },
   SRIDParameter].concat(formatParameters);
 
+const autocompleteParameter = {
+  name: 'autocomplete',
+  doc: 'Udfør søgning som autocomplete-søgning.'
+};
 module.exports = {
   autocompleteSubtext,
   overwriteWithAutocompleteQParameter,
@@ -89,5 +93,6 @@ module.exports = {
   formatAndPagingParams,
   fuzzyParameter,
   SRIDParameter,
-  reverseGeocodingParameters
+  reverseGeocodingParameters,
+  autocompleteParameter
 };

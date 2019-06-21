@@ -3,7 +3,8 @@ const {
   formatAndPagingParams,
   fuzzyParameter,
   reverseGeocodingParameters,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -30,6 +31,7 @@ var adgangsadresseParameters = [
     'Der skelnes ikke mellem store og små bogstaver. Der returneres højst 1000 resultater ved anvendelse af parameteren.',
     examples: ['tværv*']
   },
+  autocompleteParameter,
   fuzzyParameter,
   {
     name: 'kvh',

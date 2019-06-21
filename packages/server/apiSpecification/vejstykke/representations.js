@@ -30,6 +30,30 @@ var autocompleteFieldNames = ['navn', 'kommunekode', 'kode'];
 var autocompleteFields = _.filter(fields, function(field) {
   return _.contains(autocompleteFieldNames, field.name);
 });
+
+const miniSchema = globalSchemaObject({
+  properties: Object.assign({},
+    commonSchemaDefinitions.VejstykkeRef.properties,
+    {
+      kommunenavn: {
+        type: 'string',
+        description: 'Navnet på den kommune, som vejstykket er beliggende i.'
+      },
+      tekst: {
+        type: 'string',
+        description: 'Navnet på vejstykket efterfulgt af kommunen på formen "{vejnavn}, ${kommunenavn} kommune"',
+      }
+    }),
+  docOrder: ['href', 'kommunekode','kode', 'navn', 'tekst', 'kommunenavn']
+});
+
+exports.mini = representationUtil.miniRepresentation([
+  'kommunekode', 'kode', 'navn', 'kommunenavn'],
+  fields,
+  miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'vejstykke', [row.kommunekode, row.kode]),
+  row => `${row.navn}, ${row.kommunenavn} kommune`);
+
 exports.autocomplete = {
   schema: globalSchemaObject( {
     properties: {

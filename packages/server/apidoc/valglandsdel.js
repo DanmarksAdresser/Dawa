@@ -3,7 +3,8 @@ const {
   formatAndPagingParams,
   formatParameters,
   overwriteWithAutocompleteQParameter,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 const {
   dagiNavnParameter,
@@ -24,7 +25,8 @@ const bogstavParameter = {
 const valglandsdelParameters = [
   bogstavParameter,
   dagiNavnParameter(temaModel),
-  dagiQParameter()
+  dagiQParameter(),
+  autocompleteParameter
 ];
 
 const examples = {

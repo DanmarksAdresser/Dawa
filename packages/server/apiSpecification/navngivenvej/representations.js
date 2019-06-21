@@ -1,29 +1,29 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var representationUtil = require('../common/representationUtil');
-var fields = require('./fields');
+const representationUtil = require('../common/representationUtil');
+const fields = require('./fields');
 const  { makeHref, mapBbox, mapVisueltCenter,
   formatDarStatus, mapKode4NavnTema,
   mapVejstykkeRef, mapPostnummerRefArray} = require('../commonMappers');
-var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
-var schemaUtil = require('../schemaUtil');
-var util = require('../util');
-var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+const schemaUtil = require('../schemaUtil');
+const util = require('../util');
+const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
 const commonSchemaDefinitions = require('../commonSchemaDefinitions');
 
-var normalizedFieldSchema = function(fieldName) {
+const normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('navngivenvej', fieldName);
 };
 
-var normalizedVejstykkeFieldSchema = function(fieldName) {
+const normalizedVejstykkeFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('vejstykke', fieldName);
 };
 
-var d = util.d;
-var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var schemaObject = schemaUtil.schemaObject;
+const d = util.d;
+const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
+const schemaObject = schemaUtil.schemaObject;
 const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnavneområde', 'beliggenhed_vejtilslutningspunkter', 'geom_json'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
@@ -32,8 +32,33 @@ const miniFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn'];
 
 const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
 
-exports.mini = representationUtil.defaultFlatRepresentation(miniFields);
+const miniSchema = globalSchemaObject({
+  properties: {
+    tekst: {
+      description: 'Navnet på den navngivne vej',
+      type: 'string'
+    },
+    'href': {
+      description: 'Den navngivne vejs unikke URL.',
+      $ref: '#/definitions/Href'
+    },
+    'id': normalizedFieldSchema('id'),
+    'darstatus': normalizedFieldSchema('darstatus'),
+    'navn': normalizedFieldSchema('navn'),
+    'adresseringsnavn': normalizedFieldSchema('adresseringsnavn'),
+  },
+  docOrder: ['tekst', 'href', 'id', 'darstatus', 'navn', 'adresseringsnavn']
+});
 
+exports.mini = representationUtil.miniRepresentation(
+  miniFieldNames,
+  fields,
+  miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'navngivenvej', [row.id]),
+  row => row.navn
+);
+
+exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'navngivenven');
 
 exports.json = {
   schema: globalSchemaObject({
@@ -184,52 +209,6 @@ exports.json = {
   }
 };
 
-const autocompleteFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn']
-
-const autocompleteFields = fields.filter(field => autocompleteFieldNames.includes(field.name));
-
-exports.autocomplete = {
-  schema: globalSchemaObject( {
-    properties: {
-      tekst: {
-        description: 'Navnet på den navngivne vej',
-        type: 'string'
-      },
-      navngivenvej: schemaObject({
-        description: 'Link og basale data for den navngivne vej',
-        properties: {
-          'href': {
-            description: 'Den navngivne vejs unikke URL.',
-            $ref: '#/definitions/Href'
-          },
-          'id': normalizedFieldSchema('id'),
-          'darstatus': normalizedFieldSchema('darstatus'),
-          'navn': normalizedFieldSchema('navn'),
-          'adresseringsnavn': normalizedFieldSchema('adresseringsnavn'),
-        },
-        docOrder: ['href', 'id', 'darstatus', 'navn', 'adresseringsnavn']
-      })
-    },
-    docOrder: ['tekst', 'navngivenvej']
-  }),
-  fields: autocompleteFields,
-  mapper: function (baseUrl, params) {
-    return function(row) {
-      return {
-        tekst: row.navn,
-        navngivenvej: {
-          href: makeHref(baseUrl, 'navngivenvej', [row.id]),
-          id: row.id,
-          darstatus: formatDarStatus(row.darstatus),
-          navn: row.navn,
-          adresseringsnavn: row.adresseringsnavn
-        }
-      };
-    };
-  }
-};
-
-
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
 exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
@@ -238,5 +217,5 @@ const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFie
 exports.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
 
 
-var registry = require('../registry');
+const registry = require('../registry');
 registry.addMultiple('navngivenvej', 'representation', module.exports);

@@ -56,16 +56,24 @@ exports.struktur= [
 exports.search = [
   {
     name: 'q',
-    type: 'string',
-    renameTo: 'search'
+    type: 'string'
+  },
+  {
+    name: 'autocomplete',
+    type: 'boolean',
+    defaultValue: "false"
   }
 ];
 
 exports.autocomplete = [
   {
     name: 'q',
-    type: 'string',
-    renameTo: 'autocomplete'
+    type: 'string'
+  },
+  {
+    name: 'autocomplete',
+    type: 'boolean',
+    defaultValue: "true"
   }
 ];
 

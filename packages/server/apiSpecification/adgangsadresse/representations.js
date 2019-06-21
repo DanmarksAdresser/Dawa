@@ -15,14 +15,14 @@ var util = require('../util');
 var adressebetegnelse = util.adressebetegnelse;
 var schemaObject = schemaUtil.schemaObject;
 var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-const { makeHref, makeHrefFromPath}  = commonMappers;
+const {makeHref, makeHrefFromPath} = commonMappers;
 
 var mapPostnummerRef = commonMappers.mapPostnummerRef;
 var mapKommuneRef = commonMappers.mapKommuneRef;
-const { d, numberToString, maybeNull, kode4String }= util;
+const {d, numberToString, maybeNull, kode4String} = util;
 
 var normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
-var normalizedFieldSchema = function(fieldName) {
+var normalizedFieldSchema = function (fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('adgangsadresse', fieldName);
 };
 
@@ -30,17 +30,17 @@ var nullableType = schemaUtil.nullableType;
 var kvhFormat = require('./kvhTransformer').format;
 var kvhFieldsDts = require('./kvhTransformer').kvhFieldsDts;
 
-var normalizedDdknSchema = function(fieldName) {
+var normalizedDdknSchema = function (fieldName) {
   var field = _.findWhere(ddknSchemas, {name: fieldName});
   var schema = _.clone(field.schema);
   schema.description = field.description;
   return schema;
 }
 
-  /*
-   * flat format
-   */
-exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs) {
+/*
+ * flat format
+ */
+exports.flat = representationUtil.adresseFlatRepresentation(fields, function (rs) {
   return {
     kvh: kvhFormat(rs)
   };
@@ -54,16 +54,101 @@ const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kild
   'valglandsdelsbogstav', 'valglandsdelsnavn', 'landsdelsnuts3', 'landsdelsnavn'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
+function adresseText(row) {
+  var fields = _.clone(row);
+  fields.husnr = husnrUtil.formatHusnr(row.husnr);
+  return adressebetegnelse(fields, true);
+}
 
-const miniFieldNamesWithoutCoords = ['id', 'status', 'darstatus', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn'];
+
+const miniFieldNamesWithoutCoords = [
+  'id', 'status', 'darstatus', 'kommunekode', 'vejkode', 'vejnavn',
+  'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr',
+  'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn'];
 
 const miniFieldNames = miniFieldNamesWithoutCoords.concat(['x', 'y']);
 
+const miniSchema = globalSchemaObject({
+  properties: {
+    tekst: {
+      description: 'Adgangsadressenbetegnelsen på formen {vej} {husnr}, {supplerende bynavn}, {postnr} {postnrnavn}',
+      type: 'string'
+    },
+    href: {
+      description: 'Adgangsadressens unikke URL.',
+      type: 'string'
+    },
+    id: {
+      description: 'Adgangsadressens unikke UUID.',
+      $ref: '#/definitions/UUID'
+    },
+    status: {
+      description: 'status (BBR)',
+      type: 'integer'
+    },
+    darstatus: {
+      description: 'status (DAR)',
+      type: 'integer'
+    },
+    kommunekode: {
+      description: 'Kommunekoden',
+      $ref: '#/definitions/NullableKode4'
+    },
+    vejkode: {
+      description: 'Vejkoden identificerer et vejstykke i en kommune.',
+      $ref: '#/definitions/NullableKode4'
+    },
+    vejnavn: {
+      description: 'Vejnavnet',
+      type: nullableType('string')
+    },
+    adresseringsvejnavn: {
+      description: 'Forkortet udgave af vejnavnet.',
+      type: nullableType('string')
+    },
+    husnr: {
+      description: 'Husnummer',
+      $ref: '#/definitions/husnr'
+    },
+    supplerendebynavn: {
+      $ref: '#/definitions/Nullablesupplerendebynavn'
+    },
+    postnr: {
+      description: 'Postnummer',
+      type: nullableType('string')
+    },
+    postnrnavn: {
+      description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
+        'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
+      type: nullableType('string')
+    },
+    stormodtagerpostnr: {
+      description: 'Evt. stormodtagerpostnummer, som er tilknyttet adgangsadressen.',
+      type: nullableType('string')
+    },
+    stormodtagerpostnrnavn: {
+      description: 'Stormodtagerpostnummerets navn.',
+      type: nullableType('string')
+    },
+    x: {
+      description: 'Adgangsadressens X-koordinat.',
+      type: 'number'
+    },
+    y: {
+      description: 'Adgangsadressens X-koordinat.',
+      type: 'number'
+    }
+  },
+  docOrder: ['tekst', 'href', 'id', 'status', 'darstatus', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn',
+    'stormodtagerpostnr', 'stormodtagerpostnrnavn', 'x', 'y']
+});
+
 
 const miniFieldsWithoutCoords = fields.filter(field => _.contains(miniFieldNamesWithoutCoords, field.name));
-const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
 
-exports.mini = representationUtil.defaultFlatRepresentation(miniFields);
+exports.mini = representationUtil.miniRepresentation(miniFieldNames, fields, miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'adgangsadresse', [row.id]),
+  adresseText);
 
 exports.json = {
   fields: _.where(fields, {selectable: true}),
@@ -74,17 +159,17 @@ exports.json = {
         description: 'Adgangsadressens URL.',
         $ref: '#/definitions/Href'
       },
-      'id'     : normalizedFieldSchema('id'),
+      'id': normalizedFieldSchema('id'),
       status: normalizedFieldSchema('status'),
       darstatus: {
         description: 'Adgangsadressens status angivet ved statuskode i DAR. 2=Føreløbig, 3=Gældende, 4=Nedlagt, 5=Henlagt',
         type: 'integer'
       },
-      'vejstykke'    : {
+      'vejstykke': {
         description: 'Vejstykket som adressen er knyttet til.',
         $ref: '#/definitions/VejstykkeKodeOgNavn'
       },
-      'husnr'  : normalizedFieldSchema('husnr'),
+      'husnr': normalizedFieldSchema('husnr'),
       navngivenvej: schemaObject({
         description: 'Den navngivne vej, som adgangsadressen er placeret på',
         properties: {
@@ -124,14 +209,14 @@ exports.json = {
         description: 'Evt. stormodtagerpostnummer (firmapostnummer) som er tilknyttet adressen.',
         $ref: '#/definitions/NullablePostnummerRef'
       },
-      'kommune':{
+      'kommune': {
         description: 'Kommunen som adressen er beliggende i.',
         $ref: '#/definitions/KommuneRef'
       },
       'ejerlav': schemaObject({
         description: 'DEPRECATED. Opdateres ikke længere. Benyt "jordstykke" i stedet. ' +
-        'Feltet indeholder den værdi der i sin tid var registreret i BBR. I dag beregnes det tilhørende' +
-        ' jordstykke ud fra adgangspunktets placering.',
+          'Feltet indeholder den værdi der i sin tid var registreret i BBR. I dag beregnes det tilhørende' +
+          ' jordstykke ud fra adgangspunktets placering.',
         nullable: true,
         properties: {
           'kode': normalizedFieldSchema('ejerlavkode'),
@@ -154,7 +239,7 @@ exports.json = {
           },
           nedlagt: {
             description: 'Tidspunkt for adgangsadressens nedlæggelse eller henlæggelse, dvs. det tidspunkt' +
-            ' hvor adgangsadressen har status "nedlagt" eller "henlagt". Kan være i fremtiden.'
+              ' hvor adgangsadressen har status "nedlagt" eller "henlagt". Kan være i fremtiden.'
           },
 
         },
@@ -176,11 +261,11 @@ exports.json = {
           tekstretning: normalizedFieldSchema('tekstretning'),
           ændret: normalizedFieldSchema('adressepunktændringsdato')
         },
-        docOrder: ['id', 'koordinater', 'højde','nøjagtighed','kilde', 'tekniskstandard','tekstretning', 'ændret']
+        docOrder: ['id', 'koordinater', 'højde', 'nøjagtighed', 'kilde', 'tekniskstandard', 'tekstretning', 'ændret']
       }),
       vejpunkt: schemaObject({
         description:
-`
+          `
 <p>Et geografisk punkt på færdselsnettet som repræsenterer startpunktet \
 af den rute, der fører til et bestemt adgangspunkt.</p>
 <p>Beskrivelse:</p>\
@@ -266,7 +351,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
             type: 'string'
           },
           ændret: {
-           type: 'string',
+            type: 'string',
             description: 'Dato og tid hvor der sidst er ændret i vejpunktet i DAR. Angives i dansk tidszone. Eksempel: 2002-04-08T14:38:00.',
           }
         },
@@ -277,7 +362,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         description: 'Adressens placering i Det Danske Kvadratnet (DDKN).',
         properties: {
           'm100': normalizedDdknSchema('ddkn_m100'),
-          'km1' : normalizedDdknSchema('ddkn_km1'),
+          'km1': normalizedDdknSchema('ddkn_km1'),
           'km10': normalizedDdknSchema('ddkn_km10')
         },
         docOrder: ['m100', 'km1', 'km10']
@@ -399,7 +484,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       },
       jordstykke: schemaObject({
         description: 'Jordstykket, som adressens adgangspunkt ligger på. Dette kan afvige fra det jordstykke der er' +
-        ' registreret i BBR.',
+          ' registreret i BBR.',
         nullable: true,
         properties: {
           href: {
@@ -412,12 +497,12 @@ vej, som adgangspunktets adresser refererer til.</p>`,
           },
           matrikelnr: {
             description: 'Jordstykkets matrikelnummer. Udgør sammen med ejerlavet en unik nøgle for jordstykket.' +
-            ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”',
+              ' Repræsenteret ved Indtil 7 tegn: max. 4 cifre + max. 3 små bogstaver. Eksempel: ”18b”',
             $ref: '#/definitions/matrikelnr'
           },
           esrejendomsnr: {
             description: 'Identifikation af den vurderingsejendom jf. Ejendomsstamregisteret, ESR,' +
-            ' som jordstykket er en del af. Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
+              ' som jordstykket er en del af. Repræsenteret ved op til syv cifre. Eksempel ”13606”.',
             schema: commonSchemaDefinitions.Nullableesrejendomsnr
           }
         },
@@ -433,21 +518,21 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       },
       kvh: {
         description: 'Sammensat nøgle for adgangsadressen. Indeholder til brug for integration til ældre systemer felter, der tilsammen identificerer adressen. Hvis det er muligt, bør adressens id eller href benyttes til identifikation.<br />' +
-                     'KVH-nøglen er sammen således:' +
-                     '<dl>' +
-                      kvhFieldsDts +
-                     '</dl>' +
-                     'En adresse på vejstykke 1074 (Melvej) nummer 6 i kommune 420 (Assens) vil altså få KVH-nøgle "04201074___6"',
+          'KVH-nøglen er sammen således:' +
+          '<dl>' +
+          kvhFieldsDts +
+          '</dl>' +
+          'En adresse på vejstykke 1074 (Melvej) nummer 6 i kommune 420 (Assens) vil altså få KVH-nøgle "04201074___6"',
         type: 'string'
       }
     },
-    docOrder: ['href','id', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr','navngivenvej','supplerendebynavn', 'supplerendebynavn2',
-      'postnummer', 'stormodtagerpostnummer','kommune', 'ejerlav', 'matrikelnr','esrejendomsnr', 'historik',
-      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn', 'landsdel','region','retskreds','politikreds', 'afstemningsområde',
+    docOrder: ['href', 'id', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr', 'navngivenvej', 'supplerendebynavn', 'supplerendebynavn2',
+      'postnummer', 'stormodtagerpostnummer', 'kommune', 'ejerlav', 'matrikelnr', 'esrejendomsnr', 'historik',
+      'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn', 'landsdel', 'region', 'retskreds', 'politikreds', 'afstemningsområde',
       'opstillingskreds', 'storkreds', 'valglandsdel', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
   }),
-  mapper: function (baseUrl){
-    return function(rs) {
+  mapper: function (baseUrl) {
+    return function (rs) {
       var adr = {};
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
@@ -471,23 +556,21 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         dagi_id: numberToString(rs.supplerendebynavn_dagi_id)
       } : null;
       adr.postnummer = mapPostnummerRef({nr: rs.postnr, navn: rs.postnrnavn}, baseUrl);
-      if(rs.stormodtagerpostnr) {
+      if (rs.stormodtagerpostnr) {
         adr.stormodtagerpostnummer = mapPostnummerRef(
           {nr: rs.stormodtagerpostnr, navn: rs.stormodtagerpostnrnavn},
           baseUrl);
-      }
-      else {
+      } else {
         adr.stormodtagerpostnummer = null;
       }
       adr.kommune = mapKommuneRef({kode: rs.kommunekode, navn: rs.kommunenavn}, baseUrl);
       const adgangspunkt_koordinater = rs.adgangspunkt_geom_json ? JSON.parse(rs.adgangspunkt_geom_json).coordinates : null;
-      if(rs.ejerlavkode) {
+      if (rs.ejerlavkode) {
         adr.ejerlav = {
           kode: rs.ejerlavkode,
           navn: rs.ejerlavnavn
         };
-      }
-      else {
+      } else {
         adr.ejerlav = null;
       }
       adr.esrejendomsnr = rs.esrejendomsnr ? "" + rs.esrejendomsnr : null;
@@ -506,10 +589,10 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         nøjagtighed: maybeNull(rs.nøjagtighed),
         kilde: maybeNull(rs.kilde),
         tekniskstandard: maybeNull(rs.tekniskstandard),
-        tekstretning:    maybeNull(rs.tekstretning),
-        'ændret':        d(rs.adressepunktændringsdato)
+        tekstretning: maybeNull(rs.tekstretning),
+        'ændret': d(rs.adressepunktændringsdato)
       };
-      if(rs.vejpunkt_id) {
+      if (rs.vejpunkt_id) {
         const vejpunkt_coordinater = rs.vejpunkt_geom_json ? JSON.parse(rs.vejpunkt_geom_json).coordinates : null;
         adr.vejpunkt = {
           id: rs.vejpunkt_id,
@@ -517,15 +600,14 @@ vej, som adgangspunktets adresser refererer til.</p>`,
           nøjagtighed: maybeNull(rs.vejpunkt_nøjagtighed),
           tekniskstandard: maybeNull(rs.vejpunkt_tekniskstandard),
           koordinater: vejpunkt_coordinater,
-          ændret:        d(rs.vejpunkt_ændret)
+          ændret: d(rs.vejpunkt_ændret)
         }
-      }
-      else {
+      } else {
         adr.vejpunkt = null;
       }
       adr.DDKN = rs.ddkn_m100 || rs.ddkn_km1 || rs.ddkn_km10 ? {
         m100: maybeNull(rs.ddkn_m100),
-        km1:  maybeNull(rs.ddkn_km1),
+        km1: maybeNull(rs.ddkn_km1),
         km10: maybeNull(rs.ddkn_km10)
       } : null;
       // DAGI temaer
@@ -539,19 +621,18 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         href: makeHref(baseUrl, 'afstemningsområde', [rs.kommunekode, rs.afstemningsområdenummer]),
         nummer: "" + rs.afstemningsområdenummer,
         navn: rs.afstemningsområdenavn
-        } : null;
+      } : null;
       adr.storkreds = commonMappers.mapStorkredsRef(rs, baseUrl);
       adr.valglandsdel = commonMappers.mapValglandsdelRef(rs, baseUrl);
       adr.zone = rs.zone ? util.zoneKodeFormatter(rs.zone) : null;
-      if(rs.jordstykke_matrikelnr) {
+      if (rs.jordstykke_matrikelnr) {
         const jordstykke = {};
         jordstykke.href = makeHref(baseUrl, 'jordstykke', [rs.jordstykke_ejerlavkode, rs.jordstykke_matrikelnr]),
-        jordstykke.ejerlav = commonMappers.mapEjerlavRef(rs.jordstykke_ejerlavkode, rs.jordstykke_ejerlavnavn, baseUrl);
+          jordstykke.ejerlav = commonMappers.mapEjerlavRef(rs.jordstykke_ejerlavkode, rs.jordstykke_ejerlavnavn, baseUrl);
         jordstykke.matrikelnr = rs.jordstykke_matrikelnr;
-        jordstykke.esrejendomsnr = rs.jordstykke_esrejendomsnr  ?  "" + rs.jordstykke_esrejendomsnr  : null;
+        jordstykke.esrejendomsnr = rs.jordstykke_esrejendomsnr ? "" + rs.jordstykke_esrejendomsnr : null;
         adr.jordstykke = jordstykke;
-      }
-      else {
+      } else {
         adr.jordstykke = null;
       }
 
@@ -565,93 +646,13 @@ vej, som adgangspunktets adresser refererer til.</p>`,
   }
 };
 
-var autocompleteFieldNames = ['id', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn'];
-exports.autocomplete = {
-  fields: representationUtil.fieldsWithNames(fields, autocompleteFieldNames),
-  schema: globalSchemaObject({
-    properties: {
-      tekst: {
-        description: 'Adgangsadressen på formen {vej} {husnr}, {supplerende bynavn}, {postnr} {postnrnavn}',
-        type: 'string'
-      },
-      adgangsadresse: {
-        description: 'Udvalgte informationer for adgangsadressen.',
-        properties: {
-          href: {
-            description: 'Adgangsadressens unikke URL.',
-            type: 'string'
-          },
-          id: {
-            description: 'Adgangsadressens unikke UUID.',
-            $ref: '#/definitions/UUID'
-          },
-          vejnavn: {
-            description: 'Vejnavnet',
-            type: nullableType('string')
-          },
-          husnr: {
-            description: 'Husnummer',
-            $ref: '#/definitions/husnr'
-          },
-          supplerendebynavn: {
-            $ref: '#/definitions/Nullablesupplerendebynavn'
-          },
-          postnr: {
-            description: 'Postnummer',
-            type: nullableType('string')
-          },
-          postnrnavn: {
-            description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
-              'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
-            type: nullableType('string')
-          },
-          stormodtagerpostnr: {
-            description: 'Evt. stormodtagerpostnummer, som er tilknyttet adgangsadressen.',
-            type: nullableType('string')
-          },
-          stormodtagerpostnrnavn: {
-            description: 'Stormodtagerpostnummerets navn.',
-            type: nullableType('string')
-          }
-        },
-        docOrder: ['id', 'href', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn',
-          'stormodtagerpostnr', 'stormodtagerpostnrnavn']
-      }
-    },
-    docOrder: ['tekst', 'adgangsadresse']
-  }),
-  mapper: function(baseUrl) {
-    return function (row) {
-      function adresseText(row) {
-        var fields = _.clone(row);
-        fields.husnr = husnrUtil.formatHusnr(row.husnr);
-        return adressebetegnelse(fields, true);
-      }
-
-      return {
-        tekst: adresseText(row),
-        adgangsadresse: {
-          id: row.id,
-          href: makeHref(baseUrl, 'adgangsadresse', [row.id]),
-          vejnavn: row.vejnavn,
-          husnr: husnrUtil.formatHusnr(row.husnr),
-          supplerendebynavn: row.supplerendebynavn,
-          postnr: kode4String(row.postnr),
-          postnrnavn: row.postnrnavn,
-          stormodtagerpostnr: kode4String(row.stormodtagerpostnr),
-          stormodtagerpostnrnavn: row.stormodtagerpostnrnavn
-        }
-      };
-    };
-  }
-};
-
+exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'adgangsadresse');
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
 exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
 
 const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFieldsWithoutCoords);
-exports.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
+exports.geojsonMini = representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
 
 var registry = require('../registry');
 registry.addMultiple('adgangsadresse', 'representation', module.exports);

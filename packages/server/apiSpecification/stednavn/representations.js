@@ -11,8 +11,17 @@ const registry = require('../registry');
 const fieldsExcludedFromFlat = ['sted_geom_json', 'visueltcenter'];
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 const {globalSchemaObject} = require('../commonSchemaDefinitionsUtil');
-const {nullableType} = require('../schemaUtil');
 const {makeHref } = require('../commonMappers');
+
+const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
+
+const normalizedFieldSchema = function(fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('stednavn', fieldName);
+};
+
+const normalizedStedFieldSchema = function(fieldName) {
+  return normalizedFieldSchemas.normalizedSchemaField('sted', fieldName);
+};
 
 const stedRepresentations = require('../sted/representations');
 
@@ -22,6 +31,35 @@ exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
 const fieldsExcludedFromJson = ['sted_geom_json', 'visueltcenter'];
 
+const miniSchema = globalSchemaObject({
+  properties: {
+    tekst: {
+      type: 'string',
+      description: 'Stednavnets navn'
+    },
+    href: {
+      type: 'string',
+      description: 'Stednavnets unikke URL'
+    },
+    navn: normalizedFieldSchema('navn'),
+    navnestatus: normalizedFieldSchema('navnestatus'),
+    brugsprioritet: normalizedFieldSchema('brugsprioritet'),
+    sted_id: normalizedStedFieldSchema('id'),
+    sted_hovedtype: normalizedStedFieldSchema('hovedtype'),
+    sted_undertype: normalizedStedFieldSchema('undertype')
+  },
+  docOrder: ['tekst', 'href', 'navn', 'navnestatus', 'brugsprioritet',
+    'sted_id', 'sted_hovedtype', 'sted_undertype']
+});
+
+exports.mini = representationUtil.miniRepresentation(
+  ['sted_id', 'navn', 'navnestatus', 'brugsprioritet', 'sted_hovedtype', 'sted_undertype'],
+  fields,
+  miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'stednavn', [row.sted_id, row.navn]),
+  row => row.navn
+);
+
 exports.json = {
   schema: globalSchemaObject({
     title: 'Stednavn',
@@ -30,18 +68,9 @@ exports.json = {
         type: 'string',
         description: 'Stednavnets unikke URL'
       },
-      navn: {
-        type: nullableType('string'),
-        description: 'Stednavnets navn'
-      },
-      navnestatus: {
-        enum: ['officielt', 'uofficielt', 'suAutoriseret'],
-        description: 'Stednavnets navnestatus. Mulige værdier: "officielt", "uofficielt", "suAutoriseret"',
-      },
-      brugsprioritet: {
-        enum: ['primær', 'sekundær'],
-        description: 'Angiver stednavnets brugsprioritet. Et sted har et primært stednavn og 0 eller flere sekundære stednavne. Mulige værdier: primær, sekundær'
-      },
+      navn: normalizedFieldSchema('navn'),
+      navnestatus: normalizedFieldSchema('navnestatus'),
+      brugsprioritet: normalizedFieldSchema('brugsprioritet'),
       sted: Object.assign({}, stedRepresentations.json.schema, {description: 'Stedet, som stednavnet tilhører'})
     },
     docOrder: ['href', 'navn', 'navnestatus', 'brugsprioritet', 'sted']

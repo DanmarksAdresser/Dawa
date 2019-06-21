@@ -2,7 +2,8 @@ const {
   formatAndPagingParams,
   pagingParameters,
   reverseGeocodingParameters,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -117,7 +118,7 @@ module.exports = [
     entity: 'jordstykke',
     path: '/jordstykker',
     subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
-    parameters: [searchParameter, ...commonParameters, ...reverseParameters, ...formatAndPagingParams, ...dagiSridCirkelPolygonParameters('jordstykker'), strukturParameter],
+    parameters: [searchParameter, autocompleteParameter, ...commonParameters, ...reverseParameters, ...formatAndPagingParams, ...dagiSridCirkelPolygonParameters('jordstykker'), strukturParameter],
     examples: [{description: 'Hent alle jordstykker', query: []},
       {
         description: 'Find jordstykker for ejerlav med kode <em>80652</em>',
@@ -143,7 +144,7 @@ module.exports = [
     entity: 'jordstykke',
     path: '/jordstykker/autocomplete',
     subtext: 'Autocomplete af jordstykker.',
-    parameters: [autocompleteSearchParameter, ...commonParameters, ...dagiSridCirkelPolygonParameters('jordstykker'), ...pagingParameters],
+    parameters: [autocompleteSearchParameter, autocompleteParameter, ...commonParameters, ...dagiSridCirkelPolygonParameters('jordstykker'), ...pagingParameters],
     nomulti: true,
     examples: []
   },

@@ -2,7 +2,8 @@ const {
   autocompleteSubtext,
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -30,7 +31,9 @@ const ejerlavParameters = [
     name: 'q',
     doc: 'Søgetekst. Der søges i ejerlavsnavnet. Alle ord i søgeteksten skal matche ejerlavsnavnet. ' +
     'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
-  }];
+  },
+  autocompleteParameter
+  ];
 
 const ejerlavEventExamples =  [
   {

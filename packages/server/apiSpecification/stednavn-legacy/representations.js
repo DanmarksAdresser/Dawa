@@ -20,6 +20,49 @@ exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
 const fieldsExcludedFromJson = ['geom_json', 'visueltcenter'];
 
+const miniSchema = globalSchemaObject({
+  properties: {
+    tekst: {
+      type: 'string',
+      description: 'Stednavnets navn'
+    },
+    id: {
+      type: 'string',
+      schema: schema.uuid,
+      description: 'Stednavnets unikke ID'
+    },
+    href: {
+      type: 'string',
+      description: 'Stednavnets unikke URL'
+    },
+    hovedtype: {
+      type: 'string',
+      description: 'Stednavnets hovedtype, eksempelvis Bebyggelse'
+    },
+    undertype: {
+      type: 'string',
+      description: 'Stednavnets undertype, eksempelvis bydel'
+    },
+    navn: {
+      type: nullableType('string'),
+      description: 'Stednavnets navn'
+    },
+    navnestatus: {
+      enum: ['officielt', 'uofficielt', 'suAutoriseret'],
+      description: 'Stednavnets navnestatus. Mulige værdier: "officielt", "uofficielt", "suAutoriseret"',
+    }
+  },
+  docOrder: ['tekst', 'href', 'id', 'navn', 'navnestatus', 'hovedtype', 'undertype']
+});
+
+exports.mini = representationUtil.miniRepresentation(
+  ['id', 'navn', 'navnestatus', 'hovedtype', 'undertype'],
+  fields,
+  miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'stednavn-legacy', [row.id]),
+  row => row.navn
+);
+
 exports.json = {
   schema: globalSchemaObject({
     title: 'Stednavn',

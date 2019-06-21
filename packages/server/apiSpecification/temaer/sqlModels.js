@@ -346,8 +346,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
       ...(additionalParameterImpls[model.singular] || []),
     sqlParameterImpl.reverseGeocodingWithin('t.geom'),
     sqlParameterImpl.geomWithin('t.geom'),
-    sqlParameterImpl.search(columns, [], true),
-    sqlParameterImpl.autocomplete(columns),
+    sqlParameterImpl.search(columns),
     sqlParameterImpl.paging(columns, model.primaryKey, true)
   ];
 

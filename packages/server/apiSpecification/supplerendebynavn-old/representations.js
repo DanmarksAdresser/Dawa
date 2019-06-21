@@ -1,16 +1,16 @@
 "use strict";
 
-var _ = require('underscore');
+const _ = require('underscore');
 
-var representationUtil = require('../common/representationUtil');
-var fields = require('./fields');
-var commonMappers = require('../commonMappers');
-var commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
+const representationUtil = require('../common/representationUtil');
+const fields = require('./fields');
+const commonMappers = require('../commonMappers');
+const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 
-var globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
-var makeHref = commonMappers.makeHref;
-var mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
-var mapKommuneRefArray = commonMappers.mapKommuneRefArray;
+const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
+const makeHref = commonMappers.makeHref;
+const mapPostnummerRefArray = commonMappers.mapPostnummerRefArray;
+const mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 
 exports.flat = representationUtil.defaultFlatRepresentation(fields);
 
@@ -41,7 +41,7 @@ exports.json = {
     },
     'docOrder': ['href', 'navn', 'kommuner', 'postnumre']
   }),
-  mapper: function(baseUrl, params) {
+  mapper: function(baseUrl) {
     return function(row) {
       return {
         href: makeHref(baseUrl, 'supplerendebynavn', [row.navn]),
@@ -53,33 +53,31 @@ exports.json = {
   }
 };
 
-exports.autocomplete = {
-  fields: _.where(fields, {name: 'navn'}),
-  schema: globalSchemaObject({
-    properties: {
-      tekst: {
-        description: 'Det supplerende bynavn.',
-        type: 'string'
-      },
-      supplerendebynavn: {
-        description: 'Link og basale data for det supplerende bynavn.',
-        $ref: '#/definitions/SupplerendeBynavnRef'
-      }
+const miniSchema = globalSchemaObject({
+  properties: {
+    navn: {
+      type: 'string',
+      description: 'Det supplerende bynavns navn'
     },
-    docOrder: ['tekst', 'supplerendebynavn']
-  }),
-  mapper: function(baseUrl, params) {
-    return function(row) {
-      return {
-        tekst: row.navn,
-        supplerendebynavn: {
-          href:  makeHref(baseUrl, 'supplerendebynavn', [row.navn]),
-          navn: row.navn
-        }
-      };
-    };
-  }
-};
+    tekst: {
+      type: 'string',
+      description: 'Tekstbeskrivelse af det supplerende bynavn - identisk med navn'
+    },
+    href: {
+      type: 'string',
+      description: 'Det supplerende bynavns URL.'
+    }
+  },
+  docOrder: ['href', 'navn', 'tekst']
+});
 
-var registry = require('../registry');
+exports.mini = representationUtil.miniRepresentation(['navn'], fields,
+  miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'supplerendebynavn', [row.navn]),
+  row => row.navn
+);
+
+exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'supplerendebynavn');
+
+const registry = require('../registry');
 registry.addMultiple('supplerendebynavn-old', 'representation', module.exports);

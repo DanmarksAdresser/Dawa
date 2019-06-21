@@ -10,5 +10,11 @@
     "kode": 99,
     "navn": "retskreds test",
     "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))"
+  },
+  {
+    "dagi_id": 100115,
+    "kode": 1180,
+    "navn": "retskreds test 2",
+    "geom": null
   }
 ]

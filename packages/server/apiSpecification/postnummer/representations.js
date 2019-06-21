@@ -16,7 +16,6 @@ const normalizedFieldSchema = function(fieldName) {
 
 const globalSchemaObject = commonSchemaDefinitionsUtil.globalSchemaObject;
 const makeHref = commonMappers.makeHref;
-const mapPostnummerRef = commonMappers.mapPostnummerRef;
 const mapKommuneRefArray = commonMappers.mapKommuneRefArray;
 
 const nullableType = schemaUtil.nullableType;
@@ -105,33 +104,43 @@ exports.json = {
   }
 };
 
-const autocompleteFieldNames = ['nr', 'navn'];
-exports.autocomplete = {
-  schema: globalSchemaObject( {
-    properties: {
-      tekst: {
-        description: 'Postnummeret (4 cifre) efterfulgt af postnummerområdets navn, f.eks. "8260 Viby J".',
-        type: 'string'
-      },
-      postnummer: {
-        description: 'Link og basale data for postnummret.',
-        $ref: '#/definitions/PostnummerRef'
-      }
+const miniFieldNames = ['nr', 'navn', 'stormodtager'];
+
+const miniSchema = globalSchemaObject({
+  properties: {
+    tekst: {
+      description: 'Postnummeret (4 cifre) efterfulgt af postnummerområdets navn, f.eks. "8260 Viby J".',
+      type: 'string'
     },
-    docOrder: ['tekst', 'postnummer']
-  }),
-  fields: _.filter(fields, function(field) {
-    return _.contains(autocompleteFieldNames, field.name);
-  }),
-  mapper: function(baseUrl) {
-    return function(row) {
-      return {
-        tekst: row.nr + ' ' + row.navn,
-        postnummer: mapPostnummerRef(row, baseUrl)
-      };
-    };
-  }
-};
+    href: {
+      description: 'Postnummerets unikke URL',
+      type: 'string'
+    },
+    nr: {
+      description: 'Postnummer',
+      '$ref': '#/definitions/Postnr'
+    },
+    navn: {
+      description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
+        'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
+      type: nullableType('string')
+    },
+    stormodtager: {
+      type: 'boolean',
+      description: 'Angiver, om postnummeret er et stormodtagerpostnummer.'
+    }
+  },
+  docOrder: ['tekst', 'href', 'nr', 'navn', 'stormodtager']
+});
+
+const formatPostnummerTekst = row => `${row.nr} ${row.navn}`;
+const formatHref = (baseUrl, row) => makeHref(baseUrl, 'postnummer', [row.nr]);
+
+exports.mini = representationUtil.miniRepresentation(
+  miniFieldNames, fields, miniSchema, formatHref, formatPostnummerTekst);
+
+exports.autocomplete = representationUtil.autocompleteRepresentation(
+  exports.mini, 'postnummer');
 
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
 exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);

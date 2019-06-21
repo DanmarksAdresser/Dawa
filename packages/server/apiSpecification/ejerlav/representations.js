@@ -25,6 +25,26 @@ const autocompleteFields = _.filter(fields, function(field) {
   return _.contains(autocompleteFieldNames, field.name);
 });
 
+const miniSchema = globalSchemaObject({
+  properties: {
+    tekst: {
+      type: 'string',
+      description: 'Tekstbeskrivelse af ejerlavet på formen "{navn} ({kode})'
+    },
+    'href': {
+      description: 'Ejerlavets unikke URL.',
+      $ref: '#/definitions/Href'
+    },
+    'kode': normalizedFieldSchema('kode'),
+    'navn' : normalizedFieldSchema('navn')
+  },
+  docOrder: ['tekst', 'href', 'kode', 'navn']
+});
+
+exports.mini = representationUtil.miniRepresentation(['kode', 'navn'], fields, miniSchema,
+  (baseUrl, row) => makeHref(baseUrl, 'ejerlav', [row.kode]),
+  (row) => `${row.name} (${row.kode})`);
+
 exports.autocomplete = {
   schema: globalSchemaObject( {
     properties: {

@@ -1,65 +1,84 @@
 "use strict";
 
-var dbapi = require('../../dbapi');
-var nameAndKey = require('./nameAndKey');
-var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
-var parameters = require('./parameters');
-var sqlUtil = require('../common/sql/sqlUtil')
+const dbapi = require('../../dbapi');
+const nameAndKey = require('./nameAndKey');
+const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+const parameters = require('./parameters');
+const sqlUtil = require('../common/sql/sqlUtil')
 
-var assembleSqlModel = sqlUtil.assembleSqlModel;
+const assembleSqlModel = sqlUtil.assembleSqlModel;
 
-var columns = {
-  navn: {
-    column: 'vejstykker.vejnavn'
-  },
+const columns = {
   postnr: {
     select: null,
-    where: 'vp2.postnr'
+    where: function (sqlParts, parameterArray) {
+      const subquery = {
+        select: ["*"],
+        from: ['navngivenvejkommunedel_mat nvk join vejstykkerpostnumremat vp on nvk.id = vp.navngivenvejkommunedel_id'],
+        whereClauses: [`nvk.vejnavn = vejnavne.navn`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'postnr',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {postnr: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
   },
   kommunekode: {
     select: null,
-      where: 'vejstykker.kommunekode'
+    where: function (sqlParts, parameterArray) {
+      const subquery = {
+        select: ["*"],
+        from: ['navngivenvejkommunedel_mat nvk'],
+        whereClauses: [`nvk.vejnavn = vejnavne.navn`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'kommunekode',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {kommunekode: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
   },
   kommuner: {
-    select: "json_agg(DISTINCT CAST((k.kode, k.navn) AS KommuneRef))"
+    select: "(SELECT json_agg(json_build_object('kode', k.kode, 'navn', k.navn)) from navngivenvejkommunedel_mat v join kommuner k on v.kommunekode = k.kode where v.vejnavn = vejnavne.navn)"
   },
   postnumre: {
-    select: 'json_agg(DISTINCT CAST((p.nr, p.navn) AS PostnummerRef))'
-  },
-  tsv: {
-    column: 'vejstykker.tsv'
+    select: `(SELECT json_agg(json_build_object('nr', p.nr, 'navn', p.navn)) 
+    from navngivenvejkommunedel_mat v join vejstykkerpostnumremat  vp on v.id = vp.navngivenvejkommunedel_id join postnumre p on vp.postnr = p.nr where v.vejnavn = vejnavne.navn)`
   }
 };
 
 function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
-    var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
-    sqlParts.whereClauses.push("vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT vejnavn, vejnavn <-> " + fuzzyqAlias + " as dist from navngivenvejkommunedel_mat vejstykker ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)");
-    sqlParts.orderClauses.push(`levenshtein(lower(vejstykker.vejnavn), lower(${fuzzyqAlias}), 2, 1, 3)`);
+    const fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
+    sqlParts.whereClauses.push(`vejnavne.navn IN (select navn from vejnavne_mat order by navn <-> ${fuzzyqAlias} limit 100)`);
+    sqlParts.orderClauses.push(`levenshtein(lower(vejnavne.navn), lower(${fuzzyqAlias}), 2, 1, 3)`);
   }
 }
 
 
-var parameterImpls = [
+const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
-  sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns, ['navn']),
+  sqlParameterImpl.search(columns, ['navn']),
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
-var baseQuery = function() {
+const baseQuery = function() {
   return {
     select: [],
     from: [
-      ' navngivenvejkommunedel_mat vejstykker' +
-        " LEFT JOIN kommuner k ON k.kode = vejstykker.kommunekode" +
-        ' LEFT JOIN vejstykkerPostnumreMat  vp1 ON (vp1.kommunekode = vejstykker.kommunekode AND vp1.vejkode = vejstykker.kode)' +
-        ' LEFT JOIN Postnumre p ON (p.nr = vp1.postnr)' +
-        ' LEFT JOIN vejstykkerPostnumreMat vp2 ON (vp2.kommunekode = vejstykker.kommunekode AND vp2.vejkode = vejstykker.kode)'
+      'vejnavne_mat vejnavne'
     ],
     whereClauses: [],
-    groupBy: 'vejstykker.vejnavn, vejstykker.tsv',
     orderClauses: [],
     sqlParams: []
   };
@@ -67,9 +86,9 @@ var baseQuery = function() {
 
 
 
-var sqlModel = assembleSqlModel(columns, parameterImpls, baseQuery);
+const sqlModel = assembleSqlModel(columns, parameterImpls, baseQuery);
 
 module.exports = sqlUtil.applyFallbackToFuzzySearch(sqlModel);
 
-var registry = require('../registry');
+const registry = require('../registry');
 registry.add('vejnavn', 'sqlModel', undefined, module.exports);

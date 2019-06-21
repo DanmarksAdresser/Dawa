@@ -12,5 +12,12 @@
     "navn": "Region test",
     "geom": "SRID=25832;MULTIPOLYGON(((725020 6166300,725030 6166300,725030 6166310,725020 6166310,725020 6166300)))",
     "nuts2": "DK02"
+  },
+  {
+    "dagi_id": 10000,
+    "kode": 1085,
+    "navn": "Region test 2",
+    "geom": null,
+    "nuts2": "DK03"
   }
 ]

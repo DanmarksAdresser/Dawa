@@ -25,7 +25,10 @@ exports.applyDefaultPagingForAutocomplete = function(params) {
   }
 };
 
-function representationName(formatParam, strukturParam) {
+function representationName(formatParam, strukturParam, autocompleteParam) {
+  if(autocompleteParam) {
+    strukturParam = strukturParam || 'mini';
+  }
   switch(formatParam) {
     case 'csv':
       if(strukturParam === 'mini') {
@@ -58,13 +61,13 @@ function representationName(formatParam, strukturParam) {
   }
 }
 
-exports.chooseRepresentationForQuery = function (formatParam, strukturParam, representations) {
-  const name = representationName(formatParam, strukturParam);
+exports.chooseRepresentationForQuery = function ({format, struktur, autocomplete}, representations) {
+  const name = representationName(format, struktur, autocomplete);
   return representations[name];
 };
 
-exports.chooseRepresentationForAutocomplete = function(formatParam, strukturParam, representations) {
-  if((formatParam || 'json') === 'json') {
+exports.chooseRepresentationForAutocomplete = function({format, struktur}, representations) {
+  if((format || 'json') === 'json') {
     return representations.autocomplete;
   }
   return null;

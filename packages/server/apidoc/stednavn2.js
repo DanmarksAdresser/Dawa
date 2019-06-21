@@ -4,7 +4,8 @@ const {
   formatAndPagingParams,
   fuzzyParameter,
   SRIDParameter,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -56,6 +57,7 @@ module.exports = [
         name: 'q',
         doc: 'Find stednavne, hvor navnet matcher den angivne søgetekst'
       },
+      autocompleteParameter,
       ...commonStednavnParameters,
       {
         name: 'x',
@@ -103,6 +105,7 @@ module.exports = [
         name: 'q',
         doc: 'Se beskrivelse under <a href="generelt#autocomplete">autocomplete</a>'
       },
+      autocompleteParameter,
       ...commonStednavnParameters
     ],
     examples: []

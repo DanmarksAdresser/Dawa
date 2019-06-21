@@ -23,21 +23,22 @@ var normalizedFieldSchema = function(fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('adresse', fieldName);
 };
 
+function adresseText(row) {
+  var fields = _.clone(row);
+  fields.husnr = husnrUtil.formatHusnr(row.husnr);
+  return adressebetegnelse(fields);
+}
+
 var kvhxFieldsDts = require('./kvhxTransformer').kvhxFieldsDts;
 var kvhxFormat = require('./kvhxTransformer').format;
 var kvhFormat = require('../adgangsadresse/kvhTransformer').format;
 
-var nullableType = schemaUtil.nullableType;
-var kode4String = util.kode4String;
 
 const adgangsadresseMiniFieldNamesWithoutCoords = _.without(adgangsadresseRepresentations.mini.outputFields, 'x', 'y');
 const miniFieldNamesWithoutCoords = adgangsadresseMiniFieldNamesWithoutCoords.concat(['adgangsadresseid', 'etage', 'dør']);
 const miniFieldNames = miniFieldNamesWithoutCoords.concat(['x', 'y']);
 
 const miniFieldsWithoutCoords = fields.filter(field => _.contains(miniFieldNamesWithoutCoords, field.name));
-const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
-
-exports.mini = representationUtil.defaultFlatRepresentation(miniFields);
 
 exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs) {
   return {
@@ -63,6 +64,36 @@ exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_EN
 
 var adresseDefinitions = _.clone(definitions);
 adresseDefinitions.Adgangsadresse = adgangsadresseRepresentations.json.schema;
+
+
+const miniSchema = {
+  properties: JSON.parse(JSON.stringify(adgangsadresseRepresentations.mini.schema.properties)),
+  docOrder: JSON.parse(JSON.stringify(adgangsadresseRepresentations.mini.schema.docOrder)),
+} ;
+
+Object.assign(miniSchema.properties, {
+  adgangsadresseid: {
+    description: 'Adgangsadressens ID.',
+    $ref: '#/definitions/UUID'
+  },
+  'etage':   {
+    '$ref': '#/definitions/NullableEtage'
+  },
+  'dør':     {
+    '$ref': '#/definitions/NullableDør'
+  }
+});
+
+miniSchema.docOrder = [...miniSchema.docOrder, 'adgangsadresseid', 'etage', 'dør'];
+
+exports.mini = representationUtil.miniRepresentation(
+  miniFieldNames,
+  fields,
+  globalSchemaObject(miniSchema),
+  (baseUrl, row) => makeHref(baseUrl, 'adresse', [row.id]),
+  adresseText);
+
+exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'adresse');
 
 exports.json = {
   fields: _.where(fields, {selectable: true}),
@@ -149,95 +180,6 @@ exports.json = {
       });
       adr.adgangsadresse = adgangsadresseMapper(adgangsadresseUnmapped);
       return adr;
-    };
-  }
-};
-
-var autocompleteFieldNames = ['id', 'vejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'etage', 'dør', 'stormodtagerpostnr', 'stormodtagerpostnrnavn', 'adgangsadresseid'];
-
-exports.autocomplete = {
-  fields: representationUtil.fieldsWithNames(fields, autocompleteFieldNames),
-  schema: globalSchemaObject({
-    properties: {
-      tekst: {
-        description: 'Adressen på formen {vej} {husnr}, {etage}. {dør}, {supplerende bynavn}, {postnr} {postnrnavn}',
-        type: 'string'
-      },
-      adresse: {
-        description: 'Udvalge informationer om adressen.',
-        properties: {
-          href: {
-            description: 'Adressens unikke URL.',
-            type: 'string'
-          },
-          id: {
-            description: 'Adressens unikke UUID.',
-            $ref: '#/definitions/UUID'
-          },
-          vejnavn: {
-            description: 'Vejnavnet',
-            type: nullableType('string')
-          },
-          'etage':   {
-            '$ref': '#/definitions/NullableEtage'
-          },
-          'dør':     {
-            '$ref': '#/definitions/NullableDør'
-          },
-          husnr: {
-            description: 'Husnummer',
-            $ref: '#/definitions/husnr'
-          },
-          supplerendebynavn: {
-            $ref: '#/definitions/Nullablesupplerendebynavn'
-          },
-          postnr: {
-            description: 'Postnummer',
-            type: nullableType('string')
-          },
-          postnrnavn: {
-            description: 'Det navn der er knyttet til postnummeret, typisk byens eller bydelens navn. ' +
-              'Repræsenteret ved indtil 20 tegn. Eksempel: ”København NV”.',
-            type: nullableType('string')
-          },
-          stormodtagerpostnr: {
-            description: 'Evt. stormodtagerpostnummer, som er tilknyttet adgangsadressen.',
-            type: nullableType('string')
-          },
-          stormodtagerpostnrnavn: {
-            description: 'Stormodtagerpostnummerets navn.',
-            type: nullableType('string')
-          }
-        },
-        docOrder: ['id', 'href', 'vejnavn', 'etage', 'dør','husnr', 'supplerendebynavn', 'postnr', 'postnrnavn', 'stormodtagerpostnr', 'stormodtagerpostnrnavn']
-
-      }
-    },
-    docOrder: ['tekst', 'adresse']
-  }),
-  mapper: function(baseUrl) {
-    return function (row) {
-      function adresseText(row) {
-        var fields = _.clone(row);
-        fields.husnr = husnrUtil.formatHusnr(row.husnr);
-        return adressebetegnelse(fields);
-      }
-      return {
-        tekst: adresseText(row),
-        adresse: {
-          id: row.id,
-          href: makeHref(baseUrl, 'adresse', [row.id]),
-          vejnavn: maybeNull(row.vejnavn),
-          husnr: husnrUtil.formatHusnr(row.husnr),
-          etage: maybeNull(row.etage),
-          dør: maybeNull(row.dør),
-          supplerendebynavn: maybeNull(row.supplerendebynavn),
-          postnr: kode4String(row.postnr),
-          postnrnavn: maybeNull(row.postnrnavn),
-          stormodtagerpostnr: kode4String(row.stormodtagerpostnr),
-          stormodtagerpostnrnavn: row.stormodtagerpostnrnavn
-        }
-      };
     };
   }
 };

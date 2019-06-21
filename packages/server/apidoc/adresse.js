@@ -2,7 +2,8 @@ const {
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
   autocompleteSubtext,
-  fuzzyParameter
+  fuzzyParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -23,6 +24,7 @@ const adresseIdParameter = {
 };
 const adresseParameters = [
   adresseIdParameter,
+  autocompleteParameter,
   {
     name: 'q',
     doc: 'Søgetekst. Der søges i vejnavn, husnr, etage, dør, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adressebetegnelsen. ' +

@@ -1,7 +1,8 @@
 const {
   autocompleteSubtext,
   formatAndPagingParams,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  autocompleteParameter
 } = require('./common');
 
 var supplerendeBynavneIdParameters = {
@@ -15,6 +16,7 @@ var supplerendeBynavneParameters = [{
   doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche det supplerende bynavn. ' +
   'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
 },
+  autocompleteParameter,
   supplerendeBynavneIdParameters,
   {
     name: 'postnr',

@@ -50,8 +50,8 @@ class DawaClient {
   }
 
   query(sql, params, options) {
-    // console.log(sql);
-    // console.log(JSON.stringify(params))
+    console.log(sql);
+    console.log(JSON.stringify(params))
     options = options || {};
     const skipQueue = options.skipQueue || false;
     if (this.released) {

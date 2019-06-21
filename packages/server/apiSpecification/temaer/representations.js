@@ -85,7 +85,33 @@ const mapMetaFields = row => {
     bbox: commonMappers.mapBbox(row),
     visueltcenter: commonMappers.mapVisueltCenter(row)
   };
-}
+};
+
+const miniFieldNames = {
+  kommune: ['dagi_id', 'kode', 'navn', 'udenforkommuneinddeling', 'regionskode', 'regionsnavn'],
+  landsdel: ['dagi_id', 'nuts3', 'navn', 'regionskode', 'regionsnavn', 'landsdelskode', 'landsdelsnavn'],
+  region: ['dagi_id', 'kode', 'navn'],
+  afstemningsområde: ['dagi_id', 'nummer', 'navn', 'kommunekode', 'kommunenavn', 'opstillingskredsnummer', 'opstillingskredsnavn', 'afstemningsstednavn'],
+  opstillingskreds: ['dagi_id', 'kode', 'nummer', 'navn', 'kredskommunekode', 'kredskommunenavn', 'storkredsnummer', 'storkredsnavn'],
+  storkreds: ['dagi_id', 'nummer', 'navn', 'valglandsdelsbogstav', 'valglandsdelsnavn'],
+  valglandsdel: ['dagi_id', 'bogstav', 'navn'],
+  politikreds: ['dagi_id', 'kode', 'navn'],
+  retskreds: ['dagi_id', 'kode', 'navn'],
+  sogn: ['dagi_id', 'kode', 'navn', 'kommunekode', 'kommunenavn'],
+  menighedsrådsafstemningsområde: ['dagi_id', 'nummer', 'navn', 'kommunekode', 'kommunenavn', 'sognekode', 'sognenavn'],
+  supplerendebynavn: ['dagi_id', 'navn', 'darstatus', 'kommunekode', 'kommunenavn']
+};
+
+const miniFieldsNotInOutput = {
+  opstillingskreds: ['kode']
+};
+
+const makeHrefFormatter = model => (baseUrl, row) =>
+  makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function (keyName) {
+      return row[keyName];
+    }
+  ));
+
 
 const kommuneJsonRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.kommune, ['geom_json']);
@@ -430,9 +456,19 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
   var fieldsExcludedFromFlat = ['geom_json'];
   var flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 
-
   representations.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
+  representations.mini = representationUtil.miniRepresentation(
+    [...miniFieldNames[model.singular], 'visueltcenter_x', 'visueltcenter_y', 'bbox_xmin', 'bbox_ymin', 'bbox_xmax', 'bbox_ymax'],
+    fields,
+    null,
+    makeHrefFormatter(model),
+    autocompleteTekst[model.singular].mapper);
+
+  if(miniFieldsNotInOutput[model.singular]) {
+    representations.mini.outputFields = representations.mini.outputFields.filter(
+      fieldName => !miniFieldsNotInOutput[model.singular].includes(fieldName));
+  }
   function jsonSchema() {
     return schemaForFlatFields(model, []);
   }

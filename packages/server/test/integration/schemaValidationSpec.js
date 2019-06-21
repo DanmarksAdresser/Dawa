@@ -1,14 +1,14 @@
 "use strict";
 
-var chai = require('chai');
-var _ = require('underscore');
+const chai = require('chai');
+const _ = require('underscore');
 const { go } = require('ts-csp');
 
-var registry = require('../../apiSpecification/registry');
-var schemaValid = require('../helpers/schema-valid');
-var testdb = require('@dawadk/test-util/src/testdb');
+const registry = require('../../apiSpecification/registry');
+const schemaValid = require('../helpers/schema-valid');
+const testdb = require('@dawadk/test-util/src/testdb');
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(schemaValid);
 
 require('../../apiSpecification/allSpecs');
@@ -18,50 +18,30 @@ require('../../apiSpecification/allSpecs');
  * is returned at least once.
  */
 
-var valuesNeverExpectedToBeSeen = {
-  vejstykker: {
-    adresseringsnavn: true,
-    historik: {
-      oprettet: true,
-      ændret: true
-    }
-  },
-  postnumre: {
-  },
-  vejnavne: {
-  },
-  adgangsadresser: {
-    ejerlav: {
-      kode: true,
-      navn: true
-    },
-    matrikelnr: true,
-    esrejendomsnr: true
-  },
-  adresser: {
-    matrikelnr: true,
-    esrejendomsnr: true,
-    adgangsadresse: {
-      ejerlav: {
-        kode: true,
-        navn: true
-      },
-      matrikelnr: true,
-      esrejendomsnr: true
-    }
-  },
-  navngivneveje: {
-    beskrivelse: true,
-    beliggenhed: {
-      vejtilslutningspunkter: {
-        type: true,
-        coordinates: true
+const valuesNeverExpectedToBeSeen = {
+  json: {
+    vejstykker: {
+      historik: {
+        ændret: true
       }
     },
-    historik: {
-      nedlagt: true
+    adresser: {
+    },
+    navngivneveje: {
+      beskrivelse: true,
+      beliggenhed: {
+        vejtilslutningspunkter: {
+          type: true,
+          coordinates: true
+        }
+      },
+      historik: {
+        nedlagt: true
+      }
     }
-  }
+  },
+  flat: {},
+  mini: {}
 };
 
 function hasType(schema, type) {
@@ -91,7 +71,7 @@ function recordVisitedValues(json, schema, record) {
 function verifyAllValuesVisited(schema, record, prefix) {
   prefix = prefix || '';
   return _.reduce(schema.properties, function(memo, typeDef, key) {
-    var keyPath = prefix + '.' + key;
+    const keyPath = prefix + '.' + key;
     if(record[key] === undefined) {
       /*eslint no-console: 0 */
       console.log('KEY NOT SEEN: ' + key);
@@ -108,51 +88,58 @@ function verifyAllValuesVisited(schema, record, prefix) {
 }
 
 describe('Validering af JSON-formatteret output', function() {
-  var allNamesAndKeys = registry.where({
+  const allNamesAndKeys = registry.where({
     type: 'nameAndKey'
   });
   allNamesAndKeys.forEach(function(nameAndKey) {
-    var entityName = nameAndKey.singular;
-    var sqlModel = registry.findWhere({
+    const entityName = nameAndKey.singular;
+    const sqlModel = registry.findWhere({
       entityName: entityName,
       type: 'sqlModel'
     });
-    var jsonRepresentation = registry.findWhere({
-      entityName: entityName,
-      type: 'representation',
-      qualifier: 'json'
-    });
-    if(!jsonRepresentation) {
-      return;
+    for(let qualifier of ['json', 'flat', 'mini']) {
+      const representation = registry.findWhere({
+        entityName: entityName,
+        type: 'representation',
+        qualifier
+      });
+      if(!representation) {
+        return;
+      }
+      if(!sqlModel) {
+        return;
+      }
+      const mapper = representation.mapper('BASE_URL', {});
+      const schema = representation.schema;
+      if(!schema) {
+        if(qualifier === 'json') {
+          throw new Error('no schema for ' + nameAndKey.singular);
+        }
+        else {
+          continue;
+        }
+      }
+      it(`Alle ${nameAndKey.plural} for representation ${qualifier} skal validere`, function() {
+        return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
+          const rows = yield sqlModel.processQuery(client, _.pluck(representation.fields, 'name'), {});
+          rows.forEach(function(row) {
+            const json = mapper(row);
+            expect(json).to.be.schemaValid(schema);
+          });
+        }));
+      });
+      it('Alle felter i ' + nameAndKey.plural + ' skal ses mindst en gang', function() {
+        const schema = representation.schema;
+        const valuesSeen = valuesNeverExpectedToBeSeen[qualifier][nameAndKey.plural] || {};
+        return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
+          const rows = yield sqlModel.processQuery(client, _.pluck(representation.fields, 'name'), {medtagnedlagte: true});
+          rows.forEach(function (row) {
+            const json = mapper(row);
+            recordVisitedValues(json, schema, valuesSeen);
+          });
+          expect(verifyAllValuesVisited(schema, valuesSeen)).to.equal(true);
+        }));
+      });
     }
-    if(!sqlModel) {
-      return;
-    }
-    var mapper = jsonRepresentation.mapper('BASE_URL', {});
-    var schema = jsonRepresentation.schema;
-    if(!schema) {
-      throw new Error('no schema for ' + nameAndKey.singular);
-    }
-    it('Alle ' + nameAndKey.plural + ' skal validere', function() {
-      return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
-        const rows = yield sqlModel.processQuery(client, _.pluck(jsonRepresentation.fields, 'name'), {});
-        rows.forEach(function(row) {
-          const json = mapper(row);
-          expect(json).to.be.schemaValid(schema);
-        });
-      }));
-    });
-    it('Alle felter i ' + nameAndKey.plural + ' skal ses mindst en gang', function() {
-      var schema = jsonRepresentation.schema;
-      var valuesSeen = valuesNeverExpectedToBeSeen[nameAndKey.plural] || {};
-      return testdb.withTransaction('test', 'READ_ONLY', client => go(function*() {
-        const rows = yield sqlModel.processQuery(client, _.pluck(jsonRepresentation.fields, 'name'), {medtagnedlagte: true});
-        rows.forEach(function (row) {
-          var json = mapper(row);
-          recordVisitedValues(json, schema, valuesSeen);
-        });
-        expect(verifyAllValuesVisited(schema, valuesSeen)).to.equal(true);
-      }));
-    });
   });
 });

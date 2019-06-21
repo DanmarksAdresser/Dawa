@@ -6,7 +6,8 @@ const {
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
   reverseGeocodingParameters,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 
 const temaModels = require('../dagiImport/temaModels');
@@ -43,7 +44,8 @@ const dagiKodeNavnParameters = (tema) => {
       doc: firstUpper(tema.singularSpecific) + 's kode. 4 cifre.'
     },
     dagiNavnParameter(tema),
-    dagiQParameter()
+    dagiQParameter(),
+    autocompleteParameter
   ];
 };
 

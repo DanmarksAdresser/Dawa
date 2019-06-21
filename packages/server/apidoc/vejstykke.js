@@ -4,7 +4,8 @@ const {
   reverseGeocodingParameters,
   overwriteWithAutocompleteQParameter,
   SRIDParameter,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -40,6 +41,7 @@ const vejstykkerParameters = [
     'Der skelnes ikke mellem store og små bogstaver.',
     examples: ['tværvej']
   },
+  autocompleteParameter,
   {
     name: 'fuzzy',
     doc: 'Aktiver fuzzy søgning'

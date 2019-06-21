@@ -227,10 +227,8 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
 
     const formatParam = params.format;
 
-    const strukturParam = params.struktur;
-
     // choose the right representation based on the format requested by client
-    const representation = resourceSpec.chooseRepresentation(formatParam, strukturParam, resourceSpec.representations);
+    const representation = resourceSpec.chooseRepresentation(params, resourceSpec.representations);
     if (_.isUndefined(representation) || _.isNull(representation)) {
       return queryParameterFormatErrorResponse('Det valgte format ' + formatParam + ' er ikke understøttet for denne ressource');
     }

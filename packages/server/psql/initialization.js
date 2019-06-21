@@ -31,7 +31,7 @@ const createChangeTables = (client)=> go(function*() {
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
   'supplerendebynavn2_postnr', 'matrikel_jordstykker', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
     'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter', 'supplerendebynavne_mat',
-  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'vask_adgangsadresser', 'vask_adresser'];
+  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'vask_adgangsadresser', 'vask_adresser', 'vejnavne_mat'];
   for(let table of tableNames) {
     const model = tableModel.tables[table];
     assert(model);
@@ -76,6 +76,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'vejmidter'},
   {name: 'navngivenvej_mat'},
   {name: 'navngivenvejkommunedel_mat'},
+  {name: 'vejnavne_mat'},
   {name: 'adgangsadresser_mat' },
   {name: 'adresser_mat' },
   {name: 'navngivenvejkommunedel_postnr_mat'},

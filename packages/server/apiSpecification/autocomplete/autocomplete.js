@@ -643,10 +643,11 @@ function prepareQuery(params) {
   }
   return Object.assign(
     {
-      search: regularSearchQuery,
+      q: regularSearchQuery,
       fuzzy: fuzzyEnabled,
       per_side: 200,
-      side: 1
+      side: 1,
+      autocomplete: true
     },
     params.gældende ? {status: 1} : {},
     delegatedParameterValues

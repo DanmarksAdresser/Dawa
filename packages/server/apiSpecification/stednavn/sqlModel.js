@@ -39,7 +39,6 @@ const parameterImpls = [
   sqlParameterImpl.reverseGeocoding('geom', true),
   sqlParameterImpl.geomWithin(),
   sqlParameterImpl.search(columns, ['sted_id', 'navn']),
-  sqlParameterImpl.autocomplete(columns, ['sted_id', 'navn']),
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, ['sted_id', 'navn'])
 ];

@@ -48,7 +48,7 @@ exports.mapVejstykkeRef = (dbJson, baseUrl) => {
 };
 
 exports.mapKode4NavnTema = function(temaNavn, kode, navn, baseUrl) {
-  if (kode) {
+  if (kode && navn) {
     return {
       href: exports.makeHref(baseUrl, temaNavn, [kode]),
       kode: kode4String(kode),

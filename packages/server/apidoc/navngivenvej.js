@@ -1,7 +1,8 @@
 const {
   formatAndPagingParams,
   strukturParameter,
-  SRIDParameter
+  SRIDParameter,
+  autocompleteParameter
 } = require('./common');
 
 const navngivenVejIdParameter =
@@ -109,6 +110,7 @@ module.exports = [
     subtext: 'Søger efter navngivne veje. Returnerer de navngivne veje, som opfylder kriteriet.',
     parameters: [
       qParam,
+      autocompleteParameter,
       ...commonFilterParams,
       navngivenVejGeometriParameter,
       ...cirkelPolygonParameters,
@@ -145,6 +147,7 @@ module.exports = [
     subtext: 'Autocomplete på navngivne veje. Returnerer de navngivne veje, som opfylder kriteriet.',
     parameters: [
       autocompleteQParam,
+      autocompleteParameter,
       ...commonFilterParams,
       ...formatAndPagingParams],
     examples: [

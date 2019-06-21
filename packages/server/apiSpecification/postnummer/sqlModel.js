@@ -69,7 +69,6 @@ const parameterImpls = [
   sqlParameterImpl.geomWithin('geom'),
   sqlParameterImpl.reverseGeocodingWithin('geom'),
   sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns),
   sqlParameterImpl.paging(columns, nameAndKey.key, true)
 ];
 

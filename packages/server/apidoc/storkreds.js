@@ -3,7 +3,8 @@ const {
   formatParameters,
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 const {
   dagiNavnParameter,
@@ -25,6 +26,7 @@ const storkredsParameters = [
   nummerParameter,
   dagiNavnParameter(temaModel),
   dagiQParameter(),
+  autocompleteParameter,
   {
     name: 'valglandsdelsbogstav',
     doc: 'Find storkredsene i den angivne valglandsdel.'

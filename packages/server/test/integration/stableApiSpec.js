@@ -255,9 +255,9 @@ describe('Stable API', () => {
             "kommunekode": "0350",
             "kommunenavn": "Lejre",
             "sognekode": "7171",
-            "sognenavn": null,
+            "sognenavn": "Sogn test 2",
             "regionskode": "1085",
-            "regionsnavn": null,
+            "regionsnavn": "Region test 2",
             "retskredskode": "1118",
             "retskredsnavn": null,
             "udvidet_esrejendomsnr": "3500009408",
@@ -319,18 +319,14 @@ describe('Stable API', () => {
             "region": {
               "href": "http://dawa/regioner/1085",
               "kode": "1085",
-              "navn": null
+              "navn": "Region test 2"
             },
             "sogn": {
               "href": "http://dawa/sogne/7171",
               "kode": "7171",
-              "navn": null
+              "navn": "Sogn test 2"
             },
-            "retskreds": {
-              "href": "http://dawa/retskredse/1118",
-              "kode": "1118",
-              "navn": null
-            }
+            "retskreds": null
           }
         }]
       }
@@ -1027,7 +1023,9 @@ describe('Stable API', () => {
           id: '0a3f5089-0408-32b8-e044-0003ba298018'
         },
         value: {
+          "tekst": "Brammingevej 18, Bolbro, 5200 Odense V",
           "id": "0a3f5089-0408-32b8-e044-0003ba298018",
+          "href": "http://dawa/adgangsadresser/0a3f5089-0408-32b8-e044-0003ba298018",
           "status": 1,
           "darstatus": 3,
           "vejkode": "0855",
@@ -1037,6 +1035,8 @@ describe('Stable API', () => {
           "supplerendebynavn": "Bolbro",
           "postnr": "5200",
           "postnrnavn": "Odense V",
+          "stormodtagerpostnr": null,
+          "stormodtagerpostnrnavn": null,
           "kommunekode": "0461",
           "x": 10.3314668,
           "y": 55.3948974
@@ -1375,7 +1375,9 @@ describe('Stable API', () => {
           id: '0a3f50b3-a112-32b8-e044-0003ba298018'
         },
         value: {
+          "tekst": "Brammingevej 18, 1. tv, Bolbro, 5200 Odense V",
           "id": "0a3f50b3-a112-32b8-e044-0003ba298018",
+          "href": "http://dawa/adresser/0a3f50b3-a112-32b8-e044-0003ba298018",
           "status": 1,
           "darstatus": 3,
           "vejkode": "0855",
@@ -1387,6 +1389,8 @@ describe('Stable API', () => {
           "supplerendebynavn": "Bolbro",
           "postnr": "5200",
           "postnrnavn": "Odense V",
+          "stormodtagerpostnr": null,
+          "stormodtagerpostnrnavn": null,
           "kommunekode": "0461",
           "adgangsadresseid": "0a3f5089-0408-32b8-e044-0003ba298018",
           "x": 10.3314668,

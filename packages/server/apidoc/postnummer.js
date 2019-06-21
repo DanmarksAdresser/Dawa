@@ -3,7 +3,8 @@ const {
   overwriteWithAutocompleteQParameter,
   reverseGeocodingParameters,
   strukturParameter,
-  autocompleteSubtext
+  autocompleteSubtext,
+  autocompleteParameter
 } = require('./common');
 const {dagiSridCirkelPolygonParameters} = require('./dagiCommon');
 
@@ -45,6 +46,7 @@ const postnummerParameters = [nrParameter,
     doc: 'Søgetekst. Der søges i postnummernavnet. Alle ord i søgeteksten skal matche postnummernavnet. ' +
     'Wildcard * er tilladt i slutningen af hvert ord. Der returneres højst 1000 resultater ved anvendelse af parameteren.'
   },
+  autocompleteParameter,
   {
     name: 'stormodtagere',
     doc: "Hvis denne parameter er sat til 'true', vil stormodtager-postnumre medtages i resultatet. Default er false."

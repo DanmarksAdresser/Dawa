@@ -165,8 +165,7 @@ AND NOT (nv.id = ${idAlias})`);
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.includeDeletedNavngivenVej,
-  sqlParameterImpl.search(columns),
-  sqlParameterImpl.autocomplete(columns, ['navn']),
+  sqlParameterImpl.search(columns, ['navn']),
   sqlParameterImpl.geomWithin('nv.geom'),
   sqlParameterImpl.reverseGeocoding('nv.geom'),
   distanceParameterImpl,

@@ -3,7 +3,8 @@ const {
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
   reverseGeocodingParameters,
-  strukturParameter
+  strukturParameter,
+  autocompleteParameter
 } = require('./common');
 
 const {
@@ -23,8 +24,9 @@ const kommuneIdParameter = {
 const kommuneParameters = [{
   name: 'q',
   doc: 'Søgetekst. Der søges i kommunenavnet. Alle ord i søgeteksten skal matche kommunenavnet. ' +
-  'Wildcard * er tilladt i slutningen af hvert ord.'
+    'Wildcard * er tilladt i slutningen af hvert ord.'
 },
+  autocompleteParameter,
   {
     name: 'navn',
     doc: 'Navnet på kommunen, f.eks. <em>Aarhus</em>',

@@ -51,7 +51,7 @@ testdb.withTransactionAll('test', function (clientFn) {
           fuzzy: ''
         });
         expect(result).to.have.length(100);
-      }).asPromise();
+      });
     });
 
     it('By default, 20 results are returned when doing fuzzy search on autocomplete resource', function () {
@@ -61,7 +61,7 @@ testdb.withTransactionAll('test', function (clientFn) {
           fuzzy: ''
         });
         expect(result).to.have.length(20);
-      }).asPromise();
+      });
     });
   });
   describe('Fuzzy search on adgangsadresser', function () {

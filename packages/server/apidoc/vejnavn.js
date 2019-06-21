@@ -2,7 +2,8 @@ const {
   autocompleteSubtext,
   formatAndPagingParams,
   fuzzyParameter,
-  overwriteWithAutocompleteQParameter
+  overwriteWithAutocompleteQParameter,
+  autocompleteParameter
 } = require('./common');
 
 const vejnavneIdParameter = {
@@ -14,10 +15,10 @@ const vejnavneIdParameter = {
 const vejnavneParameters = [{
   name: 'q',
   doc: 'Søgetekst. Der søges i vejnavnet. Alle ord i søgeteksten skal matche vejnavnet. ' +
-  'Wildcard * er tilladt i slutningen af hvert ord. ' +
-  'Der skelnes ikke mellem store og små bogstaver.',
-  examples: ['tværvej']
-},
+    'Wildcard * er tilladt i slutningen af hvert ord. ' +
+    'Der skelnes ikke mellem store og små bogstaver.',
+  examples: ['tværvej']},
+  autocompleteParameter,
   fuzzyParameter,
 
   vejnavneIdParameter,
@@ -42,7 +43,7 @@ module.exports = [
     parameters: vejnavneParameters.concat(formatAndPagingParams),
     examples: [{
       description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og ' +
-      'indeholder et ord der starter med <em>hvid</em>',
+        'indeholder et ord der starter med <em>hvid</em>',
       query: [{name: 'postnr', value: '2400'},
         {name: 'q', value: 'hvid*'}]
     },
