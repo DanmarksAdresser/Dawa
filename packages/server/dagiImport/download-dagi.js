@@ -40,7 +40,9 @@ var wfsServices = {
       danmark: 'Danmark',
       menighedsrådsafstemningsområde: 'Menighedsraadsafstemningsomraade',
       samlepostnummer: 'Samlepostnummer',
-      supplerendebynavn: 'SupplerendeBynavn'
+      supplerendebynavn: 'SupplerendeBynavn',
+      landsdel: 'Landsdel'
+
     }
   }
 };

@@ -8,8 +8,13 @@ const withMigrationTransaction = (client, description, fn) => withTransaction(cl
 
 const withImportTransaction = (client, description, fn) => withTransaction(client, description,orderedTableModels, fn);
 
+const importWithoutEvents = (client, description, tablesWithoutEvents, fn ) => {
+  const tableModels = orderedTableModels.filter(tableModel => !tablesWithoutEvents.includes(tableModel.table));
+  return withTransaction(client, description, tableModels, fn);
+};
 
 module.exports = {
   withImportTransaction,
-  withMigrationTransaction
+  withMigrationTransaction,
+  importWithoutEvents
 };

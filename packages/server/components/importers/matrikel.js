@@ -19,7 +19,9 @@ const {
 
 const jordstykkeColumns = ['ejerlavkode', 'matrikelnr', 'kommunekode', 'sognekode',
   'regionskode', 'retskredskode', 'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr',
-  'featureid', 'moderjordstykke', 'registreretareal', 'arealberegningsmetode', 'vejareal', 'vejarealberegningsmetode', 'vandarealberegningsmetode', 'fælleslod'];
+  'featureid', 'moderjordstykke', 'registreretareal', 'arealberegningsmetode', 'vejareal', 'vejarealberegningsmetode',
+  'vandarealberegningsmetode',
+  'fælleslod'];
 
 
 const matrikelJordstykkeTableModel = tableSchema.tables.matrikel_jordstykker;
@@ -142,5 +144,6 @@ const createMatrikelImporter = ({srcDir, refresh}) => {
 
 module.exports = {
   streamEjerlav,
-  createMatrikelImporter
+  createMatrikelImporter,
+  jordstykkeColumns
 };
