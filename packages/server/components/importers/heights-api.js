@@ -22,7 +22,11 @@ function hoejdeClient(apiUrl, accessToken) {
     });
     if(result.hoejde === -9999) {
       // The API uses the value -9999 for heights outside the supported area
-      return null;
+      logger.error('Unsupported coordinates used for height service', {
+        x,
+        y
+      });
+      return -9999;
     }
     if (result.hoejde === null || result.hoejde === undefined || result.hoejde < -100) {
       logger.error('Got bad result from height service', {
