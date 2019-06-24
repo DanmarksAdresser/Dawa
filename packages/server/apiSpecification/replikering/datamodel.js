@@ -97,7 +97,7 @@ module.exports = {
       {
         name: 'højde',
         type: 'real',
-        description: 'Adgangspunktets højde i meter over havoverfladen. Beregnet ud fra Danmarks Højdemodel.'
+        description: 'Adgangspunktets højde i meter over havoverfladen. Beregnet ud fra Danmarks Højdemodel. Værdien -9999 angiver, at højden er udenfor højdemodellen, og derfor ikke kan beregnes.'
       }
     ]
   },
@@ -273,7 +273,7 @@ module.exports = {
         name: 'højde',
         type: 'real',
         nullable: true,
-        description: 'Højden (koten) er beregnet efter Dansk Vertikal Reference 1990 (DVR90) fra middelvandstanden i havene ved Danmarks kyster til terrænniveau.  Angivet i meter.'
+        description: 'Højden (koten) er beregnet efter Dansk Vertikal Reference 1990 (DVR90) fra middelvandstanden i havene ved Danmarks kyster til terrænniveau.  Angivet i meter. Beregnet ud fra den danske højdemodel. Værdien -9999 angiver, at adressens adgangspunkt er udenfor højdemodellen, og derfor ikke kan beregnes.'
       },
       {
         name: 'adgangspunktid',
