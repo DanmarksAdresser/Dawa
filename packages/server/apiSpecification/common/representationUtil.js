@@ -56,6 +56,23 @@ exports.defaultFlatRepresentation = function (fields) {
 
 exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatter, textFormatter) =>{
   const miniFieldNamesSet = new Set(miniFieldNames);
+  const allFieldNamesSet = new Set(allFields.map(field => field.name));
+  if(allFieldNamesSet.has('visueltcenter_x')) {
+    miniFieldNamesSet.add('visueltcenter_x');
+    miniFieldNamesSet.add('visueltcenter_y');
+    if(miniSchema) {
+      miniSchema.properties.visueltcenter_x = {
+        type: ['number', 'null'],
+        description: 'x-koordinat for det visuelle center. Kan f.eks. anvendes til at placere en label på et kort. Koordinatsystem styres med srid parameteren.'
+      };
+      miniSchema.properties.visueltcenter_y = {
+        type: ['number', 'null'],
+        description: 'y-koordinat for det visuelle center.'
+      };
+      miniSchema.docOrder.push('visueltcenter_x');
+      miniSchema.docOrder.push('visueltcenter_y');
+    }
+  }
   const miniFields = allFields.filter(field => miniFieldNamesSet.has(field.name));
   const outputFields = [...miniFields.map(field => field.name), 'href', 'tekst'];
   return {

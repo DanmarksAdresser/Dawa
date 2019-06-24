@@ -23,6 +23,12 @@ const doImport = (client, importer, maxChanges) => go(function*() {
   if(!context.rollback) {
     verifyChanges(context, maxChanges);
   }
+  // This is a workaround for the following:
+  // When importing stednavne, the TSV column is derived from the kommune.
+  // However, the relation between sted and kommune has not yet been computed.
+  // therefore, the TSV will be wrong.
+  // We fix this for now by running the importer twice.
+  yield executeRollbackable(client, 'importStednavne',[importer], EXECUTION_STRATEGY.fast);
 });
 const importStednavneFromStream = (client, stream, maxChanges) => go(function*() {
   const importer = createStednavneImporterFromStream({stream});
