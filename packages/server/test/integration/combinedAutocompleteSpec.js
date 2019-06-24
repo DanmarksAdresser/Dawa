@@ -1,6 +1,6 @@
 "use strict";
 
-var expect = require('chai').expect;
+const {expect, assert} = require('chai');
 var request = require('request-promise');
 const {go} = require('ts-csp');
 
@@ -26,7 +26,7 @@ describe('Combined Autocomplete', function () {
 
   testdb.withTransactionEach('test', function (clientFn) {
     it('Skal returnere vejnavne hvis mere end et vejnavn matcher', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "2",
           q: "ma",
@@ -37,7 +37,7 @@ describe('Combined Autocomplete', function () {
       }).asPromise();
     });
     it('Skal returnere vejnavne, hvis "vejnavn" er angivet som type', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "12",
           q: "Magtenbøllev",
@@ -48,7 +48,7 @@ describe('Combined Autocomplete', function () {
       }).asPromise();
     });
     it('Skal returnere adgangsadresser, hvis "adgangsadresse er angivet som type', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "18",
           q: "Magtenbøllevej 102",
@@ -59,7 +59,7 @@ describe('Combined Autocomplete', function () {
       }).asPromise();
     });
     it('* i søgning skal placeres ved careten', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "12",
           q: "Magtenbøllev 102"
@@ -69,7 +69,7 @@ describe('Combined Autocomplete', function () {
       }).asPromise();
     });
     it('Ved angivelse af adgangsadresseid skal søgningen begrænses til denne ID', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "11",
           q: "Mannerupvej",
@@ -82,7 +82,7 @@ describe('Combined Autocomplete', function () {
     });
     it('Hvis der søges efter adresser men returneres vejnavne,' +
       ' så skal vejnavnet tilføjes et mellemrum og careten placeres efter mellemrummet', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "2",
           q: "ma"
@@ -95,7 +95,7 @@ describe('Combined Autocomplete', function () {
     });
     it('Hvis der søges efter adresser, men returneres adgangsadresser,' +
       ' så skal careten placeres såd den er klar til indtastning af etage og dør', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {q: "Østre Stationsvej"});
         expect(result.length).to.be.above(1);
         const sugg = result[0];
@@ -106,7 +106,7 @@ describe('Combined Autocomplete', function () {
     });
     it('Ved angivelse af startfrom=adgangsadresse returneres altid adgangsadresser,' +
       ' selvom mere end et vejnavn matcher søgningen ', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "t",
           caretpos: "1",
@@ -120,7 +120,7 @@ describe('Combined Autocomplete', function () {
 
     it('Hvis der ikke er nogen hits i vejnavne, og søgeteksten ikke indeholder et tal, og fuzzy søgning er aktiveret, ' +
       ' så skal der returneres vejnavne', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "8",
           q: "fjors ga",
@@ -133,7 +133,7 @@ describe('Combined Autocomplete', function () {
     });
 
     it('Hvis fuzzy søgning er aktiv, og søgeteksten indeholder et tal, og der ikke er nogen almindelige hits, så skal der returneres adresser', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "8",
           q: "fjors gade 5",
@@ -146,7 +146,7 @@ describe('Combined Autocomplete', function () {
     });
 
     it('Hvis laver en fuzzy autocomplete med type vejnavn, så får jeg vejnavne tilbage', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           caretpos: "10",
           q: "fjors gade",
@@ -160,7 +160,7 @@ describe('Combined Autocomplete', function () {
     });
 
     it('Hvis laver en fuzzy autocomplete med type adgangsadresse, så får jeg adgangsadresser tilbage', function () {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "fjors gade 5 5",
           fuzzy: "",
@@ -173,7 +173,7 @@ describe('Combined Autocomplete', function () {
     });
 
     it('Søgning skal ikke gå videre til adgangsadresser med mindre det indtastede matcher vjenavnet eksakt', () => {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "mosev",
           fuzzy: "",
@@ -187,7 +187,7 @@ describe('Combined Autocomplete', function () {
     });
 
     it('Søgning skal gå videre til adgangsadresser med det indtastede matcher vejnavn eksakt', () => {
-      return go(function*() {
+      return go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "mosevej ",
           fuzzy: "",
@@ -199,7 +199,7 @@ describe('Combined Autocomplete', function () {
       }).asPromise();
     });
 
-    it('Skal understøtte JSONP', () => go(function*() {
+    it('Skal understøtte JSONP', () => go(function* () {
       const result = yield helpers.getStringResponse(clientFn(), autocomplete, {}, {
           q: "Mosede",
           callback: 'cb'
@@ -210,7 +210,7 @@ describe('Combined Autocomplete', function () {
 
     // Legacy behavior
     it('Hvis jeg anvender adgangsadresseid parameteren sammen med type parameteren, så ignoreres type parameteren',
-      () => go(function*() {
+      () => go(function* () {
         const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
             q: "Mosede engvej",
             fuzzy: "",
@@ -222,7 +222,7 @@ describe('Combined Autocomplete', function () {
         expect(result[0].type).to.equal('adresse');
       }));
 
-    it('Søgning med startfra senere end type skal give tomt resultat', () => go(function*() {
+    it('Søgning med startfra senere end type skal give tomt resultat', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "Mosede ",
           fuzzy: "",
@@ -233,7 +233,7 @@ describe('Combined Autocomplete', function () {
       expect(result.length).to.equal(0);
     }));
 
-    it('Supplerende bynavn kan fjernes fra adgangsadressetekster', () => go(function*() {
+    it('Supplerende bynavn kan fjernes fra adgangsadressetekster', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "stadionvej",
           fuzzy: "",
@@ -245,7 +245,7 @@ describe('Combined Autocomplete', function () {
       expect(result[0].tekst).to.equal("Stadionvej 38, , 5200 Odense V");
       expect(result[0].forslagstekst).to.equal("Stadionvej 38, 5200 Odense V");
     }));
-    it('Supplerende bynavn kan fjernes fra adressetekster', () => go(function*() {
+    it('Supplerende bynavn kan fjernes fra adressetekster', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "stadionvej 38",
           fuzzy: "",
@@ -257,7 +257,7 @@ describe('Combined Autocomplete', function () {
       expect(result[0].tekst).to.equal("Stadionvej 38, st. tv, 5200 Odense V");
       expect(result[0].forslagstekst).to.equal("Stadionvej 38, st. tv, 5200 Odense V");
     }));
-    it('multilinje kan aktiveres for adgangsadresseforslag', () => go(function*() {
+    it('multilinje kan aktiveres for adgangsadresseforslag', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "stadionvej",
           fuzzy: "",
@@ -271,7 +271,7 @@ describe('Combined Autocomplete', function () {
 
     }));
 
-    it('multilinje kan aktiveres for adresseforslag', () => go(function*() {
+    it('multilinje kan aktiveres for adresseforslag', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "stadionvej 38",
           fuzzy: "",
@@ -285,7 +285,7 @@ describe('Combined Autocomplete', function () {
 
     }));
 
-    it('stormodtagerpostnumre kan aktiveres for adgangsadresser', () => go(function*() {
+    it('stormodtagerpostnumre kan aktiveres for adgangsadresser', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "girostrøget 1, 0800",
           type: 'adgangsadresse',
@@ -299,7 +299,7 @@ describe('Combined Autocomplete', function () {
       expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastrup, 2630 Taastrup");
 
     }));
-    it('stormodtagerpostnumre kan aktiveres for adresser', () => go(function*() {
+    it('stormodtagerpostnumre kan aktiveres for adresser', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           q: "girostrøget 1",
           type: 'adresse',
@@ -313,7 +313,7 @@ describe('Combined Autocomplete', function () {
       expect(result[1].forslagstekst).to.equal("Girostrøget 1, Høje Taastrup, 0800 Høje Taastrup");
     }));
 
-    it('Kan hente en adresse ud fra id', () => go(function*() {
+    it('Kan hente en adresse ud fra id', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           id: '01ffcb65-c425-4cee-9145-bef6570f34bb',
           type: 'adresse'
@@ -322,7 +322,7 @@ describe('Combined Autocomplete', function () {
       expect(result).to.have.length(1);
       expect(result[0].data.id).to.equal('01ffcb65-c425-4cee-9145-bef6570f34bb');
     }));
-    it('Kan hente en adgangsadresse ud fra id', () => go(function*() {
+    it('Kan hente en adgangsadresse ud fra id', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
           id: '17c718a1-5510-40cd-8380-735dca3f0afd',
           type: 'adgangsadresse'
@@ -330,6 +330,16 @@ describe('Combined Autocomplete', function () {
       );
       expect(result).to.have.length(1);
       expect(result[0].data.id).to.equal('17c718a1-5510-40cd-8380-735dca3f0afd');
+    }));
+
+    it('Der returneres som default 20 svar', () => go(function* () {
+      const result = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          type: 'adgangsadresse',
+          q: 'fkc',
+          fuzzy: ''
+        }
+      );
+      assert.strictEqual(result.length, 20);
     }));
   });
 });

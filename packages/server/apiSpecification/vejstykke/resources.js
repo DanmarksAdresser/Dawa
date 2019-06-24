@@ -76,7 +76,7 @@ exports.neighbors = {
 
     params.neighborkode=params.kode;
     delete params.kode;
-    resourcesUtil.applyDefaultPagingForQuery(params)
+    resourcesUtil.applyDefaultPaging(params)
   }
 };
 

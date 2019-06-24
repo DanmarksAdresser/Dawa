@@ -17,7 +17,7 @@ var sqlModels = require('./sqlModels');
     representations: representationsMap[entityName],
     sqlModel: sqlModels[entityName],
     singleResult: false,
-    processParameters: resourcesUtil.applyDefaultPagingForQuery,
+    processParameters: resourcesUtil.applyDefaultPaging,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
   };
   registry.add(`${entityName}_history`, 'resource', 'query', resource);

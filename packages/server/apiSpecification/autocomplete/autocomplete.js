@@ -774,7 +774,10 @@ const autocompleteResource = {
   sqlModel: sqlModel,
   singleResult: true,
   chooseRepresentation: resourcesUtil.chooseRepresentationForAutocomplete,
-  processParameters: resourcesUtil.applyDefaultPagingForAutocomplete,
+  processParameters: params => {
+    params.autocomplete = true;
+    resourcesUtil.applyDefaultPaging(params);
+  },
   disableStreaming: true
 };
 

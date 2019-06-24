@@ -7,21 +7,22 @@ var commonParameters = require('./commonParameters');
  * By default, if per_side is specified, side defaults to 1.
  * If side is specified, per_side defaults to 20.
  */
-exports.applyDefaultPagingForQuery = function(params) {
-  if(params.per_side && !params.side) {
-    params.side = 1;
+exports.applyDefaultPaging = function(params) {
+  if(params.autocomplete) {
+    if(!params.per_side) {
+      params.per_side = 20;
+    }
+    if(!params.side) {
+      params.side = 1;
+    }
   }
-  if(params.side && !params.per_side) {
-    params.per_side = 20;
-  }
-};
-
-exports.applyDefaultPagingForAutocomplete = function(params) {
-  if(!params.per_side) {
-    params.per_side = 20;
-  }
-  if(!params.side) {
-    params.side = 1;
+  else {
+    if(params.per_side && !params.side) {
+      params.side = 1;
+    }
+    if(params.side && !params.per_side) {
+      params.per_side = 20;
+    }
   }
 };
 
@@ -92,7 +93,7 @@ exports.queryResourcePathSpec = function(path, parameterGroups, representations,
     sqlModel: sqlModel,
     singleResult: false,
     chooseRepresentation: exports.chooseRepresentationForQuery,
-    processParameters: exports.applyDefaultPagingForQuery
+    processParameters: exports.applyDefaultPaging
   };
 };
 
@@ -111,7 +112,7 @@ exports.autocompleteResourcePathSpec = function(path, parameters, autocompleteRe
     sqlModel: sqlModel,
     singleResult: false,
     chooseRepresentation: exports.chooseRepresentationForAutocomplete,
-    processParameters: exports.applyDefaultPagingForAutocomplete
+    processParameters: exports.applyDefaultPaging
   };
 };
 

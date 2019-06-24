@@ -41,7 +41,7 @@ for(let variant of ['public', 'full']) {
       sqlModel: sqlModel,
       singleResult: false,
       chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-      processParameters: resourcesUtil.applyDefaultPagingForQuery,
+      processParameters: resourcesUtil.applyDefaultPaging,
       cacheStrategy: noCacheStrategy
     };
 

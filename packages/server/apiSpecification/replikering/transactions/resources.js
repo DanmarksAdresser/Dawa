@@ -22,7 +22,7 @@ module.exports = {
     sqlModel: sqlModel.query,
     singleResult: false,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
-    processParameters:  resourcesUtil.applyDefaultPagingForQuery,
+    processParameters:  resourcesUtil.applyDefaultPaging,
     cacheStrategy: noCacheStrategy
   },
   seneste: {

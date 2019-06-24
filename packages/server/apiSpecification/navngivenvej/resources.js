@@ -68,7 +68,7 @@ exports.neighbors = {
   processParameters: (params) => {
     params.neighborid=params.id;
     delete params.id;
-    resourcesUtil.applyDefaultPagingForQuery(params)
+    resourcesUtil.applyDefaultPaging(params)
   }
 };
 
