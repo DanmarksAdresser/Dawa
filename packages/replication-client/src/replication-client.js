@@ -99,14 +99,14 @@ const commands = [
 ;
 const version = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'))).version;
 
+const httpClientParams = {batchSize: 200, userAgent: `DAWAReplicationClient,version=${version}`};
 const {command, options} = parseCommands(commands, process.argv, version);
 
 const runCommand = (command, options) => go(function* () {
   if (command === 'gen-config') {
     const replicationUrl = options.url;
     const replicationSchema = "dawa_replication";
-    const version = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), {encoding: 'utf-8'})).version;
-    const httpClient = new ReplicationHttpClient(replicationUrl, {batchSize: 200, userAgent: `DAWAReplicationClient,version=${version}`});
+    const httpClient = new ReplicationHttpClient(replicationUrl, httpClientParams);
     const replicationModel = yield httpClient.datamodel();
     const jsonText = JSON.stringify((generateConfig(replicationUrl, replicationSchema, replicationModel, {
       entities: options.entities
@@ -118,7 +118,7 @@ const runCommand = (command, options) => go(function* () {
     if (err) {
       throw err;
     }
-    const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, 200);
+    const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, httpClientParams);
     const replicationModel = yield httpClient.datamodel();
     const ddl = generateDDLStatements(replicationModel, replicationConfig, {
       withChangeTables: options.withChangeTables,
@@ -131,7 +131,7 @@ const runCommand = (command, options) => go(function* () {
     if (err) {
       throw err;
     }
-    const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, 200);
+    const httpClient = new ReplicationHttpClient(replicationConfig.replication_url, httpClientParams);
     const {host, port, user, database, password}  = pgConnectionString(options.database);
     log('info', `Connecting to database using host=${host ? host : ''}, port=${port ? port : ''}, database=${database}, user=${user}, password=${password ? '<hidden>' : '(none)'}`);
 
