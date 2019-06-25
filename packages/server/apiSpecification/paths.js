@@ -5,6 +5,24 @@ var registry = require('./registry');
 var _ = require('underscore');
 require('./allNamesAndKeys');
 
+const getProtocol = req => {
+  if(req.headers['cloudfront-forwarded-proto']) {
+    const cfProto = req.headers['cloudfront-forwarded-proto'];
+    if(cfProto === 'http' || cfProto === 'https') {
+      return cfProto;
+    }
+    else {
+      logger.error('Invalid value of cloudFront-forwarded-proto header', {value:cfProto });
+      return 'http';
+    }
+  }
+  else {
+    return 'http';
+  }
+
+};
+exports.getProtocol = getProtocol;
+
 var map = registry.entriesWhere({
   type: 'nameAndKey'
 }).reduce((memo, entry) => {
@@ -18,20 +36,7 @@ var map = registry.entriesWhere({
 // the NodeJS instances. By default, these are prefixed with "origin-". We remove the "origin-" prefix to get the real
 // hostname.
 exports.baseUrl = function (req) {
-  let protocol;
-  if(req.headers['cloudfront-forwarded-proto']) {
-    const cfProto = req.headers['cloudfront-forwarded-proto'];
-    if(cfProto === 'http' || cfProto === 'https') {
-      protocol = cfProto;
-    }
-    else {
-      logger.error('Invalid value of cloudFront-forwarded-proto header', {value:cfProto });
-      protocol = 'http';
-    }
-  }
-  else {
-    protocol = 'http';
-  }
+  const protocol = getProtocol(req);
 
   var host = req.headers.host;
   if(!_.isString(host)) {

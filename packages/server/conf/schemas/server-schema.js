@@ -43,6 +43,11 @@ module.exports = mergeConfigSchemas([
         required: true
       }
     },
+    redirect_insecure: {
+      doc: 'Redirect http dokumentationssider til https',
+      format: 'boolean',
+      default: true
+    },
     pg: {
       pool: {
         max: {

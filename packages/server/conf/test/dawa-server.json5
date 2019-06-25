@@ -9,5 +9,6 @@
   database_url: 'dawatest',
   replication: {
     enabled: true
-  }
+  },
+  redirect_insecure: false
 }

@@ -9,8 +9,27 @@ var parameterDoc = require('../../parameterDoc');
 var registry = require('../../apiSpecification/registry');
 require('../../apiSpecification/allSpecs');
 const allPages = require('../../apidoc/all-pages');
-const config = require('@dawadk/common/src/config/holder').getConfig();
+const configHolder = require('@dawadk/common/src/config/holder');
+const config = configHolder.getConfig();
 const baseUrl = config.get('test.dawa_base_url');
+
+const documentation = require('../../documentation');
+
+describe.only('Documentation redirect to https', () => {
+  it('Will redirect based on protocol provided by cloudfront if configured to do so', () => {
+    /* eslint require-yield: 0 */
+    return configHolder.withConfigOverride({redirect_insecure: true}, () => go(function*() {
+      const mockReq = {
+        headers: {
+          'cloudfront-forwarded-proto': 'http'
+        },
+        url: '/adgangsadresser?foo=bar'
+      };
+      assert(documentation.internal.shouldRedirectToHttps(mockReq));
+      assert.strictEqual(documentation.internal.getRedirectUrl(mockReq), "https://dawa/adgangsadresser?foo=bar");
+    }));
+  });
+});
 
 describe('Parameter documentation.', function() {
   var undocumented = ['format', 'callback', 'srid', 'noformat', 'ndjson'];

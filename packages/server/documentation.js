@@ -14,7 +14,7 @@ const { schemas: replikeringSchemas } = require('./apiSpecification/replikering/
 const replikeringBindings = require('./apiSpecification/replikering/dbBindings');
 const replikeringDataSections = require('./apidoc/replikering-data-page');
 const {cachingMiddleware} = require('./middleware/caching');
-
+const config = require('@dawadk/common/src/config/holder').getConfig();
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
 
@@ -64,9 +64,22 @@ function pugDocumentationParams(req) {
   };
 }
 
+const shouldRedirectToHttps = req =>
+  config.get('redirect_insecure') && paths.getProtocol(req) !== 'https';
+
+const getRedirectUrl = req => {
+  const secureBaseUrl = paths.baseUrl(req).replace('http:', 'https:');
+  return `${secureBaseUrl}${req.url}`;
+};
+
 function setupPugPage(path, page) {
   app.get(path, function (req, res) {
-    res.render(page, pugDocumentationParams(req));
+    if(shouldRedirectToHttps(req)) {
+      res.redirect(getRedirectUrl(req));
+    }
+    else {
+      res.render(page, pugDocumentationParams(req));
+    }
   });
 }
 
@@ -129,3 +142,7 @@ for(let [oldPath, newPath] of redirects) {
 }
 
 module.exports = app;
+module.exports.internal = {
+  shouldRedirectToHttps,
+  getRedirectUrl
+};
