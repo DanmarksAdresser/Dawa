@@ -53,11 +53,17 @@ const miniSchema = globalSchemaObject({
 });
 
 exports.mini = representationUtil.miniRepresentation(
-  ['sted_id', 'navn', 'navnestatus', 'brugsprioritet', 'sted_hovedtype', 'sted_undertype'],
+  ['sted_id', 'navn', 'navnestatus', 'brugsprioritet', 'sted_hovedtype', 'sted_undertype', 'sted_kommuner'],
   fields,
   miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'stednavn', [row.sted_id, row.navn]),
-  row => row.navn
+  row => {
+    let text = row.navn;
+    if(row.sted_kommuner && row.sted_kommuner.length === 1) {
+      text += `, ${row.sted_kommuner[0].navn} kommune`;
+    }
+    return text;
+  }
 );
 
 exports.json = {

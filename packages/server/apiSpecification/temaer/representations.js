@@ -77,6 +77,23 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
   };
 });
 
+const kodeNavnMiniTekst = (row) => `${row.navn} (${row.kode})`;
+const kodeNrMiniTekst = (row) => `${row.navn} (${row.nummer})`
+const miniTekst = {
+  kommune: kodeNavnMiniTekst,
+  region: kodeNavnMiniTekst,
+  politikreds: kodeNavnMiniTekst,
+  retskreds: kodeNavnMiniTekst,
+  sogn: kodeNavnMiniTekst,
+  menighedsrådsafstemningsområde: kodeNrMiniTekst,
+  opstillingskreds: kodeNrMiniTekst,
+  storkreds: kodeNrMiniTekst,
+  valglandsdel: row => `${row.navn} (${row.bogstav})`,
+  afstemningsområde: row => `${row.navn}, ${row.kommunenavn} (${row.afstemningsstednavn})`,
+  supplerendebynavn: row => `${row.navn}, ${row.kommunenavn} kommune`,
+  landsdel: row => row.navn
+};
+
 const mapMetaFields = row => {
   return {
     ændret: row.ændret,
@@ -459,11 +476,11 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
   representations.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
   representations.mini = representationUtil.miniRepresentation(
-    [...miniFieldNames[model.singular], 'visueltcenter_x', 'visueltcenter_y', 'bbox_xmin', 'bbox_ymin', 'bbox_xmax', 'bbox_ymax'],
+    [...miniFieldNames[model.singular], 'bbox_xmin', 'bbox_ymin', 'bbox_xmax', 'bbox_ymax'],
     fields,
     null,
     makeHrefFormatter(model),
-    autocompleteTekst[model.singular].mapper);
+    miniTekst[model.singular]);
 
   if(miniFieldsNotInOutput[model.singular]) {
     representations.mini.outputFields = representations.mini.outputFields.filter(

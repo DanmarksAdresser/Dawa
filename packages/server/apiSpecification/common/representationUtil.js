@@ -80,7 +80,7 @@ exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatt
     outputFields,
     schema: miniSchema,
     mapper: function (baseUrl, params) {
-      const flatMapper = exports.defaultFlatMapper(miniFields);
+      const flatMapper = exports.defaultFlatMapper(miniFields.filter(field => !field.multi));
       return row => {
         const result = flatMapper(row);
         result.href = hrefFormatter(baseUrl, row);
