@@ -1,3 +1,4 @@
+const Promise = require('bluebird');
 const _ = require('underscore');
 const {go, Channel, parallel} = require('ts-csp');
 
@@ -25,8 +26,18 @@ const createTempChangeTable = (client, replication_schema, bindingConf, tableNam
   null::${replication_schema}.operation_type as operation, 
   ${bindingConf.table}.* from ${bindingConf.table} where false)`);
 
+const createFastMapper = (replikeringModel, entityConf, bindingConf) => obj =>  {
+  const result = {};
+  for(let attrName of entityConf.attributes) {
+    const replikeringAttrModel = _.findWhere(replikeringModel.attributes, {name: attrName});
+    let attrValue = obj[attrName];
+    const binding = Object.assign({}, defaultBindings[replikeringAttrModel.type], bindingConf.attributes[attrName]);
+    result[binding.columnName] = binding.toCsv ? binding.toCsv(attrValue) : attrValue;
+  }
+  return Promise.resolve(result);
+};
 
-const createMapper = (replikeringModel, entityConf, bindingConf) => obj => go(function*() {
+const createSlowMapper = (replikeringModel, entityConf, bindingConf) => obj => go(function*() {
   const result = {};
   for(let attrName of entityConf.attributes) {
     const replikeringAttrModel = _.findWhere(replikeringModel.attributes, {name: attrName});
@@ -39,6 +50,16 @@ const createMapper = (replikeringModel, entityConf, bindingConf) => obj => go(fu
   }
   return result;
 });
+
+const createMapper = (replikeringModel, entityConf, bindingConf) => {
+  for(let attrName of entityConf.attributes) {
+    const replikeringAttrModel = _.findWhere(replikeringModel.attributes, {name: attrName});
+    if(replikeringAttrModel.offloaded) {
+      return createSlowMapper(replikeringModel, entityConf, bindingConf);
+    }
+  }
+  return createFastMapper(replikeringModel, entityConf, bindingConf);
+};
 
 const copyToTable = (client, src, asyncMapper, table, columnNames, batchSize) => {
   const csvOptions = {

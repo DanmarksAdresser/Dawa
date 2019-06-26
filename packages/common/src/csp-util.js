@@ -1,12 +1,18 @@
 "use strict";
 
 const { go, Signal, OperationType, CLOSED } = require('ts-csp');
-
 const mapAsync = function(arr, mapFn) {
   return go(function*() {
     const result = [];
     for(let item of arr) {
-      result.push(yield this.delegateAbort(mapFn(item)));
+      const promise = mapFn(item);
+      // performance optimization to avoid yield and process in tight loop
+      if(promise.isFulfilled && promise.isFulfilled()) {
+        result.push(promise.value());
+      }
+      else {
+        result.push(yield this.delegateAbort(promise));
+      }
     }
     return result;
   });

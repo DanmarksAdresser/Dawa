@@ -3,13 +3,22 @@ const requestPromise = require('request-promise');
 const request = require('request');
 const split2 = require('split2');
 const cspUtil = require('@dawadk/common/src/csp-util');
-
+const {go, parallel} = require('ts-csp');
+const { pipeline } = require('stream');
 const URI = require('urijs');
-
+const Promise = require('bluebird');
 
 const ndjsonStream = (url, dstChan, batchSize, headers) => {
-  const stream = request({url, headers}).pipe(split2(JSON.parse));
-  return cspUtil.pipeFromStream(stream, dstChan, batchSize);
+  const splitter = split2(JSON.parse);
+  // wrap stream pipeline in go Process.
+  const pipe = go(function*() {
+    return yield Promise.promisify(pipeline)(
+      request({url, headers}),
+      splitter
+    );
+  });
+  return parallel(pipe,
+    cspUtil.pipeFromStream(splitter, dstChan, batchSize));
 };
 
 const getUdtraekUrl = (baseurl, entityName, remoteTxid) => {
