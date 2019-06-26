@@ -34,7 +34,12 @@ runConfigured(configSchema, [], conf => {
   var isaliveApp = express();
   isaliveApp.get('/isalive', function(req, res) {
     isalive.isaliveMaster().then(function(isalive) {
-      res.json(isalive);
+      if(isalive.status !== 'up') {
+        res.status(500).json(isalive);
+      }
+      else {
+        res.json(isalive);
+      }
     }).catch(function(err) {
       logger.error('isalive', 'Unexpected error during isalive', err);
       res.status(500).send('Unexpected error during isalive: ' + util.inspect(err));
