@@ -14,17 +14,20 @@ const schema = {
   dar_api_uri: {
     doc: 'URI til DAR endpoint',
     format: 'String',
-    default: 'https://sg.danmarksadresseregister.dk/AWSDeltaService'
+    default: 'https://sg.danmarksadresseregister.dk/AWSDeltaService',
+    cli: true
   },
   notification_url: {
     doc: 'WS URI hvor importeren modtager notifikationer',
     format: 'String',
-    default: 'https://dar-notifications.aws.dk/prod/listen'
+    default: 'https://dar-notifications.aws.dk/prod/listen',
+    cli: true
   },
   poll_interval: {
     doc: 'Millisekunder mellem API poll for nye records',
     format: 'nat',
-    default: 5000
+    default: 5000,
+    cli: true
   },
   no_daemon: {
     doc: 'Kør kun én import',
@@ -41,7 +44,8 @@ const schema = {
   isalive_port: {
     doc: 'Port til isalive server',
     format: 'nat',
-    default: 3000
+    default: 3000,
+    cli: true
   }
 };
 

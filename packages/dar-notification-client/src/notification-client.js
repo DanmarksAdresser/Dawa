@@ -1,7 +1,7 @@
 "use strict";
 
 const WebSocket = require('ws');
-const wsHeartbeats = require('ws-heartbeats');
+const heartbeat = require('./heartbeat');
 
 const logger = require('@dawadk/common/src/logger').forCategory('notificationClient');
 
@@ -16,9 +16,11 @@ const logger = require('@dawadk/common/src/logger').forCategory('notificationCli
  */
 module.exports = (notificationWsUrl, messageChan) => {
   let ws = new WebSocket(notificationWsUrl);
-  wsHeartbeats(ws, {
-    heartbeatTimeout: 30000,
-    heartbeatInterval: 15000
+  ws.on('open', () => {
+    heartbeat(ws, {
+      pingTimeout: 30000,
+      pingInterval: 15000
+    });
   });
   let dead = false;
 
