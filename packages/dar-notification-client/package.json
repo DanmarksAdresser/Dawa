@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/dar-notification-client",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "WebSocket klient til at tilgå dar-notification-server",
   "private": true,
   "license": "MIT",
