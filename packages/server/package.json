@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/server",
-  "version": "1.29.25",
+  "version": "1.29.26",
   "private": true,
   "author": "Styrelsen for Dataforsyning og Effektivisering (SDFE)",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@dawadk/common": "^1.1.6",
-    "@dawadk/import-util": "^2.1.0",
     "@dawadk/dar-notification-client": "^1.1.0",
+    "@dawadk/import-util": "^2.1.0",
     "@dawadk/validate-history": "^1.0.29",
     "@mapbox/polylabel": "^1.0.2",
     "JSONStream": "1.3.5",
