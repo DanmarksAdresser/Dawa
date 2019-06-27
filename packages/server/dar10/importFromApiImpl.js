@@ -16,7 +16,7 @@ const moment = require('moment');
 const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(function* () {
   const importer = createDarApiImporter({darClient, remoteEventIds});
   const beforeMillis = Date.now();
-  yield pool.withTransaction('READ_WRITE', client => go(function*() {
+  yield pool.withTransaction('READ_WRITE', client => go(function* () {
     const resultContext = yield executeRollbackable(client, 'importDarApi', [importer], EXECUTION_STRATEGY.quick);
     const afterMillis = Date.now();
     const darTxTimestampMillis = resultContext['dar-api']['remote-tx-timestamp'] ?
@@ -25,16 +25,14 @@ const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(fun
     const totalRowCount = resultContext['dar-api']['total-row-count'];
     if (pretend) {
       throw new Abort('Rolling back transaction due to pretend parameter');
-    }
-    else if (!resultContext.rollback) {
+    } else if (!resultContext.rollback) {
       logger.info('Imported Transaction', {
         txid: resultContext.txid,
         delay: (afterMillis - darTxTimestampMillis),
         duration: (afterMillis - beforeMillis),
         totalRowCount
       });
-    }
-    else {
+    } else {
       logger.info('Rolling back import - nothing to import');
     }
   }));
@@ -65,8 +63,7 @@ const importNotifications = (pool, darClient, notifications, mustUpdateAll) => g
       return acc;
     }, {});
     return yield importIncrementally(pool, darClient, remoteEventIds);
-  }
-  else {
+  } else {
     const remoteEventIds = notifications.reduce((acc, events) => {
       for (let {entitet, eventid} of events) {
         acc[entitet] = acc[entitet] ? Math.max(acc[entitet], eventid) : eventid;
@@ -95,7 +92,7 @@ const importUsingStatus = (pool, darClient, pretend) => go(function* () {
 const runImportLoop = (pool, darClient, notificationWsUrl, isaliveResponseChan, {pretend}) => go(function* () {
   //start by performing a local update using the status API
   yield importUsingStatus(pool, darClient, pretend);
-  isaliveResponseChan.putSync({status: 'up', hasReceivedEvent: false});
+  isaliveResponseChan.putSync({status: 'up', usingNotifications: false});
   if (!notificationWsUrl) {
     return;
   }
@@ -122,18 +119,27 @@ const runImportLoop = (pool, darClient, notificationWsUrl, isaliveResponseChan, 
       logger.info("Received DAR notifications");
       yield importNotifications(pool, darClient, notifications, mustUpdateAll);
       mustUpdateAll = false;
-      isaliveResponseChan.putSync({status: 'up', hasImportedEvent: true});
+      isaliveResponseChan.putSync({status: 'up', usingNotifications: true});
     }
-  }
-  finally {
+  } catch (e) {
+    if(e instanceof Abort) {
+      throw e;
+    }
+    logger.error('DAR import using notifications failed', e);
+    isaliveResponseChan.putSync({
+      status: 'up',
+      usingNotifications: false,
+      notificationFailureError: e.message
+    });
+  } finally {
     wsClientCloseFn();
   }
 });
 
-const createIsalive = (isaliveResponseChan, port) => go(function*() {
+const createIsalive = (isaliveResponseChan, port) => go(function* () {
   let response = {status: 'unknown'};
   var isaliveApp = express();
-  isaliveApp.get('/isalive', function(req, res) {
+  isaliveApp.get('/isalive', function (req, res) {
     if (response.status === 'down') {
       res.status(500);
     }
@@ -144,11 +150,10 @@ const createIsalive = (isaliveResponseChan, port) => go(function*() {
 
   const server = isaliveApp.listen(port);
   try {
-    while(true) {
+    while (true) {
       response = yield this.takeOrAbort(isaliveResponseChan);
     }
-  }
-  finally {
+  } finally {
     server.close();
   }
 });
@@ -160,8 +165,7 @@ const importDaemon = (pool, darClient,
   }
   if (noDaemon) {
     yield this.delegateAbort(importUsingStatus(pool, darClient));
-  }
-  else {
+  } else {
     const isaliveResponseChan = new Channel();
     const isaliveProcess = createIsalive(isaliveResponseChan, isalivePort);
     try {
@@ -170,8 +174,7 @@ const importDaemon = (pool, darClient,
           try {
             yield this.delegateAbort(runImportLoop(pool, darClient,
               notificationUrl, isaliveResponseChan, {pretend}));
-          }
-          catch (err) {
+          } catch (err) {
             if (err instanceof Abort) {
               throw err;
             }
@@ -181,8 +184,7 @@ const importDaemon = (pool, darClient,
           yield Promise.delay(pollIntervalMs);
         }
       }
-    }
-    finally {
+    } finally {
       isaliveProcess.abort.raise("Aborting");
     }
   }
