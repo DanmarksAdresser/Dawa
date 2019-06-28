@@ -21,8 +21,7 @@ CREATE VIEW jordstykker_view AS (
          fælleslod
   FROM matrikel_jordstykker j
          LEFT JOIN ejerlav e ON j.ejerlavkode = e.kode
-         LEFT JOIN ois_matrikelreference mr
-                   ON j.ejerlavkode = mr.landsejerlavkode AND j.matrikelnr = mr.matrnr AND
-                      mr.ophoert_ts is null
+         LEFT JOIN LATERAL (select * from ois_matrikelreference mr
+                   WHERE mr.ophoert_ts is null AND j.ejerlavkode = mr.landsejerlavkode AND j.matrikelnr = mr.matrnr limit 1) mr ON true
          LEFT JOIN ois_grund g ON mr.grund_id = g.grund_id AND g.ophoert_ts is null
 );

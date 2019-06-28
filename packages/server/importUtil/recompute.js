@@ -14,9 +14,10 @@ const { EXECUTION_STRATEGY } = require('../components/common');
 const schema = {
   components: {
     doc: 'Komma-separeret liste af ID-er for componenter som skal genberegnes',
-    format: 'String',
+    format: 'string',
     cli: true,
-    required: true
+    required: true,
+    default: null
   }
 };
 
