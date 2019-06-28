@@ -5,7 +5,7 @@ const fs = require('fs');
 const Promise = require('bluebird');
 const uuid = require('uuid');
 const { go, parallel } = require('ts-csp');
-
+const logger = require('@dawadk/common/src/logger').forCategory('isalive');
 const {   queryScheduler,
   connectionScheduler
 } = require('../dist-scheduler/dist-scheduler-master-instance');
@@ -32,7 +32,7 @@ const  getStatus = (worker) => go(function*() {
     }).timeout(20000);
   }
   catch(e) {
-    console.error(e);
+    logger.error("Could not get status from worker process", e);
     return {
       status: 'down',
       reason: 'Could not get status from worker process',

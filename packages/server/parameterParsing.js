@@ -34,6 +34,8 @@ exports.parseParameters = function(params, parameterSpec) {
       return memo;
     },
     {params: {}, errors: []});
+
+  // The valider param is used to produce an error on unknown parameters
   if(params.valider !== undefined) {
     for(let paramName of Object.keys(params)) {
       if(paramName !== 'valider' && !parameterSpec[paramName]) {

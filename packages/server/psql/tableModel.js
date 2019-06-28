@@ -349,7 +349,9 @@ const stednavne = {
     {name: 'navnestatus'},
     {name: 'brugsprioritet'},
     tsvColumn({
-      deriveFn: table => `to_tsvector('adresser', ${table}.navn || ' ' || (case when (select count(*) from sted_kommune where sted_kommune.stedid = ${table}.stedid) = 1 then (select navn from kommuner join sted_kommune on kommuner.kode = sted_kommune.kommunekode where sted_kommune.stedid = ${table}.stedid) else '' end))`
+      deriveFn: table => `to_tsvector('adresser', ${table}.navn || ' ' 
+      || (case when (select count(*) from sted_kommune where sted_kommune.stedid = ${table}.stedid) = 1 then (select navn from kommuner join sted_kommune on kommuner.kode = sted_kommune.kommunekode where sted_kommune.stedid = ${table}.stedid) else '' end)
+      || ' ' || (select undertype from steder where steder.id = stedid))`
     })
   ]
 };

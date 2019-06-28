@@ -35,7 +35,7 @@ const miniSchema = globalSchemaObject({
   properties: {
     tekst: {
       type: 'string',
-      description: 'Stednavnets navn'
+      description: 'Stednavnets navn efterfulgt af kommunens navn samt stedets undertype. Kommunenavn medtages kun hvis stedets geografi ikke overlapper mere end én kommune.'
     },
     href: {
       type: 'string',
@@ -62,6 +62,7 @@ exports.mini = representationUtil.miniRepresentation(
     if(row.sted_kommuner && row.sted_kommuner.length === 1) {
       text += `, ${row.sted_kommuner[0].navn} kommune`;
     }
+    text += ` (${row.sted_undertype})`;
     return text;
   }
 );

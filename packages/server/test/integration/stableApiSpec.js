@@ -443,6 +443,24 @@ describe('Stable API', () => {
 },
 
   stednavn: {
+      json: {
+        mini: [{
+          params: {
+            stedid: '19e4392f-c7b1-5d41-0000-d380220a2006',
+            navn: 'Test stednavn punkt'
+          },
+          value: {
+              "sted_id": "19e4392f-c7b1-5d41-0000-d380220a2006",
+              "sted_hovedtype": "Bygning",
+              "sted_undertype": "hal",
+              "navn": "Test stednavn punkt",
+              "brugsprioritet": "primær",
+              "navnestatus": "officielt",
+              "href": "http://dawa/stednavne2/19e4392f-c7b1-5d41-0000-d380220a2006/Test%20stednavn%20punkt",
+              "tekst": "Test stednavn punkt, Kommune test kommune (hal)"
+            }
+        }]
+      },
     geojson: {
       flad: [{
         params: {
