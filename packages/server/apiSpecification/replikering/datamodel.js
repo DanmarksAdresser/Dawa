@@ -414,7 +414,7 @@ module.exports = {
         nullable: true,
         description: `Ejerlavets bounding box, dvs. det mindste rectangel som indeholder geometrien. 
         Består af et array af 4 tal.
-        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to to sidste tal er
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to sidste tal er
         koordinaterne for bounding boxens nordøstlige hjørne.`
       }, {
         name: 'geometri',
