@@ -34,6 +34,13 @@ exports.parseParameters = function(params, parameterSpec) {
       return memo;
     },
     {params: {}, errors: []});
+  if(params.valider !== undefined) {
+    for(let paramName of Object.keys(params)) {
+      if(paramName !== 'valider' && !parameterSpec[paramName]) {
+        parsedParameters.errors.push([paramName, `Ukendt parameter ${paramName}`]);
+      }
+    }
+  }
   return parsedParameters;
 };
 

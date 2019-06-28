@@ -74,7 +74,7 @@ describe("When Parsing parameters", function () {
 });
 
 describe("Parsing parameters of type 'undefined'", function () {
-  it("should never fail", function (done) {
+  it("should never fail", function () {
     expect(parameterParsing.parseParameters({anyValue: "aString"}, parameterSpec))
       .to.deep.equal({params: {anyValue: "aString"}, errors: []});
 
@@ -86,19 +86,28 @@ describe("Parsing parameters of type 'undefined'", function () {
 
     expect(parameterParsing.parseParameters({anyValue: "[[[1,2,3]]]"}, parameterSpec))
       .to.deep.equal({params: {anyValue: "[[[1,2,3]]]"}, errors: []});
-
-    done();
   });
 });
 
 describe("When parsing unknown parameters'", function () {
-  it("they should just be ignored", function (done) {
+  it("they should just be ignored if valider param is not set", function () {
     expect(parameterParsing.parseParameters({anyValue: "42", unknownParam: ""}, parameterSpec))
       .to.deep.equal({params: {anyValue: "42"}, errors: []});
 
     expect(parameterParsing.parseParameters({unknownParam: ""}, parameterSpec))
       .to.deep.equal({params: {}, errors: []});
-
-    done();
   });
+
+  it('Should result in an error if valider param is set', () => {
+    expect(parameterParsing.parseParameters({anyValue: "42", unknownParam: "", valider: ''}, parameterSpec))
+      .to.deep.equal({params: {anyValue: "42"}, errors: [
+        ['unknownParam', 'Ukendt parameter unknownParam']
+      ]});
+
+    expect(parameterParsing.parseParameters({unknownParam: "", valider: 'asdf'}, parameterSpec))
+      .to.deep.equal({params: {}, errors: [
+        ['unknownParam', 'Ukendt parameter unknownParam']
+      ]});
+  })
+
 });

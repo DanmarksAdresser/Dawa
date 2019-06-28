@@ -15,7 +15,7 @@ const baseUrl = config.get('test.dawa_base_url');
 
 const documentation = require('../../documentation');
 
-describe.only('Documentation redirect to https', () => {
+describe('Documentation redirect to https', () => {
   it('Will redirect based on protocol provided by cloudfront if configured to do so', () => {
     /* eslint require-yield: 0 */
     return configHolder.withConfigOverride({redirect_insecure: true}, () => go(function*() {
