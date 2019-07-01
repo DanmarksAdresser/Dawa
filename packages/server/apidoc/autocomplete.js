@@ -1,5 +1,6 @@
 const {
-  formatAndPagingParams
+  formatAndPagingParams,
+  SRIDParameter
 } = require('./common');
 
 module.exports = [
@@ -10,18 +11,18 @@ module.exports = [
     parameters: [{
       name: 'type',
       doc: 'Angiver, om brugeren er ved at indtaste et vejnavn, en adgangsadresse eller en adresse.' +
-      ' Mulige værdier: "vejnavn", "adgangsadresse" eller "adresse". De returnerede værdier er ikke nødvendigvis af' +
-      ' denne type. Hvis brugeren f.eks. er ved at indtaste en adresse, men ikke har indtastet nok til at vejnavnet er entydigt ' +
-      ' bestemt, så vil servicen returnere vejnavne som valgmuligheder for brugeren'
+        ' Mulige værdier: "vejnavn", "adgangsadresse" eller "adresse". De returnerede værdier er ikke nødvendigvis af' +
+        ' denne type. Hvis brugeren f.eks. er ved at indtaste en adresse, men ikke har indtastet nok til at vejnavnet er entydigt ' +
+        ' bestemt, så vil servicen returnere vejnavne som valgmuligheder for brugeren'
     }, {
       name: 'startfra',
       doc: 'Autocomplete søger igennem vejnavne, adgangsadresser og adresser. Som udgangspunkt returneres' +
-      ' den første type, der giver mere end ét resultat. Med startfra parameteren angives, at søgningen skal' +
-      ' starte senere i rækken. Hvis man f.eks. ikke ønsker, at der kan returneres vejnavne, angives startfra=adgangsadresse, og' +
-      ' man vil få adgangsadresser tilbage, selvom mere end et vejnavn matcher søgningen. Parameteren er tiltænkt' +
-      ' den situation, hvor brugeren vælger et vejnavn blandt de muligheder, som autocomplete-komponenten viser.' +
-      ' I denne situation forventer brugeren, at der autocomplete-komponenten efterfølgende viser adgangsadresser. Ved at angive startfra=adgangsadresse' +
-      ' sikres dette. Mulige værdier for parameteren: "vejnavn" (default), "adgangsadresse", "adresse"'
+        ' den første type, der giver mere end ét resultat. Med startfra parameteren angives, at søgningen skal' +
+        ' starte senere i rækken. Hvis man f.eks. ikke ønsker, at der kan returneres vejnavne, angives startfra=adgangsadresse, og' +
+        ' man vil få adgangsadresser tilbage, selvom mere end et vejnavn matcher søgningen. Parameteren er tiltænkt' +
+        ' den situation, hvor brugeren vælger et vejnavn blandt de muligheder, som autocomplete-komponenten viser.' +
+        ' I denne situation forventer brugeren, at der autocomplete-komponenten efterfølgende viser adgangsadresser. Ved at angive startfra=adgangsadresse' +
+        ' sikres dette. Mulige værdier for parameteren: "vejnavn" (default), "adgangsadresse", "adresse"'
     }, {
       name: 'q',
       doc: 'Søgetekst - den tekst brugeren har indtastet'
@@ -46,19 +47,37 @@ module.exports = [
     }, {
       name: 'stormodtagerpostnumre',
       doc: 'Angiver, om der returneres forslag med stormodtagerpostnumre. Mulige værdier: true eller false. ' +
-      'Default false. Bemærk, at hvis stormodtagerpostnumre aktiveres, ' +
-      'så kan samme adresse optræde to gange i listen af forslag.'
+        'Default false. Bemærk, at hvis stormodtagerpostnumre aktiveres, ' +
+        'så kan samme adresse optræde to gange i listen af forslag.'
     }, {
       name: 'fuzzy',
       doc: 'Aktiver fuzzy søgning'
     }, {
       name: 'id',
       doc: 'Returner adresse eller adgangsadresse med den angivne ID. type-parameteren afgør, om der søges' +
-      ' efter adgangsadresser eller adresser. Der returneres en tom array hvis (adgangs)adressen ikke findes.'
+        ' efter adgangsadresser eller adresser. Der returneres en tom array hvis (adgangs)adressen ikke findes.'
     }, {
       name: 'gældende',
       doc: 'Returner kun gældende adresser, ikke foreløbige.'
-    }].concat(formatAndPagingParams),
+    }, {
+      name: 'polygon',
+      doc: 'Autocomplete indenfor polygon. Beregnet til mindre polygoner - store polygoner vil resultere i dårlig performance. ' +
+        'Polygonet specificeres som et array af koordinater på samme måde som' +
+        ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+        ' Bemærk at polygoner skal' +
+        ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+        ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+        ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+        ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
+    },
+      {
+        name: 'cirkel',
+        doc: `Autocomplete indenfor cirklen angivet af koordinatet (x,y) og radius r. 
+         Beregnet til mindre cirkler. Store cirkler vil resultere i dårlig performance.
+         Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk.
+         Radius angives i meter. cirkel={x},{y},{r}.`
+      },
+    SRIDParameter].concat(formatAndPagingParams),
     examples: [
       {
         description: 'Autocomplete "Magreteplasen 4, 8" med fuzzy søgning slået til og careten placeret i slutningen af teksten',

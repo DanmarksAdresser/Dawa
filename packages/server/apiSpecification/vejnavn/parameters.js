@@ -2,7 +2,6 @@ var schema = require('../parameterSchema');
 var registry = require('../registry');
 
 var normalizeParameters = require('../common/parametersUtil').normalizeParameters;
-
 module.exports = {
   id: normalizeParameters([
     {
@@ -25,7 +24,7 @@ module.exports = {
       type: 'integer',
       schema: schema.kode4,
       multi: true
-    }
+    },
   ])
 };
 

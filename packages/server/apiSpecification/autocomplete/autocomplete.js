@@ -244,7 +244,9 @@ const delegatedParameters = [
     type: 'integer',
     schema: schema.postnr,
     multi: true
-  }
+  },
+  ...commonParameters.geomWithin,
+  ...commonParameters.crs
 ];
 
 var nonDelegatedParameters = [

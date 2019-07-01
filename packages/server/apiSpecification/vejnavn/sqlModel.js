@@ -64,9 +64,26 @@ function fuzzySearchParameterImpl(sqlParts, params) {
   }
 }
 
+const vejnavneGeomWithin = (sqlParts, params) => {
+  if(params.polygon || params.cirkel) {
+    const subquery = {
+      select: ["*"],
+      from: ['navngivenvejkommunedel_mat nvk'],
+      whereClauses: [`nvk.vejnavn = vejnavne.navn`],
+      orderClauses: [],
+      sqlParams: sqlParts.sqlParams
+    };
+    const geomWithin = sqlParameterImpl.geomWithin();
+    geomWithin(subquery, params);
+    const subquerySql = dbapi.createQuery(subquery).sql;
+    sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+  }
+};
+
 
 const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+  vejnavneGeomWithin,
   sqlParameterImpl.search(columns, ['navn']),
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)

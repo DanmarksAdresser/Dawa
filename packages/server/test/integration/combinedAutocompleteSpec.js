@@ -341,5 +341,26 @@ describe('Combined Autocomplete', function () {
       );
       assert.strictEqual(result.length, 20);
     }));
+
+    it('Kan autocomplete indenfor polygon', () => go(function* () {
+      const vejnavnResult = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          type: 'adresse',
+          fuzzy: '',
+          q: 'hov',
+          polygon: '[[[683890.4,6157621.95], [683890.4,6167652.12], [692020.25,6167652.12], [692020.25,6157621.95], [683890.4,6157621.95]]]',
+          srid: '25832'
+        }
+      );
+      assert.strictEqual(vejnavnResult.length, 1);
+      const adgangsadresseResult = yield helpers.getJson(clientFn(), autocomplete, {}, {
+          type: 'adresse',
+          fuzzy: '',
+          q: 'hovedvejen 2',
+          polygon: '[[[683890.4,6157621.95], [683890.4,6167652.12], [692020.25,6167652.12], [692020.25,6157621.95], [683890.4,6157621.95]]]',
+          srid: '25832'
+        }
+      );
+      assert.strictEqual(adgangsadresseResult.length, 2);
+    }));
   });
 });

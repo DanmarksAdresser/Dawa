@@ -14,19 +14,21 @@ module.exports = [
   resourcesUtil.queryResourceSpec(nameAndKey, {
       propertyFilter: parameters.propertyFilter,
       search: commonParameters.search,
-      fuzzy: commonParameters.fuzzy
+      fuzzy: commonParameters.fuzzy,
+      geomWithin: commonParameters.geomWithin
     }, representations,
     sqlModel),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
     propertyFilter: parameters.propertyFilter,
     autocomplete: commonParameters.autocomplete,
-    fuzzy: commonParameters.fuzzy
+    fuzzy: commonParameters.fuzzy,
+    geomWithin: commonParameters.geomWithin
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {}, representations, sqlModel)
 ];
 
 var registry = require('../registry');
 var qualifiers = ['query', 'autocomplete', 'getByKey'];
-_.zip(qualifiers, module.exports).forEach(function(pair) {
+_.zip(qualifiers, module.exports).forEach(function (pair) {
   registry.add('vejnavn', 'resource', pair[0], pair[1]);
 });

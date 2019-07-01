@@ -42,6 +42,10 @@
 <div class="dawa-autocomplete-container">
     <input type="search" id="autocomplete-stormodtagerpostnumre-false">
 </div>
+<h3>Autocomplete indenfor polygon</h3>
+<div class="dawa-autocomplete-container">
+    <input type="search" id="autocomplete-polygon">
+</div>
 <h3>Forudfylde adresse med adresseid</h3>
 <div class="dawa-autocomplete-container">
     <input type="search" id="autocomplete-address-id">
@@ -108,6 +112,16 @@
     },
     id: 'f5a68d45-935b-48d6-8d11-6363327ca1ae'
   });
+dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-polygon"), {
+  baseUrl:BASE_URL,
+  select: function(selected) {
+    console.log('Selected address:');
+    console.dir(selected);
+  },
+  params: {
+    polygon: '[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]]'
+  }
+});
   dawaAutocomplete.dawaAutocomplete(document.getElementById("autocomplete-stormodtagerpostnumre-false"), {
     baseUrl:BASE_URL,
     select: function(selected) {
