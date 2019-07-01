@@ -50,7 +50,7 @@ exports.mapVejstykkeRef = (dbJson, baseUrl) => {
 exports.mapKode4NavnTema = function(temaNavn, kode, navn, baseUrl) {
   if (kode && navn) {
     return {
-      href: exports.makeHref(baseUrl, temaNavn, [kode]),
+      href: exports.makeHref(baseUrl, temaNavn, [kode4String(kode)]),
       kode: kode4String(kode),
       navn: navn
     };

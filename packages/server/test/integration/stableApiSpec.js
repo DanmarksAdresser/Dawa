@@ -179,7 +179,7 @@ describe('Stable API', () => {
               12.57121565,
               55.59060158
             ],
-            "href": "http://dawa/kommuner/99",
+            "href": "http://dawa/kommuner/0099",
             "dagi_id": "100101",
             "kode": "0099",
             "navn": "Kommune test",
@@ -220,7 +220,7 @@ describe('Stable API', () => {
             "nummer": "1",
             "navn": "MRAfstemningsområde Test",
             "kommune": {
-              "href": "http://dawa/kommuner/99",
+              "href": "http://dawa/kommuner/0099",
               "kode": "0099",
               "navn": "Kommune test"
             },
@@ -298,7 +298,7 @@ describe('Stable API', () => {
               "href": "http://dawa/ejerlav/60851"
             },
             "kommune": {
-              "href": "http://dawa/kommuner/350",
+              "href": "http://dawa/kommuner/0350",
               "kode": "0350",
               "navn": "Lejre"
             },
@@ -605,7 +605,7 @@ describe('Stable API', () => {
             }
           },
           "kommune": {
-            "href": "http://dawa/kommuner/99",
+            "href": "http://dawa/kommuner/0099",
             "kode": "0099",
             "navn": "Kommune test"
           },
@@ -743,7 +743,7 @@ describe('Stable API', () => {
                 }
               },
               "kommune": {
-                "href": "http://dawa/kommuner/99",
+                "href": "http://dawa/kommuner/0099",
                 "kode": "0099",
                 "navn": "Kommune test"
               },
@@ -798,7 +798,7 @@ describe('Stable API', () => {
           "kode": "0099",
           "navn": "Opstillingskreds test",
           "kredskommune": {
-            "href": "http://dawa/kommuner/99",
+            "href": "http://dawa/kommuner/0099",
             "kode": "0099",
             "navn": "Kommune test"
           },
@@ -995,7 +995,7 @@ describe('Stable API', () => {
           "navn": "Høje Taastrup",
           "darstatus": 3,
           "kommune": {
-            "href": "http://dawa/kommuner/169",
+            "href": "http://dawa/kommuner/0169",
             "kode": "0169",
             "navn": "Høje-Taastrup"
           },
@@ -1155,17 +1155,17 @@ describe('Stable API', () => {
           "retskreds": {
             "kode": "0099",
             "navn": "retskreds test",
-            "href": "http://dawa/retskredse/99"
+            "href": "http://dawa/retskredse/0099"
           },
           "politikreds": {
             "kode": "0099",
             "navn": "Politikreds test",
-            "href": "http://dawa/politikredse/99"
+            "href": "http://dawa/politikredse/0099"
           },
           "opstillingskreds": {
             "kode": "0099",
             "navn": "Opstillingskreds test",
-            "href": "http://dawa/opstillingskredse/99"
+            "href": "http://dawa/opstillingskredse/0099"
           },
           "zone": "Landzone",
           "jordstykke": null,
@@ -1525,12 +1525,12 @@ describe('Stable API', () => {
             "retskreds": {
               "kode": "0099",
               "navn": "retskreds test",
-              "href": "http://dawa/retskredse/99"
+              "href": "http://dawa/retskredse/0099"
             },
             "politikreds": {
               "kode": "0099",
               "navn": "Politikreds test",
-              "href": "http://dawa/politikredse/99"
+              "href": "http://dawa/politikredse/0099"
             },
             "afstemningsområde": {
               "href": "http://dawa/afstemningsomraader/461/12",
@@ -1540,7 +1540,7 @@ describe('Stable API', () => {
             "opstillingskreds": {
               "kode": "0099",
               "navn": "Opstillingskreds test",
-              "href": "http://dawa/opstillingskredse/99"
+              "href": "http://dawa/opstillingskredse/0099"
             },
             "storkreds": {
               "href": "http://dawa/storkredse/1",
@@ -1684,7 +1684,7 @@ describe('Stable API', () => {
           "navn": "Gl. Assensvej",
           "adresseringsnavn": "Gl. Assensvej",
           "administrerendekommune": {
-            "href": "http://dawa/kommuner/420",
+            "href": "http://dawa/kommuner/0420",
             "kode": "0420",
             "navn": "Assens"
           },

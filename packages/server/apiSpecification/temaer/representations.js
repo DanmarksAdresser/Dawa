@@ -72,13 +72,13 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
       return 'Koden efterfulgt af navnet på ' + tema.singularSpecific;
     },
     mapper: function (row) {
-      return '' + row.kode + ' ' + row.navn;
+      return '' + kode4String(row.kode) + ' ' + row.navn;
     }
   };
 });
 
-const kodeNavnMiniTekst = (row) => `${row.navn} (${row.kode})`;
-const kodeNrMiniTekst = (row) => `${row.navn} (${row.nummer})`
+const kodeNavnMiniTekst = (row) => `${row.navn} (${kode4String(row.kode)})`;
+const kodeNrMiniTekst = (row) => `${row.navn} (${row.nummer})`;
 const miniTekst = {
   kommune: kodeNavnMiniTekst,
   region: kodeNavnMiniTekst,
@@ -137,7 +137,7 @@ const kommuneJsonRepresentation = (() => {
   };
   const mapper = baseUrl => row => {
     const result = Object.assign(mapMetaFields(row), {
-      href: makeHref(baseUrl, 'kommune', [row.kode]),
+      href: makeHref(baseUrl, 'kommune', [kode4String(row.kode)]),
       dagi_id: numberToString(row.dagi_id),
       kode: kode4String(row.kode),
       navn: row.navn,
@@ -175,7 +175,7 @@ const opstillingskredsJsonRepresentation = (() => {
       nummer: numToStr(row.nummer),
       kode: kode4String(row.nummer),
       navn: row.navn,
-      kredskommune: mapKode4NavnTema('kommune', row.kredskommunekode, row.kredskommunenavn, baseUrl),
+      kredskommune: mapKode4NavnTema('kommune', kode4String(row.kredskommunekode), row.kredskommunenavn, baseUrl),
       region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
       storkreds: commonMappers.mapStorkredsRef(row, baseUrl),
       valglandsdel: commonMappers.mapValglandsdelRef(row, baseUrl),
