@@ -301,6 +301,13 @@ ORDER BY st_distance(ap.position, dar_ao_geo.geom) DESC;`
     from dar1_husnummer_current hn 
     left join dar1_adressepunkt_current ap on hn.adgangspunkt_id = ap.id 
     where ap.id is null  and adgangspunkt_id is not null`
+  },
+  {
+    key: 'JordstykkeInkonsistentESR',
+    description: 'Jordstykker hvor ESR ejendomsnummer fra matrikelkortet afgiver fra ESR ejendomsnummeret i BBR',
+    query: `select mj.ejerlavkode, mj.matrikelnr, mj.esrejendomsnr as matrikel_esr, j.esrejendomsnr as bbr_esr 
+from matrikel_jordstykker mj join jordstykker j on mj.ejerlavkode = j.ejerlavkode and mj.matrikelnr = j.matrikelnr
+   where mj.esrejendomsnr is distinct from j.esrejendomsnr`
   }
 ];
 
