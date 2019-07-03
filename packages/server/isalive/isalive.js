@@ -6,6 +6,8 @@ const Promise = require('bluebird');
 const uuid = require('uuid');
 const { go, parallel } = require('ts-csp');
 const logger = require('@dawadk/common/src/logger').forCategory('isalive');
+const config = require('@dawadk/common/src/config/holder').getConfig();
+
 const {   queryScheduler,
   connectionScheduler
 } = require('../dist-scheduler/dist-scheduler-master-instance');
@@ -58,9 +60,12 @@ const getWorkerStatuses = () => go(function*() {
 
 const isaliveMaster = () => go(function*() {
   const workerStatuses = yield getWorkerStatuses();
-  const allWorkersUp = workerStatuses.every(workerStatus => workerStatus.isalive.status === 'up');
+  // It seems that NodeJS sometimes leaves dead processes,
+  // So we just count that the number of working workers are as expected.
+  const numberOfRunningWorkers = workerStatuses.filter(workerStatus => workerStatus.isalive.status === 'up').length;
+  const expectedRunningWorkers = config.get('processes');
   return {
-    status: allWorkersUp ? "up" : "down",
+    status: numberOfRunningWorkers >= expectedRunningWorkers ? "up" : "down",
     name: packageJson.name,
     version: packageJson.version,
     generation_time: new Date().toISOString(),
