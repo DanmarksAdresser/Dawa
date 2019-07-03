@@ -161,7 +161,7 @@ const definitions = {
   'Dør':     {
     postgresql: 'VARCHAR(4)',
     description: 'Dørbetegnelse. Hvis værdi angivet kan den antage følgende værdier: ' +
-      'tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
+      'tal fra 1 til 9999, små bogstaver samt tegnene / og -.',
     type: 'string'
   },
   'Status': {

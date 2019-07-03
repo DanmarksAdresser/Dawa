@@ -44,7 +44,7 @@ const adresseParameters = [
   },
   {
     name: 'dør',
-    doc: 'Dørbetegnelse. Tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.',
+    doc: 'Dørbetegnelse. Tal fra 1 til 9999, små bogstaver samt tegnene / og -.',
     nullable: true
   },
   {

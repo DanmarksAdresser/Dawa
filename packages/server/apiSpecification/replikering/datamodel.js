@@ -347,7 +347,7 @@ module.exports = {
         nullable: true,
         schema: definitions.NullableDør,
         description: 'Dørbetegnelse. Hvis værdi angivet kan den antage følgende værdier:' +
-        ' tal fra 1 til 9999, små og store bogstaver samt tegnene / og -.'
+        ' tal fra 1 til 9999, små bogstaver samt tegnene / og -.'
       }, {
         name: 'kilde',
         type: 'integer',
