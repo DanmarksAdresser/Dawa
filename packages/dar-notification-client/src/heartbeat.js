@@ -25,7 +25,7 @@ module.exports = function socketTimeout (webSocketClient, options) {
       webSocketClient.ping();
       schedulePing();
     }, options.heartbeatInterval);
-  };
+  }
 
   function setPingTimeout() {
     clearTimeout(pingNotReceivedTimeout);
