@@ -6,7 +6,7 @@ const dar10TableModels = require('../dar10/dar10TableModels');
 const {
   geomColumns, geomColumn, tsvColumn, visueltCenterComputed, visueltCenterDerived,
   visueltCenterFromSource, bboxColumn, preservedColumn, offloadedGeomColumn,
-  offloadedGeomBlobrefColumn
+  offloadedGeomBlobrefColumn, privateColumn
 } = require('@dawadk/import-util/src/common-columns');
 const {name} = require('@dawadk/import-util/src/table-diff-protocol');
 
@@ -434,9 +434,7 @@ const vejstykkerpostnumremat = {
     {name: 'kommunekode'},
     {name: 'vejkode'},
     {name: 'postnr'},
-    {
-      name: 'tekst'
-    }
+    privateColumn({name: 'tekst'})
   ]
 };
 

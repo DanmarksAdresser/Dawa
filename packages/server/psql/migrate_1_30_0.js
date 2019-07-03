@@ -1,4 +1,5 @@
 "use strict";
+const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
 const {go} = require('ts-csp');
@@ -58,28 +59,25 @@ runConfigured(schema, [], config => go(function* () {
     yield client.query('alter table regioner_changes add column nuts2 text');
     const jordstykkeColumnsWithGeo = [...jordstykkeColumns, 'geom'];
     yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
+    yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*() {
+      yield client.query(`INSERT INTO matrikel_jordstykker(${jordstykkeColumnsWithGeo.join(',')}) (select ${jordstykkeColumnsWithGeo.join(',')} FROM jordstykker)`);
+      yield initChangeTable(client, txid, tableSchema.tables.matrikel_jordstykker);
+      const tablesToVerify = ['jordstykker', 'tilknytninger_mat', 'vejnavne_mat','navngivenvejkommunedel_mat'];
+      const processors = allProcessors.filter(
+        processor => _.intersection(processor.produces, tablesToVerify).length > 0);
+      yield execute(client, txid, processors, EXECUTION_STRATEGY.verify);
+    }));
     yield importWithoutEvents(client, 'migrate_1_30_0',
       ['landsdele', 'landsdelstilknytninger'],
       txid => go(function* () {
-        yield client.query(`INSERT INTO matrikel_jordstykker(${jordstykkeColumnsWithGeo.join(',')}) (select ${jordstykkeColumnsWithGeo.join(',')} FROM jordstykker)`);
-        yield initChangeTable(client, txid, tableSchema.tables.matrikel_jordstykker);
         yield importDagi(client, txid,
-          ['landsdel'],
+          ['landsdel', 'region'],
           featureMappingsDatafordeler,
           config.get('dagi_dir'),
           '',
           'wfsMulti',
           5000000);
       }));
-    yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*() {
-      yield importDagi(client, txid,
-        ['region'],
-        featureMappingsDatafordeler,
-        config.get('dagi_dir'),
-        '',
-        'wfsMulti',
-        5000000);
-    }));
     yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
       yield execute(client, txid, allProcessors, EXECUTION_STRATEGY.verify);
     }));

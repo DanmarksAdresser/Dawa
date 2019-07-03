@@ -8,7 +8,6 @@ const allProcessors = [
   ...require('./dar-current'),
   ...require('./dawa-materialized-incremental'),
   ...require('./dawa-materialized-non-incremental'),
-  require('./land-connected-adresses'),
   require('./land-parcel-associations'),
   ...require('./legacy-dawa-materialized'),
   require('./legacy-supplerende-bynavne'),

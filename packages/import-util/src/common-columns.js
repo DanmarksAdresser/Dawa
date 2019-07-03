@@ -174,6 +174,14 @@ const geomColumns = ({
   return columns;
 };
 
+const privateColumn = ({name}) => ({
+  type: 'private',
+  name
+});
+
+isPublic.method('private', () => false);
+
+
 module.exports = {
   geomColumn,
   ændretColumn,
@@ -187,5 +195,6 @@ module.exports = {
   geomColumns,
   preservedColumn,
   offloadedGeomColumn,
-  offloadedGeomBlobrefColumn
+  offloadedGeomBlobrefColumn,
+  privateColumn
 }
