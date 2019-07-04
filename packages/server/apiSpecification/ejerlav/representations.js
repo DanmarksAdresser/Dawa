@@ -43,7 +43,7 @@ const miniSchema = globalSchemaObject({
 
 exports.mini = representationUtil.miniRepresentation(['kode', 'navn'], fields, miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'ejerlav', [row.kode]),
-  (row) => `${row.name} (${row.kode})`);
+  (row) => `${row.navn} (${row.kode})`);
 
 exports.autocomplete = {
   schema: globalSchemaObject( {
