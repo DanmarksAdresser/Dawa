@@ -510,7 +510,21 @@ describe('Stable API', () => {
   }
 ,
   ejerlav: {
+
     json: {
+      mini: [{
+        params: {
+          kode: '60851'
+        },
+        value: {
+          "kode": 60851,
+          "navn": "Borup, Osted",
+          "visueltcenter_x": 11.93255624,
+          "visueltcenter_y": 55.53796482,
+          "href": "http://dawa/ejerlav/60851",
+          "tekst": "Borup, Osted (60851)"
+        }
+      }],
       nestet: [{
         params: {
           kode: '60851'
