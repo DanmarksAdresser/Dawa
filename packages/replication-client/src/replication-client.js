@@ -48,7 +48,8 @@ const commands = [
         type: 'boolean',
         description: `Download a complete copy of all entities instead of relying on events to perform the update.\
  Used if new attributes has been added, or if data inconsistencies are suspected.`
-      }]
+      },
+      entitiesParam]
     },
     {
       name: 'gen-config',
@@ -166,7 +167,7 @@ const runCommand = (command, options) => go(function* () {
     else {
       yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, txid => go(function* () {
         const datamodel = yield httpClient.datamodel();
-        yield impl.update(client, txid, datamodel, replicationConfig, pgModel, httpClient, {forceDownload: options.forceDownload});
+        yield impl.update(client, txid, datamodel, replicationConfig, pgModel, httpClient, {forceDownload: options.forceDownload, entities: options.entities});
       })));
     }
   }

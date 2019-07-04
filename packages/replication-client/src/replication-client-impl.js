@@ -270,7 +270,17 @@ const update = (client, localTxid, replicationModels, replicationConfig, pgModel
   const remoteTxid = options.remoteTxid ?
     options.remoteTxid :
     (yield httpClient.lastTransaction()).txid;
-  for (let entityConf of replicationConfig.entities) {
+  const allEntityNames = replicationConfig.entities.map(entityConf => entityConf.name);
+  const entitiesParam = options.entities;
+  let replicatedEntities;
+  if(entitiesParam) {
+    replicatedEntities = _.intersection(allEntityNames, entitiesParam);
+  }
+  else {
+    replicatedEntities = allEntityNames;
+  }
+  for (let entityName of replicatedEntities) {
+    const entityConf = replicationConfig.entities.find(entityConf =>entityConf.name = entityName);
     const bindingConf = replicationConfig.bindings[entityConf.name];
     yield updateEntity(
       client,
