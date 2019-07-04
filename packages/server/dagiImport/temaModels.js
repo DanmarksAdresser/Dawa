@@ -589,7 +589,7 @@ exports.modelList = [{
     tilknytningKey: ['dagi_id'],
     tilknytningTable: 'supplerendebynavntilknytninger',
     useNearestForAdgangsadresseMapping: false,
-    deriveTsv: table => `to_tsvector('adresser', ${table}.navn || ' ' || (select navn from kommuner where kode = ${table}.kommunekode))`
+    deriveTsv: table => `to_tsvector('adresser', ${table}.navn || ' ' || (select navn from kommuner where kode = ${table}.kommunekode) || ' kommune' )`
   },
   {
     singular: 'landsdel',
