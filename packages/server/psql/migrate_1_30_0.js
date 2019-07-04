@@ -8,7 +8,7 @@ const proddb = require('./proddb');
 const configHolder = require('@dawadk/common/src/config/holder');
 const {generateTemaTable, generateTilknytningTable} = require('../dagiImport/sqlGen');
 const {reloadDatabaseCode} = require('./initialization');
-const {createChangeTable, initChangeTable} = require('@dawadk/import-util/src/table-diff');
+const {createChangeTable, initChangeTable, applyCurrentTableToChangeTable} = require('@dawadk/import-util/src/table-diff');
 const tableSchema = require('./tableModel');
 const {importWithoutEvents, withImportTransaction} = require('../importUtil/transaction-util');
 const importDagi = require('../dagiImport/importDagiImpl');
@@ -17,6 +17,7 @@ const { jordstykkeColumns } = require('../components/importers/matrikel');
 const { execute } = require('../components/execute');
 const { EXECUTION_STRATEGY} = require('../components/common');
 const { allProcessors } = require('../components/processors/all-processors');
+const { derive } = require('@dawadk/import-util/src/table-diff-protocol');
 
 const schema = configHolder.mergeConfigSchemas([
   {
@@ -78,6 +79,14 @@ runConfigured(schema, [], config => go(function* () {
           'wfsMulti',
           5000000);
       }));
+    yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
+      for(let table of ['stednavne', 'kommuner','dagi_supplerendebynavne', 'afstemningsomraader', 'menighedsraadsafstemningsomraader', 'regioner', 'politikredse', 'retskredse', 'sogne', 'opstillingskredse', 'storkredse', 'valglandsdele', 'ejerlav', 'jordstykker']) {
+        const tableModel = tableSchema.tables[table];
+        const tsvColumn = tableModel.columns.find(attr => attr.type === 'tsv');
+        yield client.query(`update ${table} set tsv = ${derive(tsvColumn)(table)}`);
+        yield applyCurrentTableToChangeTable(client, tableModel, ['tsv']);
+      }
+    }));
     yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
       yield execute(client, txid, allProcessors, EXECUTION_STRATEGY.verify);
     }));

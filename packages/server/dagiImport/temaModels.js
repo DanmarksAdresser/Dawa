@@ -486,7 +486,7 @@ exports.modelList = [{
     tilknytningKey: ['kommunekode', 'afstemningsområdenummer'],
     tilknytningTable: 'afstemningsomraadetilknytninger',
     useNearestForAdgangsadresseMapping: true,
-    deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn || ' ' || ${table}.afstemningsstednavn)`
+    deriveTsv: table => `to_tsvector('adresser', ${table}.nummer || ' ' || ${table}.navn || ' ' || (select navn from kommuner where kommuner.kode = kommunekode) || ' ' || ${table}.afstemningsstednavn)`
 
   },
   {
