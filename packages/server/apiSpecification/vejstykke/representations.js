@@ -35,20 +35,22 @@ const miniSchema = globalSchemaObject({
   properties: Object.assign({},
     commonSchemaDefinitions.VejstykkeRef.properties,
     {
+      adresseringsnavn: normalizedFieldSchema('adresseringsnavn'),
       kommunenavn: {
         type: 'string',
         description: 'Navnet på den kommune, som vejstykket er beliggende i.'
       },
+      navngivenvej_id: normalizedFieldSchema('navngivenvej_id'),
       tekst: {
         type: 'string',
         description: 'Navnet på vejstykket efterfulgt af kommunen på formen "{vejnavn}, ${kommunenavn} kommune"',
       }
     }),
-  docOrder: ['href', 'kommunekode','kode', 'navn', 'tekst', 'kommunenavn']
+  docOrder: ['href', 'kommunekode','kode', 'navn', 'adresseringsnavn', 'tekst', 'kommunenavn', 'navngivenvej_id']
 });
 
 exports.mini = representationUtil.miniRepresentation([
-  'kommunekode', 'kode', 'navn', 'kommunenavn'],
+  'kommunekode', 'kode', 'navn', 'adresseringsnavn', 'kommunenavn', 'navngivenvej_id'],
   fields,
   miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'vejstykke', [row.kommunekode, row.kode]),
