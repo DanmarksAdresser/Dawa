@@ -1354,6 +1354,73 @@ it("autocomplete nr", function(done){
 
 });
 
+
+describe('Landsdele', function(){
+
+  it("q=syd*", function(done){
+    request(encodeURI(host+"/landsdele?q=syd*&cache=no-cache"), function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var landsdele= JSON.parse(body);
+      var navn= landsdele[0].navn;
+
+      //console.log(util.inspect(bynavne[0]));
+      //console.log(bynavn);
+      assert(navn.search('Syd')!=-1,"Navn indeholder ikke Syd")
+      done();
+    })
+  })
+
+
+it("autocomplete nuts3", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'landsdele';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'DK011';
+    options.qs.autocomplete= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var landsdele= JSON.parse(body);
+      assert(landsdele.length > 0, 'Der burde være landsdele, som starter med DK011')
+      // regioner.forEach(function (adgangsadresse, index) {
+      //   assert(husnrstørreogligmed(adgangsadresse.husnr,'14C'));
+      // });
+      //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
+      done();
+    })
+  })
+
+  it("autocomplete navn", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'landsdele';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'byen';
+    options.qs.autocomplete= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var landsdele= JSON.parse(body);
+      assert(landsdele.length > 0, 'Der burde være landsdele, som starter med byen');
+      request(landsdele[0].href+'?cache=no-cache', (error, response, body) => { 
+        console.log(landsdele[0].href); 
+        assert.equal(error,null, 'href adresserer ikke en landsdel');
+        assert.equal(response.statusCode,200, 'href adresserer ikke en landsdel');
+        var landsdel= JSON.parse(body);
+        request(landsdel.href+'?cache=no-cache', (error, response, body) => { 
+          console.log(landsdel.href); 
+          assert.equal(error,null, 'href adresserer ikke en landsdel');
+          assert.equal(response.statusCode,200, 'href adresserer ikke en landsdel');
+          done();
+        })
+      })
+    })
+  })
+
+});
+
 describe('Sognesøgning', function(){
 
   it("q=grøn*", function(done){
@@ -1599,6 +1666,26 @@ it("autocomplete nr", function(done){
     })
   })
 
+  it("autocomplete navn 2", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'afstemningsomraader';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'ho';
+    options.qs.autocomplete= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med ho')
+      request(afstemningsområder[0].href, function (error, response, body) {
+        assert.equal(error,null, 'ugyldig href');
+        assert.equal(response.statusCode,200, 'ugyldig href');
+        done();
+      })
+    })
+  })
+
   it("reverse geokodning", function(done){
     var options= {};
     options.baseUrl= host;
@@ -1674,6 +1761,26 @@ it("autocomplete nr", function(done){
       // });
       //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
       done();
+    })
+  })
+
+  it("autocomplete navn 2", function(done){
+    var options= {};
+    options.baseUrl= host;
+    options.url= 'menighedsraadsafstemningsomraader';
+    options.qs= {cache: 'no-cache'};
+    options.qs.q= 'ho';
+    options.qs.autocomplete= true;
+    request(options, function (error, response, body) {
+      assert.equal(error,null);
+      assert.equal(response.statusCode,200);
+      var afstemningsområder= JSON.parse(body);
+      assert(afstemningsområder.length > 0, 'Der burde være afstemningsområder, som starter med ho')
+      request(afstemningsområder[0].href+'?cache=no-cache', function (error, response, body) {
+        assert.equal(error,null, 'Ugyldig href');
+        assert.equal(response.statusCode,200, 'Ugyldig href');
+        done();
+      })
     })
   })
 
