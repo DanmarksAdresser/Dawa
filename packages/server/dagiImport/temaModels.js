@@ -635,7 +635,7 @@ exports.modelList = [{
     tilknytningKey: ['nuts3'],
     tilknytningTable: 'landsdelstilknytninger',
     useNearestForAdgangsadresseMapping: true,
-    deriveTsv: table => `to_tsvector('adresser', ${table}.navn)`
+    deriveTsv: table => `to_tsvector('adresser', ${table}.navn || ' ' || ${table}.nuts3)`
   }
 ];
 

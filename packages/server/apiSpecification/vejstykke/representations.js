@@ -41,12 +41,12 @@ const miniSchema = globalSchemaObject({
         description: 'Navnet på den kommune, som vejstykket er beliggende i.'
       },
       navngivenvej_id: normalizedFieldSchema('navngivenvej_id'),
-      tekst: {
+      betegnelse: {
         type: 'string',
         description: 'Navnet på vejstykket efterfulgt af kommunen på formen "{vejnavn}, ${kommunenavn} kommune"',
       }
     }),
-  docOrder: ['href', 'kommunekode','kode', 'navn', 'adresseringsnavn', 'tekst', 'kommunenavn', 'navngivenvej_id']
+  docOrder: ['href', 'kommunekode','kode', 'navn', 'adresseringsnavn', 'betegnelse', 'kommunenavn', 'navngivenvej_id']
 });
 
 exports.mini = representationUtil.miniRepresentation([
@@ -54,7 +54,7 @@ exports.mini = representationUtil.miniRepresentation([
   fields,
   miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'vejstykke', [row.kommunekode, row.kode]),
-  row => `${row.navn}, ${row.kommunenavn} kommune`);
+  row => `${row.navn}, ${row.kommunenavn} Kommune (${kode4String(row.kode)})`);
 
 exports.autocomplete = {
   schema: globalSchemaObject( {

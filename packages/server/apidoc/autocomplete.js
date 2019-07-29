@@ -69,6 +69,9 @@ module.exports = [
         ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
         ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
         ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].'
+    }, {
+      name: 'geometri',
+      doc: 'Angiver hvilken geometri der anvendes ved geometriske søgninger (polygon- eller cirkelparametrene). Mulige værdier: "adgangspunkt" eller "vejpunkt".'
     },
       {
         name: 'cirkel',

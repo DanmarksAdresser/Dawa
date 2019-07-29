@@ -27,7 +27,7 @@ const autocompleteFields = _.filter(fields, function(field) {
 
 const miniSchema = globalSchemaObject({
   properties: {
-    tekst: {
+    betegnelse: {
       type: 'string',
       description: 'Tekstbeskrivelse af ejerlavet på formen "{navn} ({kode})'
     },
@@ -38,7 +38,7 @@ const miniSchema = globalSchemaObject({
     'kode': normalizedFieldSchema('kode'),
     'navn' : normalizedFieldSchema('navn')
   },
-  docOrder: ['tekst', 'href', 'kode', 'navn']
+  docOrder: ['betegnelse', 'href', 'kode', 'navn']
 });
 
 exports.mini = representationUtil.miniRepresentation(['kode', 'navn'], fields, miniSchema,

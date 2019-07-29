@@ -108,7 +108,7 @@ const miniFieldNames = ['nr', 'navn', 'stormodtager'];
 
 const miniSchema = globalSchemaObject({
   properties: {
-    tekst: {
+    betegnelse: {
       description: 'Postnummeret (4 cifre) efterfulgt af postnummerområdets navn, f.eks. "8260 Viby J".',
       type: 'string'
     },
@@ -130,7 +130,7 @@ const miniSchema = globalSchemaObject({
       description: 'Angiver, om postnummeret er et stormodtagerpostnummer.'
     }
   },
-  docOrder: ['tekst', 'href', 'nr', 'navn', 'stormodtager']
+  docOrder: ['betegnelse', 'href', 'nr', 'navn', 'stormodtager']
 });
 
 const formatPostnummerTekst = row => `${row.nr} ${row.navn}`;

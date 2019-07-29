@@ -21,7 +21,7 @@ const miniSchema = globalSchemaObject({
       type: 'string',
       description: 'Vejnavnet.'
     },
-    tekst: {
+    betegnelse: {
       type: 'string',
       description: 'Tekstbeskrivelse af det vejnavnet - identisk med navn'
     },
@@ -30,7 +30,7 @@ const miniSchema = globalSchemaObject({
       description: 'Det vejnavnets URL.'
     }
   },
-  docOrder: ['href', 'navn', 'tekst']
+  docOrder: ['href', 'navn', 'betegnelse']
 });
 
 exports.mini = representationUtil.miniRepresentation(['navn'], fields,

@@ -54,7 +54,7 @@ exports.defaultFlatRepresentation = function (fields) {
   };
 };
 
-exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatter, textFormatter) =>{
+exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatter, betegnelseFormatter) =>{
   const miniFieldNamesSet = new Set(miniFieldNames);
   const allFieldNamesSet = new Set(allFields.map(field => field.name));
   if(allFieldNamesSet.has('visueltcenter_x')) {
@@ -74,7 +74,7 @@ exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatt
     }
   }
   const miniFields = allFields.filter(field => miniFieldNamesSet.has(field.name));
-  const outputFields = [...miniFields.map(field => field.name), 'href', 'tekst'];
+  const outputFields = [...miniFields.map(field => field.name), 'href', 'betegnelse'];
   return {
     fields: miniFields,
     outputFields,
@@ -84,7 +84,7 @@ exports.miniRepresentation = (miniFieldNames, allFields, miniSchema, hrefFormatt
       return row => {
         const result = flatMapper(row);
         result.href = hrefFormatter(baseUrl, row);
-        result.tekst = textFormatter(row);
+        result.betegnelse = betegnelseFormatter(row);
         return result;
       }
     }
@@ -98,14 +98,14 @@ exports.autocompleteRepresentation = (miniRepresentation, dataPropertyName) => {
   };
   const schema = {
     properties: {
-      tekst: miniSchema.properties.tekst
+      tekst: miniSchema.properties.betegnelse
     },
     docOrder: ['tekst', dataPropertyName]
   };
   delete miniSchema.properties.tekst;
   schema.properties[dataPropertyName] = miniSchema;
   schema.properties[dataPropertyName].docOrder =
-   _.without(schema.properties[dataPropertyName].docOrder, 'tekst');
+   _.without(schema.properties[dataPropertyName].docOrder, 'betegnelse');
   return {
     fields: miniRepresentation.fields,
     schema: globalSchemaObject(schema),
@@ -114,9 +114,9 @@ exports.autocompleteRepresentation = (miniRepresentation, dataPropertyName) => {
       return row => {
         const miniResult = miniMapper(row);
         const result = {
-          tekst: miniResult.tekst
+          tekst: miniResult.betegnelse
         };
-        delete miniResult.tekst;
+        delete miniResult.betegnelse;
         result[dataPropertyName] = miniResult;
         return result;
       };

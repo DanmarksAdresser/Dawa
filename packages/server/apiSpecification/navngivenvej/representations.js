@@ -28,13 +28,13 @@ const fieldsExcludedFromFlat = ['beliggenhed_vejnavnelinje', 'beliggenhed_vejnav
 const flatFields = representationUtil.fieldsWithoutNames(fields, fieldsExcludedFromFlat);
 exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
-const miniFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn'];
+const miniFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn', 'administrerendekommunekode', 'administrerendekommunenavn'];
 
 const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
 
 const miniSchema = globalSchemaObject({
   properties: {
-    tekst: {
+    betegnelse: {
       description: 'Navnet på den navngivne vej',
       type: 'string'
     },
@@ -46,8 +46,16 @@ const miniSchema = globalSchemaObject({
     'darstatus': normalizedFieldSchema('darstatus'),
     'navn': normalizedFieldSchema('navn'),
     'adresseringsnavn': normalizedFieldSchema('adresseringsnavn'),
+    administrerendekommunekode: {
+      type: 'string',
+      description: 'Den administrerende kommunes kommunekode'
+    },
+    administrerendekommunenavn: {
+      type: 'string',
+      description: 'Den administrerende kommunes navn'
+    }
   },
-  docOrder: ['tekst', 'href', 'id', 'darstatus', 'navn', 'adresseringsnavn']
+  docOrder: ['betegnelse', 'href', 'id', 'darstatus', 'navn', 'adresseringsnavn', 'administrerendekommunekode', 'administrerendekommunenavn']
 });
 
 exports.mini = representationUtil.miniRepresentation(
@@ -58,7 +66,7 @@ exports.mini = representationUtil.miniRepresentation(
   row => row.navn
 );
 
-exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'navngivenven');
+exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'navngivenvej');
 
 exports.json = {
   schema: globalSchemaObject({

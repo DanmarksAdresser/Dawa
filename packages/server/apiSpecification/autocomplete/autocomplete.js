@@ -11,6 +11,7 @@ const adresseTextMatch = require('../adresseTextMatch');
 const levenshtein = require('../levenshtein');
 const commonParameters = require('../common/commonParameters');
 const config = require('@dawadk/common/src/config/holder').getConfig();
+const adgangsadresseParameters = require('../adgangsadresse/parameters');
 
 const { go } = require('ts-csp');
 
@@ -245,6 +246,7 @@ const delegatedParameters = [
     schema: schema.postnr,
     multi: true
   },
+  ...adgangsadresseParameters.geometri,
   ...commonParameters.geomWithin,
   ...commonParameters.crs
 ];

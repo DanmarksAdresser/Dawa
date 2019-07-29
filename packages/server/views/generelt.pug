@@ -31,6 +31,11 @@ block main
       pre <a href="/kommuner/0101?struktur=nestet&format=geojson">#{url}/kommuner/0101?struktur=nestet&format=geojson</a>
     p Nogle ressourcer understøtter også en særlig mini-struktur, som indeholder de vigtigste felter. Det gælder eksempelvis adgangsadresser:
       pre <a href="/adgangsadresser?struktur=mini&per_side=10">#{url}/adgangsadresser?struktur=mini&per_side=10</a>
+
+    h3.anchor-header#parametervalidering Parametervalidering
+    p DAWA accepterer som udgangspunkt ukendte parametre. Derfor returneres ikke nogen fejl, hvis klienten ved en vejl anvender et forkert navn til en parameter. Tilføj parameteren "valider" for at modtage en
+      | fejl hvis der anvendes ukendte parametre. Eksempel:
+      pre <a href="/adgangsadresser?regionkode=1084&valider">#{url}/adgangsadresser?regionkode=1084&valider</a>
     h3.anchor-header#tidsformat Tidsformat
     p Tidspunkter returneres i to forskellige formater, som begge er specificeret i <a href='http://tools.ietf.org/html/rfc3339'>Date and Time on the Internet: Timestamps</a>. Det drejer sig om <a href='http://tools.ietf.org/html/rfc3339#page-4'>Coordinated Universal Time (UTC)</a> og <a href='http://tools.ietf.org/html/rfc3339#page-5'>Unqualified Local Time</a>. Vi havde foretrukket ét format, nemlig UTC, men da det ikke er alle vore datakilder, som kan leverer dette, har vi været nød til anvende to. UTC har formen: 2000-02-05T12:00:00.000Z. Unqualified Local Time har formen: 2009-02-11T09:56:50.000.
 

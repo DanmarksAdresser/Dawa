@@ -22,7 +22,7 @@ const fieldsExcludedFromJson = ['geom_json', 'visueltcenter'];
 
 const miniSchema = globalSchemaObject({
   properties: {
-    tekst: {
+    betegnelse: {
       type: 'string',
       description: 'Stednavnets navn'
     },
@@ -52,7 +52,7 @@ const miniSchema = globalSchemaObject({
       description: 'Stednavnets navnestatus. Mulige værdier: "officielt", "uofficielt", "suAutoriseret"',
     }
   },
-  docOrder: ['tekst', 'href', 'id', 'navn', 'navnestatus', 'hovedtype', 'undertype']
+  docOrder: ['betegnelse', 'href', 'id', 'navn', 'navnestatus', 'hovedtype', 'undertype']
 });
 
 exports.mini = representationUtil.miniRepresentation(

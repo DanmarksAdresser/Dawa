@@ -30,7 +30,7 @@ describe('Mini-format', () => {
       });
       expect(result).to.have.length(1);
       expect(result[0]).to.deep.equal({
-        "tekst": "Hovedvejen 292, Boruphuse, 4320 Lejre",
+        "betegnelse": "Hovedvejen 292, Boruphuse, 4320 Lejre",
         "id": "0a3f5081-c2b5-32b8-e044-0003ba298018",
         "href": "http://dawa/adgangsadresser/0a3f5081-c2b5-32b8-e044-0003ba298018",
         "status": 1,
@@ -56,7 +56,7 @@ describe('Mini-format', () => {
       });
       expect(result).to.have.length(1);
       expect(result[0]).to.deep.equal({
-        "tekst": "Hovedvejen 292, Boruphuse, 4320 Lejre",
+        "betegnelse": "Hovedvejen 292, Boruphuse, 4320 Lejre",
         "href": "http://dawa/adresser/0a3f50ab-a7fe-32b8-e044-0003ba298018",
         "id": "0a3f50ab-a7fe-32b8-e044-0003ba298018",
         "status": 1,
@@ -87,7 +87,7 @@ describe('Mini-format', () => {
       });
       expect(result).to.have.length(1);
       expect(result[0]).to.deep.equal({
-        "tekst": "Hovedvejen 292, Boruphuse, 4320 Lejre",
+        "betegnelse": "Hovedvejen 292, Boruphuse, 4320 Lejre",
         "id": "0a3f5081-c2b5-32b8-e044-0003ba298018",
         "href": "http://dawa/adgangsadresser/0a3f5081-c2b5-32b8-e044-0003ba298018",
         "status": "1",
@@ -115,7 +115,7 @@ describe('Mini-format', () => {
       });
       expect(result).to.have.length(1);
       expect(result[0]).to.deep.equal({
-        "tekst": "Hovedvejen 292, Boruphuse, 4320 Lejre",
+        "betegnelse": "Hovedvejen 292, Boruphuse, 4320 Lejre",
         "id": "0a3f50ab-a7fe-32b8-e044-0003ba298018",
         "href": "http://dawa/adresser/0a3f50ab-a7fe-32b8-e044-0003ba298018",
         "status": "1",

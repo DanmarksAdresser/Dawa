@@ -70,7 +70,7 @@ const miniFieldNames = miniFieldNamesWithoutCoords.concat(['x', 'y']);
 
 const miniSchema = globalSchemaObject({
   properties: {
-    tekst: {
+    betegnelse: {
       description: 'Adgangsadressenbetegnelsen på formen {vej} {husnr}, {supplerende bynavn}, {postnr} {postnrnavn}',
       type: 'string'
     },
@@ -139,7 +139,7 @@ const miniSchema = globalSchemaObject({
       type: 'number'
     }
   },
-  docOrder: ['tekst', 'href', 'id', 'status', 'darstatus', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn',
+  docOrder: ['betegnelse', 'href', 'id', 'status', 'darstatus', 'kommunekode', 'vejkode', 'vejnavn', 'adresseringsvejnavn', 'husnr', 'supplerendebynavn', 'postnr', 'postnrnavn',
     'stormodtagerpostnr', 'stormodtagerpostnrnavn', 'x', 'y']
 });
 

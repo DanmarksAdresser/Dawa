@@ -98,7 +98,7 @@ const navngivenvejkommunedel_mat = {
       name: 'adresseringsnavn'
     },
     tsvColumn({
-      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '') || ' ' || (select navn from kommuner where kode = ${table}.kommunekode) || ' kommune'))`
+      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '') || ' ' || (select navn from kommuner where kode = ${table}.kommunekode) || ' kommune ' || to_char(${table}.kode, '0000') ))`
     }),
     geomColumn({}),
     {

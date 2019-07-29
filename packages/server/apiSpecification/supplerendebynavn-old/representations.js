@@ -59,7 +59,7 @@ const miniSchema = globalSchemaObject({
       type: 'string',
       description: 'Det supplerende bynavns navn'
     },
-    tekst: {
+    betegnelse: {
       type: 'string',
       description: 'Tekstbeskrivelse af det supplerende bynavn - identisk med navn'
     },
@@ -68,7 +68,7 @@ const miniSchema = globalSchemaObject({
       description: 'Det supplerende bynavns URL.'
     }
   },
-  docOrder: ['href', 'navn', 'tekst']
+  docOrder: ['href', 'navn', 'betegnelse']
 });
 
 exports.mini = representationUtil.miniRepresentation(['navn'], fields,

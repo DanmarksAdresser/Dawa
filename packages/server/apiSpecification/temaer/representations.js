@@ -77,21 +77,21 @@ kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
   };
 });
 
-const kodeNavnMiniTekst = (row) => `${row.navn} (${kode4String(row.kode)})`;
-const kodeNrMiniTekst = (row) => `${row.navn} (${row.nummer})`;
-const miniTekst = {
-  kommune: kodeNavnMiniTekst,
-  region: kodeNavnMiniTekst,
-  politikreds: kodeNavnMiniTekst,
-  retskreds: kodeNavnMiniTekst,
-  sogn: kodeNavnMiniTekst,
-  menighedsrådsafstemningsområde: kodeNrMiniTekst,
-  opstillingskreds: kodeNrMiniTekst,
-  storkreds: kodeNrMiniTekst,
+const kodeNavnMiniBetegnelse = (row) => `${row.navn} (${kode4String(row.kode)})`;
+const kodeNrMiniBetegnelse = (row) => `${row.navn} (${row.nummer})`;
+const miniBetegnelse = {
+  kommune: kodeNavnMiniBetegnelse,
+  region: kodeNavnMiniBetegnelse,
+  politikreds: kodeNavnMiniBetegnelse,
+  retskreds: kodeNavnMiniBetegnelse,
+  sogn: kodeNavnMiniBetegnelse,
+  menighedsrådsafstemningsområde: kodeNrMiniBetegnelse,
+  opstillingskreds: kodeNrMiniBetegnelse,
+  storkreds: kodeNrMiniBetegnelse,
   valglandsdel: row => `${row.navn} (${row.bogstav})`,
   afstemningsområde: row => `${row.navn}, ${row.kommunenavn} (${row.afstemningsstednavn})`,
-  supplerendebynavn: row => `${row.navn}, ${row.kommunenavn} kommune`,
-  landsdel: row => row.navn
+  supplerendebynavn: row => `${row.navn}, ${row.kommunenavn} Kommune`,
+  landsdel: row => `${row.navn} (${row.nuts3})`
 };
 
 const mapMetaFields = row => {
@@ -106,7 +106,7 @@ const mapMetaFields = row => {
 
 const miniFieldNames = {
   kommune: ['dagi_id', 'kode', 'navn', 'udenforkommuneinddeling', 'regionskode', 'regionsnavn'],
-  landsdel: ['dagi_id', 'nuts3', 'navn', 'regionskode', 'regionsnavn', 'landsdelskode', 'landsdelsnavn'],
+  landsdel: ['dagi_id', 'nuts3', 'navn', 'regionskode', 'regionsnavn', 'landsdelsnavn'],
   region: ['dagi_id', 'kode', 'navn'],
   afstemningsområde: ['dagi_id', 'nummer', 'navn', 'kommunekode', 'kommunenavn', 'opstillingskredsnummer', 'opstillingskredsnavn', 'afstemningsstednavn'],
   opstillingskreds: ['dagi_id', 'kode', 'nummer', 'navn', 'kredskommunekode', 'kredskommunenavn', 'storkredsnummer', 'storkredsnavn'],
@@ -124,7 +124,7 @@ const miniFieldsNotInOutput = {
 };
 
 const makeHrefFormatter = model => (baseUrl, row) =>
-  makeHrefFromPath(baseUrl, model.plural, _.map(model.primaryKey, function (keyName) {
+  makeHrefFromPath(baseUrl, model.path || model.plural, _.map(model.primaryKey, function (keyName) {
       return row[keyName];
     }
   ));
@@ -297,7 +297,7 @@ const mrAfstemningsområdeRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.menighedsrådsafstemningsområde, ['geom_json']);
   const mapper = baseUrl => row => {
     const result = Object.assign(mapMetaFields(row), {
-      href: makeHref(baseUrl, 'menighedsrådsafstemningsområde', [row.kommunekode, row.nummer]),
+      href: makeHrefFromPath(baseUrl, 'menighedsraadsafstemningsomraader', [row.kommunekode, row.nummer]),
       dagi_id: numberToString(row.dagi_id),
       ændret: row.ændret,
       geo_version: row.geo_version,
@@ -403,7 +403,7 @@ const landsdelsRepresentation = (() => {
   const fields = representationUtil.fieldsWithoutNames(fieldMap.landsdel, ['geom_json']);
   const mapper = baseUrl => row => {
     const result = Object.assign(mapMetaFields(row), {
-      href: makeHrefFromPath(baseUrl, 'landsdel', [row.dagi_id]),
+      href: makeHref(baseUrl, 'landsdel', [row.nuts3]),
       dagi_id: numberToString(row.dagi_id),
       navn: row.navn,
       nuts3: row.nuts3,
@@ -480,7 +480,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     fields,
     null,
     makeHrefFormatter(model),
-    miniTekst[model.singular]);
+    miniBetegnelse[model.singular]);
 
   if(miniFieldsNotInOutput[model.singular]) {
     representations.mini.outputFields = representations.mini.outputFields.filter(

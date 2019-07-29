@@ -11,10 +11,27 @@ const testdb = require('@dawadk/test-util/src/testdb');
 require('../../apiSpecification/allSpecs');
 
 // These tests are expected to fail whenever the API is changed or extended
-describe('Stable API', () => {
+describe.only('Stable API', () => {
   const expectedResults = {
     vejstykke: {
+
       json: {
+        mini: [{
+          params: {
+            kommunekode: '0101',
+            kode: '0728'
+          },
+          value: {
+            "kode": "0728",
+            "kommunekode": "0101",
+            "kommunenavn": "København",
+            "navn": "Borgmester Christiansens Gade",
+            "adresseringsnavn": "Borgm Christiansensg",
+            "navngivenvej_id": "13eff875-5986-489b-b1e8-10ecacd95e09",
+            "href": "http://dawa/vejstykker/101/728",
+            "betegnelse": "Borgmester Christiansens Gade, København Kommune (0728)"
+          }
+        }],
         nestet: [{
           params: {
             kommunekode: '0169',
@@ -107,6 +124,26 @@ describe('Stable API', () => {
       },
       landsdel: {
         json: {
+          mini: [{
+            params: {
+              nuts3: 'DK014'
+            },
+            value: {
+              "dagi_id": "200002",
+              "navn": "Landsdel test",
+              "nuts3": "DK014",
+              "regionskode": "1084",
+              "regionsnavn": "Region test",
+              "bbox_xmin": 12.5711324,
+              "bbox_ymin": 55.59055443,
+              "bbox_xmax": 12.57129891,
+              "bbox_ymax": 55.59064873,
+              "visueltcenter_x": 12.57121565,
+              "visueltcenter_y": 55.59060158,
+              "href": "http://dawa/landsdele/DK014",
+              "betegnelse": "Landsdel test (DK014)"
+            }
+          }],
           nestet: [{
             params: {
               nuts3: 'DK014'
@@ -121,7 +158,7 @@ describe('Stable API', () => {
               "dagi_id": "200002",
               "geo_version": 1,
               "geo_ændret": "2019-05-27T07:30:38.403Z",
-              "href": "http://dawa/landsdel/200002",
+              "href": "http://dawa/landsdele/DK014",
               "navn": "Landsdel test",
               "nuts3": "DK014",
               "visueltcenter": [
@@ -457,7 +494,7 @@ describe('Stable API', () => {
               "brugsprioritet": "primær",
               "navnestatus": "officielt",
               "href": "http://dawa/stednavne2/19e4392f-c7b1-5d41-0000-d380220a2006/Test%20stednavn%20punkt",
-              "tekst": "Test stednavn punkt, Kommune test kommune (hal)"
+              "betegnelse": "Test stednavn punkt, Kommune test Kommune (hal)"
             }
         }]
       },
@@ -522,7 +559,7 @@ describe('Stable API', () => {
           "visueltcenter_x": 11.93255624,
           "visueltcenter_y": 55.53796482,
           "href": "http://dawa/ejerlav/60851",
-          "tekst": "Borup, Osted (60851)"
+          "betegnelse": "Borup, Osted (60851)"
         }
       }],
       nestet: [{
@@ -986,6 +1023,26 @@ describe('Stable API', () => {
 ,
   supplerendebynavn: {
     json: {
+      mini: [{
+        params: {
+          dagi_id: "655869"
+        },
+        value: {
+          "dagi_id": "655869",
+          "navn": "Kragerup",
+          "darstatus": 3,
+          "kommunekode": null,
+          "kommunenavn": null,
+          "bbox_xmin": null,
+          "bbox_ymin": null,
+          "bbox_xmax": null,
+          "bbox_ymax": null,
+          "visueltcenter_x": null,
+          "visueltcenter_y": null,
+          "href": "http://dawa/supplerendebynavne2/655869",
+          "betegnelse": "Kragerup, null Kommune"
+        }
+      }],
       nestet: [{
         params: {
           dagi_id: "665614"
@@ -1055,7 +1112,7 @@ describe('Stable API', () => {
           id: '0a3f5089-0408-32b8-e044-0003ba298018'
         },
         value: {
-          "tekst": "Brammingevej 18, Bolbro, 5200 Odense V",
+          "betegnelse": "Brammingevej 18, Bolbro, 5200 Odense V",
           "id": "0a3f5089-0408-32b8-e044-0003ba298018",
           "href": "http://dawa/adgangsadresser/0a3f5089-0408-32b8-e044-0003ba298018",
           "status": 1,
@@ -1407,7 +1464,7 @@ describe('Stable API', () => {
           id: '0a3f50b3-a112-32b8-e044-0003ba298018'
         },
         value: {
-          "tekst": "Brammingevej 18, 1. tv, Bolbro, 5200 Odense V",
+          "betegnelse": "Brammingevej 18, 1. tv, Bolbro, 5200 Odense V",
           "id": "0a3f50b3-a112-32b8-e044-0003ba298018",
           "href": "http://dawa/adresser/0a3f50b3-a112-32b8-e044-0003ba298018",
           "status": 1,
@@ -1687,6 +1744,23 @@ describe('Stable API', () => {
 ,
   navngivenvej: {
     json: {
+      mini: [{
+        params: {
+          id: "1e260555-5c81-434f-af77-1bea6fc4c8a8"
+        },
+        value: {
+          "administrerendekommunekode": "0420",
+          "administrerendekommunenavn": "Assens",
+          "adresseringsnavn": "Gl. Assensvej",
+          "betegnelse": "Gl. Assensvej",
+          "darstatus": "gældende",
+          "href": "http://dawa/navngivneveje/1e260555-5c81-434f-af77-1bea6fc4c8a8",
+          "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",
+          "navn": "Gl. Assensvej",
+          "visueltcenter_x": 10.09839859,
+          "visueltcenter_y": 55.37194497
+        }
+      }],
       nestet: [{
         params: {
           id: "1e260555-5c81-434f-af77-1bea6fc4c8a8"
