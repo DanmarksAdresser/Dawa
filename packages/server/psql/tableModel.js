@@ -895,6 +895,10 @@ exports.materializations = Object.assign({
         columns: ['adgangspunktid']
       },
       {
+        table: 'dar1_Adressepunkt_current',
+        columns: ['vejpunkt_id']
+      },
+      {
         table: 'dar1_SupplerendeBynavn_current',
         columns: ['supplerendebynavn_id']
       }, {
