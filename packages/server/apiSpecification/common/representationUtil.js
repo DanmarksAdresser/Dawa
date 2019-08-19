@@ -146,8 +146,6 @@ function removeZCoordinate(coordinates) {
 
 exports.removeZCoordinate = removeZCoordinate;
 
-
-
 exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentation) {
   return {
     fields: propertiesRepresentation.fields.concat([geomJsonField]),
@@ -187,10 +185,21 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
   };
 };
 
+const addGeojsonRepresentations = (representations, geomjsonField) => {
+  for(let [geojsonKey, repKey] of [['geojsonNested', 'json'], ['geojsonMini', 'mini'], ['geojson', 'flat']]) {
+    if(representations[repKey]) {
+      representations[geojsonKey] = exports.geojsonRepresentation(geomjsonField, representations[repKey]);
+    }
+  }
+};
+
+exports.addGeojsonRepresentations = addGeojsonRepresentations;
+
 const insertAfter = (arr, elm, ins) => {
   const index = arr.indexOf(elm) + 1;
   arr.splice(index, 0, ins);
-}
+};
+
 
 exports.adresseFlatRepresentation = function (fields, additionalFieldsMapper) {
   var fieldsExcludedFromFlat = ['geom_json', 'x', 'y', 'vejpunkt_geom_json', 'adgangspunkt_geom_json'];

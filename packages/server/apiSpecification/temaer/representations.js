@@ -554,8 +554,7 @@ temaModels.modelList.filter(model => model.published).forEach(model => {
     };
   }
   const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-  representations.geojson = representationUtil.geojsonRepresentation(geojsonField, representations.flat);
-  representations.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, representations.json);
+  representationUtil.addGeojsonRepresentations(representations, geojsonField);
   exports[model.singular] = representations;
 
   registry.addMultiple(model.singular, 'representation', module.exports[model.singular]);

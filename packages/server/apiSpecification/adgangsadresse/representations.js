@@ -648,11 +648,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
 
 exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'adgangsadresse');
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
-
-const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFieldsWithoutCoords);
-exports.geojsonMini = representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
+representationUtil.addGeojsonRepresentations(exports, geojsonField);
 
 var registry = require('../registry');
 registry.addMultiple('adgangsadresse', 'representation', module.exports);

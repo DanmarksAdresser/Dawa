@@ -34,11 +34,7 @@ var kvhxFormat = require('./kvhxTransformer').format;
 var kvhFormat = require('../adgangsadresse/kvhTransformer').format;
 
 
-const adgangsadresseMiniFieldNamesWithoutCoords = _.without(adgangsadresseRepresentations.mini.outputFields, 'x', 'y');
-const miniFieldNamesWithoutCoords = adgangsadresseMiniFieldNamesWithoutCoords.concat(['adgangsadresseid', 'etage', 'dør']);
-const miniFieldNames = miniFieldNamesWithoutCoords.concat(['x', 'y']);
-
-const miniFieldsWithoutCoords = fields.filter(field => _.contains(miniFieldNamesWithoutCoords, field.name));
+const miniFieldNames = [...adgangsadresseRepresentations.mini.outputFields, 'adgangsadresseid', 'etage', 'dør'];
 
 exports.flat = representationUtil.adresseFlatRepresentation(fields, function(rs) {
   return {
@@ -185,11 +181,7 @@ exports.json = {
 };
 
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
-
-const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFieldsWithoutCoords);
-exports.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
+representationUtil.addGeojsonRepresentations(exports, geojsonField);
 
 var registry = require('../registry');
 registry.addMultiple('adresse', 'representation', module.exports);

@@ -173,8 +173,7 @@ exports.json = {
   }
 };
 const geomJsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geomJsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geomJsonField, exports.json);
+representationUtil.addGeojsonRepresentations(exports, geomJsonField);
 
 var registry = require('../registry');
 registry.addMultiple('vejstykke', 'representation', module.exports);

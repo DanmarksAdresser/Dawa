@@ -30,8 +30,6 @@ exports.flat = representationUtil.defaultFlatRepresentation(flatFields);
 
 const miniFieldNames = ['id', 'darstatus', 'navn', 'adresseringsnavn', 'administrerendekommunekode', 'administrerendekommunenavn'];
 
-const miniFields = fields.filter(field => _.contains(miniFieldNames, field.name));
-
 const miniSchema = globalSchemaObject({
   properties: {
     betegnelse: {
@@ -218,11 +216,7 @@ exports.json = {
 };
 
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
-
-const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFields);
-exports.geojsonMini=representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
+representationUtil.addGeojsonRepresentations(exports, geojsonField);
 
 
 const registry = require('../registry');
