@@ -1,11 +1,9 @@
 "use strict";
 
-const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const q = require('q');
 const _ = require('underscore');
-const Promise = require('bluebird');
 
 const { go } = require('ts-csp');
 const oisCommon = require('./common');
@@ -15,76 +13,31 @@ const importUtil = require('@dawadk/import-util/src/postgres-streaming');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
 const tablediff = require('../importUtil/table-diff-legacy');
 const logger = require('@dawadk/common/src/logger').forCategory('oisImport');
-const tmp = require('tmp');
-
-const OIS_FILE_REGEX = /^ois_bbrt_(co\d+t)_(na|da|te)000_(\d+)_(\d+)_(\d+).zip$/i;
+const {fileNameToDescriptor, getLastImportedSerial, getOisFileRegex} = require('../ois-common/ois-import');
 
 
-function createUnzippedStream(filePath, filePattern) {
-  var args = ['e', '-so', path.resolve(filePath), filePattern];
-  var proc = child_process.spawn('7za', args);
-  return proc.stdout;
-}
-
-function unzipToTempFile(filePath, filePattern) {
-  const tmpFile = tmp.fileSync();
-  const out = fs.createWriteStream(tmpFile.name);
-  var args = ['e', '-so', path.resolve(filePath), filePattern];
-  var proc = child_process.spawn('7za', args);
-  proc.stdout.pipe(out);
-  return new Promise(resolve => {
-    out.on('finish', () => resolve(tmpFile));
-  })
-}
-
-
-
-function createOisStream(entityName, dataDir, fileName) {
+const createOisStream = (entityName, dataDir, fileName) => go(function*() {
   const model = oisModels[entityName];
-  const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
-  const stream = createUnzippedStream(path.join(dataDir, fileName), xmlFileName);
-  return oisParser.oisStream(stream, model);
-}
-
-const createOisStreamTmp = (entityName, dataDir, fileName) => go(function*() {
-  const model = oisModels[entityName];
-  const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
-  const tmpFile = yield unzipToTempFile(path.join(dataDir, fileName), xmlFileName);
-  const stream = fs.createReadStream(tmpFile.name);
-  stream.on('end', () => tmpFile.removeCallback());
   return oisParser.oisStream(stream, model);
 });
 
 function oisFileToTable(client, entityName, dataDir, fileName, table) {
   return q.async(function*() {
     const columns = oisCommon.postgresColumnNames[entityName];
-    const oisStream = yield createOisStreamTmp(entityName, dataDir, fileName);
+    const oisStream = yield createOisStream(entityName, dataDir, fileName);
     yield promisingStreamCombiner([oisStream].concat(importUtil.streamToTablePipeline(client, table, columns)));
+    const streams = streamToTablePipeline()
   })();
 }
 
-const fileNameToDescriptor = fileName => {
-  const match = OIS_FILE_REGEX.exec(fileName);
-  if (!match) {
-    throw new Error(`Filename ${fileName} did not match regex`);
-  }
-  const oisTable = match[1].toLowerCase();
-  const total = match[2].toLowerCase() !== 'da';
-  const serial = parseInt(match[3], 10);
-  return {
-    oisTable: oisTable,
-    total: total,
-    serial: serial,
-    fileName: fileName,
-    fileDate: match[4],
-    fileTime: match[5]
-  };
+const bbrtFilenameToDescriptor = fileName => {
+  return fileNameToDescriptor('bbrt', fileName);
 };
 
-const getLastImportedSerial = (client, entityName) => q.async(function*() {
-  const alreadyImportedSerialsSql = `SELECT max(serial) as serial FROM ois_importlog WHERE entity = $1`;
-  return (yield client.queryp(alreadyImportedSerialsSql, [entityName])).rows[0].serial;
-})();
+const getLastImportedSerialForEntity = (client, entityName) => {
+  const oisTable = oisModels[entityName].oisTable;
+  return getLastImportedSerial(client, oisTable);
+};
 
 const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
   return q.async(function*() {
@@ -97,8 +50,9 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
         files.push(fileOrDirectory);
       }
     }
-    const oisFiles = files.filter(file => OIS_FILE_REGEX.test(file));
-    const descriptors = oisFiles.map(fileNameToDescriptor);
+    const oisFileRegex = getOisFileRegex('bbrt');
+    const oisFiles = files.filter(file => oisFileRegex.test(file));
+    const descriptors = oisFiles.map(bbrtFilenameToDescriptor);
     const oisTable = oisModel.oisTable;
     const descriptorsForEntity = descriptors.filter(descriptor => descriptor.oisTable.toLowerCase() === oisTable.toLowerCase());
     if (descriptorsForEntity.length === 0) {
@@ -115,7 +69,7 @@ const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
       }
     }
     const serials = Object.keys(serialToFileMap).map(serial => parseInt(serial, 10));
-    const lastImportedSerial = yield getLastImportedSerial(client, oisModelName);
+    const lastImportedSerial = yield getLastImportedSerialForEntity(client, oisModelName);
     const lastTotalSerial = _.max(descriptors.filter(descriptor => descriptor.total).map(descriptor => descriptor.serial));
     const firstSerialToImport = Math.max(lastImportedSerial+1, lastTotalSerial);
     const serialsToImport = serials.filter(serial => serial >= firstSerialToImport);
@@ -249,7 +203,5 @@ function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst, entity
 exports.oisFileToTable = oisFileToTable;
 exports.importOis = importOis;
 exports.internal = {
-  createOisStream: createOisStream,
-  createUnzippedStream: createUnzippedStream,
   findFileName: findFileName
 };

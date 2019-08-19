@@ -13,7 +13,8 @@ const allProcessors = [
   require('./legacy-supplerende-bynavne'),
   require('./place-associations'),
   require('./hoejder'),
-  require('./hoejde_importer_afventer')
+  require('./hoejde_importer_afventer'),
+  ...require('./grbbr'),
 ];
 
 const validateProcessors = (processors) => {

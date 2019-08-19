@@ -13,6 +13,7 @@ const dar10SqlSchema = require('../dar10/generateSqlSchemaImpl');
 const generateViews = require('../dar10/generateViews');
 var sqlCommon = require('./common');
 const generateOisSchemaImpl = require('../ois/generateSqlSchemaImpl');
+const { generateSql } = require('../ois2/model');
 const tableModel = require('./tableModel');
 const { createChangeTable } = require('@dawadk/import-util/src/table-diff');
 const { generateAllTemaTables, generateTilknytningMatViews } = require('../dagiImport/sqlGen');
@@ -20,6 +21,7 @@ const { generateTilknytningMatView } = require('../importUtil/tilknytningUtil');
 const stednavnTilknytningModels = require('../stednavne/stednavnTilknytningModels');
 const jordstykkeTilknytningModel = require('../matrikeldata/jordstykkeTilknytningModel');
 const bygningTilknytningModel = require('../bygninger/bygningTilknytningModel');
+const oisModel = require('../ois2/model');
 
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
@@ -31,10 +33,11 @@ const createChangeTables = (client)=> go(function*() {
   'navngivenvejkommunedel_postnr_mat', 'brofasthed', 'ikke_brofaste_adresser', 'bygninger', 'bygningtilknytninger', 'bygning_kommune',
   'supplerendebynavn2_postnr', 'matrikel_jordstykker', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
     'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter', 'supplerendebynavne_mat',
-  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'vask_adgangsadresser', 'vask_adresser', 'vejnavne_mat'];
+  'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'vask_adgangsadresser', 'vask_adresser', 'vejnavne_mat',
+    ...oisModel.allTableModels.map(tableModel => tableModel.table)];
   for(let table of tableNames) {
     const model = tableModel.tables[table];
-    assert(model);
+    assert(model, "no table model for " + model.table);
     yield createChangeTable(client, tableModel.tables[table]);
   }
 });
@@ -151,16 +154,9 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'wms_vejpunktlinjer'},
   {name: 'wfs_adgangsadresser', type: 'view'},
   {name: 'wfs_adresser', type: 'view'},
-  {name: 'wms_navngivneveje', type: 'view'}
+  {name: 'wms_navngivneveje', type: 'view'},
+  {name: 'grbbr_virkning_ts'}
 ]);
-
-exports.forAllTableSpecs = function(client, func){
-  return q.async(function*() {
-    for(let spec of exports.tableSpecs) {
-      yield func(client, spec);
-    }
-  })();
-};
 
 exports.loadTables = function(client, scriptDir) {
   return q.async(function*() {
@@ -174,6 +170,7 @@ exports.loadTables = function(client, scriptDir) {
     }
     yield client.query(dar10SqlSchema);
     yield client.queryp(generateOisSchemaImpl());
+    yield client.query(generateSql());
     yield createChangeTables(client);
   })();
 };
@@ -199,6 +196,7 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
     }
     yield client.query(generateTilknytningMatView(jordstykkeTilknytningModel));
     yield client.query(generateTilknytningMatView(bygningTilknytningModel));
+    yield client.query(oisModel.viewSql);
   })();
 };
 

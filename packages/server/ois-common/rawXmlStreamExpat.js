@@ -6,7 +6,7 @@ var util = require('util');
 
 module.exports = function rawXmlStream(fileStream, oisTableName) {
   var parser = new expat.Parser('ISO-8859-1');
-
+console.log(oisTableName);
   util.inherits(ParseStream, Readable);
   function ParseStream() {
     Readable.call(this, { objectMode : true });
@@ -25,6 +25,7 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
     }
     else if (currentObj && !currentField) {
       currentField = name;
+      currentObj[currentField] = '';
     }
   });
   parser.on('endElement', function(name) {
@@ -37,7 +38,6 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
       if(!result) {
         fileStream.pause();
       }
-
     }
   });
 
@@ -53,9 +53,6 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
     if(currentField) {
       // for some reason, text content of a node may be split into
       // multiple text events, so we need to merge them together.
-      if(!currentObj[currentField]) {
-        currentObj[currentField] = '';
-      }
       currentObj[currentField] += text;
     }
   });

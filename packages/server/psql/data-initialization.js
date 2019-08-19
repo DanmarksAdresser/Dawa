@@ -7,7 +7,7 @@ var loadStormodtagereImpl = require('./loadStormodtagereImpl');
 const importDagiImpl = require('../dagiImport/importDagiImpl');
 const importDar10Impl = require('../dar10/importDarImpl');
 const importJordstykkerImpl = require('../matrikeldata/importJordstykkerImpl');
-const importOisImpl = require('../ois/importOisImpl');
+// const importOisImpl = require('../ois/importOisImpl');
 const {withImportTransaction} = require('../importUtil/transaction-util');
 const importStednavneImpl = require('../stednavne/importStednavneImpl');
 const temaModels = require('../dagiImport/temaModels');
@@ -16,6 +16,7 @@ const importHeightsImpl = require('../heights/importAdresseHeightsImpl');
 const importBygningerImpl = require('../bygninger/importBygningerImpl');
 const importVejmidterImpl = require('../vejmidter/importVejmidterImpl');
 const logger = require('@dawadk/common/src/logger').forCategory('loadTestData');
+
 const initializeData = client => go(function*() {
   logger.info('Importing raw CSV');
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {
@@ -49,7 +50,7 @@ const initializeData = client => go(function*() {
     yield generateHistoryImpl.generateHistory(client, txid, '2018-05-05T00:00:00.000Z');
   }));
   logger.info('Importing OIS');
-  yield importOisImpl.importOis(client, path.join(__dirname, '../test/data/ois'));
+  // yield importOisImpl.importOis(client, path.join(__dirname, '../test/data/ois'));
   logger.info('Importing jordstykker');
   client.allowParallelQueries = false;
   yield withImportTransaction(client, 'loadtestData', (txid) => go(function* () {

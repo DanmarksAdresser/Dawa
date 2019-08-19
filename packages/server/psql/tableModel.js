@@ -9,6 +9,7 @@ const {
   offloadedGeomBlobrefColumn, privateColumn
 } = require('@dawadk/import-util/src/common-columns');
 const {name} = require('@dawadk/import-util/src/table-diff-protocol');
+const oisModel = require('../ois2/model');
 
 const vejnavne_mat = {
   table: 'vejnavne_mat',
@@ -777,6 +778,7 @@ const vask_adresser = {
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
+const oisTables = _.indexBy(oisModel.allTableModels, 'table');
 exports.tables = Object.assign({
     adgangsadresser,
     enhedsadresser,
@@ -820,7 +822,8 @@ exports.tables = Object.assign({
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
-  dar10CurrentTables);
+  dar10CurrentTables,
+  oisTables);
 
 exports.materializations = Object.assign({
   navngivenvej_mat: {

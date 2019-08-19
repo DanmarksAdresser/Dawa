@@ -5,8 +5,7 @@ const util = require('util');
 const _ = require('underscore');
 const { go } = require('ts-csp');
 
-
-const sqlUtil = require('@dawadk/common/src/postgres/sql-util')
+const {mergeValidTime, createHeadTailTempTable } = require('@dawadk/import-util/src/history-util');
 
 util.inherits(TableInserter, Writable);
 function TableInserter(client, table, columns) {
@@ -45,37 +44,6 @@ const cutoffAfter = (client, table, cutoffDate) => go(function*() {
 const cutoffBefore = (client, table, cutoffDate) => go(function*(){
   yield client.query(` delete from ${table} where upper(virkning) <= $1::timestamptz`, [cutoffDate]);
   yield client.query(`update ${table} SET virkning = tstzrange(greatest(lower(virkning), $1::timestamptz), upper(virkning), '[)')`, [cutoffDate]);
-});
-
-const createHeadTailTempTable = (client, tableName, htsTableName, idColumns, columns, bitemporal) => {
-  const selectIds = sqlUtil.selectList(tableName, idColumns.concat('virkning'));
-  const selectHead = "(lag(virkning, 1) OVER w) IS NULL OR COALESCE(upper(lag(virkning, 1) OVER w) <> lower(virkning), TRUE) AS head";
-  const selectTail = "(lead(virkning, 1) OVER w) IS NULL OR COALESCE(lower(lead(virkning, 1) OVER w) <> upper(virkning), TRUE) AS tail";
-  const window = `WINDOW w AS (PARTITION BY ${columns.join(', ')} ORDER BY lower(virkning))`;
-  const whereClause = bitemporal ? " WHERE upper(registrering) IS NULL" : "";
-  const selectQuery = `SELECT ${selectIds}, ${selectHead}, ${selectTail} FROM ${tableName} ${whereClause} ${window}`;
-  const sql = `CREATE TEMP TABLE ${htsTableName} AS (${selectQuery});` +
-    ` CREATE INDEX ON ${htsTableName}(${idColumns.join(', ')})`;
-  return client.queryp(sql);
-};
-
-const mergeValidTime = (client, tableName, targetTableName, idColumns, columns, bitemporal) => go(function*() {
-  const htsTableName = tableName + "_hts";
-  yield createHeadTailTempTable(client, tableName, htsTableName, idColumns, columns, bitemporal);
-  const subselect =
-    `SELECT upper(ht2.virkning)
-     FROM ${htsTableName} ht2
-     WHERE ${sqlUtil.columnsEqualClause('ht', 'ht2', idColumns)}
-      AND ht2.tail AND lower(ht2.virkning) >= lower(ht.virkning) ORDER BY ${columns.join(', ')}, lower(virkning) LIMIT 1`
-  const select = `SELECT ${sqlUtil.selectList('tab', columns)},
-  tstzrange(lower(ht.virkning),
-  (${subselect}), '[)') as virkning
-  FROM ${htsTableName} ht
-  JOIN ${tableName} tab ON ${sqlUtil.columnsEqualClause('ht', 'tab', idColumns)} AND ht.virkning = tab.virkning ${bitemporal ? ' AND upper(tab.registrering) IS NULL' : ''}
-  WHERE ht.head`;
-  const sql = `CREATE TEMP TABLE ${targetTableName} AS (${select})`;
-  yield client.queryp(sql);
-  yield client.queryp(`DROP TABLE ${htsTableName}`);
 });
 
 const processAdgangsadresserHistory = client => go(function*() {
