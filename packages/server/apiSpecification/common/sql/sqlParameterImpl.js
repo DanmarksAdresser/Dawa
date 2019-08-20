@@ -82,10 +82,15 @@ function searchWhereClause(paramAlias, columnSpec) {
   return "(" + columnName + " @@ to_tsquery('adresser_query', " + paramAlias + "))";
 }
 
+const sqlRankExpr = (queryParamAlias, vectorExpr) =>
+  `round(1000000 * ts_rank(${vectorExpr}, to_tsquery('adresser_query',${queryParamAlias}), 16))`;
+
 function searchOrderClause(paramAlias) {
-  var columnName = 'tsv';
-  return 'round(1000000 * ts_rank(' + columnName + ", to_tsquery('adresser_query'," + paramAlias + '), 16)) DESC';
+  var vectorExpr = 'tsv';
+  return `${sqlRankExpr(paramAlias, vectorExpr)} DESC`;
 }
+
+exports.searchOrderClause = searchOrderClause;
 
 module.exports.husnrInterval = function () {
   return function (sqlParts, params) {
@@ -155,30 +160,57 @@ const applyOrdering = (sqlParts, columnSpecs, transformed, fieldNames) => {
   }
 };
 
-function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
-  var parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
-  dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
-  // In order to not examine too many results,
-  // we first fetch at most 1000 rows without ranking them in a subselect,
-  // and the ranks that result, rather than ranking a very large
-  // number of results.
-  sqlUtil.addSelect(columnSpec, 'tsv', sqlParts, params);
-  sqlParts.limit = 1000;
-  var query = dbapi.createQuery(sqlParts);
-  var transformedQuery = {
-    select: ['*'],
-    from: ['(' + query.sql + ') AS searchResult'],
-    whereClauses: [],
-    groupBy: '',
-    orderClauses: [],
-    sqlParams: query.params
-  };
-  var rankAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
-  transformedQuery.orderClauses.unshift(searchOrderClause(rankAlias));
-  _.extend(sqlParts, transformedQuery);
-  params.transformedQuery = true;
+exports.searchFilter = columnSpec => (sqlParts, params) => {
+  if(notNull(params.q)) {
+    const tsQuery = params.autocomplete ?
+      toPgSuggestQuery(params.q) :
+      toPgSearchQuery(params.q);
+    const parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
+    dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
+    console.log('ADDING SELECT FOR tsv');
+    sqlUtil.addSelect(columnSpec, 'tsv', sqlParts, params);
+    sqlParts.limit = 1000;
+    var query = dbapi.createQuery(sqlParts);
+    var transformedQuery = {
+      select: ['*'],
+      from: ['(' + query.sql + ') AS searchResult'],
+      whereClauses: [],
+      groupBy: '',
+      orderClauses: [],
+      sqlParams: query.params
+    };
+    _.extend(sqlParts, transformedQuery);
+    params.transformedQuery = true;
+  }
+};
 
-}
+exports.searchRank = (sqlParts, params) => {
+  if(notNull(params.q)) {
+    const tsQuery = params.autocomplete ?
+      toPgSuggestQuery(params.q) :
+      toPgSearchQuery(params.q);
+    const rankAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
+    sqlParts.orderClauses.unshift(searchOrderClause(rankAlias));
+  }
+};
+
+const searchRankStednavne = (sqlParts, params) => {
+  if(notNull(params.q)) {
+    const tsQuery = params.autocomplete ?
+      toPgSuggestQuery(params.q) :
+      toPgSearchQuery(params.q);
+    const tsRankQueryAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
+    const defaultRankExpr = sqlRankExpr(tsRankQueryAlias, 'tsv');
+    const byNameRankExpr = sqlRankExpr(tsRankQueryAlias, `to_tsvector('adresser', navn)`);
+    const rankClause = `GREATEST(${defaultRankExpr}, ${byNameRankExpr}) DESC`;
+    sqlParts.orderClauses.unshift(rankClause);
+    const qAlias = dbapi.addSqlParameter(sqlParts, params.q);
+    sqlParts.orderClauses.push(`levenshtein(lower(navn), lower(${qAlias}), 2, 1, 3)`)
+  }
+};
+
+exports.searchRankStednavne = searchRankStednavne;
+
 
 /*
  * Applies a search query and orders the results by rank
@@ -188,11 +220,9 @@ function applyTsQuery(sqlParts, params, tsQuery, columnSpec) {
 exports.search = function (columnSpec, orderFields) {
   orderFields = orderFields || [];
   return function (sqlParts, params) {
+    exports.searchFilter(columnSpec)(sqlParts, params);
+    exports.searchRank(sqlParts, params);
     if (notNull(params.q)) {
-      const tsQuery = params.autocomplete ?
-        toPgSuggestQuery(params.q) :
-        toPgSearchQuery(params.q);
-      applyTsQuery(sqlParts, params, tsQuery, columnSpec);
       applyOrdering(sqlParts, columnSpec, params.transformedQuery, orderFields);
     }
   };
