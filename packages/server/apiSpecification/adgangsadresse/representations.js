@@ -144,8 +144,6 @@ const miniSchema = globalSchemaObject({
 });
 
 
-const miniFieldsWithoutCoords = fields.filter(field => _.contains(miniFieldNamesWithoutCoords, field.name));
-
 exports.mini = representationUtil.miniRepresentation(miniFieldNames, fields, miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'adgangsadresse', [row.id]),
   adresseText);

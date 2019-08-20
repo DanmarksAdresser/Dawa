@@ -6,7 +6,6 @@ const  {assembleSqlModel}  = require('../common/sql/sqlUtil');
 const dbapi = require('../../dbapi');
 const { applyFallbackToFuzzySearch }= require('../common/sql/sqlUtil')
 const stedColumns  = require('../sted/columns');
-const { notNull } = require('../util');
 
 const columns = Object.entries(stedColumns).reduce((memo, [columnName, col]) => {
     memo[`sted_${columnName}`] = col;

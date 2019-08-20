@@ -167,7 +167,6 @@ exports.searchFilter = columnSpec => (sqlParts, params) => {
       toPgSearchQuery(params.q);
     const parameterAlias = dbapi.addSqlParameter(sqlParts, tsQuery);
     dbapi.addWhereClause(sqlParts, searchWhereClause(parameterAlias, columnSpec));
-    console.log('ADDING SELECT FOR tsv');
     sqlUtil.addSelect(columnSpec, 'tsv', sqlParts, params);
     sqlParts.limit = 1000;
     var query = dbapi.createQuery(sqlParts);
