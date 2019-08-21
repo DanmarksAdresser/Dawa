@@ -10,7 +10,9 @@ const tableDiffNg = require('@dawadk/import-util/src/table-diff');
 const tableModel = require('../../psql/tableModel');
 const bygningerTableModel = tableModel.tables.bygninger;
 const { computeVisualCenter } = require('@dawadk/import-util/src/visual-center');
+const logger = require('@dawadk/common/src/logger').forCategory('bygningImport');
 
+const uuidRegex = /^([0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12})$/;
 const importBygningerFromStream = (client, txid, stream, maxChanges) => go(function*() {
   yield client.query('create temp table fetch_bygninger_raw(id bigint, bygningstype text, ændret timestamptz, metode3d text, målested text, bbrbygning_id uuid, synlig boolean, overlap boolean, visueltcenter text, geomjson text)');
   const jsonTransformer = JSONStream.parse('features.*');
@@ -18,13 +20,21 @@ const importBygningerFromStream = (client, txid, stream, maxChanges) => go(funct
     const raw = geojsonFeature.properties;
     const geometry = geojsonFeature.geometry;
     const visueltCenter = computeVisualCenter(geometry);
+    let bbrBygningId = raw.BBRUUID;
+    if(bbrBygningId && !uuidRegex.test(bbrBygningId.toLowerCase())) {
+      logger.error('Invalid BBR Bygning ID', {
+        id: raw.ID_LOKALID,
+        invalidBbrId: bbrBygningId
+      });
+      bbrBygningId = null;
+    }
     return {
       id: raw.ID_LOKALID,
       bygningstype: raw.BYGNINGSTYPE,
       ændret: raw.REGISTRERINGFRA,
       målested: raw.MAALESTEDBYGNING,
       metode3d: raw.METODE3D,
-      bbrbygning_id: raw.BBRUUID,
+      bbrbygning_id: bbrBygningId,
       synlig: raw.SYNLIGBYGNING === 'true' ,
       overlap: raw.OVERLAPBYGNING === 'true',
       visueltcenter: visueltCenter ? JSON.stringify({type: 'Point', coordinates: visueltCenter}) : null,
