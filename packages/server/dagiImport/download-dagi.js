@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 "use strict";
 
-const q = require('q');
-const { go } = require('ts-csp');
+const Promise = require('bluebird');
+const {go} = require('ts-csp');
 var request = require('request-promise');
 var _ = require('underscore');
 var fs = require('fs');
 var path = require('path');
-var async = require('async');
 var xml2js = require('xml2js');
 var logger = require('@dawadk/common/src/logger');
 
-const runConfigured  = require('@dawadk/common/src/cli/run-configured');
+const runConfigured = require('@dawadk/common/src/cli/run-configured');
 
 var wfsServices = {
   zone: {
@@ -99,11 +98,11 @@ const schema = {
   }
 };
 
-runConfigured(schema, [], config => go(function*() {
+runConfigured(schema, [], config => go(function* () {
 
   var serviceSpec = wfsServices[config.get('service')];
 
-  if(!serviceSpec) {
+  if (!serviceSpec) {
     throw new Error('ugyldig service parameter');
   }
 
@@ -111,7 +110,7 @@ runConfigured(schema, [], config => go(function*() {
   var dagiLogin = config.get('service_login') || serviceSpec.defaultLogin;
   var dagiPassword = config.get('service_password');
 
-  if(serviceSpec.loginRequired && !dagiPassword) {
+  if (serviceSpec.loginRequired && !dagiPassword) {
     throw new Error("Intet kodeord angivet");
   }
 
@@ -121,57 +120,64 @@ runConfigured(schema, [], config => go(function*() {
 
   var directory = path.resolve(config.get('target_dir'));
 
-  function saveDagiTema(temaNavn, callback) {
+  const saveDagiTema = temaNavn => go(function* () {
     logger.info("downloadDagi", "Downloader DAGI tema " + temaNavn);
-    var queryParams = {
+    const queryParams = {
       SERVICE: 'WFS',
       VERSION: serviceSpec.wfsVersion,
       REQUEST: 'GetFeature',
     };
     const typenameParamName = serviceSpec.wfsVersion === '2.0.0' ? 'TYPENAMES' : 'TYPENAME';
-    queryParams[typenameParamName] =  featureNames[temaNavn];
+    queryParams[typenameParamName] = featureNames[temaNavn];
 
-    if(serviceSpec.loginRequired){
+    if (serviceSpec.loginRequired) {
       _.extend(queryParams, {
         password: dagiPassword
       });
       queryParams[serviceSpec.loginParam] = dagiLogin;
     }
-    var paramString = _.map(queryParams,function (value, name) {
+    const paramString = _.map(queryParams, function (value, name) {
       return name + '=' + encodeURIComponent(value);
     }).join('&');
-    var url = dagiUrl + '&' + paramString;
-    logger.info("downloadDagi", "fetching from WFS", { url: url});
-    function getDagiTema( callback) {
-      request.get(url, function (err, response, body) {
-        if (err) {
-          return callback(err);
-        }
-        if (response.statusCode >= 300) {
-          return callback(new Error('Unexpected status code from WFS service: ' + response.statusCode + ' response: ' + body));
-        }
-        xml2js.parseString(body, {
-          tagNameProcessors: [xml2js.processors.stripPrefix],
-          trim: true
-        }, function (err) {
-          if (err) {
-            return callback(err);
-          }
-          callback(null, body);
-        });
-      });
-    }
-    async.retry(config.get('retries'), getDagiTema, function(err, temaXml) {
-      if(err) {
-        return callback(err);
+    const url = dagiUrl + '&' + paramString;
+    logger.info("downloadDagi", "fetching from WFS", {url: url});
+
+    const getDagiTema = () => go(function* () {
+      const response = yield request.get({url, resolveWithFullResponse: true});
+      const body = response.body;
+      if (response.statusCode >= 300) {
+        throw new Error('Unexpected status code from WFS service: ' + response.statusCode + ' response: ' + body);
       }
-      var filename = config.get('file_prefix') + temaNavn;
-      fs.writeFile(path.join(directory, filename), temaXml, callback);
+      const parsedXml = yield Promise.promisify(xml2js.parseString)(body, {
+        tagNameProcessors: [xml2js.processors.stripPrefix],
+        trim: true
+      });
+      if(!parsedXml.FeatureCollection) {
+        throw new Error('Unexpected response content from WFS service.', {
+          truncatedResponse: body.substring(0, 100)
+        });
+      }
+      return body;
     });
-  }
 
-  for(let temaNavn of featuresToDownload) {
-    yield q.nfcall(saveDagiTema, temaNavn);
+    const getDagiTemaWithRetry = () => go(function* () {
+      const retries = config.get('retries');
+      for (let i = 0; i < retries; ++i) {
+        try {
+          return yield getDagiTema();
+        } catch (e) {
+          logger.error('downloadDagi', 'Failed to get tema from WFS service', e);
+        }
+      }
+      throw new Error('No more retries, aborting');
+    });
 
+    const temaXml = yield getDagiTemaWithRetry();
+    const filename = config.get('file_prefix') + temaNavn;
+    yield Promise.promisify(fs.writeFile)(path.join(directory, filename), temaXml);
+  });
+
+  for (let temaNavn of featuresToDownload) {
+    yield saveDagiTema(temaNavn);
   }
 }));
