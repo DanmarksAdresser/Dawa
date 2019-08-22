@@ -72,7 +72,6 @@ exports.json = {
 };
 
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
+representationUtil.addGeojsonRepresentations(exports, geojsonField);
 
 registry.addMultiple('bebyggelse', 'representation', module.exports);

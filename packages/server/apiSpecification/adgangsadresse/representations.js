@@ -144,8 +144,6 @@ const miniSchema = globalSchemaObject({
 });
 
 
-const miniFieldsWithoutCoords = fields.filter(field => _.contains(miniFieldNamesWithoutCoords, field.name));
-
 exports.mini = representationUtil.miniRepresentation(miniFieldNames, fields, miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'adgangsadresse', [row.id]),
   adresseText);
@@ -648,11 +646,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
 
 exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'adgangsadresse');
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
-
-const miniWithoutCordsRep = representationUtil.defaultFlatRepresentation(miniFieldsWithoutCoords);
-exports.geojsonMini = representationUtil.geojsonRepresentation(geojsonField, miniWithoutCordsRep);
+representationUtil.addGeojsonRepresentations(exports, geojsonField);
 
 var registry = require('../registry');
 registry.addMultiple('adgangsadresse', 'representation', module.exports);

@@ -143,8 +143,7 @@ exports.autocomplete = representationUtil.autocompleteRepresentation(
   exports.mini, 'postnummer');
 
 const geojsonField = _.findWhere(fields, {name: 'geom_json'});
-exports.geojson = representationUtil.geojsonRepresentation(geojsonField, exports.flat);
-exports.geojsonNested = representationUtil.geojsonRepresentation(geojsonField, exports.json);
+representationUtil.addGeojsonRepresentations(exports, geojsonField);
 
 const registry = require('../registry');
 registry.addMultiple('postnummer', 'representation', module.exports);

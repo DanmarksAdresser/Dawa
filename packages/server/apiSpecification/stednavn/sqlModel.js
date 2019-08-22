@@ -25,6 +25,8 @@ const columns = Object.entries(stedColumns).reduce((memo, [columnName, col]) => 
       column: 'stednavne.tsv'
     }
   });
+
+
 const fuzzySearchParameterImpl = (sqlParts, params) => {
   if(params.fuzzyq) {
     const fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
@@ -38,7 +40,8 @@ const parameterImpls = [
   sqlParameterImpl.reverseGeocodingWithin(),
   sqlParameterImpl.reverseGeocoding('geom', true),
   sqlParameterImpl.geomWithin(),
-  sqlParameterImpl.search(columns, ['sted_id', 'navn']),
+  sqlParameterImpl.searchFilter(columns),
+  sqlParameterImpl.searchRankStednavne,
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, ['sted_id', 'navn'])
 ];

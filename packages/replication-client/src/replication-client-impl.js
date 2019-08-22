@@ -239,6 +239,7 @@ const updateEntity = (client,
   const table = bindingConf.table;
   const hasChangeTable = !!pgModel.public[`${table}_changes`];
   const forceDownload = options.forceDownload;
+
   const hasContent = (yield client.queryRows(`select EXISTS(SELECT * from ${table}) as has_content`))[0].has_content;
   if (!hasContent) {
     return yield initializeEntity(client, remoteTxid, localTxid, replicationModel, replicationSchema,
@@ -280,7 +281,7 @@ const update = (client, localTxid, replicationModels, replicationConfig, pgModel
     replicatedEntities = allEntityNames;
   }
   for (let entityName of replicatedEntities) {
-    const entityConf = replicationConfig.entities.find(entityConf =>entityConf.name = entityName);
+    const entityConf = replicationConfig.entities.find(entityConf =>entityConf.name === entityName);
     const bindingConf = replicationConfig.bindings[entityConf.name];
     yield updateEntity(
       client,
