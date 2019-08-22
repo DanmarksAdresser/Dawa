@@ -43,7 +43,7 @@ const parametersForBothAdresseAndAdgangsAdresse = [
   },
   {
     name: 'husnr',
-    doc: 'Husnummer. Max 4 cifre eventuelt med et efterfølgende bogstav.'
+    doc: 'Husnummer. Max 3 cifre eventuelt med et efterfølgende bogstav.'
   },
   {
     name: 'husnrfra',
