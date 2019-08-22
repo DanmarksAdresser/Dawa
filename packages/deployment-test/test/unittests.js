@@ -153,15 +153,15 @@ describe('Adressesøgning', function(){
     })
   })
 
-  it('postnr=8330&vejnavn=Nygårds Allé', function(done){
-    request(encodeURI(host+'/adresser?postnr=8330&vejnavn=Nygårds Allé&cache=no-cache'), function (error, response, body) {    
-      assert.equal(error,null);
-      assert.equal(response.statusCode,200);
-      var adresser= JSON.parse(body);
-      assert(adresser.length>0);
-      done();
-    })
-  })
+  // it('postnr=8330&vejnavn=Nygårds Allé', function(done){
+  //   request(encodeURI(host+'/adresser?postnr=8330&vejnavn=Nygårds Allé&cache=no-cache'), function (error, response, body) {    
+  //     assert.equal(error,null);
+  //     assert.equal(response.statusCode,200);
+  //     var adresser= JSON.parse(body);
+  //     assert(adresser.length>0);
+  //     done();
+  //   })
+  // })
 
 });
 
