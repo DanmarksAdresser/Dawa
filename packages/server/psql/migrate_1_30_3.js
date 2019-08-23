@@ -29,12 +29,6 @@ runConfigured(schema, [], config => go(function* () {
 
   yield proddb.withTransaction('READ_WRITE', client => go(function* () {
     yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
-      for(let table of ['stednavne', 'kommuner','dagi_supplerendebynavne', 'afstemningsomraader', 'menighedsraadsafstemningsomraader', 'regioner', 'politikredse', 'retskredse', 'sogne', 'opstillingskredse', 'storkredse', 'valglandsdele', 'ejerlav', 'jordstykker']) {
-        const tableModel = tableSchema.tables[table];
-        const tsvColumn = tableModel.columns.find(attr => attr.type === 'tsv');
-        yield client.query(`update ${table} set tsv = ${derive(tsvColumn)(table)}`);
-        yield applyCurrentTableToChangeTable(client, tableModel, ['tsv']);
-      }
     }));
   }));
 }));

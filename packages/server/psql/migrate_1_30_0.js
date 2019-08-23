@@ -60,6 +60,14 @@ runConfigured(schema, [], config => go(function* () {
     yield client.query('alter table regioner_changes add column nuts2 text');
     const jordstykkeColumnsWithGeo = [...jordstykkeColumns, 'geom'];
     yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
+    yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
+      for(let table of ['stednavne', 'kommuner','dagi_supplerendebynavne', 'afstemningsomraader', 'menighedsraadsafstemningsomraader', 'regioner', 'politikredse', 'retskredse', 'sogne', 'opstillingskredse', 'storkredse', 'valglandsdele', 'ejerlav', 'jordstykker', 'navngivenvej']) {
+        const tableModel = tableSchema.tables[table];
+        const tsvColumn = tableModel.columns.find(attr => attr.type === 'tsv');
+        yield client.query(`update ${table} set tsv = ${derive(tsvColumn)(table)}`);
+        yield applyCurrentTableToChangeTable(client, tableModel, ['tsv']);
+      }
+    }));
     yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*() {
       yield client.query(`INSERT INTO matrikel_jordstykker(${jordstykkeColumnsWithGeo.join(',')}) (select ${jordstykkeColumnsWithGeo.join(',')} FROM jordstykker)`);
       yield initChangeTable(client, txid, tableSchema.tables.matrikel_jordstykker);
@@ -79,14 +87,6 @@ runConfigured(schema, [], config => go(function* () {
           'wfsMulti',
           5000000);
       }));
-    yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
-      for(let table of ['stednavne', 'kommuner','dagi_supplerendebynavne', 'afstemningsomraader', 'menighedsraadsafstemningsomraader', 'regioner', 'politikredse', 'retskredse', 'sogne', 'opstillingskredse', 'storkredse', 'valglandsdele', 'ejerlav', 'jordstykker']) {
-        const tableModel = tableSchema.tables[table];
-        const tsvColumn = tableModel.columns.find(attr => attr.type === 'tsv');
-        yield client.query(`update ${table} set tsv = ${derive(tsvColumn)(table)}`);
-        yield applyCurrentTableToChangeTable(client, tableModel, ['tsv']);
-      }
-    }));
     yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
       yield execute(client, txid, allProcessors, EXECUTION_STRATEGY.verify);
     }));
