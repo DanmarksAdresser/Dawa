@@ -61,7 +61,7 @@ exports.mini = representationUtil.miniRepresentation(
   fields,
   miniSchema,
   (baseUrl, row) => makeHref(baseUrl, 'navngivenvej', [row.id]),
-  row => row.navn
+  row => `${row.navn}, ${row.administrerendekommunenavn} Kommune`
 );
 
 exports.autocomplete = representationUtil.autocompleteRepresentation(exports.mini, 'navngivenvej');

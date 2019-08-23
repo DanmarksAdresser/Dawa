@@ -309,7 +309,7 @@ const navngivenvej_mat = {
     bboxColumn({}),
     visueltCenterDerived({}),
     tsvColumn({
-      deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, '')))`
+      deriveFn: (table) => `setweight(to_tsvector('adresser', processForIndexing(coalesce(${table}.navn, ''))), 'A') || setweight(to_tsvector('adresser', (select processForIndexing(navn|| ' Kommune') from kommuner where kode = administrerendekommune)), 'B')`
     })
   ]
 };
