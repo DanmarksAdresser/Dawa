@@ -61,7 +61,7 @@ runConfigured(schema, [], config => go(function* () {
     const jordstykkeColumnsWithGeo = [...jordstykkeColumns, 'geom'];
     yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
     yield withImportTransaction(client, 'migrate_1_30_0', txid => go(function*(){
-      for(let table of ['stednavne', 'kommuner','dagi_supplerendebynavne', 'afstemningsomraader', 'menighedsraadsafstemningsomraader', 'regioner', 'politikredse', 'retskredse', 'sogne', 'opstillingskredse', 'storkredse', 'valglandsdele', 'ejerlav', 'jordstykker', 'navngivenvej']) {
+      for(let table of ['stednavne', 'kommuner','dagi_supplerendebynavne', 'afstemningsomraader', 'menighedsraadsafstemningsomraader', 'regioner', 'politikredse', 'retskredse', 'sogne', 'opstillingskredse', 'storkredse', 'valglandsdele', 'ejerlav', 'jordstykker', 'navngivenvej_mat']) {
         const tableModel = tableSchema.tables[table];
         const tsvColumn = tableModel.columns.find(attr => attr.type === 'tsv');
         yield client.query(`update ${table} set tsv = ${derive(tsvColumn)(table)}`);
