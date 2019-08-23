@@ -10,7 +10,7 @@ require('../../apiSpecification/allSpecs');
 
 const ID_OMRÅDE = '0e2e13c9-78d0-4751-9f92-bfee3c5a5ad6';
 
-describe('NavngivenVej API', () => {
+describe.only('NavngivenVej API', () => {
   testdb.withTransactionEach('test', (clientFn) => {
     const getByKeyResource = registry.get({
       entityName: 'navngivenvej',
@@ -73,14 +73,14 @@ describe('NavngivenVej API', () => {
       const result = yield helpers.getJson(clientFn(), autocompleteResource, {}, {
         q: 'engvangsv'
       });
-      assert.strictEqual(result[0].tekst, 'Engvangsvej');
+      assert.strictEqual(result[0].tekst, 'Engvangsvej, Kalundborg Kommune');
     }));
     it(`Kan fuzzy autocomplete navngiven vej`, () => go(function* () {
       const result = yield helpers.getJson(clientFn(), autocompleteResource, {}, {
         q: 'envangsv',
         fuzzy: ''
       });
-      assert.strictEqual(result[0].tekst, 'Engvangsvej');
+      assert.strictEqual(result[0].tekst, 'Engvangsvej, Kalundborg Kommune');
     }));
 
     it('Nedlagte vejstykker er ikke med hvis medtagnedlagte ikke er angivet', () => go(function*() {
@@ -100,6 +100,13 @@ describe('NavngivenVej API', () => {
       const vejstykker = result[0].vejstykker;
       const nedlagt = vejstykker.find(vejstykke => vejstykke.darstatus === 4);
       assert(nedlagt);
+    }));
+
+    it('Kan kombinere polygon-søgning med q-parameter i navngivne veje', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource,
+        {},
+        {q:'Drøsselbjergvej', polygon: '[[[10.18,55.3],[12,55.3],[12,55.6],[12,55.6],[10.18,55.3]]]'});
+      assert.strictEqual(result.length, 1);
     }));
   });
 });

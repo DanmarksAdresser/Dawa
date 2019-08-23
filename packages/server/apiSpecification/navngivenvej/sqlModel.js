@@ -165,11 +165,11 @@ AND NOT (nv.id = ${idAlias})`);
 var parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.includeDeletedNavngivenVej,
-  sqlParameterImpl.search(columns, ['navn']),
   sqlParameterImpl.geomWithin('nv.geom'),
   sqlParameterImpl.reverseGeocoding('nv.geom'),
   distanceParameterImpl,
   regexParameterImpl,
+  sqlParameterImpl.search(columns, ['navn']),
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
