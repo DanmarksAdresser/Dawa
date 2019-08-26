@@ -1752,7 +1752,7 @@ describe('Stable API', () => {
           "administrerendekommunekode": "0420",
           "administrerendekommunenavn": "Assens",
           "adresseringsnavn": "Gl. Assensvej",
-          "betegnelse": "Gl. Assensvej",
+          "betegnelse": "Gl. Assensvej, Assens Kommune",
           "darstatus": "gældende",
           "href": "http://dawa/navngivneveje/1e260555-5c81-434f-af77-1bea6fc4c8a8",
           "id": "1e260555-5c81-434f-af77-1bea6fc4c8a8",

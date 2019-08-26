@@ -3366,7 +3366,7 @@ describe('OIS', function(){
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===5, "Der er ikke fundet fem ejerskab, men " + ejerskaber.length);
+      assert(ejerskaber.length===6, "Der er ikke fundet seks ejerskab, men " + ejerskaber.length);
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 
@@ -3882,7 +3882,7 @@ describe('BBR Light', function(){
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===5, "Der er ikke fundet fem ejerskab, men " + ejerskaber.length);
+      assert(ejerskaber.length===6, "Der er ikke fundet seks ejerskab, men " + ejerskaber.length);
       function grund(element, index, array) {          
         return element.EntitetsType===1; 
       } 

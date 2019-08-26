@@ -193,14 +193,14 @@ exports.searchRank = (sqlParts, params) => {
   }
 };
 
-const searchRankStednavne = (sqlParts, params) => {
+const searchRankPreferName = (sqlParts, params) => {
   if(notNull(params.q)) {
     const tsQuery = params.autocomplete ?
       toPgSuggestQuery(params.q) :
       toPgSearchQuery(params.q);
     const tsRankQueryAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
     const defaultRankExpr = sqlRankExpr(tsRankQueryAlias, 'tsv');
-    const byNameRankExpr = sqlRankExpr(tsRankQueryAlias, `to_tsvector('adresser', navn)`);
+    const byNameRankExpr = sqlRankExpr(tsRankQueryAlias, `setweight(to_tsvector('adresser', navn), 'A')`);
     const rankClause = `GREATEST(${defaultRankExpr}, ${byNameRankExpr}) DESC`;
     sqlParts.orderClauses.unshift(rankClause);
     const qAlias = dbapi.addSqlParameter(sqlParts, params.q);
@@ -208,7 +208,7 @@ const searchRankStednavne = (sqlParts, params) => {
   }
 };
 
-exports.searchRankStednavne = searchRankStednavne;
+exports.searchRankStednavne = searchRankPreferName;
 
 
 /*
