@@ -169,7 +169,8 @@ var parameterImpls = [
   sqlParameterImpl.reverseGeocoding('nv.geom'),
   distanceParameterImpl,
   regexParameterImpl,
-  sqlParameterImpl.search(columns, ['navn']),
+  sqlParameterImpl.searchFilter(columns),
+  sqlParameterImpl.searchRankStednavne,
   fuzzySearchParameterImpl,
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
