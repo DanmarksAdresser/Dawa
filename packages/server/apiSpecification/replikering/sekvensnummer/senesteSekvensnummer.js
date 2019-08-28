@@ -28,8 +28,8 @@ var resource = {
   representations: {flat: representation},
   sqlModel: sqlModel,
   singleResult: true,
-  chooseRepresentation: function(formatParam) {
-    if(!formatParam || formatParam === 'json' || formatParam === 'csv') {
+  chooseRepresentation: ({format})=> {
+    if(!format || format === 'json' || format === 'csv') {
       return representation;
     }
     else {

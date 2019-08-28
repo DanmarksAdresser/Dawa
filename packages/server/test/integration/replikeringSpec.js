@@ -229,7 +229,15 @@ describe('Opslag på replikerings-API', () => {
       const response = yield helpers.getCsvFromHandler(clientFn(), replikeringEventHandler.responseHandler, {}, {entitet: 'adgangsadresse', 'id': '0a3f507b-c0c9-32b8-e044-0003ba298018'});
       assert.strictEqual(response[0].husnr, '4B');
     }));
+
+    it('Kan hente seneste sekvensnummer', () => go(function*() {
+      const response = yield request.get({
+        url: `${config.get('test.dawa_base_url')}/replikering/senestesekvensnummer`,
+        simple: false, resolveWithFullResponse: true, json: true});
+      assert.strictEqual(response.statusCode, 200);
+    }));
   });
+
 });
 
 describe('Ordning af CSV-felter', () => {
