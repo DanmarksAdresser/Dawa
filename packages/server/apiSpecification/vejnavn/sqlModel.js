@@ -51,8 +51,27 @@ const columns = {
     select: "(SELECT json_agg(json_build_object('kode', k.kode, 'navn', k.navn)) from navngivenvejkommunedel_mat v join kommuner k on v.kommunekode = k.kode where v.vejnavn = vejnavne.navn)"
   },
   postnumre: {
-    select: `(SELECT json_agg(json_build_object('nr', p.nr, 'navn', p.navn)) 
-    from navngivenvejkommunedel_mat v join vejstykkerpostnumremat  vp on v.id = vp.navngivenvejkommunedel_id join postnumre p on vp.postnr = p.nr where v.vejnavn = vejnavne.navn)`
+    select: (sqlParts, columnSpec, params) => {
+      // Desværre er tidligere releaset opførsel således, at postnumrene der returneres
+      // er påvirket af en evt. kommunekodeparameter. Vi er derfor nødt til at holde bagudkompatibilitet,
+      // således at de postnumre der returneres kun er dem som er angivet af kommunekode-parameteren.
+      const subquery = {
+        select: ["json_agg(json_build_object('nr', p.nr, 'navn', p.navn)) "],
+        from: ['navngivenvejkommunedel_mat v join vejstykkerpostnumremat  vp on v.id = vp.navngivenvejkommunedel_id join postnumre p on vp.postnr = p.nr'],
+        whereClauses: [`v.vejnavn = vejnavne.navn`],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'kommunekode',
+        multi: true
+      }], {kommunekode: {column: 'vp.kommunekode'}});
+      if(params.kommunekode) {
+        propertyFilterFn(subquery, {kommunekode: params.kommunekode});
+      }
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      return `(${subquerySql})`;
+    }
   }
 };
 
