@@ -25,7 +25,7 @@ const vejnavneParameters = [{
 
   {
     name: 'kommunekode',
-    doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune.',
+    doc: 'Kommunekode. 4 cifre. Eksempel: 0101 for Københavns kommune. Af hensyn til bagudkompatibilitet påvirker parameteren også hvilke postnumre, der returneres for hvert vejnavn. Kun postnumre indenfor den angivne kommune medtages.',
     examples: ['0101']
   },
 
