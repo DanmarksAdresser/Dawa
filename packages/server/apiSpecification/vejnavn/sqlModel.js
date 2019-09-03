@@ -13,9 +13,9 @@ const columns = {
     select: null,
     where: function (sqlParts, parameterArray) {
       const subquery = {
-        select: ["*"],
+        select: ["distinct vejnavn as navn"],
         from: ['navngivenvejkommunedel_mat nvk join vejstykkerpostnumremat vp on nvk.id = vp.navngivenvejkommunedel_id'],
-        whereClauses: [`nvk.vejnavn = vejnavne.navn`],
+        whereClauses: [],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
@@ -25,7 +25,7 @@ const columns = {
       }], {});
       propertyFilterFn(subquery, {postnr: parameterArray});
       const subquerySql = dbapi.createQuery(subquery).sql;
-      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+      sqlParts.from.push('natural join (' + subquerySql + ') pnrs');
     }
   },
   kommunekode: {
