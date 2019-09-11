@@ -116,7 +116,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     const autocompleteTextSql = `(vejnavn || ', ' || k.navn || ' kommune')`;
-    sqlParts.whereClauses.push(`vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT vejnavn, vejnavn <->  ${fuzzyqAlias} as dist from vejstykker ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)`);
+    sqlParts.whereClauses.push(`vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT navn as vejnavn, navn <->  ${fuzzyqAlias} as dist from vejnavne_mat ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)`);
     sqlParts.orderClauses.push(`levenshtein(lower(${autocompleteTextSql}), lower(${fuzzyqAlias}), 2, 1, 3)`);
   }
 }
