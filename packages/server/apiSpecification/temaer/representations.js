@@ -109,7 +109,7 @@ const miniFieldNames = {
   landsdel: ['dagi_id', 'nuts3', 'navn', 'regionskode', 'regionsnavn', 'landsdelsnavn'],
   region: ['dagi_id', 'kode', 'navn'],
   afstemningsområde: ['dagi_id', 'nummer', 'navn', 'kommunekode', 'kommunenavn', 'opstillingskredsnummer', 'opstillingskredsnavn', 'afstemningsstednavn'],
-  opstillingskreds: ['dagi_id', 'kode', 'nummer', 'navn', 'kredskommunekode', 'kredskommunenavn', 'storkredsnummer', 'storkredsnavn'],
+  opstillingskreds: ['dagi_id', 'kode', 'nummer', 'navn', 'kredskommunekode', 'kredskommunenavn', 'storkredsnummer', 'storkredsnavn', 'valgkredsnummer'],
   storkreds: ['dagi_id', 'nummer', 'navn', 'valglandsdelsbogstav', 'valglandsdelsnavn'],
   valglandsdel: ['dagi_id', 'bogstav', 'navn'],
   politikreds: ['dagi_id', 'kode', 'navn'],
@@ -175,6 +175,7 @@ const opstillingskredsJsonRepresentation = (() => {
       nummer: numToStr(row.nummer),
       kode: kode4String(row.nummer),
       navn: row.navn,
+      valgkredsnummer: numToStr(row.valgkredsnummer),
       kredskommune: mapKode4NavnTema('kommune', kode4String(row.kredskommunekode), row.kredskommunenavn, baseUrl),
       region: mapKode4NavnTema('region', row.regionskode, row.regionsnavn, baseUrl),
       storkreds: commonMappers.mapStorkredsRef(row, baseUrl),
@@ -191,6 +192,7 @@ const opstillingskredsJsonRepresentation = (() => {
       navn: normalizedFieldSchema('navn'),
       nummer: normalizedFieldSchema('nummer'),
       kode: normalizedFieldSchema('kode'),
+      valgkredsnummer: normalizedFieldSchema('valgkredsnummer'),
       kredskommune: Object.assign({}, commonSchemaDefinitions.KommuneRef, {description: 'Opstillingskredsens kredskommune.'}),
       region: Object.assign({}, commonSchemaDefinitions.RegionsRef, {description: 'Den region, som opstillingskredsen ligger i.'}),
       storkreds: Object.assign({}, commonSchemaDefinitions.StorkredsRef, {description: 'Den storkreds, som opstillingskredsen tilhører.'}),
@@ -203,7 +205,7 @@ const opstillingskredsJsonRepresentation = (() => {
 
       }
     }, commonGeoProps),
-    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'nummer', 'kode',
+    docOrder: ['dagi_id', 'href', 'navn', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'nummer', 'valgkredsnummer', 'kode',
       'kredskommune', 'region', 'storkreds', 'valglandsdel', 'kommuner']
   });
   return {fields, mapper, schema};
