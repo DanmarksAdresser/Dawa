@@ -846,6 +846,7 @@ describe('Stable API', () => {
             55.59060158
           ],
           "nummer": "99",
+          "valgkredsnummer": "2",
           "kode": "0099",
           "navn": "Opstillingskreds test",
           "kredskommune": {
@@ -888,6 +889,7 @@ describe('Stable API', () => {
           "nummer": "99",
           "kode": "0099",
           "navn": "Opstillingskreds test",
+          "valgkredsnummer": "2",
           "regionskode": "1084",
           "regionsnavn": "Region test",
           "kredskommunekode": "0099",

@@ -164,6 +164,10 @@ const additionalFieldsMap = {
     },
     {
       name: 'valglandsdelsnavn'
+    },
+    {
+      name: 'valgkredsnummer',
+      formatter: numberToString
     }
   ],
   storkreds: [
