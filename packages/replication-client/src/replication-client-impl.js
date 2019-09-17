@@ -12,6 +12,7 @@ const {computeDifferences} = tableDiff;
 const log = require('./log');
 const request = require('request-promise');
 const {geomColumn} = require('@dawadk/import-util/src/common-columns');
+const {withReplicationTransaction} = require('./transactions');
 
 /**
  * Create a process which streams CSV from ch to the specified table
@@ -159,6 +160,7 @@ const updateEntityIncrementally = (client, remoteTxid, localTxid, replicationMod
   const count = (yield client.queryRows(`select count(*)::integer as cnt from ${tmpEventTableName}`))[0].cnt;
   if (count === 0) {
     log('info', `No new records for ${entityConf.name}`);
+    yield client.query(`drop table ${tmpEventTableName}`);
     return;
   }
   // remove any operation that has been replaced by a new operation in the same local transaction
@@ -199,7 +201,7 @@ SELECT operation, ${columnNames.join(',')}
 
   // Store changes in change table
   if(options.useChangeTable) {
-    client.query(`INSERT INTO ${`${bindingConf.table}_changes`}(txid, operation, ${columnNames.join(',')})
+    yield client.query(`INSERT INTO ${`${bindingConf.table}_changes`}(txid, operation, ${columnNames.join(',')})
     (select txid, operation, ${columnNames.join(',')} from ${tmpEventTableName})`);
   }
   yield client.query(`drop table ${tmpEventTableName}`);
@@ -224,7 +226,8 @@ const updateEntityUsingDownload = (client, remoteTxid, localTxid, replicationMod
   if(!options.useChangeTable) {
     yield client.query(` DROP TABLE ${tableModel.table}_changes`);
   }
-});
+  yield client.query(`DROP TABLE ${tmpTableName}`);
+ });
 
 const updateEntity = (client,
                       remoteTxid,
@@ -266,8 +269,11 @@ const updateEntity = (client,
 });
 
 
-const update = (client, localTxid, replicationModels, replicationConfig, pgModel, httpClient, options) => go(function* () {
-  options = Object.assign({batchSize: 200, forceDownload: false}, options);
+const update = (pool, replicationModels, replicationConfig, pgModel, httpClient, options) => go(function* () {
+  options = Object.assign({batchSize: 200, forceDownload: false, multipleTransactions: false}, options);
+  if(options.multipleTransactions) {
+    log('info', 'Replicating using multiple database transactions');
+  }
   const remoteTxid = options.remoteTxid ?
     options.remoteTxid :
     (yield httpClient.lastTransaction()).txid;
@@ -280,21 +286,61 @@ const update = (client, localTxid, replicationModels, replicationConfig, pgModel
   else {
     replicatedEntities = allEntityNames;
   }
-  for (let entityName of replicatedEntities) {
-    const entityConf = replicationConfig.entities.find(entityConf =>entityConf.name === entityName);
-    const bindingConf = replicationConfig.bindings[entityConf.name];
-    yield updateEntity(
-      client,
-      remoteTxid,
-      localTxid,
-      replicationModels[entityConf.name],
-      replicationConfig.replication_schema,
-      entityConf,
-      bindingConf,
-      pgModel,
-      httpClient,
-      options);
+
+  const updateSingleTx = () => pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, localTxid => go(function* () {
+    for (let entityName of replicatedEntities) {
+      const entityConf = replicationConfig.entities.find(entityConf =>entityConf.name === entityName);
+      const bindingConf = replicationConfig.bindings[entityConf.name];
+      yield updateEntity(
+        client,
+        remoteTxid,
+        localTxid,
+        replicationModels[entityConf.name],
+        replicationConfig.replication_schema,
+        entityConf,
+        bindingConf,
+        pgModel,
+        httpClient,
+        options);
+    }
+  })));
+
+  const updateMultipleTx = () => go(function*() {
+    for (let entityName of replicatedEntities) {
+      const entityConf = replicationConfig.entities.find(entityConf =>entityConf.name === entityName);
+      const bindingConf = replicationConfig.bindings[entityConf.name];
+      let success = false;
+      while(!success) {
+        try {
+          yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, localTxid => go(function* () {
+            yield updateEntity(
+              client,
+              remoteTxid,
+              localTxid,
+              replicationModels[entityConf.name],
+              replicationConfig.replication_schema,
+              entityConf,
+              bindingConf,
+              pgModel,
+              httpClient,
+              options);
+          })));
+          success = true;
+        }
+        catch(e) {
+          log('error', `Update of entity ${entityName} failed, retrying in 10 seconds. Message: ${e.message}`, e);
+          yield Promise.delay(10000);
+        }
+      }
+    }
+  });
+  if(options.multipleTransactions) {
+    yield updateMultipleTx();
   }
+  else {
+    yield updateSingleTx();
+  }
+
 });
 
 module.exports = {
