@@ -13,7 +13,7 @@ const createOisImporter = require('../components/importers/ois');
 const { execute } = require('../components/execute');
 const { EXECUTION_STRATEGY} = require('../components/common');
 const { createChangeTable } = require('@dawadk/import-util/src/table-diff');
-
+const oisModels = require('../ois/oisModels');
 const schema = configHolder.mergeConfigSchemas([
   {
     database_url: {
@@ -52,6 +52,12 @@ runConfigured(schema, [], config => go(function* () {
     yield client.query('ALTER TABLE jordstykker_changes ADD COLUMN grund_id uuid');
     yield client.query('ALTER TABLE jordstykker ADD COLUMN ejendomsrelation_id uuid');
     yield client.query('ALTER TABLE jordstykker_changes ADD COLUMN ejendomsrelation_id uuid');
+
+    yield client.query('ALTER TABLE ois_importlog RENAME entity TO oistable');
+    for(let entityName of Object.keys(oisModels)) {
+      const oisTable = oisModels[entityName].oisTable;
+      yield client.query('update ois_importlog set oistable = $1 where oistable = $2', [oisTable.toLowerCase(), entityName]);
+    }
     yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
     yield withImportTransaction(client, 'migrate_1_31_0', txid => go(function*(){
     }));

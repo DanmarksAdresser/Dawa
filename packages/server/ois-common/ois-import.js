@@ -46,12 +46,12 @@ const getLastImportedSerial = (client, oisTable) => go(function* () {
   const alreadyImportedSerialsSql = `SELECT max(serial) as serial
                                      FROM ois_importlog
                                      WHERE oistable = $1`;
-  return (yield client.queryRows(alreadyImportedSerialsSql, [oisTable]))[0].serial;
+  return (yield client.queryRows(alreadyImportedSerialsSql, [oisTable.toLowerCase()]))[0].serial;
 });
 
 const registerOisImport = (client, oisTable, serial, total) =>
   client.query('INSERT INTO ois_importlog(oistable, serial, total, ts) VALUES ($1, $2, $3, NOW())',
-    [oisTable, serial, total]);
+    [oisTable.toLowerCase(), serial, total]);
 
 
 const findFilesToImportForEntity = (client, oisRegister, oisTable, dataDir) => go(function* () {
