@@ -83,7 +83,7 @@ describe('DAR API import integration ', () => {
         body: notification
       });
       assert.deepStrictEqual(response, {});
-      yield Promise.delay(1000);
+      yield Promise.delay(2000);
       importProcess.abort.raise("Aborting test");
       try {
         yield importProcess;
