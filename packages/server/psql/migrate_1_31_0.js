@@ -46,23 +46,29 @@ runConfigured(schema, [], config => go(function* () {
     for(let tableModel of grbbrTableModels.allTableModels) {
       yield createChangeTable(client, tableModel);
     }
-    yield client.query('ALTER TABLE jordstykker ADD COLUMN bfenummer TEXT');
-    yield client.query('ALTER TABLE jordstykker_changes ADD COLUMN bfenummer TEXT');
+    yield client.query('ALTER TABLE jordstykker ADD COLUMN bfenummer BIGINT');
+    yield client.query('ALTER TABLE jordstykker_changes ADD COLUMN bfenummer BIGINT');
     yield client.query('ALTER TABLE jordstykker ADD COLUMN grund_id uuid');
     yield client.query('ALTER TABLE jordstykker_changes ADD COLUMN grund_id uuid');
     yield client.query('ALTER TABLE jordstykker ADD COLUMN ejendomsrelation_id uuid');
     yield client.query('ALTER TABLE jordstykker_changes ADD COLUMN ejendomsrelation_id uuid');
+    yield client.query(`
+    CREATE INDEX ON jordstykker (bfenummer);
+    CREATE INDEX ON jordstykker(grund_id);
+    CREATE INDEX ON jordstykker(ejendomsrelation_id);
+`);
 
     yield client.query('ALTER TABLE ois_importlog RENAME entity TO oistable');
     for(let entityName of Object.keys(oisModels)) {
       const oisTable = oisModels[entityName].oisTable;
       yield client.query('update ois_importlog set oistable = $1 where oistable = $2', [oisTable.toLowerCase(), entityName]);
     }
+
     yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
     yield withImportTransaction(client, 'migrate_1_31_0', txid => go(function*(){
     }));
     yield importWithoutEvents(client, 'migrate_1_31_0',
-      grbbrTableModels.allTableModels.map(model => model.table),
+      [...grbbrTableModels.allTableModels.map(model => model.table), 'jordstykker'],
       txid => go(function* () {
         const importer = createOisImporter({dataDir: config.get('ois_dir')});
         return yield execute(client, txid, [importer],  EXECUTION_STRATEGY.verify);

@@ -41,9 +41,11 @@ CREATE INDEX ON jordstykker (esrejendomsnr);
 CREATE INDEX ON jordstykker (udvidet_esrejendomsnr);
 CREATE INDEX ON jordstykker (sfeejendomsnr);
 CREATE INDEX ON jordstykker (featureid);
-CREATE INDEX ON jordstykker (bfenummer);
 CREATE INDEX ON jordstykker USING GIST (geom);
 CREATE INDEX ON jordstykker USING GIN (tsv);
+CREATE INDEX ON jordstykker (bfenummer);
+CREATE INDEX ON jordstykker(grund_id);
+CREATE INDEX ON jordstykker(ejendomsrelation_id);
 
 
 DROP TABLE IF EXISTS jordstykker_adgadr CASCADE;
