@@ -166,13 +166,13 @@ const attrVerifiers = {
   geometry3d: val => typeof(val) === 'object'
   };
 
-const verifyAttr = (attr, val) => {
+const verifyAttr = (entity, attr, val) => {
   if(val === null) {
     assert(attr.nullable, `Null-værdi i ikke-nullable attribut ${attr.name}`);
     return;
   }
   const verifier = attrVerifiers[attr.type];
-  assert(verifier(val), `Value ${val} is of type ${attr.type}`);
+  assert(verifier(val), `Attribute ${attr.name} for entity ${entity} has value ${JSON.stringify(val)} which is  of type ${attr.type}`);
 };
 
 const entitiesWithoutData = ['dar_reserveretvejnavn_historik', 'dar_reserveretvejnavn_aktuel'];
@@ -186,7 +186,7 @@ describe('Replikerede entiteter', () => {
         for(let row of response) {
           for(let attr of model.attributes) {
             const val = row[attr.name];
-            verifyAttr(attr, val);
+            verifyAttr(entity, attr, val);
           }
         }
       }

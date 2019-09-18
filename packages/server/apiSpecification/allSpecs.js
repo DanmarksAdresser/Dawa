@@ -23,6 +23,7 @@ require('./replikering/model/datamodelResource');
 require('./consistency');
 require('./autocomplete/autocomplete.js');
 require('./ois/resources');
+require('./bbr/resources');
 require('./stednavn/resources');
 require('./stednavn-legacy/resources');
 require('./sted/resources');

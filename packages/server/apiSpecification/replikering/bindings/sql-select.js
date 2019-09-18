@@ -6,23 +6,23 @@ const selectSql = defmulti(binding => binding.type);
 
 const aliasedColumn = (column, alias) => alias ? `${alias}.${column}` : column;
 
-const simpleSqlSelect = ({attrName, column}, alias) => [[aliasedColumn(column, alias), attrName]];
+const simpleSqlSelect = ({column}, alias) => [[aliasedColumn(column, alias), column]];
 
 selectSql.method('column', simpleSqlSelect);
 
-selectSql.method('timestamp', ({attrName, column}, alias) =>
-  [[selectIsoTimestampUtc(aliasedColumn(column, alias)), attrName]]);
+selectSql.method('timestamp', ({column}, alias) =>
+  [[selectIsoTimestampUtc(aliasedColumn(column, alias)), column]]);
 
-selectSql.method('localTimestamp', ({attrName, column}, alias) =>
-  [[selectLocalDateTime(aliasedColumn(column, alias)), attrName]]);
+selectSql.method('localTimestamp', ({column}, alias) =>
+  [[selectLocalDateTime(aliasedColumn(column, alias)), column]]);
 
-selectSql.method('geometry', ({attrName, column}, alias) =>
-  [[`ST_AsGeoJSON(${aliasedColumn(column, alias)})`, attrName]]
+selectSql.method('geometry', ({column}, alias) =>
+  [[`ST_AsGeoJSON(${aliasedColumn(column, alias)})`, column]]
 );
 
-selectSql.method('offloadedGeometry', ({attrName, column}, alias) =>
-  [[`ST_AsGeoJSON(${aliasedColumn(column, alias)})`, attrName],
-    [aliasedColumn(`${column}_blobref`, alias), `${attrName}_ref`]]
+selectSql.method('offloadedGeometry', ({column}, alias) =>
+  [[`ST_AsGeoJSON(${aliasedColumn(column, alias)})`, column],
+    [aliasedColumn(`${column}_blobref`, alias), `${column}_ref`]]
 );
 
 selectSql.method('kode4', simpleSqlSelect);
@@ -34,16 +34,16 @@ selectSql.method('darStatus', simpleSqlSelect);
 selectSql.method('numberToString', simpleSqlSelect);
 selectSql.method('stringToNumber', simpleSqlSelect);
 
-selectSql.method('timestampInterval', ({attrName, column}, alias) => {
+selectSql.method('timestampInterval', ({column}, alias) => {
   return [
 
-    [selectIsoTimestampUtc(`lower(${aliasedColumn(column, alias)})`), `${attrName}start`],
-    [selectIsoTimestampUtc(`upper(${aliasedColumn(column, alias)})`), `${attrName}slut`]
+    [selectIsoTimestampUtc(`lower(${aliasedColumn(column, alias)})`), `${column}start`],
+    [selectIsoTimestampUtc(`upper(${aliasedColumn(column, alias)})`), `${column}slut`]
   ]
 });
 
-selectSql.method('legacy', ({attrName, column, selectTransform}, alias) =>
-  [[selectTransform(aliasedColumn(column, alias)), attrName]]
+selectSql.method('legacy', ({column, selectTransform}, alias) =>
+  [[selectTransform(aliasedColumn(column, alias)), column]]
 );
 
 module.exports = selectSql;

@@ -1,7 +1,6 @@
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const tmp = require('tmp');
 const _ = require('underscore');
 const Promise = require('bluebird');
 const {go} = require('ts-csp');
@@ -14,23 +13,12 @@ const createUnzipperProcess = (filePath, filePattern) => {
   return proc;
 }
 
-const unzipToTempFile = (filePath, filePattern) => {
-  const tmpFile = tmp.fileSync();
-  const out = fs.createWriteStream(tmpFile.name);
-  var args = ['e', '-so', path.resolve(filePath), filePattern];
-  var proc = child_process.spawn('7za', args);
-  proc.stdout.pipe(out);
-  return new Promise(resolve => {
-    out.on('finish', () => resolve(tmpFile));
-  })
-};
-
 const createOisStream = (dataDir, fileName, oisTable) => go(function* () {
   const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
   const filePath = path.join(dataDir, fileName);
   const unzipperProc = createUnzipperProcess(filePath, xmlFileName);
   const xmlStream = rawXmlStream(unzipperProc.stdout, oisTable);
-  return xmlStream;
+  return yield Promise.resolve(xmlStream);
 });
 
 const getOisFileRegex = registerName =>
@@ -57,9 +45,14 @@ const fileNameToDescriptor = (registerName, fileName) => {
 const getLastImportedSerial = (client, oisTable) => go(function* () {
   const alreadyImportedSerialsSql = `SELECT max(serial) as serial
                                      FROM ois_importlog
-                                     WHERE entity = $1`;
+                                     WHERE oistable = $1`;
   return (yield client.queryRows(alreadyImportedSerialsSql, [oisTable]))[0].serial;
 });
+
+const registerOisImport = (client, oisTable, serial, total) =>
+  client.query('INSERT INTO ois_importlog(oistable, serial, total, ts) VALUES ($1, $2, $3, NOW())',
+    [oisTable, serial, total]);
+
 
 const findFilesToImportForEntity = (client, oisRegister, oisTable, dataDir) => go(function* () {
   const filesAndDirectories = yield Promise.promisify(fs.readdir)(dataDir);
@@ -123,5 +116,6 @@ module.exports = {
   fileNameToDescriptor,
   getLastImportedSerial,
   createOisStream,
-  findFilesToImportForEntity
+  findFilesToImportForEntity,
+  registerOisImport
 };

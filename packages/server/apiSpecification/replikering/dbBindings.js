@@ -3,6 +3,7 @@ const temaModels = require('../../dagiImport/temaModels');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 const types = require('./bindings/binding-types');
 const getProvidedAttributes = require('./bindings/get-provided-attributes');
+const grbbrModels = require('../../ois2/replication-models');
 
 const addDefaultBindings = (attributes, bindings) => {
   const providedAttributeNames = bindings.reduce((acc, binding) => {
@@ -249,5 +250,7 @@ for (let temaModel of temaModels.modelList) {
   unnormalizedBindings[temaModel.entity || temaModel.singular] = temaModels.toReplikeringBinding(temaModel);
   unnormalizedBindings[temaModel.tilknytningName] = temaModels.toReplikeringTilknytningDbBinding(temaModel);
 }
+
+Object.assign(unnormalizedBindings, grbbrModels.bindingMap);
 
 module.exports = normalize(datamodels, unnormalizedBindings);

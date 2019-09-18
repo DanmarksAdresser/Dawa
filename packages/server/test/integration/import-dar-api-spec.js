@@ -91,7 +91,7 @@ describe('DAR API import integration ', () => {
       catch(e) {
         assert.instanceOf(e, Abort);
       }
-      yield pool.withTransaction('READ_WRITE', client => go(function*() {
+      yield pool.withTransaction({}, 'READ_WRITE', client => go(function*() {
         const result = yield client.queryRows(`SELECT * FROM dar1_postnummer_current`);
         assert.strictEqual(result[0].id, '873e4c91-c2d3-4674-a491-2f0e30bac7eb');
       }));

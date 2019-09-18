@@ -16,7 +16,7 @@ const moment = require('moment');
 const importIncrementally = (pool, darClient, remoteEventIds, pretend) => go(function* () {
   const importer = createDarApiImporter({darClient, remoteEventIds});
   const beforeMillis = Date.now();
-  yield pool.withTransaction('READ_WRITE', client => go(function* () {
+  yield pool.withTransaction({}, 'READ_WRITE', client => go(function* () {
     const resultContext = yield executeRollbackable(client, 'importDarApi', [importer], EXECUTION_STRATEGY.quick);
     const afterMillis = Date.now();
     const darTxTimestampMillis = resultContext['dar-api']['remote-tx-timestamp'] ?

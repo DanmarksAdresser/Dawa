@@ -27,8 +27,7 @@ exports.fieldsWithoutNames = function (fields, names) {
 
 exports.defaultFlatMapper = function (flatFields) {
   return function (row) {
-
-    return _.reduce(flatFields, function (memo, field) {
+    const result = _.reduce(flatFields, function (memo, field) {
       var modelValue = row[field.name];
       var formattedValue;
       if (field.formatter) {
@@ -40,6 +39,7 @@ exports.defaultFlatMapper = function (flatFields) {
       memo[field.name] = formattedValue;
       return memo;
     }, {});
+    return result;
   };
 };
 

@@ -1,16 +1,19 @@
 DROP VIEW IF EXISTS jordstykker_view CASCADE;
 CREATE VIEW jordstykker_view AS (
     SELECT ejerlavkode,
-           e.navn                                                                     as ejerlavnavn,
+           e.navn                                    as ejerlavnavn,
            matrikelnr,
            kommunekode,
            sognekode,
            regionskode,
            retskredskode,
-           (g.esrejdnr::integer)::text                                                AS esrejendomsnr,
+           (er.ejendomsnummer)::text AS esrejendomsnr,
            to_char(kommunekode, 'FM000') ||
-           to_char(g.esrejdnr::integer, 'FM0000000')                                  AS udvidet_esrejendomsnr,
+           to_char(er.ejendomsnummer::integer, 'FM0000000') AS udvidet_esrejendomsnr,
+           grund_id,
+           ejendomsrelation_id,
            sfeejendomsnr,
+           er.bfenummer,
            j.geom,
            featureid,
            moderjordstykke,
@@ -22,12 +25,12 @@ CREATE VIEW jordstykker_view AS (
            fælleslod
     FROM matrikel_jordstykker j
              LEFT JOIN ejerlav e ON j.ejerlavkode = e.kode
-             LEFT JOIN LATERAL (select g.esrejdnr
-                                from ois_matrikelreference mr
-                                         LEFT JOIN ois_grund g
-                                                   ON mr.grund_id = g.grund_id AND g.ophoert_ts is null
-                                WHERE mr.ophoert_ts is null
-                                  AND j.ejerlavkode = mr.landsejerlavkode
-                                  AND j.matrikelnr = mr.matrnr
-                                limit 1) g ON true
+             LEFT JOIN LATERAL (SELECT er.bfenummer, er.ejendomsnummer, g.id as grund_id, er.id as ejendomsrelation_id
+                                FROM bbr_grundjordstykke_current gj
+                                         JOIN bbr_grund_current g ON gj.grund = g.id
+                                         JOIN bbr_ejendomsrelation_current er
+                                              ON g.bestemtfastejendom = er.id
+                                WHERE gj.jordstykke = j.featureid
+                                LIMIT 1
+        ) er ON true
 );

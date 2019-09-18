@@ -69,7 +69,7 @@ const legacyFormatter = (attrName, entityBinding) => {
   const attrBinding = getAttributeBinding(attrName, entityBinding);
   return val => {
     const src = {};
-    src[attrName] = val;
+    src[attrBinding.column || attrName] = val;
     const dst = {};
     format(attrBinding, src, dst);
     return dst[attrName];

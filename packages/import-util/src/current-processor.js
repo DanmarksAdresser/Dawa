@@ -19,8 +19,6 @@ const createCurrentProcessor = ({historyTableModel, currentTableModel, materiali
   });
 
   const materializeIncrementally = (client, txid) => go(function* () {
-    console.dir(tableModels);
-    console.dir(materialization);
     yield materialize.computeDirty(client, txid, tableModels, materialization);
     yield client.query(`INSERT INTO ${currentTableModel.table}_dirty
     (SELECT id FROM ${historyTableModel.table}, 

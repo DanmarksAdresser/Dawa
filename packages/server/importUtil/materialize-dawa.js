@@ -3,6 +3,7 @@ const schemaModel = require('../psql/tableModel');
 const temaModels = require('../dagiImport/temaModels');
 const dar10TableModels = require('../dar10/dar10TableModels');
 const replikeringDataModel = require('../apiSpecification/replikering/datamodel');
+const grbbrTableModels = require('../ois2/table-models');
 
 const temaTableNames = temaModels.modelList.map(model => model.table || model.plural);
 const tilknytningTableNames =
@@ -13,6 +14,7 @@ const tilknytningTableNames =
 
 const dar10HistoryTableNames = Object.values(dar10TableModels.historyTableModels).map(model => model.table);
 const dar10currentTableTableNames = Object.values(dar10TableModels.currentTableModels).map(model => model.table);
+const replicatedGrbbrTableModels = grbbrTableModels.allTableModels;
 const dawaBaseTableNames = ['vejstykker', 'vejmidter', 'vejpunkter', 'navngivenvej', 'postnumre', 'jordstykker', 'bygninger', 'ejerlav',
   'hoejder',
   'adgangsadresser',
@@ -23,6 +25,7 @@ const dawaBaseTableNames = ['vejstykker', 'vejmidter', 'vejpunkter', 'navngivenv
 
 const orderedTableNames = [...dar10HistoryTableNames,
   ...dar10currentTableTableNames,
+  ...replicatedGrbbrTableModels.map(model => model.table),
   ...dawaBaseTableNames,
   ...temaTableNames,
   ...tilknytningTableNames];

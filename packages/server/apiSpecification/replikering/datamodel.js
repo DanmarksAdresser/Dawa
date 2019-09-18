@@ -4,6 +4,7 @@ const definitions = require('../commonSchemaDefinitions');
 const temaModels = require('../../dagiImport/temaModels');
 const schemaUtil = require('../../apiSpecification/schemaUtil');
 const darReplikeringModels = require('../../dar10/replikeringModels');
+const grbbrModels = require('../../ois2/replication-models');
 
 const { defaultSchemas } = require('./datamodelUtil');
 
@@ -1057,6 +1058,8 @@ for(let [entityName, model] of Object.entries( darReplikeringModels.historyRepli
   module.exports[`dar_${entityName.toLowerCase()}_historik`] = model;
 }
 
+Object.assign(module.exports, grbbrModels.modelMap);
+
 const getDefaultSchema = (type, nullable) => {
   const schemaType = defaultSchemas[type];
   assert(schemaType);
@@ -1070,3 +1073,4 @@ for(let modelName of Object.keys(module.exports)) {
     attr.deprecated = !!attr.deprecated;
   }
 }
+

@@ -3,6 +3,7 @@ module.exports = [
   ...require('./adresse'),
   ...require("./afstemningsområde"),
   ...require('./autocomplete'),
+  ...require('./bbr'),
   ...require('./bebyggelse'),
   ...require('./darhistorik'),
   ...require('./ejerlav'),

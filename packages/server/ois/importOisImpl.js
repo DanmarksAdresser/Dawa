@@ -1,7 +1,5 @@
 "use strict";
 
-const fs = require('fs');
-const path = require('path');
 const q = require('q');
 const _ = require('underscore');
 
@@ -13,90 +11,15 @@ const importUtil = require('@dawadk/import-util/src/postgres-streaming');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
 const tablediff = require('../importUtil/table-diff-legacy');
 const logger = require('@dawadk/common/src/logger').forCategory('oisImport');
-const {fileNameToDescriptor, getLastImportedSerial, getOisFileRegex} = require('../ois-common/ois-import');
+const {createOisStream, findFilesToImportForEntity, registerOisImport} = require('../ois-common/ois-import');
 
 
-const createOisStream = (entityName, dataDir, fileName) => go(function*() {
-  const model = oisModels[entityName];
-  return oisParser.oisStream(stream, model);
+const oisFileToTable = (client, entityName, dataDir, fileName, table) => go(function* () {
+  const columns = oisCommon.postgresColumnNames[entityName];
+  const oisStream = yield createOisStream(dataDir, fileName, oisModels[entityName].oisTable);
+  const transformer = oisParser(oisModels[entityName]);
+  yield promisingStreamCombiner([oisStream, transformer, ...importUtil.streamToTablePipeline(client, table, columns)]);
 });
-
-function oisFileToTable(client, entityName, dataDir, fileName, table) {
-  return q.async(function*() {
-    const columns = oisCommon.postgresColumnNames[entityName];
-    const oisStream = yield createOisStream(entityName, dataDir, fileName);
-    yield promisingStreamCombiner([oisStream].concat(importUtil.streamToTablePipeline(client, table, columns)));
-    const streams = streamToTablePipeline()
-  })();
-}
-
-const bbrtFilenameToDescriptor = fileName => {
-  return fileNameToDescriptor('bbrt', fileName);
-};
-
-const getLastImportedSerialForEntity = (client, entityName) => {
-  const oisTable = oisModels[entityName].oisTable;
-  return getLastImportedSerial(client, oisTable);
-};
-
-const findFilesToImportForEntity = (client, oisModelName, dataDir) => {
-  return q.async(function*() {
-    const oisModel = oisModels[oisModelName];
-    const filesAndDirectories = yield q.nfcall(fs.readdir, dataDir);
-    const files = [];
-    for (let fileOrDirectory of filesAndDirectories) {
-      const stat = yield q.nfcall(fs.stat, path.join(dataDir, fileOrDirectory));
-      if (!stat.isDirectory()) {
-        files.push(fileOrDirectory);
-      }
-    }
-    const oisFileRegex = getOisFileRegex('bbrt');
-    const oisFiles = files.filter(file => oisFileRegex.test(file));
-    const descriptors = oisFiles.map(bbrtFilenameToDescriptor);
-    const oisTable = oisModel.oisTable;
-    const descriptorsForEntity = descriptors.filter(descriptor => descriptor.oisTable.toLowerCase() === oisTable.toLowerCase());
-    if (descriptorsForEntity.length === 0) {
-      return [];
-    }
-    const serialToFileMap = _.groupBy(descriptorsForEntity, 'serial');
-    for (let serialStr of Object.keys(serialToFileMap)) {
-      if (serialToFileMap[serialStr].length > 1) {
-        logger.error('Duplicate Serial', {
-          serial: serialStr,
-          files: serialToFileMap[serialStr]
-        });
-        throw new Error('Duplicate serial');
-      }
-    }
-    const serials = Object.keys(serialToFileMap).map(serial => parseInt(serial, 10));
-    const lastImportedSerial = yield getLastImportedSerialForEntity(client, oisModelName);
-    const lastTotalSerial = _.max(descriptors.filter(descriptor => descriptor.total).map(descriptor => descriptor.serial));
-    const firstSerialToImport = Math.max(lastImportedSerial+1, lastTotalSerial);
-    const serialsToImport = serials.filter(serial => serial >= firstSerialToImport);
-    serialsToImport.sort((a, b) => a - b);
-    if(serialsToImport.length === 0) {
-      return [];
-    }
-    const firstImportedSerial = serialsToImport[0];
-    if (firstImportedSerial !== firstSerialToImport) {
-      logger.error('Missing serial', {
-        entity: oisModelName,
-        serial: lastImportedSerial + 1
-      });
-      throw new Error('Missing serial');
-    }
-    for (let i = 0; i < serialsToImport.length - 2; ++i) {
-      if (serialsToImport[i] + 1 !== serialsToImport[i + 1]) {
-        logger.error('Missing serial', {
-          entity: oisModelName,
-          serial: serialsToImport[i] + 1
-        });
-        throw new Error('Missing serial');
-      }
-    }
-    return serialsToImport.map(serial => serialToFileMap[serial][0]);
-  })();
-};
 
 const findFileName = (filesIndDirectory, entityName) => {
   const matches = _.filter(filesIndDirectory, function (file) {
@@ -124,8 +47,9 @@ const createFetchTable = (client, entityName) => {
 
 const clean = (client,entityName) => go(function*() {
   const table = oisCommon.dawaTableName(entityName);
+  const oisTable = oisModels[entityName].oisTable;
   yield client.query(`delete from ${table}`);
-  yield client.query('delete from ois_importlog where entity = $1', [entityName]);
+  yield client.query('delete from ois_importlog where oistable = $1', [oisTable]);
 });
 
 function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst, entityNames) {
@@ -138,7 +62,8 @@ function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst, entity
     }
     const fileDescriptorsMap = {};
     for(let entityName of entityNames) {
-      fileDescriptorsMap[entityName] = yield findFilesToImportForEntity(client, entityName, dataDir);
+      const oisTable = oisModels[entityName].oisTable;
+      fileDescriptorsMap[entityName] = yield findFilesToImportForEntity(client, 'bbrt', oisTable, dataDir);
     }
     const filesToImportCount = entityNames.reduce((acc, entityName) => {
       return acc + fileDescriptorsMap[entityName].length;
@@ -193,8 +118,8 @@ function importOis(client, dataDir, singleFileNameOnly, shouldCleanFirst, entity
           }
           logger.info('Importerede OIS fil', Object.assign({}, fileDescriptor, changes));
         }
-        yield client.queryp('INSERT INTO ois_importlog(entity, serial, total, ts) VALUES ($1, $2, $3, NOW())',
-          [entityName, fileDescriptor.serial, !delta]);
+        const oisTable = oisModels[entityName].oisTable;
+        yield registerOisImport(client, oisTable, fileDescriptor.serial, !delta);
       }
     }
   })();

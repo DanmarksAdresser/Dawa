@@ -6,7 +6,6 @@ var util = require('util');
 
 module.exports = function rawXmlStream(fileStream, oisTableName) {
   var parser = new expat.Parser('ISO-8859-1');
-console.log(oisTableName);
   util.inherits(ParseStream, Readable);
   function ParseStream() {
     Readable.call(this, { objectMode : true });

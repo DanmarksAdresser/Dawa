@@ -9,7 +9,7 @@ const {
   offloadedGeomBlobrefColumn, privateColumn
 } = require('@dawadk/import-util/src/common-columns');
 const {name} = require('@dawadk/import-util/src/table-diff-protocol');
-const oisModel = require('../ois2/model');
+const grbbrTableModels = require('../ois2/table-models');
 
 const vejnavne_mat = {
   table: 'vejnavne_mat',
@@ -568,6 +568,11 @@ const jordstykker = {
       name: 'ejerlavnavn'
     },
     ...matrikel_jordstykker.columns.filter((col) => name(col) !== 'geom'),
+    {
+      name: 'bfenummer'
+    },
+    privateColumn({name: 'grund_id'}),
+    privateColumn({name: 'ejendomsrelation_id'}),
     ...geomColumns({offloaded: false}),
     visueltCenterComputed({}),
     tsvColumn({
@@ -778,7 +783,7 @@ const vask_adresser = {
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
-const oisTables = _.indexBy(oisModel.allTableModels, 'table');
+const oisTables = _.indexBy(grbbrTableModels.allTableModels, 'table');
 exports.tables = Object.assign({
     adgangsadresser,
     enhedsadresser,
@@ -1183,6 +1188,19 @@ exports.materializations = Object.assign({
       {
         table: 'matrikel_jordstykker',
         columns: ['ejerlavkode', 'matrikelnr']
+      },
+      {
+        table: 'bbr_grundjordstykke_current',
+        columns: ['featureid'],
+        references: ['jordstykke']
+      },
+      {
+        table: 'bbr_grund_current',
+        columns: ['grund_id']
+      },
+      {
+        table: 'bbr_ejendomsrelation_current',
+        columns: ['ejendomsrelation_id']
       }
     ]
   }

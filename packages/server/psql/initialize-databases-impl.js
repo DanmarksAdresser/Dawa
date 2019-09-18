@@ -62,7 +62,7 @@ CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
     }));
   }
-  for (let [db, loadData] of [[config.get('test.data_db'), true], [config.get('test.schema_db'), false]]) {
+  for (let [db, loadData] of [[config.get('test.schema_db'), false], [config.get('test.data_db'), true]]) {
     const pool = createDatabasePool({
       connString: makeConnectionString(user, password, host, port, db),
       pooled: false
