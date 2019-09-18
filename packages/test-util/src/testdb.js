@@ -113,7 +113,7 @@ const withTransactionAll = function(dbname, transactionFn) {
 function withPoolAll(dbname, dbFn) {
   withTransactionAll(dbname, clientFn => {
     const pool = {
-      withTransaction: (mode, transactionFn) =>
+      withTransaction: (connectionOptions, mode, transactionFn) =>
         transactionFn(clientFn())
     };
     dbFn(pool);

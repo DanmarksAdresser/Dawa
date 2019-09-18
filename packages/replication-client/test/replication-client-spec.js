@@ -5,7 +5,6 @@ const generateConfig = require('../src/generate-config');
 const replikeringModels = require('@dawadk/server/apiSpecification/replikering/datamodel');
 const databaseSchemaUtil = require('../src/database-schema-util');
 const {update} = require('../src/replication-client-impl');
-const {withReplicationTransaction} = require('../src/transactions');
 const Promise = require("bluebird");
 const {ReplicationHttpClient} = require('../src/replication-http-client');
 const config = require('@dawadk/common/src/config/holder').getConfig();
@@ -129,52 +128,61 @@ class FakeClient {
   }
 }
 
-const initializeSchema = (client, config, withChangeTables) => go(function* () {
-  const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, config, {withChangeTables});
-  for (let stmt of stmts) {
-    yield client.query(stmt);
-  }
+const initializeSchema = (pool, config, withChangeTables) =>
+  pool.withTransaction({}, 'READ_WRITE', client => go(function* () {
+    const stmts = databaseSchemaUtil.generateDDLStatements(testReplicationModels, config, {withChangeTables});
+    for (let stmt of stmts) {
+      yield client.query(stmt);
+    }
+  }));
+
+const getPgMetadata = pool => pool.withTransaction({}, 'READ_WRITE', client => pgMetadata(client));
+
+const initializeData = (pool, config) => go(function*() {
+  yield update(pool, testReplicationModels, config, yield getPgMetadata(pool), new FakeClient(testClientData), {remoteTxid: 1});
 });
 
-const initializeData = (client, config) => withReplicationTransaction(client, config.replication_schema, txid => go(function* () {
-  yield update(client, txid, testReplicationModels, config, yield pgMetadata(client), new FakeClient(testClientData), {remoteTxid: 1});
-}));
-for(let withChangeTables of [true, false]) {
+for (let withChangeTables of [true, false]) {
   describe(`replikerings-klient, withChangeTables=${withChangeTables}`, () => {
-    testdb.withTransactionAll('replikeringtest', (clientFn) => {
+    testdb.withPoolAll('replikeringtest', pool => {
       it(`Can initialize the database schema, withChangeTables=${withChangeTables}`, () => go(function* () {
-        yield initializeSchema(clientFn(), testReplicationConfig, withChangeTables);
+        yield initializeSchema(pool, testReplicationConfig, withChangeTables);
       }));
       it(`Can initialize database, withChangeTables=${withChangeTables}`, () => go(function* () {
-        yield initializeData(clientFn(), testReplicationConfig);
-        const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
-        assert.strictEqual(result.length, 2);
-        assert.deepStrictEqual(result[0], {id: 1, value: 'one'});
-        assert.deepStrictEqual(result[1], {id: 2, value: 'two'});
+        yield initializeData(pool, testReplicationConfig);
+        yield  pool.withTransaction({}, 'READ_WRITE', client => go(function*() {
+          const result = yield client.queryRows('SELECT * FROM test_entity order by id');
+          assert.strictEqual(result.length, 2);
+          assert.deepStrictEqual(result[0], {id: 1, value: 'one'});
+          assert.deepStrictEqual(result[1], {id: 2, value: 'two'});
+        }));
       }));
 
       it('Has updated source_transactions table', () => go(function* () {
-        const rows = yield clientFn().queryRows(`select * from ${testReplicationConfig.replication_schema}.source_transactions`);
-        assert.deepStrictEqual(rows[0], {
-          source_txid: 1,
-          local_txid: 1,
-          entity: 'test_entity',
-          type: 'download'
-        });
+        yield  pool.withTransaction({}, 'READ_WRITE', client => go(function*() {
+          const rows = yield client.queryRows(`select * from ${testReplicationConfig.replication_schema}.source_transactions`);
+          assert.deepStrictEqual(rows[0], {
+            source_txid: 1,
+            local_txid: 1,
+            entity: 'test_entity',
+            type: 'download'
+          });
+        }));
       }));
 
       it('Can update incrementally', () => go(function* () {
-        yield withReplicationTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
-          yield update(clientFn(), txid, testReplicationModels, testReplicationConfig,
-            yield pgMetadata(clientFn()),
-            new FakeClient(testClientData),
-            {});
-          const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
+        yield update(pool, testReplicationModels, testReplicationConfig,
+          yield getPgMetadata(pool),
+          new FakeClient(testClientData),
+          {});
+
+        yield  pool.withTransaction({}, 'READ_WRITE', client => go(function*() {
+          const result = yield client.queryRows('SELECT * FROM test_entity order by id');
           assert.strictEqual(result.length, 2);
           assert.deepStrictEqual(result[0], {id: 2, value: 'two updated'});
           assert.deepStrictEqual(result[1], {id: 3, value: 'three'});
           if (withChangeTables) {
-            const changes = yield clientFn().queryRows('SELECT * FROM test_entity_changes order by id');
+            const changes = yield client.queryRows('SELECT * FROM test_entity_changes order by id');
             assert.deepStrictEqual(changes, [
                 {txid: 2, operation: 'delete', id: 1, value: 'one'},
                 {txid: 2, operation: 'update', id: 2, value: 'two updated'},
@@ -188,67 +196,73 @@ for(let withChangeTables of [true, false]) {
   });
 }
 
-for(let withChangeTables of [true, false]) {
-  describe(`Replikerings-klient, withChangeTables=${withChangeTables}`, () => {
-    testdb.withTransactionEach('replikeringtest', (clientFn) => {
+for (let withChangeTables of [true, false]) {
+  describe(`Replikerings-klient update using download, withChangeTables=${withChangeTables}`, () => {
+    testdb.withPoolAll('replikeringtest', pool => {
       it('Can update using download', () => go(function* () {
-        yield initializeSchema(clientFn(), testReplicationConfig, withChangeTables);
-        yield initializeData(clientFn(), testReplicationConfig);
-        yield withReplicationTransaction(clientFn(), testReplicationConfig.replication_schema, txid => go(function* () {
-          yield update(clientFn(), txid, testReplicationModels,
-            testReplicationConfig,
-            yield pgMetadata(clientFn()),
-            new FakeClient(testClientData),
-            {
-              forceDownload: true,
-              remoteTxid: 3
-            }
-          );
+        yield initializeSchema(pool, testReplicationConfig, withChangeTables);
+        yield initializeData(pool, testReplicationConfig);
+        yield update(pool, testReplicationModels,
+          testReplicationConfig,
+          yield getPgMetadata(pool),
+          new FakeClient(testClientData),
+          {
+            forceDownload: true,
+            remoteTxid: 3
+          }
+        );
+        yield  pool.withTransaction({}, 'READ_WRITE', client => go(function* () {
+          const result = yield client.queryRows('SELECT * FROM test_entity order by id');
+          assert.strictEqual(result.length, 2);
+          assert.deepStrictEqual(result[0], {id: 2, value: 'two updated'});
+          assert.deepStrictEqual(result[1], {id: 3, value: 'three'});
+          if (withChangeTables) {
+            const changes = yield client.queryRows('select * from test_entity_changes order by id');
+            assert.deepStrictEqual(changes, [
+              {txid: 2, operation: 'delete', id: 1, value: 'one'},
+              {txid: 2, operation: 'update', id: 2, value: 'two updated'},
+              {txid: 2, operation: 'insert', id: 3, value: 'three'}
+            ]);
+          }
         }));
-        const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
-        assert.strictEqual(result.length, 2);
-        assert.deepStrictEqual(result[0], {id: 2, value: 'two updated'});
-        assert.deepStrictEqual(result[1], {id: 3, value: 'three'});
-        if (withChangeTables) {
-          const changes = yield clientFn().queryRows('select * from test_entity_changes order by id');
-          assert.deepStrictEqual(changes, [
-            {txid: 2, operation: 'delete', id: 1, value: 'one'},
-            {txid: 2, operation: 'update', id: 2, value: 'two updated'},
-            {txid: 2, operation: 'insert', id: 3, value: 'three'}
-          ]);
-        }
       }));
-
+    });
+  });
+  describe(`Replikerings-klient column name mappings withChangeTables=${withChangeTables}`, () => {
+    testdb.withPoolAll('replikeringtest', pool => {
       it('Can use column name mappings', () => go(function* () {
         const config = JSON.parse(JSON.stringify(testReplicationConfig));
         config.bindings.test_entity.attributes.value = {columnName: 'my_value'};
-        yield initializeSchema(clientFn(), config, withChangeTables);
-        yield initializeData(clientFn(), config);
-        yield withReplicationTransaction(clientFn(), config.replication_schema, txid => go(function* () {
-          yield update(clientFn(), txid, testReplicationModels, config, yield pgMetadata(clientFn()), new FakeClient(testClientData), {});
+        yield initializeSchema(pool, config, withChangeTables);
+        yield initializeData(pool, config);
+        yield update(pool, testReplicationModels, config, yield getPgMetadata(pool), new FakeClient(testClientData), {});
+        yield  pool.withTransaction({}, 'READ_WRITE', client => go(function* () {
+          const result = yield client.queryRows('SELECT * FROM test_entity order by id');
+          assert.strictEqual(result.length, 2);
+          assert.deepStrictEqual(result[0], {id: 2, my_value: 'two updated'});
+          assert.deepStrictEqual(result[1], {id: 3, my_value: 'three'});
         }));
-        const result = yield clientFn().queryRows('SELECT * FROM test_entity order by id');
-        assert.strictEqual(result.length, 2);
-        assert.deepStrictEqual(result[0], {id: 2, my_value: 'two updated'});
-        assert.deepStrictEqual(result[1], {id: 3, my_value: 'three'});
       }));
     });
   });
 }
 
 describe('replikerings-klient-integration', () => {
-  testdb.withTransactionAll('replikeringtest', (clientFn) => {
+  testdb.withPoolAll('replikeringtest', pool => {
     it('Can initialize the database schema ', () => go(function* () {
       const stmts = databaseSchemaUtil.generateDDLStatements(replikeringModels, testDarConfig, {withChangeTables: true});
-      for (let stmt of stmts) {
-        yield clientFn().query(stmt);
-      }
+      yield  pool.withTransaction({}, 'READ_WRITE', client => go(function* () {
+        for (let stmt of stmts) {
+          yield client.query(stmt);
+        }
+      }));
     }));
     it('Can initialize database from test server', () => go(function* () {
-      yield withReplicationTransaction(clientFn(), testDarConfig.replication_schema, txid => go(function* () {
-        const httpClient = new ReplicationHttpClient(testDarConfig.replication_url, {batchSize: 200, userAgent: 'TestReplicationClient'});
-        yield update(clientFn(), txid, replikeringModels, testDarConfig,yield pgMetadata(clientFn()), httpClient );
-      }));
+      const httpClient = new ReplicationHttpClient(testDarConfig.replication_url, {
+        batchSize: 200,
+        userAgent: 'TestReplicationClient'
+      });
+      yield update(pool, replikeringModels, testDarConfig, yield getPgMetadata(pool), httpClient);
     })).timeout(60000);
   });
 });

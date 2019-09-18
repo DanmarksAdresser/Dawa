@@ -59,6 +59,8 @@ const importStednavneFromStream = (client, txid, stream) => go(function*() {
   // Identiske sekundære navne ikke tilladt
   yield client.query(`INSERT INTO fetch_stednavne(${stednavneColumns.join(',')}) (
   SELECT distinct on (id,navn) id, navn, navnestatus, brugsprioritet FROM fetch_stednavne_raw where brugsprioritet='sekundær')`);
+  // sekundært navn må ikke være lig primært navn
+  yield client.query(`DELETE FROM fetch_stednavne f WHERE f.brugsprioritet = 'sekundær' AND exists(select * from fetch_stednavne f2 where f2.brugsprioritet = 'primær' and f2.stedid = f.stedid and f2.navn = f.navn)`);
 
   yield tableDiffNg.computeDifferences(client, txid, `fetch_stednavne`, stednavneTableModel);
   yield tableDiffNg.applyChanges(client, txid, stednavneTableModel);

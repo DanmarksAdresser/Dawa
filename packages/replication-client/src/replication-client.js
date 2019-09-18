@@ -7,7 +7,6 @@ const {go} = require('ts-csp');
 const {parseCommands} = require('@dawadk/common/src/cli/commander-wrapper');
 const databasePools = require('@dawadk/common/src/postgres/database-pools');
 const impl = require('./replication-client-impl');
-const {withReplicationTransaction} = require('./transactions');
 const {ReplicationHttpClient} = require('./replication-http-client');
 const generateConfig = require('./generate-config');
 const {getValidatedConfig, validateAgainstDatabase} = require('./validate-config');
@@ -49,6 +48,11 @@ const commands = [
         description: `Download a complete copy of all entities instead of relying on events to perform the update.\
  Used if new attributes has been added, or if data inconsistencies are suspected.`
       },
+        {
+          name: 'multiple-transactions',
+          type: 'boolean',
+          description: 'Download entities in one transaction per entity rather than a single large transaction.'
+        },
       entitiesParam]
     },
     {
@@ -165,10 +169,12 @@ const runCommand = (command, options) => go(function* () {
       }
     }
     else {
-      yield pool.withTransaction({}, 'READ_WRITE', client => withReplicationTransaction(client, replicationConfig.replication_schema, txid => go(function* () {
-        const datamodel = yield httpClient.datamodel();
-        yield impl.update(client, txid, datamodel, replicationConfig, pgModel, httpClient, {forceDownload: options.forceDownload, entities: options.entities});
-      })));
+      const datamodel = yield httpClient.datamodel();
+      yield impl.update(pool, datamodel, replicationConfig, pgModel, httpClient, {
+        forceDownload: options.forceDownload,
+        entities: options.entities,
+        multipleTransactions: options.multipleTransactions
+      });
     }
   }
 });
