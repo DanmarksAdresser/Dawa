@@ -116,7 +116,7 @@ const referenceAttributes = {
       type: {
         'kind': 'reference',
         type: 'integer',
-        sqlType: 'integer'
+        sqlType: 'bigint'
       },
       description: ''
     },
@@ -125,7 +125,7 @@ const referenceAttributes = {
       type: {
         'kind': 'reference',
         type: 'integer',
-        sqlType: 'integer'
+        sqlType: 'bigint'
       },
       description: ''
     },
@@ -134,7 +134,7 @@ const referenceAttributes = {
       type: {
         'kind': 'reference',
         type: 'integer',
-        sqlType: 'integer'
+        sqlType: 'bigint'
       },
       description: ''
     }
@@ -456,6 +456,18 @@ const defaultBinding = (eaAttr => bindingTypes.column({
 
 const toBinding = defmulti(eaAttr => eaAttr.type.kind);
 const primitiveEaAttrToBinding = defmulti(eaAttr => eaAttr.type.name);
+
+toBinding.method('reference', eaAttr => {
+  if(eaAttr.type.type === 'integer' && eaAttr.type.sqlType === 'bigint') {
+    return bindingTypes.stringToNumber({
+      attrName: eaAttr.name,
+      column: toColumnName(eaAttr.name)
+    });
+  }
+  else {
+    return defaultBinding(eaAttr);
+  }
+});
 
 toBinding.method('primitive', primitiveEaAttrToBinding);
 toBinding.defaultMethod(defaultBinding);
