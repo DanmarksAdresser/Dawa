@@ -556,6 +556,12 @@ module.exports = {
         description: 'SFE ejendomsnummer.'
       },
       {
+        name: 'bfenummer',
+        type: 'integer',
+        nullable: true,
+        description: 'BFE Nummer.'
+      },
+      {
         name: 'geometri',
         type: 'geometry',
         description: 'Jordstykkets geometri. Leveres som GeoJSON polygon.'

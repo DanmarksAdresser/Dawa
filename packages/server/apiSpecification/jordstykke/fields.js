@@ -1,6 +1,6 @@
 const fieldsUtil = require('../common/fieldsUtil');
 const sqlModel = require('./sqlModel');
-const { numberToString, kode4String  }= require('../util');
+const { numberToString, kode4String, stringToNumber  }= require('../util');
 
 module.exports = [
   {
@@ -66,6 +66,10 @@ module.exports = [
     name: 'esrejendomsnr'
   }, {
     name: 'sfeejendomsnr'
+  },
+  {
+    name: 'bfenummer',
+    formatter: stringToNumber
   },
   {
     name: 'ejerlavnavn'

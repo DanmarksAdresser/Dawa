@@ -15,7 +15,7 @@ const schemaObject = require('../schemaUtil').schemaObject;
 const commonMappers = require('../commonMappers');
 const {makeHref} = require('../commonMappers');
 const normalizedFieldSchemas = require('../replikering/normalizedFieldSchemas');
-const { numberToString } = require('../util');
+const { numberToString, stringToNumber } = require('../util');
 
 var normalizedFieldSchema = function (fieldName) {
   return normalizedFieldSchemas.normalizedSchemaField('jordstykke', fieldName);
@@ -49,6 +49,7 @@ const autocompleteSchemaProperties = {
   udvidet_esrejendomsnr: normalizedFieldSchema('udvidet_esrejendomsnr'),
   esrejendomsnr: normalizedFieldSchema('esrejendomsnr'),
   sfeejendomsnr: normalizedFieldSchema('sfeejendomsnr'),
+  bfenummer: normalizedFieldSchema('bfenummer'),
   kommune: {
     description: 'Kommunen som jordstykket er beliggende i.',
     $ref: '#/definitions/NullableKommuneRef'
@@ -64,7 +65,7 @@ const autocompleteSchemaProperties = {
     $ref: '#/definitions/NullableBbox'
   },
 };
-const autocompletePropertiesDocOrder = ['href','ejerlav', 'matrikelnr', 'udvidet_esrejendomsnr', 'esrejendomsnr', 'sfeejendomsnr', 'kommune', 'visueltcenter', 'bbox'];
+const autocompletePropertiesDocOrder = ['href','ejerlav', 'matrikelnr', 'udvidet_esrejendomsnr', 'esrejendomsnr', 'sfeejendomsnr', 'bfenummer', 'kommune', 'visueltcenter', 'bbox'];
 
 exports.autocomplete = {
   schema: globalSchemaObject({
@@ -94,6 +95,7 @@ exports.autocomplete = {
     result.esrejendomsnr = row.esrejendomsnr ? ('' + row.esrejendomsnr) : null;
     result.udvidet_esrejendomsnr = row.udvidet_esrejendomsnr ? ('' + row.udvidet_esrejendomsnr) : null;
     result.sfeejendomsnr = row.sfeejendomsnr ? ('' + row.sfeejendomsnr) : null;
+    result.bfenummer = stringToNumber(row.bfenummer);
     return {
       tekst: `${result.matrikelnr} ${result.ejerlav.navn} (${result.ejerlav.kode})`,
       jordstykke: result

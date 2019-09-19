@@ -104,7 +104,8 @@ const unnormalizedBindings = {
       types.geometry({attrName: 'visueltcenter'}),
       types.geometry({attrName: 'bbox'}),
       types.geometry({attrName: 'geometri', column: 'geom'}),
-      types.numberToString({attrName: 'featureid'})
+      types.numberToString({attrName: 'featureid'}),
+      types.stringToNumber({attrName: 'bfenummer'})
     ]
   },
   jordstykketilknytning: {
