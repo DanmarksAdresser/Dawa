@@ -1,10 +1,11 @@
 "use strict";
 
-const {createRowFormatter, getAllProvidedAttributes} = require('../replikering/bindings/util');
+const {createRowFormatter, getAllProvidedAttributes, getAttributeBinding} = require('../replikering/bindings/util');
 const grbbrModels = require('../../ois2/parse-ea-model');
 const {getReplicationBinding} = require('../../ois2/replication-models');
 const {getRelationsForEntity} = require('../../ois2/relations');
-const {makeRefObj} = require('./common');
+const {makeRefObj, geojsonFields} = require('./common');
+const {addGeojsonRepresentationsUsingBinding} = require('../common/representationUtil');
 
 const createFlatFormatter = (grbbrModel) => {
   const binding = getReplicationBinding(grbbrModel.name, 'current');
@@ -62,6 +63,13 @@ const makeRepresentations = () => grbbrModels.reduce((acc, grbbrModel) => {
     flat: makeFlatRepresentation(grbbrModel),
     json: makeJsonRepresentation(grbbrModel)
   };
+  if(geojsonFields[grbbrModel.name]) {
+    const binding = getReplicationBinding(grbbrModel.name, 'current');
+    const geometryAttrBinding = getAttributeBinding(geojsonFields[grbbrModel.name], binding);
+    addGeojsonRepresentationsUsingBinding(acc[grbbrModel.name], geometryAttrBinding);
+  }
   return acc;
 }, {});
+
+
 module.exports = makeRepresentations();

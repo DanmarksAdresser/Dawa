@@ -19,6 +19,11 @@ const plurals = {
   fordelingaffordelingsareal: 'fordelingaffordelingsarealer'
 };
 
+const geojsonFields = {
+  bygning: 'byg404Koordinat',
+  tekniskanlæg: 'tek109Koordinat'
+};
+
 const externalRefs = {
     husnummer: baseUrl => id => {
       return {
@@ -68,5 +73,6 @@ module.exports = {
   externalRefs,
   getQueryPath,
   makeRefObj,
-  getEntityName
+  getEntityName,
+  geojsonFields
 };

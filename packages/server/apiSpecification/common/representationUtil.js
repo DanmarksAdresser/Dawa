@@ -3,6 +3,7 @@
 const _ = require('underscore');
 const commonMappers = require('../commonMappers');
 const { globalSchemaObject } = require('../commonSchemaDefinitionsUtil');
+const format = require('../replikering/bindings/format');
 
 /*
  * Computes the list of fieldMap that should be included in the CSV representation for the given type
@@ -146,6 +147,47 @@ function removeZCoordinate(coordinates) {
 
 exports.removeZCoordinate = removeZCoordinate;
 
+const extractGeometry = (attrBinding, row) => {
+  const dst = {};
+  format(attrBinding, row, dst);
+  return dst[attrBinding.attrName];
+}
+
+exports.geojsonRepresentationUsingBinding = (propertiesRepresentation, geometryAttrBinding) => {
+  return {
+    fields: [],
+    mapper: function (baseUrl, params, singleResult) {
+      const propertiesMapper = propertiesRepresentation.mapper(baseUrl, params, singleResult);
+      return function (row) {
+        var result = {};
+        result.type = 'Feature';
+
+        result.geometry = extractGeometry(geometryAttrBinding, row);
+        if(params.format === 'geojson' && result.geometry) {
+          result.geometry.coordinates = removeZCoordinate(result.geometry.coordinates);
+        }
+        if (singleResult) {
+          result.crs = {
+            type: 'name',
+            properties: {
+              name: 'EPSG:' + (params.srid || 4326)
+            }
+          };
+        }
+        result.properties = propertiesMapper(row);
+        if(result.properties.bbox_xmin) {
+          result.bbox = commonMappers.mapBbox(result.properties);
+          delete result.properties.bbox_xmin;
+          delete result.properties.bbox_ymin;
+          delete result.properties.bbox_xmax;
+          delete result.properties.bbox_ymax;
+        }
+        return result;
+      };
+    }
+  };
+};
+
 exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentation) {
   return {
     fields: propertiesRepresentation.fields.concat([geomJsonField]),
@@ -185,8 +227,18 @@ exports.geojsonRepresentation = function (geomJsonField, propertiesRepresentatio
   };
 };
 
+const geojsonCombinations = [['geojsonNested', 'json'], ['geojsonMini', 'mini'], ['geojson', 'flat']];
+
+exports.addGeojsonRepresentationsUsingBinding = (representations, geometryBinding) => {
+  for(let [geojsonKey, repKey] of geojsonCombinations) {
+    if(representations[repKey]) {
+      representations[geojsonKey] = exports.geojsonRepresentationUsingBinding(representations[repKey], geometryBinding);
+    }
+  }
+};
+
 const addGeojsonRepresentations = (representations, geomjsonField) => {
-  for(let [geojsonKey, repKey] of [['geojsonNested', 'json'], ['geojsonMini', 'mini'], ['geojson', 'flat']]) {
+  for(let [geojsonKey, repKey] of geojsonCombinations) {
     if(representations[repKey]) {
       representations[geojsonKey] = exports.geojsonRepresentation(geomjsonField, representations[repKey]);
     }
