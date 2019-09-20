@@ -11,7 +11,8 @@ for (let grbbrModel of grbbrModels) {
     propertyFilter: parameterMap[grbbrModel.name].propertyFilter,
     struktur: commonParameters.struktur,
     format: commonParameters.format,
-    paging: commonParameters.paging
+    paging: commonParameters.paging,
+    crs: commonParameters.crs
   };
   const queryResource = {
     path: getQueryPath(grbbrModel.name),

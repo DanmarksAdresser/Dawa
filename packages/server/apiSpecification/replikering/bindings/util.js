@@ -5,7 +5,9 @@ const { defaultSchemas } = require('../datamodelUtil');
 const parameterSchema = require('../../parameterSchema');
 const format = require('./format');
 const sqlSelect = require('./sql-select');
+const sqlSelectForApi = require('./sql-select-for-api');
 const toColumn = require('./to-column');
+const dbapi = require('../../../dbapi');
 /**
  * Given an attribute name, and a *entity* binding, find the attribute binding that provides
  * the attribute specified by name.
@@ -101,6 +103,22 @@ const makeSelectClause = attributeBindings =>
     .map(([select, as]) => `${select} AS ${as}`)
     .join(', ');
 
+const typesRequiringSrid = ['geometry'];
+
+const addSelectForLookup = (sqlParts, attributeBindings, params) => {
+  const requiresSrid = attributeBindings.some(binding => typesRequiringSrid.includes(binding.type));
+  const opts = {};
+  if(requiresSrid) {
+    const srid = params.srid || 4326;
+    const sridAlias = dbapi.addSqlParameter(sqlParts, srid);
+    Object.assign(opts, {srid, sridAlias});
+  }
+  const clauses =  attributeBindings.map(binding => sqlSelectForApi(binding, null, opts))
+    .reduce((acc, select) => acc.concat(select), [])
+    .map(([select, as]) => `${select} AS ${as}`);
+  sqlParts.select = [...sqlParts.select, ...clauses ];
+};
+
 const getAllProvidedAttributes = attributeBindings =>
   attributeBindings
     .map(getProvidedAttributes)
@@ -109,6 +127,7 @@ const getAllProvidedAttributes = attributeBindings =>
 const getColumnSpec = (filterParameters, binding) => {
   const columns = filterParameters.reduce((memo, filterParam) => {
     const bindingAttr = binding.attributes.find(attr => getProvidedAttributes(attr).includes(filterParam.name));
+    assert(bindingAttr, `Found column for parameter ${JSON.stringify(filterParam)}`)
     const columnSpec = toColumn(bindingAttr);
     memo[filterParam.name] = columnSpec;
     return memo;
@@ -126,5 +145,6 @@ module.exports = {
   createRowFormatter,
   makeSelectClause,
   getAllProvidedAttributes,
-  getColumnSpec
+  getColumnSpec,
+  addSelectForLookup
 };

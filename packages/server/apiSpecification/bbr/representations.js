@@ -4,9 +4,9 @@ const {createRowFormatter, getAllProvidedAttributes, getAttributeBinding} = requ
 const grbbrModels = require('../../ois2/parse-ea-model');
 const {getReplicationBinding} = require('../../ois2/replication-models');
 const {getRelationsForEntity} = require('../../ois2/relations');
-const {makeRefObj, geojsonFields} = require('./common');
+const {makeRefObj, geojsonFields, getEntityName} = require('./common');
 const {addGeojsonRepresentationsUsingBinding} = require('../common/representationUtil');
-
+const registry = require('../registry');
 const createFlatFormatter = (grbbrModel) => {
   const binding = getReplicationBinding(grbbrModel.name, 'current');
   const basicRowFormatter = createRowFormatter(binding);
@@ -58,18 +58,19 @@ const makeJsonRepresentation = (grbbrModel) => {
   };
 };
 
-const makeRepresentations = () => grbbrModels.reduce((acc, grbbrModel) => {
-  acc[grbbrModel.name] = {
+const makeRepresentations = grbbrModel => {
+  const representations = {
     flat: makeFlatRepresentation(grbbrModel),
     json: makeJsonRepresentation(grbbrModel)
   };
   if(geojsonFields[grbbrModel.name]) {
     const binding = getReplicationBinding(grbbrModel.name, 'current');
     const geometryAttrBinding = getAttributeBinding(geojsonFields[grbbrModel.name], binding);
-    addGeojsonRepresentationsUsingBinding(acc[grbbrModel.name], geometryAttrBinding);
+    addGeojsonRepresentationsUsingBinding(representations, geometryAttrBinding);
   }
-  return acc;
-}, {});
-
-
-module.exports = makeRepresentations();
+  return representations;
+};
+for(let grbbrModel of grbbrModels) {
+  exports[grbbrModel.name] = makeRepresentations(grbbrModel);
+  registry.addMultiple(getEntityName(grbbrModel), 'representation', exports[grbbrModel.name]);
+}

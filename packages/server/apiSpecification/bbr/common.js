@@ -1,5 +1,9 @@
 const { assert } = require('chai');
 const {makeHref} = require('../commonMappers');
+
+const indices = require('../../ois2/indices');
+const relations = require('../../ois2/relations');
+const grbbrModels = require('../../ois2/parse-ea-model');
 const bbrPath = '/bbr';
 const entityPrefix = 'bbr_';
 
@@ -23,6 +27,44 @@ const geojsonFields = {
   bygning: 'byg404Koordinat',
   tekniskanlæg: 'tek109Koordinat'
 };
+
+const bbrParameterNames = {
+  bygning: {
+    byg021BygningensAnvendelse: 'anvendelseskode'
+  }
+};
+
+const getParameterName = (grbbrModel, attrName) => {
+  if(bbrParameterNames[grbbrModel.name] && bbrParameterNames[grbbrModel.name][attrName]) {
+    return bbrParameterNames[grbbrModel.name][attrName];
+  }
+  const relation = relations.getRelation(grbbrModel.name, attrName);
+  if(relation) {
+    return `${attrName}_id`;
+  }
+  return attrName;
+};
+
+
+const toFilterSpec = (grbbrModel, attributeName) => {
+  const grbbrAttribute = grbbrModel.attributes.find(attr => attr.name === attributeName);
+  const parameter = {
+    name: getParameterName(grbbrModel, attributeName),
+    type: grbbrAttribute.type === 'integer' ? 'integer' : 'string',
+    multi: true
+  };
+  const columnName = grbbrAttribute.binding.column;
+  return {
+    parameter,
+    columnName
+  };
+};
+
+const filterSpecs = grbbrModels.reduce((acc, grbbrModel) => {
+  const indexedAttrNames = ['id', 'status', 'kommunekode', ...indices.filter(index => index.entity === grbbrModel.name).map(index => index.columns[0])];
+  acc[grbbrModel.name] = indexedAttrNames.map(attrName => toFilterSpec(grbbrModel, attrName));
+  return acc;
+}, {});
 
 const externalRefs = {
     husnummer: baseUrl => id => {
@@ -74,5 +116,7 @@ module.exports = {
   getQueryPath,
   makeRefObj,
   getEntityName,
-  geojsonFields
+  geojsonFields,
+  bbrParameterNames,
+  filterSpecs
 };

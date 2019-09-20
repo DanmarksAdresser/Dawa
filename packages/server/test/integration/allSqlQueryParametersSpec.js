@@ -26,7 +26,27 @@ function multiVerifier(verifierFn) {
   };
 }
 
+const simpleParameterTest = (args, path, converter) => {
+  converter = converter || (v => v);
+  const pathSegments = path.split('.');
+  return {
+    values: args,
+    verifier: (obj, paramValue) => {
+      const objectValue = pathSegments.reduce((acc, segment) => acc ? acc[segment] : null, obj);
+      return converter(paramValue) === objectValue;
+    }
+  };
+};
 var sampleParameters = {
+  bbr_bygning: {
+    id: simpleParameterTest(['00499a75-9979-43de-b2cb-ee89bed4cc0b'], 'id'),
+    status: simpleParameterTest(['2', '6'], 'status'),
+    kommunekode: simpleParameterTest(['0253'], 'kommunekode'),
+    husnummer_id: simpleParameterTest(['0a3f5081-49bf-32b8-e044-0003ba298018'], 'husnummer.id'),
+    jordstykke_id: simpleParameterTest(['361758'],  'jordstykke.id', parseInt),
+    grund_id: simpleParameterTest(['a68c46ce-9112-4e37-b5ab-7139dfcd01c3'], 'grund.id'),
+    anvendelseskode: simpleParameterTest(['120'], 'byg021BygningensAnvendelse')
+  },
   bygning: {
     id: {
       values: ['1005266425'],
@@ -994,6 +1014,7 @@ _.keys(sampleParameters).forEach(function(specName) {
   });
 
   var untestedParams = {
+    bbr_bygning: ['ejerlejlighed_id']
   };
   var allParameters = propertyFilterParameters.concat(additionalParameters[specName] || []);
   describe('Query for ' + specName, function() {

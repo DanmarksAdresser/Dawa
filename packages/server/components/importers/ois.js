@@ -19,7 +19,7 @@ const importOisFile = (client, txid, dataDir, fileDescriptor, oisImportSpec, fet
   yield promisingStreamCombiner(streams);
   yield client.query(`DELETE FROM ${fetchTableName} USING ${tmpFetchTable} WHERE ${fetchTableName}.rowkey = ${tmpFetchTable}.rowkey`)
   yield client.query(`INSERT INTO ${fetchTableName} (SELECT * from ${tmpFetchTable})`);
-  yield client.query(`DELETE FROM ${tmpFetchTable}`);
+  yield client.query(`TRUNCATE ${tmpFetchTable}`);
   yield registerOisImport(client, fileDescriptor.oisTable, fileDescriptor.serial, fileDescriptor.total);
 });
 

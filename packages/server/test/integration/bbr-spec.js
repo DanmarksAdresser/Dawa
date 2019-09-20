@@ -14,7 +14,7 @@ const getQueryResource = entityName => registry.get({
   qualifier: 'query'
 });
 
-describe.only('BBR Grunddata API', () => {
+describe('BBR Grunddata API', () => {
   testdb.withTransactionEach('test', (clientFn) => {
     it('Kan lave GeoJSON søgning på bygning', () => go(function* () {
       const result = yield helpers.getJson(clientFn(), getQueryResource('bygning'), {}, {
