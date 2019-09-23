@@ -56,6 +56,7 @@ runConfigured(schema, [], config => go(function* () {
     CREATE INDEX ON jordstykker (bfenummer);
     CREATE INDEX ON jordstykker(grund_id);
     CREATE INDEX ON jordstykker(ejendomsrelation_id);
+    CREATE INDEX ON jordstykker(featureid);
 `);
 
     yield client.query('ALTER TABLE ois_importlog RENAME entity TO oistable');
