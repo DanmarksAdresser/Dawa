@@ -5,10 +5,11 @@ const { streamToTablePipeline } = require('@dawadk/import-util/src/postgres-stre
 const {computeDifferences, applyChanges, computeDifferencesSubset } = require('@dawadk/import-util/src/table-diff');
 const importModels = require('../../ois2/import-models');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
-
+const logger = require('@dawadk/common/src/logger').forCategory('grbbrImport');
 const importOisFile = (client, txid, dataDir, fileDescriptor, oisImportSpec, fetchTableName, tmpFetchTable) => go(function*() {
   // we cannot just stream directly into fetch table because multiple files may result in duplicate keys.
   const { fileName } = fileDescriptor;
+  logger.info(`Streaming OIS file to database`, {file: fileName});
   const oisXmlStream = yield createOisStream(dataDir, fileName, oisImportSpec.oisTable);
   const {tableModel, mapFn } = oisImportSpec;
   const columnNames = tableModel.columns.map(column => column.name);

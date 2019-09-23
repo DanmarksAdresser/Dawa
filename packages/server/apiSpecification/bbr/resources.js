@@ -14,6 +14,7 @@ for (let grbbrModel of grbbrModels) {
     paging: commonParameters.paging,
     crs: commonParameters.crs
   };
+  const sqlModel = sqlModels[grbbrModel.name];
   const queryResource = {
     path: getQueryPath(grbbrModel.name),
     pathParameters: parameterMap[grbbrModel.name].propertyFilter.map(param => ({
@@ -22,9 +23,30 @@ for (let grbbrModel of grbbrModels) {
     })),
     queryParameters: resourcesUtil.flattenParameters(queryParameters),
     representations: representations[grbbrModel.name],
-    sqlModel: sqlModels[grbbrModel.name],
+    sqlModel,
     chooseRepresentation: resourcesUtil.chooseRepresentationForQuery,
     processParameters: resourcesUtil.applyDefaultPaging
   };
+
+  const getByKeyPath = `${getQueryPath(grbbrModel.name)}/:id`;
+  const getByKeyResource = {
+    path: getByKeyPath,
+    pathParameters: parameterMap[grbbrModel.name].id,
+    queryParameters: resourcesUtil.flattenParameters(
+      Object.assign({},
+        {format: commonParameters.format},
+        {
+          crs: commonParameters.crs,
+          struktur: commonParameters.struktur,
+        })),
+    representations: representations,
+    sqlModel,
+    singleResult: true,
+    processParameters: () => null,
+    chooseRepresentation: resourcesUtil.chooseRepresentationForQuery
+  };
+
   registry.add(getEntityName(grbbrModel), 'resource', 'query', queryResource);
+  registry.add(getEntityName(grbbrModel), 'resource', 'getByKey', getByKeyResource);
+
 }
