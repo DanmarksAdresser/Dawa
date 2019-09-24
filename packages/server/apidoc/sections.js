@@ -1,5 +1,6 @@
 const bbrOrder = ['enhed', 'bygning', 'tekniskanlaeg', 'ejerskab', 'grund', 'matrikelreference', 'opgang', 'etage', 'bygningspunkt', 'kommune'];
-
+const grbbrModels = require('../ois2/parse-ea-model');
+const {getEntityName} = require("../apiSpecification/bbr/common");
 module.exports = [{
   name: 'Adresser',
   headingClass: 'h2-icon h2-adresser',
@@ -15,8 +16,15 @@ module.exports = [{
   headingClass: 'h2-icon h2-matrikel',
   lead: 'For en generel introduktion til matrikelkortet, se <a href="/dok/matrikelkortet">her<a/>.',
   entities: ['ejerlav', 'jordstykke']
-}, {
-  name: 'BBR',
+},
+  {
+    name: 'BBR',
+    headingClass: 'h2-icon h2-bbr',
+    lead: 'For en generel introduktion til BBR, se <a href="/dok/bbr">her<a/>.',
+    entities: grbbrModels.map(getEntityName)
+  },
+  {
+  name: 'BBR (LEGACY)',
   headingClass: 'h2-icon h2-bbr',
   lead: 'For en generel introduktion til BBR, se <a href="/dok/bbr">her<a/>.',
   entities: bbrOrder.map(entityName => `BBR ${entityName}`)

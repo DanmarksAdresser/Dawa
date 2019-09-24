@@ -81,7 +81,7 @@ const referenceAttributes = {
         type: 'integer',
         sqlType: 'integer'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'husnummer',
@@ -90,7 +90,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'ejerlejlighed',
@@ -99,7 +99,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'grund',
@@ -108,7 +108,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }],
   Ejendomsrelation: [
     {
@@ -118,7 +118,7 @@ const referenceAttributes = {
         type: 'integer',
         sqlType: 'bigint'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'ejerlejlighed',
@@ -127,7 +127,7 @@ const referenceAttributes = {
         type: 'integer',
         sqlType: 'bigint'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'samletFastEjendom',
@@ -136,7 +136,7 @@ const referenceAttributes = {
         type: 'integer',
         sqlType: 'bigint'
       },
-      description: ''
+      definition: ''
     }
   ],
   Enhed: [
@@ -147,7 +147,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'etage',
@@ -156,7 +156,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'opgang',
@@ -165,7 +165,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'bygning',
@@ -174,7 +174,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ],
   Etage: [
@@ -185,7 +185,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ],
   Grund: [
@@ -196,7 +196,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'bestemtFastEjendom',
@@ -205,7 +205,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ],
   Opgang: [
@@ -216,7 +216,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'bygning',
@@ -225,7 +225,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ],
   TekniskAnlæg: [
@@ -236,7 +236,7 @@ const referenceAttributes = {
         type: 'integer',
         sqlType: 'integer'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'husnummer',
@@ -245,7 +245,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'enhed',
@@ -254,7 +254,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'ejerlejlighed',
@@ -263,7 +263,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'bygningPåFremmedGrund',
@@ -272,7 +272,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'bygning',
@@ -281,7 +281,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'grund',
@@ -290,7 +290,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ],
   fordelingsareal: [
@@ -301,7 +301,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ],
   fordelingaffordelingsareal: [
@@ -312,7 +312,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     },
     {
       name: 'fordelingsareal',
@@ -321,7 +321,7 @@ const referenceAttributes = {
         type: 'uuid',
         sqlType: 'uuid'
       },
-      description: ''
+      definition: ''
     }
   ]
 };
@@ -487,12 +487,19 @@ primitiveEaAttrToBinding.defaultMethod(defaultBinding);
 const toColumnName = attrName => attrName.substring(0, 32).toLowerCase();
 
 const toGrbbrAttr = (eaAttr) => {
+  let description = eaAttr.definition;
+  if(eaAttr.type.kind === 'codeList'){
+    const codeList = codeLists.find(list => list.eaid === eaAttr.type.eaid);
+    if(codeList) {
+      description += ` For mulige værdier, se <a href="${codeList.vokabularium}">kodelisten.</a>`
+    }
+  }
   return {
     name: eaAttr.name,
     type: toReplicationType(eaAttr.type),
     sqlType: toSqlType(eaAttr.type),
     binding: toBinding(eaAttr),
-    description: eaAttr.definition
+    description
   };
 };
 
