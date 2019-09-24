@@ -7,7 +7,9 @@ const {createUnzipperProcess} = require('./ois-import');
 const Promise = require('bluebird');
 const iconv = require('iconv-lite');
 const logger = require('@dawadk/common/src/logger').forCategory('shortenOisFile');
-
+const rawXmlStream = require('./rawXmlStreamExpat');
+const zlib = require('zlib');
+const through2 = require("through2");
 const escapeXml = str => {
   const charsToReplace = {
     '&': '&amp;',
@@ -184,8 +186,40 @@ const shortenOisFiles = (srcDir, targetDir, count) => go(function* () {
   }
 });
 
+const toNdjson = (inputDir, fileName, outputDir) => {
+  const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
+  const ndjsonFilename = (fileName.substring(0, fileName.length - 4) + '.gz').toUpperCase();
+  const inputFilePath = path.join(inputDir, fileName);
+  const outputNdjsonFilePath = path.join(outputDir, ndjsonFilename);
+  if(fs.existsSync(outputNdjsonFilePath)) {
+    logger.info(`Skipping file, output file already exists`, {fileName});
+    return Promise.resolve();
+  }
+  const unzipperProc = createUnzipperProcess(inputFilePath, xmlFileName);
+  const fileInputStream = unzipperProc.stdout;
+  const xmlObjectStream = rawXmlStream(fileInputStream);
+  const outputStream = fs.createWriteStream(outputNdjsonFilePath, {encoding: 'latin1'});
+  const zipper = zlib.createGzip();
+  const stringifier = through2.obj(function(obj, encoding, callback) {
+    this.push(JSON.stringify(obj) + '\n');
+    callback();
+  });
+  xmlObjectStream.pipe(stringifier);
+  stringifier.pipe(zipper);
+  zipper.pipe(outputStream);
+  for(let stream of [fileInputStream, zipper, xmlObjectStream, stringifier, outputStream]) {
+    stream.on('error', e => logger.error(e));
+  }
+  return new Promise((resolve, reject) => {
+    outputStream.on('finish', () => {
+      resolve('resolved!');
+    });
+  });
+};
+
 module.exports = {
   filterOisFile,
   shortenOisFile,
-  shortenOisFiles
+  shortenOisFiles,
+  toNdjson
 };

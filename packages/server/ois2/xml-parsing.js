@@ -14,6 +14,9 @@ parseXmlAttr.method('point2d', (attr, xmlObject) => {
 parseXmlAttr.defaultMethod((attr, xmlObject) => xmlObject[attr.name]);
 
 const createMapFn = entity => xmlObject => {
+  if(xmlObject.LOEBENUMMER) {
+    return null;
+  }
   const result = {};
   result.rowkey = xmlObject.ois_id;
   result.registrering = new Range(xmlObject.registreringFra, xmlObject.registreringTil  ? xmlObject.registreringTil : null, '[)');

@@ -7,6 +7,10 @@ var fieldParsers = require('./fieldParsers');
 // Parse an OIS XML file into a stream of javascript objects
 module.exports = oisModel =>
   through2.obj(function (rawObject, enc, callback) {
+    if(rawObject.LOEBENUMMER) {
+      callback();
+      return;
+    }
     const result = oisModel.fields.reduce(function (memo, field) {
       var rawValue = rawObject[field.name];
       var parsedValue;

@@ -4,7 +4,7 @@ var expat = require('node-expat')
 var Readable = require('stream').Readable;
 var util = require('util');
 
-module.exports = function rawXmlStream(fileStream, oisTableName) {
+module.exports = function rawXmlStream(fileStream) {
   var parser = new expat.Parser('ISO-8859-1');
   util.inherits(ParseStream, Readable);
   function ParseStream() {
@@ -15,11 +15,12 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
   };
 
   var parseStream = new ParseStream();
-
+  let depth = 0;
   var currentObj;
   var currentField;
   parser.on('startElement', function(name) {
-    if(name === oisTableName) {
+    ++depth;
+    if(depth === 2) {
       currentObj = {};
     }
     else if (currentObj && !currentField) {
@@ -28,15 +29,16 @@ module.exports = function rawXmlStream(fileStream, oisTableName) {
     }
   });
   parser.on('endElement', function(name) {
+    --depth;
     if(name === currentField) {
       currentField = null;
     }
-    else if (name === oisTableName) {
+    else if (depth === 1) {
       const result = parseStream.push(currentObj);
-      currentObj = null;
       if(!result) {
         fileStream.pause();
       }
+      currentObj = null;
     }
   });
 

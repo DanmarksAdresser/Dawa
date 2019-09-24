@@ -16,7 +16,7 @@ const {createOisStream, findFilesToImportForEntity, registerOisImport} = require
 
 const oisFileToTable = (client, entityName, dataDir, fileName, table) => go(function* () {
   const columns = oisCommon.postgresColumnNames[entityName];
-  const oisStream = yield createOisStream(dataDir, fileName, oisModels[entityName].oisTable);
+  const oisStream = yield createOisStream(dataDir, fileName, oisModels[entityName].oisTable,'xml');
   const transformer = oisParser(oisModels[entityName]);
   yield promisingStreamCombiner([oisStream, transformer, ...importUtil.streamToTablePipeline(client, table, columns)]);
 });

@@ -1,28 +1,53 @@
+const { assert } =require('chai');
 const child_process = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const split2 = require('split2');
 const _ = require('underscore');
 const Promise = require('bluebird');
 const {go} = require('ts-csp');
 const rawXmlStream = require('./rawXmlStreamExpat');
 const logger = require('@dawadk/common/src/logger').forCategory('oisImport');
-
+const zlib = require('zlib');
 const createUnzipperProcess = (filePath, filePattern) => {
   const args = ['e', '-so', path.resolve(filePath), filePattern];
   const proc = child_process.spawn('7za', args);
   return proc;
 }
 
-const createOisStream = (dataDir, fileName, oisTable) => go(function* () {
-  const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
+const createOisStream = (dataDir, fileName, oisTable, format) => go(function* () {
   const filePath = path.join(dataDir, fileName);
-  const unzipperProc = createUnzipperProcess(filePath, xmlFileName);
-  const xmlStream = rawXmlStream(unzipperProc.stdout, oisTable);
-  return yield Promise.resolve(xmlStream);
+  if(format === 'ndjson') {
+    const inputStream = fs.createReadStream(filePath);
+    const unzipper = zlib.createGunzip({});
+    const splitter = split2('\n', line => {
+      try {
+        return JSON.parse(line);
+      }
+      catch(e) {
+        logger.error(`Error streaming OIS file: ${e.message}`, e);
+        throw e;
+      }
+    }, {});
+    for(let stream of [inputStream, unzipper, splitter]) {
+      stream.on('error', e => logger.error(`Error streaming OIS file: ${e.message}`, e));
+    }
+    inputStream.pipe(unzipper).pipe(splitter);
+    return yield Promise.resolve(splitter);
+  }
+  else if(format === 'xml') {
+    const xmlFileName = (fileName.substring(0, fileName.length - 4) + '.XML').toUpperCase();
+    const unzipperProc = createUnzipperProcess(filePath, xmlFileName);
+    const xmlStream = rawXmlStream(unzipperProc.stdout);
+    return yield Promise.resolve(xmlStream);
+  }
+  else {
+    assert(false);
+  }
 });
 
 const getOisFileRegex = registerName =>
-  new RegExp(`^ois_${registerName}_(co\\d+t)_(na|da|te)000_(\\d+)_(\\d+)_(\\d+).zip$`, 'i');
+  new RegExp(`^ois_${registerName}_(co\\d+t)_(na|da|te)000_(\\d+)_(\\d+)_(\\d+).(zip|gz)$`, 'i');
 
 const fileNameToDescriptor = (registerName, fileName) => {
   const match = getOisFileRegex(registerName).exec(fileName);
@@ -38,7 +63,8 @@ const fileNameToDescriptor = (registerName, fileName) => {
     serial: serial,
     fileName: fileName,
     fileDate: match[4],
-    fileTime: match[5]
+    fileTime: match[5],
+    format: match[6].toLowerCase() === 'zip' ? 'xml' : 'ndjson'
   };
 };
 
