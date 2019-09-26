@@ -61,20 +61,21 @@ function getMaxEventId(client, tablePrefix, entityName) {
  * @returns {*}
  */
 const  getNextVirkningTime = (client, txid, darEntitiesWithNewRows)  =>go(function*() {
-    const virkningTimeDb = (yield client.queryp('SELECT GREATEST((SELECT virkning from dar1_meta), NOW()) as time')).rows[0].time;
-
-    if (darEntitiesWithNewRows.length === 0) {
-      return virkningTimeDb;
-    }
-    const registrationTimeSelects = darEntitiesWithNewRows.map(entity =>
-      `select max(greatest(lower(registrering), upper(registrering))) FROM dar1_${entity}_changes WHERE txid = ${txid}`);
-    const selectMaxRegistrationQuery = `SELECT GREATEST((${registrationTimeSelects.join('),(')}))`;
-    const virkningTimeChanges = (yield client.queryp(`${selectMaxRegistrationQuery} as v`)).rows[0].v;
-    const latest = virkningTimeChanges ? moment.max(moment(virkningTimeDb), moment(virkningTimeChanges)) :
-      moment(virkningTimeDb);
-    return latest.toISOString();
+  const virkningTimeDb = (yield client.queryp('SELECT GREATEST((SELECT virkning from dar1_meta), NOW()) as time')).rows[0].time;
+  if (darEntitiesWithNewRows.length === 0) {
+    return virkningTimeDb;
+  }
+  const registrationTimeSelects = darEntitiesWithNewRows.map(entity =>
+    `select max(lower(registrering)) FROM dar1_${entity}_changes WHERE txid = ${txid}`);
+  const selectMaxRegistrationQuery = `SELECT GREATEST((${registrationTimeSelects.join('),(')}))`;
+  const virkningTimeChanges = (yield client.queryp(`${selectMaxRegistrationQuery} as v`)).rows[0].v;
+  // We have previously received invalid registration times far in the future. We ignore the registration time of the changeset if the registration time is beyond 1 minute into the future.
+  const virkningTimeChangesValid = virkningTimeChanges &&
+    moment(virkningTimeDb).add(2, 'minute').isAfter(moment(virkningTimeChanges));
+  const latest = virkningTimeChangesValid ? moment.max(moment(virkningTimeDb), moment(virkningTimeChanges)) :
+    moment(virkningTimeDb);
+  return latest.toISOString();
 });
-
 
 const setVirkningTime = (client, virkningTime) => go(function*() {
   const prevVirkning = (yield getMeta(client)).virkning;
