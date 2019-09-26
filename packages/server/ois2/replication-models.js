@@ -49,9 +49,6 @@ const toReplicationModel = (grbbrModel, temporality) => {
   };
   const grbbrAttributes =  grbbrModel.attributes;
   const replicationAttrs = grbbrAttributes.map(attr => {
-    if(attr.description === null || attr.description === undefined) {
-      console.log('missing description for '+ attr.name);
-    }
     return {
       name: attr.name,
       type: attr.type,

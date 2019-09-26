@@ -26,7 +26,8 @@ const createMapFn = entity => xmlObject => {
       logger.error('Ugyldigt registreringsinterval', {
         registreringfra: result.registrering.lower,
         registreringtil: result.registrering.upper,
-        rowkey: result.rowkey
+        rowkey: result.rowkey,
+        id: xmlObject.id_lokalId
       });
       return null;
     }

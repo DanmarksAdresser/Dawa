@@ -1,12 +1,9 @@
-const assert = require('assert');
-
 const definitions = require('../commonSchemaDefinitions');
 const temaModels = require('../../dagiImport/temaModels');
-const schemaUtil = require('../../apiSpecification/schemaUtil');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 const grbbrModels = require('../../ois2/replication-models');
 
-const { defaultSchemas } = require('./datamodelUtil');
+const { getDefaultSchema } = require('./datamodelUtil');
 
 const commonVaskAttributes = [
   {
@@ -1065,12 +1062,6 @@ for(let [entityName, model] of Object.entries( darReplikeringModels.historyRepli
 }
 
 Object.assign(module.exports, grbbrModels.modelMap);
-
-const getDefaultSchema = (type, nullable) => {
-  const schemaType = defaultSchemas[type];
-  assert(schemaType);
-  return nullable ? schemaUtil.nullable(schemaType) : schemaType;
-};
 
 for(let modelName of Object.keys(module.exports)) {
   const model = module.exports[modelName];

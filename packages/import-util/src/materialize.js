@@ -107,7 +107,6 @@ const clearAndMaterialize = (client, txid, tablemodels, materialization) => go(f
   const model = tablemodels[materialization.table];
   yield client.query(`DELETE FROM ${materialization.table}; DELETE FROM ${materialization.table}_changes`);
   yield initializeFromScratch(client, txid, materialization.view, model);
-  yield client.query(`ANALYZE ${materialization.table}`);
 });
 
 const recomputeMaterialization = (client, txid, tableModels, materialization) => go(function* () {

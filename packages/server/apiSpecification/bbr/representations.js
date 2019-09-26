@@ -1,11 +1,15 @@
 "use strict";
 
+const _ = require('underscore');
 const {createRowFormatter, getAllProvidedAttributes, getAttributeBinding} = require('../replikering/bindings/util');
 const grbbrModels = require('../../ois2/parse-ea-model');
 const {getReplicationBinding} = require('../../ois2/replication-models');
 const {getRelationsForEntity} = require('../../ois2/relations');
 const {makeRefObj, geojsonFields, getEntityName} = require('./common');
 const {addGeojsonRepresentationsUsingBinding} = require('../common/representationUtil');
+const {getDefaultSchema} = require('../replikering/datamodelUtil');
+const {globalSchemaObject}  = require('../commonSchemaDefinitionsUtil');
+
 const registry = require('../registry');
 const createFlatFormatter = (grbbrModel) => {
   const binding = getReplicationBinding(grbbrModel.name, 'current');
@@ -51,10 +55,34 @@ const createJsonFormatter = (grbbrModel) => {
   };
 };
 
+const toJsonSchema = (grbbrModel) => {
+  const relations = getRelationsForEntity(grbbrModel.name);
+  const toSchema = attr => {
+    let result ;
+    if (relations.find(relation => relation.attribute === attr.name)) {
+      result = {type: ['null', 'object']};
+    } else {
+      result = Object.assign({}, getDefaultSchema(attr.type, attr.name !== 'id'));
+    }
+    result.description = attr.description;
+    return result;
+  };
+
+  const properties = _.object(grbbrModel.attributes.map((grbbrAttr) => {
+    return [grbbrAttr.name, toSchema(grbbrAttr)];
+  }));
+  const docOrder = grbbrModel.attributes.map(attr => attr.name);
+  return globalSchemaObject({
+    properties,
+    docOrder
+  })
+};
+
 const makeJsonRepresentation = (grbbrModel) => {
   return {
     fields: [],
-    mapper: createJsonFormatter(grbbrModel)
+    mapper: createJsonFormatter(grbbrModel),
+    schema: toJsonSchema(grbbrModel)
   };
 };
 
@@ -63,14 +91,14 @@ const makeRepresentations = grbbrModel => {
     flat: makeFlatRepresentation(grbbrModel),
     json: makeJsonRepresentation(grbbrModel)
   };
-  if(geojsonFields[grbbrModel.name]) {
+  if (geojsonFields[grbbrModel.name]) {
     const binding = getReplicationBinding(grbbrModel.name, 'current');
     const geometryAttrBinding = getAttributeBinding(geojsonFields[grbbrModel.name], binding);
     addGeojsonRepresentationsUsingBinding(representations, geometryAttrBinding);
   }
   return representations;
 };
-for(let grbbrModel of grbbrModels) {
+for (let grbbrModel of grbbrModels) {
   exports[grbbrModel.name] = makeRepresentations(grbbrModel);
   registry.addMultiple(getEntityName(grbbrModel), 'representation', exports[grbbrModel.name]);
 }

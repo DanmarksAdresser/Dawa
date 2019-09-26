@@ -17,8 +17,15 @@ module.exports = grbbrModels.map(grbbrModel => {
         heading: `BBR ${grbbrModel.name} enkeltopslag`,
         anchor: 'opslag',
         path: `${getQueryPath(grbbrModel.name)}/{id}`
+      },
+      {
+        type: 'datadescription',
+        heading: `Beskrivelse af BBR ${grbbrModel.name}`,
+        anchor: 'databeskrivelse',
+        lead: `<p>API'et returnerer følgende data for BBR ${grbbrModel.name}</p>`,
+        entity: entityName,
+        qualifier: 'json'
       }
-
     ]
   }
 });

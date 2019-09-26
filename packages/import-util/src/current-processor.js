@@ -33,11 +33,11 @@ const createCurrentProcessor = ({historyTableModel, currentTableModel, materiali
   });
 
   const initialize = (client, txid) =>
-    materialize.recomputeMaterialization(client, txid, tableModels, materialization);
+    materialize.clearAndMaterialize(client, txid, tableModels, materialization);
 
 
   const execute = (client, txid,  strategy, context) => go(function*() {
-    if ((yield client.queryRows(`select * from ${currentTableModel.table} limit 1`)).length > 0) {
+    if ((yield client.queryRows(`select * from ${currentTableModel.table} limit 1`)).length === 0) {
       yield initialize(client, txid);
     } else {
       if(context.changes[historyTableModel.table].total > 0 || (yield hasChangedEntitiesDueToVirkningTime(client))) {

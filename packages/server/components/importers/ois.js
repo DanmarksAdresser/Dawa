@@ -1,4 +1,3 @@
-const Promise = require('bluebird');
 const { go } = require('ts-csp');
 const { findFilesToImportForEntity, createOisStream , registerOisImport} = require('../../ois-common/ois-import');
 const { streamToTablePipeline } = require('@dawadk/import-util/src/postgres-streaming');
@@ -6,6 +5,7 @@ const {computeDifferences, applyChanges, computeDifferencesSubset } = require('@
 const importModels = require('../../ois2/import-models');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
 const logger = require('@dawadk/common/src/logger').forCategory('grbbrImport');
+const {advanceVirkningTime} = require('@dawadk/import-util/src/current-util');
 const importOisFile = (client, txid, dataDir, fileDescriptor, oisImportSpec, fetchTableName, tmpFetchTable) => go(function*() {
   // we cannot just stream directly into fetch table because multiple files may result in duplicate keys.
   const { fileName, format } = fileDescriptor;
@@ -37,6 +37,7 @@ const doImport = (client, txid, dataDir, oisImportSpec) => go(function*() {
   for(let fileDescriptor of filesToImport) {
     yield importOisFile(client, txid, dataDir, fileDescriptor, oisImportSpec, fetchTableName, tmpFetchTable);
   }
+  yield client.query(`DROP TABLE ${tmpFetchTable}`);
   if(isTotal) {
     yield computeDifferences(client, txid, fetchTableName, tableModel);
   }
@@ -48,7 +49,6 @@ const doImport = (client, txid, dataDir, oisImportSpec) => go(function*() {
   }
   yield client.query(`DROP TABLE ${fetchTableName}`);
   yield applyChanges(client, txid, tableModel);
-  yield Promise.delay(5000);
 });
 
 module.exports = ({dataDir}) => {
@@ -56,6 +56,7 @@ module.exports = ({dataDir}) => {
     for(let importModel of importModels) {
       yield doImport(client, txid, dataDir, importModel);
     }
+    yield advanceVirkningTime(client, txid, 'grbbr_virkning_ts', importModels.map(model => model.tableModel));
   });
   return {
     id: 'OIS-Bitemporal-Import',
