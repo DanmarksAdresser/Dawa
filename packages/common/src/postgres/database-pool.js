@@ -22,7 +22,8 @@ const DEFAULT_RAW_POOL_OPTIONS = {
   idleTimeoutMillis: 3000,
   Promise,
   statementTimeout: 10000,
-  autoStart: false
+  autoStart: false,
+  client_encoding: 'utf8'
 };
 
 const withUnpooledRawConnection = (options, connectionFn) => go(function*() {
