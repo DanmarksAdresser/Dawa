@@ -4,6 +4,7 @@ const tableModels= require('./table-models');
 
 module.exports = grbbrModels.map(grbbrModel => {
   return {
+    name: grbbrModel.name,
     oisTable: grbbrModel.oisTable,
     oisRegister: 'grbbr',
     tableModel: tableModels.getTableModel(grbbrModel.name, 'bi'),

@@ -2,7 +2,7 @@ const { go } = require('ts-csp');
 const { findFilesToImportForEntity, createOisStream , registerOisImport} = require('../../ois-common/ois-import');
 const { streamToTablePipeline } = require('@dawadk/import-util/src/postgres-streaming');
 const {computeDifferences, applyChanges, computeDifferencesSubset } = require('@dawadk/import-util/src/table-diff');
-const importModels = require('../../ois2/import-models');
+const allImportModels = require('../../ois2/import-models');
 const promisingStreamCombiner = require('@dawadk/import-util/src/promising-stream-combiner');
 const logger = require('@dawadk/common/src/logger').forCategory('grbbrImport');
 const {advanceVirkningTime} = require('@dawadk/import-util/src/current-util');
@@ -51,18 +51,20 @@ const doImport = (client, txid, dataDir, oisImportSpec) => go(function*() {
   yield applyChanges(client, txid, tableModel);
 });
 
-module.exports = ({dataDir}) => {
+module.exports = ({dataDir, entityNames}) => {
+  entityNames = entityNames || allImportModels.map(importModel => importModel.name);
+  const importedModels = allImportModels.filter(model => entityNames.includes(model.name));
   const execute = (client, txid, strategy, context) => go(function*() {
-    for(let importModel of importModels) {
+    for(let importModel of importedModels) {
       yield doImport(client, txid, dataDir, importModel);
     }
-    yield advanceVirkningTime(client, txid, 'grbbr_virkning_ts', importModels.map(model => model.tableModel));
+    yield advanceVirkningTime(client, txid, 'grbbr_virkning_ts', allImportModels.map(model => model.tableModel));
   });
   return {
     id: 'OIS-Bitemporal-Import',
     description: 'OIS Bitemporal Importer',
     execute,
-    produces: importModels.map(importModel => importModel.tableModel.table),
+    produces: importedModels.map(importModel => importModel.tableModel.table),
     requires: []
   };
 };
