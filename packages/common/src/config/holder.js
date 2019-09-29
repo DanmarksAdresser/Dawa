@@ -84,6 +84,11 @@ const initialize = (schema, configFiles, cmdLineOptions) => {
     validate: val => typeof val === 'boolean'
   });
 
+  convict.addFormat({
+    name: 'integerOrNull',
+    validate: val => val === null || Number.isInteger(val)
+  });
+
   convictConfig = convict(schema);
 
   for (let file of configFiles) {

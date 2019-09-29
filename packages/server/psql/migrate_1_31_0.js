@@ -14,6 +14,7 @@ const {EXECUTION_STRATEGY} = require('../components/common');
 const {createChangeTable, applyCurrentTableToChangeTable} = require('@dawadk/import-util/src/table-diff');
 const oisModels = require('../ois/oisModels');
 const logger = require('@dawadk/common/src/logger').forCategory('migrate');
+const grbbrModels = require('../ois2/parse-ea-model');
 const grbbrProcessors = require('../components/processors/grbbr');
 const tableSchema = require('./tableModel');
 const schema = configHolder.mergeConfigSchemas([
@@ -33,11 +34,10 @@ const schema = configHolder.mergeConfigSchemas([
       required: true
     },
     etape: {
-      doc: 'Hvilken etape der køres',
-      format: 'integer',
+      doc: 'Hvilken etape der køres. Hvis ikke angivet kores alle etaper.',
+      format: 'integerOrNull',
       default: null,
-      cli: true,
-      required: true
+      cli: true
     }
   },
   require('@dawadk/import-util/conf/schemas/s3-offload-schema')
@@ -103,7 +103,7 @@ runConfigured(schema, [], config => go(function* () {
           txid => go(function* () {
             const importer = createOisImporter({
               dataDir: config.get('ois_dir'),
-              entityNames: grbbrTableModels.map(model => model.name)
+              entityNames: grbbrModels.map(model => model.name)
             });
             yield importer.execute(client, txid);
           }));
@@ -144,10 +144,17 @@ runConfigured(schema, [], config => go(function* () {
                  ejendomsrelation_id=v.ejendomsrelation_id
              FROM jordstykker_view v
              WHERE j.featureid = v.featureid`);
-        yield applyCurrentTableToChangeTable(client, tableSchema.tables.jordstykker, ['grund_id', 'bfenumer', 'ejendomsrelation_id']);
+        yield applyCurrentTableToChangeTable(client, tableSchema.tables.jordstykker, ['grund_id', 'bfenummer', 'ejendomsrelation_id']);
       }));
     })
   ];
-
-  yield etaper[config.get('etape')]();
+  const etape = config.get('etape');
+  if(etape === null) {
+    for(let etape of etaper) {
+      yield etape();
+    }
+  }
+  else {
+    yield etaper[etape]();
+  }
 }));
