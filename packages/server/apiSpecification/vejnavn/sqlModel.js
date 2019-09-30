@@ -48,7 +48,7 @@ const columns = {
     }
   },
   kommuner: {
-    select: "(SELECT json_agg(json_build_object('kode', k.kode, 'navn', k.navn)) from navngivenvejkommunedel_mat v join kommuner k on v.kommunekode = k.kode where v.vejnavn = vejnavne.navn)"
+    select: "(SELECT json_agg(json_build_object('kode', kode, 'navn', navn)) from (select distinct on (k.kode) k.kode, k.navn FROM navngivenvejkommunedel_mat v join kommuner k on v.kommunekode = k.kode where v.vejnavn = vejnavne.navn) s)"
   },
   postnumre: {
     select: (sqlParts, columnSpec, params) => {
@@ -56,7 +56,7 @@ const columns = {
       // er påvirket af en evt. kommunekodeparameter. Vi er derfor nødt til at holde bagudkompatibilitet,
       // således at de postnumre der returneres kun er dem som er angivet af kommunekode-parameteren.
       const subquery = {
-        select: ["json_agg(json_build_object('nr', p.nr, 'navn', p.navn)) "],
+        select: ["distinct on (p.nr) p.nr, p.navn"],
         from: ['navngivenvejkommunedel_mat v join vejstykkerpostnumremat  vp on v.id = vp.navngivenvejkommunedel_id join postnumre p on vp.postnr = p.nr'],
         whereClauses: [`v.vejnavn = vejnavne.navn`],
         orderClauses: [],
@@ -70,7 +70,7 @@ const columns = {
         propertyFilterFn(subquery, {kommunekode: params.kommunekode});
       }
       const subquerySql = dbapi.createQuery(subquery).sql;
-      return `(${subquerySql})`;
+      return `(select json_agg(json_build_object('nr', nr, 'navn', navn)) FROM (${subquerySql}) s)`;
     }
   }
 };
