@@ -29,16 +29,16 @@ const assignSequenceNumbers = (client, txid, tableModel, op) => go(function*() {
   const seqSelectId = selectList('c', tableModel.primaryKey);
   let seqFromClause = `${changeTable} c`;
   let seqWhereClause = `txid = ${txid} AND operation='${op}' AND public`;
+  const selectLastSeq =`select coalesce(max(sequence_number), 0) as last_seq FROM transaction_history`;
   const selectSeq =
-    `SELECT ${seqSelectId}, row_number() over () as s FROM ${seqFromClause} WHERE ${seqWhereClause}`;
+    `SELECT ${seqSelectId}, last_seq+row_number() over () as s FROM ${seqFromClause}, (${selectLastSeq}) last_seq WHERE ${seqWhereClause}`;
   const sql = `WITH seq AS (${selectSeq}),
-                      last_seq AS (select coalesce(max(sequence_number), 0) FROM transaction_history),
                       t as (UPDATE ${changeTable} 
-                            SET changeid = s + (select * from last_seq) 
+                            SET changeid = s 
                             FROM seq 
                             WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)}AND ${changeTable}.txid = ${txid})
                  INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
-                   (SELECT s + (select * from last_seq), '${tableModel.entity || tableModel.table}', '${op}', ${txid} FROM seq)`;
+                   (SELECT s, '${tableModel.entity || tableModel.table}', '${op}', ${txid} FROM seq)`;
   yield client.query(sql);
 });
 

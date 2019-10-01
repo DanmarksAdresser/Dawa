@@ -13,6 +13,13 @@ const schema = {
     cli: true,
     default: null,
     required: true
+  },
+  verify: {
+    doc: 'Verify all tables',
+    format: 'boolean',
+    cli: true,
+    default: false,
+    required: true
   }
 };
 runConfiguredImporter('import-ois-grbbr', schema, (config) => go(function* () {
@@ -22,6 +29,6 @@ runConfiguredImporter('import-ois-grbbr', schema, (config) => go(function* () {
   });
 
   yield proddb.withTransaction('READ_WRITE', client => go(function* () {
-    yield importGrbbr(client, config.get('data_dir'), false);
+    yield importGrbbr(client, config.get('data_dir'), config.get('verify'));
   }));
 }));

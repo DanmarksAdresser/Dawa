@@ -125,7 +125,7 @@ runConfigured(schema, [], config => go(function* () {
       }));
     }),
     () => go(function* () {
-      logger.info('Etape 3: Beregning af aktuelle tabeller samt jordstykker');
+      logger.info('Etape 4: Beregning af aktuelle tabeller samt jordstykker');
       yield proddb.withTransaction('READ_WRITE', client => go(function* () {
         const currentTables = Object.values(grbbrTableModels.getTableModels('current'))
           .map(tableModel => tableModel.table);

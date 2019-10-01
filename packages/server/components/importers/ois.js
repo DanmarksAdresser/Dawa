@@ -43,7 +43,7 @@ const doImport = (client, txid, dataDir, oisImportSpec) => go(function*() {
   }
   else {
     const dirtyTableName = `dirty_${tableModel.table}`;
-    yield client.query(`CREATE TEMP TABLE ${dirtyTableName} AS (select id FROM ${fetchTableName})`);
+    yield client.query(`CREATE TEMP TABLE ${dirtyTableName} AS (select ${tableModel.primaryKey.join(',')} FROM ${fetchTableName})`);
     yield computeDifferencesSubset(client, txid, fetchTableName, dirtyTableName, tableModel);
     yield client.query(`DROP TABLE ${dirtyTableName}`);
   }
