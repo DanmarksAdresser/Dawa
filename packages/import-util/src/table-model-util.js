@@ -26,20 +26,24 @@ const publicNonKeyColumnNames = tableModel =>
 const assignSequenceNumbers = (client, txid, tableModel, op) => go(function*() {
   const table = tableModel.table;
   const changeTable = `${table}_changes`;
+  const hasChanges = (yield client.queryRows(`select * from ${changeTable} where txid = ${txid} and operation = '${op}' limit 1`)).length > 0;
+  if(!hasChanges) {
+    return;
+  }
   const seqSelectId = selectList('c', tableModel.primaryKey);
   let seqFromClause = `${changeTable} c`;
   let seqWhereClause = `txid = ${txid} AND operation='${op}' AND public`;
   const selectLastSeq =`select coalesce(max(sequence_number), 0) as last_seq FROM transaction_history`;
   const selectSeq =
     `SELECT ${seqSelectId}, last_seq+row_number() over () as s FROM ${seqFromClause}, (${selectLastSeq}) last_seq WHERE ${seqWhereClause}`;
-  const sql = `WITH seq AS (${selectSeq}),
-                      t as (UPDATE ${changeTable} 
+  yield client.query(`create temp table tmp_seq as (${selectSeq})`);
+  yield client.query(`UPDATE ${changeTable} 
                             SET changeid = s 
-                            FROM seq 
-                            WHERE ${columnsEqualClause('seq', changeTable, tableModel.primaryKey)}AND ${changeTable}.txid = ${txid})
-                 INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
-                   (SELECT s, '${tableModel.entity || tableModel.table}', '${op}', ${txid} FROM seq)`;
-  yield client.query(sql);
+                            FROM tmp_seq 
+                            WHERE ${columnsEqualClause('tmp_seq', changeTable, tableModel.primaryKey)}AND ${changeTable}.txid = ${txid}`);
+  yield client.query(`INSERT INTO transaction_history(sequence_number, entity, operation, txid) 
+                   (SELECT s, '${tableModel.entity || tableModel.table}', '${op}', ${txid} FROM tmp_seq)`);
+  yield client.query(`drop table tmp_seq`);
 });
 
 const insert = (client, tableModel, object) => {
