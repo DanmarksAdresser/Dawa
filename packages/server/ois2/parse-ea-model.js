@@ -293,7 +293,7 @@ const referenceAttributes = {
       definition: ''
     }
   ],
-  fordelingsareal: [
+  Fordelingsareal: [
     {
       name: 'bygning',
       type: {
@@ -304,7 +304,7 @@ const referenceAttributes = {
       definition: ''
     }
   ],
-  fordelingaffordelingsareal: [
+  FordelingAfFordelingsareal: [
     {
       name: 'enhed',
       type: {

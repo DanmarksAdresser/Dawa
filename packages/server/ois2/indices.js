@@ -97,4 +97,13 @@ module.exports = [
   }, {
     entity: 'ejerlejlighed',
     columns: ['enhed']
+  }, {
+    entity: 'fordelingsareal',
+    columns: ['bygning']
+  }, {
+    entity: 'fordelingaffordelingsareal',
+    columns: ['fordelingsareal']
+  }, {
+    entity: 'fordelingaffordelingsareal',
+    columns: ['enhed']
   }];

@@ -24,8 +24,11 @@ const generateSqlForTable = (grbbrModel, temporality) => {
   const allColSpecs = [...additionalCols[temporality], ...attrs.map(attr => `${attr.binding.column} ${attr.sqlType}`)];
   const tableModel = tableModels.getTableModel(grbbrModel.name, temporality);
   const indicesSql = indices[temporality].map(indexCols => `CREATE INDEX ON ${tableModel.table}(${indexCols})`).join(';\n');
-  const additionalIndicesSql = temporality === 'current ' ? additionalIndices[grbbrModel.name].map(index => `CREATE INDEX ON ${tableModel.table}(${index.columns.join(',')})`).join(``) : '';
-
+  const additionalIndicesSql = temporality === 'current' ?
+      additionalIndices
+          .filter(index => index.entity === grbbrModel.name)
+          .map(index => `CREATE INDEX ON ${tableModel.table}(${index.columns.join(',')})`).join(`;\n`)
+      : '';
   return `DROP TABLE IF EXISTS ${tableModel.table} CASCADE;
 CREATE TABLE ${tableModel.table}(
     ${allColSpecs.join(',\n')},
@@ -41,6 +44,7 @@ const tableSql = temporalities.map((temporality) => {
 }).join(';\n');
 
 module.exports = {
-  tableSql
+  tableSql,
+
 };
 
