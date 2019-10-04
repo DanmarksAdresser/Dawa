@@ -857,6 +857,9 @@ exports.materializations = Object.assign({
       }, {
         table: 'dar1_NavngivenVejKommunedel_current',
         columns: ['id']
+      }, {
+      table: 'vejmidter',
+        columns: ['kommunekode', 'kode']
       }]
   },
   vejnavne_mat: {

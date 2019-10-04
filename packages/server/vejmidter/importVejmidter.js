@@ -16,6 +16,12 @@ const schema = {
     default: null,
     required: true,
     cli: true
+  },
+  verify: {
+    doc: 'Kontroller afledte tabeller',
+    format: 'boolean',
+    default: false,
+    cli: true
   }
 };
 
@@ -27,6 +33,6 @@ runConfiguredImporter('vejmidter', schema, config => go(function*() {
 
   yield proddb.withTransaction('READ_WRITE', client =>
     withImportTransaction(client, "importVejmidter", (txid) =>
-      importVejmidterImpl.importVejmidter(client,txid, config.get("file"))));
+      importVejmidterImpl.importVejmidter(client,txid, config.get("file"), config.get('verify'))));
   logger.info('Successfully imported vejmidter');
 }));
