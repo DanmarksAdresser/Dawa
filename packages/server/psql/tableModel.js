@@ -1188,20 +1188,10 @@ exports.materializations = Object.assign({
       {
         table: 'matrikel_jordstykker',
         columns: ['ejerlavkode', 'matrikelnr']
-      },
-      {
-        table: 'bbr_grundjordstykke_current',
-        columns: ['featureid'],
-        references: ['jordstykke']
-      },
-      {
-        table: 'bbr_grund_current',
-        columns: ['grund_id']
-      },
-      {
-        table: 'bbr_ejendomsrelation_current',
-        columns: ['ejendomsrelation_id']
       }
+    ],
+    nonIncrementalDependents: [
+      'bbr_grundjordstykke_current', 'bbr_grund_current', 'bbr_ejendomsrelation_current'
     ]
   }
 
