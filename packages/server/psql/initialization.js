@@ -35,6 +35,7 @@ const createChangeTables = (client)=> go(function*() {
   'supplerendebynavn2_postnr', 'matrikel_jordstykker', 'jordstykker', 'jordstykker_adgadr', 'hoejder', 'hoejde_importer_resultater',
     'hoejde_importer_afventer', 'navngivenvej_mat', 'navngivenvejkommunedel_mat', 'vejmidter', 'supplerendebynavne_mat',
   'supplerendebynavn_postnr_mat', 'supplerendebynavn_kommune_mat', 'postnumre_kommunekoder_mat', 'vask_adgangsadresser', 'vask_adresser', 'vejnavne_mat',
+    'vejnavnpostnummerrelation',
     ...grbbrTableModels.allTableModels.map(model => model.table)];
   for(let table of tableNames) {
     const model = tableModel.tables[table];
@@ -112,6 +113,7 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'postnumremini',              scriptFile: 'postnumre-mini-view.sql',    type: 'view'},
   {name: 'vejstykkerpostnumremat'},
   {name: 'navngivenvej_postnummer'},
+  {name: 'vejnavnpostnummerrelation'},
   {name: 'postnumre_kommunekoder_mat', scriptFile: 'postnumre-kommunekoder-mat.sql'},
   {name: 'gridded_temaer_matview',     scriptFile: 'gridded-temaer-matview.sql'},
   {name: 'tilknytninger_mat'},

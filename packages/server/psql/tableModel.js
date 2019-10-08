@@ -780,6 +780,20 @@ const vask_adresser = {
   ]
 };
 
+const vejnavnpostnummerrelation = {
+  table: 'vejnavnpostnummerrelation',
+  primaryKey: ['postnr', 'vejnavn'],
+  columns: [
+    {name: 'vejnavn'},
+    {name: 'postnr'},
+    {name: 'postnrnavn'},
+    tsvColumn({
+      deriveFn: table => `to_tsvector(processforindexing(${table}.vejnavn)) || ${postnrTsVector(`${table}.postnr`, `${table}.postnrnavn`)}`
+    }),
+    geomColumn({})
+  ]
+};
+
 const dar10RawTables = _.indexBy(Object.values(dar10TableModels.rawTableModels), 'table');
 const dar10HistoryTables = _.indexBy(Object.values(dar10TableModels.historyTableModels), 'table');
 const dar10CurrentTables = _.indexBy(Object.values(dar10TableModels.currentTableModels), 'table');
@@ -823,7 +837,8 @@ exports.tables = Object.assign({
     postnumre_kommunekoder_mat,
     vask_adgangsadresser,
     vask_adresser,
-    vejnavne_mat
+    vejnavne_mat,
+    vejnavnpostnummerrelation
   }, dagiTables,
   dar10RawTables,
   dar10HistoryTables,
@@ -1196,8 +1211,15 @@ exports.materializations = Object.assign({
     nonIncrementalDependents: [
       'bbr_grundjordstykke_current', 'bbr_grund_current', 'bbr_ejendomsrelation_current'
     ]
+  },
+  vejnavnpostnummerrelation: {
+    table: 'vejnavnpostnummerrelation',
+    view: 'vejnavnpostnummerrelation_view',
+    dependents: [],
+    nonIncrementalDependents: [
+      'dar1_NavngivenVej_current', 'dagi_postnumre', 'adgangsadresser_mat'
+    ]
   }
-
 }, dagiMaterializations);
 
 for (let dawaMaterialization of Object.values(dar10TableModels.dawaMaterializations)) {
