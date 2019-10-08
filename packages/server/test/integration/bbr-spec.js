@@ -20,7 +20,7 @@ const getByKeyResource = entityName => registry.get({
     qualifier: 'getByKey'
 });
 
-describe.only('BBR Grunddata API', () => {
+describe('BBR Grunddata API', () => {
     testdb.withTransactionEach('test', (clientFn) => {
         it('Kan lave enkeltopslag påbygning', () => go(function* () {
             const result = yield helpers.getJson(clientFn(),
@@ -28,6 +28,7 @@ describe.only('BBR Grunddata API', () => {
                 {id: "00058c31-60c7-45d5-9b80-a031270c0034"},
                 {});
             assert.strictEqual(result.id, "00058c31-60c7-45d5-9b80-a031270c0034");
+            assert.strictEqual(result.href, "http://dawa/bbr/bygninger/00058c31-60c7-45d5-9b80-a031270c0034");
         }));
         it('Kan lave GeoJSON søgning på bygning', () => go(function* () {
             const result = yield helpers.getJson(clientFn(), getQueryResource('bygning'), {}, {
