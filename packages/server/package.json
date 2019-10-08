@@ -18,7 +18,8 @@
     "dawa-import-high-volume-recipients": "./psql/loadStormodtagere.js",
     "dawa-import-ois": "./ois/importOis.js",
     "dawa-import-place-names": "./stednavne/importStednavne.js",
-    "dawa-import-road-centers": "./vejmidter/importVejmidter.js"
+    "dawa-import-road-centers": "./vejmidter/importVejmidter.js",
+    "dawa-import-bbr": "./ois2/import-ois-grbbr.js"
   },
   "dependencies": {
     "@dawadk/common": "^2.0.1",
