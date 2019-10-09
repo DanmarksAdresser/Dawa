@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/server",
-  "version": "1.31.4",
+  "version": "1.31.6",
   "private": true,
   "author": "Styrelsen for Dataforsyning og Effektivisering (SDFE)",
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
@@ -18,7 +18,8 @@
     "dawa-import-high-volume-recipients": "./psql/loadStormodtagere.js",
     "dawa-import-ois": "./ois/importOis.js",
     "dawa-import-place-names": "./stednavne/importStednavne.js",
-    "dawa-import-road-centers": "./vejmidter/importVejmidter.js"
+    "dawa-import-road-centers": "./vejmidter/importVejmidter.js",
+    "dawa-import-bbr": "./ois2/import-ois-grbbr.js"
   },
   "dependencies": {
     "@dawadk/common": "^2.0.1",

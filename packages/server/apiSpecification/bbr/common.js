@@ -118,5 +118,6 @@ module.exports = {
   getEntityName,
   geojsonFields,
   bbrParameterNames,
-  filterSpecs
+  filterSpecs,
+  makeBbrHref
 };

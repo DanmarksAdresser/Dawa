@@ -34,12 +34,12 @@ for (let grbbrModel of grbbrModels) {
     pathParameters: parameterMap[grbbrModel.name].id,
     queryParameters: resourcesUtil.flattenParameters(
       Object.assign({},
-        {format: commonParameters.format},
         {
+          format: commonParameters.format,
           crs: commonParameters.crs,
           struktur: commonParameters.struktur,
         })),
-    representations: representations,
+    representations: representations[grbbrModel.name],
     sqlModel,
     singleResult: true,
     processParameters: () => null,

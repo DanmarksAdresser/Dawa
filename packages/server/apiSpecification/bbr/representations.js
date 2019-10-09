@@ -5,7 +5,7 @@ const {createRowFormatter, getAllProvidedAttributes, getAttributeBinding} = requ
 const grbbrModels = require('../../ois2/parse-ea-model');
 const {getReplicationBinding} = require('../../ois2/replication-models');
 const {getRelationsForEntity} = require('../../ois2/relations');
-const {makeRefObj, geojsonFields, getEntityName} = require('./common');
+const {makeRefObj, geojsonFields, getEntityName, makeBbrHref} = require('./common');
 const {addGeojsonRepresentationsUsingBinding} = require('../common/representationUtil');
 const {getDefaultSchema} = require('../replikering/datamodelUtil');
 const {globalSchemaObject}  = require('../commonSchemaDefinitionsUtil');
@@ -51,6 +51,7 @@ const createJsonFormatter = (grbbrModel) => {
         formattedRow[relation.attribute] = makeRefObj(baseUrl, relation.references, id);
       }
     }
+    formattedRow.href = makeBbrHref(baseUrl,grbbrModel.name, formattedRow.id);
     return formattedRow;
   };
 };
@@ -71,7 +72,12 @@ const toJsonSchema = (grbbrModel) => {
   const properties = _.object(grbbrModel.attributes.map((grbbrAttr) => {
     return [grbbrAttr.name, toSchema(grbbrAttr)];
   }));
-  const docOrder = grbbrModel.attributes.map(attr => attr.name);
+  const hrefProperty = {href: {
+    type: 'string',
+      description: 'URL til objektet'
+    }};
+  Object.assign(properties, hrefProperty);
+  const docOrder = ['href', ...grbbrModel.attributes.map(attr => attr.name)];
   return globalSchemaObject({
     properties,
     docOrder
