@@ -60,7 +60,11 @@ module.exports = {
       {
         name: 'moderjordstykke',
         type: 'integer'
-      }
+      },
+        {
+            name: 'bfenummer',
+            type: 'integer'
+        }
     ])
 };
 

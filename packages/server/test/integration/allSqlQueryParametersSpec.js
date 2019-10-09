@@ -41,7 +41,7 @@ var sampleParameters = {
   bbr_bygning: {
     id: simpleParameterTest(['00499a75-9979-43de-b2cb-ee89bed4cc0b'], 'id'),
     status: simpleParameterTest(['2', '6'], 'status'),
-    kommunekode: simpleParameterTest(['0253'], 'kommunekode'),
+    kommunekode: simpleParameterTest(['0253'], 'kommune.kode'),
     husnummer_id: simpleParameterTest(['0a3f5081-49bf-32b8-e044-0003ba298018'], 'husnummer.id'),
     jordstykke_id: simpleParameterTest(['361758'],  'jordstykke.id', parseInt),
     grund_id: simpleParameterTest(['a68c46ce-9112-4e37-b5ab-7139dfcd01c3'], 'grund.id'),
@@ -735,6 +735,10 @@ var sampleParameters = {
     retskredskode: {
       values: ['1180'],
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
+    },
+    bfenummer: {
+      values: ['2226263'],
+      verifier: (jordstykke, bfenummer) => jordstykke.bfenummer === parseInt(bfenummer)
     }
   },
   "sted": {

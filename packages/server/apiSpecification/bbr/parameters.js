@@ -13,3 +13,4 @@ grbbrModels.forEach(grbbrModel => {
   };
   registry.addMultiple(getEntityName(grbbrModel), 'parameterGroup', exports[grbbrModel.name]);
 });
+console.dir(exports.bygning);
