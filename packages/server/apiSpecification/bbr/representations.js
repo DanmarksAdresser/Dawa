@@ -47,9 +47,8 @@ const createJsonFormatter = (grbbrModel) => {
     const formattedRow = basicRowFormatter(row);
     for (let relation of relations) {
       const id = formattedRow[relation.attribute];
-      if (id) {
-        formattedRow[relation.attribute] = makeRefObj(baseUrl, relation.references, id);
-      }
+      delete formattedRow[relation.attribute];
+      formattedRow[relation.as || relation.attribute] = id ? makeRefObj(baseUrl, relation.references, id) : null;
     }
     formattedRow.href = makeBbrHref(baseUrl,grbbrModel.name, formattedRow.id);
     return formattedRow;
@@ -59,25 +58,24 @@ const createJsonFormatter = (grbbrModel) => {
 const toJsonSchema = (grbbrModel) => {
   const relations = getRelationsForEntity(grbbrModel.name);
   const toSchema = attr => {
-    let result ;
-    if (relations.find(relation => relation.attribute === attr.name)) {
-      result = {type: ['null', 'object']};
+    let result  = {description: attr.description};
+    const relation = relations.find(relation => relation.attribute === attr.name);
+    if (relation) {
+      result.type =['null', 'object'];
+      return [relation.as || attr.name, result];
     } else {
-      result = Object.assign({}, getDefaultSchema(attr.type, attr.name !== 'id'));
+      Object.assign(result, getDefaultSchema(attr.type, attr.name !== 'id'));
+      return [attr.name, result];
     }
-    result.description = attr.description;
-    return result;
   };
 
-  const properties = _.object(grbbrModel.attributes.map((grbbrAttr) => {
-    return [grbbrAttr.name, toSchema(grbbrAttr)];
-  }));
+  const properties = _.object(grbbrModel.attributes.map(toSchema));
   const hrefProperty = {href: {
     type: 'string',
       description: 'URL til objektet'
     }};
   Object.assign(properties, hrefProperty);
-  const docOrder = ['href', ...grbbrModel.attributes.map(attr => attr.name)];
+  const docOrder = Object.keys(properties);
   return globalSchemaObject({
     properties,
     docOrder

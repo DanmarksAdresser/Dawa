@@ -1,4 +1,5 @@
 const _ = require('underscore');
+const { assert } = require('chai');
 const fs = require('fs');
 const path = require('path');
 const iconv = require('iconv-lite');
@@ -17,6 +18,21 @@ const parseGrunddataModel = (filePath) => {
     attrValueProcessor: a => he.decode(a, {isAttributeValue: true}),//default is a=>a
     tagValueProcessor: a => he.decode(a)
   });
+};
+
+const descriptionOverrides = {
+  ejendomsrelation: {
+    id: 'Unik og uforanderlig identifikation af ejendomsrelationen igennem hele dens livscyklus'
+  },
+  bygningpåfremmedgrund: {
+    id: 'Unik og uforanderlig identifikation af relationenen.'
+  },
+  enhedejerlejlighed: {
+    id: 'Unik og uforanderlig identifikation af relationenen.'
+  },
+  grundjordstykke: {
+    id: 'Unik og uforanderlig identifikation af relationenen.'
+  }
 };
 
 const bindingTypes = require('../apiSpecification/replikering/bindings/binding-types');
@@ -505,11 +521,17 @@ const toGrbbrAttr = (eaAttr) => {
 
 const toGrbrrEntityModel = eaEntityModel => {
   const oisMapping = entityOisTableMappings.find(mapping => mapping.name === eaEntityModel.name.toLowerCase());
-  return {
+  const result = {
     name: eaEntityModel.name.toLowerCase(),
     oisTable: oisMapping.oisTable,
     attributes: eaEntityModel.attributes.map(toGrbbrAttr)
   };
+  for(let [attrName, description] of Object.entries(descriptionOverrides[result.name] || {})) {
+    const attr = result.attributes.find(attr => attr.name === attrName);
+    assert(attr);
+    attr.description = description;
+  }
+  return result;
 };
 
 

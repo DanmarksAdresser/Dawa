@@ -1,4 +1,5 @@
 const { assert } = require('chai');
+const grbbrModels = require('./parse-ea-model');
 const relations = [{
   entity: 'bygning',
   attribute: 'grund',
@@ -121,7 +122,12 @@ const relations = [{
   entity: 'fordelingaffordelingsareal',
   attribute: 'enhed',
   references: 'enhed'
-}];
+}, ...grbbrModels.map(model => ({
+  entity: model.name,
+  attribute: 'kommunekode',
+  references: 'kommune',
+  as: 'kommune'
+}))];
 
 const getRelationsForEntity = entityName => relations.filter(relation => relation.entity === entityName);
 const getRelation = (entityName, attribute) => {

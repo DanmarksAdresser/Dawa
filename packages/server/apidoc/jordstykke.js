@@ -60,6 +60,10 @@ const commonParameters = [
   {
     name: 'moderjordstykke',
     doc: 'Find jordstykker, hvor moderjordstykket er jordstykket med det angivne featureid'
+  },
+  {
+    name: 'bfenummer',
+    doc: 'Find jordstykker med det angivne bfenummer'
   }
 ];
 

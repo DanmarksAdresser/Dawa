@@ -1,5 +1,6 @@
 const { assert } = require('chai');
 const {makeHref} = require('../commonMappers');
+const _ = require('underscore');
 
 const indices = require('../../ois2/indices');
 const relations = require('../../ois2/relations');
@@ -28,11 +29,8 @@ const geojsonFields = {
   tekniskanlæg: 'tek109Koordinat'
 };
 
-const bbrParameterNames = {
-  bygning: {
-    byg021BygningensAnvendelse: 'anvendelseskode'
-  }
-};
+const bbrParameterNames = _.object(grbbrModels.map(model => [model.name, {'kommunekode': 'kommunekode'}]));
+bbrParameterNames.bygning.byg021BygningensAnvendelse = 'anvendelseskode';
 
 const getParameterName = (grbbrModel, attrName) => {
   if(bbrParameterNames[grbbrModel.name] && bbrParameterNames[grbbrModel.name][attrName]) {
@@ -83,6 +81,12 @@ const externalRefs = {
         id,
         href: makeHref(baseUrl, 'adresse', [id])
       }
+    },
+    kommune: baseUrl => kode => {
+      return {
+        kode,
+        href: makeHref(baseUrl, 'kommune', [kode])
+      };
     }
   }
 ;
