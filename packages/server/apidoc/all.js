@@ -30,6 +30,7 @@ module.exports = [
   ...require('./supplerendebynavn2'),
   ...require('./valglandsdel'),
   ...require('./vejnavn'),
+  ...require('./vejnavnpostnummerrelation'),
   ...require('./vejstykke'),
   ...require('./vejstykkepostnummerrelation'),
   ...require('./zone'),

@@ -30,7 +30,7 @@ CREATE VIEW vejnavnpostnummerrelation_view AS (
                                st_union(intersection)::geometry(geometry, 25832) as geom
                         from ((select * from intersections) union (select * from addr_relations)) t
                         group by vejnavn, postnr)
-    select aggregated.*, p.navn as postnrnavn
+    select aggregated.*, vejnavn || ', ' || formatPostnr(p.nr) || ' ' || p.navn as betegnelse, p.navn as postnrnavn
     FROM aggregated
              left join postnumre p
                        on aggregated.postnr = p.nr);

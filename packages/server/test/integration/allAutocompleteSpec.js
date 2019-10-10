@@ -33,6 +33,7 @@ const sampleParameters = {
   '/landsdele/autocomplete': ['test'],
   '/ejerlav/autocomplete': ['bor'],
   '/navngivneveje/autocomplete': ['dro'],
+  '/vejnavnpostnummerrelationer/autocomplete': ['dro'],
   '/stednavne2/autocomplete': ['nord'],
   '/stednavne/autocomplete': ['nord']
 };

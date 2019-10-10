@@ -6,6 +6,7 @@ require('./supplerendebynavn-old/nameAndKey');
 require('./vejnavn/nameAndKey');
 require('./vejstykke/nameAndKey');
 require('./vejstykkepostnummerrelation/nameAndKey');
+require('./vejnavnpostnummerrelation/nameAndKey');
 require('./ejerlav/nameAndKey');
 require('./navngivenvej/nameAndKey');
 require('./tematilknytninger/namesAndKeys');
