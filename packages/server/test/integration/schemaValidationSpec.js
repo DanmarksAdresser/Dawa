@@ -65,7 +65,6 @@ const valuesNeverExpectedToBeSeen = {
       ejerlejlighed: true
     },
     bbr_enhed: {
-      bygning: true,
       enh044DatoForDelvisIbrugtagningsTilladelse: true,
       enh053SupplerendeVarme: true,
       enh068FlexboligTilladelsesart: true,
