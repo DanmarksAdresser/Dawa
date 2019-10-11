@@ -95,7 +95,7 @@ module.exports = [
     entity: 'enhedejerlejlighed',
     columns: ['ejerlejlighed']
   }, {
-    entity: 'ejerlejlighed',
+    entity: 'enhedejerlejlighed',
     columns: ['enhed']
   }, {
     entity: 'fordelingsareal',

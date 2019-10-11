@@ -127,7 +127,17 @@ const examples = {
       }]
     }
   ],
-
+    enhedejerlejlighed: [
+        {
+            description: 'Find enhedejerlejlighed relationen for enheden med ID "328992b9-de7b-42a8-957f-e822234fdaa7"',
+            query: [
+                {
+                    name: 'enhed_id',
+                    value: "328992b9-de7b-42a8-957f-e822234fdaa7"
+                }
+            ]
+        }
+    ]
 };
 
 const strukturParam = {
