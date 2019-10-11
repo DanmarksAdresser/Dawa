@@ -137,6 +137,28 @@ const examples = {
                 }
             ]
         }
+    ],
+    fordelingsareal: [
+        {
+            description: 'Find fordelingsarealer for bygningen med id "23415b72-671d-4bc1-a934-e9e70510ae21"',
+            query: [
+                {
+                    name: 'bygning_id',
+                    value: '23415b72-671d-4bc1-a934-e9e70510ae21'
+                }
+            ]
+        }
+    ],
+    fordelingaffordelingsareal: [
+        {
+            description: 'Find fordelingen af fordelingsarealet med ID "59402429-9b01-4a37-909a-f1f5d8d234e2"',
+            query: [
+                {
+                    name: 'fordelingsareal_id',
+                    value: '59402429-9b01-4a37-909a-f1f5d8d234e2'
+                }
+            ]
+        }
     ]
 };
 
