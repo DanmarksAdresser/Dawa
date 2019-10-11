@@ -18,10 +18,15 @@ const plurals = {
   enhedejerlejlighed: 'enhedejerlejlighed',
   etage: 'etager',
   grund: 'grunde',
-  grundjordstykke: 'grundjordstykker',
+  grundjordstykke: 'grundjordstykke',
   opgang: 'opgange',
   fordelingsareal: 'fordelingsarealer',
   fordelingaffordelingsareal: 'fordelingaffordelingsarealer'
+};
+
+const pathOverrides = {
+  bygningpåfremmedgrund: 'bygningpaafremmedgrund',
+  tekniskanlæg: 'tekniskeanlaeg'
 };
 
 const geojsonFields = {
@@ -94,7 +99,9 @@ const externalRefs = {
 const getQueryPath = (entityName) => {
   const plural = plurals[entityName];
   assert(plural, `plural not found for ${entityName}`);
-  return `${bbrPath}/${plural}`;
+  const override = pathOverrides[entityName];
+  const path = override || plural;
+  return `${bbrPath}/${encodeURIComponent(path)}`;
 }
 
 const makeBbrHref = (baseUrl, entityName, id) => {

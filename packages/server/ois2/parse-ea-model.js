@@ -182,15 +182,6 @@ const referenceAttributes = {
         sqlType: 'uuid'
       },
       definition: ''
-    },
-    {
-      name: 'bygning',
-      type: {
-        'kind': 'reference',
-        type: 'uuid',
-        sqlType: 'uuid'
-      },
-      definition: ''
     }
   ],
   Etage: [
@@ -433,6 +424,13 @@ const entityOisTableMappings = [
   }
 ];
 
+const filteredAttributes= {
+  grundjordstykke: ['status'],
+  bygningpåfremmedgrund: ['status'],
+  enhedejerlejlighed: ['status'],
+  enhed: ['bygning']
+};
+
 const importedEntityNames = entityOisTableMappings.map(entity => entity.name);
 
 const parsedEntitiesWithoutCommonAttrs = eaClasses.map(parseClass);
@@ -441,7 +439,7 @@ const commonAttributes = baseEntity.attributes.filter(attr => !['registreringFra
 const importedEntities = parsedEntitiesWithoutCommonAttrs
   .filter(entity => importedEntityNames.includes(entity.name.toLowerCase()))
   .map(entity => {
-    return Object.assign({}, entity, {attributes: entity.attributes = [...commonAttributes, ...entity.attributes]});
+    return Object.assign({}, entity, {attributes: [...commonAttributes, ...entity.attributes]});
   });
 
 
@@ -521,10 +519,12 @@ const toGrbbrAttr = (eaAttr) => {
 
 const toGrbrrEntityModel = eaEntityModel => {
   const oisMapping = entityOisTableMappings.find(mapping => mapping.name === eaEntityModel.name.toLowerCase());
+  const name = eaEntityModel.name.toLowerCase();
+  const isFilteredAttr = attr => (filteredAttributes[name] || []).includes(attr.name);
   const result = {
-    name: eaEntityModel.name.toLowerCase(),
+    name,
     oisTable: oisMapping.oisTable,
-    attributes: eaEntityModel.attributes.map(toGrbbrAttr)
+    attributes: eaEntityModel.attributes.map(toGrbbrAttr).filter(attr => !isFilteredAttr(attr))
   };
   for(let [attrName, description] of Object.entries(descriptionOverrides[result.name] || {})) {
     const attr = result.attributes.find(attr => attr.name === attrName);
