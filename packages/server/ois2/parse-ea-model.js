@@ -156,6 +156,15 @@ const referenceAttributes = {
         sqlType: 'uuid'
       },
       definition: ''
+    },
+    {
+      name: 'bygning',
+      type: {
+        'kind': 'reference',
+        type: 'uuid',
+        sqlType: 'uuid'
+      },
+      definition: ''
     }
   ],
   Etage: [
@@ -400,11 +409,10 @@ const entityOisTableMappings = [
 ];
 
 const filteredAttributes= {
-  bygning: ['byg406Koordinatsystem'],
+  bygning: ['byg406Koordinatsystem', 'byg301TypeAfFlytning'],
   grundjordstykke: ['status'],
   bygningpåfremmedgrund: ['status'],
-  enhedejerlejlighed: ['status'],
-  enhed: ['bygning']
+  enhedejerlejlighed: ['status']
 };
 
 const importedEntityNames = entityOisTableMappings.map(entity => entity.name);

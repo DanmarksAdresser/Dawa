@@ -47,5 +47,27 @@ describe('BBR Grunddata API', () => {
             assert.isNotNull(result.features[0].geometry);
             assert.strictEqual(result.features[0].geometry.coordinates.length, 2);
         }));
+        for(let entityName of ['bygning', 'tekniskanlæg']) {
+            it(`Kan lave reverse geocoding på ${entityName}`, () => go(function*() {
+                const result = yield helpers.getJson(clientFn(), getQueryResource(entityName), {}, {
+                    format: 'geojson',
+                    srid: '25832',
+                    x: '725055',
+                    y: '6166305'
+                });
+                assert.strictEqual(result.features.length, 1);
+            }));
+            const expectedPolygonResults = {
+                bygning: 190,
+                tekniskanlæg: 63
+            }
+            it(`Kan lave polygon sgning på ${entityName}`, () => go(function*() {
+                const result = yield helpers.getJson(clientFn(), getQueryResource(entityName), {}, {
+                    format: 'geojson',
+                    srid: '25832',
+                    polygon: '[[[683890.4,6157621.95], [683890.4,6167652.12], [692020.25,6167652.12], [692020.25,6157621.95], [683890.4,6157621.95]]]'                });
+                assert.strictEqual(result.features.length, expectedPolygonResults[entityName]);
+            }));
+        }
     });
 });

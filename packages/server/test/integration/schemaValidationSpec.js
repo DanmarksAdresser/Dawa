@@ -71,7 +71,8 @@ const valuesNeverExpectedToBeSeen = {
       enh069FlexboligOphørsdato: true,
       enh105SupplerendeAnvendelseskode1: true,
       enh106SupplerendeAnvendelseskode2: true,
-      enh107SupplerendeAnvendelseskode3: true
+      enh107SupplerendeAnvendelseskode3: true,
+      bygning: true
     },
     bbr_etage: {
       eta500Notatlinjer: true

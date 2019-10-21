@@ -3,7 +3,7 @@ const dbapi = require('../../dbapi');
 const cursorChannel = require('@dawadk/common/src/postgres/cursor-channel');
 const grbbrModels = require('../../ois2/parse-ea-model');
 const registry = require('../registry');
-const {getEntityName, filterSpecs} = require('./common');
+const {getEntityName, filterSpecs, geojsonFields} = require('./common');
 const {getReplicationModel, getReplicationBinding} = require('../../ois2/replication-models');
 const {addSelectForLookup} = require('../replikering/bindings/util');
 const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
@@ -30,6 +30,10 @@ const createSqlModel = (grbbrModel, replicationModel, replicationBinding, parame
     propertyFilterImpl,
     sqlParameterImpl.paging({}, ['id']),
   ];
+  if(geojsonFields[grbbrModel.name]) {
+    parameterImpls.push(sqlParameterImpl.geomWithin(geojsonFields[grbbrModel.name]));
+    parameterImpls.push(sqlParameterImpl.reverseGeocoding(geojsonFields[grbbrModel.name]));
+  }
   const allAttrNames = replicationModel.attributes.map(attr => attr.name);
   const createQuery = (fieldNames, params) => {
     const sqlParts = baseQuery();
