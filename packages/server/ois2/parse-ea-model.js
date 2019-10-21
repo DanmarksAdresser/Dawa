@@ -127,37 +127,11 @@ const referenceAttributes = {
       definition: ''
     }],
   Ejendomsrelation: [
-    {
-      name: 'bygningPåFremmedGrund',
-      type: {
-        'kind': 'reference',
-        type: 'integer',
-        sqlType: 'bigint'
-      },
-      definition: ''
-    },
-    {
-      name: 'ejerlejlighed',
-      type: {
-        'kind': 'reference',
-        type: 'integer',
-        sqlType: 'bigint'
-      },
-      definition: ''
-    },
-    {
-      name: 'samletFastEjendom',
-      type: {
-        'kind': 'reference',
-        type: 'integer',
-        sqlType: 'bigint'
-      },
-      definition: ''
-    }
   ],
   Enhed: [
     {
-      name: 'adresseIdentificerer',
+      name: 'adresse',
+      oisName: 'adresseIdentificerer',
       type: {
         'kind': 'reference',
         type: 'uuid',
@@ -217,7 +191,8 @@ const referenceAttributes = {
   ],
   Opgang: [
     {
-      name: 'adgangFraHusnummer',
+      name: 'husnummer',
+      oisName: 'adgangFraHusnummer',
       type: {
         kind: 'reference',
         type: 'uuid',
@@ -425,6 +400,7 @@ const entityOisTableMappings = [
 ];
 
 const filteredAttributes= {
+  bygning: ['byg406Koordinatsystem'],
   grundjordstykke: ['status'],
   bygningpåfremmedgrund: ['status'],
   enhedejerlejlighed: ['status'],
@@ -504,12 +480,13 @@ const toGrbbrAttr = (eaAttr) => {
   let description = eaAttr.definition;
   if(eaAttr.type.kind === 'codeList'){
     const codeList = codeLists.find(list => list.eaid === eaAttr.type.eaid);
-    if(codeList) {
+    if(codeList && codeList.vokabularium) {
       description += ` For mulige værdier, se <a href="${codeList.vokabularium}">kodelisten.</a>`
     }
   }
   return {
     name: eaAttr.name,
+    oisName: eaAttr.oisName,
     type: toReplicationType(eaAttr.type),
     sqlType: toSqlType(eaAttr.type),
     binding: toBinding(eaAttr),

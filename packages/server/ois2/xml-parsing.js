@@ -5,13 +5,13 @@ const parseXmlAttr = defmulti((attr, xmlObject) => attr.type);
 parseXmlAttr.method('point2d', (attr, xmlObject) => {
   const value = xmlObject[attr.name];
   if(value && value !== 'GEOMETRYCOLLECTION EMPTY') {
-    return `SRID=25832;${xmlObject[attr.name]}`;
+    return `SRID=25832;${xmlObject[attr.oisName || attr.name]}`;
   }
   else {
     return null;
   }
 });
-parseXmlAttr.defaultMethod((attr, xmlObject) => xmlObject[attr.name]);
+parseXmlAttr.defaultMethod((attr, xmlObject) => xmlObject[attr.oisName || attr.name]);
 
 const createMapFn = entity => xmlObject => {
   if(xmlObject.LOEBENUMMER) {

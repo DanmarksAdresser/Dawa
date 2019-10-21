@@ -27,10 +27,10 @@ module.exports = [
     columns: ['bygning']
   }, {
     entity: 'opgang',
-    columns: ['adgangFraHusnummer']
+    columns: ['husnummer']
   }, {
     entity: 'enhed',
-    columns: ['adresseIdentificerer']
+    columns: ['adresse']
   }, {
     entity: 'enhed',
     columns: ['enh020EnhedensAnvendelse']
@@ -69,13 +69,7 @@ module.exports = [
     columns: ['tek020Klassifikation']
   }, {
     entity: 'ejendomsrelation',
-    columns: ['bygningPåFremmedGrund']
-  }, {
-    entity: 'ejendomsrelation',
     columns: ['ejendomsnummer']
-  }, {
-    entity: 'ejendomsrelation',
-    columns: ['samletFastEjendom']
   }, {
     entity: 'ejendomsrelation',
     columns: ['bfeNummer']
