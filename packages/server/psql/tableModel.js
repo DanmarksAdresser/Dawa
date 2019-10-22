@@ -335,8 +335,7 @@ const navngivenvejkommunedel_postnr_mat = {
   primaryKey: ['navngivenvejkommunedel_id', 'postnummer_id'],
   columns: [
     {name: 'navngivenvejkommunedel_id'},
-    {name: 'postnummer_id'},
-    {name: 'adgangsadresseid'}
+    {name: 'postnummer_id'}
   ]
 };
 
@@ -1185,20 +1184,37 @@ exports.materializations = Object.assign({
     nonIncrementalDependents: [
       'dar1_Husnummer_current',
       'dar1_NavngivenVejKommunedel_current',
-      'dar1_DARKommuneinddeling_current'
+      'dar1_DARKommuneinddeling_current',
+      'dagi_postnumre'
     ],
     dependents: []
   },
   vejstykkerpostnumremat: {
     table: 'vejstykkerpostnumremat',
     view: 'vejstykkerpostnumremat_view',
-    nonIncrementalDependents: [
-      'navngivenvejkommunedel_postnr_mat',
-      'dar1_NavngivenVej_current',
-      'dar1_NavngivenVejKommunedel_current',
-      'dar1_Postnummer_current'
-    ],
-    dependents: []
+    dependents: [
+      {
+        table: 'navngivenvejkommunedel_postnr_mat',
+        columns: ['navngivenvejkommunedel_id', 'postnummer_id']
+      },
+      {
+        table: 'dar1_NavngivenVejKommunedel_current',
+        columns: ['navngivenvejkommunedel_id']
+      },
+      {
+        table: 'dar1_NavngivenVej_current',
+        columns: ['navngivenvej_id']
+      },
+      {
+        table: 'dar1_DARKommuneinddeling_current',
+        columns: ['kommunekode'],
+        references: ['kommunekode']
+      },
+      {
+        table: 'dar1_Postnummer_current',
+        columns: ['postnummer_id']
+      }
+    ]
   },
   jordstykker: {
     table: 'jordstykker',

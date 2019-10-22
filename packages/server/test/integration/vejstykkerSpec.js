@@ -16,6 +16,18 @@ describe('Vejstykker', () => {
       expect(result).to.not.be.empty;
       expect(result[0].navn).to.equal('Eliasgade');
     }));
+
+    it('Postnummer er med selvom der ikke er en adresse på vejstykket med postnummeret', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), queryResource, [], {
+        kommunekode: '0461',
+        kode: '6814'
+      });
+      assert.strictEqual(result.length, 1);
+      const vejstykke = result[0];
+      const postnummer = vejstykke.postnumre.find(postnummer => postnummer.nr = '5200');
+      assert(postnummer);
+    }));
+
     it('Kan finde vejstykker ud fra regulært udtryk', () => go(function*() {
       const result = yield helpers.getJson(clientFn(), queryResource, [], {regex: 'marken'});
       expect(result).to.have.length(2);
