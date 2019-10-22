@@ -1,6 +1,7 @@
 const tableModels = require("./table-models");
 const grbbrModels = require('./parse-ea-model');
 const additionalIndices = require('./indices');
+const {geojsonFields} = require('../apiSpecification/bbr/common');
 
 const generateSqlForTable = (grbbrModel, temporality) => {
   const historyColSpec = [`rowkey integer not null`, `virkning tstzrange not null`];
@@ -29,12 +30,15 @@ const generateSqlForTable = (grbbrModel, temporality) => {
           .filter(index => index.entity === grbbrModel.name)
           .map(index => `CREATE INDEX ON ${tableModel.table}(${index.columns.join(',')})`).join(`;\n`)
       : '';
-  return `DROP TABLE IF EXISTS ${tableModel.table} CASCADE;
+  const geomIndexSql = geojsonFields[grbbrModel.name] ?
+      `;\nCREATE INDEX ON ${tableModel.table} USING GIST(${geojsonFields[grbbrModel.name]})` : '';
+  return `DROP TABLE IF EXISTS ${tableModel.table} CASCADE;   
 CREATE TABLE ${tableModel.table}(
     ${allColSpecs.join(',\n')},
     ${primaryKeyClause[temporality]});
     ${indicesSql};
-  ${additionalIndicesSql}`;
+  ${additionalIndicesSql}
+  ${geomIndexSql}`;
 };
 
 const temporalities = ['bi', 'history', 'current'];

@@ -18,12 +18,8 @@ const relations = [{
   attribute: 'ejerlejlighed',
   references: 'ejendomsrelation'
 }, {
-  entity: 'ejendomsrelation',
-  attribute: 'bygningPåFremmedGrund',
-  references: 'bygning'
-}, {
   entity: 'enhed',
-  attribute: 'adresseIdentificerer',
+  attribute: 'adresse',
   references: 'adresse'
 }, {
   entity: 'enhed',
@@ -33,6 +29,10 @@ const relations = [{
   entity: 'enhed',
   attribute: 'opgang',
   references: 'opgang'
+}, {
+  entity: 'enhed',
+  attribute: 'bygning',
+  references: 'bygning'
 }, {
   entity: 'etage',
   attribute: 'bygning',
@@ -47,7 +47,7 @@ const relations = [{
   references: 'ejendomsrelation'
 }, {
   entity: 'opgang',
-  attribute: 'adgangFraHusnummer',
+  attribute: 'husnummer',
   references: 'husnummer'
 }, {
   entity: 'opgang',

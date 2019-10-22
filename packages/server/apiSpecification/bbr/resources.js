@@ -1,6 +1,6 @@
 const registry = require("../registry");
 const grbbrModels = require('../../ois2/parse-ea-model');
-const {getQueryPath, getEntityName} = require('./common');
+const {getQueryPath, getEntityName, geojsonFields} = require('./common');
 const representations = require('./representations');
 const sqlModels = require('./sqlModels');
 const resourcesUtil = require('../common/resourcesUtil');
@@ -14,6 +14,10 @@ for (let grbbrModel of grbbrModels) {
     paging: commonParameters.paging,
     crs: commonParameters.crs
   };
+  if(geojsonFields[grbbrModel.name]) {
+    queryParameters.geomWithin = commonParameters.geomWithin;
+    queryParameters.reverseGeocoding = commonParameters.reverseGeocodingOptional;
+  }
   const sqlModel = sqlModels[grbbrModel.name];
   const queryResource = {
     path: getQueryPath(grbbrModel.name),

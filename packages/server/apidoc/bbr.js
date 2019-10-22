@@ -1,7 +1,7 @@
 const grbbrModels = require('../ois2/parse-ea-model');
-const {getQueryPath, getEntityName} = require('../apiSpecification/bbr/common');
+const {getQueryPath, getEntityName, geojsonFields} = require('../apiSpecification/bbr/common');
 const parameterMap = require('../apiSpecification/bbr/parameters');
-const {formatAndPagingParams, formatParameters} = require('./common');
+const {formatAndPagingParams, formatParameters, reverseGeocodingParameters} = require('./common');
 const subtextsQuery = {
     bygning: 'Find bygninger fra BBR.',
     enhed: 'Find enheder fra BBR.',
@@ -30,6 +30,64 @@ const subtextsGetByKey = {
     enhedejerlejlighed: 'Modtag BBR Find enhed-ejerlejlighed relation.',
     etage: 'Modtag BBR etage.',
     opgang: 'Modtag BBR opgang.'
+};
+
+const additionalParameters = {
+    bygning: [{
+        name: 'polygon',
+        doc: 'Find bygninger, hvor koordinatet ligger indenfor det angivne polygon.' +
+            ' Polygonet specificeres som et array af koordinater på samme måde som' +
+            ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+            ' Bemærk at polygoner skal' +
+            ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+            ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+            ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+            ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+    },
+        {
+            name: 'cirkel',
+            doc: 'Find de bygninger, hvor koordinatet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+            examples: []
+        },
+        {
+            name: 'x',
+            doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+                'i det koordinatsystem som er angivet ved srid-parameteren.'
+        },
+        {
+            name: 'y',
+            doc: 'Find bygningen nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+                'i det koordinatsystem som er angivet ved srid-parameteren.'
+        }
+    ],
+    tekniskanlæg: [
+        {
+            name: 'polygon',
+            doc: 'Find tekniske anlæg, hvor koordinatet ligger indenfor det angivne polygon.' +
+                ' Polygonet specificeres som et array af koordinater på samme måde som' +
+                ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
+                ' Bemærk at polygoner skal' +
+                ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
+                ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+                ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
+                ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
+        },
+        {
+            name: 'cirkel',
+            doc: 'Find de tekniske anlæg, hvor koordinatet overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+            examples: []
+        },
+        {
+            name: 'x',
+            doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+                'i det koordinatsystem som er angivet ved srid-parameteren.'
+        },
+        {
+            name: 'y',
+            doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
+                'i det koordinatsystem som er angivet ved srid-parameteren.'
+        }
+    ]
 };
 
 const examples = {
@@ -178,7 +236,7 @@ const queryDocs = grbbrModels.map(grbbrModel => {
         entity: getEntityName(grbbrModel),
         path,
         subtext,
-        parameters: [...propertyFilterParamDocs, strukturParam, ...formatAndPagingParams],
+        parameters: [...propertyFilterParamDocs,...(additionalParameters[grbbrModel.name] || []), strukturParam, ...formatAndPagingParams],
         examples: examples[grbbrModel.name] || []
     };
 });

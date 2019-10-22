@@ -32,7 +32,7 @@ const baseQuery = (model, binding) => {
     select: ['i.txid, i.operation as operation', sqlUtil.selectIsoDateUtc('t.time') + ' as tidspunkt', 'changeid as sekvensnummer',
       selectAttributesClause],
     from: [`transaction_history t JOIN ${tableName}_changes i ON t.sequence_number = i.changeid`],
-    whereClauses: [`entity = '${tableModel.entity}' and public`],
+    whereClauses: [`entity = '${tableModel.entity || tableModel.table}' and public`],
     orderClauses: [],
     sqlParams: []
   };
