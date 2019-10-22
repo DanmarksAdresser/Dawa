@@ -34,20 +34,28 @@ const queryParameters = [
     ...idParameters,
     {
         name: 'polygon',
-        doc: 'Find de vejstykker, som overlapper med det angivne polygon. ' +
+        doc: 'Find de vejnavnpostnummerrelationer, som overlapper med det angivne polygon. ' +
             'Polygonet specificeres som et array af koordinater på samme måde som' +
             ' koordinaterne specificeres i GeoJSON\'s <a href="http://geojson.org/geojson-spec.html#polygon">polygon</a>.' +
             ' Bemærk at polygoner skal' +
             ' være lukkede, dvs. at første og sidste koordinat skal være identisk.<br>' +
-            ' Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Dette' +
+            ' Som koordinatsystem kan anvendes ETRS89/UTM32 eller  WGS84/geografisk. Dette' +
             ' angives vha. srid parameteren, se ovenover.<br> Eksempel: ' +
             ' polygon=[[[10.3,55.3],[10.4,55.3],[10.4,55.31],[10.4,55.31],[10.3,55.3]]].',
         examples: []
     },
     {
         name: 'cirkel',
-        doc: 'Find de vejstykker, som overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
+        doc: 'Find de vejnavnpostnummerrelationer, som overlapper med den cirkel angivet af koordinatet (x,y) og radius r. Som koordinatsystem kan anvendes (ETRS89/UTM32 eller) WGS84/geografisk. Radius angives i meter. cirkel={x},{y},{r}.',
         examples: []
+    },
+    {
+        name: 'x',
+        doc: 'Find vejnavnpostnummerrelationen nærmest det angivne koordinat. Anvendes sammen med y-parameteren.'
+    },
+    {
+        name: 'y',
+        doc: 'Find vejnavnpostnummerrelationen nærmest det angivne koordinat. Anvendes sammen med x-parameteren.'
     }
 ];
 

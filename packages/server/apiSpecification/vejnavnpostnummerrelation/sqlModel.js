@@ -30,6 +30,8 @@ function fuzzySearchParameterImpl(sqlParts, params) {
 
 const parameterImpls = [
     sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
+    sqlParameterImpl.reverseGeocoding(),
+    sqlParameterImpl.geomWithin(),
     sqlParameterImpl.search(columns, ['vejnavn', 'postnr']),
     fuzzySearchParameterImpl,
     sqlParameterImpl.paging(columns, nameAndKey.key)

@@ -27,7 +27,9 @@ exports.autocomplete = resourcesUtil.autocompleteResourceSpec(
         propertyFilter: parameters.propertyFilter,
         autocomplete: commonParameters.autocomplete,
         crs: commonParameters.crs,
-        fuzzy: commonParameters.fuzzy
+        fuzzy: commonParameters.fuzzy,
+        geomWithin: commonParameters.geomWithin,
+        reverseGeocodingOptional: commonParameters.reverseGeocodingOptional
     },
     representations.autocomplete,
     sqlModel
@@ -36,8 +38,7 @@ exports.autocomplete = resourcesUtil.autocompleteResourceSpec(
 exports.getByKey = resourcesUtil.getByKeyResourceSpec(
     nameAndKey, parameters.id,{
         struktur: commonParameters.struktur,
-        crs: commonParameters.crs,
-        includeDeleted: commonParameters.includeDeleted
+        crs: commonParameters.crs
     },
     representations,
     sqlModel
