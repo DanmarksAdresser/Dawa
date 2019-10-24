@@ -15,6 +15,34 @@ const columns = {
             var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
             return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'geom');
         }
+    },
+    kommunekode: {
+        select: null,
+        where: function (sqlParts, parameterArray) {
+            const subquery = {
+                select: ["*"],
+                from: [`from vejstykkerpostnumremat vp 
+        join navngivenvejkommunedel_mat nv on vp.navngivenvejkommunedel_id = nv.id`],
+                whereClauses: [`nv.vejnavn = vejnavnpostnummerrelation.vejnavn`, `postnr=vp.postnr`],
+                orderClauses: [],
+                sqlParams: sqlParts.sqlParams
+            };
+            const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+                name: 'kommunekode',
+                multi: true
+            }], {});
+            propertyFilterFn(subquery, {kommunekode: parameterArray});
+            const subquerySql = dbapi.createQuery(subquery).sql;
+            sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+        }
+    },
+    kommuner: {
+        select: `(with kommuner as (select distinct vp.kommunekode as kode, k.navn 
+        from vejstykkerpostnumremat vp 
+        join navngivenvejkommunedel_mat nv on vp.navngivenvejkommunedel_id = nv.id 
+        join kommuner k on vp.kommunekode = k.kode 
+        where nv.vejnavn = vejnavnpostnummerrelation.vejnavn and postnr=vp.postnr)
+        select json_agg(json_build_object('kode', kode, 'navn', navn)) from kommuner)`
     }
 };
 

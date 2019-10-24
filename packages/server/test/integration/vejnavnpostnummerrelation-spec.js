@@ -48,7 +48,7 @@ describe('Vejnavnpostnummerrelation API', () => {
                 vejnavn: 'Hovedvejen'
             }, {});
             assert.strictEqual(result.vejnavn, 'Hovedvejen');
-            assert.strictEqual(result.postnr, '4320');
+            assert.strictEqual(result.postnummer.nr, '4320');
         }));
         it('Kan lave en soegning', () => go(function* () {
             const result = yield helpers.getJson(clientFn(), queryResource, {},
@@ -57,7 +57,7 @@ describe('Vejnavnpostnummerrelation API', () => {
                 });
             assert.strictEqual(result.length, 1);
             assert.strictEqual(result[0].vejnavn, 'Hovedvejen');
-            assert.strictEqual(result[0].postnr, '4320');
+            assert.strictEqual(result[0].postnummer.nr, '4320');
         }));
         it('Kan lave en fuzzy soegning', () => go(function* () {
             const result = yield helpers.getJson(clientFn(), queryResource, {},
@@ -67,7 +67,7 @@ describe('Vejnavnpostnummerrelation API', () => {
                 });
             assert(result.length > 1);
             assert.strictEqual(result[0].vejnavn, 'Hovedvejen');
-            assert.strictEqual(result[0].postnr, '4320');
+            assert.strictEqual(result[0].postnummer.nr, '4320');
         }));
     });
 });

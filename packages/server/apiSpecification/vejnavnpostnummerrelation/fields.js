@@ -19,6 +19,10 @@ var fields = [
     {
         name: 'geom_json',
         selectable: true
+    },
+    {
+        name: 'kommuner',
+        multi: true
     }
 ];
 
