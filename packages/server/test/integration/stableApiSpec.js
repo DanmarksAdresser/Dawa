@@ -11,7 +11,7 @@ const testdb = require('@dawadk/test-util/src/testdb');
 require('../../apiSpecification/allSpecs');
 
 // These tests are expected to fail whenever the API is changed or extended
-describe.only('Stable API', () => {
+describe('Stable API', () => {
   const expectedResults = {
     vejstykke: {
 
