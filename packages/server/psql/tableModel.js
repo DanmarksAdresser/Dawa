@@ -102,6 +102,8 @@ const navngivenvejkommunedel_mat = {
       deriveFn: (table) => `to_tsvector('adresser', processForIndexing(coalesce(${table}.vejnavn, '') || ' ' || (select navn from kommuner where kode = ${table}.kommunekode) || ' kommune ' || to_char(${table}.kode, '0000') ))`
     }),
     geomColumn({}),
+    visueltCenterDerived({}),
+    bboxColumn({}),
     {
       name: 'navngivenvej_id'
     }]

@@ -1,16 +1,16 @@
 "use strict";
 
 const dbapi = require('../../dbapi');
-var nameAndKey = require('./nameAndKey');
-var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
-var parameters = require('./parameters');
-var sqlUtil = require('../common/sql/sqlUtil');
+const nameAndKey = require('./nameAndKey');
+const sqlParameterImpl = require('../common/sql/sqlParameterImpl');
+const parameters = require('./parameters');
+const sqlUtil = require('../common/sql/sqlUtil');
 const postgisSqlUtil = require('../common/sql/postgisSqlUtil');
-var assembleSqlModel = sqlUtil.assembleSqlModel;
-var selectIsoTimestamp = sqlUtil.selectIsoDate;
+const assembleSqlModel = sqlUtil.assembleSqlModel;
+const selectIsoTimestamp = sqlUtil.selectIsoDate;
 
 
-var columns = {
+const columns = {
   id: {
     column: 'vejstykker.id'
   },
@@ -48,19 +48,19 @@ var columns = {
       // this is a bit hackish, we add the parameters from
       // the parent query to the subquery to get
       // correct parameter indices for the subquery
-      var subquery = {
+      const subquery = {
         select: ["*"],
         from: ['vejstykkerpostnumremat'],
         whereClauses: ['vejstykkerpostnumremat.kommunekode = vejstykker.kommunekode', 'vejstykkerpostnumremat.vejkode = vejstykker.kode'],
         orderClauses: [],
         sqlParams: sqlParts.sqlParams
       };
-      var propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
         name: 'postnr',
         multi: true
       }], {});
       propertyFilterFn(subquery, {postnr: parameterArray});
-      var subquerySql = dbapi.createQuery(subquery).sql;
+      const subquerySql = dbapi.createQuery(subquery).sql;
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
   },
@@ -75,7 +75,7 @@ var columns = {
   },
   geom_json: {
     select: function (sqlParts, sqlModel, params) {
-      var sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
+      const sridAlias = dbapi.addSqlParameter(sqlParts, params.srid || 4326);
       return postgisSqlUtil.geojsonColumn(params.srid || 4326, sridAlias, 'vejstykker.geom');
     }
   },
@@ -86,6 +86,8 @@ var columns = {
     column: 'nv.darstatus'
   }
 };
+
+Object.assign(columns, postgisSqlUtil.bboxVisualCenterColumns('vejstykker'));
 
 const distanceParameterImpl = (sqlParts, params) => {
   // This is implemented with a JOIN
@@ -114,14 +116,14 @@ const regexParameterImpl = (sqlParts, params) => {
 
 function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
-    var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
+    const fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     const autocompleteTextSql = `(vejnavn || ', ' || k.navn || ' kommune')`;
     sqlParts.whereClauses.push(`vejstykker.vejnavn IN (select distinct ON (vejnavn, dist) vejnavn from (SELECT navn as vejnavn, navn <->  ${fuzzyqAlias} as dist from vejnavne_mat ORDER BY dist LIMIT 1000) as v order by v.dist limit 100)`);
     sqlParts.orderClauses.push(`levenshtein(lower(${autocompleteTextSql}), lower(${fuzzyqAlias}), 2, 1, 3)`);
   }
 }
 
-var parameterImpls = [
+const parameterImpls = [
   sqlParameterImpl.simplePropertyFilter(parameters.propertyFilter, columns),
   sqlParameterImpl.includeDeletedVejstykker,
   sqlParameterImpl.search(columns, ['navn']),
@@ -133,7 +135,7 @@ var parameterImpls = [
   sqlParameterImpl.paging(columns, nameAndKey.key)
 ];
 
-var baseQuery = function() {
+const baseQuery = function() {
   return {
     select: [],
     from: [`navngivenvejkommunedel_mat vejstykker
@@ -147,5 +149,5 @@ var baseQuery = function() {
 
 module.exports = sqlUtil.applyFallbackToFuzzySearch(assembleSqlModel(columns, parameterImpls, baseQuery));
 
-var registry = require('../registry');
+const registry = require('../registry');
 registry.add('vejstykke', 'sqlModel', undefined, module.exports);

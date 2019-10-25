@@ -11,7 +11,7 @@ const testdb = require('@dawadk/test-util/src/testdb');
 require('../../apiSpecification/allSpecs');
 
 // These tests are expected to fail whenever the API is changed or extended
-describe('Stable API', () => {
+describe.only('Stable API', () => {
   const expectedResults = {
     vejstykke: {
 
@@ -29,7 +29,9 @@ describe('Stable API', () => {
             "adresseringsnavn": "Borgm Christiansensg",
             "navngivenvej_id": "13eff875-5986-489b-b1e8-10ecacd95e09",
             "href": "http://dawa/vejstykker/101/728",
-            "betegnelse": "Borgmester Christiansens Gade, København Kommune (0728)"
+            "betegnelse": "Borgmester Christiansens Gade, København Kommune (0728)",
+            "visueltcenter_x": 12.53627319,
+            "visueltcenter_y": 55.64817076
           }
         }],
         nestet: [{
@@ -68,7 +70,9 @@ describe('Stable API', () => {
               "oprettet": "2018-05-17T10:55:12.245",
               "ændret": null,
               "nedlagt": "2018-05-17T10:55:12.245"
-            }
+            },
+            visueltcenter: null,
+            bbox: null
           }
         }]
       }

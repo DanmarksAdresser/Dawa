@@ -142,9 +142,19 @@ exports.json = {
           }
         },
         docOrder: ['oprettet', 'ændret', 'nedlagt']
-      })
+      }),
+        visueltcenter: {
+          description: 'Koordinater for vejstykkets visuelle center. Kan eksempelvis benyttes til at placere label på et kort.',
+          $ref: '#/definitions/NullableVisueltCenter'
+        },
+        bbox: {
+          description: `Geometriens bounding box, dvs. det mindste rektangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
+          $ref: '#/definitions/NullableBbox'
+        },
     },
-    docOrder: ['id','href', 'darstatus', 'kode', 'navn', 'adresseringsnavn', 'navngivenvej', 'kommune', 'postnumre', 'historik']
+    docOrder: ['id','href', 'darstatus', 'kode', 'navn', 'adresseringsnavn', 'navngivenvej', 'kommune', 'postnumre', 'historik', 'visueltcenter', 'bbox']
   }),
   fields: representationUtil.fieldsWithoutNames(_.where(fields, {'selectable' : true}), ['geom_json']),
   mapper: function(baseUrl) {
@@ -167,7 +177,9 @@ exports.json = {
           oprettet: d(row.oprettet),
           ændret: d(row.ændret),
           nedlagt: d(row.nedlagt)
-        }
+        },
+        bbox: commonMappers.mapBbox(row),
+        visueltcenter: commonMappers.mapVisueltCenter(row)
       };
     };
   }

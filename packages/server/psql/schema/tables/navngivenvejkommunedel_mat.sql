@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS navngivenvejkommunedel_mat (
   adresseringsnavn VARCHAR(255),
   tsv tsvector,
   geom  geometry(MULTILINESTRINGZ, 25832),
+  bbox                      GEOMETRY(Polygon, 25832),
+  visueltcenter             GEOMETRY(Point, 25832),
   navngivenvej_id uuid
 );
 
