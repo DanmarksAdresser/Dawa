@@ -47,6 +47,27 @@ var sampleParameters = {
     grund_id: simpleParameterTest(['a68c46ce-9112-4e37-b5ab-7139dfcd01c3'], 'grund.id'),
     anvendelseskode: simpleParameterTest(['120'], 'byg021BygningensAnvendelse')
   },
+  bbr_enhed: {
+    id: simpleParameterTest(["000029ce-f80d-4486-b8d5-b398efa4ed29"], 'id'),
+    status: simpleParameterTest(['3', '6'], 'status'),
+    kommunekode: simpleParameterTest(['0253'], 'kommune.kode'),
+    adresse_id: simpleParameterTest(["0a3f50aa-ef0a-32b8-e044-0003ba298018"], 'adresse.id'),
+    etage_id: simpleParameterTest(['c33fe7ca-49a5-4941-9ecf-d069c38c1bd9'],  'etage.id'),
+    opgang_id: simpleParameterTest(['dd11d884-dfc7-479e-9582-154e35733229'], 'opgang.id'),
+    anvendelseskode: simpleParameterTest(['430'], 'enh020EnhedensAnvendelse'),
+  },
+  bbr_tekniskanlæg: {
+    id: simpleParameterTest(["46d44590-5bec-43f2-b05d-11154617a3d7"], 'id'),
+    status: simpleParameterTest(['10', '6'], 'status'),
+    kommunekode: simpleParameterTest(['0253'], 'kommune.kode'),
+    husnummer_id: simpleParameterTest(["0a3f5081-29af-32b8-e044-0003ba298018"], 'husnummer.id'),
+    jordstykke_id: simpleParameterTest(['1326481'],  'jordstykke.id', parseInt),
+    grund_id: simpleParameterTest(['f8e017a0-82cc-431f-8fdb-ce7b197516cb'], 'grund.id'),
+    bygning_id: simpleParameterTest(['e3466e72-ad74-4de6-afbd-be414e1f0189'], 'bygning.id'),
+    klassifikationskode: simpleParameterTest(['1110'], 'tek020Klassifikation'),
+    bygningPåFremmedGrund_id: simpleParameterTest(['241d02cf-5963-4a89-aee1-90facc6c8819'], 'bygningPåFremmedGrund.id'),
+
+  },
   bygning: {
     id: {
       values: ['1005266425'],
@@ -997,7 +1018,7 @@ var sampleParameters = {
 
 var additionalParameters = {
   adgangsadresse: adgangsadresseParameters.husnrinterval,
-  adresse: adgangsadresseParameters.husnrinterval
+  adresse: adgangsadresseParameters.husnrinterval,
 };
 
 _.keys(sampleParameters).forEach(function(specName) {
@@ -1018,7 +1039,9 @@ _.keys(sampleParameters).forEach(function(specName) {
   });
 
   var untestedParams = {
-    bbr_bygning: ['ejerlejlighed_id']
+    bbr_bygning: ['ejerlejlighed_id'],
+    bbr_enhed: ['bygning_id'],
+    bbr_tekniskanlæg: ['enhed_id','ejerlejlighed_id']
   };
   var allParameters = propertyFilterParameters.concat(additionalParameters[specName] || []);
   describe('Query for ' + specName, function() {

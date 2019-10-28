@@ -1,7 +1,7 @@
 const grbbrModels = require('../ois2/parse-ea-model');
-const {getQueryPath, getEntityName, geojsonFields} = require('../apiSpecification/bbr/common');
+const {getQueryPath, getEntityName} = require('../apiSpecification/bbr/common');
 const parameterMap = require('../apiSpecification/bbr/parameters');
-const {formatAndPagingParams, formatParameters, reverseGeocodingParameters} = require('./common');
+const {formatAndPagingParams, formatParameters} = require('./common');
 const subtextsQuery = {
     bygning: 'Find bygninger fra BBR.',
     enhed: 'Find enheder fra BBR.',
