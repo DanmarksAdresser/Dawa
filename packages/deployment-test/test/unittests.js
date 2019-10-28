@@ -4114,6 +4114,12 @@ describe('BBR Light', function(){
 
 });
 
+describe('BBR', function(){
+
+
+
+});
+
 describe('Stednavne', function(){
 
   it("stednavnetyper", function(done){
