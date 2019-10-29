@@ -36,6 +36,8 @@ const geojsonFields = {
 
 const bbrParameterNames = _.object(grbbrModels.map(model => [model.name, {'kommunekode': 'kommunekode'}]));
 bbrParameterNames.bygning.byg021BygningensAnvendelse = 'anvendelseskode';
+bbrParameterNames.enhed.enh020EnhedensAnvendelse = 'anvendelseskode';
+bbrParameterNames.tekniskanlæg.tek020Klassifikation = 'klassifikationskode';
 
 const getParameterName = (grbbrModel, attrName) => {
   if(bbrParameterNames[grbbrModel.name] && bbrParameterNames[grbbrModel.name][attrName]) {
