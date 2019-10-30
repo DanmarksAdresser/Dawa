@@ -4258,10 +4258,10 @@ describe('GRBBR', function(){
     var adgangsadresser= JSON.parse(response.body);
     assert(adgangsadresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-    // find adgangsadressens bygning
+    // find adgangsadressens opgang
     options= {};
     options.baseUrl= host;
-    options.url='bbr/bygninger';
+    options.url='bbr/opgange';
     options.qs= {};
     options.qs.cache= 'no-cache';
     options.qs.status= 6;
@@ -4269,9 +4269,20 @@ describe('GRBBR', function(){
     options.resolveWithFullResponse= true;
     response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
-    var bygninger= JSON.parse(response.body);
-    assert(bygninger.length===1, "Der er ikke fundet én enhed, men " + bygninger.length);
-    assert(bygninger[0].byg021BygningensAnvendelse==='140', 'Bygningen er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
+    var opgange= JSON.parse(response.body);
+    assert(opgange.length===1, "Der er ikke fundet én opgang, men " + opgange.length);
+
+    // find adgangsadressens bygning
+    options= {};
+    options.url=opgange[0].bygning.href;
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.status= 6;
+    options.resolveWithFullResponse= true;
+    response=  await rp(options);    
+    assert(response.statusCode===200, "Http status code != 200");
+    var bygning= JSON.parse(response.body);
+    assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
 
     // undersøg om bygningen er en bygningpaafremmedgrund
     options= {};
@@ -4279,7 +4290,7 @@ describe('GRBBR', function(){
     options.url='bbr/bygningpaafremmedgrund';
     options.qs= {};
     options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygninger[0].id;
+    options.qs.bygning_id= bygning.id;
     options.resolveWithFullResponse= true;
     response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
@@ -4306,7 +4317,7 @@ describe('GRBBR', function(){
     options.url='bbr/opgange';
     options.qs= {};
     options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygninger[0].id;
+    options.qs.bygning_id= bygning.id;
     options.resolveWithFullResponse= true;
     response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
@@ -4332,7 +4343,7 @@ describe('GRBBR', function(){
     options.url='bbr/etager';
     options.qs= {};
     options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygninger[0].id;
+    options.qs.bygning_id= bygning.id;
     options.resolveWithFullResponse= true;
     response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
@@ -4354,7 +4365,7 @@ describe('GRBBR', function(){
 
     // grunden bygningen ligger på
     options= {};
-    options.url=bygninger[0].grund.href;
+    options.url=bygning.grund.href;
     options.qs= {};
     options.qs.cache= 'no-cache';
     options.resolveWithFullResponse= true;
@@ -4375,7 +4386,7 @@ describe('GRBBR', function(){
     assert(response.statusCode===200, "Http status code != 200");
     var grundjordstykker= JSON.parse(response.body);
     assert(grundjordstykker.length===1, 'Der er fundet ' + grundjordstykker.length + ' grundjordstykker');
-    assert(grundjordstykker[0].jordstykke.id===bygninger[0].jordstykke.id, 'Jordstykket tilknyttet grunden (' + grundjordstykker[0].id + ') er forskelligt fra jordstykket tilknyttet bygningen (' + bygninger[0].jordstykke.id + ')');
+    assert(grundjordstykker[0].jordstykke.id===bygning.jordstykke.id, 'Jordstykket tilknyttet grunden (' + grundjordstykker[0].id + ') er forskelligt fra jordstykket tilknyttet bygningen (' + bygning.jordstykke.id + ')');
   
     // jordstykket
     options= {};
@@ -4396,7 +4407,7 @@ describe('GRBBR', function(){
     options.url='bbr/tekniskeanlaeg';
     options.qs= {};
     options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygninger[0].id;
+    options.qs.bygning_id= bygning.id;
     options.resolveWithFullResponse= true;
     response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
