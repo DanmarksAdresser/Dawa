@@ -4117,10 +4117,10 @@ describe('BBR Light', function(){
 describe('GRBBR', function(){
 
 
-  it("test af  manglende enhed", async function(){
+  it("test af  manglende enhed samt manglende bygningsreference på enhed", async function(){
 
     // finde adresse
-    var options= {};
+    let options= {};
     options.baseUrl= host;
     options.url='adresser';
     options.qs= {};
@@ -4129,7 +4129,7 @@ describe('GRBBR', function(){
     options.resolveWithFullResponse= true;
     let response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
-    var adresser= JSON.parse(response.body);
+    let adresser= JSON.parse(response.body);
     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
     // find adressens enhed
@@ -4143,14 +4143,26 @@ describe('GRBBR', function(){
     options.resolveWithFullResponse= true;
     response=  await rp(options);    
     assert(response.statusCode===200, "Http status code != 200");
-    var enheder= JSON.parse(response.body);
+    let enheder= JSON.parse(response.body);
     assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-    assert(enheder[0].enh020EnhedensAnvendelse==='140', 'Enheden er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
+    assert(enheder[0].enh020EnhedensAnvendelse==='140', 'Enheden er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
 
+    // find enhedens bygning
+    options= {};
+    assert(enheder[0].bygning, 'Enhedens byning mangler');
+    options.url=enheder[0].bygning.href;
+    options.qs= {};
+    options.qs.cache= 'no-cache';
+    options.qs.status= 6;
+    options.resolveWithFullResponse= true;
+    response=  await rp(options);    
+    assert(response.statusCode===200, "Http status code != 200");
+    let bygning= JSON.parse(response.body);
+    assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
   });
 
 
-  it("adresse til oplysninger om enhed", async function(){
+  it("adresse til oplysninger om enhed", async function() {
 
     // finde adresse
     var options= {};
