@@ -790,7 +790,7 @@ const vejnavnpostnummerrelation = {
     {name: 'postnrnavn'},
     {name: 'betegnelse'},
     tsvColumn({
-      deriveFn: table => `to_tsvector(processforindexing(${table}.betegnelse))`
+      deriveFn: table => `to_tsvector('adresser', processforindexing(${table}.betegnelse))`
     }),
     geomColumn({})
   ]
