@@ -32,5 +32,6 @@ module.exports = [
   require('./supplerendebynavn2-page'),
   require('./valglandsdel-page'),
   require('./vejnavn-page'),
+  require('./vejnavnpostnummerrelation-page'),
   require('./vejstykke-page')
 ];
