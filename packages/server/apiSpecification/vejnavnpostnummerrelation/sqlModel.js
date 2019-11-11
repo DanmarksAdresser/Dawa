@@ -41,7 +41,7 @@ const columns = {
         from vejstykkerpostnumremat vp 
         join navngivenvejkommunedel_mat nv on vp.navngivenvejkommunedel_id = nv.id 
         join kommuner k on vp.kommunekode = k.kode 
-        where nv.vejnavn = vejnavnpostnummerrelation.vejnavn and postnr=vp.postnr)
+        where nv.vejnavn = vejnavnpostnummerrelation.vejnavn and vejnavnpostnummerrelation.postnr=vp.postnr)
         select json_agg(json_build_object('kode', kode, 'navn', navn)) from kommuner)`
     }
 };
