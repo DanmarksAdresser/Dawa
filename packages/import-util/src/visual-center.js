@@ -70,7 +70,7 @@ const computeVisualCenters = (client, txid, tableModel) => go(function* () {
         yield client.query(`UPDATE ${tableModel.table}_changes SET visueltcenter = ST_SetSRID(ST_GeomFromGeoJSON($1), 25832) WHERE ${whereClause}`, [JSON.stringify(visualCenterGeojson)]);
       }
       else {
-        yield client.query(`UPDATE ${tableModel.table}_changes SET visueltcenter = ST_ClosestPoint(${tableModel.table}.geom, ST_Centroid(${tableModel.table}.geom))WHERE ${whereClause}`);
+        yield client.query(`UPDATE ${tableModel.table}_changes SET visueltcenter = ST_ClosestPoint(${tableModel.table}_changes.geom, ST_Centroid(${tableModel.table}_changes.geom))WHERE ${whereClause}`);
       }
     }
   }

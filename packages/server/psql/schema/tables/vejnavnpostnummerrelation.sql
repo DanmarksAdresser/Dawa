@@ -6,6 +6,8 @@ CREATE TABLE vejnavnpostnummerrelation
     postnrnavn text,
     betegnelse text,
     tsv TSVECTOR,
+    bbox                      GEOMETRY(Polygon, 25832),
+    visueltcenter             GEOMETRY(Point, 25832),
     geom    geometry(Geometry, 25832),
     primary key(postnr, vejnavn)
 );

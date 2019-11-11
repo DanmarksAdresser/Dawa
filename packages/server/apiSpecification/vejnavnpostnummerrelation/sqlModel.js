@@ -46,6 +46,8 @@ const columns = {
     }
 };
 
+Object.assign(columns, postgisSqlUtil.bboxVisualCenterColumns('vejnavnpostnummerrelation'));
+
 function fuzzySearchParameterImpl(sqlParts, params) {
     if(params.fuzzyq) {
         var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);

@@ -4,7 +4,7 @@ const _ = require('underscore');
 const nameAndKey = require('./nameAndKey');
 const representationUtil = require('../common/representationUtil');
 const fields = require('./fields');
-const  { makeHref, mapPostnummerRef, mapKommuneRefArray} = require('../commonMappers');
+const  { makeHref, mapPostnummerRef, mapKommuneRefArray, mapBbox, mapVisueltCenter} = require('../commonMappers');
 const commonSchemaDefinitionsUtil = require('../commonSchemaDefinitionsUtil');
 const {kode4String} = require('../util');
 
@@ -78,9 +78,20 @@ exports.json = {
                 description: 'De kommuner hvori der ligger en vej med dette navn og postnummer',
                 type: 'array',
                 items: { '$ref': '#/definitions/KommuneRef'}
-            }
+            },
+            visueltcenter: {
+                description: 'Koordinater for geometriens visuelle center. Kan eksempelvis benyttes til at placere label på et kort.',
+                $ref: '#/definitions/NullableVisueltCenter'
+            },
+            bbox: {
+                description: `Geometriens bounding box, dvs. det mindste rektangel som indeholder geometrien. Består af et array af 4 tal.
+        De første to tal er koordinaterne for bounding boxens sydvestlige hjørne, og to sidste tal er
+        koordinaterne for bounding boxens nordøstlige hjørne. Anvend srid parameteren til at angive det ønskede koordinatsystem.`,
+                $ref: '#/definitions/NullableBbox'
+            },
+
         },
-        docOrder: ['betegnelse', 'href', 'vejnavn', 'postnummer', 'kommuner']
+        docOrder: ['betegnelse', 'href', 'vejnavn', 'postnummer', 'visueltcenter', 'bbox', 'kommuner']
     }),
     mapper: function (baseUrl) {
         return function(row) {
@@ -89,6 +100,8 @@ exports.json = {
                 href: hrefFormatter(baseUrl, row),
                 vejnavn: row.vejnavn,
                 postnummer: mapPostnummerRef({nr: row.postnr, navn: row.postnrnavn}, baseUrl),
+                bbox: mapBbox(row),
+                visueltcenter: mapVisueltCenter(row),
                 kommuner: mapKommuneRefArray(row.kommuner, baseUrl)
             }
         };
