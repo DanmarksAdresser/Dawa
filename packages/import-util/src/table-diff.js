@@ -336,15 +336,16 @@ const initializeChangeTable = (client, txid, tableModel) => {
   (SELECT ${txid}, 'insert', false, ${selectFields} FROM ${tableModel.table})`);
 };
 
-const initializeFromScratch = (client, txid, sourceTableOrView, tableModel, columns) => go(function* () {
-  columns = columns || nonDerivedColumnNames(tableModel);
-  const selectFields = selectList(null, columns);
-  const changeTableName = `${tableModel.table}_changes`;
-  const sql = `INSERT INTO ${changeTableName}(txid, operation, public, ${selectFields}) 
-  (SELECT ${txid}, 'insert', false, ${selectFields} FROM ${sourceTableOrView})`;
-  yield client.query(sql);
-  yield client.query(`ANALYZE ${changeTableName}`);
-  yield deriveColumnsForChange(client, txid, tableModel);
+const initializeFromScratch = (client, txid, sourceTableOrView, tableModel) => go(function* () {
+  const selectClause = makeSelectClause('t', tableModel);
+  const changesColumnList = ['txid', 'operation', columnsForSelectClause(tableModel).map(name)];
+  const insertSql = `INSERT INTO ${tableModel.table}_changes(${changesColumnList.join(', ')}) 
+    (SELECT ${txid}, 'insert', ${selectClause} FROM ${sourceTableOrView} t)`;
+  yield client.query(insertSql);
+  yield client.query(`ANALYZE ${tableModel.table}_changes`);
+  for(let col of tableModel.columns) {
+    yield preApplyChanges(col, client, txid, tableModel);
+  }
   yield applyChanges(client, txid, tableModel);
   yield client.query(`ANALYZE ${tableModel.table}`);
 });

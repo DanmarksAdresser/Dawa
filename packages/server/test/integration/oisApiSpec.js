@@ -91,7 +91,7 @@ const fullResults = {
         "GruTilUdtrDato": null,
         "GruTilAltAfld": null,
         "GruTilAltAfldDato": null,
-        "href": "http://dawa/ois/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
+        "href": "http://dawa/bbrlight/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
       },
       flad: {
         "ois_id": 49881,
@@ -228,13 +228,13 @@ const fullResults = {
         "Opdelingsnr": null,
         "BygSkadeOmfatFors": null,
         "Gyldighedsdato": null,
-        "href": "http://dawa/ois/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
+        "href": "http://dawa/bbrlight/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
         "ejerskaber": [],
         "bygningspunkt": {
           "ois_id": 6093147,
           "ois_ts": "2016-12-12 19:26:53.370",
           "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-          "href": "http://dawa/ois/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
+          "href": "http://dawa/bbrlight/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
           "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
           "PktRevDato": "2016-12-12T09:29:07.017",
           "KoorOest": 726016.09,
@@ -462,173 +462,12 @@ const fullResults = {
   }
 };
 
-const publicResults = {
-  grund: {
-    "2aee4375-4a3a-4e1d-91b4-1ba061b1fc97": {
-      mini: {
-        "ois_id": 49881,
-        "ois_ts": "2010-12-17 13:10:48.303",
-        "Grund_id": "2aee4375-4a3a-4e1d-91b4-1ba061b1fc97",
-        "Kommune_id": "07c7b9a2-7320-436a-bf28-33883768e7e4",
-        "ESREjdNr": "002632",
-        "ObjStatus": 1,
-        "MatrSFE_id": "2695110",
-        "AdgAdr_id": "0a3f5088-0121-32b8-e044-0003ba298018",
-        "OPRET_TS": "2000-02-05T05:57:34.000",
-        "AENDR_TS": "2008-12-08T11:16:19.000",
-        "Ophoert_ts": null,
-        "Gyldighedsdato": null
-      },
-      nestet: {
-        "ois_id": 49881,
-        "ois_ts": "2010-12-17 13:10:48.303",
-        "Grund_id": "2aee4375-4a3a-4e1d-91b4-1ba061b1fc97",
-        "Kommune_id": "07c7b9a2-7320-436a-bf28-33883768e7e4",
-        "ESREjdNr": "002632",
-        "ObjStatus": 1,
-        "MatrSFE_id": "2695110",
-        "AdgAdr_id": "0a3f5088-0121-32b8-e044-0003ba298018",
-        "OPRET_TS": "2000-02-05T05:57:34.000",
-        "AENDR_TS": "2008-12-08T11:16:19.000",
-        "Ophoert_ts": null,
-        "Gyldighedsdato": null,
-        "href": "http://dawa/bbrlight/grunde/2aee4375-4a3a-4e1d-91b4-1ba061b1fc97"
-      },
-      flad: {
-        "ois_id": 49881,
-        "ois_ts": "2010-12-17 13:10:48.303",
-        "Grund_id": "2aee4375-4a3a-4e1d-91b4-1ba061b1fc97",
-        "Kommune_id": "07c7b9a2-7320-436a-bf28-33883768e7e4",
-        "ESREjdNr": "002632",
-        "ObjStatus": 1,
-        "MatrSFE_id": "2695110",
-        "AdgAdr_id": "0a3f5088-0121-32b8-e044-0003ba298018",
-        "OPRET_TS": "2000-02-05T05:57:34.000",
-        "AENDR_TS": "2008-12-08T11:16:19.000",
-        "Ophoert_ts": null,
-        "Gyldighedsdato": null
-      }
-    }
-  }
-  ,
-  bygning: {
-    '54a074d4-b006-442c-b7fb-092cb91b8693': {
-      nestet: {
-        "ois_id": 5344873,
-        "ois_ts": "2016-12-12 19:23:12.463",
-        "Bygning_id": "54a074d4-b006-442c-b7fb-092cb91b8693",
-        "Bygningsnr": "2",
-        "ObjStatus": 3,
-        "AdgAdr_id": "0a3f507d-f236-32b8-e044-0003ba298018",
-        "BygPktNoejagtigKls": null,
-        "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-        "OPRET_TS": "2016-12-12T09:29:06.463",
-        "AENDR_TS": "2016-12-12T09:30:03.910",
-        "Ophoert_ts": null,
-        "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
-        "KomKode": "0185",
-        "Landsejerlavkode": 11659,
-        "KomEjerlavKode": 5,
-        "MatrNr": "2afÃ¸",
-        "ESREjdNr": "051692",
-        "Grund_id": "db50f6b0-c332-45cf-8f7a-1161933e367a",
-        "href": "http://dawa/bbrlight/bygninger/54a074d4-b006-442c-b7fb-092cb91b8693",
-        "ejerskaber": [],
-        "bygningspunkt": {
-          "ois_id": 6093147,
-          "ois_ts": "2016-12-12 19:26:53.370",
-          "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-          "href": "http://dawa/bbrlight/bygningspunkter/39c749bf-9ecd-4570-a52b-ae6810178563",
-          "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
-          "PktRevDato": "2016-12-12T09:29:07.017",
-          "KoorOest": 726016.09,
-          "KoorNord": 6166521.3,
-          "KoorSystem": 5,
-          "TxtRetn": 200,
-          "TxtPlacer": "5",
-          "DDKNcelle100m": "100m_61665_7260",
-          "DDKNcelle1km": "1km_6166_726",
-          "DDKNcelle10km": "10km_616_72",
-          "OPRET_TS": "2016-12-12T09:29:06.307",
-          "AENDR_TS": "2016-12-12T09:29:06.307",
-          "Ophoert_ts": null,
-          "BygPktKilde": 0,
-          "koordinater": [
-            12.58708724,
-            55.59208269
-          ]
-        }
-      },
-      flad: {
-        "ois_id": 5344873,
-        "ois_ts": "2016-12-12 19:23:12.463",
-        "Bygning_id": "54a074d4-b006-442c-b7fb-092cb91b8693",
-        "Bygningsnr": "2",
-        "ObjStatus": 3,
-        "AdgAdr_id": "0a3f507d-f236-32b8-e044-0003ba298018",
-        "Grund_id": "db50f6b0-c332-45cf-8f7a-1161933e367a",
-        "BygPktNoejagtigKls": null,
-        "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-        "OPRET_TS": "2016-12-12T09:29:06.463",
-        "AENDR_TS": "2016-12-12T09:30:03.910",
-        "Ophoert_ts": null,
-        "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
-        "KomKode": "0185",
-        "Landsejerlavkode": 11659,
-        "KomEjerlavKode": 5,
-        "MatrNr": "2afÃ¸",
-        "ESREjdNr": "051692",
-        "bygningspunkt_ois_id": 6093147,
-        "bygningspunkt_ois_ts": "2016-12-12 19:26:53.370",
-        "bygningspunkt_BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-        "bygningspunkt_Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
-        "bygningspunkt_PktRevDato": "2016-12-12T09:29:07.017",
-        "bygningspunkt_KoorOest": 726016.09,
-        "bygningspunkt_KoorNord": 6166521.3,
-        "bygningspunkt_KoorSystem": 5,
-        "bygningspunkt_TxtRetn": 200,
-        "bygningspunkt_TxtPlacer": "5",
-        "bygningspunkt_DDKNcelle100m": "100m_61665_7260",
-        "bygningspunkt_DDKNcelle1km": "1km_6166_726",
-        "bygningspunkt_DDKNcelle10km": "10km_616_72",
-        "bygningspunkt_OPRET_TS": "2016-12-12T09:29:06.307",
-        "bygningspunkt_AENDR_TS": "2016-12-12T09:29:06.307",
-        "bygningspunkt_Ophoert_ts": null,
-        "bygningspunkt_BygPktKilde": 0,
-        "bygningspunkt_koordinater_x": 12.58708724,
-        "bygningspunkt_koordinater_y": 55.59208269
-      },
-      mini: {
-        "ois_id": 5344873,
-        "ois_ts": "2016-12-12 19:23:12.463",
-        "Bygning_id": "54a074d4-b006-442c-b7fb-092cb91b8693",
-        "Bygningsnr": "2",
-        "ObjStatus": 3,
-        "AdgAdr_id": "0a3f507d-f236-32b8-e044-0003ba298018",
-        "Grund_id": "db50f6b0-c332-45cf-8f7a-1161933e367a",
-        "BygPktNoejagtigKls": null,
-        "BygPkt_id": "39c749bf-9ecd-4570-a52b-ae6810178563",
-        "OPRET_TS": "2016-12-12T09:29:06.463",
-        "AENDR_TS": "2016-12-12T09:30:03.910",
-        "Ophoert_ts": null,
-        "Kommune_id": "56d4cc87-195c-4486-bf3f-aa5142ba5279",
-        "KomKode": "0185",
-        "Landsejerlavkode": 11659,
-        "KomEjerlavKode": 5,
-        "MatrNr": "2afÃ¸",
-        "ESREjdNr": "051692"
-      }
-    }
-  }
-};
-
 const expectedResultsMap = {
-  full: fullResults,
-  public: publicResults
+  public: fullResults
 };
 
 describe('OIS API', () => {
-  for(let variant of ['full', 'public']) {
+  for(let variant of ['public']) {
     const expectedResults = expectedResultsMap[variant];
     describe(variant, () => {
       testdb.withTransactionEach('test', (clientFn) => {
