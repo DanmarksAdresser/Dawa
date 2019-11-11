@@ -4,12 +4,11 @@ const _ = require('underscore');
 
 const oisApiModels = require('./oisApiModels');
 const fullOisModels = require('../../ois/oisModels');
-const publicOisModels = require('../../ois/publicOisModels');
 const namesAndKeys = require('./namesAndKeys');
 const schemas = require('./schemas');
 
 const oisModelsMap = {
-  'public': publicOisModels,
+  'public': fullOisModels,
   full: fullOisModels
 };
 

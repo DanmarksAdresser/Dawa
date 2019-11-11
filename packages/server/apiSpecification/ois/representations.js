@@ -5,14 +5,13 @@ const _ = require('underscore');
 const namesAndKeys = require('./namesAndKeys');
 const oisApiModels = require('./oisApiModels');
 const fullOisModels = require('../../ois/oisModels');
-const publicOisModels = require('../../ois/publicOisModels');
 const fieldsMap = require('./fields');
 const representationUtil = require('../common/representationUtil');
 const registry = require('../registry');
 
 const oisModelsMap = {
   full: fullOisModels,
-  public: publicOisModels
+  public: fullOisModels
 };
 
 const makeOisHref = (baseUrl, variant, apiModelName, id) => {

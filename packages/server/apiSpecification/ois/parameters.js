@@ -1,7 +1,6 @@
 "use strict";
 
 const fullOisModels= require('../../ois/oisModels');
-const publicOisModels= require('../../ois/publicOisModels');
 const fieldSpec = require('./fieldSpec');
 const schemas = require('./schemas');
 
@@ -10,7 +9,7 @@ const filtersMap = require('./filterParameterSpec');
 const  { normalizeParameters }  = require('../common/parametersUtil');
 
 const modelsMap = {
-  public: publicOisModels,
+  public: fullOisModels,
   full: fullOisModels
 };
 
