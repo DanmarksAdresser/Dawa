@@ -1,9 +1,7 @@
 const {
     autocompleteSubtext,
     formatAndPagingParams,
-    reverseGeocodingParameters,
     overwriteWithAutocompleteQParameter,
-    SRIDParameter,
     strukturParameter,
     autocompleteParameter
 } = require('./common');

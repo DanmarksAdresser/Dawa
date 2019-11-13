@@ -17,6 +17,8 @@ const logger = require('@dawadk/common/src/logger').forCategory('migrate');
 const grbbrModels = require('../ois2/parse-ea-model');
 const grbbrProcessors = require('../components/processors/grbbr');
 const tableSchema = require('./tableModel');
+const { withImportTransaction } = require('../importUtil/transaction-util');
+const {clearAndMaterialize, recomputeMaterialization} = require('@dawadk/import-util/src/materialize');
 const schema = configHolder.mergeConfigSchemas([
   {
     database_url: {
@@ -77,8 +79,19 @@ runConfigured(schema, [], config => go(function* () {
           const oisTable = oisModels[entityName].oisTable;
           yield client.query('update ois_importlog set oistable = $1 where oistable = $2', [oisTable.toLowerCase(), entityName]);
         }
-
+        yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/vejnavnpostnummerrelation.sql'), {encoding: 'utf-8'}));
+        yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/navngivenvejkommunedel_mat.sql'), {encoding: 'utf-8'}));
+        yield client.query(fs.readFileSync(path.join(__dirname, 'schema/tables/navngivenvejkommunedel_postnr_mat.sql'), {encoding: 'utf-8'}));
+        yield createChangeTable(client, tableSchema.tables.vejnavnpostnummerrelation);
+        yield createChangeTable(client, tableSchema.tables.navngivenvejkommunedel_mat);
+        yield createChangeTable(client, tableSchema.tables.navngivenvejkommunedel_postnr_mat);
         yield reloadDatabaseCode(client, path.join(__dirname, 'schema'));
+        yield withImportTransaction(client, 'migrate_1_32_0', (txid) => go(function*() {
+          yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.vejnavnpostnummerrelation);
+          yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.navngivenvejkommunedel_mat);
+          yield clearAndMaterialize(client, txid, tableSchema.tables, tableSchema.materializations.navngivenvejkommunedel_postnr_mat);
+          yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.vejstykkerpostnumremat);
+        }));
       }));
     }),
     () => go(function* () {

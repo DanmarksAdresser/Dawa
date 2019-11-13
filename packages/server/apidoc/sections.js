@@ -18,13 +18,13 @@ module.exports = [{
   entities: ['ejerlav', 'jordstykke']
 },
   {
-    name: 'BBR',
+    name: 'BBR BETA',
     headingClass: 'h2-icon h2-bbr',
-    lead: 'For en generel introduktion til BBR, se <a href="/dok/bbr">her<a/>.',
+    lead: 'Dette er en BETA af BBR data baseret på grunddatamodellen. Data er ikke komplette.',
     entities: grbbrModels.map(getEntityName)
   },
   {
-  name: 'BBR (LEGACY)',
+  name: 'BBR',
   headingClass: 'h2-icon h2-bbr',
   lead: 'For en generel introduktion til BBR, se <a href="/dok/bbr">her<a/>.',
   entities: bbrOrder.map(entityName => `BBR ${entityName}`)

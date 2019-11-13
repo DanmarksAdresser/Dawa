@@ -17,8 +17,7 @@ const { assert } = require('chai');
 const {go} = require('ts-csp');
 
 const {allColumnNames, nonPrimaryColumnNames,
-  deriveColumnsForChange,
-  nonDerivedColumnNames, assignSequenceNumbers, columnsDistinctClause} = require('./table-model-util');
+  deriveColumnsForChange, assignSequenceNumbers, columnsDistinctClause} = require('./table-model-util');
 const {selectList, columnsEqualClause} = require('@dawadk/common/src/postgres/sql-util');
 const { streamArrayToTable} = require('./postgres-streaming');
 
