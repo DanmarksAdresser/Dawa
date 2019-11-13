@@ -93,6 +93,7 @@ runConfigured(schema, [], config => go(function* () {
           yield recomputeMaterialization(client, txid, tableSchema.tables, tableSchema.materializations.vejstykkerpostnumremat);
         }));
       }));
+      logger.info('Etape 0 afsluttet');
     }),
     () => go(function* () {
       logger.info('Etape 1: Bygnings-indlæsning');
@@ -107,6 +108,8 @@ runConfigured(schema, [], config => go(function* () {
             yield importer.execute(client, txid);
           }));
       }));
+      logger.info('Etape 1 afsluttet');
+
     }),
     () => go(function* () {
       logger.info('Etape 2: Indlæsning af ikke-bygning');
@@ -121,6 +124,7 @@ runConfigured(schema, [], config => go(function* () {
             yield importer.execute(client, txid);
           }));
       }));
+      logger.info('Etape 2 afsluttet');
     }),
     () => go(function* () {
       logger.info('Etape 3: Beregning af historiske tabeller');
@@ -136,6 +140,7 @@ runConfigured(schema, [], config => go(function* () {
             }
           }));
       }));
+      logger.info('Etape 3 afsluttet');
     }),
     () => go(function* () {
       logger.info('Etape 4: Beregning af aktuelle tabeller samt jordstykker');
@@ -159,6 +164,7 @@ runConfigured(schema, [], config => go(function* () {
              WHERE j.featureid = v.featureid`);
         yield applyCurrentTableToChangeTable(client, tableSchema.tables.jordstykker, ['grund_id', 'bfenummer', 'ejendomsrelation_id']);
       }));
+      logger.info('Etape 4 afsluttet');
     })
   ];
   const etape = config.get('etape');
