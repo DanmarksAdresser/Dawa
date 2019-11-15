@@ -5196,3 +5196,50 @@ describe('Bygninger', function(){
 });
 
 
+describe('Vejnavnpostnummerrelation', function() {
+
+
+  it("Søgning", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.qs.vejnavn = "Holbækmotorvejen";
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelationer = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelationer.length === 10, "Der er ikke fundet én, men  " + vejnavnpostnummerrelationer.length);
+  });
+
+  it("Opslag", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer/2605/Holbækmotorvejen';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelation = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelation.kommuner.length === 2, "Der er ikke fundet to kommuner, men  " + vejnavnpostnummerrelation.length);
+  });
+
+  it("Autocomplete", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer/autocomplete';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.qs.q = "Holbækm";
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelationer = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelationer.length === 10, "Der er ikke fundet én, men  " + vejnavnpostnummerrelationer.length);
+  });
+
+});
+
+
