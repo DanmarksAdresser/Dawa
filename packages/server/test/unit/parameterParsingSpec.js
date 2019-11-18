@@ -1,6 +1,6 @@
 "use strict";
 
-var expect = require('chai').expect;
+const {expect, assert} = require('chai');
 
 var parameterParsing = require("../../parameterParsing");
 
@@ -108,6 +108,11 @@ describe("When parsing unknown parameters'", function () {
       .to.deep.equal({params: {}, errors: [
         ['unknownParam', 'Ukendt parameter unknownParam']
       ]});
-  })
+  });
+
+  it('Should not result in an error if both valider and cache params are set', () => {
+    const result = parameterParsing.parseParameters({valider: '', cache: 'no-cache'}, parameterSpec);
+    assert.deepEqual(result, {params: {}, errors: []});
+  });
 
 });

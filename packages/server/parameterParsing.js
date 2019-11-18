@@ -12,6 +12,8 @@ const DEFAULT_MAX_PARAM_LENGTH = 100;
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
 
+const parametersAlwaysValid = ['cache', 'valider'];
+
 exports.parseParameters = function(params, parameterSpec) {
   _.each(_.keys(parameterSpec),
          function(name){
@@ -38,7 +40,7 @@ exports.parseParameters = function(params, parameterSpec) {
   // The valider param is used to produce an error on unknown parameters
   if(params.valider !== undefined) {
     for(let paramName of Object.keys(params)) {
-      if(paramName !== 'valider' && !parameterSpec[paramName]) {
+      if(!parametersAlwaysValid.includes(paramName) && !parameterSpec[paramName]) {
         parsedParameters.errors.push([paramName, `Ukendt parameter ${paramName}`]);
       }
     }
