@@ -34,11 +34,11 @@ const commonGeoProps = {
   'ændret': {
     description: 'Tidspunkt for seneste ændring registreret i DAWA. Opdateres ikke hvis ændringen kun vedrører' +
     ' geometrien (se felterne geo_ændret og geo_version).',
-    $ref: '#/definitions/NullableDateTimeUtc'
+    $ref: '#/definitions/DateTimeUtc'
   },
   'geo_ændret': {
     description: 'Tidspunkt for seneste ændring af geometrien registreret i DAWA.',
-    $ref: '#/definitions/NullableDateTimeUtc'
+    $ref: '#/definitions/DateTimeUtc'
   },
   geo_version: {
     description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
