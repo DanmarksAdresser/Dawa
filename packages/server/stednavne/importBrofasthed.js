@@ -1,28 +1,31 @@
 "use strict";
 
 const {go} = require('ts-csp');
-const _ = require('underscore');
 
-const {runImporter} = require('@dawadk/common/src/cli/run-importer');
+const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const { withImportTransaction} = require('../importUtil/transaction-util');
 const importBrofasthedImpl = require('./importBrofasthedImpl');
 const proddb = require('../psql/proddb');
-const optionSpec = {
-  pgConnectionUrl: [false, 'URL som anvendes ved forbindelse til databasen', 'string'],
-  file: [false, 'Fil med angivelse af brofasthed', 'string', 'data/brofasthed.csv'],
-  init: [false, 'Initiel import', 'boolean', false]
+const convictSchema = {
+  file: {
+    format: 'string',
+    doc: 'Fil med brofasthed',
+    required: true,
+    default: null,
+    cli: true
+  }
 };
 
-runImporter('brofasthed', optionSpec, _.keys(optionSpec), function (args, options) {
+runConfiguredImporter('brofasthed', convictSchema, config => go(function* () {
   proddb.init({
-    connString: options.pgConnectionUrl,
+    connString: config.get('database_url'),
     pooled: false
   });
 
-  return proddb.withTransaction('READ_WRITE', client => go(function*() {
+  yield proddb.withTransaction('READ_WRITE', client => go(function*() {
     yield withImportTransaction(client, 'importBrofasthed', txid => go(function*() {
-      yield importBrofasthedImpl(client, txid, options.file, options.init);
+      yield importBrofasthedImpl(client, txid, config.get('file'), false);
 
     }));
   }));
-});
+}));
