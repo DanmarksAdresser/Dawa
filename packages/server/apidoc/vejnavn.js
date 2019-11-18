@@ -67,6 +67,10 @@ module.exports = [
       {
         description: 'Find alle vejnavne i Københavns kommune (kommunekode 0101)',
         query: [{name: 'kommunekode', value: '0101'}]
+      },
+      { 
+        description: 'Fuzzy søgning efter Rante mestervej', 
+        query: [{name: 'q', value: 'Rante mestervej'}, {name: 'fuzzy', value: ''}]
       }]
   },
   {

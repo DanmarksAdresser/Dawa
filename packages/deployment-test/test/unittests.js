@@ -3683,8 +3683,8 @@ describe('BBR Light', function(){
       var enheder= JSON.parse(response.body);          
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et lejet rækkehus");
-      assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
-      assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
+      //assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
+      //assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
 
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
@@ -3738,8 +3738,8 @@ describe('BBR Light', function(){
       var enheder= JSON.parse(response.body);          
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
       assert(enheder[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i et lejet rækkehus");
-      assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
-      assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
+      //assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
+      //assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
       assert(enheder[0].bygning.ESREjdNr!==enheder[0].ejerskaber[0].ESREjdNr, "Enheds og bygnings esrejendomsnr er ens");
       assert(enheder[0].ejerskaber[0].EntitetsType===3, "Enheds ejerskab er ikke en ejerlejlighed");
 
@@ -3793,8 +3793,8 @@ describe('BBR Light', function(){
       var enheder= JSON.parse(response.body);          
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et parcelhus");
-      assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
-      assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
+      //assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
+      //assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
      
       var eejerskabopt= {};
       eejerskabopt.baseUrl= host;
@@ -4060,8 +4060,8 @@ describe('BBR Light', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var bygninger= JSON.parse(response.body);
       assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
-      assert(typeof bygninger[0].BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
-      assert(typeof bygninger[0].OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
+      //assert(typeof bygninger[0].BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
+      //assert(typeof bygninger[0].OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
       done();
     }).catch((err) => {
       done(err);
@@ -4083,8 +4083,8 @@ describe('BBR Light', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var bygninger= JSON.parse(response.body);
       assert(bygninger.features.length===1, "Der er flere end én bygning, men " + bygninger.features.length); 
-      assert(typeof bygninger.features[0].properties.BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
-      assert(typeof bygninger.features[0].properties.OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
+      //assert(typeof bygninger.features[0].properties.BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
+      //assert(typeof bygninger.features[0].properties.OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
       done();
     }).catch((err) => {
       done(err);
@@ -5191,6 +5191,53 @@ describe('Bygninger', function(){
     .catch((err) => {
       done(err);
     });
+  });
+
+});
+
+
+describe('Vejnavnpostnummerrelation', function() {
+
+
+  it("Søgning", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.qs.vejnavn = "Holbækmotorvejen";
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelationer = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelationer.length === 10, "Der er ikke fundet én, men  " + vejnavnpostnummerrelationer.length);
+  });
+
+  it("Opslag", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer/2605/Holbækmotorvejen';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelation = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelation.kommuner.length === 2, "Der er ikke fundet to kommuner, men  " + vejnavnpostnummerrelation.length);
+  });
+
+  it("Autocomplete", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer/autocomplete';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.qs.q = "Holbækm";
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelationer = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelationer.length === 10, "Der er ikke fundet én, men  " + vejnavnpostnummerrelationer.length);
   });
 
 });
