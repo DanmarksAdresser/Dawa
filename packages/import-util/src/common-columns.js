@@ -58,7 +58,7 @@ preApplyChanges.method('geoVersion', ({geomColumnName}, client, txid, tableModel
     yield client.query(`UPDATE ${tableModel.table}_changes SET geo_version = 1 WHERE operation = 'insert'and txid = ${txid}`);
     yield  client.query(`UPDATE ${tableModel.table}_changes new SET geo_version = old.geo_version
     FROM ${tableModel.table} old WHERE ${columnsEqualClause('old', 'new', tableModel.primaryKey)} 
-                                 AND operation = 'update' and txid = ${txid}`);
+                                 AND operation <> 'insert' and txid = ${txid}`);
     yield  client.query(`UPDATE ${tableModel.table}_changes new SET geo_version = old.geo_version + 1
     FROM ${tableModel.table} old WHERE ${columnsEqualClause('old', 'new', tableModel.primaryKey)} AND 
                                       NOT ST_Equals(old.${geomColumnName}, new.${geomColumnName})
