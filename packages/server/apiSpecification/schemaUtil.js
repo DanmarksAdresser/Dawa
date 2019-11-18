@@ -14,7 +14,10 @@ exports.nullableType = function(type) {
 
 exports.nullable = function(schemaType) {
   var result = _.clone(schemaType);
-  if(result.enum) {
+  if(result.$ref && result.$ref.startsWith('#/definitions/') && !result.$ref.startsWith('#/definitions/Nullable')) {
+    result.$ref = result.$ref.replace('#/definitions/', '#/definitions/Nullable');
+  }
+  else if(result.enum) {
     result.enum = [...result.enum, null];
   }
   else {

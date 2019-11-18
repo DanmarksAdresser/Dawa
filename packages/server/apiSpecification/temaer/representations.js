@@ -42,7 +42,7 @@ const commonGeoProps = {
   },
   geo_version: {
     description: 'Versionsangivelse for geometrien. Inkrementeres hver gang geometrien ændrer sig i DAWA.',
-    type: ['null', 'integer']
+    type: 'integer'
   },
   bbox: {
     description: `Geometriens bounding box, dvs. det mindste rectangel som indeholder geometrien. Består af et array af 4 tal.
@@ -65,6 +65,7 @@ var autocompleteTekst = {
   supplerendebynavn: nameOnlyAutocomplete,
   landsdel: nameOnlyAutocomplete
 };
+
 var kodeAndNavnTemaer = ['region', 'kommune', 'sogn', 'opstillingskreds', 'retskreds', 'politikreds'];
 kodeAndNavnTemaer.forEach(function (dagiTemaNavn) {
   autocompleteTekst[dagiTemaNavn] = {
@@ -398,6 +399,11 @@ const supplerendebynavnRepresentation = (() => {
     docOrder: ['href', 'dagi_id', 'ændret', 'geo_version', 'geo_ændret', 'bbox', 'visueltcenter', 'navn',
       'darstatus', 'kommune', 'postnumre']
   });
+
+  for(let prop of ['ændret', 'geo_ændret', 'geo_version']) {
+    schema.properties[prop] = nullable(schema.properties[prop]);
+  }
+
   return {fields, mapper, schema};
 })();
 
