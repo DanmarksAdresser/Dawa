@@ -21,12 +21,26 @@ describe('Documentation redirect to https', () => {
     return configHolder.withConfigOverride({redirect_insecure: true}, () => go(function*() {
       const mockReq = {
         headers: {
+          host: 'dawa.aws.dk',
           'cloudfront-forwarded-proto': 'http'
         },
         url: '/adgangsadresser?foo=bar'
       };
       assert(documentation.internal.shouldRedirectToHttps(mockReq));
-      assert.strictEqual(documentation.internal.getRedirectUrl(mockReq), "https://dawa/adgangsadresser?foo=bar");
+      assert.strictEqual(documentation.internal.getRedirectUrl(mockReq), "https://dawa.aws.dk/adgangsadresser?foo=bar");
+    }));
+  });
+
+  it('Will not redirect localhost', () => {
+    return configHolder.withConfigOverride({redirect_insecure: true}, () => go(function*() {
+      const mockReq = {
+        headers: {
+          host: 'localhost',
+          'cloudfront-forwarded-proto': 'http'
+        },
+        url: '/adgangsadresser?foo=bar'
+      };
+      assert.isFalse(documentation.internal.shouldRedirectToHttps(mockReq));
     }));
   });
 });

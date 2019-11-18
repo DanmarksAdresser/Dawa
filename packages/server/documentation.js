@@ -64,8 +64,15 @@ function pugDocumentationParams(req) {
   };
 }
 
-const shouldRedirectToHttps = req =>
-  config.get('redirect_insecure') && paths.getProtocol(req) !== 'https';
+const shouldRedirectToHttps = req => {
+  const host = req.headers.host;
+  if(_.isString(host) && host.indexOf('aws.dk') !== -1) {
+    return  config.get('redirect_insecure') && paths.getProtocol(req) !== 'https';
+  }
+  else {
+    return false;
+  }
+};
 
 const getRedirectUrl = req => {
   const secureBaseUrl = paths.baseUrl(req).replace('http:', 'https:');
