@@ -6,6 +6,7 @@ const { ALL_DAR_ENTITIES,
   copyEventIdsToFetchTable,
   createFetchTable,
   setMeta,
+    getMeta,
   setInitialMeta,
   getMaxEventId } = require('../../dar10/import-dar-util');
 const streamToTable = require('../../dar10/streamToTable');
@@ -92,15 +93,31 @@ const importIncremental = (client, txid, dataDir) => go(function*() {
   yield setMeta(client, {last_event_id: maxEventId});
 });
 
+const getChangesBefore = (client, txid, entityName, time) => go(function*(){
+  const queryResult =yield client.queryRows(
+      `select operation, count(*)::integer as c from dar1_${entityName}_changes 
+where coalesce(upper(registrering), lower(registrering)) < $1 group by operation`, [time]);
+  return queryResult.reduce((acc, row) => {
+    acc[row.operation] = row.c;
+    return acc;
+  }, {insert: 0, update: 0, 'delete': 0});
+});
 
 module.exports = options => {
   const execute = (client, txid, strategy, context) => go(function*() {
+    const virkningTimeBefore = (yield getMeta(client)).virkning;
     context['DAR-meta-changed'] = true;
     if(yield alreadyImported(client)) {
       yield importIncremental(client, txid, options.dataDir);
     }
     else {
       yield importInitial(client, txid, options.dataDir);
+    }
+    for (let entityName of ALL_DAR_ENTITIES) {
+      const changes = yield getChangesBefore(client, txid, entityName, virkningTimeBefore);
+      if(changes.insert || changes.update || changes.delete) {
+        logger.info('Unexpected changes to DAR entity', Object.assign({}, {entity: entityName}, changes));
+      }
     }
   });
   return {
