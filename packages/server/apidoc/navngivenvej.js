@@ -52,6 +52,10 @@ const commonFilterParams= [
     doc: 'Find de navngivne veje, som har det angivne adresseringsnavn. Navnet er case-sensitivt.'
   },
   {
+    name: 'postnr',
+    doc: 'Find de navngivne veje, som ligger i det angivne postnummer.'
+  },
+  {
     name: 'kommunekode',
     doc: 'Find de navngivne veje, som ligger i kommunen med den angivne kommunekode.'
   },

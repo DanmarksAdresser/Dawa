@@ -69,6 +69,28 @@ const columns = {
       sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
     }
   },
+  postnr: {
+    select: null,
+    where: function (sqlParts, parameterArray) {
+      // this is a bit hackish, we add the parameters from
+      // the parent query to the subquery to get
+      // correct parameter indices for the subquery
+      const subquery = {
+        select: ["*"],
+        from: ['navngivenvejpostnummerrelation'],
+        whereClauses: ['navngivenvej_id = nv.id'],
+        orderClauses: [],
+        sqlParams: sqlParts.sqlParams
+      };
+      const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
+        name: 'postnr',
+        multi: true
+      }], {});
+      propertyFilterFn(subquery, {postnr: parameterArray});
+      const subquerySql = dbapi.createQuery(subquery).sql;
+      sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+    }
+  },
   vejstykkeid: {
     select: null,
     where: function (sqlParts, parameterArray) {
@@ -111,8 +133,8 @@ const columns = {
     }
   },
   postnumre: {
-    select: `(SELECT json_agg(json_build_object('nr', p.postnr, 'navn', p.navn))
-    FROM dar1_navngivenvejpostnummerrelation_current np join dar1_postnummer_current p on np.postnummer_id = p.id
+    select: `(SELECT json_agg(json_build_object('nr', np.postnr, 'navn', p.navn))
+    FROM navngivenvejpostnummerrelation np JOIN postnumre p ON np.postnr = p.nr
     WHERE nv.id = np.navngivenvej_id)`
   },
   geom_json: {

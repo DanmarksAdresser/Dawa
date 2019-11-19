@@ -45,6 +45,12 @@ module.exports = {
       multi: true
     },
     {
+      name: 'postnr',
+      type: 'integer',
+      schema: schema.kode4,
+      multi: true
+    },
+    {
       name: 'administrerendekommunekode',
       type: 'integer',
       schema: schema.kode4,

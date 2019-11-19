@@ -781,6 +781,16 @@ const vask_adresser = {
     ]
 };
 
+const navngivenvejpostnummerrelation = {
+    table: 'navngivenvejpostnummerrelation',
+    primaryKey: ['navngivenvej_id', 'postnr'],
+    columns: [
+        {name: 'navngivenvej_id'},
+        {name: 'postnr'},
+        geomColumn({})
+    ]
+};
+
 const vejnavnpostnummerrelation = {
     table: 'vejnavnpostnummerrelation',
     primaryKey: ['postnr', 'vejnavn'],
@@ -842,6 +852,7 @@ exports.tables = Object.assign({
         vask_adgangsadresser,
         vask_adresser,
         vejnavne_mat,
+        navngivenvejpostnummerrelation,
         vejnavnpostnummerrelation
     }, dagiTables,
     dar10RawTables,
@@ -1233,12 +1244,20 @@ exports.materializations = Object.assign({
             'bbr_grundjordstykke_current', 'bbr_grund_current', 'bbr_ejendomsrelation_current'
         ]
     },
+    navngivenvejpostnummerrelation: {
+      table: 'navngivenvejpostnummerrelation',
+        view: 'navngivenvejpostnummerrelation_view',
+        dependents: [],
+        nonIncrementalDependents: [
+            'dar1_NavngivenVej_current', 'dagi_postnumre', 'adgangsadresser_mat'
+        ]
+    },
     vejnavnpostnummerrelation: {
         table: 'vejnavnpostnummerrelation',
         view: 'vejnavnpostnummerrelation_view',
         dependents: [],
         nonIncrementalDependents: [
-            'dar1_NavngivenVej_current', 'dagi_postnumre', 'adgangsadresser_mat'
+            'navngivenvejpostnummerrelation', 'dagi_postnumre'
         ]
     }
 }, dagiMaterializations);

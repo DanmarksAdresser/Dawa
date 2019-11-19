@@ -6,6 +6,7 @@ module.exports = [tableSchema.materializations.navngivenvejkommunedel_postnr_mat
   tableSchema.materializations.vejstykkerpostnumremat,
   tableSchema.materializations.postnumre_kommunekoder_mat,
   tableSchema.materializations.vejnavne_mat,
+    tableSchema.materializations.navngivenvejpostnummerrelation,
     tableSchema.materializations.vejnavnpostnummerrelation
 ].map(materialization => fromMaterializations(
   materialization.table,

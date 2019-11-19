@@ -119,6 +119,10 @@ var sampleParameters = {
       values: ['420', '0461'],
       verifier: (vej, kommunekode) => _.some(vej.vejstykker, vejstykke => parseInt(vejstykke.kommunekode) === parseInt(kommunekode))
     },
+    postnr: {
+      values: ['2791', '4200'],
+      verifier: (vej, postnr) => _.some(vej.postnumre, postnummer => parseInt(postnummer.nr) === parseInt(postnr))
+    },
     administrerendekommunekode: {
       values: ['0510', '510'],
       verifier: (vej,kommunekode) => parseInt(vej.administrerendekommune.kode) ===parseInt(kommunekode)
