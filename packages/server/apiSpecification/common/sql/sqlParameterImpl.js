@@ -199,12 +199,15 @@ const searchRankPreferName = (sqlParts, params) => {
       toPgSuggestQuery(params.q) :
       toPgSearchQuery(params.q);
     const tsRankQueryAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsQuery));
-    const defaultRankExpr = sqlRankExpr(tsRankQueryAlias, 'tsv');
+    const tsExactQuery = tsQuery.replace(':*', '');
+    const tsExactQueryAlias = dbapi.addSqlParameter(sqlParts, queryForRanking(tsExactQuery));
+    const exactRankExpr = sqlRankExpr(tsExactQueryAlias, `to_tsvector('adresser', navn)`);
     const byNameRankExpr = sqlRankExpr(tsRankQueryAlias, `setweight(to_tsvector('adresser', navn), 'A')`);
-    const rankClause = `GREATEST(${defaultRankExpr}, ${byNameRankExpr}) DESC`;
-    sqlParts.orderClauses.unshift(rankClause);
+    const defaultRankExpr = sqlRankExpr(tsRankQueryAlias, 'tsv');
+    const orderClauses = [`${exactRankExpr} DESC`, `${byNameRankExpr} DESC`, `${defaultRankExpr} DESC`];
+    sqlParts.orderClauses = [...orderClauses, ...sqlParts.orderClauses];
     const qAlias = dbapi.addSqlParameter(sqlParts, params.q);
-    sqlParts.orderClauses.push(`levenshtein(lower(navn), lower(${qAlias}), 2, 1, 3)`)
+    sqlParts.orderClauses.push(`levenshtein(lower(navn), lower(${qAlias}), 2, 1, 3)`);
   }
 };
 
