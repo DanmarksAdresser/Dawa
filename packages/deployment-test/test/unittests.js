@@ -3,12 +3,12 @@
 process.on('unhandledRejection', up => { throw up })
 
 var assert = require("assert")
-	,	request = require("request")
-	, util= require('util')
+  ,	request = require("request")
+  , util= require('util')
   , csv = require('csv')
   , rp = require('request-promise')
-  , Q= require('Q')
-  , http= require('http');
+  , http= require('http')
+  , _= require("underscore");
 
 //var host= "http://localhost:3000";
 //var host= "http://dawa-p2.aws.dk";
@@ -796,6 +796,42 @@ describe('Navngiven vej', function(){
     .catch((err) => {
       done(err);
     });
+  });
+
+  it("postnr", async function(){
+    var options= {};
+    options.baseUrl= host;
+    options.url='navngivneveje';
+    options.qs= {};
+    let postnr= '2400';
+    options.qs.postnr= postnr;
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    let response= await rp(options);
+    assert(response.statusCode===200, "Http status code != 200");
+    var navngivneveje= JSON.parse(response.body);
+    assert(navngivneveje.length>20, "Der er burde være flere navngivne veje: " + navngivneveje.length);
+    let udenpostnr= _.filter(navngivneveje, (nv) => {return _.find(nv.postnumre, (postnummer) => {return postnummer.nr === postnr}) === undefined});
+    assert(udenpostnr.length===0, "Alle navngivne veje burde rumme postnummer  "+postnr);
+  });
+
+  it("postnr og vejnavn", async function(){
+    var options= {};
+    options.baseUrl= host;
+    options.url='navngivneveje';
+    options.qs= {};
+    let postnr= '2500';
+    options.qs.postnr= postnr;
+    options.qs.navn= 'Holbækmotorvejen';
+    options.qs.cache= 'no-cache';
+    options.resolveWithFullResponse= true;
+    let response= await rp(options);
+    assert(response.statusCode===200, "Http status code != 200");
+    var navngivneveje= JSON.parse(response.body);
+    assert(navngivneveje.length===1, "Der er burde være en: "+navngivneveje.length);
+    assert(navngivneveje[0].postnumre.length===10, "Der er burde være 10 postnumre: "+navngivneveje[0].postnumre.length);
+    let udenpostnr= _.filter(navngivneveje, (nv) => {return _.find(nv.postnumre, (postnummer) => {return postnummer.nr === postnr}) === undefined});
+    assert(udenpostnr.length===0, "Alle navngivne veje burde rumme postnummer  "+postnr);
   });
 
 
