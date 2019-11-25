@@ -32,7 +32,7 @@ CREATE VIEW adgangsadresser_mat_view AS
     hn.vejpunkt_id,
     ST_X(ap.position)                AS etrs89oest,
     ST_Y(ap.position)                AS etrs89nord,
-    ap.oprindelse_nøjagtighedsklasse AS noejagtighed,
+    COALESCE(ap.oprindelse_nøjagtighedsklasse, 'U') AS noejagtighed,
     CASE ap.oprindelse_kilde
     WHEN 'Grundkort'
       THEN 1
