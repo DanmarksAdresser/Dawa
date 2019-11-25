@@ -17,8 +17,8 @@ format.method('geometry', ({attrName, column}, src, dst) => dst[attrName]= src[c
 format.method('offloadedGeometry', ({attrName, column}, src, dst) => {
   if (src[`${column}_ref`]) {
     dst[attrName] = {
-      $refid: src[`${attrName}_ref`],
-      $url: s3Url(src[`${attrName}_ref`])
+      $refid: src[`${column}_ref`],
+      $url: s3Url(src[`${column}_ref`])
     };
   } else if (src[column]) {
     dst[attrName] = JSON.parse(src[column]);
