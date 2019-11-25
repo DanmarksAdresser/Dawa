@@ -141,8 +141,8 @@ module.exports = [
     parameters: [adresseIdParameter, strukturParameterAdresse, geometriParam, ...medtagUgyldigeNedlagte],
     nomulti: true,
     examples: [{
-      description: 'Returner adressen med id 0255b942-f3ac-4969-a963-d2c4ed9ab943',
-      path: ['/adresser/0255b942-f3ac-4969-a963-d2c4ed9ab943']
+      description: 'Returner adressen med id 000021c5-e9ee-411d-b2d8-ec9161780ccd',
+      path: ['/adresser/000021c5-e9ee-411d-b2d8-ec9161780ccd']
     }]
   },
   {
