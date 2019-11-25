@@ -96,7 +96,7 @@ const importIncremental = (client, txid, dataDir) => go(function*() {
 const getChangesBefore = (client, txid, entityName, time) => go(function*(){
   const queryResult =yield client.queryRows(
       `select operation, count(*)::integer as c from dar1_${entityName}_changes 
-where coalesce(upper(registrering), lower(registrering)) < $1 group by operation`, [time]);
+where coalesce(upper(registrering), lower(registrering)) < $1 and txid = $2 group by operation`, [time, txid]);
   return queryResult.reduce((acc, row) => {
     acc[row.operation] = row.c;
     return acc;
