@@ -64,6 +64,14 @@ describe('Replikering', () => {
       assert.strictEqual(result[0].kode, 60851);
     }));
 
+    it('Offloadede geometrier kan hentes', () => go(function*() {
+      const result = yield helpers.getJson(clientFn(), ejerlavUdtraekResource, {}, {kode: "60851"});
+      assert.strictEqual(result.length, 1);
+      const url = result[0].geometri.$url;
+      const geom = yield request.get({url, json: true, gzip: true});
+      assert.strictEqual(geom.type, 'MultiPolygon');
+    }));
+
     it('Kan lave opslag på jordstykketilknytningsudtræk ud fra adgangsadresseid', () => go(function* () {
       const result = yield helpers.getJsonFromHandler(clientFn(),
         replikeringUdtrækHandler.responseHandler,
