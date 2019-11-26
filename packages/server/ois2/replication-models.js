@@ -48,16 +48,17 @@ const toReplicationModel = (grbbrModel, temporality) => {
     bi: ['rowkey']
   };
   const grbbrAttributes =  grbbrModel.attributes;
+  const key = keys[temporality];
   const replicationAttrs = grbbrAttributes.map(attr => {
     return {
       name: attr.name,
       type: attr.type,
-      nullable: true,
+      nullable: !key.includes(attr.name),
       description: attr.description || ''
     };
   });
   return {
-    key: keys[temporality],
+    key,
     attributes: [...temporalAttributes[temporality], ...replicationAttrs]
   };
 };
