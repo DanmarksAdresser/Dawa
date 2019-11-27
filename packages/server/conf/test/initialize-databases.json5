@@ -1,6 +1,5 @@
 {
-  test: {
-    database_host: 'db',
-    database_user: 'postgres'
+  grbbr: {
+    enabled: true
   }
 }

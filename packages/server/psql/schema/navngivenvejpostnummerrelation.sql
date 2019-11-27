@@ -12,6 +12,8 @@ CREATE VIEW navngivenvejpostnummerrelation_view AS (
                                      where st_intersects(p.geom,
                                                          coalesce(nv.vejnavnebeliggenhed_vejnavnelinje,
                                                                   nv.vejnavnebeliggenhed_vejnavneområde))
+                                       -- Filtrer gadepostnumre fra i de geografiske beregninger
+                                       AND NOT (nr >= 1000 and nr <= 1999)
                                        and (st_length(st_intersection(nv.vejnavnebeliggenhed_vejnavnelinje, p.geom)) > 7
                                          or st_area(st_intersection(nv.vejnavnebeliggenhed_vejnavneområde, p.geom)) > 7)
                   ) p_div on true

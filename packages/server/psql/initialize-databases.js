@@ -1,5 +1,4 @@
 const runConfiguredCli = require('@dawadk/common/src/cli/run-configured');
-const impl = require('./initialize-databases-impl');
 const {mergeConfigSchemas} = require('@dawadk/common/src/config/holder');
 const configSchema = mergeConfigSchemas([
   require('@dawadk/common/src/config/test-db-schema'),
@@ -8,8 +7,9 @@ const configSchema = mergeConfigSchemas([
 const configHolder = require('@dawadk/common/src/config/holder');
 const logger = require('@dawadk/common/src/logger').forCategory('initialize-databases');
 
-const configFiles = [require.resolve('@dawadk/import-util/conf/test/s3-offload.json5')];
+const configFiles = [require.resolve('@dawadk/import-util/conf/test/s3-offload.json5'), require.resolve('../conf/test/initialize-databases.json5')];
 runConfiguredCli(configSchema, configFiles, (config) => {
   logger.info(`Configuration:\n${configHolder.documentConfigured(configSchema, config)}`);
+  const impl = require('./initialize-databases-impl');
   return impl();
 });

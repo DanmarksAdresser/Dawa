@@ -11,7 +11,9 @@ CREATE VIEW navngivenvejkommunedel_postnr_mat_view AS
           SELECT DISTINCT nvk.id as navngivenvejkommunedel_id, postnr
           FROM navngivenvejkommunedel_mat nvk JOIN LATERAL (
               select nr as postnr FROM dagi_postnumre_divided p
-              where st_intersects(st_force2d(nvk.geom), p.geom)) t  ON true)
+              where st_intersects(st_force2d(nvk.geom), p.geom)
+                -- Filtrer gadepostnumre fra i de geografiske beregninger
+              AND NOT (nr >= 1000 and nr <= 1999)) t  ON true)
        SELECT navngivenvejkommunedel_id, dar_p.id as postnummer_id
        FROM intersecting JOIN navngivenvejkommunedel_mat nvk ON intersecting.navngivenvejkommunedel_id = nvk.ID
                          JOIN dagi_postnumre p ON postnr = p.nr
