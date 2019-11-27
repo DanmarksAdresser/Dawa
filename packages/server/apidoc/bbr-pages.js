@@ -27,5 +27,5 @@ module.exports = grbbrModels.map(grbbrModel => {
         qualifier: 'json'
       }
     ]
-  }
+  };
 });

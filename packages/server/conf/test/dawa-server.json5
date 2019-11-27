@@ -6,6 +6,9 @@
     enabled: true,
     protected: false
   },
+  grbbr: {
+    enabled: true
+  },
   database_url: 'dawatest',
   replication: {
     enabled: true

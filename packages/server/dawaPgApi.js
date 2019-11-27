@@ -65,9 +65,11 @@ exports.setupRoutes = function () {
   registry.where({
     type: 'resource'
   }).forEach(function (resource) {
-    const responseHandler = resourceImpl.resourceResponseHandler(resource);
+    if (!resource.path.startsWith('/bbr/') || conf.get('grbbr.enabled')) {
+      const responseHandler = resourceImpl.resourceResponseHandler(resource);
       app.get(resource.path, resourceImpl.createExpressHandler(responseHandler));
-    });
+    }
+  });
 
   registry.where({
     type: 'resourceImpl'

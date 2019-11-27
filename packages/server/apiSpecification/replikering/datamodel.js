@@ -2,7 +2,7 @@ const definitions = require('../commonSchemaDefinitions');
 const temaModels = require('../../dagiImport/temaModels');
 const darReplikeringModels = require('../../dar10/replikeringModels');
 const grbbrModels = require('../../ois2/replication-models');
-
+const config = require('@dawadk/common/src/config/holder').getConfig();
 const { getDefaultSchema } = require('./datamodelUtil');
 
 const commonVaskAttributes = [
@@ -1061,7 +1061,9 @@ for(let [entityName, model] of Object.entries( darReplikeringModels.historyRepli
   module.exports[`dar_${entityName.toLowerCase()}_historik`] = model;
 }
 
-Object.assign(module.exports, grbbrModels.modelMap);
+if(config.get('grbbr.enabled')) {
+  Object.assign(module.exports, grbbrModels.modelMap);
+}
 
 for(let modelName of Object.keys(module.exports)) {
   const model = module.exports[modelName];

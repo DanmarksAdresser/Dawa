@@ -132,6 +132,13 @@ module.exports = mergeConfigSchemas([
         default: 7200000
       }
     },
+    grbbr: {
+      enabled: {
+        doc: 'Whether the GRBBR API is enabled',
+        format: 'Boolean',
+        default: false
+      }
+    },
     ois: {
       enabled: {
         doc: "whether OIS API is enabled",
