@@ -31,6 +31,10 @@ const queryParameters = [
     },
     ...idParameters,
     {
+        name: 'kommunekode',
+        doc: 'Find vejnavnpostnummerrelationer indenfor den angivne kommune'
+    },
+    {
         name: 'polygon',
         doc: 'Find de vejnavnpostnummerrelationer, som overlapper med det angivne polygon. ' +
             'Polygonet specificeres som et array af koordinater på samme måde som' +

@@ -1,3 +1,6 @@
+const registry = require('../registry');
+
+const schema = require('../parameterSchema');
 module.exports = {
     id: [
         {
@@ -17,6 +20,15 @@ module.exports = {
         {
             name: 'vejnavn',
             type: 'string'
+        },
+        {
+            name: 'kommunekode',
+            type: 'integer',
+            schema: schema.kode4,
+            multi: true
         }
-    ]
+        ]
 };
+
+
+registry.addMultiple('vejnavnpostnummerrelation', 'parameterGroup', module.exports);

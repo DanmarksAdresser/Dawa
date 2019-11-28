@@ -20,20 +20,20 @@ const columns = {
         select: null,
         where: function (sqlParts, parameterArray) {
             const subquery = {
-                select: ["*"],
-                from: [`from vejstykkerpostnumremat vp 
+                select: ["distinct vejnavn,postnr"],
+                from: [`vejstykkerpostnumremat vp 
         join navngivenvejkommunedel_mat nv on vp.navngivenvejkommunedel_id = nv.id`],
-                whereClauses: [`nv.vejnavn = vejnavnpostnummerrelation.vejnavn`, `postnr=vp.postnr`],
+                whereClauses: [ ],
                 orderClauses: [],
                 sqlParams: sqlParts.sqlParams
             };
             const propertyFilterFn = sqlParameterImpl.simplePropertyFilter([{
                 name: 'kommunekode',
                 multi: true
-            }], {});
+            }], {kommunekode: { column: 'vp.kommunekode'}});
             propertyFilterFn(subquery, {kommunekode: parameterArray});
             const subquerySql = dbapi.createQuery(subquery).sql;
-            sqlParts.whereClauses.push('EXISTS(' + subquerySql + ')');
+            sqlParts.from.push(`NATURAL JOIN (${subquerySql}) komt`);
         }
     },
     kommuner: {

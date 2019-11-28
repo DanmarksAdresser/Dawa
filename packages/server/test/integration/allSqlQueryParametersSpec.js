@@ -193,6 +193,18 @@ var sampleParameters = {
       }
     }
   },
+  vejnavnpostnummerrelation: {
+    vejnavn: simpleParameterTest(['Birkede Brovej'], 'vejnavn'),
+    postnr: simpleParameterTest(['6100'], 'postnummer.nr'),
+    kommunekode: {
+      values: ['461', '0461'],
+      verifier: function(vejnavn, kommunekode) {
+        return _.some(vejnavn.kommuner, function(kommune) {
+          return kommune.kode === kode4String(kommunekode);
+        });
+      }
+    }
+  },
   postnummer: {
     nr: {
       values: ['6100'],
