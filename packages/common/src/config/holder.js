@@ -21,7 +21,8 @@ const config = {
       }
     }
     return convictConfig.get(key);
-  }
+  },
+  has: key =>  convictConfig.has(key)
 };
 
 const mergeConfigSchemas = (schemas) => objectAssignDeep({}, ...schemas);

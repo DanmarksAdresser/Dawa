@@ -1061,7 +1061,7 @@ for(let [entityName, model] of Object.entries( darReplikeringModels.historyRepli
   module.exports[`dar_${entityName.toLowerCase()}_historik`] = model;
 }
 
-if(config.get('grbbr.enabled')) {
+if(!config.has('grbbr.enabled') || config.get('grbbr.enabled')) {
   Object.assign(module.exports, grbbrModels.modelMap);
 }
 
