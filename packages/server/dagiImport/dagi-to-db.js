@@ -4,20 +4,6 @@
 const _ = require('underscore');
 const { go } = require('ts-csp');
 const runConfiguredImporter  = require('@dawadk/import-util/src/run-configured-importer');
-const { withImportTransaction } = require('../importUtil/transaction-util');
-
-const logger = require('@dawadk/common/src/logger').forCategory('dagiToDb');
-
-const featureMappingsDatafordeler = require('./featureMappingsDatafordeler');
-const featureMappingsZone = require('./featureMappingsZone');
-const proddb = require('../psql/proddb');
-const {makeAllChangesNonPublic} = require('@dawadk/import-util/src/materialize');
-const importDagiImpl = require('./importDagiImpl');
-
-const featureMappingsMap = {
-  zone: featureMappingsZone,
-  datafordeler: featureMappingsDatafordeler
-};
 
 const schema = {
   data_dir: {
@@ -60,6 +46,21 @@ const schema = {
 };
 
 runConfiguredImporter('dagi-to-db', schema,  (config) => go(function*() {
+  const { withImportTransaction } = require('../importUtil/transaction-util');
+
+  const logger = require('@dawadk/common/src/logger').forCategory('dagiToDb');
+
+  const featureMappingsDatafordeler = require('./featureMappingsDatafordeler');
+  const featureMappingsZone = require('./featureMappingsZone');
+  const proddb = require('../psql/proddb');
+  const {makeAllChangesNonPublic} = require('@dawadk/import-util/src/materialize');
+  const importDagiImpl = require('./importDagiImpl');
+
+  const featureMappingsMap = {
+    zone: featureMappingsZone,
+    datafordeler: featureMappingsDatafordeler
+  };
+
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

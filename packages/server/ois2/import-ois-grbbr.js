@@ -3,8 +3,6 @@
 
 const {go} = require('ts-csp');
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const importGrbbr = require('./import-grbbr-impl');
-const proddb = require('../psql/proddb');
 
 const schema = {
   data_dir: {
@@ -23,6 +21,8 @@ const schema = {
   }
 };
 runConfiguredImporter('import-ois-grbbr', schema, (config) => go(function* () {
+  const importGrbbr = require('./import-grbbr-impl');
+  const proddb = require('../psql/proddb');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

@@ -2,8 +2,6 @@
 "use strict";
 
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const importOisImpl = require('./importOisImpl');
-const proddb = require('../psql/proddb');
 const { go } = require('ts-csp');
 
 require('sax').MAX_BUFFER_LENGTH = 512 * 1024;
@@ -38,6 +36,8 @@ const schema = {
 };
 
 runConfiguredImporter('ois', schema, config => go(function*() {
+  const importOisImpl = require('./importOisImpl');
+  const proddb = require('../psql/proddb');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

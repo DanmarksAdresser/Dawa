@@ -2,10 +2,6 @@
 "use strict";
 
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const importVejmidterImpl = require('./importVejmidterImpl');
-const proddb = require('../psql/proddb');
-const { withImportTransaction} = require('../importUtil/transaction-util');
-const logger = require('@dawadk/common/src/logger').forCategory('Vejmidter');
 const { go } = require('ts-csp');
 
 
@@ -26,6 +22,10 @@ const schema = {
 };
 
 runConfiguredImporter('vejmidter', schema, config => go(function*() {
+  const importVejmidterImpl = require('./importVejmidterImpl');
+  const proddb = require('../psql/proddb');
+  const { withImportTransaction} = require('../importUtil/transaction-util');
+  const logger = require('@dawadk/common/src/logger').forCategory('Vejmidter');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

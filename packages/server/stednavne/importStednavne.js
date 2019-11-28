@@ -2,8 +2,6 @@
 "use strict";
 
 const {go} = require('ts-csp');
-const importStednavneImpl = require('./importStednavneImpl');
-const proddb = require('../psql/proddb');
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const convictSchema = {
   file: {
@@ -22,6 +20,8 @@ const convictSchema = {
 };
 
 runConfiguredImporter('stednavne', convictSchema, config => go(function* () {
+  const importStednavneImpl = require('./importStednavneImpl');
+  const proddb = require('../psql/proddb');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

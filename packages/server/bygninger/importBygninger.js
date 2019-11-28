@@ -4,9 +4,6 @@
 const {go} = require('ts-csp');
 
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const { withImportTransaction} = require('../importUtil/transaction-util');
-const importBygninerImpl = require('./importBygningerImpl');
-const proddb = require('../psql/proddb');
 
 const schema = {
   file: {
@@ -25,6 +22,9 @@ const schema = {
 };
 
 runConfiguredImporter('bygninger', schema, config => go(function*() {
+  const { withImportTransaction} = require('../importUtil/transaction-util');
+  const importBygninerImpl = require('./importBygningerImpl');
+  const proddb = require('../psql/proddb');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

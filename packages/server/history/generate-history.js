@@ -2,15 +2,15 @@
 "use strict";
 
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const generateHistoryImpl = require('./generateCombinedHistoryImpl');
-const logger = require('@dawadk/common/src/logger').forCategory('generateHistoryDar1');
-const proddb = require('../psql/proddb');
 const {go} = require('ts-csp');
-const {withImportTransaction} = require('../importUtil/transaction-util');
 
 
 const schema = {};
 runConfiguredImporter('generateHistory', schema, config => go(function* () {
+    const generateHistoryImpl = require('./generateCombinedHistoryImpl');
+    const logger = require('@dawadk/common/src/logger').forCategory('generateHistoryDar1');
+    const proddb = require('../psql/proddb');
+    const {withImportTransaction} = require('../importUtil/transaction-util');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

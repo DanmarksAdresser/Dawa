@@ -3,9 +3,7 @@
 
 const { go } = require('ts-csp');
 const runConfiguredImporter  = require('@dawadk/import-util/src/run-configured-importer');
-const importAdresseHeightsImpl = require('./importAdresseHeightsImpl');
 const proddb = require('../psql/proddb');
-const { withImportTransaction} = require('../importUtil/transaction-util');
 
  const schema = {
   file: {
@@ -18,6 +16,8 @@ const { withImportTransaction} = require('../importUtil/transaction-util');
 };
 
 runConfiguredImporter('højdeudtræk', schema, config=> go(function*() {
+    const importAdresseHeightsImpl = require('./importAdresseHeightsImpl');
+    const { withImportTransaction} = require('../importUtil/transaction-util');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

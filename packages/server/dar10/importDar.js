@@ -5,9 +5,7 @@ const {go} = require('ts-csp');
 
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const proddb = require('../psql/proddb');
-const { withImportTransaction } = require('../importUtil/transaction-util');
 
-const { importDownload, importDownloadIncrementally } = require('./importDarImpl');
 const schema = {
   data_dir: {
     doc: 'Directory with NDJSON files to import',
@@ -24,6 +22,9 @@ const schema = {
   }
 }
 runConfiguredImporter('importDar10', schema, function (config) {
+  const { withImportTransaction } = require('../importUtil/transaction-util');
+
+  const { importDownload, importDownloadIncrementally } = require('./importDarImpl');
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

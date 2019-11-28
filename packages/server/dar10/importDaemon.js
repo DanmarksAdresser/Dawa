@@ -5,10 +5,6 @@ const { go, Abort } = require('ts-csp');
 
 const runConfiguredImporter  = require('@dawadk/import-util/src/run-configured-importer');
 const proddb = require('../psql/proddb');
-const darApiClient = require('./darApiClient');
-const logger = require('@dawadk/common/src/logger').forCategory('darImport');
-
-const importFromApiImpl = require('./importFromApiImpl');
 
 const schema = {
   dar_api_uri: {
@@ -50,6 +46,11 @@ const schema = {
 };
 
 runConfiguredImporter("importDar10Daemon", schema, (config) => go(function*()  {
+  const darApiClient = require('./darApiClient');
+  const logger = require('@dawadk/common/src/logger').forCategory('darImport');
+
+  const importFromApiImpl = require('./importFromApiImpl');
+
   proddb.init({
     connString: config.get('database_url'),
     pooled: false

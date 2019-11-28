@@ -9,9 +9,6 @@
 //
 const { go } = require('ts-csp');
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
-const loadStormodtagereImpl = require('./loadStormodtagereImpl');
-const proddb = require('./proddb');
-const { withImportTransaction } = require('../importUtil/transaction-util');
 
 const schema = {
   file: {
@@ -24,6 +21,9 @@ const schema = {
 };
 
 runConfiguredImporter('stormodtagere', schema, config => go(function*() {
+  const loadStormodtagereImpl = require('./loadStormodtagereImpl');
+  const proddb = require('./proddb');
+  const { withImportTransaction } = require('../importUtil/transaction-util');
   const inputFile = config.get('file');
   proddb.init({
     connString:config.get('database_url'),
