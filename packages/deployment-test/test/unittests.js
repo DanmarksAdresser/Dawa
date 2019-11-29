@@ -665,6 +665,22 @@ describe('Vejnavnesøgning', function(){
     })
   })
 
+  it("Søgning med kommunekode", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavne';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.qs.q = "slesv*";
+    options.qs.kommunekode = "0101";
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavne = JSON.parse(response.body);
+    assert(vejnavne.length === 1, "Der er ikke fundet ét vejnavn, men  " + vejnavne.length);
+    assert(vejnavne[0].postnumre.length === 1, "Der er ikke fundet ét postnummer, men  " + vejnavne[0].postnumre.length);
+  });
+
 });
 
 describe('Vejstykkesøgning', function(){
@@ -5235,6 +5251,7 @@ describe('Bygninger', function(){
 describe('Vejnavnpostnummerrelation', function() {
 
 
+
   it("Søgning", async function () {
     let options = {};
     options.baseUrl = host;
@@ -5247,6 +5264,21 @@ describe('Vejnavnpostnummerrelation', function() {
     assert(response.statusCode === 200, "Http status code != 200");
     let vejnavnpostnummerrelationer = JSON.parse(response.body);
     assert(vejnavnpostnummerrelationer.length === 10, "Der er ikke fundet én, men  " + vejnavnpostnummerrelationer.length);
+  });
+
+  it("Søgning med kommunekode", async function () {
+    let options = {};
+    options.baseUrl = host;
+    options.url = 'vejnavnpostnummerrelationer';
+    options.qs = {};
+    options.qs.cache = 'no-cache';
+    options.qs.q = "slesv*";
+    options.qs.kommunekode = "0101";
+    options.resolveWithFullResponse = true;
+    let response = await rp(options);
+    assert(response.statusCode === 200, "Http status code != 200");
+    let vejnavnpostnummerrelationer = JSON.parse(response.body);
+    assert(vejnavnpostnummerrelationer.length === 1, "Der er ikke fundet én, men  " + vejnavnpostnummerrelationer.length);
   });
 
   it("Opslag", async function () {
