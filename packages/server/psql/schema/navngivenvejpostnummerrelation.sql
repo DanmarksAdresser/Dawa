@@ -25,5 +25,13 @@ CREATE VIEW navngivenvejpostnummerrelation_view AS (
                                                 25832) as geom
                             FROM adgangsadresser_mat
                             where status = 3),
-         unioned as (select * from intersections union select * from addr_relations)
+         gadepostnr_intersections as (
+             select a.navngivenvej_id, a.postnr, st_intersection(p.geom,coalesce(nv.vejnavnebeliggenhed_vejnavnelinje,
+                                                                             nv.vejnavnebeliggenhed_vejnavneområde)) as geom
+             FROM addr_relations a
+                 JOIN dagi_postnumre p ON a.postnr = p.nr
+                 JOIN dar1_navngivenvej_current nv ON a.navngivenvej_id = nv.id
+             WHERE a.postnr >= 1000 AND a.postnr <= 1999
+         ),
+         unioned as (select * from intersections union select * from addr_relations union select * from gadepostnr_intersections)
     select navngivenvej_id,postnr,st_union(geom) as geom from unioned group by navngivenvej_id,postnr);
