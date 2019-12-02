@@ -24,7 +24,7 @@ const regexReplacements = [
   // replace stueplan with st
   [/stueplan/i, 'st'],
   // remove sal , e.g. 1. sal
-  [/(\d+\.?\s+)(sal)(.+)/i, '$1$3']
+  [/(\d+[\s.]+)(sal)([. ,].+)/i, '$1$3']
 ];
 
 const processRegexes = betegnelse =>
