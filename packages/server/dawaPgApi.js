@@ -8,7 +8,7 @@ var express          = require('express');
 var methodOverride = require('method-override');
 var bodyParser = require('body-parser');
 const conf = require('@dawadk/common/src/config/holder').getConfig();
-
+const cors = require('cors');
 var resourceImpl = require('./apiSpecification/common/resourceImpl');
 
 var registry = require('./apiSpecification/registry');
@@ -32,12 +32,6 @@ function preventHeadMiddleware(req, res, next) {
   }
 }
 
-//noinspection JSUnusedLocalSymbols
-function corsMiddleware(req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  next();
-}
-
 /******************************************************************************/
 /*** Routes *******************************************************************/
 /******************************************************************************/
@@ -49,7 +43,8 @@ exports.setupRoutes = function () {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
   app.use(preventHeadMiddleware);
-  app.use(corsMiddleware);
+  app.use(cors());
+  app.options("*", cors())
 
   const replicationEnabled = conf.get("replication.enabled");
   if(!replicationEnabled) {
