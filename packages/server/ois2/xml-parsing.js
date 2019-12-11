@@ -11,7 +11,13 @@ parseXmlAttr.method('point2d', (attr, xmlObject) => {
     return null;
   }
 });
-parseXmlAttr.defaultMethod((attr, xmlObject) => xmlObject[attr.oisName || attr.name]);
+parseXmlAttr.defaultMethod((attr, xmlObject) => {
+  const value = xmlObject[attr.oisName || attr.name];
+  if(value === '00000000-0000-0000-0000-000000000000') {
+    return null;
+  }
+  return value;
+});
 
 const createMapFn = entity => xmlObject => {
   if(xmlObject.LOEBENUMMER) {
