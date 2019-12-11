@@ -11,8 +11,7 @@ const relations = [{
 }, {
   entity: 'bygning',
   attribute: 'jordstykke',
-  references: 'jordstykke',
-  referencedAttribute: 'dagi_id'
+  references: 'jordstykke'
 }, {
   entity: 'bygning',
   attribute: 'ejerlejlighed',
@@ -56,8 +55,7 @@ const relations = [{
 }, {
   entity: 'tekniskanlæg',
   attribute: 'jordstykke',
-  references: 'jordstykke',
-  referencedAttribute: 'dagi_id'
+  references: 'jordstykke'
 }, {
   entity: 'tekniskanlæg',
   attribute: 'husnummer',
