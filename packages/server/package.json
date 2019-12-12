@@ -6,6 +6,7 @@
   "homepage": "http://github.com/DanmarksAdresser/Dawa",
   "bin": {
     "dawa-server": "./server.js",
+    "dawa-check-consistency": "./consistency/check-consistency.js",
     "dawa-download-dagi": "./dagiImport/download-dagi.js",
     "dawa-import-history": "./history/generate-history.js",
     "dawa-import-address-heights": "./heights/importAdresseHeights.js",
