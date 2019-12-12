@@ -12,7 +12,6 @@ const schema = {
         doc: 'File to store report in',
         format: 'string',
         cli: true,
-        required: true,
         default: null
     }
 };
@@ -22,7 +21,6 @@ runConfiguredImporter('consistencyChecker', schema, function (config) {
     const {relations} = require('../ois2/relations');
     const {getTableModel: getCurrentBbrTableModel} = require('../ois2/table-models');
     const {checkForeignKey} = require('./referential-consistency-check');
-
     proddb.init({
         connString: config.get('database_url'),
         pooled: false
@@ -69,8 +67,19 @@ runConfiguredImporter('consistencyChecker', schema, function (config) {
             logger.info('Checking foreign key spec ' + JSON.stringify(spec));
             report.push(yield checkForeignKey(client, spec, 10));
         }
-        fs.writeFileSync(config.get('report_file'),
-            JSON.stringify(report, null, 2),
-            {encoding: 'utf8'});
+        const jsonText = JSON.stringify(report, null, 2);
+        if(config.get('report_file')) {
+            fs.writeFileSync(config.get('report_file'),
+                jsonText,
+                {encoding: 'utf8'});
+        }
+        else {
+            const {uploadToS3} = require('@dawadk/import-util/src/s3-offload');
+            const s3 = require('@dawadk/import-util/src/s3-util').createS3();
+            const bucket = config.get('s3_offload.bucket');
+            const prefix = config.get('s3_offload.key_prefix');
+            const fileName = `consistency-report.json`;
+            yield uploadToS3(s3, bucket, `reports`, `${prefix}${fileName}`, jsonText);
+        }
     }));
 }, 60 * 60 * 3);
