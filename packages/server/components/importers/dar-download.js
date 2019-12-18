@@ -116,7 +116,7 @@ module.exports = options => {
     for (let entityName of ALL_DAR_ENTITIES) {
       const changes = yield getChangesBefore(client, txid, entityName, virkningTimeBefore);
       if(changes.insert || changes.update || changes.delete) {
-        logger.info('Unexpected changes to DAR entity', Object.assign({}, {entity: entityName}, changes));
+        logger.info('Unexpected changes to DAR entity', Object.assign({}, {entity: entityName, txid}, changes));
       }
     }
   });
