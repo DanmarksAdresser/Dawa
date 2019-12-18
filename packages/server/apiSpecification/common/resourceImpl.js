@@ -17,7 +17,7 @@ const sqlUtil = require('./sql/sqlUtil');
 
 const {defaultCacheStrategy} = require('./caching');
 
-const {pipeToStream, pipe} = require('@dawadk/common/src/csp-util');
+const { pipeToStream, pipe, SocketclosedError } = require('@dawadk/common/src/csp-util');
 
 const {QuerySlotTimeout, ConnectionSlotTimeout} = require('../../psql/requestLimiter');
 const conf = require('@dawadk/common/src/config/holder').getConfig();
@@ -463,7 +463,7 @@ exports.createExpressHandler = function (responseHandler) {
         } else {
           requestOutcome = 'COMPLETED';
         }
-      } else if (requestContext.error && clientDisconnectedSignal.isRaised()) {
+      } else if (requestContext.error && (clientDisconnectedSignal.isRaised() || requestContext.error instanceof SocketclosedError)) {
         requestOutcome = 'ABORTED';
         delete requestContext.error;
       } else if (requestContext.error instanceof QuerySlotTimeout ||

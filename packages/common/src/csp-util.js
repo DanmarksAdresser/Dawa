@@ -120,13 +120,19 @@ const pipeFromStream = (stream, dst, batchSize) => {
   });
 };
 
+class SocketClosedError extends Error {
+  constructor(message) {
+    super(message);
+  }
+}
+
 const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
   const errorSignal = new Signal();
   let wantMoreDataSignal = new Signal();
   stream.on('drain', () => wantMoreDataSignal.raise());
   if(typeof stream.socket !=='undefined') {
     if(!stream.socket || stream.socket.destroyed) {
-      errorSignal.raise(new Error('Client closed connection'));
+      errorSignal.raise(new SocketClosedError('Client closed connection'));
     }
   }
   else {
@@ -265,5 +271,6 @@ module.exports = {
   sleep,
   channelEvents,
   takeWithTimeout,
-  waitUntil
+  waitUntil,
+  SocketClosedError
 };
