@@ -23,7 +23,6 @@ const { generateTilknytningMatView } = require('../importUtil/tilknytningUtil');
 const stednavnTilknytningModels = require('../stednavne/stednavnTilknytningModels');
 const jordstykkeTilknytningModel = require('../matrikeldata/jordstykkeTilknytningModel');
 const bygningTilknytningModel = require('../bygninger/bygningTilknytningModel');
-
 var psqlScriptQ = sqlCommon.psqlScriptQ;
 
 const createChangeTables = (client)=> go(function*() {
