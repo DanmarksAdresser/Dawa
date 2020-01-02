@@ -19,4 +19,5 @@ CREATE VIEW navngivenvejkommunedel_mat_view AS
   FROM dar1_navngivenvejkommunedel_current nvk
     JOIN dar1_navngivenvej_current nv
       ON (nv.id = nvk.navngivenvej_id)
-     LEFT JOIN vejmidter vm on nvk.kommune = vm.kommunekode AND nvk.vejkode = vm.kode;
+     LEFT JOIN vejmidter vm on nvk.kommune = vm.kommunekode AND nvk.vejkode = vm.kode
+WHERE nvk.id <> '61d1d017-2a50-4dd4-921e-822b3fcf613b';
