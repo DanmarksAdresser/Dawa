@@ -1,6 +1,6 @@
 {
   "name": "@dawadk/dar-notification-server",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Webservice til modtagelse og udstille hændelser fra DAR",
   "private": true,
   "main": "index.js",
@@ -9,7 +9,7 @@
     "dawa-dar-notifications": "./src/notifications.js"
   },
   "dependencies": {
-    "@dawadk/common": "^3.0.0",
+    "@dawadk/common": "^3.0.1",
     "q": "^1.5.1",
     "underscore": "1.9.1",
     "ws": "^7.0.0",
