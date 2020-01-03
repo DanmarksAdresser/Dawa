@@ -149,7 +149,7 @@ const pipeToStream = (src, stream, batchSize, initialDataSignal) => {
         initialDataSignal.raise();
       }
       if(takeResult.ch === errorSignal) {
-        throw new Error('stream emitted an error: ' + errorSignal.value());
+        throw errorSignal.value();
       }
       const values = takeResult.values;
       const closed = values[values.length - 1] === CLOSED;
