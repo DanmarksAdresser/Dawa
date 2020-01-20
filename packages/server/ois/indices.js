@@ -32,7 +32,7 @@ module.exports = [{
   columns: ['AdgAdr_id']
 }, {
   entity: 'enhed',
-  columns: ['EnhAdr_id']
+  columns: ['EnhAdr_id','Enhed_id']
 }, {
   entity: 'enhed',
   columns: ['ENH_ANVEND_KODE']
