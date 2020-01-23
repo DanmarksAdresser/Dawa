@@ -12,7 +12,7 @@ const DEFAULT_MAX_PARAM_LENGTH = 100;
 /*** Parameter parsing and validation *****************************************/
 /******************************************************************************/
 
-const parametersAlwaysValid = ['cache', 'valider'];
+const parametersAlwaysValid = ['cache', 'valider', 'download'];
 
 exports.parseParameters = function(params, parameterSpec) {
   _.each(_.keys(parameterSpec),

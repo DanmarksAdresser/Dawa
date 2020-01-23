@@ -294,6 +294,12 @@ const prepareResponse = (client, resourceSpec, baseUrl, pathParams, queryParams)
   Object.assign(preparedResponse.headers, {
     'Cache-Control': cacheStrategy(queryParams.cache, preparedResponse.status)
   });
+  if(queryParams.download !== undefined) {
+    const filename = queryParams.download !== '' ? `; filename*=UTF-8''${encodeURIComponent(queryParams.download)}` : '';
+    Object.assign(preparedResponse.headers, {
+      'Content-Disposition': `attachment${filename}`
+    });
+  }
   return preparedResponse;
 });
 
