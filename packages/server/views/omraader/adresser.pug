@@ -50,7 +50,7 @@ block main
             div.col-sm-3.col-lg-2.col-form-label Valgt adgangsadresse:
             div.col-sm-6.col-form-label
               span#autocomplete-adgangsadresse-choice
-        fieldset
+        fieldset.form-group
           legend Autocomplete af adresse i København
           div.row
             label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse') Adresse:
@@ -61,6 +61,29 @@ block main
             div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
             div.col-sm-6.col-form-label
               span#autocomplete-adresse-kbh-choice
+        fieldset.form-group
+          legend Autocomplete af adresse uden visning af supplerende bynavn
+          div.row
+            label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse-suppl') Adresse:
+            div.col-sm-6
+              div(style={position: 'relative'})
+                input.form-control#autocomplete-adresse-suppl(type='search', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+          div.row
+            div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
+            div.col-sm-6.col-form-label
+              span#autocomplete-adresse-suppl-choice
+        fieldset.form-group
+          legend Autocomplete, hvor hvert forslag vises på flere linjer
+          div.row
+            label.col-sm-3.col-lg-2.col-form-label(for='autocomplete-adresse-multi') Adresse:
+            div.col-sm-6
+              div(style={position: 'relative'})
+                input.form-control#autocomplete-adresse-multi(type='search', autocomplete='off', placeholder='vejnavn husnr, etage. dør, postnummer')
+          div.row
+            div.col-sm-3.col-lg-2.col-form-label Valgt adresse:
+            div.col-sm-6.col-form-label
+              span#autocomplete-adresse-multi-choice
+
       p.
         DAWA's autocomplete komponent er anvendt til at etablere adresseindtastningen med autocomplete. Hvordan den anvendes er beskrevet i <a href='/dok/guide/autocomplete'>autocomplete guiden</a>. Du kan også anvende <a href='/dok/api/autocomplete'>autocomplete API'et</a> direkte.
       h3 Feltindtastning

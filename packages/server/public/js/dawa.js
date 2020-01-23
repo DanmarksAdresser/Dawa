@@ -321,6 +321,20 @@ export function initForside() {
         $('#autocomplete-adresse-kbh-choice').text(data.tekst);
       }
     });
+    dawaAutocomplete.dawaAutocomplete(document.getElementById('autocomplete-adresse-suppl'), {
+      supplerendebynavn: false,
+      baseUrl: '',
+      select: function (data) {
+        $('#autocomplete-adresse-suppl-choice').text(data.tekst);
+      }
+    });
+    dawaAutocomplete.dawaAutocomplete(document.getElementById('autocomplete-adresse-multi'), {
+      multiline: true,
+      baseUrl: '',
+      select: function (data) {
+        $('#autocomplete-adresse- multi-choice').text(data.tekst);
+      }
+    });
     searchPostnr('#postnummer');
     $('#vej').focus(function () {
       searchVejnavn('#postnummer', '#vej');
