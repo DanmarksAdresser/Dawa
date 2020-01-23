@@ -57,7 +57,8 @@ module.exports = [
     geomWithin: commonParameters.geomWithin,
     autocomplete: commonParameters.autocomplete,
     fuzzy: commonParameters.fuzzy,
-    stednavnafstand: parameters.stednavnafstand
+    stednavnafstand: parameters.stednavnafstand,
+    geometri: parameters.geometri
   }, representations.autocomplete, sqlModel),
   resourcesUtil.reverseGeocodingResourceSpec(
     '/adgangsadresser/reverse',

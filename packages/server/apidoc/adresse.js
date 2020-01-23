@@ -149,7 +149,7 @@ module.exports = [
     entity: 'adresse',
     path: '/adresser/autocomplete',
     subtext: autocompleteSubtext('adresser'),
-    parameters: [...overwriteWithAutocompleteQParameter(adresseParameters), ...medtagUgyldigeNedlagte, ...formatAndPagingParams],
+    parameters: [...overwriteWithAutocompleteQParameter(adresseParameters),geometriParam, ...medtagUgyldigeNedlagte, ...formatAndPagingParams],
     examples: [{
       description: 'Find alle adresser som indeholder <em>rand</em>',
       query: [{name: 'q', value: 'rand'}]

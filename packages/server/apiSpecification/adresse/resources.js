@@ -57,7 +57,8 @@ module.exports = [
     autocomplete: commonParameters.autocomplete,
     crs: commonParameters.crs,
     fuzzy: commonParameters.fuzzy,
-    stednavnafstand: adgangsadresseParameters.stednavnafstand
+    stednavnafstand: adgangsadresseParameters.stednavnafstand,
+    geometri: parameters.geometri,
   }, representations.autocomplete, sqlModel),
   resourcesUtil.getByKeyResourceSpec(nameAndKey,
     parameters.id,

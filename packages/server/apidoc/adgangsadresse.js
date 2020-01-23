@@ -136,7 +136,7 @@ module.exports = [
     path: '/adgangsadresser/autocomplete',
     subtext: autocompleteSubtext('adgangsadresser'),
     parameters:
-      [...overwriteWithAutocompleteQParameter(adgangsadresseParameters), ...medtagUgyldigeNedlagte, ...formatAndPagingParams],
+      [...overwriteWithAutocompleteQParameter(adgangsadresseParameters), geometriParam, ...medtagUgyldigeNedlagte, ...formatAndPagingParams],
     examples: [
       {
         description: 'Find alle adgangsadresser som indeholder <em>rand</em>',
