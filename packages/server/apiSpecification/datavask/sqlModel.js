@@ -248,7 +248,6 @@ function parseAddressTexts(addressTextToFormattedAddressMap, unparsedAddressText
   return _.mapObject(addressTextToFormattedAddressMap, (address, parsedAddressText) => {
 
     let result = adresseTextMatch(unparsedAddressText, address);
-
     // We consider leading zeroes in husnr and etage to be insignificant
     result.address.husnr = removePrefixZeroes(result.address.husnr);
     if(result.address.etage) {
@@ -347,6 +346,39 @@ function uniquesForVersion(stormodtagere, version) {
 
 }
 
+const isVejnavnMatchingGoodEnough = (client, postnr, parsedVejnavn, addressVejnavn, postnrnavn, vejnavndifferences) => go(function*() {
+  if (vejnavndifferences === 0) {
+    return true;
+  }
+  if (vejnavndifferences > 3) {
+    return false;
+  }
+  let  closestVejstykkeSql;
+  if(postnr === '') {
+    closestVejstykkeSql = [`
+    SELECT vejnavn
+    FROM vask_vejstykker_postnumre v
+    JOIN vask_postnumre vp ON v.postnr = vp.nr
+    WHERE vp.navn = $1
+    ORDER BY levenshtein(lower($2), lower(vejnavn))
+    LIMIT 1`, [postnrnavn, parsedVejnavn]];
+  }
+  else {
+    closestVejstykkeSql =[`
+    SELECT vejnavn
+    FROM vask_vejstykker_postnumre v
+    WHERE postnr = $1
+    ORDER BY levenshtein(lower($2), lower(vejnavn))
+    LIMIT 1`, [postnr, parsedVejnavn]];
+  }
+  const closestVejstykke =
+      (yield this.delegateAbort(client.queryRows(closestVejstykkeSql[0],
+          closestVejstykkeSql[1])))[0];
+  // hvis der ikke er et closestVejstykke, så er det fordi et stormodtagerpostnummer er anvendt.
+  return !closestVejstykke || (closestVejstykke.vejnavn === addressVejnavn);
+
+});
+
 function createSqlModel(entityName) {
   var columns = columnsMap[entityName]
 
@@ -427,30 +459,15 @@ function createSqlModel(entityName) {
               }
               if (parseResult.unknownTokens.length === 0 &&
                 differences.husnr === 0 &&
-                differences.postnr === 0 &&
+                  (differences.postnr === 0 || (parseResult.address.postnr === '' && differences.postnrnavn === 0))  &&
                 (differences.etage || 0) === 0 && (differences.dør || 0) === 0) {
-                var vejnavnMatchesCloseEnough;
-                if (differences.vejnavn === 0) {
-                  vejnavnMatchesCloseEnough = true;
-                }
-                else if (differences.vejnavn > 3) {
-                  vejnavnMatchesCloseEnough = false;
-                }
-                else {
-                  var parsedVejnavn = parsedAddress.vejnavn;
-                  const closestVejstykkeSql = `
-SELECT vejnavn
-FROM vask_vejstykker_postnumre v
-WHERE postnr = $1
-ORDER BY
-  levenshtein(lower($2), lower(vejnavn))
-LIMIT 1`;
-                  const closestVejstykke =
-                    (yield this.delegateAbort(client.queryRows(closestVejstykkeSql,
-                      [parsedAddress.postnr, parsedVejnavn])))[0];
-                  // hvis der ikke er et closestVejstykke, så er det fordi et stormodtagerpostnummer er anvendt.
-                  vejnavnMatchesCloseEnough = !closestVejstykke || (closestVejstykke.vejnavn === address.vejnavn);
-                }
+                var vejnavnMatchesCloseEnough = yield isVejnavnMatchingGoodEnough(
+                    client,
+                    parsedAddress.postnr,
+                    parsedAddress.vejnavn,
+                    address.vejnavn,
+                    parsedAddress.postnrnavn,
+                    differences.vejnavn);
                 if (vejnavnMatchesCloseEnough) {
                   return 'B';
                 }

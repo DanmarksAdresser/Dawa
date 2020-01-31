@@ -375,12 +375,12 @@ describe('adresseTextMatch', () => {
       {
         "address": {
           "etage": "13",
-          "husnr": "foobar",
+          "husnr": "",
           "postnr": "8260",
           "postnrnavn": "viby",
           "vejnavn": "højvangsvej"
         },
-        "unknownTokens": []
+        "unknownTokens": ["foobar"]
       });
   });
 });

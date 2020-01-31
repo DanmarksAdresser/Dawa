@@ -151,7 +151,7 @@ var adgangsadresseTests = [{
     id: '0a3f5096-91d3-32b8-e044-0003ba298018'
   }
 }, {
-  it: 'Kan finde en adgangsadresse med stavefejli postnrnavn',
+  it: 'Kan finde en adgangsadresse med stavefejl i postnrnavn',
   betegnelse: 'Margrethepladsen 4, 8000 Århus C',
   result: {
     kategori: 'B',
@@ -170,6 +170,13 @@ var adgangsadresseTests = [{
   result: {
     kategori: 'B',
     id: '0a3f507a-4bd5-32b8-e044-0003ba298018'
+  }
+}, {
+  it: 'Accepterer manglende postnr hvis postnrnavn matcher præcist',
+  betegnelse: 'Margrethepladsen 4, Aarhus C',
+  result: {
+    kategori: 'B',
+    id: '0a3f5096-91d3-32b8-e044-0003ba298018'
   }
 }];
 

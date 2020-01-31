@@ -53,13 +53,13 @@ function consumeUntilWhitespace(charlist) {
 
     }
   }
-  return [resultList, result];
+  return [resultList, result, true];
 }
 
-function consume(charlist, length, mustEndWithWhitespace) {
+function consume(charlist, length, mustEndWithWhitespace, atWhitespace) {
   if(charlist.length === 0 && length === 0) {
     // end of string, we're done
-    return [[], ''];
+    return [[], '', atWhitespace];
   }
   if(charlist.length === 0) {
     throw new Error('attempted to consume from empty charlist');
@@ -68,25 +68,25 @@ function consume(charlist, length, mustEndWithWhitespace) {
   if(entry.op === 'I') {
     if(isWhitespace(entry.uvasket) && length === 0) {
       // we're done
-      return [charlist, ''];
+      return [charlist, '', atWhitespace];
     }
     // consume the rest of the token
-    let result = consume(charlist.slice(1), length, mustEndWithWhitespace);
-    return [result[0], entry.uvasket + result[1]];
+    let result = consume(charlist.slice(1), length, mustEndWithWhitespace, isWhitespace(entry.uvasket));
+    return [result[0], entry.uvasket + result[1], result[2]];
   }
   if(length === 0) {
-    if(mustEndWithWhitespace) {
+    if(mustEndWithWhitespace && !atWhitespace) {
       // We need to check that we do not split a token
       return consumeUntilWhitespace(charlist);
     }
-    return [charlist, ''];
+    return [charlist, '', atWhitespace];
   }
   if(entry.op === 'K' || entry.op === 'U') {
-    let result =  consume(charlist.slice(1), length - 1, mustEndWithWhitespace);
-    return [result[0], entry.uvasket + result[1]];
+    let result =  consume(charlist.slice(1), length - 1, mustEndWithWhitespace, isWhitespace(entry.uvasket));
+    return [result[0], entry.uvasket + result[1], result[2]];
   }
   if(entry.op === 'D') {
-    return consume(charlist.slice(1), length - 1, mustEndWithWhitespace);
+    return consume(charlist.slice(1), length - 1, mustEndWithWhitespace, atWhitespace);
   }
 }
 
@@ -158,7 +158,7 @@ function consumeBetween(charlist) {
       let result = consumeBetween(unknownTokenResult[0]);
       return [result[0], [unknownTokenResult[1]].concat(result[1])]
     }
-    return [charlist, []];
+    return [charlist, [], true];
   }
   throw new Error(`unexpected for consumeBetween: ${JSON.stringify(entry)}`);
 }
@@ -207,7 +207,7 @@ function parseTokens(uvasketText, vasketText, tokens, rules) {
     parsedTokens: [],
     unknownTokens: []
   };
-
+  let atWhitespace = true;
   tokens.forEach((token, index) => {
     const tokenEndsInNumber = /^\d$/.test(token.charAt(token.length - 1));
     const nextTokenBeginsWithNumber = tokens.length > index+1 && tokens[index+1].length > 0 && /^\d$/.test(tokens[index+1].charAt(0));
@@ -215,12 +215,13 @@ function parseTokens(uvasketText, vasketText, tokens, rules) {
       index === rules.length - 1 ||
       rules[index+1].mustBeginAtWhitespace ||
       (tokenEndsInNumber && nextTokenBeginsWithNumber);
-    var parseResult = consume(charlist, token.length, mustEndWithWhitespace);
-    var betweenResult = consumeBetween(parseResult[0]);
+    var parseResult = consume(charlist, token.length, mustEndWithWhitespace, atWhitespace);
+    var betweenResult = consumeBetween(parseResult[0], parseResult[2]);
 
     result.parsedTokens = result.parsedTokens.concat(parseResult[1]);
     result.unknownTokens = result.unknownTokens.concat(betweenResult[1]);
     charlist = betweenResult[0];
+    atWhitespace = result.unknownTokens.length > 0 ? true : parseResult[2];
   });
   return result;
 }
