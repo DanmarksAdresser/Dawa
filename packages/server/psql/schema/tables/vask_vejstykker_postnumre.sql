@@ -10,3 +10,4 @@ CREATE TABLE vask_vejstykker_postnumre(
 
 CREATE INDEX ON vask_vejstykker_postnumre(kommunekode, vejkode, postnr);
 CREATE INDEX ON vask_vejstykker_postnumre(postnr);
+CREATE INDEX ON vask_vejstykker_postnumre USING GIST(tekst gist_trgm_ops);
