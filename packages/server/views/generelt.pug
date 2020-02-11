@@ -32,6 +32,11 @@ block main
     p Nogle ressourcer understøtter også en særlig mini-struktur, som indeholder de vigtigste felter. Det gælder eksempelvis adgangsadresser:
       pre <a href="/adgangsadresser?struktur=mini&per_side=10">#{url}/adgangsadresser?struktur=mini&per_side=10</a>
 
+    h3.anchor-header#download Download i browser
+    p Parameteren <code>download</code> tilføjer en Content-Disposition header til svaret, som får en browser til at gemme svaret som en fil fremfor at vise den:
+      pre <a href="/kommuner?format=csv&download">#{url}/kommuner?format=csv&download</a>
+    p Filnavnet, som browseren benytter kan konfigureres ved at angive en værdi for <code>download</code> parameteren:
+      pre <a href="/kommuner?format=csv&download=filnavn.csv">#{url}/kommuner?format=csv&download=filnavn.csv</a>
     h3.anchor-header#parametervalidering Parametervalidering
     p DAWA accepterer som udgangspunkt ukendte parametre. Derfor returneres ikke nogen fejl, hvis klienten ved en vejl anvender et forkert navn til en parameter. Tilføj parameteren "valider" for at modtage en
       | fejl hvis der anvendes ukendte parametre. Eksempel:

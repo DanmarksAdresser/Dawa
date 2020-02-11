@@ -73,7 +73,10 @@ module.exports = [
   {
     entity: 'postnummer',
     path: '/postnumre',
-    subtext: 'Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.',
+    subtext: `<p>Søg efter postnumre. Returnerer de postnumre som opfylder kriteriet.</p> 
+      Bemærk, at postnumrenes geografi som udgangspunkt også medtager havområder (<a href="https://vis.aws.dk/postnumre">https://vis.aws.dk/postnumre</a>), hvilket ikke er det der
+      ønskes i de fleste tilfælde.
+      Ønskes landafgrænsede postnumre tilføjes parameteren landpostnumre <a href="https://vis.aws.dk/postnumre?landpostnumre">https://vis.aws.dk/postnumre?landpostnumre</a>).`,
     parameters:
       [...postnummerParameters,
         landpostnumreParam,
