@@ -29,8 +29,8 @@ block content
               b Hvor mange requests må jeg lave til DAWA?
             span.faq-svar.
                Der er forskellige begræsninger indbygget i systemet, som alle vil kunne resultere i at et request bliver afvist med en fejlkode 429.<br>
-               I yderste lag er der en begrænsning på 100 requests/sekund.<br>
-               Dernæst er der en begræsning på ca. 10 samtidigt åbne requests.<br>
+               I yderste lag er der en begrænsning på 30 requests/sekund fra hver IP.<br>
+               Dernæst er der en begræsning på ca. 10 samtidigt åbne requests fra hver IP.<br>
                Til sidst kan man blive afvist, hvis der ikke er tilstrækkelig ledig serverkapacitet til at påbegynde behandlingen af forspørgslen indenfor en rimelig svartid. Serverkapaciteten fordeles ligeligt mellem klienter.<br>
                Alle disse situationer vil resultere i et fejlsvar med HTTP status 429 tilbage. Derudover laver vi ikke nogen automatisk begrænsning eller blacklisting af klienter.<br>
                Manuel blacklisting kan kun komme på tale i ekstreme situationer hvor en klient skaber alvorlige driftsproblemer eller henter meget store mængder af meningsløse data over længere tid.<br>
