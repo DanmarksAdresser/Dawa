@@ -26,9 +26,11 @@ var adgangsadresseIdParameter = {
 var adgangsadresseParameters = [
   {
     name: 'q',
-    doc: 'Søgetekst. Der søges i vejnavn, husnr, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adgangsadressen. ' +
-    'Wildcard * er tilladt i slutningen af hvert ord.' +
-    'Der skelnes ikke mellem store og små bogstaver. Der returneres højst 1000 resultater ved anvendelse af parameteren.',
+    doc: `Søgetekst. Der søges i vejnavn, husnr, supplerende bynavn, postnr og postnummerets navn. Alle ord i søgeteksten skal matche adgangsadressen. 
+    Wildcard * er tilladt i slutningen af hvert ord.
+    Der skelnes ikke mellem store og små bogstaver. Der returneres højst 1000 resultater ved anvendelse af parameteren.
+    Parameteren "fuzzy" kan tilføjes for at lave fuzzy søgning.
+    Hvis behovet er at fremsøge en enkelt adresse ud fra en adressetekst, så vil det i de fleste tilfælde være bedre at benytte <a href="/dok/api/adgangsadresse#datavask">datavask API'et</a>.`,
     examples: ['tværv*']
   },
   autocompleteParameter,
@@ -134,7 +136,10 @@ module.exports = [
   {
     entity: 'adgangsadresse',
     path: '/adgangsadresser/autocomplete',
-    subtext: autocompleteSubtext('adgangsadresser'),
+    subtext: `Autocomplete af adgangsadresser. Der kan anvendes de samme parametre som ved søgning, men bemærk at
+         <em>q</em> parameteren fortolkes anderledes. Læs mere under <a href="generelt#autocomplete">autocomplete</a>. 
+        DAWA tilbyder en <a href="/dok/api/autocomplete">kombineret autocomplete</a>, som giver en bedre brugeroplevelse end autocomplete
+        direkte i adgangsadresser.`,
     parameters:
       [...overwriteWithAutocompleteQParameter(adgangsadresseParameters), geometriParam, ...medtagUgyldigeNedlagte, ...formatAndPagingParams],
     examples: [

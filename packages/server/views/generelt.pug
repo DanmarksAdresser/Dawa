@@ -56,6 +56,8 @@ block main
       li Tegn, som ikke er bogstaver eller et wildcard i slutningen af et ord fortolkes som mellemrum.
       li Tekstsøgning kan kombineres med andre søgeparametre. Se mulighederne under dokumentationen for de enkelte APIer.
       li Ved anvendelse af tekstsøgning returneres maximalt 1000 instanser.
+    p Hvis behovet er at fremsøge en enkelt adresse eller adgangsadresse ud fra en adressetekst vil det i de fleste
+      | tilfælde være bedst at benytte <a href="/dok/guide/datavask">datavask API'et.</a>.
     h4 Eksempler
     p Find de adresser som matcher <em>Lilledal 1</em>
     pre
@@ -68,17 +70,19 @@ block main
       a(href='#{url}/vejnavne?q=vibor*&kommunekode=751') #{url}/vejnavne?q=vibo*r&kommunekode=751
 
     h3.anchor-header#autocomplete Autocomplete
-    p DAWA udstiller API'er til autocomplete af adresser, adgangsadresser, veje, postnumre, supplerende bynavne samt kommuner.
+    p DAWA udstiller API'er til autocomplete af de fleste entiteter.
     p Autocomplete har samme egenskaber som tekstsøgninger beskrevet ovenfor, med følgende forskelle:
     ul
       li Der tilføjes automatisk et wildcard til det sidste ord i søgningen, med mindre det sidste tegn i søgestrengen er et mellemrum
       li Autocomplete returnerer en liste af simple forslag. Hvert forslag indeholder et 'tekst' felt, som beskriver forslaget, samt et objekt med oplysninger der identificerer forslaget.
       li Der returneres som udgangspunkt 20 resultater. Ønskes et andet antal anvendes per_side parameteren.
       li Der understøttes kun formaterne <em>json</em>, <em>jsonp</em> og <em>ndjson</em>. CSV er ikke understøttet.
+    p For adgangsadresser og adresser tilbyder DAWA også et <a href="/dok/api/autocomplete">kombineret autocomplete API</a>
+      | med tilhørende javacript klientbibliotek, som giver en bedre brugeroplevelse til adresseindtastning.
     h4 Eksempler
     p Find de adresser som matcher <em>Lilledal 1</em>
     pre
-      a(href='#{url}/adresser/autocomplete?q=Lilledal 1') #{url}/adresser/autocomplete?q=Lilledal 1
+      a(href='#{url}/adresser/autocomplete?q=Lilledal 1') #{url}/adresser/?q=Lilledal 1
     p Find alle vejnavne, som matcher <em>vibor</em>
     pre
       a(href='#{url}/vejnavne/autocomplete?q=vibor') #{url}/vejnavne/autocomplete?q=vibor
