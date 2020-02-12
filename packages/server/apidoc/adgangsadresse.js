@@ -1,5 +1,4 @@
 const {
-  autocompleteSubtext,
   formatAndPagingParams,
   fuzzyParameter,
   reverseGeocodingParameters,

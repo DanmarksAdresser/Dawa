@@ -1,7 +1,6 @@
 const {
   formatAndPagingParams,
   overwriteWithAutocompleteQParameter,
-  autocompleteSubtext,
   fuzzyParameter,
   autocompleteParameter
 } = require('./common');
