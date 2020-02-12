@@ -1,8 +1,8 @@
 // rollup.config.js
-import commonjs from 'rollup-plugin-commonjs';
-import resolve from 'rollup-plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
-import inject from 'rollup-plugin-inject';
+import inject from '@rollup/plugin-inject';
 
 export default {
   input: 'public/js/dawa.js',
@@ -14,16 +14,7 @@ export default {
       jQuery: 'jquery'
     }),
     babel({
-      "presets": [
-        [
-          "env",
-          {
-            "modules": false
-          }
-        ]
-      ],
-      ignore: ["*.css", "*.scss"],
-      "plugins": ["external-helpers", "transform-object-rest-spread"]
+      ignore: ["*.css", "*.scss"]
     })
   ],
   output: [{
