@@ -20,7 +20,7 @@ const polygonArea = (coordinates) => {
   for(let linestringCoords of coordinates) {
     area += linestringArea(linestringCoords);
   }
-  return area;
+  return Math.abs(area);
 };
 
 /**
