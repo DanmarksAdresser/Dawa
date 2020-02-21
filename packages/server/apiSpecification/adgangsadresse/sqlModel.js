@@ -9,7 +9,6 @@ var sqlUtil = require('../common/sql/sqlUtil');
 var util = require('../util');
 
 var assembleSqlModel = sqlUtil.assembleSqlModel;
-var notNull = util.notNull;
 
 var baseQuery = function () {
   return {
@@ -31,11 +30,11 @@ function addAdditionalAdgangsadresseOrdering(sqlParts, rawQuery) {
   sqlParts.orderClauses.push('husnr');
 }
 var searchAdgangsadresse = function(columnSpec) {
-  var searchFn = sqlParameterImpl.search(columnSpec);
+  var searchFn = sqlParameterImpl.twoStepSearch(columnSpec, 'a_id');
   return function(sqlParts, params) {
-    if(notNull(params.q)) {
+    if(params.q) {
       searchFn(sqlParts, params);
-      addAdditionalAdgangsadresseOrdering(sqlParts, params.search);
+      addAdditionalAdgangsadresseOrdering(sqlParts, params.q);
     }
   };
 };

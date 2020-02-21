@@ -17,8 +17,17 @@ var addWhereClause = function(sqlParts, clause) {
 
 function createQuery(parts){
   let sql = '';
+  const sqlParams = parts.sqlParams;
   if(parts.with && parts.with.length > 0) {
-    sql +=  'WITH\n' + parts.with.join(',\n') + '\n';
+    const stringWiths = parts.with.map((withSpec) => {
+      if(!Array.isArray(withSpec)) {
+        return withSpec;
+      }
+      else {
+        return `${withSpec[1]} AS (${createQuery(Object.assign({}, withSpec[0], {sqlParams})).sql})`;
+      }
+    });
+    sql +=  'WITH\n' + stringWiths.join(',\n') + '\n';
   }
   sql +=  'SELECT ' + parts.select.join(', ');
   if(parts.from && parts.from.length !== 0) {

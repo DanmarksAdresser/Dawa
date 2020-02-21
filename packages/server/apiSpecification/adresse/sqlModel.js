@@ -124,10 +124,9 @@ function addAdditionalAdresseOrdering(sqlParts, rawQuery) {
   sqlParts.orderClauses.push('dør');
 }
 var searchAdresse = function(columnSpec) {
-  var searchFn = sqlParameterImpl.search(columnSpec);
-  return function(sqlParts, params) {
+  return(sqlParts, params) => {
     if(notNull(params.q)) {
-      searchFn(sqlParts, params);
+      sqlParameterImpl.twoStepSearch(columnSpec, 'e_id')(sqlParts, params);
       addAdditionalAdresseOrdering(sqlParts, params.q);
     }
   };
