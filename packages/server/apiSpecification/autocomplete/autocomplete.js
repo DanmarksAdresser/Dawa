@@ -679,6 +679,12 @@ const queryVejnavn = (client, params) => {
     params = Object.assign({}, params, {
       fuzzy: shouldDoFuzzySearch
     });
+
+    // Vi vil ikke have vejnavn-resultater hvis der er to separate tal i query. Det
+    // håndterer søgninger så som "vej 1 1"
+    if(/\d[^\d]+\d/.test(params.q)) {
+      return [];
+    }
     const regularSearchParams = prepareQuery(params);
 
     const result = yield this.delegateAbort(
