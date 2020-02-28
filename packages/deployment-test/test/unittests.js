@@ -5291,7 +5291,7 @@ describe('Vejnavnpostnummerrelation', function() {
     let response = await rp(options);
     assert(response.statusCode === 200, "Http status code != 200");
     let vejnavnpostnummerrelation = JSON.parse(response.body);
-    assert(vejnavnpostnummerrelation.kommuner.length === 2, "Der er ikke fundet to kommuner, men  " + vejnavnpostnummerrelation.length);
+    assert(vejnavnpostnummerrelation.kommuner.length === 1, "Der er ikke fundet en kommuner, men  " + vejnavnpostnummerrelation.kommuner.length);
   });
 
   it("Autocomplete", async function () {
