@@ -14,7 +14,7 @@ var schemas = [
 ];
 
 var postnumre = {
-  "source": "http://dawa.aws.dk/replikering/postnumre",
+  "source": "https://dawa.aws.dk/replikering/postnumre",
   "schema": [
     {
       "name": "sekvensnummer",

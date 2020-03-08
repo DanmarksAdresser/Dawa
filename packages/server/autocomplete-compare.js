@@ -81,7 +81,7 @@ class Reader extends Writable {
 
 cliParameterParsing.main(optionSpec, Object.keys(optionSpec), function (args, options) {
   const baseUrlLocal = options.baseUrl;
-  const baseUrlProd = 'http://dawa.aws.dk';
+  const baseUrlProd = 'https://dawa.aws.dk';
 
   const requestStream = byline(fs.createReadStream(options.requestsFile, {encoding: 'utf8'}));
   const reader = new Reader();

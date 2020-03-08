@@ -3,7 +3,7 @@ module.exports = {
   heading: 'Landsdele',
   lead: `<p>API'et udstiller Danmarks NUTS landsdele samt tilhørende funktionalitet. <a href="https://da.wikipedia.org/wiki/NUTS">NUTS</a> er en administrativ inddeling, som anvendes til statistik. Danmarks NUTS hierarki består af flere inddelinger: Regioner (NUTS 2), landsdele (NUTS 3), kommuner (LAU 1) og sogne (LAU 2).</p> 
 
-<p>Der er følgende NUTS landsdele i Danmark: <a href="http://info.aws.dk/landsdele">http://info.aws.dk/landsdele</a></p>
+<p>Der er følgende NUTS landsdele i Danmark: <a href="https://info.aws.dk/landsdele">https://info.aws.dk/landsdele</a></p>
 
 <p>DAWA udstiller andre typer landsdele. Indenfor valgtemaet udstilles valglandsdele, som bl.a. anvendes ved fordeling af tillægsmandater. Stednavne har undertypen landsdel. Valglandsdele og landsdelene fra stednavne er forskellig fra NUTS landsdelene.</p>
 
