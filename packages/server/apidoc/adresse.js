@@ -127,7 +127,7 @@ module.exports = [
         query: [{name: 'kvhx', value: '04615319__93__1____'}]
       },
       {
-        description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32N (SRID 25832)',
+        description: 'Hent alle adresse i postnummer 8471, i GeoJSON format, med koordinater angivet i ETRS89 / UTM zone 32 Nord (SRID 25832)',
         query: [{name: 'postnr', value: '8471'},
           {name: 'format', value: 'geojson'},
           {name: 'srid', value: '25832'}]
