@@ -65,7 +65,7 @@ const fuzzyParameter = {
 const SRIDParameter = {
   name: 'srid',
   doc: 'Angiver <a href="http://en.wikipedia.org/wiki/SRID">SRID</a>' +
-  ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84).'
+  ' for det koordinatsystem, som geospatiale parametre er angivet i. Default er 4326 (WGS84 / Geografiske koordinater). For ETRS89 / UTM zone 32 Nord anvender du 25832'
 };
 
 const reverseGeocodingParameters = [{
