@@ -20,9 +20,9 @@ const verifyMaxChanges = (context, temaModel, maxChanges) => {
 };
 
 module.exports = (client, txid, temaNames, featureMappings,
-                  dataDir, filePrefix, source, maxChanges) => go(function*() {
+                  dataDir, filePrefix, source, maxChanges, verify) => go(function*() {
   const importer = createDagiImporter({temaNames, dataDir, filePrefix, source, featureMappings});
-  const context = yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow);
+  const context = yield execute(client, txid, [importer], verify ? EXECUTION_STRATEGY.verify : EXECUTION_STRATEGY.slow);
   for(let tema of temaNames) {
     const temaModel = temaModels.modelMap[tema];
     verifyMaxChanges(context, temaModel, maxChanges);

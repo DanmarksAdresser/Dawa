@@ -42,6 +42,12 @@ const schema = {
     format: 'Boolean',
     default: false,
     cli: true
+  },
+  verify: {
+    doc: 'Verify all tables',
+    format: 'boolean',
+    default: false,
+    cli: true
   }
 };
 
@@ -75,7 +81,12 @@ runConfiguredImporter('dagi-to-db', schema,  (config) => go(function*() {
       yield proddb.withTransaction('READ_WRITE', client => go(function*() {
         yield withImportTransaction(client, 'dagiToDb', (txid) => go(function*() {
           const source = config.get('service') === 'datafordeler' ? 'wfsMulti' : 'wfs';
-          yield importDagiImpl(client, txid, temaNames, featureMappings, config.get('data_dir'), config.get('file_prefix'), source, config.get('max_changes'));
+          yield importDagiImpl(client, txid, temaNames, featureMappings,
+              config.get('data_dir'),
+              config.get('file_prefix'),
+              source,
+              config.get('max_changes'),
+              config.get('verify'));
           if(config.get('init')) {
             yield makeAllChangesNonPublic(client, txid);
           }
