@@ -113,6 +113,9 @@ const valuesNeverExpectedToBeSeen = {
     },
     bbr_grundjordstykke: {
       status: true
+    },
+    jordstykke: {
+      bfenummer: true
     }
   },
   flat: {},

@@ -569,11 +569,11 @@ const jordstykker = {
             name: 'ejerlavnavn'
         },
         ...matrikel_jordstykker.columns.filter((col) => name(col) !== 'geom'),
-        {
+        preservedColumn(        {
             name: 'bfenummer'
-        },
+        }),
         privateColumn({name: 'grund_id'}),
-        privateColumn({name: 'ejendomsrelation_id'}),
+        preservedColumn({name: 'ejendomsrelation_id'}),
         ...geomColumns({offloaded: false}),
         visueltCenterComputed({}),
         tsvColumn({

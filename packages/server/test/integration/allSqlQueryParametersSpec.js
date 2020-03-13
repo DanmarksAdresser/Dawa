@@ -772,10 +772,6 @@ var sampleParameters = {
     retskredskode: {
       values: ['1180'],
       verifier: (jordstykke, retskredskode) => jordstykke.retskreds.kode === retskredskode
-    },
-    bfenummer: {
-      values: ['2226263'],
-      verifier: (jordstykke, bfenummer) => jordstykke.bfenummer === parseInt(bfenummer)
     }
   },
   "sted": {
@@ -1057,7 +1053,8 @@ _.keys(sampleParameters).forEach(function(specName) {
   var untestedParams = {
     bbr_bygning: ['ejerlejlighed_id'],
     bbr_enhed: ['bygning_id'],
-    bbr_tekniskanlæg: ['enhed_id','ejerlejlighed_id']
+    bbr_tekniskanlæg: ['enhed_id','ejerlejlighed_id'],
+    jordstykke: ['bfenummer']
   };
   var allParameters = propertyFilterParameters.concat(additionalParameters[specName] || []);
   describe('Query for ' + specName, function() {

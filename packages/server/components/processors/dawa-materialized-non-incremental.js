@@ -7,7 +7,8 @@ module.exports = [tableSchema.materializations.navngivenvejkommunedel_postnr_mat
   tableSchema.materializations.postnumre_kommunekoder_mat,
   tableSchema.materializations.vejnavne_mat,
     tableSchema.materializations.navngivenvejpostnummerrelation,
-    tableSchema.materializations.vejnavnpostnummerrelation
+    tableSchema.materializations.vejnavnpostnummerrelation,
+  tableSchema.materializations.jordstykker
 ].map(materialization => fromMaterializations(
   materialization.table,
   `Opslagstabel ${materialization.table}`,

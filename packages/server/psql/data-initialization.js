@@ -52,6 +52,7 @@ const initializeData = client => go(function*() {
   }));
   logger.info('Importing OIS');
   yield importOisImpl.importOis(client, path.join(__dirname, '../test/data/ois'));
+
   logger.info('Importing GRBBR');
   yield importOisGrbbr(client, 'test/data/ois2');
   logger.info('Importing jordstykker');
