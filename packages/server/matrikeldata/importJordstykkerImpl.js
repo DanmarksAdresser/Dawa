@@ -7,7 +7,7 @@ const { execute } = require('../components/execute');
 
 const importJordstykkerImpl = (client, txid, srcDir, refresh) => go(function*() {
   const importer = createMatrikelImporter({srcDir,refresh});
-  yield execute(client, txid, [importer], EXECUTION_STRATEGY.slow);
+  yield execute(client, txid, [importer], EXECUTION_STRATEGY.verify);
 });
 
 module.exports = {
