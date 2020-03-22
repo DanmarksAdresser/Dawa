@@ -48,18 +48,15 @@ const computeVisualCenter = geojsonGeometry => {
 
 /**
  * Compute the visual center for all rows in the change table for current txid.
- * @param client
- * @param txid
- * @param tableModel
- * @returns {Process}
  */
-const computeVisualCenters = (client, txid, tableModel) => go(function* () {
+const computeVisualCenters = (client, txid, tableModel, changeTableName) => go(function* () {
+  changeTableName = changeTableName || `${tableModel.table}_changes`;
   const allPrimaryKeys = yield client.queryRows(`SELECT ${tableModel.primaryKey.join(',')}
-    FROM ${tableModel.table}_changes WHERE geom IS NOT NULL AND visueltcenter IS NULL AND txid = ${txid}`);
+    FROM ${changeTableName} WHERE geom IS NOT NULL AND visueltcenter IS NULL AND txid = ${txid}`);
   for(let key of allPrimaryKeys) {
     const whereClause = `txid = ${txid}
       AND ${tableModel.primaryKey.map(keyName => format(`${keyName} = %L`, key[keyName])).join(' AND ')}`;
-    const query = `SELECT st_asgeojson(geom) as geom_json, st_isvalid(geom) as valid FROM ${tableModel.table}_changes WHERE ${whereClause}`;
+    const query = `SELECT st_asgeojson(geom) as geom_json, st_isvalid(geom) as valid FROM ${changeTableName} WHERE ${whereClause}`;
     const queryResult = (yield client.queryRows(query))[0];
     const geojsonText = queryResult.geom_json;
     if(geojsonText) {
@@ -67,10 +64,10 @@ const computeVisualCenters = (client, txid, tableModel) => go(function* () {
       const visualCenter = computeVisualCenter(geojson);
       const visualCenterGeojson = {type: 'Point', coordinates: visualCenter};
       if(visualCenter) {
-        yield client.query(`UPDATE ${tableModel.table}_changes SET visueltcenter = ST_SetSRID(ST_GeomFromGeoJSON($1), 25832) WHERE ${whereClause}`, [JSON.stringify(visualCenterGeojson)]);
+        yield client.query(`UPDATE ${changeTableName} SET visueltcenter = ST_SetSRID(ST_GeomFromGeoJSON($1), 25832) WHERE ${whereClause}`, [JSON.stringify(visualCenterGeojson)]);
       }
       else {
-        yield client.query(`UPDATE ${tableModel.table}_changes SET visueltcenter = ST_ClosestPoint(${tableModel.table}_changes.geom, ST_Centroid(${tableModel.table}_changes.geom))WHERE ${whereClause}`);
+        yield client.query(`UPDATE ${changeTableName} SET visueltcenter = ST_ClosestPoint(${changeTableName}.geom, ST_Centroid(${changeTableName}.geom))WHERE ${whereClause}`);
       }
     }
   }

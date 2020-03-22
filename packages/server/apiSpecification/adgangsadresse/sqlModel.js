@@ -6,7 +6,6 @@ var nameAndKey = require('./nameAndKey');
 var parameters = require('./parameters');
 var sqlParameterImpl = require('../common/sql/sqlParameterImpl');
 var sqlUtil = require('../common/sql/sqlUtil');
-var util = require('../util');
 
 var assembleSqlModel = sqlUtil.assembleSqlModel;
 

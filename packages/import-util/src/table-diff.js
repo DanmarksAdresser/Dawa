@@ -163,8 +163,7 @@ const computeUpdatesSubset = (client, txid, sourceTableOrView, dirtyTable, table
 });
 
 const computeUpdatesView =
-  (client, txid, sourceTableOrView, dstTable, tableModel, nonPreservedColumns) => go(function* () {
-    assert(nonPreservedColumns === undefined);
+  (client, txid, sourceTableOrView, dstTable, tableModel) => go(function* () {
 
     const comparedColumns = tableModel.columns
       .filter(col => compare(col))
