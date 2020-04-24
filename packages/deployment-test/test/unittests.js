@@ -11,9 +11,9 @@ var assert = require("assert")
   , _= require("underscore");
 
 //var host= "http://localhost:3000";
-//var host= "http://dawa-p2.aws.dk";
+//var host= "https://dawa-p2.aws.dk";
 
-var host= "http://dawa.aws.dk";
+var host= "https://dawa.aws.dk";
 //var host= "http://52.212.234.159";
 
 if (process.env.URL) host= process.env.URL; // windows: set URL=http://dawa-p1.aws.dk, mac: URL=http://dawa-p1.aws.dk mocha unittests.js -t 20000
@@ -2328,7 +2328,7 @@ describe('Adgangsadresseopslag', function(){
     })
   })
 
-  http://dawa-p2.aws.dk/adgangsadresser/reverse?x=11.254677072750962&y=55.72665088543518&format=geojson&geometri=vejpunkt
+  https://dawa-p2.aws.dk/adgangsadresser/reverse?x=11.254677072750962&y=55.72665088543518&format=geojson&geometri=vejpunkt
 
   it("reverse og vejpunkt", function(done){
 
@@ -2486,7 +2486,7 @@ describe('Jordstykker', function(){
       done();
     })
   })
-  http://dawa-p2.aws.dk/jordstykker?ejerlavkode=100453&matrikelnr=8bd&&format=geojson
+  https://dawa-p2.aws.dk/jordstykker?ejerlavkode=100453&matrikelnr=8bd&&format=geojson
 
   it('reverse geokodning', function(done){
     request(encodeURI(host+'/jordstykker/reverse?y=55.737308&x=12.513428&cache=no-cache'), function (error, response, body) {
@@ -3039,7 +3039,7 @@ describe('Korttjenester', function(){
 
   it("WMS", function(done){
     var options= {};
-    options.url='http://kort.aws.dk/geoserver/aws4_wms/wms';
+    options.url='https://kort.aws.dk/geoserver/aws4_wms/wms';
     options.qs= {};
     options.qs.styles= "StandardStor";
     options.qs.servicename= "wms";
@@ -3067,7 +3067,7 @@ describe('Korttjenester', function(){
 
   it("WFS", function(done){
     var options= {};
-    options.url='http://kort.aws.dk/geoserver/aws4_wfs/wfs';
+    options.url='https://kort.aws.dk/geoserver/aws4_wfs/wfs';
     options.qs= {};
     options.qs.SERVICE= "WFS";
     options.qs.REQUEST= "GetFeature";

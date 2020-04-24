@@ -1,6 +1,6 @@
-{
+\{
 	"postnumre": {
-		"source": "http://dawa.aws.dk/replikering/postnumre",
+		"source": "https://dawa.aws.dk/replikering/postnumre",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -58,7 +58,7 @@
 		]
 	},
 	"vejstykker": {
-		"source": "http://dawa.aws.dk/replikering/vejstykker",
+		"source": "https://dawa.aws.dk/replikering/vejstykker",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -143,7 +143,7 @@
 		]
 	},
 	"adgangsadresser": {
-		"source": "http://dawa.aws.dk/replikering/adgangsadresser",
+		"source": "https://dawa.aws.dk/replikering/adgangsadresser",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -399,7 +399,7 @@
 		]
 	},
 	"adresser": {
-		"source": "http://dawa.aws.dk/replikering/adresser",
+		"source": "https://dawa.aws.dk/replikering/adresser",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -529,7 +529,7 @@
 		]
 	},
 	"ejerlav": {
-		"source": "http://dawa.aws.dk/replikering/ejerlav",
+		"source": "https://dawa.aws.dk/replikering/ejerlav",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -578,7 +578,7 @@
 		]
 	},
 	"regionstilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/regionstilknytninger",
+		"source": "https://dawa.aws.dk/replikering/regionstilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -627,7 +627,7 @@
 		]
 	},
 	"kommunetilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/kommunetilknytninger",
+		"source": "https://dawa.aws.dk/replikering/kommunetilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -676,7 +676,7 @@
 		]
 	},
 	"postnummertilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/postnummertilknytninger",
+		"source": "https://dawa.aws.dk/replikering/postnummertilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -725,7 +725,7 @@
 		]
 	},
 	"sognetilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/sognetilknytninger",
+		"source": "https://dawa.aws.dk/replikering/sognetilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -774,7 +774,7 @@
 		]
 	},
 	"politikredstilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/politikredstilknytninger",
+		"source": "https://dawa.aws.dk/replikering/politikredstilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -823,7 +823,7 @@
 		]
 	},
 	"opstillingskredstilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/opstillingskredstilknytninger",
+		"source": "https://dawa.aws.dk/replikering/opstillingskredstilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -872,7 +872,7 @@
 		]
 	},
 	"valglandsdelstilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/valglandsdelstilknytninger",
+		"source": "https://dawa.aws.dk/replikering/valglandsdelstilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -921,7 +921,7 @@
 		]
 	},
 	"zonetilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/zonetilknytninger",
+		"source": "https://dawa.aws.dk/replikering/zonetilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
@@ -970,7 +970,7 @@
 		]
 	},
 	"jordstykketilknytninger": {
-		"source": "http://dawa.aws.dk/replikering/jordstykketilknytninger",
+		"source": "https://dawa.aws.dk/replikering/jordstykketilknytninger",
 		"schema": [
 			{
 				"name": "sekvensnummer",
