@@ -20,7 +20,7 @@ const getByKeyResource = entityName => registry.get({
     qualifier: 'getByKey'
 });
 
-describe('BBR Grunddata API', () => {
+describe ('BBR Grunddata API', () => {
     testdb.withTransactionEach('test', (clientFn) => {
         it('Kan lave enkeltopslag påbygning', () => go(function* () {
             const result = yield helpers.getJson(clientFn(),
@@ -58,8 +58,8 @@ describe('BBR Grunddata API', () => {
                 assert.strictEqual(result.features.length, 1);
             }));
             const expectedPolygonResults = {
-                bygning: 190,
-                tekniskanlæg: 63
+                bygning: 193,
+                tekniskanlæg: 64
             }
             it(`Kan lave polygon sgning på ${entityName}`, () => go(function*() {
                 const result = yield helpers.getJson(clientFn(), getQueryResource(entityName), {}, {

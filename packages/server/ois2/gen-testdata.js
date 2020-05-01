@@ -26,7 +26,7 @@ const schema = {
 
 const getFileForEntity = (allFiles, entityName) => {
   const oisTable = grbbrModels.find(grbbrModel => grbbrModel.name === entityName).oisTable;
-  const file = allFiles.find(file => new RegExp(oisTable, 'i').test(file));
+  const file = allFiles.find(file => new RegExp(`${oisTable}_NA`, 'i').test(file));
   assert(file, `found file for ${entityName}`);
   return file;
 };

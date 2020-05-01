@@ -409,10 +409,14 @@ const entityOisTableMappings = [
 ];
 
 const filteredAttributes= {
-  bygning: ['byg406Koordinatsystem', 'byg301TypeAfFlytning'],
+  bygning: ['byg406Koordinatsystem', 'byg301TypeAfFlytning', 'byg500Notatlinjer'],
   grundjordstykke: ['status'],
   bygningpåfremmedgrund: ['status'],
-  enhedejerlejlighed: ['status']
+  enhedejerlejlighed: ['status'],
+  enhed: ['enh500Notatlinjer'],
+  fordelingsareal: ['for500Notatlinjer'],
+  grund: ['gru500Notatlinjer'],
+  tekniskanlæg: ['tek500Notatlinjer']
 };
 
 const importedEntityNames = entityOisTableMappings.map(entity => entity.name);
