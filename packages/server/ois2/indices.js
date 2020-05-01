@@ -41,9 +41,6 @@ module.exports = [
     entity: 'enhed',
     columns: ['etage']
   }, {
-    entity: 'enhed',
-    columns: ['bygning']
-  }, {
     entity: 'etage',
     columns: ['bygning']
   }, {

@@ -156,15 +156,6 @@ const referenceAttributes = {
         sqlType: 'uuid'
       },
       definition: ''
-    },
-    {
-      name: 'bygning',
-      type: {
-        'kind': 'reference',
-        type: 'uuid',
-        sqlType: 'uuid'
-      },
-      definition: ''
     }
   ],
   Etage: [

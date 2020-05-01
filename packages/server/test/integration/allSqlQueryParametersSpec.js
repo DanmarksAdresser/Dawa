@@ -1052,7 +1052,6 @@ _.keys(sampleParameters).forEach(function(specName) {
 
   var untestedParams = {
     bbr_bygning: ['ejerlejlighed_id'],
-    bbr_enhed: ['bygning_id'],
     bbr_tekniskanlæg: ['enhed_id','ejerlejlighed_id'],
     jordstykke: ['bfenummer']
   };

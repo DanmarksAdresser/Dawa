@@ -29,10 +29,6 @@ const relations = [{
   attribute: 'opgang',
   references: 'opgang'
 }, {
-  entity: 'enhed',
-  attribute: 'bygning',
-  references: 'bygning'
-}, {
   entity: 'etage',
   attribute: 'bygning',
   references: 'bygning'
