@@ -33,6 +33,7 @@ const schema = {
 const cleanBbr = (client) => go(function*() {
   yield client.query(tableSql);
   yield client.query(`delete from transaction_history where entity like 'bbr_%'`);
+  yield client.query(`delete from ois_importlog where oistable like 'co5%'`);
   yield initialization.reloadDatabaseCode(client);
 });
 
