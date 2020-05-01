@@ -162,7 +162,9 @@ exports.tableSpecs = normaliseTableSpec([
   {name: 'grbbr_virkning_ts'}
 ]);
 
-exports.loadTables = function(client, scriptDir) {
+const scriptDir = path.join(__dirname, 'schema');
+
+exports.loadTables = function(client) {
   return q.async(function*() {
     console.log('creating tables');
     yield psqlScriptQ(client, path.join(scriptDir, 'tables'), 'misc.sql');
@@ -179,7 +181,7 @@ exports.loadTables = function(client, scriptDir) {
   })();
 };
 
-exports.reloadDatabaseCode = function(client, scriptDir) {
+exports.reloadDatabaseCode = function(client) {
   return q.async(function*() {
     console.log('loading database functions from ' + scriptDir);
     yield psqlScriptQ(client, scriptDir, 'misc.sql');
@@ -204,10 +206,9 @@ exports.reloadDatabaseCode = function(client, scriptDir) {
   })();
 };
 
-const scriptDir = path.join(__dirname, 'schema');
 
 
 exports.initializeSchema = (client) => go(function*() {
   yield exports.loadTables(client, scriptDir);
-  yield exports.reloadDatabaseCode(client, scriptDir);
+  yield exports.reloadDatabaseCode(client);
 });
