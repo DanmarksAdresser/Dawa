@@ -121,7 +121,8 @@ const removeIncomplete = client => go(function*() {
 });
 
 const removeFuture = client => go(function*() {
-  yield client.query(`DELETE FROM adgangspunkt_merged WHERE lower(virkning) > now()`);
+  yield client.query(`DELETE FROM adgangspunkt_merged WHERE lower(virkning) > now(); 
+UPDATE adgangspunkt_merged SET virkning = virkning + tstzrange(now(), null, '[)') WHERE upper(virkning) >= now()`);
 });
 
 const generateAdgangsadresser = (client, adgangsadresserDestTable, dar10CutoffDate) => go(function*() {
