@@ -5,6 +5,9 @@ const {go} = require('ts-csp');
 const runConfiguredImporter = require('@dawadk/import-util/src/run-configured-importer');
 const { tableSql } = require('./sql-gen');
 const initialization = require('../psql/initialization');
+const grbbrTableModels = require('../ois2/table-models');
+const tableSchema = require('../psql/tableModel');
+const { createChangeTable } = require('@dawadk/import-util/src/table-diff');
 
 const schema = {
   data_dir: {
@@ -35,6 +38,11 @@ const cleanBbr = (client) => go(function*() {
   yield client.query(`delete from transaction_history where entity like 'bbr_%'`);
   yield client.query(`delete from ois_importlog where oistable like 'co5%'`);
   yield initialization.reloadDatabaseCode(client);
+  const tableNames = grbbrTableModels.allTableModels.map(model => model.table);
+  for (let table of tableNames) {
+    const model = tableSchema.tables[table];
+    yield createChangeTable(client, model);
+  }
 });
 
 runConfiguredImporter('import-ois-grbbr', schema, (config) => go(function* () {
