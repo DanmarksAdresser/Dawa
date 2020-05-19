@@ -132,6 +132,9 @@ exports.simplePropertyFilter = function (parameterSpec, columnSpec) {
                             }
                         });
                     sqlParts.whereClauses.push("(" + orClauses.join(" OR ") + ")");
+                    if(parameter.orderBy) {
+                        sqlParts.orderClauses = [...sqlParts.orderClauses, ...parameter.orderBy];
+                    }
                 }
             }
         });

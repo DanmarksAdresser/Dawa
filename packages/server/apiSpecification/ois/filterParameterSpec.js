@@ -84,7 +84,8 @@ module.exports = {
       type: 'string',
       pattern: '^\\d{1,4}$'
     },
-    process: processKommunekode
+    process: processKommunekode,
+    orderBy: ['b.bygning_id']
 
   }],
   etage: [{

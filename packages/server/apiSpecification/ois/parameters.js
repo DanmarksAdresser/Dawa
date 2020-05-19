@@ -67,6 +67,7 @@ const filterParams = (variant, oisApiModelName) => {
       type: parametertypeFromField(sourceField),
       renameTo: filter.field,
       schema: filter.schema || schemas.schemaFromField(sourceField, false),
+      orderBy: filter.orderBy,
       multi: true
     };
     if(filter.process) {
