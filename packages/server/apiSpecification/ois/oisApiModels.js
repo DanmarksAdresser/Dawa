@@ -118,12 +118,12 @@ module.exports = {
     }, {
       relationName: 'opgang',
       alias: 'o',
-      method: 'LEFT JOIN',
+      method: 'JOIN',
       clauses: [['e.opgang_id', 'o.opgang_id']]
     }, {
       relationName: 'bygning',
       alias: 'b',
-      method: 'LEFT JOIN',
+      method: 'JOIN',
       clauses: [['b.bygning_id', 'o.bygning_id']]
     }]
   },
