@@ -15,7 +15,8 @@ module.exports = {
     propertyFilter: [
         {
             name: 'postnr',
-            type: 'integer'
+            type: 'integer',
+            schema: schema.postnr
         },
         {
             name: 'vejnavn',
