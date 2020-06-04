@@ -3,7 +3,7 @@ module.exports = [
   require('./adresse-page'),
   require('./afstemningsområde-page'),
   require('./autocomplete-page'),
-  ...require('./bbr-pages'),
+  // ...require('./bbr-pages'),
   require('./bebyggelse-page'),
   require('./bygning-page'),
   require('./darhistorik-page'),

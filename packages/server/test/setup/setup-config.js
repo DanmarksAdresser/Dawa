@@ -1,4 +1,6 @@
 const Promise = require('bluebird');
+const fs = require('fs');
+const path = require('path');
 
 Promise.config({
   longStackTraces: true
@@ -15,4 +17,18 @@ const testConfigSchemas = configHolder.mergeConfigSchemas([
 
 const configFiles = [require.resolve('@dawadk/import-util/conf/test/s3-offload.json5'),
   require.resolve('../../conf/test/dawa-server.json5')];
+
+const testConfigFile = path.join(__dirname, '../../../../local-conf/test-conf.json5');
+if(fs.existsSync(testConfigFile)) {
+  configFiles.push(testConfigFile);
+}
+if(fs.existsSync(testConfigFile)) {
+  // eslint-disable-next-line no-console
+  console.log(`loading additional test config from ${testConfigFile}`)
+  configFiles.push(testConfigFile);
+}
+else {
+  // eslint-disable-next-line no-console
+  console.log(`In order to configure stuff for testing, create the file ${testConfigFile}`)
+}
 configHolder.initialize(testConfigSchemas, configFiles, {});
