@@ -15,7 +15,8 @@ module.exports = [
       propertyFilter: parameters.propertyFilter,
       search: commonParameters.search,
       fuzzy: commonParameters.fuzzy,
-      geomWithin: commonParameters.geomWithin
+      geomWithin: commonParameters.geomWithin,
+      struktur: commonParameters.struktur,
     }, representations,
     sqlModel),
   resourcesUtil.autocompleteResourceSpec(nameAndKey, {
@@ -24,7 +25,9 @@ module.exports = [
     fuzzy: commonParameters.fuzzy,
     geomWithin: commonParameters.geomWithin
   }, representations.autocomplete, sqlModel),
-  resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {}, representations, sqlModel)
+  resourcesUtil.getByKeyResourceSpec(nameAndKey, parameters.id, {
+      struktur: commonParameters.struktur,
+  }, representations, sqlModel)
 ];
 
 var registry = require('../registry');

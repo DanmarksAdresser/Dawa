@@ -3,7 +3,8 @@ const {
   formatAndPagingParams,
   fuzzyParameter,
   overwriteWithAutocompleteQParameter,
-  autocompleteParameter
+  autocompleteParameter,
+  strukturParameter
 } = require('./common');
 
 const vejnavneIdParameter = {
@@ -57,7 +58,7 @@ module.exports = [
     entity: 'vejnavn',
     path: '/vejnavne',
     subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
-    parameters: vejnavneParameters.concat(formatAndPagingParams),
+    parameters: [...vejnavneParameters, strukturParameter, ...formatAndPagingParams],
     examples: [{
       description: 'Find vejnavne som ligger i postnummeret<em>2400 København NV</em> og ' +
         'indeholder et ord der starter med <em>hvid</em>',
@@ -77,7 +78,7 @@ module.exports = [
     entity: 'vejnavn',
     path: '/vejnavne/{navn}',
     subtext: 'Søg efter vejnavne. Returnerer de vejnavne som opfylder kriteriet.',
-    parameters: [vejnavneIdParameter],
+    parameters: [vejnavneIdParameter, strukturParameter],
     nomulti: true,
     examples: [{
       description: 'Hent information om vejnavnet <em>Gammel Viborgvej</em>',
@@ -88,7 +89,7 @@ module.exports = [
     entity: 'vejnavn',
     path: '/vejnavne/autocomplete',
     subtext: autocompleteSubtext('vejnavne'),
-    parameters: overwriteWithAutocompleteQParameter(vejnavneParameters).concat(formatAndPagingParams),
+    parameters: [...overwriteWithAutocompleteQParameter(vejnavneParameters), ...formatAndPagingParams],
     examples: [{
       description: 'Find alle vejnavne som indeholder <em>jolle</em>',
       query: [{name: 'q', value: 'jolle'}]
