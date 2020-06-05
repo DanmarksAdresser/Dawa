@@ -17,6 +17,12 @@ module.exports = mergeConfigSchemas([
       default: 4,
       cli: true
     },
+    hostname: {
+      doc: 'Use specified hostname for URLs in responses. If not set, the hostname is based on the host header in the request.',
+      format: 'string',
+      default: null,
+      cli: true
+    },
     socket_timeout_millis: {
       "doc": "Socket timeout",
       "format": "nat",
