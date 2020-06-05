@@ -23,12 +23,12 @@ module.exports = [{
   lead: 'For en generel introduktion til matrikelkortet, se <a href="/dok/matrikelkortet">her<a/>.',
   entities: ['ejerlav', 'jordstykke']
 },
-  {
-    name: 'BBR BETA',
-    headingClass: 'h2-icon h2-bbr',
-    lead: grbbrLeadText,
-    entities: grbbrModels.map(getEntityName)
-  },
+  // {
+  //   name: 'BBR BETA',
+  //   headingClass: 'h2-icon h2-bbr',
+  //   lead: grbbrLeadText,
+  //   entities: grbbrModels.map(getEntityName)
+  // },
   {
   name: 'BBR',
   headingClass: 'h2-icon h2-bbr',
