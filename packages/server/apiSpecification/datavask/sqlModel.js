@@ -364,12 +364,16 @@ const isVejnavnMatchingGoodEnough = (client, postnr, parsedVejnavn, addressVejna
     LIMIT 1`, [postnrnavn, parsedVejnavn]];
   }
   else {
-    closestVejstykkeSql =[`
-    SELECT vejnavn
+    const allVejnavn = `SELECT vejnavn
     FROM vask_vejstykker_postnumre v
-    WHERE postnr = $1
+    WHERE postnr = $1 UNION SELECT vejnavn
+                        FROM vejnavnpostnummerrelation v
+                        WHERE postnr = $1`;
+    closestVejstykkeSql =[`
+    select vejnavn from (${allVejnavn}) t
     ORDER BY levenshtein(lower($2), lower(vejnavn))
-    LIMIT 1`, [postnr, parsedVejnavn]];
+    LIMIT 1
+`, [postnr, parsedVejnavn]];
   }
   const closestVejstykke =
       (yield this.delegateAbort(client.queryRows(closestVejstykkeSql[0],
@@ -380,7 +384,7 @@ const isVejnavnMatchingGoodEnough = (client, postnr, parsedVejnavn, addressVejna
 });
 
 function createSqlModel(entityName) {
-  var columns = columnsMap[entityName]
+  var columns = columnsMap[entityName];
 
   return {
     allSelectableFieldNames: function (allFieldNames) {
