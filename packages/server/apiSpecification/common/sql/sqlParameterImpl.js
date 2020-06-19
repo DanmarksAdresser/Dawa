@@ -200,7 +200,7 @@ exports.twoStepSearch = (columnSpec, idColumn) => (sqlParts, params) => {
             whereClauses: [],
             groupBy: '',
             orderClauses: [],
-            limit: 1000
+            limit: 2000
         };
         dbapi.addWhereClause(secondPassQuery, searchWhereClause(difficultAlias, {}));
 
