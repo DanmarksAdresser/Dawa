@@ -78,26 +78,24 @@ exports.adgangsadresseGeojsonColumn = (srid, sridAlias, params) => {
 };
 
 exports.selectXWgs84 = geomColumn => {
-  const precision = sridToPrecision["4326"];
-  return `ST_X(ST_SnapToGrid(ST_Transform(${geomColumn}, 4326), ${precision}))`;
+  const decimals = sridToDecimals[4326];
+  return `round(ST_X(ST_Transform(${geomColumn}, 4326))::numeric, ${decimals})`;
 }
 
 exports.selectYWgs84 = geomColumn => {
-  const precision = sridToPrecision[4326];
-  return `ST_Y(ST_SnapToGrid(ST_Transform(${geomColumn}, 4326), ${precision}))`;
+  const decimals = sridToDecimals[4326];
+  return `round(ST_Y(ST_Transform(${geomColumn}, 4326))::numeric, ${decimals})`;
 }
 
 exports.selectX = (srid, sridAlias, geomColumn) => {
-  const precision = sridToPrecision[srid];
-  return `ST_X(ST_SnapToGrid(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${precision}))`;
+  return exports.selectSnappedPoint(srid, sridAlias, geomColumn, 'ST_X');
 };
 
 exports.selectY = (srid, sridAlias, geomColumn) => {
-  const precision = sridToPrecision[srid];
-  return `ST_Y(ST_SnapToGrid(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${precision}))`;
+  return exports.selectSnappedPoint(srid, sridAlias, geomColumn, 'ST_Y');
 };
 
 exports.selectSnappedPoint = (srid, sridAlias, geomColumn, postgisFn) => {
-  const precision = sridToPrecision[srid];
-  return `${postgisFn}(ST_SnapToGrid(ST_Transform(${geomColumn}, ${sridAlias}::integer), ${precision}))`;
+  const decimals = sridToDecimals[srid];
+  return `round(${postgisFn}(ST_Transform(${geomColumn}, ${sridAlias}::integer))::numeric, ${decimals})`;
 };

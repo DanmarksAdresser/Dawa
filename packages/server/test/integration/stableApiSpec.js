@@ -290,7 +290,7 @@ describe('Stable API', () => {
             "bbox_xmax": 11.94059408,
             "bbox_ymax": 55.54176378,
             "visueltcenter_x": 11.93755937,
-            "visueltcenter_y": 55.54041548,
+            "visueltcenter_y": 55.54041544,
             "ejerlavkode": 60851,
             "matrikelnr": "1a",
             "kommunekode": "0350",
@@ -331,7 +331,7 @@ describe('Stable API', () => {
             ],
             "visueltcenter": [
               11.93755937,
-              55.54041548
+              55.54041544
             ],
             "href": "http://dawa/jordstykker/60851/1a",
             "ejerlav": {

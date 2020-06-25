@@ -1,12 +1,12 @@
 const bbrOrder = ['enhed', 'bygning', 'tekniskanlaeg', 'ejerskab', 'grund', 'matrikelreference', 'opgang', 'etage', 'bygningspunkt', 'kommune'];
-const grbbrModels = require('../ois2/parse-ea-model');
-const {getEntityName} = require("../apiSpecification/bbr/common");
-const config = require('@dawadk/common/src/config/holder').getConfig();
-const grbbrEnabled = config.get('grbbr.enabled');
-let grbbrLeadText = `Dette er en BETA af BBR data baseret på grunddatamodellen. Data er ikke komplette.`;
-if(!grbbrEnabled) {
-  grbbrLeadText = `DEAKTIVERET: BBR BETA API'et er af tekniske årsager deaktiveret indtil videre.`;
-}
+// const grbbrModels = require('../ois2/parse-ea-model');
+// const {getEntityName} = require("../apiSpecification/bbr/common");
+// const config = require('@dawadk/common/src/config/holder').getConfig();
+// const grbbrEnabled = config.get('grbbr.enabled');
+// let grbbrLeadText = `Dette er en BETA af BBR data baseret på grunddatamodellen. Data er ikke komplette.`;
+// if(!grbbrEnabled) {
+//   grbbrLeadText = `DEAKTIVERET: BBR BETA API'et er af tekniske årsager deaktiveret indtil videre.`;
+// }
 module.exports = [{
   name: 'Adresser',
   headingClass: 'h2-icon h2-adresser',
