@@ -1,9 +1,4 @@
 "use strict";
-const sridToPrecision = {
-  "4326":  0.00000001,
-  "25832": 0.001
-};
-
 const sridToDecimals = {
   "4326": 8,
   "25832": 3
