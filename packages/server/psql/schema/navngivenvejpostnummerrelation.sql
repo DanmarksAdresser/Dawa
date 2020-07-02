@@ -34,4 +34,4 @@ CREATE VIEW navngivenvejpostnummerrelation_view AS (
              WHERE a.postnr >= 1000 AND a.postnr <= 1999
          ),
          unioned as (select * from intersections union select * from addr_relations union select * from gadepostnr_intersections)
-    select navngivenvej_id,postnr,st_union(geom) as geom from unioned group by navngivenvej_id,postnr);
+    select navngivenvej_id,postnr, case when st_isempty(st_union(geom)) then null else st_union(geom) end  as geom from unioned group by navngivenvej_id,postnr);
