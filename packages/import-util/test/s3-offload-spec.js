@@ -73,6 +73,12 @@ describe('S3 offload', () => {
               578947.37,
               6149329.8
             ],
+            "crs": {
+              "properties": {
+                "name": "EPSG:25832"
+              },
+              "type": "name"
+            },
             "type": "Point"
           });
         }));
