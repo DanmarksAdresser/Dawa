@@ -29,10 +29,15 @@ exports.runImporter = (importerName, optionSpec, requiredOptions, importerFn, im
       });
     }
     catch (e) {
-      logger.error('Importer failed', {
+      const logData = {
         importerName,
         error: e
-      });
+      };
+      if(e.maxChanges) {
+        Object.assign(logData, {changes: e.changes, maxChanges: e.maxChanges});
+      }
+      logger.error(`Importer failed: ${e.message}`, logData);
+
       // This is a bit hackish, but we add a little delay to ensure that the logs are flushed to disk before exiting.
       yield Promise.delay(1000);
       throw e;
