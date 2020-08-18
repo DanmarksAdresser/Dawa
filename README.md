@@ -5,10 +5,17 @@ This is the code repository for [DAWA - Danmarks Adressers Web API](https://dawa
 This repository is a "monorepo" utilizing [yarn workspaces](https://yarnpkg.com/features/workspaces). 
 [Lerna](https://lerna.js.org/) is used for scripting releases and running tests.
 
+## Setting up an environment
+ - Install node from https://nodejs.org/en/, if you do not already have node. Latest LTS is fine.
+ - Install yarn: `npm install -g yarn`
+ - Install and start a PostgreSQL server, if you do not already have one. 
+   For mac, https://postgresapp.com/ is very convenient. For other platforms, check out https://www.postgresql.org/download/ .
+ - Install git, if you do not already have it: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
+ - Clone the DAWA repository `git clone https://github.com/DanmarksAdresser/Dawa.git`
+ - Optional: Install a NodeJS version manager that enables easy switching between NodeJS versions. Read more here: https://www.npmjs.com/package/n
+
 ## Running tests
 First run `yarn install` to install dependencies and build the frontend code.
-
-Setup a PostgreSQL server. Most recent stable PostgreSQL should work fine. 
 
 Create a configuration file that describes how the tests connect to the PostgreSQL database. The file should be stored in local-conf/test-conf.json5 .
 
