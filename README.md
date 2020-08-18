@@ -34,6 +34,13 @@ The user must have access to create and remove databases. Specifically, the foll
 
 When database and configuration is ready, run `yarn test` from the root of the repository.
 
+## Starting a server
+Running the test sets up a test database "dawatest", which is populated with a small subset of real production data.
+There are scripts to start a local server against this database along with an appropriately configured local s3 stub.
+
+Go to the directory `packages/server` and run `yarn run start-servers`. This will lauch a DAWA server on `http://localhost:3000` as
+well as the S3 stub.
+
 ## Support
 Please ask any questions on [digitaliser.dk](https://digitaliser.dk/group/334445/forum).
 
