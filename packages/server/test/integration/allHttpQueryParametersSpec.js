@@ -42,7 +42,7 @@ _.keys(sampleParameters).forEach(function(entityName) {
     sample.values.forEach(function(sampleValue) {
       it('Query ' + entityName + ' for ' + paramName + ' = ' + sampleValue, function () {
         return request.get({
-          url: config.get('test.dawa_base_url')+ '/' + resourceSpec.path + '?' + paramName + "=" + sampleValue,
+          url: config.get('test.dawa_base_url') + resourceSpec.path + '?' + paramName + "=" + sampleValue,
           json: true
         }).then(function (result) {
           if (result.length === 0) {
