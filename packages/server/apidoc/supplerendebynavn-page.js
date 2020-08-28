@@ -1,6 +1,6 @@
 module.exports = {
   entity: 'supplerendebynavn',
-  heading: 'Supplerende bynavne (Forældret)',
+  heading: 'Supplerende bynavne (Forældet)',
   lead: `
 <p>DEPRECATED: Der er udgivet et nyt API for supplerende bynavne: <a href="/dok/api/supplerendebynavn2">supplerendebynavn2</a>.</p>
 <p>API'et udstiller Danmarks supplerende bynavne samt tilhørende funktionalitet.</p>`,
