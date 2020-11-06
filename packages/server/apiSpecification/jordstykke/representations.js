@@ -29,7 +29,7 @@ const fieldsExcludedFromJson = ['geom_json', 'visueltcenter'];
 const autocompleteFieldNames = ['ejerlavkode', 'ejerlavnavn', 'matrikelnr', 'kommunekode',
   'bbox_xmin', 'bbox_ymin', 'bbox_xmax', 'bbox_ymax',
   'visueltcenter_x', 'visueltcenter_y',
-  'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr'];
+  'esrejendomsnr', 'udvidet_esrejendomsnr', 'sfeejendomsnr', 'bfenummer'];
 
 const miniFields = ['ejerlavkode', 'matrikelnr', 'ejerlavnavn', 'kommunekode', 'featureid', 'visueltcenter_x', 'visueltcenter_y'];
 const miniTekstFormatter = row => `${row.matrikelnr} ${row.ejerlavnavn} (${row.ejerlavkode})`;
