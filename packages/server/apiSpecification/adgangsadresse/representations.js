@@ -42,6 +42,7 @@ var normalizedDdknSchema = function (fieldName) {
  */
 exports.flat = representationUtil.adresseFlatRepresentation(fields, function (rs) {
   return {
+    betegnelse: adresseText(rs),
     kvh: kvhFormat(rs)
   };
 });
@@ -51,7 +52,7 @@ const FIELDS_AT_END = ['højde', 'adgangspunktid', 'vejpunkt_id', 'vejpunkt_kild
   'afstemningsområdenummer', 'afstemningsområdenavn', 'brofast', 'supplerendebynavn_dagi_id',
   'navngivenvej_id', 'menighedsrådsafstemningsområdenummer', 'menighedsrådsafstemningsområdenavn',
   'vejpunkt_ændret', 'ikrafttrædelse', 'nedlagt', 'darstatus', 'storkredsnummer', 'storkredsnavn',
-  'valglandsdelsbogstav', 'valglandsdelsnavn', 'landsdelsnuts3', 'landsdelsnavn'];
+  'valglandsdelsbogstav', 'valglandsdelsnavn', 'landsdelsnuts3', 'landsdelsnavn', 'betegnelse'];
 exports.flat.outputFields = _.difference(exports.flat.outputFields, FIELDS_AT_END).concat(FIELDS_AT_END);
 
 function adresseText(row) {

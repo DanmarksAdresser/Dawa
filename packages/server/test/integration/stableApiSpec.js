@@ -1148,6 +1148,7 @@ describe('Stable API', () => {
         value: {
           "href": "http://dawa/adgangsadresser/0a3f5089-0408-32b8-e044-0003ba298018",
           "id": "0a3f5089-0408-32b8-e044-0003ba298018",
+          "adressebetegnelse": "Brammingevej 18, Bolbro, 5200 Odense V",
           "kvh": "04610855__18",
           "status": 1,
           "darstatus": 3,
@@ -1293,6 +1294,7 @@ describe('Stable API', () => {
           },
           "properties": {
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
+            "betegnelse": "Brammingevej 18, Bolbro, 5200 Odense V",
             "status": 1,
             "darstatus": 3,
             "oprettet": "2000-02-05T06:08:50.000",
@@ -1388,6 +1390,7 @@ describe('Stable API', () => {
           },
           "properties": {
             "id": "0a3f5081-c394-32b8-e044-0003ba298018",
+            "betegnelse": "Jonstrupvej 1B, Boruphuse, 4320 Lejre",
             "status": 1,
             "darstatus": 3,
             "oprettet": "2000-02-05T21:40:29.000",
@@ -1518,6 +1521,7 @@ describe('Stable API', () => {
           "adgangsadresse": {
             "href": "http://dawa/adgangsadresser/0a3f5089-0408-32b8-e044-0003ba298018",
             "id": "0a3f5089-0408-32b8-e044-0003ba298018",
+            "adressebetegnelse": "Brammingevej 18, Bolbro, 5200 Odense V",
             "kvh": "04610855__18",
             "status": 1,
             "darstatus": 3,
@@ -1663,6 +1667,7 @@ describe('Stable API', () => {
           },
           "properties": {
             "id": "0a3f50b3-a112-32b8-e044-0003ba298018",
+            "betegnelse": "Brammingevej 18, 1. tv, Bolbro, 5200 Odense V",
             "status": 1,
             "darstatus": 3,
             "oprettet": "2000-02-05T06:08:50.000",
