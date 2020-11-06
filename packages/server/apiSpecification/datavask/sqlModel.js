@@ -588,18 +588,6 @@ function createSqlModel(entityName) {
           chosenCategory = 'C';
         }
 
-        // If the matched address is WITHOUT husbogstav, but the most recent address is WITH husbogstav,
-        // we don't really know if the husbogstav is omitted or not (a common case). Therefore, we degrade
-        // to category C
-        const bestMatchingResult = results[0];
-        if(bestMatchingResult.aktueladresse) {
-          const matchedVersionHusnr = bestMatchingResult.adresse.husnr;
-          const currentHusnr = bestMatchingResult.aktueladresse.husnr;
-          if(currentHusnr && new RegExp(`^${matchedVersionHusnr}[A-Za-z]$`).test(currentHusnr)) {
-            chosenCategory = 'C';
-          }
-        }
-
         for(let result of results) {
           const variant = result.vaskeresultat.variant;
           if(variant.postnr !== result.adresse.postnr) {
