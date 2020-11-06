@@ -157,6 +157,10 @@ exports.json = {
         description: 'Adgangsadressens URL.',
         $ref: '#/definitions/Href'
       },
+      adressebetegnelse: {
+        description: 'Adgangsadressenbetegnelsen på formen {vej} {husnr}, {supplerende bynavn}, {postnr} {postnrnavn}',
+        type: 'string'
+      },
       'id': normalizedFieldSchema('id'),
       status: normalizedFieldSchema('status'),
       darstatus: {
@@ -524,7 +528,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
         type: 'string'
       }
     },
-    docOrder: ['href', 'id', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr', 'navngivenvej', 'supplerendebynavn', 'supplerendebynavn2',
+    docOrder: ['href', 'id', 'adressebetegnelse', 'kvh', 'status', 'darstatus', 'vejstykke', 'husnr', 'navngivenvej', 'supplerendebynavn', 'supplerendebynavn2',
       'postnummer', 'stormodtagerpostnummer', 'kommune', 'ejerlav', 'matrikelnr', 'esrejendomsnr', 'historik',
       'adgangspunkt', 'vejpunkt', 'DDKN', 'sogn', 'landsdel', 'region', 'retskreds', 'politikreds', 'afstemningsområde',
       'opstillingskreds', 'storkreds', 'valglandsdel', 'zone', 'jordstykke', 'bebyggelser', 'brofast']
@@ -534,6 +538,7 @@ vej, som adgangspunktets adresser refererer til.</p>`,
       var adr = {};
       adr.href = makeHref(baseUrl, 'adgangsadresse', [rs.id]);
       adr.id = rs.id;
+      adr.adressebetegnelse = adresseText(rs),
       adr.kvh = kvhFormat(rs);
       adr.status = rs.status;
       adr.darstatus = rs.darstatus;
