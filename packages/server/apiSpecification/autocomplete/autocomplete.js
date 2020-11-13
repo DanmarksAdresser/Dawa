@@ -617,6 +617,15 @@ function compareProcessedResults(a, b) {
   if(a.totalScore !== b.totalScore) {
     return a.totalScore - b.totalScore;
   }
+  if(a.scores.husnr !== b.scores.husnr) {
+    return a.scores.husnr - b.scores.husnr;
+  }
+  if(a.scores.etage < b.scores.etage) {
+    return a.scores.etage - b.scores.etage;
+  }
+  if(a.scores.dør < b.scores.dør) {
+    return a.scores.dør - b.scores.dør;
+  }
   for(let field of ['vejnavn', 'husnr', 'etage', 'dør', 'postnr', 'supplerendebynavn']) {
     const compareResult = comparators[field](a.autocompleteResult[field],
       b.autocompleteResult[field]);
@@ -708,7 +717,7 @@ const queryVejnavn = (client, params) => {
 };
 
 const sortAdresse = (entityName, q, per_side, unsortedResults) => {
-  const processedResult = unsortedResults.map(result => process(result, q, ADRESSE_FIELD_NAMES[entityName]));
+  let processedResult = unsortedResults.map(result => process(result, q, ADRESSE_FIELD_NAMES[entityName]));
   processedResult.sort(compareProcessedResults);
   processedResult.length = Math.min(processedResult.length, per_side);
   return processedResult.map(unprocess);
