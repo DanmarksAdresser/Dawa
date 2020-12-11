@@ -121,7 +121,8 @@ module.exports = [
   {
     entity: 'jordstykke',
     path: '/jordstykker',
-    subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.',
+    subtext: 'Søg efter jordstykker. Returnerer de jordstykker som opfyler søgekriterierne.' +
+        '<p>VIGTIGT: Der er udviklet en ny datamodel for matriklen, som er udstillet på <a href="https://datafordeler.dk">Datafordeleren</a>. DAWAs API er baseret en ældre datamodel, hvor data er konverteret tilbage fra den nye datamodel.</p>',
     parameters: [searchParameter, autocompleteParameter, ...commonParameters, ...reverseParameters, ...formatAndPagingParams, ...dagiSridCirkelPolygonParameters('jordstykker'), strukturParameter],
     examples: [{description: 'Hent alle jordstykker', query: []},
       {

@@ -70,7 +70,7 @@ module.exports = [
   {
     entity: 'ejerlav',
     path: '/ejerlav',
-    subtext: 'Søg efter ejerlav. Returnerer de ejerlav som opfylder kriteriet.',
+    subtext: 'Søg efter ejerlav. Returnerer de ejerlav som opfylder kriteriet. <p>VIGTIGT: Der er udviklet en ny datamodel for matriklen, som er udstillet på <a href="https://datafordeler.dk">Datafordeleren</a>. DAWAs API er baseret en ældre datamodel, hvor data er konverteret tilbage fra den nye datamodel.</p>',
     parameters: [...ejerlavParameters, ...reverseParameters, ...dagiSridCirkelPolygonParameters('ejerlav'), strukturParameter, ...formatAndPagingParams],
     examples: [{description: 'Hent alle ejerlav', query: []},
       {

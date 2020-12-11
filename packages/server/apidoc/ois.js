@@ -1,6 +1,7 @@
 const {
   formatAndPagingParams,
-  formatParameters
+  formatParameters,
+    SRIDParameter
 } = require('./common');
 
 const oisApiModel = require('../apiSpecification/ois/oisApiModels');
@@ -8,11 +9,12 @@ const oisModels = require('../ois/oisModels');
 const oisNamesAndKeys = require('../apiSpecification/ois/namesAndKeys');
 const oisParameters = require('../apiSpecification/ois/parameters');
 
-const oisReferenceText = `For dokumentation af begreber, felter, kodelister m.v. henvises til <a href="http://w2l.dk/file/632761/bbr_logisk_datamodel_v_12.2.pdf">BBR datamodellen</a>, <a href="http://bbr.dk/registreringsindhold/0/30">BBR's registreringsindhold</a> og <a href="https://www.ois.dk/Documents/PDFPrint/ois_datamodel.doc">OIS-dokumentationen</a>.`;
+const oisReferenceText = `<p>VIGTIGT: Der er udviklet en ny datamodel for BBR, som er udstillet på <a href="https://datafordeler.dk/dataoversigt/bygnings-og-boligregisteret-bbr/bbr/">Datafordeleren</a>. DAWAs BBR API er baseret en ældre datamodel, hvor data er konverteret tilbage fra den ny BBR datamodel.</p><p>For dokumentation af begreber, felter, kodelister m.v. henvises til <a href="http://w2l.dk/file/632761/bbr_logisk_datamodel_v_12.2.pdf">BBR datamodellen</a>, <a href="http://bbr.dk/registreringsindhold/0/30">BBR's registreringsindhold</a> og <a href="https://www.ois.dk/Documents/PDFPrint/ois_datamodel.doc">OIS-dokumentationen</a></p>.`;
 
 const oisAdditionalParameterDoc = {
   grund: [],
   bygning: [
+      SRIDParameter,
     {
       name: 'polygon',
       doc: 'Find bygninger, hvor bygningspunktet ligger indenfor det angivne polygon.' +
@@ -40,7 +42,9 @@ const oisAdditionalParameterDoc = {
       'i det koordinatsystem som er angivet ved srid-parameteren.'
     }
   ],
-  tekniskanlaeg: [{
+  tekniskanlaeg: [
+      SRIDParameter,
+      {
     name: 'polygon',
     doc: 'Find tekniske anlæg, hvor bygningspunktet ligger indenfor det angivne polygon.' +
     ' Polygonet specificeres som et array af koordinater på samme måde som' +
@@ -66,7 +70,9 @@ const oisAdditionalParameterDoc = {
       doc: 'Find det tekniske anlæg nærmest punktet angivet ved x- og y-parametrene. Parametrene angives' +
       'i det koordinatsystem som er angivet ved srid-parameteren.'
     }],
-  bygningspunkt: [{
+  bygningspunkt: [
+    SRIDParameter,
+    {
     name: 'polygon',
     doc: 'Find bygningspunkter der ligger indenfor det angivne polygon.' +
     ' Polygonet specificeres som et array af koordinater på samme måde som' +
