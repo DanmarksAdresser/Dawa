@@ -12,6 +12,9 @@ module.exports = (importerName, configSchema, importerFn) => {
     require('../conf/schemas/importer-cli-schema'),
     require('../conf/schemas/s3-offload-schema'),
     configSchema]);
+  logger.info('Running importer', {
+    importerName
+  });
   return runConfigured(schema, [], (config) => go(function*() {
     let timeoutProcess;
     if (config.get('importer_timeout')) {
