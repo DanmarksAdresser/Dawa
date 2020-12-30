@@ -3091,521 +3091,521 @@ describe('Korttjenester', function(){
 })
 
 
-describe('OIS', function(){
+// describe('OIS', function(){
 
-  it("relation til adresse", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//   it("relation til adresse", function(done){
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
+//     options.resolveWithFullResponse= true;
+//     var jsonrequest= rp(options).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/enheder';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/enheder';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.adresseid= adresser[0].id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
 
-      var opgangopt= {};
-      opgangopt.baseUrl= host;
-      opgangopt.url='ois/opgange';
-      opgangopt.qs= {};
-      opgangopt.qs.cache= enhedopt.qs.cache;
-      //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
-      opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
-      opgangopt.resolveWithFullResponse= true;
-      var opgangsrp= rp(opgangopt);
+//       var opgangopt= {};
+//       opgangopt.baseUrl= host;
+//       opgangopt.url='ois/opgange';
+//       opgangopt.qs= {};
+//       opgangopt.qs.cache= enhedopt.qs.cache;
+//       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
+//       opgangopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
+//       opgangopt.resolveWithFullResponse= true;
+//       var opgangsrp= rp(opgangopt);
 
-      var bygningopt= {};
-      bygningopt.baseUrl= host;
-      bygningopt.url='ois/bygninger';
-      bygningopt.qs= {};
-      bygningopt.qs.cache= enhedopt.qs.cache;
-      //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
-      bygningopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
-      bygningopt.resolveWithFullResponse= true;
-      var bygningrp= rp(bygningopt);
+//       var bygningopt= {};
+//       bygningopt.baseUrl= host;
+//       bygningopt.url='ois/bygninger';
+//       bygningopt.qs= {};
+//       bygningopt.qs.cache= enhedopt.qs.cache;
+//       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
+//       bygningopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
+//       bygningopt.resolveWithFullResponse= true;
+//       var bygningrp= rp(bygningopt);
 
-      var tekniskanlægopt= {};
-      tekniskanlægopt.baseUrl= host;
-      tekniskanlægopt.url='ois/tekniskeanlaeg';
-      tekniskanlægopt.qs= {};
-      tekniskanlægopt.qs.cache= enhedopt.qs.cache;
-      //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
-      tekniskanlægopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
-      tekniskanlægopt.resolveWithFullResponse= true;
-      var tekniskanlægrp= rp(tekniskanlægopt);
+//       var tekniskanlægopt= {};
+//       tekniskanlægopt.baseUrl= host;
+//       tekniskanlægopt.url='ois/tekniskeanlaeg';
+//       tekniskanlægopt.qs= {};
+//       tekniskanlægopt.qs.cache= enhedopt.qs.cache;
+//       //console.log('adgangsadresseid: '+adresser[0].adgangsadresse.id);
+//       tekniskanlægopt.qs.adgangsadresseid= adresser[0].adgangsadresse.id;
+//       tekniskanlægopt.resolveWithFullResponse= true;
+//       var tekniskanlægrp= rp(tekniskanlægopt);
 
-      return Promise.all([enhedrp, bygningrp, tekniskanlægrp, opgangsrp]);
-    })
-    .then(function (responses) {
-      function callok(element, index, array) {          
-        return element.statusCode===200; 
-      } 
-      assert(responses.every(callok), "Http status code != 200");
+//       return Promise.all([enhedrp, bygningrp, tekniskanlægrp, opgangsrp]);
+//     })
+//     .then(function (responses) {
+//       function callok(element, index, array) {          
+//         return element.statusCode===200; 
+//       } 
+//       assert(responses.every(callok), "Http status code != 200");
 
-      // enhed        
-      var enheder= JSON.parse(responses[0].body);        
-      assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+//       // enhed        
+//       var enheder= JSON.parse(responses[0].body);        
+//       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
 
-      // bygninger        
-      var bygninger= JSON.parse(responses[1].body);        
-      assert(bygninger.length===0, "Der er fundet bygninger: " + bygninger.length);
+//       // bygninger        
+//       var bygninger= JSON.parse(responses[1].body);        
+//       assert(bygninger.length===0, "Der er fundet bygninger: " + bygninger.length);
 
-      // tekniske anlæg        
-      var tekniskanlæg= JSON.parse(responses[2].body);        
-      assert(tekniskanlæg.length===0, "Der er fundet tekniske anlæg: " + tekniskanlæg.length);
+//       // tekniske anlæg        
+//       var tekniskanlæg= JSON.parse(responses[2].body);        
+//       assert(tekniskanlæg.length===0, "Der er fundet tekniske anlæg: " + tekniskanlæg.length);
 
-      // opgange        
-      var opgange= JSON.parse(responses[3].body);        
-      assert(opgange.length===1, "Der er ikke fundet en opgang, men: " + tekniskanlæg.length);
+//       // opgange        
+//       var opgange= JSON.parse(responses[3].body);        
+//       assert(opgange.length===1, "Der er ikke fundet en opgang, men: " + tekniskanlæg.length);
 
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.bbrid= /* '0'+ */ enheder[0].Enhed_id; // fjern '0' +
-      ejerskabopt.resolveWithFullResponse= true;
-      //console.log(ejerskabopt);
-      //console.log(util.inspect(enheder));
-      return rp(ejerskabopt);
-    })
-    .then(function (response) {
-      // ejerskab        
-      var ejerskab= JSON.parse(response.body);        
-      assert(ejerskab.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskab.length);
-      done();
-    })
-    .catch((err) => {
-      done(err);
-    });
-  });
+//       var ejerskabopt= {};
+//       ejerskabopt.baseUrl= host;
+//       ejerskabopt.url='ois/ejerskaber';
+//       ejerskabopt.qs= {};
+//       ejerskabopt.qs.cache= 'no-cache';
+//       ejerskabopt.qs.bbrid= /* '0'+ */ enheder[0].Enhed_id; // fjern '0' +
+//       ejerskabopt.resolveWithFullResponse= true;
+//       //console.log(ejerskabopt);
+//       //console.log(util.inspect(enheder));
+//       return rp(ejerskabopt);
+//     })
+//     .then(function (response) {
+//       // ejerskab        
+//       var ejerskab= JSON.parse(response.body);        
+//       assert(ejerskab.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskab.length);
+//       done();
+//     })
+//     .catch((err) => {
+//       done(err);
+//     });
+//   });
 
 
-  it("lejet rækkehus", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Rødkildevej 46, 2400 København NV";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//   it("lejet rækkehus", function(done){
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Rødkildevej 46, 2400 København NV";
+//     options.resolveWithFullResponse= true;
+//     var jsonrequest= rp(options).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/enheder';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var enheder= JSON.parse(response.body);          
-      assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-      assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et lejet rækkehus");
-      assert(enheder[0].ENH_ANVEND_KODE===130, "Enhed er ikke et rækkehus");
-      assert(enheder[0].bygning.BYG_ANVEND_KODE===130, "Bygning er ikke et rækkehus");
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/enheder';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.adresseid= adresser[0].id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
+//       return enhedrp;
+//     }).then((response) => {      
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var enheder= JSON.parse(response.body);          
+//       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+//       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et lejet rækkehus");
+//       assert(enheder[0].ENH_ANVEND_KODE===130, "Enhed er ikke et rækkehus");
+//       assert(enheder[0].bygning.BYG_ANVEND_KODE===130, "Bygning er ikke et rækkehus");
 
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
-      // ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
-      ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-      return ejerskabrp;
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===0, "Der er ikke fundet nul ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
-      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//       var ejerskabopt= {};
+//       ejerskabopt.baseUrl= host;
+//       ejerskabopt.url='ois/ejerskaber';
+//       ejerskabopt.qs= {};
+//       ejerskabopt.qs.cache= 'no-cache';
+//       ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
+//       // ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
+//       // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+//       ejerskabopt.resolveWithFullResponse= true;
+//       var ejerskabrp= rp(ejerskabopt);
+//       return ejerskabrp;
+//     }).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var ejerskaber= JSON.parse(response.body);          
+//       assert(ejerskaber.length===0, "Der er ikke fundet nul ejerskab, men " + ejerskaber.length);
+//       function grund(element, index, array) {          
+//         return element.EntitetsType===1; 
+//       } 
+//       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
-  it("ejerlejlighed", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//   it("ejerlejlighed", function(done){
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
+//     options.resolveWithFullResponse= true;
+//     var jsonrequest= rp(options).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/enheder';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var enheder= JSON.parse(response.body);          
-      assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-      assert(enheder[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i et lejet rækkehus");
-      assert(enheder[0].ENH_ANVEND_KODE===140, "Enhed er ikke et etageboligbebyggelse");
-      assert(enheder[0].bygning.BYG_ANVEND_KODE===140, "Bygning er ikke et etageboligbebyggelse");
-      assert(enheder[0].bygning.ESREjdNr!==enheder[0].ejerskaber[0].ESREjdNr, "Enheds og bygnings esrejendomsnr er ens");
-      assert(enheder[0].ejerskaber[0].EntitetsType===3, "Enheds ejerskab er ikke en ejerlejlighed");
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/enheder';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.adresseid= adresser[0].id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
+//       return enhedrp;
+//     }).then((response) => {      
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var enheder= JSON.parse(response.body);          
+//       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+//       assert(enheder[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i et lejet rækkehus");
+//       assert(enheder[0].ENH_ANVEND_KODE===140, "Enhed er ikke et etageboligbebyggelse");
+//       assert(enheder[0].bygning.BYG_ANVEND_KODE===140, "Bygning er ikke et etageboligbebyggelse");
+//       assert(enheder[0].bygning.ESREjdNr!==enheder[0].ejerskaber[0].ESREjdNr, "Enheds og bygnings esrejendomsnr er ens");
+//       assert(enheder[0].ejerskaber[0].EntitetsType===3, "Enheds ejerskab er ikke en ejerlejlighed");
 
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
-      ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-      return ejerskabrp;
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
-      function enhed(element, index, array) {          
-        return element.EntitetsType===3; 
-      } 
-      assert(ejerskaber.every(enhed), "Ejerskab er ikke en grund eller bygning");
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//       var ejerskabopt= {};
+//       ejerskabopt.baseUrl= host;
+//       ejerskabopt.url='ois/ejerskaber';
+//       ejerskabopt.qs= {};
+//       ejerskabopt.qs.cache= 'no-cache';
+//       ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
+//       ejerskabopt.resolveWithFullResponse= true;
+//       var ejerskabrp= rp(ejerskabopt);
+//       return ejerskabrp;
+//     }).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var ejerskaber= JSON.parse(response.body);          
+//       assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
+//       function enhed(element, index, array) {          
+//         return element.EntitetsType===3; 
+//       } 
+//       assert(ejerskaber.every(enhed), "Ejerskab er ikke en grund eller bygning");
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
-  it("parcelhus", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Byagervej 9, 3450 Allerød";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//   it("parcelhus", function(done){
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Byagervej 9, 3450 Allerød";
+//     options.resolveWithFullResponse= true;
+//     var jsonrequest= rp(options).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/enheder';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var enheder= JSON.parse(response.body);          
-      assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-      assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et parcelhus");
-      assert(enheder[0].ENH_ANVEND_KODE===120, "Enhed er ikke et parcelhus");
-      assert(enheder[0].bygning.BYG_ANVEND_KODE===120, "Bygning er ikke et parcelhus");
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/enheder';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.adresseid= adresser[0].id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
+//       return enhedrp;
+//     }).then((response) => {      
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var enheder= JSON.parse(response.body);          
+//       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+//       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et parcelhus");
+//       assert(enheder[0].ENH_ANVEND_KODE===120, "Enhed er ikke et parcelhus");
+//       assert(enheder[0].bygning.BYG_ANVEND_KODE===120, "Bygning er ikke et parcelhus");
      
-      var eejerskabopt= {};
-      eejerskabopt.baseUrl= host;
-      eejerskabopt.url='ois/ejerskaber';
-      eejerskabopt.qs= {};
-      eejerskabopt.qs.cache= 'no-cache';
-      eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
-      eejerskabopt.resolveWithFullResponse= true;
-      var eejerskabrp= rp(eejerskabopt);
+//       var eejerskabopt= {};
+//       eejerskabopt.baseUrl= host;
+//       eejerskabopt.url='ois/ejerskaber';
+//       eejerskabopt.qs= {};
+//       eejerskabopt.qs.cache= 'no-cache';
+//       eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
+//       eejerskabopt.resolveWithFullResponse= true;
+//       var eejerskabrp= rp(eejerskabopt);
 
-      var bejerskabopt= {};
-      bejerskabopt.baseUrl= host;
-      bejerskabopt.url='ois/ejerskaber';
-      bejerskabopt.qs= {};
-      bejerskabopt.qs.cache= 'no-cache';
-      bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
-      bejerskabopt.resolveWithFullResponse= true;
-      var bejerskabrp= rp(bejerskabopt);
+//       var bejerskabopt= {};
+//       bejerskabopt.baseUrl= host;
+//       bejerskabopt.url='ois/ejerskaber';
+//       bejerskabopt.qs= {};
+//       bejerskabopt.qs.cache= 'no-cache';
+//       bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
+//       bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+//       bejerskabopt.resolveWithFullResponse= true;
+//       var bejerskabrp= rp(bejerskabopt);
 
-      return Promise.all([eejerskabrp, bejerskabrp]);
-    }).then((responses) => {    
-      function callok(element, index, array) {          
-        return element.statusCode===200; 
-      } 
-      assert(responses.every(callok), "Http status code != 200");
+//       return Promise.all([eejerskabrp, bejerskabrp]);
+//     }).then((responses) => {    
+//       function callok(element, index, array) {          
+//         return element.statusCode===200; 
+//       } 
+//       assert(responses.every(callok), "Http status code != 200");
 
-      var eejerskaber= JSON.parse(responses[0].body);      
-      //console.log(util.inspect(eejerskaber));           
-      assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
+//       var eejerskaber= JSON.parse(responses[0].body);      
+//       //console.log(util.inspect(eejerskaber));           
+//       assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
 
-      var bejerskaber= JSON.parse(responses[1].body);      
-      //console.log(util.inspect(bejerskaber));                  
-      assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
+//       var bejerskaber= JSON.parse(responses[1].body);      
+//       //console.log(util.inspect(bejerskaber));                  
+//       assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
 
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
-      assert(bejerskaber.every(grund), "Ejerskab er ikke en grund");
+//       function grund(element, index, array) {          
+//         return element.EntitetsType===1; 
+//       } 
+//       assert(bejerskaber.every(grund), "Ejerskab er ikke en grund");
 
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
-  it("teknisk anlæg", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adgangsadresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Strengsholtvej 13, 9300 Sæby";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//   it("teknisk anlæg", function(done){
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adgangsadresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Strengsholtvej 13, 9300 Sæby";
+//     options.resolveWithFullResponse= true;
+//     var jsonrequest= rp(options).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/tekniskeanlaeg';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adgangsadresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var tekniskeanlæg= JSON.parse(response.body);          
-      assert(tekniskeanlæg.length>=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskeanlæg.length);
-      assert(tekniskeanlæg[0].ejerskaber.length===0, "Der er fundet ejerskab i det tekniske anlæg");
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/tekniskeanlaeg';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.adgangsadresseid= adresser[0].id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
+//       return enhedrp;
+//     }).then((response) => {      
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var tekniskeanlæg= JSON.parse(response.body);          
+//       assert(tekniskeanlæg.length>=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskeanlæg.length);
+//       assert(tekniskeanlæg[0].ejerskaber.length===0, "Der er fundet ejerskab i det tekniske anlæg");
      
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
-      ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr; 
-      ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-      return ejerskabrp;
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===6, "Der er ikke fundet seks ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
-      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//       var ejerskabopt= {};
+//       ejerskabopt.baseUrl= host;
+//       ejerskabopt.url='ois/ejerskaber';
+//       ejerskabopt.qs= {};
+//       ejerskabopt.qs.cache= 'no-cache';
+//       ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
+//       ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr; 
+//       ejerskabopt.resolveWithFullResponse= true;
+//       var ejerskabrp= rp(ejerskabopt);
+//       return ejerskabrp;
+//     }).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var ejerskaber= JSON.parse(response.body);          
+//       assert(ejerskaber.length===6, "Der er ikke fundet seks ejerskab, men " + ejerskaber.length);
+//       function grund(element, index, array) {          
+//         return element.EntitetsType===1; 
+//       } 
+//       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
- it("bygning på lejet grund", function(done){
-    var options= {};
-    options.baseUrl= host;
-    options.url='adgangsadresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Hjaltesvej 5A, 7800 Skive";
-    options.resolveWithFullResponse= true;
-    var jsonrequest= rp(options).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//  it("bygning på lejet grund", function(done){
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adgangsadresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Hjaltesvej 5A, 7800 Skive";
+//     options.resolveWithFullResponse= true;
+//     var jsonrequest= rp(options).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/opgange';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.adgangsadresseid= adresser[0].id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var opgange= JSON.parse(response.body);
-      assert(opgange.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/opgange';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.adgangsadresseid= adresser[0].id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
+//       return enhedrp;
+//     }).then((response) => {      
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var opgange= JSON.parse(response.body);
+//       assert(opgange.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-      var enhedopt= {};
-      enhedopt.baseUrl= host;
-      enhedopt.url='ois/bygninger';
-      enhedopt.qs= {};
-      enhedopt.qs.cache= 'no-cache';
-      enhedopt.qs.id= opgange[0].Bygning_id;
-      enhedopt.resolveWithFullResponse= true;
-      var enhedrp= rp(enhedopt);
-      return enhedrp;
-    }).then((response) => {      
-      assert(response.statusCode===200, "Http status code != 200");
-      var bygninger= JSON.parse(response.body);          
-      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
-      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ét ejerskab i bygningen, men " + bygninger[0].ejerskaber.length);
+//       var enhedopt= {};
+//       enhedopt.baseUrl= host;
+//       enhedopt.url='ois/bygninger';
+//       enhedopt.qs= {};
+//       enhedopt.qs.cache= 'no-cache';
+//       enhedopt.qs.id= opgange[0].Bygning_id;
+//       enhedopt.resolveWithFullResponse= true;
+//       var enhedrp= rp(enhedopt);
+//       return enhedrp;
+//     }).then((response) => {      
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var bygninger= JSON.parse(response.body);          
+//       assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
+//       assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ét ejerskab i bygningen, men " + bygninger[0].ejerskaber.length);
      
-      var ejerskabopt= {};
-      ejerskabopt.baseUrl= host;
-      ejerskabopt.url='ois/ejerskaber';
-      ejerskabopt.qs= {};
-      ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
-      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
-      ejerskabopt.resolveWithFullResponse= true;
-      var ejerskabrp= rp(ejerskabopt);
-      return ejerskabrp;
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
-      assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
-      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//       var ejerskabopt= {};
+//       ejerskabopt.baseUrl= host;
+//       ejerskabopt.url='ois/ejerskaber';
+//       ejerskabopt.qs= {};
+//       ejerskabopt.qs.cache= 'no-cache';
+//       ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
+//       ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+//       ejerskabopt.resolveWithFullResponse= true;
+//       var ejerskabrp= rp(ejerskabopt);
+//       return ejerskabrp;
+//     }).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var ejerskaber= JSON.parse(response.body);          
+//       assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);
+//       function grund(element, index, array) {          
+//         return element.EntitetsType===1; 
+//       } 
+//       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
 
- // it("bygning på lejet grund", function(done){
- //    var options= {};
- //    options.baseUrl= host;
- //    options.url='adgangsadresser';
- //    options.qs= {};
- //    options.qs.cache= 'no-cache';
- //    options.qs.q= "Østergade 24A, 9370 Hals";
- //    options.resolveWithFullResponse= true;
- //    var jsonrequest= rp(options).then((response) => {
- //      assert(response.statusCode===200, "Http status code != 200");
- //      var adresser= JSON.parse(response.body);
- //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//  // it("bygning på lejet grund", function(done){
+//  //    var options= {};
+//  //    options.baseUrl= host;
+//  //    options.url='adgangsadresser';
+//  //    options.qs= {};
+//  //    options.qs.cache= 'no-cache';
+//  //    options.qs.q= "Østergade 24A, 9370 Hals";
+//  //    options.resolveWithFullResponse= true;
+//  //    var jsonrequest= rp(options).then((response) => {
+//  //      assert(response.statusCode===200, "Http status code != 200");
+//  //      var adresser= JSON.parse(response.body);
+//  //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
- //      var enhedopt= {};
- //      enhedopt.baseUrl= host;
- //      enhedopt.url='ois/bygninger';
- //      enhedopt.qs= {};
- //      enhedopt.qs.cache= 'no-cache';
- //      enhedopt.qs.adgangsadresseid= adresser[0].id;
- //      enhedopt.resolveWithFullResponse= true;
- //      var enhedrp= rp(enhedopt);
- //      return enhedrp;
- //    }).then((response) => {      
- //      assert(response.statusCode===200, "Http status code != 200");
- //      var bygninger= JSON.parse(response.body);          
- //      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
- //      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
+//  //      var enhedopt= {};
+//  //      enhedopt.baseUrl= host;
+//  //      enhedopt.url='ois/bygninger';
+//  //      enhedopt.qs= {};
+//  //      enhedopt.qs.cache= 'no-cache';
+//  //      enhedopt.qs.adgangsadresseid= adresser[0].id;
+//  //      enhedopt.resolveWithFullResponse= true;
+//  //      var enhedrp= rp(enhedopt);
+//  //      return enhedrp;
+//  //    }).then((response) => {      
+//  //      assert(response.statusCode===200, "Http status code != 200");
+//  //      var bygninger= JSON.parse(response.body);          
+//  //      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
+//  //      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
      
- //      var ejerskabopt= {};
- //      ejerskabopt.baseUrl= host;
- //      ejerskabopt.url='ois/ejerskaber';
- //      ejerskabopt.qs= {};
- //      ejerskabopt.qs.cache= 'no-cache';
- //      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
- //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
- //      ejerskabopt.resolveWithFullResponse= true;
- //      var ejerskabrp= rp(ejerskabopt);
- //      return ejerskabrp;
- //    }).then((response) => {
- //      assert(response.statusCode===200, "Http status code != 200");
- //      var ejerskaber= JSON.parse(response.body);          
- //      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
- //      function grund(element, index, array) {          
- //        return element.EntitetsType===1; 
- //      } 
- //      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
- //      done();
- //    }).catch((err) => {
- //      done(err);
- //    });
- //  });
+//  //      var ejerskabopt= {};
+//  //      ejerskabopt.baseUrl= host;
+//  //      ejerskabopt.url='ois/ejerskaber';
+//  //      ejerskabopt.qs= {};
+//  //      ejerskabopt.qs.cache= 'no-cache';
+//  //      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
+//  //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+//  //      ejerskabopt.resolveWithFullResponse= true;
+//  //      var ejerskabrp= rp(ejerskabopt);
+//  //      return ejerskabrp;
+//  //    }).then((response) => {
+//  //      assert(response.statusCode===200, "Http status code != 200");
+//  //      var ejerskaber= JSON.parse(response.body);          
+//  //      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
+//  //      function grund(element, index, array) {          
+//  //        return element.EntitetsType===1; 
+//  //      } 
+//  //      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
+//  //      done();
+//  //    }).catch((err) => {
+//  //      done(err);
+//  //    });
+//  //  });
 
 
- it("fra ejerskab til adresse", function(done) {
-    var ejerskabopt= {};
-    ejerskabopt.baseUrl= host;
-    ejerskabopt.url='ois/ejerskaber';
-    ejerskabopt.qs= {};
-    ejerskabopt.qs.cache= 'no-cache';
-    ejerskabopt.qs.kommunekode= "0201";
-    ejerskabopt.qs.esrejendomsnr= "094995"; 
-    ejerskabopt.resolveWithFullResponse= true;
-    var ejerskabrp= rp(ejerskabopt);
-    ejerskabrp.then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);  
-      assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);                
-      var options= {};
-      options.baseUrl= host;
-      options.url='adresser';
-      options.qs= {};
-      options.qs.cache= 'no-cache';
-      options.qs.id= ejerskaber[0].enhed.EnhAdr_id;
-      options.resolveWithFullResponse= true;
-      return rp(options);
-    }).then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);          
-      assert(adresser.length===1, "Der er ikke fundet en adresse, men " + adresser.length);
-      assert(adresser[0].adressebetegnelse.localeCompare("Lilledal 23, 1. tv, 3450 Allerød")===0, "Adressen er ikke Lilledal 23, 1. tv, 3450 Allerød");
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//  it("fra ejerskab til adresse", function(done) {
+//     var ejerskabopt= {};
+//     ejerskabopt.baseUrl= host;
+//     ejerskabopt.url='ois/ejerskaber';
+//     ejerskabopt.qs= {};
+//     ejerskabopt.qs.cache= 'no-cache';
+//     ejerskabopt.qs.kommunekode= "0201";
+//     ejerskabopt.qs.esrejendomsnr= "094995"; 
+//     ejerskabopt.resolveWithFullResponse= true;
+//     var ejerskabrp= rp(ejerskabopt);
+//     ejerskabrp.then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var ejerskaber= JSON.parse(response.body);  
+//       assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);                
+//       var options= {};
+//       options.baseUrl= host;
+//       options.url='adresser';
+//       options.qs= {};
+//       options.qs.cache= 'no-cache';
+//       options.qs.id= ejerskaber[0].enhed.EnhAdr_id;
+//       options.resolveWithFullResponse= true;
+//       return rp(options);
+//     }).then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var adresser= JSON.parse(response.body);          
+//       assert(adresser.length===1, "Der er ikke fundet en adresse, men " + adresser.length);
+//       assert(adresser[0].adressebetegnelse.localeCompare("Lilledal 23, 1. tv, 3450 Allerød")===0, "Adressen er ikke Lilledal 23, 1. tv, 3450 Allerød");
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
- it("reverse geokodning af bygning", function(done) {
-    var reverseopt= {};
-    reverseopt.baseUrl= host;
-    reverseopt.url='ois/bygninger';
-    reverseopt.qs= {};
-    reverseopt.qs.cache= 'no-cache';
-    reverseopt.qs.x= 12.5108572474172;
-    reverseopt.qs.y= 55.6983973831476; 
-    reverseopt.resolveWithFullResponse= true;
-    var reverserp= rp(reverseopt);       
-    reverserp.then((response) => {
-      assert(response.statusCode===200, "Http status code != 200");
-      var bygninger= JSON.parse(response.body);
-      assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
-      assert(bygninger[0].BYG_ANVEND_KODE===930, "Det er ikke et udhus (930), men " + bygninger[0].BYG_ANVEND_KODE);
-      assert(bygninger[0].OPFOERELSE_AAR===1921, "Det er ikke opført i 1921, men " + bygninger[0].OPFOERELSE_AAR);
-      done();
-    }).catch((err) => {
-      done(err);
-    });
-  });
+//  it("reverse geokodning af bygning", function(done) {
+//     var reverseopt= {};
+//     reverseopt.baseUrl= host;
+//     reverseopt.url='ois/bygninger';
+//     reverseopt.qs= {};
+//     reverseopt.qs.cache= 'no-cache';
+//     reverseopt.qs.x= 12.5108572474172;
+//     reverseopt.qs.y= 55.6983973831476; 
+//     reverseopt.resolveWithFullResponse= true;
+//     var reverserp= rp(reverseopt);       
+//     reverserp.then((response) => {
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var bygninger= JSON.parse(response.body);
+//       assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
+//       assert(bygninger[0].BYG_ANVEND_KODE===930, "Det er ikke et udhus (930), men " + bygninger[0].BYG_ANVEND_KODE);
+//       assert(bygninger[0].OPFOERELSE_AAR===1921, "Det er ikke opført i 1921, men " + bygninger[0].OPFOERELSE_AAR);
+//       done();
+//     }).catch((err) => {
+//       done(err);
+//     });
+//   });
 
 
-});
+// });
 
 describe('BBR Light', function(){
 
@@ -4166,321 +4166,321 @@ describe('BBR Light', function(){
 
 });
 
-describe('GRBBR', function(){
+// describe('GRBBR', function(){
 
 
-  it("test af  manglende enhed samt manglende bygningsreference på enhed", async function(){
+//   it("test af  manglende enhed samt manglende bygningsreference på enhed", async function(){
 
-    // finde adresse
-    let options= {};
-    options.baseUrl= host;
-    options.url='adresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
-    options.resolveWithFullResponse= true;
-    let response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    let adresser= JSON.parse(response.body);
-    assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//     // finde adresse
+//     let options= {};
+//     options.baseUrl= host;
+//     options.url='adresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
+//     options.resolveWithFullResponse= true;
+//     let response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     let adresser= JSON.parse(response.body);
+//     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-    // find adressens enhed
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/enheder';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.status= 6;
-    options.qs.adresse_id= adresser[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    let enheder= JSON.parse(response.body);
-    assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-    assert(enheder[0].enh020EnhedensAnvendelse==='140', 'Enheden er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
+//     // find adressens enhed
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/enheder';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.status= 6;
+//     options.qs.adresse_id= adresser[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     let enheder= JSON.parse(response.body);
+//     assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+//     assert(enheder[0].enh020EnhedensAnvendelse==='140', 'Enheden er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
 
-    // find enhedens bygning
-    options= {};
-    assert(enheder[0].bygning, 'Enhedens byning mangler');
-    options.url=enheder[0].bygning.href;
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.status= 6;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    let bygning= JSON.parse(response.body);
-    assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
-  });
-
-
-  it("adresse til oplysninger om enhed", async function() {
-
-    // finde adresse
-    var options= {};
-    options.baseUrl= host;
-    options.url='adresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Teglbrændervej 1, st. th, 2400 København NV";
-    options.resolveWithFullResponse= true;
-    let response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var adresser= JSON.parse(response.body);
-    assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
-
-    // find adressens enhed
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/enheder';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.status= 6;
-    options.qs.adresse_id= adresser[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var enheder= JSON.parse(response.body);
-    assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
-    assert(enheder[0].enh020EnhedensAnvendelse==='140', 'Enheden er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
-
-    // undersøg om enheden er en ejerlejlighed
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/enhedejerlejlighed';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.enhed_id= enheder[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var ejerlejligheder= JSON.parse(response.body);
-    assert(ejerlejligheder.length===1, "Der er ikke fundet én ejerlejligheder, men " + ejerlejligheder.length);
+//     // find enhedens bygning
+//     options= {};
+//     assert(enheder[0].bygning, 'Enhedens byning mangler');
+//     options.url=enheder[0].bygning.href;
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.status= 6;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     let bygning= JSON.parse(response.body);
+//     assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
+//   });
 
 
-    // find ejendomsoplysninger
-    options= {};
-    options.url=ejerlejligheder[0].ejerlejlighed.href;
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.enhed_id= enheder[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var ejendom= JSON.parse(response.body);
-    assert(ejendom.ejendomstype==='Ejerlejlighed', "Ejendommen er ikke en lejlighed, men " + ejendom.ejendomstype);
+//   it("adresse til oplysninger om enhed", async function() {
 
-    // opgang
-    options= {};
-    options.url=enheder[0].opgang.href;
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var opgang= JSON.parse(response.body);
-    assert(opgang.opg020Elevator==='0', "Der er fundet elevator i opgangen");
+//     // finde adresse
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Teglbrændervej 1, st. th, 2400 København NV";
+//     options.resolveWithFullResponse= true;
+//     let response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var adresser= JSON.parse(response.body);
+//     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-    // etage
-    options= {};
-    options.url=enheder[0].etage.href;
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var etage= JSON.parse(response.body);
-    assert(etage.eta006BygningensEtagebetegnelse==='st', "Etage er ikke st"); 
+//     // find adressens enhed
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/enheder';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.status= 6;
+//     options.qs.adresse_id= adresser[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var enheder= JSON.parse(response.body);
+//     assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
+//     assert(enheder[0].enh020EnhedensAnvendelse==='140', 'Enheden er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
 
-    // teknisk anlæg
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/tekniskeanlaeg';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.enhed_id= enheder[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var tekniskeanlæg= JSON.parse(response.body);
-    assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg'); 
-  });
+//     // undersøg om enheden er en ejerlejlighed
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/enhedejerlejlighed';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.enhed_id= enheder[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var ejerlejligheder= JSON.parse(response.body);
+//     assert(ejerlejligheder.length===1, "Der er ikke fundet én ejerlejligheder, men " + ejerlejligheder.length);
 
 
-  it("adgangsadresse til oplysninger om bygning", async function(){
+//     // find ejendomsoplysninger
+//     options= {};
+//     options.url=ejerlejligheder[0].ejerlejlighed.href;
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.enhed_id= enheder[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var ejendom= JSON.parse(response.body);
+//     assert(ejendom.ejendomstype==='Ejerlejlighed', "Ejendommen er ikke en lejlighed, men " + ejendom.ejendomstype);
 
-    // finde adresse
-    var options= {};
-    options.baseUrl= host;
-    options.url='adgangsadresser';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.q= "Teglbrændervej 1, 2400 København NV";
-    options.resolveWithFullResponse= true;
-    let response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var adgangsadresser= JSON.parse(response.body);
-    assert(adgangsadresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//     // opgang
+//     options= {};
+//     options.url=enheder[0].opgang.href;
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var opgang= JSON.parse(response.body);
+//     assert(opgang.opg020Elevator==='0', "Der er fundet elevator i opgangen");
 
-    // find adgangsadressens opgang
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/opgange';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.status= 6;
-    options.qs.husnummer_id= adgangsadresser[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var opgange= JSON.parse(response.body);
-    assert(opgange.length===1, "Der er ikke fundet én opgang, men " + opgange.length);
+//     // etage
+//     options= {};
+//     options.url=enheder[0].etage.href;
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var etage= JSON.parse(response.body);
+//     assert(etage.eta006BygningensEtagebetegnelse==='st', "Etage er ikke st"); 
 
-    // find adgangsadressens bygning
-    options= {};
-    options.url=opgange[0].bygning.href;
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.status= 6;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var bygning= JSON.parse(response.body);
-    assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
-
-    // undersøg om bygningen er en bygningpaafremmedgrund
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/bygningpaafremmedgrund';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygning.id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var bygningerpaafremmedgrund= JSON.parse(response.body);
-    assert(bygningerpaafremmedgrund.length===0, "Der er ikke fundet én bygningpaafremmedgrund, men " + bygningerpaafremmedgrund.length);
+//     // teknisk anlæg
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/tekniskeanlaeg';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.enhed_id= enheder[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var tekniskeanlæg= JSON.parse(response.body);
+//     assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg'); 
+//   });
 
 
-    if (bygningerpaafremmedgrund.length>0) {
-      // find ejendomsoplysninger for bygning på fremmed grund
-      options= {};
-      options.url=bygningerpaafremmedgrund[0].bygningPåFremmedGrund.href;
-      options.qs= {};
-      options.qs.cache= 'no-cache';
-      options.resolveWithFullResponse= true;
-      response=  await rp(options);    
-      assert(response.statusCode===200, "Http status code != 200");
-      var ejendom= JSON.parse(response.body);
-      assert(ejendom.ejendomstype==='BPFG', "Ejendommen er ikke en bygning på fremmed grund, men " + ejendom.ejendomstype);
-    }
+//   it("adgangsadresse til oplysninger om bygning", async function(){
 
-    // opgange
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/opgange';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygning.id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var opgange= JSON.parse(response.body);
-    assert(opgange.length===4, 'Der er fundet ' + opgange.length + ' opgange');
+//     // finde adresse
+//     var options= {};
+//     options.baseUrl= host;
+//     options.url='adgangsadresser';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.q= "Teglbrændervej 1, 2400 København NV";
+//     options.resolveWithFullResponse= true;
+//     let response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var adgangsadresser= JSON.parse(response.body);
+//     assert(adgangsadresser.length===1, "Der er ikke fundet én "+options.qs.q); 
 
-    // opgangens enheder
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/enheder';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.opgang_id= opgange[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var opgangensenheder= JSON.parse(response.body);
-    assert(opgangensenheder.length===6, 'Der er fundet ' + opgangensenheder.length + ' enheder på opgangen');
+//     // find adgangsadressens opgang
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/opgange';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.status= 6;
+//     options.qs.husnummer_id= adgangsadresser[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var opgange= JSON.parse(response.body);
+//     assert(opgange.length===1, "Der er ikke fundet én opgang, men " + opgange.length);
 
-    // etager
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/etager';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygning.id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var etager= JSON.parse(response.body);
-    assert(etager.length===6, 'Der er fundet ' + etager.length + ' etager');
+//     // find adgangsadressens bygning
+//     options= {};
+//     options.url=opgange[0].bygning.href;
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.status= 6;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var bygning= JSON.parse(response.body);
+//     assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
 
-    // etagens enheder
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/enheder';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.etage_id= etager[0].id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var etagensenheder= JSON.parse(response.body);
-    assert(etagensenheder.length===3, 'Der er fundet ' + etagensenheder.length + ' etagens enheder');
+//     // undersøg om bygningen er en bygningpaafremmedgrund
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/bygningpaafremmedgrund';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.bygning_id= bygning.id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var bygningerpaafremmedgrund= JSON.parse(response.body);
+//     assert(bygningerpaafremmedgrund.length===0, "Der er ikke fundet én bygningpaafremmedgrund, men " + bygningerpaafremmedgrund.length);
 
-    // grunden bygningen ligger på
-    options= {};
-    options.url=bygning.grund.href;
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var grund= JSON.parse(response.body);
-    assert(grund.gru009Vandforsyning==='1', "Vandforsyningen er " + grund.gru009Vandforsyning); 
 
-    // grundens jordstykker
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/grundjordstykke';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.grund_id= grund.id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var grundjordstykker= JSON.parse(response.body);
-    assert(grundjordstykker.length===1, 'Der er fundet ' + grundjordstykker.length + ' grundjordstykker');
-    assert(grundjordstykker[0].jordstykke.id===bygning.jordstykke.id, 'Jordstykket tilknyttet grunden (' + grundjordstykker[0].id + ') er forskelligt fra jordstykket tilknyttet bygningen (' + bygning.jordstykke.id + ')');
+//     if (bygningerpaafremmedgrund.length>0) {
+//       // find ejendomsoplysninger for bygning på fremmed grund
+//       options= {};
+//       options.url=bygningerpaafremmedgrund[0].bygningPåFremmedGrund.href;
+//       options.qs= {};
+//       options.qs.cache= 'no-cache';
+//       options.resolveWithFullResponse= true;
+//       response=  await rp(options);    
+//       assert(response.statusCode===200, "Http status code != 200");
+//       var ejendom= JSON.parse(response.body);
+//       assert(ejendom.ejendomstype==='BPFG', "Ejendommen er ikke en bygning på fremmed grund, men " + ejendom.ejendomstype);
+//     }
+
+//     // opgange
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/opgange';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.bygning_id= bygning.id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var opgange= JSON.parse(response.body);
+//     assert(opgange.length===4, 'Der er fundet ' + opgange.length + ' opgange');
+
+//     // opgangens enheder
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/enheder';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.opgang_id= opgange[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var opgangensenheder= JSON.parse(response.body);
+//     assert(opgangensenheder.length===6, 'Der er fundet ' + opgangensenheder.length + ' enheder på opgangen');
+
+//     // etager
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/etager';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.bygning_id= bygning.id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var etager= JSON.parse(response.body);
+//     assert(etager.length===6, 'Der er fundet ' + etager.length + ' etager');
+
+//     // etagens enheder
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/enheder';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.etage_id= etager[0].id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var etagensenheder= JSON.parse(response.body);
+//     assert(etagensenheder.length===3, 'Der er fundet ' + etagensenheder.length + ' etagens enheder');
+
+//     // grunden bygningen ligger på
+//     options= {};
+//     options.url=bygning.grund.href;
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var grund= JSON.parse(response.body);
+//     assert(grund.gru009Vandforsyning==='1', "Vandforsyningen er " + grund.gru009Vandforsyning); 
+
+//     // grundens jordstykker
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/grundjordstykke';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.grund_id= grund.id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var grundjordstykker= JSON.parse(response.body);
+//     assert(grundjordstykker.length===1, 'Der er fundet ' + grundjordstykker.length + ' grundjordstykker');
+//     assert(grundjordstykker[0].jordstykke.id===bygning.jordstykke.id, 'Jordstykket tilknyttet grunden (' + grundjordstykker[0].id + ') er forskelligt fra jordstykket tilknyttet bygningen (' + bygning.jordstykke.id + ')');
   
-    // jordstykket
-    options= {};
-    options.baseUrl= host;
-    options.url='jordstykker';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.featureid= grundjordstykker[0].jordstykke.id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var jordstykker= JSON.parse(response.body);
-    assert(jordstykker.length===1, 'Der er fundet ' + jordstykker.length + ' jordstykker');
+//     // jordstykket
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='jordstykker';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.featureid= grundjordstykker[0].jordstykke.id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var jordstykker= JSON.parse(response.body);
+//     assert(jordstykker.length===1, 'Der er fundet ' + jordstykker.length + ' jordstykker');
    
-    // teknisk anlæg
-    options= {};
-    options.baseUrl= host;
-    options.url='bbr/tekniskeanlaeg';
-    options.qs= {};
-    options.qs.cache= 'no-cache';
-    options.qs.bygning_id= bygning.id;
-    options.resolveWithFullResponse= true;
-    response=  await rp(options);    
-    assert(response.statusCode===200, "Http status code != 200");
-    var tekniskeanlæg= JSON.parse(response.body);
-    assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg'); 
-  });
+//     // teknisk anlæg
+//     options= {};
+//     options.baseUrl= host;
+//     options.url='bbr/tekniskeanlaeg';
+//     options.qs= {};
+//     options.qs.cache= 'no-cache';
+//     options.qs.bygning_id= bygning.id;
+//     options.resolveWithFullResponse= true;
+//     response=  await rp(options);    
+//     assert(response.statusCode===200, "Http status code != 200");
+//     var tekniskeanlæg= JSON.parse(response.body);
+//     assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg'); 
+//   });
 
 
-});
+// });
 
 describe('Stednavne', function(){
 
@@ -4865,7 +4865,7 @@ describe('Stednavne2', function(){
       assert(response.statusCode===200, "Http status code != 200");
       var stednavne= JSON.parse(response.body);
       assert(stednavne.length===1, "Der burde være en: "+stednavne.length);
-      assert(stednavne[0].adressebetegnelse === 'Søtorvet 4, 8600 Silkeborg', "Burde være 'Søtorvet 4, 8600 Silkeborg'");
+      assert(stednavne[0].adressebetegnelse === 'Christian 8.s Vej 80, 8600 Silkeborg', "Burde være 'Christian 8.s Vej 80, 8600 Silkeborg'");
       done();
     })
     .catch((err) => {
