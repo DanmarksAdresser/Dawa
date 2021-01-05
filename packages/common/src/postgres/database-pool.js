@@ -28,12 +28,12 @@ const DEFAULT_RAW_POOL_OPTIONS = {
 
 const withUnpooledRawConnection = (options, connectionFn) => go(function*() {
   const client = new pg.Client(options);
-  yield Promise.promisify(client.connect, { context: client})();
+  yield client.connect();
   try {
     return yield this.delegateAbort(connectionFn(client));
   }
   finally {
-    yield Promise.promisify(client.end, { context: client})();
+    yield client.end();
   }
 });
 
@@ -42,12 +42,12 @@ const rawConnectionPool = (options) => {
   const factory = {
     create: () => go(function*() {
       const client = new pg.Client(options);
-      yield Promise.promisify(client.connect, { context: client})();
+      yield client.connect();
       yield client.query(`SET statement_timeout TO ${options.statementTimeout}`);
       return client;
     }),
     destroy: (client) => {
-      return Promise.promisify(client.end, { context: client})();
+      return client.end();
     },
     validate: client => Promise.coroutine(function*(){
       try {
