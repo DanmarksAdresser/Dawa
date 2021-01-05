@@ -2,6 +2,8 @@ const Promise = require('bluebird');
 const copyFrom = require('pg-copy-streams').from;
 const { go, Abort } = require('ts-csp');
 const { processify } = require('../csp-util');
+const configHolder = require('@dawadk/common/src/config/holder');
+const sqlLogger = require('@dawadk/common/src/logger').forCategory('Database');
 
 const transactionStatements = {
   READ_ONLY: ['BEGIN READ ONLY', 'ROLLBACK'],
@@ -49,7 +51,7 @@ class DawaClient {
     });
   }
 
-  query(sql, params, options) {
+  queryWithTiming(sql, params, options) {
     // console.log(sql);
     // console.log(JSON.stringify(params))
     options = options || {};
@@ -95,24 +97,44 @@ class DawaClient {
           finally {
             const afterQueryTs = Date.now();
             logMessage.queryTime = afterQueryTs - afterQueueTs;
-            if(logMessage.queryTime > 1000) {
-              logMessage.sql = sql;
-              logMessage.params = params;
-            }
           }
           result.rows = result.rows || [];
-          return result;
+          logMessage.rows = result.rows.length;
+          return [result, logMessage.queryTime];
         }
         catch (err) {
           if (err instanceof Abort) {
             logMessage.aborted = true;
             logMessage.abortReason = err.reason;
           }
+          else {
+            logMessage.error = err;
+          }
           throw err;
         }
         finally {
           thisClient.queryInProgress = false;
+
+          // log statistics for client
           logger(logMessage);
+
+          // log SQL, if slow or error
+          const error = logMessage.error;
+          const config = configHolder.getConfig();
+          const totalTime = logMessage.queryTime || 0;
+
+          const shouldLog = !options.skipSqlLogging || error || (config.get('logging.log_sql') && totalTime > config.get('logging.log_sql_threshold'));
+          if(shouldLog) {
+            const level = error ? 'error' : 'info';
+            sqlLogger.log(level, 'sql', {
+              cursor: false,
+              sql,
+              params,
+              rows: logMessage.rows,
+              queryTime: totalTime,
+              error,
+            });
+          }
         }
       });
 
@@ -124,6 +146,14 @@ class DawaClient {
       }
     });
 
+  }
+
+  query(sql, params, options) {
+    const thisClient = this;
+    return go(function*() {
+      const [result] = yield this.delegateAbort(thisClient.queryWithTiming(sql, params, options));
+      return result;
+    });
   }
 
   withReservedSlot(fn, timeout) {
@@ -174,11 +204,11 @@ class DawaClient {
     this.inTransaction = true;
     const client = this;
     return go(function*() {
-      yield this.delegateAbort(client.query(transactionStatements[mode][0], [], { skipQueue: true }));
+      yield this.delegateAbort(client.query(transactionStatements[mode][0], [], { skipQueue: true, skipSqlLogging: true }));
       try {
         const result = yield this.delegateAbort(processify(transactionFn()));
         // note that we do *not* abort transaction commit/rollback
-        yield client.query(transactionStatements[mode][1], [], { skipQueue: true });
+        yield client.query(transactionStatements[mode][1], [], { skipQueue: true, skipSqlLogging: true });
         return result;
       }
       catch(e) {

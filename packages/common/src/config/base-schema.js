@@ -24,6 +24,18 @@ module.exports = {
       default: 'info',
       format: 'string',
       doc: 'Default log level.'
+    },
+    log_sql: {
+      doc: "Whether to log SQL statements",
+      format: 'boolean',
+      default: true,
+      cli: true
+    },
+    log_sql_threshold: {
+      doc: 'Set a threshold for SQL statement logging (ms). Only statements slower than threshold will be logged',
+      format: 'nat',
+      default: 1000,
+      cli: true
     }
   },
   config_files: {
