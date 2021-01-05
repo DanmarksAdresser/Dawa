@@ -1,13 +1,13 @@
 {
   "name": "@dawadk/import-util",
-  "version": "5.0.9",
+  "version": "5.0.10",
   "license": "MIT",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@dawadk/common": "^3.0.2",
+    "@dawadk/common": "^3.0.3",
     "@mapbox/polylabel": "^1.0.2",
     "aws-sdk": "2.461.0",
     "bluebird": "^3.5.4",
