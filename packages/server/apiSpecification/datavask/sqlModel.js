@@ -189,16 +189,21 @@ GROUP BY id;`
   };
 
 }
-
+const postnrRegex = /\d{4}/g;
 function fuzzyQuery(entityName, betegnelse, limit) {
   const table = `vask_${entityName}r`;
   const uniqueTable = `${table}_unikke`;
+
+  // we add a postnr clause to the query for performance reasons when there is exactly one 4-digit number in the address text
+  const postnrMatches = betegnelse.match(postnrRegex);
+  const postnrClause = postnrMatches.length === 1 ? `WHERE postnr = ${postnrMatches[0]}` : '';
   const sql = `
 WITH vps AS (SELECT
                kommunekode,
                vejkode,
                postnr
              FROM vask_vejstykker_postnumre vp
+            ${postnrClause}
              ORDER BY tekst <-> $1
              LIMIT 15),
     allids AS (SELECT DISTINCT id
