@@ -29,11 +29,12 @@ go(function* () {
             break;
         }
         const match = regex.exec(value);
-        if(match[6] === 'Miss') {
+        const query = match[5] !== '-' ? `?${decodeURIComponent(match[5])}` : '';
+        if(match[6] !== 'Hit') {
             requestPlan.push({
                 cip: match[3],
                 time: moment(`${match[1]}T${match[2]}Z`).add(getRandomInt(1000)),
-                url: match[4] + (match[5] !== '-' ? ('?' + match[5]) : '')
+                url: match[4] + query
             });
         }
     }
@@ -67,7 +68,10 @@ go(function* () {
             now = moment();
         }
         const options = {
-            headers: {'X-Forwarded-For': requestPlan[index].cip},
+            headers: {
+                'X-Forwarded-For': requestPlan[index].cip,
+                'Accept-Encoding': 'gzip'
+            },
             agent
         };
         const request = http.get(`${host}${url}`, options, response => {
