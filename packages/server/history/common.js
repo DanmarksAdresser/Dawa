@@ -120,6 +120,8 @@ from vask_adgangsadresser group by kommunekode,vejkode,vejnavn,postnr, vejnavn||
 UNION
 (select kommunekode,vejkode,adresseringsvejnavn,postnr, adresseringsvejnavn|| ' ' || postnr || ' ' || postnrnavn as tekst
 from vask_adgangsadresser group by kommunekode,vejkode,adresseringsvejnavn,postnr, adresseringsvejnavn|| ' ' || postnr || ' ' || postnrnavn)
+UNION (select kommunekode, vejkode, vejnavn, s.nr as postnr, vejnavn|| ' ' || formatPostnr(s.nr) || ' ' || s.navn as tekst
+FROM stormodtagere s JOIN adgangsadresser_mat a ON s.adgangsadresseid = a.id)
 ;   
 `);
 }

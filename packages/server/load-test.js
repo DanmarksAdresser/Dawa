@@ -30,7 +30,7 @@ go(function* () {
         }
         const match = regex.exec(value);
         const query = match[5] !== '-' ? `?${decodeURIComponent(match[5])}` : '';
-        if(match[6] !== 'Miss') {
+        if(match[6] === 'Miss') {
             requestPlan.push({
                 cip: match[3],
                 time: moment(`${match[1]}T${match[2]}Z`).add(getRandomInt(1000)),

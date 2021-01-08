@@ -24,16 +24,16 @@ describe('Autocomplete', function(){
 
   it('Autocomplete med callback', function(done){
 
-    function cb(response) {  
-      //console.log(response[0].tekst); 
+    function cb(response) {
+      //console.log(response[0].tekst);
       return response.length;
     }
 
-    request(encodeURI(host+'/autocomplete?q=rødkildev&type=vejnavn&caretpos=9&callback=cb&cache=no-cache'), function (error, response, body) {      
+    request(encodeURI(host+'/autocomplete?q=rødkildev&type=vejnavn&caretpos=9&callback=cb&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var len= eval(body);
-      assert(len>1);  
+      assert(len>1);
       done();
     })
   });
@@ -48,7 +48,7 @@ describe('Adressevalidering', function(){
   });
 
   it('Lilledal,23,3450,1,tv er ok', function(done){
-    request(encodeURI(host+'/adresser?vejnavn=Lilledal&husnr=23&postnr=3450&etage=1&dør=tv&cache=no-cache'), function (error, response, body) {  	
+    request(encodeURI(host+'/adresser?vejnavn=Lilledal&husnr=23&postnr=3450&etage=1&dør=tv&cache=no-cache'), function (error, response, body) {
     	assert.equal(error,null);
     	assert.equal(response.statusCode,200);
 	    var adresser= JSON.parse(body);
@@ -58,7 +58,7 @@ describe('Adressevalidering', function(){
 	});
 
   it('Hulgårdsvej,67,2400 er ok', function(done){
-    request(encodeURI(host+'/adresser?vejnavn=Hulgårdsvej&husnr=67&postnr=2400&etage=&dør=&cache=no-cache'), function (error, response, body) {  	
+    request(encodeURI(host+'/adresser?vejnavn=Hulgårdsvej&husnr=67&postnr=2400&etage=&dør=&cache=no-cache'), function (error, response, body) {
     	assert.equal(error,null);
     	assert.equal(response.statusCode,200);
 	    var adresser= JSON.parse(body);
@@ -72,7 +72,7 @@ describe('Adressevalidering', function(){
 describe('Adressesøgning', function(){
 
   it('rødkild*, 46, 2400', function(done){
-    request(encodeURI(host+'/adresser?q=rødkild*&husnr=46&postnr=2400&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adresser?q=rødkild*&husnr=46&postnr=2400&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -82,7 +82,7 @@ describe('Adressesøgning', function(){
   })
 
   it('Konsul Beÿers Allé 2, 4300', function(done){
-    request(encodeURI(host+'/adresser?q=Konsul Beÿers Allé 20, 4300&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adresser?q=Konsul Beÿers Allé 20, 4300&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -93,7 +93,7 @@ describe('Adressesøgning', function(){
   })
 
   it('vejnavn=Rødkildevej', function(done){
-    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -103,7 +103,7 @@ describe('Adressesøgning', function(){
   })
 
   it('vejnavn=Rødkildevej&struktur=mini', function(done){
-    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&struktur=mini&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adresser?vejnavn=Rødkildevej&struktur=mini&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -114,7 +114,7 @@ describe('Adressesøgning', function(){
 
 
   it('regionskode=1083&husnr=77', function(done){
-    request(encodeURI(host+'/adgangsadresser?regionskode=1083&husnr=77&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adgangsadresser?regionskode=1083&husnr=77&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -124,7 +124,7 @@ describe('Adressesøgning', function(){
   })
 
   it('regionskode=1083&husnr=77&struktur=mini', function(done){
-    request(encodeURI(host+'/adgangsadresser?regionskode=1083&husnr=77&struktur=mini&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adgangsadresser?regionskode=1083&husnr=77&struktur=mini&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -134,7 +134,7 @@ describe('Adressesøgning', function(){
   })
 
   it('nøjagtighed=U', function(done){
-    request(encodeURI(host+'/adgangsadresser?nøjagtighed=U&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adgangsadresser?nøjagtighed=U&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -144,7 +144,7 @@ describe('Adressesøgning', function(){
   })
 
   it('ejerlavkode=2000162&matrikelnr=381', function(done){
-    request(encodeURI(host+'/adresser?ejerlavkode=2000162&matrikelnr=381&cache=no-cache'), function (error, response, body) {    
+    request(encodeURI(host+'/adresser?ejerlavkode=2000162&matrikelnr=381&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adresser= JSON.parse(body);
@@ -154,7 +154,7 @@ describe('Adressesøgning', function(){
   })
 
   // it('postnr=8330&vejnavn=Nygårds Allé', function(done){
-  //   request(encodeURI(host+'/adresser?postnr=8330&vejnavn=Nygårds Allé&cache=no-cache'), function (error, response, body) {    
+  //   request(encodeURI(host+'/adresser?postnr=8330&vejnavn=Nygårds Allé&cache=no-cache'), function (error, response, body) {
   //     assert.equal(error,null);
   //     assert.equal(response.statusCode,200);
   //     var adresser= JSON.parse(body);
@@ -168,15 +168,15 @@ describe('Adressesøgning', function(){
 describe('Adresseopslag', function(){
 
   it('2f725450-a76a-11e2-9692-b7a1608861ab', function(done){
-    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?cache=no-cache'), function (error, response, body) {   
+    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       done();
     })
-  }) 
+  })
 
   it('2f725450-a76a-11e2-9692-b7a1608861ab?struktur=mini', function(done){
-    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?struktur=mini&cache=no-cache'), function (error, response, body) {   
+    request(encodeURI(host+'/adresser/0a3f50a0-73ca-32b8-e044-0003ba298018?struktur=mini&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       done();
@@ -406,7 +406,7 @@ describe('Adresseopslag', function(){
     Promise.all([jsonrequest, csvrequest]).then(function (bodies) {
       var adresserjson= JSON.parse(bodies[0]);
       var adressejson= adresserjson[0];
-      //console.log(adressejson);      
+      //console.log(adressejson);
       csv.parse(bodies[1], {columns: true}, function (err, adressercsv) {
         var adressecsv= adressercsv[0];
         //console.log(adgangsadressecsv);
@@ -450,7 +450,7 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.opstillingskreds.navn===adressecsv.opstillingskredsnavn, 'adresse.opstillingskreds.navn i json og csv format forskellig. json: ' + adressejson.adgangsadresse.opstillingskreds.navn + ', csv: ' + adressecsv.retskredsnavn);
         assert(adressejson.adgangsadresse.esrejendomsnr===adressecsv.esrejendomsnr, 'adresse.esrejendomsnr i json og csv format forskellig. json: ' + adressejson.adgangsadresse.esrejendomsnr + ', csv: ' + adressecsv.esrejendomsnr);
         assert(adressejson.adgangsadresse.matrikelnr===adressecsv.matrikelnr, 'adresse.matrikelnr i json og csv format forskellig. json: ' + adressejson.adgangsadresse.matrikelnr + ', csv: ' + adressecsv.matrikelnr);
-        
+
         assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]==adressecsv.wgs84koordinat_længde, 'punkt.koordinater[0] i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', csv: ' + adressecsv.wgs84koordinat_længde);
         assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]==adressecsv.wgs84koordinat_bredde, 'punkt.koordinater[1] i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', csv: ' + adressecsv.wgs84koordinat_bredde);
         assert(adressejson.adgangsadresse.adgangspunkt.nøjagtighed===adressecsv.nøjagtighed, 'punkt.nøjagtighed i json og csv format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.nøjagtighed + ', csv: ' + adressecsv.nøjagtighed);
@@ -497,11 +497,11 @@ describe('Adresseopslag', function(){
     optgeojson.qs.format= 'geojson';
     var geojsonrequest= rp(optgeojson);
 
-    Promise.all([jsonrequest, geojsonrequest]).then(function (bodies) {      
+    Promise.all([jsonrequest, geojsonrequest]).then(function (bodies) {
       try {
         var adresserjson= JSON.parse(bodies[0]);
         var adressejson= adresserjson[0];
-        //console.log(adressejson);      
+        //console.log(adressejson);
         var adressergeojson= JSON.parse(bodies[1]);
         var adressegeojson= adressergeojson.features[0].properties;
         //console.log(adgangsadressegeojson);
@@ -545,7 +545,7 @@ describe('Adresseopslag', function(){
         assert(adressejson.adgangsadresse.opstillingskreds.navn===adressegeojson.opstillingskredsnavn, 'adresse.opstillingskreds.navn i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.opstillingskreds.navn + ', geojson: ' + adressegeojson.retskredsnavn);
         assert(adressejson.adgangsadresse.esrejendomsnr===adressegeojson.esrejendomsnr, 'adresse.esrejendomsnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.esrejendomsnr + ', geojson: ' + adressegeojson.esrejendomsnr);
         assert(adressejson.adgangsadresse.matrikelnr===adressegeojson.matrikelnr, 'adresse.matrikelnr i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.matrikelnr + ', geojson: ' + adressegeojson.matrikelnr);
-        
+
         assert(adressejson.adgangsadresse.adgangspunkt.koordinater[0]===adressegeojson.wgs84koordinat_længde, 'punkt.koordinater[0] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[0] + ', geojson: ' + adressegeojson.wgs84koordinat_længde);
         assert(adressejson.adgangsadresse.adgangspunkt.koordinater[1]===adressegeojson.wgs84koordinat_bredde, 'punkt.koordinater[1] i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.koordinater[1] + ', geojson: ' + adressegeojson.wgs84koordinat_bredde);
         assert(adressejson.adgangsadresse.adgangspunkt.nøjagtighed===adressegeojson.nøjagtighed, 'punkt.nøjagtighed i json og geojson format forskellig. json: ' + adressejson.adgangsadresse.adgangspunkt.nøjagtighed + ', geojson: ' + adressegeojson.nøjagtighed);
@@ -606,11 +606,11 @@ describe('Adresseopslag', function(){
         var adressejson= adresserjson[0];
         var adressermini= JSON.parse(bodies[1]);
         var adressemini= adressermini[0];
-    
+
         assert(adressejson.id===adressemini.id, 'Id i json og mini format forskellig. json: ' + adressejson.id + ', mini: ' + adressemini.id);
         assert(adressejson.status==adressemini.status, 'Status i json og mini format forskellig. json: |' + adressejson.status + '|, mini: |' + adressemini.status + '|');
         assert(adressejson.etage===adressemini.etage, 'etage i json og mini format forskellig. json: ' + adressejson.etage + ', mini: ' + adressemini.etage);
-        assert(adressejson.dør===adressemini.dør, 'dør i json og mini format forskellig. json: ' + adressejson.dør + ', mini: ' + adressemini.dør);      
+        assert(adressejson.dør===adressemini.dør, 'dør i json og mini format forskellig. json: ' + adressejson.dør + ', mini: ' + adressemini.dør);
         assert(adressejson.adgangsadresse.id===adressemini.adgangsadresseid, 'adgangsadresseid i json og mini format forskellig. json: ' + adressejson.adgangsadresse.id + ', mini: ' + adressemini.adgangsadresseid);
         assert(adressejson.adgangsadresse.vejstykke.navn===adressemini.vejnavn, 'adresse.vejstykke.navn i json og mini format forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', mini: ' + adressemini.vejnavn);
         assert(adressejson.adgangsadresse.vejstykke.navn===optjson.qs.vejnavn, 'adresse.vejstykke.navn i json og søgekriterie forskellig. json: ' + adressejson.adgangsadresse.vejstykke.navn + ', søgekriterie: ' + optjson.qs.vejnavn);
@@ -660,7 +660,7 @@ describe('Vejnavnesøgning', function(){
       assert.equal(response.statusCode,200);
       //console.log(body);
       var vejnavne= JSON.parse(body);
-      assert.equal(vejnavne.length,1);   
+      assert.equal(vejnavne.length,1);
       done();
     })
   })
@@ -785,7 +785,7 @@ describe('Unik vejstykke', function(){
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var vejnavne= JSON.parse(body);
-      assert.equal(vejnavne.length,1); 
+      assert.equal(vejnavne.length,1);
       done();
     })
   })
@@ -876,7 +876,7 @@ describe('Navngiven vej', function(){
     options.baseUrl= host;
     options.url='/navngivneveje';
     options.qs= {};
-    options.qs.cache= 'no-cache'; 
+    options.qs.cache= 'no-cache';
     options.qs.polygon= '[[[8.91172755486213, 56.59274886518194],[8.948437235894998, 56.57437007272818],[8.876752381627279, 56.579839531262145],[8.91172755486213, 56.59274886518194]]]';
     options.resolveWithFullResponse= true;
     var jsonrequest= rp(options).then((response) => {
@@ -891,7 +891,7 @@ describe('Navngiven vej', function(){
     });
   });
 
-   
+
   it("reverse", function(done){
     var options= {};
     options.baseUrl= host;
@@ -1103,10 +1103,10 @@ describe('Supplerende bynavne 2', function(){
 
 describe('Postnummersøgning', function(){
 
-  function erIkkeStormodtager(element, index, array) { 
-    return element.stormodtageradresser === null; 
-  } 
-  
+  function erIkkeStormodtager(element, index, array) {
+    return element.stormodtageradresser === null;
+  }
+
   it("stormodtagerpostnumre skal ikke med som default", function(done){
     request(encodeURI(host+"/postnumre?cache=no-cache"), function (error, response, body) {
       assert.equal(error,null);
@@ -1197,7 +1197,7 @@ describe('Postnummersøgning', function(){
       let ymax= postnummer.bbox[3];
       let coors= postnummer.geometry.coordinates[0][0];
       assert(coors.length>1, "Der er burde være mindst 1: "+coors.length);
-      for (let i= 0; i < coors.length; i++) {        
+      for (let i= 0; i < coors.length; i++) {
         assert(coors[i][0]>xmin, "bbox xmin(" + xmin + " er >= end koordinat("+coors[i][0] + ")");
         assert(coors[i][1]>ymin, "bbox ymin(" + ymin + " er >= end koordinat("+coors[i][1] + ")");
         assert(coors[i][0]<xmax, "bbox xmax(" + xmax + " er <= end koordinat("+coors[i][2] + ")");
@@ -1231,14 +1231,14 @@ describe('Postnummersøgning', function(){
 
 
   it("Landpostnumre", function(done){
-    const minøst = (accumulator, currentValue) => {/*console.log('value: ' + currentValue[0]); */ if (accumulator>currentValue[0]) accumulator= currentValue[0]; return accumulator}; 
+    const minøst = (accumulator, currentValue) => {/*console.log('value: ' + currentValue[0]); */ if (accumulator>currentValue[0]) accumulator= currentValue[0]; return accumulator};
 
     var optpostnumre= {};
     optpostnumre.baseUrl= host;
     optpostnumre.url='/postnumre';
     optpostnumre.qs= {};
-    optpostnumre.qs.nr= '6720'; 
-    optpostnumre.qs.format= 'geojson'; 
+    optpostnumre.qs.nr= '6720';
+    optpostnumre.qs.format= 'geojson';
     optpostnumre.qs.cache= 'no-cache';
     optpostnumre.resolveWithFullResponse= true;
     optpostnumre.simple= false;
@@ -1250,7 +1250,7 @@ describe('Postnummersøgning', function(){
     optlandpostnumre.qs= {};
     optlandpostnumre.qs.nr= '6720';
     optlandpostnumre.qs.landpostnumre= true;
-    optlandpostnumre.qs.format= 'geojson'; 
+    optlandpostnumre.qs.format= 'geojson';
     optlandpostnumre.qs.cache= 'no-cache';
     optlandpostnumre.resolveWithFullResponse= true;
     optlandpostnumre.simple= false;
@@ -1266,7 +1266,7 @@ describe('Postnummersøgning', function(){
       //console.log('postnumreminøst: %d, landpostnumreminøst: %d',postnumreminøst,landpostnumreminøst);
       assert(postnumreminøst<landpostnumreminøst, 'landpostnumre ligger i havet');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
 
@@ -1456,13 +1456,13 @@ it("autocomplete nuts3", function(done){
       assert.equal(response.statusCode,200);
       var landsdele= JSON.parse(body);
       assert(landsdele.length > 0, 'Der burde være landsdele, som starter med byen');
-      request(landsdele[0].href+'?cache=no-cache', (error, response, body) => { 
-        console.log(landsdele[0].href); 
+      request(landsdele[0].href+'?cache=no-cache', (error, response, body) => {
+        console.log(landsdele[0].href);
         assert.equal(error,null, 'href adresserer ikke en landsdel');
         assert.equal(response.statusCode,200, 'href adresserer ikke en landsdel');
         var landsdel= JSON.parse(body);
-        request(landsdel.href+'?cache=no-cache', (error, response, body) => { 
-          console.log(landsdel.href); 
+        request(landsdel.href+'?cache=no-cache', (error, response, body) => {
+          console.log(landsdel.href);
           assert.equal(error,null, 'href adresserer ikke en landsdel');
           assert.equal(response.statusCode,200, 'href adresserer ikke en landsdel');
           done();
@@ -1526,7 +1526,7 @@ it("autocomplete nr", function(done){
       //assert(adgangsadresse.zone==='Landzone', 'Zone er ikke Landzone, men ' + adgangsadresse.zone);
       done();
     })
-  }) 
+  })
 
   it("reverse geokodning med nærmest", function(done){
     var options= {};
@@ -1743,7 +1743,7 @@ it("autocomplete nr", function(done){
     options.baseUrl= host;
     options.url= 'afstemningsomraader';
     options.qs= {cache: 'no-cache'};
-    options.qs.x= 9.4808535;      
+    options.qs.x= 9.4808535;
     options.qs.y= 56.37780327;
     //options.qs.nærmeste= true;
     request(options, function (error, response, body) {
@@ -1841,7 +1841,7 @@ it("autocomplete nr", function(done){
     options.baseUrl= host;
     options.url= 'menighedsraadsafstemningsomraader';
     options.qs= {cache: 'no-cache'};
-    options.qs.x= 9.4808535;      
+    options.qs.x= 9.4808535;
     options.qs.y= 56.37780327;
     //options.qs.nærmeste= true;
     request(options, function (error, response, body) {
@@ -1964,7 +1964,7 @@ describe('Opstillingskredssøgning', function(){
 describe('Adgangsadressesøgning', function(){
 
   it('rødkild*, 46, 2400', function(done){
-    request(encodeURI(host+'/adgangsadresser?q=rødkild*&husnr=46&postnr=2400&cache=no-cache'), function (error, response, body) {  	
+    request(encodeURI(host+'/adgangsadresser?q=rødkild*&husnr=46&postnr=2400&cache=no-cache'), function (error, response, body) {
     	assert.equal(error,null);
     	assert.equal(response.statusCode,200);
 	    var adresser= JSON.parse(body);
@@ -1974,7 +1974,7 @@ describe('Adgangsadressesøgning', function(){
 	})
 
 	 it('vejnavn=Rødkildevej', function(done){
-    request(encodeURI(host+'/adgangsadresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {  	
+    request(encodeURI(host+'/adgangsadresser?vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {
     	assert.equal(error,null);
     	assert.equal(response.statusCode,200);
 	    var adresser= JSON.parse(body);
@@ -2071,7 +2071,7 @@ describe('Adgangsadressesøgning', function(){
   })
 
   it('sogn', function(done){
-    request(encodeURI(host+'/adgangsadresser?sognekode=7060&vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {   
+    request(encodeURI(host+'/adgangsadresser?sognekode=7060&vejnavn=Rødkildevej&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adgangsadresser= JSON.parse(body);
@@ -2087,7 +2087,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};
-    optvej.qs.cirkel= '11.25186711,55.72926984,5'; // Alleshavevej 48, 4593
+    optvej.qs.cirkel= '11.2540301,55.72797146,5'; // Alleshavevej 48, 4593
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -2098,7 +2098,7 @@ describe('Adgangsadressesøgning', function(){
     optadgang.baseUrl= host;
     optadgang.url='/adgangsadresser';
     optadgang.qs= {};
-    optadgang.qs.cirkel= '11.25186711,55.72926984,5';
+    optadgang.qs.cirkel= '11.2540301,55.72797146,5';
     optadgang.qs.geometri= 'adgangspunkt';
     optadgang.qs.cache= 'no-cache';
     optadgang.resolveWithFullResponse= true;
@@ -2113,9 +2113,9 @@ describe('Adgangsadressesøgning', function(){
       //console.log('vej.length: %d, adgang.length: %d',vej.length,adgang.length);
       assert(vej.length===0, 'adgangsadresse fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===1, 'adgangsadresse ikke fundet ud fra adgangspunkt og cirkel')
-      assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
 
@@ -2127,7 +2127,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};
-    optvej.qs.cirkel= '11.24841865,55.72338078,10'; // Alleshavevej 48, 4593
+    optvej.qs.cirkel= '11.25439786,55.72448108,5'; // Alleshavevej 48, 4593
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -2152,9 +2152,9 @@ describe('Adgangsadressesøgning', function(){
       var adgang= JSON.parse(responses[1].body);
       assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(vej[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(vej[0].husnr==='48', 'reverse på vejpunkt husnr burde være 48');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
 
@@ -2166,7 +2166,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {};      // Alleshavevej 48, 4593
-    optvej.qs.polygon= '[[[11.248430546192973, 55.723716732037296],[11.248881118413367, 55.72313325642938],[11.248022327050677, 55.72326402688884],[11.248430546192973, 55.723716732037296]]]';
+    optvej.qs.polygon= '[[[11.25439,55.72448],[11.25440,55.72448],[11.25440,55.72449],[11.25439,55.72449], [11.25439,55.72448]]]';
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -2191,9 +2191,9 @@ describe('Adgangsadressesøgning', function(){
       var adgang= JSON.parse(responses[1].body);
       assert(vej.length===1, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===0, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(vej[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(vej[0].husnr==='48', 'reverse på vejpunkt burde være 48');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
 
@@ -2206,7 +2206,7 @@ describe('Adgangsadressesøgning', function(){
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser';
     optvej.qs= {}; // Alleshavevej 48, 4593
-    optvej.qs.polygon= '[[[11.251517395720864, 55.729757549168234],[11.253021444039282, 55.728881507651074],[11.250538933028965, 55.728696939800585],[11.251517395720864, 55.729757549168234]]]';
+    optvej.qs.polygon= '[[[11.25403,55.72797],[11.25404,55.72797],[11.25404,55.72798],[11.25403,55.72798], [11.25403,55.72797]]]';
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -2231,9 +2231,9 @@ describe('Adgangsadressesøgning', function(){
       var adgang= JSON.parse(responses[1].body);
       assert(vej.length===0, 'adgangsadresse ikke fundet ud fra vejpunkt og cirkel')
       assert(adgang.length===1, 'adgangsadresse fundet ud fra adgangspunkt og cirkel')
-      assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48'); 
+      assert(adgang[0].husnr==='48', 'reverse på vejpunkt burde være 48');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
   });
@@ -2319,7 +2319,7 @@ describe('Adgangsadressesøgning', function(){
 describe('Adgangsadresseopslag', function(){
 
   it('reverse geokodning', function(done){
-    request(encodeURI(host+'/adgangsadresser/reverse?x=12.5851471984198&y=55.6832383751223&cache=no-cache'), function (error, response, body) {   
+    request(encodeURI(host+'/adgangsadresser/reverse?x=12.5851471984198&y=55.6832383751223&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
       var adgangsadresse= JSON.parse(body);
@@ -2328,16 +2328,14 @@ describe('Adgangsadresseopslag', function(){
     })
   })
 
-  https://dawa-p2.aws.dk/adgangsadresser/reverse?x=11.254677072750962&y=55.72665088543518&format=geojson&geometri=vejpunkt
-
   it("reverse og vejpunkt", function(done){
 
     var optvej= {};
     optvej.baseUrl= host;
     optvej.url='/adgangsadresser/reverse';
     optvej.qs= {};
-    optvej.qs.x= 11.24841865; // Alleshavevej 48, 4593
-    optvej.qs.y= 55.72338078;
+    optvej.qs.x= 11.25439786; // Alleshavevej 48, 4593
+    optvej.qs.y= 55.72448108;
     optvej.qs.geometri= 'vejpunkt';
     optvej.qs.cache= 'no-cache';
     optvej.resolveWithFullResponse= true;
@@ -2348,8 +2346,8 @@ describe('Adgangsadresseopslag', function(){
     optadgang.baseUrl= host;
     optadgang.url='/adgangsadresser/reverse';
     optadgang.qs= {};
-    optadgang.qs.x= 11.254677072750962;
-    optadgang.qs.y= 55.72665088543518;
+    optadgang.qs.x= 11.25439786;
+    optadgang.qs.y= 55.72448108;
     optadgang.qs.geometri= 'adgangspunkt';
     optadgang.qs.cache= 'no-cache';
     optadgang.qs.id= '0a3f509d-66fe-32b8-e044-0003ba298018';
@@ -2362,10 +2360,10 @@ describe('Adgangsadresseopslag', function(){
       assert.equal(responses[1].statusCode,200);
       var vej= JSON.parse(responses[0].body);
       var adgang= JSON.parse(responses[1].body);
-      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48'); 
-      assert(adgang.husnr==='46', 'reverse på adgangspunkt burde være 46'); 
+      assert(vej.husnr==='48', 'reverse på vejpunkt burde være 48');
+      assert(adgang.husnr==='46', 'reverse på adgangspunkt burde være 46');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
 
@@ -2382,7 +2380,7 @@ describe('Adgangsadresseautocomplete', function(){
       //console.log(body);
       var adadresser= JSON.parse(body);
       var adadresse= adadresser[0];
-      //console.log(util.inspect(adadresse));  
+      //console.log(util.inspect(adadresse));
       assert("adgangsadresse" in adadresse,"Property adgangsadresse mangler");
       done();
     })
@@ -2394,7 +2392,7 @@ describe('Adgangsadresseautocomplete', function(){
       assert.equal(response.statusCode,200);
       var adadresser= JSON.parse(body);
       var adadresse= adadresser[0]; assert.equal(error,null);
-      assert(adadresser.length>1,"Der er flere adgangsadresser på Tove Maës vej end en");      
+      assert(adadresser.length>1,"Der er flere adgangsadresser på Tove Maës vej end en");
       assert('adgangsadresse' in adadresse,"Property adgangsadresse mangler");
       done();
     })
@@ -2410,7 +2408,7 @@ describe('Adgangsadresseautocomplete', function(){
       done();
     })
   });
-  
+
 });
 
 describe('Ejerlav', function(){
@@ -2471,7 +2469,7 @@ describe('Jordstykker', function(){
     request(encodeURI(host+"/jordstykker/100453/8bd?cache=no-cache"), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
-      var jordstykke= JSON.parse(body);    
+      var jordstykke= JSON.parse(body);
       assert(jordstykke.ejerlav.kode===100453,"Forkert jordstykke");
       done();
     })
@@ -2481,7 +2479,7 @@ describe('Jordstykker', function(){
     request(encodeURI(host+"/jordstykker/100453/8bd?format=geojson&cache=no-cache"), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
-      var jordstykke= JSON.parse(body);    
+      var jordstykke= JSON.parse(body);
       assert(jordstykke.properties.ejerlavkode===100453,"Forkert jordstykke");
       done();
     })
@@ -2492,18 +2490,18 @@ describe('Jordstykker', function(){
     request(encodeURI(host+'/jordstykker/reverse?y=55.737308&x=12.513428&cache=no-cache'), function (error, response, body) {
       assert.equal(error,null);
       assert.equal(response.statusCode,200);
-      var jordstykke= JSON.parse(body); 
-      //console.log('jordstykke: %s %s (10251 22a)', jordstykke.ejerlav.kode, jordstykke.matrikelnr);     
+      var jordstykke= JSON.parse(body);
+      //console.log('jordstykke: %s %s (10251 22a)', jordstykke.ejerlav.kode, jordstykke.matrikelnr);
       assert(jordstykke.ejerlav.kode===10251&&jordstykke.matrikelnr==="22ia","Forkert jordstykke");
       done();
     })
   });
-  
+
 });
 
 
 describe('Historik', function(){
-  
+
   it("Historik på nedlagte adresser", function(done){
 
     var optadr= {};
@@ -2534,9 +2532,9 @@ describe('Historik', function(){
       function nedlagt(element, index, array) {
         return element.status === 2 || element.status === 4;
       }
-      assert(historik.some(nedlagt), 'Ingen nedlagte eller henlagte'); 
+      assert(historik.some(nedlagt), 'Ingen nedlagte eller henlagte');
       done();
-    }).catch(reason => { 
+    }).catch(reason => {
       done(reason);
     });
 
@@ -2676,7 +2674,7 @@ describe('Adressevask', function(){
       done();
     })
   })
-  
+
   it("rådhus pladsen 75, 1550", function(done){
     var options= {};
     options.baseUrl= host;
@@ -2748,8 +2746,8 @@ describe('Adressevask', function(){
       done(err);
     });
   });
-  
-}); 
+
+});
 
 describe('Zone', function(){
 
@@ -2850,7 +2848,7 @@ describe('Zone', function(){
     Promise.all([jsonrequest, csvrequest]).then(function (bodies) {
       var adgangsadresserjson= JSON.parse(bodies[0]);
       var adgangsadressejson= adgangsadresserjson[0];
-      //console.log(adgangsadresse);      
+      //console.log(adgangsadresse);
       csv.parse(bodies[1], {columns: true}, function (err, adgangsadressercsv) {
         var adgangsadressecsv= adgangsadressercsv[0];
         //console.log(adgangsadressecsv);
@@ -2872,7 +2870,7 @@ describe('Zone', function(){
         if (adgangsadressejson.stormodtagerpostnr) {
           assert(adgangsadressejson.stormodtagerpostnummer.nr===adgangsadressecsv.stormodtagerpostnr, 'adgangsadresse.stormodtagerpostnummer.nr i json og csv format forskellig. json: ' + adgangsadressejson.stormodtagerpostnummer.nr + ', csv: ' + adgangsadressecsv.stormodtagerpostnr);
           assert(adgangsadressejson.stormodtagerpostnummer.navn===adgangsadressecsv.stormodtagerpostnrnavn, 'adgangsadresse.stormodtagerpostnummer.navn i json og csv format forskellig. json: ' + adgangsadressejson.stormodtagerpostnummer.navn + ', csv: ' + adgangsadressecsv.stormodtagerpostnrnavn);
-      
+
         }
         assert(adgangsadressejson.kommune.kode===adgangsadressecsv.kommunekode, 'adgangsadresse.kommune.nr i json og csv format forskellig. json: ' + adgangsadressejson.kommune.kode + ', csv: ' + adgangsadressecsv.kommunekode);
         assert(adgangsadressejson.kommune.navn===adgangsadressecsv.kommunenavn, 'adgangsadresse.kommune.navn i json og csv format forskellig. json: ' + adgangsadressejson.kommune.navn + ', csv: ' + adgangsadressecsv.kommunenavn);
@@ -2892,7 +2890,7 @@ describe('Zone', function(){
         assert(adgangsadressejson.opstillingskreds.navn===adgangsadressecsv.opstillingskredsnavn, 'adgangsadresse.opstillingskreds.navn i json og csv format forskellig. json: ' + adgangsadressejson.opstillingskreds.navn + ', csv: ' + adgangsadressecsv.retskredsnavn);
         assert(adgangsadressejson.esrejendomsnr===adgangsadressecsv.esrejendomsnr, 'adgangsadresse.esrejendomsnr i json og csv format forskellig. json: ' + adgangsadressejson.esrejendomsnr + ', csv: ' + adgangsadressecsv.esrejendomsnr);
         assert(adgangsadressejson.matrikelnr===adgangsadressecsv.matrikelnr, 'adgangsadresse.matrikelnr i json og csv format forskellig. json: ' + adgangsadressejson.matrikelnr + ', csv: ' + adgangsadressecsv.matrikelnr);
-        
+
         assert(adgangsadressejson.adgangspunkt.koordinater[0]==adgangsadressecsv.wgs84koordinat_længde, 'adgangspunkt.koordinater[0] i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.koordinater[0] + ', csv: ' + adgangsadressecsv.wgs84koordinat_længde);
         assert(adgangsadressejson.adgangspunkt.koordinater[1]==adgangsadressecsv.wgs84koordinat_bredde, 'adgangspunkt.koordinater[1] i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.koordinater[1] + ', csv: ' + adgangsadressecsv.wgs84koordinat_bredde);
         assert(adgangsadressejson.adgangspunkt.nøjagtighed===adgangsadressecsv.nøjagtighed, 'adgangspunkt.nøjagtighed i json og csv format forskellig. json: ' + adgangsadressejson.adgangspunkt.nøjagtighed + ', csv: ' + adgangsadressecsv.nøjagtighed);
@@ -2914,7 +2912,7 @@ describe('Zone', function(){
 describe('Bebyggelser', function(){
 
   function findNavn(navn) {
-    return function findBebyggelse(bebyggelse) { 
+    return function findBebyggelse(bebyggelse) {
       return bebyggelse.navn === navn;
     }
   }
@@ -3104,7 +3102,7 @@ describe('Korttjenester', function(){
 //     var jsonrequest= rp(options).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var adresser= JSON.parse(response.body);
-//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3148,25 +3146,25 @@ describe('Korttjenester', function(){
 //       return Promise.all([enhedrp, bygningrp, tekniskanlægrp, opgangsrp]);
 //     })
 //     .then(function (responses) {
-//       function callok(element, index, array) {          
-//         return element.statusCode===200; 
-//       } 
+//       function callok(element, index, array) {
+//         return element.statusCode===200;
+//       }
 //       assert(responses.every(callok), "Http status code != 200");
 
-//       // enhed        
-//       var enheder= JSON.parse(responses[0].body);        
+//       // enhed
+//       var enheder= JSON.parse(responses[0].body);
 //       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
 
-//       // bygninger        
-//       var bygninger= JSON.parse(responses[1].body);        
+//       // bygninger
+//       var bygninger= JSON.parse(responses[1].body);
 //       assert(bygninger.length===0, "Der er fundet bygninger: " + bygninger.length);
 
-//       // tekniske anlæg        
-//       var tekniskanlæg= JSON.parse(responses[2].body);        
+//       // tekniske anlæg
+//       var tekniskanlæg= JSON.parse(responses[2].body);
 //       assert(tekniskanlæg.length===0, "Der er fundet tekniske anlæg: " + tekniskanlæg.length);
 
-//       // opgange        
-//       var opgange= JSON.parse(responses[3].body);        
+//       // opgange
+//       var opgange= JSON.parse(responses[3].body);
 //       assert(opgange.length===1, "Der er ikke fundet en opgang, men: " + tekniskanlæg.length);
 
 //       var ejerskabopt= {};
@@ -3181,8 +3179,8 @@ describe('Korttjenester', function(){
 //       return rp(ejerskabopt);
 //     })
 //     .then(function (response) {
-//       // ejerskab        
-//       var ejerskab= JSON.parse(response.body);        
+//       // ejerskab
+//       var ejerskab= JSON.parse(response.body);
 //       assert(ejerskab.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskab.length);
 //       done();
 //     })
@@ -3203,7 +3201,7 @@ describe('Korttjenester', function(){
 //     var jsonrequest= rp(options).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var adresser= JSON.parse(response.body);
-//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3214,9 +3212,9 @@ describe('Korttjenester', function(){
 //       enhedopt.resolveWithFullResponse= true;
 //       var enhedrp= rp(enhedopt);
 //       return enhedrp;
-//     }).then((response) => {      
+//     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var enheder= JSON.parse(response.body);          
+//       var enheder= JSON.parse(response.body);
 //       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
 //       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et lejet rækkehus");
 //       assert(enheder[0].ENH_ANVEND_KODE===130, "Enhed er ikke et rækkehus");
@@ -3229,17 +3227,17 @@ describe('Korttjenester', function(){
 //       ejerskabopt.qs.cache= 'no-cache';
 //       ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
 //       // ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-//       // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+//       // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr;
 //       ejerskabopt.resolveWithFullResponse= true;
 //       var ejerskabrp= rp(ejerskabopt);
 //       return ejerskabrp;
 //     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var ejerskaber= JSON.parse(response.body);          
+//       var ejerskaber= JSON.parse(response.body);
 //       assert(ejerskaber.length===0, "Der er ikke fundet nul ejerskab, men " + ejerskaber.length);
-//       function grund(element, index, array) {          
-//         return element.EntitetsType===1; 
-//       } 
+//       function grund(element, index, array) {
+//         return element.EntitetsType===1;
+//       }
 //       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
 //       done();
 //     }).catch((err) => {
@@ -3258,7 +3256,7 @@ describe('Korttjenester', function(){
 //     var jsonrequest= rp(options).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var adresser= JSON.parse(response.body);
-//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3269,9 +3267,9 @@ describe('Korttjenester', function(){
 //       enhedopt.resolveWithFullResponse= true;
 //       var enhedrp= rp(enhedopt);
 //       return enhedrp;
-//     }).then((response) => {      
+//     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var enheder= JSON.parse(response.body);          
+//       var enheder= JSON.parse(response.body);
 //       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
 //       assert(enheder[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i et lejet rækkehus");
 //       assert(enheder[0].ENH_ANVEND_KODE===140, "Enhed er ikke et etageboligbebyggelse");
@@ -3284,17 +3282,17 @@ describe('Korttjenester', function(){
 //       ejerskabopt.url='ois/ejerskaber';
 //       ejerskabopt.qs= {};
 //       ejerskabopt.qs.cache= 'no-cache';
-//       ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
+//       ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
 //       ejerskabopt.resolveWithFullResponse= true;
 //       var ejerskabrp= rp(ejerskabopt);
 //       return ejerskabrp;
 //     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var ejerskaber= JSON.parse(response.body);          
+//       var ejerskaber= JSON.parse(response.body);
 //       assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
-//       function enhed(element, index, array) {          
-//         return element.EntitetsType===3; 
-//       } 
+//       function enhed(element, index, array) {
+//         return element.EntitetsType===3;
+//       }
 //       assert(ejerskaber.every(enhed), "Ejerskab er ikke en grund eller bygning");
 //       done();
 //     }).catch((err) => {
@@ -3313,7 +3311,7 @@ describe('Korttjenester', function(){
 //     var jsonrequest= rp(options).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var adresser= JSON.parse(response.body);
-//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3324,20 +3322,20 @@ describe('Korttjenester', function(){
 //       enhedopt.resolveWithFullResponse= true;
 //       var enhedrp= rp(enhedopt);
 //       return enhedrp;
-//     }).then((response) => {      
+//     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var enheder= JSON.parse(response.body);          
+//       var enheder= JSON.parse(response.body);
 //       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
 //       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et parcelhus");
 //       assert(enheder[0].ENH_ANVEND_KODE===120, "Enhed er ikke et parcelhus");
 //       assert(enheder[0].bygning.BYG_ANVEND_KODE===120, "Bygning er ikke et parcelhus");
-     
+
 //       var eejerskabopt= {};
 //       eejerskabopt.baseUrl= host;
 //       eejerskabopt.url='ois/ejerskaber';
 //       eejerskabopt.qs= {};
 //       eejerskabopt.qs.cache= 'no-cache';
-//       eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
+//       eejerskabopt.qs.bbrid= enheder[0].Enhed_id;
 //       eejerskabopt.resolveWithFullResponse= true;
 //       var eejerskabrp= rp(eejerskabopt);
 
@@ -3347,28 +3345,28 @@ describe('Korttjenester', function(){
 //       bejerskabopt.qs= {};
 //       bejerskabopt.qs.cache= 'no-cache';
 //       bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-//       bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+//       bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr;
 //       bejerskabopt.resolveWithFullResponse= true;
 //       var bejerskabrp= rp(bejerskabopt);
 
 //       return Promise.all([eejerskabrp, bejerskabrp]);
-//     }).then((responses) => {    
-//       function callok(element, index, array) {          
-//         return element.statusCode===200; 
-//       } 
+//     }).then((responses) => {
+//       function callok(element, index, array) {
+//         return element.statusCode===200;
+//       }
 //       assert(responses.every(callok), "Http status code != 200");
 
-//       var eejerskaber= JSON.parse(responses[0].body);      
-//       //console.log(util.inspect(eejerskaber));           
+//       var eejerskaber= JSON.parse(responses[0].body);
+//       //console.log(util.inspect(eejerskaber));
 //       assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
 
-//       var bejerskaber= JSON.parse(responses[1].body);      
-//       //console.log(util.inspect(bejerskaber));                  
+//       var bejerskaber= JSON.parse(responses[1].body);
+//       //console.log(util.inspect(bejerskaber));
 //       assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
 
-//       function grund(element, index, array) {          
-//         return element.EntitetsType===1; 
-//       } 
+//       function grund(element, index, array) {
+//         return element.EntitetsType===1;
+//       }
 //       assert(bejerskaber.every(grund), "Ejerskab er ikke en grund");
 
 //       done();
@@ -3388,7 +3386,7 @@ describe('Korttjenester', function(){
 //     var jsonrequest= rp(options).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var adresser= JSON.parse(response.body);
-//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3399,29 +3397,29 @@ describe('Korttjenester', function(){
 //       enhedopt.resolveWithFullResponse= true;
 //       var enhedrp= rp(enhedopt);
 //       return enhedrp;
-//     }).then((response) => {      
+//     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var tekniskeanlæg= JSON.parse(response.body);          
+//       var tekniskeanlæg= JSON.parse(response.body);
 //       assert(tekniskeanlæg.length>=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskeanlæg.length);
 //       assert(tekniskeanlæg[0].ejerskaber.length===0, "Der er fundet ejerskab i det tekniske anlæg");
-     
+
 //       var ejerskabopt= {};
 //       ejerskabopt.baseUrl= host;
 //       ejerskabopt.url='ois/ejerskaber';
 //       ejerskabopt.qs= {};
 //       ejerskabopt.qs.cache= 'no-cache';
 //       ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
-//       ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr; 
+//       ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr;
 //       ejerskabopt.resolveWithFullResponse= true;
 //       var ejerskabrp= rp(ejerskabopt);
 //       return ejerskabrp;
 //     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var ejerskaber= JSON.parse(response.body);          
+//       var ejerskaber= JSON.parse(response.body);
 //       assert(ejerskaber.length===6, "Der er ikke fundet seks ejerskab, men " + ejerskaber.length);
-//       function grund(element, index, array) {          
-//         return element.EntitetsType===1; 
-//       } 
+//       function grund(element, index, array) {
+//         return element.EntitetsType===1;
+//       }
 //       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
 //       done();
 //     }).catch((err) => {
@@ -3440,7 +3438,7 @@ describe('Korttjenester', function(){
 //     var jsonrequest= rp(options).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var adresser= JSON.parse(response.body);
-//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3451,10 +3449,10 @@ describe('Korttjenester', function(){
 //       enhedopt.resolveWithFullResponse= true;
 //       var enhedrp= rp(enhedopt);
 //       return enhedrp;
-//     }).then((response) => {      
+//     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var opgange= JSON.parse(response.body);
-//       assert(opgange.length===1, "Der er ikke fundet én "+options.qs.q); 
+//       assert(opgange.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //       var enhedopt= {};
 //       enhedopt.baseUrl= host;
@@ -3465,29 +3463,29 @@ describe('Korttjenester', function(){
 //       enhedopt.resolveWithFullResponse= true;
 //       var enhedrp= rp(enhedopt);
 //       return enhedrp;
-//     }).then((response) => {      
+//     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var bygninger= JSON.parse(response.body);          
+//       var bygninger= JSON.parse(response.body);
 //       assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
 //       assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ét ejerskab i bygningen, men " + bygninger[0].ejerskaber.length);
-     
+
 //       var ejerskabopt= {};
 //       ejerskabopt.baseUrl= host;
 //       ejerskabopt.url='ois/ejerskaber';
 //       ejerskabopt.qs= {};
 //       ejerskabopt.qs.cache= 'no-cache';
 //       ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
-//       ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+//       ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr;
 //       ejerskabopt.resolveWithFullResponse= true;
 //       var ejerskabrp= rp(ejerskabopt);
 //       return ejerskabrp;
 //     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var ejerskaber= JSON.parse(response.body);          
+//       var ejerskaber= JSON.parse(response.body);
 //       assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);
-//       function grund(element, index, array) {          
-//         return element.EntitetsType===1; 
-//       } 
+//       function grund(element, index, array) {
+//         return element.EntitetsType===1;
+//       }
 //       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
 //       done();
 //     }).catch((err) => {
@@ -3507,7 +3505,7 @@ describe('Korttjenester', function(){
 //  //    var jsonrequest= rp(options).then((response) => {
 //  //      assert(response.statusCode===200, "Http status code != 200");
 //  //      var adresser= JSON.parse(response.body);
-//  //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//  //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //  //      var enhedopt= {};
 //  //      enhedopt.baseUrl= host;
@@ -3518,29 +3516,29 @@ describe('Korttjenester', function(){
 //  //      enhedopt.resolveWithFullResponse= true;
 //  //      var enhedrp= rp(enhedopt);
 //  //      return enhedrp;
-//  //    }).then((response) => {      
+//  //    }).then((response) => {
 //  //      assert(response.statusCode===200, "Http status code != 200");
-//  //      var bygninger= JSON.parse(response.body);          
+//  //      var bygninger= JSON.parse(response.body);
 //  //      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
 //  //      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
-     
+
 //  //      var ejerskabopt= {};
 //  //      ejerskabopt.baseUrl= host;
 //  //      ejerskabopt.url='ois/ejerskaber';
 //  //      ejerskabopt.qs= {};
 //  //      ejerskabopt.qs.cache= 'no-cache';
 //  //      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
-//  //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+//  //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr;
 //  //      ejerskabopt.resolveWithFullResponse= true;
 //  //      var ejerskabrp= rp(ejerskabopt);
 //  //      return ejerskabrp;
 //  //    }).then((response) => {
 //  //      assert(response.statusCode===200, "Http status code != 200");
-//  //      var ejerskaber= JSON.parse(response.body);          
+//  //      var ejerskaber= JSON.parse(response.body);
 //  //      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
-//  //      function grund(element, index, array) {          
-//  //        return element.EntitetsType===1; 
-//  //      } 
+//  //      function grund(element, index, array) {
+//  //        return element.EntitetsType===1;
+//  //      }
 //  //      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
 //  //      done();
 //  //    }).catch((err) => {
@@ -3556,13 +3554,13 @@ describe('Korttjenester', function(){
 //     ejerskabopt.qs= {};
 //     ejerskabopt.qs.cache= 'no-cache';
 //     ejerskabopt.qs.kommunekode= "0201";
-//     ejerskabopt.qs.esrejendomsnr= "094995"; 
+//     ejerskabopt.qs.esrejendomsnr= "094995";
 //     ejerskabopt.resolveWithFullResponse= true;
 //     var ejerskabrp= rp(ejerskabopt);
 //     ejerskabrp.then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var ejerskaber= JSON.parse(response.body);  
-//       assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);                
+//       var ejerskaber= JSON.parse(response.body);
+//       assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);
 //       var options= {};
 //       options.baseUrl= host;
 //       options.url='adresser';
@@ -3573,7 +3571,7 @@ describe('Korttjenester', function(){
 //       return rp(options);
 //     }).then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
-//       var adresser= JSON.parse(response.body);          
+//       var adresser= JSON.parse(response.body);
 //       assert(adresser.length===1, "Der er ikke fundet en adresse, men " + adresser.length);
 //       assert(adresser[0].adressebetegnelse.localeCompare("Lilledal 23, 1. tv, 3450 Allerød")===0, "Adressen er ikke Lilledal 23, 1. tv, 3450 Allerød");
 //       done();
@@ -3589,13 +3587,13 @@ describe('Korttjenester', function(){
 //     reverseopt.qs= {};
 //     reverseopt.qs.cache= 'no-cache';
 //     reverseopt.qs.x= 12.5108572474172;
-//     reverseopt.qs.y= 55.6983973831476; 
+//     reverseopt.qs.y= 55.6983973831476;
 //     reverseopt.resolveWithFullResponse= true;
-//     var reverserp= rp(reverseopt);       
+//     var reverserp= rp(reverseopt);
 //     reverserp.then((response) => {
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var bygninger= JSON.parse(response.body);
-//       assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
+//       assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);
 //       assert(bygninger[0].BYG_ANVEND_KODE===930, "Det er ikke et udhus (930), men " + bygninger[0].BYG_ANVEND_KODE);
 //       assert(bygninger[0].OPFOERELSE_AAR===1921, "Det er ikke opført i 1921, men " + bygninger[0].OPFOERELSE_AAR);
 //       done();
@@ -3620,7 +3618,7 @@ describe('BBR Light', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3664,25 +3662,25 @@ describe('BBR Light', function(){
       return Promise.all([enhedrp, bygningrp, tekniskanlægrp, opgangsrp]);
     })
     .then(function (responses) {
-      function callok(element, index, array) {          
-        return element.statusCode===200; 
-      } 
+      function callok(element, index, array) {
+        return element.statusCode===200;
+      }
       assert(responses.every(callok), "Http status code != 200");
 
-      // enhed        
-      var enheder= JSON.parse(responses[0].body);        
+      // enhed
+      var enheder= JSON.parse(responses[0].body);
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
 
-      // bygninger        
-      var bygninger= JSON.parse(responses[1].body);        
+      // bygninger
+      var bygninger= JSON.parse(responses[1].body);
       assert(bygninger.length===0, "Der er fundet bygninger: " + bygninger.length);
 
-      // tekniske anlæg        
-      var tekniskanlæg= JSON.parse(responses[2].body);        
+      // tekniske anlæg
+      var tekniskanlæg= JSON.parse(responses[2].body);
       assert(tekniskanlæg.length===0, "Der er fundet tekniske anlæg: " + tekniskanlæg.length);
 
-      // opgange        
-      var opgange= JSON.parse(responses[3].body);        
+      // opgange
+      var opgange= JSON.parse(responses[3].body);
       assert(opgange.length===1, "Der er ikke fundet en opgang, men: " + tekniskanlæg.length);
 
       var ejerskabopt= {};
@@ -3697,8 +3695,8 @@ describe('BBR Light', function(){
       return rp(ejerskabopt);
     })
     .then(function (response) {
-      // ejerskab        
-      var ejerskab= JSON.parse(response.body);        
+      // ejerskab
+      var ejerskab= JSON.parse(response.body);
       assert(ejerskab.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskab.length);
       done();
     })
@@ -3719,7 +3717,7 @@ describe('BBR Light', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3730,9 +3728,9 @@ describe('BBR Light', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
       return enhedrp;
-    }).then((response) => {      
+    }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var enheder= JSON.parse(response.body);          
+      var enheder= JSON.parse(response.body);
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et lejet rækkehus");
       //assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
@@ -3745,17 +3743,17 @@ describe('BBR Light', function(){
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
       // ejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+      // ejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr;
       ejerskabopt.resolveWithFullResponse= true;
       var ejerskabrp= rp(ejerskabopt);
       return ejerskabrp;
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
+      var ejerskaber= JSON.parse(response.body);
       assert(ejerskaber.length===0, "Der er ikke fundet nul ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
+      function grund(element, index, array) {
+        return element.EntitetsType===1;
+      }
       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
       done();
     }).catch((err) => {
@@ -3774,7 +3772,7 @@ describe('BBR Light', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3785,9 +3783,9 @@ describe('BBR Light', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
       return enhedrp;
-    }).then((response) => {      
+    }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var enheder= JSON.parse(response.body);          
+      var enheder= JSON.parse(response.body);
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
       assert(enheder[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i et lejet rækkehus");
       //assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
@@ -3800,17 +3798,17 @@ describe('BBR Light', function(){
       ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
-      ejerskabopt.qs.bbrid= enheder[0].Enhed_id; 
+      ejerskabopt.qs.bbrid= enheder[0].Enhed_id;
       ejerskabopt.resolveWithFullResponse= true;
       var ejerskabrp= rp(ejerskabopt);
       return ejerskabrp;
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
+      var ejerskaber= JSON.parse(response.body);
       assert(ejerskaber.length===1, "Der er ikke fundet et ejerskab, men " + ejerskaber.length);
-      function enhed(element, index, array) {          
-        return element.EntitetsType===3; 
-      } 
+      function enhed(element, index, array) {
+        return element.EntitetsType===3;
+      }
       assert(ejerskaber.every(enhed), "Ejerskab er ikke en grund eller bygning");
       done();
     }).catch((err) => {
@@ -3829,7 +3827,7 @@ describe('BBR Light', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3840,20 +3838,20 @@ describe('BBR Light', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
       return enhedrp;
-    }).then((response) => {      
+    }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var enheder= JSON.parse(response.body);          
+      var enheder= JSON.parse(response.body);
       assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
       assert(enheder[0].ejerskaber.length===0, "Der er fundet ejerskab i et parcelhus");
       //assert(typeof enheder[0].ENH_ANVEND_KODE === 'undefined', "Enhedens anvendelseskode er med");
       //assert(typeof enheder[0].bygning.BYG_ANVEND_KODE === 'undefined', "Bygningens anvendelseskode er med");
-     
+
       var eejerskabopt= {};
       eejerskabopt.baseUrl= host;
       eejerskabopt.url='bbrlight/ejerskaber';
       eejerskabopt.qs= {};
       eejerskabopt.qs.cache= 'no-cache';
-      eejerskabopt.qs.bbrid= enheder[0].Enhed_id;  
+      eejerskabopt.qs.bbrid= enheder[0].Enhed_id;
       eejerskabopt.resolveWithFullResponse= true;
       var eejerskabrp= rp(eejerskabopt);
 
@@ -3863,28 +3861,28 @@ describe('BBR Light', function(){
       bejerskabopt.qs= {};
       bejerskabopt.qs.cache= 'no-cache';
       bejerskabopt.qs.kommunekode= enheder[0].bygning.KomKode;
-      bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr; 
+      bejerskabopt.qs.esrejendomsnr= enheder[0].bygning.ESREjdNr;
       bejerskabopt.resolveWithFullResponse= true;
       var bejerskabrp= rp(bejerskabopt);
 
       return Promise.all([eejerskabrp, bejerskabrp]);
-    }).then((responses) => {    
-      function callok(element, index, array) {          
-        return element.statusCode===200; 
-      } 
+    }).then((responses) => {
+      function callok(element, index, array) {
+        return element.statusCode===200;
+      }
       assert(responses.every(callok), "Http status code != 200");
 
-      var eejerskaber= JSON.parse(responses[0].body);      
-      //console.log(util.inspect(eejerskaber));           
+      var eejerskaber= JSON.parse(responses[0].body);
+      //console.log(util.inspect(eejerskaber));
       assert(eejerskaber.length===0, "Der er fundet enhedsejerskab, antal: " + eejerskaber.length);
 
-      var bejerskaber= JSON.parse(responses[1].body);      
-      //console.log(util.inspect(bejerskaber));                  
+      var bejerskaber= JSON.parse(responses[1].body);
+      //console.log(util.inspect(bejerskaber));
       assert(bejerskaber.length>=1, "Der er ikke fundet bygningsejerskab, antal: " + bejerskaber.length);
 
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
+      function grund(element, index, array) {
+        return element.EntitetsType===1;
+      }
       assert(bejerskaber.every(grund), "Ejerskab er ikke en grund");
 
       done();
@@ -3904,7 +3902,7 @@ describe('BBR Light', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3915,29 +3913,29 @@ describe('BBR Light', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
       return enhedrp;
-    }).then((response) => {      
+    }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var tekniskeanlæg= JSON.parse(response.body);          
+      var tekniskeanlæg= JSON.parse(response.body);
       assert(tekniskeanlæg.length>=1, "Der er ikke fundet ét teknisk anlæg, men " + tekniskeanlæg.length);
       assert(tekniskeanlæg[0].ejerskaber.length===0, "Der er fundet ejerskab i det tekniske anlæg");
-     
+
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= tekniskeanlæg[0].KomKode;
-      ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr; 
+      ejerskabopt.qs.esrejendomsnr= tekniskeanlæg[0].ESREjdNr;
       ejerskabopt.resolveWithFullResponse= true;
       var ejerskabrp= rp(ejerskabopt);
       return ejerskabrp;
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
+      var ejerskaber= JSON.parse(response.body);
       assert(ejerskaber.length===6, "Der er ikke fundet seks ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
+      function grund(element, index, array) {
+        return element.EntitetsType===1;
+      }
       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
       done();
     }).catch((err) => {
@@ -3956,7 +3954,7 @@ describe('BBR Light', function(){
     var jsonrequest= rp(options).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var adresser= JSON.parse(response.body);
-      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3967,10 +3965,10 @@ describe('BBR Light', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
       return enhedrp;
-    }).then((response) => {      
+    }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var opgange= JSON.parse(response.body);
-      assert(opgange.length===1, "Der er ikke fundet én "+options.qs.q); 
+      assert(opgange.length===1, "Der er ikke fundet én "+options.qs.q);
 
       var enhedopt= {};
       enhedopt.baseUrl= host;
@@ -3981,29 +3979,29 @@ describe('BBR Light', function(){
       enhedopt.resolveWithFullResponse= true;
       var enhedrp= rp(enhedopt);
       return enhedrp;
-    }).then((response) => {      
+    }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var bygninger= JSON.parse(response.body);          
+      var bygninger= JSON.parse(response.body);
       assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
       assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ét ejerskab i bygningen, men " + bygninger[0].ejerskaber.length);
-     
+
       var ejerskabopt= {};
       ejerskabopt.baseUrl= host;
       ejerskabopt.url='bbrlight/ejerskaber';
       ejerskabopt.qs= {};
       ejerskabopt.qs.cache= 'no-cache';
       ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
-      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr;
       ejerskabopt.resolveWithFullResponse= true;
       var ejerskabrp= rp(ejerskabopt);
       return ejerskabrp;
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);          
+      var ejerskaber= JSON.parse(response.body);
       assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);
-      function grund(element, index, array) {          
-        return element.EntitetsType===1; 
-      } 
+      function grund(element, index, array) {
+        return element.EntitetsType===1;
+      }
       assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
       done();
     }).catch((err) => {
@@ -4023,7 +4021,7 @@ describe('BBR Light', function(){
  //    var jsonrequest= rp(options).then((response) => {
  //      assert(response.statusCode===200, "Http status code != 200");
  //      var adresser= JSON.parse(response.body);
- //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+ //      assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
  //      var enhedopt= {};
  //      enhedopt.baseUrl= host;
@@ -4034,29 +4032,29 @@ describe('BBR Light', function(){
  //      enhedopt.resolveWithFullResponse= true;
  //      var enhedrp= rp(enhedopt);
  //      return enhedrp;
- //    }).then((response) => {      
+ //    }).then((response) => {
  //      assert(response.statusCode===200, "Http status code != 200");
- //      var bygninger= JSON.parse(response.body);          
+ //      var bygninger= JSON.parse(response.body);
  //      assert(bygninger.length>=1, "Der er ikke fundet én bygning, men " + bygninger.length);
  //      assert(bygninger[0].ejerskaber.length===1, "Der er ikke fundet ejerskab i bygningen");
-     
+
  //      var ejerskabopt= {};
  //      ejerskabopt.baseUrl= host;
  //      ejerskabopt.url='ois/ejerskaber';
  //      ejerskabopt.qs= {};
  //      ejerskabopt.qs.cache= 'no-cache';
  //      ejerskabopt.qs.kommunekode= bygninger[0].KomKode;
- //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr; 
+ //      ejerskabopt.qs.esrejendomsnr= bygninger[0].ESREjdNr;
  //      ejerskabopt.resolveWithFullResponse= true;
  //      var ejerskabrp= rp(ejerskabopt);
  //      return ejerskabrp;
  //    }).then((response) => {
  //      assert(response.statusCode===200, "Http status code != 200");
- //      var ejerskaber= JSON.parse(response.body);          
+ //      var ejerskaber= JSON.parse(response.body);
  //      assert(ejerskaber.length===1, "Der er ikke fundet syv ejerskab, men " + ejerskaber.length);
- //      function grund(element, index, array) {          
- //        return element.EntitetsType===1; 
- //      } 
+ //      function grund(element, index, array) {
+ //        return element.EntitetsType===1;
+ //      }
  //      assert(ejerskaber.every(grund), "Ejerskab er ikke en grund");
  //      done();
  //    }).catch((err) => {
@@ -4072,13 +4070,13 @@ describe('BBR Light', function(){
     ejerskabopt.qs= {};
     ejerskabopt.qs.cache= 'no-cache';
     ejerskabopt.qs.kommunekode= "0201";
-    ejerskabopt.qs.esrejendomsnr= "094995"; 
+    ejerskabopt.qs.esrejendomsnr= "094995";
     ejerskabopt.resolveWithFullResponse= true;
     var ejerskabrp= rp(ejerskabopt);
     ejerskabrp.then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var ejerskaber= JSON.parse(response.body);  
-      assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);                
+      var ejerskaber= JSON.parse(response.body);
+      assert(ejerskaber.length===1, "Der er ikke fundet ét ejerskab, men " + ejerskaber.length);
       var options= {};
       options.baseUrl= host;
       options.url='adresser';
@@ -4089,7 +4087,7 @@ describe('BBR Light', function(){
       return rp(options);
     }).then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
-      var adresser= JSON.parse(response.body);          
+      var adresser= JSON.parse(response.body);
       assert(adresser.length===1, "Der er ikke fundet en adresse, men " + adresser.length);
       assert(adresser[0].adressebetegnelse.localeCompare("Lilledal 23, 1. tv, 3450 Allerød")===0, "Adressen er ikke Lilledal 23, 1. tv, 3450 Allerød");
       done();
@@ -4105,13 +4103,13 @@ describe('BBR Light', function(){
     reverseopt.qs= {};
     reverseopt.qs.cache= 'no-cache';
     reverseopt.qs.x= 12.5108572474172;
-    reverseopt.qs.y= 55.6983973831476; 
+    reverseopt.qs.y= 55.6983973831476;
     reverseopt.resolveWithFullResponse= true;
-    var reverserp= rp(reverseopt);       
+    var reverserp= rp(reverseopt);
     reverserp.then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var bygninger= JSON.parse(response.body);
-      assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);                
+      assert(bygninger.length===1, "Der er ikke fundet én bygning, men " + bygninger.length);
       //assert(typeof bygninger[0].BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
       //assert(typeof bygninger[0].OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
       done();
@@ -4130,11 +4128,11 @@ describe('BBR Light', function(){
     reverseopt.qs.id= '0000247a-4beb-4e08-8217-d3246a66ffc3';
     reverseopt.qs.format= 'geojson';
     reverseopt.resolveWithFullResponse= true;
-    var reverserp= rp(reverseopt);       
+    var reverserp= rp(reverseopt);
     reverserp.then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var bygninger= JSON.parse(response.body);
-      assert(bygninger.features.length===1, "Der er flere end én bygning, men " + bygninger.features.length); 
+      assert(bygninger.features.length===1, "Der er flere end én bygning, men " + bygninger.features.length);
       //assert(typeof bygninger.features[0].properties.BYG_ANVEND_KODE==='undefined', "Bygningens anvendelseskode er med");
       //assert(typeof bygninger.features[0].properties.OPFOERELSE_AAR==='undefined', "Bygningens opførelsesår er med");
       done();
@@ -4152,11 +4150,11 @@ describe('BBR Light', function(){
     grundopt.qs.cache= 'no-cache';
     grundopt.qs.adgangsadresseid= '0a3f507e-436a-32b8-e044-0003ba298018';
     grundopt.resolveWithFullResponse= true;
-    var reverserp= rp(grundopt);       
+    var reverserp= rp(grundopt);
     reverserp.then((response) => {
       assert(response.statusCode===200, "Http status code != 200");
       var grunde= JSON.parse(response.body);
-      assert(grunde.length===1, "Der er flere end én grund, men " + grunde.length); 
+      assert(grunde.length===1, "Der er flere end én grund, men " + grunde.length);
       assert(grunde[0].AdgAdr_id.localeCompare(grundopt.qs.adgangsadresseid) === 0, "Forkert adgangsadresseid");
       done();
     }).catch((err) => {
@@ -4179,10 +4177,10 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.q= "Lilledal 23, 1. tv, 3450 Allerød";
 //     options.resolveWithFullResponse= true;
-//     let response=  await rp(options);    
+//     let response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     let adresser= JSON.parse(response.body);
-//     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //     // find adressens enhed
 //     options= {};
@@ -4193,7 +4191,7 @@ describe('BBR Light', function(){
 //     options.qs.status= 6;
 //     options.qs.adresse_id= adresser[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     let enheder= JSON.parse(response.body);
 //     assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
@@ -4207,7 +4205,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.status= 6;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     let bygning= JSON.parse(response.body);
 //     assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikke en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
@@ -4224,10 +4222,10 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.q= "Teglbrændervej 1, st. th, 2400 København NV";
 //     options.resolveWithFullResponse= true;
-//     let response=  await rp(options);    
+//     let response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var adresser= JSON.parse(response.body);
-//     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//     assert(adresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //     // find adressens enhed
 //     options= {};
@@ -4238,7 +4236,7 @@ describe('BBR Light', function(){
 //     options.qs.status= 6;
 //     options.qs.adresse_id= adresser[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var enheder= JSON.parse(response.body);
 //     assert(enheder.length===1, "Der er ikke fundet én enhed, men " + enheder.length);
@@ -4252,7 +4250,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.enhed_id= enheder[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var ejerlejligheder= JSON.parse(response.body);
 //     assert(ejerlejligheder.length===1, "Der er ikke fundet én ejerlejligheder, men " + ejerlejligheder.length);
@@ -4265,7 +4263,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.enhed_id= enheder[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var ejendom= JSON.parse(response.body);
 //     assert(ejendom.ejendomstype==='Ejerlejlighed', "Ejendommen er ikke en lejlighed, men " + ejendom.ejendomstype);
@@ -4276,7 +4274,7 @@ describe('BBR Light', function(){
 //     options.qs= {};
 //     options.qs.cache= 'no-cache';
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var opgang= JSON.parse(response.body);
 //     assert(opgang.opg020Elevator==='0', "Der er fundet elevator i opgangen");
@@ -4287,10 +4285,10 @@ describe('BBR Light', function(){
 //     options.qs= {};
 //     options.qs.cache= 'no-cache';
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var etage= JSON.parse(response.body);
-//     assert(etage.eta006BygningensEtagebetegnelse==='st', "Etage er ikke st"); 
+//     assert(etage.eta006BygningensEtagebetegnelse==='st', "Etage er ikke st");
 
 //     // teknisk anlæg
 //     options= {};
@@ -4300,10 +4298,10 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.enhed_id= enheder[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var tekniskeanlæg= JSON.parse(response.body);
-//     assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg'); 
+//     assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg');
 //   });
 
 
@@ -4317,10 +4315,10 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.q= "Teglbrændervej 1, 2400 København NV";
 //     options.resolveWithFullResponse= true;
-//     let response=  await rp(options);    
+//     let response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var adgangsadresser= JSON.parse(response.body);
-//     assert(adgangsadresser.length===1, "Der er ikke fundet én "+options.qs.q); 
+//     assert(adgangsadresser.length===1, "Der er ikke fundet én "+options.qs.q);
 
 //     // find adgangsadressens opgang
 //     options= {};
@@ -4331,7 +4329,7 @@ describe('BBR Light', function(){
 //     options.qs.status= 6;
 //     options.qs.husnummer_id= adgangsadresser[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var opgange= JSON.parse(response.body);
 //     assert(opgange.length===1, "Der er ikke fundet én opgang, men " + opgange.length);
@@ -4343,7 +4341,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.status= 6;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var bygning= JSON.parse(response.body);
 //     assert(bygning.byg021BygningensAnvendelse==='140', 'Bygningen er ikk en Etagebolig-bygning, flerfamiliehus eller to-familiehus');
@@ -4356,7 +4354,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.bygning_id= bygning.id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var bygningerpaafremmedgrund= JSON.parse(response.body);
 //     assert(bygningerpaafremmedgrund.length===0, "Der er ikke fundet én bygningpaafremmedgrund, men " + bygningerpaafremmedgrund.length);
@@ -4369,7 +4367,7 @@ describe('BBR Light', function(){
 //       options.qs= {};
 //       options.qs.cache= 'no-cache';
 //       options.resolveWithFullResponse= true;
-//       response=  await rp(options);    
+//       response=  await rp(options);
 //       assert(response.statusCode===200, "Http status code != 200");
 //       var ejendom= JSON.parse(response.body);
 //       assert(ejendom.ejendomstype==='BPFG', "Ejendommen er ikke en bygning på fremmed grund, men " + ejendom.ejendomstype);
@@ -4383,7 +4381,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.bygning_id= bygning.id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var opgange= JSON.parse(response.body);
 //     assert(opgange.length===4, 'Der er fundet ' + opgange.length + ' opgange');
@@ -4396,7 +4394,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.opgang_id= opgange[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var opgangensenheder= JSON.parse(response.body);
 //     assert(opgangensenheder.length===6, 'Der er fundet ' + opgangensenheder.length + ' enheder på opgangen');
@@ -4409,7 +4407,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.bygning_id= bygning.id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var etager= JSON.parse(response.body);
 //     assert(etager.length===6, 'Der er fundet ' + etager.length + ' etager');
@@ -4422,7 +4420,7 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.etage_id= etager[0].id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var etagensenheder= JSON.parse(response.body);
 //     assert(etagensenheder.length===3, 'Der er fundet ' + etagensenheder.length + ' etagens enheder');
@@ -4433,10 +4431,10 @@ describe('BBR Light', function(){
 //     options.qs= {};
 //     options.qs.cache= 'no-cache';
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var grund= JSON.parse(response.body);
-//     assert(grund.gru009Vandforsyning==='1', "Vandforsyningen er " + grund.gru009Vandforsyning); 
+//     assert(grund.gru009Vandforsyning==='1', "Vandforsyningen er " + grund.gru009Vandforsyning);
 
 //     // grundens jordstykker
 //     options= {};
@@ -4446,12 +4444,12 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.grund_id= grund.id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var grundjordstykker= JSON.parse(response.body);
 //     assert(grundjordstykker.length===1, 'Der er fundet ' + grundjordstykker.length + ' grundjordstykker');
 //     assert(grundjordstykker[0].jordstykke.id===bygning.jordstykke.id, 'Jordstykket tilknyttet grunden (' + grundjordstykker[0].id + ') er forskelligt fra jordstykket tilknyttet bygningen (' + bygning.jordstykke.id + ')');
-  
+
 //     // jordstykket
 //     options= {};
 //     options.baseUrl= host;
@@ -4460,11 +4458,11 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.featureid= grundjordstykker[0].jordstykke.id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var jordstykker= JSON.parse(response.body);
 //     assert(jordstykker.length===1, 'Der er fundet ' + jordstykker.length + ' jordstykker');
-   
+
 //     // teknisk anlæg
 //     options= {};
 //     options.baseUrl= host;
@@ -4473,10 +4471,10 @@ describe('BBR Light', function(){
 //     options.qs.cache= 'no-cache';
 //     options.qs.bygning_id= bygning.id;
 //     options.resolveWithFullResponse= true;
-//     response=  await rp(options);    
+//     response=  await rp(options);
 //     assert(response.statusCode===200, "Http status code != 200");
 //     var tekniskeanlæg= JSON.parse(response.body);
-//     assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg'); 
+//     assert(tekniskeanlæg.length===0, "Der er fundet " + tekniskeanlæg.length + 'tekniske anlæg');
 //   });
 
 
@@ -5208,7 +5206,7 @@ describe('Bygninger', function(){
     options.baseUrl= host;
     options.url='/bygninger';
     options.qs= {};
-    options.qs.cache= 'no-cache'; 
+    options.qs.cache= 'no-cache';
     options.qs.polygon= '[[[8.91172755486213, 56.59274886518194],[8.948437235894998, 56.57437007272818],[8.876752381627279, 56.579839531262145],[8.91172755486213, 56.59274886518194]]]';
     options.resolveWithFullResponse= true;
     var jsonrequest= rp(options).then((response) => {
@@ -5223,7 +5221,7 @@ describe('Bygninger', function(){
     });
   });
 
-   
+
   it("reverse", function(done){
     var options= {};
     options.baseUrl= host;
