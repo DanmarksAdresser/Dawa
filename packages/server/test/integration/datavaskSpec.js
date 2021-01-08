@@ -178,6 +178,13 @@ var adgangsadresseTests = [{
     kategori: 'B',
     id: '0a3f5096-91d3-32b8-e044-0003ba298018'
   }
+}, {
+  it: 'Accepterer manglende postnr hvis postnrnavn matcher præcist og søgning er fuzzy',
+  betegnelse: 'Margretheplassen 4, Aarhus C',
+  result: {
+    kategori: 'B',
+    id: '0a3f5096-91d3-32b8-e044-0003ba298018'
+  }
 }];
 
 describe('Adressevask', () => {

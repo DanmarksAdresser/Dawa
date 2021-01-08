@@ -196,7 +196,7 @@ function fuzzyQuery(entityName, betegnelse, limit) {
 
   // we add a postnr clause to the query for performance reasons when there is exactly one 4-digit number in the address text
   const postnrMatches = betegnelse.match(postnrRegex);
-  const postnrClause = postnrMatches.length === 1 ? `WHERE postnr = ${postnrMatches[0]}` : '';
+  const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]}` : '';
   const sql = `
 WITH vps AS (SELECT
                kommunekode,
