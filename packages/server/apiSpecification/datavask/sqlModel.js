@@ -197,7 +197,6 @@ function fuzzyQuery(entityName, betegnelse, limit) {
   // we add a postnr clause to the query for performance reasons when there is exactly one 4-digit number in the address text
   const postnrMatches = betegnelse.match(postnrRegex);
   const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]}` : '';
-  console.log('postnrClause', postnrClause);
   const sql = `
 WITH vps AS (SELECT
                kommunekode,
@@ -404,10 +403,8 @@ function createSqlModel(entityName) {
         params.per_side=100;
 
         let searchResult = yield this.delegateAbort(doSearchQuery(client, entityName, params));
-        console.log('non fuzzy', JSON.stringify(searchResult, null, 2));
         if(searchResult.length === 0) {
           searchResult = yield this.delegateAbort(doFuzzyQuery(client, entityName, params));
-          console.log('fuzzy', JSON.stringify(searchResult, null, 2));
         }
 
         searchResult.forEach(result => {
