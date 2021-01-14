@@ -17,6 +17,7 @@ const {cachingMiddleware} = require('./middleware/caching');
 const config = require('@dawadk/common/src/config/holder').getConfig();
 require('./apiSpecification/allSpecs');
 const allPages = require('./apidoc/all-pages');
+const { openApiJson } = require('./openapi');
 
 /*jslint stupid: true */
 /*stupid:true makes JSLint allow use of .readFileSync */
@@ -103,6 +104,10 @@ function setupLegacySchemaPage(uriPath) {
     res.sendFile(path.resolve(__dirname, 'apidoc/schema.json'));
   });
 }
+
+app.get('/openapi.json', (req, res) => {
+  res.json(openApiJson);
+});
 
 for(let område of ['adresser', 'dagi', 'bbr', 'matrikelkortet', 'stednavne']) {
   setupPugPage(`/dok/${område}`, `omraader/${område}.pug`);

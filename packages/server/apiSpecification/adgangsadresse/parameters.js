@@ -135,21 +135,9 @@ exports.propertyFilter = normalizeParameters([
     renameTo: 'jordstykke_matrikelnr'
   },
   {
-    name: 'regionskode',
-    type: 'integer',
-    multi: true,
-    schema: schema.kode4
-  },
-  {
     name: 'afstemningsområdenummer',
     type: 'integer',
     multi: true
-  },
-  {
-    name: 'opstillingskredskode',
-    type: 'integer',
-    multi: true,
-    schema: schema.kode4
   },
   {
     name: 'storkredsnummer',
@@ -160,24 +148,6 @@ exports.propertyFilter = normalizeParameters([
     name: 'valglandsdelsbogstav',
     type: 'string',
     multi: true
-  },
-  {
-    name: 'politikredskode',
-    type: 'integer',
-    multi: true,
-    schema: schema.kode4
-  },
-  {
-    name: 'sognekode',
-    type: 'integer',
-    multi: true,
-    schema: schema.kode4
-  },
-  {
-    name: 'retskredskode',
-    type: 'integer',
-    multi: true,
-    schema: schema.kode4
   },
   {
     name: 'zone',

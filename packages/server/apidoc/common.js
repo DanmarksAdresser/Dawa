@@ -38,6 +38,10 @@ const formatParameters = [
   {
     name: 'noformat',
     doc: 'Parameteren angiver, at whitespaceformatering skal udelades'
+  },
+  {
+    name: 'ndjson',
+    doc: 'Output leveres i <a href="http://ndjson.org">Newline Delimited JSON</a>'
   }
 ];
 

@@ -30,7 +30,7 @@ go(function* () {
         }
         const match = regex.exec(value);
         const query = match[5] !== '-' ? `?${decodeURIComponent(match[5])}` : '';
-        if(match[6] === 'Miss') {
+        if(/*match[6] === 'Miss'*/ true) {
             requestPlan.push({
                 cip: match[3],
                 time: moment(`${match[1]}T${match[2]}Z`).add(getRandomInt(1000)),
@@ -57,11 +57,11 @@ go(function* () {
         maxSockets: 1000,
     });
     for (let index = 0; index < requestsToMake; ++index) {
+        now = moment();
+        const url = requestPlan[index].url;
         if(index % 1000 === 0) {
             console.log('successes', successes, 'errors', errors, 'rejections', rejections, 'badRequests', badRequests, 'notFounds', notFounds, 'serverErrors', serverErrors, 'clientErrors', clientErrors);
         }
-        now = moment();
-        const url = requestPlan[index].url;
         while (now.isBefore(requestPlan[index].time)) {
             const millisToWait = requestPlan[index].time.diff(now);
             yield Promise.delay(millisToWait);

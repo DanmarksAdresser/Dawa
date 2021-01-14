@@ -164,6 +164,18 @@ exports.getOisGetByKeyResourcePath = (oisEntityName, variant) => {
   return resource.path.replace(':id', '{id}');
 };
 
+const expressToDocRegex = /:([^\/]+)/g;
+exports.expressPathToDocPath = path => {
+  return path.replace(expressToDocRegex, '{$1}');
+}
+
+exports.getPathParameterNames = (docPath) => {
+  const regex = /\{([^\}]+)\}/g;
+  return (docPath.match(regex) || []).map(match => {
+    return match.replace('{', '').replace('}', '');
+  });
+}
+
 exports.getOisEntityNames = () => {
   return [
     'enhed',
