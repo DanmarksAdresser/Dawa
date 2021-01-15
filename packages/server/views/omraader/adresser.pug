@@ -192,12 +192,12 @@ block main
       p.
         Nogle har behov for at have en lokal, opdateret kopi af adressedata. DAWA kan anvendes til
         at etablere og holde kopien af adressedata opdateret. Til dette anvendes
-        <a href='#{url}//dok/guide/replikering'>Replikerings API'et</a>.
+        <a href='/dok/guide/replikering'>Replikerings API'et</a>.
 
 
 
 block append scripts
   script(type='text/javascript').
-    dawa.initForside()
-    dawa.setupDatavaskDemo('#vask-adresse-input', '#vask-adresse-btn', '#datavask-adresse-result', 'adresse');
-    dawa.setupDatavaskDemo('#vask-adgangsadresse-input', '#vask-adgangsadresse-btn', '#datavask-adgangsadresse-result', 'adgangsadresse');
+    dawa.initForside('#{url}')
+    dawa.setupDatavaskDemo('#{url}', '#vask-adresse-input', '#vask-adresse-btn', '#datavask-adresse-result', 'adresse');
+    dawa.setupDatavaskDemo('#{url}', '#vask-adgangsadresse-input', '#vask-adgangsadresse-btn', '#datavask-adgangsadresse-result', 'adgangsadresse');

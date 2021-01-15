@@ -40,7 +40,7 @@ block main
   p.
     Vask adressen "Rante Mester Vej 4, 2400 København":
   pre
-    <a href='/datavask/adresser?betegnelse=Rante Mester Vej 4, 2400 København'>#{url}/datavask/adresser?betegnelse=Rante Mester Vej 4, 2400 København</a>
+    <a href='#{url}/datavask/adresser?betegnelse=Rante Mester Vej 4, 2400 København'>#{url}/datavask/adresser?betegnelse=Rante Mester Vej 4, 2400 København</a>
   p.
     Svaret angiver, at der ikke er tale om et præcist match, men at matchet kan anses for sikkert (kategori B).
     I svaret er angivet hvilke forskelle der er fundet mellem den angivne adresse og resultatet.
@@ -48,7 +48,8 @@ block main
 
   p.
     Vask adressen "Girostrøget 1, 0800 Høje Tåstrup":
-    <a href='/datavask/adresser?betegnelse=Girostrøget 1, 0800 Høje Tåstrup'>#{url}/datavask/adresser?betegnelse=Girostrøget 1, 0800 Høje Tåstrup</a>
+  pre
+    <a href='#{url}/datavask/adresser?betegnelse=Girostrøget 1, 0800 Høje Tåstrup'>#{url}/datavask/adresser?betegnelse=Girostrøget 1, 0800 Høje Tåstrup</a>
   p.
     Postnummer 0800 er et såkaldt stormodtagerpostnummer. Enkelte store organisationer har et stormodtagerpostnummer,
     som kan anvendes i stedet for det almindelige postnummer.
@@ -70,5 +71,5 @@ block main
 
 block append scripts
   script.
-    dawa.setupDatavaskDemo('#vask-adresse-input', '#vask-adresse-btn', '#datavask-adresse-result', 'adresse');
-    dawa.setupDatavaskDemo('#vask-adgangsadresse-input', '#vask-adgangsadresse-btn', '#datavask-adgangsadresse-result', 'adgangsadresse');
+    dawa.setupDatavaskDemo('#{url}', '#vask-adresse-input', '#vask-adresse-btn', '#datavask-adresse-result', 'adresse');
+    dawa.setupDatavaskDemo('#{url}', '#vask-adgangsadresse-input', '#vask-adgangsadresse-btn', '#datavask-adgangsadresse-result', 'adgangsadresse');

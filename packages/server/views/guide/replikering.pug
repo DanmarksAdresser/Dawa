@@ -59,10 +59,10 @@ block main
       | anvendes, således det sikres at udtrækkene er konsistente med hinanden. For basale adressedata
       | er det nødvendigt at hente adgangsadresser, adresser, vejstykker og postnumre:
       pre
-        | <code>GET https://dawa.aws.dk/replikering/udtraek?entitet=adgangsadresse&txid=123123
-        |GET https://dawa.aws.dk/replikering/udtraek?entitet=adresse&txid=123123
-        |GET https://dawa.aws.dk/replikering/udtraek?entitet=vejstykke&txid=123123
-        |GET https://dawa.aws.dk/replikering/udtraek?entitet=postnummer&txid=123123</code>
+        | <code>GET #{url}/replikering/udtraek?entitet=adgangsadresse&txid=123123
+        |GET #{url}/replikering/udtraek?entitet=adresse&txid=123123
+        |GET #{url}/replikering/udtraek?entitet=vejstykke&txid=123123
+        |GET #{url}/replikering/udtraek?entitet=postnummer&txid=123123</code>
       | Typisk anvendes enten CSV eller NDJSON format til udtræk. Mange databaser (bl.a. <a href="https://www.postgresql.org/docs/current/static/sql-copy.html">PostgreSQL</a> og SQL Server)
       | understøtter at CSV-format indlæses direkte i en databasetabel.
       | Se <a href="/dok/api/replikering#udtraek">API dokumentationen</a> for detaljer.
@@ -89,7 +89,7 @@ block main
       | med et større transaktions-ID.
     p
       | Klienten starter med at hente seneste metadata for seneste transaktion:
-      pre <code>GET https://dawa.aws.dk/replikering/senestetransaktion</code>
+      pre <code>GET #{url}/replikering/senestetransaktion</code>
       | Af svaret fremgår transaktions-ID for den senest udførte transaktion. Det kan f.eks være, at klientens
       | tidligere har indlæst alle hændelser frem til transaktions-ID 123123, og seneste transaktion har
       | transaktions-ID 123125. Klienten mangler således at indlæse transaktionen med Id 123124 og
@@ -98,13 +98,13 @@ block main
       | Klienten kan vælge at indlæse begge transaktioner på én gang, eller klienten kan vælge at indlæse
       | hver transaktion enkeltvis. I eksempelt her indlæser vi transaktionerne enkeltvist. Først hentes metadata
       | for den næste transaktion der skal indlæses, som har transaktions-ID 123124:
-      pre <code>GET https://dawa.aws.dk/replikering/transaktioner?txid=123124</code>
+      pre <code>GET#{url}/replikering/transaktioner?txid=123124</code>
       | Det fremgår af svaret hvilke entiteter der er ændret i transaktionen. Klienten skal hente hændelserne
       | for alle de entiteter, som klienten vedligeholder en lokal kopi af. Hvis det f.eks. er entiteterne
       | "adgangsadresse" og "adresse" der har tilknyttede hændelser hentes hændelserne for disse:
       pre
-        | <code>GET https://dawa.aws.dk/replikering/haendelser?entitet=adgangsadresse&txid=123124
-        | GET https://dawa.aws.dk/replikering/haendelser?entitet=adresse&txid=123124</code>
+        | <code>GET #{url}/replikering/haendelser?entitet=adgangsadresse&txid=123124
+        | GET #{url}/replikering/haendelser?entitet=adresse&txid=123124</code>
       | Se <a href="/dok/api/replikering#haendelser">API-dokumentationen</a> for detaljer om hændelses-API'et.
     p
       | Herefter udføres de ændringer som hændelserne angiver på den lokale kopi. Hvis der anvendes
@@ -120,7 +120,7 @@ block main
     h2 Detaljer
     h3 Maskinlæsbar model
     p
-      | Replikerings-API'et udstiller en maskinlæsbar <a href="/replikering/datamodel">datamodel</a>.
+      | Replikerings-API'et udstiller en maskinlæsbar <a href='#{url}/replikering/datamodel'>datamodel</a>.
       | Denne datamodel kan benyttes i implementationen af replikerings-klienter. Den indeholder
       | information om hvilke entiteter der findes, hvilke attributter de har, og hvad typerne
       | er på attributterne.
@@ -130,7 +130,7 @@ block main
     p
       | Visse entiteter indeholder store geometrier. Det kan være regioner, kommuner eller steder.
       | Disse geometrier er ikke indlejrede i udtræk og hændelser. I stedet er der en URL der peger på geometrien.
-      | Det fremgår af <a href="/replikering/datamodel">datamodellen</a> hvilke geometri-attributter
+      | Det fremgår af <a href='#{url}/replikering/datamodel'>datamodellen</a> hvilke geometri-attributter
       | der potentielt kan have referencer i stedet for indlejrede geometrier.
       | Disse attributter har angivet <code>"offloaded": true</code>.
     p

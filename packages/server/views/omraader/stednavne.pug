@@ -26,8 +26,8 @@ block main
       er inddelt i undertyper, som f.eks. by, akvarium og bugt. Du kan anvende stednavntyper API’et til
       at få en oversigt over hovedtyper og deres undertyper:
     pre
-      a(href='/stednavntyper').
-        https://dawa.aws.dk/stednavntyper
+      a(href=`${url}/stednavntyper`).
+        #{url}/stednavntyper
 
   h2 Stedsøgning
   p
@@ -35,17 +35,17 @@ block main
       Stednavnetyperne kan anvendes til at finde de steder, du er interesseret i.
       Det kan f.eks. være alle danske byer:
     pre
-      a(href='https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by').
-        https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by
+      a(href=`${url}/steder?hovedtype=Bebyggelse&undertype=by`).
+        #{url}/steder?hovedtype=Bebyggelse&undertype=by
 
   p Hvis det er en bestemt by du søger, og den nøjagtige stavemåde for stedets primære navn er kendt:
   pre
-    a(href='/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød').
-      https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød
+    a(href=`${url}/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød`).
+      #{url}/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød
   p Geometrien får du ved at sætte <code>format</code> parameteren til <code>geojson</code>:
     pre
-      a(href='/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød&format=geojson').
-        https://dawa.aws.dk/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød&format=geojson
+      a(href=`${url}/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød&format=geojson`).
+        #{url}/steder?hovedtype=Bebyggelse&undertype=by&primærtnavn=Blovstrød&format=geojson
   p
     .
       Steder er også forsynet med et visuelt center, som kan anvendes til at placere navnet
@@ -58,7 +58,7 @@ block main
       Sted-ressourcen understøtter ikke tekstsøgning eller autocomplete. Det gør stednavneressourcen
       derimod. Der er også understøttelse for fuzzy søgning:
     pre
-      a(href="/stednavne2?q=bloustrød&fuzzy") https://dawa.aws.dk/stednavne2?q=bloustrød&fuzzy
+      a(href=`${url}/stednavne2?q=bloustrød&fuzzy`) #{url}/stednavne2?q=bloustrød&fuzzy
     .
       Ved søgning i stednavne søges som udgangspunkt både i primære og sekundære navne. Det samme
       sted kan optræde flere gange i søgeresultatet hvis stedet har flere navne.
@@ -68,8 +68,8 @@ block main
     Du kan også finde de adresser, som er placeret på et sted. Hvis du f.eks. ønsker de adresser
     der ligger i Blovstrød, kan du anvende stedets id på følgende måde:
   pre
-    a(href='https://dawa.aws.dk/adresser?stednavnid=12337669-dd6b-6b98-e053-d480220a5a3f').
-      https://dawa.aws.dk/adresser?stedid=12337669-dd6b-6b98-e053-d480220a5a3f
+    a(href=`${url}/adresser?stednavnid=12337669-dd6b-6b98-e053-d480220a5a3f`).
+      #{url}/adresser?stedid=12337669-dd6b-6b98-e053-d480220a5a3f
   p Nedenfor ser du adresserne i Blovstrød.
     img(src='/img/stednavne-blovstroed-adresser.jpg')
 

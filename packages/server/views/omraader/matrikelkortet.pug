@@ -23,10 +23,10 @@ block main
   h2 Ejerlav
   p DAWA udstiller en liste over ejerlav i Danmark:
   pre
-    a(href="//dawa.aws.dk/ejerlav") https://dawa.aws.dk/ejerlav
+    a(href=`${url}/ejerlav`) #{url}/ejerlav
   p Endvidere udstiller DAWA autocomplete-funktionalitet på ejerlavets navn:
   pre
-    a(href="//dawa.aws.dk/ejerlav/autocomplete?q=Sønder") https://dawa.aws.dk/ejerlav/autocomplete?q=Sønder
+    a(href=`${url}/ejerlav/autocomplete?q=Sønder`) #{url}/ejerlav/autocomplete?q=Sønder
   p.
     Ejerlav kan som andre ressourcer modtages i forskellige formater, eksempelvis CSV-format, se #[a(href='/dok/api/generelt#dataformater') dataformater].
     For yderligere information om ejerlav, se #[a(href='/dok/api/ejerlav') API dokumentationen].
@@ -38,7 +38,7 @@ block main
   p
     | Ønskes information om jordstykkers geografiske udstrækning vælges GeoJSON formatet:
     pre
-      a(href='//dawa.aws.dk/jordstykker?format=geojson&per_side=10') https://dawa.aws.dk/jordstykker?format=geojson&per_side=10
+      a(href=`${url}/jordstykker?format=geojson&per_side=10`) #{url}/jordstykker?format=geojson&per_side=10
     | For mere information om formatvalg se #[a(href='/dok/api/generelt#dataformater') dataformater].
   p
     | DAWA understøtter autocomplete af jordstykker:
@@ -52,8 +52,8 @@ block main
     |  jordstykkets geografiske udstrækning. Man kan finde adgangsadresserne på et jordstykke
     |  ved at benytte ejerlavkode og matrikelnr parametrene:
   pre
-    a(href='//dawa.aws.dk/adgangsadresser?ejerlavkode=1101052&matrikelnr=10b').
-      https://dawa.aws.dk/adgangsadresser?ejerlavkode=1101052&matrikelnr=10b
+    a(href=`${url}/adgangsadresser?ejerlavkode=1101052&matrikelnr=10b`).
+      #{url}/adgangsadresser?ejerlavkode=1101052&matrikelnr=10b
 
   h2 Replikering
   p Ejerlav, jordstykker samt jordstykkers tilknytning til adresser er udstillet på replikerings-API'et, hvilket
@@ -62,4 +62,4 @@ block main
 
 block append scripts
   script(type='text/javascript').
-    dawa.initMatrikelkortetSide();
+    dawa.initMatrikelkortetSide('#{url}');

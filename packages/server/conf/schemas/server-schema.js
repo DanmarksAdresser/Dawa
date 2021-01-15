@@ -196,7 +196,7 @@ module.exports = mergeConfigSchemas([
     service_url: {
       doc: 'The service URL to use in documentation. Defaults to empty string, which uses local paths',
       format: 'string',
-      default: '',
+      default: null,
       cli: true
     }
   }]);

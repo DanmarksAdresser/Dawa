@@ -25,37 +25,37 @@ block main
   h3 Find en enhed ud fra dens adresse
   p Først fremskaffes adressens id:
     pre
-      a(href='https://dawa.aws.dk/adresser?q=Grønjordskollegiet 2, 4. 2519, 2300 København S').
-        https://dawa.aws.dk/adresser?q=Grønjordskollegiet 2, 4. 2519, 2300 København S
+      a(href=`${url}/adresser?q=Grønjordskollegiet 2, 4. 2519, 2300 København S`).
+        #{url}/adresser?q=Grønjordskollegiet 2, 4. 2519, 2300 København S
 
   p Enheden hentes vha. adressens id:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/enheder?adresseid=0a3f509e-6716-32b8-e044-0003ba298018').
-        https://dawa.aws.dk/bbrlight/enheder?adresseid=0a3f509e-6716-32b8-e044-0003ba298018
+      a(href=`${url}/bbrlight/enheder?adresseid=0a3f509e-6716-32b8-e044-0003ba298018`).
+        #{url}/bbrlight/enheder?adresseid=0a3f509e-6716-32b8-e044-0003ba298018
 
   h3 Find en bygning ud fra dens adgangsadresse
   p Først findes adgangsadressens id. Det kan f.eks. gøres med følgende request:
     pre
-      a(href='https://dawa.aws.dk/adgangsadresser?q=Rentemestervej 8, 2400').
-        https://dawa.aws.dk/adgangsadresser?q=Rentemestervej 8, 2400
+      a(href=`${url}/adgangsadresser?q=Rentemestervej 8, 2400`).
+        #{url}/adgangsadresser?q=Rentemestervej 8, 2400
   p BBR bygningens id findes via opgangen vha. adgangsadressens id:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/opgange?adgangsadresseid=0a3f507a-e179-32b8-e044-0003ba298018').
-        https://dawa.aws.dk/bbrlight/opgange?adgangsadresseid=0a3f507a-e179-32b8-e044-0003ba298018
+      a(href=`${url}/bbrlight/opgange?adgangsadresseid=0a3f507a-e179-32b8-e044-0003ba298018`).
+        #{url}/bbrlight/opgange?adgangsadresseid=0a3f507a-e179-32b8-e044-0003ba298018
   p Herefter findes BBR bygningen ud fra opgangens bygnings id på følgende måde:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/bygninger?id=9a837c75-a4d4-4a0a-8379-0b76ab654265').
-        https://dawa.aws.dk/bbrlight/bygninger?id=9a837c75-a4d4-4a0a-8379-0b76ab654265
+      a(href=`${url}/bbrlight/bygninger?id=9a837c75-a4d4-4a0a-8379-0b76ab654265`).
+        #{url}/bbrlight/bygninger?id=9a837c75-a4d4-4a0a-8379-0b76ab654265
 
   h3 Find en ejerlejligheds ESR ejendomsnummer ud fra dens adresse
   p Først findes adressens id. Det kan f.eks. ske med følgende request:
     pre
-      a(href='https://dawa.aws.dk/adresser?q=lilledal%2023,%201.%20tv,%203450').
-        https://dawa.aws.dk/adresser?q=lilledal%2023,%201.%20tv,%203450
+      a(href=`${url}/adresser?q=lilledal%2023,%201.%20tv,%203450`).
+        #{url}/adresser?q=lilledal%2023,%201.%20tv,%203450
   p Herefter findes BBR enheden ud fra adressens id:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/enheder?adresseid=3cb0a0c6-2cfe-0e4a-e044-0003ba298018').
-        https://dawa.aws.dk/bbrlight/enheder?adresseid=3cb0a0c6-2cfe-0e4a-e044-0003ba298018
+      a(href=`${url}/bbrlight/enheder?adresseid=3cb0a0c6-2cfe-0e4a-e044-0003ba298018`).
+        #{url}/bbrlight/enheder?adresseid=3cb0a0c6-2cfe-0e4a-e044-0003ba298018
   p.
     Hvis BBR enheden er en ejerlejlighed rummer resultatet ejerskabsoplysninger.
     I dette tilfælde er ESR ejendomsnummeret: 094995.
@@ -63,16 +63,16 @@ block main
   h3 Find ESR ejendomsnummer for bygning på lejet/fremmed grund ud fra dens adgangsadresse
   p Først findes adgangsadressens id. Det kan f.eks. gøres med følgende request:
     pre
-      a(href='https://dawa.aws.dk/adgangsadresser?q=Hjaltesvej 5A, 7800 Skive').
-        https://dawa.aws.dk/adgangsadresser?q=Hjaltesvej 5A, 7800 Skive
+      a(href=`${url}/adgangsadresser?q=Hjaltesvej 5A, 7800 Skive`).
+        #{url}/adgangsadresser?q=Hjaltesvej 5A, 7800 Skive
   p BBR bygningens id findes via opgangen ud fra adgangsadressens id:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/opgange?adgangsadresseid=0a3f5098-08a1-32b8-e044-0003ba298018').
-        https://dawa.aws.dk/bbrlight/opgange?adgangsadresseid=0a3f5098-08a1-32b8-e044-0003ba298018
+      a(href=`${url}/bbrlight/opgange?adgangsadresseid=0a3f5098-08a1-32b8-e044-0003ba298018`).
+        #{url}/bbrlight/opgange?adgangsadresseid=0a3f5098-08a1-32b8-e044-0003ba298018
   p Herefter findes BBR bygningen på følgende måde:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/bygninger?id=0da265e5-8c13-4356-a395-627eb020e38b').
-        https://dawa.aws.dk/bbrlight/bygninger?id=0da265e5-8c13-4356-a395-627eb020e38b
+      a(href=`${url}/bbrlight/bygninger?id=0da265e5-8c13-4356-a395-627eb020e38b`).
+        #{url}/bbrlight/bygninger?id=0da265e5-8c13-4356-a395-627eb020e38b
   p.
     Hvis BBR bygningen er en bygning på lejet grund rummer resultatet ejerskabsoplysninger.
     I dette tilfælde er ESR ejendomsnummeret: 100884
@@ -80,8 +80,8 @@ block main
   h3 Find en adresse ud fra et ESR ejendomsnummer
   p Find ejerskabet ud fra ESR ejendomsnummeret og kommunekoden. ESR ejendomsnummeret er kun unikt indenfor en kommune:
     pre
-      a(href='https://dawa.aws.dk/bbrlight/ejerskaber?kommunekode=0201&esrejendomsnr=094995').
-        https://dawa.aws.dk/bbrlight/ejerskaber?kommunekode=0201&esrejendomsnr=094995
+      a(href=`${url}/bbrlight/ejerskaber?kommunekode=0201&esrejendomsnr=094995`).
+        #{url}/bbrlight/ejerskaber?kommunekode=0201&esrejendomsnr=094995
   p.
     Hvis det drejer sig om ejerskab til grund, bygning eller teknisk anlæg anvendes adgangsadresse
     id til at finde adgangsadresse. Hvis ejerskabet drejer sig om enhed/ejerlejlighed anvendes
@@ -89,8 +89,8 @@ block main
 
   p I dette tilfælde udpeger ejerskabet en enhed, hvor EnhAdr_id anvendes til at udpege adressen:
     pre
-      a(href='https://dawa.aws.dk/adresser?id=3cb0a0c6-2cfe-0e4a-e044-0003ba298018').
-        https://dawa.aws.dk/adresser?id=3cb0a0c6-2cfe-0e4a-e044-0003ba298018
+      a(href=`${url}/adresser?id=3cb0a0c6-2cfe-0e4a-e044-0003ba298018`).
+        #{url}/adresser?id=3cb0a0c6-2cfe-0e4a-e044-0003ba298018
 
   h2 Fejl på data?
   p Hvis du mener at nogen data mangler eller er fejlfyldte, kan du henvende dig til den kommunale BBR myndighed i den aktuelle kommune.

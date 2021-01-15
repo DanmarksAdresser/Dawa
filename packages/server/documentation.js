@@ -50,8 +50,9 @@ var autocompleteSchemas = _.reduce(registry.entriesWhere({
 
 
 function pugDocumentationParams(req) {
+  const url = config.get('service_url') ? config.get('service_url') : paths.baseUrl(req);
   return {
-    url: paths.baseUrl(req),
+    url,
     path: req.path,
     jsonSchemas,
     autocompleteSchemas,
