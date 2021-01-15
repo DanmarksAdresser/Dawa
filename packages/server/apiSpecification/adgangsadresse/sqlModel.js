@@ -43,7 +43,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
     // we add a postnr clause to the query for performance reasons when there is exactly one 4-digit number in the address text
     const postnrMatches = params.fuzzyq.match(postnrRegex);
-    const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]} OR ${postnrMatches[0]} NOT IN (select nr from vask_postnumre)` : '';
+    const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]} OR ${postnrMatches[0]} NOT IN (select postnr from vask_vejstykker_postnumre)` : '';
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     sqlParts.with.push(`adgadr_ids AS (SELECT id
        FROM adgangsadresser_mat adg
@@ -51,7 +51,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
        FROM vejstykkerpostnumremat vp
        ${postnrClause}
        ORDER BY tekst <-> ${fuzzyqAlias} limit 15) as vp
-       ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)`);
+       ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode)`);
     sqlParts.whereClauses.push("a_id IN (select * from adgadr_ids)");
     sqlParts.orderClauses.push("least(levenshtein(lower(adressebetegnelse(vejnavn, husnr, NULL, NULL, NULL," +
       " to_char(adgangsadresserview.postnr, 'FM0000'), postnrnavn)), lower(" + fuzzyqAlias + "), 2, 1, 3)," +
