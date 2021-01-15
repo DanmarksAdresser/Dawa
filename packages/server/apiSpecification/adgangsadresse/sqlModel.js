@@ -38,13 +38,18 @@ var searchAdgangsadresse = function(columnSpec) {
   };
 };
 
+const postnrRegex = /\d{4}/g;
 function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
+    // we add a postnr clause to the query for performance reasons when there is exactly one 4-digit number in the address text
+    const postnrMatches = params.fuzzyq.match(postnrRegex);
+    const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]}` : '';
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     sqlParts.with.push(`adgadr_ids AS (SELECT id
        FROM adgangsadresser_mat adg
        JOIN (select kommunekode, vejkode, postnr
        FROM vejstykkerpostnumremat vp
+       ${postnrClause}
        ORDER BY tekst <-> ${fuzzyqAlias} limit 15) as vp
        ON adg.kommunekode = vp.kommunekode AND adg.vejkode = vp.vejkode AND adg.postnr = vp.postnr)`);
     sqlParts.whereClauses.push("a_id IN (select * from adgadr_ids)");
