@@ -10,19 +10,14 @@ const configSchema = configHolder.mergeConfigSchemas([
   require('../conf/schemas/server-schema'),
   require('@dawadk/common/src/config/base-schema')
 ]);
-process.once('message', msg => {
-  configHolder.initialize(configSchema, [], JSON.parse(msg));
-  logger.initialize(configHolder.getConfig().get('logging'));
+
+const setupApi = (app) => {
   const config = configHolder.getConfig();
-  const errorMessages = require('../haproxy/errorMessages');
   const proddb = require('../psql/proddb');
   const { databaseQueryLimiter, databaseConnectionLimiter } = require('../psql/requestLimiter');
   const databasePools = require('@dawadk/common/src/postgres/database-pools');
 
   const dawaPgApi      = require('../dawaPgApi');
-  const documentation = require('../documentation');
-  require('../apiSpecification/allSpecs');
-  const isalive = require('../isalive/isalive-worker')
 
   const dboptions = {
     max: config.get('pg.pool.max'),
@@ -37,6 +32,21 @@ process.once('message', msg => {
   };
   proddb.init(dboptions);
   databasePools.create('prod', dboptions);
+  app.use('', dawaPgApi.setupRoutes());
+
+}
+
+const setupDocumentation = (app) => {
+  const documentation = require('../documentation');
+  app.use('', documentation);
+}
+
+process.once('message', msg => {
+  configHolder.initialize(configSchema, [], JSON.parse(msg));
+  logger.initialize(configHolder.getConfig().get('logging'));
+  const config = configHolder.getConfig();
+  require('../apiSpecification/allSpecs');
+  const isalive = require('../isalive/isalive-worker')
 
   const app = express();
 
@@ -62,9 +72,8 @@ process.once('message', msg => {
 
   const listenPort = config.get('port');
 
-  app.use('', dawaPgApi.setupRoutes());
-  app.use('', documentation);
 
+  const errorMessages = require('../haproxy/errorMessages');
   app.get('/error/:error', function(req, res) {
     const error = req.params.error;
     if(Object.keys(errorMessages).includes(error)) {
@@ -76,6 +85,11 @@ process.once('message', msg => {
       res.sendStatus(404);
     }
   });
+
+  setupDocumentation(app);
+  if(!config.get('docs_only')) {
+    setupApi(app);
+  }
 
   const server = http.createServer(app);
   isalive.setup(server);

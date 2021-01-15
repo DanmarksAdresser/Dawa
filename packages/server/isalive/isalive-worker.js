@@ -5,8 +5,17 @@ const {go} = require('ts-csp');
 
 const databasePools = require('@dawadk/common/src/postgres/database-pools');
 const logger = require('@dawadk/common/src/logger').forCategory('isalive');
+const configHolder = require('@dawadk/common/src/config/holder');
 
 const isAliveWorker = server => go(function*() {
+  if(configHolder.getConfig().get('docs_only')) {
+    return {
+      type: 'status',
+      data: {
+        status: 'up'
+      }
+    };
+  }
   const connectionCount = yield Promise.promisify(server.getConnections, {context: server})();
   let couldPerformQuery = false;
   try {
