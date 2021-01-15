@@ -43,7 +43,7 @@ function fuzzySearchParameterImpl(sqlParts, params) {
   if(params.fuzzyq) {
     // we add a postnr clause to the query for performance reasons when there is exactly one 4-digit number in the address text
     const postnrMatches = params.fuzzyq.match(postnrRegex);
-    const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]}` : '';
+    const postnrClause = (postnrMatches && postnrMatches.length === 1) ? `WHERE postnr = ${postnrMatches[0]} OR ${postnrMatches[0]} NOT IN (select nr from vask_postnumre)` : '';
     var fuzzyqAlias = dbapi.addSqlParameter(sqlParts, params.fuzzyq);
     sqlParts.with.push(`adgadr_ids AS (SELECT id
        FROM adgangsadresser_mat adg
