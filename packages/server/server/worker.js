@@ -86,11 +86,10 @@ process.once('message', msg => {
     }
   });
 
-  setupDocumentation(app);
   if(!config.get('docs_only')) {
     setupApi(app);
   }
-
+  setupDocumentation(app);
   const server = http.createServer(app);
   isalive.setup(server);
   server.listen(listenPort);
