@@ -123,7 +123,7 @@ class DawaClient {
           const config = configHolder.getConfig();
           const totalTime = logMessage.queryTime || 0;
 
-          const shouldLog = !options.skipSqlLogging && (error || (config.get('logging.log_sql') && totalTime > config.get('logging.log_sql_threshold')));
+          const shouldLog = config && (!options.skipSqlLogging && (error || (config.get('logging.log_sql') && totalTime > config.get('logging.log_sql_threshold'))));
           if(shouldLog) {
             const level = error ? 'error' : 'info';
             sqlLogger.log(level, 'sql', {

@@ -89,7 +89,9 @@ process.once('message', msg => {
   if(!config.get('docs_only')) {
     setupApi(app);
   }
-  setupDocumentation(app);
+  if(!config.get('api_only')) {
+    setupDocumentation(app);
+  }
   const server = http.createServer(app);
   isalive.setup(server);
   server.listen(listenPort);

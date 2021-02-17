@@ -71,7 +71,7 @@ const documentConfigured = (schema, config) => {
   }
   return result;
 };
-const getConfig = () => config;
+const getConfig = () => convictConfig ? config : null;
 const initialize = (schema, configFiles, cmdLineOptions) => {
   if (convictConfig) {
     throw new Error('Cannot initialize configuration twice');

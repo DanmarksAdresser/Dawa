@@ -193,6 +193,12 @@ module.exports = mergeConfigSchemas([
       default: false,
       cli: true
     },
+    api_only: {
+      doc: "Just serve the API, no docs",
+      format: 'boolean',
+      default: false,
+      cli: true
+    },
     service_url: {
       doc: 'The service URL to use in documentation. Defaults to empty string, which uses local paths',
       format: 'string',
