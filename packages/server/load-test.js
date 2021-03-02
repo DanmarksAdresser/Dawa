@@ -5,7 +5,7 @@ const {go, Channel, CLOSED} = require('ts-csp');
 const {pipeFromStream} = require('@dawadk/common/src/csp-util');
 const split2 = require('split2');
 const moment = require('moment');
-const http = require('http');
+const http = require('https');
 const host = process.argv[2];
 const file = process.argv[3];
 
@@ -50,6 +50,7 @@ go(function* () {
     let notFounds = 0;
     let serverErrors = 0;
     let clientErrors = 0;
+    let tempRedirects = 0;
     console.log('starting');
     const requestsToMake = requestPlan.length;
     const agent = new http.Agent({
@@ -87,23 +88,28 @@ go(function* () {
             else if (response.statusCode === 500) {
                 ++serverErrors;
             }
-            else if (response.statusCode === 200 || response.statusCode === 302) {
+            else if (response.statusCode === 200 || response.statusCode === 302 || response.statusCode === 307) {
                 response.on('data', () => null);
                 response.on('end', () => {
-                    ++successes;
+                    if(response.statusCode === 307) {
+                        tempRedirects++;
+                    }
+                    else {
+                        ++successes;
+                    }
                 });
                 response.on('error', () => {
                     ++errors;
                 });
             }
             else {
-                console.log('unusual response code', response.statusCode);
+                console.log('unusual response code', response.statusCode, 'url', url);
                 ++errors;
             }
         });
         request.on('error', () => ++clientErrors);
     }
-    console.log('successes', successes, 'errors', errors, 'rejections', rejections, 'badRequests', badRequests, 'notFounds', notFounds, 'serverErrors', serverErrors, 'clientErrors', clientErrors);
+    console.log('successes', successes, 'errors', errors, 'rejections', rejections, 'badRequests', badRequests, 'notFounds', notFounds, 'serverErrors', serverErrors, 'clientErrors', clientErrors, 'tempRedirects', tempRedirects);
 }).asPromise().then(() => {
     console.log('complete')
 }, error => console.log('error', error));
