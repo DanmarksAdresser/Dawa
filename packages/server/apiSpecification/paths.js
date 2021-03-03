@@ -7,13 +7,13 @@ require('./allNamesAndKeys');
 const configHolder = require('@dawadk/common/src/config/holder');
 
 const getProtocol = req => {
-  if(req.headers['cloudfront-forwarded-proto']) {
-    const cfProto = req.headers['cloudfront-forwarded-proto'] || req.headers['x-forwarded-proto'];
-    if(cfProto === 'http' || cfProto === 'https') {
-      return cfProto;
+  const proto = req.headers['cloudfront-forwarded-proto'] || req.headers['x-forwarded-proto'];
+  if(proto) {
+    if(proto === 'http' || proto === 'https') {
+      return proto;
     }
     else {
-      logger.error('Invalid value of cloudFront-forwarded-proto header', {value:cfProto });
+      logger.error('Invalid value of cloudFront-forwarded-proto header', {value: proto });
       return 'http';
     }
   }
