@@ -24,6 +24,9 @@ const getProtocol = req => {
 exports.getProtocol = getProtocol;
 
 const getHostname = req => {
+  if(req.headers['x-forwarded-host']) {
+    return req.headers['x-forwarded-host'];
+  }
   const hostFromConfig = configHolder.getConfig().get('hostname');
   if(hostFromConfig) {
     return hostFromConfig;
