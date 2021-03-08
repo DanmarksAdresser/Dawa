@@ -50,16 +50,18 @@ process.once('message', msg => {
 
   const app = express();
 
-  function socketTimeoutMiddleware(timeoutMillis) {
+  function socketKeepaliveMiddleware() {
     return function(req, res, next) {
-      res.socket.setTimeout(timeoutMillis);
-      res.socket.setKeepAlive(true, 1000);
+      // WORKAROUND: For unclear reasons, socket may be null.
+      if(res.socket) {
+        res.socket.setKeepAlive(true, 1000);
+      }
       next();
     };
   }
 
 
-  app.use(socketTimeoutMiddleware(config.get('socket_timeout_millis')));
+  app.use(socketKeepaliveMiddleware());
 
 // Hackish: We reduce memlevel to prevent zLib from caching too much internally
 // Otherwise, it will take too long for our application to start responding to JSON requests,
@@ -93,6 +95,7 @@ process.once('message', msg => {
     setupDocumentation(app);
   }
   const server = http.createServer(app);
+  server.setTimeout(config.get('socket_timeout_millis'));
   isalive.setup(server);
   server.listen(listenPort);
   logger.info("startup", "Express server listening for connections", {listenPort: listenPort, mode: app.settings.env});
