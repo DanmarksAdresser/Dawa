@@ -2,6 +2,7 @@ const convict = require('convict');
 const {go} = require('ts-csp');
 const objectAssignDeep = require(`object-assign-deep`);
 const  assert = require('assert');
+const json5 = require('json5');
 /**
  * This module provides access to the global configuration. It should be inialized *once* during application startup.
  *
@@ -90,6 +91,7 @@ const initialize = (schema, configFiles, cmdLineOptions) => {
     validate: val => val === null || Number.isInteger(val)
   });
 
+  convict.addParser({ extension: 'json5', parse: json5.parse });
   convictConfig = convict(schema);
 
   for (let file of configFiles) {
