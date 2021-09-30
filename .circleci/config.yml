@@ -1,0 +1,368 @@
+version: 2.1
+
+orbs:
+  # https://circleci.com/orbs/registry/orb/circleci/aws-ecr
+  aws-ecr: circleci/aws-ecr@6.5.0
+
+executors:
+  docker-builder:
+    docker:
+      - image: 'circleci/buildpack-deps:stretch'
+    resource_class: medium
+
+references:
+    onlyrelease: &onlyrelease
+      filters:
+        branches:
+          ignore: /.*/
+        tags:
+          only: /^v.*/
+    releaseandpr: &releaseandpr
+      filters:
+        branches:
+          ignore: master
+        tags:
+          only: /^v.*/
+
+jobs:
+  setup-image-tag:
+    executor: docker-builder
+    steps:
+      - run:
+          name: "Setup image tag"
+          command: |
+            BRANCH_NAME=$(echo $CIRCLE_BRANCH | sed 's,/,-,g')
+            PULL_REQUEST_TAG="${BRANCH_NAME}-${CIRCLE_BUILD_NUM}"
+            IMAGE_TAG="${CIRCLE_TAG:-$PULL_REQUEST_TAG}"
+            echo $IMAGE_TAG > image_tag
+            echo $IMAGE_TAG
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./image_tag
+
+  build-dawa:
+    executor: docker-builder
+    parameters:
+      save_image_file_name:
+        description: name of docker image file to save, eg. dowant_image.tar
+        type: string
+      image_name:
+        description: Name of the image when it was built, eg. dowant
+        type: string
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: "Get Image Tag"
+          command: |
+            echo 'export IMAGE_TAG=$(cat image_tag)' >> ${BASH_ENV}
+      - run:
+          name: 'Build dawa image'
+          command: |
+            docker build -t dawa:$IMAGE_TAG -f packages/server/Dockerfile .
+      - run:
+          name: 'Archive Docker image'
+          command: docker save -o << parameters.save_image_file_name >> << parameters.image_name >>:$IMAGE_TAG
+      - persist_to_workspace:
+          root: .
+          paths:
+            - ./<< parameters.save_image_file_name >>
+
+  push-ecr:
+    executor: aws-ecr/default
+    parameters:
+      image_file_name:
+        description: File name of image, eg. dowant.tar
+        type: string
+      image_name:
+        description: Name of the image when it was built, eg. dowant
+        type: string
+      ecr_repository_name:
+        description: Image of repository, eg. dowant
+        type: string
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Get Image Tag
+          command: |
+            echo 'export IMAGE_TAG=$(cat image_tag)' >> ${BASH_ENV}
+      - run:
+          name: 'Load archived Docker image'
+          command: docker load -i << parameters.image_file_name >>
+      - run:
+          name: 'Tag image for ECR'
+          command: |
+              docker tag << parameters.image_name >>:$IMAGE_TAG $AWS_HUNGRY_ACCOUNTID_INTERNAL.dkr.ecr.eu-west-1.amazonaws.com/<< parameters.ecr_repository_name >>:$IMAGE_TAG
+      - run:
+          name: 'Push Docker Image to ECR'
+          command: |
+              $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+              docker push $AWS_HUNGRY_ACCOUNTID_INTERNAL.dkr.ecr.eu-west-1.amazonaws.com/<< parameters.ecr_repository_name >>:$IMAGE_TAG
+
+  #https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-retag.html
+  tag-ecr:
+    executor: aws-ecr/default
+    parameters:
+      new_tag:
+        description: Image Prefix, eg. Staging
+        type: string
+      repo_name:
+        description: Repo name
+        type: string
+    environment:
+      REPO_URL: $AWS_HUNGRY_ACCOUNTID_INTERNAL.dkr.ecr.eu-west-1.amazonaws.com/<< parameters.repo_name >>
+    steps:
+      - attach_workspace:
+          at: .
+      - run:
+          name: Get Image Tag
+          command: |
+            echo 'export IMAGE_TAG=$(cat image_tag)' >> ${BASH_ENV}
+      - run:
+          name: Retag image with environment tag
+          command: |
+            MANIFEST=$(aws ecr batch-get-image --registry-id $AWS_HUNGRY_ACCOUNTID_INTERNAL --repository-name << parameters.repo_name >> --image-ids imageTag=$IMAGE_TAG --query 'images[].imageManifest' --output text)
+            aws ecr put-image --registry-id $AWS_HUNGRY_ACCOUNTID_INTERNAL --repository-name << parameters.repo_name >> --image-tag << parameters.new_tag >> --image-manifest "$MANIFEST"
+
+  deploy-ecs:
+    parameters:
+      service_name:
+        description: Name of the service
+        type: string
+      cluster:
+        description: Name of the cluster
+        type: string
+    docker:
+      - image: 'circleci/python:3.7.1'
+    steps:
+      - aws-cli/install
+      - attach_workspace:
+          at: .
+      - run:
+          name: Force ECS Service redeploy
+          command: |
+            aws ecs update-service --cluster << parameters.cluster >> --service "<< parameters.service_name >>" --force-new-deployment
+
+  terraform-init:
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - checkout
+      - run: 
+          name: Init Terraform
+          command: |
+            cd terraform
+            terraform init -input=false
+            terraform validate
+            terraform workspace new aws-hungry-staging || true
+            terraform workspace new aws-hungry-production || true
+      - persist_to_workspace:
+          root: /root/project/
+          paths:
+            - terraform
+
+  terraform-init-registry:
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - checkout
+      - run: 
+          name: Init Terraform
+          command: |
+            cd terraform_registry
+            terraform init -input=false
+            terraform validate
+            terraform workspace new aws-hungry-internal || true
+      - persist_to_workspace:
+          root: /root/project/
+          paths:
+            - terraform_registry
+
+  terraform-plan:
+    parameters:
+      aws-account-name:
+        description: Name of the aws account, eg. aws-hungry-development
+        type: string
+      terraform-folder:
+        description: Name of the terraform folder, eg. terraform or terraform_registry
+        type: string
+        default: terraform
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - attach_workspace:
+          at: /root/project/
+      - run: 
+          name: Terraform Plan << parameters.aws-account-name >>
+          command: |
+            cd << parameters.terraform-folder >>
+            terraform workspace select << parameters.aws-account-name >>
+            terraform plan -input=false -var-file=<< parameters.aws-account-name >>.tfvars -out=<< parameters.aws-account-name >>.tfplan
+      - persist_to_workspace:
+          root: /root/project/
+          paths:
+            - << parameters.terraform-folder >>/<< parameters.aws-account-name >>.tfplan
+
+  terraform-apply:
+    parameters:
+      aws-account-name:
+        description: Name of the aws account, eg. aws-hungry-development
+        type: string
+      terraform-folder:
+        description: Name of the terraform folder, eg. terraform or terraform_registry
+        type: string
+        default: terraform
+    docker:
+      - image: hashicorp/terraform
+    steps:
+      - attach_workspace:
+          at: /root/project/
+      - run: 
+          name: Terraform Apply << parameters.aws-account-name >>
+          command: |
+            cd << parameters.terraform-folder >>
+            terraform workspace select << parameters.aws-account-name >>
+            terraform apply -input=false << parameters.aws-account-name >>.tfplan
+
+workflows:
+  version: 2
+  build-and-push:
+    jobs:
+      - start-build:
+          <<: *releaseandpr
+          type: approval
+      - setup-image-tag:
+          <<: *releaseandpr
+          requires:
+            - start-build
+      - build-dawa:
+          <<: *releaseandpr
+          requires:
+            - setup-image-tag
+          save_image_file_name: dawa_image.tar
+          image_name: dawa
+      - push-ecr:
+          <<: *releaseandpr
+          name: push-dawa-ecr
+          context: aws-hungry-internal
+          requires:
+            - build-dawa
+          image_file_name: dawa_image.tar
+          image_name: dawa
+          ecr_repository_name: dawa
+      - tag-ecr:
+          <<: *releaseandpr
+          name: tag-ecr-staging
+          new_tag: staging
+          repo_name: dawa
+          context: aws-hungry-internal
+          requires:
+            - approve-staging-deploy
+      - deploy-ecs:
+          name: deploy-staging-ecs
+          <<: *releaseandpr
+          context: aws-hungry-staging
+          requires:
+            - tag-ecr-staging
+          cluster: Staging-Services
+          service_name: Staging-Dawa
+      - hungry-deployment/deployment-notify:
+          name: notify-staging
+          <<: *releaseandpr
+          context: 
+            - slack 
+            - circleci
+            - github
+          requires:
+            - deploy-staging-ecs
+          environment: dawa.staging.aws.hungrycloud.net
+          environment_type: staging
+
+  terraform-workflow:
+    jobs:
+      - start-terraform:
+          <<: *releaseandpr
+          type: approval
+
+      - terraform-init:
+          <<: *releaseandpr
+          context: aws-hungry-infrastructure
+          requires:
+            - start-terraform
+      
+      - terraform-plan:
+          <<: *releaseandpr
+          name: terraform-plan-aws-hungry-staging
+          context: aws-hungry-staging
+          requires:
+            - terraform-init
+          aws-account-name: aws-hungry-staging
+      - terraform-plan:
+          <<: *releaseandpr
+          name: terraform-plan-aws-hungry-production
+          context: aws-hungry-production
+          requires:
+            - terraform-init
+          aws-account-name: aws-hungry-production
+
+      - terraform-approve-aws-hungry-staging:
+          <<: *releaseandpr
+          type: approval
+          requires:
+            - terraform-plan-aws-hungry-staging
+            - terraform-plan-aws-hungry-production
+      - terraform-approve-aws-hungry-production:
+          <<: *onlyrelease
+          type: approval
+          requires:
+            - terraform-apply-aws-hungry-staging
+
+      - terraform-apply:
+          <<: *releaseandpr
+          name: terraform-apply-aws-hungry-staging
+          context: aws-hungry-staging
+          requires:
+            - terraform-approve-aws-hungry-staging
+          aws-account-name: aws-hungry-staging
+      - terraform-apply:
+          <<: *onlyrelease
+          name: terraform-apply-aws-hungry-production
+          context: aws-hungry-production
+          requires:
+            - terraform-approve-aws-hungry-production
+          aws-account-name: aws-hungry-production
+
+  terraform-registry-workflow:
+    jobs:
+      - start-terraform-registry:
+          <<: *releaseandpr
+          type: approval
+      - terraform-init-registry:
+          <<: *releaseandpr
+          context: aws-hungry-infrastructure
+          requires:
+            - start-terraform-registry
+      - terraform-plan:
+          <<: *releaseandpr
+          name: terraform-plan-aws-hungry-registry
+          context: aws-hungry-internal
+          requires:
+            - terraform-init-registry
+          aws-account-name: aws-hungry-internal
+          terraform-folder: terraform_registry
+      - terraform-approve-aws-hungry-registry:
+          <<: *releaseandpr
+          type: approval
+          requires:
+            - terraform-plan-aws-hungry-registry
+      - terraform-apply:
+          <<: *releaseandpr
+          name: terraform-apply-aws-hungry-registry
+          context: aws-hungry-internal
+          requires:
+            - terraform-approve-aws-hungry-registry
+          aws-account-name: aws-hungry-internal
+          terraform-folder: terraform_registry
