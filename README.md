@@ -1,3 +1,5 @@
+#WARNING This repo is depricated and will no longer be maintained#
+
 # Danmarks Adressers Web API - DAWA 
 This is the code repository for [DAWA - Danmarks Adressers Web API](https://dawa.aws.dk).
 
