@@ -265,7 +265,7 @@ workflows:
           <<: *releaseandpr
           type: approval
           requires:
-            - push-ecr
+            - push-dawa-ecr
       - tag-ecr:
           <<: *releaseandpr
           name: tag-ecr-staging
