@@ -9,7 +9,7 @@
   "dependencies": {
     "@dawadk/common": "^4.0.1",
     "@mapbox/polylabel": "^1.0.2",
-    "aws-sdk": "2.461.0",
+    "aws-sdk": "2.814.0",
     "bluebird": "^3.5.4",
     "chai": "^4.2.0",
     "convict": "^6.0.1",
